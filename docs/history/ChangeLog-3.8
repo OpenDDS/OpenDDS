@@ -1,0 +1,2547 @@
+Mon Dec 21 16:30:28 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit fca087fe904f4d3cf594b01063f0d5a2df33804d
+
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/SafetyProfilePool.h:
+
+          Updated doxygen comments.
+
+Thu Dec 17 22:30:29 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit a58041535588c76e624845ddc8fba559d3fcfaef
+
+          Merge pull request #262 from mitza-oci/master
+
+          Updated documentation for upcoming release...
+
+Thu Dec 17 20:45:32 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 796b08f8eb64a6187cb6abae31b25261878502c9
+
+        * NEWS:
+        * README:
+
+          Updated documentation for upcoming release.
+
+Thu Dec 17 20:45:13 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 8aed14c4a63030d698a680e10176246ef1e6a097
+
+        * tools/scripts/gitrelease.pl:
+
+          release script: use standard Perl modules instead of CPAN module
+          for date/time formatting
+
+Thu Dec 17 20:44:44 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 070ec694ba382cc7534811e3b18e61b349122808
+
+        * rules.dds.GNU:
+
+          gnuace build: fixed a bug where a user-specified version number
+          was overridden by the OpenDDS version number (for shared libs)
+
+Thu Dec 17 20:39:27 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 6a279beb9e6e0e4d20eb0659d7171c2a711d7c07
+
+        * DDS_TAO.mwc:
+        * DDS_TAO_all.mwc:
+        * configure:
+
+          no alternate TAO-safety download, no TAO 1.x support
+
+Thu Dec 17 20:36:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 63a1dfc9756b8f37238a8ebd59ca3a721550f745
+
+        * .gitignore:
+
+          Ignore a temporary file used by Visual Studio 2015.
+
+Mon Dec 07 16:14:55 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 991b1baf1d6c0abd6c1847464d676c2ff8c7f911
+
+          Merge pull request #260 from iamtheschmitzer/master
+
+          LargeSample Include rtps discovery headers
+
+Fri Dec 04 21:37:03 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit e30c0dbd64da47603d2d317a23ef3d68c1817045
+
+        * INSTALL:
+        * README:
+
+          Updated INSTALL with some info on "make install" and updated
+          README with current platforms and compilers.
+
+Fri Dec 04 20:32:28 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit dadb0ac15afe28bc135037d3f822023e5ef670fb
+
+          Merge pull request #259 from objectcomputing/appveyor_work
+
+          appveyor.yml update:
+
+Fri Dec 04 17:30:06 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 952eb7b5ab1aec9dc09bd29a36fd32e142cd4140
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Include rtps discovery headers
+
+Fri Dec 04 17:12:56 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 53f558a8af2eada8d57ed992b9baa67e90182f24
+
+        * appveyor.yml:
+
+          appveyor.yml update:
+
+          Fix path.
+
+Fri Dec 04 16:05:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit fff755267782ab601f3b3916c1e0a673aa0ba616
+
+        * appveyor.yml:
+
+          appveyor.yml update:
+
+          Build tests\DCPS\Messenger and run rtps variant.
+
+Fri Dec 04 13:57:46 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 664a82479ee92e2b223d6d9b0282df9bfc1e6a6c
+
+          Merge pull request #258 from objectcomputing/appveyor_work
+
+          appveyor_run_test.pl update:
+
+Thu Dec 03 23:17:19 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d67ea172b1b6d424d3156b468d041d35acaa8ca7
+
+        * DevGuideExamples/DCPS/Messenger/appveyor_run_test.pl:
+
+          appveyor_run_test.pl update:
+
+          Set Default Address as a workaround due to failure currently
+          on appveyor to successfully connect on dynamically discovered
+          fully qualified hostname.
+
+Thu Dec 03 17:24:01 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 26e2bc55635f8500258b858ce0e8c41cae5e9a6e
+
+          Merge pull request #257 from
+          objectcomputing/end_historic_samples_sweeper
+
+          EndHistoricSamplesMissedSweeper
+
+Wed Dec 02 21:10:38 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 282907631286f3d8fba58255b57c0668a5f84d6b
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          EndHistoricSamplesMissedSweeper
+
+          Wait to schedule sweeper until association completes, or at
+          lease a viable datalink has been created so that sweeper
+          does not timeout before it was even possible to receive messages.
+
+Wed Dec 02 19:24:04 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 799d7bb806491ea2ec849cc7e81d70903f911881
+
+          Merge pull request #256 from iamtheschmitzer/master
+
+          Revert pool size, Don't run on target
+
+Wed Dec 02 16:58:16 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c5a98e91a0a1b242a087101344a6c64036c2402d
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LargeSample/rtps.ini:
+
+          Revert pool size, Don't run on target
+
+Wed Dec 02 16:33:21 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 226651b06b46d88e85f5348904698ac3f15eda17
+
+          Merge pull request #254 from
+          objectcomputing/multicast_reliability_updates
+
+          SharedTransport test:
+
+Wed Dec 02 15:36:23 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 991ef3836de2602e8a602679b476f5bd8905d418
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          SharedTransport test:
+
+          Fix test to wait for correct number of messages to be
+          delivered in cases where command line specified more
+          than one writer/publisher.
+
+Wed Dec 02 01:29:29 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 038172ccc6db5ea7dd50aa31c0fff264669260f1
+
+          Merge pull request #253 from
+          objectcomputing/multicast_reliability_updates
+
+          Multicast reliability updates
+
+Tue Dec 01 23:26:35 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 539d37bb8bb14b820f4ca6925d1c0a3080f7d1c5
+
+          Merge branch 'master' into multicast_reliability_updates
+
+Tue Dec 01 23:25:13 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 7562bed4922e01809cbe73cb3328d760ddce9d70
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          ReliableSession Update:
+
+          Remove tracking of ranges on the active side as it was not being
+          tracked/cleared appropriately to guarantee samples were actually
+          resent when needed.
+
+Tue Dec 01 23:23:47 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 28697612e13712710cb3bac6b819a063bb8106dc
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          ReliableSession Updates:
+
+          Cleaned up some edge cases when receiving the beginning tseq so
+          that the DisjointSequence handling is more clear.
+
+          Added log statement when sending nakack in response to
+          nak_received
+
+Tue Dec 01 23:21:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b0648841d07bb76b4d3ae3b0779d4b5eb6f3d7d2
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          SharedTransport TestCase:
+
+          Update wait for data available to a do/while loop
+          in case messages are already all arrived by the time
+          the readcondition wait would be created.
+
+Tue Dec 01 22:18:28 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit df28bb7ad743f5dd1e1df764fea41ff694e688f9
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+
+          SharedTransportUpdates:
+
+          Use a WaitSet to determine all samples have been delivered prior
+          to taking.
+          Updates to TestFramework to allow use of read conditions.
+          Set DCPSPendingTimeout for test.
+
+Tue Dec 01 21:59:31 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 3b56826176baec95e0c9ba51c00aaf5cc6ecf9d0
+
+        * bin/dcps_tests.lst:
+
+          BuiltInTopicTest doesn't run on LynxOS-178.
+
+Tue Dec 01 21:41:09 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 510738551389f67cbb6fbc7b10c9330a34ef3a39
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Fix multimap insert for SunOS
+
+Tue Dec 01 18:25:18 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7faadd8aef799afcb7d42b65580f9a2f6dea9fc6
+
+          Merge pull request #252 from iamtheschmitzer/master
+
+          Log errno, rather than message, fix LargeSample rtps.ini.
+
+Tue Dec 01 17:42:43 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 825e958bd27d3ed5289d2de7f61e67837dde5f43
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Tue Dec 01 17:42:26 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 5cbf00de78f1a8de001032b3a92756346661cc46
+
+        * tests/DCPS/LargeSample/rtps.ini:
+
+          Correct config file
+
+Tue Dec 01 17:28:49 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ca15d4d8492ea001aadaef9cca9bfb01d3d0eac3
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Tue Dec 01 17:28:29 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 65fb26ce1dd5c35023b26511b3e83f99e5fd95f3
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          log errno, rather than message
+
+Mon Nov 30 23:16:58 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 44284e30f9344df1ff424e1c7476c5147948c80a
+
+          Merge pull request #251 from iamtheschmitzer/master
+
+          LargeSample fixes, Don't run Multidiscovery on target
+
+Mon Nov 30 22:36:58 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 63662343c04c4cdb1619ca848e32b1748d449cd4
+
+        * bin/dcps_tests.lst:
+
+          Don't run MultiDiscovery on LynxOS
+
+Mon Nov 30 22:36:05 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 66aebef3d11f92e27ab255706c3c23d92b734ae1
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Mon Nov 30 22:32:51 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit c404c9b19587de9c88418d3c23fa2d67bfce0b71
+
+          Merge pull request #250 from
+          objectcomputing/multicast_reliability_updates
+
+          Update logging remote and local source identifiers for new
+          identifier…
+
+Mon Nov 30 22:22:22 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit e111cac694b13a2b28fdaac5928bea8590d8167d
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Update logging remote and local source identifiers for new
+          identifier size
+
+Mon Nov 30 21:54:47 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 358f5ba01ff9b6d41f375f7bb12b7efc6ada0da4
+
+        * tests/DCPS/LargeSample/rtps.ini:
+
+          LargeSample speed up discovery, reduce memory pool size
+
+Mon Nov 30 20:34:22 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 87807f267738c683a387f316945221474f057c16
+
+          Merge pull request #249 from
+          objectcomputing/multicast_reliability_updates
+
+          Replace magic number with static variable in TransportHeader for
+          the …
+
+Mon Nov 30 20:03:10 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 84433a3a21a77a4f0ac1a7915fbad1b025ac24e9
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          Replace magic number with static variable in TransportHeader for
+          the serialized size
+
+Mon Nov 30 19:28:57 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit bc61ee92fdba2ac035f0c7e01a417bf5f13c65ff
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          FooTest5 log subscriber exit
+
+Mon Nov 30 19:25:33 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 7d9fbf0258e74d848f2a55beefae25ac1c8a2929
+
+          Merge pull request #248 from
+          objectcomputing/multicast_reliability_updates
+
+          Multicast reliability updates
+
+Mon Nov 30 18:22:46 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2a263228147dcf3a013b842c07abd606d8826032
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          Fix TransportHeader size in Shmem for TransportHeader source_
+          change from ACE_INT32 to ACE_INT64
+
+Mon Nov 30 18:21:05 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit f7223c83a8e08a9fd44248459172a55d16ed0373
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Change multimap insertion operation for sunos compatible way.
+
+Fri Nov 27 16:33:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 61b8bacd9aabda06be5df0c8398a41bdbe25a3dd
+
+          Merge pull request #247 from
+          objectcomputing/multicast_reliability_updates
+
+          Multicast reliability updates
+
+Fri Nov 27 15:47:14 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 64488220f55db952f824dd65cb66c2d3e947d9c0
+
+        * appveyor.yml:
+
+          Revert "Appveyor - try running Messenger test"
+
+          This reverts commit ca52cbd74d87d3b284605d59a79d47af7098878c.
+
+Fri Nov 27 15:47:12 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d30ff147da0f7161e2bd5cfbad32df2bf8a69739
+
+        * appveyor.yml:
+
+          Revert "Appveyor - just run Messenger"
+
+          This reverts commit b29d04b5a101c7df1b9b1de81f992d5335513252.
+
+Fri Nov 27 15:46:23 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 9d0f9688617c72505560fb08ba8fd40f0a0a425a
+
+        * appveyor.yml:
+
+          Revert "Appvey - fix path to test"
+
+          This reverts commit 4fdaa41c7eea1f4e694129d0c4f51751559ada2e.
+
+Fri Nov 27 15:10:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 4fdaa41c7eea1f4e694129d0c4f51751559ada2e
+
+        * appveyor.yml:
+
+          Appvey - fix path to test
+
+Fri Nov 27 14:22:39 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b29d04b5a101c7df1b9b1de81f992d5335513252
+
+        * appveyor.yml:
+
+          Appveyor - just run Messenger
+
+Fri Nov 27 13:40:40 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ca52cbd74d87d3b284605d59a79d47af7098878c
+
+        * appveyor.yml:
+
+          Appveyor - try running Messenger test
+
+Fri Nov 27 13:07:33 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit bc363de563d7e91cc4896ee441a3a7f6e808ff22
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Add include
+
+Wed Nov 25 23:53:08 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2d8bcad930cfd37e6b4b1464b0bc37d6a56c7e17
+
+          Merge branch 'master' into multicast_reliability_updates
+
+Wed Nov 25 23:51:33 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ebc7f7cbdbcfda871c17b0bc7c311d77dc2e41f6
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+
+          Multicast changes to enforce in-order, reliable delivery to the
+          DCPS layer. Better handling of multicast control messages
+          (nak/nakack/syn/synack)
+
+Wed Nov 25 23:50:26 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit dac30161bc294a45e272f333be7548307baaf1b6
+
+          Merge pull request #246 from iamtheschmitzer/master
+
+          RtiSerialization: don't do infinite duration wait_for_acks,
+          StaticDiscoveryalter pool size per configuration
+
+Wed Nov 25 23:50:01 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit a828e173b5f5ff6735e520330167c2ba47d2289a
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTypes.h:
+        * tools/dissector/packet-opendds.cpp:
+
+          MulticastPeer now an identifier which combines FederationId and
+          ParticipantId to give more uniqueness and differentiate better
+          between sources
+
+Wed Nov 25 23:44:19 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b904145d1baa28ef65790c81db7ecb5a7e95fde9
+
+          Merge pull request #235 from
+          objectcomputing/end_historic_samples_sweeper
+
+          Use dotted decimal address in log message
+
+Wed Nov 25 22:33:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit eb7b288b8329e4fb777faf3ec0587192d6ceee8f
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Set FederationId in tests running multicast to cut down cross
+          traffic (use OPENDDS_RTPS_DEFAULT_D0 env var since it is already
+          set uniquely for each machine)
+
+Wed Nov 25 22:09:30 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit bfecaa01a4d967f36938ddfa0474710c560510c9
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/StaticDiscovery/run_test.pl:
+
+          Alter pool size based on configuration
+
+Wed Nov 25 21:36:14 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 5b68eeeeb2417c48b12af1ec373947e233a24ce5
+
+        * tests/DCPS/RtiSerialization/publisher.cpp:
+
+          RtiSerializaion: Don't wait infinitely for acks
+
+Wed Nov 25 20:59:20 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit f1c161238994e199f3ebd8d5fd8a3752dea4f488
+
+        * tests/DCPS/SetQosPartition/run_test.pl:
+
+          Reduce logging level
+
+Wed Nov 25 20:18:30 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit a73517d5b28f1588b9a188206c2fe635196829ac
+
+          Merge pull request #245 from iamtheschmitzer/master
+
+          BuiltInTopicTest: Correct domain in ini file, allow 5 seconds for
+          discovery
+
+Wed Nov 25 18:08:18 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 880cf9a948cdecaea1838480de36d7a15c3d270c
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/rtps_disc.ini:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+
+          Correct domain in ini file, allow 5 seconds for discovery, don't
+          wait so long for kill
+
+Wed Nov 25 16:59:05 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit cda2684fc5662cd70bc06e5b4217b6097906152a
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Remove unnecessary logging
+
+Tue Nov 24 21:27:13 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 589a6ad5361d3967a1168c9bf8d7813620be91ed
+
+          Merge pull request #244 from iamtheschmitzer/master
+
+          Correct guard for ACE_HAS_ALLOC_HOOKS
+
+Tue Nov 24 20:44:52 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 6913bf64756a067af8c204754f03e1970183998f
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Correct guard for ACE_HAS_ALLOC_HOOKS
+
+Tue Nov 24 20:36:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit d37a865340d46d6267589b159803b398019c0f23
+
+          Merge pull request #243 from mitza-oci/master
+
+          Fixed a warning in the ManualAssertLiveliness test.
+
+Tue Nov 24 04:36:34 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ccd7bb510106e43e2dbfec390d331484c6056a37
+
+          Merge pull request #242 from iamtheschmitzer/master
+
+          Add include of ace/config-macros.h where depending on
+          ACE_HAS_ALLOC_HOOKS
+
+Mon Nov 23 22:05:17 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 095017f060d3229919b1a8b6193030661b4aa730
+
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+
+          Fixed a warning in the ManualAssertLiveliness test.
+
+Mon Nov 23 22:00:36 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 438bfb09a97d4e94b08b142512ade99539f1ea25
+
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/FACE/FaceTSS.cpp:
+
+          Add include of ace/config-macros.h where depending on
+          ACE_HAS_ALLOC_HOOKS
+
+Mon Nov 23 03:34:44 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 82ea628dbf3c34f38986a869f0a3fcd299f82cd5
+
+          Merge pull request #241 from iamtheschmitzer/master
+
+          Disable PoolAllocator use in standard library for the benefit of
+          older compilers
+
+Fri Nov 20 21:16:34 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 4071de795520e48781d63bd4cf3cefa70505dd94
+
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+
+          Guard using declarations in the same way the used code is guarded
+
+Fri Nov 20 20:32:42 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit d673eb45e10611105ad3fed3822d8015131af074
+
+        * dds/DCPS/SafetyProfilePool.h:
+
+          Implemented SafetyProfilePool::calloc(), required for
+          ACE_Allocator.
+
+Fri Nov 20 20:02:35 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 28b341b238363dff0d07e72280f01c8fd58fdcfb
+
+        * dds/DCPS/PoolAllocator.h:
+
+          Disable use of OpenDDS::DCPS::PoolAllocator when
+          ACE_HAS_ALLOC_HOOKS is not defined
+
+Fri Nov 20 17:23:24 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 880f7389fd871ea1fb0258a5985cca2cfd99952c
+
+          Merge pull request #240 from mitza-oci/master
+
+          Updated PerlDDS/Run_Test.pm tracking of temp files.
+
+Fri Nov 20 16:13:06 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit e02703a496a95db73a1b998bf1e8a7939684a54b
+
+        * bin/PerlDDS/Run_Test.pm:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+
+          Updated PerlDDS/Run_Test.pm tracking of temp files.
+
+Fri Nov 20 03:09:01 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit f11d0005e63a7adae7e04397d67ddc38d4785d0d
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Thu Nov 19 21:36:08 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 932bc2e13cd35389bdede1e14e480481c547afc0
+
+          Merge pull request #239 from iamtheschmitzer/master
+
+          Require ACE_HAS_ALLOC_HOOKS for call to configure_pool
+
+Thu Nov 19 20:43:49 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 43209db82ecf7aa17eca33125d9320495cb5d5f1
+
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+
+          Move log after participant factory initialization
+
+Thu Nov 19 20:25:06 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 20b2b6d36d9a6f5a92252200d58ba64918323290
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Thu Nov 19 20:24:04 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit bdb076b49093b61d3fadc8ff004ace5f73a2f06f
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Require ACE_HAS_ALLOC_HOOKS for call to configure_pool
+
+Thu Nov 19 18:23:42 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit d7ce23b615137d592147ef55d7d49e4c80bf90d0
+
+          Merge pull request #238 from jrw972/master
+
+          Dereference hash
+
+Thu Nov 19 18:10:37 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 53665d3a65f2e0697f9fbeb794d20abeecf70449
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Dereference hash
+
+Thu Nov 19 18:13:38 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit 5b380a79b78fd4b59091895135a42ba554a4abc1
+
+          Merge pull request #236 from jrw972/master
+
+          Fix wide character builds
+
+Thu Nov 19 17:49:42 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit fafb835204806405c1a8654eb605481c3335e288
+
+          Merge pull request #237 from iamtheschmitzer/master
+
+          Make memory pool default smaller, depend on ACE_HAS_ALLOC_HOOKS
+
+Thu Nov 19 17:32:16 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit daf6c96312236b75c51a4f840fd10683a678d002
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Fix wide-character builds
+
+Thu Nov 19 16:57:09 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ad3b863a4ac865dbb7121f6f885427619adda03a
+
+        * configure:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * tests/DCPS/DcpsIntegration/infrastructure.ini:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/LargeSample/rtps.ini:
+        * tests/DCPS/MultiDPTest/memory_pool.ini:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/FACE/MultiDomainMessenger/face_config.ini:
+
+          Make memory pool default smaller, depend on ACE_HAS_ALLOC_HOOKS
+
+Thu Nov 19 16:20:50 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit d9bb01e0ace9119f57269ed4b4f9de9d7b938b31
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+
+          Fix wide character builds
+
+Wed Nov 18 22:07:27 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d0b905436b71c99debf42c2434704484acf4d899
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Use dotted decimal address in log message
+
+Wed Nov 18 21:56:20 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit 6696085b2b55eee1fad67211bbb7f623c74ce454
+
+          Merge pull request #234 from jrw972/master
+
+          Support temporary files in test framework
+
+Wed Nov 18 20:42:26 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 99bd680e5f77e82e709086351be2c35a0dce1afe
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/LivelinessTest/common.cpp:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/common.h:
+        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/run_test.pl:
+        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/run_test.pl:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/common.cpp:
+        * tests/DCPS/MultiDPTest/common.h:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+
+          Convert tests using synchronization files
+
+          The test framework now manages the synchronization files for the
+          affected tests.
+
+Wed Nov 18 19:38:53 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit e3d378c5dee69156e8f9484cd0abb910cb2b818f
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Support temporary files in test framework
+
+          Some tests, e.g., DCPS/LivelinessTest, use temporary files to
+          synchronize the
+          various processes. Most of these tests assume that the files are
+          created
+          in current working directory. For split testing, the temporary
+          files
+          must appear in a directory shared by both the host and the
+          target.
+          Tests will use the add_temporary_file to add per-process
+          temporary files
+          to the framework. The framework will unlink the file when added
+          and
+          when the test framework finishes.
+
+Wed Nov 18 20:19:56 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 617c4c22ebcaf7a2231c40506f3dda91853c1e53
+
+          Merge pull request #233 from iamtheschmitzer/master
+
+          FACE Messenger/MDMessenger: Split callback subscriber to separate
+          command line
+
+Wed Nov 18 19:36:01 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit c9309b63a77eaff79c3e14a9ad4723f594e471e1
+
+          Merge pull request #232 from jrw972/master
+
+          Apply DCPSDefaultTransport to tcp, udp, and multicast
+
+Wed Nov 18 16:14:59 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 9b9bed2d8c6846b6bfc29fd9de0df12bedd4b827
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/MultiDomainMessenger/run_test.pl:
+
+          FACE MultiDomainMessenger Split Callback Subscriber to different
+          command line
+
+Tue Nov 17 22:34:43 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 3f7706001ce788188f5dc74caf722b4d11d2f6e2
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Apply DCPSDefaultTransport to tcp, udp, and multicast
+
+          The tcp, udp, and multicast transports have a local_address
+          config
+          parameter. The value of DCPSDefaultAddress will be used in lieu
+          of
+          local_address if local_address is not set and DCPSDefaultAddress
+          is set.
+
+Wed Nov 18 16:07:39 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0546cec970341d8da9655e0e03aa8a3142250938
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Messenger/run_test.pl:
+
+          FACE Messenger Split Callback Subscriber to different command
+          line
+
+Wed Nov 18 15:57:26 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 7018b020e4c514914c0b9c1d897e197022c78495
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fix wide character builds
+
+Wed Nov 18 03:33:52 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit cc6c4ed0265efe54e0c0af5f410fb417f01fa92e
+
+          Merge pull request #231 from iamtheschmitzer/master
+
+          Extend wait in DCPS Messenger, correct PerlDDS subsequent waits
+          for stopping process
+
+Wed Nov 18 02:43:12 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 246b8abc4f50e9f159bac7b296db55e2b0c38180
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Extend wait
+
+Wed Nov 18 01:54:51 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ae97b1769db6b0db77d37b879a1ae8879f31a7bd
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Wed Nov 18 01:54:14 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 423c639a2556bf1e3c674c15c6bc23fc7b0a7202
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Subsequent processes should be longer wait than initial
+
+Tue Nov 17 22:31:27 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit 12231d46a3813532771a6dc3f4a0ce32c03f0d99
+
+          Merge pull request #229 from jrw972/master
+
+          Fix DCPS/Partition test
+
+Tue Nov 17 20:31:49 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d11f046a0223cc2fce01f1babd0fd60c729ff36d
+
+          Merge pull request #228 from iamtheschmitzer/master
+
+          Wait 60 seconds for other processes, don't say unreadable
+          publisher_t…
+
+Tue Nov 17 19:35:51 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 11e95c66071f64e1f188a9650de9aa104fa02bce
+
+        * tests/DCPS/RtiSerialization/Args.h:
+        * tests/DCPS/RtiSerialization/Writer.cpp:
+        * tests/DCPS/RtiSerialization/publisher.cpp:
+
+          Always wait for acks
+
+Tue Nov 17 19:06:39 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 019900f7e35f05eea5547a161304eefb31dc0d8e
+
+        * tests/DCPS/Partition/Partition_Table.h:
+        * tests/DCPS/Partition/run_test.pl:
+
+          Fix DCPS/Partition test
+
+          Expected counts of matched subscriptions were wrong. Apparently,
+          they
+          did not take into acount "*" matching everything. Adjusted the
+          expected
+          values and enabled error checking in log files.
+
+Tue Nov 17 18:22:12 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit e7ee513d676d979bdb23a6c8141cd0efa532c8c9
+
+        * bin/PerlDDS/Run_Test.pm:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Wait 60 seconds for other processes, don't say unreadable
+          publisher_timeouts is an error
+
+Tue Nov 17 18:08:26 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit c60d7fe65e695253f66d5b55cb8d1fce241d37f7
+
+          Merge pull request #227 from mitza-oci/master
+
+          Liveliness fix to DataWriterImpl and ManualAssertLiveliness test
+
+Tue Nov 17 17:35:40 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit c23b0c7aaa8f6e5f5ff4c506859bd7b299337bdf
+
+          Merge pull request #226 from jrw972/master
+
+          Add -DCPSDefaultAddress
+
+Mon Nov 16 22:00:35 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit fd94fb61f0c8d5d44d24e64f0a8d85f41de9ca80
+
+        * bin/PerlDDS/ProcessFactory.pm:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Add -DCPSDefaultAddress
+
+          Safety profile builds must be configured with an address for
+          discovery
+          and transport. One way to do this is to specify a local_address
+          in the
+          configuration file.  To avoid (1) manually editing every test
+          configuration file and (2) parsing every configuration file to
+          determine
+          if and how the local_address should appear, we introduced a
+          configuration variable for the common section (and command-line
+          option)
+          called DCPSDefaultAddress. The default address overrides any that
+          would
+          be determined automatically but does not override a local_address
+          appearing in a file.
+
+          This commit introduces the following changes:
+          * Adds default_address to the Service_Participant.
+          * Causes Sedp to use the default address when computing locators
+          for Spdp.
+          * Causes Rtps to use the default address when computing locators
+          for Sedp.
+          * The test framework will set the default address when
+          DOC_TEST_*_IP_ADDRESS is defined.
+
+Tue Nov 17 17:21:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit d7d4edfa2330fa8dec42878285acccc7494c294f
+
+        * DevGuideExamples/DCPS/Messenger/appveyor_run_test.pl:
+
+          Increased debug logging for testing on AppVeyor.
+
+Tue Nov 17 15:26:54 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 8e3675b44d35929a4e7e619414dbd92b8ce68e4e
+
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+
+          ManualAssertLiveliness test:
+
+          - need to track liveliness lost callbacks more accurately
+          - remove much duplicated code
+
+Tue Nov 17 15:25:35 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit ab4799f1dfacc5a79a83b1fabf0238d9402a74fa
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Initialize last_liveliness_check_time_ before liveliness timer is
+          enabled.
+
+Mon Nov 16 17:22:40 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 53b6d1747b83a749e64da684f9ff6c01dd32db50
+
+          Merge pull request #223 from
+          objectcomputing/multicast_reliability_updates
+
+          Multicast reliability updates
+
+Mon Nov 16 15:35:38 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit f17f1f5d1aa50708c8163bceb999a3a8c2e021d9
+
+          Merge pull request #225 from jrw972/master
+
+          Shorten test framework lifetime
+
+Mon Nov 16 15:17:48 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit be707eabe0daf79ca71117783873a17ca648e128
+
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Shorten test framework lifetime
+
+          test/DCPS/UnitTests/run_test.pl is failing on Windows complaining
+          about
+          duplicate process names. This fix creates a new test framework
+          for each
+          executable.
+
+Sat Nov 14 03:39:33 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7bdc682e52eb1c810295cfb5b2d74f275980df97
+
+          Merge pull request #224 from iamtheschmitzer/master
+
+          FooTest5 writer sync with all readers, subscriber account for
+          multiple readers when calculating expected messages
+
+Sat Nov 14 02:28:19 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7d85790d95d9b2338204f053c350c1116768db2f
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Adjust formulas for mixed_trans case
+
+Sat Nov 14 01:36:01 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit f4fdbf61e1fb014f93decedf375d453cdcb33b7d
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          fuzz
+
+Sat Nov 14 01:24:36 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0b8602e0510012c59d70135e0541296797ab944e
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Sat Nov 14 01:24:16 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0a7b7134278801b523039e1120260599bdd0b306
+
+        * tests/DCPS/FooTest5/.gitignore:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/.gitignore:
+
+          Wait for match for num_readers. Subscriber expect every reader to
+          increment
+
+Fri Nov 13 22:24:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 01415d5453d47ed9990ee9a5a9303ed45b1f96f0
+
+          Merge pull request #222 from mitza-oci/master
+
+          ManualAssertLiveliness test: improvements to logging
+
+Fri Nov 13 22:20:44 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit db09036ea4cb550a6f43794cee2b1ef6067571b2
+
+          Merge pull request #221 from jrw972/master
+
+          Update safety profile logging
+
+Fri Nov 13 22:18:46 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 4c12bb70cd2a3abfcdf5010c1208ef4de08e820c
+
+        * tests/DCPS/RegisterInstance/run_test.pl:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+
+          Correct test parameters
+
+Fri Nov 13 21:57:51 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit f35e9888d0aa8032957c9060091a2fedc7b78091
+
+          Merge pull request #1 from mitza-oci/jrw
+
+          Updated rejects/run_test.pl use of PerlDDS::TestFramework.
+
+Fri Nov 13 21:56:15 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 199988dbd77272cb6a30c1879c8e507bce05785d
+
+        * tests/DCPS/Rejects/run_test.pl:
+
+          Updated rejects/run_test.pl use of PerlDDS::TestFramework.
+
+Fri Nov 13 21:46:40 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 7ae31e6e2bbeddb3820b3f6ad9a9a2635473c813
+
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Fix some reliability issues with sending naks, synack, and nakack
+
+Fri Nov 13 21:38:02 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ed706c2f2db06a8298d628c7532d29f3e612498f
+
+        * tests/DCPS/LargeSample/multicast.ini:
+        * tests/DCPS/ManyToMany/multicast.ini:
+
+          Decrease nak_interval for testing purposes since tests are
+          short-lived
+
+Fri Nov 13 21:23:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 0dcc04c3222876739cb908aaf4af9dc583d6fb65
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tools/dissector/.gitignore:
+
+          ManualAssertLiveliness test:
+
+          - cleaned up logging datatype mismatches
+          - log timestamps for all messages
+          - attempt to return nonzero on failure
+
+Fri Nov 13 21:20:24 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 258a4199659e46cf56a50ecdb90fbdd14c86676c
+
+        * bin/PerlDDS/Run_Test.pm:
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/DpShutdown/run_test.pl:
+        * tests/DCPS/GuardCondition/run_test.pl:
+        * tests/DCPS/ManyTopicTest/run_test.pl:
+        * tests/DCPS/RecorderReplayer/run_test.pl:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+        * tests/DCPS/Rejects/run_test.pl:
+        * tests/DCPS/RtpsMessages/run_test.pl:
+        * tests/DCPS/Serializer/run_test.pl:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/TopicReuse/run_test.pl:
+        * tests/DCPS/UnitTests/run_test.pl:
+        * tests/DCPS/WriteDataContainer/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/FACE/Compiler/idl_test1_main/run_test.pl:
+        * tests/FACE/Compiler/idl_test3_main/run_test.pl:
+        * tests/FACE/Compiler/idl_test_fixed/run_test.pl:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/run_test.pl:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/run_test.pl:
+
+          Update safety profile logging
+
+          Removed the default safetyprofile.log. Tests enabled in safety
+          profile
+          must use the test framework whichw will supply and translate a
+          log file
+          name.
+
+Fri Nov 13 21:07:06 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 8f846779f2ae33158724d71fe79423c689a21b7d
+
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Adapt to differences in ACE_sema_t in different ACE versions.
+
+Fri Nov 13 03:17:10 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ae7ddbe268be4bbf9f63ee636a6f3f103697d317
+
+          Merge pull request #220 from iamtheschmitzer/master
+
+          FooTest5 logging
+
+Fri Nov 13 02:42:30 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit efcd4ff6645e67e066eec16d08ab5096f9886820
+
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          FooTest5 logging
+
+Thu Nov 12 20:56:52 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit b778e3ec26377000f2a37bf323579e95ea05d8b5
+
+          Merge pull request #219 from iamtheschmitzer/master
+
+          Instances test faster rtps, handle timeout multidiscovery
+
+Thu Nov 12 19:56:19 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ba82b2996467da43478d50340d6224a243ef5ba7
+
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiDiscovery/MultiDiscoveryTest.cpp:
+
+          Set max_blocking_time to 1 sec, handle timeout
+
+Thu Nov 12 18:50:09 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit 2a4e4acf8ebd4612237d6f8d913ec98b1e8c64f0
+
+          Merge pull request #215 from jrw972/master
+
+          Translate log file names for remote target
+
+Thu Nov 12 18:18:53 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 589f07a5de33573da4e85360ed1d41f0f89ead49
+
+        * tests/DCPS/Instances/rtps.ini:
+        * tests/DCPS/Instances/run_test.pl:
+
+          Use rtrps config file in safety profile
+
+Thu Nov 12 15:43:21 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 1286ddde29792401b029a9601b90a555a6b9f4fc
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Expose process for target translation
+
+          The translation of file names for remote testing is done once
+          during
+          process creation. The translation must be done after process
+          creation
+          so the target test root is available.
+
+Thu Nov 12 15:38:58 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 67d6aeee21cb366633946b72833c4d07eee79f4c
+
+          Merge pull request #218 from iamtheschmitzer/master
+
+          LynxOS Fixes for FooTest5, RtiSerialization,
+          StaticDiscoveryReconnect, MultiDiscovery
+
+Thu Nov 12 15:10:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit cc6bb5b9247a7b179a5ee9631389ac6563410637
+
+          Merge pull request #216 from
+          objectcomputing/multicast_reliability_updates
+
+          UdpTransport Update: Insert key into server_link_keys_ prior to
+          releasing lock to call use…
+
+Thu Nov 12 14:53:28 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c43096fc2a338c9e3289fa3c60ab29afc348f1e0
+
+        * tests/DCPS/MultiDiscovery/MultiDiscoveryTest.cpp:
+        * tests/DCPS/StaticDiscoveryReconnect/StaticDiscoveryTest.cpp:
+
+          More cleanup of imbalanced INFINITE durations
+
+Thu Nov 12 14:52:30 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d5dd28dc28059b8ab0c08b56b8e1acb6e8a9ecc2
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/RtiSerialization/rtps.ini:
+        * tests/DCPS/RtiSerialization/rtps_disc.ini:
+        * tests/DCPS/RtiSerialization/run_test.pl:
+
+          RtiSerialization - faster RTRPS discovery, longer wait time.
+
+Thu Nov 12 14:21:34 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c6a21b2cddfb5e9cd28bcefc633166dbe75b42dc
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Don't divide by zero setting max_block_time
+
+Wed Nov 11 23:00:01 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 5823e7d465c187c6b6561166b0477f1a171b15dd
+
+          Merge pull request #217 from iamtheschmitzer/master
+
+          WriteDataContainer::obtain_buffer logging, StaticDiscoveryTest
+          revert history change.
+
+Wed Nov 11 22:17:29 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 693221563f78c578eb7833e4ea2153531f3e544c
+
+        * configure:
+
+          Fix uninitialized variable
+
+Wed Nov 11 22:16:08 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 81add70fa787fa1b030a4c2629c12fed5e9c473b
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Print error message from wait
+
+Wed Nov 11 22:09:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 24b520a12b6d3ecb9e1bec8697197634dd33e1a5
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Insert key into server_link_keys_ prior to releasing lock to call
+          use_datalink. This way if another caller obtains lock first it
+          will observe and use link instead of creating a pending
+          connection which the ongoing passive_connection operation won't
+          see and invoke (stranding the connection and never completing).
+
+Wed Nov 11 21:23:05 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 562714e8cdcfc381f58c1ab17d61ba4ab0e34e06
+
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+
+          Restore original history depth
+
+Wed Nov 11 20:41:57 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 73357c0c359d17420efa8c2544200d69187e5d72
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Translate log file names for remote target
+
+          PerlDDS attempts to unlink log files before a test and scan log
+          files
+          for errors after the test. Assume the test is running on a remote
+          target whose file system has been mounted in the local system.
+          The log
+          files will appear on the local file system but must be translated
+          to the
+          mount point.
+
+Wed Nov 11 18:17:49 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit 3cf40cf28dc2d919d37a90424ab156b82dd4e0ce
+
+          Merge pull request #214 from jrw972/master
+
+          Fix datarace in callback subscriber for MultiDomainMessenger Test
+
+Wed Nov 11 16:45:13 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit a276ff090dc06a4d2c5505b998149f7ee5eec045
+
+        * tests/FACE/MultiDomainMessenger/Subscriber/Subscriber.cpp:
+
+          Fix datarace in callback subscriber
+
+          The same callback is used for two different FACE connections. The
+          callback updates a global counter and flag. The callback may be
+          invoked
+          concurrently, thus, the counter and flag must be protected by a
+          lock.
+
+Tue Nov 10 22:54:02 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit 2d6f8161b5f52634c8cf239cd75f2a8d3655b6a4
+
+          Merge pull request #212 from jrw972/master
+
+          Send acknack when reader is going away
+
+Tue Nov 10 22:22:37 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 1f3c8f265540491f42ac610754f93859fe339076
+
+          Merge pull request #211 from iamtheschmitzer/master
+
+          Additional StaticDiscoveryTest Logging
+
+Tue Nov 10 21:15:13 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit e8268c40496ae5ab51f110ef865b3b3e11ac9d18
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+
+          Send acknack when reader is going away
+
+          The following sequence was observed in the StaticDiscovery test:
+
+          Writer             Reader
+          Send last sample
+          ...
+          Process last sample
+          ...
+          Terminate
+          ...
+          Wait for acks
+          ...
+          Timeout
+
+          The goal is to avoid the timeout.  There are three options:
+          1. Decrease the WaitForAck timeout.
+          2. Add a delay to the reader so that it will receive a heartbeat
+          from
+          the writer and send an acknack.
+          3. Have the reader send an acknack before it goes away. If the
+          writer
+          receives it then it will not timeout.
+
+          This commit implements option 3.
+
+          The StaticDiscoveryTest was modified to set the history depth
+          when
+          available.
+
+Tue Nov 10 21:01:47 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d1526c5af4b562f75632ad8928b12ffde1bc0dd6
+
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/StaticDiscovery/StaticDiscoveryTest.cpp:
+
+          Additional StaticDiscovery Logging
+
+Tue Nov 10 19:12:47 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d37248ad4a684b87ed56d3761dd8cce8e61c59bb
+
+          Merge pull request #210 from iamtheschmitzer/master
+
+          Initialize count of hex digits to 0
+
+Tue Nov 10 17:32:31 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 57dfde3d58e7588b7bf3c325649f26e579403416
+
+        * dds/DCPS/StaticDiscovery.cpp:
+
+          Initialize count of hex digits to 0
+
+Mon Nov 09 21:31:37 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
+        commit 85cffacd2189cd7416421a23e5ff396cde67e9b8
+
+          Merge pull request #209 from jrw972/master
+
+          Convert ACE_OS::printf to ACE_DEBUG
+
+Mon Nov 09 20:40:17 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 0e737b9c23fe3ee56068c1cb37571fdf1060cfbb
+
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/TopicSettings.cpp:
+
+          Add missing includes
+
+Mon Nov 09 16:51:25 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+        commit 757a05ca7be6bc58d987815cb935ea10500a36f5
+
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/TopicSettings.cpp:
+
+          Convert ACE_OS::printf to ACE_DEBUG
+
+          Convert ACE_OS::printf calls to ACE_DEBUG in FACE config file
+          parsing.
+          All other printf like calls were checked to be calls to snprintf.
+
+Mon Nov 09 14:46:34 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 051c27443e756b03d5bcd55548b3c41e7114026c
+
+          Merge pull request #208 from iamtheschmitzer/master
+
+          Undo SUNCC changes in StaticDisvcovery.cpp
+
+Fri Nov 06 20:45:05 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 2aee6860deb26087ed1cd136ad5594564c292baa
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Fri Nov 06 20:44:27 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 3b4ca2f943b2d2334677af9911e6308ed24707ec
+
+        * dds/DCPS/StaticDiscovery.cpp:
+
+          count_if does not return count
+
+Fri Nov 06 02:44:24 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7f09a209b96fce8fe7ab1f29a71f9d9fc2e7f84a
+
+          Merge pull request #207 from iamtheschmitzer/master
+
+          Additional GUID logging for static discovery
+
+Fri Nov 06 02:11:24 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7ec7e20fa14369be76bed6a4fce3127650a4336f
+
+        * dds/DCPS/StaticDiscovery.cpp:
+
+          fix compile error
+
+Fri Nov 06 01:51:12 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 5482f8d48c33d09b768b91efc4db0d3e75c6eaff
+
+          Merge pull request #206 from
+          objectcomputing/multicast_reliability_updates
+
+          Fix check for link being nil
+
+Fri Nov 06 01:49:26 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ae7e4f6d7cea5b8c4eb5a98ebb97d667b490cc49
+
+        * dds/DCPS/StaticDiscovery.cpp:
+
+          Additional GUID logging for static discovery
+
+Thu Nov 05 20:09:52 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit f153d6c6ca244990ef85c61c1e923c0c065a9dc6
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Remove use of CORBA function on non-IDL type, instead try
+          checking if .in() is nil
+
+Thu Nov 05 19:46:04 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d440832989495324ec1da3917504cbb3fa0593a6
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fix check for link being nil
+
+Thu Nov 05 18:37:33 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 70bd57c71a5706719cc9b5bc5cb2172f37cde88a
+
+          Merge pull request #205 from iamtheschmitzer/master
+
+          Initialize variables, log config file parsing at level 9 or
+          higher
+
+Thu Nov 05 17:31:01 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit f6d09c7128d47f980a292dc24b4c6cf37cdcc8ff
+
+        * dds/DCPS/ConfigUtils.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+
+          Initialize variables, log config file parsing at level 9 or
+          higher
+
+Thu Nov 05 14:38:49 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 460108a5648892bb673e23088f90d8cf8a7d5d54
+
+          Merge pull request #202 from
+          objectcomputing/multicast_reliability_updates
+
+          Multicast reliability updates
+
+Wed Nov 04 22:01:47 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 44e16472a3267c9ee60f654764bfd772d583b634
+
+          Merge pull request #204 from iamtheschmitzer/master
+
+          Split StaticDiscovery test
+
+Wed Nov 04 20:45:16 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7be94a9d8e5ad0e04c05ea0e7ce41abc45a9e1ee
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/StaticDiscovery/run_test.pl:
+
+          Split StaticDiscovery test
+
+Wed Nov 04 17:42:14 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 279a8f0db1bf06e24f13473ca18cbd866de0e150
+
+          Merge pull request #203 from iamtheschmitzer/master
+
+          Turn off Thrasher RTPS, new check for safety extended.
+
+Wed Nov 04 17:27:04 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 4b715a8085fe2afa865fd4888eb45cc048f9ff1b
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          fuzz
+
+Wed Nov 04 17:18:05 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ae06a57b05706d78124d28fc62fd5d6b7b9abdbc
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          Only check for new when safety base
+
+Wed Nov 04 15:28:07 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 31523613a5ec2572b01cb536167194aa792b51bf
+
+        * bin/dcps_tests.lst:
+
+          remove Thrasher rtps
+
+Mon Nov 02 17:13:02 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 4334be72343705d912ca6899f6e9b15e5c7102b6
+
+        * DevGuideExamples/DCPS/Messenger/appveyor_run_test.pl:
+        * tests/DCPS/Messenger/appveyor_run_test.pl:
+
+          Remove incorrect appveyor specific run test from the
+          tests/DCPS/Messenger, and correctly put in
+          DevGuideExamples/DCPS/Messenger
+
+Fri Oct 30 16:05:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 22b9da00d078adfcbb89be765d8eac00c570cf8d
+
+        * appveyor.yml:
+        * tests/DCPS/Messenger/appveyor_run_test.pl:
+
+          Have appveyor run modified Messenger run_test.pl
+          (appveyor_run_test.pl) which logs DCPSInfoRepo msgs to console
+          not log file
+
+Fri Oct 30 15:59:50 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit c1a7bf7ad3a06b2cba40353095c588721c1c2a2e
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Use a reference to avoid costly heap allocation
+
+Fri Oct 30 15:58:36 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 19f88a50796a006bf505da8b135a75d6f334a346
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Simplify overly complex logic/assignment
+
+Fri Oct 30 12:53:34 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 359fd4208f4473a395f8f075f7e51566620fb221
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Add include for GuidConverter
+
+Thu Oct 29 22:47:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 390b2bf49f63b8a4f7c7b113e2558e3712527f26
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * tests/DCPS/SharedTransport/multicast.ini:
+
+          Change Multicast transport:
+
+          - Prevent out of order messages for reliable sessions
+          - Allow for naking and ack_nacking the beginning of a sequence to
+          make sure no prior messages were missed to guarantee reliable
+          delivery
+          - Remove do/while loop from passive_connection and use
+          safer iteration over the callbacks.
+          - Change how passive_connection and session acking can be
+          recognized
+          and completed based on the receipt of any packet.
+          - Decrease nak delay for SharedTransport multicast test
+
+Thu Oct 29 21:55:42 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 6aad56489bdd02849aea8a7458ffb2baaa8c0726
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+
+          Add method to quickly get if session is reliable
+
+Thu Oct 29 21:09:54 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1aaec5abfc6bb3218047cfc67ffb506ee8ecea68
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Some additional logging and corrections in comments
+
+Thu Oct 29 20:43:21 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 0f8ff6f909942365b9ceb376656b76705410286e
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+
+          Add message out of order check to LargeSample test
+
+Tue Nov 03 16:00:26 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 1d914e010ec5825ffcab12ac369538ac43049842
+
+          Merge pull request #201 from iamtheschmitzer/master
+
+          Make thrasher subscriber reliable.
+
+Mon Nov 02 23:15:29 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c3b0490f09862cb29bfaa660fa93e635e8f8a408
+
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Make thrasher subscriber reliable
+
+Wed Oct 28 14:31:45 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit e61b474975f1115504dd7bd992f7052791e0fe8c
+
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.cpp:
+
+          Add check for valid_data
+
+Mon Oct 26 21:43:02 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 74e6e8a0caa28070e7f5f4c1dc2c71217f325625
+
+        * bin/dcps_short_tests.lst:
+
+          Short list of tests
+
+Fri Oct 23 19:30:59 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit daafc237f1eee4e734c59b0eb79c51f54af15d27
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Revert to previous version
+
+Fri Oct 23 17:21:33 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 625e256c53f1e548a1fb45fcce5735ac57fde7a7
+
+          Merge pull request #199 from iamtheschmitzer/master
+
+          Thrasher for static builds, limit rtps
+
+Fri Oct 23 15:55:00 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0676ddebcd45d5c8e7095b01a456fbc5db30c5fa
+
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          fuzz
+
+Fri Oct 23 15:46:34 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 435a42ac10d50e8efa1fa0316d9ddc2e0fa91e29
+
+        * bin/dcps_tests.lst:
+
+          comment out Thrasher high and aggressive for rtps
+
+Fri Oct 23 15:39:50 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 1828a364e38dac233d9d76d64a82074189499ab5
+
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Thrasher RTPS for static builds
+
+Fri Oct 23 14:53:06 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d006c0d279195005d7e15b4c227fa8bcb646d762
+
+        * bin/dcps_tests.lst:
+
+          Don't run ManyToMany on LynxOS
+
+Fri Oct 23 14:50:54 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c93854cf2e8c2a44a731277ad1432227d534f80d
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Thu Oct 22 19:05:51 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7aa98e75c117e49e68fbc6dd2192a758a0bb77eb
+
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Dispose could cause error 'Unable to take sample'
+
+Thu Oct 22 16:08:47 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c516f9789688d5af35adc10fe3b8f10c6fc00efd
+
+          Merge pull request #198 from iamtheschmitzer/master
+
+          Thrasher rtps, transient local, reliable.
+
+Thu Oct 22 15:17:03 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit f3e612e5c2abd262f65eabf5b84a58a812062324
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/run_test.pl:
+        * tests/DCPS/Thrasher/thrasher_rtps.ini:
+
+          Thrasher rtps, transient local, reliable.
+
+Wed Oct 21 21:19:10 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 1f7dc686eaf26948cf1e3a7b953e4758e6b65ffe
+
+          Merge pull request #197 from iamtheschmitzer/master
+
+          Multiple Test mods
+
+Wed Oct 21 19:28:57 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0677eb6013a83120c82d289598557929c84cdf61
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Don't wait for shorter time for second than first process
+
+Wed Oct 21 19:19:44 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit e3f94198f479975ba7c4dff30176e9eb92ca8c14
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Wed Oct 21 19:19:05 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit a16bb85e42d079b23af44e37a92e8a1263d93213
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Compiler/idl_test_fixed/run_test.pl:
+
+          Use run_test for TestFixed
+
+Wed Oct 21 19:15:07 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d6dabd9e5511ed69f3f14ab1afa5e0154f207102
+
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Always use take, count takes, not reads
+
+Wed Oct 21 13:42:57 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 83fb3fa43dbf8de1dc2d1aa107964e9b6aa28cbd
+
+        * bin/dcps_tests.lst:
+
+          SafetyProfilePoolTest should require config of
+          OPENDDS_SAFETY_PROFILE
+
+Tue Oct 20 17:33:13 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0aa89436d0ca107da24cce2b7fbec5b16a591c7a
+
+          Merge pull request #196 from iamtheschmitzer/master
+
+          Rework KeyTest
+
+Tue Oct 20 14:59:06 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit fef54616287ac1ee8a9828347840588131899a2c
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Unit/run_test.pl:
+
+          Missing FACE unit test
+
+Tue Oct 20 13:41:43 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 160b290908c1f91c24d92e481c1e3b5a4436c415
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Mon Oct 19 19:32:41 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0a1b8bbb52a7a0ef29e38048382966813f2eef78
+
+          Merge pull request #195 from iamtheschmitzer/master
+
+          Unit tests for LynxOS, international configure.
+
+Mon Oct 19 19:16:24 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 70e2c44f2144cc7ef14ac68aa5fbb39975b3422a
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/KeyTest/.gitignore:
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+        * tests/DCPS/KeyTest/KeyMarshalling.cpp:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Rework KeyTest
+
+Mon Oct 19 18:16:41 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit f927c80b68149fe16bb7842e9657081895793168
+
+        * bin/dcps_tests.lst:
+
+          Remove incorrect line
+
+Mon Oct 19 16:19:05 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit aad68c2d78c908aed8b1ad691a48e60cd587db48
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Unit/FreeIndexTest.cpp:
+        * tests/FACE/Unit/MemoryPoolTest.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+        * tests/FACE/Unit/SafetyProfilePoolTest.cpp:
+        * tests/FACE/Unit/run_test.pl:
+
+          run_test.pl for FACE unit tests
+
+Fri Oct 16 21:33:55 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1f79d85ade4f9b71c85e5ae0ffb362af5618665c
+
+          Merge pull request #194 from
+          objectcomputing/config_transports_investig
+
+          Config transports investig
+
+Fri Oct 16 14:38:04 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 4eaa878206b118b6d6cb3fc899a1f7e6abf0ff4b
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Fri Oct 16 14:30:47 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2d9bf22e79582a4a780a88f36d436d52e8db0c75
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Remove use of reverse lock and use individual release/acquire
+          calls so that if the transport client it shut down while the lock
+          is released, upon return from connect_datalink (should fail) the
+          lock will not be automatically accessed. If datalink fails to
+          connect in associate, return false.
+
+Fri Oct 16 14:30:10 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 08b7f71a0273ceec650c451f0f341dbf95f13412
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Additional checking for shutting down conditions to halt a late
+          joining association.
+
+Fri Oct 16 14:28:57 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit e5e885a6810be1860e5115cafebe44ecfa4973c8
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+
+          In connect_datalink, get an rch to the config to make sure it is
+          still viable when accessing its local_address, otherwise if
+          config_i_ is nil or transport is shutting down return (check this
+          again after lock is acquired). Pass a ACE_INET_Addr local_address
+          into the blob_to_key helper function to guard against the
+          config_i_ going away while waiting for the call to resolve and
+          avoid the possible access violation.
+
+Fri Oct 16 14:26:25 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ec0d7f95c4c4914093a54db15c20cfbe915f4c79
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          In passive_connection remove the do/while loop and replace with a
+          copy of the vector of callbacks to iterate over and check each
+          with current list since the lock is released and reacquired.
+
+Fri Oct 16 14:20:52 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 0198a98185822bc7b83a70f230d583cb3b2ff7e2
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          TransportImpl to initialize with is_shut_down_ flag set to false,
+          and toggle is_shut_down_ earlier when entering shutdown().
+
+Thu Oct 15 16:35:08 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 3c8eac63f20c6f6e4b2bc1cbaf74c0fc27d47b11
+
+        * configure:
+
+          Detect international version of MSVC
+
+Wed Oct 14 23:23:23 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d69e1f5f1b7e3c4aca0c679575a8aad137e56424
+
+          Merge pull request #193 from iamtheschmitzer/master
+
+          Log to file when no stderr, handle remote targets in run_test.pl
+
+Wed Oct 14 22:36:35 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 6f83a4497a4d461ac33304d6910f6e8e604db549
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Wed Oct 14 22:35:07 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 388e4de4f0fffd908b8a10ceb4c60ecadb1f9ea2
+
+        * bin/PerlDDS/ProcessFactory.pm:
+        * bin/PerlDDS/Run_Test.pm:
+
+          Create process using target
+
+Wed Oct 14 22:34:28 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit e7d4f4d382c3a47bdb255201e25796c7cb5e053f
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Set default log file when no stderr available
+
+Wed Oct 14 19:20:12 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit e4b808e3776acee21ef23c2526352fe68709e35d
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Wed Oct 14 01:36:03 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ff092b06bdd33aca33d1a89687430e6b5808b411
+
+          Merge pull request #192 from
+          objectcomputing/config_transports_investig
+
+          Have the writer wait until it has a matched publication, i.e.
+          subscri…
+
+Tue Oct 13 21:49:10 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit dd8dea590815d2fd63f9f2dbbd57b3c2945506c1
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Tue Oct 13 21:48:50 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 367a34dd90085a5dddae414213976c8310cd6858
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Default create PerlACE::TestTarget
+
+Tue Oct 13 21:44:00 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 1b7dda1c2d83f2fd4ea18bdc240e6027e0cb64e2
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Tue Oct 13 21:22:43 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2c3bf1c6c78b71c3ce26c8e9c16ef4dd0f159c7c
+
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
+
+          Add include
+
+Tue Oct 13 21:02:54 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit a38d56a0cc71381589ae7e0c14088404d18d3cc7
+
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
+
+          Have the writer wait until it has a matched publication, i.e.
+          subscriber is available before beginning writes to avoid writer
+          going away before subscriber comes online
+
+Tue Oct 13 19:17:46 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 2c3d8e24de585e1d255940ea4d820f1946384a61
+
+        * bin/PerlDDS/ProcessFactory.pm:
+
+          Use PerlACE::TestTarget
+
+Tue Oct 13 16:40:40 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d264cdc2d8f8f86b8fbb745b0834fe5383b95f00
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Tue Oct 13 16:39:29 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 449579e9769078c4e069d5d80b0a33787d5d45e6
+
+        * bin/PerlDDS/ProcessFactory.pm:
+
+          call create_test_target
+
+Fri Oct 09 18:23:06 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c54fc50b27de5bd28996cdbc5bbf1353c0e4f5bf
+
+          Merge pull request #191 from iamtheschmitzer/master
+
+          Don't call get_ip_interfaces in safety profile.
+
+Fri Oct 09 17:29:59 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 8c80a695095a30be325161f2d13a0032b95f4d65
+
+          Merge pull request #189 from
+          objectcomputing/stat_disc_recon_investig
+
+          Allow code to reach clean-up stage instead of returning directly
+          from…
+
+Fri Oct 09 17:09:54 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 8f630ecea04718035465a0fc822531c88c358fce
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Fuzz
+
+Fri Oct 09 17:05:37 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 2f3ddd2c5f4d01aa2a8ae00a25aae879cd28e7d6
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          Don't call get_ip_interfaces when in safety profile to prevent
+          error logging.
+
+Fri Oct 09 16:57:28 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 83839eefad117e0d211162efcbda3fc2e9b589d4
+
+        * configure:
+
+          Default --safety-profile to extended
+
+Fri Oct 09 16:10:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 46a219ebab1e52ea4c3123689c97c42f28625bdd
+
+        * tests/DCPS/StaticDiscoveryReconnect/StaticDiscoveryTest.cpp:
+
+          Make sure to remove local listener before exiting helper so that
+          cleanup doesn't try to access it after.
+
+Thu Oct 08 22:19:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit ab736866611ca77e4ed8bcc6704e392ff0b8a5e3
+
+          Merge pull request #190 from mitza-oci/VxWorks7
+
+          Changes from VxWorks7 testing
+
+Thu Oct 08 20:49:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 4a1bb9b88fcafce88abf531a8947fd6cfdc56a0c
+
+        * FACE/TS_common.hpp:
+
+          Fixed typo in TS_common.hpp
+
+Thu Oct 08 20:21:59 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 684bbf35458bf62c4e72b920252702c881cac493
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed handling of RTPS Discovery's SedpLocalAddress config
+          option.
+
+Mon Oct 05 19:14:06 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit ecd958d81b4a6927384c2e5b4e00c1782c2a018a
+
+        * FACE/TS_common.hpp:
+
+          Updated for compatibility with VxWorks
+
+Thu Oct 08 18:10:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 89bb5cfac6a9442cac48881e5b7e57517a0e8066
+
+        * tests/DCPS/StaticDiscoveryReconnect/StaticDiscoveryTest.cpp:
+
+          Allow code to reach clean-up stage instead of returning directly
+          from switch. Clean up publisher and subscriber entities before
+          returning from do_(reader/writer) helpers. Replace some magic
+          numbers with sleep constants.
+
+Thu Oct 08 17:58:59 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 65977095638da3dd29e1e5a2ff6d0e8bf95ffe3f
+
+          Merge pull request #188 from iamtheschmitzer/master
+
+          Thrasher for safety profile builds
+
+Thu Oct 08 17:09:02 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 5cc9999e4bcc7abd1c1d660f843e43b045a5b589
+
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Don't compare to undefined when no more command line params
+
+Thu Oct 08 17:08:26 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit b7897579bb3b6b480b1736f762f54fa49d46ca2d
+
+        * tests/DCPS/Thrasher/thrasher.ini:
+
+          Use large enough pool to handle aggressive mode
+
+Wed Oct 07 15:19:35 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 776d880dbb13ba42f367ffdbc077a575e0e4c671
+
+          Merge pull request #187 from iamtheschmitzer/master
+
+          Fix Thrasher run_test.pl
+
+Wed Oct 07 14:27:18 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c8bd410cb99c2086fa7f4eec5204d5c4de185d84
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Wed Oct 07 14:25:29 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 8f13a0f427761a2abd2c531f5864ef47a04b1993
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Wed Oct 07 14:21:39 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d639cf86f649f39e8577c890c3cb690f1d49d4de
+
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          fix string comparison!
+
+Tue Oct 06 18:08:51 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 82994f525cf0184bcdf467e249c07fbabad0c433
+
+          Merge pull request #186 from iamtheschmitzer/master
+
+          Configure updates for safety extended
+
+Tue Oct 06 17:48:10 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit b643317a439527a6dd2c8ab89223302522f8110e
+
+        * configure:
+
+          updates for safety extended build
+
+Tue Oct 06 14:46:00 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 77fb7988629ef95477eda51685b8d3886c87904d
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Mon Oct 05 21:25:18 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 6f6d775b9d28308543b2f50a3459436870e748cb
+
+          Merge pull request #185 from
+          objectcomputing/config_transports_investig
+
+          Remove the DataWriterRemoteImpl's reference back to the
+          DataWriterImp…
+
+Mon Oct 05 19:24:46 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b9dea2b08c2dd6c83617a878e85413d97f9a00f0
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Remove the DataReaderRemoteImpl's reference back to the
+          DataReaderImpl (parent) prior to notifying the orb so that
+          asynchronous add_association calls do not still see the
+          DataReaderImpl and access it after it has gone away. Provide
+          try/catch blocks around calls from InfoRepoDiscovery which could
+          not result in a thrown exception if the orb object has been
+          disabled already by the remove operation
+
+Mon Oct 05 14:32:34 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 17200ab0334e230170df87f7153cb56ea75e4e30
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Remove the DataWriterRemoteImpl's reference back to the
+          DataWriterImpl (parent) prior to notifying the orb so that
+          asynchronous add_association calls do not still see the
+          DataWriterImpl and access it after it has gone away
+
+Wed Sep 30 22:06:28 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1e699cd9e92fc8e157942d1140c94eb532254302
+
+          Merge pull request #184 from
+          objectcomputing/static_disc_test_investigation
+
+          Fix issue where incrementing variable after object no longer
+          guarante…
+
+Wed Sep 30 21:27:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit f660e854852e54d91d956c04ec5985282ce7f104
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fix issue where incrementing variable after object no longer
+          guaranteed to exist
+
+Mon Sep 28 15:44:01 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 4b16a851b9dec05344d75e43690ccf11bfe34a26
+
+        * tests/FACE/Conformance/ConformanceTest-SafetyBase.cfg:
+        * tests/FACE/Conformance/ConformanceTest-SafetyExt.cfg:
+        * tests/FACE/Conformance/ConformanceTest.cfg:
+
+          Conformance test config files for both Safety Base and Safety
+          Extended profiles
+
+Wed Sep 23 18:56:32 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit fe914aa065694f70a066a728281387bbd0966359
+
+          Merge pull request #182 from objectcomputing/configure_changes
+
+          Add unlink during the backup and open sub routine to protect
+          against …
+
+Mon Sep 21 14:59:07 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c7cac1d2711b6796cdee6caafa1c29f9b6e8de4c
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Mon Sep 21 14:58:57 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 1a3927bfa35e99d6f2bbe5fcf529d69722e2d383
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/StaticDiscovery/DataReaderListenerImpl.cpp:
+
+          run aggressive thrasher
+
+Thu Sep 17 21:30:41 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit fb88e4324ec8ae134491085fb6440f7393046b74
+
+          Merge pull request #183 from objectcomputing/multi_disc_test_edit
+
+          Fix MultiDiscoveryTest for safety profile builds where 2
+          instances of…
+
+Thu Sep 17 20:58:00 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit d1190056f57eff1e7b134ce8a9147cdf6a86cc30
+
+        * tests/DCPS/Thrasher/run_test.pl:
+        * tests/DCPS/Thrasher/thrasher_rtps.ini:
+
+          Use correct parameters
+
+Thu Sep 17 20:42:10 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b1d33bb5c6bcdaa2a0d015b79eb03d7fd1a7ef61
+
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiDiscovery/config.ini:
+        * tests/DCPS/MultiDiscovery/run_test.pl:
+
+          Fix MultiDiscoveryTest for safety profile builds where 2
+          instances of rtps discovery are used. Set the transport config
+          for domain 31 to not use mulitcast. Add DataReader id's to log
+          messages to make reading log easier. Add debug level control to
+          run_test.pl.
+
+Thu Sep 17 18:14:59 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 85a5ef45a571c9898d269ec30d90c80f5b454dc7
+
+        * configure:
+
+          configure ld library path correctly
+
+Thu Sep 17 17:52:57 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b3bdc22b3e90af2c64a23c69bcab80dea65977fc
+
+        * configure:
+
+          Add unlink during the backup and open sub routine to protect
+          against symlinked files, particularly during cross compile for
+          safety profile builds
+
+Wed Sep 16 21:24:43 UTC 2015  iamtheschmitzer  <schmitzj@ociweb.com>
+        commit 17bb603734e32e6349aa1721b54a3bbd63044877
+
+        * tools/scripts/gitrelease.pl:
+
+          Correct dir for convert files
+
+Wed Sep 16 20:20:53 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 046c00b46b892d1ae9f9477a55351f063c0cf2f3
+
+          Merge pull request #181 from iamtheschmitzer/master
+
+          Convert windows line endings
+
+Wed Sep 16 19:45:31 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit dcde10fc44b69491eae6361cf93a1fe7a7db77a0
+
+          Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
+
+Wed Sep 16 19:45:12 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 67c81eb5048270857dd5c25d4455dc7b6086fd7b
+
+        * tools/scripts/gitrelease.pl:
+        * tools/scripts/modules/ConvertFiles.pm:
+
+          Convert line endings for windows
+
+Wed Sep 16 16:38:41 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit bdfdbca37ce7d9432b8b887e5f5e90779784f016
+
+          Merge pull request #180 from objectcomputing/multi_disc_test
+
+          Include header for DataWriter_var in the listener
+
+Wed Sep 16 14:36:49 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 752a9b89c2c4cbbc07507467abc6697c15be483f
+
+        * tests/DCPS/MultiDiscovery/MultiDiscoveryTest.cpp:
+
+          Add RtpsDiscovery for static builds
+
+Wed Sep 16 14:23:52 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit cb275c2d25839cf52c0d108551f2a7b49c4cd191
+
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.cpp:
+
+          Add include for WaitSet
+
+Wed Sep 16 14:21:27 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit c9f152ddcf1244ac62eae0ef4e7faefc4610241a
+
+        * tests/DCPS/MultiDiscovery/.gitignore:
+
+          Add ignores to new test directory
+
+Wed Sep 16 14:18:08 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 08bb8ca366dc260a904a6343edfa4add3c3b5fe5
+
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.h:
+        * tests/DCPS/MultiDiscovery/MultiDiscoveryTest.cpp:
+
+          Fix ambiguity in passing writer by passing origin flag to check
+          and always having writer available
+
+Wed Sep 16 14:09:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b8dcf62b34ea588d363b4ee2d9ed6261713978a0
+
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.h:
+
+          Include header for DataWriter_var in the listener
+
+Tue Sep 15 20:33:14 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 73a5a3929e74bae155411a7fbba9c694b315338e
+
+          Merge pull request #179 from objectcomputing/multi_disc_test
+
+          Multi disc test
+
+Tue Sep 15 18:56:24 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit a7e094c9e99ae60f13ee6a5ed9d58f3bfc4b6f59
+
+        * tests/DCPS/MultiDiscovery/run_test.pl:
+
+          fix fuzz error
+
+Tue Sep 15 18:52:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 99d8273a1ea56f6c34dc54277ad0c366bc4c72d5
+
+        * bin/dcps_tests.lst:
+
+          Add MultiDiscovery test to the dcps_test.lst
+
+Tue Sep 15 18:46:16 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ea44e61f3ba818fadd02b9b854f93afccd782418
+
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiDiscovery/DataReaderListenerImpl.h:
+        * tests/DCPS/MultiDiscovery/MultiDiscoveryTest.cpp:
+        * tests/DCPS/MultiDiscovery/MultiDiscoveryTest.mpc:
+        * tests/DCPS/MultiDiscovery/TestMsg.idl:
+        * tests/DCPS/MultiDiscovery/config.ini:
+        * tests/DCPS/MultiDiscovery/run_test.pl:
+
+          Add new MultiDiscovery test to test processes using multiple
+          types of discovery to create an association/message loop
+
+Tue Sep 15 18:41:05 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 57f6259d1d438dfc885e02e79131638fd3ede4f6
+
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+
+          Fix Static Discovery participant matching logic to check that
+          participant's are different but are in the same domain
+
+Mon Sep 14 22:54:19 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 3b94300837c3ee8f61055ec410bfc57f47cff465
+
+          Merge pull request #178 from iamtheschmitzer/master
+
+          Fix #elinclude
+
+Mon Sep 14 22:53:26 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 7186e4376ffc2a7aa918b03220891753d0c331ff
+
+        * tests/Utils/Safety.h:
+
+          Fix #elinclude
+
+Mon Sep 14 21:35:51 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 0b778a1df81636e6d3471ca015ef0d2e6104f8db
+
+        * tools/scripts/gitrelease.pl:
+
+          Wait to push tag to remote
+
+Mon Sep 14 21:19:28 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit ab57453a84d686fd8276849044ba9ddb28dc6939
+
+        * tools/scripts/gitrelease.pl:
+
+          fix ChangeLog generation
+
+Mon Sep 14 19:25:22 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 1b2d3bb48a139ba6202dce73dafe2a2efdeb1574
+
+          Merge pull request #177 from iamtheschmitzer/master
+
+          Don't check for operator new in safety extended. Fix
+          gitrelease.pl
+
+Mon Sep 14 17:02:54 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 8db05b34c4e96841d1013a325357a58f980adf2e
+
+        * tests/Utils/Safety.h:
+
+          fuzz
+
+Mon Sep 14 16:59:24 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c6ee44f80eb504ba14807c3ab0fa42aad2f86837
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Mon Sep 14 16:57:46 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 3257cb04b6956a1c27871a7de55b194326ae3de1
+
+        * tools/scripts/gitrelease.pl:
+
+          Fixes found during release: (1) compensate for old versions of
+          git and tar (2) doxygen not generating release number (3) md5
+          output (4) Download devguide pdf from subversion (5) nothing to
+          do to upload to github
+
+Mon Sep 14 14:56:25 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit 6a3ae65cd537724e3853ceddb44615ad6f876693
+
+        * tests/Utils/Safety.h:
+
+          Don't check for global operator new calls in safety extended.
+
+Fri Sep 11 14:06:23 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+        commit c21162296798a4d8b9ab03fff56e11d6ba4c6b24
+
+          Merge branch 'master' of github.com:objectcomputing/OpenDDS
+
+Thu Sep 10 17:06:05 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
+
+        * tools/scripts/gitrelease.pl:
+
+          Validate authors file
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
