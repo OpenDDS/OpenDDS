@@ -58,7 +58,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyDataSeq(
   }
 }
 
-#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+#if defined (_MSC_VER)
 #pragma warning (disable:4996) //std::copy OK here
 #endif
 template <class Sample_T, size_t DEF_MAX>
@@ -117,7 +117,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
     }
   }
 }
-#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+#if defined (_MSC_VER)
 #pragma warning (default:4996)
 #endif
 
@@ -150,7 +150,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::get_buffer(
   return yours.sc_buffer_;
 }
 
-#if defined (_MSC_VER) && (_MSC_VER >= 1400)
+#if defined (_MSC_VER)
 #pragma warning (default:4996)
 #endif
 
