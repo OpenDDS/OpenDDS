@@ -103,9 +103,6 @@ public:
 
   virtual int visit_valuebox(AST_ValueBox *node);
 
-#if (TAO_MAJOR_VERSION > 1 || \
-     (TAO_MAJOR_VERSION == 1 && (TAO_MINOR_VERSION > 7)))
-
   virtual int visit_template_module (AST_Template_Module *node);
 
   virtual int visit_template_module_inst (AST_Template_Module_Inst *node);
@@ -133,8 +130,6 @@ public:
   virtual int visit_connector(AST_Connector *node);
 
   virtual int visit_finder(AST_Finder *node);
-
-#endif
 
 protected:
   AST_Decl *scope_;

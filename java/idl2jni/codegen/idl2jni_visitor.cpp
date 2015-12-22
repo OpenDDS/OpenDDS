@@ -592,9 +592,6 @@ int idl2jni_visitor::visit_valuebox(AST_ValueBox *)
   return 0;
 }
 
-#if (TAO_MAJOR_VERSION > 1 || \
-     (TAO_MAJOR_VERSION == 1 && (TAO_MINOR_VERSION >= 7)))
-
 int
 idl2jni_visitor::visit_template_module (AST_Template_Module *)
 {
@@ -668,5 +665,3 @@ int idl2jni_visitor::visit_finder(AST_Finder *)
 {
   return 0;
 }
-
-#endif

@@ -26,11 +26,7 @@ typedef CORBA::LocalObject_var LocalObject_var;
 template <class Stub>
 class LocalObject
   : public virtual Stub
-#if TAO_MAJOR_VERSION > 1 || TAO_MINOR_VERSION > 6
   , public virtual CORBA::LocalObject
-#else
-  , public virtual TAO_Local_RefCounted_Object
-#endif
   , public virtual PoolAllocationBase
 {
 public:

@@ -15,11 +15,7 @@
 #include "tao/Version.h"
 
 class idl2jni_runtime_Export IDL2JNI_BaseJavaPeer
-#if TAO_MAJOR_VERSION > 1 || TAO_MINOR_VERSION > 6
   : public virtual CORBA::LocalObject
-#else
-  : public virtual TAO_Local_RefCounted_Object
-#endif
 {
 public:
   IDL2JNI_BaseJavaPeer(JNIEnv *jni, jobject local)

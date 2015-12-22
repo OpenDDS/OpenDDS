@@ -13,6 +13,7 @@ lib*.dylib
 *.sln
 *.suo
 .*.swp
+*.VC.opendb
 
 /setenv.sh
 /setenv.cmd
@@ -24,4 +25,3 @@ lib*.dylib
 /build
 /ipch
 /ACE_wrappers
-/*.VC.opendb
