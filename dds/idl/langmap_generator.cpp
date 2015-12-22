@@ -1330,7 +1330,6 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     case AST_Decl::NT_array:
       gen_array(name, arr = AST_Array::narrow_from_decl(base));
       break;
-#if ACE_MAJOR_VERSION > 5
     case AST_Decl::NT_fixed:
 # ifdef ACE_HAS_CDR_FIXED
       gen_fixed(name, AST_Fixed::narrow_from_decl(base));
@@ -1340,7 +1339,6 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
         " with this version of ACE+TAO\n";
       return false;
 # endif
-#endif
     default:
       be_global->lang_header_ <<
         "typedef " << map_type(base) << ' ' << nm << ";\n";

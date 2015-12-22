@@ -54,11 +54,6 @@ BE_post_init(char*[], long)
     }
     be_global->add_inc_path(dds_root.c_str());
     ACE_CString included;
-    DRV_add_include_path(included, dds_root.c_str(), 0
-#if TAO_MAJOR_VERSION > 1 || (TAO_MAJOR_VERSION == 1 && TAO_MINOR_VERSION > 6)
-, true);
-#else
-);
-#endif
+    DRV_add_include_path(included, dds_root.c_str(), 0, true);
   }
 }

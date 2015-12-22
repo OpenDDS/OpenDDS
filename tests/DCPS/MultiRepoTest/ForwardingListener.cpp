@@ -6,29 +6,9 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 
-// Only for Microsoft VC6
-#if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)
-
-// Added unused arguments with default value to work around with vc6
-// bug on template function instantiation.
-template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
-int read (::DDS::DataReader_ptr reader, ::DDS::DataWriter_ptr writer,
-          DT* dt = 0, DR* dr = 0, DR_ptr dr_ptr = 0, DR_var* dr_var = 0, DR_impl* dr_impl = 0)
-{
-  ACE_UNUSED_ARG (dt);
-  ACE_UNUSED_ARG (dr);
-  ACE_UNUSED_ARG (dr_ptr);
-  ACE_UNUSED_ARG (dr_var);
-  ACE_UNUSED_ARG (dr_impl);
-
-#else
-
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
 int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
 {
-
-#endif
-
   try
   {
     DR_var foo_dr
