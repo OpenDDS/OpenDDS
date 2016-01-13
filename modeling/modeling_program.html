@@ -1,0 +1,65 @@
+---
+layout: page
+title: Using Generated Code
+categories: [opendds]
+tags: []
+order: 73
+---
+<div id="contenttext">
+
+  <div class="bodytext" style="padding:12px;" align="justify">
+    <a name="Applications"><span class="headertext">Application Programming</span></a>
+    <p>Once a model has been transformed into C++ libraries,
+      applications can then link these libraries. The generated C++ code is intended to be
+      used along with an OpenDDS C++ support library to reduce the amount of
+      code being generated and to simplify application development.</p>
+
+    <p><em>Refer to the <a href="http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf">
+          OpenDDS Developer's Guide</a> for in-depth details on application programming.</em></p>
+
+    <p>The snippet of code shown below illustrates how application code can use the
+      C++ support library and generated code to construct a DataWriter in just a few
+      lines of code.</p>
+{% highlight C++ %}
+int main(int argc, char* argv[])
+{
+  try {
+    // Using support library
+    OpenDDS::Model::Application application(argc, argv);
+
+    // Using generated code
+    MessengerLib::DefaultMessengerType model(application, argc, argv);
+    using OpenDDS::Model::MessengerLib::Elements;
+    DDS::DataWriter_var writer = model.writer(Elements::DataWriters::writer);
+    ...
+  }        ...
+}{% endhighlight %}
+  </div>
+
+  <div class="panel" align="justify">
+    <a name="Building"><span class="colortitle">Building</span></a>
+    <span class="bodytext"><br />
+      <p>Included in the files generated are <a href="http://www.ociweb.com/products/MPC">MPC</a> files
+        that specify how to build a C++ library representing the model from the generated source. Using
+        MPC, files such as makefiles or Visual Studio project files can be generated, making it easy to
+        build the C++ library.</p>
+      <div align="center">
+        <img src="../images/modeling/code_gen_mpc_flow.png" width="400">
+      </div>
+    </span>
+  </div>
+
+  <div class="bodytext" style="padding:12px;" align="justify">
+    <a name="Dependencies"><span class="colortitle">Dependencies Between Models</span></a>
+    <p>
+      The generated model library could depend on other generated model libraries.
+      For example, there could be an external data type library which is generated
+      to a different directory. This could cause a great deal of maintenance of project files, as
+      models change their dependencies over time. To help overcome this,
+      the generated model library records the paths to all of its externally referenced
+      model libraries in a separate MPC file. Inheriting from this paths base project
+      will inherit the needed settings to include the dependent model as well.
+    </p>
+  </div>
+
+</div>

@@ -1,0 +1,92 @@
+---
+layout: page
+title: Building
+categories: [opendds]
+tags: []
+order: 103
+---
+<div id="contenttext">
+  <div class="bodytext" align="justify">
+    <a name="Dependencies"><span class="headertext">Dependencies</span></a>
+    <ul>
+      <li>
+        TAO
+        <p>OpenDDS requires TAO. If you will be using the <code>configure</code> script for OpenDDS (see the <code>INSTALL</code> file for details), you do not need to download TAO first -- the <code>configure</code> script will download it for you.</p><p>
+          OpenDDS has been tested against the
+          versions of TAO given below. Note that the _._a releases are from OCI and can
+          be obtained from <a href="http://www.theaceorb.com/">http://www.theaceorb.com/</a>.
+          The DOC Group releases can be obtained from <a href="http://download.dre.vanderbilt.edu/">
+            http://download.dre.vanderbilt.edu/</a>. For responsive support from OCI it
+          is recommended that the latest version of the OCI release of TAO used for OpenDDS
+          development and testing be used.
+          <ul>
+            <li>
+              OCI TAO 2.0a patch 7 or greater</li>
+            <li>
+              OCI TAO 2.2a patch 8 or greater</li>
+            <li>
+              DOC Group TAO 2.3.3 or greater</li>
+          </ul>
+        </p>
+        <br />
+      </li>
+      <li>
+        GNU Make
+        <p>GNU Make 3.80 or higher is used for automating the compiling and linking of OpenDDS on Unix and Linux systems.</p>
+      </li>
+      <li>
+        Perl
+        <p>Perl is used for running the automated tests and examples
+          included in this source tree, or if you will be generating Makefiles or
+          Visual Studio project files.</p>
+        <p>The "configure" script also uses Perl.</p>
+        <p>On Windows platforms, we recommend the use of ActiveState Perl.</p>
+      </li>
+    </ul>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="OperatingSystems"><span class="headertext">Operating Systems</span></a>
+    <p>This release of OpenDDS has been tested under the following platforms:</p>
+    <ul>
+      <li>Windows Server 2003, Windows 7 (64-bit), Windows Server 2008 R2 (64-bit)</li>
+      <li>Linux Red Hat EL 5 and 5.3 (x86_64), Red Hat EL and CentOS 6.6 (x86_64), Red Hat EL 7 (x86_64), Fedora 12 (x86_64), Fedora Core 6 (x86),
+        Ubuntu 14.04 LTS (x86_64), openSUSE 11.4 (x86_64)</li>
+      <li>SunOS 5.10 (Solaris 10) (SPARC)</li>
+      <li>MacOSX Yosemite</li>
+      <li>LynxOS-178</li>
+      <li>We have also built OpenDDS for VxWorks 6.9 and 7 and have run basic
+        system and performance tests (but not the entire regression test suite).
+        Please contact sales@ociweb.com or opendds-main@lists.sourceforge.net for
+        more information on support for ACE, TAO, and OpenDDS on VxWorks.
+      </li>
+    </ul>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="Compilers"><span class="headertext">Compilers</span></a>
+    <p>This release of OpenDDS has been tested using the following compilers:</p>
+    <ul>
+      <li>Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)</li>
+      <li>Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)</li>
+      <li>Microsoft Visual C++ 11 (Visual Studio 2012)</li>
+      <li>Microsoft Visual C++ 12 (Visual Studio 2013)</li>
+      <li>Microsoft Visual C++ 14 (Visual Studio 2015)</li>
+      <li>gcc 4.1.x (deprecated after OpenDDS 3.7)</li>
+      <li>gcc 4.4.x</li>
+      <li>gcc 4.5.x</li>
+      <li>gcc 4.8.x</li>
+      <li>gcc 5.3</li>
+      <li>Clang 3.7 (llvm.org) and 6.10 (Apple)</li>
+      <li>Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25</li>
+    </ul>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="DetailedInstructions"><span class="headertext">Detailed Instructions</span></a>
+    <p>Please see the file <code>INSTALL</code> for detailed instructions
+      on building DDS on a number of platforms.</p>
+  </div>
+
+</div>
+

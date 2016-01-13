@@ -1,0 +1,17 @@
+<html>
+<head>
+<title>OpenDDS - Latency Tests</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<meta name="keywords" content="tests, publish"/>
+</head>
+<body>
+<div class="viewer" id="contentWrapper">
+<small><a href="../../performance.html">Performance</a> &gt; Latency Tests</small><h1 class="publishLogo">OpenDDS - Performance Testing Results</h1>
+<div id="publishContentWrapper">
+<h2>Latency Tests</h2>
+The latency tests were executed to determine the performance of OpenDDS delivering data of different sizes via all the available transport mechanisms.  The tests themselves were setup as two processes on the same host, with a publication and subscription in each process.  The originating process publishes test data on a partition which is received by a subscription in the other process which republishes the data on a separate partition to be received by a subscription in the originating process.  This allows timing information to be as accurate as possible since the same process will be taking the send time and receive time measurements.  This arrangement is illustrated in the diagram below.<br><br><span class="imgcentered"><img src="../../images/perf/sgi100317/latency-tests.png"></span><br><br>These tests were executed for 2 minutes to ensure that enough data was collected.  The last 5,000 sample latencies were stored and reported for analysis.  This means that the last 50 seconds of data is used in the analysis for latency and jitter.  The SIZE parameter was varied for different test executions, with a separate test executed for each of 50, 100, 250, 500, 1000, 2500, 5000, 8000, 16000, and 32000 bytes.<br><br>The tests were executed with the hosts in runlevel 3 (network, no desktop/display manager) and with high priority (nice -n -15).<br><br>Once the tests were executed, the results were analyzed with the results shown as <a class="externalLink null" href="latency_results.html">summary</a> and <a class="externalLink null" href="latency_details.html">detailed</a> data.<br><br>The <a class="externalLink null" href="latency_results.html">summary</a> data compares the performance for each transport across all message sizes sent for testing.<br><br>The <a class="externalLink null" href="latency_details.html">detailed</a> data contains links to plots for each individual test run.<br>
+<hr>Tags: tests, publish
+<hr>DonBusch, Thu 25 Mar 2010 10:11:00 AM CST&nbsp;(created Thu 25 Mar 2010 04:09:00 PM CST)
+</div></div>
+</body>
+</html>

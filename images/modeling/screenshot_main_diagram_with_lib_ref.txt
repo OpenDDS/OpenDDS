@@ -1,0 +1,2 @@
+File screenshot_main_diagram_with_lib_ref.txt is a copy of
+svn+ssh://svn.ociweb.com/education/training/tracks/DistributedComputing/OpenDDSModelingSDK/images/screenshot_main_diagram_with_lib_ref.png

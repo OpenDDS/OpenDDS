@@ -1,0 +1,2 @@
+File screenshot_validation_error_and_warning.txt is a copy of
+svn+ssh://svn.ociweb.com/education/training/tracks/DistributedComputing/OpenDDSModelingSDK/images/screenshot_validation_error_and_warning.png

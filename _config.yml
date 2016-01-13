@@ -1,0 +1,12 @@
+# Site settings
+title: OpenDDS
+email: info@ociweb.com
+description: OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). OpenDDS also supports Java bindings through JNI.
+baseurl: "/OpenDDS" # the subpath of your site, e.g. /blog/
+twitter_username: ObjectComputing
+github_username:  objectcomputing
+safe: true
+lsi: false
+
+# Build settings
+markdown: kramdown

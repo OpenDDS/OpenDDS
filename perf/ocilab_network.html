@@ -1,0 +1,16 @@
+<html>
+<head>
+<title>OpenDDS - OCILab Network</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<meta name="keywords" content="publish"/>
+</head>
+<body>
+<div class="viewer" id="contentWrapper">
+<small><a href="../performance.html">Performance</a> &gt; OCILab Network</small><h1 class="publishLogo">OpenDDS - Performance Testing Environments</h1>
+<div id="publishContentWrapper">
+<h2>OCILab Network</h2>
+The network performance of the test environment was tested to determine the maximum sustainable bandwidth that can be used in this test environment.  In order to determine this we used an ftp server on one host and used the <strong><em>wget</em></strong> command as a client to transfer data between hosts using the <strong><em>ftp</em></strong> protocol. Measurements were taken of the rate at which a 256MB file was transferred between the hosts. Conditions that were varied included the processing priority and whether the data was read and written from and to disk or RAM.<br><br>Process priority was controlled by either normal server and client execution or by starting both server and client with a 'nice' value of -10. At this level, only one system process had a higher priority. Reading and writing from and to disk was simply done by transferring the file between regular file systems. Reading and writing from and to RAM was done by creating a <strong><em>tmpfs</em></strong> filesystem in RAM and using that to store the file on both ends of the transfer.<br><br>The following table summarizes the results. The clearly dominant factor was the write speed to disk. When data was written to RAM, the network appears to be the limiting factor. The maximum transfer rate of the network for this equipment configuration appears to be 596 Mb/s or just under 60% of the theoretical 1 Gb/s.<br><br><div class="centeredTable"><table class="twtable"><caption align="bottom"> <strong>Network Throughput</strong> </caption><tbody><tr class="evenRow"><td align="center"><strong>Priority</strong></td><td align="center"><strong>Read From</strong></td><td align="center"><strong>Write To</strong></td><td align="center"><strong>Throughput</strong></td></tr><tr class="oddRow"><td rowspan="3" align="center">Normal</td><td rowspan="2" align="center">Disk</td><td align="center">Disk</td><td align="center">292 Mbps</td></tr><tr class="evenRow"><td rowspan="2" align="center">RAM</td><td align="center">595 Mbps</td></tr><tr class="oddRow"><td align="center">RAM</td><td align="center">595 Mbps</td></tr><tr class="evenRow"><td rowspan="3" align="center">High</td><td rowspan="2" align="center">Disk</td><td align="center">Disk</td><td align="center">467 Mbps</td></tr><tr class="oddRow"><td rowspan="2" align="center">RAM</td><td align="center">596 Mbps</td></tr><tr class="evenRow"><td align="center">RAM</td><td align="center">595 Mbps</td></tr></tbody></table></div><br><br>The detailed data collected appears below.<br><img src="../images/perf/oci_network.png">
+<hr>$Id: ocilab_network.html 52 2010-01-30 00:00:25Z martinezm $
+</div></div>
+</body>
+</html>

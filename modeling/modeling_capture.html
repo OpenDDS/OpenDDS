@@ -1,0 +1,156 @@
+---
+layout: page
+title: Model Capture
+categories: [opendds]
+tags: []
+order: 71
+---
+<div id="contenttext">
+
+  <div class="bodytext" align="justify">
+    <a name="Overview"><span class="headertext">Overview</span></a>
+    <p>
+      OpenDDS Model Capture is done using the
+      <a href="index.html#Plug-ins">Eclipse plug-in tools</a>.
+      The basic steps to capturing a model are:
+      <ul><li>Create a <a href="#Main">main diagram</a>.</ul></li>
+      <ul><li>Create and populate various <a href="#Package">package diagrams</a>
+          that define the <a href="#DCPS">DCPS model</a>,
+          <a href="#Data">data definitions</a>, and
+          <a href="#Qos">QoS policies</a>.</ul></li>
+      <ul><li><a href="#Validation">Validate the model</a>.</ul></li>
+      These steps are outlined below. <em>This outline is not sufficient for using the SDK.</em>
+      The OpenDDS Modeling SDK installation includes additions to the
+      Eclipse help system that provides details on working with an OpenDDS model.
+      See Help &gt; Help Contents &gt; OpenDDS Modeling SDK Guide.
+    </p>
+  </div>
+
+  <div class="panel" align="justify">
+    <a name="Main"><span class="colortitle">Main Diagram</span></a>
+    <span class="bodytext"><br />
+      <p>
+        The main diagram provides the structure that will hold all
+        of the other diagrams that will be used in the model.  Files associated with
+        the main diagram are the XMI diagram file,
+        &lt;model&gt;.opendds_diagram, and a XMI file
+        of the semantic model,
+        &lt;model&gt;.opendds.  The file &lt;model&gt;.opendds
+        is what is used to generate source code.
+      </p>
+      <p>
+        Start capturing a model by creating a new main OpenDDS Diagram:
+      </p>
+      <p>
+        <div align="center">
+          <img src="../images/modeling/screenshot_opendds_diagram_wizard.png" border="0" alt="new diagram" />
+        </div>
+      </p>
+      <p>
+        This will open a package diagram.  From this diagram all
+        of the other diagrams that will be used in the model will
+        be created.
+      </p>
+    </span>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="Package"><span class="colortitle">Package Diagrams</span></a>
+    <p>Package diagrams are the main entry point into capturing
+      a model.  They allow the developer to specify any package
+      structures required for the project as well as defining
+      any local or referenced DCPS models, data definitions,
+      and QoS policies.  Once terminal (non-package) elements
+      have been captured on the diagram, sub-diagrams can
+      be opened from them to edit the internal structure of
+      those elements.  Those diagrams are described below.
+    </p>
+    <div align="center">
+      <img src="../images/modeling/screenshot_main_diagram.png" border="0" alt="package diagram" />
+    </div>
+  </div>
+
+  <div class="panel" align="justify">
+    <a name="DCPS"><span class="headertext">DCPS Model</span></a>
+    <span class="bodytext"><br />
+      <p>DCPS middleware diagrams capture the DDS Entities
+        that will be used by the model.  This includes Domain,
+        DomainParticipant, Publisher, Subscriber, DataWriter,
+        DataReader, Topic, ContentFilteredTopic, and MultiTopic
+        Entities.  These elements and their relationships define
+        the DDS service that will be generated into a linkable
+        library and made available to any linking application.
+      </p>
+      <div align="center">
+        <img src="../images/modeling/dcpsdiagram.png" border="0" alt="DCPS diagram" />
+      </div>
+    </span>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="Data"><span class="colortitle">Data Definition</span></a>
+    <p>Data definition diagrams capture the data types that will be
+      transported between publications and subscriptions.
+      This is a simple graphical representation
+      of the data structures that will be written and read
+      from the DDS service.  Only data types that have been
+      defined in a model can be used by code generated from
+      a model.  These types may be included in a model or
+      referenced from another model.  This allows data types
+      to be defined in a separate, reusable, model that is
+      then linked by many other DCPS models.
+    </p>
+    <div align="center">
+      <img src="../images/modeling/screenshot_datalib_struct.png" border="0" alt="data diagram" />
+    </div>
+  </div>
+
+  <div class="panel" align="justify">
+    <a name="Qos"><span class="headertext">QoS Policies</span></a>
+    <span class="bodytext"><br />
+      <p>QoS Policy diagrams allow commonly used policy values to
+        be captured and named.  This allows a project to share
+        the same policy values by name, ensuring consistency
+        between all uses of those policy values.
+      </p>
+      <div align="center">
+        <img src="../images/modeling/qosdiagram.png" border="0" alt="qos diagram" />
+      </div>
+    </span>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="Libraries"><span class="colortitle">Model Libraries</span></a>
+    <p>The OpenDDS Modeling SDK supports <i>model libraries</i>, which are
+      packages of QoS policy, data types, or DCPS domain entities, whose
+      elements can be used by other model libraries. A library in one model file
+      can reference elements from a library in the same file or another file.
+    </p>
+    <p>Through the use of modeling libraries, reuse and concurrent
+      development of different portions of a model is feasible.</p>
+    <p>Libraries can optionally be placed in nested UML packages. Through
+      the use of libraries and packages, a large complicated model becomes
+      more manageable.</p>
+    <div align="center">
+      <img src="../images/modeling/screenshot_main_diagram_with_lib_ref.png"/>
+    </div>
+  </div>
+
+  <div class="panel" align="justify">
+    <a name="Validation"><span class="colortitle">Validation</span></a>
+    <span class="bodytext"><br />
+      <p>Validations can be performed at the model level to find semantic
+        problems that are not easily detectable in the code. For example,
+        during validation of a DataLib a check is made that the size of
+        Arrays is greater than 0. As another example, during validation of a DcpsLib,
+        a check is made that a DataWriter is associated with a Topic. Resolving validations
+        at the model level helps minimize the number of cycles of modeling &gt; code generation
+        &gt; testing.
+      </p>
+      <div align="center">
+        <img src="../images/modeling/screenshot_validation_error_and_warning.png"/>
+      </div>
+    </span>
+  </div>
+
+</div>

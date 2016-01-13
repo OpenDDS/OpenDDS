@@ -1,0 +1,74 @@
+---
+layout: page
+title: Model to Code
+categories: [opendds]
+tags: []
+order: 72
+---
+<div id="contenttext">
+
+  <div class="bodytext" align="justify">
+    <a name="Overview"><span class="headertext">Model Code Generation</span></a>
+    <p>Once an OpenDDS model has been defined using the modeling tool, it can be transformed into C++ code using
+      the code generation tool. Using the MPC build files included with the generated code, a C++ library based on
+      the model file can easily be
+      built. Developers can then use this library along with OpenDDS libraries to construct custom application code.
+    </p>
+    <div align="center">
+      <img src="../images/modeling/screenshot_code_gen_wizard.png" width="370">
+    </div>
+  </div>
+
+
+  <div class="panel" align="justify">
+    <a name="Customize"><span class="colortitle">Customization</span></a>
+    <span class="bodytext"><br />
+      <p>The configuration for transports (TCP, UDP, and Multicast) can done using the code generation tool. A publisher or subscriber
+        transport ID in the model is associated with a transport configuration with the same ID.
+        Deferring transport configuration details to external configuration
+        files available at run time is also possible. In that case, no
+        transport specific information needs to be provided in the
+        customization tab.</p>
+      <p>Customization also allows additional instances of the model to be
+        defined, with transport information either direct (in the form) or
+        deferred (in a configuration file).  Different instances require the
+        <em>Transport Offset</em> attribute to be set for each instance so that
+        transport ID values in the model do not interfere across instances
+        when added to the base of each instance.</p>
+      <div align="center">
+        <img src="../images/modeling/screenshot_code_gen_customization_tab.png">
+      </div>
+    </span>
+  </div>
+
+
+  <div class="bodytext" align="justify">
+    <a name="Build"><span class="headertext">Build Paths</span></a>
+    <p>Elements within model files may refer to elements in external model
+      files.  To enable the generated code to mirror this referencing, the
+      location of the external generated code needs to be provided.
+      Build Paths provides a mechanism for specifying this using absolute
+      paths (no base variable) or paths relative to environment variables.
+      The environment variables are required at build time to locate the
+      external include and library files.  The Build Paths are incorporated
+      into MPC files to allow seamless integration into the build system
+      for the generated code.</p>
+    <div align="center">
+      <img src="../images/modeling/screenshot_code_gen_build_paths_tab.png">
+    </div>
+  </div>
+
+
+  <div class="panel" align="justify">
+    <a name="Generation"><span class="colortitle">Generation</span></a>
+    <span class="bodytext"><br />
+      <p>After any transport configuration has been defined and/or build paths specified, the IDL, C++,
+        and build support files can be generated in a directory within the Eclipse workspace specified by
+        the user. It is possible to generate individual files or generate all files at once.</p>
+      <div align="center">
+        <img src="../images/modeling/screenshot_code_gen_generate_tab.png" width="500">
+      </div>
+    </span>
+  </div>
+
+</div>

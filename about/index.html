@@ -1,0 +1,194 @@
+---
+layout: page
+title: About OpenDDS
+categories: [opendds]
+tags: []
+order: 20
+---
+<div id="contenttext">
+  <div class="bodytext" align="justify">
+    <a name="OpenDDS"><span class="headertext">OpenDDS</span></a>
+    <p>
+      OpenDDS is an open-source C++ implementation of the Object Management Group's
+      specification "Data Distribution Service for Real-time Systems".  Although
+      OpenDDS is itself developed in C++, Java and JMS bindings are provided so
+      that Java applications can use OpenDDS.
+    </p>
+    <p>
+      OpenDDS is built on the <a href="http://www.theaceorb.com/product/aboutace.html">ACE</a>
+      abstraction layer to provide platform portability.  OpenDDS also leverages
+      capabilities of <a href="http://www.theaceorb.com/">TAO</a>, such as its IDL compiler
+      and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
+    </p>
+    <p>
+      The primary development of OpenDDS was done by the ACE/TAO development
+      team at <a href="http://www.ociweb.com">Object Computing, Incorporated</a> in
+      St. Louis and Phoenix.  It is released under the same generous license
+      terms as ACE, TAO and MPC.  See the LICENSE file for details.
+    </p>
+  </div>
+  <div class="panel" align="justify">
+    <a name="Features"><span class="colortitle">Features</span></a>
+    <span class="bodytext">
+      <br />
+      <p>
+	OpenDDS is based on the 1.2 DDS Specification (formal/07-01-01)
+	and version 2.2 of The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDS-RTPS) (formal/2014-11-01).
+      </p>
+      <p>
+	It offers the following default transport protocols (IPv4 and IPv6):
+	<ul>
+	  <li>
+	    TCP/IP
+	  </li>
+	  <li>
+	    RTPS/UDP
+	  </li>
+	  <li>
+	    UDP/IP
+	  </li>
+	  <li>
+	    IP multicast
+	  </li>
+	</ul>
+	The <a href="transport.html">pluggable transport framework</a> allows anyone to create a
+	transport to fit custom requirements.
+      </p>
+      <p>
+	OpenDDS has been found to perform better than other TAO
+	services (notification and real-time event channel) by a factor of two
+	or three. The features offered by the Real-Time Event Channel and Notification Service are similar to DDS,
+	but not identical, so carefully examine your use-cases before choosing
+	one service over another. Speed is not the only criterion.
+    </p> </span>
+  </div>
+  <div class="bodytext" align="justify">
+    <a name="Compliance"><span class="headertext">Compliance with the DDS Specification</span></a>
+    <p>
+      OpenDDS supports the following capabilities defined in the DDS 1.2 Specification:
+    </p>
+    <p>
+      All profiles (including optional profiles) of the DCPS layer are implemented.
+    </p>
+    <p>
+      The Built-In Topic functionality is available and enabled by default.  To disable
+      Built-in Topic support pass "-NOBITS" option to DCPSInfoRepo and "-DcpsBit 0" to all
+      clients.
+    </p>
+    <p>
+      Developers can define a structure in IDL that will be used as a DDS data type.  The
+      structure may include basic scalar types, strings, sequences, arrays, enumeration and
+      unions.  It may not contain interfaces or value types.  Zero or more keys can be specified
+      for a data type.
+    </p>
+  </div>
+  <div class="bodytext" align="justify">
+    <a name="Compliance"><span class="headertext">Compliance with the DDS-RTPS Specification</span></a>
+    <p>
+      OpenDDS supports the following capabilities defined in the DDS-RTPS 2.2 Specification:
+      <ul>
+	<li>
+	  Support of all RTPS Messages
+	</li>
+	<li>
+	  Support of RTPS Discovery by implementation of the Simple Participant Discovery Protocol (SPDP) and
+	  Simple Endpoint Discovery Protocol (SEDP)
+	</li>
+	<li>
+	  Implementation of all elements have tunable timing properties
+	</li>
+	<li>
+	  Support of all required RTPS Reader and RTPS Writer behaviors
+	</li>
+	<li>
+	  Support of all required RTPS QoS functionality
+	</li>
+      </ul>
+    </p>
+  </div>
+  <div class="panel" align="justify">
+    <a name="Performance"><span class="headertext">Peformance Testing</span></a>
+    <span class="bodytext">
+      <br />
+      <p>
+	Performance testing of OpenDDS can be performed using the <strong>OpenDDS-Bench</strong>
+	performance testing framework. This framework is currently located at:
+      </p>
+      <div>
+	<pre>$DDS_ROOT/performance-tests/Bench</pre>
+      </div>							<p>
+	in the OpenDDS source code distribution. Detailed information
+	about the OpenDDS-Bench framework is located at:
+      </p>
+      <div>
+	<pre>$DDS_ROOT/performance-tests/Bench/doc/userguide.html</pre>
+      </div>							<p>
+	<a href="performance.html#Configuration">Tests are configured</a>
+	using files.  The configuration files for some tests are included in
+	the OpenDDS distribution and can be used to repeat the testing
+	reported here in a user's environment. This way, users can compare
+	existing or other candidate data transport mechanisms in their
+	specific target environment to <a href="performance.html">these results</a>.
+	The <a href="performance.html#Environment">test environments</a>
+	include both OCI and customer test labs.
+      </p>
+      <p>
+	Some testing was performed in the <a href="../perf/ocilab.html">OCI training laboratory</a>.
+	These tests
+	are representative of performance in a busy, user-driven environment of
+	many desktop hosts with other tasks sharing the processing and network
+	resources along with the test execution. Testing in this environment
+	leads to noisy results, but demonstrates the performance of OpenDDS
+	under actual, adverse, conditions.
+      </p>
+      <p>
+	Additional testing was performed on a <a href="../perf/sgilab.html">single, multi-core box</a>.
+	While this configuration is unlikely to be commonly deployed, its
+	purpose is to establish the baseline behavior of OpenDDS in a
+	non-networked environment. Therefore, the latency numbers are those
+	that directly result from the running of the publisher and subscriber,
+	in different threads, on the same box, in loopback mode so as to
+	ensure that the entire transport stack is exercised.
+      </p>
+      <p>
+	This baseline behavior on a single host can, of course, be improved by
+	employing shared memory transport and other techniques. Therefore, the
+	performance characteristics reported in the single-host case do not
+	represent the lowest possible latency for OpenDDS. They are intended
+	to provide a reference measurement.  For instance, testing with
+	various processor speeds shows that OpenDDS improves in almost a
+	directly proportional manner.
+	Further testing will be performed on boxes with faster processor speeds as they
+	become available to reaffirm this conclusion.
+      </p>
+      <p>
+	When OpenDDS is introduced into a more typical network setting, additional
+	latency will accrue, of course, depending on the network protocol, topology,
+	distance and network hardware, etc. In general, when measuring the latency in
+	networked settings, these other factors may well swamp the baseline results
+	seen here. The testing in the OCI training lab shows that latency might be
+	two to three times greater on a general purpose LAN. (See the <a href="performance.html">actual results</a>
+	of tests performed at "OCI Lab".)
+      </p>
+      <p>
+	Further performance testing will be performed on racked systems using
+	the standard protocols supported such as TCP/IP. This configuration is
+	increasingly commonly deployed for certain types of easily distributed
+	tasks that require close cooperation. The advertised latency between
+	boxes on <a href="http://en.wikipedia.org/wiki/InfiniBand">Infinband</a>,
+	for example, is a few hundred nanoseconds. (Other rack fabrics offer
+	similar numbers.) Therefore this should not cause much noticeable
+	additional latency. Testing will confirm this.
+      </p>
+      <p>
+	Comparison of the latency of OpenDDS with that of proprietary
+	offerings indicates OpenDDS performs about the same as the fastest of
+	its competitors. There is no advantage to be gained by purchasing a
+	proprietary implementation.  The bottom line appears to be that when
+	using the open source DDS product, the savings from license fees can
+	be applied to network hardware, racks for co-located systems, etc. All
+	these investments will yield a commensurate return.
+    </p> </span>
+  </div>
+</div>
+</div>

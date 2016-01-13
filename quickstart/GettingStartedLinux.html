@@ -1,0 +1,50 @@
+---
+layout: page
+title: Linux/Solaris/MacOSX
+categories: [opendds]
+tags: []
+order: 12
+---
+The goal of this guide is help you download and compile OpenDDS and run a simple example.
+<div class="bodytext" align="justify">
+  <a name="Build Directions"><span class="headertext">Build Directions</span></a>
+  <ol>
+    <li><p>Ensure that your environment has:</p>
+      <ul>
+        <li>a C++ compiler</li>
+        <li>GNU Make</li>
+        <li>Perl</li>
+      </ul>
+      <p>See <a href="../documents/building.html">Building</a> for a complete list of dependencies and supported platforms.</p>
+    </li>
+    <li>Download and extract the latest tgz from the <a href="http://download.ociweb.com/OpenDDS/">download site</a></li>
+    <li>Enter the OpenDDS-&lt;version&gt; directory</li>
+    <li><code>./configure</code></li>
+    <li><code>make</code></li>
+  </ol>
+
+  <p>See <a href="support.html">Support</a> if you encounter problems with configuration or building.</p>
+
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Run the Messenger Example"><span class="headertext">Run the Messenger Example</span></a>
+  <ol>
+    <li><code>source setenv.sh</code></li>
+    <li><code>cd DevGuideExamples/DCPS/Messenger</code></li>
+    <li><code>./run_test.pl</code></li>
+  </ol>
+  <p>The Messenger Example starts an InfoRepo, publisher, and subscriber.
+    The InfoRepo allows the publisher and subscriber to find each other.
+    Once the publisher finds the subscriber, it sends 10 messages to the subscriber and waits 30 seconds for the subscriber to acknowledge the messages.
+  </p>
+
+  <p>Note: The setenv.sh script sets various environment variables needed for running OpenDDS tests.
+    Be sure to source setenv.sh if you start a new terminal session.
+  </p>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Next Steps"><span class="headertext">Next Steps</span></a>
+  <p>See Chapter 2 of the <a href="http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide</a> for a detailed explanation of the Messenger Example.</p>
+</div>

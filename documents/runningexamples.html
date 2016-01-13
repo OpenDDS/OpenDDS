@@ -1,0 +1,34 @@
+---
+layout: page
+title: Running Examples
+categories: [opendds]
+tags: []
+order: 104
+---
+<div id="contenttext">
+  <div class="bodytext" align="justify">
+    <p>OpenDDS examples are found in the <em>examples</em> and <em>DevGuideExamples</em>
+      subdirectories of the DDS directory.  The <em>DevGuideExamples</em> directory provides the
+      example code from the
+      <a href="http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf">OpenDDS Developer's Guide</a>.</p>
+
+    <p>Each of the examples has at least one perl script that runs the example code and verifies that the
+      example works.  The scripts require no parameters to run but most have an optional parameter for the transport
+      to use.  The command to run the example scripts is <em>perl run_test.pl</em>.  Replace the run_test.pl
+      with the name of the script you want to run.</p>
+  </div>
+
+  <div class="panel" align="justify">
+    <span class="bodytext"><br />
+      <p>The <em>tests</em> subdirectory contains code for testing various functionality of OpenDDS.
+        The code in these tests was usually designed explicitly for testing a limited area of functionality
+        and may not properly implement all the required functionality of a normal running program.</p>
+    </span>
+  </div>
+
+  <div class="panel" align="justify">
+    <span class="bodytext"><br />
+      <p>The <em>performance-tests</em> subdirectory contains code for performance testing of various functionality of OpenDDS.</p>
+    </span>
+  </div>
+</div>

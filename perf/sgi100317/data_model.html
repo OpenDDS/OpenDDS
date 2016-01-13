@@ -1,0 +1,148 @@
+<html>
+<head>
+<title>OpenDDS - Data Model</title>
+<link rel="stylesheet" type="text/css" href="style.css"/>
+<meta name="keywords" content="publish"/>
+</head>
+<body>
+<div class="viewer" id="contentWrapper">
+<small><a href="../../performance.html">Performance</a> &gt; Data Model</small><h1 class="publishLogo">OpenDDS - Performance Testing Results</h1>
+<div id="publishContentWrapper">
+<h2>Data Model</h2>
+The contents of the <em>$DDS_ROOT/performance-tests/Bench/doc/datamode.txt</em> file are reproduced here for reference.<br><blockquote><pre># $Id: datamodel.txt 2749 2009-12-09 19:04:00Z martinezm $
+
+Overall test configuration requires that each process be identified.
+Each process can then be configured using the configuration file format
+below.  The overall test topology is then completely determined by the
+Topic and Partition values for individual publications and subscriptions.
+
+#
+# Individual scenario definition configuration file contents are
+# described below.  Files with this format can be specified to a
+# testprocess executable and will configure that process to create the
+# specified entities with the specified characteristics.
+#
+
+[participant/&lt;name&gt;]
+  # Participant Qos Policy values
+  UserData      = &lt;string&gt;
+  EntityFactory = &lt;bool&gt; # Boolean: numeric 0 or 1
+
+  # Test execution parameters
+  DomainId      = &lt;number&gt;
+
+[topic/&lt;name&gt;]
+  # Topic Qos Policy values
+  TopicData                           = &lt;string&gt;
+  Durability                          = &lt;string&gt; # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  DurabilityServiceDuration           = &lt;number&gt;
+  DurabilityServiceHistoryKind        = &lt;string&gt; # One of ALL, LAST
+  DurabilityServiceHistoryDepth       = &lt;number&gt;
+  DurabilityServiceSamples            = &lt;number&gt;
+  DurabilityServiceInstances          = &lt;number&gt;
+  DurabilityServiceSamplesPerInstance = &lt;number&gt;
+  Deadline                            = &lt;number&gt;
+  LatencyBudget                       = &lt;number&gt;
+  LivelinessKind                      = &lt;string&gt; # One of AUTOMATIC, PARTICIPANT, TOPIC
+  LivelinessDuration                  = &lt;number&gt;
+  ReliabilityKind                     = &lt;string&gt; # One of BEST_EFFORT, RELIABLE
+  ReliabilityMaxBlocking              = &lt;number&gt;
+  DestinationOrder                    = &lt;string&gt; # One of SOURCE, RECEPTION
+  HistoryKind                         = &lt;string&gt; # One of ALL, LAST
+  HistoryDepth                        = &lt;number&gt;
+  ResourceMaxSamples                  = &lt;number&gt;
+  ResourceMaxInstances                = &lt;number&gt;
+  ResourceMaxSamplesPerInstance       = &lt;number&gt;
+  TransportPriority                   = &lt;number&gt;
+  LifespanDuration                    = &lt;number&gt;
+  OwnershipKind                       = &lt;string&gt; # One of SHARED, EXCLUSIVE
+
+  # Test execution parameters
+  Participant                         = &lt;string&gt; # One of participant &lt;name&gt;
+
+[publication/&lt;name&gt;]
+  # Publisher Qos Policy values
+  Presentation                        = &lt;string&gt; # One of INSTANCE, TOPIC, GROUP
+  PresentationCoherent                = &lt;bool&gt; # Boolean: numeric 0 or 1
+  PresentationOrdered                 = &lt;bool&gt; # Boolean: numeric 0 or 1
+  Partition                           = &lt;string&gt; # Only single value supported
+  GroupData                           = &lt;string&gt;
+  EntityFactory                       = &lt;bool&gt; # Boolean: numeric 0 or 1
+
+  # DataWriter Qos Policy values
+  Durability                          = &lt;string&gt; # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  DurabilityServiceDuration           = &lt;number&gt;
+  DurabilityServiceHistoryKind        = &lt;string&gt; # One of ALL, LAST
+  DurabilityServiceHistoryDepth       = &lt;number&gt;
+  DurabilityServiceSamples            = &lt;number&gt;
+  DurabilityServiceInstances          = &lt;number&gt;
+  DurabilityServiceSamplesPerInstance = &lt;number&gt;
+  Deadline                            = &lt;number&gt;
+  LatencyBudget                       = &lt;number&gt;
+  LivelinessKind                      = &lt;string&gt; # One of AUTOMATIC, PARTICIPANT, TOPIC
+  LivelinessDuration                  = &lt;number&gt;
+  ReliabilityKind                     = &lt;string&gt; # One of BEST_EFFORT, RELIABLE
+  ReliabilityMaxBlocking              = &lt;number&gt;
+  DestinationOrder                    = &lt;string&gt; # One of SOURCE, RECEPTION
+  HistoryKind                         = &lt;string&gt; # One of ALL, LAST
+  HistoryDepth                        = &lt;number&gt;
+  ResourceMaxSamples                  = &lt;number&gt;
+  ResourceMaxInstances                = &lt;number&gt;
+  ResourceMaxSamplesPerInstance       = &lt;number&gt;
+  TransportPriority                   = &lt;number&gt;
+  Lifespan                            = &lt;number&gt;
+  UserData                            = &lt;string&gt;
+  #VERSION1.2# OwnershipKind                       = &lt;string&gt; # One of SHARED, EXCLUSIVE
+  OwnershipStrength                   = &lt;number&gt;
+  WriterDataLifecycle                 = &lt;bool&gt; # Boolean: numeric 0 or 1
+
+  # Test execution parameters
+  Topic                               = &lt;string&gt; # One of topic &lt;name&gt;
+  TransportIndex                      = &lt;number&gt; # Index into transport configurations
+  MessageSource                       = &lt;string&gt; # One of subscription &lt;name&gt;
+  MessageFixedRate                    = &lt;number&gt; # Samples per second, 0 indicates use MessageRate
+  MessageRate                         = &lt;number&gt; # Samples per second, Poisson arrival times
+  MessageSize                         = &lt;number&gt; # bytes per sample
+  MessageMax                          = &lt;number&gt; # upper bound for size
+  MessageMin                          = &lt;number&gt; # lower bound for size
+  MessageDeviation                    = &lt;number&gt; # standard deviation for size
+
+[subscription/&lt;name&gt;]
+  # Subscriber Qos Policy values
+  Presentation                        = &lt;string&gt; # One of INSTANCE, TOPIC, GROUP
+  PresentationCoherent                = &lt;bool&gt; # Boolean: numeric 0 or 1
+  PresentationOrdered                 = &lt;bool&gt; # Boolean: numeric 0 or 1
+  Partition                           = &lt;string&gt; # Only single value supported
+  GroupData                           = &lt;string&gt;
+  EntityFactory                       = &lt;bool&gt; # Boolean: numeric 0 or 1
+
+  # DataReader Qos Policy values
+  Durability                          = &lt;string&gt; # One of VOLATILE, LOCAL, TRANSIENT, PERSISTENT
+  Deadline                            = &lt;number&gt;
+  LatencyBudget                       = &lt;number&gt;
+  LivelinessKind                      = &lt;string&gt; # One of AUTOMATIC, PARTICIPANT, TOPIC
+  LivelinessDuration                  = &lt;number&gt;
+  ReliabilityKind                     = &lt;string&gt; # One of BEST_EFFORT, RELIABLE
+  ReliabilityMaxBlocking              = &lt;number&gt;
+  DestinationOrder                    = &lt;string&gt; # One of SOURCE, RECEPTION
+  HistoryKind                         = &lt;string&gt; # One of ALL, LAST
+  HistoryDepth                        = &lt;number&gt;
+  ResourceMaxSamples                  = &lt;number&gt;
+  ResourceMaxInstances                = &lt;number&gt;
+  ResourceMaxSamplesPerInstance       = &lt;number&gt;
+  UserData                            = &lt;string&gt;
+  TimeBasedFilter                     = &lt;number&gt;
+  ReaderDataLifecycle                 = &lt;bool&gt; # Boolean: numeric 0 or 1
+
+  # Test execution parameters
+  Topic                               = &lt;string&gt; # One of topic &lt;name&gt;
+  TransportIndex                      = &lt;number&gt; # Index into transport configurations
+  DataCollectionFile                  = &lt;string&gt; # Filename for collected data
+  DataCollectionBound                 = &lt;number&gt;
+  DataCollectionRetention             = &lt;string&gt; # One of ALL, OLDEST, NEWEST
+</pre></blockquote>
+<hr>Tags: publish
+<hr>DonBusch, Sat 27 Mar 2010 11:28:00 AM CST&nbsp;(created Fri 26 Mar 2010 12:12:00 PM CST)
+</div></div>
+</body>
+</html>

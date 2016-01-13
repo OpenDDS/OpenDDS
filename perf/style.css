@@ -1,0 +1,385 @@
+a:hover {
+    text-decoration: none;
+}
+
+.publishLogo {
+    position: relative;
+    background-color:#fff;
+    background-image: url(/opendds/images/perf/opendds.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    color:#666;
+    padding: 32px 0 5px 72px;
+    border-bottom: 1px solid #ccc;
+}
+
+.headerForeground {
+    position: relative;
+    background-color:#fff;
+    background-image: url(/opendds/images/perf/opendds.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    color:#666;
+    padding: 32px 0 5px 72px;
+    border-bottom: 1px solid #ccc;
+}
+
+.headerForeground a {
+    color:#666;
+    font-weight: bold;
+}
+
+.footer {
+    border-top: 1px solid #ccc;
+    color:#ccc;
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.siteTitle {
+    font-weight: bold;
+}
+
+#mainMenu {
+    padding: 25px 0 0 20px;
+}
+
+.toolbar {
+    float: right;
+}
+
+.imgcenter {
+  display: block;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.rightside {
+  display: block;
+  text-align: right;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.viewer div.centeredTable {
+	text-align: center;
+}
+
+.viewer div.centeredTable table {
+	margin: 0 auto;
+	text-align: left;
+}
+
+#publishContentWrapper {margin: 0 5em 0 5em; padding: 0;}
+
+th { border-style: inset;}
+td { border-style: inset;}
+/*{{{*/
+* html .tiddler {height:1%;}
+
+body {font-size:.75em; font-family:arial,helvetica; margin:0; padding:0;}
+
+h1,h2,h3,h4,h5,h6 {font-weight:bold; text-decoration:none;}
+h1,h2,h3 {padding-bottom:1px; margin-top:1.2em;margin-bottom:0.3em;}
+h4,h5,h6 {margin-top:1em;}
+h1 {font-size:1.35em;}
+h2 {font-size:1.25em;}
+h3 {font-size:1.1em;}
+h4 {font-size:1em;}
+h5 {font-size:.9em;}
+
+hr {height:1px;}
+
+a {text-decoration:none;}
+
+dt {font-weight:bold;}
+
+ol {list-style-type:decimal;}
+ol ol {list-style-type:lower-alpha;}
+ol ol ol {list-style-type:lower-roman;}
+ol ol ol ol {list-style-type:decimal;}
+ol ol ol ol ol {list-style-type:lower-alpha;}
+ol ol ol ol ol ol {list-style-type:lower-roman;}
+ol ol ol ol ol ol ol {list-style-type:decimal;}
+
+.txtOptionInput {width:11em;}
+
+#contentWrapper .chkOptionInput {border:0;}
+
+.externalLink {text-decoration:underline;}
+
+.indent {margin-left:3em;}
+.outdent {margin-left:3em; text-indent:-3em;}
+code.escaped {white-space:nowrap;}
+
+.tiddlyLinkExisting {font-weight:bold;}
+.tiddlyLinkNonExisting {font-style:italic;}
+
+/* the 'a' is required for IE, otherwise it renders the whole tiddler in bold */
+a.tiddlyLinkNonExisting.shadow {font-weight:bold;}
+
+#mainMenu .tiddlyLinkExisting,
+	#mainMenu .tiddlyLinkNonExisting,
+	#sidebarTabs .tiddlyLinkNonExisting {font-weight:normal; font-style:normal;}
+#sidebarTabs .tiddlyLinkExisting {font-weight:bold; font-style:normal;}
+
+.header {position:relative;}
+.header a:hover {background:transparent;}
+.headerShadow {position:relative; padding:4.5em 0 1em 1em; left:-1px; top:-1px;}
+.headerForeground {position:absolute; padding:4.5em 0 1em 1em; left:0px; top:0px;}
+
+.siteTitle {font-size:3em;}
+.siteSubtitle {font-size:1.2em;}
+
+#mainMenu {position:absolute; left:0; width:10em; text-align:right; line-height:1.6em; padding:1.5em 0.5em 0.5em 0.5em; font-size:1.1em;}
+
+#sidebar {position:absolute; right:3px; width:16em; font-size:.9em;}
+#sidebarOptions {padding-top:0.3em;}
+#sidebarOptions a {margin:0 0.2em; padding:0.2em 0.3em; display:block;}
+#sidebarOptions input {margin:0.4em 0.5em;}
+#sidebarOptions .sliderPanel {margin-left:1em; padding:0.5em; font-size:.85em;}
+#sidebarOptions .sliderPanel a {font-weight:bold; display:inline; padding:0;}
+#sidebarOptions .sliderPanel input {margin:0 0 0.3em 0;}
+#sidebarTabs .tabContents {width:15em; overflow:hidden;}
+
+.wizard {padding:0.1em 1em 0 2em;}
+.wizard h1 {font-size:2em; font-weight:bold; background:none; padding:0; margin:0.4em 0 0.2em;}
+.wizard h2 {font-size:1.2em; font-weight:bold; background:none; padding:0; margin:0.4em 0 0.2em;}
+.wizardStep {padding:1em 1em 1em 1em;}
+.wizard .button {margin:0.5em 0 0; font-size:1.2em;}
+.wizardFooter {padding:0.8em 0.4em 0.8em 0;}
+.wizardFooter .status {padding:0 0.4em; margin-left:1em;}
+.wizard .button {padding:0.1em 0.2em;}
+
+#messageArea {position:fixed; top:2em; right:0; margin:0.5em; padding:0.5em; z-index:2000; _position:absolute;}
+.messageToolbar {display:block; text-align:right; padding:0.2em;}
+#messageArea a {text-decoration:underline;}
+
+.tiddlerPopupButton {padding:0.2em;}
+.popupTiddler {position: absolute; z-index:300; padding:1em; margin:0;}
+
+.popup {position:absolute; z-index:300; font-size:.9em; padding:0; list-style:none; margin:0;}
+.popup .popupMessage {padding:0.4em;}
+.popup hr {display:block; height:1px; width:auto; padding:0; margin:0.2em 0;}
+.popup li.disabled {padding:0.4em;}
+.popup li a {display:block; padding:0.4em; font-weight:normal; cursor:pointer;}
+.listBreak {font-size:1px; line-height:1px;}
+.listBreak div {margin:2px 0;}
+
+.tabset {padding:1em 0 0 0.5em;}
+.tab {margin:0 0 0 0.25em; padding:2px;}
+.tabContents {padding:0.5em;}
+.tabContents ul, .tabContents ol {margin:0; padding:0;}
+.txtMainTab .tabContents li {list-style:none;}
+.tabContents li.listLink { margin-left:.75em;}
+
+#contentWrapper {display:block;}
+#splashScreen {display:none;}
+
+#displayArea {margin:1em 17em 0 14em;}
+
+.toolbar {text-align:right; font-size:.9em;}
+
+.tiddler {padding:1em 1em 0;}
+
+.missing .viewer,.missing .title {font-style:italic;}
+
+.title {font-size:1.6em; font-weight:bold;}
+
+.missing .subtitle {display:none;}
+.subtitle {font-size:1.1em;}
+
+.tiddler .button {padding:0.2em 0.4em;}
+
+.tagging {margin:0.5em 0.5em 0.5em 0; float:left; display:none;}
+.isTag .tagging {display:block;}
+.tagged {margin:0.5em; float:right;}
+.tagging, .tagged {font-size:0.9em; padding:0.25em;}
+.tagging ul, .tagged ul {list-style:none; margin:0.25em; padding:0;}
+.tagClear {clear:both;}
+
+.footer {font-size:.9em;}
+.footer li {display:inline;}
+
+.annotation {padding:0.5em; margin:0.5em;}
+
+* html .viewer pre {width:99%; padding:0 0 1em 0;}
+.viewer {line-height:1.4em; padding-top:0.5em;}
+.viewer .button {margin:0 0.25em; padding:0 0.25em;}
+.viewer blockquote {line-height:1.5em; padding-left:0.8em;margin-left:2.5em;}
+.viewer ul, .viewer ol {margin-left:0.5em; padding-left:1.5em;}
+
+.viewer table, table.twtable {border-collapse:collapse; margin:0.8em 1.0em;}
+.viewer th, .viewer td, .viewer tr,.viewer caption,.twtable th, .twtable td, .twtable tr,.twtable caption {padding:3px;}
+table.listView {font-size:0.85em; margin:0.8em 1.0em;}
+table.listView th, table.listView td, table.listView tr {padding:0px 3px 0px 3px;}
+
+.viewer pre {padding:0.5em; margin-left:0.5em; font-size:1.2em; line-height:1.4em; overflow:auto;}
+.viewer code {font-size:1.2em; line-height:1.4em;}
+
+.editor {font-size:1.1em;}
+.editor input, .editor textarea {display:block; width:100%; font:inherit;}
+.editorFooter {padding:0.25em 0; font-size:.9em;}
+.editorFooter .button {padding-top:0px; padding-bottom:0px;}
+
+.fieldsetFix {border:0; padding:0; margin:1px 0px;}
+
+.sparkline {line-height:1em;}
+.sparktick {outline:0;}
+
+.zoomer {font-size:1.1em; position:absolute; overflow:hidden;}
+.zoomer div {padding:1em;}
+
+* html #backstage {width:99%;}
+* html #backstageArea {width:99%;}
+#backstageArea {display:none; position:relative; overflow: hidden; z-index:150; padding:0.3em 0.5em;}
+#backstageToolbar {position:relative;}
+#backstageArea a {font-weight:bold; margin-left:0.5em; padding:0.3em 0.5em;}
+#backstageButton {display:none; position:absolute; z-index:175; top:0; right:0;}
+#backstageButton a {padding:0.1em 0.4em; margin:0.1em;}
+#backstage {position:relative; width:100%; z-index:50;}
+#backstagePanel {display:none; z-index:100; position:absolute; width:90%; margin-left:3em; padding:1em;}
+.backstagePanelFooter {padding-top:0.2em; float:right;}
+.backstagePanelFooter a {padding:0.2em 0.4em;}
+#backstageCloak {display:none; z-index:20; position:absolute; width:100%; height:100px;}
+
+.whenBackstage {display:none;}
+.backstageVisible .whenBackstage {display:block;}
+/*}}}*/
+/*{{{*/
+body {background:#fff; color:#000;}
+
+a {color:#600;}
+a:hover {/*background-color:#600; color:#fff;*/}
+a img {border:0;}
+
+h1,h2,h3,h4,h5,h6 {color:#666; background:transparent;}
+h1 {border-bottom:2px solid #ccc;}
+h2,h3 {border-bottom:1px solid #ccc;}
+
+.button {color:#600; border:1px solid #fff;}
+.button:hover {color:#600; background:#ccc; border-color:#999;}
+.button:active {color:#fff; background:#999; border:1px solid #666;}
+
+.header {background:#600;}
+.headerShadow {color:#000;}
+.headerShadow a {font-weight:normal; color:#000;}
+.headerForeground {color:#fff;}
+.headerForeground a {font-weight:normal; color:#eee;}
+
+.tabSelected{color:#600;
+	background:#eee;
+	border-left:1px solid #ccc;
+	border-top:1px solid #ccc;
+	border-right:1px solid #ccc;
+}
+.tabUnselected {color:#fff; background:#999;}
+.tabContents {color:#600; background:#eee; border:1px solid #ccc;}
+.tabContents .button {border:0;}
+
+#sidebar {}
+#sidebarOptions input {border:1px solid #600;}
+#sidebarOptions .sliderPanel {background:#eee;}
+#sidebarOptions .sliderPanel a {border:none;color:#600;}
+#sidebarOptions .sliderPanel a:hover {color:#fff; background:#600;}
+#sidebarOptions .sliderPanel a:active {color:#600; background:#fff;}
+
+.wizard {background:#eee; border:1px solid #600;}
+.wizard h1 {color:#600; border:none;}
+.wizard h2 {color:#000; border:none;}
+.wizardStep {background:#fff; color:#000;
+	border:1px solid #600;}
+.wizardStep.wizardStepDone {background:#ccc;}
+.wizardFooter {background:#eee;}
+.wizardFooter .status {background:#600; color:#fff;}
+.wizard .button {color:#000; background:#ccc; border: 1px solid;
+	border-color:#eee #666 #666 #eee;}
+.wizard .button:hover {color:#000; background:#fff;}
+.wizard .button:active {color:#fff; background:#000; border: 1px solid;
+	border-color:#600 #eee #eee #600;}
+
+.wizard .notChanged {background:transparent;}
+.wizard .changedLocally {background:#80ff80;}
+.wizard .changedServer {background:#8080ff;}
+.wizard .changedBoth {background:#ff8080;}
+.wizard .notFound {background:#ffff80;}
+.wizard .putToServer {background:#ff80ff;}
+.wizard .gotFromServer {background:#80ffff;}
+
+#messageArea {border:1px solid #999; background:#ccc; color:#000;}
+#messageArea .button {color:#600; background:#eee; border:none;}
+
+.popupTiddler {background:#eee; border:2px solid #999;}
+
+.popup {background:#eee; color:#666; border-left:1px solid #999; border-top:1px solid #999; border-right:2px solid #666; border-bottom:2px solid #666;}
+.popup hr {color:#600; background:#600; border-bottom:1px;}
+.popup li.disabled {color:#999;}
+.popup li a, .popup li a:visited {color:#000; border: none;}
+.popup li a:hover {background:#ccc; color:#000; border: none;}
+.popup li a:active {background:#eee; color:#000; border: none;}
+.popupHighlight {background:#fff; color:#000;}
+.listBreak div {border-bottom:1px solid #666;}
+
+.tiddler .defaultCommand {font-weight:bold;}
+
+.shadow .title {color:#666;}
+
+.title {color:#666;}
+.subtitle {color:#666;}
+
+.toolbar {color:#600;}
+.toolbar a {color:#ccc;}
+.selected .toolbar a {color:#999;}
+.selected .toolbar a:hover {color:#000;}
+
+.tagging, .tagged {border:1px solid #eee; background-color:#eee;}
+.selected .tagging, .selected .tagged {background-color:#ccc; border:1px solid #999;}
+.tagging .listTitle, .tagged .listTitle {color:#600;}
+.tagging .button, .tagged .button {border:none;}
+
+.footer {color:#ccc;}
+.selected .footer {color:#999;}
+
+.sparkline {background:#eee; border:0;}
+.sparktick {background:#600;}
+
+.error, .errorButton {color:#000; background:#f88;}
+.warning {color:#000; background:#eee;}
+.lowlight {background:#ccc;}
+
+.zoomer {background:none; color:#999; border:3px solid #999;}
+
+.imageLink, #displayArea .imageLink {background:transparent;}
+
+.annotation {background:#ccc; color:#000; border:2px solid #999;}
+
+.viewer .listTitle {list-style-type:none; margin-left:-2em;}
+.viewer .button {border:1px solid #999;}
+.viewer blockquote {border-left:3px solid #666;}
+
+.viewer table, table.twtable {border:2px solid #666;}
+.viewer th, .viewer thead td, .twtable th, .twtable thead td {background:#999; border:1px solid #666; color:#fff;}
+.viewer td, .viewer tr, .twtable td, .twtable tr {border:1px solid #666;}
+
+.viewer pre {border:1px solid #ccc; background:#eee;}
+.viewer code {color:#666;}
+.viewer hr {border:0; border-top:dashed 1px #666; color:#666;}
+
+.highlight, .marked {background:#ccc;}
+
+.editor input {border:1px solid #600;}
+.editor textarea {border:1px solid #600; width:100%;}
+.editorFooter {color:#999;}
+
+#backstageArea {background:#000; color:#999;}
+#backstageArea a {background:#000; color:#fff; border:none;}
+#backstageArea a:hover {background:#ccc; color:#000; }
+#backstageArea a.backstageSelTab {background:#fff; color:#000;}
+#backstageButton a {background:none; color:#fff; border:none;}
+#backstageButton a:hover {background:#000; color:#fff; border:none;}
+#backstagePanel {background:#fff; border-color: #fff #666 #666 #666;}
+.backstagePanelFooter .button {border:none; color:#fff;}
+.backstagePanelFooter .button:hover {color:#000;}
+#backstageCloak {background:#000; opacity:0.6; filter:'alpha(opacity=60)';}
+/*}}}*/

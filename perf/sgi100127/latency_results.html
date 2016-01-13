@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>OpenDDS - Latency Results</title>
+<link rel="stylesheet" type="text/css" href="../style.css"/>
+<meta name="keywords" content="results, publish"/>
+</head>
+<body>
+<div class="viewer" id="contentWrapper">
+<small><a href="../../performance.html">Performance</a> &gt; Latency Results</small><h1 class="publishLogo">OpenDDS - Performance Testing Results</h1>
+<div id="publishContentWrapper">
+<h2>Latency Results</h2>
+The results of executing the latency testing are included here.  More
+detailed information is included in the <a class="externalLink null"
+href="latency_details.html">Latency Details</a> table.  These results
+include latency and jitter.<br><br>Latency for the TCP, UDP, best effort
+Multicast, and reliable Multicast transports are shown in the diagram
+below.  Latency was measured by taking a timestamp in the originating
+process, inserting that timestamp into the data sample and sending it.
+When the data sample is received in the terminating process, another
+timestamp is generated and the latency is defined as the different
+between these two timestamps.  This means that the latency numbers
+include the OpenDDS transport latency <em>plus</em> the system and
+network transport latencies <em>plus</em> the time to copy the entire
+data sample since the timestamps are from the start of sending to the end
+of receiving.  The time to copy the message bytes is what causes the
+latency charts below to have a linear aspect over the message sizes,
+since as the message size increases, there are more bytes to
+transport.<br><br>The latencies below are in microseconds and are
+plotted against the size of the message being sent.<br><br><img
+src="../../images/perf/sgi100127/transport-latency.png"><br><br>The
+following diagram is a more detailed look at the
+smaller message sizes of the previous chart.<br><br><img
+src="../../images/perf/sgi100127/transport-latency-zoom.png"><br><br>Jitter
+is defined as the time variation of latency on
+successive samples.  Jitter is plotted below as a
+percent of the latency for each message size.<br><br><img
+src="../../images/perf/sgi100127/transport-jitter.png"><br><br>The
+following diagram is a more detailed look at the
+smaller message sizes of the previous chart.<br><br><img
+src="../../images/perf/sgi100127/transport-jitter-zoom.png"><br>
+<hr>$Id: latency_results.html 53 2010-01-30 23:51:02Z martinezm $
+</div></div>
+</body>
+</html>

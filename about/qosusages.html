@@ -1,0 +1,117 @@
+---
+layout: page
+title: QoS Policy Usage
+categories: [opendds]
+tags: []
+order: 50
+---
+<div id="contenttext">
+
+  <div class="bodytext" align="justify">
+    <span class="headertext">QoS Polices for System Performance<a name="PolicyPurposes"></a></span>
+    <p>Aspects of performance listed here:
+      <ul>
+        <li><a href="#RealTimePolicies">Real-time Delivery</a></li>
+        <li><a href="#BandwidthPolicies">Bandwidth</a></li>
+        <li><a href="#RedundancyPolicies">Redundancy</a></li>
+        <li><a href="#PersistencePolicies">Persistence</a></li>
+      </ul>
+    </p>
+  </div>
+
+  <div class="panel" align="justify">
+    <span class="headertext"><a name="RealTimePolicies">Real-time Delivery</a></span>
+    <span class="bodytext"><br />
+      <p></p>
+
+      <h3>DEADLINE</h3>
+      <p>Require the publisher to always send at least one value within the period.</p>
+
+      <h3>RELIABILITY</h3>
+      <p>Using a RELIABLE setting may result in resends of data.  A RELIABLE setting can potentially block while trying to send.  The max_blocking_time is important to minimize the time that the send can block for.</p>
+
+      <h3>LIFESPAN</h3>
+      <p>Setting an expiration time for the samples will ensure that the receiving application will not receive any values that are too old.</p>
+
+      <h3>RESOURCE_LIMITS</h3>
+      <p>Too few available samples and delays will occur acquiring samples to send.</p>
+
+      <h3>PRESENTATION</h3>
+      <p>Don't allow grouping and re-ordering of values that can delay delivery to the application.</p>
+
+      <h3>TIME_BASED_FILTER</h3>
+      <p>Setting a higher minimum_separation will result in less samples being set.</p>
+
+      <h3></h3>
+      <p></p>
+
+    </span>
+  </div>
+
+  <div class="panel" align="justify">
+    <span class="headertext"><a name="BandwidthPolicies">Bandwidth</a></span>
+    <span class="bodytext"><br />
+      <p>None of the QoS policies are for directly controlling bandwidth.  Several have some effect on bandwidth. </p>
+
+      <h3>LIVELINESS</h3>
+      <p>A low liveliness lease_duration will result in extra liveliness messages for publishers that are not publishing values frequently. (lower lease_duration raises bandwidth)</p>
+
+      <h3>DEADLINE</h3>
+      <p>Setting a lower deadline will result in more traffic. (lower deadline raises bandwidth)</p>
+
+      <h3>RELIABILITY</h3>
+      <p>Using a RELIABLE setting may result in resends of data. (RELIABLE possibly raises bandwidth)</p>
+
+    </span>
+  </div>
+
+  <div class="panel" align="justify">
+    <span class="headertext"><a name="RedundancyPolicies">Redundancy</a></span>
+    <span class="bodytext"><br />
+      <p></p>
+
+      <h3>OWNERSHIP</h3>
+      <p>Setting to EXCLUSIVE allows multiple publishers to be publishing for the same Instance but only one will be recognized as the owner (authoritative source).  A failure/death of the current owner allows the subscribers to continue receiving values from the new owner.</p>
+
+      <h3>OWNERSHIP_STRENGTH</h3>
+      <p>Establishes the order of ownership when OWNERSHIP is set to EXCLUSIVE</p>
+
+      <h3>LIVELINESS</h3>
+      <p>The lease_duration is important for determining that an entity has died.  A lower value means that a death will be detected sooner.</p>
+
+      <h3>DESTINATION_ORDER</h3>
+      <p>BY_RECEPTION_TIMESTAMP can result in two subscribers having data in different orders. BY_SOURCE_
+        TIMESTAMP forces all subscribers to have the data in the same order.</p>
+
+      <h3>HISTORY</h3>
+      <p>The sets a buffer between the changing values and the delivery to the subscriptions.  Set to KEEP_LAST and a small depth, could potentially cause blocking depending on other QoS policies.</p>
+
+    </span>
+  </div>
+
+  <div class="panel" align="justify">
+    <span class="headertext"><a name="PersistencePolicies">Persistence</a></span>
+    <span class="bodytext"><br />
+      <p>Persistence of data that has been published</p>
+
+      <h3>DURABILITY</h3>
+      <p>Controls how the data will be stored.  Values of TRANSIENT and PERSISTENT result in data outliving the DataWriter.</p>
+
+      <h3>DURABILITY_SERVICE</h3>
+      <p>This policy configures how much data is stored after it is published.  The RESOURCE_LIMITS policy defined how much data is stored in OpenDDS.</p>
+
+      <h3>HISTORY</h3>
+      <p>Controls the storing of values before they are delivered.</p>
+
+      <h3>RESOURCE_LIMITS</h3>
+      <p>Specifies that available number of samples that can be handled.</p>
+
+      <h3>WRITER_DATA_LIFECYCLE</h3>
+      <p>Whether samples will be automatically disposed.</p>
+
+      <h3>READER_DATA_LIFECYCLE</h3>
+      <p>Whether samples will be automatically removed.</p>
+
+    </span>
+  </div>
+</div>

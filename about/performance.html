@@ -1,0 +1,165 @@
+---
+layout: page
+title: Performance Testing
+categories: [opendds]
+tags: []
+order: 60
+---
+<div id="contenttext">
+
+  <div class="bodytext" align="justify">
+    <a name="Performance"><span class="colortitle">Test Results</span></a>
+    <p>
+      <table border width="100%">
+        <caption>Test Descriptions and Results (most recent first)</caption>
+        <tr><th>Date</th><th>Test</th><th>Environment</th><th>Version</th><th>Results</th></tr>
+        <tr>
+          <td>March 17, 2010</td>
+          <td><a href="../perf/tests/latency_tests.html">Latency</a><br/>loopback: host1 == host2</td>
+          <td><a href="../perf/sgilab2.html">SGI Lab, 3.3 GHz</a></td>
+          <td>2.1.2</td>
+          <td><a href="../perf/sgi100317/latency_results.html">sgi100317</a></td>
+        </tr>
+        <tr><td>January 27, 2010</td>
+          <td><a href="../perf/tests/latency_tests.html">Latency</a><br/>loopback: host1 == host2</td>
+          <td><a href="../perf/sgilab.html">SGI Lab, 3.0 GHz</a></td>
+          <td>2.0</td>
+          <td><a href="../perf/sgi100127/latency_results.html">sgi100127</a></td>
+        </tr>
+        <tr><td>January 25, 2010</td>
+          <td><a href="../perf/tests/latency_tests.html">Latency</a></td>
+          <td><a href="../perf/ocilab.html">OCI Lab</a></td>
+          <td>2.0</td>
+          <td><a href="../perf/lab100125/latency_results.html">lab100125</a></td>
+        </tr>
+      </table>
+    </p>
+  </div>
+
+  <div class="panel" align="justify">
+    <a name="Configuration"><span class="colortitle">Test Configuration</span></a>
+    <span class="bodytext"><br />
+      <p>
+        Testing using the OpenDDS-Bench performance testing framework is based on the use of configuration files to specify the behavior and topology of the test.  There are two basic types of configuration file used for the testing.  These are transport configuration files, used to configure the instances of transports for the test processes, and test configuration files, used to establish the test conditions and topology.  These are briefly described here.
+      </p>
+      <h2>Transport Configuration Files</h2>
+      <p>
+        The transport configuration files specify the specific configuration of transport instances by instance key.  Each transport used within a test will have a transport key associated with it, and that key is configured with a section in a transport configuration file.  Typically a single transport configuration file is used per test, with each process selecting the appropriately configured transport instances that it uses from the file.  The following table shows the transport configuration files provided in the <em>etc</em> directory for use during testing.<br/>
+      </p>
+      <table border width="100%">
+        <caption align="top"> Files in $DDS_ROOT/performance-tests/Bench/etc </caption>
+        <tbody>
+          <tr>
+            <td align="center">File</td>
+            <td align="center">Description</td>
+          </tr>
+          <tr class="oddRow">
+            <td align="left"><pre>transport.ini</pre></td>
+            <td align="left">general purpose configuration file defining 10 transport instances of each type</td>
+          </tr>
+          <tr class="evenRow">
+            <td align="left"><pre>transport-tcp.ini</pre></td>
+            <td align="left">configures transport instances using the <strong>
+                <em>tcp</em>
+              </strong> transport type</td>
+          </tr>
+          <tr class="oddRow">
+            <td align="left"><pre>transport-udp.ini</pre></td>
+            <td align="left">configures transport instances using the <strong>
+                <em>udp</em>
+              </strong> transport type<br/>due to the nature of this transport implementation, this file will need to be tailored for each test host on which it is used</td>
+          </tr>
+          <tr class="evenRow">
+            <td align="left"><pre>transport-multi-be.ini</pre></td>
+            <td align="left">configures transport instances using the <strong>
+                <em>multicast</em>
+              </strong> transport type to operate in best effort mode</td>
+          </tr>
+          <tr class="oddRow">
+            <td align="left"><pre>transport-multi-rel.ini</pre></td>
+            <td align="left">configures transport instances using the <strong>
+                <em>multicast</em>
+              </strong> transport type to operate in reliable mode</td>
+          </tr>
+        </tbody>
+      </table>
+      <h2>Test Configuration Files</h2>
+      The test configuration files used for each test are unique are are defined as part of the OpenDDS-Bench performance test framework.  Each test will have a configuration file to be used for each test process for each test case.  The configuration files specify both the DDS Quality of Service policy values for each Entity in the test process and the test specific configuration for that process and those Entities.  The data which can be specified in these configuration files is defined in the <em>
+        <a class="externalLink null" href="../perf/data_model.html">$DDS_ROOT/performance-tests/Bench/doc/datamodel.txt</a>
+      </em> file.
+    </span>
+  </div>
+
+  <div class="bodytext" align="justify">
+    <a name="Environment"><span class="colortitle">Test Environments</span></a>
+    <p>
+      Performance tests of the OpenDDS implementation were executed in various
+      environments.  The environments for which we are reporting results are
+      described in the following table.
+    </p>
+    <table border width="100%">
+      <caption align="top"> Test Environments </caption>
+      <tbody>
+        <tr>
+          <td align="center">Name</td>
+          <td align="center">Short Description</td>
+        </tr>
+        <tr class="oddRow">
+          <td align="left">
+            <a class="externalLink null" href="../perf/ocilab.html">OCI test lab</a>
+          </td>
+          <td align="center">SUSE 9.1, Intel P4 2.6 GHz, 1.5 MB RAM, gigabit ethernet</td>
+        </tr>
+        <tr class="evenRow">
+          <td align="left">
+            <a class="externalLink null" href="../perf/sgilab.html">SGI 3.0 GHz test lab</a>
+          </td>
+          <td align="center">SUSE SLES 10, SGI Altix ICE 8200, Intel Harpertown (Xeon 3.0 GHz), 2 GB RAM</td>
+        </tr>
+        <tr class="evenRow">
+          <td align="left">
+            <a class="externalLink null" href="../perf/sgilab2.html">SGI 3.3 GHz test lab</a>
+          </td>
+          <td align="center">SUSE SLES 10, SGI Altix ICE 8200, Intel W5590 (Xeon 3.3 GHz), 2 GB RAM</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <div class="panel" align="justify">
+    <a name="Descriptions"><span class="colortitle">Test Descriptions</span></a>
+    <span class="bodytext"><br />
+      <p>
+        The tests available with configurations in the OpenDDS-Bench performance
+        test framework are summarized in the table below.
+      </p>
+      <table border width="100%">
+        <caption align="top"> Test Descriptions </caption>
+        <tbody>
+          <tr>
+            <td align="center">Name</td>
+            <td align="center">Short Description</td>
+          </tr>
+          <tr class="oddRow">
+            <td align="left">
+              <a class="externalLink null" href="../perf/tests/latency_tests.html">Latency</a>
+            </td>
+            <td align="left">Measure latency between 2 hosts from start of send to end of read.</td>
+          </tr>
+          <tr class="evenRow">
+            <td align="left">
+              <a class="externalLink null" href="../perf/tests/latency_tests.html">Latency
+                (loopback)</a>
+            </td>
+            <td align="left">Measure latency using loopback interface from start of
+              send to end of read.  This is the same test as the 2 host test, but with
+              host1 == host2.</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </span>
+  </div>
+
+</div>

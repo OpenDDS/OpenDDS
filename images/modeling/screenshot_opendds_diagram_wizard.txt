@@ -1,0 +1,2 @@
+File screenshot_opendds_diagram_wizard is a copy of
+svn+ssh://svn.ociweb.com/education/training/tracks/DistributedComputing/OpenDDSModelingSDK/images/screenshot_opendds_diagram_wizard.png

@@ -1,0 +1,348 @@
+---
+layout: page
+title: Modeling SDK
+categories: [opendds]
+tags: []
+order: 70
+---
+<div id="contenttext">
+
+  <div class="bodytext" align="justify">
+    <a name="Overview"><span class="headertext">Introduction</span></a>
+    <p>
+      OpenDDS includes the OpenDDS Modeling Software Development Kit (SDK).  This is a set of tools
+      to simplify using the Object Management Group (OMG) Data Distribution Service (DDS).
+      This modeling SDK can be used to easily capture aspects of
+      the DDS service that are not of interest to the application
+      developer, leaving the developer free to devote more
+      time to application issues rather than the details of internal
+      middleware plumbing.  The modeling SDK is a set of <a href="#Plug-ins">Eclipse Plug-ins</a>
+      that can be easily installed using the standard Eclipse installation mechanisms.
+    </p>
+
+    <p>
+      To provide portability of widely used skills, the model uses standards-based
+      UML modeling elements and should
+      be familiar to users of other UML tools.  The elements
+      available for describing a model are based on the
+      metamodel described in <a href="http://www.omg.org/cgi-bin/doc?ptc/10-05-17.pdf">
+        UML Profile For Data Distribution Specification</a> (OMG: ptc/2010-05-17).
+      In turn, this specification reflects the DDS Platform
+      Independent Model (PIM) defined in
+      (<a href="http://www.omg.org/cgi-bin/doc?formal/07-01-01">Data Distribution Service for Real-time Systems</a>
+      (OMG: formal/07-01-01</a>).
+  </p>
+
+  <p>
+    Once a model has been <a href="#Capture">captured</a>,
+    it is used to <a href="#Generate">generate source code</a>.
+    That source code is then compiled into
+    link libraries that can be <a href="#Programming">linked into a user application</a>.
+    Applications access the DDS API by instantiating classes
+    generated from the model and accessing the Entities
+    represented in the model by name.  The application is
+    then free to send and receive data directly from the DDS
+    defined Entities.  All of the features defined in the
+    specification are available for use by applications when
+    using code generated from a model.
+  </p>
+
+  <p>
+    The SDK is built on top of the <a href="http://www.eclipse.org/modeling/emf/">Eclipse Modeling Framework</a> (EMF).
+    Because of the <a href="http://en.wikipedia.org/wiki/List_of_Eclipse_Modeling_Framework_based_software">universal acceptance of EMF</a>,
+    it is feasible to consider interoperability with other modeling tools.
+    In addition, the OpenDDS Modeling SDK model files use the standards-based
+    <a href="http://www.omg.org/spec/XMI/">XML Metadata Interchange</a> (XMI) format.
+    This provides further opportunity for interoperability with tools that work with XMI files. To simplify this interoperability,
+    the semantic model information is in one file and the graphical representation is in another. This separation allows diagrams to be
+    created from semantic models obtained by other tools.
+  </p>
+
+  <p>
+    The serialization schema for the semantic model content is available in XSD format.
+    If legacy and other external data is converted into this format,
+    then the SDK will be able to incorporate that data and make it available as if it were captured in the native SDK editors.
+  </p>
+
+  <div align="center">
+    <img src="../images/modeling/opendds_modeling_sdk_flow.png"/>
+  </div>
+</div>
+
+<div class="panel" align="justify">
+  <a name="Plug-ins"><span class="headertext">Eclipse Plug-ins</span></a>
+  <span class="bodytext"><br />
+    <p>
+      OpenDDS Modeling is provided via Eclipse plug-ins that include
+      tools such as graphical model capture editors and code
+      generation forms.  These plug-ins were developed for Eclipse Galileo (3.5)
+      and have been successfully used with Helios (3.6).
+    </p>
+
+    <p>
+      To install the plug-ins, use the standard installation mechanism for Eclipse,
+      an installation site is available for the tools at:
+      <ul><li><a href="http://www.opendds.org/modeling/eclipse">http://www.opendds.org/modeling/eclipse</a></li></ul>
+      The feature to install from that site is:
+      <ul><li><em>OpenDDS Modeling SDK</em></li></ul>
+      To simplify installation where a full Internet connection
+      may not be available, the file:
+      <ul><li><a href=
+                 "http://www.opendds.org/modeling/eclipse/opendds_modeling_site.zip">
+            http://www.opendds.org/modeling/eclipse/opendds_modeling_site.zip
+      </a></li></ul>
+      is available for download as well.  This can be used as
+      a local archive for installation by Eclipse.
+    </p>
+  </span>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Capture"><span class="colortitle">Model Capture</span></a>
+  <p>
+    As mentioned in the introduction,
+    a UML model defining DCPS elements and policies along
+    with data definitions is captured using the graphical
+    model capture editors included in the Eclipse plug-ins.
+    The elements of the UML model follows the structure of
+    the DDS UML Platform Independent Model (PIM) defined in
+    the DDS specification
+    (<a href="http://www.omg.org/cgi-bin/doc?formal/07-01-01">OMG: formal/07-01-01</a>).
+  </p>
+
+  <p>
+    Different diagram types are used to capture information
+    in the model, including:
+  <p>
+    <table border>
+      <tr><th>Diagram</th><th>Description</th></tr>
+
+      <tr><td><code>main</code></td>
+        <td>Captures information about packaging and contains
+          elements representing each of the other diagrams included
+          in the model.  This includes all of the DCPS, QoS, and
+          Data diagrams that are included locally in the model.
+          References to external model diagrams are possible from
+          this diagram as well.</td>
+      </tr>
+
+      <tr><td><code>DCPS</code></td>
+        <td>Captures information about the DCPS elements included
+          in the model.  These are the DCPS Entities and their
+          relationships.</td>
+      </tr>
+
+      <tr><td><code>QoS</code></td>
+        <td>Captures information about Quality of Service
+          policies that are used within the model.  These diagrams
+          are used to share common sets of policy values between
+          more than one element in the DCPS model.  Alternatively,
+          the policy values can be set locally to the elements to
+          which they apply.</td>
+      </tr>
+
+      <tr><td><code>Data</code></td>
+        <td>Captures the data definitions for data types that
+          will be transported by the DDS service.</td>
+      </tr>
+    </table>
+  </p>
+  </p>
+  <p>
+    Opening a new OpenDDS model within the plug-ins begins
+    with a top level <em>main</em> diagram.  This diagram
+    includes any package structures to be included in the
+    model along with the local QoS policy definitions,
+    data definitions, and DCPS elements of the model.
+  </p>
+
+  <p>
+    A model can contain references to other externally defined
+    models. This supports reuse and concurrent development.
+    To maximize this potential, models can be created for QoS policies only, data
+    definitions only, or DCPS elements only and then be referenced
+    in other models.  This allows sharing of data definitions and
+    QoS policies among different DCPS models as well as including
+    externally defined data in a new set of data definitions.
+  </p>
+
+  <p>
+    See <a href="modeling_capture.html">Model Capture</a>
+    for more detailed information on capturing a model.
+  </p>
+</span>
+</div>
+
+
+<div class="panel" align="justify">
+  <a name="Generation"><span class="headertext">Code Generation</span></a>
+  <span class="bodytext"><br />
+    <p>
+      Source code is then generated from the captured model
+      using a separate forms based editor. The generated code can
+      then be compiled into link libraries. These libraries provide the middleware
+      elements defined in the model.  User applications can then utilize the
+      middleware elements by linking to the libraries.
+    </p>
+
+    <p>
+      Forms are used to customize and generate code from a
+      model.  A file separate from the model file is used
+      for this purpose.  This allows more than one set of code
+      customization and generation instructions to be created for
+      any single model.  The forms used to capture information
+      about customization and code generation are:
+      <table border>
+        <tr><th>Form</th><th>Description</th></tr>
+
+        <tr><td><code>Code Generation</code></td>
+          <td>Specifies the model file to use for code generation
+            and the target directory where the generated output
+            files will be placed.  This form also includes the
+            push button controls for generating the output files
+            - one for generating all output files, and one for
+            each output file that can be generated.</td></tr>
+
+        <tr><td><code>Model Customization</code></td>
+          <td>This form allows individual variants of a model
+            to be specified to allow them to be created and used
+            simultaneously.  The features which are unique to
+            each variant include an offset to transport indices
+            to avoid conflicts with transport index values.
+            The transport configuration can also be specified
+            directly for each transport in the model.</td></tr>
+
+        <tr><td><code>Build Paths</code></td>
+          <td>This form allows the developer to include paths
+            to be searched at build time for include files and
+            link libraries.  These paths can be specified as
+            an environment variable that will be available at
+            build time, a path, or a combination of the two:
+            an environment variable with a path relative to
+            the value of that variable.</td></tr>
+      </table>
+    </p>
+
+    <p>
+      Specifics of code generation are unique to the individual
+      generation forms and are kept separate from the model
+      for which generation is being performed.  Code generation
+      is performed on a single model at a time and includes the
+      ability to tailor the generated code as well as specifying
+      search paths to be used for locating resources at build
+      time.  The model to be generated from as well as the target
+      directory into which the resulting generated source code
+      will be placed are selectable via the forms interface.
+    </p>
+
+    <p>
+      It is possible to generate model variations (separately
+      instantiatable forms of the same model) that can then
+      be created within the same application or different
+      applications.  It is also possible to specify locations
+      to search for header files and link libraries at build time.
+    </p>
+
+    <p>
+      The files generated from a model include:
+    <p>
+      <table border>
+        <tr><th>File</th><th>Description</th></tr>
+
+        <tr><td><code>&lt;model&gt;.idl</code></td>
+          <td>Includes the IDL data definitions for the model.
+            The IDL compiler will convert these into C++
+            files that can be included into the application.</td></tr>
+
+        <tr><td><code>&lt;model&gt;Traits.h<br/>&lt;model&gt;Traits.cpp</code></td>
+          <td>Includes customization and a definition of each
+            model type that was specified to be generated.
+            This is the only header that needs to be
+            included in the application code.  It includes
+            the remaining required files needed by the
+            application, including the data definition files.
+        </td></tr>
+
+        <tr><td><code>&lt;model&gt;_T.h<br/>&lt;model&gt;_T.cpp</code></td>
+          <td>This contains the actual model definition
+            information that is customized by the traits.
+            It defines the class that provides access to
+            the DDS specified Entities and API.
+        </td></tr>
+
+        <tr><td><code>&lt;model&gt;.mpc<br/>&lt;model&gt;.mpb<br/>&lt;model&gt;_paths.mpb</code></td>
+          <td>Build support files.  These files are used
+            to build the linkable library of the model.
+            They can also be used to simplify building of
+            the application and any other libraries that
+            include elements from this model.
+        </td></tr>
+
+      </table>
+    </p>
+    The build support files are based on the
+    <a href="http://www.ociweb.com/products/MPC">MPC</a>
+    portable build system used by OpenDDS itself.  It can be used to
+    generate makefiles or project files for building the model
+    libraries according to the development environment.
+    </p>
+
+    <p>
+      See <a href="modeling_generate.html">Model to Code</a>
+      for more detailed information on code generation from a model.
+    </p>
+  </span>
+</div>
+
+
+<div class="bodytext" align="justify">
+  <a name="Programming"><span class="colortitle">Programming</span></a>
+  <p>
+    In order to use the middleware defined by a model,
+    applications need to link in the generated code.
+    This is done through header files and link libraries.
+    Support for building applications using the MPC portable
+    build tool is included in the generated files.
+  </p>
+
+  <p>
+    Application access to the DDS API is provided through
+    a class for each model that will be created within the
+    application.  A single header file per model should be
+    included which defines the model classes.  In addition, a
+    separate support class needs to be instantiated in order
+    to manage the lifetime of the OpenDDS service within
+    the application.
+  </p>
+
+  <p>
+    See <a href="modeling_program.html">Using Code Generated from a Model</a>
+    for more detailed information on application programming with a model.
+  </p>
+</div>
+
+<div class="panel" align="justify">
+  <a name="MoreInformation"><span class="headertext">Getting More Information</span></a>
+  <span class="bodytext"><br />
+    <p>
+      For further information about the OpenDDS Modeling SDK:
+    </p>
+    <ul>
+      <li>Training in OpenDDS Programming with C++ and the OpenDDS Modeling SDK
+        is available from Object Computing, Inc. (OCI). See
+        <a href="http://www.ociweb.com/training/Distributed-Computing">
+          Course Offerings - Distributed Computing</a> for
+        descriptions of these and other Distributed Computing course offerings
+        from OCI.</li>
+      <li>The <a href="http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf">
+          OpenDDS Developer's Guide</a> contains information on installing and
+        getting started with the SDK, along with details on developing applications
+        that use the SDK.</li>
+      <li>The OpenDDS Modeling SDK includes content accessible from
+        the Eclipse Help system on creating graphical models and generation code
+        from these models. This content is under the <b>OpenDDS Modeling SDK Guide</b>
+        topic.</li>
+    </ul>
+  </span>
+</div>
+
