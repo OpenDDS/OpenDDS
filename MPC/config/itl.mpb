@@ -1,6 +1,6 @@
 feature(!no_itl) {
-  includes += $(ITL_ROOT)/cpp
-  includes += $(ITL_ROOT)/cpp/rapidjson/include
+  includes += $(DDS_ROOT)/tools/IntermediateTypeLang/cpp
+  includes += $(DDS_ROOT)/tools/IntermediateTypeLang/cpp/rapidjson/include
 }
 
 feature(no_itl) {

@@ -1,0 +1,200 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:A:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "s",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "l",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:ShortArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 16 },
+            "size" : [3]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:ArrayOfShortArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:ShortArray:1.0",
+            "size" : [4]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:StructSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:A:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:MyEnum:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"b" : "0", "d" : "1", "as" : "2", "sa" : "3", "ss" : "4", "other1" : "5", "other2" : "6"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:MyUnion:1.0",
+        "type" :
+          {
+            "kind" : "union",
+            "discriminator" : "IDL:MyEnum:1.0",
+            "fields" :
+              [
+                {
+                  "name" : "u_b",
+                  "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } },
+                  "labels" : ["b"]
+                }
+              ,
+                {
+                  "name" : "u_d",
+                  "type" : { "kind" : "float", "model" : "binary64" },
+                  "labels" : ["d"]
+                }
+              ,
+                {
+                  "name" : "u_as",
+                  "type" : "IDL:A:1.0",
+                  "labels" : ["as"]
+                }
+              ,
+                {
+                  "name" : "u_sa",
+                  "type" : "IDL:ShortArray:1.0",
+                  "labels" : ["sa"]
+                }
+              ,
+                {
+                  "name" : "u_ss",
+                  "type" : "IDL:StructSeq:1.0",
+                  "labels" : ["ss"]
+                }
+              ,
+                {
+                  "name" : "u_f",
+                  "type" : { "kind" : "float", "model" : "binary32" },
+                  "labels" : []
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Source:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "rhs_a",
+                  "type" : "IDL:A:1.0"
+                }
+              ,
+                {
+                  "name" : "rhs_sa",
+                  "type" : "IDL:ShortArray:1.0"
+                }
+              ,
+                {
+                  "name" : "rhs_asa",
+                  "type" : "IDL:ArrayOfShortArray:1.0"
+                }
+              ,
+                {
+                  "name" : "rhs_ss",
+                  "type" : "IDL:StructSeq:1.0"
+                }
+              ,
+                {
+                  "name" : "rhs_e",
+                  "type" : "IDL:MyEnum:1.0"
+                }
+              ,
+                {
+                  "name" : "rhs_u",
+                  "type" : "IDL:MyUnion:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Target:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "lhs_a",
+                  "type" : "IDL:A:1.0"
+                }
+              ,
+                {
+                  "name" : "lhs_sa",
+                  "type" : "IDL:ShortArray:1.0"
+                }
+              ,
+                {
+                  "name" : "lhs_asa",
+                  "type" : "IDL:ArrayOfShortArray:1.0"
+                }
+              ,
+                {
+                  "name" : "lhs_ss",
+                  "type" : "IDL:StructSeq:1.0"
+                }
+              ,
+                {
+                  "name" : "lhs_e",
+                  "type" : "IDL:MyEnum:1.0"
+                }
+              ,
+                {
+                  "name" : "lhs_u",
+                  "type" : "IDL:MyUnion:1.0"
+                }
+              ]
+          }
+      }
+    ]
+}

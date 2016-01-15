@@ -1,0 +1,3 @@
+[submodule "tools/IntermediateTypeLang/cpp/rapidjson"]
+	path = tools/IntermediateTypeLang/cpp/rapidjson
+	url = git://github.com/miloyip/rapidjson.git

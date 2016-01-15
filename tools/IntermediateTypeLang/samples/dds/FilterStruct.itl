@@ -1,0 +1,1816 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/StringSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/LongSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32 }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DomainId_t:1.0",
+        "type" : { "kind" : "int", "bits" : 32 }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/InstanceHandle_t:1.0",
+        "type" : { "kind" : "int", "bits" : 32 }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/BuiltinTopicKeyValue:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32 },
+            "size" : [3]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/BuiltinTopicKey_t:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "value",
+                  "type" : "IDL:DDS/BuiltinTopicKeyValue:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/InstanceHandleSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:DDS/InstanceHandle_t:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ReturnCode_t:1.0",
+        "type" : { "kind" : "int", "bits" : 32 }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/QosPolicyId_t:1.0",
+        "type" : { "kind" : "int", "bits" : 32 }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/StringSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/Duration_t:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "sec",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "nanosec",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/Time_t:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "sec",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "nanosec",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/StatusKind:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/StatusMask:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/InconsistentTopicStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SampleLostStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SampleRejectedStatusKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"NOT_REJECTED" : "0", "REJECTED_BY_INSTANCES_LIMIT" : "1", "REJECTED_BY_SAMPLES_LIMIT" : "2", "REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT" : "3"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SampleRejectedStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_reason",
+                  "type" : "IDL:DDS/SampleRejectedStatusKind:1.0"
+                }
+              ,
+                {
+                  "name" : "last_instance_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/LivelinessLostStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/LivelinessChangedStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "alive_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "not_alive_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "alive_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "not_alive_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_publication_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/OfferedDeadlineMissedStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_instance_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/RequestedDeadlineMissedStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_instance_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/QosPolicyCount:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "policy_id",
+                  "type" : "IDL:DDS/QosPolicyId_t:1.0"
+                }
+              ,
+                {
+                  "name" : "count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/QosPolicyCountSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:DDS/QosPolicyCount:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/OfferedIncompatibleQosStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_policy_id",
+                  "type" : "IDL:DDS/QosPolicyId_t:1.0"
+                }
+              ,
+                {
+                  "name" : "policies",
+                  "type" : "IDL:DDS/QosPolicyCountSeq:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/RequestedIncompatibleQosStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_policy_id",
+                  "type" : "IDL:DDS/QosPolicyId_t:1.0"
+                }
+              ,
+                {
+                  "name" : "policies",
+                  "type" : "IDL:DDS/QosPolicyCountSeq:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/PublicationMatchedStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "current_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "current_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_subscription_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SubscriptionMatchedStatus:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "total_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "total_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "current_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "current_count_change",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "last_publication_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ConditionSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:DDS/Condition:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SampleStateKind:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SampleStateMask:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ViewStateKind:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ViewStateMask:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/InstanceStateKind:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/InstanceStateMask:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/OctetSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 8, "unsigned" : true }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/UserDataQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "value",
+                  "type" : "IDL:DDS/OctetSeq:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/TopicDataQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "value",
+                  "type" : "IDL:DDS/OctetSeq:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/GroupDataQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "value",
+                  "type" : "IDL:DDS/OctetSeq:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/TransportPriorityQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "value",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/LifespanQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "duration",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DurabilityQosPolicyKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"VOLATILE_DURABILITY_QOS" : "0", "TRANSIENT_LOCAL_DURABILITY_QOS" : "1", "TRANSIENT_DURABILITY_QOS" : "2", "PERSISTENT_DURABILITY_QOS" : "3"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DurabilityQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "kind",
+                  "type" : "IDL:DDS/DurabilityQosPolicyKind:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/PresentationQosPolicyAccessScopeKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"INSTANCE_PRESENTATION_QOS" : "0", "TOPIC_PRESENTATION_QOS" : "1", "GROUP_PRESENTATION_QOS" : "2"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/PresentationQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "access_scope",
+                  "type" : "IDL:DDS/PresentationQosPolicyAccessScopeKind:1.0"
+                }
+              ,
+                {
+                  "name" : "coherent_access",
+                  "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+                }
+              ,
+                {
+                  "name" : "ordered_access",
+                  "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DeadlineQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "period",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/LatencyBudgetQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "duration",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/OwnershipQosPolicyKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"SHARED_OWNERSHIP_QOS" : "0", "EXCLUSIVE_OWNERSHIP_QOS" : "1"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/OwnershipQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "kind",
+                  "type" : "IDL:DDS/OwnershipQosPolicyKind:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/OwnershipStrengthQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "value",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/LivelinessQosPolicyKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"AUTOMATIC_LIVELINESS_QOS" : "0", "MANUAL_BY_PARTICIPANT_LIVELINESS_QOS" : "1", "MANUAL_BY_TOPIC_LIVELINESS_QOS" : "2"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/LivelinessQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "kind",
+                  "type" : "IDL:DDS/LivelinessQosPolicyKind:1.0"
+                }
+              ,
+                {
+                  "name" : "lease_duration",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/TimeBasedFilterQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "minimum_separation",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/PartitionQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "name",
+                  "type" : "IDL:DDS/StringSeq:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ReliabilityQosPolicyKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"BEST_EFFORT_RELIABILITY_QOS" : "0", "RELIABLE_RELIABILITY_QOS" : "1"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ReliabilityQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "kind",
+                  "type" : "IDL:DDS/ReliabilityQosPolicyKind:1.0"
+                }
+              ,
+                {
+                  "name" : "max_blocking_time",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DestinationOrderQosPolicyKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS" : "0", "BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS" : "1"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DestinationOrderQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "kind",
+                  "type" : "IDL:DDS/DestinationOrderQosPolicyKind:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/HistoryQosPolicyKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"KEEP_LAST_HISTORY_QOS" : "0", "KEEP_ALL_HISTORY_QOS" : "1"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/HistoryQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "kind",
+                  "type" : "IDL:DDS/HistoryQosPolicyKind:1.0"
+                }
+              ,
+                {
+                  "name" : "depth",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ResourceLimitsQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "max_samples",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "max_instances",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "max_samples_per_instance",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/EntityFactoryQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "autoenable_created_entities",
+                  "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/WriterDataLifecycleQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "autodispose_unregistered_instances",
+                  "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ReaderDataLifecycleQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "autopurge_nowriter_samples_delay",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ,
+                {
+                  "name" : "autopurge_disposed_samples_delay",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DurabilityServiceQosPolicy:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "service_cleanup_delay",
+                  "type" : "IDL:DDS/Duration_t:1.0"
+                }
+              ,
+                {
+                  "name" : "history_kind",
+                  "type" : "IDL:DDS/HistoryQosPolicyKind:1.0"
+                }
+              ,
+                {
+                  "name" : "history_depth",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "max_samples",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "max_instances",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "max_samples_per_instance",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DomainParticipantFactoryQos:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "entity_factory",
+                  "type" : "IDL:DDS/EntityFactoryQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DomainParticipantQos:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "user_data",
+                  "type" : "IDL:DDS/UserDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "entity_factory",
+                  "type" : "IDL:DDS/EntityFactoryQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/TopicQos:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "topic_data",
+                  "type" : "IDL:DDS/TopicDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "durability",
+                  "type" : "IDL:DDS/DurabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "durability_service",
+                  "type" : "IDL:DDS/DurabilityServiceQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "deadline",
+                  "type" : "IDL:DDS/DeadlineQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "latency_budget",
+                  "type" : "IDL:DDS/LatencyBudgetQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "liveliness",
+                  "type" : "IDL:DDS/LivelinessQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "reliability",
+                  "type" : "IDL:DDS/ReliabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "destination_order",
+                  "type" : "IDL:DDS/DestinationOrderQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "history",
+                  "type" : "IDL:DDS/HistoryQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "resource_limits",
+                  "type" : "IDL:DDS/ResourceLimitsQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "transport_priority",
+                  "type" : "IDL:DDS/TransportPriorityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "lifespan",
+                  "type" : "IDL:DDS/LifespanQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership",
+                  "type" : "IDL:DDS/OwnershipQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DataWriterQos:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "durability",
+                  "type" : "IDL:DDS/DurabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "durability_service",
+                  "type" : "IDL:DDS/DurabilityServiceQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "deadline",
+                  "type" : "IDL:DDS/DeadlineQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "latency_budget",
+                  "type" : "IDL:DDS/LatencyBudgetQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "liveliness",
+                  "type" : "IDL:DDS/LivelinessQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "reliability",
+                  "type" : "IDL:DDS/ReliabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "destination_order",
+                  "type" : "IDL:DDS/DestinationOrderQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "history",
+                  "type" : "IDL:DDS/HistoryQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "resource_limits",
+                  "type" : "IDL:DDS/ResourceLimitsQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "transport_priority",
+                  "type" : "IDL:DDS/TransportPriorityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "lifespan",
+                  "type" : "IDL:DDS/LifespanQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "user_data",
+                  "type" : "IDL:DDS/UserDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership",
+                  "type" : "IDL:DDS/OwnershipQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership_strength",
+                  "type" : "IDL:DDS/OwnershipStrengthQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "writer_data_lifecycle",
+                  "type" : "IDL:DDS/WriterDataLifecycleQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/PublisherQos:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "presentation",
+                  "type" : "IDL:DDS/PresentationQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "partition",
+                  "type" : "IDL:DDS/PartitionQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "group_data",
+                  "type" : "IDL:DDS/GroupDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "entity_factory",
+                  "type" : "IDL:DDS/EntityFactoryQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/DataReaderQos:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "durability",
+                  "type" : "IDL:DDS/DurabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "deadline",
+                  "type" : "IDL:DDS/DeadlineQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "latency_budget",
+                  "type" : "IDL:DDS/LatencyBudgetQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "liveliness",
+                  "type" : "IDL:DDS/LivelinessQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "reliability",
+                  "type" : "IDL:DDS/ReliabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "destination_order",
+                  "type" : "IDL:DDS/DestinationOrderQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "history",
+                  "type" : "IDL:DDS/HistoryQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "resource_limits",
+                  "type" : "IDL:DDS/ResourceLimitsQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "user_data",
+                  "type" : "IDL:DDS/UserDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership",
+                  "type" : "IDL:DDS/OwnershipQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "time_based_filter",
+                  "type" : "IDL:DDS/TimeBasedFilterQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "reader_data_lifecycle",
+                  "type" : "IDL:DDS/ReaderDataLifecycleQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SubscriberQos:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "presentation",
+                  "type" : "IDL:DDS/PresentationQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "partition",
+                  "type" : "IDL:DDS/PartitionQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "group_data",
+                  "type" : "IDL:DDS/GroupDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "entity_factory",
+                  "type" : "IDL:DDS/EntityFactoryQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/ParticipantBuiltinTopicData:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "key",
+                  "type" : "IDL:DDS/BuiltinTopicKey_t:1.0"
+                }
+              ,
+                {
+                  "name" : "user_data",
+                  "type" : "IDL:DDS/UserDataQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/TopicBuiltinTopicData:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "key",
+                  "type" : "IDL:DDS/BuiltinTopicKey_t:1.0"
+                }
+              ,
+                {
+                  "name" : "name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "type_name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "durability",
+                  "type" : "IDL:DDS/DurabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "durability_service",
+                  "type" : "IDL:DDS/DurabilityServiceQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "deadline",
+                  "type" : "IDL:DDS/DeadlineQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "latency_budget",
+                  "type" : "IDL:DDS/LatencyBudgetQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "liveliness",
+                  "type" : "IDL:DDS/LivelinessQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "reliability",
+                  "type" : "IDL:DDS/ReliabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "transport_priority",
+                  "type" : "IDL:DDS/TransportPriorityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "lifespan",
+                  "type" : "IDL:DDS/LifespanQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "destination_order",
+                  "type" : "IDL:DDS/DestinationOrderQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "history",
+                  "type" : "IDL:DDS/HistoryQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "resource_limits",
+                  "type" : "IDL:DDS/ResourceLimitsQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership",
+                  "type" : "IDL:DDS/OwnershipQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "topic_data",
+                  "type" : "IDL:DDS/TopicDataQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/PublicationBuiltinTopicData:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "key",
+                  "type" : "IDL:DDS/BuiltinTopicKey_t:1.0"
+                }
+              ,
+                {
+                  "name" : "participant_key",
+                  "type" : "IDL:DDS/BuiltinTopicKey_t:1.0"
+                }
+              ,
+                {
+                  "name" : "topic_name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "type_name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "durability",
+                  "type" : "IDL:DDS/DurabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "durability_service",
+                  "type" : "IDL:DDS/DurabilityServiceQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "deadline",
+                  "type" : "IDL:DDS/DeadlineQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "latency_budget",
+                  "type" : "IDL:DDS/LatencyBudgetQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "liveliness",
+                  "type" : "IDL:DDS/LivelinessQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "reliability",
+                  "type" : "IDL:DDS/ReliabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "lifespan",
+                  "type" : "IDL:DDS/LifespanQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "user_data",
+                  "type" : "IDL:DDS/UserDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership",
+                  "type" : "IDL:DDS/OwnershipQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership_strength",
+                  "type" : "IDL:DDS/OwnershipStrengthQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "destination_order",
+                  "type" : "IDL:DDS/DestinationOrderQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "presentation",
+                  "type" : "IDL:DDS/PresentationQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "partition",
+                  "type" : "IDL:DDS/PartitionQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "topic_data",
+                  "type" : "IDL:DDS/TopicDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "group_data",
+                  "type" : "IDL:DDS/GroupDataQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SubscriptionBuiltinTopicData:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "key",
+                  "type" : "IDL:DDS/BuiltinTopicKey_t:1.0"
+                }
+              ,
+                {
+                  "name" : "participant_key",
+                  "type" : "IDL:DDS/BuiltinTopicKey_t:1.0"
+                }
+              ,
+                {
+                  "name" : "topic_name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "type_name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "durability",
+                  "type" : "IDL:DDS/DurabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "deadline",
+                  "type" : "IDL:DDS/DeadlineQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "latency_budget",
+                  "type" : "IDL:DDS/LatencyBudgetQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "liveliness",
+                  "type" : "IDL:DDS/LivelinessQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "reliability",
+                  "type" : "IDL:DDS/ReliabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "ownership",
+                  "type" : "IDL:DDS/OwnershipQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "destination_order",
+                  "type" : "IDL:DDS/DestinationOrderQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "user_data",
+                  "type" : "IDL:DDS/UserDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "time_based_filter",
+                  "type" : "IDL:DDS/TimeBasedFilterQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "presentation",
+                  "type" : "IDL:DDS/PresentationQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "partition",
+                  "type" : "IDL:DDS/PartitionQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "topic_data",
+                  "type" : "IDL:DDS/TopicDataQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "group_data",
+                  "type" : "IDL:DDS/GroupDataQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:DDS/SampleInfo:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "sample_state",
+                  "type" : "IDL:DDS/SampleStateKind:1.0"
+                }
+              ,
+                {
+                  "name" : "view_state",
+                  "type" : "IDL:DDS/ViewStateKind:1.0"
+                }
+              ,
+                {
+                  "name" : "instance_state",
+                  "type" : "IDL:DDS/InstanceStateKind:1.0"
+                }
+              ,
+                {
+                  "name" : "source_timestamp",
+                  "type" : "IDL:DDS/Time_t:1.0"
+                }
+              ,
+                {
+                  "name" : "instance_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ,
+                {
+                  "name" : "publication_handle",
+                  "type" : "IDL:DDS/InstanceHandle_t:1.0"
+                }
+              ,
+                {
+                  "name" : "disposed_generation_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "no_writers_generation_count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "sample_rank",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "generation_rank",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "absolute_generation_rank",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "valid_data",
+                  "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:TBTD:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "durability",
+                  "type" : "IDL:DDS/DurabilityQosPolicy:1.0"
+                }
+              ,
+                {
+                  "name" : "durability_service",
+                  "type" : "IDL:DDS/DurabilityServiceQosPolicy:1.0"
+                }
+              ]
+          }
+      }
+    ]
+}
