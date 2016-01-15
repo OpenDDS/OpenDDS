@@ -8,7 +8,7 @@
 
 using namespace rapidjson;
 
-// FUZZ: disable_check_for_improper_main_declaration
+// FUZZ: disable check_for_improper_main_declaration
 
 int main(int argc, char** argv) {
   std::cout << "parsing " << argv[1] << std::endl;
