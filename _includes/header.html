@@ -15,15 +15,23 @@
 
       <ul class="trigger">
 {% assign sorted_pages = site.pages | sort: "order" %}
-{% assign level = -1 %}
+{% assign level = 2 %}
 {% for p in sorted_pages %}
   {% assign slash = p.url | split: '/' %}
-  {% if slash.size == 2 and slash[1] != 'index.html' %}
+  {% unless slash == empty or slash[1] == 'index.html' or slash[2] == 'main.css' %}
+    {% assign basename = slash | last %}
+    {% if basename == 'index.html' %}{% assign indent = slash.size | minus: 1 %}{% else %}{% assign indent = slash.size %}{% endif %}
+    {% assign level_m1 = level | minus: 1 %}
+    {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
         <li><a href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a>
-  {% endif %}
-  {% if slash.size == 3 and slash[2] == 'index.html' %}
-        <li><a href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a>
-  {% endif %}
+    {% if basename == 'index.html' %}
+          <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span>
+          <ul class="sub-menu">
+    {% else %}
+        </li>
+    {% endif %}
+    {% assign level = slash.size %}
+  {% endunless %}
 {% endfor %}
       </ul>
 

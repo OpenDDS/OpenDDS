@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Middleware News Brief
-order: 122
+order: 82
 categories: [opendds]
 ---
 OCI publishes Middleware News Brief articles on a number of topics.  The following are related to OpenDDS:

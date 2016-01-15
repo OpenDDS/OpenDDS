@@ -58,7 +58,7 @@
         position:relative;
         display:inline-table;
         li {
-            float: left;
+//            float: left;
             padding: 0 5px;
             background: #FFF;
             display: inline-block;
@@ -74,6 +74,7 @@
         line-height: 56px;
 //        font-size: 26px;
         margin-bottom: 0;
+        margin-left: 0;
         display: inline-block;
         > li > a { display: inline-block; }
         > li:hover > a { background: #F7F7F7; }
@@ -88,7 +89,7 @@
         z-index: 1;
         display: none;
         background: #FFF;
-        top: 100%;
+//        top: 100%;
         width: 210px;
         padding: 0;
         border-top: 1px solid #E6E6E6;

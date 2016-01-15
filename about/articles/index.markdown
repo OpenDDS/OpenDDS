@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Articles
-order: 120
+order: 80
 categories: [opendds]
 ---
 {% assign sorted_pages = site.pages | sort:"order" %}
