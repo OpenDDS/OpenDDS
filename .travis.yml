@@ -25,7 +25,7 @@ branches:
 before_script:
   - export
   - tar czf modeling_plugins.tar.gz tools/modeling/plugins
-  - rm -rf tools/modeling/plugins
+  - rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson
   - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
   - if [ "$CXX" == "g++" ]; then ./configure; fi
   - if [ "$CXX" == "clang++" ]; then ./configure --compiler=clang++ --no-inline; fi

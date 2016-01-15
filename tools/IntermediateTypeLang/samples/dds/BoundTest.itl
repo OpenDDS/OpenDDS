@@ -1,0 +1,560 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/StringSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/FloatSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "float", "model" : "binary32" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/EnumType:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"FIRST" : "0", "SECOND" : "1", "THIRD" : "2"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/SimpleBoundedMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "short_field",
+                  "type" : { "kind" : "int", "bits" : 16 }
+                }
+              ,
+                {
+                  "name" : "unsigned_short_field",
+                  "type" : { "kind" : "int", "bits" : 16, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "long_field",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "unsigned_long_field",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "long_long_field",
+                  "type" : { "kind" : "int", "bits" : 64 }
+                }
+              ,
+                {
+                  "name" : "unsigned_long_long_field",
+                  "type" : { "kind" : "int", "bits" : 64, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "char_field",
+                  "type" : { "kind" : "int", "bits" : 8, "note" : { "presentation" : { "type" : "char" } } }
+                }
+              ,
+                {
+                  "name" : "wchar_field",
+                  "type" : { "kind" : "int", "note" : { "presentation" : { "type" : "char" }, "idl" : { "type" : "wchar" } } }
+                }
+              ,
+                {
+                  "name" : "float_field",
+                  "type" : { "kind" : "float", "model" : "binary32" }
+                }
+              ,
+                {
+                  "name" : "double_field",
+                  "type" : { "kind" : "float", "model" : "binary64" }
+                }
+              ,
+                {
+                  "name" : "long_double_field",
+                  "type" : { "kind" : "float", "model" : "binary128" }
+                }
+              ,
+                {
+                  "name" : "boolean_field",
+                  "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+                }
+              ,
+                {
+                  "name" : "octet_field",
+                  "type" : { "kind" : "int", "bits" : 8, "unsigned" : true }
+                }
+              ,
+                {
+                  "name" : "enum_field",
+                  "type" : "IDL:Bound/EnumType:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/StringMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "string_field",
+                  "type" : { "kind" : "string" }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/WStringMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "wstring_field",
+                  "type" : { "kind" : "string", "note" : { "idl" : { "type" : "wstring" } } }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/ShortArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 16 },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/UnsignedShortArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 16, "unsigned" : true},
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/LongArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32 },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/UnsignedLongArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32, "unsigned" : true},
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/LongLongArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 64 },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/UnsignedLongLongArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 64, "unsigned" : true},
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/CharArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 8, "note" : { "presentation" : { "type" : "char" } } },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/WCharArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "note" : { "presentation" : { "type" : "char" }, "idl" : { "type" : "wchar" } } },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/FloatArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "float", "model" : "binary32" },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/DoubleArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "float", "model" : "binary64" },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/LongDoubleArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "float", "model" : "binary128" },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/BooleanArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/OctetArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 8, "unsigned" : true },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/EnumTypeArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Bound/EnumType:1.0",
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/SimpleBoundedArrayMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "short_array",
+                  "type" : "IDL:Bound/ShortArray:1.0"
+                }
+              ,
+                {
+                  "name" : "unsigned_short_array",
+                  "type" : "IDL:Bound/UnsignedShortArray:1.0"
+                }
+              ,
+                {
+                  "name" : "long_array",
+                  "type" : "IDL:Bound/LongArray:1.0"
+                }
+              ,
+                {
+                  "name" : "unsigned_long_array",
+                  "type" : "IDL:Bound/UnsignedLongArray:1.0"
+                }
+              ,
+                {
+                  "name" : "long_long_array",
+                  "type" : "IDL:Bound/LongLongArray:1.0"
+                }
+              ,
+                {
+                  "name" : "unsigned_long_long_array",
+                  "type" : "IDL:Bound/UnsignedLongLongArray:1.0"
+                }
+              ,
+                {
+                  "name" : "char_array",
+                  "type" : "IDL:Bound/CharArray:1.0"
+                }
+              ,
+                {
+                  "name" : "wchar_array",
+                  "type" : "IDL:Bound/WCharArray:1.0"
+                }
+              ,
+                {
+                  "name" : "float_array",
+                  "type" : "IDL:Bound/FloatArray:1.0"
+                }
+              ,
+                {
+                  "name" : "double_array",
+                  "type" : "IDL:Bound/DoubleArray:1.0"
+                }
+              ,
+                {
+                  "name" : "long_double_array",
+                  "type" : "IDL:Bound/LongDoubleArray:1.0"
+                }
+              ,
+                {
+                  "name" : "boolean_array",
+                  "type" : "IDL:Bound/BooleanArray:1.0"
+                }
+              ,
+                {
+                  "name" : "octet_array",
+                  "type" : "IDL:Bound/OctetArray:1.0"
+                }
+              ,
+                {
+                  "name" : "enum_array",
+                  "type" : "IDL:Bound/EnumTypeArray:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/StringArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string" },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/StringArrayMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "string_array",
+                  "type" : "IDL:Bound/StringArray:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/WStringArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string", "note" : { "idl" : { "type" : "wstring" } } },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/WStringArrayMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "wstring_array",
+                  "type" : "IDL:Bound/WStringArray:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/Nest1:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "long_field",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "short_field",
+                  "type" : { "kind" : "int", "bits" : 16 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/Nest2:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "nest1_field",
+                  "type" : "IDL:Bound/Nest1:1.0"
+                }
+              ,
+                {
+                  "name" : "float_field",
+                  "type" : { "kind" : "float", "model" : "binary32" }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/BoundedNestedMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "nest2_field",
+                  "type" : "IDL:Bound/Nest2:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/Nest3:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "long_field",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "short_field",
+                  "type" : { "kind" : "int", "bits" : 16 }
+                }
+              ,
+                {
+                  "name" : "string_field",
+                  "type" : { "kind" : "string" }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/Nest4:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "nest3_field",
+                  "type" : "IDL:Bound/Nest3:1.0"
+                }
+              ,
+                {
+                  "name" : "float_field",
+                  "type" : { "kind" : "float", "model" : "binary32" }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Bound/UnboundedNestedMessage:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "nest4_field",
+                  "type" : "IDL:Bound/Nest4:1.0"
+                }
+              ]
+          }
+      }
+    ]
+}

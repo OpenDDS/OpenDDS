@@ -1,0 +1,297 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger7/ResponseArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32 },
+            "size" : [3]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger7/HeaderType:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "from",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject_id",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger7/Message:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "header",
+                  "type" : "IDL:Messenger7/HeaderType:1.0"
+                }
+              ,
+                {
+                  "name" : "text",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "responses",
+                  "type" : "IDL:Messenger7/ResponseArray:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger8/ResponseArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32 },
+            "size" : [10]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger8/HeaderType:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "from",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject_id",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "responses",
+                  "type" : "IDL:Messenger8/ResponseArray:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger8/Message:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "header",
+                  "type" : "IDL:Messenger8/HeaderType:1.0"
+                }
+              ,
+                {
+                  "name" : "text",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger9/HeaderType:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "from",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject_id",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger9/HeaderTypeArray:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Messenger9/HeaderType:1.0",
+            "size" : [2]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger9/Message:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "headers",
+                  "type" : "IDL:Messenger9/HeaderTypeArray:1.0"
+                }
+              ,
+                {
+                  "name" : "text",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger10/CountType:1.0",
+        "type" : { "kind" : "int", "bits" : 32 }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger10/Message:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "text",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "count",
+                  "type" : "IDL:Messenger10/CountType:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger11/Message:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "long_1",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "long_2",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "long_3",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "long_4",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger12/Message:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "long_1",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "long_2",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "long_3",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "long_4",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "long_5",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ]
+}

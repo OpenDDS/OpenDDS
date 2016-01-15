@@ -1,0 +1,415 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/BooleanSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/CharSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 8, "note" : { "presentation" : { "type" : "char" } } }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/DoubleSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "float", "model" : "binary64" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/FloatSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "float", "model" : "binary32" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/LongDoubleSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "float", "model" : "binary128" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/LongSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32 }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/OctetSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 8, "unsigned" : true }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ShortSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 16 }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/StringSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ULongSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/UShortSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 16, "unsigned" : true}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/WCharSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "note" : { "presentation" : { "type" : "char" }, "idl" : { "type" : "wchar" } } }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/WStringSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string", "note" : { "idl" : { "type" : "wstring" } } }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/LongLongSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 64 }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ULongLongSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 64, "unsigned" : true}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/PolicyType:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/PolicyList:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:omg.org/CORBA/Policy:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/PolicyTypeSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:omg.org/CORBA/PolicyType:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/SetOverrideType:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"SET_OVERRIDE" : "0", "ADD_OVERRIDE" : "1"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/PolicyErrorCode:1.0",
+        "type" : { "kind" : "int", "bits" : 16 }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceType:1.0",
+        "type" : { "kind" : "int", "bits" : 16, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceOption:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceDetailType:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceDetailData:1.0",
+        "type" : "IDL:omg.org/CORBA/OctetSeq:1.0"
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceOptionSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:omg.org/CORBA/ServiceOption:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceDetail:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "service_detail_type",
+                  "type" : "IDL:omg.org/CORBA/ServiceDetailType:1.0"
+                }
+              ,
+                {
+                  "name" : "service_detail",
+                  "type" : "IDL:omg.org/CORBA/ServiceDetailData:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceDetailSeq:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:omg.org/CORBA/ServiceDetail:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ServiceInformation:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "service_options",
+                  "type" : "IDL:omg.org/CORBA/ServiceOptionSeq:1.0"
+                }
+              ,
+                {
+                  "name" : "service_details",
+                  "type" : "IDL:omg.org/CORBA/ServiceDetailSeq:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ParameterMode:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"PARAM_IN" : "0", "PARAM_OUT" : "1", "PARAM_INOUT" : "2"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/ORBid:1.0",
+        "type" : { "kind" : "string" }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/Flags:1.0",
+        "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/Identifier:1.0",
+        "type" : { "kind" : "string" }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/RepositoryId:1.0",
+        "type" : { "kind" : "string" }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/TCKind:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"tk_null" : "0", "tk_void" : "1", "tk_short" : "2", "tk_long" : "3", "tk_ushort" : "4", "tk_ulong" : "5", "tk_float" : "6", "tk_double" : "7", "tk_boolean" : "8", "tk_char" : "9", "tk_octet" : "10", "tk_any" : "11", "tk_TypeCode" : "12", "tk_Principal" : "13", "tk_objref" : "14", "tk_struct" : "15", "tk_union" : "16", "tk_enum" : "17", "tk_string" : "18", "tk_sequence" : "19", "tk_array" : "20", "tk_alias" : "21", "tk_except" : "22", "tk_longlong" : "23", "tk_ulonglong" : "24", "tk_longdouble" : "25", "tk_wchar" : "26", "tk_wstring" : "27", "tk_fixed" : "28", "tk_value" : "29", "tk_value_box" : "30", "tk_native" : "31", "tk_abstract_interface" : "32", "tk_local_interface" : "33", "tk_component" : "34", "tk_home" : "35", "tk_event" : "36"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/NamedValue:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "name",
+                  "type" : "IDL:omg.org/CORBA/Identifier:1.0"
+                }
+              ,
+                {
+                  "name" : "argument",
+                  "type" : "IDL:omg.org/CORBA/Any:1.0"
+                }
+              ,
+                {
+                  "name" : "len",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "arg_modes",
+                  "type" : "IDL:omg.org/CORBA/Flags:1.0"
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:omg.org/CORBA/exception_type:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"NO_EXCEPTION" : "0", "USER_EXCEPTION" : "1", "SYSTEM_EXCEPTION" : "2"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/KeyedData:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "a_long_value",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "handle_value",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "sample_sequence",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "writer_id",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "unbounded_sequence",
+                  "type" : "IDL:omg.org/CORBA/FloatSeq:1.0"
+                }
+              ]
+          }
+      }
+    ]
+}

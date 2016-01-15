@@ -1,0 +1,159 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:LocationInfo:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "flight_id1",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "flight_id2",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "x",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "y",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "z",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:PlanInfo:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "flight_id1",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "flight_id2",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "flight_name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "tailno",
+                  "type" : { "kind" : "string" }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:MoreInfo:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "flight_id1",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "more",
+                  "type" : { "kind" : "string" }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:UnrelatedInfo:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "misc",
+                  "type" : { "kind" : "string" }
+                }
+              ]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Resulting:1.0",
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "flight_id1",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "flight_id2",
+                  "type" : { "kind" : "int", "bits" : 32, "unsigned" : true}
+                }
+              ,
+                {
+                  "name" : "flight_name",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "x",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "y",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "height",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "more",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "misc",
+                  "type" : { "kind" : "string" }
+                }
+              ]
+          }
+      }
+    ]
+}

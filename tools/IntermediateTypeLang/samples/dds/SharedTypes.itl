@@ -1,0 +1,214 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/AnEnum:1.0",
+        "type" :
+          {
+            "kind" : "int",
+            "bits" : 32,
+            "unsigned" : true,
+            "constrained" : true,
+            "values" : {"redx" : "0", "greenx" : "1", "bluex" : "2"}
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/SeqOfBoolean:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "capacity" : 6,
+            "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/SeqOfString:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "capacity" : 6,
+            "type" : { "kind" : "string" }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/SeqOfChar:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "capacity" : 6,
+            "type" : { "kind" : "int", "bits" : 8, "note" : { "presentation" : { "type" : "char" } } }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/SeqOfOctet:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "capacity" : 6,
+            "type" : { "kind" : "int", "bits" : 8, "unsigned" : true }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/SeqOfLong:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "capacity" : 6,
+            "type" : { "kind" : "int", "bits" : 32 }
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/SeqOfAnEnum:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/AnEnum:1.0"
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfBoolean:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 1, "note" : { "presentation" : { "type" : "bool" } } },
+            "size" : [5]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfString:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "string" },
+            "size" : [5]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfChar:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 8, "note" : { "presentation" : { "type" : "char" } } },
+            "size" : [5]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfOctet:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 8, "unsigned" : true },
+            "size" : [5]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfLong:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : { "kind" : "int", "bits" : 32 },
+            "size" : [5]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfAnEnum:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/AnEnum:1.0",
+            "size" : [5]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfSeqOfBoolean:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/SeqOfBoolean:1.0",
+            "size" : [6]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfSeqOfString:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/SeqOfString:1.0",
+            "size" : [6]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfSeqOfChar:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/SeqOfChar:1.0",
+            "size" : [6]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfSeqOfOctet:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/SeqOfOctet:1.0",
+            "size" : [6]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfSeqOfLong:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/SeqOfLong:1.0",
+            "size" : [6]
+          }
+      }
+    ,
+      {
+        "kind" : "alias",
+        "name" : "IDL:Xyz/ArrayOfSeqOfAnEnum:1.0",
+        "type" :
+          {
+            "kind" : "sequence",
+            "type" : "IDL:Xyz/SeqOfAnEnum:1.0",
+            "size" : [6]
+          }
+      }
+    ]
+}

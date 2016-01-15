@@ -1,0 +1,33 @@
+* General
+** TODO Pick a license
+** TODO Examples
+** TODO Common annotations (enums, bitsets, rational numbers, strings, maps, sets, etc.)
+* Grammar
+** TODO Tuples
+* Bindings
+  Support for generating and parsing ITL in various languages.
+** C++
+*** Features
+*** Bugs
+*** Tests
+*** Documentation
+** Java
+*** Features
+*** Bugs
+*** Tests
+*** Documentation
+* Producers
+  Add support for generating ITL.
+  - IDL (DDS)
+  - FAST
+* Consumers
+  Add support for consuming ITL or producing from ITL.
+  - FROM (Pronghorn)
+  - Avro
+  - Wireshark (DDS)
+  - XMI (DDS Modeling)
+  - DDS Modeling Eclipe Plugin
+  - Protobuf
+  - Thift
+  - TypeCode
+* Demos
