@@ -6,12 +6,24 @@ tags: []
 order: 97
 ---
 <div id="contenttext">
-
   <div class="bodytext" align="justify">
     <span class="headertext">Latest Release</span>
-    <p>The latest release is available at the OpenDDS download site:&nbsp; <a href="http://download.ociweb.com/OpenDDS/">http://download.ociweb.com/OpenDDS/</a>.</p>
+    <p>The latest release is available at the OpenDDS download site: <a href="http://download.ociweb.com/OpenDDS/">http://download.ociweb.com/OpenDDS/</a> and from GitHub: <ul>
+{% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
+{% assign latest_rel = sorted_rel | first %}
+{% assign assets = latest_rel.assets | sort: "name" | reverse %}
+{% for a in assets %}{% capture tn %}Open{{latest_rel.tag_name}}{% endcapture %}
+{% assign ext = a.name | remove: tn %}
+{% if ext == '.zip' %}
+  {% assign note = 'Windows' %}
+{% else %}
+  {% assign note = 'Linux/Solaris/MacOSX' %}
+{% endif %}
+<li> <a href="{{a.browser_download_url}}">{{a.name}}</a> ({{note}})</li>
+{% endfor %}
+</ul></p>
     <span class="headertext">Previous Releases</span>
-    <p style="text-align: left;">Previous releases are available in the previous releases section of the OpenDDS download site: <a href="http://download.ociweb.com/OpenDDS/previous-releases/">http://download.ociweb.com/OpenDDS/previous-releases/</a>. </p>
+    <p style="text-align: left;">Previous releases are available in the previous releases section of the OpenDDS download site: <a href="http://download.ociweb.com/OpenDDS/previous-releases/">http://download.ociweb.com/OpenDDS/previous-releases/</a> or on the <a href="{{site.github.releases_url}}">GitHub releases page</a>. </p>
 
     <span class="headertext">Support</span>
     <p>See <a href="support.html">the OpenDDS support page</a> for support options.</p>
@@ -21,8 +33,7 @@ order: 97
   <div class="panel" align="justify">
     <span class="headertext">Current Development Code</span>
     <span class="bodytext"><br />
-      <p><b>WARNING: Code in the repository may not work properly.</b>  The code in the repository is changing and can be unstable at any given time.</p>
-      <p>The current development code is available on GitHub: <a href="https://github.com/objectcomputing/OpenDDS">https://github.com/objectcomputing/OpenDDS</a></p>
+      <p>Use the <a href="{{site.github.repository_url}}">GitHub repository</a> to find the latest in-development version, but note that the code in the repository is changing and can be unstable at any given time. GitHub can also be used to contribute via <a href="{{site.github.issues_url}}">Issues</a> and <a href="{{site.github.repository_url}}/pulls">Pull Requests</a>.</p>
     </span>
   </div>
 
