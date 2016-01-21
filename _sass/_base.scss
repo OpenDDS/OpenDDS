@@ -91,6 +91,10 @@ ul, ol {
     margin-left: $spacing-unit;
 }
 
+.page-content ul {
+    padding-left: 25px;
+}
+
 li {
     > ul,
     > ol {
@@ -112,7 +116,7 @@ h1, h2, h3, h4, h5, h6 {
 /**
  * Links
  */
-a[href] {
+.page-content a[href] {
     color: $brand-color;
     text-decoration: none;
 
@@ -178,8 +182,8 @@ pre {
  * Wrapper
  */
 .wrapper {
-    max-width: -webkit-calc(900px - (#{$spacing-unit} * 2));
-    max-width:         calc(900px - (#{$spacing-unit} * 2));
+    max-width: -webkit-calc(1200px - (#{$spacing-unit} * 2));
+    max-width:         calc(1200px - (#{$spacing-unit} * 2));
     margin-right: auto;
     margin-left: auto;
     padding-right: $spacing-unit;
@@ -193,8 +197,6 @@ pre {
         padding-left: $spacing-unit / 2;
     }
 }
-
-
 
 /**
  * Clearfix

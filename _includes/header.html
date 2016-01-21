@@ -23,12 +23,12 @@
     {% if basename == 'index.html' %}{% assign indent = slash.size | minus: 1 %}{% else %}{% assign indent = slash.size %}{% endif %}
     {% assign level_m1 = level | minus: 1 %}
     {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
-        <li><a href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a>
+        <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}
     {% if basename == 'index.html' %}
-          <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span>
+          <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
           <ul class="sub-menu">
     {% else %}
-        </li>
+        </a></li>
     {% endif %}
     {% assign level = slash.size %}
   {% endunless %}
