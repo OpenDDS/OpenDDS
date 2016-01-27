@@ -1,10 +1,7 @@
 .site-header {
     font-weight: bold;
     background-color: hsl(205, 100%, 32%);
-
-    // Positioning context for the mobile navigation icon
     position: relative;
-
     a { color: white; text-decoration: none; }
 }
 
@@ -15,16 +12,6 @@
     margin-bottom: 0;
     float: left;
     padding: $spacing-unit;
-
-//    background-image: linear-gradient(117deg,
-//                                      hsl(200, 100%, 41%) 10px,
-//                                      hsl(205, 100%, 25%) 80px,
-//                                      hsl(205, 100%, 32%) 110px);
-
-//    &,
-//    &:visited {
-//        color: $grey-color-dark;
-//    }
 }
 
 .site-nav {
@@ -33,9 +20,9 @@
     margin: 0px auto;
     box-sizing: border-box;
 
-    .menu-icon {
-        display: none;
-    }
+    .menu-icon { display: none; }
+
+    .toggle, [id^="drop"] { display: none; }
 
     a {
         color: white;
@@ -44,9 +31,7 @@
 
     .arrow { font-size: 11px; }
 
-    .page-link {
-        line-height: $base-line-height;
-    }
+    .page-link { line-height: $base-line-height; }
 
     ul {
         padding: 0 10px;
@@ -54,24 +39,15 @@
         list-style: none;
         position:relative;
         display:inline-table;
-        li {
-            display: inline-block;
-        }
-        li:hover > ul {
-            opacity: 1;
-            visibility: visible;
-            transition: visibility 0s, opacity 0.15s linear;
-        }
+        li { display: inline-block; }
     }
 
     .trigger {
         line-height: 20px;
-//        font-size: 26px;
         margin-bottom: 0;
         margin-left: 0;
         display: block;
         > li > a {
-            display: inline-block;
             padding-top: 12px;
             padding-bottom: 15px;
             padding-left: 15px;
@@ -81,13 +57,6 @@
             font-weight: bold;
             position: relative;
         }
-        > li:hover > a {
-            background-color: white;
-            border-top-color: hsl(39, 63%, 56%);
-            color: hsl(205, 100%, 32%);
-        }
-        > li:hover > a:hover { color: hsl(37, 54%, 43%); }
-        > li:hover .sub-menu { display: block; }
     }
 
     .sub-menu {
@@ -107,15 +76,40 @@
             padding: 3px 20px;
             position: relative;
             white-space: nowrap;
-            a {
-                color: hsl(205, 100%, 32%);
-            }
+            a { color: hsl(205, 100%, 32%); }
         }
-        li:hover > a { color: rgb(169, 123, 50); }
         ul {
             position: absolute;
             left: 100%;
             top: 0;
+        }
+    }
+
+    @include anti-media-query($on-palm) {
+
+        ul li:hover > ul {
+            opacity: 1;
+            visibility: visible;
+            transition: visibility 0s, opacity 0.15s linear;
+        }
+
+        .trigger {
+            li > a { display: inline-block; }
+
+            > li:hover {
+                > a {
+                    background-color: white;
+                    border-top-color: hsl(39, 63%, 56%);
+                    color: hsl(205, 100%, 32%);
+                }
+                > a:hover { color: hsl(37, 54%, 43%); }
+                .sub-menu { display: block; }
+            }
+        }
+
+        .sub-menu {
+            li:hover > a { color: rgb(169, 123, 50); }
+            .mobile { display: none; }
         }
     }
 
@@ -127,8 +121,6 @@
         border: 1px solid $grey-color-light;
         border-radius: 5px;
         text-align: right;
-
-        .arrow { display: none; }
 
         .menu-icon {
             display: block;
@@ -142,11 +134,21 @@
             > svg {
                 width: 18px;
                 height: 15px;
-
-                path {
-                    fill: hsl(205, 100%, 32%);
-                }
+                path { fill: hsl(205, 100%, 32%); }
             }
+        }
+
+        .toggle + a { display: none; }
+
+        .toggle { 
+            display: block;
+            color: hsl(205, 100%, 32%);
+        }
+
+        [id^="drop"]:checked + ul {
+            display: block;
+            visibility: visible;
+            opacity: 1;
         }
 
         .trigger {
@@ -167,11 +169,14 @@
                     padding: 0;
                 }
             }
-            > li:hover .sub-menu { display: none; }
         }
 
-        &:hover .trigger {
-            display: block;
+        .sub-menu {
+            position: static;
+            box-shadow: 6px 6px 12px hsla(0, 0, 0, 0.4);
+            ul {
+                position: static;
+            }
         }
 
         .page-link {

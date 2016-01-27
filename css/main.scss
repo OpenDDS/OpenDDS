@@ -39,6 +39,11 @@ $on-laptop:        800px;
     }
 }
 
+@mixin anti-media-query($device) {
+    @media screen and (min-width: $device + 1) {
+        @content;
+    }
+}
 
 
 // Import partials from `sass_dir` (defaults to `_sass`)
