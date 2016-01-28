@@ -1734,7 +1734,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       sedp_.task_.enqueue(id, rdata.release());
 
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER) {
+    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
+               && !sample.header_.key_fields_only_) {
       ACE_Auto_Ptr<ParticipantMessageData> data(new ParticipantMessageData);
       if (!(ser >> *data)) {
         ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
