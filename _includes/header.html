@@ -5,6 +5,7 @@
     <a class="site-title" href="{{ site.baseurl }}/">{{ site.title }}</a>
 
     <nav class="site-nav">
+      <input type="checkbox" id="drop"/>
       <label for="drop" class="toggle"><span class="menu-icon">
         <svg viewBox="0 0 18 15">
           <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
@@ -12,7 +13,6 @@
           <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </span></svg>
       </label>
-      <input type="checkbox" id="drop"/>
       <ul class="trigger">
 {% assign sorted_pages = site.pages | sort: "order" %}
 {% assign level = 2 %}
@@ -22,14 +22,14 @@
   {% unless slash == empty or slash[1] == 'index.html' or slash[2] == 'main.css' %}
     {% assign basename = slash | last %}
     {% if basename == 'index.html' %}{% assign indent = slash.size | minus: 1 %}{% else %}{% assign indent = slash.size %}{% endif %}
-    {% capture arrow %} <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span>{% endcapture %}
+    {% capture arrow %}{% endcapture %}
     {% assign level_m1 = level | minus: 1 %}
     {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
     {% if basename == 'index.html' %}
         <li>
-          <label for="drop-{{counter}}" class="toggle">{{p.title}}{{arrow}}</label>
-          <a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}{{arrow}}</a>
           <input type="checkbox" id="drop-{{counter}}"/>
+          <label for="drop-{{counter}}" class="toggle">{{p.title}} <span class="arrow">&#9660;</span></label>
+          <a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}} <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
       {% assign counter = counter | plus: 1 %}
           <ul class="sub-menu">
             <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">Index</a></li>
@@ -40,7 +40,6 @@
   {% endunless %}
 {% endfor %}
       </ul>
-
     </nav>
   </div>
 </header>

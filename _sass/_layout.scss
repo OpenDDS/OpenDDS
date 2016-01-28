@@ -138,17 +138,22 @@
             }
         }
 
-        .toggle + a { display: none; }
+        #drop:checked ~ label path { fill: rgb(169, 123, 50); }
+
+        .toggle ~ a { display: none; }
 
         .toggle { 
             display: block;
             color: hsl(205, 100%, 32%);
         }
 
-        [id^="drop"]:checked + ul {
-            display: block;
-            visibility: visible;
-            opacity: 1;
+        [id^="drop"]:checked {
+            ~ ul {
+                display: block;
+                visibility: visible;
+                opacity: 1;
+            }
+            ~ label { color: rgb(169, 123, 50); }
         }
 
         .trigger {
