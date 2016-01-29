@@ -56,6 +56,10 @@ my %platforminfo =
                'libpath' => 'LD_LIBRARY_PATH',
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
+   'freebsd' => {
+		 'compilers' => ['clang++'],
+		 'libpath' => 'LD_LIBRARY_PATH',
+		},
    'lynxos-178' => {
                     'libpath' => 'LD_LIBRARY_PATH',
                     'no_host' => 1,
@@ -1224,7 +1228,7 @@ else { # not cross-compiling:
 
 print "Completed configuring OpenDDS, next ";
 if ($slash eq '/') {
-  print "run '", ($^O eq 'solaris' ? 'g' : ''), "make'";
+  print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
 }
 else {
   print "build '", $opts{'solution_file'}, "' using the '",
