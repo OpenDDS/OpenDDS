@@ -14,6 +14,15 @@
     padding: $spacing-unit;
 }
 
+.sidebar {
+    width: 20%;
+    float: right;
+}
+
+.sidebar:after {
+    clear: both;
+}
+
 .site-nav {
     float: left;
     line-height: normal;
