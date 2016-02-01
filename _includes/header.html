@@ -19,7 +19,7 @@
 {% assign counter = 0 %}
 {% for p in sorted_pages %}
   {% assign slash = p.url | split: '/' %}
-  {% unless slash == empty or slash[1] == 'index.html' or slash[2] == 'main.css' %}
+  {% unless slash == empty or slash[1] == 'index.html' or slash[2] == 'main.css' or p.sitemap == false %}
     {% assign basename = slash | last %}
     {% if basename == 'index.html' %}{% assign indent = slash.size | minus: 1 %}{% else %}{% assign indent = slash.size %}{% endif %}
     {% capture arrow %}{% endcapture %}
