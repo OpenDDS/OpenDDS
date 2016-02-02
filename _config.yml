@@ -9,7 +9,7 @@ lsi: false
 
 # github-metadata
 repository: objectcomputing/OpenDDS
-gems: ['jekyll-github-metadata']
+gems: ['jekyll-github-metadata', 'jekyll-redirect-from']
 
 # Build settings
 markdown: kramdown
