@@ -1,0 +1,3 @@
+Q: Why can't I see the element I added to my figure?
+
+A: If auto-sizing isn't enabled for the figure, depending on the figure's size, an element added to one of the figure's compartments may be be immediately visible. By increasing the size of the figure they element should appear. See the OpenDDS Modeling SDK Guide &gt; Tasks &gt; Working with Diagrams &gt; Creating Figures in the Eclipse help for information on how to make the figure automatically re-size to accommodate additional content.

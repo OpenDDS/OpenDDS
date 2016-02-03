@@ -1,0 +1,7 @@
+Q: How do I turn off BIT support at run-time?
+
+A: Turning off BIT support involves it being turned off in the DCPS Information Repository and any associated participants.
+
+ <P> The DCPSInfoRepo option -NOBITS disables BIT support for the InfoRepo.
+
+ <P> The option '-DCPSBit 0' will disable BIT support for all participants in the process.

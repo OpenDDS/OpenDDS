@@ -1,0 +1,5 @@
+Q: What could be causing std lib related build failures on Linux?
+
+A: OpenDDS makes more extensive use of the C++ standard library, compared to ACE+TAO.  You may be uncovering issues that ACE+TAO may have managed to avoid.
+ <p>
+ We have seen gcc 4.0.x-series compiler users to hit this problem more often. The visibility feature in this compiler still seems to be in a state of flux. If you see these errors, we recommend turning off the visibility feature by adding "no_hidden_visibility=1" to your platform_macros.GNU file and rebuilding all of ACE+TAO and OpenDDS.

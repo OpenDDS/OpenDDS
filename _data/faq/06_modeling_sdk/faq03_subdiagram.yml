@@ -1,0 +1,4 @@
+Q: How to I open a library (for example a DataLib) on the main diagram?
+
+A: Double clicking on the library should open the library in a subdiagram. However, sometimes no action will be taken after double clicking. An alternative way to open a library is to select the library and then press the Enter key. This topic, along with other topics related to libraries, is in the Eclipse help content under OpenDDS Modeling SDK Guide &gt; Tasks &gt; Modeling &gt; Working with OpenDDS Models.
+

@@ -1,0 +1,17 @@
+Q: Why can't my publisher establish a connection with a remote subscriber?
+
+A: While there can be multiple reasons for inter-host communication
+ failure, this entry deals with connection establishment failures
+ due to improper endpoint configuration.
+ 
+ The configuration option "local_address" represents the endpoint address.
+ This host/port tuple is used by the publisher to initiate connection
+ establishment. In order to allow inter-host communication, make sure the
+ endpoint address is publicly visible.
+ 
+ A common mistake is to re-use the configuration provided in the
+ exercises without modifications. Since the examples are intended to
+ be run on an intra-host environment, they generally use the 'localhost'
+ interface. This configuration will fail when the test is run in an
+ inter-host setting.
+ 

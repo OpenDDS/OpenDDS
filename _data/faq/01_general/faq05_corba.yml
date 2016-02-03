@@ -1,0 +1,6 @@
+Q: Does OpenDDS use CORBA?
+
+A: OpenDDS optionally uses CORBA to administer and control the establishment of data connections
+   (when configured to use the DCPSInfoRepo for discovery, which is the default). CORBA is never
+   used in the distribution of application data.  When configured for RTPS peer-to-peer discovery,
+   the CORBA libraries (TAO) are present but not used for any inter-process communication at all.  When configured for Safety Profile, which uses RTPS, no TAO libraries are used at runtime.

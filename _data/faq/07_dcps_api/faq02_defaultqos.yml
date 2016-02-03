@@ -1,0 +1,4 @@
+Q: What are the *_QOS_DEFAULT macros?
+
+A: These macros (for example DATAWRITER_QOS_DEFAULT) are placeholders, used only to provide a default value to the create_* methods.  These macros themselves do not expand to QoS structure instances that can be used for any purpose other than passing to the create_* methods.  This includes the DATAWRITER_QOS_USE_TOPIC_QOS (and DATAREADER_QOS_...).  In Java they are obviously not macros, instead they are classes in the DDS package that have a public static get() method.
+

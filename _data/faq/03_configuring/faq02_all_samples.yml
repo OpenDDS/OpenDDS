@@ -1,0 +1,33 @@
+Q: Why did a subscriber did not receive all samples sent by the publisher?
+
+A: |
+ While there can be multiple reasons that the samples are lost or dropped, a common
+ problem is that the publisher starts sending samples before the subscriber is
+ ready to receive. To synchronize, the publisher can use a WaitSet before writing.
+ This ensures the subscriber is ready to receive samples. <summary>Here is the example code.</summary>
+
+ <details><pre>
+    DDS::StatusCondition_var cond = writer->get_statuscondition();
+    cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ws->attach_condition(cond);
+
+    while (true) {
+      DDS::PublicationMatchedStatus matches;
+      if (writer->get_publication_matched_status(matches) != DDS::RETCODE_OK) {
+        // failure
+      } else if (matches.current_count >= 1) {
+        break;
+      }
+
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout =
+        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        // failure
+      }
+    }
+
+    ws->detach_condition(cond);
+ </pre></details>

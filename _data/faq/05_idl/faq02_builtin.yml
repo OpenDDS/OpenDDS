@@ -1,0 +1,22 @@
+Q: How do I use sequences of built-in types in IDL?
+
+A: |
+ If you'd like to use a sequence of one of the following IDL built-in types:
+ <ul>
+ <li>boolean, octet</li>
+ <li>char, wchar, string, wstring</li>
+ <li>float, double, long double</li>
+ <li>short, long, long long</li>
+ <li>unsigned short, unsigned long, unsigned long long</li>
+ </ul>
+ TAO already has a typedef for these sequences, the typedef name is the name of the built-in type in CamelCase with a "Seq" suffix (unsigned types use a "U" prefix, such as "ULongSeq").<br/>
+ To use the existing typedef, add an #include for the pidl file from the tao directory:
+ <pre>
+ #include &lt;tao/LongSeq.pidl&gt;
+ </pre>
+ The typedefs are in the "CORBA" IDL module, so the typedef for LongSeq could be used as:
+ <pre>
+ struct X {
+   CORBA::LongSeq seq;
+ };
+ </pre>

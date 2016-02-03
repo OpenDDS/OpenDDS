@@ -1,0 +1,13 @@
+Q: What's a PRF?
+A: >
+  "PRF"
+  refers to the PROBLEM-REPORT-FORM, i.e., <code>$DDS_ROOT/PROBLEM-REPORT-FORM</code>.
+  <p> The odds of getting questions answered, bugs fixed, etc., goes up significantly
+  when you report problems using the PRF because it insures that developers
+  and support personnel get the most commonly required information right away.
+  Failure to use the PRF means that those folks have to spend valuable time
+  (yours and theirs) having a conversation to get that information just to
+  start debugging.  Unless you've got a paid support contract, there's even
+  a chance that nobody will answer! </p><p>
+  So, always use the PRF!
+  <br>

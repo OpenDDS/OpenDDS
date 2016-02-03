@@ -1,0 +1,18 @@
+Q: Why don't anonymous IDL sequences compile?
+
+A: |
+ Anonymous IDL sequences use the sequence keyword outside of a typedef:
+ <pre>
+  struct X {
+    sequence&lt;Y&gt; seq;
+  };
+ </pre>
+ Anonymous sequences have been deprecated in the OMG IDL specification.
+ OpenDDS no longer supports using anonymous sequences, instead use a typedef
+ to name the sequence type:
+ <pre>
+  typedef sequence&lt;Y&gt; YSeq;
+  struct X {
+    YSeq seq;
+  };
+ </pre>

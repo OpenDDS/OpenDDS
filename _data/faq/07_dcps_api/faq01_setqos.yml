@@ -1,0 +1,4 @@
+Q: How should I override a specific QoS policy and leave others defaulted?
+
+A: First create an empty QoS variable of the proper type (for example DDS::DataWriterQos), then call the parent's get_default_*_qos() method (for example) Publisher::get_default_datawriter_qos(dw_qos).  Then you can modify the QoS and pass it to the proper create_* method.
+

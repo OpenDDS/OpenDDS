@@ -1,0 +1,11 @@
+Q: How do I turn off BIT support at build-time?
+
+A: >
+ It is possible to build OpenDDS without BIT support which will reduce overall footprint. For this you will need to generate new project files:
+ <pre>
+     mwc.pl -type &lt;yourtype&gt; -features built_in_topics=0 DDS.mwc
+ </pre>
+
+ If &lt;yourtype&gt; happens to be gnuace, add "built_in_topics=0" to the
+ platform_macros.GNU file or the MAKEFLAGS environment variable.
+ Alternatively, use the configure script with "--no-built-in-topics".

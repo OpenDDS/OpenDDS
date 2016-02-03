@@ -1,0 +1,4 @@
+Q: What is the status of BIT support in OpenDDS?
+
+A: Support for Built-In-Topics is complete since the 0.12 release.  This means that BITs will now work as specified. BIT support is now turned on by default.
+

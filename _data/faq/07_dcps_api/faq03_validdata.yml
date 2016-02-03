@@ -1,0 +1,4 @@
+Q: Why do I get samples with invalid data in them?
+
+A: Make sure the call to read/take returns a status of RETCODE_OK and the SampleInfo's valid_data is set to true.  Both of these conditions are required for the sample to be valid.
+

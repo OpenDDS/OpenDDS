@@ -1,0 +1,43 @@
+
+Q: Summarize the network connections established by OpenDDS in a two participant scenario?
+
+A: >
+ <summary>This scenario has two participants (one only publishes and the other only subscribes) using the TCP transport
+   with no Built-In Topics.  The DCPSInfoRepo is used for discovery.
+   Here we would expect to see three established TCP connections at each participant:</summary>
+
+ <details><OL>
+ <LI>The participant contacts the InfoRepo over IIOP (CORBA).  The endpoint used for this connection can be supplied as:
+ <PRE>   -DCPSInfoRepo HOST:PORT</PRE>
+ (or a similar setting in the .ini file)<BR>
+ The HOST is obviously the host where the InfoRepo is running.  The PORT
+ for the InfoRepo can be controlled by passing an argument to the
+ InfoRepo process:
+ <PRE>   -ORBListenEndpoints iiop://:PORT</PRE>
+ Another option that's useful for port-forwarding solutions such as NAT
+ traversal and SSH tunneling is hostname_in_ior.  This gets appended to
+ the endpoint like so
+ <PRE>   -ORBListenEndpoints iiop://:PORT/hostname_in_ior=HOST_ALIAS</PRE>
+ Where HOST_ALIAS is a hostname (or dotted-decimal IP) that can be used
+ by the client to contact the server.  In the NAT traversal example, the
+ HOST_ALIAS would be the external side of the NAT and the PORT would be
+ the port that's forwarded to the host running the server.<BR>
+ You can also specify more than one endpoint (just repeating the
+ <EM>-ORBListenEndpoints</EM> will work) so you can provide endpoints that will
+ work for both "inside" and "outside" clients.<p>
+ 
+ 
+ <LI>The InfoRepo will make an IIOP connection *back* to the participant.
+  This is just the inverse of connection #1, but there is no equivalent
+ to the <EM>-DCPSInfoRepo corbaloc:...</EM> option.  It's not necessary because
+ the InfoRepo knows how to find the participant already (from data
+ transmitted over connection #1).  To control the endpoint here, use the
+ same <EM>-ORBListenEndpoints ...</EM> option but this time with the participant
+ and not the InfoRepo.<p>
+ 
+ <LI>Once the publishing participant and the subscribing participant have
+ been associated, they connect directly using the tcp transport (by default)
+ instance in each one. Here the endpoint is determined by the
+ subscriber's transport config (the "local_address" value).  Unfortunately
+ there is no equivalent to the <EM>hostname_in_ior</EM> for DDS transports.
+ </OL></details>
