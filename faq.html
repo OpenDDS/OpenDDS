@@ -8,12 +8,16 @@ categories: [opendds]
   <h2>Contents</h2>
 {% assign sorted = site.data.faq | sort %}
 {% for category in sorted %}
-  <h3><a href="#{{category[0]}}">{{category[1]._category.name}}</a></h3>
-  {% assign sorted_entries = category[1] | sort %}
+{% assign catnum = category[0] | split: "_" | first | append: "_" %}
+{% assign catname = category[0] | remove_first: catnum %}
+  <h3><a href="#{{catname}}">{{category[1]._category.name}}</a></h3>
   <ul>
+  {% assign sorted_entries = category[1] | sort %}
   {% for entry in sorted_entries %}
     {% unless entry[0] == "_category" %}
-    <li><a href="#{{category[0]}}-{{entry[0]}}">{{entry[1].Q}}</a></li>
+      {% assign entnum = entry[0] | split: "_" | first | append: "_" %}
+      {% assign entname = entry[0] | remove_first: entnum %}
+    <li><a href="#{{catname}}-{{entname}}">{{entry[1].Q}}</a></li>
     {% endunless %}
   {% endfor %}
   </ul>
@@ -21,15 +25,19 @@ categories: [opendds]
   <hr/>
   <h2>Answers</h2>
 {% for category in sorted %}
-  <h3 id="{{category[0]}}" class="faq_cat_hdr">{{category[1]._category.name}}
-    <a href="#{{category[0]}}">&#8882;</a></h3>
+{% assign catnum = category[0] | split: "_" | first | append: "_" %}
+{% assign catname = category[0] | remove_first: catnum %}
+  <h3 id="{{catname}}" class="faq_cat_hdr">{{category[1]._category.name}}
+    <a href="#{{catname}}">&#8882;</a></h3>
   <ul>
   {% assign sorted_entries = category[1] | sort %}
   {% for entry in sorted_entries %}
     {% unless entry[0] == "_category" %}
-    <li id="{{category[0]}}-{{entry[0]}}">
+      {% assign entnum = entry[0] | split: "_" | first | append: "_" %}
+      {% assign entname = entry[0] | remove_first: entnum %}
+    <li id="{{catname]}}-{{entname}}">
       <p class="faq_q">{{entry[1].Q}}
-        <a href="#{{category[0]}}-{{entry[0]}}">&#8882;</a></p>
+        <a href="#{{catname}}-{{entname}}">&#8882;</a></p>
       <div class="faq_a">{{entry[1].A}}</div>
     </li>
     {% endunless %}
