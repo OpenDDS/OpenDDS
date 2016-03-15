@@ -50,7 +50,11 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
 
   Header_Files {
     DdsDcpsConditionSeqS.h
+    DdsDcpsCoreS.h
     DdsDcpsDataReaderSeqS.h
+    DdsDcpsGuidTypeSupportS.h
+    DdsDcpsCoreTypeSupportS.h
+    DdsDcpsInfrastructureTypeSupportS.h
   }
 }
 
@@ -93,7 +97,9 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
 
   Header_Files {
     DdsDcpsConditionSeqS.h
+    DdsDcpsCoreS.h
     DdsDcpsDataReaderSeqS.h
+    DdsDcpsInfrastructureTypeSupportS.h
   }
 }
 
@@ -121,5 +127,9 @@ feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support,
 
   IDL_Files {
     DdsDcpsCoreTypeSupport.idl
+  }
+
+  Header_Files {
+    DdsDcpsCoreTypeSupportS.h
   }
 }
