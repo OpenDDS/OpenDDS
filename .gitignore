@@ -13,6 +13,7 @@ lib*.dylib
 *.sln
 *.suo
 .*.swp
+*.VC.db
 *.VC.opendb
 
 /setenv.sh
