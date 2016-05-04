@@ -104,8 +104,8 @@ public:
   }
 
   void log_perceived_qos_limits (WriteDataContainer* wdc) const {
-    ACE_DEBUG((LM_DEBUG, "Test Data Container perceived qos limits: depth(%d), max_num_instances(%d), max_num_samples(%d)\n",
-               wdc->depth_,
+    ACE_DEBUG((LM_DEBUG, "Test Data Container perceived qos limits: max_samples_per_instance(%d), max_num_instances(%d), max_num_samples(%d)\n",
+               wdc->max_samples_per_instance_,
                wdc->max_num_instances_,
                wdc->max_num_samples_));
   }
@@ -124,15 +124,12 @@ public:
   {
     const bool reliable = dw_qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
-              CORBA::Long const depth =
-                get_instance_sample_list_depth(
-                    dw_qos.history.kind,
-                    dw_qos.history.depth,
-                    dw_qos.resource_limits.max_samples_per_instance);
-
               bool resource_blocking = false;
 
               size_t n_chunks = TheServiceParticipant->n_chunks();
+              int depth = dw_qos.resource_limits.max_samples_per_instance;
+              if (depth == DDS::LENGTH_UNLIMITED)
+                depth = 0x7fffffff;
 
               if (dw_qos.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
                 n_chunks = dw_qos.resource_limits.max_samples;
@@ -165,6 +162,7 @@ public:
                 max_total_samples = dw_qos.resource_limits.max_samples;
 
               return new WriteDataContainer(fast_dw,
+                                            depth,
                                             depth,
                                             dw_qos.reliability.max_blocking_time,
                                             n_chunks,
@@ -587,15 +585,14 @@ int run_test(int argc, ACE_TCHAR *argv[])
         { //Test Case 3 scope
           //=====================================================
           ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("\n\n==== TEST case 3 : Reliable, Keep Last (1), max samples = 2.\n")
+                     ACE_TEXT("\n\n==== TEST case 3 : Reliable, max samples per instance = 1, max samples = 2.\n")
                      ACE_TEXT("Write 1 sample ea. on 3 instances: Should block on third obtain buffer due to max_samples\n")
-                     ACE_TEXT("Detached thread to call data_delivered while fourth obtain buffer attempt is blocked\n")
-                     ACE_TEXT("Blocked writer should wakeup and complete write\n")
                      ACE_TEXT("===============================================\n")));
 
           test->get_default_datawriter_qos(dw_qos);
 
           dw_qos.resource_limits.max_samples = 2;
+          dw_qos.resource_limits.max_samples_per_instance = 1;
 
           dw_qos.reliability.max_blocking_time.sec = 2;
           dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
@@ -716,46 +713,6 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           test->log_send_state_lists("After TEST_ASSERT 3rd obtain_buffer TIMED OUT", test_data_container);
 
-          // Create reader thread.
-          test->prep_delayed_deliver(test_data_container, element_1);
-
-          // Create delayed deliver thread to wait then call data_delivered
-          // simulating transport being finished with a sample
-          Delayed_Deliver_Handler ddh (test);
-          ddh.activate();
-
-          DataSampleElement* element_3 = 0;
-
-          test->log_send_state_lists("About to attempt to obtain_buffer for the 4th time", test_data_container);
-          ret = test_data_container->obtain_buffer(element_3, handle3);
-          test->log_send_state_lists("After 4th obtain buffer which should block then wakeup", test_data_container);
-
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "obtain buffer failed for element 3\n"));
-          }
-
-          element_3->set_sample(mb3);
-
-          if (ret != DDS::RETCODE_OK) {
-            return ret;
-          }
-
-          ret = test_data_container->enqueue(element_3, handle3);
-          test->log_send_state_lists("After enqueue", test_data_container);
-
-          temp.reset();
-          test_data_container->get_unsent_data(temp);
-          test->log_send_state_lists("After get_unsent_data", test_data_container);
-
-          if (ret != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR, "failed to enqueue element 3\n"));
-          }
-          TEST_ASSERT(ret == DDS::RETCODE_OK);
-
-          test->log_send_state_lists("After TEST_ASSERT 4th obtain_buffer successful (block & wakeup)", test_data_container);
-
-          ddh.wait();
-
           test_data_container->unregister_all();
 
           guard.release();
@@ -766,8 +723,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
         { //Test Case 4 scope
           //=====================================================
           ACE_DEBUG((LM_INFO,
-                     ACE_TEXT("\n\n==== TEST case 4 : Reliable, Keep Last (depth = 2), max samples = 3.\n")
-                     ACE_TEXT("Write 3 samples on 1 instance: Should block on third obtain buffer due to depth\n")
+                     ACE_TEXT("\n\n==== TEST case 4 : Reliable, max samples per instance = 2, max samples = 3.\n")
+                     ACE_TEXT("Write 3 samples on 1 instance: Should block on third obtain buffer due to max samples per instance\n")
                      ACE_TEXT("===============================================\n")));
 
           test->get_default_datawriter_qos(dw_qos);
@@ -775,6 +732,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           dw_qos.history.depth = 2;
 
           dw_qos.resource_limits.max_samples = MAX_SAMPLES;
+          dw_qos.resource_limits.max_samples_per_instance = dw_qos.history.depth;
 
           Test::SimpleDataWriterImpl* fast_dw = new Test::SimpleDataWriterImpl();
           test->substitute_dw_particpant(fast_dw, tpi);

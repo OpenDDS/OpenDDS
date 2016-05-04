@@ -1249,42 +1249,34 @@ DataWriterImpl::enable()
 
   const bool reliable = qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
-  CORBA::Long const depth =
-    get_instance_sample_list_depth(
-      qos_.history.kind,
-      qos_.history.depth,
-      qos_.resource_limits.max_samples_per_instance);
+  CORBA::Long const max_samples_per_instance =
+    (qos_.resource_limits.max_samples_per_instance == DDS::LENGTH_UNLIMITED)
+    ? 0x7fffffff : qos_.resource_limits.max_samples_per_instance;
 
-  bool resource_blocking = false;
+  CORBA::Long max_instances = 0, max_total_samples = 0;
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
     n_chunks_ = qos_.resource_limits.max_samples;
 
-    if (qos_.resource_limits.max_instances == DDS::LENGTH_UNLIMITED) {
-      resource_blocking = true;
-
-    } else {
-      resource_blocking =
+    if (qos_.resource_limits.max_instances == DDS::LENGTH_UNLIMITED ||
         (qos_.resource_limits.max_samples < qos_.resource_limits.max_instances)
         || (qos_.resource_limits.max_samples <
-            (qos_.resource_limits.max_instances * depth));
+            (qos_.resource_limits.max_instances * max_samples_per_instance))) {
+      max_total_samples = reliable ? qos_.resource_limits.max_samples : 0;
     }
   }
-
-  //else using value from Service_Participant
-
-  // enable the type specific part of this DataWriter
-  this->enable_specific();
-
-  CORBA::Long max_instances = 0;
 
   if (reliable && qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
     max_instances = qos_.resource_limits.max_instances;
 
-  CORBA::Long max_total_samples = 0;
+  const CORBA::Long max_durable_per_instance =
+    qos_.durability.kind == DDS::VOLATILE_DURABILITY_QOS ? 0 :
+    qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS ? max_samples_per_instance :
+    qos_.history.depth == DDS::LENGTH_UNLIMITED ? 0x7fffffff :
+    qos_.history.depth;
 
-  if (reliable && resource_blocking)
-    max_total_samples = qos_.resource_limits.max_samples;
+  // enable the type specific part of this DataWriter
+  this->enable_specific();
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Get data durability cache if DataWriter QoS requires durable
@@ -1296,7 +1288,8 @@ DataWriterImpl::enable()
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
   data_container_ = new WriteDataContainer(this,
-                                           depth,
+                                           max_samples_per_instance,
+                                           max_durable_per_instance,
                                            qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,

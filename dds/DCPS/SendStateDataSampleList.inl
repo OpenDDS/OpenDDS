@@ -50,6 +50,29 @@ SendStateDataSampleList::tail() const
 
 ACE_INLINE
 void
+SendStateDataSampleList::enqueue_head(const DataSampleElement* sample)
+{
+  ++size_;
+
+  // const_cast here so that higher layers don't need to pass around so many
+  // non-const pointers to DataSampleElement.  Ideally the design would be
+  // changed to accommodate const-correctness throughout.
+  DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
+
+  if (head_ == 0) {
+    // First sample in list.
+    head_ = tail_ = mSample;
+
+  } else {
+    // Add to existing list.
+    mSample->next_send_sample_ = head_;
+    head_->previous_send_sample_ = mSample;
+    head_ = mSample;
+  }
+}
+
+ACE_INLINE
+void
 SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {
   ++size_;
@@ -135,6 +158,34 @@ SendStateDataSampleList::const_iterator
 SendStateDataSampleList::end() const
 {
   return const_iterator(this->head_, this->tail_, 0);
+}
+
+ACE_INLINE
+SendStateDataSampleList::reverse_iterator
+SendStateDataSampleList::rbegin()
+{
+  return reverse_iterator(end());
+}
+
+ACE_INLINE
+SendStateDataSampleList::reverse_iterator
+SendStateDataSampleList::rend()
+{
+  return reverse_iterator(begin());
+}
+
+ACE_INLINE
+SendStateDataSampleList::const_reverse_iterator
+SendStateDataSampleList::rbegin() const
+{
+  return const_reverse_iterator(end());
+}
+
+ACE_INLINE
+SendStateDataSampleList::const_reverse_iterator
+SendStateDataSampleList::rend() const
+{
+  return const_reverse_iterator(begin());
 }
 
 } // namespace DCPS

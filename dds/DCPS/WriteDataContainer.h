@@ -124,8 +124,10 @@ public:
   WriteDataContainer(
     /// The writer which owns this container.
     DataWriterImpl*  writer,
-    /// Depth of the instance sample queue.
-    CORBA::Long      depth,
+    /// Max samples kept within each instance
+    CORBA::Long      max_samples_per_instance,
+    /// Max durable samples sent for each instance
+    CORBA::Long      max_durable_per_instance,
     /// The timeout for write.
     ::DDS::Duration_t max_blocking_time,
     /// The number of chunks that the DataSampleElementAllocator
@@ -356,28 +358,26 @@ private:
   WriteDataContainer & operator= (WriteDataContainer const &);
   // --------------------------
 
-  void copy_and_append(SendStateDataSampleList& list,
-                       const SendStateDataSampleList& appended,
-                       const RepoId& reader_id,
-                       const DDS::LifespanQosPolicy& lifespan
+  void copy_and_prepend(SendStateDataSampleList& list,
+                        const SendStateDataSampleList& appended,
+                        const RepoId& reader_id,
+                        const DDS::LifespanQosPolicy& lifespan,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                       ,
-                       const OPENDDS_STRING& filterClassName,
-                       const FilterEvaluator* eval,
-                       const DDS::StringSeq& params
+                        const OPENDDS_STRING& filterClassName,
+                        const FilterEvaluator* eval,
+                        const DDS::StringSeq& params,
 #endif
-                       );
+                        ssize_t& max_resend_samples);
+
   /**
-   * Remove the sample (head) from the instance list if it is only being
-   * used for history purposes (located on sent_data_ list).
-   * This method also updates the internal lists to reflect
-   * the change.
-   * The "released" boolean value indicates whether a sample was
-   * released.
+   * Remove the oldest "n" samples from each instance list that are
+   * in a state such that they could only be used for durability
+   * purposes (see reenqueue_all).
+   * "n" is determined by max_durable_per_instance_, so these samples
+   * are truely unneeded -- there are max_durable_per_instance_ newer
+   * samples available in the instance.
    */
-  DDS::ReturnCode_t remove_oldest_historical_sample(
-    InstanceDataSampleList& instance_list,
-    bool& released);
+  void remove_excess_durable();
 
   /**
    * Remove the oldest sample (head) from the instance history list.
@@ -445,11 +445,11 @@ private:
 
   /// The maximum size a container should allow for
   /// an instance sample list
-  /// It corresponds to the QoS.HISTORY.depth value for
-  /// QoS.HISTORY.kind==KEEP_LAST and corresponds to the
-  /// QoS.RESOURCE_LIMITS.max_samples_per_instance for
-  /// the case of QoS.HISTORY.kind==KEEP_ALL.
-  CORBA::Long                     depth_;
+  CORBA::Long                     max_samples_per_instance_;
+
+  /// The maximum number of samples from each instance that
+  /// can be added to the resend_data_ for durability.
+  CORBA::Long                     max_durable_per_instance_;
 
   /// The maximum number of instances allowed or zero
   /// to indicate unlimited.
@@ -462,7 +462,7 @@ private:
   /// It corresponds to the QoS.RESOURCE_LIMITS.max_instances
   /// when QoS.RELIABILITY.kind == DDS::RELIABLE_RELIABILITY_QOS
   /// It also covers QoS.RESOURCE_LIMITS.max_samples and
-  /// max_instances * depth
+  /// max_instances * max_samples_per_instance
   CORBA::Long                     max_num_samples_;
 
   /// The maximum time to block on write operation.

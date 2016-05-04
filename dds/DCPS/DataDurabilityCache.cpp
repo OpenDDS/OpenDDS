@@ -481,11 +481,12 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
 
   // Apply DURABILITY_SERVICE QoS HISTORY and RESOURCE_LIMITS related
   // settings prior to data insertion into the cache.
-  CORBA::Long const depth =
-    get_instance_sample_list_depth(
-      qos.history_kind,
-      qos.history_depth,
-      qos.max_samples_per_instance);
+  int depth = qos.history_kind == DDS::KEEP_ALL_HISTORY_QOS
+    ? qos.max_samples_per_instance
+    : qos.history_depth;
+
+  if (depth == DDS::LENGTH_UNLIMITED)
+    depth = 0x7fffffff;
 
   // Iterator to first DataSampleElement to be copied.
   SendStateDataSampleList::iterator element(the_data.begin());

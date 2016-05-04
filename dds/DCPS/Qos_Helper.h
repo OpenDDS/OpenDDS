@@ -39,12 +39,6 @@ DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv);
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t time_to_duration(const DDS::Time_t& t);
 
-ACE_INLINE OpenDDS_Dcps_Export
-CORBA::Long get_instance_sample_list_depth(
-  DDS::HistoryQosPolicyKind history,
-  long                        history_depth,
-  long                        max_samples_per_instance);
-
 /// Validate DDS::Duration_t value (infinite or positive and
 /// non-zero).
 ACE_INLINE OpenDDS_Dcps_Export
