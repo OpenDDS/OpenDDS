@@ -156,7 +156,7 @@ private:
   bool remove_writer(const DDS::InstanceHandle_t& instance_handle,
                      OwnershipWriterInfos& infos,
                      const PublicationId& pub_id);
-  
+
   void remove_owner(const DDS::InstanceHandle_t& instance_handle,
                     OwnershipWriterInfos& infos,
                     bool sort);
