@@ -1,4 +1,5 @@
 #include "Idl/FaceMessage_TS.hpp"
+#include "../../Utils.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 # include "dds/DCPS/RTPS/RtpsDiscovery.h"
@@ -54,7 +55,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   bool receiveMessageHappened = false;
   int recv_msg_count = 0;
   if (!status) {
-    const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
+    const FACE::TIMEOUT_TYPE timeout = TestUtils::seconds_to_timeout(20);
     FACE::TRANSACTION_ID_TYPE txn;
     Messenger::Message msg;
     std::cout << "Subscriber: about to Receive_Message()" << std::endl;
@@ -67,20 +68,15 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                  txn));
       ++recv_msg_count;
       receiveMessageHappened = true;
-      if ((msg.count != expected) && expected > 0) {
-        std::cerr << "ERROR: Expected count " << expected << ", got "
-                  << msg.count << std::endl;
-        status = FACE::INVALID_PARAM;
-        break;
-      } else {
-        if (expected % 2 != 0) {
-          ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
-          FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
-          if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
-        }
+      if (expected % 2 != 0) {
+        ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
+        FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
+        if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
         expected = msg.count + 1;
       }
     }
+    if (status == FACE::TIMED_OUT)
+      status = FACE::RC_NO_ERROR; // time out OK when writer is done
   }
   bool testPassed = true;
   if (!callbackHappened) {

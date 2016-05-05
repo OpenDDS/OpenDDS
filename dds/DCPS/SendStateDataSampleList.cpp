@@ -23,23 +23,21 @@ namespace DCPS {
 
 const SendStateDataSampleList*
 SendStateDataSampleList::send_list_containing_element(const DataSampleElement* element,
-                                                 OPENDDS_VECTOR(SendStateDataSampleList*) send_lists)
+                                                      SendStateDataSampleList** begin,
+                                                      SendStateDataSampleList** end)
 {
-  DataSampleElement* head = const_cast<DataSampleElement*>(element);
+  const DataSampleElement* head = element;
 
   while (head->previous_send_sample_ != 0) {
     head = head->previous_send_sample_;
   }
 
-  SendStateDataSampleList* list_containing_element = 0;
-
-  for(OPENDDS_VECTOR(SendStateDataSampleList*)::iterator it = send_lists.begin(); it != send_lists.end(); ++it) {
+  for (SendStateDataSampleList** it = begin; it != end; ++it) {
     if ((*it)->head_ == head) {
-        list_containing_element = *it;
-        break;
+      return *it;
     }
   }
-  return list_containing_element;
+  return 0;
 }
 
 

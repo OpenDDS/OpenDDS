@@ -90,6 +90,7 @@ private:
  * @c over the "send samples" in a @c SendStateDataSampleList.
  */
 class OpenDDS_Dcps_Export SendStateDataSampleListConstIterator
+  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement>
 {
 public:
   typedef const DataSampleElement* pointer;
@@ -145,22 +146,36 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
 
   friend class ::DDS_TEST;
 
+  static const SendStateDataSampleList*
+    send_list_containing_element(const DataSampleElement* element,
+                                 SendStateDataSampleList** begin,
+                                 SendStateDataSampleList** end);
+
  public:
 
   /// STL-style bidirectional iterator and const-iterator types.
   typedef SendStateDataSampleListIterator iterator;
   typedef SendStateDataSampleListConstIterator const_iterator;
 
+  typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
   /// Default constructor clears the list.
   SendStateDataSampleList();
-  ~SendStateDataSampleList(){};
+  ~SendStateDataSampleList(){}
 
   /// Returns a pointer to the SendStateDataSampleList containing a
   /// given DataSampleElement for use in the typical situation where
   /// the send state of a DataSampleElement is tracked by shifting
   /// it between distinct SendStateDataSampleLists, one for each state
-  static const SendStateDataSampleList* send_list_containing_element(const DataSampleElement* element,
-                                                                OPENDDS_VECTOR(SendStateDataSampleList*) send_lists);
+  template <size_t N>
+  static const SendStateDataSampleList*
+    send_list_containing_element(const DataSampleElement* element,
+                                 SendStateDataSampleList* (&send_lists)[N])
+  {
+    return send_list_containing_element(element,
+                                        &send_lists[0], &send_lists[N]);
+  }
 
   /// Reset to initial state.
   void reset();
@@ -168,6 +183,8 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
   ssize_t size() const;
   DataSampleElement* head() const;
   DataSampleElement* tail() const;
+
+  void enqueue_head(const DataSampleElement* element);
 
   void enqueue_tail(const DataSampleElement* element);
   void enqueue_tail(SendStateDataSampleList list);
@@ -184,18 +201,23 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
   iterator end();
   const_iterator end() const;
 
+  reverse_iterator rbegin();
+  const_reverse_iterator rbegin() const;
+  reverse_iterator rend();
+  const_reverse_iterator rend() const;
+
  protected:
 
-   /// The first element of the list.
-   DataSampleElement* head_;
+  /// The first element of the list.
+  DataSampleElement* head_;
 
-   /// The last element of the list.
-   DataSampleElement* tail_;
+  /// The last element of the list.
+  DataSampleElement* tail_;
 
-   /// Number of elements in the list.
-   ssize_t                size_;
-   //TBD size is never negative so should be size_t but this ripples through
-   // the transport code so leave it for now. SHH
+  /// Number of elements in the list.
+  ssize_t                size_;
+  //TBD size is never negative so should be size_t but this ripples through
+  // the transport code so leave it for now. SHH
 
 };
 

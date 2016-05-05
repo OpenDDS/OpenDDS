@@ -97,38 +97,31 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                   << std::dec << "\tttid: " << txn << std::endl;
       ++recv_msg_count;
       receiveMessageHappened = true;
-      if ((msg.count != expected) && expected > 0) {
-        std::cerr << "ERROR: Expected count " << expected << ", got "
-                  << msg.count << std::endl;
-        status = FACE::INVALID_PARAM;
+      FACE::TS::MessageHeader hdr;
+      FACE::TS::Receive_Message(connId, timeout, txn, hdr, sizeof(FACE::TS::MessageHeader), status);
+      if (status != FACE::RC_NO_ERROR) {
+        std::cout << "ERROR: Receive_Message for header failed for tid: " << txn << " with status: " << status << std::endl;
         break;
-      } else {
-        FACE::TS::MessageHeader hdr;
-        FACE::TS::Receive_Message(connId, timeout, txn, hdr, sizeof(FACE::TS::MessageHeader), status);
-        if (status != FACE::RC_NO_ERROR) {
-          std::cout << "ERROR: Receive_Message for header failed for tid: " << txn << " with status: " << status << std::endl;
-          break;
-        }
-        std::cout << "Message Header - tid: " << txn
-                  << "\n\tplatform view guid: " << hdr.platform_view_guid
-                  << "\n\tsource timestamp: " << hdr.message_timestamp
-                  << "\n\tinstance guid: " << std::hex << hdr.message_instance_guid
-                  << "\n\tsource guid: " << std::dec << hdr.message_source_guid
-                  << "\n\tvalidity " << hdr.message_validity << std::endl;
-        if (hdr.message_source_guid != 9645061) {
-          std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid
-                    << " != 9645061" << std::endl;
-          status = FACE::INVALID_PARAM;
-          return status;
-        }
-        if (hdr.message_instance_guid != msg.msg_instance_guid) {
-            std::cout << "ERROR: Receive_Message for header failed.  message_instance_guid " << std::hex << hdr.message_instance_guid
-                      << " != " << msg.msg_instance_guid << std::endl;
-            status = FACE::INVALID_PARAM;
-            return status;
-        }
-        expected = msg.count + 1;
       }
+      std::cout << "Message Header - tid: " << txn
+                << "\n\tplatform view guid: " << hdr.platform_view_guid
+                << "\n\tsource timestamp: " << hdr.message_timestamp
+                << "\n\tinstance guid: " << std::hex << hdr.message_instance_guid
+                << "\n\tsource guid: " << std::dec << hdr.message_source_guid
+                << "\n\tvalidity " << hdr.message_validity << std::endl;
+      if (hdr.message_source_guid != 9645061) {
+        std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid
+                  << " != 9645061" << std::endl;
+        status = FACE::INVALID_PARAM;
+        return status;
+      }
+      if (hdr.message_instance_guid != msg.msg_instance_guid) {
+        std::cout << "ERROR: Receive_Message for header failed.  message_instance_guid " << std::hex << hdr.message_instance_guid
+                  << " != " << msg.msg_instance_guid << std::endl;
+        status = FACE::INVALID_PARAM;
+        return status;
+      }
+      expected = msg.count + 1;
     }
   }
   bool testPassed = true;

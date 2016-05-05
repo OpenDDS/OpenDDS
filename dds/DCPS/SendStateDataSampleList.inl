@@ -50,6 +50,29 @@ SendStateDataSampleList::tail() const
 
 ACE_INLINE
 void
+SendStateDataSampleList::enqueue_head(const DataSampleElement* sample)
+{
+  ++size_;
+
+  // const_cast here so that higher layers don't need to pass around so many
+  // non-const pointers to DataSampleElement.  Ideally the design would be
+  // changed to accommodate const-correctness throughout.
+  DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
+
+  if (head_ == 0) {
+    head_ = tail_ = mSample;
+    sample->next_send_sample_ = sample->previous_send_sample_ = 0;
+
+  } else {
+    sample->next_send_sample_ = head_;
+    sample->previous_send_sample_ = 0;
+    head_->previous_send_sample_ = mSample;
+    head_ = mSample;
+  }
+}
+
+ACE_INLINE
+void
 SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {
   ++size_;
@@ -60,14 +83,12 @@ SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
   DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
 
   if (head_ == 0) {
-    // First sample in list.
     head_ = tail_ = mSample;
+    sample->next_send_sample_ = sample->previous_send_sample_ = 0;
 
   } else {
-    // Add to existing list.
-    //sample->previous_writer_sample_ = tail_;
-    //tail_->next_writer_sample_ = sample;
-    mSample->previous_send_sample_ = tail_;
+    sample->previous_send_sample_ = tail_;
+    sample->next_send_sample_ = 0;
     tail_->next_send_sample_ = mSample;
     tail_ = mSample;
   }
@@ -86,9 +107,9 @@ SendStateDataSampleList::dequeue_head(DataSampleElement*& stale)
     return false;
 
   } else {
-    --size_ ;
+    --size_;
 
-    head_ = head_->next_send_sample_ ;
+    head_ = head_->next_send_sample_;
 
     if (head_ == 0) {
       tail_ = 0;
@@ -97,13 +118,8 @@ SendStateDataSampleList::dequeue_head(DataSampleElement*& stale)
       head_->previous_send_sample_ = 0;
     }
 
-    //else
-    //  {
-    //    head_->previous_writer_sample_ = 0;
-    //  }
-
-    stale->next_send_sample_ = 0 ;
-    stale->previous_send_sample_ = 0 ;
+    stale->next_send_sample_ = 0;
+    stale->previous_send_sample_ = 0;
 
     return true;
   }
@@ -135,6 +151,34 @@ SendStateDataSampleList::const_iterator
 SendStateDataSampleList::end() const
 {
   return const_iterator(this->head_, this->tail_, 0);
+}
+
+ACE_INLINE
+SendStateDataSampleList::reverse_iterator
+SendStateDataSampleList::rbegin()
+{
+  return reverse_iterator(end());
+}
+
+ACE_INLINE
+SendStateDataSampleList::reverse_iterator
+SendStateDataSampleList::rend()
+{
+  return reverse_iterator(begin());
+}
+
+ACE_INLINE
+SendStateDataSampleList::const_reverse_iterator
+SendStateDataSampleList::rbegin() const
+{
+  return const_reverse_iterator(end());
+}
+
+ACE_INLINE
+SendStateDataSampleList::const_reverse_iterator
+SendStateDataSampleList::rend() const
+{
+  return const_reverse_iterator(begin());
 }
 
 } // namespace DCPS

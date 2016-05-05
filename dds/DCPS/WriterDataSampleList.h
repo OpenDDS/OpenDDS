@@ -34,7 +34,7 @@ class OpenDDS_Dcps_Export WriterDataSampleList {
 
   /// Default constructor clears the list.
   WriterDataSampleList();
-  ~WriterDataSampleList(){};
+  ~WriterDataSampleList(){}
 
   /// Reset to initial state.
   void reset();

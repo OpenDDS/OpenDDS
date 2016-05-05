@@ -20,6 +20,12 @@
 namespace OpenDDS {
 namespace DCPS {
 
+bool
+InstanceDataSampleList::on_some_list(const DataSampleElement* iter)
+{
+  return iter->next_instance_sample_ || iter->previous_instance_sample_
+    || (iter->handle_ && iter->handle_->samples_.head_ == iter);
+}
 
 bool
 InstanceDataSampleList::dequeue(const DataSampleElement* stale)
@@ -28,32 +34,25 @@ InstanceDataSampleList::dequeue(const DataSampleElement* stale)
     return false;
   }
 
-  // Same as dequeue from head.
   if (stale == head_) {
-    DataSampleElement* tmp = head_;
+    DataSampleElement* tmp;
     return dequeue_head(tmp);
   }
 
-  // Search from head_->next_instance_sample_.
-  DataSampleElement* previous = head_;
-  DataSampleElement* item;
-  for (item = head_->next_instance_sample_;
-       item != 0;
-       item = item->next_instance_sample_) {
-    if (item == stale) {
-      previous->next_instance_sample_ = item->next_instance_sample_;
-      if (previous->next_instance_sample_ == 0) {
-        tail_ = previous;
-      }
-      --size_ ;
-      item->next_instance_sample_ = 0;
-      break;
-    }
+  if (stale == tail_) {
+    tail_ = tail_->previous_instance_sample_;
+    tail_->next_instance_sample_ = 0;
 
-    previous = item;
+  } else {
+    stale->previous_instance_sample_->next_instance_sample_ =
+      stale->next_instance_sample_;
+    stale->next_instance_sample_->previous_instance_sample_ =
+      stale->previous_instance_sample_;
   }
 
-  return item;
+  stale->next_instance_sample_ = stale->previous_instance_sample_ = 0;
+  --size_;
+  return true;
 }
 
 

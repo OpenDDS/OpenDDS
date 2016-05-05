@@ -48,6 +48,20 @@ InstanceDataSampleList::tail() const
 }
 
 ACE_INLINE
+DataSampleElement*
+InstanceDataSampleList::next(const DataSampleElement* iter)
+{
+  return iter->next_instance_sample_;
+}
+
+ACE_INLINE
+DataSampleElement*
+InstanceDataSampleList::prev(const DataSampleElement* iter)
+{
+  return iter->previous_instance_sample_;
+}
+
+ACE_INLINE
 void
 InstanceDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {
@@ -58,16 +72,17 @@ InstanceDataSampleList::enqueue_tail(const DataSampleElement* sample)
 
   mSample->next_instance_sample_ = 0;
 
-  ++ size_ ;
+  ++size_;
 
   if (head_ == 0) {
     // First sample on queue.
-    head_ = tail_ = mSample ;
+    head_ = tail_ = mSample;
 
   } else {
     // Another sample on an existing queue.
-    tail_->next_instance_sample_ = mSample ;
-    tail_ = mSample ;
+    tail_->next_instance_sample_ = mSample;
+    mSample->previous_instance_sample_ = tail_;
+    tail_ = mSample;
   }
 }
 
@@ -85,11 +100,13 @@ InstanceDataSampleList::dequeue_head(DataSampleElement*& stale)
     return false;
 
   } else {
-    --size_ ;
-    head_ = head_->next_instance_sample_ ;
+    --size_;
+    head_ = head_->next_instance_sample_;
 
     if (head_ == 0) {
       tail_ = 0;
+    } else {
+      head_->previous_instance_sample_ = 0;
     }
 
     stale->next_instance_sample_ = 0;

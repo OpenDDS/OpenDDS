@@ -68,7 +68,8 @@ resend_data_expired(DataSampleElement const & element,
 
 WriteDataContainer::WriteDataContainer(
   DataWriterImpl* writer,
-  CORBA::Long    depth,
+  CORBA::Long max_samples_per_instance,
+  CORBA::Long max_durable_per_instance,
   ::DDS::Duration_t max_blocking_time,
   size_t         n_chunks,
   DDS::DomainId_t domain_id,
@@ -82,7 +83,8 @@ WriteDataContainer::WriteDataContainer(
   CORBA::Long     max_total_samples)
   : transaction_id_(0),
     writer_(writer),
-    depth_(depth),
+    max_samples_per_instance_(max_samples_per_instance),
+    max_durable_per_instance_(max_durable_per_instance),
     max_num_instances_(max_instances),
     max_num_samples_(max_total_samples),
     max_blocking_time_(max_blocking_time),
@@ -219,42 +221,47 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
-                   this->lock_,
+                   lock_,
                    DDS::RETCODE_ERROR);
 
-  // Make a copy of sending_data_ and sent_data_;
-  if (sent_data_.size() > 0) {
-    this->copy_and_append(this->resend_data_,
-                          sent_data_,
-                          reader_id,
-                          lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                          , filterClassName, eval, expression_params
-#endif
-                          );
-
-  if (sending_data_.size() > 0) {
-    this->copy_and_append(this->resend_data_,
-                          sending_data_,
-                          reader_id,
-                          lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                          , filterClassName, eval, expression_params
-#endif
-                          );
+  ssize_t total_size = 0;
+  for (PublicationInstanceMapType::iterator it = instances_.begin();
+       it != instances_.end(); ++it) {
+    const ssize_t durable = std::min(it->second->samples_.size(),
+                                     ssize_t(max_durable_per_instance_));
+    total_size += durable;
+    it->second->durable_samples_remaining_ = durable;
   }
 
-    if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
-      GuidConverter reader(reader_id);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
-                 ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend to %C.\n"),
-                 this->domain_id_,
-                 this->topic_name_,
-                 OPENDDS_STRING(converter).c_str(),
-                 OPENDDS_STRING(reader).c_str()));
-    }
+  copy_and_prepend(resend_data_,
+                   sending_data_,
+                   reader_id,
+                   lifespan,
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                   filterClassName, eval, expression_params,
+#endif
+                   total_size);
+
+  copy_and_prepend(resend_data_,
+                   sent_data_,
+                   reader_id,
+                   lifespan,
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                   filterClassName, eval, expression_params,
+#endif
+                   total_size);
+
+  if (DCPS_debug_level > 9 && resend_data_.size()) {
+    GuidConverter converter(publication_id_);
+    GuidConverter reader(reader_id);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
+               ACE_TEXT("domain %d topic %C publication %C copying ")
+               ACE_TEXT("sending/sent to resend to %C.\n"),
+               domain_id_,
+               topic_name_,
+               OPENDDS_STRING(converter).c_str(),
+               OPENDDS_STRING(reader).c_str()));
   }
 
   return DDS::RETCODE_OK;
@@ -561,12 +568,12 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     // Should be on sending_data_.  If it is in sent_data_
     // or unsent_data there was a problem.
     //
-    OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
-    send_lists.push_back(&sent_data_);
-    send_lists.push_back(&unsent_data_);
-    send_lists.push_back(&orphaned_to_transport_);
-
-    const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
+    SendStateDataSampleList* send_lists[] = {
+      &sent_data_,
+      &unsent_data_,
+      &orphaned_to_transport_};
+    const SendStateDataSampleList* containing_list =
+      SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
     if (containing_list == &this->sent_data_) {
       ACE_ERROR((LM_WARNING,
@@ -627,18 +634,31 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     release_buffer(stale);
     writer_->controlTracker.message_delivered();
   } else {
+
+    if (max_durable_per_instance_) {
+      DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
+      sent_data_.enqueue_tail(sample);
+
+    } else {
+      if (InstanceDataSampleList::on_some_list(sample)) {
+        PublicationInstance* const inst = sample->get_handle();
+        inst->samples_.dequeue(sample);
+      }
+      release_buffer(stale);
+    }
+
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
-                 ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
+                 ACE_TEXT("domain %d topic %C publication %C %s.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 OPENDDS_STRING(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str(),
+                 max_durable_per_instance_
+                 ? ACE_TEXT("stored for durability")
+                 : ACE_TEXT("released")));
     }
-
-    DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
-    sent_data_.enqueue_tail(sample);
 
     this->wakeup_blocking_writers (stale);
   }
@@ -722,12 +742,12 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     //
     // If it is in sent_data_ or unsent_data there was a problem.
     //
-    OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
-    send_lists.push_back(&sent_data_);
-    send_lists.push_back(&unsent_data_);
-    send_lists.push_back(&orphaned_to_transport_);
-
-    const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
+    SendStateDataSampleList* send_lists[] = {
+      &sent_data_,
+      &unsent_data_,
+      &orphaned_to_transport_};
+    const SendStateDataSampleList* containing_list =
+      SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
     if (containing_list == &this->sent_data_) {
       ACE_ERROR((LM_WARNING,
@@ -775,77 +795,46 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     empty_condition_.broadcast();
 }
 
-DDS::ReturnCode_t
-WriteDataContainer::remove_oldest_historical_sample(
-  InstanceDataSampleList& instance_list,
-  bool& released)
+void
+WriteDataContainer::remove_excess_durable()
 {
-  DataSampleElement* stale = 0;
+  if (!max_durable_per_instance_)
+    return;
 
-  if (instance_list.head() != 0) {
-    stale = instance_list.head();
-  } else {
-    //it is fine for the instance_list to be empty
-    return DDS::RETCODE_OK;
-  }
+  size_t n_released = 0;
 
-  // Only interested in trying to remove historical samples.
-  // If the sample is not on the sent_data_ list, simply can't
-  // be removed  -- not an error
+  for (PublicationInstanceMapType::iterator iter = instances_.begin();
+       iter != instances_.end();
+       ++iter) {
 
-  OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
-  send_lists.push_back(&sent_data_);
+    CORBA::Long durable_allowed = max_durable_per_instance_;
+    InstanceDataSampleList& instance_list = iter->second->samples_;
 
-  const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
+    for (DataSampleElement* it = instance_list.tail(), *prev; it; it = prev) {
+      prev = InstanceDataSampleList::prev(it);
 
-  // Identify if the stale data is in the sent_data_ (i.e. HISTORY)
-  // and can therefore be released
+      if (DataSampleHeader::test_flag(HISTORIC_SAMPLE_FLAG, it->get_sample())) {
 
-  bool result = false;
-
-  if (containing_list == &this->sent_data_) {
-    // No one is using the historical data sample, so we can release it back to
-    // its allocator.
-    // First remove the oldest sample from the instance list.
-    //
-    if (instance_list.dequeue_head(stale) == false) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("WriteDataContainer::remove_oldest_historical_sample, ")
-                        ACE_TEXT("dequeue_head_next_sample failed\n")),
-                       DDS::RETCODE_ERROR);
+        if (durable_allowed) {
+          --durable_allowed;
+        } else {
+          instance_list.dequeue(it);
+          sent_data_.dequeue(it);
+          release_buffer(it);
+          ++n_released;
+        }
+      }
     }
-
-    // Now attempt to remove the sample from the internal list and release its buffer
-    result = this->sent_data_.dequeue(stale) != 0;
-    release_buffer(stale);
-    released = true;
-
-    if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_historical_sample: ")
-                 ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),
-                 this->domain_id_,
-                 this->topic_name_,
-                 OPENDDS_STRING(converter).c_str()));
-    }
-
-  } else {
-    //Sample is not a historical sample
-    return DDS::RETCODE_OK;
   }
 
-  if (result == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("WriteDataContainer::remove_oldest_historical_sample, ")
-                      ACE_TEXT("dequeue_next_send_sample from internal list failed.\n")),
-                     DDS::RETCODE_ERROR);
-
+  if (n_released && DCPS_debug_level > 9) {
+    const GuidConverter converter(publication_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) WriteDataContainer::remove_excess_durable: ")
+               ACE_TEXT("domain %d topic %C publication %C %B samples removed ")
+               ACE_TEXT("from durable data.\n"), domain_id_, topic_name_,
+               OPENDDS_STRING(converter).c_str(), n_released));
   }
-
-  return DDS::RETCODE_OK;
 }
 
 
@@ -882,14 +871,13 @@ WriteDataContainer::remove_oldest_sample(
   //
   // Locate the head of the list that the stale data is in.
   //
-  OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
-  send_lists.push_back(&sending_data_);
-  send_lists.push_back(&sent_data_);
-  send_lists.push_back(&unsent_data_);
-  send_lists.push_back(&orphaned_to_transport_);
-
-  const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
-
+  SendStateDataSampleList* send_lists[] = {
+    &sending_data_,
+    &sent_data_,
+    &unsent_data_,
+    &orphaned_to_transport_};
+  const SendStateDataSampleList* containing_list =
+    SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
   //
   // Identify the list that the stale data is in.
@@ -1022,6 +1010,8 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 {
   DBG_ENTRY_LVL("WriteDataContainer","obtain_buffer", 6);
 
+  remove_excess_durable();
+
   PublicationInstance* instance = get_handle_instance(handle);
 
   ACE_NEW_MALLOC_RETURN(
@@ -1043,82 +1033,51 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   bool need_to_set_abs_timeout = true;
   ACE_Time_Value abs_timeout;
 
-  //depth_ covers both HistoryQosPolicy kind and depth as well as
-  //ResourceLimitsQosPolicy max_samples_per_instance
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth
-  while ((instance_list.size() >= depth_) ||
+  while ((instance_list.size() >= max_samples_per_instance_) ||
          ((this->max_num_samples_ > 0) &&
          ((CORBA::Long) this->num_all_samples () >= this->max_num_samples_))) {
 
-    //Need to either remove stale samples or wait for space to become available
     if (this->writer_->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
-      //Remove historical samples already sent
-      bool removed_historical = false;
-      if (DCPS_debug_level >= 2) {
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
-                              ACE_TEXT(" instance %d attempting to remove")
-                              ACE_TEXT(" its oldest historical sample\n"),
-                              handle));
+      // Reliable writers can wait
+      if (need_to_set_abs_timeout) {
+        abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
+        need_to_set_abs_timeout = false;
       }
-
-      ret = this->remove_oldest_historical_sample(instance_list, removed_historical);
-
-      //else try to remove historical samples from other instances
-      if (ret == DDS::RETCODE_OK && !removed_historical) {
+      if (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
-                                ACE_TEXT(" instance %d attempting to remove")
-                                ACE_TEXT(" oldest historical sample from any full instances\n"),
-                                handle));
+                                ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
+                      handle));
         }
-        PublicationInstanceMapType::iterator it = instances_.begin();
 
-        while (!removed_historical && it != instances_.end() && ret == DDS::RETCODE_OK) {
-          if(it->second->samples_.size() >= depth_) {
-            ret = this->remove_oldest_historical_sample(it->second->samples_, removed_historical);
-          }
-          ++it;
-        }
-      }
+        waiting_on_release_ = true;
+        int const wait_result = condition_.wait(&abs_timeout);
 
-      if (ret == DDS::RETCODE_OK && !removed_historical) {
-        //Reliable writers can wait
-        if (need_to_set_abs_timeout) {
-          abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
-          need_to_set_abs_timeout = false;
-        }
-        if (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
-          if (DCPS_debug_level >= 2) {
-            ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
-                                  ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
-                                  handle));
-          }
+        if (wait_result == 0) {
+          remove_excess_durable();
 
-          waiting_on_release_ = true;
-          // lock is released while waiting and acquired before returning
-          // from wait.
-          int const wait_result = condition_.wait(&abs_timeout);
-
-          if (wait_result != 0) {
-            if (errno == ETIME) {
-              if (DCPS_debug_level >= 2) {
-                ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
-                                      ACE_TEXT(" instance %d timed out waiting for samples to be released by transport\n"),
-                                      handle));
-              }
-              ret = DDS::RETCODE_TIMEOUT;
-            } else {
-              ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::obtain_buffer condition_.wait()")
-                                    ACE_TEXT("%p\n")));
-              ret = DDS::RETCODE_ERROR;
-            }
-          }
         } else {
-          //either shutdown has been signaled or max_blocking_time
-          //has surpassed so treat as timeout
-          ret = DDS::RETCODE_TIMEOUT;
+          if (errno == ETIME) {
+            if (DCPS_debug_level >= 2) {
+              ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
+                                    ACE_TEXT(" instance %d timed out waiting for samples to be released by transport\n"),
+                          handle));
+            }
+            ret = DDS::RETCODE_TIMEOUT;
+
+          } else {
+            ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::obtain_buffer condition_.wait()")
+                                  ACE_TEXT("%p\n")));
+            ret = DDS::RETCODE_ERROR;
+          }
         }
+
+      } else {
+        //either shutdown has been signaled or max_blocking_time
+        //has surpassed so treat as timeout
+        ret = DDS::RETCODE_TIMEOUT;
       }
 
     } else {
@@ -1135,7 +1094,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                                 ACE_TEXT(" its oldest sample\n"),
                                 handle));
         }
-        ret = this->remove_oldest_sample(instance_list, oldest_released);
+        ret = remove_oldest_sample(instance_list, oldest_released);
       }
       //else try to remove stale samples from other instances which are full
       if (ret == DDS::RETCODE_OK && !oldest_released) {
@@ -1148,8 +1107,8 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         PublicationInstanceMapType::iterator it = instances_.begin();
 
         while (!oldest_released && it != instances_.end() && ret == DDS::RETCODE_OK) {
-          if(it->second->samples_.size() >= depth_) {
-            ret = this->remove_oldest_sample(it->second->samples_, oldest_released);
+          if (it->second->samples_.size() >= max_samples_per_instance_) {
+            ret = remove_oldest_sample(it->second->samples_, oldest_released);
           }
           ++it;
         }
@@ -1165,8 +1124,8 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         PublicationInstanceMapType::iterator it = instances_.begin();
 
         while (!oldest_released && it != instances_.end() && ret == DDS::RETCODE_OK) {
-          if(it->second->samples_.size() > 0) {
-            ret = this->remove_oldest_sample(it->second->samples_, oldest_released);
+          if (it->second->samples_.size() > 0) {
+            ret = remove_oldest_sample(it->second->samples_, oldest_released);
           }
           ++it;
         }
@@ -1289,23 +1248,20 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
 }
 
 void
-WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
-                                    const SendStateDataSampleList& appended,
-                                    const RepoId& reader_id,
-                                    const DDS::LifespanQosPolicy& lifespan
+WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
+                                     const SendStateDataSampleList& appended,
+                                     const RepoId& reader_id,
+                                     const DDS::LifespanQosPolicy& lifespan,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                                    ,
-                                    const OPENDDS_STRING& filterClassName,
-                                    const FilterEvaluator* eval,
-                                    const DDS::StringSeq& params
+                                     const OPENDDS_STRING& filterClassName,
+                                     const FilterEvaluator* eval,
+                                     const DDS::StringSeq& params,
 #endif
-                                    )
+                                     ssize_t& max_resend_samples)
 {
-  for (SendStateDataSampleList::const_iterator cur = appended.begin();
-       cur != appended.end(); ++cur) {
+  for (SendStateDataSampleList::const_reverse_iterator cur = appended.rbegin();
+       cur != appended.rend() && max_resend_samples; ++cur) {
 
-    // Do not copy and append data that has exceeded the configured
-    // lifespan.
     if (resend_data_expired(*cur, lifespan))
       continue;
 
@@ -1314,17 +1270,23 @@ WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
       continue;
 #endif
 
+    PublicationInstance* const inst = cur->get_handle();
+    if (inst->durable_samples_remaining_ == 0)
+      continue;
+    --inst->durable_samples_remaining_;
+
     DataSampleElement* element = 0;
     ACE_NEW_MALLOC(element,
-                    static_cast<DataSampleElement*>(
-                      sample_list_element_allocator_.malloc(
-                        sizeof(DataSampleElement))),
-                    DataSampleElement(*cur));
+                   static_cast<DataSampleElement*>(
+                     sample_list_element_allocator_.malloc(
+                       sizeof(DataSampleElement))),
+                   DataSampleElement(*cur));
 
     element->set_num_subs(1);
     element->set_sub_id(0, reader_id);
 
-    list.enqueue_tail(element);
+    list.enqueue_head(element);
+    --max_resend_samples;
   }
 }
 

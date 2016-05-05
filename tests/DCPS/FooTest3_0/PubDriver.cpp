@@ -304,6 +304,11 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
     dw_qos.liveliness.lease_duration.nanosec = 0;
   }
 
+  if (test_to_run_ == ALLOCATOR_TEST)
+  {
+    dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+  }
+
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     dw_qos,

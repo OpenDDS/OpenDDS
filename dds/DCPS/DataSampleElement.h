@@ -169,6 +169,7 @@ private:
 
   /// Thread of data within the instance.
   mutable DataSampleElement* next_instance_sample_;
+  mutable DataSampleElement* previous_instance_sample_;
 
   /// Thread of data being unsent/sending/sent/released.
   mutable DataSampleElement* next_send_sample_;

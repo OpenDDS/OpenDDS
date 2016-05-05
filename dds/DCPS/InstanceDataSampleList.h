@@ -32,10 +32,8 @@ class DataSampleElement;
 class OpenDDS_Dcps_Export InstanceDataSampleList {
 
  public:
-
-  /// Default constructor clears the list.
   InstanceDataSampleList();
-  ~InstanceDataSampleList(){};
+  ~InstanceDataSampleList(){}
 
   /// Reset to initial state.
   void reset();
@@ -43,6 +41,10 @@ class OpenDDS_Dcps_Export InstanceDataSampleList {
   ssize_t size() const;
   DataSampleElement* head() const;
   DataSampleElement* tail() const;
+
+  static bool on_some_list(const DataSampleElement* iter);
+  static DataSampleElement* next(const DataSampleElement* iter);
+  static DataSampleElement* prev(const DataSampleElement* iter);
 
   void enqueue_tail(const DataSampleElement* element);
 

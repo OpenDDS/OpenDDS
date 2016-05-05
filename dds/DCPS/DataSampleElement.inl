@@ -28,6 +28,7 @@ DataSampleElement::DataSampleElement(
     previous_writer_sample_(0),
     next_writer_sample_(0),
     next_instance_sample_(0),
+    previous_instance_sample_(0),
     next_send_sample_(0),
     previous_send_sample_(0)
 
@@ -55,6 +56,7 @@ DataSampleElement::DataSampleElement(const DataSampleElement& elem)
   , previous_writer_sample_(elem.previous_writer_sample_)
   , next_writer_sample_(elem.next_writer_sample_)
   , next_instance_sample_(elem.next_instance_sample_)
+  , previous_instance_sample_(elem.previous_instance_sample_)
   , next_send_sample_(elem.next_send_sample_)
   , previous_send_sample_(elem.previous_send_sample_)
 
@@ -89,6 +91,7 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
   previous_writer_sample_ = rhs.previous_writer_sample_;
   next_writer_sample_ = rhs.next_writer_sample_;
   next_instance_sample_ = rhs.next_instance_sample_;
+  previous_instance_sample_ = rhs.previous_instance_sample_;
   next_send_sample_ = rhs.next_send_sample_;
   previous_send_sample_ = rhs.previous_send_sample_;
   send_listener_ = rhs.send_listener_;
