@@ -465,14 +465,7 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
   }
   return true;
 #else
-  if (socket.open(local_address) != 0) {
-    ACE_ERROR_RETURN((LM_WARNING,
-      ACE_TEXT("(%P|%t) WARNING:")
-      ACE_TEXT("open_appropriate_socket_type: socket open not successful:")
-      ACE_TEXT("errno: %d\n"), errno),
-      false);
-  }
-  return true;
+  return socket.open(local_address) == 0;
 #endif
 }
 }
