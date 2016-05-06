@@ -13,6 +13,7 @@
 #include "Definitions.h"
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
+#include "ace/config-lite.h"
 
 #include <iterator>
 
@@ -157,8 +158,21 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
   typedef SendStateDataSampleListIterator iterator;
   typedef SendStateDataSampleListConstIterator const_iterator;
 
+#if defined __SUNPRO_CC && __SUNPRO_CC <= 0x5130 \
+   && defined _RWSTD_NO_CLASS_PARTIAL_SPEC
+  typedef std::reverse_iterator<iterator, std::bidirectional_iterator_tag,
+                                DataSampleElement, DataSampleElement&,
+                                DataSampleElement*, std::ptrdiff_t>
+    reverse_iterator;
+  typedef std::reverse_iterator<const_iterator, std::bidirectional_iterator_tag,
+                                const DataSampleElement,
+                                const DataSampleElement&,
+                                const DataSampleElement*, std::ptrdiff_t>
+    const_reverse_iterator;
+#else
   typedef std::reverse_iterator<iterator> reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+#endif
 
   /// Default constructor clears the list.
   SendStateDataSampleList();
