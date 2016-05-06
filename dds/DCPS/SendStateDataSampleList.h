@@ -41,11 +41,12 @@ class OpenDDS_Dcps_Export SendStateDataSampleListIterator
 {
 public:
 
-  /// Default constructor.
+  /// Default constructor required by ForwardIterator concept
+  SendStateDataSampleListIterator(){}
+
   /**
    * This constructor is used when constructing an "end" iterator.
    */
-
   SendStateDataSampleListIterator(DataSampleElement* head,
                          DataSampleElement* tail,
                          DataSampleElement* current);
@@ -71,8 +72,6 @@ public:
   }
 
 private:
-  SendStateDataSampleListIterator();
-
   DataSampleElement* head_;
   DataSampleElement* tail_;
   DataSampleElement* current_;
@@ -97,6 +96,8 @@ public:
   typedef const DataSampleElement* pointer;
   typedef const DataSampleElement& reference;
 
+  /// Default constructor required by ForwardIterator concept
+  SendStateDataSampleListConstIterator(){}
 
   SendStateDataSampleListConstIterator(const DataSampleElement* head,
                                   const DataSampleElement* tail,
@@ -124,8 +125,6 @@ public:
   }
 
 private:
-  SendStateDataSampleListConstIterator();
-
   const DataSampleElement* head_;
   const DataSampleElement* tail_;
   const DataSampleElement* current_;
