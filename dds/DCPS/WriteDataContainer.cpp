@@ -589,10 +589,6 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
 
-      if (containing_list == &this->orphaned_to_transport_) {
-        orphaned_to_transport_.dequeue(sample);
-        release_buffer(stale);
-      }
       //No-op: elements may be removed from all WriteDataContainer lists during shutdown
       //and inform transport of their release.  Transport will call data-delivered on the
       //elements as it processes the removal but they will already be gone from the send lists.
@@ -608,6 +604,16 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                      OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_delivered();
+      }
+
+      if (containing_list == &this->orphaned_to_transport_) {
+        orphaned_to_transport_.dequeue(sample);
+        release_buffer(stale);
+
+      } else if (!containing_list) {
+        // samples that were retrieved from get_resend_data()
+        // are not on any send-state list
+        release_buffer(stale);
       }
 
       if (!pending_data())
@@ -762,6 +768,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
                  ACE_TEXT("The dropped sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
+
       //No-op: elements may be removed from all WriteDataContainer lists during shutdown
       //and inform transport of their release.  Transport will call data-dropped on the
       //elements as it processes the removal but they will already be gone from the send lists.
@@ -778,11 +785,17 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
         }
         writer_->controlTracker.message_dropped();
       }
+
       if (containing_list == &this->orphaned_to_transport_) {
         orphaned_to_transport_.dequeue(sample);
         release_buffer(stale);
         if (!pending_data())
           empty_condition_.broadcast();
+
+      } else if (!containing_list) {
+        // samples that were retrieved from get_resend_data()
+        // are not on any send-state list
+        release_buffer(stale);
       }
     }
 
