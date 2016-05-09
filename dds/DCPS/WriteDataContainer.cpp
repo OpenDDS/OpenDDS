@@ -612,7 +612,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
-        // are not on any send-state list
+        SendStateDataSampleList::remove(stale);
         release_buffer(stale);
       }
 
@@ -794,7 +794,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
 
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
-        // are not on any send-state list
+        SendStateDataSampleList::remove(stale);
         release_buffer(stale);
       }
     }

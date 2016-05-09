@@ -206,6 +206,11 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
 
   bool dequeue(const DataSampleElement* stale);
 
+  /// Remove from whichever list "stale" belongs to, without needing
+  /// a reference to the SendStateDataSampleList object itself.
+  /// That SendStateDataSampleList is no longer accurate and can't be used.
+  static void remove(DataSampleElement* stale);
+
   /// Return iterator to beginning of list.
   iterator begin();
   const_iterator begin() const;
