@@ -79,8 +79,11 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
   // reference (to this object) that we pass-in here.
   this->connection_->set_receive_strategy(this);
 
-  // Give the reactor its own "copy" of the reference to the connection object.
-  this->connection_->_add_ref();
+  if (connection_->is_connector()) {
+    // Give the reactor its own reference to the connection object.
+    // If ACE_Acceptor was used, the reactor already has this reference
+    this->connection_->_add_ref();
+  }
 
   if (DCPS_debug_level > 9) {
     std::stringstream buffer;

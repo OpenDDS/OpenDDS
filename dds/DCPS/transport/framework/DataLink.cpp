@@ -183,7 +183,6 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
-    this->_add_ref();
     ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
     ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
     reactor->schedule_timer(this, 0, future_release_time);
@@ -670,7 +669,9 @@ DataLink::transport_shutdown()
   this->set_scheduling_release(false);
   this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
   ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
-  reactor->cancel_timer(this);
+  if (reactor->cancel_timer(this)) {
+    _remove_ref(); // if we were able to cancel, reactor had a ref
+  }
 
   this->stop();
 
