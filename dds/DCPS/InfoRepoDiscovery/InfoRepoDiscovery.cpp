@@ -297,7 +297,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                                         DEFAULT_STATUS_MASK);
 
     if (participant->federated()) {
-      DDS::ParticipantBuiltinTopicDataDataReader* pbit_dr =
+      DDS::ParticipantBuiltinTopicDataDataReader_var pbit_dr =
         DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr.in());
 
       // Create and attach the listener.

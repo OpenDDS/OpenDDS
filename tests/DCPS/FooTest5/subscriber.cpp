@@ -307,7 +307,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ::Xyz::FooTypeSupportImpl* fts_servant
             = new ::Xyz::FooTypeSupportImpl();
-          //x ortableServer::ServantBase_var safe_servant = fts_servant;
+          OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
           if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE))
             {
@@ -593,6 +593,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (! CORBA::is_nil (dpf.in ()))
         {
           dpf->delete_participant(participant.in ());
+          participant = 0;
+          dpf = 0;
         }
     }
   catch (const CORBA::Exception& ex)
