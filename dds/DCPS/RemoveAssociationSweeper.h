@@ -116,7 +116,11 @@ int RemoveAssociationSweeper<T>::handle_timeout(
     const ACE_Time_Value& ,
     const void* arg)
 {
-  PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
+  WriterInfo* const info =
+    const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));
+  info->remove_association_timer_ = WriterInfo::NO_TIMER;
+  const PublicationId pub_id = info->writer_id_;
+  info->_remove_ref();
 
   if (DCPS_debug_level >= 1) {
     GuidConverter sub_repo(reader_->get_repo_id());
