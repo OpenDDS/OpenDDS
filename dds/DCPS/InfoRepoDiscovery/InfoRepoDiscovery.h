@@ -30,8 +30,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class FailoverListener;
-
 /**
  * @class InfoRepoDiscovery
  *
@@ -229,9 +227,6 @@ private:
 
   bool use_local_bit_config_;
   TransportConfig_rch bit_config_;
-
-  /// Listener to initiate failover with.
-  FailoverListener*    failoverListener_;
 
   CORBA::ORB_var orb_;
   bool orb_from_user_;
