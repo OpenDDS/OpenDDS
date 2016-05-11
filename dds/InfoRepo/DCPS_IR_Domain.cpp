@@ -58,13 +58,6 @@ DCPS_IR_Domain::DCPS_IR_Domain(DDS::DomainId_t id, RepoIdGenerator& generator)
 
 DCPS_IR_Domain::~DCPS_IR_Domain()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  if (0 != cleanup_built_in_topics()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to clean up the Built-In Topics!\n"));
-  }
-
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
 const DCPS_IR_Participant_Map&
@@ -884,24 +877,18 @@ int DCPS_IR_Domain::cleanup_built_in_topics()
 
   if (useBIT_) {
     // clean up the Built-in Topic objects
+    bitParticipant_->delete_contained_entities();
+    bitPublisher_ = 0;
+    bitParticipantDataWriter_ = 0;
+    bitTopicDataWriter_ = 0;
+    bitSubscriptionDataWriter_ = 0;
+    bitPublicationDataWriter_ = 0;
+    bitParticipantTopic_ = 0;
+    bitTopicTopic_ = 0;
+    bitSubscriptionTopic_ = 0;
+    bitPublicationTopic_ = 0;
 
-    if (!CORBA::is_nil(bitPublisher_)) {
-      bitPublisher_->delete_datawriter(bitParticipantDataWriter_);
-      bitPublisher_->delete_datawriter(bitTopicDataWriter_);
-      bitPublisher_->delete_datawriter(bitSubscriptionDataWriter_);
-      bitPublisher_->delete_datawriter(bitPublicationDataWriter_);
-
-      bitParticipant_->delete_publisher(bitPublisher_);
-    }
-
-    if (!CORBA::is_nil(bitParticipant_)) {
-      bitParticipant_->delete_topic(bitParticipantTopic_);
-      bitParticipant_->delete_topic(bitTopicTopic_);
-      bitParticipant_->delete_topic(bitSubscriptionTopic_);
-      bitParticipant_->delete_topic(bitPublicationTopic_);
-
-      bitParticipantFactory_->delete_participant(bitParticipant_);
-    }
+    bitParticipantFactory_->delete_participant(bitParticipant_); // deletes this
   }
 
   return 0;
@@ -1309,7 +1296,7 @@ void DCPS_IR_Domain::dispose_participant_bit(DCPS_IR_Participant* participant)
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   if (useBIT_) {
-    if (!participant->is_bit()) {
+    if (!participant->isBitPublisher()) {
       try {
         DDS::ParticipantBuiltinTopicData key_data;
         DDS::InstanceHandle_t handle = participant->get_handle();

@@ -426,6 +426,23 @@ private:
 
   long reassociate_timer_id_;
   long dispatch_check_timer_id_;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  struct BIT_Cleanup_Handler : ACE_Event_Handler
+  {
+    BIT_Cleanup_Handler(TAO_DDS_DCPSInfo_i* parent, DDS::DomainId_t domain)
+      : parent_(parent), domain_(domain)
+    {
+      reference_counting_policy().value(Reference_Counting_Policy::ENABLED);
+      parent->_add_ref();
+    }
+
+    int handle_exception(ACE_HANDLE fd);
+
+    PortableServer::Servant_var<TAO_DDS_DCPSInfo_i> parent_;
+    DDS::DomainId_t domain_;
+  };
+#endif
 };
 
 #endif /* DCPSINFO_I_H */

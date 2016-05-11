@@ -880,14 +880,20 @@ DomainParticipantImpl::delete_contained_entities()
   Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
   disc->fini_bit(this);
 
-  TheServiceParticipant->reactor()->notify(this);
+  if (ACE_OS::thr_equal(TheServiceParticipant->reactor_owner(),
+                        ACE_Thread::self())) {
+    handle_exception(0);
 
-  shutdown_mutex_.acquire();
-  while (!shutdown_complete_) {
-    shutdown_condition_.wait();
+  } else {
+    TheServiceParticipant->reactor()->notify(this);
+
+    shutdown_mutex_.acquire();
+    while (!shutdown_complete_) {
+      shutdown_condition_.wait();
+    }
+    shutdown_complete_ = false;
+    shutdown_mutex_.release();
   }
-  shutdown_complete_ = false;
-  shutdown_mutex_.release();
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 

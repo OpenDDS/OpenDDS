@@ -160,6 +160,8 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
+  bool useBIT() const { return useBIT_; }
+
 private:
   OpenDDS::DCPS::TopicStatus add_topic_i(OpenDDS::DCPS::RepoId& topicId,
                                          const char * topicName,
