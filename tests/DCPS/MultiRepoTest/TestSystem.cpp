@@ -158,7 +158,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
     ACE_TEXT("(%P|%t) %T INFO: creating subscription type support for type %C.\n"),
     this->config_.typeName().c_str()
   ));
-  ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
+  ::Xyz::FooNoKeyTypeSupport_var subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
   if(::DDS::RETCODE_OK != subscriber_data->register_type(
                             this->subscriberParticipant_.in (),
                             this->config_.typeName().c_str()
@@ -173,7 +173,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
     ACE_TEXT("(%P|%t) %T INFO: creating publication type support for type %C.\n"),
     this->config_.typeName().c_str()
   ));
-  ::Xyz::FooNoKeyTypeSupportImpl* publisher_data = new ::Xyz::FooNoKeyTypeSupportImpl();
+  ::Xyz::FooNoKeyTypeSupport_var publisher_data = new ::Xyz::FooNoKeyTypeSupportImpl();
   if(::DDS::RETCODE_OK != publisher_data->register_type(
                             this->publisherParticipant_.in (),
                             this->config_.typeName().c_str()
@@ -312,8 +312,9 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
       );
 
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) %T INFO: creating data reader for topic: %C, type: %C.\n"),
-    description->get_name(), description->get_type_name()
+             ACE_TEXT("(%P|%t) %T INFO: creating data reader for topic: %C, type: %C.\n"),
+             CORBA::String_var(description->get_name()).in(),
+             CORBA::String_var(description->get_type_name()).in()
   ));
   this->dataReader_ = this->subscriber_->create_datareader(
                         description.in(),
