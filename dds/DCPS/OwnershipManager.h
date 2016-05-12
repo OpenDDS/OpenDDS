@@ -10,7 +10,6 @@
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
-//#include "EntityImpl.h"
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -28,19 +27,19 @@ class DataReaderImpl;
 
 class OpenDDS_Dcps_Export OwnershipManager {
 public:
-  typedef OPENDDS_VECTOR(DataReaderImpl*) ReaderVec;
+  typedef OPENDDS_SET(DataReaderImpl*) ReaderSet;
 
   // TypeInstanceMap is only used for EXCLUSIVE ownership.
   struct InstanceMap {
     InstanceMap() : map_(0) {}
     InstanceMap(void* map, DataReaderImpl* reader)
-    : map_(map)
+      : map_(map)
     {
-      readers_.push_back(reader);
+      readers_.insert(reader);
     }
 
     void* map_;
-    ReaderVec readers_;
+    ReaderSet readers_;
   };
 
   typedef OPENDDS_MAP(OPENDDS_STRING, InstanceMap) TypeInstanceMap;
@@ -104,8 +103,8 @@ public:
   * is deleted upon the last reader unregistering an instance of the
   * type.
   */
-  void  unregister_reader(const char* type_name,
-                          DataReaderImpl* reader);
+  void unregister_reader(const char* type_name,
+                         DataReaderImpl* reader);
 
   /**
   * Remove a writer from all instances ownership collection.
@@ -161,7 +160,8 @@ private:
                     OwnershipWriterInfos& infos,
                     bool sort);
 
-  void remove_candidate(OwnershipWriterInfos& infos,const PublicationId& pub_id);
+  void remove_candidate(OwnershipWriterInfos& infos,
+                        const PublicationId& pub_id);
 
   void broadcast_new_owner(const DDS::InstanceHandle_t& instance_handle,
                            OwnershipWriterInfos& infos,
