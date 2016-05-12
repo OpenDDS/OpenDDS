@@ -245,7 +245,7 @@ OwnershipManager::remove_owner(const DDS::InstanceHandle_t& instance_handle,
                 Util::DescendingOwnershipStrengthSort);
     }
 
-    const WriterInfos::const_iterator begin = infos.candidates_.begin();
+    const WriterInfos::iterator begin = infos.candidates_.begin();
     infos.owner_ = *begin;
     infos.candidates_.erase(begin);
     new_owner = infos.owner_.pub_id_;
