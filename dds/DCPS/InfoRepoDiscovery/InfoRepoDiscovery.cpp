@@ -98,7 +98,6 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
     ior_(ior),
     bit_transport_port_(0),
     use_local_bit_config_(false),
-    failoverListener_(0),
     orb_from_user_(false)
 {
 }
@@ -109,14 +108,12 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
     info_(info),
     bit_transport_port_(0),
     use_local_bit_config_(false),
-    failoverListener_(0),
     orb_from_user_(false)
 {
 }
 
 InfoRepoDiscovery::~InfoRepoDiscovery()
 {
-  delete this->failoverListener_;
   if (!orb_from_user_ && orb_runner_) {
     if (0 == --orb_runner_->use_count_) {
       orb_runner_->shutdown();
@@ -297,12 +294,11 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                                         DEFAULT_STATUS_MASK);
 
     if (participant->federated()) {
-      DDS::ParticipantBuiltinTopicDataDataReader* pbit_dr =
+      DDS::ParticipantBuiltinTopicDataDataReader_var pbit_dr =
         DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr.in());
 
-      // Create and attach the listener.
-      failoverListener_ = new FailoverListener(key());
-      pbit_dr->set_listener(failoverListener_, DEFAULT_STATUS_MASK);
+      DataReaderListener_var failover = new FailoverListener(key());
+      pbit_dr->set_listener(failover, DEFAULT_STATUS_MASK);
     }
 
     DDS::DataReaderQos dr_qos;

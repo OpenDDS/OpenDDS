@@ -50,6 +50,9 @@ public:
 
   virtual void remove_associations(const ReaderIdSeq& subids, bool notify) = 0;
 
+  virtual void listener_add_ref() = 0;
+  virtual void listener_remove_ref() = 0;
+
   /// Hook for the listener to override a normal control message with
   /// customized messages to different DataLinks.
   virtual SendControlStatus send_control_customized(

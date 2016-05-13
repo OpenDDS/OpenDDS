@@ -154,6 +154,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const ReaderIdSeq&, bool) {}
+  void listener_add_ref() {}
+  void listener_remove_ref() {}
 
   TransportSendElementAllocator alloc_;
   SendStateDataSampleList list_;

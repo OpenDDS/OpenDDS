@@ -1464,6 +1464,40 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
                  domainId));
     }
   }
+
+  if (where->second->participants().empty()) {
+    delete where->second;
+    domains_.erase(where);
+  }
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  else if (where->second->useBIT() &&
+           where->second->participants().size() == 1) {
+    // The only participant left is the one we created to publish BITs.
+    // It can be removed now since no user participants exist in this domain,
+    // but it has to be removed on the Service Participant's reactor thread
+    // in order to make the locking work properly in delete_participant().
+    const ACE_Event_Handler_var eh = new BIT_Cleanup_Handler(this, domainId);
+    TheServiceParticipant->reactor()->notify(eh.handler());
+  }
+#endif
+}
+
+int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, parent_->lock_, 0);
+
+  const DCPS_IR_Domain_Map::iterator where = parent_->domains_.find(domain_);
+
+  if (where == parent_->domains_.end()) {
+    return 0;
+  }
+
+  if (where->second->participants().size() == 1) {
+    where->second->cleanup_built_in_topics();
+  }
+
+  return 0;
 }
 
 void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,

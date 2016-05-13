@@ -203,6 +203,9 @@ private:
                            DCPS::SequenceNumber& sequence,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
+    void listener_add_ref() {}
+    void listener_remove_ref() {}
+
   } publications_writer_, subscriptions_writer_, participant_message_writer_;
 
   class Reader

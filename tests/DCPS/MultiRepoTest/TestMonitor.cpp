@@ -272,7 +272,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       current->first
     ));
     if( 0 == CORBA::is_nil( current->second.in())) {
-      ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
+      ::Xyz::FooNoKeyTypeSupport_var subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
       if(::DDS::RETCODE_OK != subscriber_data->register_type(
                                 current->second.in (),
                                 this->config_.typeName().c_str()
