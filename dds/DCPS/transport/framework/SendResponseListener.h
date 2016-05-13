@@ -28,7 +28,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export SendResponseListener
   : public TransportSendListener {
 public:
-  SendResponseListener(const OPENDDS_STRING& msg_src);
+  explicit SendResponseListener(const OPENDDS_STRING& msg_src);
   virtual ~SendResponseListener();
 
   virtual void data_delivered(const DataSampleElement* sample);
@@ -46,7 +46,11 @@ public:
   void remove_associations(const ReaderIdSeq&, bool) {}
 
   void track_message();
+
 private:
+  void listener_add_ref() {}
+  void listener_remove_ref() {}
+
   MessageTracker tracker_;
 };
 

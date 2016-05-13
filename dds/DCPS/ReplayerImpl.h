@@ -167,6 +167,8 @@ private:
 
   void _add_ref() { EntityImpl::_add_ref(); }
   void _remove_ref() { EntityImpl::_remove_ref(); }
+  void listener_add_ref() { EntityImpl::_add_ref(); }
+  void listener_remove_ref() { EntityImpl::_remove_ref(); }
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 

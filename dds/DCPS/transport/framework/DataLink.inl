@@ -328,28 +328,32 @@ ACE_INLINE
 void
 DataLink::remove_listener(const RepoId& local_id)
 {
-  GuardType guard(this->pub_sub_maps_lock_);
+  GuardType guard(pub_sub_maps_lock_);
   {
-    IdToSendListenerMap::iterator pos = this->send_listeners_.find(local_id);
-    if (pos != this->send_listeners_.end()) {
-      this->send_listeners_.erase(pos);
+    IdToSendListenerMap::iterator pos = send_listeners_.find(local_id);
+    if (pos != send_listeners_.end()) {
+      pos->second->listener_remove_ref();
+      send_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
         GuidConverter converter(local_id);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink::remove_listener: removed %C from send_listeners\n"),
+                   ACE_TEXT("(%P|%t) DataLink::remove_listener: ")
+                   ACE_TEXT("removed %C from send_listeners\n"),
                    OPENDDS_STRING(converter).c_str()));
       }
       return;
     }
   }
   {
-    IdToRecvListenerMap::iterator pos = this->recv_listeners_.find(local_id);
-    if (pos != this->recv_listeners_.end()) {
-      this->recv_listeners_.erase(pos);
+    IdToRecvListenerMap::iterator pos = recv_listeners_.find(local_id);
+    if (pos != recv_listeners_.end()) {
+      pos->second->listener_remove_ref();
+      recv_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
         GuidConverter converter(local_id);
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink::remove_listener: removed %C from recv_listeners\n"),
+                   ACE_TEXT("(%P|%t) DataLink::remove_listener: ")
+                   ACE_TEXT("removed %C from recv_listeners\n"),
                    OPENDDS_STRING(converter).c_str()));
       }
       return;

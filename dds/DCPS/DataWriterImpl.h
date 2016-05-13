@@ -581,6 +581,9 @@ private:
 
   void association_complete_i(const RepoId& remote_id);
 
+  void listener_add_ref() { EntityImpl::_add_ref(); }
+  void listener_remove_ref() { EntityImpl::_remove_ref(); }
+
   friend class ::DDS_TEST; // allows tests to get at privates
 
   /// The name of associated topic.
