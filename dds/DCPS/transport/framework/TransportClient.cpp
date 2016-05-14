@@ -189,6 +189,12 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 void
 TransportClient::transport_detached(TransportImpl* which)
 {
+  TransportSendListener* const this_tsl = get_send_listener();
+  TransportReceiveListener* const this_trl = get_receive_listener();
+  if (this_tsl)
+    this_tsl->listener_add_ref();
+  else if (this_trl)
+    this_trl->listener_add_ref();
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -234,9 +240,15 @@ TransportClient::transport_detached(TransportImpl* which)
         which->stop_accepting_or_connecting(this, it2->first);
       }
 
-      return;
+      break;
     }
   }
+
+  guard.release();
+  if (this_tsl)
+    this_tsl->listener_remove_ref();
+  else if (this_trl)
+    this_trl->listener_remove_ref();
 }
 
 bool
