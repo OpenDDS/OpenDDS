@@ -1483,6 +1483,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
 #endif
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, parent_->lock_, 0);
@@ -1499,6 +1500,7 @@ int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 
   return 0;
 }
+#endif
 
 void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
   const OpenDDS::DCPS::RepoId& participantId,
