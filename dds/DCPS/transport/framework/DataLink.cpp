@@ -194,15 +194,11 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
 //this thread avoids possibly deadlocking trying to access reactor
 //to stop strategies or schedule timers
 void
-DataLink::schedule_stop(ACE_Time_Value& schedule_to_stop_at)
+DataLink::schedule_stop(const ACE_Time_Value& schedule_to_stop_at)
 {
   if (!this->stopped_ && this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
-    //Add ref before handing to the reactor
-    //ref removed in handle_exception or in handle_timeout based on stopping now or delayed
-    this->_add_ref();
     this->scheduled_to_stop_at_ = schedule_to_stop_at;
-    TransportReactorTask_rch reactor(this->impl_->reactor_task());
-    reactor->get_reactor()->notify(this);
+    notify_reactor();
     // reactor will invoke our DataLink::handle_exception()
   } else {
     if (DCPS_debug_level > 0) {
@@ -210,6 +206,17 @@ DataLink::schedule_stop(ACE_Time_Value& schedule_to_stop_at)
                  ACE_TEXT("(%P|%t) DataLink::schedule_stop() - Already stopped or already scheduled for stop\n")));
     }
   }
+}
+
+void
+DataLink::notify_reactor()
+{
+  // Add ref before handing to the reactor
+  // ref removed in handle_exception or in handle_timeout
+  // based on stopping now or delayed
+  _add_ref();
+  TransportReactorTask_rch reactor(impl_->reactor_task());
+  reactor->get_reactor()->notify(this);
 }
 
 void
@@ -456,8 +463,7 @@ DataLink::cancel_release()
     }
     this->set_scheduling_release(false);
     this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
-    TransportReactorTask_rch reactor(this->impl_->reactor_task());
-    reactor->get_reactor()->notify(this);
+    notify_reactor();
   }
   return true;
 }

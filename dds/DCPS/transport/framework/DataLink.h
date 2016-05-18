@@ -87,7 +87,7 @@ public:
   //Allows DataLink::stop to be done on the reactor thread so that
   //this thread avoids possibly deadlocking trying to access reactor
   //to stop strategies or schedule timers
-  void schedule_stop(ACE_Time_Value& schedule_to_stop_at);
+  void schedule_stop(const ACE_Time_Value& schedule_to_stop_at);
   /// The stop method is used to stop the DataLink prior to shutdown.
   void stop();
 
@@ -327,6 +327,8 @@ private:
                        const RepoId& readerId,
                        const RepoIdSet& incl_excl,
                        ReceiveListenerSet::ConstrainReceiveSet constrain);
+
+  void notify_reactor();
 
   typedef ACE_SYNCH_MUTEX     LockType;
 

@@ -1027,6 +1027,10 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
   PublicationInstance* instance = get_handle_instance(handle);
 
+  if (!instance) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
   ACE_NEW_MALLOC_RETURN(
     element,
     static_cast<DataSampleElement*>(
