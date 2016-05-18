@@ -24,6 +24,7 @@
 
 #include "tao/ORB_Core.h"
 #include "tao/IORTable/IORTable.h"
+#include "tao/BiDir_GIOP/BiDirGIOP.h"
 
 #include <orbsvcs/Shutdown_Utilities.h>
 
@@ -240,12 +241,20 @@ InfoRepo::init()
 
   PortableServer::POAManager_var poa_manager = root_poa->the_POAManager();
 
+  const bool use_bidir = TheServiceParticipant->use_bidir_giop();
+
   // Use persistent and user id POA policies so the Info Repo's
   // object references are consistent.
-  CORBA::PolicyList policies(2);
-  policies.length(2);
+  CORBA::PolicyList policies(2 + use_bidir);
+  policies.length(2 + use_bidir);
   policies[0] = root_poa->create_id_assignment_policy(PortableServer::USER_ID);
   policies[1] = root_poa->create_lifespan_policy(PortableServer::PERSISTENT);
+  if (use_bidir) {
+    CORBA::Any policy;
+    policy <<= BiDirPolicy::BOTH;
+    policies[2] =
+      orb_->create_policy(BiDirPolicy::BIDIRECTIONAL_POLICY_TYPE, policy);
+  }
   PortableServer::POA_var info_poa = root_poa->create_POA("InfoRepo",
                                                           poa_manager,
                                                           policies);

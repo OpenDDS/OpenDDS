@@ -16,6 +16,7 @@
 #include "dds/DCPS/ConfigUtils.h"
 
 #include "tao/ORB_Core.h"
+#include "tao/BiDir_GIOP/BiDirGIOP.h"
 #include "ace/Reactor.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
@@ -32,11 +33,51 @@
 #endif
 
 namespace {
+const char ROOT_POA[] = "RootPOA";
+const char BIDIR_POA[] = "BiDirPOA";
+
+struct DestroyPolicy {
+  explicit DestroyPolicy(const CORBA::Policy_ptr& p)
+    : p_(CORBA::Policy::_duplicate(p)) {}
+
+  ~DestroyPolicy() { p_->destroy(); }
+
+  CORBA::Policy_var p_;
+};
+
+PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
+{
+  CORBA::Object_var obj =
+    orb->resolve_initial_references(ROOT_POA);
+  PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj.in());
+
+  if (TheServiceParticipant->use_bidir_giop()) {
+    PortableServer::POAList_var children = root_poa->the_children();
+    for (CORBA::ULong i = 0; i < children->length(); ++i) {
+      if (0 == std::strcmp(CORBA::String_var(children[i]->the_name()).in(),
+                           BIDIR_POA)) {
+        return PortableServer::POA::_duplicate(children[i]);
+      }
+    }
+
+    CORBA::PolicyList policies(1);
+    policies.length(1);
+    CORBA::Any policy;
+    policy <<= BiDirPolicy::BOTH;
+    policies[0] =
+      orb->create_policy(BiDirPolicy::BIDIRECTIONAL_POLICY_TYPE, policy);
+    DestroyPolicy destroy(policies[0]);
+    PortableServer::POAManager_var manager = root_poa->the_POAManager();
+    return root_poa->create_POA(BIDIR_POA, manager, policies);
+  }
+
+  return root_poa._retn();
+}
 
 /// Get a servant pointer given an object reference.
 /// @throws PortableServer::POA::ObjectNotActive
 ///         PortableServer::POA::WrongAdapter
-///         PortableServer::POA::WongPolicy
+///         PortableServer::POA::WrongPolicy
 template <class T_impl, class T_ptr>
 T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
 {
@@ -44,9 +85,7 @@ T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
     return 0;
   }
 
-  CORBA::Object_var obj =
-    orb->resolve_initial_references("RootPOA");
-  PortableServer::POA_var poa = PortableServer::POA::_narrow(obj.in());
+  PortableServer::POA_var poa = get_POA(orb);
 
   T_impl* the_servant =
     dynamic_cast<T_impl*>(poa->reference_to_servant(p));
@@ -64,13 +103,9 @@ T_impl* remote_reference_to_servant(T_ptr p, CORBA::ORB_ptr orb)
 template <class T>
 typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_ptr orb)
 {
-  CORBA::Object_var obj =
-    orb->resolve_initial_references("RootPOA");
-  PortableServer::POA_var poa = PortableServer::POA::_narrow(obj.in());
-
+  PortableServer::POA_var poa = get_POA(orb);
   PortableServer::ObjectId_var oid = poa->activate_object(servant);
-
-  obj = poa->id_to_reference(oid.in());
+  CORBA::Object_var obj = poa->id_to_reference(oid.in());
 
   typename T::_stub_ptr_type the_obj = T::_stub_type::_narrow(obj.in());
   return the_obj;
@@ -79,9 +114,7 @@ typename T::_stub_ptr_type servant_to_remote_reference(T* servant, CORBA::ORB_pt
 template <class T>
 void deactivate_remote_object(T obj, CORBA::ORB_ptr orb)
 {
-  CORBA::Object_var poa_obj =
-    orb->resolve_initial_references("RootPOA");
-  PortableServer::POA_var poa = PortableServer::POA::_narrow(poa_obj.in());
+  PortableServer::POA_var poa = get_POA(orb);
   PortableServer::ObjectId_var oid =
     poa->reference_to_id(obj);
   poa->deactivate_object(oid.in());
@@ -173,7 +206,7 @@ InfoRepoDiscovery::get_dcps_info()
         orb_runner_->activate();
 
         CORBA::Object_var rp =
-          orb_runner_->orb_->resolve_initial_references("RootPOA");
+          orb_runner_->orb_->resolve_initial_references(ROOT_POA);
         PortableServer::POA_var poa = PortableServer::POA::_narrow(rp);
         PortableServer::POAManager_var poa_manager = poa->the_POAManager();
         poa_manager->activate();

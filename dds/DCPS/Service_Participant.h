@@ -193,6 +193,8 @@ public:
                     bool attach_participant = true);
 #endif
 
+  bool use_bidir_giop() const;
+
   /// Rebind a domain from one repository to another.
   void remap_domains(Discovery::RepoKey oldKey,
                      Discovery::RepoKey newKey,
