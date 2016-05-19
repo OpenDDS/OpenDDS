@@ -224,9 +224,23 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 void
 InfoRepo::init()
 {
-  ACE_Argv_Type_Converter cvt(this->federatorConfig_.argc(),
-                              this->federatorConfig_.argv());
-  this->orb_ = CORBA::ORB_init(cvt.get_argc(), cvt.get_ASCII_argv(), "");
+  ACE_ARGV args;
+  args.add(federatorConfig_.argv(), true /*quote arg*/);
+
+  const bool use_bidir = TheServiceParticipant->use_bidir_giop();
+  if (use_bidir) {
+    const ACE_TCHAR* config[] = {
+      ACE_TEXT("-ORBSvcConfDirective"),
+      ACE_TEXT("static Client_Strategy_Factory \"-ORBWaitStrategy rw -ORBTransportMuxStrategy exclusive -ORBConnectStrategy blocked -ORBConnectionHandlerCleanup 1\""),
+      ACE_TEXT("-ORBSvcConfDirective"),
+      ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""),
+      0
+    };
+    args.add((ACE_TCHAR**)config, true /*quote arg*/);
+  }
+
+  int argc = args.argc();
+  orb_ = CORBA::ORB_init(argc, args.argv());
 
   this->info_servant_ =
     new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
@@ -240,8 +254,6 @@ InfoRepo::init()
   PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj);
 
   PortableServer::POAManager_var poa_manager = root_poa->the_POAManager();
-
-  const bool use_bidir = TheServiceParticipant->use_bidir_giop();
 
   // Use persistent and user id POA policies so the Info Repo's
   // object references are consistent.
@@ -279,14 +291,13 @@ InfoRepo::init()
 
   // Initialize the DomainParticipantFactory
   DDS::DomainParticipantFactory_var dpf =
-    TheParticipantFactoryWithArgs(cvt.get_argc(),
-                                  cvt.get_TCHAR_argv());
+    TheParticipantFactoryWithArgs(argc, args.argv());
 
   // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
   // command line options.
 
   // Check the non-ORB arguments.
-  this->parse_args(cvt.get_argc(), cvt.get_TCHAR_argv());
+  this->parse_args(argc, args.argv());
 
   // Activate the POA manager before initialize built-in-topics
   // so invocations can be processed.
