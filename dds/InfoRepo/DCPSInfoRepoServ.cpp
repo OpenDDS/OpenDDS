@@ -24,6 +24,7 @@
 
 #include "tao/ORB_Core.h"
 #include "tao/IORTable/IORTable.h"
+#include "tao/BiDir_GIOP/BiDirGIOP.h"
 
 #include <orbsvcs/Shutdown_Utilities.h>
 
@@ -223,9 +224,33 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 void
 InfoRepo::init()
 {
-  ACE_Argv_Type_Converter cvt(this->federatorConfig_.argc(),
-                              this->federatorConfig_.argv());
-  this->orb_ = CORBA::ORB_init(cvt.get_argc(), cvt.get_ASCII_argv(), "");
+  ACE_ARGV args;
+  args.add(federatorConfig_.argv(), true /*quote arg*/);
+
+  bool use_bidir = true;
+
+  for (int i = 0; i < args.argc() - 1; ++i) {
+    if (0 == ACE_OS::strcmp(args[i], ACE_TEXT("-DCPSBidirGIOP"))) {
+      use_bidir = ACE_OS::atoi(args[i + 1]);
+      break;
+    }
+  }
+
+  if (use_bidir) {
+    const ACE_TCHAR* config[] = {
+      ACE_TEXT("-ORBSvcConfDirective"),
+      ACE_TEXT("static Client_Strategy_Factory \"-ORBWaitStrategy rw ")
+        ACE_TEXT("-ORBTransportMuxStrategy exclusive -ORBConnectStrategy blocked ")
+        ACE_TEXT("-ORBConnectionHandlerCleanup 1\""),
+      ACE_TEXT("-ORBSvcConfDirective"),
+      ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""),
+      0
+    };
+    args.add((ACE_TCHAR**)config, true /*quote arg*/);
+  }
+
+  int argc = args.argc();
+  orb_ = CORBA::ORB_init(argc, args.argv());
 
   this->info_servant_ =
     new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
@@ -242,10 +267,16 @@ InfoRepo::init()
 
   // Use persistent and user id POA policies so the Info Repo's
   // object references are consistent.
-  CORBA::PolicyList policies(2);
-  policies.length(2);
+  CORBA::PolicyList policies(2 + use_bidir);
+  policies.length(2 + use_bidir);
   policies[0] = root_poa->create_id_assignment_policy(PortableServer::USER_ID);
   policies[1] = root_poa->create_lifespan_policy(PortableServer::PERSISTENT);
+  if (use_bidir) {
+    CORBA::Any policy;
+    policy <<= BiDirPolicy::BOTH;
+    policies[2] =
+      orb_->create_policy(BiDirPolicy::BIDIRECTIONAL_POLICY_TYPE, policy);
+  }
   PortableServer::POA_var info_poa = root_poa->create_POA("InfoRepo",
                                                           poa_manager,
                                                           policies);
@@ -270,14 +301,13 @@ InfoRepo::init()
 
   // Initialize the DomainParticipantFactory
   DDS::DomainParticipantFactory_var dpf =
-    TheParticipantFactoryWithArgs(cvt.get_argc(),
-                                  cvt.get_TCHAR_argv());
+    TheParticipantFactoryWithArgs(argc, args.argv());
 
   // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
   // command line options.
 
   // Check the non-ORB arguments.
-  this->parse_args(cvt.get_argc(), cvt.get_TCHAR_argv());
+  this->parse_args(argc, args.argv());
 
   // Activate the POA manager before initialize built-in-topics
   // so invocations can be processed.

@@ -6,6 +6,7 @@ workspace {
   $(TAO_ROOT)/TAO_IDL
   $(TAO_ROOT)/tao/tao.mpc
   $(TAO_ROOT)/tao/AnyTypeCode/AnyTypeCode.mpc
+  $(TAO_ROOT)/tao/BiDir_GIOP/BiDir_GIOP.mpc
   $(TAO_ROOT)/tao/CodecFactory/CodecFactory.mpc
   $(TAO_ROOT)/tao/CSD_Framework/CSD_Framework.mpc
   $(TAO_ROOT)/tao/CSD_ThreadPool/CSD_ThreadPool.mpc

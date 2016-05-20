@@ -346,5 +346,12 @@ Service_Participant::default_address() const
   return this->default_address_;
 }
 
+ACE_INLINE
+bool
+Service_Participant::use_bidir_giop() const
+{
+  return bidir_giop_;
+}
+
 } // namespace DDS
 } // namespace OpenDDS

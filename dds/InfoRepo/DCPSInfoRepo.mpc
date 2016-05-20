@@ -35,7 +35,7 @@ project(*Lib): dcpslib, iortable, dcps_inforepodiscovery, DCPSInfoRepo_bits, imr
 }
 
 
-project(*Serv): dcpslib, dcps_inforepodiscovery, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install_lib {
+project(*Serv): dcpslib, dcps_inforepodiscovery, iortable, bidir_giop, DCPSInfoRepo_bits, imr_client, svc_utils, install_lib {
   sharedname = OpenDDS_InfoRepoServ
   dynamicflags = OPENDDS_DCPSINFOREPOSERV_BUILD_DLL
   includes  += $(DDS_ROOT)
@@ -121,7 +121,7 @@ project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, instal
 }
 
 
-project(*Main): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install {
+project(*Main): dcpsexe, iortable, bidir_giop, DCPSInfoRepo_bits, imr_client, svc_utils, install {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
   requires += no_opendds_safety_profile

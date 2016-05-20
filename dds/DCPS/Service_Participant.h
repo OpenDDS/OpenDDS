@@ -193,6 +193,8 @@ public:
                     bool attach_participant = true);
 #endif
 
+  bool use_bidir_giop() const;
+
   /// Rebind a domain from one repository to another.
   void remap_domains(Discovery::RepoKey oldKey,
                      Discovery::RepoKey newKey,
@@ -586,6 +588,9 @@ private:
   /// Number of seconds to wait on pending samples to be sent
   /// or dropped.
   ACE_Time_Value pending_timeout_;
+
+  /// Enable TAO's Bidirectional GIOP?
+  bool bidir_giop_;
 
   //used to track state of service participant
   bool shut_down_;
