@@ -589,6 +589,9 @@ private:
   /// or dropped.
   ACE_Time_Value pending_timeout_;
 
+  /// Enable TAO's Bidirectional GIOP?
+  bool bidir_giop_;
+
   //used to track state of service participant
   bool shut_down_;
 

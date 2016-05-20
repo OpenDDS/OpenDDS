@@ -109,7 +109,7 @@ $transportDebug = $transport if $transport;
 my $verboseDebug;
 $verboseDebug = "-ORBVerboseLogging 1 " if $verbose;
 
-my $repoOpts = "";
+my $repoOpts = "-DCPSBidirGIOP 0 ";
 $repoOpts .= $verboseDebug if $verboseDebug;
 $repoOpts .= "-DCPSDebugLevel $repoDebug " if $repoDebug;
 $repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;

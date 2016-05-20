@@ -350,7 +350,7 @@ ACE_INLINE
 bool
 Service_Participant::use_bidir_giop() const
 {
-  return true; //TODO
+  return bidir_giop_;
 }
 
 } // namespace DDS

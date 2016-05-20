@@ -227,11 +227,21 @@ InfoRepo::init()
   ACE_ARGV args;
   args.add(federatorConfig_.argv(), true /*quote arg*/);
 
-  const bool use_bidir = TheServiceParticipant->use_bidir_giop();
+  bool use_bidir = true;
+
+  for (int i = 0; i < args.argc() - 1; ++i) {
+    if (0 == ACE_OS::strcmp(args[i], ACE_TEXT("-DCPSBidirGIOP"))) {
+      use_bidir = ACE_OS::atoi(args[i + 1]);
+      break;
+    }
+  }
+
   if (use_bidir) {
     const ACE_TCHAR* config[] = {
       ACE_TEXT("-ORBSvcConfDirective"),
-      ACE_TEXT("static Client_Strategy_Factory \"-ORBWaitStrategy rw -ORBTransportMuxStrategy exclusive -ORBConnectStrategy blocked -ORBConnectionHandlerCleanup 1\""),
+      ACE_TEXT("static Client_Strategy_Factory \"-ORBWaitStrategy rw ")
+        ACE_TEXT("-ORBTransportMuxStrategy exclusive -ORBConnectStrategy blocked ")
+        ACE_TEXT("-ORBConnectionHandlerCleanup 1\""),
       ACE_TEXT("-ORBSvcConfDirective"),
       ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""),
       0

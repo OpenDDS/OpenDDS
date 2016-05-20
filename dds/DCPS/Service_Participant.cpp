@@ -145,6 +145,7 @@ static bool got_default_discovery = false;
 static bool got_log_fname = false;
 static bool got_log_verbose = false;
 static bool got_default_address = false;
+static bool got_bidir_giop = false;
 
 Service_Participant::Service_Participant()
   :
@@ -188,6 +189,7 @@ Service_Participant::Service_Participant()
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
     pending_timeout_(ACE_Time_Value::zero),
+    bidir_giop_(true),
     shut_down_(false)
 {
   initialize();
@@ -521,6 +523,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       this->defaultDiscovery_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       arg_shifter.consume_arg();
       got_default_discovery = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSBidirGIOP"))) != 0) {
+      bidir_giop_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+      got_bidir_giop = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
@@ -1533,6 +1540,17 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultDiscovery"),
         this->defaultDiscovery_);
+    }
+
+    if (got_bidir_giop) {
+      ACE_Configuration::VALUETYPE type;
+      if (cf.find_value(sect, ACE_TEXT("DCPSBidirGIOP"), type) != -1) {
+        ACE_DEBUG((LM_NOTICE,
+          ACE_TEXT("(%P|%t) NOTICE: using DCPSBidirGIOP value ")
+          ACE_TEXT("from command option, overriding config file\n")));
+      }
+    } else {
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBidirGIOP"), bidir_giop_, bool)
     }
 
     ACE_Configuration::VALUETYPE type;
