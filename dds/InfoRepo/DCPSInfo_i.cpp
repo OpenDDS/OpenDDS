@@ -421,7 +421,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
       }
       return OpenDDS::DCPS::GUID_UNKNOWN;
     }
-  
+
     dispatchingPublication = OpenDDS::DCPS::DataWriterRemote::_unchecked_narrow(pubObj);
   }
 
