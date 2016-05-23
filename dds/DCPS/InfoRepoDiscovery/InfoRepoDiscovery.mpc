@@ -1,4 +1,4 @@
-project(OpenDDS*): dcpslib, dcps_tcp, bidir_giop, install {
+project(OpenDDS*): dcpslib, dcps_tcp, install {
   requires += no_opendds_safety_profile
   dynamicflags = OPENDDS_INFOREPODISCOVERY_BUILD_DLL
 
