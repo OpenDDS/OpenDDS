@@ -52,3 +52,6 @@ feature (!no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_SAFETY_PROFILE
   dcps_ts_flags += -DOPENDDS_SAFETY_PROFILE
 }
+
+feature (no_opendds_safety_profile) : bidir_giop {
+}
