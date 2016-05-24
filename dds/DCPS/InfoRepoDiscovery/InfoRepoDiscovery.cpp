@@ -52,6 +52,13 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
   PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj.in());
 
   if (TheServiceParticipant->use_bidir_giop()) {
+#ifdef CORBA_E_COMPACT
+    try {
+      return root_poa->find_POA(BIDIR_POA, false /*activate*/);
+    } catch (const CORBA::Exception&) {
+      // go ahead and create it...
+    }
+#else
     PortableServer::POAList_var children = root_poa->the_children();
     for (CORBA::ULong i = 0; i < children->length(); ++i) {
       if (0 == std::strcmp(CORBA::String_var(children[i]->the_name()).in(),
@@ -59,6 +66,7 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
         return PortableServer::POA::_duplicate(children[i]);
       }
     }
+#endif
 
     CORBA::PolicyList policies(1);
     policies.length(1);
