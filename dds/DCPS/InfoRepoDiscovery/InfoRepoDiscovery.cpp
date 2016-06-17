@@ -53,11 +53,13 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
 
   if (TheServiceParticipant->use_bidir_giop()) {
 #ifdef CORBA_E_COMPACT
-    try {
-      return root_poa->find_POA(BIDIR_POA, false /*activate*/);
-    } catch (const CORBA::Exception&) {
-      // go ahead and create it...
-    }
+    while (true) {
+      try {
+        return root_poa->find_POA(BIDIR_POA, false /*activate*/);
+      } catch (const PortableServer::POA::AdapterNonExistent&) {
+        // go ahead and create it...
+      }
+      try {
 #else
     PortableServer::POAList_var children = root_poa->the_children();
     for (CORBA::ULong i = 0; i < children->length(); ++i) {
@@ -77,6 +79,14 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
     DestroyPolicy destroy(policies[0]);
     PortableServer::POAManager_var manager = root_poa->the_POAManager();
     return root_poa->create_POA(BIDIR_POA, manager, policies);
+
+#ifdef CORBA_E_COMPACT
+      } catch (const PortableServer::POA::AdapterAlreadyExists&) {
+        // another thread created it, try to find it again
+      }
+    }
+#endif
+
   }
 
   return root_poa._retn();
