@@ -26,6 +26,8 @@
 
 #include "tao/debug.h"
 
+#include "ace/Auto_Ptr.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -273,7 +275,7 @@ WriteDataContainer::register_instance(
   DataSample*&                  registered_sample)
 {
   PublicationInstance* instance = 0;
-  auto_ptr<PublicationInstance> safe_instance;
+  std::auto_ptr<PublicationInstance> safe_instance;
 
   if (instance_handle == DDS::HANDLE_NIL) {
     if (max_num_instances_ > 0
