@@ -52,41 +52,36 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
   PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj.in());
 
   if (TheServiceParticipant->use_bidir_giop()) {
-#ifdef CORBA_E_COMPACT
     while (true) {
+#ifdef CORBA_E_COMPACT
       try {
         return root_poa->find_POA(BIDIR_POA, false /*activate*/);
       } catch (const PortableServer::POA::AdapterNonExistent&) {
         // go ahead and create it...
       }
-      try {
 #else
-    PortableServer::POAList_var children = root_poa->the_children();
-    for (CORBA::ULong i = 0; i < children->length(); ++i) {
-      if (0 == std::strcmp(CORBA::String_var(children[i]->the_name()).in(),
-                           BIDIR_POA)) {
-        return PortableServer::POA::_duplicate(children[i]);
+      PortableServer::POAList_var children = root_poa->the_children();
+      for (CORBA::ULong i = 0; i < children->length(); ++i) {
+        if (0 == std::strcmp(CORBA::String_var(children[i]->the_name()).in(),
+                             BIDIR_POA)) {
+          return PortableServer::POA::_duplicate(children[i]);
+        }
       }
-    }
 #endif
-
-    CORBA::PolicyList policies(1);
-    policies.length(1);
-    CORBA::Any policy;
-    policy <<= BiDirPolicy::BOTH;
-    policies[0] =
-      orb->create_policy(BiDirPolicy::BIDIRECTIONAL_POLICY_TYPE, policy);
-    DestroyPolicy destroy(policies[0]);
-    PortableServer::POAManager_var manager = root_poa->the_POAManager();
-    return root_poa->create_POA(BIDIR_POA, manager, policies);
-
-#ifdef CORBA_E_COMPACT
+      CORBA::PolicyList policies(1);
+      policies.length(1);
+      CORBA::Any policy;
+      policy <<= BiDirPolicy::BOTH;
+      policies[0] =
+        orb->create_policy(BiDirPolicy::BIDIRECTIONAL_POLICY_TYPE, policy);
+      DestroyPolicy destroy(policies[0]);
+      PortableServer::POAManager_var manager = root_poa->the_POAManager();
+      try {
+        return root_poa->create_POA(BIDIR_POA, manager, policies);
       } catch (const PortableServer::POA::AdapterAlreadyExists&) {
         // another thread created it, try to find it again
       }
     }
-#endif
-
   }
 
   return root_poa._retn();
