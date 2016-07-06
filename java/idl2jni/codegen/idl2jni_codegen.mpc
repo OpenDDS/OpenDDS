@@ -1,4 +1,4 @@
-project: aceexe, crosscompile, dds_macros {
+project: aceexe, crosscompile, dds_macros, install {
 
   exename   = idl2jni
   exeout    = $(DDS_ROOT)/bin
@@ -21,4 +21,8 @@ project: aceexe, crosscompile, dds_macros {
     idl_stubs: all
   }
 
+  verbatim(gnuace, postinstall) {
+"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/bin"
+"	ln -sf $(INSTALL_PREFIX)/bin/idl2jni $(INSTALL_PREFIX)/share/dds/bin"
+  }
 }
