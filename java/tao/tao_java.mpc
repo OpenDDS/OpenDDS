@@ -1,4 +1,4 @@
-project: taolib, idl2jni {
+project: taolib, idl2jni, install {
   libout        = $(DDS_ROOT)/lib
   idl2jniflags += -SS -Wb,stub_export_include=tao_java_export.h \
                       -Wb,stub_export_macro=tao_java_Export \
@@ -31,5 +31,9 @@ project: taolib, idl2jni {
     $(TAO_ROOT)/tao/ULongLongSeq.pidl
     $(TAO_ROOT)/tao/ULongSeq.pidl
     $(TAO_ROOT)/tao/UShortSeq.pidl
+  }
+
+  verbatim(gnuace, postinstall) {
+"	cp $(DDS_ROOT)/lib/tao_java.jar $(INSTALL_PREFIX)/lib"
   }
 }
