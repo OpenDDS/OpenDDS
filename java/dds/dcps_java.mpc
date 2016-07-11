@@ -110,5 +110,6 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
 
   verbatim(gnuace, postinstall) {
 "	cp $(DDS_ROOT)/lib/OpenDDS_DCPS.jar $(INSTALL_PREFIX)/lib"
+"	rm $(INSTALL_PREFIX)/dds/*.idl && rmdir $(INSTALL_PREFIX)/dds"
   }
 }
