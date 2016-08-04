@@ -70,8 +70,8 @@ sub traverse {
         }
         else {
             $continue = 1;
+        }
     }
-}
 
     return 1;
 }
@@ -346,7 +346,7 @@ if ($capture_info) {
             print "Coverage: combine coverage data\n" if $verbose;
             $status =
                 system("lcov --add-tracefile $dds_output --add-tracefile " .
-                       " $dds_output --output-file $output1");
+                       "$test_output --output-file $output1");
         }
     }
 }
