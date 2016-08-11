@@ -342,7 +342,7 @@ DisjointSequence::validate(const SequenceRange& range)
 void
 DisjointSequence::dump() const
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) DisjointSequence[%X]::dump Ranges of seen "
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DisjointSequence[%X]::dump included ranges of "
                        "SequenceNumbers:\n", this));
   for (RangeSet::const_iterator iter = sequences_.begin();
        iter != sequences_.end(); ++iter) {
