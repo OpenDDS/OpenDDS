@@ -1029,14 +1029,22 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
     sr.first.setValue(gap.gapStart.high, gap.gapStart.low);
     SequenceNumber base;
     base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
-    sr.second = base.previous();
+    SequenceNumber first_received = SequenceNumber::MAX_VALUE;
+    if (!wi->second.recvd_.empty()) {
+      OPENDDS_VECTOR(SequenceRange) missing = wi->second.recvd_.missing_sequence_ranges();
+      if (!missing.empty()) {
+        first_received = missing.front().second;
+      }
+    }
+    sr.second = std::min(first_received, base.previous());
     if (sr.first <= sr.second) {
       if (Transport_debug_level > 5) {
         const GuidConverter conv(src);
         const GuidConverter rdr(rr.first);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::process_gap_i "
-                  "Reader %C received GAP with range [%q, %q] from %C\n",
+                  "Reader %C received GAP with range [%q, %q] (inserting range [%q, %q]) from %C\n",
                   OPENDDS_STRING(rdr).c_str(),
+                  sr.first.getValue(), base.previous().getValue(),
                   sr.first.getValue(), sr.second.getValue(),
                   OPENDDS_STRING(conv).c_str()));
       }
@@ -1725,6 +1733,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       const SequenceNumber& dd_first = ri->second.durable_data_.begin()->first;
       if (!requests.empty() && requests.high() < dd_first) {
         // All nacks were below the start of the durable data.
+          requests.insert(SequenceRange(requests.high(), dd_first.previous()));
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                      "sending durability gaps for all requests: "));
