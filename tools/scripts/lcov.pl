@@ -339,7 +339,7 @@ if ($capture_info) {
         my $test_output = "$run_dir/test.info";
         print "Coverage: collect test coverage data\n" if $verbose;
         $status =
-            system("lcov --capture --gcov-tool $gcov_tool $lcov_base" .
+            system("lcov --capture --gcov-tool $gcov_tool " .
                    "--directory $operating_dir --output-file $test_output " .
                    "--list-full-path --ignore-errors gcov,source --follow");
         if (!$status) {
