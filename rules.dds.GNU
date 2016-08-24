@@ -46,6 +46,8 @@ no_opendds_safety_profile ?= 1
 
 OPENDDS_IDL = $(DDS_ROOT)/bin/opendds_idl
 OPENDDS_IDL_DEP = $(OPENDDS_IDL)
+IDL2JNI = $(DDS_ROOT)/bin/idl2jni
+IDL2JNI_DEP = $(IDL2JNI)
 
 # Turn on symbol versioning. The scheme that we follow is to allow
 # applications dependent on libraries, with same version numbers (major,
