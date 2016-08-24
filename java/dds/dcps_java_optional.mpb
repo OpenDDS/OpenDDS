@@ -35,8 +35,8 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     automatic_in  = 0
     automatic_out = 1
     libpath       = $(ACE_ROOT)/lib
-    command       = $(DDS_ROOT)/bin/opendds_idl
-    dependent = $(DDS_ROOT)/bin/opendds_idl $(DDS_ROOT)/dds/idl/IDLTemplate.txt
+    command       = $(OPENDDS_IDL)
+    dependent = $(OPENDDS_IDL_DEP) $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_java_flags = commandflags
   }
 
