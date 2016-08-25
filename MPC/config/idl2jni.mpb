@@ -1,3 +1,6 @@
+feature(!full_jre) : java {
+  javacflags += -classpath $(DDS_ROOT)/lib/i2jrt_compact.jar
+}
 
 project: taolib_with_idl, portableserver, java, dds_macros {
 

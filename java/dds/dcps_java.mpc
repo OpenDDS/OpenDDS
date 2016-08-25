@@ -64,7 +64,7 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
     DDS/DATAREADER_QOS_DEFAULT.java << DDS/DataReaderQos.java
     DDS/DATAWRITER_QOS_USE_TOPIC_QOS.java << DDS/DataWriterQos.java
     DDS/DATAREADER_QOS_USE_TOPIC_QOS.java << DDS/DataReaderQos.java
-    DDS/WaitSet.java << DDS/_WaitSetInterfTAOPeer.java
+    DDS/WaitSet.java << DDS/_WaitSetInterfTAOPeer.java DDS/ConditionSeqHolder.java
     DDS/GuardCondition.java << DDS/_GuardConditionInterfTAOPeer.java
     OpenDDS/DCPS/transport/TheTransportRegistry.java << DDS/Entity.java
     OpenDDS/DCPS/transport/ConfigurationConflictException.java

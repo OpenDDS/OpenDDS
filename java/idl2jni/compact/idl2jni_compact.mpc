@@ -1,0 +1,18 @@
+project: java, dds_macros, install {
+
+  avoids += full_jre
+
+  libout = $(DDS_ROOT)/lib
+
+  specific {
+    jarname = i2jrt_compact
+  }
+
+  Java_Files {
+    org/omg/CORBA
+  }
+
+  verbatim(gnuace, postinstall) {
+"	cp $(DDS_ROOT)/lib/i2jrt_compact.jar $(INSTALL_PREFIX)/lib"
+  }
+}
