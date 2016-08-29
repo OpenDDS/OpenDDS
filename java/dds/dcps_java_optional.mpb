@@ -2,6 +2,18 @@ feature (!content_subscription): idl2jni {
   idl2jniflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE -DOPENDDS_NO_QUERY_CONDITION -DOPENDDS_NO_CONTENT_FILTERED_TOPIC -DOPENDDS_NO_MULTI_TOPIC
 }
 
+feature (!query_condition): idl2jni {
+  idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION
+}
+
+feature (!content_filtered_topic): idl2jni {
+  idl2jniflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
+}
+
+feature (!multi_topic): idl2jni {
+  idl2jniflags += -DOPENDDS_NO_MULTI_TOPIC
+}
+
 feature (!ownership_profile): idl2jni {
   idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE -DOPENDDS_NO_OWNERSHIP_PROFILE
 }
