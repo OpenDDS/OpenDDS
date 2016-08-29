@@ -275,6 +275,7 @@ sub parse {
   my $stype;
   my $simple;
   my $seq = 0;
+  my $typedef_requires_holder;
 
   ## Keep track of whether or not an interface is local
   my $local;
@@ -315,6 +316,7 @@ sub parse {
           $single = $name;
           $stype = 1 if ($name ne 'native');
           $simple = 1;
+          $typedef_requires_holder = undef;
         }
         elsif ($keyword == 4) {
           ## The interface will be local
@@ -325,6 +327,9 @@ sub parse {
           ## reset this flag so that we know that in a typedef, we have
           ## found the original type part.
           $stype = undef;
+          if (!defined $typedef_requires_holder && $name eq 'sequence') {
+            $typedef_requires_holder = 1;
+          }
         }
       }
       else {
@@ -429,7 +434,7 @@ sub parse {
         $seq++;
 
         ## A sequence typedef is not simple
-        $simple = undef;
+        $simple = undef if $typedef_requires_holder;
       }
       elsif ($c eq '>') {
         ## Keep track of the sequence type closing
