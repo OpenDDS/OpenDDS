@@ -745,6 +745,19 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set unicast local address");
   }
 
+  if (!outer_->disco_->sedp_local_address().empty()) {
+    const OPENDDS_STRING& local = outer_->disco_->sedp_local_address();
+    const size_t len = local.find(':');
+    const size_t last = (len == std::string::npos) ? local.size() : len;
+    if (0 != local_addr.set_address(local.c_str(), static_cast<int>(last))) {
+      ACE_DEBUG((LM_ERROR,
+                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket()")
+                 ACE_TEXT(" - failed setting unicast local_addr to %C\n"),
+                 local.c_str()));
+      throw std::runtime_error("failed to set unicast local address string");
+    }
+  }
+
   if (!OpenDDS::DCPS::open_appropriate_socket_type(unicast_socket_, local_addr)) {
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((
