@@ -16,7 +16,7 @@ project {
     automatic            = 1
     inputext             = .java
     command              = perl
-    commandflags         = $(DDS_ROOT)/java/build_scripts/javac_wrapper.pl -sourcepath . -d classes -classpath .
+    commandflags         = $(DDS_ROOT)/java/build_scripts/javac_wrapper.pl -sourcepath . -d classes -classpath . -implicit:none
     generic_outputext    = .class
     generic_pre_dirname  = classes/
     keyword javacflags   = commandflags
