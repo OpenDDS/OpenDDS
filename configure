@@ -56,6 +56,15 @@ my %platforminfo =
                'libpath' => 'LD_LIBRARY_PATH',
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
+   'linux-cross' => {
+                     'libpath' => 'LD_LIBRARY_PATH',
+                     'aceplatform' => 'linux',
+                     'aceconfig' => 'linux',
+                     'no_host' => 1,
+                     'usage' => ['Use --target-compiler to specify the ' .
+                                 'cross-compiler binary',
+                                ],
+                    },
    'freebsd' => {
 		 'compilers' => ['clang++'],
 		 'libpath' => 'LD_LIBRARY_PATH',
@@ -65,12 +74,33 @@ my %platforminfo =
                     'no_host' => 1,
                     'aceplatform' => 'lynxos',
                     'compiler_root_env' => 'ENV_PREFIX',
+                    'usage' => ['Set up the cross-compile using '.
+                                'the script from LynxOS',
+                               ],
                    },
    'vxworks' => {
                  'libpath' => 'LD_LIBRARY_PATH',
                  'no_host' => 1,
+                 'usage' => ['Use the wrenv script before running configure',
+                             'Specify the VSB with --macros=VSB_DIR=<dir>',
+                            ],
                 },
   );
+
+sub targetUsage {
+  print "Cross-compile targets: specify --target=TGT where TGT is one of:\n";
+  for my $k (sort keys %platforminfo) {
+    if ($platforminfo{$k}->{'no_host'}) {
+      print "\t$k\n";
+      if ($platforminfo{$k}->{'usage'}) {
+        for my $line (@{$platforminfo{$k}->{'usage'}}) {
+          print "\t\t$line\n";
+        }
+      }
+    }
+  }
+  exit 1;
+}
 
 ## arg processing and usage
 
@@ -80,13 +110,15 @@ my @specs = # Array of array-refs, each inner array is an option group which
   (
    ['Options controlling the configure script:',
     'help|h|?', 'Show this help and exit',
+    'target-help', 'Show details of cross-compile target configs',
     'verbose|v', 'Trace script execution',
     'dry-run|n', 'Don\'t do anything',
    ],
    ['Build platform and compiler:',
     'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
-    'target=s', 'Cross-compile target (none)',
+    'target=s', 'Cross-compile target (none): see --target-help',
+    'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
     'prefix=s', 'Installation prefix (none)',
    ],
    ['Build flags:',
@@ -113,6 +145,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark (use WIRESHARK_SRC)',
     'glib:s', 'GLib for wireshark (use GLIB_ROOT or system pkg)',
+    'rapidjson', 'RapidJSON for wireshark itl (optional)',
     'qt:s', 'Qt (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
@@ -179,7 +212,8 @@ EOT
             $optkey .= '[=VAL]' if $opt =~ /:s/;
             $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
             $optkey .= '...' if $opt =~ /s\@$/;
-            print "--$optkey" . ' ' x (27 - length $optkey) . " $descr\n";
+            my $pad = 27 - length $optkey;
+            print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
           }
          );
   exit 1;
@@ -201,6 +235,7 @@ sub parseArgs {
   my $opts = {};
   GetOptions($opts, @getopts) or usage();
   usage() if $opts->{'help'};
+  targetUsage() if $opts->{'target-help'};
 
   if ($opts->{'verbose'}) {
     print "Options:\n";
@@ -354,9 +389,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
-    # Must also match international version, like
-    # Microsoft (R) 32-Bit C/C++-Optimierungscompiler Version 16.00.40219.01 für 80x86
-    if (/[Cc]ompiler Version (\d+)\./) {
+    if (/compiler version (\d+)\./i) { # match i18n version strings
       if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$1}) {
         die "Unknown or unsupported Visual C++ compiler version: $1\nStopped";
       }
@@ -625,7 +658,7 @@ sub dump_and_unlink { # removes temp files created by dry-run
 
 sub write_config_h {
   my %buildEnv = %{shift()};
-  my $pi = $platforminfo{$buildEnv{'build'}};
+  my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
   $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
@@ -642,8 +675,7 @@ sub write_config_h {
   $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
   print $CFGH "#include \"ace/config-$cfg.h\"\n";
   if (defined $opts{'no-opendds-safety-profile'}) {
-    print $CFGH "#define ACE_FACE_SAFETY_" . 
-                uc($opts{'safety-profile'}) . "\n";
+    print $CFGH "#define ACE_FACE_SAFETY_" . uc($opts{'safety-profile'}) . "\n";
     if ($opts{'safety-profile'} eq 'extended') {
       print $CFGH "#ifndef ACE_HAS_ALLOC_HOOKS\n";
       print $CFGH "#  define ACE_HAS_ALLOC_HOOKS\n";
@@ -660,20 +692,26 @@ my $wrote_df = 0;
 
 sub write_default_features {
   my %buildEnv = %{shift()};
+  my @feat;
   if ($buildEnv{'build'} eq 'target') {
-    if ($opts{'ipv6'} || $opts{'features'}) {
-      my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
-                               "/config/default.features");
-      $wrote_df = 1;
-      print $DF "ipv6=1\n" if $opts{'ipv6'};
-      for my $f (@{$opts{'features'}}) {
-        print $DF "$f\n";
-      }
-      $DF->close;
-      print "Wrote $buildEnv{'ACE_ROOT'}/.../default.features\n"
-        if $opts{'verbose'};
-      dump_and_unlink($DF) if $opts{'dry-run'};
+    push(@feat, 'ipv6=1') if $opts{'ipv6'};
+    push(@feat, @{$opts{'features'}}) if $opts{'features'};
+  }
+  elsif ($opts{'java'}) {
+    push(@feat, 'java=1');
+  }
+
+  if (@feat) {
+    my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
+                             "/config/default.features");
+    $wrote_df = 1;
+    for my $f (@feat) {
+      print $DF "$f\n";
     }
+    $DF->close;
+    print "Wrote $buildEnv{'ACE_ROOT'}/.../default.features\n"
+      if $opts{'verbose'};
+    dump_and_unlink($DF) if $opts{'dry-run'};
   }
 }
 
@@ -696,10 +734,24 @@ sub write_platform_macros {
       if ($cross_compile) {
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
         print $PMG 'TAO_IDL_DEP = $(TAO_IDL)', "\n";
+        print $PMG 'TAO_IDL_PREPROCESSOR = ', $opts{'compiler'}, "\n";
+        print $PMG 'TAO_IDLFLAGS += -g $(HOST_ACE)/bin/ace_gperf', "\n";
+        print $PMG 'build_tao_idl_be = 0', "\n";
+        if ($opts{'target-compiler'}) {
+          my $tcomp = $opts{'target-compiler'};
+          if ($tcomp =~ s/-g([c+])\1$/-/) {
+            print $PMG 'CROSS_COMPILE = ', $tcomp, "\n";
+          }
+          else {
+            $opts{'nonstdcompiler'} = $tcomp;
+            print $PMG 'LDFLAGS += -Wl,-rpath-link,$(ACE_ROOT)/lib', "\n";
+          }
+        }
       }
     }
     if ($buildEnv{'build'} eq 'host') {
       print $PMG "static_libs_only = 1\n";
+      print $PMG "java = 1\n" if $opts{'java'};
     }
     if ($opts{'prefix'}) {
       print $PMG "INSTALL_PREFIX=" . $opts{'prefix'} . "\n";
@@ -734,6 +786,7 @@ my %optdep =
    'ant' =>       ['ANT_HOME',      'bin/ant'],
    'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',             'wireshark'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
+   'rapidjson' => [undef,           undef,                       'no_itl=0'],
    'qt' =>        ['QTDIR',         '',                          'qt4'],
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp', 'boost'],
   );
@@ -753,7 +806,7 @@ my %use_win_default = ('boost' => 'c:\\Boost');
 
 for my $key (keys %optdep) {
   if (exists $opts{$key} && $opts{$key} eq '') {
-    if ($ENV{$optdep{$key}->[0]}) {
+    if (defined $optdep{$key}->[0] && $ENV{$optdep{$key}->[0]}) {
       $opts{$key} = $ENV{$optdep{$key}->[0]};
     }
     elsif ($slash eq '/' && exists $use_system_pkg{$key}) {
@@ -764,7 +817,7 @@ for my $key (keys %optdep) {
       $opts{$key} = $use_win_default{$key};
       print "Defaulting $key to $use_win_default{$key}\n" if $opts{'verbose'};
     }
-    else {
+    elsif (defined $optdep{$key}->[0]) {
       die "ERROR: --$key requires a value\n";
     }
   }
@@ -809,7 +862,7 @@ for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
     my ($e, $s, $m) = @{$optdep{$key}};
-    env_from_opt($key, $e);
+    env_from_opt($key, $e) if defined $e;
     if ($s && !-r $targetEnv{$e} . '/' . $s) {
       die "Can't find $key at $targetEnv{$e} (using $s)\n";
     }
@@ -892,7 +945,8 @@ workspace {
   $(ACE_ROOT)/ace/ace.mpc
   $(ACE_ROOT)/apps/gperf/src
   $(TAO_ROOT)/TAO_IDL
-  dds/idl/opendds_idl.mpc
+  dds/idl
+  java/idl2jni/codegen
 EOT
   print $MWC "  \$(TAO_ROOT)/tao/tao.mpc\n" if $opts{'safety-profile'};
   print $MWC "}\n";
@@ -963,6 +1017,8 @@ sub generate_workspace {
         print $UM <<'EOT';
 OPENDDS_IDL = $(HOST_DDS)/bin/opendds_idl
 OPENDDS_IDL_DEP = $(OPENDDS_IDL)
+IDL2JNI = $(HOST_DDS)/bin/idl2jni
+IDL2JNI_DEP = $(IDL2JNI)
 CROSS-COMPILE = 1
 EOT
       }
@@ -985,21 +1041,24 @@ EOT
   locate_mpc($ace_src);
 
   # Append to default.features
-  if (@features && ($buildEnv->{'build'} eq 'target')) {
-    my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
-      "/default.features";
-    my $DF = $wrote_df
-      ? ($opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file"))
-      : backup_and_open($df_file);
-    for my $f (@features) {
-      print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
+  if ($buildEnv->{'build'} eq 'target') {
+    push(@features, 'cross_compile') if $cross_compile;
+    if (@features) {
+      my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
+        "/default.features";
+      my $DF = $wrote_df
+        ? ($opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file"))
+        : backup_and_open($df_file);
+      for my $f (@features) {
+        print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
+      }
+      $DF->close;
+      if ($opts{'verbose'}) {
+        print '' . ($wrote_df ? 'Appended to' : 'Wrote') .
+          " $buildEnv->{'ACE_ROOT'}/.../default.features\n";
+      }
+      dump_and_unlink($DF) if $opts{'dry-run'};
     }
-    $DF->close;
-    if ($opts{'verbose'}) {
-      print '' . ($wrote_df ? 'Appended to' : 'Wrote') .
-        " $buildEnv->{'ACE_ROOT'}/.../default.features\n";
-    }
-    dump_and_unlink($DF) if $opts{'dry-run'};
   }
 
   my $ws = 'DDS.mwc';
