@@ -97,12 +97,15 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       AddrVec spdp_send_addrs;
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
       OPENDDS_STRING mi, sla;
-      // spdpaddr defaults to DCPSDefaultAddress if set
-      OPENDDS_STRING spdpaddr = TheServiceParticipant->default_address().empty() ?
-              "0.0.0.0" : TheServiceParticipant->default_address().c_str();
+      OPENDDS_STRING spdpaddr;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
         has_ttl = false, sm = false;
+
+      // spdpaddr defaults to DCPSDefaultAddress if set
+      if (!TheServiceParticipant->default_address().empty()) {
+        spdpaddr = TheServiceParticipant->default_address().c_str();
+      }
 
       DCPS::ValueMap values;
       DCPS::pullValues(cf, it->second, values);
