@@ -736,7 +736,8 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                            (outer_->disco_->pg() * participant_id);
 
   ACE_INET_Addr local_addr;
-  if (0 != local_addr.set(uni_port)) {
+
+  if (0 != local_addr.set(uni_port, outer_->disco_->spdp_local_address().c_str())) {
     ACE_DEBUG((
           LM_ERROR,
           ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
