@@ -24,7 +24,7 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
 
   Idl2Jni_Files {
     $(DDS_ROOT)/dds/DdsDcpsCore.idl
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl
+    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl << DdsDcpsConditionSeqJC.h
     $(DDS_ROOT)/dds/DdsDcpsDomain.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionJC.h DdsDcpsPublicationJC.h
     $(DDS_ROOT)/dds/DdsDcpsTypeSupportExt.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionExtJC.h DdsDcpsPublicationJC.h DdsDcpsDomainJC.h
     $(DDS_ROOT)/dds/DdsDcpsGuid.idl
@@ -87,25 +87,25 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
   JavaH_Files {
     commandflags += -classpath ../../lib/i2jrt.jar
 
-    classes/OpenDDS/DCPS/TheParticipantFactory.class
-    classes/OpenDDS/DCPS/TheServiceParticipant.class
-    classes/DDS/PARTICIPANT_QOS_DEFAULT.class
-    classes/DDS/TOPIC_QOS_DEFAULT.class
-    classes/DDS/PUBLISHER_QOS_DEFAULT.class
-    classes/DDS/DATAWRITER_QOS_DEFAULT.class
-    classes/DDS/SUBSCRIBER_QOS_DEFAULT.class
-    classes/DDS/DATAREADER_QOS_DEFAULT.class
-    classes/DDS/DATAWRITER_QOS_USE_TOPIC_QOS.class
-    classes/DDS/DATAREADER_QOS_USE_TOPIC_QOS.class
-    classes/DDS/WaitSet.class
-    classes/DDS/GuardCondition.class
-    classes/OpenDDS/DCPS/transport/TheTransportRegistry.class
-    classes/OpenDDS/DCPS/transport/TcpInst.class
-    classes/OpenDDS/DCPS/transport/UdpInst.class
-    classes/OpenDDS/DCPS/transport/MulticastInst.class
-    classes/OpenDDS/DCPS/transport/RtpsUdpInst.class
+    classes/OpenDDS/DCPS/TheParticipantFactory.class << classes/DDS/DomainParticipantFactory.class
+    classes/OpenDDS/DCPS/TheServiceParticipant.class << classes/DDS/DomainParticipant.class classes/DDS/DomainParticipantOperations.class
+    classes/DDS/PARTICIPANT_QOS_DEFAULT.class << classes/DDS/DomainParticipantQoS.class
+    classes/DDS/TOPIC_QOS_DEFAULT.class << classes/DDS/TopicQoS.class
+    classes/DDS/PUBLISHER_QOS_DEFAULT.class << classes/DDS/PublisherQoS.class
+    classes/DDS/DATAWRITER_QOS_DEFAULT.class << classes/DDS/DataWriterQoS.class
+    classes/DDS/SUBSCRIBER_QOS_DEFAULT.class << classes/DDS/SubscriberQoS.class
+    classes/DDS/DATAREADER_QOS_DEFAULT.class << classes/DDS/DataReaderQoS.class
+    classes/DDS/DATAWRITER_QOS_USE_TOPIC_QOS.class << classes/DDS/DataWriterQoS.class
+    classes/DDS/DATAREADER_QOS_USE_TOPIC_QOS.class << classes/DDS/DataReaderQoS.class
+    classes/DDS/WaitSet.class << classes/DDS/_WaitSetInterfTAOPeer.class
+    classes/DDS/GuardCondition.class << classes/DDS/_GuardConditionInterfTAOPeer.class
+    classes/OpenDDS/DCPS/transport/TheTransportRegistry.class << classes/OpenDDS/DCPS/transport/TransportConfig.class classes/OpenDDS/DCPS/transport/TransportInst.class classes/DDS/Entity.class classes/DDS/EntityOperations.class
+    classes/OpenDDS/DCPS/transport/TcpInst.class << classes/OpenDDS/DCPS/transport/TransportInst.class
+    classes/OpenDDS/DCPS/transport/UdpInst.class << classes/OpenDDS/DCPS/transport/TransportInst.class
+    classes/OpenDDS/DCPS/transport/MulticastInst.class << classes/OpenDDS/DCPS/transport/TransportInst.class
+    classes/OpenDDS/DCPS/transport/RtpsUdpInst.class << classes/OpenDDS/DCPS/transport/TransportInst.class
     classes/OpenDDS/DCPS/transport/TransportInst.class
-    classes/OpenDDS/DCPS/transport/TransportConfig.class
+    classes/OpenDDS/DCPS/transport/TransportConfig.class << classes/OpenDDS/DCPS/transport/TransportInst.class
   }
 
   verbatim(gnuace, postinstall) {
