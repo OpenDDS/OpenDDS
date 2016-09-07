@@ -89,14 +89,14 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
 
     classes/OpenDDS/DCPS/TheParticipantFactory.class << classes/DDS/DomainParticipantFactory.class
     classes/OpenDDS/DCPS/TheServiceParticipant.class << classes/DDS/DomainParticipant.class classes/DDS/DomainParticipantOperations.class
-    classes/DDS/PARTICIPANT_QOS_DEFAULT.class << classes/DDS/DomainParticipantQoS.class
-    classes/DDS/TOPIC_QOS_DEFAULT.class << classes/DDS/TopicQoS.class
-    classes/DDS/PUBLISHER_QOS_DEFAULT.class << classes/DDS/PublisherQoS.class
-    classes/DDS/DATAWRITER_QOS_DEFAULT.class << classes/DDS/DataWriterQoS.class
-    classes/DDS/SUBSCRIBER_QOS_DEFAULT.class << classes/DDS/SubscriberQoS.class
-    classes/DDS/DATAREADER_QOS_DEFAULT.class << classes/DDS/DataReaderQoS.class
-    classes/DDS/DATAWRITER_QOS_USE_TOPIC_QOS.class << classes/DDS/DataWriterQoS.class
-    classes/DDS/DATAREADER_QOS_USE_TOPIC_QOS.class << classes/DDS/DataReaderQoS.class
+    classes/DDS/PARTICIPANT_QOS_DEFAULT.class << classes/DDS/DomainParticipantQos.class
+    classes/DDS/TOPIC_QOS_DEFAULT.class << classes/DDS/TopicQos.class
+    classes/DDS/PUBLISHER_QOS_DEFAULT.class << classes/DDS/PublisherQos.class
+    classes/DDS/DATAWRITER_QOS_DEFAULT.class << classes/DDS/DataWriterQos.class
+    classes/DDS/SUBSCRIBER_QOS_DEFAULT.class << classes/DDS/SubscriberQos.class
+    classes/DDS/DATAREADER_QOS_DEFAULT.class << classes/DDS/DataReaderQos.class
+    classes/DDS/DATAWRITER_QOS_USE_TOPIC_QOS.class << classes/DDS/DataWriterQos.class
+    classes/DDS/DATAREADER_QOS_USE_TOPIC_QOS.class << classes/DDS/DataReaderQos.class
     classes/DDS/WaitSet.class << classes/DDS/_WaitSetInterfTAOPeer.class
     classes/DDS/GuardCondition.class << classes/DDS/_GuardConditionInterfTAOPeer.class
     classes/OpenDDS/DCPS/transport/TheTransportRegistry.class << classes/OpenDDS/DCPS/transport/TransportConfig.class classes/OpenDDS/DCPS/transport/TransportInst.class classes/DDS/Entity.class classes/DDS/EntityOperations.class
