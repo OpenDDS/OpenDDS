@@ -736,9 +736,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                            (outer_->disco_->pg() * participant_id);
 
   ACE_INET_Addr local_addr;
-  OPENDDS_STRING spdpaddr;
+  OPENDDS_STRING spdpaddr = outer_->disco_->spdp_local_address().c_str();
  
-  if (outer_->disco_->spdp_local_address().empty()) {
+  if (spdpaddr.empty()) {
     spdpaddr = "0.0.0.0";
   }
 
