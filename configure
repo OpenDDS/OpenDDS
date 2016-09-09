@@ -31,6 +31,11 @@ sub perlOS_to_host {
   return $^O;
 }
 
+sub perlOS_to_java_platform {
+    return 'win32' if $^O eq 'MSWin32';
+    return $^O;    
+}
+
 my %platforminfo =
   ('win32' => {
                'compilers' => ['cl'],
@@ -45,7 +50,6 @@ my %platforminfo =
                 'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
                                8 => 'mountainlion', 9 => 'mavericks',
                                10 => 'yosemite', 11 => 'elcapitan'},
-                'java_platform' => 'darwin',
                },
    'solaris' => {
                  'compilers' => ['CC', 'g++'],
@@ -797,9 +801,7 @@ if (exists $opts{'java'}) {
   if ($opts{'static'}) {
     die "ERROR: --static can't be used with --java\n";
   }
-  my $host = $opts{'host'};
-  my $java_platform = exists $platforminfo{$host}->{'java_platform'} ? $platforminfo{$host}->{'java_platform'} : $host;
-  setEnv('JAVA_PLATFORM', $java_platform);
+  setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
 }
 
 $opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
@@ -808,10 +810,34 @@ $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost/;
 my %use_win_default = ('boost' => 'c:\\Boost');
 
+
+sub default_java_home {
+  my $host = $opts{'host'};
+  my $result = '';
+  if ($host eq 'macosx') {
+     $result = `/usr/libexec/java_home`;
+  }
+  elsif ($host ne 'win32') {
+     $result = `readlink -f /usr/bin/javac | sed "s:/bin/javac::"`;
+  }
+  
+  chomp $result;
+  return $result;
+}
+
 for my $key (keys %optdep) {
   if (exists $opts{$key} && $opts{$key} eq '') {
     if (defined $optdep{$key}->[0] && $ENV{$optdep{$key}->[0]}) {
       $opts{$key} = $ENV{$optdep{$key}->[0]};
+      
+      if ($key eq 'java') {
+        ## when the environmental variable JAVA_HOME is set to a JRE location, 
+        ## try to resolve JAVA_HOME based on the location of javac
+        my $java_home = default_java_home();
+        if (!-r $targetEnv{$optdep{$key}->[1]} . '/' . $optdep{$key}->[2] and $java_home ne '') {
+          $opts{'java'} = $java_home;
+        }
+      }
     }
     elsif ($slash eq '/' && exists $use_system_pkg{$key}) {
       $opts{$key} = '/usr';
@@ -821,11 +847,20 @@ for my $key (keys %optdep) {
       $opts{$key} = $use_win_default{$key};
       print "Defaulting $key to $use_win_default{$key}\n" if $opts{'verbose'};
     }
+    elsif ($key eq 'java') {
+        
+      $opts{'java'} = default_java_home();
+  
+      if ($opts{'java'} eq '') {
+          die "ERROR: --$key requires a value\n";
+      }
+    }
     elsif (defined $optdep{$key}->[0]) {
       die "ERROR: --$key requires a value\n";
     }
   }
 }
+
 
 sub env_from_opt {
   my $key = shift;

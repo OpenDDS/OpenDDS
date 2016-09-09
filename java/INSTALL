@@ -109,24 +109,17 @@ general overview of OpenDDS.
      The top level of the OpenDDS distribution is a directory that contains
      the subdirectory named dds.
      
-     
-  3. Find the full path to JDK
-  
-     Linix    => export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
-     Mac OS X => export JAVA_HOME=$(/usr/libexec/java_home)
-
-  4. Configure and build OpenDDS 
+  3. Configure and build OpenDDS 
 
      Build as in $DDS_ROOT/install, but add --java option
 
      Unix => cd $DDS_ROOT
-             export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
-             ./configure --java=$JVA_HOME
+             ./configure --java
              make       
      Windows => configure --java=<full path to the JDK>
        
 
-  5. Run a test Java application to verify the build
+  4. Run a test Java application to verify the build
 
      Note: first set environment via the setenv script.
 
