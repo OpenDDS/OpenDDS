@@ -8,7 +8,7 @@ general overview of OpenDDS.
 ======================================================================
 * Prerequisites
 
-  - JDK (Java Development Kit) for Java SE 5 or 6
+  - JDK (Java Development Kit) for Java SE 5 through 8
 
     <http://java.sun.com/javase/downloads>
     Sun distributes the JDK for Windows, Linux, and Solaris.  OpenDDS supports
@@ -50,10 +50,15 @@ general overview of OpenDDS.
     - Sun Studio 12 (SunCC 5.9) Earlier versions are known to have problems
       with some of the code in the OpenDDS Java bindings.
 
-    On Linux, Mac OS X, and Solaris, GNU make is also required.  It will almost
-    certainly be installed by default on Linux and Mac OS X (if not use your
+    On Linux and Solaris, GNU make is also required.  It will almost
+    certainly be installed by default on Linux (if not use your
     platform's package management system).  On Solaris be sure that you are
     using GNU make, which may be invoked as "gmake".
+    
+    On OS X El Capitan, Yosemite, Mavericks onward, the required build tools 
+    can be installed by typing the following command from termial.
+       
+       xcode-select --install 
 
   - Perl v5.8 or later
 
@@ -103,18 +108,25 @@ general overview of OpenDDS.
      use paths with no spaces (true on Unix too but spaces are rarely seen).
      The top level of the OpenDDS distribution is a directory that contains
      the subdirectory named dds.
+     
+     
+  3. Find the full path to JDK
+  
+     Linix    => export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+     Mac OS X => export JAVA_HOME=$(/usr/libexec/java_home)
 
-  3. Configure and build OpenDDS 
+  4. Configure and build OpenDDS 
 
      Build as in $DDS_ROOT/install, but add --java option
 
-     Unix =>
-       ./configure --java=<full path to the JDK>
-     Windows => 
-       configure --java=<full path to the JDK>
+     Unix => cd $DDS_ROOT
+             export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
+             ./configure --java=$JVA_HOME
+             make       
+     Windows => configure --java=<full path to the JDK>
+       
 
-
-  4. Run a test Java application to verify the build
+  5. Run a test Java application to verify the build
 
      Note: first set environment via the setenv script.
 
