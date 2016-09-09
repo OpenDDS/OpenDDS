@@ -1,3 +1,4 @@
+#! /usr/bin/perl
 # -*- CPerl -*-
 eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
@@ -43,7 +44,8 @@ my %platforminfo =
                 'libpath' => 'DYLD_LIBRARY_PATH',
                 'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
                                8 => 'mountainlion', 9 => 'mavericks',
-                               10 => 'yosemite'},
+                               10 => 'yosemite', 11 => 'elcapitan'},
+                'java_platform' => 'darwin',
                },
    'solaris' => {
                  'compilers' => ['CC', 'g++'],
@@ -795,7 +797,9 @@ if (exists $opts{'java'}) {
   if ($opts{'static'}) {
     die "ERROR: --static can't be used with --java\n";
   }
-  setEnv('JAVA_PLATFORM', $opts{'host'});
+  my $host = $opts{'host'};
+  my $java_platform = exists $platforminfo{$host}->{'java_platform'} ? $platforminfo{$host}->{'java_platform'} : $host;
+  setEnv('JAVA_PLATFORM', $java_platform);
 }
 
 $opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
