@@ -863,7 +863,7 @@ void write_native_unarrow(const char *cxx, const char *javaInterf)
 //add in "_var" if it's not already there
 string varify(const string &str)
 {
-  if (str.size() > 4 && str.substr(str.size() - 4) != "_var") {
+  if (str.size() <= 4 || str.substr(str.size() - 4) != "_var") {
     return str + "_var";
   }
 
