@@ -815,10 +815,10 @@ sub default_java_home {
   my $host = $opts{'host'};
   my $result = '';
   if ($host eq 'macosx') {
-     $result = `/usr/libexec/java_home`;
+    $result = `/usr/libexec/java_home`;
   }
-  elsif ($host ne 'win32') {
-     $result = `readlink -f /usr/bin/javac | sed "s:/bin/javac::"`;
+  elsif ($host ne 'win32') {    
+    $result = `readlink -f \$(which javac) | sed "s:/bin/javac::"`;
   }
   
   chomp $result;
@@ -834,7 +834,8 @@ for my $key (keys %optdep) {
         ## when the environmental variable JAVA_HOME is set to a JRE location, 
         ## try to resolve JAVA_HOME based on the location of javac
         my $java_home = default_java_home();
-        if (!-r $targetEnv{$optdep{$key}->[1]} . '/' . $optdep{$key}->[2] and $java_home ne '') {
+        my $jre_h_path = $opts{$key} . '/' . $optdep{'java'}->[1];
+        if (!-r $jre_h_path and $java_home ne '') {
           $opts{'java'} = $java_home;
         }
       }
