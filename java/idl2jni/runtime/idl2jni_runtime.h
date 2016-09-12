@@ -89,7 +89,7 @@ void copyToCxx(JNIEnv *jni,
 template <typename Traits>
 void copyToJava(JNIEnv *jni, jobject &target,
   const TAO::details::object_reference_const_sequence_element<Traits> &source,
-  bool createNewObject = false)
+  bool /* createNewObject = false */)
 {
   typename Traits::object_type_var var = Traits::duplicate(source);
   copyToJava(jni, target, var);
