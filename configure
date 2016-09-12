@@ -316,15 +316,7 @@ if (!exists $platforminfo{$opts{'host'}} ||
   die "ERROR: unknown host $opts{'host'}, stopped";
 }
 print "host system is: $opts{'host'}\n" if $opts{'verbose'};
-if ($opts{'host'} eq 'macosx') {
-  my $vers = `sw_vers -productVersion`;
-  $vers =~ /10\.(\d+)\.?/;
-  if (!exists $platforminfo{'macosx'}->{'versions'}->{$1}) {
-    die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
-  }
-  $opts{'host_version'} = $platforminfo{'macosx'}->{'versions'}->{$1};
-  print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
-}
+
 
 $opts{'target'} = $opts{'host'} unless $opts{'target'};
 
@@ -1202,6 +1194,22 @@ sub configure_build {
   if (-r "$buildEnvRef->{ACE_ROOT}/ace/config.h") {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   } else {
+    
+    if ($opts{'host'} eq 'macosx') {
+      if (-r "$buildEnvRef->{ACE_ROOT}/ace/config-macosx-all.h" and 
+          -r "$buildEnvRef->{ACE_ROOT}/include/makeinclude/platform_macosx_all.GNU") {
+        $opts{'host_version'} = 'all' 
+      } else {
+        my $vers = `sw_vers -productVersion`;
+        $vers =~ /10\.(\d+)\.?/;
+        if (!exists $platforminfo{'macosx'}->{'versions'}->{$1}) {
+          die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
+        }
+        $opts{'host_version'} = $platforminfo{'macosx'}->{'versions'}->{$1};
+        print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
+      }
+    }
+      
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
