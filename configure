@@ -11,6 +11,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Getopt::Long;
 use Dumpvalue;
 use File::Spec;
+use File::Basename;
 use File::Copy;
 require File::Temp;
 use File::Temp ();
@@ -807,14 +808,17 @@ sub default_java_home {
   my $host = $opts{'host'};
   my $result = '';
   if ($host eq 'macosx') {
-    $result = `/usr/libexec/java_home`;
+    return `/usr/libexec/java_home`;
   }
-  elsif ($host ne 'win32') {    
-    $result = `readlink -f \$(which javac) | sed "s:/bin/javac::"`;
-  }
-  
-  chomp $result;
-  return $result;
+  else {  
+    $result = which('javac');
+      
+    while (-l $result) {
+      $result = readlink($result);
+    }
+    # remove bin/javac
+    return dirname(dirname($result))
+  }  
 }
 
 for my $key (keys %optdep) {

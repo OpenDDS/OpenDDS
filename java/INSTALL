@@ -113,10 +113,13 @@ general overview of OpenDDS.
 
      Build as in $DDS_ROOT/install, but add --java option
 
-     Unix => cd $DDS_ROOT
-             ./configure --java
-             make       
-     Windows => configure --java=<full path to the JDK>
+     Unix    => cd $DDS_ROOT
+                ./configure --java
+                make       
+     Windows => cd $DDS_ROOT
+                configure --java
+                Start Visual Studio by executing the generated solution from the command prompt
+                Select Build -> Build Solution
        
 
   4. Run a test Java application to verify the build
