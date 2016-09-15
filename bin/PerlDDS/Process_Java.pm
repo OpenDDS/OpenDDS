@@ -7,6 +7,7 @@ use PerlACE::Process;
 
 our @ISA = qw(PerlACE::Process);
 PerlACE::add_lib_path("$DDS_ROOT/lib");
+PerlACE::add_lib_path("$ACE_ROOT/lib") if $^O eq 'darwin';
 
 ## Constructor Arguments:
 ## 1. Main Class
