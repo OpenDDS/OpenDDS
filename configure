@@ -1,3 +1,4 @@
+#! /usr/bin/perl
 # -*- CPerl -*-
 eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
@@ -10,6 +11,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 use Getopt::Long;
 use Dumpvalue;
 use File::Spec;
+use File::Basename;
 use File::Copy;
 require File::Temp;
 use File::Temp ();
@@ -30,6 +32,11 @@ sub perlOS_to_host {
   return $^O;
 }
 
+sub perlOS_to_java_platform {
+    return 'win32' if $^O eq 'MSWin32';
+    return $^O;    
+}
+
 my %platforminfo =
   ('win32' => {
                'compilers' => ['cl'],
@@ -43,7 +50,7 @@ my %platforminfo =
                 'libpath' => 'DYLD_LIBRARY_PATH',
                 'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
                                8 => 'mountainlion', 9 => 'mavericks',
-                               10 => 'yosemite'},
+                               10 => 'yosemite', 11 => 'elcapitan'},
                },
    'solaris' => {
                  'compilers' => ['CC', 'g++'],
@@ -310,15 +317,7 @@ if (!exists $platforminfo{$opts{'host'}} ||
   die "ERROR: unknown host $opts{'host'}, stopped";
 }
 print "host system is: $opts{'host'}\n" if $opts{'verbose'};
-if ($opts{'host'} eq 'macosx') {
-  my $vers = `sw_vers -productVersion`;
-  $vers =~ /10\.(\d+)\.?/;
-  if (!exists $platforminfo{'macosx'}->{'versions'}->{$1}) {
-    die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
-  }
-  $opts{'host_version'} = $platforminfo{'macosx'}->{'versions'}->{$1};
-  print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
-}
+
 
 $opts{'target'} = $opts{'host'} unless $opts{'target'};
 
@@ -795,7 +794,7 @@ if (exists $opts{'java'}) {
   if ($opts{'static'}) {
     die "ERROR: --static can't be used with --java\n";
   }
-  setEnv('JAVA_PLATFORM', $opts{'host'});
+  setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
 }
 
 $opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
@@ -804,10 +803,38 @@ $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost/;
 my %use_win_default = ('boost' => 'c:\\Boost');
 
+
+sub default_java_home {
+  my $host = $opts{'host'};
+  my $result = '';
+  if ($host eq 'macosx') {
+    return `/usr/libexec/java_home`;
+  }
+  else {  
+    $result = which('javac');
+      
+    while (-l $result) {
+      $result = readlink($result);
+    }
+    # remove bin/javac
+    return dirname(dirname($result))
+  }  
+}
+
 for my $key (keys %optdep) {
   if (exists $opts{$key} && $opts{$key} eq '') {
     if (defined $optdep{$key}->[0] && $ENV{$optdep{$key}->[0]}) {
       $opts{$key} = $ENV{$optdep{$key}->[0]};
+      
+      if ($key eq 'java') {
+        ## when the environmental variable JAVA_HOME is set to a JRE location, 
+        ## try to resolve JAVA_HOME based on the location of javac
+        my $java_home = default_java_home();
+        my $jre_h_path = $opts{$key} . '/' . $optdep{'java'}->[1];
+        if (!-r $jre_h_path and $java_home ne '') {
+          $opts{'java'} = $java_home;
+        }
+      }
     }
     elsif ($slash eq '/' && exists $use_system_pkg{$key}) {
       $opts{$key} = '/usr';
@@ -817,11 +844,20 @@ for my $key (keys %optdep) {
       $opts{$key} = $use_win_default{$key};
       print "Defaulting $key to $use_win_default{$key}\n" if $opts{'verbose'};
     }
+    elsif ($key eq 'java') {
+        
+      $opts{'java'} = default_java_home();
+  
+      if ($opts{'java'} eq '') {
+          die "ERROR: --$key requires a value\n";
+      }
+    }
     elsif (defined $optdep{$key}->[0]) {
       die "ERROR: --$key requires a value\n";
     }
   }
 }
+
 
 sub env_from_opt {
   my $key = shift;
@@ -1162,6 +1198,22 @@ sub configure_build {
   if (-r "$buildEnvRef->{ACE_ROOT}/ace/config.h") {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   } else {
+    
+    if ($opts{'host'} eq 'macosx') {
+      if (-r "$buildEnvRef->{ACE_ROOT}/ace/config-macosx-all.h" and 
+          -r "$buildEnvRef->{ACE_ROOT}/include/makeinclude/platform_macosx_all.GNU") {
+        $opts{'host_version'} = 'all' 
+      } else {
+        my $vers = `sw_vers -productVersion`;
+        $vers =~ /10\.(\d+)\.?/;
+        if (!exists $platforminfo{'macosx'}->{'versions'}->{$1}) {
+          die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
+        }
+        $opts{'host_version'} = $platforminfo{'macosx'}->{'versions'}->{$1};
+        print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
+      }
+    }
+      
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
