@@ -5,8 +5,12 @@ use POSIX;
 use Cwd;
 use LWP::Simple;
 use File::Basename;
+use File::stat;
 use lib dirname (__FILE__) . "/modules";
 use ConvertFiles;
+use Pithub::Repos::Releases;
+use Data::Dumper;
+use Net::FTP::File;
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -1017,32 +1021,167 @@ sub verify_ftp_upload {
 sub message_ftp_upload {
   return "Release needs to be uploaded to ftp site";
 }
-############################################################################
-sub verify_update_opendds_org_latest_release {
+
+sub remedy_ftp_upload {
   my $settings = shift();
-  my $url = "http://www.opendds.org/latestReleaseVersion.html";
-  my $content = get($url);
-  if ($content =~ /Latest [Rr]elease $settings->{version}/) {
-    return 1;
+  my $version = $settings->{version};
+  my $FTP_DIR = "downloads/OpenDDS";
+  my $PRIOR_RELEASE_PATH = 'previous-releases/';
+
+  # login to ftp server and setup binary file transfers
+  my $ftp = Net::FTP->new($settings->{ftp_host}, Debug => 0, Port => $settings->{ftp_port})
+      or die "Cannot connect to $settings->{ftp_host}: $@";
+
+  $ftp->login($settings->{ftp_user}, $settings->{ftp_password})
+      or die "Cannot login ", $ftp->message;
+
+  $ftp->cwd($FTP_DIR)
+      or die "Cannot change dir to $FTP_DIR ", $ftp->message;
+
+  my @current_release_files = $ftp->ls()
+      or die "Cannot ls() $FTP_DIR ", $ftp->message;
+
+  $ftp->binary;
+
+  my $base = "OpenDDS-$version";
+  # Check for required files
+  my @new_release_files = (
+      "$base-doxygen.tar.gz",
+      "$base-doxygen.zip",
+      "$base.tar.gz",
+      "$base.zip",
+      "$base.md5",
+      "OpenDDS-latest.pdf"
+  );
+  if (!$settings->{nodevguide}) {
+    push(@new_release_files , "$base.pdf");
   }
+
+  my %release_file_map = map { $_ => 1 } @new_release_files;
+
+  # handle previous release files
+  foreach my $file (@current_release_files) {
+
+    # skip directories, this is not the file you're looking for...
+    my $isDir = $ftp->isdir($file);
+    next if $isDir;
+
+    # replace 'OpenDDS-latest.pdf'
+    if ($file eq 'OpenDDS-latest.pdf') {
+      print "deleting $file\n";
+      $ftp->delete($file);
+
+      my $local_file = join("/", $settings->{parent_dir}, $file);
+      print "uploading $file\n";
+      $ftp->put($local_file, $file);
+    }
+
+    # transfer files to prior release path that are not in the current release set
+    unless ( exists($release_file_map{$file})){
+      my $new_path = $PRIOR_RELEASE_PATH . $file;
+      print "moving $file to $new_path\n";
+      $ftp->rename($file,$new_path);
+    }
+  }
+
+  # upload new release files
+  foreach my $file (@new_release_files) {
+    print "uploading $file\n";
+    my $local_file = join("/", $settings->{parent_dir}, $file);
+    $ftp->put($local_file, $file);
+  }
+
+  $ftp->quit;
+  return 1;
 }
 
-sub message_update_opendds_org_latest_release {
-  return "OpenDDS.org latest release version page needs updating";
-}
 ############################################################################
-sub verify_update_opendds_org_latest_news {
+sub verify_github_upload {
   my $settings = shift();
-  my $url = "http://www.opendds.org/latestNewsArticle.html";
-  my $content = get($url);
-  if ($content =~ /Version $settings->{version} [Rr]eleased/) {
-    return 1;
+  my $verified = 0;
+
+  my $r = Pithub::Repos::Releases->new;
+  my $release_list = $r->list(
+      user => $settings->{github_user},
+      repo => $settings->{github_repo},
+  );
+  unless ( $release_list->success ) {
+    printf "error accessing github: %s\n", $release_list->response->status_line;
+  } else {
+    while ( my $row = $release_list->next ) {
+      if ($row->{tag_name} eq $settings->{git_tag}){
+        #printf "%d\t[%s]\n",$row->{id},$row->{tag_name};
+        $verified = 1;
+        last;
+      }
+    }
   }
+  return $verified;
 }
 
-sub message_update_opendds_org_latest_news {
-  return "OpenDDS.org latest news page needs updating";
+sub message_github_upload {
+  return "Release needs to be uploaded to github site";
 }
+
+sub remedy_github_upload {
+  my $settings = shift();
+
+  my $rc = 1;
+
+  # printf "%s:%s\n%s\n", $settings->{github_user},$settings->{github_repo},$settings->{github_token};
+
+  my $ph = Pithub::Repos::Releases->new(
+      user => $settings->{github_user},
+      repo => $settings->{github_repo},
+      token => $settings->{github_token}
+  );
+  my @lines;
+  open(my $news, "NEWS") or die "Can't read NEWS file";
+  while (<$news>) {
+    if (/^=====/) {
+      last;
+    }
+    push (@lines, $_);
+  }
+  close $news;
+  my $header  = "#### Release notes for Version $settings->{version} of OpenDDS\n";
+  my $middle = join("",@lines);
+  my $footer = "#### Using the GitHub \"releases\" page\nDownload $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/Solaris/MacOSX) instead of using the GitHub-generated \"source code\" links.";
+  my $text = $header.$middle.$footer;
+  my $release = $ph->create(
+      data => {
+          name => 'OpenDDS ' . $settings->{version},
+          tag_name => 'DDS-' . $settings->{version},
+          body => $text
+      }
+  );
+  unless ( $release->success ) {
+    printf "error accessing github: %s\n", $release->response->status_line;
+    $rc = 0;
+  } else {
+    for my $f ("$settings->{parent_dir}/$settings->{tgz_src}",
+               "$settings->{parent_dir}/$settings->{zip_src}") {
+      open(my $fh, $f) or die "Can't open";
+      binmode $fh;
+      my $size = stat($fh)->size;
+      my $data;
+      read $fh, $data, $size or die "Can't read";
+      my $mime = ($f =~ /\.gz$/) ? 'application/gzip' : 'application/x-zip-compressed';
+      my $asset = $ph->assets->create(
+          release_id => $release->content->{id},
+          name => $f,
+          content_type => $mime,
+          data => $data
+      );
+      unless ( $asset->success ) {
+        printf "error accessing github: %s\n", $asset->response->status_line;
+        $rc = 0;
+      }
+    }
+  }
+  return $rc;
+}
+
 ############################################################################
 sub verify_email_list {
   # Can't verify
@@ -1182,15 +1321,13 @@ my %release_step_hash  = (
   },
   'Upload to FTP Site' => {
     verify  => sub{verify_ftp_upload(@_)},
-    message => sub{message_ftp_upload(@_)}
+    message => sub{message_ftp_upload(@_)},
+    remedy => sub{remedy_ftp_upload(@_)}
   },
-  'Update opendds.org latest release page' => {
-    verify  => sub{verify_update_opendds_org_latest_release(@_)},
-    message => sub{message_update_opendds_org_latest_release(@_)}
-  },
-  'Update opendds.org latest news page' => {
-    verify  => sub{verify_update_opendds_org_latest_news(@_)},
-    message => sub{message_update_opendds_org_latest_news(@_)}
+  'Upload to GitHub' => {
+     verify  => sub{verify_github_upload(@_)},
+     message => sub{message_github_upload(@_)},
+     remedy  => sub{remedy_github_upload(@_)}
   },
   'Email DDS-Release-Announce list' => {
     verify  => sub{verify_email_list(@_)},
@@ -1222,8 +1359,6 @@ my @ordered_steps = (
   'Download Devguide',
   'Upload to FTP Site',
   'Upload to GitHub',
-  'Update opendds.org latest release page',
-  'Update opendds.org latest news page',
   'Email DDS-Release-Announce list',
 );
 
@@ -1279,6 +1414,12 @@ my %settings = (
   devguide   => "OpenDDS-$version.pdf",
   timestamp  => POSIX::strftime($timefmt, gmtime),
   git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
+  github_repo     => 'OpenDDS',
+  github_user     => 'objectcomputing',
+  github_token    => $ENV{GITHUB_TOKEN},
+  ftp_user        => $ENV{FTP_USERNAME},
+  ftp_password    => $ENV{FTP_PASSWD},
+  ftp_host        => $ENV{FTP_HOST},
   changelog  => "docs/history/ChangeLog-$version",
   modified   => {"NEWS" => 1,
                 "PROBLEM-REPORT-FORM" => 1,
