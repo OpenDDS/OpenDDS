@@ -1,3 +1,51 @@
+Version 3.9 of OpenDDS.
+
+- Updated how DataWriter QoS is interpreted by internal data strucutres:
+  - RESOURCE_LIMITS.max_samples_per_instance controls total samples that can be
+    stored per instance, independent of HISTORY
+  - HISTORY.depth controls number of samples (per instance) that will be made
+    available to late-joining readers if DURABILITY is enabled
+    - KEEP_ALL history uses max_samples_per_instance as its depth
+  - WriteDataContainer is more eager to remove samples that are no longer needed
+  - WriteDataContainer will not remove samples that are required to implement
+    DURABILITY, hence if RELIABILITY is enabled this can block a write() just
+    like other "no resource available" scenarios
+
+- Fixed an RTPS interoperability issue with the new ParticipantMessageData
+  messages (used for liveliness)
+
+- Enhanced RTPS support for DURABILITY QoS enabling faster reader/writer
+  associations when DURABILITY is in use (set to TRANSIENT_LOCAL)
+
+- RTPS Discovery has a new option "SpdpLocalAddress" which can be used to
+  bind SPDP's socket to a particular network interface
+
+- InfoRepo discovery will use TAO's BiDir GIOP feature to reduce number
+  of sockets needed (disable with -DCPSBidirGIOP 0)
+
+- Intermediate Type Language (itl), a helper library used by the OpenDDS
+  wireshark dissector, is now included in the source tree in
+  tools/IntermediateTypeLang.  itl depends on the 3rd-pary lib rapidjson.
+  When running the configure script, use --rapidjson=<location>
+
+- Corrected makefile generation for Java bindings with IDL bounded strings
+
+- Fixed a bug where some header files would be missing from "make install"
+
+- "make install" now works with Java bindings
+
+- Configure script: now supports FreeBSD, Mac OS X El Capitan,
+  and cross-compiles for Linux targets (Raspberry Pi and Intel Edison tested).
+  The configure script attempts to find the JDK if invoked with --java.
+
+- cross-compilation now works with Java bindings, including use of JRE compact1
+
+Notes:
+- Deprecated platforms/compilers TBD
+
+
+========================================================================
+
 Version 3.8 of OpenDDS.
 
 - Improved support for Safety Profile
