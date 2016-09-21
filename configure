@@ -34,7 +34,7 @@ sub perlOS_to_host {
 
 sub perlOS_to_java_platform {
     return 'win32' if $^O eq 'MSWin32';
-    return $^O;    
+    return $^O;
 }
 
 my %platforminfo =
@@ -808,26 +808,28 @@ sub default_java_home {
   my $host = $opts{'host'};
   my $result = '';
   if ($host eq 'macosx') {
-    return `/usr/libexec/java_home`;
+    $result = `/usr/libexec/java_home`;
+    chomp $result;
+    return $result;
   }
-  else {  
+  else {
     $result = which('javac');
-      
+
     while (-l $result) {
       $result = readlink($result);
     }
     # remove bin/javac
     return dirname(dirname($result))
-  }  
+  }
 }
 
 for my $key (keys %optdep) {
   if (exists $opts{$key} && $opts{$key} eq '') {
     if (defined $optdep{$key}->[0] && $ENV{$optdep{$key}->[0]}) {
       $opts{$key} = $ENV{$optdep{$key}->[0]};
-      
+
       if ($key eq 'java') {
-        ## when the environmental variable JAVA_HOME is set to a JRE location, 
+        ## when the environmental variable JAVA_HOME is set to a JRE location,
         ## try to resolve JAVA_HOME based on the location of javac
         my $java_home = default_java_home();
         my $jre_h_path = $opts{$key} . '/' . $optdep{'java'}->[1];
@@ -845,9 +847,9 @@ for my $key (keys %optdep) {
       print "Defaulting $key to $use_win_default{$key}\n" if $opts{'verbose'};
     }
     elsif ($key eq 'java') {
-        
+
       $opts{'java'} = default_java_home();
-  
+
       if ($opts{'java'} eq '') {
           die "ERROR: --$key requires a value\n";
       }
@@ -1161,7 +1163,7 @@ sub write_environment {
   my $dir = shift;
   my $MK = undef;
   if ($slash eq '/') {
-    if (!$opts{'dry-run'} && !-r $dir . '/GNUmakefile.dist') {
+    if (!$opts{'dry-run'}) {
       move($dir . '/GNUmakefile', $dir . '/GNUmakefile.dist');
     }
     $MK = backup_and_open($dir . '/GNUmakefile');
@@ -1198,11 +1200,11 @@ sub configure_build {
   if (-r "$buildEnvRef->{ACE_ROOT}/ace/config.h") {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   } else {
-    
+
     if ($opts{'host'} eq 'macosx') {
-      if (-r "$buildEnvRef->{ACE_ROOT}/ace/config-macosx-all.h" and 
+      if (-r "$buildEnvRef->{ACE_ROOT}/ace/config-macosx-all.h" and
           -r "$buildEnvRef->{ACE_ROOT}/include/makeinclude/platform_macosx_all.GNU") {
-        $opts{'host_version'} = 'all' 
+        $opts{'host_version'} = 'all';
       } else {
         my $vers = `sw_vers -productVersion`;
         $vers =~ /10\.(\d+)\.?/;
@@ -1213,7 +1215,7 @@ sub configure_build {
         print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
       }
     }
-      
+
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
