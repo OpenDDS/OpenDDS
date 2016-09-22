@@ -1364,7 +1364,7 @@ my %release_step_hash  = (
      message => sub{message_github_upload(@_)},
      remedy  => sub{remedy_github_upload(@_)}
   },
-  'Release Website'{
+  'Release Website' => {
     verify  => sub{verify_website_release(@_)},
     message => sub{message_website_release(@_)},
     remedy  => sub{remedy_website_release(@_)},
@@ -1432,6 +1432,12 @@ sub string_arg_value {
 }
 
 my $version = $ARGV[0] || "";
+
+my %base_settings = (
+  base_name  => "OpenDDS-$version",
+  parent_dir => '../OpenDDS-Release',
+);
+
 my %settings = (
     list         => any_arg_is("--list"),
     remedy       => any_arg_is("--remedy"),
@@ -1442,20 +1448,20 @@ my %settings = (
     branch       => string_arg_value("--branch") || "master",
     github_user  => string_arg_value("--github-user") || "objectcomputing",
     version      => $version,
+    base_name    => $base_settings{base_name},
     git_tag      => "DDS-$version",
-    base_name    => "OpenDDS-$version",
-    parent_dir   => "../OpenDDS-Release",
-    clone_dir    => "$parent_dir/$base_name",
-    tar_src      => "$base_name.tar",
-    tgz_src      => "$base_name.tar.gz",
-    zip_src      => "$base_name.zip",
-    md5_src      => "$base_name.md5",
-    tar_dox      => "$base_name-doxygen.tar",
-    tgz_dox      => "$base_name-doxygen.tar.gz",
-    zip_dox      => "$base_name-doxygen.zip",
-    devguide     => "$base_name.pdf",
+    parent_dir   => $base_settings{parent_dir},
+    clone_dir    => join("/", $base_settings{parent_dir}, $base_settings{base_name}),
+    tar_src      => "$base_settings{base_name}.tar",
+    tgz_src      => "$base_settings{base_name}.tar.gz",
+    zip_src      => "$base_settings{base_name}.zip",
+    md5_src      => "$base_settings{base_name}.md5",
+    tar_dox      => "$base_settings{base_name}-doxygen.tar",
+    tgz_dox      => "$base_settings{base_name}-doxygen.tar.gz",
+    zip_dox      => "$base_settings{base_name}-doxygen.zip",
+    devguide     => "$base_settings{base_name}.pdf",
     timestamp    => POSIX::strftime($timefmt, gmtime),
-    git_url      => "git@github.com:$github_user/OpenDDS.git",
+    git_url      => 'git@github.com:objectcomputing/OpenDDS.git',
     github_repo  => 'OpenDDS',
     github_token => $ENV{GITHUB_TOKEN},
     ftp_user     => $ENV{FTP_USERNAME},
