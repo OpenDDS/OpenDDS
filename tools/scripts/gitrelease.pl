@@ -20,13 +20,14 @@ sub usage {
   return "gitrelease.pl <version> [options]\n" .
          "    version:  release version in a.b or a.b.c notation\n" .
          "options:\n" .
-         "  --list          just show step names (default perform check)\n" .
-         "  --remedy        remediate problems where possible\n" .
-         "  --remote=name   valid git remote for OpenDDS (default: origin)\n" .
-         "  --branch=name   valid git branch for cloning (default: master)\n" .
-         "  --step=#        # of individual step to run (default: all)\n" .
-         "  --force         keep going if possible (requires --step)\n" .
-         "  --no-devguide   no devguide issued for this release\n"
+         "  --list             just show step names (default perform check)\n" .
+         "  --remedy           remediate problems where possible\n" .
+         "  --remote=name      valid git remote for OpenDDS (default: origin)\n" .
+         "  --branch=name      valid git branch for cloning (default: master)\n" .
+         "  --github-user=name user or organization name for github updates (default: objectcomputing)\n" .
+         "  --step=#           # of individual step to run (default: all)\n" .
+         "  --force            keep going if possible (requires --step)\n" .
+         "  --no-devguide      no devguide issued for this release\n"
 }
 
 sub normalizePath {
@@ -1000,13 +1001,17 @@ sub verify_ftp_upload {
   my $settings = shift();
   my $url = "http://download.ociweb.com/OpenDDS/";
   my $content = get($url);
-  my $base = "OpenDDS-$settings->{version}";
-  # Check for required files
-  my @files = ("$base-doxygen.tar.gz", "$base-doxygen.zip",
-               "$base.tar.gz",         "$base.zip",
-               "$base.md5",            "OpenDDS-latest.pdf");
+
+  my @files = (
+      "$settings->{base_name}-doxygen.tar.gz",
+      "$settings->{base_name}-doxygen.zip",
+      "$settings->{base_name}.tar.gz",
+      "$settings->{base_name}.zip",
+      "$settings->{base_name}.md5",
+      "OpenDDS-latest.pdf"
+  );
   if (!$settings->{nodevguide}) {
-    push(@files , "$base.pdf");
+    push(@files , "$settings->{base_name}.pdf");
   }
   foreach my $file (@files) {
     if ($content =~ /$file/) {
@@ -1043,18 +1048,16 @@ sub remedy_ftp_upload {
 
   $ftp->binary;
 
-  my $base = "OpenDDS-$version";
-  # Check for required files
   my @new_release_files = (
-      "$base-doxygen.tar.gz",
-      "$base-doxygen.zip",
-      "$base.tar.gz",
-      "$base.zip",
-      "$base.md5",
+      "$settings->{base_name}-doxygen.tar.gz",
+      "$settings->{base_name}-doxygen.zip",
+      "$settings->{base_name}.tar.gz",
+      "$settings->{base_name}.zip",
+      "$settings->{base_name}.md5",
       "OpenDDS-latest.pdf"
   );
   if (!$settings->{nodevguide}) {
-    push(@new_release_files , "$base.pdf");
+    push(@new_release_files , "$settings->{base_name}.pdf");
   }
 
   my %release_file_map = map { $_ => 1 } @new_release_files;
@@ -1183,6 +1186,39 @@ sub remedy_github_upload {
 }
 
 ############################################################################
+sub verify_website_release {
+  # verify there are no differences between website-next-release branch and gh-pages branch
+  my $status = open(GITDIFF, 'git diff origin/website-next-release origin/gh-pages|');
+  my $delta = "";
+  while (<GITDIFF>) {
+    if (/^...(.*)/) {
+      $delta .= $_;
+    }
+  }
+  close(GITDIFF);
+  return ($delta.length == 0);
+
+}
+
+sub message_website_release {
+  return 'origin/website-next-release branch needs to merge into origin/gh-pages branch';
+}
+
+sub remedy_website_release {
+  my $settings = shift();
+  print "Releasing gh-pages website\n";
+  my $rc = 0;
+#  $rc = system('git checkout gh-pages');
+#  if (!$rc) {
+#    $rc = system('git merge website-next-release');
+#  }
+#  if (!$rc) {
+#    $rc =   system ('git push');
+#  }
+  return !$rc;
+}
+
+############################################################################
 sub verify_email_list {
   # Can't verify
 }
@@ -1199,7 +1235,6 @@ sub remedy_email_dds_release_announce {
   email_announce_contents($settings) .
   news_contents_excerpt($settings);
 }
-
 
 ############################################################################
 sub ignore_step {
@@ -1329,6 +1364,11 @@ my %release_step_hash  = (
      message => sub{message_github_upload(@_)},
      remedy  => sub{remedy_github_upload(@_)}
   },
+  'Release Website'{
+    verify  => sub{verify_website_release(@_)},
+    message => sub{message_website_release(@_)},
+    remedy  => sub{remedy_website_release(@_)},
+  },
   'Email DDS-Release-Announce list' => {
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
@@ -1359,6 +1399,7 @@ my @ordered_steps = (
   'Download Devguide',
   'Upload to FTP Site',
   'Upload to GitHub',
+  'Release Website',
   'Email DDS-Release-Announce list',
 );
 
@@ -1392,41 +1433,41 @@ sub string_arg_value {
 
 my $version = $ARGV[0] || "";
 my %settings = (
-  list       => any_arg_is("--list"),
-  remedy     => any_arg_is("--remedy"),
-  force      => any_arg_is("--force"),
-  nodevguide => any_arg_is("--no-devguide"),
-  step       => numeric_arg_value("--step"),
-  remote     => string_arg_value("--remote") || "origin",
-  branch     => string_arg_value("--branch") || "master",
-  version    => $version,
-  git_tag    => "DDS-$version",
-  clone_dir_name => "OpenDDS-$version",
-  clone_dir  => "../OpenDDS-Release/OpenDDS-$version",
-  parent_dir => "../OpenDDS-Release",
-  tar_src    => "OpenDDS-$version.tar",
-  tgz_src    => "OpenDDS-$version.tar.gz",
-  zip_src    => "OpenDDS-$version.zip",
-  md5_src    => "OpenDDS-$version.md5",
-  tar_dox    => "OpenDDS-$version-doxygen.tar",
-  tgz_dox    => "OpenDDS-$version-doxygen.tar.gz",
-  zip_dox    => "OpenDDS-$version-doxygen.zip",
-  devguide   => "OpenDDS-$version.pdf",
-  timestamp  => POSIX::strftime($timefmt, gmtime),
-  git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
-  github_repo     => 'OpenDDS',
-  github_user     => 'objectcomputing',
-  github_token    => $ENV{GITHUB_TOKEN},
-  ftp_user        => $ENV{FTP_USERNAME},
-  ftp_password    => $ENV{FTP_PASSWD},
-  ftp_host        => $ENV{FTP_HOST},
-  changelog  => "docs/history/ChangeLog-$version",
-  modified   => {"NEWS" => 1,
-                "PROBLEM-REPORT-FORM" => 1,
-                "VERSION" => 1,
-                "dds/Version.h" => 1,
-                "docs/history/ChangeLog-$version" => 1,
-                "tools/scripts/gitrelease.pl" => 1}
+    list         => any_arg_is("--list"),
+    remedy       => any_arg_is("--remedy"),
+    force        => any_arg_is("--force"),
+    nodevguide   => any_arg_is("--no-devguide"),
+    step         => numeric_arg_value("--step"),
+    remote       => string_arg_value("--remote") || "origin",
+    branch       => string_arg_value("--branch") || "master",
+    github_user  => string_arg_value("--github-user") || "objectcomputing",
+    version      => $version,
+    git_tag      => "DDS-$version",
+    base_name    => "OpenDDS-$version",
+    parent_dir   => "../OpenDDS-Release",
+    clone_dir    => "$parent_dir/$base_name",
+    tar_src      => "$base_name.tar",
+    tgz_src      => "$base_name.tar.gz",
+    zip_src      => "$base_name.zip",
+    md5_src      => "$base_name.md5",
+    tar_dox      => "$base_name-doxygen.tar",
+    tgz_dox      => "$base_name-doxygen.tar.gz",
+    zip_dox      => "$base_name-doxygen.zip",
+    devguide     => "$base_name.pdf",
+    timestamp    => POSIX::strftime($timefmt, gmtime),
+    git_url      => "git@github.com:$github_user/OpenDDS.git",
+    github_repo  => 'OpenDDS',
+    github_token => $ENV{GITHUB_TOKEN},
+    ftp_user     => $ENV{FTP_USERNAME},
+    ftp_password => $ENV{FTP_PASSWD},
+    ftp_host     => $ENV{FTP_HOST},
+    changelog    => "docs/history/ChangeLog-$version",
+    modified     => {"NEWS" => 1,
+        "PROBLEM-REPORT-FORM" => 1,
+        "VERSION" => 1,
+        "dds/Version.h" => 1,
+        "docs/history/ChangeLog-$version" => 1,
+        "tools/scripts/gitrelease.pl" => 1}
 );
 
 my $half_divider = '-' x 40;
