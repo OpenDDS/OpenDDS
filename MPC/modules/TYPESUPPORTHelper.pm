@@ -55,7 +55,8 @@ sub get_output {
     }
   }
 
-  return \@out, $deps;
+  # check for list context for compatibility with older MPC
+  return wantarray ? (\@out, $deps) : \@out;
 }
 
 sub get_outputexts {
