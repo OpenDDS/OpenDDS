@@ -1196,8 +1196,9 @@ sub verify_website_release {
     }
   }
   close(GITDIFF);
-  return ($delta.length == 0);
-
+  # return 1 to pass
+  # return 0 to fail
+  return (length($delta) == 0) ? 1 : 0;
 }
 
 sub message_website_release {
