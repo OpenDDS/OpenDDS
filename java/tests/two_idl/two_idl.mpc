@@ -1,0 +1,25 @@
+project: dcpslib, dcps_tcp, dcps_test_java {
+
+    sharedname      = two_idl_test
+
+    idlflags        += -Wb,stub_export_include=two_idl_test_Export.h \
+                       -Wb,stub_export_macro=two_idl_test_Export
+    dcps_ts_flags   += -Wb,export_macro=two_idl_test_Export
+    idl2jniflags    += -Wb,stub_export_include=two_idl_test_Export.h \
+                       -Wb,stub_export_macro=two_idl_test_Export
+
+    dynamicflags    += TWO_IDL_TEST_BUILD_DLL
+
+    TypeSupport_Files {
+        Message.idl
+    }
+
+    TypeSupport_Files {
+        dcps_ts_flags += -SI
+        Common.idl
+    }
+
+    Java_Files {
+        Message.java << Quote.java
+    }
+}
