@@ -1434,8 +1434,9 @@ sub string_arg_value {
 my $version = $ARGV[0] || "";
 
 my %base_settings = (
-  base_name  => "OpenDDS-$version",
-  parent_dir => '../OpenDDS-Release',
+  base_name   => "OpenDDS-$version",
+  parent_dir  => '../OpenDDS-Release',
+  github_user => string_arg_value("--github-user") || "objectcomputing",
 );
 
 my %settings = (
@@ -1446,7 +1447,7 @@ my %settings = (
     step         => numeric_arg_value("--step"),
     remote       => string_arg_value("--remote") || "origin",
     branch       => string_arg_value("--branch") || "master",
-    github_user  => string_arg_value("--github-user") || "objectcomputing",
+    github_user  => $base_settings{github_user},
     version      => $version,
     base_name    => $base_settings{base_name},
     git_tag      => "DDS-$version",
@@ -1461,7 +1462,7 @@ my %settings = (
     zip_dox      => "$base_settings{base_name}-doxygen.zip",
     devguide     => "$base_settings{base_name}.pdf",
     timestamp    => POSIX::strftime($timefmt, gmtime),
-    git_url      => 'git@github.com:objectcomputing/OpenDDS.git',
+    git_url      => "git\@github.com:$base_settings{github_user}/OpenDDS.git",
     github_repo  => 'OpenDDS',
     github_token => $ENV{GITHUB_TOKEN},
     ftp_user     => $ENV{FTP_USERNAME},
