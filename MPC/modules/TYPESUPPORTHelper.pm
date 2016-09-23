@@ -23,10 +23,10 @@ sub get_output {
   $tsidl =~ s/\.idl$/TypeSupport.idl/;
   push(@out, $dir . basename($tsidl));
 
-  my $i2j = CommandHelper::get('idl2jni_files');
-
+  my $deps;
   if ($flags =~ /-Wb,java/) {
 
+    my $i2j = CommandHelper::get('idl2jni_files');
     $i2j->do_cached_parse($file, $flags);
 
     my $tsfile = $tsidl;
@@ -36,8 +36,14 @@ sub get_output {
     if (defined $tsinfo) {
       my @types = split /;/, $tsinfo;
       foreach my $type (@types) {
-        $type =~ s/::/\//g;
-        push(@out, $dir . $type . 'TypeSupportImpl.java');
+        my @parts = split /::/, $type;
+        my $tsimpl = $dir . join('/', @parts) . 'TypeSupportImpl.java';
+        push(@out, $tsimpl);
+        my $peer_base = pop @parts;
+        my $peer = $dir . join('/', @parts);
+        $peer .= '/' if length $peer;
+        $peer .= '_' . $peer_base . 'TypeSupportTAOPeer.java';
+        $deps->{'java_files'}->{$tsimpl} = [$peer];
       }
     }
   }
@@ -49,7 +55,8 @@ sub get_output {
     }
   }
 
-  return \@out;
+  # check for list context for compatibility with older MPC
+  return wantarray ? (\@out, $deps) : \@out;
 }
 
 sub get_outputexts {
