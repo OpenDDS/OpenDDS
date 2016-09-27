@@ -204,7 +204,7 @@ namespace java_ts_generator {
       }
     }
 
-    if (jpackage[jpackage.size() - 1] == '.') {
+    if (jpackage.size() && jpackage[jpackage.size() - 1] == '.') {
       jpackage.resize(jpackage.size() - 1);
     }
 
