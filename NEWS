@@ -40,9 +40,6 @@ Version 3.9 of OpenDDS.
 
 - cross-compilation now works with Java bindings, including use of JRE compact1
 
-Notes:
-- Deprecated platforms/compilers TBD
-
 
 ========================================================================
 
