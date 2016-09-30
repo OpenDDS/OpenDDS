@@ -1,0 +1,1192 @@
+Thu Sep 29 22:04:52 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit cf143b29606bd8012bd75074b8232ed86396f41c
+
+        * INSTALL:
+        * NEWS:
+        * README:
+
+          Updated documentation for upcoming release 3.9.
+
+Thu Sep 29 22:05:40 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 368d933cece83ff09f7834f2e0670ed032e9bdd1
+
+          Merge pull request #305 from plabanca/release-process
+
+          Release process
+
+Thu Sep 29 22:05:35 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 44bfe39cb6c6c8e9599b31aa184f8386b84a70d1
+
+          Merge pull request #307 from
+          huangminghuang/many_to_many_test_wait_fix
+
+          Fix ManyToMany test infinite wait issue
+
+Wed Sep 28 15:47:28 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit e297f051a76aeedf005eb580fe503dda269e1dbf
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          Java/JMS integration: parse output from newer JUnit versions
+
+Mon Sep 26 21:55:00 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 47beac869bf4650a3ad92e97ed344dff5f374e47
+
+          Merge pull request #309 from mitza-oci/master
+
+          opendds_idl: fixed bug with Java support when IDL modules are not
+          used
+
+Mon Sep 26 16:49:37 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit ede67ed8abd190d1aaa58d3c97c1f08644a9ade9
+
+        * dds/idl/ts_generator.cpp:
+
+          opendds_idl: fixed bug with Java support when IDL modules are not
+          used
+
+Fri Sep 23 22:22:20 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit b3c2c45e86a6c2be2f1955d8a99c896605e65fa0
+
+          Merge pull request #308 from mitza-oci/master
+
+          Test support for Java bindings with two IDL files (one included
+          by the other).
+
+Fri Sep 23 21:55:39 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 6a8596f1df9f5800e80e4515a49ff44d66810adb
+
+        * java/tests/two_idl/.gitignore:
+        * java/tests/two_idl/Common.idl:
+        * java/tests/two_idl/Message.idl:
+        * java/tests/two_idl/two_idl.mpc:
+        * java/tests/two_idl/two_idl_test_Export.h:
+
+          Test support for Java bindings with two IDL files (one included
+          by the other).
+
+          This is a compile-only test. It should show that the recent
+          change to
+          MPC/modules/TYPESUPPORTHelper.pm and the corresponding MPC change
+          are working.
+
+Fri Sep 23 21:41:11 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit ef15f57575d790e447935d47d902335e85a32cee
+
+          Merge pull request #306 from mitza-oci/master
+
+          TYPESUPPORTHelper (for Java bindings): provide extra dependency
+          info to MPC
+
+Fri Sep 23 20:49:12 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 11e5ff9e4caab781438d01dccd8dc4d51d107113
+
+        * tools/scripts/gitrelease.pl:
+
+          simplify website release return logic
+
+Fri Sep 23 18:07:02 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit ab1dea2cb3a1020535bd8fed3a0cc94b4464ea8a
+
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Fix ManyToMany test infinite wait issue
+
+Fri Sep 23 15:59:38 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 6a0ecd676a9608002fb549e802018ef89337acc8
+
+        * tools/scripts/gitrelease.pl:
+
+          Cleanup base settings
+
+Thu Sep 22 22:55:09 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 8c7e5edad56a339cf347ceddafd91e3d907366f9
+
+          Merge branch 'master' into release-process
+
+Thu Sep 22 22:53:00 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 3c1022165ebb7d036c984ae7443ed8d8048006e1
+
+        * tools/scripts/gitrelease.pl:
+
+          Normalize settings hash values
+
+          Normalize settings hash values
+
+Thu Sep 22 20:00:15 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 0c5a60bd93923765e7e82667d1913ac15bdd1160
+
+        * .gitignore:
+        * tools/scripts/gitrelease.pl:
+
+          Add Release Website
+
+          Initial support for website release
+
+Thu Sep 22 19:46:48 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 254726f296fc3feeafff2aa4209516d53febaae7
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+
+          Compatibility with MPC versions that don't have the required
+          change.
+
+Thu Sep 22 19:34:12 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 6107f43fb72fe47c3ff464ea218a9f70b3dc4d77
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+
+          TYPESUPPORTHelper (for Java bindings): provide extra dependency
+          info to MPC
+
+          Requires https://github.com/DOCGroup/MPC/pull/23 to take effect,
+          but this
+          version can be run with the existing MPC and the new info will be
+          ignored.
+
+Wed Sep 21 21:36:06 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 12bd2405d999d3d524079e5f62282d58ef584482
+
+          Merge remote-tracking branch 'objectcomputing/master'
+
+Wed Sep 21 21:32:08 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 2e878b12e189145139d315ca6afd9ecfcb839f99
+
+          Merge remote-tracking branch 'objectcomputing/master' into
+          release-process
+
+Wed Sep 21 20:08:36 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 6c2f4b17952a2c515c4e48511aae4a383d4c3bb3
+
+        * configure:
+
+          Updated configure script for new ACE Mac OS config file name
+          scheme
+
+Wed Sep 21 17:22:50 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 355ff1a9182b98d64e719966d1a76f9cc1f13078
+
+        * NEWS:
+
+          NEWS (release notes) for upcoming version 3.9
+
+Wed Sep 21 16:59:03 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit daa0105bd633a00f61f927ca2928e087ea8de719
+
+        * configure:
+
+          Configure script cleanup
+
+Fri Sep 16 19:12:40 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 1d1f5e33952503c73a4ea96ae5fe124bbd1a038c
+
+        * tools/scripts/gitrelease.pl:
+
+          Added update methods for Github and FTP
+
+          Added Github Release Methods
+          Added FTP Update Methods
+
+Fri Sep 16 16:20:51 UTC 2016  Phillip LaBanca  <labancap@ociweb.com>
+        commit 27e884b58d3dd9ee04bb2d9990d11044e6ce3ced
+
+          Merge remote-tracking branch 'objectcomputing/master'
+
+Thu Sep 15 16:35:30 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit d76891f41ca4c88eea5936aed64a7b1d199aa157
+
+          Merge pull request #304 from mitza-oci/master
+
+          Java tests: set DYLD_LIBRARY_PATH to include ACE_ROOT/lib on Mac
+          OS X - El Capitan
+
+Thu Sep 15 15:02:58 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 8c309e8f1600ffdf9af92fd7c1e216a87ea080ac
+
+        * bin/PerlDDS/Process_Java.pm:
+
+          Java tests: set DYLD_LIBRARY_PATH to include ACE_ROOT/lib on Mac
+          OS X - El Capitan
+
+Wed Sep 14 23:05:03 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 59809f088c59b72b1b12b25a50aa072f8f4f9688
+
+          Merge pull request #302 from huangminghuang/master
+
+          Fixes for Java bindings docs and configure, and build on Mac OS X
+          El Capitan
+
+Wed Sep 14 14:45:43 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 5261e34d397b5fb4b28a037ff64584d5517dcf40
+
+        * configure:
+        * java/INSTALL:
+
+          Allows JAVA_HOME to be set based on the path of javac on Windows
+
+Mon Sep 12 21:04:09 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 15a960d61ac519cc453485d4640d2aa233ce0494
+
+        * configure:
+
+          Allows deferring MacOSX version detection to build time
+
+          If $ACE_ROOT/include/makeinclude/platform_macosx_all.GNU and
+          $ACE_ROOT/config-macosx-all.h exists, use those two files instead
+          using the files with with OS X code name in them.
+
+Mon Sep 12 20:12:57 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 67dde3cd145602c6992e2dc82ab4f6b22ad74008
+
+        * java/tests/messenger/run_test.pl:
+
+          Added shebang
+
+Fri Sep 09 22:18:23 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 60b0ea5b7e2ee368c5e4eddab9aa39ebde49e193
+
+          Merge pull request #301 from mitza-oci/master
+
+          Fixed a bug in Java mapping generation for structs with short
+          names (4 or less)
+
+Fri Sep 09 22:10:26 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 47e4cc3f00ef83c8001dd3704146b484d93d48bf
+
+        * configure:
+
+          Fixed the problem of detect the existence of jre.h in previous
+          commit
+
+Fri Sep 09 21:27:55 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 1653a30d601f73b88fc3d1d40ef6b8bccbdb90f6
+
+        * configure:
+        * java/INSTALL:
+
+          Auto detect JAVA_HOME on unix when it’s not set.
+
+Fri Sep 09 19:16:42 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit f5da0443e62d5c68bb33b12f7eaaa63d79b130f5
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Fixed a bug in Java mapping generation for structs with short
+          names (4 or less)
+
+Fri Sep 09 18:11:19 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 094dcd95acb650c544f5c0a592f64d36ff90bfb1
+
+        * java/INSTALL:
+
+          Update for instructions on Mac OS X
+
+Fri Sep 09 18:10:22 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit ac1d04e7de01d1f636ca1c78b455a4240d313543
+
+        * java/tests/multirepo/run_test.pl:
+
+          Added Shebang
+
+Fri Sep 09 18:10:14 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 98e7a4f15ec24ec88f1859eed630fa8e4539b9ba
+
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+
+          Fixed unused variable warning.
+
+Fri Sep 09 18:09:52 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
+        commit 6bcfd318a118e9378748e99b88d94597fdac7965
+
+        * configure:
+
+          Fixed issues for Mac OS X
+
+          1. Fixed the issue with unrecognized platform on El Capitan.
+          2. Fixed the issue with the environmental variable JAVA_PLATFORM
+          is incorrectly set to macosx instead of darwin.
+          3. Added shebang.
+
+Thu Sep 08 07:28:05 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 5df04a595047cd3a1b37e5a7e284ac40c13076a4
+
+          Merge pull request #298 from nxdefiant/master
+
+          RTPS/SPDP: Add new config option SpdpLocalAddress for
+          configuration of the…
+
+Thu Sep 08 07:27:24 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 0a632f081dcdebe75057f5bf9fd8ccb346c126af
+
+          Merge pull request #299 from mitza-oci/master
+
+          Java build/dependency fixes
+
+Wed Sep 07 20:12:54 UTC 2016  Erik Andresen  <ea@drshh.de>
+        commit dd7a0c54573b5916102157e2021df269a4c3ceee
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          remove trailing space
+
+Wed Sep 07 19:37:04 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 3a2090e68a67983c66fbc4bf3a693aa0aeee0fd2
+
+        * java/dds/dcps_java.mpc:
+
+          More Java dependency fixes.
+
+Wed Sep 07 18:31:16 UTC 2016  Erik Andresen  <ea@drshh.de>
+        commit c7a9b52834535a2aa9347b4d13c7361f6408de7f
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Spdp open_unicast_socket: initialize local addr from config
+
+Wed Sep 07 18:07:16 UTC 2016  Erik Andresen  <ea@drshh.de>
+        commit fdfe9be0e3d9720639545e77e3702585941a0049
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Spdp: fix Spdp local addr if rtsp is not used
+
+Wed Sep 07 17:51:28 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 8101526e923630d0e8be5f5898081648f21769bd
+
+        * java/dds/dcps_java.mpc:
+
+          corrected capitalization of java class files
+
+Wed Sep 07 15:12:08 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 761051b83b221205baa4cddef4e98cfca90f380d
+
+        * java/dds/dcps_java.mpc:
+
+          Java build dependencies update (mostly javah) now that we have
+          -implicit:none
+
+Wed Sep 07 12:49:15 UTC 2016  Erik Andresen  <ea@drshh.de>
+        commit 6870e0303636c343ec2e1b0a3ccc21a9ef9e4461
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          RTPS: Add new config option SpdpLocalAddress for configuration of
+          the SPDP
+          Interface. Default to DCPSDefaultAddress if set
+
+Fri Sep 02 19:16:38 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit e1c2d4978b45523fcab12670eb18df5091343f01
+
+          Merge pull request #296 from mitza-oci/master
+
+          Configure script and Java build improvements
+
+Thu Sep 01 20:48:14 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 71827e03943a1c0a5e9e3bcb3c8ee5c10cab82fc
+
+        * configure:
+
+          configure script: support cross-compile for Linux and other
+          script cleanup
+
+Thu Sep 01 19:55:54 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 76614c6511a5415a843bc83b1aae20d8e05c4cb0
+
+        * MPC/config/java.mpb:
+
+          Java bindings: use -implicit:none with javac
+
+Tue Aug 30 22:12:45 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 51b5e841c4ee5d16ced008b64e4285b51ca6f336
+
+          Merge pull request #295 from mitza-oci/master
+
+          Java build process: correct handling of bounded string typedefs
+          in IDL.
+
+Mon Aug 29 20:53:58 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit d207442e1a610afaa5402acc24efb5fe235549f3
+
+        * MPC/modules/IDLBase.pm:
+
+          Java build process: correct handling of bounded string typedefs
+          in IDL.
+
+Mon Aug 29 18:14:14 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 7071d3ba4959b7765a7d668bc1273ffe2bbf1e6b
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Allow selective exclusion of content-subscription features with
+          Java bindings.
+
+Fri Aug 26 13:32:33 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 221fc0760f8e8b854e0d9a4f0dd1b0a4eb74fa9d
+
+          Merge pull request #294 from mitza-oci/master
+
+          Support for Java compact1 profile (use MPC feature full_jre=0)
+
+Thu Aug 25 20:53:44 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 10a5da0693ddb1d06d1d3f937b60abd409d13b4a
+
+        * bin/PerlDDS/Process_Java.pm:
+        * java/idl2jni/compact/org/omg/CORBA/LocalObject.java:
+
+          Continued support for JRE's compact1 profile
+
+Thu Aug 25 20:35:56 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit df1ad8a1675504c7fc777e216e81f4900fd56418
+
+        * java/idl2jni/compact/org/omg/CORBA/BAD_PARAM.java:
+        * java/idl2jni/compact/org/omg/CORBA/NO_IMPLEMENT.java:
+
+          Additional exception types needed for compact1 JRE profile.
+
+Thu Aug 25 19:54:29 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit c32d50a255624b0a1d0cbd089881d21306cead8d
+
+        * MPC/config/idl2jni.mpb:
+        * java/dds/dcps_java.mpc:
+        * java/idl2jni/compact/.gitignore:
+        * java/idl2jni/compact/idl2jni_compact.mpc:
+        * java/idl2jni/compact/org/omg/CORBA/BAD_INV_ORDER.java:
+        * java/idl2jni/compact/org/omg/CORBA/CompletionStatus.java:
+        * java/idl2jni/compact/org/omg/CORBA/Context.java:
+        * java/idl2jni/compact/org/omg/CORBA/ContextList.java:
+        * java/idl2jni/compact/org/omg/CORBA/DomainManager.java:
+        * java/idl2jni/compact/org/omg/CORBA/ExceptionList.java:
+        * java/idl2jni/compact/org/omg/CORBA/NVList.java:
+        * java/idl2jni/compact/org/omg/CORBA/NamedValue.java:
+        * java/idl2jni/compact/org/omg/CORBA/Object.java:
+        * java/idl2jni/compact/org/omg/CORBA/Policy.java:
+        * java/idl2jni/compact/org/omg/CORBA/Request.java:
+        * java/idl2jni/compact/org/omg/CORBA/SetOverrideType.java:
+        * java/idl2jni/compact/org/omg/CORBA/StringSeqHolder.java:
+        * java/idl2jni/compact/org/omg/CORBA/SystemException.java:
+        * lib/.gitignore:
+
+          Support for Java compact1 profile (use MPC feature full_jre=0)
+
+Wed Aug 24 22:24:27 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit da211b244bb92bda2fb43bb37417d504aba0f45a
+
+          Merge pull request #292 from mitza-oci/master
+
+          Use idl2jni from a host build to allow cross-compilation with
+          java=1.
+
+Wed Aug 24 21:20:04 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit b4ac096cc0107024d6dfe75cf323040605f19c35
+
+        * MPC/config/idl2jni.mpb:
+        * java/dds/dcps_java_optional.mpb:
+        * rules.dds.GNU:
+
+          Use idl2jni from a host build to allow cross-compilation with
+          java=1.
+
+Fri Aug 12 22:29:31 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 9b7b4909b51c6cfb177a3c079d8e3c20be2476c8
+
+          Merge pull request #290 from
+          oschwaldp-oci/coverage_script_updates
+
+          Remove base directory flag when processing test coverage files.
+
+Fri Aug 12 22:03:40 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 3b30df2b5ae9f468b607fc6ef7e0f662aca39514
+
+        * tools/scripts/lcov.pl:
+
+          Remove base directory flag when procesing test coverage files.
+
+Thu Aug 11 20:28:32 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 7149e80ab00e35bbae4b46d451a5a625e32147da
+
+          Merge pull request #289 from oschwaldp-oci/durability_support
+
+          Durability support
+
+Thu Aug 11 16:14:18 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 14cfe280cf1836be4328a3ea5ad44a82a2e7fc9b
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Allow durable writer to GAP all the way up to the first durable
+          sample it has available when sending durability gaps. Speeds up
+          newly joining durable reader's ability to catch up with current
+          samples, especially when associating with a rapidly publishing
+          writer.
+
+Thu Aug 11 16:12:47 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit a35ccbb83ac4994c0170a392a1204606b0b92d90
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Fix spelling.
+
+Thu Aug 11 15:54:54 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 64cad2c995730457403b8be63f2bf2fadca0c15e
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fix logging message to be more accurate
+
+Mon Aug 08 18:35:38 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 89599aa4cb17590b749417f9f906014974fde660
+
+          Merge pull request #288 from
+          objectcomputing/coverage_and_footprint
+
+          Try passing the demangle-cpp option to genhtml for coverage page
+          html…
+
+Mon Aug 08 18:34:38 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 42113d537e5baf554b1e2651e37c2e4d583259e7
+
+        * tools/scripts/lcov.pl:
+
+          Try passing the demangle-cpp option to genhtml for coverage page
+          html generation.
+
+Thu Aug 04 15:15:58 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit de0c87910a1fa04e4f9223e5642a428f626019cb
+
+          Merge pull request #287 from
+          objectcomputing/coverage_and_footprint
+
+          Working to fix coverage analysis script. Add tracefile for test
+          outp…
+
+Thu Aug 04 15:11:43 UTC 2016  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2a5c2e5d812418f481db2ca03d460146d4930021
+
+        * tools/scripts/lcov.pl:
+
+          Working to fix coverage analysis script. Add tracefile for test
+          output, not dds_output twice.
+
+Mon Jul 11 21:30:14 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit fef983e57f573ceaeaf8612d6aab1f75cab192ad
+
+          Merge pull request #286 from mitza-oci/master
+
+          Remove installed files that shouldn't have been
+
+Mon Jul 11 17:08:06 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 510ed8a967e8301663fe9431d1ded563d657e59c
+
+        * java/dds/dcps_java.mpc:
+
+          Remove installed files that shouldn't have been
+
+Wed Jul 06 20:16:17 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit cd846b5ab696c8e68605eed5a22f878e351ca804
+
+          Merge pull request #285 from mitza-oci/master
+
+          make install for OpenDDS Java bindings
+
+Wed Jul 06 15:43:59 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit ff4089116601cfba3dae831c431efd9fac4fff58
+
+        * java/dds/dcps_java.mpc:
+        * java/idl2jni/codegen/idl2jni_codegen.mpc:
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+        * java/tao/tao_java.mpc:
+
+          make install for OpenDDS Java bindings
+
+Mon Jun 20 14:33:13 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 2143b75eda224e647cadc7d63d96e2e7758cde71
+
+          Merge pull request #284 from mitza-oci/auto_ptr
+
+          Updated use of ace/Auto_ptr.h
+
+Mon Jun 20 14:33:05 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 567e40f740478a4fd8b635bfcc60ca2ef032f418
+
+          Merge pull request #283 from mitza-oci/master
+
+          Made POA operations for BiDirGIOP more robust when not CORBA/e
+          Compact
+
+Fri Jun 17 19:42:31 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit a0eacc436a01560b9ccf7ffff9632dbf6b51649e
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Updated use of ace/Auto_ptr.h
+
+Fri Jun 17 18:02:27 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 670110a8669d593ff9864277c1b9951b767b19b1
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Made POA operations for BiDirGIOP more robust when not CORBA/e
+          Compact
+
+Fri Jun 17 13:15:01 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit bc81122cfda025967e5cd548b86a09316f9683fa
+
+          Merge pull request #282 from mitza-oci/master
+
+          Made POA operations for CORBA/e Compact and BiDirGIOP more robust
+
+Thu Jun 16 22:13:07 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit ad96d5fcbc426728103b769244cde3522bc10a76
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Made POA operations for CORBA/e Compact and BiDirGIOP more robust
+
+Tue May 24 21:29:02 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit c29e3209d9cdb0a4e85e637368fa5d4fe78f46f9
+
+          Merge pull request #281 from mitza-oci/master
+
+          Made the BiDirGIOP change compatible with CORBA/e Compact.
+
+Tue May 24 14:52:36 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 51e14c4a474377a16280c0a38e9f0d99363d1827
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Made the BiDirGIOP change compatible with CORBA/e Compact.
+
+Mon May 23 22:25:07 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 06dd27acd7ac8814432f999fabd50f060e8cd2ae
+
+          Merge pull request #280 from mitza-oci/master
+
+          Made the BiDirGIOP change compatible with static builds.
+
+Mon May 23 14:29:24 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit b6267f0e45880f75dbda0382363350448b74a70d
+
+        * MPC/config/dcps_optional_features.mpb:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+
+          Made the BiDirGIOP change compatible with static builds.
+
+Fri May 20 18:37:57 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 0ba0ddbe48bba053ef7e1b1e55ad1df72eb06ac8
+
+          Merge pull request #279 from mitza-oci/bidir-giop
+
+          DCPSInfoRepo: use TAO's Bidirectional GIOP support
+
+Fri May 20 14:19:08 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit bf9bdbb232d5ed940a483aa4eacc9931a2e6c279
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed fuzz script error
+
+Fri May 20 13:55:09 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 432c44ba85ec84796f6bf248300563edfdac3e85
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * tests/DCPS/Federation/run_test.pl:
+
+          BiDir GIOP configurability
+
+Thu May 19 15:57:38 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit fe67c140b59041c1ddfe68542255ba3e1ce9421a
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          InfoRepo dispatching ORB isn't compatible with BiDir GIOP
+
+          Instead configure the ORB to avoid nested upcalls
+
+Wed May 18 14:16:19 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 10aff18f81cde8cabb4185953f2799a8d7256649
+
+        * DDS_TAOv2.mwc:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Use TAO's BiDir GIOP support in InfoRepo discovery
+
+Wed May 18 01:29:08 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 4f11e7a79ddc0cc345aa84e82fd71f130499db71
+
+          Merge pull request #278 from mitza-oci/master
+
+          WriteDataContainer and DataLink bug fixes
+
+Tue May 17 20:31:04 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 712a18ab2a0cb77c0d133a6f418f084e00f77d45
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+
+          One more fix to DataLink ref counting when interacting with
+          Reactor
+
+Tue May 17 17:16:07 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit f20a5348f60cddeff0c536e5648f5a677f288246
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Check for invalid (but non-0) instance handle in write()
+
+Mon May 16 16:06:40 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit b5c1bd073b142e9dac2b8bf3df2a9ab965c4b016
+
+          Merge pull request #277 from mitza-oci/master
+
+          Fixed compile error when built-in topics are disabled.
+
+Mon May 16 14:23:56 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 4e495766758c05781418e33ca12f4db60c474719
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed compile error when built-in topics are disabled.
+
+Sat May 14 22:49:10 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 210be23bb7cf7cab20cf942f4d6faa0a070e9827
+
+          Merge pull request #276 from mitza-oci/master
+
+          Update TransportClient for changes in TransportSend/RecvListener
+          from PR 275
+
+Fri May 13 19:47:15 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit e1d2a077785149733e264620d8f9a9a66daef4ae
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Update TransportClient for changes in TransportSend/RecvListener
+          from PR 275
+
+Fri May 13 18:58:18 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit a1f1063221a5ea03169854f7fab17f14f3a0ef73
+
+          Merge pull request #275 from mitza-oci/master
+
+          Fixed reference counting and other memory management bugs
+
+Fri May 13 13:45:07 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit ca575ef87efba0af5b2d7e7dc7bb035464b29ce5
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+
+          DataLink::notify_connection_deleted needs to access the send/recv
+          listener maps with the correct lock. Required changing
+          TransportSendListener to use a similar refcount mechanism to
+          TransportReceiveListener.
+
+Thu May 12 16:07:57 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 07aadd0c40e705e82f0ebf25ab0ebfe191585ba6
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          C++03 compatibility: vector::erase doesn't work with
+          const_iterator
+
+Thu May 12 15:48:31 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit fe4e053b0e13281bf03b92e9df99eaf0762069b5
+
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          OwnershipManager::InstanceMap needs a set of readers, not a
+          vector.
+
+Wed May 11 22:11:57 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 60aff220884c11c2ef38599e0feb02bc2c543624
+
+        * dds/DCPS/RemoveAssociationSweeper.h:
+
+          Track references to WriterInfo used by RemoveAssociationSweeper
+
+Wed May 11 20:10:04 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit d4b9467643fea1d2b7c323aa0980a713beffe5e7
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+
+          DCPSInfoRepo Built-In Topics cleanup handling
+
+Wed May 11 16:03:27 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 4bc47758f756490032a8a2821cdac153ef357241
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+
+          InfoRepoDiscovery can be used by >1 domain participant
+
+Wed May 11 15:59:56 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 5aa971b570f383b1f8aa6d7470ea9e0a3820b4b6
+
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+
+          Fixed reference counting bugs in MultiRepoTest
+
+Tue May 10 19:48:20 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 3c47a30b0827ac19a8e5bc9f867344f595e99556
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Make sure we don't have any notifications in the reactor after a
+          wait().
+
+Tue May 10 19:47:51 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 91d67e3ec15cc211a2a46c07996871852b61aa6c
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          More reference counting fixes.
+
+Mon May 09 22:24:37 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 9d1ca718dffe587172df080f6adf309efb44823f
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+
+          Fixed reference counting bugs
+
+Mon May 09 21:57:14 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 4feb88a91310b1432801ef8b2c6875c4e079c6b8
+
+          Merge pull request #274 from mitza-oci/master
+
+          Continued bug fixing for pull request #272
+
+Mon May 09 19:25:51 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 103ffaf3cff5bc96001fa2c819f77cf63abf9bd0
+
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          One more fix for WDC buffer management with resends
+
+Mon May 09 17:31:46 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit e9394052a0e746b1b8b03a66740b38760d12c1e2
+
+          Merge pull request #273 from mitza-oci/master
+
+          Portability and memory fixes for pull request #272
+
+Mon May 09 14:41:12 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit b0f8a36c29efa06bf930e5a484deac81656c49f4
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed order of operations in WDC buffer management
+
+Fri May 06 19:40:51 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit fd3e1f485b6990ec1de7ad13341f09413ac61b11
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Release buffers for resent samples upon callback to WDC
+
+Fri May 06 14:28:29 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit ca1d960872cad91db8ff2d8e494ccb4b09d332ef
+
+        * dds/DCPS/SendStateDataSampleList.h:
+
+          Standard-conforming iterators (Forward or stronger) need default
+          constructors.
+
+Fri May 06 14:19:46 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 7c16250052409755da9609477b466255a0185ef0
+
+        * dds/DCPS/SendStateDataSampleList.h:
+
+          Adapt to non-standard SunCC standard library.
+
+Thu May 05 18:03:21 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 85d009b1fb4e0097fda1184a61c5da4614f3ea78
+
+          Merge pull request #272 from mitza-oci/master
+
+          Updated handling of QoS in WriteDataContainer:
+
+Thu May 05 15:38:24 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 17c15a0feef8bea9896f2c7377505e49395d3304
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/FACE/CallbackAndReceive/Subscriber/Subscriber.cpp:
+        * tests/FACE/Header/Subscriber/Subscriber.cpp:
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Utils.h:
+
+          Updated tests for WriteDataContainer changes.
+
+Thu May 05 15:36:27 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit c7b323493196d08475070468038a5eb1ec9abf2e
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          open_appropriate_socket_type doesn't need to log a warning when
+          open fails, callers will log as needed.
+
+Wed May 04 22:30:12 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 8cfeaf5938a7e12e4def3e5126859de364680af7
+
+        * dds/DCPS/SendStateDataSampleList.inl:
+
+          Clear next/prev pointers when inserting into list
+
+Wed May 04 21:22:50 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 26d7c6c5a59c6331775a15246b053871aa98109d
+
+        * dds/DCPS/OwnershipManager.h:
+
+          Fixed trailing whitespace.
+
+Wed May 04 21:08:14 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 13332ffae8b22c3a72b11b215bf31fed81e7b0a0
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/InstanceDataSampleList.cpp:
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriterDataSampleList.h:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Updated handling of QoS in WriteDataContainer:
+
+          - RESOURCE_LIMITS.max_samples_per_instance controls total samples
+          that can be
+          stored per instance, independent of HISTORY
+          - HISTORY.depth controls number of samples (per instance) that
+          will be made
+          available to late-joining readers if DURABILITY is enabled
+          - KEEP_ALL history uses max_samples_per_instance as its depth
+          - WriteDataContainer is more eager to remove samples that are no
+          longer needed
+          - WriteDataContainer will not remove samples that are required to
+          implement
+          DURABILITY, hence if RELIABILITY is enabled this can block a
+          write() just
+          like other "no resource available" scenarios
+
+Mon Apr 04 17:51:29 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit c6802de3b4bd82b0806337e83d6228ba05db24ee
+
+        * .gitignore:
+
+          Ignore a temp file used by latest update to Visual Studio 2015.
+
+Tue Mar 15 15:56:04 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 159b5a6418ac088f1fa23326a15374832e9a7663
+
+          Merge pull request #267 from mitza-oci/master
+
+          Fixing issue of some *S.h headers missing from "make install"
+
+Tue Mar 15 15:07:58 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 58b4bd317984421656ecfcfec2f79db6b2ec9a50
+
+        * dds/dcps_optional_safety.mpb:
+
+          Work-around what appears to be a bug in MPC, make sure that *S.h
+          are known to the makefiles and thus get installed.
+
+Wed Feb 17 21:13:35 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 790aad346862c000eeda41061f6c1b6e446f9c89
+
+        * tests/FACE/Conformance/ConformanceTest-SafetyBase.cfg:
+        * tests/FACE/Conformance/ConformanceTest-SafetyExt.cfg:
+
+          Updated paths in FACE conformance test config files.
+
+Tue Feb 02 15:33:14 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit d30aefdf79d235e5954603f203f0120ecbfa2fc1
+
+          Merge pull request #266 from mitza-oci/master
+
+          Added FreeBSD to the configure script.
+
+Fri Jan 29 20:58:03 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit f377c4fb8d8c3e720e3c349241f1aede06a9ae43
+
+        * configure:
+
+          Added FreeBSD to the configure script.
+
+          Note that the version of ACE in use must have support for FreeBSD
+          to make this usable.
+
+Thu Jan 28 17:39:13 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit a2b6185fe1a7ba7a2aada9f10d8f88c5269eb30e
+
+          Merge pull request #265 from mitza-oci/master
+
+          Interop fix: account for ParticipantMessageData key-only
+          messages.
+
+Thu Jan 28 16:28:37 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit ced18797469acda3b5050685bd725d83237a0423
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Interop fix: account for ParticipantMessageData key-only
+          messages.
+
+Fri Jan 15 23:02:34 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit bf8eb8185c64b499fe4e15c5f897e1e1438896ab
+
+          Merge pull request #264 from mitza-oci/master
+
+          Import the Intermediate Type Language (itl) library which was
+          previously in a separate git repo.
+
+Fri Jan 15 21:31:54 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 5360b3fb00232da40208a4dfa25a163c9bddb797
+
+        * tools/IntermediateTypeLang/cpp/main.cpp:
+
+          Typo in the previous commit
+
+Fri Jan 15 21:27:21 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 05eb5e4695ca044c082217fb19bdce28701b6bab
+
+        * .travis.yml:
+        * tools/IntermediateTypeLang/cpp/main.cpp:
+
+          Fuzz fixes for itl/rapidjson.
+
+Fri Jan 15 21:15:19 UTC 2016  Adam Mitz  <mitza@ociweb.com>
+        commit 39e99e13c00e761a925d86ae7968be729eedf3c7
+
+        * .gitmodules:
+        * MPC/config/itl.mpb:
+        * tools/IntermediateTypeLang/PROJECTS.org:
+        * tools/IntermediateTypeLang/README.md:
+        * tools/IntermediateTypeLang/cpp/Makefile:
+        * tools/IntermediateTypeLang/cpp/itl/itl.hpp:
+        * tools/IntermediateTypeLang/cpp/main.cpp:
+        * tools/IntermediateTypeLang/cpp/rapidjson:
+        * tools/IntermediateTypeLang/samples/dds/BazDef.itl:
+        * tools/IntermediateTypeLang/samples/dds/BoundTest.itl:
+        * tools/IntermediateTypeLang/samples/dds/FaceMessage.itl:
+        * tools/IntermediateTypeLang/samples/dds/FilterStruct.itl:
+        * tools/IntermediateTypeLang/samples/dds/Foo1Def.itl:
+        * tools/IntermediateTypeLang/samples/dds/Foo2Def.itl:
+        * tools/IntermediateTypeLang/samples/dds/Foo3Def.itl:
+        * tools/IntermediateTypeLang/samples/dds/Foo4Def.itl:
+        * tools/IntermediateTypeLang/samples/dds/FooDef.itl:
+        * tools/IntermediateTypeLang/samples/dds/FooDef2.itl:
+        * tools/IntermediateTypeLang/samples/dds/FooDef3.itl:
+        * tools/IntermediateTypeLang/samples/dds/FooType.itl:
+        * tools/IntermediateTypeLang/samples/dds/KeyTest.itl:
+        * tools/IntermediateTypeLang/samples/dds/KeyTest2.itl:
+        * tools/IntermediateTypeLang/samples/dds/KeyedData.itl:
+        * tools/IntermediateTypeLang/samples/dds/Messenger.itl:
+        * tools/IntermediateTypeLang/samples/dds/Messenger2.itl:
+        * tools/IntermediateTypeLang/samples/dds/MetaStructTest.itl:
+        * tools/IntermediateTypeLang/samples/dds/MultiTopicTest.itl:
+        * tools/IntermediateTypeLang/samples/dds/NoKeyData.itl:
+        * tools/IntermediateTypeLang/samples/dds/Nsc.itl:
+        * tools/IntermediateTypeLang/samples/dds/Reliability.itl:
+        * tools/IntermediateTypeLang/samples/dds/SampleType.itl:
+        * tools/IntermediateTypeLang/samples/dds/SharedTypes.itl:
+        * tools/IntermediateTypeLang/samples/dds/Simple.itl:
+        * tools/IntermediateTypeLang/samples/dds/Test.itl:
+        * tools/IntermediateTypeLang/samples/dds/TestFramework.itl:
+        * tools/IntermediateTypeLang/samples/dds/TestMsg.itl:
+
+          Import the Intermediate Type Language (itl) library which was
+          previously in a separate git repo.
+
+          If itl is used (MPC feature no_itl=0), the rapidjson library is
+          needed and can be obtained via git submodules.
+
+Tue Dec 22 23:01:13 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit 74ac421181eaab53160a2b2b3ad359dd976fe0d0
+
+          Merge pull request #263 from mitza-oci/master
+
+          Removed support for vc71 and TAO 1.x.
+
+Tue Dec 22 20:02:37 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+        commit c088509fa8859f4b88e35819b5015f6cdd461796
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * tests/DCPS/Federation/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+
+          Removed support for building on Visual C++ 7.1 (vc71 / Visual
+          Studio 2003).
+
+Tue Dec 22 19:41:05 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * .gitignore:
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/be_init.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/dds_visitor.h:
+        * dds/idl/langmap_generator.cpp:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/runtime/idl2jni_BaseJavaPeer.h:
+
+          Removed support for building against TAO 1.x / ACE 5.x.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

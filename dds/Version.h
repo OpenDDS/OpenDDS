@@ -6,6 +6,6 @@
  */
 
 #define DDS_MAJOR_VERSION 3
-#define DDS_MINOR_VERSION 8
+#define DDS_MINOR_VERSION 9
 #define DDS_MICRO_VERSION 0
-#define DDS_VERSION "3.8"
+#define DDS_VERSION "3.9"
