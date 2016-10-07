@@ -335,11 +335,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     std::reverse_copy(impls_.begin(), impls_.end(),
                       std::back_inserter(pend.impls_));
 
-    pend.initiate_connect(this, guard);
-
-    //Revisit if this should be used instead of always returning true.
-    //return pend.initiate_connect(this, guard);
-    return true;
+    return pend.initiate_connect(this, guard);
 
   } else { // passive
 
@@ -431,6 +427,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
     result = impl->connect_datalink(remote, attribs_, this);
+    guard.acquire();
     if (!result.success_) {
       if (DCPS_debug_level) {
         GuidConverter writer_converter(repo_id_);
@@ -442,7 +439,6 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
       }
       return false;
     }
-    guard.acquire();
   }
 
   //Check to make sure the pending assoc still exists in the map and hasn't been slated for removal
@@ -527,7 +523,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                               "between %C and remote %C unsuccessful\n",
                               OPENDDS_STRING(tmp_local).c_str(),
                               OPENDDS_STRING(tmp_remote).c_str()), 0);
-          return false;
+          break;
         }
 
         if (res.success_) {
