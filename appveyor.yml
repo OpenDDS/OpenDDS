@@ -9,8 +9,8 @@ install:
   - cd ..
   - set MPC_ROOT=%CD%\ext\MPC
   - call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-  - call configure --no-tests --ace=ext\ATCD\ACE
-  - ext\ATCD\ACE\bin\mwc.pl -type vc12 tests\DCPS\Messenger
+  - call configure --no-tests --ace=ext\ACE_TAO\ACE
+  - ext\ACE_TAO\ACE\bin\mwc.pl -type vc12 tests\DCPS\Messenger
 
 platform:
   - x64
