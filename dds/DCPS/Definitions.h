@@ -31,9 +31,15 @@
 #define DDS_HAS_WCHAR
 #endif
 
+#if defined (ACE_HAS_CPP11)
+#define OPENDDS_DELETED_COPY_CTOR_ASSIGN(CLASS)         \
+  CLASS(const CLASS&) = delete;           \
+  CLASS& operator=(const CLASS&) = delete;
+#else
 #define OPENDDS_DELETED_COPY_CTOR_ASSIGN(CLASS)         \
   ACE_UNIMPLEMENTED_FUNC(CLASS(const CLASS&))           \
   ACE_UNIMPLEMENTED_FUNC(CLASS& operator=(const CLASS&))
+#endif
 
 // If features content_filtered_topic, multi_topic, and query_condition
 // are all disabled, define a macro to indicate common code these
