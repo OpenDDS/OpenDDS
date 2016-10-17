@@ -8,6 +8,7 @@
 #ifndef OPENDDS_DCPS_DEFINITION_H
 #define OPENDDS_DCPS_DEFINITION_H
 
+#include "dds/Versioned_Namespace.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
