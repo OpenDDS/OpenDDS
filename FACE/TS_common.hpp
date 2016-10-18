@@ -4,7 +4,7 @@
 
 // Solaris already has NOSIGNAL in system headers
 // which we do not use
-#if (defined (__sun) && defined (NOSIGNAL)) 
+#if (defined (__sun) && defined (NOSIGNAL))
 #undef NOSIGNAL
 #endif
 
