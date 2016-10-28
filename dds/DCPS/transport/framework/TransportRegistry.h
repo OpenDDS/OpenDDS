@@ -20,7 +20,6 @@
 #include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
 ACE_END_VERSIONED_NAMESPACE_DECL
@@ -31,6 +30,8 @@ namespace DDS {
 }
 
 #define TheTransportRegistry OpenDDS::DCPS::TransportRegistry::instance()
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -125,6 +126,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "TransportRegistry.inl"

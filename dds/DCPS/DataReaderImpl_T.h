@@ -9,6 +9,8 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace DCPS {
 
@@ -2017,5 +2019,7 @@ DataAllocator* data_allocator_;
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_DataReaderImpl_T_h */

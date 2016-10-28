@@ -19,7 +19,6 @@
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Reactor_Timer_Interface.h"
 

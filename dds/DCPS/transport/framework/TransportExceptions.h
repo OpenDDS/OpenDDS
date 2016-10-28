@@ -10,6 +10,8 @@
 
 #include "dds/DCPS/dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 namespace Transport {
@@ -29,5 +31,7 @@ class OpenDDS_Dcps_Export ConfigurationConflict  : public Exception {};
 } // namespace Transport
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_TRANSPORT_EXCEPTIONS_H */

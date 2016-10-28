@@ -5,8 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Service_Participant.h"
-
 #include "ace/OS_NS_string.h"
 #include "ace/Truncate.h"
 
@@ -15,6 +13,8 @@ namespace {
 const ACE_UINT32 NSECS_IN_SEC = 1000000000;
 
 } // namespace
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -1489,3 +1489,5 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataWriterQos& a_datawriter_qos,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

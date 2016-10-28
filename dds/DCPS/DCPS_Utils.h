@@ -17,6 +17,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -81,5 +83,7 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & qos1
                                           const DDS::DomainParticipantQos & qos2);
 
 }}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_UTILS_H */

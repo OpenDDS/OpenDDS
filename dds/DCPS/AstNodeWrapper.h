@@ -16,6 +16,8 @@
 #include <sstream>
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -54,6 +56,8 @@ struct FilterEvaluator::AstNodeWrapper {
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
 #endif

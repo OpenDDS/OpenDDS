@@ -8,6 +8,8 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace DCPS {
 
@@ -609,5 +611,7 @@ private:
 
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_DataWriterImpl_T_h */

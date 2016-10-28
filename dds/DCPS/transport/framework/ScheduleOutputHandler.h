@@ -12,6 +12,8 @@
 #include <ace/Event_Handler.h>
 #include "dds/DCPS/PoolAllocationBase.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace DCPS {
 
 class TransportSendStrategy;
@@ -53,6 +55,8 @@ class ScheduleOutputHandler : public ACE_Event_Handler, public PoolAllocationBas
 };
 
 }} // End of namespace OpenDDS::DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "ScheduleOutputHandler.inl"

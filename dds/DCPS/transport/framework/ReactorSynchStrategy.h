@@ -11,7 +11,11 @@
 #include "dds/DCPS/dcps_export.h"
 #include "ThreadSynchStrategy.h"
 
-#include <ace/Reactor.h>
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+class ACE_Reactor;
+ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS { namespace DCPS {
 
@@ -60,6 +64,8 @@ public:
 };
 
 }} // end namespace OpenDDS::DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "ReactorSynchStrategy.inl"

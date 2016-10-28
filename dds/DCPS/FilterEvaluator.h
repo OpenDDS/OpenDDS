@@ -17,6 +17,8 @@
 #include "Comparator_T.h"
 #include "RcObject_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -186,6 +188,8 @@ template<typename T>
 struct MetaStructImpl;
 
 }  }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #endif

@@ -13,6 +13,8 @@
 #include <algorithm>
 #include "dds/DCPS/PoolAllocator.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -81,5 +83,7 @@ public:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DURABILITY_QUEUE_H */

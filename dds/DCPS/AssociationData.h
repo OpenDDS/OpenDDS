@@ -12,6 +12,8 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "ace/INET_Addr.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -51,5 +53,7 @@ struct AssociationData {
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_ASSOCIATIONDATA_H */
