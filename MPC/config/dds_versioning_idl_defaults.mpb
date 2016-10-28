@@ -4,5 +4,6 @@
 
 project : taoidldefaults {
   idlflags += -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
-              -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL
+              -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
+              -Wb,versioning_include=dds/Versioned_Namespace.h
 }
