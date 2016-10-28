@@ -8,10 +8,9 @@
 #ifndef OPENDDS_DCPS_DEFINITION_H
 #define OPENDDS_DCPS_DEFINITION_H
 
-#include "dds/Versioned_Namespace.h"
-#include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/Serializer.h"
 #include "ace/Message_Block.h"
 #include "ace/Global_Macros.h"
