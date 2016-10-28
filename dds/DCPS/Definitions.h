@@ -47,6 +47,8 @@
 #define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #endif
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -285,5 +287,6 @@ struct VarLess : public std::binary_function<V, V, bool> {
 } // namespace OpenDDS
 } // namespace DCPS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_DEFINITION_H */
