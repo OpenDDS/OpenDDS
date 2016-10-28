@@ -13,6 +13,7 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -47,7 +48,6 @@ public:
                                    const ::DDS::SubscriptionMatchedStatus & status)=0;
 };
 
-
 typedef RcHandle<RecorderListener> RecorderListener_rch;
 
 typedef Recorder* Recorder_ptr;
@@ -70,7 +70,7 @@ public:
    *  Find the bit key for a given repo id.
    */
   virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId&     id,
-                                              DDS::BuiltinTopicKey_t& key)=0;
+                                              DDS::BuiltinTopicKey_t& key) = 0;
 #endif
 
   /**
@@ -104,16 +104,18 @@ public:
 }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace TAO {
 
 template<>
-struct OpenDDS_Dcps_Export Objref_Traits<OpenDDS::DCPS::Recorder> {
-  static OpenDDS::DCPS::Recorder_ptr duplicate(OpenDDS::DCPS::Recorder_ptr p);
-  static void release(OpenDDS::DCPS::Recorder_ptr p);
-  static OpenDDS::DCPS::Recorder_ptr nil();
-  static CORBA::Boolean marshal(const OpenDDS::DCPS::Recorder_ptr p,
+struct OpenDDS_Dcps_Export Objref_Traits< ::OpenDDS::DCPS::Recorder> {
+  static ::OpenDDS::DCPS::Recorder_ptr duplicate( ::OpenDDS::DCPS::Recorder_ptr p);
+  static void release(::OpenDDS::DCPS::Recorder_ptr p);
+  static ::OpenDDS::DCPS::Recorder_ptr nil();
+  static ::CORBA::Boolean marshal(const ::OpenDDS::DCPS::Recorder_ptr p,
                                 TAO_OutputCDR& cdr);
 };
 

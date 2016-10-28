@@ -20,6 +20,8 @@
 
 class SafetyProfilePoolTest;
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -90,13 +92,19 @@ private:
 
 }}
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #else // ! OPENDDS_SAFETY_PROFILE
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 typedef ACE_Allocator SafetyProfilePool;
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_SAFETY_PROFILE
 

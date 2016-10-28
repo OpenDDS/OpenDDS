@@ -17,6 +17,8 @@
 #include "BuiltInTopicUtils.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -125,5 +127,7 @@ void BitPubListenerImpl::on_sample_lost(
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // DDS_HAS_MINIMUM_BIT

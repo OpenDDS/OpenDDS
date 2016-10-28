@@ -12,6 +12,7 @@
 
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "Definitions.h"
 #include "LocalObject.h"
 
