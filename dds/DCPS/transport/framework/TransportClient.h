@@ -180,7 +180,7 @@ private:
     ACE_Event_Handler::Reference_Count add_reference() {  this->_add_ref(); return 1; }
     ACE_Event_Handler::Reference_Count remove_reference() { this->_remove_ref(); return 1; }
   };
-  
+
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;
 
   typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
@@ -236,8 +236,8 @@ private:
       virtual void execute()
       {
         if (timer_->reactor()) {
-          timer_->reactor()->schedule_timer(assoc_.in(), 
-                                            transport_client_, 
+          timer_->reactor()->schedule_timer(assoc_.in(),
+                                            transport_client_,
                                             transport_client_->passive_connect_duration_);
         }
       }

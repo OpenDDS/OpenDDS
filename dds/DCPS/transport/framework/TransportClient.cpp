@@ -303,13 +303,13 @@ TransportClient::associate(const AssociationData& data, bool active)
               OPENDDS_STRING(tc_assoc).c_str(),
               OPENDDS_STRING(remote_new).c_str()), 0);
   } else {
-    
+
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TransportClient::associate ")
                ACE_TEXT("already associating with remote.\n")));
 
     return false;
-    
+
   }
 
   PendingAssoc_rch pend = iter->second;
