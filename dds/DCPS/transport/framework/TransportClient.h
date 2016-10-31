@@ -164,7 +164,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
 
-  struct PendingAssoc : ACE_Event_Handler, public PoolAllocationBase {
+  struct PendingAssoc : ACE_Event_Handler, public RcObject<ACE_SYNCH_MUTEX> {
     bool active_, removed_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
@@ -177,9 +177,13 @@ private:
 
     bool initiate_connect(TransportClient* tc, Guard& guard);
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
+    ACE_Event_Handler::Reference_Count add_reference() {  this->_add_ref(); return 1; }
+    ACE_Event_Handler::Reference_Count remove_reference() { this->_remove_ref(); return 1; }
   };
+  
+  typedef RcHandle<PendingAssoc> PendingAssoc_rch;
 
-  typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc*, GUID_tKeyLessThan) PendingMap;
+  typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
 
   class PendingAssocTimer : public ReactorInterceptor {
   public:
@@ -188,23 +192,16 @@ private:
       : ReactorInterceptor(reactor, owner)
     { }
 
-    void schedule_timer(TransportClient* transport_client, PendingAssoc* pend)
+    void schedule_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
       ScheduleCommand c(this, transport_client, pend);
       execute_or_enqueue(c);
     }
 
-    void cancel_timer(TransportClient* transport_client, PendingAssoc* pend)
+    void cancel_timer(TransportClient* transport_client, const PendingAssoc_rch& pend)
     {
       CancelCommand c(this, transport_client, pend);
       execute_or_enqueue(c);
-    }
-
-    void delete_pending_assoc(PendingAssoc* pend)
-    {
-      DeleteCommand c(pend);
-      // Always defer.
-      enqueue(c);
     }
 
     virtual bool reactor_is_shut_down() const
@@ -220,7 +217,7 @@ private:
     public:
       CommandBase(PendingAssocTimer* timer,
                   TransportClient* transport_client,
-                  PendingAssoc* assoc)
+                  const PendingAssoc_rch& assoc)
         : timer_ (timer)
         , transport_client_ (transport_client)
         , assoc_ (assoc)
@@ -228,41 +225,34 @@ private:
     protected:
       PendingAssocTimer* timer_;
       TransportClient* transport_client_;
-      PendingAssoc* assoc_;
+      PendingAssoc_rch assoc_;
     };
     struct ScheduleCommand : public CommandBase {
       ScheduleCommand(PendingAssocTimer* timer,
                       TransportClient* transport_client,
-                      PendingAssoc* assoc)
+                      const PendingAssoc_rch& assoc)
         : CommandBase (timer, transport_client, assoc)
       { }
       virtual void execute()
       {
         if (timer_->reactor()) {
-          timer_->reactor()->schedule_timer(assoc_, transport_client_, transport_client_->passive_connect_duration_);
+          timer_->reactor()->schedule_timer(assoc_.in(), 
+                                            transport_client_, 
+                                            transport_client_->passive_connect_duration_);
         }
       }
     };
     struct CancelCommand : public CommandBase {
       CancelCommand(PendingAssocTimer* timer,
                     TransportClient* transport_client,
-                    PendingAssoc* assoc)
+                    const PendingAssoc_rch& assoc)
         : CommandBase (timer, transport_client, assoc)
       { }
       virtual void execute()
       {
         if (timer_->reactor()) {
-          timer_->reactor()->cancel_timer(assoc_);
+          timer_->reactor()->cancel_timer(assoc_.in());
         }
-      }
-    };
-    struct DeleteCommand : public CommandBase {
-      DeleteCommand(PendingAssoc* assoc)
-        : CommandBase (0, 0, assoc)
-      { }
-      virtual void execute()
-      {
-        delete assoc_;
       }
     };
   };
