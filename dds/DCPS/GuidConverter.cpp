@@ -13,6 +13,8 @@
 #include "ace/ACE.h"
 #include "ace/OS_NS_stdio.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -153,3 +155,4 @@ GuidConverter::uniqueId() const
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

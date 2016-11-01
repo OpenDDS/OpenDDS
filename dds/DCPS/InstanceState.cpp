@@ -19,6 +19,8 @@
 # include "InstanceState.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::InstanceState::InstanceState(DataReaderImpl* reader,
                                             ACE_Recursive_Thread_Mutex& lock,
                                             DDS::InstanceHandle_t handle)
@@ -298,4 +300,4 @@ OpenDDS::DCPS::InstanceState::reset_ownership (::DDS::InstanceHandle_t instance)
   this->reader_->reset_ownership(instance);
 }
 
-
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

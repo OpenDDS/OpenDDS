@@ -18,6 +18,8 @@
 #include <stdexcept>
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -97,5 +99,7 @@ MultiTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_NO_MULTI_TOPIC

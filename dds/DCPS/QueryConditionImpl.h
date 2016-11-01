@@ -21,6 +21,8 @@
 
 #include <vector>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -64,11 +66,14 @@ private:
   CORBA::String_var query_expression_;
   DDS::StringSeq query_parameters_;
   FilterEvaluator evaluator_;
-  mutable ACE_Recursive_Thread_Mutex lock_; //concurrent access to query_parameters_
+  /// Concurrent access to query_parameters_
+  mutable ACE_Recursive_Thread_Mutex lock_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_NO_QUERY_CONDITION
 

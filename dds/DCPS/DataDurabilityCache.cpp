@@ -9,7 +9,6 @@
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "DataDurabilityCache.h"
 #include "Service_Participant.h"
 #include "SendStateDataSampleList.h"
@@ -28,6 +27,7 @@
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_sys_time.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <fstream>
 #include <algorithm>

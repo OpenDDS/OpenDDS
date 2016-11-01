@@ -8,6 +8,8 @@
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 using namespace OpenDDS::DCPS;
 
 MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
@@ -144,3 +146,5 @@ MessageTracker::dropped_count()
 {
   return dropped_count_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

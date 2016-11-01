@@ -24,6 +24,7 @@
 #include "CoherentChangeControl.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -121,5 +122,7 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE

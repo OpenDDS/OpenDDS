@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 DDS::DataReader_ptr
 OpenDDS::DCPS::DataReaderImpl::get_dr_obj_ref()
@@ -41,3 +43,5 @@ OpenDDS::DCPS::DataReaderImpl::disable_transport()
 {
   this->transport_disabled_ = true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

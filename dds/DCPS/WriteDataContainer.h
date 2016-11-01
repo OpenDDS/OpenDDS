@@ -29,6 +29,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -537,5 +539,7 @@ private:
 
 } /// namespace OpenDDS
 } /// namespace DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_WRITE_DATA_CONTAINER_H */

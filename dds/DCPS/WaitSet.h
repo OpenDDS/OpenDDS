@@ -22,6 +22,8 @@
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "ace/Atomic_Op.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -82,6 +84,8 @@ private:
 };
 
 } // namespace DDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 

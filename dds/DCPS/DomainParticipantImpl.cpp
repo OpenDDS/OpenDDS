@@ -59,6 +59,8 @@ int find(
 
 } // namespace Util
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -2234,3 +2236,5 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DEC

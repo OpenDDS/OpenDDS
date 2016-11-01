@@ -22,6 +22,8 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "tao/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -928,6 +930,7 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
   return true;
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 } // namespace DCPS
 } // namespace OpenDDS

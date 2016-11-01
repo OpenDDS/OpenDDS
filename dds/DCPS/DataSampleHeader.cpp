@@ -65,6 +65,8 @@ namespace {
   }
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -728,3 +730,5 @@ DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

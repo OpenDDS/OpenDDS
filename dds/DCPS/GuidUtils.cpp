@@ -33,6 +33,8 @@ setopts(std::ostream& os)
 
 } // namespace
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace DCPS {
 
 OPENDDS_STRING
@@ -121,3 +123,5 @@ operator>>(std::istream& is, GUID_t& rhs)
 #endif
 
 }  }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

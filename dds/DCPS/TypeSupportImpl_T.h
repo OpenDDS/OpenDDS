@@ -8,6 +8,8 @@
 #include "dds/DCPS/DataReaderImpl_T.h"
 #include "dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace DCPS {
 
@@ -91,5 +93,7 @@ namespace OpenDDS {
 
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_TypeSupportImpl_h */

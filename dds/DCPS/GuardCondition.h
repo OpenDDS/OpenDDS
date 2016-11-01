@@ -17,6 +17,8 @@
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/ConditionImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
 
 class GuardCondition;
@@ -43,6 +45,8 @@ private:
 };
 
 } // namespace DDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 

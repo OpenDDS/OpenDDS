@@ -20,6 +20,8 @@
 
 class DDS_TEST;
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -167,5 +169,7 @@ void RemoveAssociationSweeper<T>::CancelCommand::execute()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_REMOVEASSOCIATIONSWEEPER_H  */

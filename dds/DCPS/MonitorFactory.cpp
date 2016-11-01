@@ -8,6 +8,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "MonitorFactory.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -95,6 +97,8 @@ MonitorFactory::service_initialize()
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 using namespace OpenDDS::DCPS;
 
 
@@ -106,3 +110,4 @@ ACE_STATIC_SVC_DEFINE (MonitorFactory,
                        ACE_Service_Type::DELETE_THIS |
                          ACE_Service_Type::DELETE_OBJ,
                        0)
+

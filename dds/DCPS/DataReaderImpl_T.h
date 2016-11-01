@@ -35,7 +35,7 @@ namespace OpenDDS {
 
     typedef OPENDDS_MAP_CMP(MessageType, ::DDS::InstanceHandle_t,
                             typename TraitsType::LessThanType) InstanceMap;
-    typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageType, ACE_Null_Mutex>  DataAllocator;
+    typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageType, ACE_Null_Mutex>  DataAllocator;
 
     typedef typename TraitsType::DataReaderType Interface;
 
@@ -67,7 +67,7 @@ namespace OpenDDS {
     virtual ::DDS::ReturnCode_t enable_specific ()
     {
       data_allocator_ = new DataAllocator(get_n_chunks ());
-      if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
+      if (OpenDDS::DCPS::DCPS_debug_level >= 2)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) %CDataReaderImpl::")
                    ACE_TEXT("enable_specific-data")
@@ -616,9 +616,9 @@ namespace OpenDDS {
     received_data.length(0);
   }
 
-  void dec_ref_data_element(::OpenDDS::DCPS::ReceivedDataElement* item)
+  void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement* item)
   {
-    using ::OpenDDS::DCPS::ReceivedDataElement;
+    using OpenDDS::DCPS::ReceivedDataElement;
 
     if (0 == item->dec_ref())
       {
@@ -857,7 +857,7 @@ namespace OpenDDS {
 
     const bool cdr = sample.header_.cdr_encapsulation_;
 
-    ::OpenDDS::DCPS::Serializer ser(
+    OpenDDS::DCPS::Serializer ser(
       sample.sample_,
       sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
       cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR
@@ -873,7 +873,7 @@ namespace OpenDDS {
       ser.reset_alignment();
     }
     if (sample.header_.key_fields_only_) {
-      ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
+      ser >> OpenDDS::DCPS::KeyOnly< MessageType>(data);
     } else {
       ser >> data;
     }
@@ -924,7 +924,7 @@ protected:
       ser.reset_alignment();
     }
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
-      ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
+      ser >> OpenDDS::DCPS::KeyOnly< MessageType>(*data);
     } else {
       ser >> *data;
     }
@@ -1033,13 +1033,13 @@ private:
   }
 #endif
 
-  ::OpenDDS::DCPS::RakeResults< MessageSequenceType >
-      results(this, received_data, info_seq, max_samples,
-              this->subqos_.presentation,
+  OpenDDS::DCPS::RakeResults< MessageSequenceType >
+    results(this, received_data, info_seq, max_samples,
+            this->subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-              a_condition,
+            a_condition,
 #endif
-              ::OpenDDS::DCPS::DDS_OPERATION_READ);
+            OpenDDS::DCPS::DDS_OPERATION_READ);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (! group_coherent_ordered) {
@@ -1129,13 +1129,13 @@ private:
   }
 #endif
 
-  ::OpenDDS::DCPS::RakeResults< MessageSequenceType >
-      results(this, received_data, info_seq, max_samples,
-              this->subqos_.presentation,
+  OpenDDS::DCPS::RakeResults< MessageSequenceType >
+    results(this, received_data, info_seq, max_samples,
+            this->subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-              a_condition,
+            a_condition,
 #endif
-              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
+            OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (! group_coherent_ordered) {
@@ -1210,13 +1210,13 @@ int ignored)
 
   typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
 
-  ::OpenDDS::DCPS::RakeResults< MessageSequenceType >
-      results(this, received_data, info_seq, max_samples,
-              this->subqos_.presentation,
+  OpenDDS::DCPS::RakeResults< MessageSequenceType >
+    results(this, received_data, info_seq, max_samples,
+            this->subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-              a_condition,
+            a_condition,
 #endif
-              ::OpenDDS::DCPS::DDS_OPERATION_READ);
+            OpenDDS::DCPS::DDS_OPERATION_READ);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
   if (inst == 0) return ::DDS::RETCODE_BAD_PARAMETER;
@@ -1275,13 +1275,13 @@ int ignored)
 
   typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
 
-  ::OpenDDS::DCPS::RakeResults< MessageSequenceType >
-      results(this, received_data, info_seq, max_samples,
-              this->subqos_.presentation,
+  OpenDDS::DCPS::RakeResults< MessageSequenceType >
+    results(this, received_data, info_seq, max_samples,
+            this->subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-              a_condition,
+            a_condition,
 #endif
-              ::OpenDDS::DCPS::DDS_OPERATION_TAKE);
+            OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
 

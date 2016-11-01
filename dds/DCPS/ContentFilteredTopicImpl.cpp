@@ -13,6 +13,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -110,4 +112,7 @@ ContentFilteredTopicImpl::remove_reader(DataReaderImpl& reader)
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+
