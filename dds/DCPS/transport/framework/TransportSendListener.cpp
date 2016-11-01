@@ -14,6 +14,8 @@
 #include "TransportSendListener.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -80,3 +82,5 @@ TransportSendListener::retrieve_inline_qos_data(InlineQosData& qos_data) const
 }
 
 } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

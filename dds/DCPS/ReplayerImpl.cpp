@@ -37,7 +37,6 @@
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 
-#include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 
@@ -188,8 +187,8 @@ ReplayerImpl::init(
 }
 
 
-DDS::ReturnCode_t ReplayerImpl::set_qos (const ::DDS::PublisherQos & publisher_qos,
-                                         const DDS::DataWriterQos &  qos)
+DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qos,
+                                         const DDS::DataWriterQos & qos)
 {
 
   OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(publisher_qos, DDS::RETCODE_UNSUPPORTED);

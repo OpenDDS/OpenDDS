@@ -13,6 +13,8 @@
 #include "TransportSendElement.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TransportSendElement::~TransportSendElement()
 {
   DBG_ENTRY_LVL("TransportSendElement","~TransportSendElement",6);
@@ -65,3 +67,5 @@ OpenDDS::DCPS::TransportSendElement::msg_payload() const
   DBG_ENTRY_LVL("TransportSendElement", "msg_payload", 6);
   return this->element_->get_sample() ? this->element_->get_sample()->cont() : 0;
 }
+
+OPENDDS_VERSIONED_NAMESPACE_DECL

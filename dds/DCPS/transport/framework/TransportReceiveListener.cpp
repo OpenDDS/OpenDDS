@@ -13,6 +13,8 @@
 #include "TransportReceiveListener.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TransportReceiveListener::TransportReceiveListener()
 {
   DBG_ENTRY_LVL("TransportReceiveListener","TransportReceiveListener",6);
@@ -22,3 +24,5 @@ OpenDDS::DCPS::TransportReceiveListener::~TransportReceiveListener()
 {
   DBG_ENTRY_LVL("TransportReceiveListener","~TransportReceiveListener",6);
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

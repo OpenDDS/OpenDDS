@@ -5,9 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "dcps_export.h"
 
 #include "Recorder.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -53,3 +54,5 @@ TAO::Objref_Traits<OpenDDS::DCPS::Recorder>::marshal(const OpenDDS::DCPS::Record
 {
   return false;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

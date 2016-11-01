@@ -11,6 +11,7 @@
 #include "EntryExit.h"
 #include "dds/DCPS/GuidConverter.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -412,3 +413,5 @@ DataLink::send_final_acks (const RepoId& /*readerid*/)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

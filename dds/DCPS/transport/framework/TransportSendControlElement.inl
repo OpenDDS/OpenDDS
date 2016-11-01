@@ -8,6 +8,8 @@
 #include "EntryExit.h"
 #include "dds/DCPS/DataSampleElement.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -92,3 +94,5 @@ TransportSendControlElement::sequence() const
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

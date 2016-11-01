@@ -7,6 +7,8 @@
 
 #include "EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     const ACE_Message_Block*           message,
@@ -49,3 +51,4 @@ OpenDDS::DCPS::TransportRetainedElement::owned_by_transport ()
   return true;
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

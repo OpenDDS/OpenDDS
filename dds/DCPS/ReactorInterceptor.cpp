@@ -9,6 +9,7 @@
 #include "ReactorInterceptor.h"
 
 #include "ace/Log_Msg.h"
+#include "ace/Synch.h"
 
 namespace OpenDDS {
 namespace DCPS {

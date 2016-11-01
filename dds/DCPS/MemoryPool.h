@@ -13,6 +13,8 @@
 class MemoryPoolTest;
 class FreeIndexTest;
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -212,5 +214,7 @@ private:
 };
 
 }} // end namespaces
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_MEMORY_POOL_H

@@ -8,10 +8,10 @@
 #ifndef OPENDDS_DCPS_MESSAGETRACKER_H
 #define OPENDDS_DCPS_MESSAGETRACKER_H
 
-#include <dds/DCPS/dcps_export.h>
-#include <ace/Thread_Mutex.h>
-
+#include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "ace/Thread_Mutex.h"
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

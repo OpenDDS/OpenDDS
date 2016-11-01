@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 
 #include "ace/Malloc_Base.h"
+#include /**/ "dds/Versioned_Namespace.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "ace/Atomic_Op.h"

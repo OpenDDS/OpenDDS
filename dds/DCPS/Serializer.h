@@ -322,11 +322,15 @@ template<typename T> struct KeyOnly {
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #if defined (__ACE_INLINE__)
 # include "Serializer.inl"
 #else  /* __ACE_INLINE__ */
 
 #include <ace/CDR_Stream.h>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -380,8 +384,9 @@ void find_size_ulong(size_t& size, size_t& padding);
 } // namespace DCPS
 } // namespace OpenDDS
 
-#endif  /* __ACE_INLINE__ */
-
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+
+#endif  /* __ACE_INLINE__ */
 
 #endif /* OPENDDS_DCPS_SERIALIZER_H */

@@ -7,6 +7,7 @@
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"
+#include "ace/Synch.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

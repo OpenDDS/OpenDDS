@@ -7,6 +7,8 @@
 
 #include "EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 OpenDDS::DCPS::TransportSendElement::TransportSendElement(int initial_count,
   const DataSampleElement* sample,
@@ -52,3 +54,5 @@ OpenDDS::DCPS::TransportSendElement::sample() const
 {
   return this->element_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

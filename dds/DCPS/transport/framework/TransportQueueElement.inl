@@ -8,6 +8,8 @@
 #include "ace/Message_Block.h"
 #include "EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -113,3 +115,5 @@ TransportQueueElement::MatchOnDataPayload::matches(
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

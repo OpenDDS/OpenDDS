@@ -28,6 +28,8 @@
 
 #include "ace/Auto_Ptr.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -72,7 +74,7 @@ WriteDataContainer::WriteDataContainer(
   DataWriterImpl* writer,
   CORBA::Long max_samples_per_instance,
   CORBA::Long max_durable_per_instance,
-  ::DDS::Duration_t max_blocking_time,
+  DDS::Duration_t max_blocking_time,
   size_t         n_chunks,
   DDS::DomainId_t domain_id,
   char const * topic_name,
@@ -1508,3 +1510,5 @@ WriteDataContainer::log_send_state_lists (OPENDDS_STRING description)
 
 } // namespace OpenDDS
 } // namespace DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -10,6 +10,8 @@
 
 #include <algorithm>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -112,3 +114,5 @@ TransportHeader::init(ACE_Message_Block* buffer)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
