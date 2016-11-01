@@ -14,8 +14,7 @@
 #include "BasicQueue_T.h"
 #include "TransportDefs.h"
 #include "ace/Task.h"
-#include "ace/Synch.h"
-#include "ace/Condition_T.h"
+#include "ace/Synch_Traits.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

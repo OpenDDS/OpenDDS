@@ -10,6 +10,7 @@
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
 #include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsTypeSupportExtC.h"
 #include "DataDurabilityCache.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
@@ -20,15 +21,12 @@
 #include "SafetyProfileStreams.h"
 #include "Service_Participant.h"
 
-#include "tao/ORB_Core.h"
-
 #include "ace/Reactor.h"
 #include "ace/Message_Block.h"
 #include "ace/Log_Msg.h"
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_sys_time.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <fstream>
 #include <algorithm>

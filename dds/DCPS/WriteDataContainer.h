@@ -19,10 +19,7 @@
 
 //#include "Service_Participant.h"
 
-#include "ace/Condition_T.h"
-#include "ace/Null_Mutex.h"
-#include "ace/Thread_Mutex.h"
-#include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Synch_Traits.h"
 
 #include <memory>
 

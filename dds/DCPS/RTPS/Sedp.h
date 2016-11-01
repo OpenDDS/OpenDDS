@@ -32,7 +32,6 @@
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "ace/Task_Ex_T.h"
-#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
 

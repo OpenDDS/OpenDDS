@@ -12,7 +12,6 @@
 #include "PoolAllocationBase.h"
 #include "ace/Reactor.h"
 #include "ace/Thread.h"
-#include "ace/Condition_Thread_Mutex.h"
 #include "dcps_export.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

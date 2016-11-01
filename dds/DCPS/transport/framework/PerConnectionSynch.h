@@ -11,7 +11,6 @@
 #include "ThreadSynch.h"
 #include "ace/Task.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Condition_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -23,7 +23,6 @@
 #include "ace/Atomic_Op.h"
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Mcast.h"
-#include "ace/Condition_Thread_Mutex.h"
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"

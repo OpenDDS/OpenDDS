@@ -14,6 +14,8 @@
 
 #include "ace/Recursive_Thread_Mutex.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
@@ -141,3 +143,5 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::reschedule_deadline()
 {
   this->reader_impl_->reschedule_deadline();
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

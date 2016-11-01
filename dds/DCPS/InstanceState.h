@@ -128,7 +128,7 @@ public:
 
   bool no_writer () const;
 
-  void reset_ownership (::DDS::InstanceHandle_t instance);
+  void reset_ownership (DDS::InstanceHandle_t instance);
 
   DDS::InstanceHandle_t instance_handle() const { return handle_; }
 

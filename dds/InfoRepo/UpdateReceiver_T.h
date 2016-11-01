@@ -12,7 +12,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Condition_T.h"
 #include "ace/Task.h"
 
 #include <list>
