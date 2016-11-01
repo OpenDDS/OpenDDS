@@ -30,6 +30,10 @@ Recorder_ptr Recorder::_duplicate(Recorder_ptr obj)
 }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::Recorder_ptr
 TAO::Objref_Traits<OpenDDS::DCPS::Recorder>::duplicate(OpenDDS::DCPS::Recorder_ptr p)
 {
@@ -55,4 +59,4 @@ TAO::Objref_Traits<OpenDDS::DCPS::Recorder>::marshal(const OpenDDS::DCPS::Record
   return false;
 }
 
-OPENDDS_END_VERSIONED_NAMESPACE_DECL
+TAO_END_VERSIONED_NAMESPACE_DECL

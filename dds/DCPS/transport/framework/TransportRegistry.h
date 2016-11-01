@@ -24,14 +24,14 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
   class Entity;
   typedef Entity* Entity_ptr;
 }
 
 #define TheTransportRegistry OpenDDS::DCPS::TransportRegistry::instance()
-
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {

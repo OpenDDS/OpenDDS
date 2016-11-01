@@ -94,14 +94,19 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace TAO {
 
+#if !defined (_DDS_WAITSET__TRAITS_)
+#define _DDS_WAITSET__TRAITS_
+
 template<>
 struct OpenDDS_Dcps_Export Objref_Traits< DDS::WaitSet> {
-  static ::DDS::WaitSet_ptr duplicate(::DDS::WaitSet_ptr p);
-  static void release(::DDS::WaitSet_ptr p);
-  static ::DDS::WaitSet_ptr nil();
-  static CORBA::Boolean marshal(const ::DDS::WaitSet_ptr p,
+  static DDS::WaitSet_ptr duplicate(DDS::WaitSet_ptr p);
+  static void release(DDS::WaitSet_ptr p);
+  static DDS::WaitSet_ptr nil();
+  static CORBA::Boolean marshal(const DDS::WaitSet_ptr p,
                                 TAO_OutputCDR & cdr);
 };
+
+#endif
 
 } // namespace TAO
 

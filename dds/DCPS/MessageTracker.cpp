@@ -2,12 +2,12 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "ace/Synch.h"
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"
-#include "ace/Synch.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

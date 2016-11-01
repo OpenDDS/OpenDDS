@@ -77,7 +77,6 @@ namespace DCPS {
 
     /// All messages have been transported condition variable.
     ACE_Condition_Thread_Mutex done_condition_;
-
   };
 
 } // namespace DCPS
