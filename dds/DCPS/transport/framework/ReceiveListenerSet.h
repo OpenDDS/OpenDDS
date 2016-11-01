@@ -13,7 +13,7 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -11,8 +11,8 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "ace/Synch_Traits.h"
 
 #include <utility>
 

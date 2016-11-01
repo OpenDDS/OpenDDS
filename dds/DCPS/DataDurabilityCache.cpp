@@ -9,8 +9,8 @@
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
+#include "dds/DdsDcpsDomainC.h"
 #include "DataDurabilityCache.h"
-#include "Service_Participant.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "WriteDataContainer.h"
@@ -18,6 +18,7 @@
 #include "Qos_Helper.h"
 #include "debug.h"
 #include "SafetyProfileStreams.h"
+#include "Service_Participant.h"
 
 #include "tao/ORB_Core.h"
 

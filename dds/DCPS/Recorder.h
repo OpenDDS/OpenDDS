@@ -44,8 +44,8 @@ public:
    *  Callback for when the Recorder is associated with a DataWriter.
    *  @param recorder Recorder that received the association
    */
-  virtual void on_recorder_matched(Recorder*                                recorder,
-                                   const ::DDS::SubscriptionMatchedStatus & status)=0;
+  virtual void on_recorder_matched(Recorder*                              recorder,
+                                   const DDS::SubscriptionMatchedStatus & status)=0;
 };
 
 typedef RcHandle<RecorderListener> RecorderListener_rch;
@@ -77,8 +77,8 @@ public:
    * Set the Quality of Service settings for the Recorder.
    *
    */
-  virtual DDS::ReturnCode_t set_qos (const ::DDS::SubscriberQos & subscriber_qos,
-                                     const DDS::DataReaderQos &   datareader_qos)=0;
+  virtual DDS::ReturnCode_t set_qos (const DDS::SubscriberQos & subscriber_qos,
+                                     const DDS::DataReaderQos & datareader_qos)=0;
 
   /**
    * Get the Quality of Service settings for the Recorder.

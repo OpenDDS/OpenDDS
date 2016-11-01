@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsCoreC.h"
 #include "DataSampleElement.h"
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
@@ -16,9 +17,9 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 
-#include "ace/Condition_T.h"
-#include "Service_Participant.h"
+//#include "Service_Participant.h"
 
+#include "ace/Condition_T.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
@@ -131,7 +132,7 @@ public:
     /// Max durable samples sent for each instance
     CORBA::Long      max_durable_per_instance,
     /// The timeout for write.
-    ::DDS::Duration_t max_blocking_time,
+    DDS::Duration_t max_blocking_time,
     /// The number of chunks that the DataSampleElementAllocator
     /// needs allocate.
     size_t           n_chunks,
@@ -469,7 +470,7 @@ private:
 
   /// The maximum time to block on write operation.
   /// This comes from DataWriter's QoS HISTORY.max_blocking_time
-  ::DDS::Duration_t               max_blocking_time_;
+  DDS::Duration_t               max_blocking_time_;
 
   /// The block waiting flag.
   bool                            waiting_on_release_;

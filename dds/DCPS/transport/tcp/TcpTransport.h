@@ -21,7 +21,7 @@
 
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Connector.h"
 #include "ace/SOCK_Connector.h"
 

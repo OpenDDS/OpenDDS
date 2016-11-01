@@ -25,7 +25,7 @@
 #include "ace/SOCK_Stream.h"
 #include "ace/Svc_Handler.h"
 #include "ace/INET_Addr.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 namespace OpenDDS {
 namespace DCPS {

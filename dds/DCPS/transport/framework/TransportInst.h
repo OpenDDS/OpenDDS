@@ -19,7 +19,7 @@
 #include "TransportImpl.h"
 #include "dds/DCPS/RcObject_T.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/PoolAllocator.h"
 

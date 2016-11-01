@@ -16,7 +16,7 @@
 #include "TransportDefs.h"
 #include "TransportSendControlElement.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

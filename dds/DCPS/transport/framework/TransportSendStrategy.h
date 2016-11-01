@@ -21,7 +21,7 @@
 #include "TransportInst_rch.h"
 #include "ThreadSynchStrategy_rch.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

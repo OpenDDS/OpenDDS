@@ -25,7 +25,7 @@
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Event_Handler.h"
 
 #include <utility>

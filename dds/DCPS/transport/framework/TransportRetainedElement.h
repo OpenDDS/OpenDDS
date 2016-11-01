@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportQueueElement.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
