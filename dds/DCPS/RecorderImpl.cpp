@@ -40,6 +40,7 @@
 
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -1103,3 +1104,5 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
 
 } // namespace DCPS
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

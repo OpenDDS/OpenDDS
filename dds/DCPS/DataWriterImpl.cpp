@@ -40,7 +40,6 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
-#include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 

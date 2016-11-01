@@ -18,8 +18,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include "ace/Thread_Mutex.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Atomic_Op.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -31,6 +30,10 @@ class ConditionImpl;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace DDS {
 
@@ -92,11 +95,11 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace TAO {
 
 template<>
-struct OpenDDS_Dcps_Export Objref_Traits<DDS::WaitSet> {
-  static DDS::WaitSet_ptr duplicate(DDS::WaitSet_ptr p);
-  static void release(DDS::WaitSet_ptr p);
-  static DDS::WaitSet_ptr nil();
-  static CORBA::Boolean marshal(const DDS::WaitSet_ptr p,
+struct OpenDDS_Dcps_Export Objref_Traits< DDS::WaitSet> {
+  static ::DDS::WaitSet_ptr duplicate(::DDS::WaitSet_ptr p);
+  static void release(::DDS::WaitSet_ptr p);
+  static ::DDS::WaitSet_ptr nil();
+  static CORBA::Boolean marshal(const ::DDS::WaitSet_ptr p,
                                 TAO_OutputCDR & cdr);
 };
 

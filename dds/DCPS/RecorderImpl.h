@@ -22,6 +22,7 @@
 #include "Recorder.h"
 #include "RemoveAssociationSweeper.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -106,8 +107,8 @@ public:
    * Set the Quality of Service settings for the Recorder.
    *
    */
-  DDS::ReturnCode_t set_qos (const ::DDS::SubscriberQos & subscriber_qos,
-                             const DDS::DataReaderQos &   datareader_qos);
+  DDS::ReturnCode_t set_qos (const DDS::SubscriberQos & subscriber_qos,
+                             const DDS::DataReaderQos & datareader_qos);
 
   /**
    * Get the Quality of Service settings for the Recorder.
@@ -205,5 +206,7 @@ private:
 
 } // namespace DCPS
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* end of include guard: OPENDDS_DCPS_RECORDERIMPL_H */

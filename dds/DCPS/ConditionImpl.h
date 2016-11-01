@@ -9,9 +9,9 @@
 #define OPENDDS_DCPS_CONDITIONIMPL_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/WaitSet.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
 
