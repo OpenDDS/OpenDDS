@@ -17,6 +17,8 @@
 #include "DirectPriorityMapper.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::DirectPriorityMapper::~DirectPriorityMapper()
 {
 }
@@ -73,3 +75,5 @@ OpenDDS::DCPS::DirectPriorityMapper::thread_priority() const
 
   return value;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

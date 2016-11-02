@@ -6,6 +6,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "debug.h"
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
@@ -13,10 +14,10 @@
 #include "GuidConverter.h"
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
+#include "RecorderImpl.h"
+#include "ReplayerImpl.h"
+// #include "StaticDiscovery.h"
 
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-
-#include "tao/ORB_Core.h"
 
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
@@ -28,10 +29,6 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/Sched_Params.h"
 #include "ace/Malloc_Allocator.h"
-
-#include "RecorderImpl.h"
-#include "ReplayerImpl.h"
-#include "StaticDiscovery.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -84,11 +81,12 @@ void set_log_verbose(unsigned long verbose_logging)
     }
 
   (ACE_LOG_MSG->*flagop)(value);
-
 }
 
 
 }
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -1313,7 +1311,7 @@ Service_Participant::load_configuration(
   }
 
   // Register static discovery.
-  this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
+//   this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
 
   status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
 
@@ -1373,7 +1371,7 @@ Service_Participant::load_configuration(
   }
 
   // Needs to be loaded after transport configs and instances and domains.
-  status = StaticDiscovery::instance()->load_configuration(config);
+//   status = StaticDiscovery::instance()->load_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1949,3 +1947,5 @@ Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participan
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

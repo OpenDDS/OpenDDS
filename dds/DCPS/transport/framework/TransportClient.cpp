@@ -25,6 +25,8 @@
 #include <algorithm>
 #include <iterator>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -1144,3 +1146,5 @@ TransportClient::remove_all_msgs()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

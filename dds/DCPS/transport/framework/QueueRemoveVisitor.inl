@@ -7,6 +7,8 @@
 
 #include "EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -36,3 +38,5 @@ QueueRemoveVisitor::removed_bytes() const
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

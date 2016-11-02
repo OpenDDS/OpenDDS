@@ -20,10 +20,11 @@
 #include "tao/debug.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 
-
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
 #endif /* __ACE_INLINE__ */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -252,3 +253,5 @@ TransportImpl::dump_to_str()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

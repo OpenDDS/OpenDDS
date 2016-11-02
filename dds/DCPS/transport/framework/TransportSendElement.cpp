@@ -68,4 +68,4 @@ OpenDDS::DCPS::TransportSendElement::msg_payload() const
   return this->element_->get_sample() ? this->element_->get_sample()->cont() : 0;
 }
 
-OPENDDS_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

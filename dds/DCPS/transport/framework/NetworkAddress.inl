@@ -10,6 +10,8 @@
 #include "ace/CDR_Stream.h"
 #include "ace/OS_NS_netdb.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 OpenDDS::DCPS::NetworkAddress::NetworkAddress()
   : reserved_(0)
@@ -56,3 +58,5 @@ void OpenDDS::DCPS::NetworkAddress::dump()
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress addr: %s reserved: %d\n", addr_.c_str(), reserved_));
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

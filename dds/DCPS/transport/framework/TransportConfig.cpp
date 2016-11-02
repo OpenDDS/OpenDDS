@@ -13,6 +13,8 @@
 # include "TransportConfig.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -52,3 +54,5 @@ TransportConfig::populate_locators(TransportLocatorSeq& trans_info) const
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
