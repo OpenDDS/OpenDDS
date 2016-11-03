@@ -6,6 +6,8 @@
 #ifndef OPENDDS_RCHANDLE_T_H
 #define OPENDDS_RCHANDLE_T_H
 
+#include "dds/Versioned_Namespace.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

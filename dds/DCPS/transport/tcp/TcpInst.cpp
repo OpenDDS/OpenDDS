@@ -19,6 +19,8 @@
 #include "TcpInst.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TcpInst::~TcpInst()
 {
   DBG_ENTRY_LVL("TcpInst","~TcpInst",6);
@@ -103,3 +105,5 @@ OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_
     return 0;
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

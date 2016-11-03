@@ -40,14 +40,14 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
           sn = static_cast<UTL_ScopedName*>(sn->tail())) {
         string str = sn->head()->get_string();
         if (str.size()) {
-          be_global->header_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace " << str << " {\n";
+          be_global->header_ << "namespace " << str << " {\n";
           ++n_;
         }
       }
     }
     ~Namespaces()
     {
-      for (size_t i = 0; i < n_; ++i) be_global->header_ << "}\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n";
+      for (size_t i = 0; i < n_; ++i) be_global->header_ << "}\n";
     }
   } ns(name);
 

@@ -139,7 +139,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  inline static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
     "};\n}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
-  be_global->header_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n";
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);
     be_global->header_ <<
@@ -147,7 +146,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  typedef OpenDDS::DCPS::DataReaderImpl_T<" << cxxName << "> " << short_name << "DataReaderImpl;\n"
       "  typedef OpenDDS::DCPS::TypeSupportImpl_T<" << cxxName << "> " << short_name << "TypeSupportImpl;\n";
   }
-  be_global->header_ << "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n";
 
   ScopedNamespaceGuard cppGuard(name, be_global->impl_);
 
