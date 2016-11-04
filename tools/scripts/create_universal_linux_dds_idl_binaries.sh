@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-###########################################################################################################################
-# This script is used to create dds and tao IDL binaries without the dependencies on libstdc++ shared libraries;
-# however, they still depend on libc.so and
+##############################################################################
+# This script is used to create dds and tao IDL binaries which link only on
+# libc.so , libm.so, linux-gate.so and ld-linux.so at runtime.
 #
-###########################################################################################################################
+# Prerequesite: docker
+##############################################################################
 
 buildbits=32
 docker_image=phusion/holy-build-box-${buildbits}
