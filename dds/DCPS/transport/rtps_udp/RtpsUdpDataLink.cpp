@@ -2561,6 +2561,7 @@ RtpsUdpDataLink::HeartBeat::disable()
 void
 RtpsUdpDataLink::send_final_acks (const RepoId& readerid)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   RtpsReaderMap::iterator rr = readers_.find (readerid);
   if (rr != readers_.end ()) {
     send_ack_nacks (rr, true);
