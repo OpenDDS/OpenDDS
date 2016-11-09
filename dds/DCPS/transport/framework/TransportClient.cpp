@@ -294,7 +294,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, new PendingAssoc())).first;
+    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc_rch(new PendingAssoc()))).first;
 
     GuidConverter tc_assoc(this->repo_id_);
     GuidConverter remote_new(data.remote_id_);
@@ -386,7 +386,7 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
 {
   TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
 
-  tc->use_datalink(data_.remote_id_, 0);
+  tc->use_datalink(data_.remote_id_, DataLink_rch());
 
   return 0;
 }
@@ -908,7 +908,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
       }
       DataLinkSet_rch pub_links =
         (cur->get_num_subs() > 0)
-        ? links_.select_links(cur->get_sub_ids(), cur->get_num_subs())
+        ? DataLinkSet_rch(links_.select_links(cur->get_sub_ids(), cur->get_num_subs()))
         : DataLinkSet_rch(&links_, false);
 
       if (pub_links.is_nil() || pub_links->empty()) {
