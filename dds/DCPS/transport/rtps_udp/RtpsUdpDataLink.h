@@ -31,6 +31,8 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/RcEventHandler.h"
+
 
 class DDS_TEST;
 
@@ -418,7 +420,9 @@ private:
       HeartBeat* heartbeat_;
     };
 
-  } heartbeat_, heartbeatchecker_;
+  };
+
+  RcEventHandler<HeartBeat> heartbeat_, heartbeatchecker_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {

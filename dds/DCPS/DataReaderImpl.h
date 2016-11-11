@@ -38,6 +38,7 @@
 #include "Service_Participant.h"
 #include "PoolAllocator.h"
 #include "RemoveAssociationSweeper.h"
+#include "RcEventHandler.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -112,6 +113,7 @@ public:
 };
 
 #endif
+
 
 // Class to cleanup in case EndHistoricSamples is missed
 class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
@@ -692,8 +694,8 @@ private:
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
-  EndHistoricSamplesMissedSweeper* end_historic_sweeper_;
-  RemoveAssociationSweeper<DataReaderImpl>*        remove_association_sweeper_;
+  RcEventHandler<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
+  RcEventHandler<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -802,12 +804,12 @@ private:
       }
     };
   };
-  LivelinessTimer* liveliness_timer_;
+  RcEventHandler<LivelinessTimer> liveliness_timer_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  RequestedDeadlineWatchdog* watchdog_;
+  RcEventHandler<RequestedDeadlineWatchdog> watchdog_;
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.
