@@ -89,7 +89,6 @@ TransportClient::~TransportClient()
   }
 
   pending_assoc_timer_->wait();
-  pending_assoc_timer_->destroy();
 
   for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {

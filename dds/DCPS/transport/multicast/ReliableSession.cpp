@@ -70,7 +70,6 @@ ReliableSession::~ReliableSession()
 {
   nak_watchdog_->cancel();
   nak_watchdog_->wait();
-  nak_watchdog_->destroy();
 }
 
 bool

@@ -23,6 +23,7 @@
 #include "Qos_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
+#include "RcEventHandler.h"
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"
@@ -671,7 +672,7 @@ private:
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  OfferedDeadlineWatchdog* watchdog_;
+  RcEventHandler<OfferedDeadlineWatchdog> watchdog_;
   /// The flag indicates whether the liveliness timer is scheduled and
   /// needs be cancelled.
   bool                       cancel_timer_;

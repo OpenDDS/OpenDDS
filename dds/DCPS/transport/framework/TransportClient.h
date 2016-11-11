@@ -19,6 +19,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/DiscoveryListener.h"
+#include "dds/DCPS/RcEventHandler.h"
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
@@ -164,7 +165,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
 
-  struct PendingAssoc : ACE_Event_Handler, public RcObject<ACE_SYNCH_MUTEX> {
+  struct PendingAssoc : ACE_Event_Handler {
     bool active_, removed_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
@@ -177,11 +178,9 @@ private:
 
     bool initiate_connect(TransportClient* tc, Guard& guard);
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
-    ACE_Event_Handler::Reference_Count add_reference() {  this->_add_ref(); return 1; }
-    ACE_Event_Handler::Reference_Count remove_reference() { this->_remove_ref(); return 1; }
   };
 
-  typedef RcHandle<PendingAssoc> PendingAssoc_rch;
+  typedef RcEventHandler<PendingAssoc> PendingAssoc_rch;
 
   typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
 
@@ -256,7 +255,7 @@ private:
       }
     };
   };
-  PendingAssocTimer* pending_assoc_timer_;
+  RcEventHandler<PendingAssocTimer> pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 

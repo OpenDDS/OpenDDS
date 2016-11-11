@@ -96,7 +96,6 @@ MulticastSession::~MulticastSession()
 {
   syn_watchdog_->cancel();
   syn_watchdog_->wait();
-  syn_watchdog_->destroy();
 }
 
 bool
