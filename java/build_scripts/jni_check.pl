@@ -17,7 +17,11 @@ if ($^O eq 'MSWin32') {
   $nm = 'dumpbin /exports';
   @decorators = (['', '.dll'], ['', 'd.dll'], ['lib', '.dll']);
 } else {
-  $nm = 'nm -g -P';
+  if ($^O eq 'solaris') {
+    $nm = 'gnm -g -P';
+  } else {
+    $nm = 'nm -g -P';
+  }
   $pattern = '^_?(Java_\\S+) T ';
   @decorators = (['lib', '.so'], ['lib', '.sl'], ['lib', '.a'], ['lib', '.so'],
                  ['lib', '.dylib'], ['lib', '.so'], ['lib', '.dll']);

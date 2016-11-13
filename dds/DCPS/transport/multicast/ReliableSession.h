@@ -17,6 +17,7 @@
 
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/RcEventHandler.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -78,7 +79,7 @@ public:
   virtual void syn_hook(const SequenceNumber& seq);
 
 private:
-  NakWatchdog* nak_watchdog_;
+  RcEventHandler<NakWatchdog> nak_watchdog_;
 
   DisjointSequence nak_sequence_;
 

@@ -97,7 +97,6 @@ RecorderImpl::~RecorderImpl()
   }
 
   remove_association_sweeper_->wait();
-  remove_association_sweeper_->destroy();
 }
 
 

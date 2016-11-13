@@ -191,7 +191,7 @@ WriteDataContainer::enqueue(
   // Extract the instance queue.
   InstanceDataSampleList& instance_list = instance->samples_;
 
-  if (this->writer_->watchdog_) {
+  if (this->writer_->watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
     this->writer_->watchdog_->execute(instance, false);
@@ -331,7 +331,7 @@ WriteDataContainer::register_instance(
   // The registered_sample is shallow copied.
   registered_sample = instance->registered_sample_->duplicate();
 
-  if (this->writer_->watchdog_) {
+  if (this->writer_->watchdog_.in()) {
     this->writer_->watchdog_->schedule_timer(instance);
   }
 
@@ -370,7 +370,7 @@ WriteDataContainer::unregister(
   // Unregister the instance with typed DataWriter.
   this->writer_->unregistered(instance_handle);
 
-  if (this->writer_->watchdog_)
+  if (this->writer_->watchdog_.in())
     this->writer_->watchdog_->cancel_timer(instance);
 
   return DDS::RETCODE_OK;
@@ -426,7 +426,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
     }
   }
 
-  if (this->writer_->watchdog_)
+  if (this->writer_->watchdog_.in())
     this->writer_->watchdog_->cancel_timer(instance);
   return DDS::RETCODE_OK;
 }

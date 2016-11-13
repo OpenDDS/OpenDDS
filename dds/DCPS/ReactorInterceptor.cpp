@@ -21,8 +21,6 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
   , condition_(mutex_)
-  , registration_counter_(0)
-  , destroy_(false)
 {
   if (reactor == 0) {
     ACE_DEBUG((LM_ERROR, "(%P|%t) ERROR: ReactorInterceptor initialized with null reactor\n"));
@@ -54,7 +52,6 @@ void ReactorInterceptor::wait()
   if (should_execute_immediately()) {
     handle_exception_i(guard);
     reactor()->purge_pending_notifications(this);
-    registration_counter_ = 0;
   } else {
     while (!command_queue_.empty()) {
       condition_.wait();
@@ -62,23 +59,10 @@ void ReactorInterceptor::wait()
   }
 }
 
-void ReactorInterceptor::destroy()
-{
-  ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-  if (!reactor_is_shut_down() && registration_counter_ > 0) {
-    // Wait until we get handle exception.
-    destroy_ = true;
-  } else {
-    guard.release();
-    delete this;
-  }
-}
 
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
-
-  --registration_counter_;
 
   return handle_exception_i(guard);
 }
@@ -93,16 +77,12 @@ void ReactorInterceptor::process_command_queue()
   }
 }
 
-int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
+int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>&)
 {
   process_command_queue();
 
   condition_.signal();
 
-  if (registration_counter_ == 0 && destroy_) {
-    guard.release();
-    delete this;
-  }
   return 0;
 }
 
