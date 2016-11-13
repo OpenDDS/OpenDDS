@@ -125,7 +125,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  typedef " << cxxName << "TypeSupport TypeSupportType;\n"
     "  typedef " << cxxName << "DataWriter DataWriterType;\n"
     "  typedef " << cxxName << "DataReader DataReaderType;\n"
-    "  typedef " << module_scope(name) << "OpenDDSGenerated::" << short_name << "_KeyLessThan LessThanType;\n"
+    "  typedef " << "OpenDDSGenerated::" << module_scope(name) << short_name << "_KeyLessThan LessThanType;\n"
     "\n"
     "  inline static const char* type_name () { return \"" << cxxName << "\"; }\n"
     "  inline static bool gen_has_key (const MessageType& x) { return ::OpenDDS::DCPS::gen_has_key(x); }\n"
