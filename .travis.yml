@@ -18,10 +18,6 @@ before_install:
   - git clone -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
   - cd ..
 
-branches:
-  only:
-    - master
-
 before_script:
   - export
   - tar czf modeling_plugins.tar.gz tools/modeling/plugins
