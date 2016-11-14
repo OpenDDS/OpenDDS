@@ -24,6 +24,7 @@
 #include "dds/DCPS/RepoIdConverter.h"
 
 #include /**/ "tao/debug.h"
+#include "tao/ORB_Core.h"
 
 #include /**/ "ace/Read_Buffer.h"
 #include /**/ "ace/OS_NS_stdio.h"

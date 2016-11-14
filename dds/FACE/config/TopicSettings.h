@@ -5,6 +5,8 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "FACE/OpenDDS_FACE_Export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class OpenDDS_FACE_Export TopicSettings {
@@ -19,5 +21,7 @@ public:
 typedef OPENDDS_MAP(OPENDDS_STRING, TopicSettings) TopicMap;
 
 } } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

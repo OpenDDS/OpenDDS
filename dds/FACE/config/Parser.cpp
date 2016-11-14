@@ -10,6 +10,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 namespace {
@@ -494,3 +496,5 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
 }
 
 } } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

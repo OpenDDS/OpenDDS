@@ -11,6 +11,7 @@
 #include "Shmem_Export.h"
 
 #include "ShmemDataLink_rch.h"
+#include "ShmemDataLink.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include "dds/DCPS/PoolAllocator.h"

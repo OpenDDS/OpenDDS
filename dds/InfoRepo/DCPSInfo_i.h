@@ -23,8 +23,6 @@
 #include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
 
-#include "tao/ORB_Core.h"
-
 #include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

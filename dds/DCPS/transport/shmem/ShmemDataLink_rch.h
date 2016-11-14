@@ -22,4 +22,6 @@ typedef RcHandle<ShmemDataLink> ShmemDataLink_rch;
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #endif  /* OPENDDS_SHMEMDATALINK_RCH_H */

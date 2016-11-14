@@ -4,6 +4,7 @@
 #include <ace/CDR_Base.h>
 #include "OpenDDS_FACE_Export.h"
 
+
 namespace OpenDDS {
   namespace FaceTypes {
     template<typename CharT> class String_var;
@@ -41,10 +42,10 @@ namespace FACE {
   typedef Char& Char_out;
   typedef WChar& WChar_out;
 
-  typedef OpenDDS::FaceTypes::String_var<Char> String_var;
-  typedef OpenDDS::FaceTypes::String_out<Char> String_out;
-  typedef OpenDDS::FaceTypes::String_var<WChar> WString_var;
-  typedef OpenDDS::FaceTypes::String_out<WChar> WString_out;
+  typedef ::OpenDDS::FaceTypes::String_var<Char> String_var;
+  typedef ::OpenDDS::FaceTypes::String_out<Char> String_out;
+  typedef ::OpenDDS::FaceTypes::String_var<WChar> WString_var;
+  typedef ::OpenDDS::FaceTypes::String_out<WChar> WString_out;
 
   OpenDDS_FACE_Export Char* string_alloc(UnsignedLong len);
   OpenDDS_FACE_Export Char* string_dup(const Char* str);

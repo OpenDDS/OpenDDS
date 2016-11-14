@@ -2,8 +2,8 @@
 #define FACE_CONFIG_PARSER_H
 
 #include "FACE/OpenDDS_FACE_Export.h"
-#include "ConnectionSettings.h"
 #include "QosSettings.h"
+#include "ConnectionSettings.h"
 #include "TopicSettings.h"
 
 class ACE_Configuration_Heap;
@@ -40,5 +40,7 @@ private:
 };
 
 } } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
