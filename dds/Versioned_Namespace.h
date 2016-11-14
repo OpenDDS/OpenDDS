@@ -15,14 +15,10 @@
 #ifndef OPENDDS_VERSIONED_NAMESPACE_H
 #define OPENDDS_VERSIONED_NAMESPACE_H
 
-// #if !defined (OPENDDS_ORBCONF_H) && !defined (ACE_CONFIG_MACROS_H)
-// # error This header is only meant to be included after "tao/orbconf.h".
-// #endif  /* !OPENDDS_ORBCONF_H */
-
 #if !defined (OPENDDS_HAS_VERSIONED_NAMESPACE) \
   && defined (ACE_HAS_VERSIONED_NAMESPACE) \
   && ACE_HAS_VERSIONED_NAMESPACE == 1
-# define OPENDDS_HAS_VERSIONED_NAMESPACE 1
+# define OPENDDS_HAS_VERSIONED_NAMESPACE 0
 #endif  /* !OPENDDS_HAS_VERSIONED_NAMESPACE
            && ACE_HAS_VERSIONED_NAMESPACE == 1*/
 
