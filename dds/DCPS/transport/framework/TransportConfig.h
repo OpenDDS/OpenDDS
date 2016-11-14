@@ -63,8 +63,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined(__ACE_INLINE__)
-#include "TransportConfig.inl"
-#endif /* __ACE_INLINE__ */
-
 #endif /* OPENDDS_DCPS_TRANSPORTCONFIG_H */

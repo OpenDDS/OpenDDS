@@ -25,6 +25,8 @@
 #include "TcpConnection.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // The connection lost can be detected by both send and receive strategy. When
 // that happens, both of them add a request to the reconnect task. The reconnect
 // will be attempted when the first request is dequeued and the second request
@@ -991,5 +993,6 @@ OpenDDS::DCPS::TcpConnection::shutdown()
   this->shutdown_ = true;
 
   this->reconnect_task_.close(1);
-
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

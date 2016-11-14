@@ -9,10 +9,6 @@
 #include "TransportConfig.h"
 #include "TransportInst.h"
 
-#if !defined (__ACE_INLINE__)
-# include "TransportConfig.inl"
-#endif /* !__ACE_INLINE__ */
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

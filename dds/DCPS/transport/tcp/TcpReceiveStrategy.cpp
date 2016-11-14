@@ -18,6 +18,8 @@
 #include "TcpReceiveStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
   const TcpDataLink_rch& link,
   const TcpConnection_rch& connection,
@@ -203,3 +205,5 @@ OpenDDS::DCPS::TcpReceiveStrategy::relink(bool do_suspend)
   if (!this->connection_.is_nil())
     this->connection_->relink_from_recv(do_suspend);
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -11,6 +11,8 @@
 #include "TcpSendStrategy.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // This can not be inlined since it needs to have the internals of the
 // TcpTransport available in order to call add_ref(), and that
 // gets a bit circular in the dependencies.  Oh well.
@@ -50,3 +52,5 @@ OpenDDS::DCPS::TcpAcceptor::transport_shutdown()
   // Drop the reference to the TcpTransport object.
   this->transport_ = 0;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

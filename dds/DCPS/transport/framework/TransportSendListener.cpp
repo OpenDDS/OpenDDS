@@ -10,10 +10,6 @@
 #include "TransportSendListener.h"
 #include "EntryExit.h"
 
-#if !defined (__ACE_INLINE__)
-#include "TransportSendListener.inl"
-#endif /* __ACE_INLINE__ */
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

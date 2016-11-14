@@ -81,8 +81,4 @@ protected:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (__ACE_INLINE__)
-#include "TransportSendListener.inl"
-#endif /* __ACE_INLINE__ */
-
 #endif /* OPENDDS_DCPS_TRANSPORTSENDLISTENER_H */
