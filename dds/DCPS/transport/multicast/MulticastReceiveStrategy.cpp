@@ -10,6 +10,8 @@
 
 #include "ace/Reactor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -112,3 +114,5 @@ MulticastReceiveStrategy::stop_i()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

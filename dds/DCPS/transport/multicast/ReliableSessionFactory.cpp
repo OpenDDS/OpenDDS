@@ -8,6 +8,8 @@
 #include "ReliableSessionFactory.h"
 #include "ReliableSession.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -30,3 +32,5 @@ ReliableSessionFactory::create(ACE_Reactor* reactor,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

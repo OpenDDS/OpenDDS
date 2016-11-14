@@ -15,6 +15,8 @@
 #include <iostream>
 #include <sstream>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -79,3 +81,5 @@ ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

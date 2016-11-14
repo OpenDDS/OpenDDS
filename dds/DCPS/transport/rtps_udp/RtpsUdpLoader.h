@@ -13,6 +13,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Service_Config.h"
 #include "ace/Service_Object.h"
+#include "dds/Versioned_Namespace.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

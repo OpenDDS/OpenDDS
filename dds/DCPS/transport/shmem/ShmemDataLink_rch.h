@@ -10,6 +10,8 @@
 
 #include "dds/DCPS/RcHandle_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
