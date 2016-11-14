@@ -34,6 +34,8 @@ namespace {
   }
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -303,3 +305,5 @@ RtpsDiscovery::StaticInitializer::StaticInitializer()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

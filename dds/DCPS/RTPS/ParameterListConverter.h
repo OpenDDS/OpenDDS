@@ -10,6 +10,8 @@
 #include "dds/DCPS/RTPS/rtps_export.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace RTPS {
 
 namespace ParameterListConverter {
@@ -33,5 +35,7 @@ namespace ParameterListConverter {
                       OpenDDS::DCPS::DiscoveredReaderData& writer_data);
 }
 } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

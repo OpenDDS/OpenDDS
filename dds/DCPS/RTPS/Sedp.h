@@ -40,6 +40,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -392,5 +394,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_RTPS_SEDP_H

@@ -11,6 +11,8 @@
 #include "RtpsCoreC.h"
 #include "dds/DCPS/GuidUtils.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace RTPS {
 
@@ -58,5 +60,7 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_2;
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* RTPS_BASEMESSAGETYPES_H */

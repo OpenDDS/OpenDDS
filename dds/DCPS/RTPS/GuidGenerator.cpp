@@ -16,6 +16,8 @@
 #include "ace/OS_NS_netdb.h"
 #include "ace/OS_NS_sys_time.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace RTPS {
 
@@ -67,3 +69,5 @@ GuidGenerator::populate(DCPS::GUID_t &container)
 
 } // namespace RTPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
