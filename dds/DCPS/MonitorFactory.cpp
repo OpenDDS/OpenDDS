@@ -101,7 +101,6 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 using namespace OpenDDS::DCPS;
 
-
 ACE_FACTORY_DEFINE (OpenDDS_Dcps, MonitorFactory)
 ACE_STATIC_SVC_DEFINE (MonitorFactory,
                        ACE_TEXT ("OpenDDS_Monitor_Default"),
