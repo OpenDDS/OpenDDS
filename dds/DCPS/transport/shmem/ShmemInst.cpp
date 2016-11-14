@@ -9,6 +9,7 @@
 #include "ShmemLoader.h"
 
 #include "ace/Configuration.h"
+#include "ace/OS_NS_unistd.h"
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
