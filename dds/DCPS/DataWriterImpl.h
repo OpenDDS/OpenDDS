@@ -31,7 +31,8 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/OS_NS_sys_time.h"
-#include "ace/Synch_Traits.h"
+#include "ace/Condition_T.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <memory>
 

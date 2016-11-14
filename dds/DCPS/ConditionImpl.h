@@ -13,7 +13,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/WaitSet.h"
 
-#include "ace/Synch_Traits.h"
+#include "ace/Recursive_Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

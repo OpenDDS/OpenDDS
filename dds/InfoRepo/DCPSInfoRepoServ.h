@@ -12,7 +12,6 @@
 
 #include <string>
 
-#include "tao/ORB_Core.h"
 #include "tao/PortableServer/Servant_var.h"
 
 #include "DCPSInfoRepoServ_Export.h"

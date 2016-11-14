@@ -7,6 +7,8 @@
 
 #include "DcpsInfo_pch.h"
 
+#include "tao/ORB_Core.h"
+
 #include /**/ "DCPSInfo_i.h"
 
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
@@ -24,7 +26,6 @@
 #include "dds/DCPS/RepoIdConverter.h"
 
 #include /**/ "tao/debug.h"
-#include "tao/ORB_Core.h"
 
 #include /**/ "ace/Read_Buffer.h"
 #include /**/ "ace/OS_NS_stdio.h"

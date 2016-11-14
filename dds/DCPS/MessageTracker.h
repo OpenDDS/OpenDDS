@@ -11,7 +11,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "ace/Thread_Mutex.h"
-#include "ace/Synch_Traits.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -9,6 +9,11 @@
 #define DCPSINFO_I_H
 
 #include  "inforepo_export.h"
+
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
+
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
 #include /**/ "DCPS_IR_Participant.h"
@@ -18,10 +23,6 @@
 #include "dds/DCPS/RepoIdGenerator.h"
 #include "FederationId.h"
 #include "UpdateManager.h"
-
-#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
-#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
-#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
 
 #include <map>
 

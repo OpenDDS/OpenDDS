@@ -29,7 +29,8 @@
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "ace/Null_Mutex.h"
-#include "ace/Synch_Traits.h"
+#include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Condition_T.h"
 
 #include "dds/DCPS/PoolAllocator.h"
 
