@@ -6,7 +6,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "tests/DCPS/FooType5/FooDefC.h"
 
-#include "ace/Synch.h"
+#include "ace/Thread_Mutex.h"
 #include "ace/Containers_T.h"
 #include "ace/Hash_Map_Manager.h"
 

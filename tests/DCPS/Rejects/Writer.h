@@ -6,9 +6,8 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include "MessengerTypeSupportC.h"
 #include <ace/Task.h>
-#include <ace/Synch.h>
+#include <ace/Synch_Traits.h>
 #include <ace/Condition_T.h>
-
 
 class Writer : public ACE_Task_Base
 {
