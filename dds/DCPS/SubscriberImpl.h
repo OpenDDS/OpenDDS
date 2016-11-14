@@ -14,7 +14,7 @@
 #include "Definitions.h"
 #include "DataCollector_T.h"
 #include "DataReaderImpl.h"
-#include "ace/Synch.h"
+#include "ace/Recursive_Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

@@ -19,7 +19,6 @@
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Thread_Mutex.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "ace/Atomic_Op.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -42,8 +42,6 @@
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
-#include "ace/Condition_T.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <stdexcept>
 
