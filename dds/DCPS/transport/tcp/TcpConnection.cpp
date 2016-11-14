@@ -18,6 +18,7 @@
 
 #include "ace/os_include/netinet/os_tcp.h"
 #include "ace/OS_NS_arpa_inet.h"
+#include "ace/OS_NS_unistd.h"
 #include <sstream>
 #include <string>
 
