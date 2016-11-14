@@ -12,6 +12,8 @@
 #include "RtpsCustomizedElement.inl"
 #endif
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -49,3 +51,5 @@ RtpsCustomizedElement::msg_payload() const
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

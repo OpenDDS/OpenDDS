@@ -24,3 +24,5 @@ UdpInitializer::UdpInitializer()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

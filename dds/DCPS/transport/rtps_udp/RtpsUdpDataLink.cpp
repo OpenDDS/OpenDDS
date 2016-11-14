@@ -45,6 +45,8 @@ bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
 
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -2570,3 +2572,5 @@ RtpsUdpDataLink::send_final_acks (const RepoId& readerid)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

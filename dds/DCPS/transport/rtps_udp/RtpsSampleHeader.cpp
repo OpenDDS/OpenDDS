@@ -38,6 +38,8 @@ namespace {
           STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -727,3 +729,5 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

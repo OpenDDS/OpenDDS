@@ -10,6 +10,8 @@
 
 #include "ace/Reactor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -132,6 +134,7 @@ UdpReceiveStrategy::reassemble(ReceivedDataSample& data)
   return info.first.reassemble(header.sequence_, header.first_fragment_, data);
 }
 
-
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

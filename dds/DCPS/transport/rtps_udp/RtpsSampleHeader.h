@@ -19,6 +19,8 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -100,6 +102,8 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #ifdef __ACE_INLINE__
 #include "RtpsSampleHeader.inl"

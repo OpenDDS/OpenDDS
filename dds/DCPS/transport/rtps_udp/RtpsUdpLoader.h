@@ -14,6 +14,8 @@
 #include "ace/Service_Config.h"
 #include "ace/Service_Object.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -28,5 +30,7 @@ ACE_FACTORY_DECLARE(OpenDDS_Rtps_Udp, RtpsUdpLoader)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* DCPS_RTPSUDPLOADER_H */
