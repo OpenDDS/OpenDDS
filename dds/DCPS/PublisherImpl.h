@@ -11,7 +11,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "DataWriterImpl.h"
-#include "ace/Synch.h"
 #include "ace/Reverse_Lock_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
