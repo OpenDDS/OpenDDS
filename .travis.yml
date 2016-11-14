@@ -21,7 +21,6 @@ before_install:
 branches:
   only:
     - master
-    - jwi-versioned
 
 before_script:
   - export
@@ -29,7 +28,7 @@ before_script:
   - rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson
   - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
   - if [ "$CXX" == "g++" ]; then ./configure; fi
-  - if [ "$CXX" == "clang++" ]; then ./configure --compiler=clang++ --no-inline --features=versioned_namespace=1; fi
+  - if [ "$CXX" == "clang++" ]; then ./configure --compiler=clang++ --no-inline; fi
 #  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
   - cat $ACE_ROOT/ace/config.h
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
