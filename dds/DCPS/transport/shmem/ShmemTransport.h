@@ -10,7 +10,6 @@
 
 #include "Shmem_Export.h"
 
-#include "ShmemDataLink.h"
 #include "ShmemDataLink_rch.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 

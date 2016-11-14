@@ -9,6 +9,7 @@
 #define DCPS_UDP_H
 
 #include "Udp_Export.h"
+#include "dds/Versioned_Namespace.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
