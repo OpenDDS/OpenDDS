@@ -115,6 +115,9 @@ done
 EOF
 
 docker run -it --rm -u $UID -e "buildbits=$buildbits" -v $PWD:$MOUNT_DIR $EXTRA_DOCKER_FLAGS $docker_image bash $MOUNT_DIR/build_tao_dds_idl.sh
+
 echo ""
 echo "build is done, all binaries are in the $PWD/build/install/bin directory"
+
+rm -rf build/universal_linux_idls_build
 
