@@ -1,7 +1,6 @@
 #include "DDSShapeDynamics.hpp"
 #include <iostream>
 
-#include <boost/cstdint.hpp>
 extern char* colorString_[];
 
 using org::omg::dds::demo::ShapeType;
@@ -48,8 +47,8 @@ DDSShapeDynamics::simulate() {
         DDS::ANY_INSTANCE_STATE);
 
   if (samples.length() > 0) {
-    boost::int32_t sampleIndex = -1;
-    boost::uint32_t i = 0;
+    CORBA::Long sampleIndex = -1;
+    CORBA::ULong i = 0;
 
     QPoint tmp;
     plist_.erase(plist_.begin(), plist_.end());

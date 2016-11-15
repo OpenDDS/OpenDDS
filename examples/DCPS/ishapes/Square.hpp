@@ -2,14 +2,13 @@
 #define _SQUARE_HPP
 
 #include <QtGui/QtGui>
-#include <boost/shared_ptr.hpp>
 #include <Shape.hpp>
 #include <ShapeDynamics.hpp>
 
 class Square : public Shape {
 public:
     Square(const QRect& bounds,
-           boost::shared_ptr<ShapeDynamics> dynamics,
+           shared_ptr<ShapeDynamics> dynamics,
            const QPen& pen,
            const QBrush& brush,
            bool targeted = false);
@@ -24,7 +23,7 @@ private:
     Square& operator=(const Square&);
 
 private:
-    boost::shared_ptr<ShapeDynamics> dynamics_;
+    shared_ptr<ShapeDynamics> dynamics_;
 
 };
 

@@ -4,6 +4,16 @@
 #include <QtCore/QRect>
 #include <QtGui/QPen>
 #include <QtGui/QBrush>
+#if defined (ACE_HAS_CPP11)
+# include <memory>
+using std::shared_ptr;
+#define STD_TO_STRING std::to_string
+#else
+# include <boost/shared_ptr.hpp>
+using boost::shared_ptr;
+#define STD_TO_STRING boost::lexical_cast<std::string>
+#endif /* ACE_HAS_CPP11 */
+
 
 class Shape {
 public:

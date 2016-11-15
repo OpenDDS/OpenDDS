@@ -3,7 +3,7 @@
 #include <iostream>
 
 Square::Square(const QRect& bounds,
-               boost::shared_ptr<ShapeDynamics> dynamics,
+               shared_ptr<ShapeDynamics> dynamics,
                const QPen& pen,
                const QBrush& brush,
                bool targeted)
