@@ -1,4 +1,3 @@
-#include <boost/shared_ptr.hpp>
 #include "config.hpp"
 #include "ShapesDialog.hpp"
 #include <QtGui/QtGui>
@@ -9,7 +8,6 @@
 #include <Triangle.hpp>
 #include <BouncingShapeDynamics.hpp>
 #include <DDSShapeDynamics.hpp>
-#include <boost/lexical_cast.hpp>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 
@@ -203,10 +201,10 @@ ShapesDialog::onPublishButtonClicked() {
     ShapeTypeDataWriter_var dw =
       ShapeTypeDataWriter::_narrow(writer);
 
-    boost::shared_ptr<BouncingShapeDynamics>
+    shared_ptr<BouncingShapeDynamics>
       dynamics(new BouncingShapeDynamics(x, y, rect, constr, PI/6, speed,
            shape, dw));
-    boost::shared_ptr<Shape>
+    shared_ptr<Shape>
       circle(new Circle(rect, dynamics, pen, brush));
     shapesWidget->addShape(circle);
 
@@ -232,10 +230,10 @@ ShapesDialog::onPublishButtonClicked() {
     ShapeTypeDataWriter_var dw =
       ShapeTypeDataWriter::_narrow(writer);
 
-    boost::shared_ptr<BouncingShapeDynamics>
+    shared_ptr<BouncingShapeDynamics>
       dynamics(new BouncingShapeDynamics(x, y, rect, constr, PI/6, speed,
            shape, dw));
-    boost::shared_ptr<Shape>
+    shared_ptr<Shape>
       square(new Square(rect, dynamics, pen, brush));
     shapesWidget->addShape(square);
     // std::cout << "CREATE SQUARE" << std::endl;
@@ -261,10 +259,10 @@ ShapesDialog::onPublishButtonClicked() {
     ShapeTypeDataWriter_var dw =
       ShapeTypeDataWriter::_narrow(writer);
 
-    boost::shared_ptr<BouncingShapeDynamics>
+    shared_ptr<BouncingShapeDynamics>
       dynamics(new BouncingShapeDynamics(x, y, rect, constr, PI/6, speed,
            shape, dw));
-    boost::shared_ptr<Shape>
+    shared_ptr<Shape>
       triangle(new Triangle(rect, dynamics, pen, brush));
     shapesWidget->addShape(triangle);
     // std::cout << "CREATE TRIANGLE" << std::endl;
@@ -296,15 +294,11 @@ ShapesDialog::onSubscribeButtonClicked() {
   filterParams_ = DDS::StringSeq();
   if (filterDialog_->isEnabled()) {
     QRect rect =  filterDialog_->getFilterBounds();
-    std::string x0 =
-      boost::lexical_cast<std::string>(rect.x());
-    std::string x1 =
-      boost::lexical_cast<std::string>(rect.x() + rect.width());
+    std::string x0 = STD_TO_STRING (rect.x());
+    std::string x1 = STD_TO_STRING (rect.x() + rect.width());
 
-    std::string y0 =
-      boost::lexical_cast<std::string>(rect.y());
-    std::string y1 =
-      boost::lexical_cast<std::string>(rect.y() + rect.height());
+    std::string y0 = STD_TO_STRING (rect.y());
+    std::string y1 = STD_TO_STRING (rect.y() + rect.height());
     filterParams_.length(4);
     filterParams_[0] = x0.c_str();
     filterParams_[1] = x1.c_str();
@@ -392,9 +386,9 @@ ShapesDialog::onSubscribeButtonClicked() {
   case CIRCLE: {
     for (int i = 0; i < CN; ++i) {
       std::string colorStr(colorString_[i]);
-      boost::shared_ptr<DDSShapeDynamics>
+      shared_ptr<DDSShapeDynamics>
         dynamics(new DDSShapeDynamics(x, y, dr, colorStr, i));
-      boost::shared_ptr<Shape>
+      shared_ptr<Shape>
         circle(new Circle(rect, dynamics, pen, brush, true));
       dynamics->setShape(circle);
       shapesWidget->addShape(circle);
@@ -405,9 +399,9 @@ ShapesDialog::onSubscribeButtonClicked() {
   case SQUARE: {
     for (int i = 0; i < CN; ++i) {
       std::string colorStr(colorString_[i]);
-      boost::shared_ptr<DDSShapeDynamics>
+      shared_ptr<DDSShapeDynamics>
         dynamics(new DDSShapeDynamics(x, y, dr, colorStr, i));
-      boost::shared_ptr<Shape>
+      shared_ptr<Shape>
         square(new Square(rect, dynamics, pen, brush, true));
       dynamics->setShape(square);
       shapesWidget->addShape(square);
@@ -417,9 +411,9 @@ ShapesDialog::onSubscribeButtonClicked() {
   case TRIANGLE: {
     for (int i = 0; i < CN; ++i) {
       std::string colorStr(colorString_[i]);
-      boost::shared_ptr<DDSShapeDynamics>
+      shared_ptr<DDSShapeDynamics>
         dynamics(new DDSShapeDynamics(x, y, dr, colorStr, i));
-      boost::shared_ptr<Shape>
+      shared_ptr<Shape>
         triangle(new Triangle(rect, dynamics, pen, brush, true));
       dynamics->setShape(triangle);
       shapesWidget->addShape(triangle);
