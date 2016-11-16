@@ -1255,17 +1255,17 @@ int ignored)
 }
 
 DDS::ReturnCode_t take_instance_i (
-                                     MessageSequenceType & received_data,
-                                     DDS::SampleInfoSeq & info_seq,
-                                     ::CORBA::Long max_samples,
-                                     DDS::InstanceHandle_t a_handle,
-                                     DDS::SampleStateMask sample_states,
-                                     DDS::ViewStateMask view_states,
-                                     DDS::InstanceStateMask instance_states,
+                                   MessageSequenceType & received_data,
+                                   DDS::SampleInfoSeq & info_seq,
+                                   ::CORBA::Long max_samples,
+                                   DDS::InstanceHandle_t a_handle,
+                                   DDS::SampleStateMask sample_states,
+                                   DDS::ViewStateMask view_states,
+                                   DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                     DDS::QueryCondition_ptr a_condition)
+                                   DDS::QueryCondition_ptr a_condition)
 #else
-int ignored)
+                                   int ignored)
 #endif
 {
 #ifdef OPENDDS_NO_QUERY_CONDITION
@@ -1319,17 +1319,17 @@ int ignored)
 }
 
 DDS::ReturnCode_t read_next_instance_i (
-                                          MessageSequenceType & received_data,
-                                          DDS::SampleInfoSeq & info_seq,
-                                          ::CORBA::Long max_samples,
-                                          DDS::InstanceHandle_t a_handle,
-                                          DDS::SampleStateMask sample_states,
-                                          DDS::ViewStateMask view_states,
-                                          DDS::InstanceStateMask instance_states,
+                                        MessageSequenceType & received_data,
+                                        DDS::SampleInfoSeq & info_seq,
+                                        ::CORBA::Long max_samples,
+                                        DDS::InstanceHandle_t a_handle,
+                                        DDS::SampleStateMask sample_states,
+                                        DDS::ViewStateMask view_states,
+                                        DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                          DDS::QueryCondition_ptr a_condition)
+                                        DDS::QueryCondition_ptr a_condition)
 #else
-int ignored)
+                                        int ignored)
 #endif
 {
 #ifdef OPENDDS_NO_QUERY_CONDITION
@@ -1387,17 +1387,17 @@ return DDS::RETCODE_NO_DATA;
 }
 
 DDS::ReturnCode_t take_next_instance_i (
-                                          MessageSequenceType & received_data,
-                                          DDS::SampleInfoSeq & info_seq,
-                                          ::CORBA::Long max_samples,
-                                          DDS::InstanceHandle_t a_handle,
-                                          DDS::SampleStateMask sample_states,
-                                          DDS::ViewStateMask view_states,
-                                          DDS::InstanceStateMask instance_states,
+                                        MessageSequenceType & received_data,
+                                        DDS::SampleInfoSeq & info_seq,
+                                        ::CORBA::Long max_samples,
+                                        DDS::InstanceHandle_t a_handle,
+                                        DDS::SampleStateMask sample_states,
+                                        DDS::ViewStateMask view_states,
+                                        DDS::InstanceStateMask instance_states,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                          DDS::QueryCondition_ptr a_condition)
+                                        DDS::QueryCondition_ptr a_condition)
 #else
-int ignored)
+                                        int ignored)
 #endif
 {
 #ifdef OPENDDS_NO_QUERY_CONDITION
@@ -1925,10 +1925,10 @@ void notify_status_condition_no_sample_lock()
 
 /// Common input read* & take* input processing and precondition checks
 DDS::ReturnCode_t check_inputs (
-                                  const char* method_name,
-                                  MessageSequenceType & received_data,
-                                  DDS::SampleInfoSeq & info_seq,
-                                  ::CORBA::Long max_samples)
+                                const char* method_name,
+                                MessageSequenceType & received_data,
+                                DDS::SampleInfoSeq & info_seq,
+                                ::CORBA::Long max_samples)
 {
   typename MessageSequenceType::PrivateMemberAccess received_data_p (received_data);
 
