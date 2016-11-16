@@ -6,15 +6,13 @@
 #include <QtCore/QRect>
 #include <QtGui/QPixmap>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-
 #include <Shape.hpp>
 
 class ShapesWidget  : public QWidget
 {
   Q_OBJECT
   public:
-  typedef std::vector<boost::shared_ptr<Shape> > ShapeList;
+  typedef std::vector<shared_ptr<Shape> > ShapeList;
   typedef std::vector<QRect> FilterList;
 public:
 
@@ -27,7 +25,7 @@ public:
 
 public slots:
   void nextAnimationFrame();
-  void addShape(boost::shared_ptr<Shape> shape);
+  void addShape(shared_ptr<Shape> shape);
 
 protected:
   void paintEvent(QPaintEvent *event);

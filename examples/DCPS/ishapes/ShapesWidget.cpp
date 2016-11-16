@@ -1,8 +1,6 @@
 #include <iostream>
 #include <QtGui/QtGui>
-#include <boost/shared_ptr.hpp>
-#include "ShapesWidget.hpp"
-
+#include <ShapesWidget.hpp>
 
 ShapesWidget::ShapesWidget(QWidget *parent)
 : QWidget(parent),
@@ -17,7 +15,7 @@ ShapesWidget::~ShapesWidget() {
 }
 
 void
-ShapesWidget::addShape(boost::shared_ptr<Shape> shape) {
+ShapesWidget::addShape(shared_ptr<Shape> shape) {
     shapeList_.push_back(shape);
 }
 
