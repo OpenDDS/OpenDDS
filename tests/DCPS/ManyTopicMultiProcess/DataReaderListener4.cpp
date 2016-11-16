@@ -22,13 +22,10 @@ void DataReaderListenerImpl4::read(::DDS::DataReader_ptr reader)
   DDS::TopicDescription_var td = reader->get_topicdescription();
   CORBA::String_var topic = td->get_name();
 
-  ::T4::Foo4DataReaderImpl* dr_servant =
-      dynamic_cast< ::T4::Foo4DataReaderImpl*>(foo_dr.in());
-
   ::T4::Foo4Seq foo(num_ops_per_thread_);
   ::DDS::SampleInfoSeq si(num_ops_per_thread_);
 
-  DDS::ReturnCode_t status = dr_servant->read(foo, si,
+  DDS::ReturnCode_t const status = foo_dr->read(foo, si,
                                               num_ops_per_thread_,
                                               ::DDS::NOT_READ_SAMPLE_STATE,
                                               ::DDS::ANY_VIEW_STATE,
