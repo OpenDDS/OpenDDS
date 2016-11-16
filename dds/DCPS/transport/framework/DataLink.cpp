@@ -24,7 +24,6 @@
 #include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "EntryExit.h"
-#include "tao/ORB_Core.h"
 #include "tao/debug.h"
 #include "ace/Reactor.h"
 #include "ace/SOCK.h"
@@ -33,6 +32,8 @@
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"
 #endif /* __ACE_INLINE__ */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -1108,3 +1109,5 @@ operator<<(std::ostream& str, const DataLink& value)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

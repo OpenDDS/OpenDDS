@@ -10,6 +10,8 @@
 #include "Watchdog.h"
 #include "Service_Participant.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -132,3 +134,5 @@ int Watchdog::reset_timer_interval(long timer_id)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

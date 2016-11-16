@@ -6,6 +6,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "debug.h"
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
@@ -13,10 +14,9 @@
 #include "GuidConverter.h"
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
-
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-
-#include "tao/ORB_Core.h"
+#include "RecorderImpl.h"
+#include "ReplayerImpl.h"
+#include "StaticDiscovery.h"
 
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
@@ -28,10 +28,6 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/Sched_Params.h"
 #include "ace/Malloc_Allocator.h"
-
-#include "RecorderImpl.h"
-#include "ReplayerImpl.h"
-#include "StaticDiscovery.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -84,11 +80,12 @@ void set_log_verbose(unsigned long verbose_logging)
     }
 
   (ACE_LOG_MSG->*flagop)(value);
-
 }
 
 
 }
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -1949,3 +1946,5 @@ Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participan
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

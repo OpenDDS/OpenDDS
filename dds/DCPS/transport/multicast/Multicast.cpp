@@ -10,6 +10,8 @@
 
 #include "ace/Service_Config.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -24,3 +26,5 @@ MulticastInitializer::MulticastInitializer()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

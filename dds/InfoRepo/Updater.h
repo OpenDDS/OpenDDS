@@ -10,7 +10,8 @@
 
 #include "UpdateDataTypes.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
+
 
 namespace Update {
 

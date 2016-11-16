@@ -12,6 +12,8 @@
 #include "TransportReplacedElement.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TransportReplacedElement::~TransportReplacedElement()
 {
   DBG_ENTRY_LVL("TransportReplacedElement","~TransportReplacedElement",6);
@@ -33,3 +35,4 @@ OpenDDS::DCPS::TransportReplacedElement::release_element(bool dropped_by_transpo
   }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

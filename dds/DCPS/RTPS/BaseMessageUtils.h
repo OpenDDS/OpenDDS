@@ -18,6 +18,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
   using DCPS::GuidPrefix_t;
@@ -218,5 +220,7 @@ locators_to_blob(const OpenDDS::DCPS::LocatorSeq& locators, DCPS::TransportBLOB&
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* RTPS_BASEMESSAGETYPES_H */

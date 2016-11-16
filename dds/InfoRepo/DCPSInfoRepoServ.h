@@ -12,16 +12,14 @@
 
 #include <string>
 
-#include "ace/Event_Handler.h"
-#include "ace/Condition_Thread_Mutex.h"
-
-#include "tao/ORB_Core.h"
 #include "tao/PortableServer/Servant_var.h"
 
 #include "DCPSInfoRepoServ_Export.h"
 #include "FederatorConfig.h"
 #include "FederatorManagerImpl.h"
 #include "ShutdownInterface.h"
+
+#include "ace/Event_Handler.h"
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo
   : public ShutdownInterface, public ACE_Event_Handler {

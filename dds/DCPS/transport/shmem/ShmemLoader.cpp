@@ -15,6 +15,8 @@ namespace {
   const char SHMEM_NAME[] = "shmem";
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -62,3 +64,5 @@ ACE_STATIC_SVC_DEFINE(
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

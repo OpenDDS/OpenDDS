@@ -20,6 +20,8 @@
 #include "yard/yard_tree.hpp"
 #include "yard/yard_text_grammar.hpp"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -124,5 +126,8 @@ namespace FilterExpressionGrammar {
 }
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #endif
 #endif

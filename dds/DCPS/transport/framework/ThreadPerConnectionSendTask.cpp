@@ -18,6 +18,8 @@
 
 #include "ace/Auto_Ptr.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -242,3 +244,5 @@ void ThreadPerConnectionSendTask::execute(SendRequest& req)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

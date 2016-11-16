@@ -20,6 +20,8 @@
 # include "TransportInst.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TransportInst::~TransportInst()
 {
   DBG_ENTRY_LVL("TransportInst","~TransportInst",6);
@@ -121,3 +123,5 @@ OpenDDS::DCPS::TransportInst::impl()
   }
   return this->impl_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

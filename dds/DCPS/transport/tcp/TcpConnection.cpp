@@ -18,12 +18,15 @@
 
 #include "ace/os_include/netinet/os_tcp.h"
 #include "ace/OS_NS_arpa_inet.h"
+#include "ace/OS_NS_unistd.h"
 #include <sstream>
 #include <string>
 
 #if !defined (__ACE_INLINE__)
 #include "TcpConnection.inl"
 #endif /* __ACE_INLINE__ */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // The connection lost can be detected by both send and receive strategy. When
 // that happens, both of them add a request to the reconnect task. The reconnect
@@ -991,5 +994,6 @@ OpenDDS::DCPS::TcpConnection::shutdown()
   this->shutdown_ = true;
 
   this->reconnect_task_.close(1);
-
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

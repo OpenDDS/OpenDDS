@@ -9,6 +9,8 @@
 #include <ace/CDR_Stream.h>
 #include "Serializer.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -1034,3 +1036,5 @@ ACE_INLINE void find_size_ulong(size_t& size, size_t& padding)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

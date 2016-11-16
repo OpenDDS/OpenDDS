@@ -15,8 +15,10 @@
 #include "TransportHeader.h"
 
 #include "ace/INET_Addr.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Lock_Adapter_T.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -153,6 +155,8 @@ private:
 
 } // namespace DCPS */
 } // namespace OpenDDS */
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "TransportReceiveStrategy_T.inl"

@@ -9,6 +9,8 @@
 #include "TransportInst.h"
 #include "TransportType.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -83,3 +85,5 @@ TransportRegistry::bind_config(const OPENDDS_STRING& name,
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

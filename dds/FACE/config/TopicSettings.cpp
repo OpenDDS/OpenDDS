@@ -6,6 +6,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 int
@@ -28,3 +30,5 @@ TopicSettings::set(const char* name, const char* value)
 }
 
 } } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

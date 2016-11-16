@@ -19,6 +19,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -126,7 +128,7 @@ public:
 
   bool no_writer () const;
 
-  void reset_ownership (::DDS::InstanceHandle_t instance);
+  void reset_ownership (DDS::InstanceHandle_t instance);
 
   DDS::InstanceHandle_t instance_handle() const { return handle_; }
 
@@ -198,13 +200,15 @@ private:
   RepoIdSet writers_;
   PublicationId owner_;
   bool exclusive_;
-  /// registered with participant so it can be calledback as
+  /// registered with participant so it can be called back as
   /// the owner is updated.
   bool registered_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "InstanceState.inl"

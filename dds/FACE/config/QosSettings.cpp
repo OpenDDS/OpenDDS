@@ -3,6 +3,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 QosSettings::QosSettings() :
@@ -525,3 +527,4 @@ int QosSettings::set_qos(
 
 } } }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

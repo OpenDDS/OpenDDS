@@ -35,6 +35,8 @@
 
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -1020,3 +1022,5 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

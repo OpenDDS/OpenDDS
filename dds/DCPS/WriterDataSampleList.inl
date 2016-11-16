@@ -8,9 +8,10 @@
 #include "DataSampleElement.h"
 #include <algorithm>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
-
 
 ACE_INLINE
 WriterDataSampleList::WriterDataSampleList()
@@ -106,3 +107,5 @@ WriterDataSampleList::dequeue_head(DataSampleElement*& stale)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

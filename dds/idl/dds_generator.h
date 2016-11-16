@@ -138,13 +138,13 @@ private:
 struct NamespaceGuard {
   NamespaceGuard()
   {
-    be_global->header_ << "namespace OpenDDS { namespace DCPS {\n\n";
-    be_global->impl_ << "namespace OpenDDS { namespace DCPS {\n\n";
+    be_global->header_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace OpenDDS { namespace DCPS {\n\n";
+    be_global->impl_ << "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace OpenDDS { namespace DCPS {\n\n";
   }
   ~NamespaceGuard()
   {
-    be_global->header_ << "}  }\n\n";
-    be_global->impl_ << "}  }\n\n";
+    be_global->header_ << "}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+    be_global->impl_ << "}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
   }
 };
 

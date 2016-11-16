@@ -18,6 +18,8 @@
 #include <ace/Proactor_Impl.h>
 #include <ace/WIN32_Proactor.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
   : barrier_(2)
   , state_(STATE_NOT_RUNNING)
@@ -209,3 +211,5 @@ OpenDDS::DCPS::TransportReactorTask::stop()
   // leave this stop method.
   this->wait();
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

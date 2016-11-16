@@ -14,13 +14,14 @@
 #include "BasicQueue_T.h"
 #include "TransportDefs.h"
 #include "ace/Task.h"
-#include "ace/Synch.h"
-#include "ace/Condition_T.h"
+#include "ace/Synch_Traits.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -116,6 +117,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

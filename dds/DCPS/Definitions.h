@@ -8,9 +8,9 @@
 #ifndef OPENDDS_DCPS_DEFINITION_H
 #define OPENDDS_DCPS_DEFINITION_H
 
-#include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/Serializer.h"
 #include "ace/Message_Block.h"
 #include "ace/Global_Macros.h"
@@ -30,9 +30,15 @@
 #define DDS_HAS_WCHAR
 #endif
 
+#if defined (ACE_HAS_CPP11)
+#define OPENDDS_DELETED_COPY_CTOR_ASSIGN(CLASS)         \
+  CLASS(const CLASS&) = delete;           \
+  CLASS& operator=(const CLASS&) = delete;
+#else
 #define OPENDDS_DELETED_COPY_CTOR_ASSIGN(CLASS)         \
   ACE_UNIMPLEMENTED_FUNC(CLASS(const CLASS&))           \
   ACE_UNIMPLEMENTED_FUNC(CLASS& operator=(const CLASS&))
+#endif
 
 // If features content_filtered_topic, multi_topic, and query_condition
 // are all disabled, define a macro to indicate common code these
@@ -40,6 +46,8 @@
 #if defined(OPENDDS_NO_QUERY_CONDITION) && defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) && defined(OPENDDS_NO_MULTI_TOPIC)
 #define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #endif
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -279,5 +287,6 @@ struct VarLess : public std::binary_function<V, V, bool> {
 } // namespace OpenDDS
 } // namespace DCPS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_DEFINITION_H */

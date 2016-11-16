@@ -36,6 +36,8 @@
 #define VDBG(DBG_ARGS) \
   VDBG_LVL(DBG_ARGS, 5)
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -45,5 +47,7 @@ extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
 
 } // namespace OpenDDS
 } // namespace DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_TRANSPORT_DEBUG_H */

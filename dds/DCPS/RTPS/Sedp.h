@@ -32,7 +32,6 @@
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "ace/Task_Ex_T.h"
-#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
 
@@ -40,6 +39,8 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
@@ -393,5 +394,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_RTPS_SEDP_H

@@ -10,13 +10,15 @@
 
 #include "Shmem_Export.h"
 
-#include "ShmemDataLink.h"
 #include "ShmemDataLink_rch.h"
-
+#include "ShmemDataLink.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+
 #include "dds/DCPS/PoolAllocator.h"
 
 #include <string>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -94,5 +96,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_SHMEMTRANSPORT_H */

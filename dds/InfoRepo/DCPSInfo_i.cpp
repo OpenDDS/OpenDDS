@@ -7,6 +7,8 @@
 
 #include "DcpsInfo_pch.h"
 
+#include "tao/ORB_Core.h"
+
 #include /**/ "DCPSInfo_i.h"
 
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"

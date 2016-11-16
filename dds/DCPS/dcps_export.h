@@ -5,6 +5,7 @@
 #define OPENDDS_DCPS_EXPORT_H
 
 #include "ace/config-all.h"
+#include "dds/Versioned_Namespace.h"
 
 #if defined (ACE_AS_STATIC_LIBS) && !defined (OPENDDS_DCPS_HAS_DLL)
 #  define OPENDDS_DCPS_HAS_DLL 0

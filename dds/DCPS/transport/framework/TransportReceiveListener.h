@@ -11,6 +11,8 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -42,8 +44,6 @@ protected:
 } // namespace DCPS
 } // namespace OpenDDS
 
-#if defined (__ACE_INLINE__)
-#include "TransportReceiveListener.inl"
-#endif /* __ACE_INLINE__ */
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_TRANSPORTRECEIVELISTENER_H */

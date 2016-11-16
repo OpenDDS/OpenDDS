@@ -21,7 +21,9 @@
 #include "TransportInst_rch.h"
 #include "ThreadSynchStrategy_rch.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -403,6 +405,8 @@ protected:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"

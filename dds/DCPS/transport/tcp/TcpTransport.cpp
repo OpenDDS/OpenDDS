@@ -26,6 +26,8 @@
 
 #include <sstream>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -814,3 +816,5 @@ TcpTransport::unbind_link(DataLink* link)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

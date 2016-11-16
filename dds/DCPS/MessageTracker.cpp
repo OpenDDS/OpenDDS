@@ -2,11 +2,14 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "ace/Synch.h"
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
 #include "ace/OS_NS_time.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 using namespace OpenDDS::DCPS;
 
@@ -144,3 +147,5 @@ MessageTracker::dropped_count()
 {
   return dropped_count_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

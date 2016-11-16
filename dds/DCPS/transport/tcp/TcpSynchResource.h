@@ -11,8 +11,8 @@
 #include "TcpConnection_rch.h"
 #include "TcpConnection.h"
 #include "dds/DCPS/transport/framework/ThreadSynchResource.h"
-#include "ace/Handle_Set.h"
-#include "ace/Time_Value.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -33,5 +33,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_TCPSYNCHRESOURCE_H */

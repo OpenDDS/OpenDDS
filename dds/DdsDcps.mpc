@@ -1,7 +1,7 @@
 project(OpenDDS_Dcps): core, coverage_optional, \
         dcps_optional_features, dcps_optional_safety, dds_macros, \
         dds_suppress_any_support, dds_taolib, gen_ostream, install, valgrind, \
-        dds_vc_warnings {
+        dds_vc_warnings, dds_versioning_idl_defaults {
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib

@@ -20,6 +20,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -77,12 +79,14 @@ private:
   std::vector<SubjectFieldSpec> aggregation_;
   std::vector<OPENDDS_STRING> selection_;
 
-  ///concurrent access to expression_parameters_
+  /// Concurrent access to expression_parameters_
   mutable ACE_Recursive_Thread_Mutex lock_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_NO_MULTI_TOPIC
 

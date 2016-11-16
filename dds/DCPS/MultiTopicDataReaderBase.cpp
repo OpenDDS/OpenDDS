@@ -26,6 +26,7 @@ namespace {
   };
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -429,5 +430,7 @@ void MultiTopicDataReaderBase::statistics_enabled(
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

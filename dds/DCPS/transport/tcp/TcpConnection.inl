@@ -13,6 +13,8 @@
 #include "ace/SOCK_Connector.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 std::size_t&
 OpenDDS::DCPS::TcpConnection::id()
@@ -75,3 +77,5 @@ OpenDDS::DCPS::TcpConnection::transport_priority() const
 {
   return this->transport_priority_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

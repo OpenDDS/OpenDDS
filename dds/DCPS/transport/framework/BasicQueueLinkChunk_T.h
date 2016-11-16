@@ -13,6 +13,8 @@
 #include "ace/OS_NS_stdlib.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -39,5 +41,7 @@ struct BasicQueueLinkChunk : public PoolAllocationBase {
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_BASICQUEUELINKCHUNK_T_H */

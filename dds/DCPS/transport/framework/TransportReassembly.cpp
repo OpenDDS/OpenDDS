@@ -12,6 +12,8 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/DisjointSequence.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -344,3 +346,5 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

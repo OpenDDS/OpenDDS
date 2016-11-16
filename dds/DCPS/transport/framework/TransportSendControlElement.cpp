@@ -14,6 +14,8 @@
 #include "TransportSendControlElement.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -110,3 +112,5 @@ TransportSendControlElement::is_control(RepoId pub_id) const
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

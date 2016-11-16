@@ -23,6 +23,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Sock_Connect.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -337,3 +339,5 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
 }
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

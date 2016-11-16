@@ -15,6 +15,8 @@
 #include "DataReaderImpl.h"
 #include <algorithm>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -422,5 +424,7 @@ OwnershipManager::remove_owner(const DDS::InstanceHandle_t& instance_handle)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE

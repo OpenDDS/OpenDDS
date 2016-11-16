@@ -18,6 +18,8 @@
 #include "dds/DCPS/ZeroCopyAllocator_T.h"
 #include <ace/Vector_T.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -26,6 +28,9 @@ class ReceivedDataElement;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -121,7 +126,7 @@ public:
       seq_.internal_set_length(len);
     }
 
-    void set_loaner(OpenDDS::DCPS::DataReaderImpl* loaner) {
+    void set_loaner(::OpenDDS::DCPS::DataReaderImpl* loaner) {
       seq_.set_loaner(loaner);
     }
 

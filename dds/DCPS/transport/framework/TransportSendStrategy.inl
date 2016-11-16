@@ -7,6 +7,7 @@
 
 #include "ThreadSynch.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE
 OpenDDS::DCPS::TransportSendStrategy::SendMode
@@ -149,3 +150,5 @@ OpenDDS::DCPS::TransportSendStrategy::current_packet_first_element() const
 {
   return this->elems_->peek();
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

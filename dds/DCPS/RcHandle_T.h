@@ -1,12 +1,14 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #ifndef OPENDDS_RCHANDLE_T_H
 #define OPENDDS_RCHANDLE_T_H
+
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -157,5 +159,7 @@ RcHandle<T> dynamic_rchandle_cast(const RcHandle<U>& h)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_RCHANDLE_T_H */

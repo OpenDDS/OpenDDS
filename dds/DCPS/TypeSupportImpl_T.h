@@ -8,6 +8,8 @@
 #include "dds/DCPS/DataReaderImpl_T.h"
 #include "dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace DCPS {
 
@@ -35,32 +37,32 @@ namespace OpenDDS {
     TypeSupportImpl_T() { }
     virtual ~TypeSupportImpl_T() { }
 
-    virtual ::DDS::DataWriter_ptr create_datawriter()
+    virtual DDS::DataWriter_ptr create_datawriter()
     {
       typedef DataWriterImpl_T<MessageType> DataWriterImplType;
 
       DataWriterImplType* writer_impl;
       ACE_NEW_RETURN(writer_impl,
                      DataWriterImplType(),
-                     ::DDS::DataWriter::_nil());
+                     DDS::DataWriter::_nil());
 
       return writer_impl;
     }
 
-    virtual ::DDS::DataReader_ptr create_datareader()
+    virtual DDS::DataReader_ptr create_datareader()
     {
       typedef DataReaderImpl_T<MessageType> DataReaderImplType;
 
       DataReaderImplType* reader_impl = 0;
       ACE_NEW_RETURN(reader_impl,
                      DataReaderImplType(),
-                     ::DDS::DataReader::_nil());
+                     DDS::DataReader::_nil());
 
       return reader_impl;
     }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-    virtual ::DDS::DataReader_ptr create_multitopic_datareader()
+    virtual DDS::DataReader_ptr create_multitopic_datareader()
     {
       typedef DataReaderImpl_T<MessageType> DataReaderImplType;
       return new OpenDDS::DCPS::MultiTopicDataReader_T<MessageType, DataReaderImplType>;
@@ -91,5 +93,7 @@ namespace OpenDDS {
 
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_TypeSupportImpl_h */

@@ -13,6 +13,8 @@
 
 #include "dds/DCPS/Definitions.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -103,6 +105,7 @@ bool operator<<(ACE_Message_Block&, const TransportHeader& value);
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined(__ACE_INLINE__)
 #include "TransportHeader.inl"

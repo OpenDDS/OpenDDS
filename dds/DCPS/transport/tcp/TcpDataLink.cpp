@@ -19,6 +19,8 @@
 #include "TcpDataLink.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
   const ACE_INET_Addr& remote_address,
   OpenDDS::DCPS::TcpTransport*  transport_impl,
@@ -342,3 +344,5 @@ bool OpenDDS::DCPS::TcpDataLink::is_release_pending() const
 {
   return this->release_is_pending_.value();
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

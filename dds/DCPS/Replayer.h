@@ -14,6 +14,8 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -33,8 +35,8 @@ public:
    *  Callback for when the Replayer is associated with a DataReader.
    *  @param replayer Replayer that received the association
    */
-  virtual void on_replayer_matched(Replayer*                               replayer,
-                                   const ::DDS::PublicationMatchedStatus & status );
+  virtual void on_replayer_matched(Replayer*                             replayer,
+                                   const DDS::PublicationMatchedStatus & status );
 };
 
 typedef RcHandle<ReplayerListener> ReplayerListener_rch;
@@ -91,8 +93,8 @@ public:
    * Set the Quality of Service settings for the Replayer.
    *
    */
-  virtual DDS::ReturnCode_t set_qos (const ::DDS::PublisherQos & publisher_qos,
-                                     const DDS::DataWriterQos &  datawriter_qos)=0;
+  virtual DDS::ReturnCode_t set_qos (const DDS::PublisherQos &  publisher_qos,
+                                     const DDS::DataWriterQos & datawriter_qos)=0;
 
   /**
    * Get the Quality of Service settings for the Replayer.
@@ -117,6 +119,8 @@ public:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 

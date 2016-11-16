@@ -6,9 +6,13 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "ReactorInterceptor.h"
 
 #include "ace/Log_Msg.h"
+#include "ace/Synch.h"
+
+#include "ReactorInterceptor.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -83,5 +87,6 @@ int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>&)
 }
 
 }
-
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

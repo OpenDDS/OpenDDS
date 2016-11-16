@@ -21,7 +21,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "ace/Condition_T.h"
+#include "ace/Synch_Traits.h"
 
 #include <list>
 #include <map>

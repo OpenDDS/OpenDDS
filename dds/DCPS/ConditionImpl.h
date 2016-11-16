@@ -9,15 +9,17 @@
 #define OPENDDS_DCPS_CONDITIONIMPL_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/WaitSet.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -40,5 +42,7 @@ protected:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

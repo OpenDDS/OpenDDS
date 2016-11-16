@@ -11,8 +11,6 @@
 #include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 #endif
 
-#include "tao/ORB_Core.h"
-
 #include <iostream>
 
 int

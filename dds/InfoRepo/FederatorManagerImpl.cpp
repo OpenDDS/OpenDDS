@@ -6,6 +6,7 @@
  */
 
 #include "DcpsInfo_pch.h"
+#include "tao/ORB_Core.h"
 #include "FederatorManagerImpl.h"
 #include "DCPSInfo_i.h"
 #include "DefaultValues.h"
@@ -18,7 +19,6 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/Tcp.h"
-#include "tao/ORB_Core.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
 

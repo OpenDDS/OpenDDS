@@ -116,6 +116,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->idl_ << idl;
 
   be_global->header_ <<
+    "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
     "namespace OpenDDS { namespace DCPS {\n"
     "template <>\n"
     "struct DDSTraits<" << cxxName << "> {\n"
@@ -124,7 +125,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  typedef " << cxxName << "TypeSupport TypeSupportType;\n"
     "  typedef " << cxxName << "DataWriter DataWriterType;\n"
     "  typedef " << cxxName << "DataReader DataReaderType;\n"
-    "  typedef " << module_scope(name) << "OpenDDSGenerated::" << short_name << "_KeyLessThan LessThanType;\n"
+    "  typedef " << "OpenDDSGenerated::" << module_scope(name) << short_name << "_KeyLessThan LessThanType;\n"
     "\n"
     "  inline static const char* type_name () { return \"" << cxxName << "\"; }\n"
     "  inline static bool gen_has_key (const MessageType& x) { return ::OpenDDS::DCPS::gen_has_key(x); }\n"
@@ -136,7 +137,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  inline static bool gen_is_bounded_size (const OpenDDS::DCPS::KeyOnly<const MessageType>& x) { return ::OpenDDS::DCPS::gen_is_bounded_size(x); }\n"
     "  inline static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
     "  inline static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
-    "};\n}  }\n\n";
+    "};\n}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);

@@ -12,6 +12,8 @@
 #include "BasicQueueVisitor_T.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -279,5 +281,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_BASICQUEUE_T_H */

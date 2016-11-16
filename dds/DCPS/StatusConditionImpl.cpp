@@ -9,6 +9,8 @@
 #include "StatusConditionImpl.h"
 #include "EntityImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -49,3 +51,5 @@ DDS::Entity_ptr StatusConditionImpl::get_entity()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

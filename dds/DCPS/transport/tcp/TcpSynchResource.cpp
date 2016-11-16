@@ -10,6 +10,8 @@
 #include "TcpConnection.h"
 #include "TcpSendStrategy.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TcpSynchResource::TcpSynchResource(
   const TcpConnection_rch& connection,
   const int& max_output_pause_period_ms)
@@ -36,3 +38,5 @@ OpenDDS::DCPS::TcpSynchResource::notify_lost_on_backpressure_timeout()
 
   this->connection_->notify_lost_on_backpressure_timeout();
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -31,6 +31,9 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     be_global->impl_ << "  return " << (empty ? "false" : "true") << ";\n";
   }
 
+  be_global->header_ <<
+    "namespace OpenDDSGenerated {\n";
+
   struct Namespaces {
     size_t n_;
     Namespaces(UTL_ScopedName* name)
@@ -52,12 +55,11 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   } ns(name);
 
   be_global->header_ <<
-    "namespace OpenDDSGenerated {\n"
     "// This structure supports use of std::map with a key\n"
     "// defined by one or more #pragma DCPS_DATA_KEY lines.\n"
     "struct " << be_global->export_macro() << ' ' <<
     name->last_component()->get_string() << "_KeyLessThan {\n"
-    "  bool operator()(const " << cxx << "& v1, const " << cxx
+    "  bool operator()(const ::" << cxx << "& v1, const ::" << cxx
     << "& v2) const\n"
     "  {\n"
     "    using ::operator<; // TAO::String_Manager's operator< is "

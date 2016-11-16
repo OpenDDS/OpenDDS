@@ -16,6 +16,7 @@
 
 #include "ace/Reactor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -562,3 +563,5 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

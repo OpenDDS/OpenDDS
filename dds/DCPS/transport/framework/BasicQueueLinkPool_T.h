@@ -12,6 +12,8 @@
 #include "BasicQueueLinkAllocator_T.h"
 #include "ace/Malloc_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -59,5 +61,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_BASICQUEUELINKPOOL_T_H */

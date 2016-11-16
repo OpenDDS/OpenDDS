@@ -10,6 +10,8 @@
 
 #include "RtpsCoreC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace RTPS {
 
@@ -33,5 +35,7 @@ namespace OpenDDS {
 
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* RTPS_MESSAGETYPES_H */

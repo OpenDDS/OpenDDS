@@ -11,12 +11,13 @@
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-// #include "RcHandle_T.h"
 #include "RcObject_T.h"
 #include "Definitions.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
 #include "transport/framework/ReceivedDataSample.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -201,5 +202,7 @@ OpenDDS::DCPS::WriterInfo::received_activity(const ACE_Time_Value& when)
 
 } // namespace DCPS
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* end of include guard: OPENDDS_DCPS_WRITERINFO_H */

@@ -1,4 +1,4 @@
-feature(no_opendds_safety_profile) : dcps_ts_defaults {
+feature(no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaults {
   idlflags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SS
   dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI
 
@@ -11,7 +11,7 @@ feature(no_opendds_safety_profile) : dcps_ts_defaults {
   }
 }
 
-feature(!no_opendds_safety_profile) : dcps_ts_defaults {
+feature(!no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaults {
   dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI -Lspcpp
 
   TypeSupport_Files {

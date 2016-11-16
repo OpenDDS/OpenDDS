@@ -30,6 +30,8 @@
 #include "TransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -1919,3 +1921,5 @@ TransportSendStrategy::mb_to_iov(const ACE_Message_Block& msg, iovec* iov)
 // close namespaces
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

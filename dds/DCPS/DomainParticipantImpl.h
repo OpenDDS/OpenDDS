@@ -8,12 +8,6 @@
 #ifndef OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 #define OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 
-#include "EntityImpl.h"
-#include "Definitions.h"
-#include "TopicImpl.h"
-#include "InstanceHandle.h"
-#include "OwnershipManager.h"
-#include "GuidBuilder.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
@@ -25,6 +19,13 @@
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+#include "EntityImpl.h"
+#include "Definitions.h"
+#include "TopicImpl.h"
+#include "InstanceHandle.h"
+#include "OwnershipManager.h"
+#include "GuidBuilder.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "ace/Null_Mutex.h"
@@ -39,6 +40,8 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -549,5 +552,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H  */

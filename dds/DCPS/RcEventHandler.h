@@ -9,6 +9,9 @@
 #define OPENDDS_RCEVENTHANDLER_H
 
 #include "ace/Event_Handler.h"
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -144,5 +147,7 @@ void swap(RcEventHandler<T>& lhs, RcEventHandler<T>& rhs)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_RCEVENTHANDLER_H */
