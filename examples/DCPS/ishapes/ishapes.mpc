@@ -1,4 +1,4 @@
-project(ishapes): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, qt4_settings, boost_base {
+project(ishapes): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, qt4_settings, boost_or_cxx11 {
 
   exename = *
   includes += .
@@ -48,4 +48,3 @@ project(ishapes): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, qt
     WriterQosDialog_moc.cpp
   }
 }
-
