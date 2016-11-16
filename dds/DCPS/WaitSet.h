@@ -98,7 +98,7 @@ namespace TAO {
 #define DDS_WAITSET__TRAITS_
 
 template<>
-struct OpenDDS_Dcps_Export Objref_Traits< DDS::WaitSet> {
+struct OpenDDS_Dcps_Export Objref_Traits<DDS::WaitSet> {
   static DDS::WaitSet_ptr duplicate(DDS::WaitSet_ptr p);
   static void release(DDS::WaitSet_ptr p);
   static DDS::WaitSet_ptr nil();
