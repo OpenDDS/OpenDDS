@@ -17,8 +17,6 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 
-//#include "Service_Participant.h"
-
 #include "ace/Synch_Traits.h"
 
 #include <memory>
