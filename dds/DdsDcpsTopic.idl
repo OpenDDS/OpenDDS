@@ -13,6 +13,9 @@
 #pragma ciao lem "dds/DdsDcpsTopicE.idl"
 
 module DDS {
+    local interface DomainParticipant;
+    local interface Topic;
+
     // ----------------------------------------------------------------------
     local interface TopicDescription {
                 string get_type_name();
