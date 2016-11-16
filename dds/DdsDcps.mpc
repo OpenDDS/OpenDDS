@@ -80,9 +80,9 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   }
 
   verbatim(gnuace, postinstall) {
-"  echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(INSTALL_PREFIX)/share/dds/dds-devel.sh"
-"  @$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
-"  ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
+"	echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(INSTALL_PREFIX)/share/dds/dds-devel.sh"
+"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
+"	ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
   }
 
 }
