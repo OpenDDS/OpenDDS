@@ -94,8 +94,8 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace TAO {
 
-#if !defined (_DDS_WAITSET__TRAITS_)
-#define _DDS_WAITSET__TRAITS_
+#if !defined(DDS_WAITSET__TRAITS_)
+#define DDS_WAITSET__TRAITS_
 
 template<>
 struct OpenDDS_Dcps_Export Objref_Traits< DDS::WaitSet> {
@@ -106,7 +106,7 @@ struct OpenDDS_Dcps_Export Objref_Traits< DDS::WaitSet> {
                                 TAO_OutputCDR & cdr);
 };
 
-#endif
+#endif /* DDS_WAITSET__TRAITS_ */
 
 } // namespace TAO
 

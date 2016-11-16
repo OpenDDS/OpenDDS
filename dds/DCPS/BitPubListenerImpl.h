@@ -10,9 +10,7 @@
 
 #ifndef DDS_HAS_MINIMUM_BIT
 
-#include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "Definitions.h"
 #include "LocalObject.h"
 

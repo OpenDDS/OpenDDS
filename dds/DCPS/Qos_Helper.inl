@@ -259,7 +259,7 @@ ACE_INLINE
 bool operator==(const DDS::PartitionQosPolicy& qos1,
                 const DDS::PartitionQosPolicy& qos2)
 {
-  CORBA::ULong const len = qos1.name.length();
+  const CORBA::ULong len = qos1.name.length();
 
   if (len == qos2.name.length()) {
     for (CORBA::ULong i = 0; i < len; ++i) {

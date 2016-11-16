@@ -135,7 +135,7 @@ int remove(
 template <typename Seq>
 void push_back(Seq& seq, const typename Seq::value_type& val)
 {
-  CORBA::ULong const len = seq.length();
+  const CORBA::ULong len = seq.length();
   seq.length(len + 1);
   seq[len] = val;
 }

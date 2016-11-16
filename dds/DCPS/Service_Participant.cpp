@@ -16,8 +16,6 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
-// #include "StaticDiscovery.h"
-
 
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
@@ -1311,7 +1309,7 @@ Service_Participant::load_configuration(
   }
 
   // Register static discovery.
-//   this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
+  this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
 
   status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
 
@@ -1371,7 +1369,7 @@ Service_Participant::load_configuration(
   }
 
   // Needs to be loaded after transport configs and instances and domains.
-//   status = StaticDiscovery::instance()->load_configuration(config);
+  status = StaticDiscovery::instance()->load_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,

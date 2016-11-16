@@ -331,9 +331,4 @@ module OpenDDS
   };
 };
 
-module DDS {
-    local interface DomainParticipant;
-    local interface Topic;
-};
-
 #endif  /* OPENDDS_DCPS_INFRASTRUCTURE_IDL */
