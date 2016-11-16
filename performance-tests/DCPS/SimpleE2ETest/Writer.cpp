@@ -8,7 +8,7 @@
 #include "ace/OS_NS_unistd.h"
 
 
-template<class T, class W, class W_var, class W_ptr, class Wimpl>
+template<class T, class W, class W_var, class W_ptr>
 void write (long id,
             int size,
             int num_messages,
@@ -27,8 +27,6 @@ void write (long id,
     = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  Wimpl* pt_servant = dynamic_cast<Wimpl*> (pt_dw.in ());
-
   //SHH remove this kludge when the transport is fixed.
   ACE_OS::sleep(5); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
@@ -41,9 +39,7 @@ void write (long id,
   for (int i = 0; i < num_messages; i ++)
   {
     data.sequence_num = i;
-    ::DDS::ReturnCode_t ret
-       = pt_servant->write(data,
-                      handle);
+    ::DDS::ReturnCode_t ret = pt_dw->write(data, handle);
     if (ret != ::DDS::RETCODE_OK)
       {
         ACE_ERROR((LM_ERROR,
@@ -111,8 +107,7 @@ Writer::svc ()
         write < ::Xyz::Pt128,
                ::Xyz::Pt128DataWriter,
                ::Xyz::Pt128DataWriter_var,
-               ::Xyz::Pt128DataWriter_ptr,
-               ::Xyz::Pt128DataWriterImpl>
+               ::Xyz::Pt128DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -125,8 +120,7 @@ Writer::svc ()
         write < ::Xyz::Pt512,
                ::Xyz::Pt512DataWriter,
                ::Xyz::Pt512DataWriter_var,
-               ::Xyz::Pt512DataWriter_ptr,
-               ::Xyz::Pt512DataWriterImpl>
+               ::Xyz::Pt512DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -139,8 +133,7 @@ Writer::svc ()
         write < ::Xyz::Pt2048,
                ::Xyz::Pt2048DataWriter,
                ::Xyz::Pt2048DataWriter_var,
-               ::Xyz::Pt2048DataWriter_ptr,
-               ::Xyz::Pt2048DataWriterImpl>
+               ::Xyz::Pt2048DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -153,8 +146,7 @@ Writer::svc ()
         write < ::Xyz::Pt8192,
                ::Xyz::Pt8192DataWriter,
                ::Xyz::Pt8192DataWriter_var,
-               ::Xyz::Pt8192DataWriter_ptr,
-               ::Xyz::Pt8192DataWriterImpl>
+               ::Xyz::Pt8192DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,

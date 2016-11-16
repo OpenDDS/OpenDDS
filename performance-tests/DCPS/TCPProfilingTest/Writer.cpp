@@ -31,9 +31,6 @@ void write (long id,
     = ::profilingTest::testMsgDataWriter::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  ::profilingTest::testMsgDataWriterImpl* pt_servant =
-    dynamic_cast< ::profilingTest::testMsgDataWriterImpl*>(pt_dw.in ());
-
   ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
 
@@ -43,8 +40,7 @@ void write (long id,
   for (int i = 0; i < num_messages; i ++)
   {
     data.count = i;
-    pt_servant->write(data,
-                      handle);
+    pt_dw->write(data, handle);
   }
 }
 
