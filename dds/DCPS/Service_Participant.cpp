@@ -16,6 +16,7 @@
 #include "ConfigUtils.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "StaticDiscovery.h"
 
 #include "ace/Singleton.h"
 #include "ace/Arg_Shifter.h"
