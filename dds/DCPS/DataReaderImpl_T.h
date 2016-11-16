@@ -717,9 +717,9 @@ namespace OpenDDS {
   }
 
   virtual DDS::ReturnCode_t take(
-                                   OpenDDS::DCPS::AbstractSamples& samples,
-                                   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-                                   DDS::InstanceStateMask instance_states)
+                                 OpenDDS::DCPS::AbstractSamples& samples,
+                                 DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+                                 DDS::InstanceStateMask instance_states)
   {
 
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -727,11 +727,10 @@ namespace OpenDDS {
                       this->sample_lock_,
                       DDS::RETCODE_ERROR);
 
-
     MessageSequenceType data;
     DDS::SampleInfoSeq infos;
     DDS::ReturnCode_t rc = take_i(data, infos, DDS::LENGTH_UNLIMITED,
-                                    sample_states, view_states, instance_states, 0);
+                                  sample_states, view_states, instance_states, 0);
 
     samples.reserve(data.length());
 
@@ -743,15 +742,15 @@ namespace OpenDDS {
   }
 
   DDS::ReturnCode_t read_instance_generic(void*& data,
-                                            DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
-                                            DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-                                            DDS::InstanceStateMask instance_states)
+                                          DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
+                                          DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+                                          DDS::InstanceStateMask instance_states)
   {
     MessageSequenceType dataseq;
     DDS::SampleInfoSeq infoseq;
     DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
-                                             DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
-                                             instance_states, 0);
+                                           DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
+                                           instance_states, 0);
     if (rc == DDS::RETCODE_NO_DATA) return rc;
     const CORBA::ULong last = dataseq.length() - 1;
     data = new MessageType(dataseq[last]);
@@ -760,15 +759,15 @@ namespace OpenDDS {
   }
 
   DDS::ReturnCode_t read_next_instance_generic(void*& data,
-                                                 DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
-                                                 DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-                                                 DDS::InstanceStateMask instance_states)
+                                               DDS::SampleInfo& info, DDS::InstanceHandle_t previous_instance,
+                                               DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
+                                               DDS::InstanceStateMask instance_states)
   {
     MessageSequenceType dataseq;
     DDS::SampleInfoSeq infoseq;
     DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
-                                                  DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
-                                                  instance_states, 0);
+                                                DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
+                                                instance_states, 0);
     if (rc == DDS::RETCODE_NO_DATA) return rc;
     const CORBA::ULong last = dataseq.length() - 1;
     data = new MessageType(dataseq[last]);
@@ -779,7 +778,7 @@ namespace OpenDDS {
 #endif
 
   DDS::InstanceHandle_t store_synthetic_data(const MessageType& sample,
-                                               DDS::ViewStateKind view)
+                                             DDS::ViewStateKind view)
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
@@ -900,7 +899,7 @@ protected:
                              bool & filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    MessageType* data;
+    MessageType* data = 0;
 
     ACE_NEW_MALLOC_NORETURN(data,
                             static_cast< MessageType *>(

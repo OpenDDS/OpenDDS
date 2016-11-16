@@ -4,7 +4,6 @@
 #include <ace/CDR_Base.h>
 #include "OpenDDS_FACE_Export.h"
 
-
 namespace OpenDDS {
   namespace FaceTypes {
     template<typename CharT> class String_var;
