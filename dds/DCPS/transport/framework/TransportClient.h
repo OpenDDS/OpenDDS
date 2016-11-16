@@ -167,7 +167,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
 
-  struct PendingAssoc : ACE_Event_Handler {
+  struct PendingAssoc : ACE_Event_Handler, PoolAllocationBase {
     bool active_, removed_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
