@@ -39,7 +39,7 @@ namespace OpenDDS {
     {
       typedef DataWriterImpl_T<MessageType> DataWriterImplType;
 
-      DataWriterImplType* writer_impl;
+      DataWriterImplType* writer_impl = 0;
       ACE_NEW_RETURN(writer_impl,
                      DataWriterImplType(),
                      ::DDS::DataWriter::_nil());

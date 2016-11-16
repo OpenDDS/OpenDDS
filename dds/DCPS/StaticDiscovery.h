@@ -197,8 +197,8 @@ public:
   virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
   virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid);
 #ifndef DDS_HAS_MINIMUM_BIT
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+  OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+  OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 

@@ -281,9 +281,9 @@ private:
   DCPS::TransportInst_rch transport_inst_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+  OpenDDS::DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
+  OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+  OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   void populate_discovered_writer_msg(
