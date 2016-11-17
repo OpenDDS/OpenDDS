@@ -296,9 +296,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1; // failure
       }
 
-      Test::SimpleDataWriterImpl* fast_dw =
-        dynamic_cast<Test::SimpleDataWriterImpl*>(foo_dw.in ());
-
       Test::SimpleDataReader_var foo_dr
         = Test::SimpleDataReader::_narrow(dr.in ());
       if (CORBA::is_nil (foo_dr.in ()))
@@ -308,10 +305,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1; // failure
       }
 
-      Test::SimpleDataReaderImpl* fast_dr =
-        dynamic_cast<Test::SimpleDataReaderImpl*>(foo_dr.in ());
-
-
       // wait for association establishement before writing.
       // -- replaced this sleep with the while loop below;
       //    waiting on the one association we expect.
@@ -319,7 +312,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::InstanceHandleSeq handles;
       while (1)
       {
-          fast_dw->get_matched_subscriptions(handles);
+          foo_dw->get_matched_subscriptions(handles);
           if (handles.length() > 0)
               break;
           else
@@ -345,10 +338,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           // register the data so we can use the handle.
           ::DDS::InstanceHandle_t handle
-            = fast_dw->register_instance(foo1);
+            = foo_dw->register_instance(foo1);
 
           // write first sample
-          fast_dw->write(foo1, handle);
+          foo_dw->write(foo1, handle);
 
           // wait for write to propogate
           if (!wait_for_data(sub.in (), 5))
@@ -358,7 +351,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           // read should return one sample with view state NEW.
           DDS::ReturnCode_t status  ;
-          status = fast_dr->read(  data1
+          status = foo_dr->read(  data1
             , info1
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -392,7 +385,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           foo2.count = 2;
 
           // write second sample
-          fast_dw->write(foo2, handle);
+          foo_dw->write(foo2, handle);
 
           // wait for write to propogate
           if (!wait_for_data(sub.in (), 5))
@@ -404,7 +397,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // we read previously and the instance is not reborn.
           Test::SimpleSeq     data2 (max_samples);
           ::DDS::SampleInfoSeq info2;
-          status = fast_dr->read(  data2
+          status = foo_dr->read(  data2
             , info2
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -441,7 +434,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           // Upon receiving dispose, a NEW sample is created which marks InstanceState
           // has NOT_READ_SAMPLE, but won't change the view state. The view state is
           // changed to NEW_VIEW when data sample is received.
-          fast_dw->dispose(foo1, handle);
+          foo_dw->dispose(foo1, handle);
 
           //// wait for dispose sample to propogate
           if (!wait_for_data(sub.in (), 5))
@@ -456,7 +449,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           Test::SimpleSeq     disposeData (max_samples);
           ::DDS::SampleInfoSeq disposeDataInfo;
 
-          status = fast_dr->read(  disposeData
+          status = foo_dr->read(  disposeData
             , disposeDataInfo
             , max_samples
             , ::DDS::NOT_READ_SAMPLE_STATE
@@ -478,7 +471,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           foo3.key  = 1;
           foo3.count = 3;
 
-          fast_dw->write (foo3, handle);
+          foo_dw->write (foo3, handle);
 
           //// wait for write to propogate
           if (!wait_for_data(sub.in (), 5))
@@ -494,7 +487,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           Test::SimpleSeq     data3 (max_samples);
           ::DDS::SampleInfoSeq info3;
-          status = fast_dr->read(  data3
+          status = foo_dr->read(  data3
             , info3
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -528,7 +521,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           Test::SimpleSeq     data4 (max_samples);
           ::DDS::SampleInfoSeq info4;
-          status = fast_dr->read(  data4
+          status = foo_dr->read(  data4
             , info4
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -568,7 +561,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           Test::SimpleSeq     data5 (max_samples);
           ::DDS::SampleInfoSeq info5;
-          status = fast_dr->read(  data5
+          status = foo_dr->read(  data5
             , info5
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE
@@ -609,7 +602,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           //Since it's a different instance, can not use previous handle.
           //Let it automatically register.
-          fast_dw->write (xfoo, ::DDS::HANDLE_NIL);
+          foo_dw->write (xfoo, ::DDS::HANDLE_NIL);
 
           //// wait for write to propogate
           if (!wait_for_data(sub.in (), 5))
@@ -621,7 +614,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ::DDS::SampleInfoSeq info6;
 
           // read should return one sample with view state NEW.
-          status = fast_dr->read(  data6
+          status = foo_dr->read(  data6
             , info6
             , max_samples
             , ::DDS::ANY_SAMPLE_STATE

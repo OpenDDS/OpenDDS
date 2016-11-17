@@ -11,6 +11,10 @@
 #include "ace/String_Base.h"
 #include <string>
 
+namespace Xyz {
+  typedef OpenDDS::DCPS::DataWriterImpl_T<Xyz::Foo> FooDataWriterImpl;
+}
+
 class PubDriver : public ACE_Task_Base
 {
   public:

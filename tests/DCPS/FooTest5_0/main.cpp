@@ -340,9 +340,6 @@ int run_test(int argc, ACE_TCHAR *argv[])
         return 1; // failure
       }
 
-      ::Xyz::FooDataWriterImpl* fast_dw
-        = dynamic_cast<Xyz::FooDataWriterImpl*>(foo_dw.in());
-
       ::Xyz::FooDataReader_var foo_dr
         = ::Xyz::FooDataReader::_narrow(dr.in ());
       if (CORBA::is_nil (foo_dr.in ()))
@@ -352,11 +349,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         return 1; // failure
       }
 
-      ::Xyz::FooDataReaderImpl* fast_dr
-        = dynamic_cast<Xyz::FooDataReaderImpl*>(foo_dr.in());
-
-
-      // wait for association establishement before writing.
+      // wait for association establishment before writing.
       ACE_OS::sleep(5); //REMOVE if not needed
 
 
@@ -430,13 +423,11 @@ int run_test(int argc, ACE_TCHAR *argv[])
       foo.x = -1;
       foo.y = -1;
 
-      handle
-          = fast_dw->register_instance(foo);
+      handle = foo_dw->register_instance(foo);
 
       foo.x = 7;
 
-      fast_dw->write(foo,
-                     handle);
+      foo_dw->write(foo, handle);
 
       ::Xyz::Foo sample;
       ::DDS::SampleInfo info ;
@@ -448,7 +439,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
                            1);
 
       DDS::ReturnCode_t status  ;
-      status = fast_dr->read_next_sample(sample, info) ;
+      status = foo_dr->read_next_sample(sample, info) ;
 
       if (status == ::DDS::RETCODE_OK)
       {

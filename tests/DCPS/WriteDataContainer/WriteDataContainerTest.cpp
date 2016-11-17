@@ -62,6 +62,11 @@ private:
   InstanceHandleGenerator participant_handles_;
 };
 
+namespace Test
+{
+  typedef OpenDDS::DCPS::DataWriterImpl_T<Simple> SimpleDataWriterImpl;
+}
+
 class DDS_TEST
 {
 public:

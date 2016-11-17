@@ -7,6 +7,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/DiscoveryBase.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -42,8 +43,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                      0, DEFAULT_STATUS_MASK);
   Subscriber_var bit_sub = dp->get_builtin_subscriber();
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-  ParticipantBuiltinTopicDataDataReaderImpl* bit_dr =
-    dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(dr.in());
+  OpenDDS::DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit_dr =
+    dynamic_cast<OpenDDS::DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(dr.in());
   ReturnCode_t result;
 
   { // Should be able to read synthetic data

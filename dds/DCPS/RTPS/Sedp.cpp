@@ -659,7 +659,7 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 #ifndef DDS_HAS_MINIMUM_BIT
   switch (which_bit) {
   case Msg::MSG_REMOVE_FROM_PUB_BIT: {
-    DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
+    OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
     // bit may be null if the DomainParticipant is shutting down
     if (bit && bit_ih != DDS::HANDLE_NIL) {
       bit->set_instance_state(bit_ih,
@@ -668,7 +668,7 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
     break;
   }
   case Msg::MSG_REMOVE_FROM_SUB_BIT: {
-    DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
+    OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
     // bit may be null if the DomainParticipant is shutting down
     if (bit && bit_ih != DDS::HANDLE_NIL) {
       bit->set_instance_state(bit_ih,
@@ -686,7 +686,7 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-DDS::TopicBuiltinTopicDataDataReaderImpl*
+OpenDDS::DCPS::TopicBuiltinTopicDataDataReaderImpl*
 Sedp::topic_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
@@ -695,10 +695,10 @@ Sedp::topic_bit()
 
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
-  return dynamic_cast<DDS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
+  return dynamic_cast<OpenDDS::DCPS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
-DDS::PublicationBuiltinTopicDataDataReaderImpl*
+OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl*
 Sedp::pub_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
@@ -707,10 +707,10 @@ Sedp::pub_bit()
 
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
-  return dynamic_cast<DDS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
+  return dynamic_cast<OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
-DDS::SubscriptionBuiltinTopicDataDataReaderImpl*
+OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*
 Sedp::sub_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
@@ -719,7 +719,7 @@ Sedp::sub_bit()
 
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-  return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
+  return dynamic_cast<OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -1002,7 +1002,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       {
         // Release lock for call into pub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+        OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           instance_handle =
             bit->store_synthetic_data(wdata_copy.ddsPublicationData,
@@ -1030,7 +1030,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
 #ifndef DDS_HAS_MINIMUM_BIT
-      DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+      OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
                                   DDS::NOT_NEW_VIEW_STATE);
@@ -1163,7 +1163,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       {
         // Release lock for call into sub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+        OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           instance_handle =
             bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
@@ -1192,7 +1192,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                      rdata.ddsSubscriptionData)) {
 #ifndef DDS_HAS_MINIMUM_BIT
-        DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+        OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           bit->store_synthetic_data(
                 iter->second.reader_data_.ddsSubscriptionData,

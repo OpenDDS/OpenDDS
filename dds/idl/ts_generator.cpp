@@ -86,8 +86,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->add_include(dc.c_str());
 
   static const char* h_includes[] = {
-    "dds/DCPS/DataWriterImpl_T.h",
-    "dds/DCPS/DataReaderImpl_T.h",
     "dds/DCPS/TypeSupportImpl_T.h"
   };
   add_includes(h_includes, BE_GlobalData::STREAM_H);
@@ -141,8 +139,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);
     be_global->header_ <<
-      "  typedef OpenDDS::DCPS::DataWriterImpl_T<" << cxxName << "> " << short_name << "DataWriterImpl;\n"
-      "  typedef OpenDDS::DCPS::DataReaderImpl_T<" << cxxName << "> " << short_name << "DataReaderImpl;\n"
       "  typedef OpenDDS::DCPS::TypeSupportImpl_T<" << cxxName << "> " << short_name << "TypeSupportImpl;\n";
   }
 
