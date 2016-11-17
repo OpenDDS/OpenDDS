@@ -16,6 +16,8 @@
 
 #include <vector>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace Update {
 
 Manager::Manager()
@@ -416,4 +418,4 @@ ACE_STATIC_SVC_DEFINE(UpdateManagerSvc,
                       | ACE_Service_Type::DELETE_OBJ,
                       0)
 
-//ACE_STATIC_SVC_REQUIRE (Update::UpdateManager)
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

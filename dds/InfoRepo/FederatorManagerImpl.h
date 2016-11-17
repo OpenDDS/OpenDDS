@@ -26,6 +26,8 @@
 #include <list>
 #include <map>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class TAO_DDS_DCPSInfo_i;
 
 namespace OpenDDS {
@@ -296,6 +298,8 @@ private:
 
 }
 } // End namespace OpenDDS::Federator
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"

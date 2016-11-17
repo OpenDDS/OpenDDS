@@ -16,6 +16,8 @@
 
 #include <list>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
 
 struct SampleInfo;
@@ -79,6 +81,8 @@ private:
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateReceiver_T.cpp"

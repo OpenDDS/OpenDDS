@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 int&
 OpenDDS::Federator::Config::argc()
@@ -109,3 +111,5 @@ OpenDDS::Federator::Config::federationId() const
 {
   return this->federationId_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

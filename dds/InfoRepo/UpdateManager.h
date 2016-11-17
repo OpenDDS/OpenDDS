@@ -22,6 +22,8 @@
 
 #include <set>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // forward declarations
 class TAO_DDS_DCPSInfo_i;
 
@@ -86,6 +88,8 @@ private:
 
 } // End of namespace Update
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateManager_T.cpp"
 #endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
@@ -94,6 +98,8 @@ private:
 #pragma message ("UpdateManager_T.cpp template inst")
 #pragma implementation ("UpdateManager_T.cpp")
 #endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 typedef Update::Manager UpdateManagerSvc;
 
@@ -119,5 +125,7 @@ static int ldr =
   UpdateManagerSvc_Loader::init();
 
 #endif /* ACE_HAS_BROKEN_STATIC_CONSTRUCTORS */
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UPDATE_MANAGER_H */

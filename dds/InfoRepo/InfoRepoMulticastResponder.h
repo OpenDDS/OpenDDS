@@ -22,6 +22,10 @@
 #include "ace/Reactor.h"
 #include "ace/SString.h"
 
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -93,6 +97,8 @@ private:
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

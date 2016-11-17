@@ -10,6 +10,9 @@
 
 #include "inforepo_export.h"
 #include "tao/Basic_Types.h"
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSFederationId
 {
@@ -18,11 +21,12 @@ public:
   TAO_DDS_DCPSFederationId(RepoKey initId);
   void id(RepoKey fedId);
   RepoKey id() const;
-//  void overridden(bool overrideId);
   bool overridden() const;
 private:
   RepoKey id_;
   bool    overridden_;
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_IR_FEDERATOR_ID_H */

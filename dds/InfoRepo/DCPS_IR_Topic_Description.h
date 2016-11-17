@@ -19,6 +19,10 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // forward declarations
 class DCPS_IR_Publication;
 class DCPS_IR_Domain;
@@ -110,5 +114,7 @@ private:
   DCPS_IR_Subscription_Set subscriptionRefs_;
   DCPS_IR_Topic_Set topics_;
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_IR_TOPIC_DESCRIPTION_H */

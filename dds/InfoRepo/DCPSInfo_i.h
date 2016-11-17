@@ -30,6 +30,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // typedef declarations
 typedef std::map<DDS::DomainId_t, DCPS_IR_Domain*> DCPS_IR_Domain_Map;
 
@@ -443,5 +445,7 @@ private:
   };
 #endif
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPSINFO_I_H */

@@ -21,6 +21,8 @@
 
 #include /**/ "tao/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 DCPS_IR_Participant::DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federationId,
                                          OpenDDS::DCPS::RepoId id,
                                          DCPS_IR_Domain* domain,
@@ -1024,40 +1026,5 @@ DCPS_IR_Participant::dump_to_string(const std::string& prefix, int depth) const
   return str;
 }
 
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-template class ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*>;
-template class ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
-template class ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>;
-
-template class ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*>;
-template class ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
-template class ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>;
-
-template class ACE_Node<OpenDDS::DCPS::RepoId>;
-template class ACE_Unbounded_Set<OpenDDS::DCPS::RepoId>;
-template class ACE_Unbounded_Set_Iterator<OpenDDS::DCPS::RepoId>;
-
-#elif defined(ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*>
-#pragma instantiate ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Publication*,ACE_Null_Mutex>
-
-#pragma instantiate ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*>
-#pragma instantiate ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Subscription*,ACE_Null_Mutex>
-
-#pragma instantiate ACE_Node<OpenDDS::DCPS::RepoId>
-#pragma instantiate ACE_Unbounded_Set<OpenDDS::DCPS::RepoId>
-#pragma instantiate ACE_Unbounded_Set_Iterator<OpenDDS::DCPS::RepoId>
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

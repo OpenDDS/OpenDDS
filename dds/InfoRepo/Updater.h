@@ -12,6 +12,7 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch_Traits.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace Update {
 
@@ -50,5 +51,7 @@ Updater::~Updater()
 }
 
 } // namespace Update
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UPDATER_H */

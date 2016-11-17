@@ -14,6 +14,8 @@
 #include <vector>
 #include <string>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace Update {
 
 enum ItemType  { Topic, Participant, Actor };
@@ -186,5 +188,7 @@ typedef struct ImageData<UTopic*, UParticipant*, URActor*, UWActor*> UImage;
 typedef struct ImageData<DTopic,  DParticipant,  DActor,   DActor>   DImage;
 
 } // namespace Update
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UPDATE_DATA_TYPES */
