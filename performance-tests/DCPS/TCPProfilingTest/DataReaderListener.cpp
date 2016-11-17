@@ -20,7 +20,7 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
       ACE_OS::sleep (delay);
     }
 
-   ::CORBA::Long const max_read_samples = 100;
+  const ::CORBA::Long max_read_samples = 100;
   int samples_recvd = 0;
   // initialize to zero.
 
