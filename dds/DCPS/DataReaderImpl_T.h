@@ -748,13 +748,15 @@ namespace OpenDDS {
   {
     MessageSequenceType dataseq;
     DDS::SampleInfoSeq infoseq;
-    DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
-                                           DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
-                                           instance_states, 0);
-    if (rc == DDS::RETCODE_NO_DATA) return rc;
-    const CORBA::ULong last = dataseq.length() - 1;
-    data = new MessageType(dataseq[last]);
-    info = infoseq[last];
+    const DDS::ReturnCode_t rc = read_instance_i(dataseq, infoseq,
+                                                 DDS::LENGTH_UNLIMITED, instance, sample_states, view_states,
+                                                 instance_states, 0);
+    if (rc != DDS::RETCODE_NO_DATA)
+      {
+        const CORBA::ULong last = dataseq.length() - 1;
+        data = new MessageType(dataseq[last]);
+        info = infoseq[last];
+      }
     return rc;
   }
 
@@ -765,13 +767,15 @@ namespace OpenDDS {
   {
     MessageSequenceType dataseq;
     DDS::SampleInfoSeq infoseq;
-    DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
-                                                DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
-                                                instance_states, 0);
-    if (rc == DDS::RETCODE_NO_DATA) return rc;
-    const CORBA::ULong last = dataseq.length() - 1;
-    data = new MessageType(dataseq[last]);
-    info = infoseq[last];
+    const DDS::ReturnCode_t rc = read_next_instance_i(dataseq, infoseq,
+                                                      DDS::LENGTH_UNLIMITED, previous_instance, sample_states, view_states,
+                                                      instance_states, 0);
+    if (rc != DDS::RETCODE_NO_DATA)
+      {
+        const CORBA::ULong last = dataseq.length() - 1;
+        data = new MessageType(dataseq[last]);
+        info = infoseq[last];
+      }
     return rc;
   }
 
