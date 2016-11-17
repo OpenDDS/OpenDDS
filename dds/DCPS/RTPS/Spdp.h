@@ -80,7 +80,7 @@ private:
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  OpenDDS::DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
+  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : ACE_Event_Handler, public OpenDDS::DCPS::PoolAllocationBase {
