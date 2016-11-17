@@ -1995,7 +1995,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     if (DCPS_debug_level >= 5) {
       GuidConverter converter(data_reader_->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
+                 ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
                  OPENDDS_STRING(converter).c_str()));
     }
@@ -2007,7 +2007,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
       // the add_associations' call to this could overlap
       // so it is not a failure.
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
                  ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
     }
 
@@ -2065,7 +2065,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   if (DCPS_debug_level >= 5) {
     GuidConverter converter(data_reader_->get_subscription_id());
     ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
+        ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
         OPENDDS_STRING(converter).c_str(),
         alive_writers,
@@ -2087,7 +2087,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
     if (liveliness_timer_id_ == -1) {
       ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
+          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
           ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));
     }
   }

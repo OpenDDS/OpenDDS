@@ -132,7 +132,7 @@ DataLink::invoke_on_start_callbacks(bool success)
     OnStartCallback last_callback = on_start_callbacks_.back();
     on_start_callbacks_.pop_back();
 
-    guard.release();
+    //guard.release();
     last_callback.first->use_datalink(last_callback.second, link);
   }
 }
