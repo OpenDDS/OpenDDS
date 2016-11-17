@@ -16,6 +16,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -101,5 +103,7 @@ static int OpenDDS_Requires_MonitorFactoryImpl_Initializer =
 
 ACE_STATIC_SVC_DECLARE (MonitorFactoryImpl)
 ACE_FACTORY_DECLARE (OpenDDS_monitor, MonitorFactoryImpl)
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_MONITOR_FACTORY_IMPL_H */
