@@ -7,8 +7,6 @@
 #include <QtGui/QtGui>
 #include <Shape.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #define CN 9
 
 class DDSShapeDynamics : public ShapeDynamics {
@@ -29,23 +27,20 @@ public:
        int x0, int y0,
        org::omg::dds::demo::ShapeTypeDataReader_var& shapeReader,
        const std::string& color,
-       int colorIdx
-       );
+       int colorIdx);
 
   virtual ~DDSShapeDynamics();
 
 public:
-
-  void setShape(boost::shared_ptr<Shape> shape) {
+  void setShape(shared_ptr<Shape> shape) {
     shape_ = shape;
   }
-
 
   virtual void simulate();
 private:
   DDSShapeDynamics(const DDSShapeDynamics& orig);
 
-  boost::shared_ptr<Shape> shape_;
+  shared_ptr<Shape> shape_;
   int x0_;
   int y0_;
   org::omg::dds::demo::ShapeTypeDataReader_var shapeReader_;
