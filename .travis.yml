@@ -29,7 +29,7 @@ before_script:
   - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
   - if [ "$CXX" == "g++" ]; then ./configure; fi
   - if [ "$CXX" == "clang++" ]; then ./configure --compiler=clang++ --no-inline; fi
-  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
+#  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
   - cat $ACE_ROOT/ace/config.h
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
   - tar xzf modeling_plugins.tar.gz
