@@ -12,6 +12,8 @@
 # include "Entities.inl"
 #endif /* ! __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::Model::Entities::Entities(int& argc, ACE_TCHAR** argv)
   : delegate_()
   , config_(argc, argv)
@@ -477,3 +479,5 @@ OpenDDS::Model::Entities::reader(
 
   return this->readerByString_[ name];
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

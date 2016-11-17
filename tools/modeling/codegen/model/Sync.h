@@ -11,6 +11,8 @@
 #define OPENDDS_NOEXCEPT_FALSE
 #endif
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace Model {
     class OpenDDS_Model_Export WriterSync {
@@ -49,5 +51,7 @@ namespace OpenDDS {
     };
   };
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

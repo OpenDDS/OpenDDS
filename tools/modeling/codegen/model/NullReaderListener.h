@@ -14,6 +14,8 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/LocalObject.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
 class OpenDDS_Model_Export NullReaderListener
@@ -63,5 +65,7 @@ public:
 };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* NULLREADERLISTENER_H  */

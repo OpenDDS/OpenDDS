@@ -1,6 +1,8 @@
 // -*- C++ -*-
 //
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 OpenDDS::Model::Config::operator bool() const
 {
@@ -48,4 +50,6 @@ OpenDDS::Model::Config::readerProfileMap() const
 {
   return this->readerProfileMap_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

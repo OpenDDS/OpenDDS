@@ -21,6 +21,8 @@ class ACE_Configuration_Heap;
 class ACE_Configuration_Section_Key;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
 struct ParticipantProfile;
@@ -164,6 +166,9 @@ class OpenDDS_Model_Export Config  {
 };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 
 #if defined (__ACE_INLINE__)
 # include "Config.inl"

@@ -3,6 +3,8 @@
 #include "NullPublisherListener.h"
 #include <dds/DCPS/debug.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::Model::NullPublisherListener::NullPublisherListener()
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -66,3 +68,5 @@ OpenDDS::Model::NullPublisherListener::on_publication_matched(
                ACE_TEXT("(%P|%t) NullPublisherListener::on_publication_matched()\n")));
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

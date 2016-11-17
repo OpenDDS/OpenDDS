@@ -4,6 +4,8 @@
 #include "NullListener.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::Model::NullListener::NullListener()
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -96,3 +98,4 @@ OpenDDS::Model::NullListener::on_sample_lost(::DDS::DataReader_ptr /* reader */,
   }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

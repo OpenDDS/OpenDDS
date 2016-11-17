@@ -18,6 +18,8 @@
 
 #include <vector>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
   class Application;
@@ -125,6 +127,8 @@ namespace OpenDDS { namespace Model {
   };
 
 } } // End namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "Service_T.cpp"
