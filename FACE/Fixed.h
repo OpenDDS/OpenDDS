@@ -11,6 +11,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace FaceTypes {
 
@@ -397,6 +399,8 @@ gen_skip_over(DCPS::Serializer& ser, Fixed_T<Digits, Scale>*)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 namespace FACE {
   typedef OpenDDS::FaceTypes::Fixed Fixed;

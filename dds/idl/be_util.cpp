@@ -27,6 +27,10 @@ be_util::prep_be_arg (char *arg)
   static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;
   static const char WB_EXPORT_INCLUDE[] = "export_include=";
   static const size_t SZ_WB_EXPORT_INCLUDE = sizeof(WB_EXPORT_INCLUDE) - 1;
+  static const char WB_VERSIONING_BEGIN[] = "versioning_begin=";
+  static const size_t SZ_WB_VERSIONING_BEGIN = sizeof(WB_VERSIONING_BEGIN) - 1;
+  static const char WB_VERSIONING_END[] = "versioning_end=";
+  static const size_t SZ_WB_VERSIONING_END = sizeof(WB_VERSIONING_END) - 1;
   static const char WB_PCH_INCLUDE[] = "pch_include=";
   static const size_t SZ_WB_PCH_INCLUDE = sizeof(WB_PCH_INCLUDE) - 1;
   static const char WB_JAVA[] = "java";
@@ -42,6 +46,14 @@ be_util::prep_be_arg (char *arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_INCLUDE,
                                       SZ_WB_EXPORT_INCLUDE)) {
     be_global->export_include(arg + SZ_WB_EXPORT_INCLUDE);
+
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_VERSIONING_BEGIN,
+                                      SZ_WB_VERSIONING_BEGIN)) {
+    be_global->versioning_begin(arg + SZ_WB_VERSIONING_BEGIN);
+
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_VERSIONING_END,
+                                      SZ_WB_VERSIONING_END)) {
+    be_global->versioning_end(arg + SZ_WB_VERSIONING_END);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_PCH_INCLUDE, SZ_WB_PCH_INCLUDE)) {
     be_global->pch_include(arg + SZ_WB_PCH_INCLUDE);
@@ -82,6 +94,10 @@ be_util::usage (void)
     ACE_TEXT("for all files\n")
     ACE_TEXT(" -Wb,export_include=<include path>\tsets export include ")
     ACE_TEXT("file for all files\n")
+    ACE_TEXT(" -Wb,versioning_begin=<macro name>\tsets versioning begin macro ")
+    ACE_TEXT("for all files\n")
+    ACE_TEXT(" -Wb,versioning_end=<macro name>\tsets versioning end macro ")
+    ACE_TEXT("for all files\n")
     ACE_TEXT(" -Wb,pch_include=<include path>\t\tsets include ")
     ACE_TEXT("file for precompiled header mechanism\n")
     ACE_TEXT(" -Wb,java[=<output_file>]\t\tenables Java support ")

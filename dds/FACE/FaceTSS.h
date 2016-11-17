@@ -3,13 +3,13 @@
 
 #include "FACE/TS.hpp"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/Singleton.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace FaceTSS {
@@ -391,5 +391,7 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
 }
 
 } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

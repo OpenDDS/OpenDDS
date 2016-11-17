@@ -15,6 +15,8 @@
 #include <utility>
 #include <cstddef>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace FaceTypes {
 
@@ -665,5 +667,7 @@ namespace FaceTypes {
   }
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

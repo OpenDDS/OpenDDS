@@ -84,6 +84,26 @@ void BE_GlobalData::export_include(const ACE_CString& str)
   this->export_include_ = str;
 }
 
+ACE_CString BE_GlobalData::versioning_begin() const
+{
+  return this->versioning_begin_;
+}
+
+void BE_GlobalData::versioning_begin(const ACE_CString& str)
+{
+  this->versioning_begin_ = str;
+}
+
+ACE_CString BE_GlobalData::versioning_end() const
+{
+  return this->versioning_end_;
+}
+
+void BE_GlobalData::versioning_end(const ACE_CString& str)
+{
+  this->versioning_end_ = str;
+}
+
 void BE_GlobalData::pch_include(const ACE_CString& str)
 {
   this->pch_include_ = str;

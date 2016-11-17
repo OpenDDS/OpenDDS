@@ -94,6 +94,12 @@ public:
   ACE_CString export_include() const;
   void export_include(const ACE_CString& str);
 
+  ACE_CString versioning_begin() const;
+  void versioning_begin(const ACE_CString& str);
+
+  ACE_CString versioning_end() const;
+  void versioning_end(const ACE_CString& str);
+
   ACE_CString pch_include() const;
   void pch_include(const ACE_CString& str);
 
@@ -136,7 +142,7 @@ private:
   bool java_, suppress_idl_, suppress_typecode_,
     generate_wireshark_, generate_itl_, v8_, face_ts_;
 
-  ACE_CString export_macro_, export_include_, pch_include_, java_arg_, seq_;
+  ACE_CString export_macro_, export_include_, versioning_begin_, versioning_end_, pch_include_, java_arg_, seq_;
 
   LanguageMapping language_mapping_;
 };
