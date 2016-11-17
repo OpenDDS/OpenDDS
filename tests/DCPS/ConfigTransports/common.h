@@ -17,6 +17,7 @@
 #define MY_SAME_TOPIC  "foo"
 #define MY_OTHER_TOPIC  "bar"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS
 {
   namespace DCPS
@@ -24,6 +25,7 @@ namespace OpenDDS
     class TransportClient;
   }
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 extern ACE_Thread_Mutex shutdown_lock;
 extern bool shutdown_flag;
