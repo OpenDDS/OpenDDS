@@ -29,10 +29,10 @@ private:
   int init_transport () ;
   void write (char message_id, const ::Xyz::Foo& foo);
 
-  ::DDS::DomainParticipant_var dp_ ;
-  ::DDS::Publisher_var pub_ ;
-  ::DDS::DataWriter_var dw_ ;
-  ::Xyz::FooDataWriterImpl* fast_dw_ ;
+  ::DDS::DomainParticipant_var dp_;
+  ::DDS::Publisher_var pub_;
+  ::DDS::DataWriter_var dw_;
+  ::Xyz::FooDataWriter_var foo_dw_;
 };
 
 #endif /* READER_H */

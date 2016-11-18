@@ -129,11 +129,7 @@ Reader::read (const SampleInfoMap& si_map,
         throw TestException() ;
       }
 
-      ::Xyz::FooDataReaderImpl* dr_servant =
-        dynamic_cast<Xyz::FooDataReaderImpl*> (foo_dr.in ());
-
-      DDS::ReturnCode_t status  ;
-      status = dr_servant->read(foo, si,
+      DDS::ReturnCode_t status = foo_dr->read(foo, si,
                   max_samples_per_instance_,
                   ss,
                   vs,

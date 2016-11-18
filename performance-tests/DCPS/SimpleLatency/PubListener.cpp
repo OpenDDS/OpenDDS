@@ -93,8 +93,8 @@ extern long total_samples;
 AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long /*size*/)
   :writer_ (),
    reader_ (),
-   dr_servant_ (0),
-   dw_servant_ (0),
+   dr_servant_ (),
+   dw_servant_ (),
    handle_ (),
    sample_num_(1),
    done_ (0),
@@ -120,15 +120,11 @@ void AckDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
   this->reader_ = DDS::DataReader::_duplicate (dr);
   use_zero_copy_ = use_zero_copy_read;
 
-  AckMessageDataReader_var ackmessage_dr =
-    AckMessageDataReader::_narrow(this->reader_.in());
   this->dr_servant_ =
-    dynamic_cast<AckMessageDataReaderImpl*>(ackmessage_dr.in());
+    AckMessageDataReader::_narrow(this->reader_.in());
 
-  PubMessageDataWriter_var pubmessage_dw =
-    PubMessageDataWriter::_narrow (this->writer_.in ());
   this->dw_servant_ =
-    dynamic_cast<PubMessageDataWriterImpl*>(pubmessage_dw.in());
+    PubMessageDataWriter::_narrow (this->writer_.in ());
   DDSPerfTest::PubMessage msg;
   this->handle_ = this->dw_servant_->register_instance(msg);
 }

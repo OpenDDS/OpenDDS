@@ -70,8 +70,8 @@ private:
 
   DDS::DataWriter_var writer_;
   DDS::DataReader_var reader_;
-  DDSPerfTest::PubMessageDataReaderImpl* dr_servant_;
-  DDSPerfTest::AckMessageDataWriterImpl* dw_servant_;
+  DDSPerfTest::PubMessageDataReader_var dr_servant_;
+  DDSPerfTest::AckMessageDataWriter_var dw_servant_;
   DDS::InstanceHandle_t handle_;
   //  DDS::DataReader_var reader_;
   CORBA::Long  sample_num_;

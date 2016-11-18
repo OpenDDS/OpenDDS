@@ -53,18 +53,14 @@ Writer::Writer(::DDS::DomainParticipant_ptr dp,
     throw TestException() ;
   }
 
-  ::Xyz::FooDataWriter_var foo_dw = ::Xyz::FooDataWriter::_narrow(
+  foo_dw_ = ::Xyz::FooDataWriter::_narrow(
       dw_.in ());
-  if (CORBA::is_nil (foo_dw.in ()))
+  if (CORBA::is_nil (foo_dw_.in ()))
   {
     ACE_ERROR ((LM_ERROR,
                ACE_TEXT("(%P|%t) ::Xyz::FooDataWriter::_narrow failed.\n")));
     throw TestException() ;
   }
-
-  fast_dw_ =
-    dynamic_cast< ::Xyz::FooDataWriterImpl*> (foo_dw.in ());
-
 }
 
 void Writer::write (char message_id, const ::Xyz::Foo &foo)
@@ -77,19 +73,19 @@ void Writer::write (char message_id, const ::Xyz::Foo &foo)
       ACE_OS::printf ("writing %c foo.x = %f foo.y = %f, foo.key = %d\n",
                       foo.c, foo.x, foo.y, foo.key);
 
-      fast_dw_->write(foo,
+      foo_dw_->write(foo,
                       handle);
       break;
 
     case ::OpenDDS::DCPS::INSTANCE_REGISTRATION:
       ACE_OS::printf ("registering foo.key = %d\n", foo.key) ;
-      handle = fast_dw_->register_instance(foo);
+      handle = foo_dw_->register_instance(foo);
       break;
 
     case ::OpenDDS::DCPS::DISPOSE_INSTANCE:
       ACE_OS::printf ("disposing foo.key = %d\n", foo.key) ;
 
-      fast_dw_->dispose(foo,
+      foo_dw_->dispose(foo,
                         handle);
       break;
 

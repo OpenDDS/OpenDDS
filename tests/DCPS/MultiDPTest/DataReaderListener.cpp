@@ -7,7 +7,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
-template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
+template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>
 int read (::DDS::DataReader_ptr reader)
 {
   try
@@ -21,15 +21,10 @@ int read (::DDS::DataReader_ptr reader)
       throw TestException() ;
     }
 
-    DR_impl* dr_servant =
-      dynamic_cast<DR_impl*> (foo_dr.in ());
-
     DT foo;
     ::DDS::SampleInfo si ;
 
-    DDS::ReturnCode_t status  ;
-
-    status = dr_servant->read_next_sample(foo, si) ;
+    DDS::ReturnCode_t const status = foo_dr->read_next_sample(foo, si) ;
 
     if (status == ::DDS::RETCODE_OK)
     {
@@ -150,8 +145,7 @@ void DataReaderListenerImpl::on_subscription_matched (
         ::Xyz::FooSeq,
         ::Xyz::FooDataReader,
         ::Xyz::FooDataReader_ptr,
-        ::Xyz::FooDataReader_var,
-        ::Xyz::FooDataReaderImpl> (reader);
+        ::Xyz::FooDataReader_var> (reader);
 
     if (ret != 0)
     {

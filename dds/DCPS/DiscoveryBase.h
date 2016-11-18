@@ -25,6 +25,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
   namespace DCPS {
+    typedef DataReaderImpl_T<DDS::ParticipantBuiltinTopicData> ParticipantBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
+    typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
     {
@@ -1096,7 +1100,7 @@ namespace OpenDDS {
         bool removed = endpoint_manager().disassociate(iter->second.pdata_);
         if (removed) {
 #ifndef DDS_HAS_MINIMUM_BIT
-          DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+          ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
           // bit may be null if the DomainParticipant is shutting down
           if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
             bit->set_instance_state(iter->second.bit_ih_,
@@ -1113,14 +1117,14 @@ namespace OpenDDS {
       }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-      DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
+      ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
       {
         if (!bit_subscriber_.in())
           return 0;
 
         DDS::DataReader_var d =
           bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-        return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
+        return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
       }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
