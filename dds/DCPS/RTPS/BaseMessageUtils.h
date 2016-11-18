@@ -10,6 +10,7 @@
 
 #include "RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
 #include "md5.h"
@@ -30,6 +31,8 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
 
   OpenDDS::DCPS::KeyOnly<const T> ko(msg);
 
+  typedef DCPS::MarshalTraits< T> MarshalTraitsType;
+
   static const size_t HASH_LIMIT = 16;
   std::memset(hash.value, 0, HASH_LIMIT);
 
@@ -41,7 +44,7 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   static const bool swap_bytes = false;
 #endif
 
-  if (gen_is_bounded_size(ko) &&
+  if (MarshalTraitsType::gen_is_bounded_key_size() &&
       gen_max_marshaled_size(ko, true /*align*/) <= HASH_LIMIT) {
     // If it is bounded and can always fit in 16 bytes, we will use the
     // marshaled key
