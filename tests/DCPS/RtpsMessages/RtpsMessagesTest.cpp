@@ -2,6 +2,7 @@
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 
 #include <iostream>
 #include <cstring>
@@ -14,11 +15,6 @@ struct TestMsg {
   ACE_CDR::ULong key;
   TAO::String_Manager value;
 };
-
-bool gen_is_bounded_size(KeyOnly<const TestMsg>)
-{
-  return true;
-}
 
 size_t gen_max_marshaled_size(KeyOnly<const TestMsg>, bool /*align*/)
 {
@@ -38,16 +34,18 @@ bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru)
   return strm << stru.t.key;
 }
 
+namespace OpenDDS { namespace DCPS {
+template <>
+struct MarshalTraits<TestMsg> {
+inline static bool gen_is_bounded_size() { return true; }
+inline static bool gen_is_bounded_key_size() { return true; }
+};
+} }
 
 struct BigKey {
   CORBA::Octet key[24];
   TAO::String_Manager value;
 };
-
-bool gen_is_bounded_size(KeyOnly<const BigKey>)
-{
-  return true;
-}
 
 size_t gen_max_marshaled_size(KeyOnly<const BigKey>, bool /*align*/)
 {
@@ -64,6 +62,13 @@ bool operator<<(Serializer& strm, KeyOnly<const BigKey> stru)
   return strm.write_octet_array(stru.t.key, 24);
 }
 
+namespace OpenDDS { namespace DCPS {
+template <>
+struct MarshalTraits<BigKey> {
+inline static bool gen_is_bounded_size() { return true; }
+inline static bool gen_is_bounded_key_size() { return true; }
+};
+} }
 
 bool test_key_hash()
 {

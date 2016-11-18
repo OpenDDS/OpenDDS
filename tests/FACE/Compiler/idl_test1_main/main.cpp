@@ -234,15 +234,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
   }
 
-  Xyz::AStruct a_struct;
-  if (!OpenDDS::DCPS::gen_has_key(a_struct)) {
+  if (!OpenDDS::DCPS::DDSTraits<Xyz::AStruct>::gen_has_key()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("_dcps_has_key(Xyz::AStruct) returned false when expecting true.\n")
       ));
   }
 
-  Xyz::StructContainingArrayOfAStructSeq ascaoass;
-  if (OpenDDS::DCPS::gen_has_key(ascaoass)) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::StructContainingArrayOfAStructSeq>::gen_has_key()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("_dcps_has_key(Xyz::StructContainingArrayOfAStructSeq) returned true when expecting false.\n")
       ));
@@ -288,7 +286,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   std::map<Xyz::Foo, Xyz::Foo*, Xyz::OpenDDSGenerated::Foo_KeyLessThan> foomap;
 
-  if (OpenDDS::DCPS::gen_has_key(my_foo)) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::gen_has_key()) {
     foomap[my_foo] = &my_foo;
     foomap[foo2] = &foo2;
     // foo2 and my_foo should have mapped to the same place
@@ -328,7 +326,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   const size_t expected_padding = 7;
 
   size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(my_foo, false /*align*/);
-  const bool bounded = OpenDDS::DCPS::gen_is_bounded_size(my_foo);
+  const bool bounded = OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::gen_is_bounded_size();
   size_t cs = find_size(my_foo, padding);
 
   ACE_DEBUG((LM_DEBUG,"OpenDDS::DCPS::gen_max_marshaled_size(my_foo) => %B\n", ms));

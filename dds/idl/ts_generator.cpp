@@ -118,6 +118,13 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
+  {
+    ScopedNamespaceGuard hGuard(name, be_global->header_);
+
+    be_global->header_ <<
+      "class " << short_name << "TypeSupportImpl;\n";
+  }
+
   be_global->header_ <<
     "namespace OpenDDS { namespace DCPS {\n"
     "template <>\n"
@@ -125,6 +132,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  typedef " << cxxName << " MessageType;\n"
     "  typedef " << cxxName << "Seq MessageSequenceType;\n"
     "  typedef " << cxxName << "TypeSupport TypeSupportType;\n"
+    "  typedef " << cxxName << "TypeSupportImpl TypeSupportTypeImpl;\n"
     "  typedef " << cxxName << "DataWriter DataWriterType;\n"
     "  typedef " << cxxName << "DataReader DataReaderType;\n"
     "  typedef " << module_scope(name) << "OpenDDSGenerated::" << short_name << "_KeyLessThan LessThanType;\n"
