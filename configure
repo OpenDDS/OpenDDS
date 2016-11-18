@@ -124,6 +124,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Build platform and compiler:',
     'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
+    'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
     'prefix=s', 'Installation prefix (none)',
@@ -393,6 +394,10 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
         die "Unknown or unsupported Visual C++ compiler version: $1\nStopped";
       }
       $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$1};
+      if ($1 >= 19) {
+        push(@{$opts{'features'}}, 'no_cxx11=0');
+        print "VC++ has C++11 support\n" if $opts{'verbose'};
+      }
       last;
     }
   }
@@ -404,6 +409,24 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   $ENV{'PATH'} = $savepath;
   print "detected Visual C++ version: $opts{'compiler_version'}\n"
     if $opts{'verbose'};
+}
+elsif ($opts{'compiler'} =~ /g\+\+/) {
+  if ($opts{'std'}) {
+    push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
+    print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
+  }
+  else {
+    my $ver = `$opts{'compiler'} --version`;
+    if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
+      $opts{'std'} = 'gnu++14';
+      print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+    }
+  }
+
+  if ($opts{'std'} && $opts{'std'} =~ /(0x|11|0y|14|1z|17)$/) {
+    push(@{$opts{'features'}}, 'no_cxx11=0');
+    print "Compiler has C++11 support\n" if $opts{'verbose'};
+  }
 }
 
 sub looksRelative {

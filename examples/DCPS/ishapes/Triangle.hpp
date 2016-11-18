@@ -1,14 +1,13 @@
 #ifndef _TRIANGLE_HPP
 #define _TRIANGLE_HPP
 
-#include <boost/shared_ptr.hpp>
 #include <Shape.hpp>
 #include <ShapeDynamics.hpp>
 
 class Triangle : public Shape {
 public:
   Triangle(const QRect& bounds,
-           boost::shared_ptr<ShapeDynamics> dynamics,
+           shared_ptr<ShapeDynamics> dynamics,
            const QPen& pen,
            const QBrush& brush,
            bool targeted = false);
@@ -25,7 +24,7 @@ private:
   Triangle& operator=(const Triangle&);
 
 private:
-  boost::shared_ptr<ShapeDynamics> dynamics_;
+  shared_ptr<ShapeDynamics> dynamics_;
   QPolygon triangle_;
 };
 
