@@ -73,8 +73,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     return true;
   }
 
-  const bool empty = info->key_list_.is_empty();
-
   const std::string cxxName = scoped(name);
   const std::string short_name = name->last_component()->get_string();
 
@@ -125,6 +123,8 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "class " << short_name << "TypeSupportImpl;\n";
   }
 
+  const bool has_keys = info->key_list_.is_empty();
+
   be_global->header_ <<
     "namespace OpenDDS { namespace DCPS {\n"
     "template <>\n"
@@ -138,14 +138,14 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  typedef " << module_scope(name) << "OpenDDSGenerated::" << short_name << "_KeyLessThan LessThanType;\n"
     "  typedef MarshalTraits<" << cxxName << "> MarshalTraitsType;\n"
     "\n"
-    "  inline static const char* type_name () { return \"" << cxxName << "\"; }\n"
-    "  inline static bool gen_has_key () { return " << (empty ? "false" : "true") << "; }\n"
+    "  static const char* type_name () { return \"" << cxxName << "\"; }\n"
+    "  static bool gen_has_key () { return " << (has_keys ? "false" : "true") << "; }\n"
     "\n"
-    "  inline static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
-    "  inline static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
+    "  static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
+    "  static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
     "\n"
-    "  inline static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
-    "  inline static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
+    "  static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
+    "  static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
     "};\n}  }\n\n";
 
   {
@@ -165,17 +165,17 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  " << short_name << "TypeSupportImpl() {}\n"
       "  virtual ~" << short_name << "TypeSupportImpl() {}\n"
       "\n"
-      "  virtual ::DDS::DataWriter_ptr create_datawriter();\n"
-      "  virtual ::DDS::DataReader_ptr create_datareader();\n"
+      "  virtual DDS::DataWriter_ptr create_datawriter();\n"
+      "  virtual DDS::DataReader_ptr create_datareader();\n"
       "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
-      "  virtual ::DDS::DataReader_ptr create_multitopic_datareader();\n"
+      "  virtual DDS::DataReader_ptr create_multitopic_datareader();\n"
       "#endif /* !OPENDDS_NO_MULTI_TOPIC */\n"
       "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n"
       "  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();\n"
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n"
       "  virtual bool has_dcps_key();\n"
       "  const char* default_type_name() const;\n"
-      "  " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
+      "  static " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
   }
 

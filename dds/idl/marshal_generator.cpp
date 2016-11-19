@@ -1307,8 +1307,8 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     be_global->header_ <<
       "template <>\n"
       "struct MarshalTraits<" << cxx << "> {\n"
-      "inline static bool gen_is_bounded_size() { return " << (is_bounded_struct ? "true" : "false") << "; }\n"
-      "inline static bool gen_is_bounded_key_size() { return " << (bounded_key ? "true" : "false") << "; }\n"
+      "  static bool gen_is_bounded_size() { return " << (is_bounded_struct ? "true" : "false") << "; }\n"
+      "  static bool gen_is_bounded_key_size() { return " << (bounded_key ? "true" : "false") << "; }\n"
       "};\n";
   }
 
