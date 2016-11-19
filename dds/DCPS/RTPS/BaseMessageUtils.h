@@ -42,7 +42,7 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   static const bool swap_bytes = false;
 #endif
 
-  if (DCPS::MarshalTraits<T>::MarshalTraitsType::gen_is_bounded_key_size() &&
+  if (DCPS::MarshalTraits<T>::gen_is_bounded_key_size() &&
       gen_max_marshaled_size(ko, true /*align*/) <= HASH_LIMIT) {
     // If it is bounded and can always fit in 16 bytes, we will use the
     // marshaled key
