@@ -49,13 +49,17 @@ class SendStateDataSampleListIterator;
  * communication mechanisms and the DataLink objects that represent the
  * currently active communication channels to peers.
  */
-class OpenDDS_Dcps_Export TransportClient {
+class OpenDDS_Dcps_Export TransportClient :
+  public EnableSharedFromThis<TransportClient>
+{
 public:
   // Used by TransportImpl to complete associate() processing:
   void use_datalink(const RepoId& remote_id, const DataLink_rch& link);
 
   // values for flags parameter of transport_assoc_done():
   enum { ASSOC_OK = 1, ASSOC_ACTIVE = 2 };
+  virtual void _add_ref(){};
+  virtual void _remove_ref(){};
 
 protected:
   TransportClient();
@@ -127,6 +131,7 @@ protected:
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
   void on_notification_of_connection_deletion(const RepoId& peerId);
+
 
 private:
 
@@ -302,6 +307,8 @@ private:
 
   RepoId repo_id_;
 };
+
+typedef RcHandle<TransportClient> TransportClient_rch;
 
 }
 }
