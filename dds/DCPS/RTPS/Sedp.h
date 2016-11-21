@@ -234,6 +234,9 @@ private:
     void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
+    virtual void _add_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref(); }
+    virtual void _remove_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref(); }
+
     void listener_add_ref() { _add_ref(); }
     void listener_remove_ref() { _remove_ref(); }
 

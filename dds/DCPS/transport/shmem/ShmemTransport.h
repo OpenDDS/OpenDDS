@@ -37,13 +37,13 @@ public:
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
-                                               TransportClient* client);
+                                               const TransportClient_rch& client);
 
   virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
                                               const ConnectionAttribs& attribs,
-                                              TransportClient* client);
+                                              const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(TransportClient* client,
+  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
                                             const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);

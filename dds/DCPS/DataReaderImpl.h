@@ -250,6 +250,8 @@ public:
   /// The liveliness status need update.
   void writer_removed(WriterInfo& info);
 
+  virtual void _add_ref();
+  virtual void _remove_ref();
   /**
    * cleanup the DataWriter.
    */
