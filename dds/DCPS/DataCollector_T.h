@@ -45,10 +45,10 @@ public:
    * @param onFull - behavior of collector when bound is reached.
    *
    * OnFull == KeepOldest: The buffer is limited to the amount of data
-   *                       specified by the bouund parameter and only
+   *                       specified by the bound parameter and only
    *                       the data collected first is retained.
    * OnFull == KeepNewest: The buffer is limited to the amount of data
-   *                       specified by the bouund parameter and only
+   *                       specified by the bound parameter and only
    *                       the most recently collected data is
    *                       retained.
    * OnFull == Unbounded:  The buffer contains all collected data and
