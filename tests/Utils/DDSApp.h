@@ -15,7 +15,6 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DCPS/TypeSupportImpl_T.h"
 
 #include <map>
 #include <string>
@@ -208,10 +207,9 @@ private:
     DDS::StatusMask mask)
   {
     typedef OpenDDS::DCPS::DDSTraits<MessageType> TraitsType;
-    typedef ::OpenDDS::DCPS::TypeSupportImpl_T<MessageType> TypeSupportImplType;
     typedef typename TraitsType::TypeSupportType::_var_type TypeSupportVarType;
 
-    TypeSupportVarType ts(new TypeSupportImplType);
+    TypeSupportVarType ts(new typename TraitsType::TypeSupportTypeImpl);
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       throw std::runtime_error(" ERROR: register_type failed!");
     }

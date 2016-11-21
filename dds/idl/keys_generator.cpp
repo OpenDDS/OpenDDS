@@ -23,13 +23,6 @@ bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   }
 
   const bool empty = info->key_list_.is_empty();
-  {
-    NamespaceGuard ng;
-    Function has_key("gen_has_key", "bool");
-    has_key.addArg("", "const " + cxx + "&");
-    has_key.endArgs();
-    be_global->impl_ << "  return " << (empty ? "false" : "true") << ";\n";
-  }
 
   struct Namespaces {
     size_t n_;

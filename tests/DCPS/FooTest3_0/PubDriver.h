@@ -6,6 +6,7 @@
 #include "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/DataWriterImpl_T.h"
 #include "ace/INET_Addr.h"
 #include "ace/Task.h"
 #include "ace/String_Base.h"

@@ -313,7 +313,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger1::Message message;  // No Key, length = 0, bounded = true
     std::cout << "Messenger1::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger1::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger1::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger1::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -329,7 +329,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.subject_id = 0x01020304;
     std::cout << "Messenger2::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger2::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger2::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger2::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -346,7 +346,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.count      = 0x05060708;
     std::cout << "Messenger3::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger3::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger3::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger3::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -361,7 +361,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger4::Message message;  // Keys of many types, length = 0, bounded = false
     std::cout << "Messenger4::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger4::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger4::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger4::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(!is_bounded);
@@ -376,7 +376,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger5::Message message;  // Wide string Key, length = 0, bounded = false
     std::cout << "Messenger5::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger5::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger5::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger5::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(!is_bounded);
@@ -393,7 +393,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     std::cout << "Messenger6::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger6::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger6::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger6::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -409,7 +409,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.responses[0] = 0x01020304;
     std::cout << "Messenger7::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger7::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger7::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger7::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -425,7 +425,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.header.responses[0] = 0x01020304;
     std::cout << "Messenger8::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger8::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger8::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger8::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -441,7 +441,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.headers[1].subject_id = 0x01020304;
     std::cout << "Messenger9::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger9::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger9::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger9::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -457,7 +457,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.count = 0x01020304;
     std::cout << "Messenger10::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger10::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger10::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger10::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(!is_bounded);
@@ -476,7 +476,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.long_4 = 0x0d0e0f10;
     std::cout << "Messenger11::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger11::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger11::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger11::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);
@@ -496,7 +496,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.long_5 = 0x11121314;
     std::cout << "Messenger12::Message" << std::endl;
     size_t length = gen_max_marshaled_size(KeyOnly<const Messenger12::Message>(message), false /*align*/);
-    bool is_bounded = gen_is_bounded_size(KeyOnly<const Messenger12::Message>(message));
+    bool is_bounded = MarshalTraits<Messenger12::Message>::gen_is_bounded_key_size();
     std::cout << "  is bounded = " << is_bounded << std::endl;
     std::cout << "  length = " << length << std::endl;
     TEST_CHECK(is_bounded);

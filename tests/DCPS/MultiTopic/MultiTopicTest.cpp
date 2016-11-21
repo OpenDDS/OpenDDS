@@ -49,7 +49,7 @@ template <typename MessageType>
 struct Writer {
   Writer(const Publisher_var& pub, const char* topic_name,
          const DomainParticipant_var& other_participant)
-    : ts_(new ::OpenDDS::DCPS::TypeSupportImpl_T<MessageType>())
+    : ts_(new typename ::OpenDDS::DCPS::DDSTraits<MessageType>::TypeSupportTypeImpl())
   {
     DomainParticipant_var dp = pub->get_participant();
     check(ts_->register_type(dp, ""));

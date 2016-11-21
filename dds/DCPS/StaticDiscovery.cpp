@@ -9,6 +9,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include <ctype.h>

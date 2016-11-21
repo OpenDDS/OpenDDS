@@ -9,6 +9,7 @@
 #include "DataReaderListenerImpl.h"
 #include "TestMsgTypeSupportC.h"
 #include "TestMsgTypeSupportImpl.h"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 
 #include <iostream>
 
