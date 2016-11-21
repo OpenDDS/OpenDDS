@@ -26,6 +26,8 @@ class MetaStruct;
 
 template <typename Message> struct DDSTraits;
 
+template <typename Message> struct MarshalTraits;
+
 class OpenDDS_Dcps_Export TypeSupportImpl
   : public virtual LocalObject<TypeSupport> {
 public:

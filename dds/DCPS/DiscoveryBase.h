@@ -14,6 +14,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
+#include "dds/DCPS/DataReaderImpl_T.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "ace/Select_Reactor.h"
 

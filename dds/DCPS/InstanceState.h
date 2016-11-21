@@ -66,14 +66,14 @@ public:
 
   /// DISPOSE message received for this instance.
   /// Return flag indicates whether the instance state was changed.
-  /// This flag is used by concreate DataReader to determine whether
+  /// This flag is used by concrete DataReader to determine whether
   /// it should notify listener. If state is not changed, the dispose
   /// message is ignored.
   bool dispose_was_received(const PublicationId& writer_id);
 
   /// UNREGISTER message received for this instance.
   /// Return flag indicates whether the instance state was changed.
-  /// This flag is used by concreate DataReader to determine whether
+  /// This flag is used by concrete DataReader to determine whether
   /// it should notify listener. If state is not changed, the unregister
   /// message is ignored.
   bool unregister_was_received(const PublicationId& writer_id);

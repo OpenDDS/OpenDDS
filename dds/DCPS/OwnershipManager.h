@@ -79,7 +79,7 @@ public:
 
   /**
   * Acquire/release lock for type instance map.
-  * The following functions are synchnorized by instance_lock_.
+  * The following functions are synchronized by instance_lock_.
   */
   int instance_lock_acquire();
   int instance_lock_release();

@@ -8,6 +8,7 @@
 #include "dds/DCPS/InstanceHandle.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/DataWriterImpl_T.h"
 
 #include "../common/TestSupport.h"
 

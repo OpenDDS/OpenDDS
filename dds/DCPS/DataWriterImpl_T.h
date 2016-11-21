@@ -29,6 +29,7 @@ namespace OpenDDS {
   {
   public:
     typedef DDSTraits<MessageType> TraitsType;
+    typedef MarshalTraits<MessageType> MarshalTraitsType;
 
     typedef OPENDDS_MAP_CMP(MessageType, DDS::InstanceHandle_t,
                             typename TraitsType::LessThanType) InstanceMap;
@@ -315,14 +316,14 @@ namespace OpenDDS {
                                            dw_objref);
 
       MessageType data;
-      if (TraitsType::gen_is_bounded_size(data)) {
+      if (MarshalTraitsType::gen_is_bounded_size()) {
         marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(data, true);
         // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
         marshaled_size_ = 0; // should use gen_find_size when marshaling
       }
-      OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
-      if (TraitsType::gen_is_bounded_size(ko)) {
+      if (MarshalTraitsType::gen_is_bounded_key_size()) {
+        OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
         key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
         // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
@@ -336,8 +337,7 @@ namespace OpenDDS {
    */
     virtual DDS::ReturnCode_t enable_specific ()
     {
-      MessageType data;
-      if (TraitsType::gen_is_bounded_size (data))
+      if (MarshalTraitsType::gen_is_bounded_size ())
         {
           data_allocator_ = new DataAllocator (n_chunks_, marshaled_size_);
           if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
