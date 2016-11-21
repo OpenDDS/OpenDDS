@@ -3376,6 +3376,18 @@ DataReaderImpl::unregister_for_writer(const RepoId& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
+
+void DataReaderImpl::_add_ref()
+{
+  CORBA::Object::_add_ref();
+}
+
+void DataReaderImpl::_remove_ref()
+{
+  CORBA::Object::_remove_ref();
+}
+
+
 EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                                                  ACE_thread_t owner,
                                                                  DataReaderImpl* reader)

@@ -80,7 +80,7 @@ class OpenDDS_Dcps_Export DataWriterImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportSendListener,
-    public virtual ACE_Event_Handler {
+    private ACE_Event_Handler {
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
@@ -187,6 +187,14 @@ public:
                                           const DDS::StringSeq& params);
 
   virtual void inconsistent_topic();
+
+
+  virtual void _add_ref();
+  virtual void _remove_ref();
+
+  virtual ACE_Event_Handler::Reference_Count add_reference();
+  virtual ACE_Event_Handler::Reference_Count remove_reference();
+
 
   /**
    * cleanup the DataWriter.
@@ -582,8 +590,8 @@ private:
 
   void association_complete_i(const RepoId& remote_id);
 
-  void listener_add_ref() { EntityImpl::_add_ref(); }
-  void listener_remove_ref() { EntityImpl::_remove_ref(); }
+  void listener_add_ref();
+  void listener_remove_ref();
 
   friend class ::DDS_TEST; // allows tests to get at privates
 

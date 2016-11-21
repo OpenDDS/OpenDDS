@@ -66,7 +66,7 @@ TransportImpl::shutdown()
 
   this->pre_shutdown_i();
 
-  OPENDDS_SET(TransportClient*) local_clients;
+  OPENDDS_SET(TransportClient_rch) local_clients;
 
   {
     GuardType guard(this->lock_);
@@ -82,7 +82,7 @@ TransportImpl::shutdown()
     // We can release our lock_ now.
   }
 
-  for (OPENDDS_SET(TransportClient*)::iterator it = local_clients.begin();
+  for (OPENDDS_SET(TransportClient_rch)::iterator it = local_clients.begin();
        it != local_clients.end(); ++it) {
     (*it)->transport_detached(this);
   }
@@ -166,10 +166,9 @@ TransportImpl::configure(TransportInst* config)
 }
 
 void
-TransportImpl::add_pending_connection(TransportClient* client, DataLink* link)
+TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink* link)
 {
-  pending_connections_.insert(std::pair<TransportClient* const, DataLink_rch>(
-    client, DataLink_rch(link, false)));
+  pending_connections_.insert( std::make_pair(client, DataLink_rch(link, false)));
 }
 
 void
@@ -186,7 +185,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend)
 }
 
 void
-TransportImpl::attach_client(TransportClient* client)
+TransportImpl::attach_client(const TransportClient_rch& client)
 {
   DBG_ENTRY_LVL("TransportImpl", "attach_client", 6);
 
@@ -195,7 +194,7 @@ TransportImpl::attach_client(TransportClient* client)
 }
 
 void
-TransportImpl::detach_client(TransportClient* client)
+TransportImpl::detach_client(const TransportClient_rch& client)
 {
   DBG_ENTRY_LVL("TransportImpl", "detach_client", 6);
 

@@ -12,6 +12,7 @@
 #include "ace/Atomic_Op.h"
 #include "ace/Malloc_Base.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -70,6 +71,15 @@ private:
   // method instead (if needed).
   RcObject(const RcObject&);
   RcObject& operator=(const RcObject&);
+};
+
+template <class T>
+struct EnableSharedFromThis
+{
+  RcHandle<T> shared_from_this()
+  {
+    return RcHandle<T>(static_cast<T*>(this), false);
+  }
 };
 
 } // namespace DCPS

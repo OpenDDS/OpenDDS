@@ -88,7 +88,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   OpenDDS::DCPS::RepoId pubPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubId = OpenDDS::DCPS::GUID_UNKNOWN;
-  TAO_DDS_DCPSDataWriter_i dwImpl;
+  OpenDDS::DCPS::RcHandle<TAO_DDS_DCPSDataWriter_i> dwImpl(new TAO_DDS_DCPSDataWriter_i);
 
   TheServiceParticipant->get_domain_participant_factory();
 
@@ -151,7 +151,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
     }
 
   // Add publication
-  if (!dwImpl.received().expectNothing())
+  if (!dwImpl->received().expectNothing())
     {
       failed = true;
     }
@@ -169,7 +169,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   pubId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                &dwImpl,
+                                dwImpl.in(),
                                 dwQos.in(),
                                 tii,
                                 pQos.in());
@@ -179,7 +179,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_publication failed!\n") ));
     }
 
-  if (!dwImpl.received().expectNothing())
+  if (!dwImpl->received().expectNothing())
     {
       failed = true;
     }
@@ -206,7 +206,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                  ACE_TEXT("CONFLICTING_TYPENAME and returned %d"), topicStatus));
     }
 
-  if (!dwImpl.received().expectNothing())
+  if (!dwImpl->received().expectNothing())
     {
       failed = true;
     }
@@ -257,7 +257,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Topic creation returned existing topic")));
     }
 
-  if (!dwImpl.received().expectNothing())
+  if (!dwImpl->received().expectNothing())
     {
       failed = true;
     }
@@ -299,7 +299,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   if (use_rtps)
     expected.push_back(DiscReceivedCalls::ASSOC_COMPLETE);
-  if (!dwImpl.received().expect(orb, max_delay, expected))
+  if (!dwImpl->received().expect(orb, max_delay, expected))
     {
       failed = true;
     }

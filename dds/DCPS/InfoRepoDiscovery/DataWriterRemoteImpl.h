@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteS.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 #include "ace/Thread_Mutex.h"
 
@@ -52,7 +53,7 @@ public:
   void detach_parent();
 
 private:
-  DataWriterCallbacks* parent_;
+  RcHandle<DataWriterCallbacks> parent_;
   ACE_Thread_Mutex mutex_;
 };
 

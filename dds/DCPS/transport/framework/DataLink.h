@@ -243,10 +243,10 @@ public:
 
   void default_listener(TransportReceiveListener* trl);
   TransportReceiveListener* default_listener() const;
-
-  typedef std::pair<TransportClient*, RepoId> OnStartCallback;
-  bool add_on_start_callback(TransportClient* client, const RepoId& remote);
-  void remove_on_start_callback(TransportClient* client, const RepoId& remote);
+  typedef RcHandle<TransportClient> TransportClient_rch;
+  typedef std::pair<TransportClient_rch, RepoId> OnStartCallback;
+  bool add_on_start_callback(const TransportClient_rch& client, const RepoId& remote);
+  void remove_on_start_callback(const TransportClient_rch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
 
   void set_scheduling_release(bool scheduling_release);

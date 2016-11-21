@@ -57,7 +57,7 @@ DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
   impl->_add_ref();
-  this->impl_ = impl;
+  this->impl_.reset(impl);
 
   datalink_release_delay_.sec(this->impl_->config_->datalink_release_delay_ / 1000);
   datalink_release_delay_.usec(this->impl_->config_->datalink_release_delay_ % 1000 * 1000);
@@ -117,6 +117,31 @@ DataLink::impl() const
   return impl_;
 }
 
+
+bool
+DataLink::add_on_start_callback(const TransportClient_rch& client, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+
+  if (started_ && !send_strategy_.is_nil()) {
+    return false; // link already started
+  }
+  on_start_callbacks_.push_back(std::make_pair(client, remote));
+  return true;
+}
+
+void
+DataLink::remove_on_start_callback(const TransportClient_rch& client, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+  on_start_callbacks_.erase(
+    std::remove(on_start_callbacks_.begin(),
+                on_start_callbacks_.end(),
+                std::make_pair(client, remote)),
+    on_start_callbacks_.end());
+}
+
+
 void
 DataLink::invoke_on_start_callbacks(bool success)
 {
@@ -131,6 +156,10 @@ DataLink::invoke_on_start_callbacks(bool success)
 
     OnStartCallback last_callback = on_start_callbacks_.back();
     on_start_callbacks_.pop_back();
+
+    // Need increment the reference count before release the lock;
+    // otherwise, the callback object may be deleted before it is used.
+    //RcHandle<TransportClient> client(last_callback.first, false);
 
     guard.release();
     last_callback.first->use_datalink(last_callback.second, link);
@@ -290,7 +319,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_subscription_id];
 
     if (rls.is_nil())
-      rls = new ReceiveListenerSet;
+      rls.reset(new ReceiveListenerSet);
     rls->insert(local_publication_id, 0);
 
     if (send_listeners_.insert(std::make_pair(local_publication_id,
@@ -330,7 +359,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_publication_id];
 
     if (rls.is_nil())
-      rls = new ReceiveListenerSet;
+      rls.reset(new ReceiveListenerSet);
     rls->insert(local_subscription_id, receive_listener);
 
     if (recv_listeners_.insert(std::make_pair(local_subscription_id,
@@ -410,7 +439,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   if (ris.size() == 1) {
     DataLinkSet_rch& links = released_locals[local_id];
     if (links.is_nil())
-      links = new DataLinkSet;
+      links.reset(new DataLinkSet);
     links->insert_link(this);
     {
       GuardType guard(this->released_assoc_by_local_lock_);

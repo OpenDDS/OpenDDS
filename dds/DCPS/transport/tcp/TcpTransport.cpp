@@ -23,6 +23,7 @@
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 
 #include <sstream>
 
@@ -67,7 +68,7 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
 TransportImpl::AcceptConnectResult
 TcpTransport::connect_datalink(const RemoteTransport& remote,
                                const ConnectionAttribs& attribs,
-                               TransportClient* client)
+                               const TransportClient_rch& client)
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_datalink", 6);
 
@@ -185,7 +186,7 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
 //Called with links_lock_ held
 bool
 TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                              TransportClient* client, const RepoId& remote_id)
+                              const TransportClient_rch& client, const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("TcpTransport", "find_datalink_i", 6);
 
@@ -230,7 +231,7 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
 TransportImpl::AcceptConnectResult
 TcpTransport::accept_datalink(const RemoteTransport& remote,
                               const ConnectionAttribs& attribs,
-                              TransportClient* client)
+                              const TransportClient_rch& client)
 {
   GuidConverter remote_conv(remote.repo_id_);
   GuidConverter local_conv(attribs.local_id_);
@@ -310,7 +311,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 }
 
 void
-TcpTransport::stop_accepting_or_connecting(TransportClient* client,
+TcpTransport::stop_accepting_or_connecting(const TransportClient_rch& client,
                                            const RepoId& remote_id)
 {
   GuidConverter remote_converted(remote_id);
@@ -319,7 +320,7 @@ TcpTransport::stop_accepting_or_connecting(TransportClient* client,
             std::string(remote_converted).c_str()), 5);
 
   GuardType guard(connections_lock_);
-  typedef std::multimap<TransportClient*, DataLink_rch>::iterator iter_t;
+  typedef PendConnMap::iterator iter_t;
   const std::pair<iter_t, iter_t> range =
     pending_connections_.equal_range(client);
 
