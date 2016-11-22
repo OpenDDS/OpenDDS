@@ -14,6 +14,8 @@
 #include "dcps_export.h"
 #include "SafetyProfilePool.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -86,6 +88,8 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 }
 
 }}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #define OPENDDS_STRING std::basic_string<char, std::char_traits<char>, \
           OpenDDS::DCPS::PoolAllocator<char> >

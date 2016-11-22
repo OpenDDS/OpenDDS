@@ -26,7 +26,6 @@
 #include "dds/DCPS/StaticIncludes.h"
 #endif
 
-#include "tao/ORB_Core.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"

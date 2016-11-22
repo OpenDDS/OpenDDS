@@ -12,6 +12,8 @@
 
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -483,6 +485,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::lookup_instance(
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
 #endif

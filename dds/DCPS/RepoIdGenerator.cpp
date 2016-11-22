@@ -11,6 +11,8 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "ace/Log_Msg.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 const unsigned RepoIdGenerator::KeyBits = 24;
 
 const unsigned RepoIdGenerator::KeyMask = (1 << KeyBits) - 1;
@@ -83,3 +85,5 @@ RepoIdGenerator::last(long key)
     this->lastKey_ = key;
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

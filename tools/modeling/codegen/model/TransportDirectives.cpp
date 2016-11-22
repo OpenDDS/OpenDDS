@@ -1,5 +1,7 @@
 #include "TransportDirectives.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 const ACE_TCHAR*
 OpenDDS::Model::Transport::Tcp::svcName = ACE_TEXT("OpenDDS_Tcp");
 
@@ -25,3 +27,4 @@ OpenDDS::Model::Transport::Multicast::svcConfDir =
     ACE_TEXT("dynamic OpenDDS_Multicast Service_Object *")
     ACE_TEXT(" OpenDDS_Multicast:_make_MulticastLoader()");
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -9,6 +9,11 @@
 #define DCPSINFO_I_H
 
 #include  "inforepo_export.h"
+
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
+
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
 #include /**/ "DCPS_IR_Participant.h"
@@ -19,17 +24,13 @@
 #include "FederationId.h"
 #include "UpdateManager.h"
 
-#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
-#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
-#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
-
-#include "tao/ORB_Core.h"
-
 #include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // typedef declarations
 typedef std::map<DDS::DomainId_t, DCPS_IR_Domain*> DCPS_IR_Domain_Map;
@@ -444,5 +445,7 @@ private:
   };
 #endif
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPSINFO_I_H */

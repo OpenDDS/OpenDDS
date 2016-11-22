@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -57,3 +59,5 @@ SingleSendBuffer::contains(const SequenceNumber& seq) const
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

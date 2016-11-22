@@ -40,11 +40,12 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
-#include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 
 #include <stdexcept>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -1527,7 +1528,7 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    get_lock(),
-                   ::DDS::RETCODE_ERROR);
+                   DDS::RETCODE_ERROR);
 
   DDS::ReturnCode_t ret = register_instance_i(handle, data, source_timestamp);
   if (ret != DDS::RETCODE_OK) {
@@ -1694,7 +1695,7 @@ DataWriterImpl::write(DataSample* data,
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     get_lock (),
-                    ::DDS::RETCODE_ERROR);
+                    DDS::RETCODE_ERROR);
 
   // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
   GUIDSeq_var filter_out_var(filter_out);
@@ -1842,7 +1843,7 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DDS::ReturnCode_t ret = ::DDS::RETCODE_ERROR;
+  DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
 
@@ -2658,3 +2659,5 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

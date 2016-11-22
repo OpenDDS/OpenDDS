@@ -9,6 +9,9 @@
 #define DCPS_MULTICAST_H
 
 #include "Multicast_Export.h"
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -22,5 +25,7 @@ static MulticastInitializer multicast_init;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* DCPS_MULTICAST_H */

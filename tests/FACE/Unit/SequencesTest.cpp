@@ -121,6 +121,7 @@ typedef ::TAO_FixedArray_Var_T<Arry, Arry_slice, Arry_tag> Arry_var;
 typedef Arry Arry_out;
 typedef ::TAO_Array_Forany_T<Arry, Arry_slice, Arry_tag> Arry_forany;
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace TAO {
   template <>
   struct Array_Traits<Arry_forany> {
@@ -133,6 +134,7 @@ namespace TAO {
     static void destroy(Arry_slice*) {}
   };
 }
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 struct SA1 : Sequence<Arry, Unbounded, ArrayEltPolicy<Arry_forany> > {};
 
@@ -144,6 +146,7 @@ typedef ::TAO_VarArray_Var_T<Aos, Aos_slice, Aos_tag> Aos_var;
 typedef ::TAO_Array_Out_T<Aos, Aos_var, Aos_slice, Aos_tag> Aos_out;
 typedef ::TAO_Array_Forany_T<Aos, Aos_slice, Aos_tag> Aos_forany;
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace TAO {
   template <>
   struct Array_Traits<Aos_forany> {
@@ -167,6 +170,7 @@ namespace TAO {
     }
   };
 }
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 struct SA2 : Sequence <Aos, Bounded<2>, ArrayEltPolicy<Aos_forany> > {};
 struct SA3 : Sequence <Aos, Unbounded, ArrayEltPolicy<Aos_forany> > {};
@@ -181,6 +185,7 @@ typedef SmallArry SmallArry_out;
 typedef ::TAO_Array_Forany_T<SmallArry, SmallArry_slice, SmallArry_tag>
   SmallArry_forany;
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace TAO {
   template <>
   struct Array_Traits<SmallArry_forany> {
@@ -193,6 +198,7 @@ namespace TAO {
     static void destroy(SmallArry_slice*) {}
   };
 }
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 struct SA4 : Sequence<SmallArry, Unbounded, ArrayEltPolicy<SmallArry_forany> >
 {};

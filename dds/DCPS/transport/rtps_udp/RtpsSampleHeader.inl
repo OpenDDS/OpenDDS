@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -84,3 +86,5 @@ RtpsSampleHeader::control_message_supported(char message_id)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

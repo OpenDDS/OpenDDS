@@ -9,6 +9,8 @@
 #include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DCPS/GuidConverter.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -132,3 +134,5 @@ DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

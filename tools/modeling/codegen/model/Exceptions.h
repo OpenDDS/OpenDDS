@@ -13,6 +13,8 @@
 #include <exception>
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
 class Exception : public std::exception {
@@ -76,6 +78,8 @@ class OutOfBoundsException : public Exception {
 };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

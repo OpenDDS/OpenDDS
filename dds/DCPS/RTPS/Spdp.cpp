@@ -25,6 +25,8 @@
 #include <cstring>
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
@@ -835,3 +837,5 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

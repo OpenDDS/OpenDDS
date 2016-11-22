@@ -10,6 +10,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "model_export.h"
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS { namespace Model { namespace Transport {
 
@@ -36,6 +39,8 @@ namespace OpenDDS { namespace Model { namespace Transport {
     extern OpenDDS_Model_Export const ACE_TCHAR *svcConfDir;
   };
 }; }; };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
 

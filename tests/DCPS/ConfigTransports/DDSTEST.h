@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/PoolAllocator.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
     namespace DCPS {
         class TransportClient;
@@ -17,6 +18,7 @@ namespace OpenDDS {
 
     };
 };
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 /**
  * @brief A bridge for tests that need access to non-public parts of the transport framework

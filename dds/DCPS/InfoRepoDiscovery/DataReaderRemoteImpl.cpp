@@ -8,6 +8,8 @@
 #include "DataReaderRemoteImpl.h"
 #include "dds/DCPS/DataReaderCallbacks.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -106,3 +108,5 @@ DataReaderRemoteImpl::update_incompatible_qos(
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

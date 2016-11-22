@@ -3,6 +3,8 @@
 #include <dds/DCPS/WaitSet.h>
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 using OpenDDS::DCPS::DCPS_debug_level;
 
 OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var writer,
@@ -222,3 +224,4 @@ void OpenDDS::Model::ReaderCondSync::signal()
   condition_.broadcast();
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

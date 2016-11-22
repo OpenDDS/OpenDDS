@@ -8,6 +8,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "GuardCondition.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
 
 CORBA::Boolean GuardCondition::get_trigger_value()
@@ -30,6 +32,8 @@ GuardCondition_ptr GuardCondition::_duplicate(GuardCondition_ptr obj)
 }
 
 } // namespace DDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 DDS::GuardCondition_ptr
 TAO::Objref_Traits<DDS::GuardCondition>::duplicate(DDS::GuardCondition_ptr p)
@@ -56,3 +60,4 @@ TAO::Objref_Traits<DDS::GuardCondition>::marshal(
 {
   return CORBA::Object::marshal(p, cdr);
 }
+

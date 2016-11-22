@@ -9,6 +9,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -168,3 +170,5 @@ FailoverListener::on_budget_exceeded(
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

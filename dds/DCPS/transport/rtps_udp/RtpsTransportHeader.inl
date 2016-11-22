@@ -7,6 +7,8 @@
 
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -77,3 +79,5 @@ RtpsTransportHeader::last_fragment(bool /*frag*/)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

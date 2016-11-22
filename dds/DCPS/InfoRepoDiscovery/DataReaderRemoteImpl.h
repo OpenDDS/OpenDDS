@@ -18,6 +18,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -55,6 +57,8 @@ private:
   DataReaderCallbacks* parent_;
   ACE_Thread_Mutex mutex_;
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 } // namespace DCPS
 } // namespace OpenDDS

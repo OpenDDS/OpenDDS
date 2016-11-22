@@ -3,6 +3,8 @@
 #include "Application.h"
 #include <ace/Log_Msg.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 template< typename ModelName, class InstanceTraits>
 inline
 OpenDDS::Model::Service<ModelName, InstanceTraits>::Service(
@@ -434,3 +436,4 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::transportConfigName(
   return this->modelData_.transportConfigName(which);
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

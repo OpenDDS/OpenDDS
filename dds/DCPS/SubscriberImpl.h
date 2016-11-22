@@ -14,12 +14,14 @@
 #include "Definitions.h"
 #include "DataCollector_T.h"
 #include "DataReaderImpl.h"
-#include "ace/Synch.h"
+#include "ace/Recursive_Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -166,7 +168,7 @@ private:
   /// Keep track of DataReaders with data
   /// std::set for now, want to encapsulate
   /// this so we can switch between a set or
-  /// list depending on Presentation Qos.
+  /// list depending on Presentation QoS.
   typedef OPENDDS_SET(DataReaderImpl*) DataReaderSet;
 
   /// DataReader id to qos map.
@@ -209,5 +211,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_SUBSCRIBER_H  */

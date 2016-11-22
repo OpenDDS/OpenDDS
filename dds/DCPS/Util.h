@@ -8,6 +8,8 @@
 #ifndef OPENDDS_DCPS_UTIL_H
 #define OPENDDS_DCPS_UTIL_H
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -141,5 +143,7 @@ void push_back(Seq& seq, const typename Seq::value_type& val)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_UTIL_H */

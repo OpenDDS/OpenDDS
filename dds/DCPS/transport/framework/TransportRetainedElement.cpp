@@ -12,6 +12,8 @@
 #include "TransportRetainedElement.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TransportRetainedElement::~TransportRetainedElement()
 {
   DBG_ENTRY_LVL("TransportRetainedElement","~TransportRetainedElement",6);
@@ -54,3 +56,5 @@ OpenDDS::DCPS::TransportRetainedElement::msg_payload() const
   DBG_ENTRY_LVL("TransportRetainedElement", "msg_payload", 6);
   return this->msg_->cont();
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

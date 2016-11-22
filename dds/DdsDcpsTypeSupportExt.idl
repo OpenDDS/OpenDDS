@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,9 +7,7 @@
 #define OPENDDS_DCPS_TYPE_SUPPORT_IDL
 
 #include "dds/DdsDcpsTopic.idl"
-//x #include "dds/DdsDcpsDataWriterRemote.idl"
 #include "dds/DdsDcpsPublication.idl"
-//x #include "dds/DdsDcpsDataReaderRemote.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
 

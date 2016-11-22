@@ -29,6 +29,8 @@ namespace {
 
 using namespace OpenDDS::DCPS::FilterExpressionGrammar;
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -905,5 +907,7 @@ MetaStruct::~MetaStruct()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

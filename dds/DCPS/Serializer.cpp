@@ -15,6 +15,8 @@
 # include "Serializer.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -223,3 +225,5 @@ Serializer::use_rti_serialization()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

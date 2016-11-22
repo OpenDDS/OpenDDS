@@ -157,6 +157,8 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     if (tv != -1) VALUE.msec(tv);                                                \
   }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -230,5 +232,7 @@ typedef ACE_CDR::Long Priority;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_TRANSPORTDEFS_H */

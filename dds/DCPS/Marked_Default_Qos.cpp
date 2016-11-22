@@ -9,6 +9,8 @@
 #include "Marked_Default_Qos.h"
 #include "Service_Participant.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -95,3 +97,5 @@ Marked_Default_Qos::marked_default_DataReader_Use_TopicQos()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -12,6 +12,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
   class OpenDDS_Model_Export NullTopicListener
@@ -30,5 +32,7 @@ namespace OpenDDS { namespace Model {
   };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* NULLTOPICLISTENER_H  */

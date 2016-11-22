@@ -23,6 +23,8 @@
 # include "FederatorConfig.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace {
 
 // FederationDomain key value.
@@ -333,3 +335,5 @@ Config::processFile()
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

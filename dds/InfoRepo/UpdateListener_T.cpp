@@ -9,6 +9,8 @@
 #include "FederatorConfig.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -187,3 +189,5 @@ UpdateListener<DataType, ReaderType>::join()
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

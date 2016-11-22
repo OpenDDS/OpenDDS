@@ -21,10 +21,12 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "ace/Condition_T.h"
+#include "ace/Synch_Traits.h"
 
 #include <list>
 #include <map>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class TAO_DDS_DCPSInfo_i;
 
@@ -296,6 +298,8 @@ private:
 
 }
 } // End namespace OpenDDS::Federator
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"

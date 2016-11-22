@@ -11,6 +11,8 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/GuidConverter.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -107,3 +109,5 @@ ReceiveListenerSet::map() const
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

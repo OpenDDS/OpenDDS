@@ -29,6 +29,7 @@
 #include "dds/DCPS/Recorder.h"
 
 #include "ace/Semaphore.h"
+#include "ace/Thread_Semaphore.h"
 
 bool
 make_dr_reliable()

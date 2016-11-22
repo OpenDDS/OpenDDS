@@ -13,6 +13,8 @@
 
 #include <string>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
   /// Abstract interface for dependency free callbacks to the model data.
@@ -34,6 +36,8 @@ namespace OpenDDS { namespace Model {
   };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

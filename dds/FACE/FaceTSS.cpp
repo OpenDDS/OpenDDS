@@ -1,6 +1,5 @@
-#include "ace/config-macros.h"
-#include "FACE/TS.hpp"
 #include "FaceTSS.h"
+#include "FACE/TS.hpp"
 #include "config/Parser.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -19,6 +18,8 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 using OpenDDS::DCPS::operator==;
 #endif
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace FACE {
 namespace TS {
@@ -882,3 +883,5 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   return_code = FACE::RC_NO_ERROR;
 }
 }}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -13,6 +13,7 @@
 
 #include "ace/OS_NS_sys_time.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -262,3 +263,5 @@ WriterInfo::set_group_info(const CoherentChangeControl& info)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

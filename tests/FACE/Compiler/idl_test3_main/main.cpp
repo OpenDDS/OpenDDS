@@ -545,7 +545,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   foo2.theString = "four";
 
 
-  std::map<Xyz::Foo, Xyz::Foo*, Xyz::OpenDDSGenerated::Foo_KeyLessThan> foomap;
+  std::map<Xyz::Foo, Xyz::Foo*, Xyz::Foo_OpenDDS_KeyLessThan> foomap;
 
   if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::gen_has_key()) {
     foomap[my_foo] = &my_foo;

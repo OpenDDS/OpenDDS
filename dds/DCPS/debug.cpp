@@ -9,6 +9,8 @@
 
 #include "debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS_Dcps_Export unsigned int OpenDDS::DCPS::DCPS_debug_level = 0;
 
 namespace OpenDDS {
@@ -21,3 +23,5 @@ OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

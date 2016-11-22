@@ -13,6 +13,7 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -43,10 +44,9 @@ public:
    *  Callback for when the Recorder is associated with a DataWriter.
    *  @param recorder Recorder that received the association
    */
-  virtual void on_recorder_matched(Recorder*                                recorder,
-                                   const ::DDS::SubscriptionMatchedStatus & status)=0;
+  virtual void on_recorder_matched(Recorder*                              recorder,
+                                   const DDS::SubscriptionMatchedStatus & status)=0;
 };
-
 
 typedef RcHandle<RecorderListener> RecorderListener_rch;
 
@@ -70,15 +70,15 @@ public:
    *  Find the bit key for a given repo id.
    */
   virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId&     id,
-                                              DDS::BuiltinTopicKey_t& key)=0;
+                                              DDS::BuiltinTopicKey_t& key) = 0;
 #endif
 
   /**
    * Set the Quality of Service settings for the Recorder.
    *
    */
-  virtual DDS::ReturnCode_t set_qos (const ::DDS::SubscriberQos & subscriber_qos,
-                                     const DDS::DataReaderQos &   datareader_qos)=0;
+  virtual DDS::ReturnCode_t set_qos (const DDS::SubscriberQos & subscriber_qos,
+                                     const DDS::DataReaderQos & datareader_qos)=0;
 
   /**
    * Get the Quality of Service settings for the Recorder.
@@ -104,16 +104,18 @@ public:
 }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace TAO {
 
 template<>
-struct OpenDDS_Dcps_Export Objref_Traits<OpenDDS::DCPS::Recorder> {
-  static OpenDDS::DCPS::Recorder_ptr duplicate(OpenDDS::DCPS::Recorder_ptr p);
-  static void release(OpenDDS::DCPS::Recorder_ptr p);
-  static OpenDDS::DCPS::Recorder_ptr nil();
-  static CORBA::Boolean marshal(const OpenDDS::DCPS::Recorder_ptr p,
+struct OpenDDS_Dcps_Export Objref_Traits< ::OpenDDS::DCPS::Recorder> {
+  static ::OpenDDS::DCPS::Recorder_ptr duplicate( ::OpenDDS::DCPS::Recorder_ptr p);
+  static void release(::OpenDDS::DCPS::Recorder_ptr p);
+  static ::OpenDDS::DCPS::Recorder_ptr nil();
+  static ::CORBA::Boolean marshal(const ::OpenDDS::DCPS::Recorder_ptr p,
                                 TAO_OutputCDR& cdr);
 };
 

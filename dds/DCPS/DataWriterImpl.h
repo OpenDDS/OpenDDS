@@ -31,8 +31,6 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/OS_NS_sys_time.h"
-#include "ace/Condition_T.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <memory>
 
@@ -41,6 +39,8 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 class DDS_TEST;
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -716,5 +716,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

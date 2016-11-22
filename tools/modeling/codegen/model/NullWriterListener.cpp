@@ -2,6 +2,8 @@
 #include "NullWriterListener.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::Model::NullWriterListener::NullWriterListener()
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -113,3 +115,4 @@ OpenDDS::Model::NullWriterListener::on_connection_deleted(
   }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

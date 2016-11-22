@@ -18,6 +18,8 @@
 #include "ace/Reverse_Lock_T.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -177,5 +179,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* DCPS_DATALINKWATCHDOG_T_H */

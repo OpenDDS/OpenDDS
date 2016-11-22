@@ -10,6 +10,8 @@
 #include /**/ "dds/DdsDcpsInfrastructureC.h"
 #include "model_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
   /// Load a string into an Octet sequence.
@@ -19,6 +21,8 @@ namespace OpenDDS { namespace Model {
                             );
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UTILITIES_H */
 

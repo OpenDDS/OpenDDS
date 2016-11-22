@@ -7,6 +7,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "Replayer.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 ReplayerListener::~ReplayerListener()
@@ -32,6 +34,8 @@ Replayer_ptr Replayer::_duplicate(Replayer_ptr obj)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::Replayer_ptr
 TAO::Objref_Traits<OpenDDS::DCPS::Replayer>::duplicate(OpenDDS::DCPS::Replayer_ptr p)

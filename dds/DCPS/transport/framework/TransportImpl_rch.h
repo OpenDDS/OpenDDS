@@ -10,6 +10,8 @@
 
 #include "dds/DCPS/RcHandle_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -36,5 +38,7 @@ typedef RcHandle<TransportImpl> TransportImpl_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_TRANSPORTIMPL_RCH_H */

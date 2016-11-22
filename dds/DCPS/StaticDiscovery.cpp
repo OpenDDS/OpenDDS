@@ -14,6 +14,8 @@
 
 #include <ctype.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -1821,3 +1823,4 @@ StaticDiscovery_rch StaticDiscovery::instance_(new StaticDiscovery(Discovery::DE
 }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -159,6 +159,8 @@ bool paramsChanged(OpenDDS::DCPS::ContentFilterProperty_t& dest,
 
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
@@ -2218,3 +2220,5 @@ WaitForAcks::reset()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

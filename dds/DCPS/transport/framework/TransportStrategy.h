@@ -12,6 +12,8 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "ace/Synch_Traits.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -31,5 +33,7 @@ public:
 
 } // namespace DCPS */
 } // namespace OpenDDS */
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_TRANSPORTSTRATEGY */

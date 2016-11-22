@@ -3,6 +3,8 @@
 
 #include "EntityProfiles.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
 void
@@ -196,3 +198,4 @@ ReaderProfile::copyToReaderQos(::DDS::DataReaderQos& dds_qos)
 
 } } // End of namespace OpenDDS::Model
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

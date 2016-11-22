@@ -33,6 +33,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // forward declarations
 class DCPS_IR_Topic_Description;
 typedef std::set<DCPS_IR_Topic_Description*> DCPS_IR_Topic_Description_Set;
@@ -244,5 +246,7 @@ private:
   DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_IR_DOMAIN_H */

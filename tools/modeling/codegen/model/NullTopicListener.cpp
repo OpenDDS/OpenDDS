@@ -3,6 +3,8 @@
 #include "NullTopicListener.h"
 #include <dds/DCPS/debug.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::Model::NullTopicListener::NullTopicListener()
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -32,3 +34,4 @@ OpenDDS::Model::NullTopicListener::on_inconsistent_topic(
   }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -17,6 +17,8 @@
 
 #include "dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 /**
  * @class RepoIdGenerator
  *
@@ -137,5 +139,7 @@ private:
   /// Unique value for the EntityKey.
   long lastKey_;
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* REPOIDGENERATOR_H  */

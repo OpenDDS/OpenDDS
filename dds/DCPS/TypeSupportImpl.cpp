@@ -11,6 +11,8 @@
 
 #include "Registered_Data_Types.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -43,3 +45,5 @@ TypeSupportImpl::get_type_name()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

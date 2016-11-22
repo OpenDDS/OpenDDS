@@ -11,6 +11,8 @@
 #include "tao/debug.h"
 #include "ace/Dynamic_Service.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -25,3 +27,5 @@ Tcp_Initializer::Tcp_Initializer()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

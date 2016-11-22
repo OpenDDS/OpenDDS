@@ -18,6 +18,8 @@
 #include "dds/DCPS/ZeroCopyAllocator_T.inl"
 #endif /* __//ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -184,5 +186,7 @@ FirstTimeFastAllocator<T, N>::dump() const
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* ZEROCOPYALLOCATOR_T_CPP  */

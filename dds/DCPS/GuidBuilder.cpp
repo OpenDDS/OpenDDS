@@ -26,6 +26,8 @@ fill_guid(CORBA::Octet* begin, long value, std::size_t len)
 
 } // namespace
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -147,3 +149,5 @@ GuidBuilder::entityKind(EntityKind kind)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

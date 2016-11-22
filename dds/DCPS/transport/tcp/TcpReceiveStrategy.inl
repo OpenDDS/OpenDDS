@@ -8,6 +8,8 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE ACE_Reactor*
 OpenDDS::DCPS::TcpReceiveStrategy::get_reactor()
 {
@@ -20,3 +22,5 @@ OpenDDS::DCPS::TcpReceiveStrategy::gracefully_disconnected()
 {
   return this->gracefully_disconnected_;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

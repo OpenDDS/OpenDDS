@@ -11,6 +11,8 @@
 #include "ConfigUtils.h"
 #include "ace/SString.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace DCPS {
 
   int pullValues( ACE_Configuration_Heap& cf,
@@ -66,3 +68,5 @@ namespace OpenDDS { namespace DCPS {
   }
 
 }  }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

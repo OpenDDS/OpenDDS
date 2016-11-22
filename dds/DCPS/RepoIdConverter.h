@@ -15,6 +15,8 @@
 
 #include "dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 
 namespace Federator {
@@ -79,5 +81,7 @@ public:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_REPOIDCONVERTER_H */

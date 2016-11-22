@@ -20,6 +20,8 @@
 #include "RcObject_T.h"
 #include "RakeData.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -124,5 +126,7 @@ ComparatorBase::Ptr make_struct_cmp(Field Sample::* mp,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

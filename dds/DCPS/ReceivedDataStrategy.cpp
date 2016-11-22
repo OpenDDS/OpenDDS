@@ -79,6 +79,8 @@ private:
 
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -161,3 +163,5 @@ SourceDataStrategy::add(ReceivedDataElement* data_sample)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

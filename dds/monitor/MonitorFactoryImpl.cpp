@@ -25,6 +25,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -390,3 +392,4 @@ ACE_STATIC_SVC_DEFINE (MonitorFactoryImpl,
                          ACE_Service_Type::DELETE_OBJ,
                        0)
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

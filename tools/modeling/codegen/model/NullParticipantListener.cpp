@@ -4,6 +4,8 @@
 #include <dds/DCPS/debug.h>
 #include "NullParticipantListener.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::Model::NullParticipantListener::NullParticipantListener()
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -173,4 +175,6 @@ OpenDDS::Model::NullParticipantListener::on_sample_lost(
                ACE_TEXT("(%P|%t) NullParticipantListener::on_sample_lost()\n")));
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

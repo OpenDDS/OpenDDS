@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 
 #include "ace/Malloc_Base.h"
+#include /**/ "dds/Versioned_Namespace.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "ace/Atomic_Op.h"
@@ -19,6 +20,8 @@
 #include <cstring>
 
 class SafetyProfilePoolTest;
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -90,13 +93,19 @@ private:
 
 }}
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #else // ! OPENDDS_SAFETY_PROFILE
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 typedef ACE_Allocator SafetyProfilePool;
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_SAFETY_PROFILE
 

@@ -29,9 +29,11 @@ void copyInto(DDS::ConditionSeq& target,
 
 } // namespace
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
 
-ReturnCode_t WaitSet::attach_condition(Condition_ptr cond)
+DDS::ReturnCode_t WaitSet::attach_condition(Condition_ptr cond)
 {
   using OpenDDS::DCPS::ConditionImpl;
   Condition_var condv(Condition::_duplicate(cond));
@@ -174,6 +176,8 @@ WaitSet_ptr WaitSet::_duplicate(WaitSet_ptr obj)
 }
 
 } // namespace DDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 DDS::WaitSet_ptr
 TAO::Objref_Traits<DDS::WaitSet>::duplicate(DDS::WaitSet_ptr p)

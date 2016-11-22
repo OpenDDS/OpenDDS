@@ -16,6 +16,8 @@
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -205,5 +207,7 @@ DDS::BuiltinTopicKey_t keyFromSample(TopicType*)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* BUILTINTOPICUTILS_H  */

@@ -14,6 +14,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -34,5 +36,7 @@ extern void OpenDDS_Dcps_Export set_DCPS_debug_level(unsigned int lvl);
 
 } // namespace OpenDDS
 } // namespace DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_DEBUG_H */

@@ -17,6 +17,8 @@
 #include "UpdateReceiver_T.h"
 #include "UpdateProcessor_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -186,5 +188,7 @@ UpdateReceiver<DataType>::svc()
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UPDATERECEIVER_T_CPP */

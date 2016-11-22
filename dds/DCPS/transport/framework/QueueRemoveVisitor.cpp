@@ -13,6 +13,8 @@
 #include "QueueRemoveVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -70,3 +72,5 @@ QueueRemoveVisitor::visit_element_remove(TransportQueueElement* element,
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

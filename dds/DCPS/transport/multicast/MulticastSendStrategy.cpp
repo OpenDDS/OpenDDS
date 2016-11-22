@@ -10,6 +10,8 @@
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "ace/Proactor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -127,3 +129,5 @@ MulticastSendStrategy::handle_write_dgram(const ACE_Asynch_Write_Dgram::Result& 
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

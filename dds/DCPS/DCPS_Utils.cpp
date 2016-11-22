@@ -15,6 +15,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -352,3 +354,5 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
 }
 
 }}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

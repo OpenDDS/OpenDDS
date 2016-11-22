@@ -17,6 +17,8 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/ReactorSynchStrategy.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   std::size_t id,
   const TcpDataLink_rch& link,
@@ -168,3 +170,5 @@ OpenDDS::DCPS::TcpSendStrategy::stop_i()
   // Take back the "copy" of connection object given. (see constructor).
   this->connection_ = 0;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

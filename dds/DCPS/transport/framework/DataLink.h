@@ -25,7 +25,7 @@
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Event_Handler.h"
 
 #include <utility>
@@ -35,6 +35,8 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_SOCK;
 ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -421,6 +423,8 @@ protected:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "DataLink.inl"

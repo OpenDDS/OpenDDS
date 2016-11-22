@@ -17,10 +17,13 @@
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/ConditionImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
 
 class GuardCondition;
 typedef GuardCondition* GuardCondition_ptr;
+typedef TAO_Objref_Var_T<GuardCondition> GuardCondition_var;
 
 class OpenDDS_Dcps_Export GuardCondition
   : public virtual OpenDDS::DCPS::LocalObject<DDS::GuardConditionInterf>
@@ -44,6 +47,8 @@ private:
 
 } // namespace DDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace TAO {
@@ -60,11 +65,5 @@ struct OpenDDS_Dcps_Export Objref_Traits<DDS::GuardCondition> {
 } // namespace TAO
 
 TAO_END_VERSIONED_NAMESPACE_DECL
-
-namespace DDS {
-
-typedef TAO_Objref_Var_T<GuardCondition> GuardCondition_var;
-
-} // namespace DDS
 
 #endif

@@ -38,6 +38,8 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #define OPENDDS_FILESYSTEMSTORAGE_MAX_FILES_PER_DIR 512
 #endif
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace FileSystemStorage {
 
@@ -246,6 +248,8 @@ ACE_TString b32h_decode(const ACE_TCHAR* encoded);
 
 } // namespace FileSystemStorage
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
 #endif

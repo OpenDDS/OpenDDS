@@ -20,6 +20,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // forward declarations
 class DCPS_IR_Participant;
 class DCPS_IR_Topic;
@@ -193,5 +195,7 @@ private:
 
   OpenDDS::DCPS::IncompatibleQosStatus incompatibleQosStatus_;
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_IR_PUBLICATION_H */

@@ -6,6 +6,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "dds/DdsDcpsGuidC.h"
 #include "DomainParticipantImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "Service_Participant.h"
@@ -20,7 +21,6 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "Util.h"
 #include "MonitorFactory.h"
-#include "dds/DdsDcpsGuidC.h"
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
@@ -58,6 +58,8 @@ int find(
 }
 
 } // namespace Util
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -2234,3 +2236,5 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

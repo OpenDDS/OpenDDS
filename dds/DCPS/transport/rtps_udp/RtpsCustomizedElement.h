@@ -14,6 +14,8 @@
 
 #include "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -46,6 +48,8 @@ typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "RtpsCustomizedElement.inl"

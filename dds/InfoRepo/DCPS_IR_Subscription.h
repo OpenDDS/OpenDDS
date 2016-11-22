@@ -20,6 +20,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // forward declarations
 class DCPS_IR_Publication;
 typedef ACE_Unbounded_Set<DCPS_IR_Publication*> DCPS_IR_Publication_Set;
@@ -203,5 +205,7 @@ private:
 
   OpenDDS::DCPS::IncompatibleQosStatus incompatibleQosStatus_;
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_IR_SUBSCRIPTION_H */

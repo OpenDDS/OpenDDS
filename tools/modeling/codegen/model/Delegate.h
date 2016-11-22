@@ -14,6 +14,8 @@
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/PoolAllocator.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
   class DomainParticipant;
   class Topic;
@@ -121,6 +123,8 @@ namespace OpenDDS { namespace Model {
   };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

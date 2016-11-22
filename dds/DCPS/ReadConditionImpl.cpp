@@ -9,6 +9,8 @@
 #include "ReadConditionImpl.h"
 #include "DataReaderImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -40,3 +42,5 @@ DDS::DataReader_ptr ReadConditionImpl::get_datareader()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

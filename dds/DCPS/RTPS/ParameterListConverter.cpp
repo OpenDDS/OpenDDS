@@ -13,6 +13,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace RTPS {
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -1130,3 +1132,5 @@ int from_param_list(const ParameterList& param_list,
 }
 
 } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

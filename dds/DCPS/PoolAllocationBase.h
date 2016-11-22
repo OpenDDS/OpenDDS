@@ -52,6 +52,7 @@
   using PoolAllocationBase::operator delete;   \
   using PoolAllocationBase::operator delete[]; \
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -64,5 +65,7 @@ public:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_PoolAllocationBase_h */

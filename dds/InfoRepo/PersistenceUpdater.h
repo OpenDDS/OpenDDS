@@ -22,6 +22,8 @@
 
 #include <string>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace Update {
 
 // Forward declaration
@@ -136,5 +138,7 @@ static UpdateManagerSvc_Loader load = &UpdateManagerSvc_Loader::init;
 static int load = PersistenceUpdaterSvc_Loader::init();
 
 #endif /* ACE_HAS_BROKEN_STATIC_CONSTRUCTORS */
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* PERSISTENCE_UPDATER_H */

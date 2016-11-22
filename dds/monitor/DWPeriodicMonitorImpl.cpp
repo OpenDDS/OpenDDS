@@ -11,9 +11,10 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
-
 
 DWPeriodicMonitorImpl::DWPeriodicMonitorImpl(DataWriterImpl* dw,
               OpenDDS::DCPS::DataWriterPeriodicReportDataWriter_ptr dw_per_writer)
@@ -44,3 +45,4 @@ DWPeriodicMonitorImpl::report() {
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

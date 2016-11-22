@@ -9,6 +9,9 @@
 #define DCPS_RTPS_UDP_H
 
 #include "Rtps_Udp_Export.h"
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -22,5 +25,7 @@ static RtpsUdpInitializer rtps_udp_init;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* DCPS_UDP_H */

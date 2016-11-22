@@ -49,6 +49,8 @@ private:
 
 } // End of anonymous namespace.
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 DCPS_IR_Domain::DCPS_IR_Domain(DDS::DomainId_t id, RepoIdGenerator& generator)
   : id_(id),
     participantIdGenerator_(generator),
@@ -1538,36 +1540,5 @@ std::string DCPS_IR_Domain::dump_to_string(const std::string& prefix, int depth)
   return str;
 }
 
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-template class ACE_Node<DCPS_IR_Topic_Description*>;
-template class ACE_Unbounded_Set<DCPS_IR_Topic_Description*>;
-template class ACE_Unbounded_Set_Iterator<DCPS_IR_Topic_Description*>;
-
-template class ACE_Node<DCPS_IR_Participant*>;
-template class ACE_Unbounded_Set<DCPS_IR_Participant*>;
-template class ACE_Unbounded_Set_Iterator<DCPS_IR_Participant*>;
-
-template class ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*>;
-template class ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
-template class ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
-template class ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>;
-
-#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Node<DCPS_IR_Topic_Description*>
-#pragma instantiate ACE_Unbounded_Set<DCPS_IR_Topic_Description*>
-#pragma instantiate ACE_Unbounded_Set_Iterator<DCPS_IR_Topic_Description*>
-
-#pragma instantiate ACE_Node<DCPS_IR_Participant*>
-#pragma instantiate ACE_Unbounded_Set<DCPS_IR_Participant*>
-#pragma instantiate ACE_Unbounded_Set_Iterator<DCPS_IR_Participant*>
-
-#pragma instantiate ACE_Map_Entry<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*>
-#pragma instantiate ACE_Map_Manager<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator_Base<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
-#pragma instantiate ACE_Map_Reverse_Iterator<OpenDDS::DCPS::RepoId,DCPS_IR_Participant*,ACE_Null_Mutex>
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */

@@ -20,6 +20,8 @@ OpenDDS::DCPS::TransportHeader::DCPS_PROTOCOL[] =
 # include "TransportHeader.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -59,3 +61,5 @@ TransportHeader::get_length(const char* marshaled_header)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
