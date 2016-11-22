@@ -116,12 +116,14 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
+  be_global->header_ << be_global->versioning_begin() << "\n";
   {
     ScopedNamespaceGuard hGuard(name, be_global->header_);
 
     be_global->header_ <<
       "class " << short_name << "TypeSupportImpl;\n";
   }
+  be_global->header_ << be_global->versioning_end() << "\n";
 
   const bool has_keys = info->key_list_.is_empty();
 
@@ -144,8 +146,8 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
     "  static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
     "\n"
-    "  inline static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
-    "  inline static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
+    "  static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
+    "  static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
     "};\n}  }\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
   be_global->header_ << be_global->versioning_begin() << "\n";
@@ -166,10 +168,10 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  " << short_name << "TypeSupportImpl() {}\n"
       "  virtual ~" << short_name << "TypeSupportImpl() {}\n"
       "\n"
-      "  virtual ::DDS::DataWriter_ptr create_datawriter();\n"
-      "  virtual ::DDS::DataReader_ptr create_datareader();\n"
+      "  virtual DDS::DataWriter_ptr create_datawriter();\n"
+      "  virtual DDS::DataReader_ptr create_datareader();\n"
       "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
-      "  virtual ::DDS::DataReader_ptr create_multitopic_datareader();\n"
+      "  virtual DDS::DataReader_ptr create_multitopic_datareader();\n"
       "#endif /* !OPENDDS_NO_MULTI_TOPIC */\n"
       "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n"
       "  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();\n"
@@ -181,6 +183,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
+  be_global->impl_ << be_global->versioning_begin() << "\n";
   {
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);
     be_global->impl_ <<
@@ -230,6 +233,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "  return TypeSupportType::_narrow(obj);\n"
       "}\n";
   }
+  be_global->impl_ << be_global->versioning_end() << "\n";
 
   if (be_global->face_ts()) {
     face_ts_generator::generate(name);

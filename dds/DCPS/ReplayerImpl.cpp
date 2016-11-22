@@ -6,7 +6,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-// #include "DataWriterImpl.h"
+#include "ReplayerImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
@@ -41,8 +41,6 @@
 #include "ace/Auto_Ptr.h"
 
 #include <stdexcept>
-
-#include "ReplayerImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

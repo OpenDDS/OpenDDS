@@ -8,6 +8,7 @@
 #ifndef OPENDDS_DCPS_REPLAYERIMPL_H
 #define OPENDDS_DCPS_REPLAYERIMPL_H
 
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
@@ -27,7 +28,6 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/OS_NS_sys_time.h"
-#include "ace/Synch_Traits.h"
 
 #include <memory>
 
