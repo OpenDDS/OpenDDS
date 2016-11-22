@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_THREADSYNCHWORKER_H
 
 #include "dds/DCPS/dcps_export.h"
+#include <cstddef>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
