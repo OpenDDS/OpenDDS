@@ -28,14 +28,15 @@
 #include "GuidBuilder.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include "ace/Null_Mutex.h"
-#include "ace/Recursive_Thread_Mutex.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "Recorder.h"
 #include "Replayer.h"
+
+#include "ace/Null_Mutex.h"
+#include "ace/Condition_T.h"
+#include "ace/Recursive_Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
