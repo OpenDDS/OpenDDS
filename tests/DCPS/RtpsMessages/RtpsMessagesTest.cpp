@@ -34,13 +34,15 @@ bool operator<<(Serializer& strm, KeyOnly<const TestMsg> stru)
   return strm << stru.t.key;
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<TestMsg> {
-inline static bool gen_is_bounded_size() { return true; }
-inline static bool gen_is_bounded_key_size() { return true; }
+static bool gen_is_bounded_size() { return true; }
+static bool gen_is_bounded_key_size() { return true; }
 };
 } }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 struct BigKey {
   CORBA::Octet key[24];
@@ -62,6 +64,7 @@ bool operator<<(Serializer& strm, KeyOnly<const BigKey> stru)
   return strm.write_octet_array(stru.t.key, 24);
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<BigKey> {
@@ -69,6 +72,7 @@ inline static bool gen_is_bounded_size() { return true; }
 inline static bool gen_is_bounded_key_size() { return true; }
 };
 } }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 bool test_key_hash()
 {

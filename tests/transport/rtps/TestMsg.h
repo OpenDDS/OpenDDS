@@ -60,10 +60,12 @@ bool operator>>(Serializer& strm, KeyOnly<TestMsg> stru)
   return (strm >> stru.t.key);
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
 template <>
 struct MarshalTraits<TestMsg> {
-inline static bool gen_is_bounded_size() { return false; }
-inline static bool gen_is_bounded_key_size() { return true; }
+static bool gen_is_bounded_size() { return false; }
+static bool gen_is_bounded_key_size() { return true; }
 };
 } }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
