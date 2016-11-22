@@ -42,18 +42,19 @@ MulticastTransport::~MulticastTransport()
 {
 }
 
-MulticastDataLink*
+MulticastDataLink_rch
 MulticastTransport::make_datalink(const RepoId& local_id,
                                   Priority priority,
                                   bool active)
 {
+
   RcHandle<MulticastSessionFactory> session_factory;
 
   if (this->config_i_->reliable_) {
-    ACE_NEW_RETURN(session_factory, ReliableSessionFactory, 0);
+    session_factory.reset(new ReliableSessionFactory);
 
   } else {
-    ACE_NEW_RETURN(session_factory, BestEffortSessionFactory, 0);
+    session_factory.reset(new BestEffortSessionFactory);
   }
 
   MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(local_id).federationId() << 32
@@ -64,43 +65,36 @@ MulticastTransport::make_datalink(const RepoId& local_id,
             this->config_i_->name().c_str(), (unsigned int)(local_peer >> 32), (unsigned int)local_peer,
             priority, active), 2);
 
-  MulticastDataLink_rch link;
-  ACE_NEW_RETURN(link,
-                 MulticastDataLink(this,
+  MulticastDataLink_rch link(new MulticastDataLink(this,
                                    session_factory.in(),
                                    local_peer,
-                                   active),
-                 0);
+                                   active));
 
   // Configure link with transport configuration and reactor task:
-  TransportReactorTask_rch rtask = reactor_task();
+  TransportReactorTask_rch rtask(reactor_task());
   //link->configure(this->config_i_.in(), rtask.in());
   link->configure(config_i_.in(), rtask.in());
 
   // Assign send strategy:
-  MulticastSendStrategy* send_strategy;
-  ACE_NEW_RETURN(send_strategy, MulticastSendStrategy(link.in()), 0);
-  link->send_strategy(send_strategy);
+  link->send_strategy(new MulticastSendStrategy(link.in()));
 
   // Assign receive strategy:
-  MulticastReceiveStrategy* recv_strategy;
-  ACE_NEW_RETURN(recv_strategy, MulticastReceiveStrategy(link.in()), 0);
-  link->receive_strategy(recv_strategy);
+  link->receive_strategy(new MulticastReceiveStrategy(link.in()));
 
   // Join multicast group:
   if (!link->join(this->config_i_->group_address_)) {
     ACE_TCHAR str[64];
     this->config_i_->group_address_.addr_to_string(str,
                                                    sizeof(str)/sizeof(str[0]));
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport::make_datalink: ")
-                      ACE_TEXT("failed to join multicast group: %s!\n"),
-                      str),
-                     0);
+    ACE_DEBUG((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ERROR: ")
+                    ACE_TEXT("MulticastTransport::make_datalink: ")
+                    ACE_TEXT("failed to join multicast group: %s!\n"),
+                    str));
+    return MulticastDataLink_rch();
   }
 
-  return link._retn();
+  return link;
 }
 
 MulticastSession*
@@ -116,7 +110,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                      0);
   }
 
-  MulticastSession_rch session = link->find_or_create_session(remote_peer);
+  MulticastSession_rch session(link->find_or_create_session(remote_peer));
 
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -178,7 +172,6 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
   MulticastDataLink_rch link;
 
   if (link_iter == this->client_links_.end()) {
-
     link = this->make_datalink(attribs.local_id_, attribs.priority_, true /*active*/);
     this->client_links_[local_peer] = link;
   } else {
@@ -188,8 +181,8 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
   MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote.repo_id_).federationId() << 32
                             | RepoIdConverter(remote.repo_id_).participantId();
 
-  MulticastSession_rch session =
-    this->start_session(link, remote_peer, true /*active*/);
+  MulticastSession_rch session(
+    this->start_session(link, remote_peer, true /*active*/));
 
   if (session.is_nil()) {
     Links::iterator to_remove = this->client_links_.find(local_peer);
@@ -239,11 +232,11 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
     guard.release();
 
     VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink found\n"));
-    MulticastSession_rch session =
-      this->start_session(link, remote_peer, false /*!active*/);
+    MulticastSession_rch session(
+      this->start_session(link, remote_peer, false /*!active*/));
 
     if (session.is_nil()) {
-      link = 0;
+      link.reset();
     }
     return AcceptConnectResult(link._retn());
 
@@ -254,8 +247,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
     //can't call start session with connections_lock_ due to reactor
     //call in session->start which could deadlock with passive_connection
     guard.release();
-    MulticastSession_rch session =
-      this->start_session(link, remote_peer, false /*!active*/);
+    MulticastSession_rch session(
+      this->start_session(link, remote_peer, false /*!active*/));
 
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 
@@ -312,7 +305,7 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
 
   if (server_link != this->server_links_.end()) {
     link = static_rchandle_cast<DataLink>(server_link->second);
-    MulticastSession_rch session = server_link->second->find_or_create_session(remote_peer);
+    MulticastSession_rch session (server_link->second->find_or_create_session(remote_peer));
     session->set_acked();
   }
 
@@ -339,9 +332,9 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
 bool
 MulticastTransport::configure_i(TransportInst* config)
 {
-  this->config_i_ = dynamic_cast<MulticastInst*>(config);
+  this->config_i_.reset( dynamic_cast<MulticastInst*>(config) );
 
-  if (this->config_i_ == 0) {
+  if (!this->config_i_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%@]::configure_i: ")

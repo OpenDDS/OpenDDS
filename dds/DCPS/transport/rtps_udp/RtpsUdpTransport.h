@@ -70,11 +70,11 @@ private:
                                     bool& requires_inline_qos) const;
 
   virtual void release_datalink(DataLink* link);
-  void pre_detach(TransportClient* client);
+  void pre_detach(const TransportClient_rch& client);
 
   virtual OPENDDS_STRING transport_type() const { return "rtps_udp"; }
 
-  RtpsUdpDataLink* make_datalink(const GuidPrefix_t& local_prefix);
+  RtpsUdpDataLink_rch make_datalink(const GuidPrefix_t& local_prefix);
 
   void use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,

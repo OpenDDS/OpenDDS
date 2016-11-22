@@ -571,7 +571,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   RcHandle<SingleSendBuffer>& send_buff = wi->second.send_buff_;
 
   if (send_buff.is_nil()) {
-    send_buff = new SingleSendBuffer(SingleSendBuffer::UNLIMITED, 1 /*mspp*/);
+    send_buff.reset( new SingleSendBuffer(SingleSendBuffer::UNLIMITED, 1 /*mspp*/) );
 
     send_buff->bind(outer_->send_strategy_.in());
   }

@@ -94,8 +94,8 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link._retn());
     }
 
-    link = new TcpDataLink(key.address(), this, attribs.priority_,
-                           key.is_loopback(), true /*active*/);
+    link.reset(new TcpDataLink(key.address(), this, attribs.priority_,
+                           key.is_loopback(), true /*active*/));
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
@@ -105,8 +105,8 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     }
   }
 
-  TcpConnection_rch connection =
-    new TcpConnection(key.address(), link->transport_priority(), tcp_config_);
+  TcpConnection_rch connection(
+    new TcpConnection(key.address(), link->transport_priority(), tcp_config_));
   connection->set_datalink(link.in());
 
   TcpConnection* pConn = connection.in();
@@ -262,8 +262,8 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link._retn());
 
     } else {
-      link = new TcpDataLink(key.address(), this, key.priority(),
-                             key.is_loopback(), key.is_active());
+      link.reset( new TcpDataLink(key.address(), this, key.priority(),
+                             key.is_loopback(), key.is_active()));
 
       if (links_.bind(key, link) != 0 /*OK*/) {
         ACE_ERROR((LM_ERROR,
@@ -353,13 +353,13 @@ TcpTransport::configure_i(TransportInst* config)
   this->create_reactor_task();
 
   // Ask our base class for a "copy" of the reference to the reactor task.
-  this->reactor_task_ = reactor_task();
+  this->reactor_task_.reset( reactor_task() );
 
   connector_.open(reactor_task_->get_reactor());
 
   // Make a "copy" of the reference for ourselves.
   tcp_config->_add_ref();
-  this->tcp_config_ = tcp_config;
+  this->tcp_config_.reset( tcp_config );
 
   // Open the reconnect task
   if (this->con_checker_->open()) {
@@ -383,7 +383,7 @@ TcpTransport::configure_i(TransportInst* config)
     // Remember to drop our reference to the tcp_config_ object since
     // we are about to return -1 here, which means we are supposed to
     // keep a copy after all.
-    TcpInst_rch cfg = this->tcp_config_._retn();
+    TcpInst_rch cfg (this->tcp_config_._retn());
 
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
@@ -715,14 +715,14 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
 
   connection->id() = last_link_;
 
-  TransportSendStrategy_rch send_strategy =
+  TransportSendStrategy_rch send_strategy (
     new TcpSendStrategy(last_link_, link, this->tcp_config_, connection,
                         new TcpSynchResource(connection,
                                              this->tcp_config_->max_output_pause_period_),
-                        this->reactor_task_, link->transport_priority());
+                        this->reactor_task_, link->transport_priority()));
 
-  TransportStrategy_rch receive_strategy =
-    new TcpReceiveStrategy(link, connection, this->reactor_task_);
+  TransportStrategy_rch receive_strategy(
+    new TcpReceiveStrategy(link, connection, this->reactor_task_));
 
   if (link->connect(connection, send_strategy, receive_strategy) != 0) {
     return -1;

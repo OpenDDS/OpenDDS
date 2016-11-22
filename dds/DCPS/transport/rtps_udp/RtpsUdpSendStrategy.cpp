@@ -29,7 +29,7 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link)
   : TransportSendStrategy(0, TransportInst_rch(link->config(), false),
                           0,  // synch_resource
                           link->transport_priority(),
-                          new NullSynchStrategy),
+                          ThreadSynchStrategy_rch(new NullSynchStrategy)),
     link_(link),
     override_dest_(0),
     override_single_dest_(0),

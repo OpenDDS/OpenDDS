@@ -73,7 +73,7 @@ OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
 {
   DBG_ENTRY_LVL("DataLinkSet","select_links",6);
 
-  DataLinkSet_rch selected_links = new DataLinkSet();
+  DataLinkSet_rch selected_links ( new DataLinkSet() );
   GuardType guard(this->lock_);
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();

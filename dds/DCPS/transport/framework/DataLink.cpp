@@ -172,7 +172,7 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
     }
-    if (this->impl_ != 0) {
+    if (this->impl_) {
       ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
       if (reactor->cancel_timer(this) > 0) {
         if (DCPS_debug_level > 0) {

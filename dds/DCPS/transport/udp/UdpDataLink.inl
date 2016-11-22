@@ -21,13 +21,13 @@ UdpDataLink::configure(UdpInst* config,
 ACE_INLINE void
 UdpDataLink::send_strategy(UdpSendStrategy* send_strategy)
 {
-  this->send_strategy_ = send_strategy;
+  this->send_strategy_.reset(send_strategy);
 }
 
 ACE_INLINE void
 UdpDataLink::receive_strategy(UdpReceiveStrategy* recv_strategy)
 {
-  this->recv_strategy_ = recv_strategy;
+  this->recv_strategy_.reset(recv_strategy);
 }
 
 ACE_INLINE bool

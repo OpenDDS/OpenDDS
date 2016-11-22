@@ -62,7 +62,7 @@ private:
   DataLink* add_datalink(const std::string& remote_address);
 
   /// Create the DataLink object and start it
-  ShmemDataLink* make_datalink(const std::string& remote_address);
+  ShmemDataLink_rch make_datalink(const std::string& remote_address);
 
   std::pair<std::string, std::string> blob_to_key(const TransportBLOB& blob);
 

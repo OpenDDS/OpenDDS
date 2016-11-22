@@ -55,7 +55,7 @@ OpenDDS::DCPS::TcpConnection::set_datalink(OpenDDS::DCPS::TcpDataLink* link)
 {
   // Keep a "copy" of the reference to the data link for ourselves.
   link->_add_ref();
-  this->link_ = link;
+  this->link_.reset(link);
 }
 
 ACE_INLINE ACE_INET_Addr

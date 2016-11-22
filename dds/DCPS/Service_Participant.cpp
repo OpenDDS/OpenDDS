@@ -1339,7 +1339,7 @@ Service_Participant::load_configuration(
   if (this->global_transport_config_ != ACE_TEXT("")) {
     TransportConfig_rch config = TransportRegistry::instance()->get_config(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
-    if (config == 0) {
+    if (!config) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                         ACE_TEXT("Unable to locate specified global transport config: %s\n"),
@@ -1861,7 +1861,7 @@ Service_Participant::get_data_durability_cache(
 void
 Service_Participant::add_discovery(Discovery_rch discovery)
 {
-  if (discovery != 0) {
+  if (discovery) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
     this->discoveryMap_[discovery->key()] = discovery;
   }

@@ -848,12 +848,12 @@ DomainParticipantImpl::get_filter_eval(const char* filter)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, filter_cache_lock_,
                    RcHandle<FilterEvaluator>());
-  typedef std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > Map;
-  Map::iterator iter = filter_cache_.find(filter);
-  if (iter == filter_cache_.end()) {
-    return filter_cache_[filter] = new FilterEvaluator(filter, false);
-  }
-  return iter->second;
+
+  RcHandle<FilterEvaluator>& result = filter_cache_[filter];
+  if (!result)
+    result.reset(new FilterEvaluator(filter, false));
+
+  return result;
 }
 
 void

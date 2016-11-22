@@ -147,7 +147,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             // configuration in ACE_Configuration_Heap to the TransportInst
             // object.
             TransportInst_rch inst = create_inst(transport_id, transport_type);
-            if (inst == 0) {
+            if (!inst) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                                 ACE_TEXT("Unable to create transport instance in [transport/%C] section.\n"),
@@ -201,7 +201,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 
           // Create a TransportConfig object.
           TransportConfig_rch config = create_config(config_id);
-          if (config == 0) {
+          if (!config) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                               ACE_TEXT("Unable to create transport config in [config/%C] section.\n"),
@@ -281,7 +281,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
     OPENDDS_VECTOR(OPENDDS_STRING)& insts = configInfoVec[i].second;
     for (unsigned int j = 0; j < insts.size(); ++j) {
       TransportInst_rch inst = get_inst(insts[j]);
-      if (inst == 0) {
+      if (!inst) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                           ACE_TEXT("The inst (%C) in [config/%C] section is undefined.\n"),
@@ -296,7 +296,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
   // file with all the instances from this file.
   if (!instances.empty()) {
     TransportConfig_rch config = create_config(file_name);
-    if (config == 0) {
+    if (!config) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                         ACE_TEXT("Unable to create default transport config.\n"),
@@ -364,7 +364,7 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
                name.c_str()));
     return TransportInst_rch();
   }
-  TransportInst_rch inst = type->new_inst(name);
+  TransportInst_rch inst (type->new_inst(name));
   inst_map_[name] = inst;
   return inst;
 }
@@ -395,7 +395,7 @@ TransportRegistry::create_config(const OPENDDS_STRING& name)
     return TransportConfig_rch();
   }
 
-  TransportConfig_rch inst = new TransportConfig(name);
+  TransportConfig_rch inst ( new TransportConfig(name) );
   config_map_[name] = inst;
   return inst;
 }

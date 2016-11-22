@@ -26,7 +26,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
  TransportReceiveListener* receive_listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","insert",6);
-  ReceiveListenerSet_rch listener_set = this->find_or_create(publisher_id);
+  ReceiveListenerSet_rch listener_set (this->find_or_create(publisher_id));
 
   if (listener_set.is_nil()) {
     // find_or_create failure
@@ -57,7 +57,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
   // created - and just for us.  This is to make sure we don't leave any
   // empty ReceiveListenerSets in our map_.
   if (listener_set->size() == 0) {
-    listener_set = this->remove_set(publisher_id);
+    listener_set.reset(this->remove_set(publisher_id));
 
     if (listener_set.is_nil()) {
       ACE_ERROR((LM_ERROR,

@@ -34,45 +34,32 @@ UdpTransport::UdpTransport(const TransportInst_rch& inst)
   }
 }
 
-UdpDataLink*
+UdpDataLink_rch
 UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
                             Priority priority, bool active)
 {
-  UdpDataLink_rch link;
-  ACE_NEW_RETURN(link, UdpDataLink(this, priority, active), 0);
-
-  if (link.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpTransport::make_datalink: ")
-                      ACE_TEXT("failed to create DataLink!\n")),
-                     0);
-  }
-
+  UdpDataLink_rch link(new UdpDataLink(this, priority, active));
   // Configure link with transport configuration and reactor task:
-  TransportReactorTask_rch rtask = reactor_task();
+  TransportReactorTask_rch rtask (reactor_task());
   link->configure(config_i_.in(), rtask.in());
 
   // Assign send strategy:
-  UdpSendStrategy* send_strategy;
-  ACE_NEW_RETURN(send_strategy, UdpSendStrategy(link.in()), 0);
-  link->send_strategy(send_strategy);
+  link->send_strategy(new UdpSendStrategy(link.in()));
 
   // Assign receive strategy:
-  UdpReceiveStrategy* recv_strategy;
-  ACE_NEW_RETURN(recv_strategy, UdpReceiveStrategy(link.in()), 0);
-  link->receive_strategy(recv_strategy);
+  link->receive_strategy(new UdpReceiveStrategy(link.in()));
 
   // Open logical connection:
-  if (!link->open(remote_address)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpTransport::make_datalink: ")
-                      ACE_TEXT("failed to open DataLink!\n")),
-                     0);
+  if (link->open(remote_address)) {
+    return link;
   }
 
-  return link._retn();
+  ACE_DEBUG((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("UdpTransport::make_datalink: ")
+              ACE_TEXT("failed to open DataLink!\n")));
+
+  return UdpDataLink_rch();
 }
 
 TransportImpl::AcceptConnectResult
@@ -100,9 +87,9 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
   }
 
   // Create new DataLink for logical connection:
-  UdpDataLink_rch link = make_datalink(remote_address,
+  UdpDataLink_rch link (make_datalink(remote_address,
                                        attribs.priority_,
-                                       active);
+                                       active));
 
   if (!link.is_nil()) {
     client_links_.insert(UdpDataLinkMap::value_type(key, link));
@@ -169,7 +156,7 @@ UdpTransport::configure_i(TransportInst* config)
 {
   config_i_ = UdpInst_rch(dynamic_cast<UdpInst*>(config), false);
 
-  if (config_i_ == 0) {
+  if (!config_i_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpTransport::configure_i: ")

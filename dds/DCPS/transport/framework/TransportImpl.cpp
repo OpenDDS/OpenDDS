@@ -124,7 +124,7 @@ TransportImpl::configure(TransportInst* config)
   }
 
   config->_add_ref();
-  this->config_ = config;
+  this->config_.reset( config );
 
   // Let our subclass take a shot at the configuration object.
   if (this->configure_i(config) == false) {
@@ -179,7 +179,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend)
     return;
   }
 
-  this->reactor_task_ = new TransportReactorTask(useAsyncSend);
+  this->reactor_task_.reset( new TransportReactorTask(useAsyncSend) );
   if (0 != this->reactor_task_->open(0)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }

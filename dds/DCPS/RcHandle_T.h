@@ -23,7 +23,11 @@ public:
     : ptr_(0)
   {}
 
-  RcHandle(T* p, bool take_ownership = true)
+  RcHandle(int) : ptr_(0)
+  {
+  }
+
+  explicit RcHandle(T* p, bool take_ownership = true)
     : ptr_(p)
   {
     if (!take_ownership) {
@@ -56,11 +60,11 @@ public:
     swap(tmp);
   }
 
-  RcHandle& operator=(T* p)
-  {
-    this->reset(p);
-    return *this;
-  }
+  // RcHandle& operator=(T* p)
+  // {
+  //   this->reset(p);
+  //   return *this;
+  // }
 
   RcHandle& operator=(const RcHandle& b)
   {
@@ -120,6 +124,12 @@ public:
     T* retval = this->ptr_;
     this->ptr_ = 0;
     return retval;
+  }
+
+
+  operator bool() const
+  {
+    return in() != 0;
   }
 
   bool operator==(const RcHandle& rhs) const

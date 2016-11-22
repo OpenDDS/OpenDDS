@@ -34,7 +34,7 @@ OpenDDS::DCPS::TcpDataLink::TcpDataLink(
 {
   DBG_ENTRY_LVL("TcpDataLink","TcpDataLink",6);
   transport_impl->_add_ref();
-  this->transport_ = transport_impl;
+  this->transport_.reset(transport_impl);
 }
 
 OpenDDS::DCPS::TcpDataLink::~TcpDataLink()
@@ -234,7 +234,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
     return this->transport_->connect_tcp_datalink(this_rch, conn_rch);
   }
 
-  this->connection_ = conn_rch._retn();
+  this->connection_.swap(conn_rch);
 
   TcpReceiveStrategy* rs = static_cast<TcpReceiveStrategy*>(brs.in());
 

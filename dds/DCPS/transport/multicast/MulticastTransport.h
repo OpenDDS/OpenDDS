@@ -61,9 +61,9 @@ private:
   typedef ACE_Thread_Mutex         ThreadLockType;
   typedef ACE_Guard<ThreadLockType>     GuardThreadType;
 
-  MulticastDataLink* make_datalink(const RepoId& local_id,
-                                   Priority priority,
-                                   bool active);
+  MulticastDataLink_rch make_datalink(const RepoId& local_id,
+                                      Priority priority,
+                                      bool active);
 
   MulticastSession* start_session(const MulticastDataLink_rch& link,
                                   MulticastPeer remote_peer, bool active);

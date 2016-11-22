@@ -80,13 +80,13 @@ MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
     }
     send_strategy->send_buffer(this->send_buffer_);
   }
-  this->send_strategy_ = send_strategy;
+  this->send_strategy_.reset(send_strategy);
 }
 
 void
 MulticastDataLink::receive_strategy(MulticastReceiveStrategy* recv_strategy)
 {
-  this->recv_strategy_ = recv_strategy;
+  this->recv_strategy_.reset(recv_strategy);
 }
 
 bool
@@ -191,8 +191,8 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
     return sess._retn();
   }
 
-  MulticastSession_rch session =
-    this->session_factory_->create(transport()->reactor(), transport()->reactor_owner(), this, remote_peer);
+  MulticastSession_rch session(
+    this->session_factory_->create(transport()->reactor(), transport()->reactor_owner(), this, remote_peer));
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")

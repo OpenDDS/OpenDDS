@@ -35,42 +35,29 @@ ShmemTransport::ShmemTransport(const TransportInst_rch& inst)
   }
 }
 
-ShmemDataLink*
+ShmemDataLink_rch
 ShmemTransport::make_datalink(const std::string& remote_address)
 {
-  ShmemDataLink_rch link;
-  ACE_NEW_RETURN(link, ShmemDataLink(this), 0);
-
-  if (link.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ShmemTransport::make_datalink: ")
-                      ACE_TEXT("failed to create DataLink!\n")),
-                     0);
-  }
+  ShmemDataLink_rch link(new ShmemDataLink(this));
 
   link->configure(config_i_.in());
 
   // Assign send strategy:
-  ShmemSendStrategy* send_strategy;
-  ACE_NEW_RETURN(send_strategy, ShmemSendStrategy(link.in()), 0);
-  link->send_strategy(send_strategy);
+  link->send_strategy(new ShmemSendStrategy(link.in()));
 
   // Assign receive strategy:
-  ShmemReceiveStrategy* recv_strategy;
-  ACE_NEW_RETURN(recv_strategy, ShmemReceiveStrategy(link.in()), 0);
-  link->receive_strategy(recv_strategy);
+  link->receive_strategy(new ShmemReceiveStrategy(link.in()));
 
   // Open logical connection:
   if (!link->open(remote_address)) {
-    ACE_ERROR_RETURN((LM_ERROR,
+    ACE_DEBUG((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ShmemTransport::make_datalink: ")
-                      ACE_TEXT("failed to open DataLink!\n")),
-                     0);
+                      ACE_TEXT("failed to open DataLink!\n")));
+    return ShmemDataLink_rch();
   }
 
-  return link._retn();
+  return link;
 }
 
 TransportImpl::AcceptConnectResult
@@ -128,8 +115,8 @@ ShmemTransport::configure_i(TransportInst* config)
                     ACE_TEXT("no platform support for shared memory!\n")),
                    false);
 #else
-  config_i_ = dynamic_cast<ShmemInst*>(config);
-  if (config_i_ == 0) {
+  config_i_.reset(dynamic_cast<ShmemInst*>(config));
+  if (!config_i_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ShmemTransport::configure_i: ")

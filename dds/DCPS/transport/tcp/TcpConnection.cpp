@@ -135,7 +135,7 @@ OpenDDS::DCPS::TcpConnection::set_receive_strategy
 
   // Make a "copy" for ourselves
   receive_strategy->_add_ref();
-  this->receive_strategy_ = receive_strategy;
+  this->receive_strategy_.reset(receive_strategy);
 }
 
 void
@@ -146,7 +146,7 @@ OpenDDS::DCPS::TcpConnection::set_send_strategy
 
   // Make a "copy" for ourselves
   send_strategy->_add_ref();
-  this->send_strategy_ = send_strategy;
+  this->send_strategy_.reset(send_strategy);
 }
 
 int
@@ -197,7 +197,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   // Now we need to ask the TcpAcceptor object to provide us with
   // a pointer to the TcpTransport object that "owns" the acceptor.
-  TcpTransport_rch transport = acceptor->transport();
+  TcpTransport_rch transport(acceptor->transport());
 
   if (transport.is_nil()) {
     // The acceptor gave us a nil transport (smart) pointer.
@@ -212,7 +212,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
   // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
   tcp_config->_add_ref();
-  tcp_config_ = tcp_config;
+  tcp_config_.reset( tcp_config );
   local_address_ = tcp_config_->local_address();
 
   set_sock_options(tcp_config_.in());

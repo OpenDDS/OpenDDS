@@ -681,7 +681,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
     return ads;
   }
 
-  const RcHandle<StaticParticipant> participant = new StaticParticipant(id, qos, registry);
+  const RcHandle<StaticParticipant> participant (new StaticParticipant(id, qos, registry));
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);

@@ -13,13 +13,13 @@ namespace DCPS {
 ACE_INLINE void
 RtpsUdpDataLink::send_strategy(RtpsUdpSendStrategy* send_strategy)
 {
-  send_strategy_ = send_strategy;
+  send_strategy_.reset(send_strategy);
 }
 
 ACE_INLINE void
 RtpsUdpDataLink::receive_strategy(RtpsUdpReceiveStrategy* recv_strategy)
 {
-  recv_strategy_ = recv_strategy;
+  recv_strategy_.reset(recv_strategy);
 }
 
 ACE_INLINE RtpsUdpInst*
@@ -31,14 +31,14 @@ RtpsUdpDataLink::config()
 ACE_INLINE ACE_Reactor*
 RtpsUdpDataLink::get_reactor()
 {
-  if (reactor_task_ == 0) return 0;
+  if (!reactor_task_) return 0;
   return reactor_task_->get_reactor();
 }
 
 ACE_INLINE bool
 RtpsUdpDataLink::reactor_is_shut_down()
 {
-  if (reactor_task_ == 0) return true;
+  if (!reactor_task_) return true;
   return reactor_task_->is_shut_down();
 }
 

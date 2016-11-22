@@ -55,10 +55,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(TheServiceParticipant->federation_liveliness()==70);
 
   TransportInst_rch inst = TransportRegistry::instance()->get_inst("mytcp");
-  TEST_CHECK(inst != 0);
+  TEST_CHECK(inst);
 
   TcpInst_rch tcp_inst = dynamic_rchandle_cast<TcpInst>(inst);
-  TEST_CHECK(tcp_inst != 0);
+  TEST_CHECK(tcp_inst);
 
   // tcp_inst->dump(std::cout);
 
@@ -80,11 +80,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(tcp_inst->max_output_pause_period_ == 1000);
 
   TransportInst_rch inst2 = TransportRegistry::instance()->get_inst("anothertcp");
-  TEST_CHECK(inst2 != 0);
+  TEST_CHECK(inst2);
   TEST_CHECK(inst2->name() == "anothertcp");
 
   TransportConfig_rch config = TransportRegistry::instance()->get_config("myconfig");
-  TEST_CHECK(config != 0);
+  TEST_CHECK(config);
   TEST_CHECK(config->instances_.size() == 2);
   TEST_CHECK(config->instances_[0] == inst);
   TEST_CHECK(config->instances_[1] == inst2);
@@ -97,7 +97,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #else
     TransportRegistry::instance()->get_config("test1.ini");
 #endif
-  TEST_CHECK(default_config != 0);
+  TEST_CHECK(default_config);
   //std::cout << "size=" << default_config->instances_.size() << std::endl;
   //for (unsigned int i = 0; i < default_config->instances_.size(); ++i) {
   //  std::cout << "  " << default_config->instances_[i]->name() << std::endl;
@@ -188,7 +188,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(tconf == myconf);
 
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
-    TEST_CHECK(discovery != 0);
+    TEST_CHECK(discovery);
     OpenDDS::RTPS::RtpsDiscovery_rch rd =
       dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
     TEST_CHECK(!rd.is_nil());
@@ -216,7 +216,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(!tconf.is_nil());
 
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
-    TEST_CHECK(discovery != 0);
+    TEST_CHECK(discovery);
     OpenDDS::RTPS::RtpsDiscovery_rch rd =
       dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(discovery);
     TEST_CHECK(!rd.is_nil());
@@ -230,7 +230,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   {
     DDS::DomainId_t domain = 97;
     OpenDDS::DCPS::Discovery_rch discovery = TheServiceParticipant->get_discovery(domain);
-    TEST_CHECK(discovery != 0);
+    TEST_CHECK(discovery);
     TEST_CHECK(discovery->key() == "MyDefaultDiscovery");
   }
 #endif

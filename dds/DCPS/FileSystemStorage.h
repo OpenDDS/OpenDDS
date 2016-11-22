@@ -154,8 +154,8 @@ private:
 
     typename Item::Ptr deref() const {
       if (item_.is_nil()) {
-        item_ = new Item(outer_->full_path(delegate_->second),
-                         delegate_->first, outer_.in());
+        item_.reset( new Item(outer_->full_path(delegate_->second),
+                         delegate_->first, outer_.in()));
       }
 
       return item_;

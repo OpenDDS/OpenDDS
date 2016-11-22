@@ -38,35 +38,27 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
   }
 }
 
-RtpsUdpDataLink*
+RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  TransportReactorTask_rch rt = reactor_task();
-  ACE_NEW_RETURN(link_,
-                 RtpsUdpDataLink(this, local_prefix, config_i_.in(), rt.in()),
-                 0);
+  TransportReactorTask_rch rt (reactor_task());
+  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this, local_prefix, config_i_.in(), rt.in()));
+  link->send_strategy(new RtpsUdpSendStrategy(link.in()));
+  link->receive_strategy(new RtpsUdpReceiveStrategy(link.in()));
 
-  RtpsUdpSendStrategy* send_strategy;
-  ACE_NEW_RETURN(send_strategy, RtpsUdpSendStrategy(link_.in()), 0);
-  link_->send_strategy(send_strategy);
-
-  RtpsUdpReceiveStrategy* recv_strategy;
-  ACE_NEW_RETURN(recv_strategy, RtpsUdpReceiveStrategy(link_.in()), 0);
-  link_->receive_strategy(recv_strategy);
-
-  if (!link_->open(unicast_socket_)) {
-    ACE_ERROR_RETURN((LM_ERROR,
+  if (!link->open(unicast_socket_)) {
+    ACE_DEBUG((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                       ACE_TEXT("failed to open DataLink for socket %d\n"),
-                      unicast_socket_.get_handle()),
-                     0);
+                      unicast_socket_.get_handle()));
+    return RtpsUdpDataLink_rch();
   }
 
   // RtpsUdpDataLink now owns the socket
   unicast_socket_.set_handle(ACE_INVALID_HANDLE);
 
-  return RtpsUdpDataLink_rch(link_)._retn();
+  return link;
 }
 
 TransportImpl::AcceptConnectResult
@@ -75,13 +67,16 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const TransportClient_rch& client )
 {
   GuardThreadType guard_links(this->links_lock_);
-  RtpsUdpDataLink_rch link = link_;
+
   if (link_.is_nil()) {
-    link = make_datalink(attribs.local_id_.guidPrefix);
-    if (link.is_nil()) {
+    link_ =  make_datalink(attribs.local_id_.guidPrefix);
+    if (link_.is_nil()) {
       return AcceptConnectResult();
     }
   }
+
+  RtpsUdpDataLink_rch link = link_;
+
 
   use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
                attribs.local_reliable_, remote.reliable_,
@@ -114,13 +109,14 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const TransportClient_rch& )
 {
   GuardThreadType guard_links(this->links_lock_);
-  RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
-    link = make_datalink(attribs.local_id_.guidPrefix);
-    if (link.is_nil()) {
+    link_=  make_datalink(attribs.local_id_.guidPrefix);
+    if (link_.is_nil()) {
       return AcceptConnectResult();
     }
   }
+  RtpsUdpDataLink_rch link = link_;
+
   use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
                attribs.local_reliable_, remote.reliable_,
                attribs.local_durable_, remote.durable_);
@@ -200,8 +196,8 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
   const TransportBLOB* blob = this->config_i_->get_blob(locators);
   if (!blob)
     return;
-  if (link_ == 0) {
-    make_datalink(participant.guidPrefix);
+  if (!link_) {
+    link_ = make_datalink(participant.guidPrefix);
   }
   bool requires_inline_qos;
   link_->register_for_reader(writerid, readerid, get_connection_addr(*blob, requires_inline_qos), listener);
@@ -212,7 +208,7 @@ RtpsUdpTransport::unregister_for_reader(const RepoId& /*participant*/,
                                         const RepoId& writerid,
                                         const RepoId& readerid)
 {
-  if (link_ != 0) {
+  if (link_) {
     link_->unregister_for_reader(writerid, readerid);
   }
 }
@@ -227,8 +223,8 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
   const TransportBLOB* blob = this->config_i_->get_blob(locators);
   if (!blob)
     return;
-  if (link_ == 0) {
-    make_datalink(participant.guidPrefix);
+  if (!link_) {
+    link_ = make_datalink(participant.guidPrefix);
   }
   bool requires_inline_qos;
   link_->register_for_writer(readerid, writerid, get_connection_addr(*blob, requires_inline_qos), listener);
@@ -239,7 +235,7 @@ RtpsUdpTransport::unregister_for_writer(const RepoId& /*participant*/,
                                         const RepoId& readerid,
                                         const RepoId& writerid)
 {
-  if (link_ != 0) {
+  if (link_) {
     link_->unregister_for_writer(readerid, writerid);
   }
 }
@@ -291,9 +287,8 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   create_reactor_task();
 
   if (config_i_->opendds_discovery_default_listener_) {
-    RtpsUdpDataLink_rch link =
-      make_datalink(config_i_->opendds_discovery_guid_.guidPrefix);
-    link->default_listener(config_i_->opendds_discovery_default_listener_);
+    link_= make_datalink(config_i_->opendds_discovery_guid_.guidPrefix);
+    link_->default_listener(config_i_->opendds_discovery_default_listener_);
     default_listener_ =
       dynamic_cast<TransportClient*>(config_i_->opendds_discovery_default_listener_);
   }
@@ -318,9 +313,9 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
 }
 
 void
-RtpsUdpTransport::pre_detach(TransportClient* c)
+RtpsUdpTransport::pre_detach(const TransportClient_rch& c)
 {
-  if (default_listener_ && !link_.is_nil() && c == default_listener_) {
+  if (default_listener_ && !link_.is_nil() && c.in() == default_listener_) {
     link_->default_listener(0);
     default_listener_ = 0;
   }

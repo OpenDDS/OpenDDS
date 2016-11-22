@@ -56,7 +56,7 @@ protected:
   virtual std::string transport_type() const { return "udp"; }
 
 private:
-  UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address,
+  UdpDataLink_rch make_datalink(const ACE_INET_Addr& remote_address,
                              Priority priority, bool active);
 
   PriorityKey blob_to_key(const TransportBLOB& remote,

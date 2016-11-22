@@ -387,17 +387,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::Discovery_rch disc;
 
       if (use_rtps) {
-        OpenDDS::RTPS::RtpsDiscovery* rtpsDisc = new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery");
-        disc = rtpsDisc;
+        OpenDDS::RTPS::RtpsDiscovery_rch rtpsDisc(new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery"));
         rtpsDisc->resend_period(ACE_Time_Value(1));
         rtpsDisc->sedp_multicast(false);
+        disc = rtpsDisc;
       } else {
         CORBA::Object_var tmp =
           orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
         OpenDDS::DCPS::DCPSInfo_var info =
           OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
-        OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::InfoRepoDiscovery> ird =
-          new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info);
+        OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::InfoRepoDiscovery> ird(
+          new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info));
         disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::Discovery>(ird);
         ird->set_ORB(orb);
       }

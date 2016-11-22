@@ -65,8 +65,8 @@ private:
 
       return false;
     }
-
-    explicit SortedSetCmp(ComparatorBase::Ptr cmp = 0) : cmp_(cmp){}
+    SortedSetCmp(){}
+    explicit SortedSetCmp(ComparatorBase::Ptr cmp) : cmp_(cmp){}
 
   private:
     ComparatorBase::Ptr cmp_;

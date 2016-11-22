@@ -29,9 +29,9 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   Priority priority)
   : TransportSendStrategy(id, static_rchandle_cast<TransportInst>(config),
                           synch_resource, priority,
-                          new ReactorSynchStrategy(
+                          RcHandle<ReactorSynchStrategy>(new ReactorSynchStrategy(
                                 this,
-                                task->get_reactor()))
+                                task->get_reactor())))
   , connection_(connection)
   , link_(link)
   , reactor_task_(task)
@@ -96,7 +96,7 @@ OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection, bool reset_mode
 
   // Replace with a new connection.
   connection->_add_ref();
-  this->connection_ = connection;
+  this->connection_ .reset( connection );
 
   // Tell the TcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
