@@ -419,7 +419,7 @@ public:
 
   /** This method provides virtual access to type specific code
    * that is used when loans are automatically returned.
-   * The destructor of the sequence supporing zero-copy read calls this
+   * The destructor of the sequence supporting zero-copy read calls this
    * method on the datareader that provided the loan.
    *
    * @param seq - The sequence of loaned values.
