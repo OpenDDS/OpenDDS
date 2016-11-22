@@ -13,6 +13,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 #include "TransportDefs.h"
 #include "TransportQueueElement.h"
+#include "ace/Synch_Traits.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;

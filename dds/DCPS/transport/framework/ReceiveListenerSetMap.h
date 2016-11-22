@@ -13,7 +13,6 @@
 #include "ReceiveListenerSet_rch.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

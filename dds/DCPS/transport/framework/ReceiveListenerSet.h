@@ -12,8 +12,8 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocator.h"
-
 #include "ace/Synch_Traits.h"
+#include "ace/Mutex.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

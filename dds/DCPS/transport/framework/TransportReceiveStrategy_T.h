@@ -15,8 +15,8 @@
 #include "TransportHeader.h"
 
 #include "ace/INET_Addr.h"
-#include "ace/Synch_Traits.h"
 #include "ace/Lock_Adapter_T.h"
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -10,6 +10,7 @@
 
 #include "ThreadSynch.h"
 #include "ace/Task.h"
+#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

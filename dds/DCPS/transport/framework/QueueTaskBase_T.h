@@ -16,10 +16,12 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Synch_Traits.h"
+#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Task.h"
 #include "ace/Unbounded_Queue.h"
 #include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

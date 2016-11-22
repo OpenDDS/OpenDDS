@@ -14,14 +14,12 @@
 #endif
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
-#include "dds/DCPS/RcObject_T.h"
-
 #include "ace/Synch_Traits.h"
-
-#include "dds/DCPS/PoolAllocator.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
