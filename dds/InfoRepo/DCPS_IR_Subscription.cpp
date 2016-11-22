@@ -18,6 +18,8 @@
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
+#include /**/ "ace/OS_NS_unistd.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
