@@ -52,7 +52,7 @@ class DataSampleElement;
  *
  * @brief Implementation of Replayer functionality
  *
- * This class is the implmentation of the Replayer.
+ * This class is the implementation of the Replayer.
  * Inheritance is used to limit the applications access to
  * underlying system methods.
  */
