@@ -11,6 +11,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/SubscriptionInstance.h>
 #include <dds/DCPS/WaitSet.h>
+#include "dds/DCPS/DataReaderImpl.h"
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 
 #include "FooTypeTypeSupportImpl.h"

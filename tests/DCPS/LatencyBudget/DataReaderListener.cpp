@@ -4,6 +4,7 @@
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
+#include "dds/DCPS/DataReaderImpl.h"
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
 

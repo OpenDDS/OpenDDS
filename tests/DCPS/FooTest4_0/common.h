@@ -12,6 +12,7 @@
 
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 
 #include <map>
 
