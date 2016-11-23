@@ -23,7 +23,7 @@
 
 #include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/transport/tcp/TcpTransport.h"
-
+#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 #include /**/ "ace/Unbounded_Set.h"
 
 #include <set>

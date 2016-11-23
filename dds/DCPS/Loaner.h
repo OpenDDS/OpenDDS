@@ -23,7 +23,7 @@ class Loaner
 {
 public:
   Loaner () {}
-  virtual ~Loaner ();
+  virtual ~Loaner () {};
 
   /**
    * This method provides virtual access to type specific code

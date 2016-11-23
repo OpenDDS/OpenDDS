@@ -17,6 +17,7 @@
 #include "dds/DCPS/DataReaderImpl_T.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "ace/Select_Reactor.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
