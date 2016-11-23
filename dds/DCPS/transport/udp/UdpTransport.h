@@ -31,7 +31,7 @@ public:
 
   void passive_connection(const ACE_INET_Addr& remote_address,
                           ACE_Message_Block* data);
-
+  UdpInst* config() const;
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -61,8 +61,6 @@ private:
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
                           Priority priority, ACE_INET_Addr local_addr, bool active);
-
-  RcHandle<UdpInst> config_i_;
 
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;

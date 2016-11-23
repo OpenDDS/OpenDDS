@@ -28,7 +28,7 @@ class RtpsUdpInst;
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
-
+  RtpsUdpInst* config() const;
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -81,8 +81,6 @@ private:
                     const TransportBLOB& remote_data,
                     bool local_reliable, bool remote_reliable,
                     bool local_durable, bool remote_durable);
-
-  RcHandle<RtpsUdpInst> config_i_;
 
   //protects access to link_ for duration of make_datalink
   typedef ACE_Thread_Mutex         ThreadLockType;

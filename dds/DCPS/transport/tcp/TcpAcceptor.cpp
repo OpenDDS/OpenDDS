@@ -31,7 +31,7 @@ OpenDDS::DCPS::TcpAcceptor::~TcpAcceptor()
 OpenDDS::DCPS::TcpInst*
 OpenDDS::DCPS::TcpAcceptor::get_configuration()
 {
-  return this->transport_->get_configuration();
+  return this->transport_->config();
 }
 
 OpenDDS::DCPS::TcpTransport*

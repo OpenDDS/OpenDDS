@@ -34,6 +34,8 @@ public:
   std::string address();
   void signal_semaphore();
 
+  ShmemInst* config() const;
+
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -67,8 +69,6 @@ private:
   std::pair<std::string, std::string> blob_to_key(const TransportBLOB& blob);
 
   void read_from_links(); // callback from ReadTask
-
-  RcHandle<ShmemInst> config_i_;
 
   typedef ACE_Thread_Mutex        LockType;
   typedef ACE_Guard<LockType>     GuardType;

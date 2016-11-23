@@ -56,6 +56,13 @@ TcpTransport::~TcpTransport()
   delete con_checker_;
 }
 
+
+TcpInst*
+TcpTransport::config() const
+{
+  return static_cast<TcpInst*>(TransportImpl::config());
+}
+
 PriorityKey
 TcpTransport::blob_to_key(const TransportBLOB& remote,
                           Priority priority,
@@ -63,7 +70,7 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
 {
   const ACE_INET_Addr remote_address =
     AssociationData::get_remote_address(remote);
-  const bool is_loopback = remote_address == tcp_config_->local_address();
+  const bool is_loopback = remote_address == config()->local_address();
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
 
@@ -106,7 +113,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   }
 
   TcpConnection_rch connection(
-    new TcpConnection(key.address(), link->transport_priority(), tcp_config_));
+    new TcpConnection(key.address(), link->transport_priority(), config()->shared_from_this() ));
   connection->set_datalink(link.in());
 
   TcpConnection* pConn = connection.in();
@@ -340,7 +347,7 @@ TcpTransport::configure_i(TransportInst* config)
 
   // Downcast the config argument to a TcpInst*
   TcpInst* tcp_config =
-    static_cast<TcpInst*>(config);
+    dynamic_cast<TcpInst*>(config);
 
   if (tcp_config == 0) {
     // The downcast failed.
@@ -352,14 +359,7 @@ TcpTransport::configure_i(TransportInst* config)
 
   this->create_reactor_task();
 
-  // Ask our base class for a "copy" of the reference to the reactor task.
-  this->reactor_task_.reset( reactor_task() );
-
-  connector_.open(reactor_task_->get_reactor());
-
-  // Make a "copy" of the reference for ourselves.
-  tcp_config->_add_ref();
-  this->tcp_config_.reset( tcp_config );
+  connector_.open(reactor_task()->get_reactor());
 
   // Open the reconnect task
   if (this->con_checker_->open()) {
@@ -370,25 +370,21 @@ TcpTransport::configure_i(TransportInst* config)
   }
 
   // Override with DCPSDefaultAddress.
-  if (this->tcp_config_->local_address() == ACE_INET_Addr () &&
+  if (tcp_config->local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
-    this->tcp_config_->local_address(0, TheServiceParticipant->default_address ().c_str ());
+    tcp_config->local_address(0, TheServiceParticipant->default_address ().c_str ());
   }
 
   // Open our acceptor object so that we can accept passive connections
-  // on our this->tcp_config_->local_address_.
+  // on our this->config()->local_address_.
 
-  if (this->acceptor_->open(this->tcp_config_->local_address(),
-                            this->reactor_task_->get_reactor()) != 0) {
-    // Remember to drop our reference to the tcp_config_ object since
-    // we are about to return -1 here, which means we are supposed to
-    // keep a copy after all.
-    TcpInst_rch cfg (this->tcp_config_._retn());
+  if (this->acceptor_->open(tcp_config->local_address(),
+                            this->reactor_task()->get_reactor()) != 0) {
 
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
-                      cfg->local_address().get_host_addr(),
-                      cfg->local_address().get_port_number(),
+                      tcp_config->local_address().get_host_addr(),
+                      tcp_config->local_address().get_port_number(),
                       ACE_TEXT("open")),
                      false);
   }
@@ -412,16 +408,16 @@ TcpTransport::configure_i(TransportInst* config)
 
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
-  if (tcp_config_->local_address().is_any()) {
+  if (tcp_config->local_address().is_any()) {
     std::string hostname = get_fully_qualified_hostname();
 
-    this->tcp_config_->local_address(port, hostname.c_str());
+    tcp_config->local_address(port, hostname.c_str());
   }
 
   // Now we got the actual listening port. Update the port number in the configuration
   // if it's 0 originally.
-  else if (tcp_config_->local_address().get_port_number() == 0) {
-    tcp_config_->local_address_set_port(port);
+  else if (tcp_config->local_address().get_port_number() == 0) {
+    tcp_config->local_address_set_port(port);
   }
 
   // Ahhh...  The sweet smell of success!
@@ -485,12 +481,6 @@ TcpTransport::shutdown_i()
     this->pending_release_links_.unbind_all();
   }
 
-  // Drop our reference to the TcpInst object.
-  this->tcp_config_ = 0;
-
-  // Drop our reference to the TransportReactorTask
-  this->reactor_task_ = 0;
-
   // Tell our acceptor about this event so that it can drop its reference
   // it holds to this TcpTransport object (via smart-pointer).
   this->acceptor_->transport_shutdown();
@@ -502,9 +492,9 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
   DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
-            this->tcp_config_->get_public_address().c_str()), 2);
+            this->config()->get_public_address().c_str()), 2);
 
-  this->tcp_config_->populate_locator(local_info);
+  this->config()->populate_locator(local_info);
 
   return true;
 }
@@ -621,12 +611,6 @@ TcpTransport::release_datalink(DataLink* link)
   }
 }
 
-TcpInst*
-TcpTransport::get_configuration()
-{
-  return this->tcp_config_.in();
-}
-
 /// This method is called by a TcpConnection object that has been
 /// created and opened by our acceptor_ as a result of passively
 /// accepting a connection on our local address.  Ultimately, the connection
@@ -640,7 +624,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
   const PriorityKey key(connection->transport_priority(),
                         remote_address,
-                        remote_address == tcp_config_->local_address(),
+                        remote_address == config()->local_address(),
                         connection->is_connector());
 
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
@@ -716,13 +700,13 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
   connection->id() = last_link_;
 
   TransportSendStrategy_rch send_strategy (
-    new TcpSendStrategy(last_link_, link, this->tcp_config_, connection,
+    new TcpSendStrategy(last_link_, link, this->config()->shared_from_this(), connection,
                         new TcpSynchResource(connection,
-                                             this->tcp_config_->max_output_pause_period_),
-                        this->reactor_task_, link->transport_priority()));
+                                             this->config()->max_output_pause_period_),
+                        this->reactor_task(), link->transport_priority()));
 
   TransportStrategy_rch receive_strategy(
-    new TcpReceiveStrategy(link, connection, this->reactor_task_));
+    new TcpReceiveStrategy(link, connection, this->reactor_task()));
 
   if (link->connect(connection, send_strategy, receive_strategy) != 0) {
     return -1;
@@ -744,7 +728,7 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
 
   PriorityKey key(connection->transport_priority(),
                   connection->get_remote_address(),
-                  connection->get_remote_address() == this->tcp_config_->local_address(),
+                  connection->get_remote_address() == this->config()->local_address(),
                   connection->is_connector());
 
   if (this->links_.find(key, link) == 0) {

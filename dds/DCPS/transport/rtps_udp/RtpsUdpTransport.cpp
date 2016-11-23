@@ -38,11 +38,17 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
   }
 }
 
+RtpsUdpInst*
+RtpsUdpTransport::config() const
+{
+  return static_cast<RtpsUdpInst*>(TransportImpl::config());
+}
+
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   TransportReactorTask_rch rt (reactor_task());
-  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this, local_prefix, config_i_.in(), rt.in()));
+  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this, local_prefix, config(), rt.in()));
   link->send_strategy(new RtpsUdpSendStrategy(link.in()));
   link->receive_strategy(new RtpsUdpReceiveStrategy(link.in()));
 
@@ -169,7 +175,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
     // If conversion was successful
     if (locator_to_address(addr, locators[i], map_ipv4_to_ipv6()) == 0) {
       // if this is a unicast address, or if we are allowing multicast
-      if (!addr.is_multicast() || config_i_->use_multicast_) {
+      if (!addr.is_multicast() || config()->use_multicast_) {
         return addr;
       }
     }
@@ -182,7 +188,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
 bool
 RtpsUdpTransport::connection_info_i(TransportLocator& info) const
 {
-  this->config_i_->populate_locator(info);
+  this->config()->populate_locator(info);
   return true;
 }
 
@@ -193,7 +199,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       const TransportLocatorSeq& locators,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
-  const TransportBLOB* blob = this->config_i_->get_blob(locators);
+  const TransportBLOB* blob = this->config()->get_blob(locators);
   if (!blob)
     return;
   if (!link_) {
@@ -220,7 +226,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       const TransportLocatorSeq& locators,
                                       DiscoveryListener* listener)
 {
-  const TransportBLOB* blob = this->config_i_->get_blob(locators);
+  const TransportBLOB* blob = this->config()->get_blob(locators);
   if (!blob)
     return;
   if (!link_) {
@@ -243,9 +249,9 @@ RtpsUdpTransport::unregister_for_writer(const RepoId& /*participant*/,
 bool
 RtpsUdpTransport::configure_i(TransportInst* config)
 {
-  config_i_ = RtpsUdpInst_rch(dynamic_cast<RtpsUdpInst*>(config), false);
+  RtpsUdpInst* conf = dynamic_cast<RtpsUdpInst*>(config);
 
-  if (config_i_.is_nil()) {
+  if (! conf) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: ")
@@ -254,9 +260,9 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   }
 
   // Override with DCPSDefaultAddress.
-  if (this->config_i_->local_address() == ACE_INET_Addr () &&
+  if (conf->local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
-    this->config_i_->local_address(0, TheServiceParticipant->default_address ().c_str ());
+    conf->local_address(0, TheServiceParticipant->default_address ().c_str ());
   }
 
   // Open the socket here so that any addresses/ports left
@@ -265,7 +271,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  if (!open_appropriate_socket_type(unicast_socket_, config_i_->local_address())) {
+  if (!open_appropriate_socket_type(unicast_socket_, conf->local_address())) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
@@ -273,7 +279,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                       false);
   }
 
-  if (config_i_->local_address().get_port_number() == 0) {
+  if (conf->local_address().get_port_number() == 0) {
 
     ACE_INET_Addr address;
     if (unicast_socket_.get_local_addr(address) != 0) {
@@ -281,16 +287,16 @@ RtpsUdpTransport::configure_i(TransportInst* config)
         ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
         ACE_TEXT("cannot get local addr")), false);
     }
-    config_i_->local_address_set_port(address.get_port_number());
+    conf->local_address_set_port(address.get_port_number());
   }
 
   create_reactor_task();
 
-  if (config_i_->opendds_discovery_default_listener_) {
-    link_= make_datalink(config_i_->opendds_discovery_guid_.guidPrefix);
-    link_->default_listener(config_i_->opendds_discovery_default_listener_);
+  if (conf->opendds_discovery_default_listener_) {
+    link_= make_datalink(conf->opendds_discovery_guid_.guidPrefix);
+    link_->default_listener(conf->opendds_discovery_default_listener_);
     default_listener_ =
-      dynamic_cast<TransportClient*>(config_i_->opendds_discovery_default_listener_);
+      dynamic_cast<TransportClient*>(conf->opendds_discovery_default_listener_);
   }
 
   return true;
@@ -303,7 +309,6 @@ RtpsUdpTransport::shutdown_i()
     link_->transport_shutdown();
   }
   link_ = 0;
-  config_i_ = 0;
 }
 
 void

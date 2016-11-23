@@ -192,7 +192,7 @@ protected:
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
   /// returned.
-  TransportReactorTask* reactor_task();
+  TransportReactorTask_rch reactor_task();
 
   typedef OPENDDS_MULTIMAP(TransportClient_rch, DataLink_rch) PendConnMap;
   PendConnMap pending_connections_;

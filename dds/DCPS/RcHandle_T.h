@@ -53,18 +53,11 @@ public:
     this->bump_down();
   }
 
-
   void reset(T* p=0)
   {
     RcHandle tmp(p);
     swap(tmp);
   }
-
-  // RcHandle& operator=(T* p)
-  // {
-  //   this->reset(p);
-  //   return *this;
-  // }
 
   RcHandle& operator=(const RcHandle& b)
   {

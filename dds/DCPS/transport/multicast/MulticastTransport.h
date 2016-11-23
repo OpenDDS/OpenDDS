@@ -31,6 +31,8 @@ public:
 
   void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);
 
+  MulticastInst* config() const;
+
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -68,7 +70,7 @@ private:
   MulticastSession* start_session(const MulticastDataLink_rch& link,
                                   MulticastPeer remote_peer, bool active);
 
-  RcHandle<MulticastInst> config_i_;
+  //RcHandle<MulticastInst> config_i_;
 
   ThreadLockType links_lock_;
   /// link for pubs.

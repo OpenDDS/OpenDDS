@@ -211,11 +211,10 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
-  tcp_config->_add_ref();
-  tcp_config_.reset( tcp_config );
-  local_address_ = tcp_config_->local_address();
+  tcp_config_ =  tcp_config->shared_from_this();
+  local_address_ = tcp_config->local_address();
 
-  set_sock_options(tcp_config_.in());
+  set_sock_options(tcp_config);
 
   // We expect that the active side of the connection (the remote side
   // in this case) will supply its listening ACE_INET_Addr as the first

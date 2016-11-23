@@ -21,12 +21,11 @@ OpenDDS::DCPS::TransportImpl::config() const
   return this->config_.in();
 }
 
-ACE_INLINE OpenDDS::DCPS::TransportReactorTask*
+ACE_INLINE OpenDDS::DCPS::TransportReactorTask_rch
 OpenDDS::DCPS::TransportImpl::reactor_task()
 {
   DBG_ENTRY_LVL("TransportImpl","reactor_task",6);
-  TransportReactorTask_rch task = this->reactor_task_;
-  return task._retn();
+  return this->reactor_task_;
 }
 
 ACE_INLINE ACE_Reactor_Timer_Interface*

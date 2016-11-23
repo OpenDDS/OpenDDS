@@ -34,6 +34,13 @@ UdpTransport::UdpTransport(const TransportInst_rch& inst)
   }
 }
 
+UdpInst*
+UdpTransport::config() const
+{
+  return static_cast<UdpInst*>(TransportImpl::config());
+}
+
+
 UdpDataLink_rch
 UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
                             Priority priority, bool active)
@@ -41,7 +48,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
   UdpDataLink_rch link(new UdpDataLink(this, priority, active));
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask (reactor_task());
-  link->configure(config_i_.in(), rtask.in());
+  link->configure(config(), rtask.in());
 
   // Assign send strategy:
   link->send_strategy(new UdpSendStrategy(link.in()));
@@ -67,16 +74,16 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
                                const ConnectionAttribs& attribs,
                                const TransportClient_rch& )
 {
-  UdpInst_rch tmp_config(this->config_i_.in(), false);
-  if (this->is_shut_down() || this->config_i_.is_nil()) {
+
+  if (this->is_shut_down() || !this->config()) {
     return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
   }
   const ACE_INET_Addr remote_address = get_connection_addr(remote.blob_);
   const bool active = true;
-  const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, tmp_config->local_address(), active);
-  tmp_config = 0; //no longer need to hold on to local config
+  const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, this->config()->local_address(), active);
+
   GuardType guard(client_links_lock_);
-  if (this->is_shut_down() || this->config_i_.is_nil()) {
+  if (this->is_shut_down() || !this->config()) {
     return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
   }
 
@@ -107,7 +114,7 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
   //GuardType guard(connections_lock_);
   const PriorityKey key = blob_to_key(remote.blob_,
-                                      attribs.priority_, config_i_->local_address(), false /* !active */);
+                                      attribs.priority_, config()->local_address(), false /* !active */);
   if (server_link_keys_.count(key)) {
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
@@ -154,9 +161,9 @@ UdpTransport::stop_accepting_or_connecting(const TransportClient_rch& client,
 bool
 UdpTransport::configure_i(TransportInst* config)
 {
-  config_i_ = UdpInst_rch(dynamic_cast<UdpInst*>(config), false);
+  UdpInst* conf = dynamic_cast<UdpInst*>(config);
 
-  if (!config_i_) {
+  if (!conf) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpTransport::configure_i: ")
@@ -167,15 +174,15 @@ UdpTransport::configure_i(TransportInst* config)
   create_reactor_task();
 
   // Override with DCPSDefaultAddress.
-  if (this->config_i_->local_address() == ACE_INET_Addr () &&
+  if (conf->local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
-    this->config_i_->local_address(0, TheServiceParticipant->default_address ().c_str ());
+    conf->local_address(0, TheServiceParticipant->default_address ().c_str ());
   }
 
   // Our "server side" data link is created here, similar to the acceptor_
   // in the TcpTransport implementation.  This establishes a socket as an
   // endpoint that we can advertise to peers via connection_info_i().
-  server_link_ = make_datalink(this->config_i_->local_address(), 0 /* priority */, false);
+  server_link_ = make_datalink(conf->local_address(), 0 /* priority */, false);
   return true;
 }
 
@@ -192,14 +199,12 @@ UdpTransport::shutdown_i()
 
   server_link_->transport_shutdown();
   server_link_ = 0;
-
-  config_i_ = 0;
 }
 
 bool
 UdpTransport::connection_info_i(TransportLocator& info) const
 {
-  this->config_i_->populate_locator(info);
+  this->config()->populate_locator(info);
   return true;
 }
 
@@ -279,7 +284,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   const char ack_data = 23;
   server_link_->socket().send(&ack_data, 1, remote_address);
 
-  const PriorityKey key = blob_to_key(blob, priority, config_i_->local_address(), false /* passive */);
+  const PriorityKey key = blob_to_key(blob, priority, config()->local_address(), false /* passive */);
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
 
