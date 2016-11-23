@@ -18,6 +18,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 
