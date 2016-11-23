@@ -1,5 +1,6 @@
 
 #include <ace/Log_Msg.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <dds/DCPS/WaitSet.h>
 

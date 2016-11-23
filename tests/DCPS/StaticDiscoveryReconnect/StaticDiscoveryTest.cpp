@@ -19,6 +19,7 @@
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_stdlib.h"
+#include "ace/OS_NS_unistd.h"
 
 const int DOMAIN_ID = 100;
 const int SLEEP_SHORT = 11;

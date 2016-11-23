@@ -20,6 +20,7 @@
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_stdlib.h"
+#include "ace/OS_NS_unistd.h"
 
 /*
   NOTE:  The messages may not be processed by the reader in this test.
