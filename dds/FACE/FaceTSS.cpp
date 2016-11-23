@@ -9,6 +9,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/SafetyProfilePool.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
