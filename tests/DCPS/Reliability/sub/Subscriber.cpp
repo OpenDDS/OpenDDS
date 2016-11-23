@@ -13,6 +13,7 @@
 #include <model/Sync.h>
 #include <stdexcept>
 #include <ctime>
+#include <iostream>
 #include <ace/Arg_Shifter.h>
 
 #include "dds/DCPS/StaticIncludes.h"

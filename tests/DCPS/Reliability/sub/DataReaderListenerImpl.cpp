@@ -7,6 +7,7 @@
 
 #include "DataReaderListenerImpl.h"
 #include "Boilerplate.h"
+#include <iostream>
 
 using namespace examples::boilerplate;
 

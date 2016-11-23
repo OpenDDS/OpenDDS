@@ -7,7 +7,7 @@
 
 #include "TakeNextReaderListenerImpl.h"
 #include "Boilerplate.h"
-
+#include <iostream>
 
 TakeNextReaderListenerImpl::TakeNextReaderListenerImpl()
 {

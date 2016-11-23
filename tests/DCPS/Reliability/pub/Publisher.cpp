@@ -9,6 +9,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <model/Sync.h>
 #include <stdexcept>
+#include <iostream>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS

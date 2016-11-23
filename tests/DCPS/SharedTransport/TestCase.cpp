@@ -8,6 +8,7 @@
 #include <ace/Arg_Shifter.h>
 #include <ace/OS_NS_string.h>
 #include <ace/OS_main.h>
+#include <iostream>
 
 #include "dds/DCPS/StaticIncludes.h"
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
