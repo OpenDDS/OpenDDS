@@ -20,9 +20,9 @@
 #include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
 #include "DataLinkCleanupTask.h"
-#include "ace/Synch_Traits.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

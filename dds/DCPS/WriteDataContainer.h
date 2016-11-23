@@ -18,6 +18,7 @@
 #include "PoolAllocationBase.h"
 
 #include "ace/Synch_Traits.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 #include <memory>
 

@@ -32,7 +32,7 @@ namespace DCPS {
  *
  * @brief Implementation of Recorder functionality
  *
- * This class is the implmentation of the Recorder.
+ * This class is the implementation of the Recorder.
  * Inheritance is used to limit the applications access to
  * underlying system methods.
  */

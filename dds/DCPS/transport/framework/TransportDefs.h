@@ -13,6 +13,7 @@
 #include "dds/DCPS/debug.h"
 #include "ace/Basic_Types.h"
 #include "ace/CDR_Base.h"
+#include "ace/Synch_Traits.h"
 #include "TransportDebug.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

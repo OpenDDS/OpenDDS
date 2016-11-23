@@ -34,6 +34,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 
   Header_Files {
     Version.h
+    Versioned_Namespace.h
     DCPS
     DCPS/transport/framework
     DCPS/yard

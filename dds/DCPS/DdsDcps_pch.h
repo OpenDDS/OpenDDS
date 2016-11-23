@@ -11,7 +11,6 @@
 #ifdef USING_PCH
 
 #include "dds/DdsDcpsDomainC.h"
-
 #include "tao/ORB_Core.h"
 
 #endif

@@ -12,6 +12,7 @@
 #include "model_export.h"
 #include <exception>
 #include <stdexcept>
+#include <dds/Versioned_Namespace.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

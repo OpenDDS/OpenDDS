@@ -12,6 +12,8 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;

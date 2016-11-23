@@ -27,6 +27,8 @@ be_util::prep_be_arg (char *arg)
   static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;
   static const char WB_EXPORT_INCLUDE[] = "export_include=";
   static const size_t SZ_WB_EXPORT_INCLUDE = sizeof(WB_EXPORT_INCLUDE) - 1;
+  static const char WB_VERSIONING_NAME[] = "versioning_name=";
+  static const size_t SZ_WB_VERSIONING_NAME = sizeof(WB_VERSIONING_NAME) - 1;
   static const char WB_VERSIONING_BEGIN[] = "versioning_begin=";
   static const size_t SZ_WB_VERSIONING_BEGIN = sizeof(WB_VERSIONING_BEGIN) - 1;
   static const char WB_VERSIONING_END[] = "versioning_end=";
@@ -46,6 +48,10 @@ be_util::prep_be_arg (char *arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_INCLUDE,
                                       SZ_WB_EXPORT_INCLUDE)) {
     be_global->export_include(arg + SZ_WB_EXPORT_INCLUDE);
+
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_VERSIONING_NAME,
+                                      SZ_WB_VERSIONING_NAME)) {
+    be_global->versioning_name(arg + SZ_WB_VERSIONING_NAME);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_VERSIONING_BEGIN,
                                       SZ_WB_VERSIONING_BEGIN)) {
@@ -94,6 +100,8 @@ be_util::usage (void)
     ACE_TEXT("for all files\n")
     ACE_TEXT(" -Wb,export_include=<include path>\tsets export include ")
     ACE_TEXT("file for all files\n")
+    ACE_TEXT(" -Wb,versioning_name=<macro name>\tsets versioning name macro ")
+    ACE_TEXT("for all files\n")
     ACE_TEXT(" -Wb,versioning_begin=<macro name>\tsets versioning begin macro ")
     ACE_TEXT("for all files\n")
     ACE_TEXT(" -Wb,versioning_end=<macro name>\tsets versioning end macro ")

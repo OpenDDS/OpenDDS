@@ -12,7 +12,6 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocationBase.h"
-#include "ace/Synch_Traits.h"
 
 #include <utility>
 

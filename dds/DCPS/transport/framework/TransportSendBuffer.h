@@ -17,6 +17,7 @@
 #include "dds/DCPS/Definitions.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include "ace/Synch_Traits.h"
 #include <utility>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

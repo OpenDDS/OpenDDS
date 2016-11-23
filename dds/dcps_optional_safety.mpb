@@ -9,7 +9,8 @@ project : dds_suppress_any_support, dcps_ts_defaults, dds_versioning_idl_default
                    -Wb,export_macro=OpenDDS_Dcps_Export \
                    -Wb,export_include=dds/DCPS/dcps_export.h \
                    -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
-                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL
+                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_name=OPENDDS_VERSIONED_NAMESPACE_NAME
 }
 
 feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults, dds_versioning_idl_defaults {

@@ -18,8 +18,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "TransportInst.h"
 #include "TransportInst_rch.h"
-
-#include <ace/Synch_Traits.h>
+#include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -95,7 +95,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 
       int resend;
       u_short pb, dg, pg, d0, d1, dx;
-      unsigned char ttl;
+      unsigned char ttl = 0;
       AddrVec spdp_send_addrs;
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
       OPENDDS_STRING mi, sla;
