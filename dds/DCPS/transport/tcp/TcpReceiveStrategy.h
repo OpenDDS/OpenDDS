@@ -20,7 +20,7 @@ namespace DCPS {
 
 class TcpConnection;
 
-class TcpReceiveStrategy : public TransportReceiveStrategy<> {
+class TcpReceiveStrategy : public TransportReceiveStrategy<>, public EnableSharedFromThis<TcpReceiveStrategy> {
 public:
 
   TcpReceiveStrategy(const TcpDataLink_rch& link,
@@ -29,7 +29,7 @@ public:
 
   virtual ~TcpReceiveStrategy();
 
-  int reset(TcpConnection* connection);
+  int reset(const TcpConnection_rch& connection);
 
   ACE_Reactor* get_reactor();
 

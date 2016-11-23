@@ -31,6 +31,8 @@ class UdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<UdpTransport> UdpTransport_rch;
 
+typedef RcHandle<UdpTransport> UdpTransport_rch;
+
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
 public:

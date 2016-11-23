@@ -38,6 +38,7 @@ namespace DCPS {
 
 class MulticastTransport;
 typedef RcHandle<MulticastTransport> MulticastTransport_rch;
+
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
@@ -80,7 +81,6 @@ public:
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
 
 private:
-  MulticastTransport* transport_;
 
   MulticastSessionFactory_rch session_factory_;
 

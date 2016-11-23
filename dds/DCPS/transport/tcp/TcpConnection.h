@@ -73,13 +73,13 @@ public:
   // itself in as a void*.
   virtual int open(void* arg);
 
-  void set_receive_strategy(TcpReceiveStrategy* receive_strategy);
+  void set_receive_strategy(const TcpReceiveStrategy_rch& receive_strategy);
 
   void remove_receive_strategy();
 
   /// Give a "copy" of the TcpSendStrategy object to this
   /// connection object.
-  void set_send_strategy(TcpSendStrategy* send_strategy);
+  void set_send_strategy(const TcpSendStrategy_rch& send_strategy);
 
   void remove_send_strategy();
 
@@ -132,6 +132,9 @@ public:
   /// Access TRANSPORT_PRIORITY.value policy value if set.
   Priority& transport_priority();
   Priority  transport_priority() const;
+
+  virtual ACE_Event_Handler::Reference_Count add_reference();
+  virtual ACE_Event_Handler::Reference_Count remove_reference();
 
   OPENDDS_POOL_ALLOCATION_FWD
 

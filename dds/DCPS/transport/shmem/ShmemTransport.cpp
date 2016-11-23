@@ -123,7 +123,6 @@ ShmemTransport::configure_i(TransportInst* config)
                       ACE_TEXT("invalid configuration!\n")),
                      false);
   }
-  conf->_add_ref();
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 # ifdef ACE_WIN32

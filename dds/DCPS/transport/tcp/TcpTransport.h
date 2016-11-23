@@ -43,7 +43,11 @@ class TcpConnectionReplaceTask;
  *    and TcpConnectionReplaceTask object(used during reconnecting).
  * 2) Reference to TransportReactorTask object owned by base class.
  */
-class OpenDDS_Tcp_Export TcpTransport : public TransportImpl, public EnableSharedFromThis<TcpTransport> {
+
+class OpenDDS_Tcp_Export TcpTransport
+  : public TransportImpl
+  , public EnableSharedFromThis<TcpTransport>
+{
 public:
 
   explicit TcpTransport(const TransportInst_rch& inst);

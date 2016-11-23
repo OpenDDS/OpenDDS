@@ -44,6 +44,7 @@ namespace DCPS {
 class RtpsUdpInst;
 class RtpsUdpTransport;
 class ReceivedDataSample;
+typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 

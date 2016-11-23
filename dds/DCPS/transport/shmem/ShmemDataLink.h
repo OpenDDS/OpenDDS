@@ -36,6 +36,8 @@ class ShmemTransport;
 class ReceivedDataSample;
 typedef RcHandle<ShmemTransport> ShmemTransport_rch;
 
+typedef RcHandle<ShmemTransport> ShmemTransport_rch;
+
 #ifdef ACE_WIN32
   typedef ACE_Pagefile_Memory_Pool ShmemPool;
 #elif !defined ACE_LACKS_SYSV_SHMEM
@@ -71,7 +73,8 @@ enum { // values for ShmemData::status_
 class OpenDDS_Shmem_Export ShmemDataLink
   : public DataLink {
 public:
-  explicit ShmemDataLink(const ShmemTransport_rch& transport);
+
+  ShmemDataLink(const ShmemTransport_rch& transport);
 
   void configure(ShmemInst* config);
 

@@ -79,12 +79,11 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
   // call when it receives a handle_input() "event", and we will carry
   // it out.  The TcpConnection object will make a "copy" of the
   // reference (to this object) that we pass-in here.
-  this->connection_->set_receive_strategy(this);
+  this->connection_->set_receive_strategy(this->shared_from_this());
 
   if (connection_->is_connector()) {
     // Give the reactor its own reference to the connection object.
     // If ACE_Acceptor was used, the reactor already has this reference
-    this->connection_->_add_ref();
   }
 
   if (DCPS_debug_level > 9) {
@@ -103,7 +102,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
       (this->connection_.in(),
        ACE_Event_Handler::READ_MASK) == -1) {
     // Take back the "copy" we made.
-    this->connection_->_remove_ref();
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpReceiveStrategy::start_i TcpConnection can't register with "
                       "reactor %@ %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
@@ -117,7 +115,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
 // The "old" connection object is unregistered with the reactor and the "new" connection
 // object is registered for receiving.
 int
-OpenDDS::DCPS::TcpReceiveStrategy::reset(TcpConnection* connection)
+OpenDDS::DCPS::TcpReceiveStrategy::reset(const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","reset",6);
 
@@ -130,7 +128,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::reset(TcpConnection* connection)
                      -1);
   }
 
-  if (this->connection_.in() == connection) {
+  if (this->connection_ == connection) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpReceiveStrategy::reset should not be called"
                       " to replace the same connection.\n"),
@@ -143,30 +141,26 @@ OpenDDS::DCPS::TcpReceiveStrategy::reset(TcpConnection* connection)
    ACE_Event_Handler::READ_MASK |
    ACE_Event_Handler::DONT_CALL);
 
-  // Take back the "copy" we made (see start_i() implementation).
-  this->connection_->_remove_ref();
 
   // This will cause the connection_ object to drop its reference to this
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();
 
   // Replace with a new connection.
-  this->connection_.reset(connection, inc_count());
+  this->connection_ = connection;
 
   // Tell the TcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
   // it out.  The TcpConnection object will make a "copy" of the
   // reference (to this object) that we pass-in here.
-  this->connection_->set_receive_strategy(this);
+  this->connection_->set_receive_strategy(this->shared_from_this());
 
   // Give the reactor its own "copy" of the reference to the connection object.
-  this->connection_->_add_ref();
 
   if (this->reactor_task_->get_reactor()->register_handler
       (this->connection_.in(),
        ACE_Event_Handler::READ_MASK) == -1) {
     // Take back the "copy" we made.
-    this->connection_->_remove_ref();
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpReceiveStrategy::reset TcpConnection can't register with "
                       "reactor\n"),
@@ -186,13 +180,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::stop_i()
    ACE_Event_Handler::READ_MASK |
    ACE_Event_Handler::DONT_CALL);
 
-  // Take back the "copy" we made (see start_i() implementation).
-  this->connection_->_remove_ref();
-
   // This will cause the connection_ object to drop its reference to this
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();
-
   this->connection_.reset();
 }
 

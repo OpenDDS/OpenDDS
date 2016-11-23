@@ -17,6 +17,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
+TransportImpl*
+DataLink::transport()
+{
+  return this->impl_.in();
+}
+
+ACE_INLINE
 bool
 DataLink::issues_on_deleted_callback() const
 {

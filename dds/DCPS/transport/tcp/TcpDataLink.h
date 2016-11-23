@@ -25,10 +25,10 @@ class TcpDataLink : public DataLink {
 public:
 
   TcpDataLink(const ACE_INET_Addr& remote_address,
-                    const TcpTransport_rch&  transport_impl,
-                    Priority          priority,
-                    bool                 is_loopback,
-                    bool                 is_active);
+              const TcpTransport_rch&  transport_impl,
+                    Priority           priority,
+                    bool               is_loopback,
+                    bool               is_active);
   virtual ~TcpDataLink();
 
   /// Accessor for the remote address.

@@ -86,6 +86,8 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
 
   this->mb_allocator_ = new MessageBlockAllocator(control_chunks);
   this->db_allocator_ = new DataBlockAllocator(control_chunks);
+
+  this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
 
 DataLink::~DataLink()
@@ -184,7 +186,6 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
                    ACE_TEXT("(%P|%t) DataLink::handle_exception() - impl_ == 0\n")));
       }
     }
-    this->_remove_ref();
     return 0;
   } else if (this->scheduled_to_stop_at_ <= ACE_OS::gettimeofday()) {
     if (this->scheduling_release_) {
@@ -200,7 +201,6 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - stopping now\n")));
     }
     this->stop();
-    this->_remove_ref();
     return 0;
   } else /* SCHEDULE TO STOP IN THE FUTURE*/ {
     if (DCPS_debug_level > 0) {
@@ -235,10 +235,6 @@ DataLink::schedule_stop(const ACE_Time_Value& schedule_to_stop_at)
 void
 DataLink::notify_reactor()
 {
-  // Add ref before handing to the reactor
-  // ref removed in handle_exception or in handle_timeout
-  // based on stopping now or delayed
-  _add_ref();
   TransportReactorTask_rch reactor(impl_->reactor_task());
   reactor->get_reactor()->notify(this);
 }
@@ -703,10 +699,7 @@ DataLink::transport_shutdown()
   this->set_scheduling_release(false);
   this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
   ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
-  if (reactor->cancel_timer(this)) {
-    _remove_ref(); // if we were able to cancel, reactor had a ref
-  }
-
+  reactor->cancel_timer(this);
   this->stop();
 
   // Drop our reference to the TransportImpl object
@@ -1014,7 +1007,6 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
       this->stop();
     }
   }
-  this->_remove_ref();
   return 0;
 }
 

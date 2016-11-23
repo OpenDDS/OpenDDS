@@ -39,7 +39,6 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
     MulticastPeer local_peer,
     bool is_active)
 : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
-  transport_(transport.in()),
   session_factory_(session_factory, inc_count()),
   local_peer_(local_peer),
   config_(0),
@@ -382,7 +381,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     return;
   }
 
-  transport_->passive_connection(local_peer, source);
+  transport()->passive_connection(local_peer, source);
 }
 
 void

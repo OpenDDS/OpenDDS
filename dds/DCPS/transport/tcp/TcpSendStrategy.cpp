@@ -38,7 +38,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
 {
   DBG_ENTRY_LVL("TcpSendStrategy","TcpSendStrategy",6);
 
-  connection->set_send_strategy(this);
+  connection->set_send_strategy(this->shared_from_this());
 }
 
 OpenDDS::DCPS::TcpSendStrategy::~TcpSendStrategy()
@@ -70,7 +70,7 @@ OpenDDS::DCPS::TcpSendStrategy::schedule_output()
 }
 
 int
-OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection, bool reset_mode)
+OpenDDS::DCPS::TcpSendStrategy::reset(const TcpConnection_rch& connection, bool reset_mode)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","reset",6);
 
@@ -83,7 +83,7 @@ OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection, bool reset_mode
                      -1);
   }
 
-  if (this->connection_.in() == connection) {
+  if (this->connection_ == connection) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpSendStrategy::reset should not be called"
                       " to replace the same connection.\n"),
@@ -94,14 +94,13 @@ OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection, bool reset_mode
   // TransportSendStrategy object.
   this->connection_->remove_send_strategy();
 
-  // Replace with a new connection.
-  this->connection_ .reset( connection , inc_count());
+  this->connection_ = connection;
 
   // Tell the TcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
   // it out.  The TcpConnection object will make a "copy" of the
   // reference (to this object) that we pass-in here.
-  this->connection_->set_send_strategy(this);
+  this->connection_->set_send_strategy(this->shared_from_this());
 
   //For the case of a send_strategy being reused for a new connection (not reconnect)
   //need to reset the state
@@ -165,8 +164,6 @@ OpenDDS::DCPS::TcpSendStrategy::stop_i()
   // This will cause the connection_ object to drop its reference to this
   // TransportSendStrategy object.
   this->connection_->remove_send_strategy();
-
-  // Take back the "copy" of connection object given. (see constructor).
   this->connection_.reset();
 }
 
