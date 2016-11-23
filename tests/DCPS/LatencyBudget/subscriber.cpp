@@ -20,6 +20,7 @@
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
+#include "ace/OS_NS_unistd.h"
 
 using namespace std;
 
