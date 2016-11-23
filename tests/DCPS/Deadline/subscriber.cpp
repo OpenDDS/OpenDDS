@@ -27,7 +27,7 @@
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
 #include <ace/Time_Value.h>
-#include >ace/OS_NS_unistd.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <cassert>
 using namespace std;
