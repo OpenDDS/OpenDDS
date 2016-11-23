@@ -2681,18 +2681,6 @@ DataWriterImpl::remove_reference()
   return 1;
 }
 
-void
-DataWriterImpl::listener_add_ref()
-{
-  CORBA::Object::_add_ref();
-}
-
-void
-DataWriterImpl::listener_remove_ref()
-{
-  CORBA::Object::_remove_ref();
-}
-
 
 } // namespace DCPS
 } // namespace OpenDDS

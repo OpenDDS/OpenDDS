@@ -189,12 +189,9 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 void
 TransportClient::transport_detached(TransportImpl* which)
 {
-  TransportSendListener* const this_tsl = get_send_listener();
-  TransportReceiveListener* const this_trl = get_receive_listener();
-  if (this_tsl)
-    this_tsl->listener_add_ref();
-  else if (this_trl)
-    this_trl->listener_add_ref();
+  TransportSendListener_rch this_tsl = get_send_listener();
+  TransportReceiveListener_rch this_trl = get_receive_listener();
+
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -243,12 +240,6 @@ TransportClient::transport_detached(TransportImpl* which)
       break;
     }
   }
-
-  guard.release();
-  if (this_tsl)
-    this_tsl->listener_remove_ref();
-  else if (this_trl)
-    this_trl->listener_remove_ref();
 }
 
 bool
@@ -611,7 +602,7 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
   links_.insert_link(link);
   data_link_index_[peer] = link;
 
-  TransportReceiveListener* trl = get_receive_listener();
+  TransportReceiveListener_rch trl = get_receive_listener();
 
   if (trl) {
     link->make_reservation(peer, repo_id_, trl);
@@ -1024,25 +1015,23 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
   }
 }
 
-TransportSendListener*
+TransportSendListener_rch
 TransportClient::get_send_listener()
 {
-  return dynamic_cast<TransportSendListener*>(this);
+  return TransportSendListener_rch(dynamic_cast<TransportSendListener*>(this), inc_count());
 }
 
-TransportReceiveListener*
+TransportReceiveListener_rch
 TransportClient::get_receive_listener()
 {
-  return dynamic_cast<TransportReceiveListener*>(this);
+  return TransportReceiveListener_rch(dynamic_cast<TransportReceiveListener*>(this), inc_count());
 }
 
 SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
                               ACE_Message_Block* msg)
 {
-  TransportSendListener* listener = get_send_listener();
-
-  return links_.send_control(repo_id_, listener, header, msg);
+  return links_.send_control(repo_id_, get_send_listener(), header, msg);
 }
 
 SendControlStatus

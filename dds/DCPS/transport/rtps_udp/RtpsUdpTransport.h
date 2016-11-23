@@ -103,7 +103,7 @@ private:
 
   ACE_SOCK_Dgram unicast_socket_;
 
-  TransportClient* default_listener_;
+  TransportClient_rch default_listener_;
 };
 
 } // namespace DCPS

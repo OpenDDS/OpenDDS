@@ -46,10 +46,10 @@ public:
   void send_control(DataSampleElement* sample);
 
   /// Send control message to each DataLink in the set.
-  SendControlStatus send_control(RepoId                  pub_id,
-                                 TransportSendListener*  listener,
-                                 const DataSampleHeader& header,
-                                 ACE_Message_Block*      msg,
+  SendControlStatus send_control(RepoId                           pub_id,
+                                 const TransportSendListener_rch& listener,
+                                 const DataSampleHeader&          header,
+                                 ACE_Message_Block*               msg,
                                  TransportSendControlElementAllocator* allocator = 0);
 
   void send_response(RepoId sub_id,

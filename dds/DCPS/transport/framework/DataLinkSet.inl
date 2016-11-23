@@ -91,10 +91,10 @@ OpenDDS::DCPS::DataLinkSet::send_control(DataSampleElement* sample)
 }
 
 ACE_INLINE OpenDDS::DCPS::SendControlStatus
-OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
-                                         TransportSendListener*  listener,
-                                         const DataSampleHeader& header,
-                                         ACE_Message_Block*      msg,
+OpenDDS::DCPS::DataLinkSet::send_control(RepoId                           pub_id,
+                                         const TransportSendListener_rch& listener,
+                                         const DataSampleHeader&          header,
+                                         ACE_Message_Block*               msg,
                                          TransportSendControlElementAllocator* allocator)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_control",6);
@@ -122,7 +122,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
 
   TransportSendControlElement* const send_element =
     TransportSendControlElement::alloc(static_cast<int>(dup_map.size()), pub_id,
-                                       listener, header, msg, &use_alloc);
+                                       listener.in(), header, msg, &use_alloc);
   if (!send_element) return SEND_CONTROL_ERROR;
 
   for (MapType::iterator itr = dup_map.begin();

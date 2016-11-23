@@ -23,6 +23,7 @@ namespace RTPS {
 namespace DCPS {
 class RtpsUdpTransport;
 class TransportReceiveListener;
+typedef RcHandle<TransportReceiveListener> TransportReceiveListener_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
@@ -76,7 +77,7 @@ private:
 
   friend class RTPS::Sedp;
   friend class RtpsUdpTransport;
-  TransportReceiveListener* opendds_discovery_default_listener_;
+  TransportReceiveListener_rch opendds_discovery_default_listener_;
   RepoId opendds_discovery_guid_;
 
   ACE_INET_Addr local_address_;

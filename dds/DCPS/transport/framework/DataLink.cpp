@@ -43,7 +43,7 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
                    bool is_active)
   : stopped_(false),
     scheduled_to_stop_at_(ACE_Time_Value::zero),
-    default_listener_(0),
+    default_listener_(),
     impl_(impl),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
@@ -167,13 +167,14 @@ DataLink::invoke_on_start_callbacks(bool success)
 int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
 {
+  TransportImpl_rch impl = this->impl_;
   if(this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
-    }
-    if (this->impl_) {
-      ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
+    }  
+    if (impl) {
+      ACE_Reactor_Timer_Interface* reactor = impl->timer();
       if (reactor->cancel_timer(this) > 0) {
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
@@ -207,9 +208,11 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
-    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
-    ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
-    reactor->schedule_timer(this, 0, future_release_time);
+    if (impl) {
+      ACE_Reactor_Timer_Interface* reactor = impl->timer();
+      ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
+      reactor->schedule_timer(this, 0, future_release_time);
+    }
   }
   return 0;
 }
@@ -282,7 +285,7 @@ DataLink::resume_send()
 int
 DataLink::make_reservation(const RepoId& remote_subscription_id,
                            const RepoId& local_publication_id,
-                           TransportSendListener* send_listener)
+                           const TransportSendListener_rch& send_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
@@ -311,11 +314,9 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
 
     if (rls.is_nil())
       rls.reset(new ReceiveListenerSet, keep_count());
-    rls->insert(local_publication_id, 0);
+    rls->insert(local_publication_id, TransportReceiveListener_rch());
 
-    if (send_listeners_.insert(std::make_pair(local_publication_id,
-                                              send_listener)).second)
-      send_listener->listener_add_ref();
+    send_listeners_.insert(std::make_pair(local_publication_id,send_listener));
   }
   return 0;
 }
@@ -323,7 +324,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
 int
 DataLink::make_reservation(const RepoId& remote_publication_id,
                            const RepoId& local_subscription_id,
-                           TransportReceiveListener* receive_listener)
+                           const TransportReceiveListener_rch& receive_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
@@ -353,9 +354,8 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
       rls.reset(new ReceiveListenerSet, keep_count());
     rls->insert(local_subscription_id, receive_listener);
 
-    if (recv_listeners_.insert(std::make_pair(local_subscription_id,
-                                              receive_listener)).second)
-      receive_listener->listener_add_ref();
+    recv_listeners_.insert(std::make_pair(local_subscription_id,
+                                          receive_listener));
   }
   return 0;
 }
@@ -723,9 +723,9 @@ DataLink::notify(ConnectionNotice notice)
   for (IdToSendListenerMap::iterator itr = send_listeners_.begin();
        itr != send_listeners_.end(); ++itr) {
 
-    TransportSendListener* tsl = itr->second;
+    const TransportSendListener_rch& tsl = itr->second;
 
-    if (tsl != 0) {
+    if (tsl) {
       if (Transport_debug_level > 0) {
         GuidConverter converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
@@ -789,9 +789,9 @@ DataLink::notify(ConnectionNotice notice)
   for (IdToRecvListenerMap::iterator itr = recv_listeners_.begin();
        itr != recv_listeners_.end(); ++itr) {
 
-    TransportReceiveListener* trl = itr->second;
+    const TransportReceiveListener_rch& trl = itr->second;
 
-    if (trl != 0) {
+    if (trl) {
       if (Transport_debug_level > 0) {
         GuidConverter converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
@@ -867,11 +867,10 @@ void DataLink::notify_connection_deleted()
   for (AssocByLocal::iterator iter = released.begin();
        iter != released.end(); ++iter) {
 
-    TransportSendListener* tsl = 0;
+    TransportSendListener_rch tsl;
     {
       GuardType guard(pub_sub_maps_lock_);
       tsl = send_listener_for(iter->first);
-      if (tsl) tsl->listener_add_ref();
     }
 
     if (tsl) {
@@ -879,16 +878,14 @@ void DataLink::notify_connection_deleted()
            ris_it != iter->second.end(); ++ris_it) {
         tsl->notify_connection_deleted(*ris_it);
       }
-      tsl->listener_remove_ref();
       found.insert(iter->first);
       continue;
     }
 
-    TransportReceiveListener* trl = 0;
+    TransportReceiveListener_rch trl;
     {
       GuardType guard(pub_sub_maps_lock_);
       trl = recv_listener_for(iter->first);
-      if (trl) trl->listener_add_ref();
     }
 
     if (trl) {
@@ -896,7 +893,6 @@ void DataLink::notify_connection_deleted()
            ris_it != iter->second.end(); ++ris_it) {
         trl->notify_connection_deleted(*ris_it);
       }
-      trl->listener_remove_ref();
       found.insert(iter->first);
     }
   }
@@ -979,14 +975,14 @@ void DataLink::clear_associations()
 {
   for (AssocByLocal::iterator iter = assoc_releasing_.begin();
        iter != assoc_releasing_.end(); ++iter) {
-    TransportSendListener* const tsl = send_listener_for(iter->first);
+    TransportSendListener_rch tsl = send_listener_for(iter->first);
     if (tsl) {
       ReaderIdSeq sub_ids;
       set_to_seq(iter->second, sub_ids);
       tsl->remove_associations(sub_ids, false);
       continue;
     }
-    TransportReceiveListener* const trl = recv_listener_for(iter->first);
+    TransportReceiveListener_rch trl = recv_listener_for(iter->first);
     if (trl) {
       WriterIdSeq pub_ids;
       set_to_seq(iter->second, pub_ids);

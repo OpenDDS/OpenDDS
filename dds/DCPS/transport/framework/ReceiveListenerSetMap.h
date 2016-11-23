@@ -30,9 +30,9 @@ public:
   ReceiveListenerSetMap();
   virtual ~ReceiveListenerSetMap();
 
-  int insert(RepoId                    publisher_id,
-             RepoId                    subscriber_id,
-             TransportReceiveListener* receive_listener);
+  int insert(RepoId                              publisher_id,
+             RepoId                              subscriber_id,
+             const TransportReceiveListener_rch& receive_listener);
 
   ReceiveListenerSet_rch find(RepoId publisher_id) const;
 

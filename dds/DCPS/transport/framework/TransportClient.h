@@ -152,8 +152,8 @@ private:
   void use_datalink_i(const RepoId& remote_id,
                       const DataLink_rch& link,
                       Guard& guard);
-  TransportSendListener* get_send_listener();
-  TransportReceiveListener* get_receive_listener();
+  TransportSendListener_rch get_send_listener();
+  TransportReceiveListener_rch get_receive_listener();
 
   //helper for initiating connection, called by PendingAssoc objects
   //allows PendingAssoc to temporarily release lock_ to allow

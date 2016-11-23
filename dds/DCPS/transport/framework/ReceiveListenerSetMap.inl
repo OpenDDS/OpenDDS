@@ -25,7 +25,6 @@ OpenDDS::DCPS::ReceiveListenerSetMap::find(RepoId publisher_id) const
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0) {
     return ReceiveListenerSet_rch();
   }
-
   return listener_set;
 }
 

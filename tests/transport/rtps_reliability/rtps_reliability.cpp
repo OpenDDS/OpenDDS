@@ -96,8 +96,8 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const WriterIdSeq&, bool) {}
 
-  void listener_add_ref() {}
-  void listener_remove_ref() {}
+  void _add_ref() {}
+  void _remove_ref() {}
 
   DisjointSequence recvd_;
   bool have_frag_;
@@ -154,8 +154,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const ReaderIdSeq&, bool) {}
-  void listener_add_ref() {}
-  void listener_remove_ref() {}
+  void _add_ref() {}
+  void _remove_ref() {}
 
   TransportSendElementAllocator alloc_;
   SendStateDataSampleList list_;

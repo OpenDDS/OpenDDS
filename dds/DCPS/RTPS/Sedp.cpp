@@ -264,7 +264,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   transport_cfg->instances_.push_back(transport_inst_);
 
   // Configure and enable each reader/writer
-  rtps_inst->opendds_discovery_default_listener_ = publications_reader_.in();
+  rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
   const bool reliability = true, durability = true;
   publications_writer_.enable_transport_using_config(reliability, durability,
