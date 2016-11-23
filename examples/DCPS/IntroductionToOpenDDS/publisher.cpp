@@ -11,6 +11,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <ace/streams.h>
+#include <ace/OS_NS_unistd.h>
 #include <orbsvcs/Time_Utilities.h>
 
 #include "dds/DCPS/StaticIncludes.h"

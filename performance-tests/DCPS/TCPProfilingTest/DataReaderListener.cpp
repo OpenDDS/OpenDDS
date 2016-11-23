@@ -4,6 +4,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "testMessageTypeSupportC.h"
 #include "testMessageTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 
 extern long subscriber_delay_msec; // from common.h
 

@@ -22,6 +22,7 @@
 
 // #include "ace/Null_Mutex.h"
 #include "ace/Condition_T.h"
+#include "ace/OS_NS_unistd.h"
 
 #include <sstream>
 

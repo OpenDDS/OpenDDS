@@ -7,6 +7,7 @@
 
 #include <ace/Arg_Shifter.h>
 #include <ace/OS_NS_string.h>
+#include <ace/OS_NS_unistd.h>
 #include <ace/OS_main.h>
 
 #include "dds/DCPS/StaticIncludes.h"

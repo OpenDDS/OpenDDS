@@ -19,6 +19,7 @@
 #include "testMessageTypeSupportImpl.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_unistd.h"
 
 #include <string>
 
