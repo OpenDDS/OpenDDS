@@ -65,6 +65,8 @@ void wstring_free(WChar* str)
 #endif // DDS_HAS_WCHAR
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace FaceTypes {
 
@@ -84,3 +86,5 @@ bool operator>>(DCPS::Serializer& ser, StringBase<FACE::WChar>& str)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

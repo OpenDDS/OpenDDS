@@ -19,8 +19,6 @@
 using OpenDDS::DCPS::operator==;
 #endif
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
-
 namespace FACE {
 namespace TS {
 
@@ -650,6 +648,8 @@ namespace {
 }
 
 }}
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace FaceTSS {
