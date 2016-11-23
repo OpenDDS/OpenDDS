@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_WRITERDATASAMPLELIST_H
 
 #include "dcps_export.h"
-#include <cstdint>
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

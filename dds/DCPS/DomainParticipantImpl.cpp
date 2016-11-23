@@ -6,8 +6,8 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "dds/DdsDcpsGuidC.h"
 #include "DomainParticipantImpl.h"
+#include "dds/DdsDcpsGuidC.h"
 #include "FeatureDisabledQosCheck.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"

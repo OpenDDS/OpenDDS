@@ -25,6 +25,7 @@
 
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include "common.h"
 
