@@ -28,20 +28,8 @@ DataWriterRemoteImpl::~DataWriterRemoteImpl()
 void
 DataWriterRemoteImpl::detach_parent()
 {
-  // ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
   this->parent_ = 0;
 }
-
-// namespace
-// {
-//   DDS::DataWriter_var getDataWriter(DataWriterCallbacks* callbacks)
-//   {
-//     // the DataWriterCallbacks will always be a DataWriter
-//     DDS::DataWriter_var var =
-//       DDS::DataWriter::_duplicate(dynamic_cast<DDS::DataWriter*>(callbacks));
-//     return var;
-//   }
-// }
 
 void
 DataWriterRemoteImpl::add_association(const RepoId& yourId,
@@ -57,13 +45,6 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
                std::string(reader_converter).c_str()));
   }
 
-  // DataWriterCallbacks* parent = 0;
-  // DDS::DataWriter_var dwv;
-  // {
-  //   ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-  //   dwv = getDataWriter(this->parent_);
-  //   parent = this->parent_;
-  // }
   if (parent_.in()) {
     parent_->add_association(yourId, reader, active);
   }
@@ -72,13 +53,6 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
 void
 DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
 {
-  // DataWriterCallbacks* parent = 0;
-  // DDS::DataWriter_var dwv;
-  // {
-  //   ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-  //   dwv = getDataWriter(this->parent_);
-  //   parent = this->parent_;
-  // }
   if (parent_.in()) {
     parent_->association_complete(remote_id);
   }
@@ -88,13 +62,6 @@ void
 DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
 {
-  // DataWriterCallbacks* parent = 0;
-  // DDS::DataWriter_var dwv;
-  // {
-  //   ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-  //   dwv = getDataWriter(this->parent_);
-  //   parent = this->parent_;
-  // }
   if (parent_.in()) {
     parent_->remove_associations(readers, notify_lost);
   }
@@ -104,13 +71,6 @@ void
 DataWriterRemoteImpl::update_incompatible_qos(
   const IncompatibleQosStatus& status)
 {
-  // DataWriterCallbacks* parent = 0;
-  // DDS::DataWriter_var dwv;
-  // {
-  //   ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-  //   dwv = getDataWriter(this->parent_);
-  //   parent = this->parent_;
-  // }
   if (parent_.in()) {
     parent_->update_incompatible_qos(status);
   }
@@ -120,13 +80,6 @@ void
 DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
                                                  const DDS::StringSeq& params)
 {
-  // DataWriterCallbacks* parent = 0;
-  // DDS::DataWriter_var dwv;
-  // {
-  //   ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-  //   dwv = getDataWriter(this->parent_);
-  //   parent = this->parent_;
-  // }
   if (parent_.in()) {
     parent_->update_subscription_params(readerId, params);
   }
