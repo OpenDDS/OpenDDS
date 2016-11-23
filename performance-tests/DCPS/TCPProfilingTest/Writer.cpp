@@ -7,11 +7,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 
-
-
 extern ACE_Condition<ACE_Recursive_Thread_Mutex> done_condition_;
-
-
 
 void write (long id,
             int size,

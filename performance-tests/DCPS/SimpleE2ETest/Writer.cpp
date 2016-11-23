@@ -7,7 +7,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 
-
 template<class T, class W, class W_var, class W_ptr>
 void write (long id,
             int size,

@@ -37,6 +37,7 @@
 
 #include "tao/debug.h"
 #include "ace/Reactor.h"
+#include "ace/OS_NS_unistd.h"
 
 namespace Util {
 

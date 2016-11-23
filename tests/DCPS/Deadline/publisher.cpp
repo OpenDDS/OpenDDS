@@ -23,6 +23,7 @@
 #endif
 
 #include <ace/streams.h>
+#include <ace/OS_NS_unistd.h>
 #include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 

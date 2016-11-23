@@ -5,6 +5,7 @@
 #include "tests/DCPS/common/TestSupport.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 #include <string>
 
 #include <sstream>
