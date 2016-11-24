@@ -45,16 +45,20 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
                std::string(reader_converter).c_str()));
   }
 
-  if (parent_.in()) {
-    parent_->add_association(yourId, reader, active);
+  // the local copy of parent_ is necessary to prevent race condition
+  RcHandle<DataWriterCallbacks> parent = parent_;
+  if (parent.in()) {
+    parent->add_association(yourId, reader, active);
   }
 }
 
 void
 DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
 {
-  if (parent_.in()) {
-    parent_->association_complete(remote_id);
+  // the local copy of parent_ is necessary to prevent race condition
+  RcHandle<DataWriterCallbacks> parent = parent_;
+  if (parent.in()) {
+    parent->association_complete(remote_id);
   }
 }
 
@@ -62,8 +66,10 @@ void
 DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
 {
-  if (parent_.in()) {
-    parent_->remove_associations(readers, notify_lost);
+  // the local copy of parent_ is necessary to prevent race condition
+  RcHandle<DataWriterCallbacks> parent = parent_;
+  if (parent.in()) {
+    parent->remove_associations(readers, notify_lost);
   }
 }
 
@@ -71,8 +77,10 @@ void
 DataWriterRemoteImpl::update_incompatible_qos(
   const IncompatibleQosStatus& status)
 {
-  if (parent_.in()) {
-    parent_->update_incompatible_qos(status);
+  // the local copy of parent_ is necessary to prevent race condition
+  RcHandle<DataWriterCallbacks> parent = parent_;
+  if (parent.in()) {
+    parent->update_incompatible_qos(status);
   }
 }
 
@@ -80,8 +88,10 @@ void
 DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
                                                  const DDS::StringSeq& params)
 {
-  if (parent_.in()) {
-    parent_->update_subscription_params(readerId, params);
+  // the local copy of parent_ is necessary to prevent race condition
+  RcHandle<DataWriterCallbacks> parent = parent_;
+  if (parent.in()) {
+    parent->update_subscription_params(readerId, params);
   }
 }
 
