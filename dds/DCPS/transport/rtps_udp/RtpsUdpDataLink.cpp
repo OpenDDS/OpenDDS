@@ -71,8 +71,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config->heartbeat_response_delay_),
-  heartbeat_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
-  heartbeatchecker_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
+  heartbeat_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats), keep_count()),
+  heartbeatchecker_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats), keep_count())
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }

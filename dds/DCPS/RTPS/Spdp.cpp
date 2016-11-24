@@ -393,8 +393,6 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
        end = outer_->disco_->spdp_send_addrs().end(); it != end; ++it) {
     send_addrs_.insert(ACE_INET_Addr(it->c_str()));
   }
-
-  reference_counting_policy().value(Reference_Counting_Policy::ENABLED);
 }
 
 void

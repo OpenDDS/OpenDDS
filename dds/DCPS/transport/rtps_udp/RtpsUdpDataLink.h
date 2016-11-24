@@ -425,7 +425,7 @@ private:
 
   };
 
-  RcEventHandler<HeartBeat> heartbeat_, heartbeatchecker_;
+  RcHandle<HeartBeat> heartbeat_, heartbeatchecker_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {

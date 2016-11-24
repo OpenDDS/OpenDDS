@@ -115,8 +115,6 @@ DataWriterImpl::DataWriterImpl()
     TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
 
   db_lock_pool_ = new DataBlockLockPool((unsigned long)n_chunks_);
-
-  ACE_Event_Handler::reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
 
 // This method is called when there are no longer any reference to the
@@ -940,7 +938,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
                                this,
                                this->dw_local_objref_.in(),
                                this->offered_deadline_missed_status_,
-                               this->last_deadline_missed_total_count_));
+                               this->last_deadline_missed_total_count_), keep_count());
 
         } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
                    && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
@@ -1363,12 +1361,12 @@ DataWriterImpl::enable()
   if (deadline_period.sec != DDS::DURATION_INFINITE_SEC
       || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC) {
     this->watchdog_.reset( new OfferedDeadlineWatchdog(
-                         this->lock_,
-                         this->qos_.deadline,
-                         this,
-                         this->dw_local_objref_.in(),
-                         this->offered_deadline_missed_status_,
-                         this->last_deadline_missed_total_count_));
+                           this->lock_,
+                           this->qos_.deadline,
+                           this,
+                           this->dw_local_objref_.in(),
+                           this->offered_deadline_missed_status_,
+                           this->last_deadline_missed_total_count_), keep_count());
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);

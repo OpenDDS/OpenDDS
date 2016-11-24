@@ -173,7 +173,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
 
-  struct PendingAssoc : ACE_Event_Handler, PoolAllocationBase {
+  struct PendingAssoc : RcEventHandler, PoolAllocationBase {
     bool active_, removed_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
@@ -188,7 +188,7 @@ private:
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
 
-  typedef RcEventHandler<PendingAssoc> PendingAssoc_rch;
+  typedef RcHandle<PendingAssoc> PendingAssoc_rch;
 
   typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
 
@@ -263,7 +263,7 @@ private:
       }
     };
   };
-  RcEventHandler<PendingAssocTimer> pending_assoc_timer_;
+  RcHandle<PendingAssocTimer> pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 

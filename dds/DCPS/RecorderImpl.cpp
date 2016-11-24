@@ -63,7 +63,7 @@ RecorderImpl::RecorderImpl()
   remove_association_sweeper_(
     new RemoveAssociationSweeper<RecorderImpl>(TheServiceParticipant->reactor(),
                                          TheServiceParticipant->reactor_owner(),
-                                         this)),
+                                         this), keep_count()),
   is_bit_(false)
 {
 

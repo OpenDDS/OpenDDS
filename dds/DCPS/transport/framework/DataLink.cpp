@@ -86,8 +86,6 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
 
   this->mb_allocator_ = new MessageBlockAllocator(control_chunks);
   this->db_allocator_ = new DataBlockAllocator(control_chunks);
-
-  this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
 
 DataLink::~DataLink()
@@ -1117,21 +1115,6 @@ operator<<(std::ostream& str, const DataLink& value)
   return str;
 }
 #endif
-
-ACE_Event_Handler::Reference_Count
-DataLink::add_reference()
-{
-  RcObject<ACE_SYNCH_MUTEX>::_add_ref();
-  return 1;
-}
-
-ACE_Event_Handler::Reference_Count
-DataLink::remove_reference()
-{
-  RcObject<ACE_SYNCH_MUTEX>::_remove_ref();
-  return 1;
-}
-
 }
 }
 

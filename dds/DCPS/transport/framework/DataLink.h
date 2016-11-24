@@ -12,6 +12,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/RcEventHandler.h"
 #include "ReceiveListenerSetMap.h"
 #include "SendResponseListener.h"
 #include "TransportDefs.h"
@@ -61,8 +62,8 @@ typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetM
  *    is enabled.
  */
 class OpenDDS_Dcps_Export DataLink
-  : public RcObject<ACE_SYNCH_MUTEX>,
-    public ACE_Event_Handler,
+  : public RcEventHandler,
+    public PoolAllocationBase,
     public EnableSharedFromThis<DataLink> {
 
   friend class DataLinkCleanupTask;
@@ -256,9 +257,6 @@ public:
   void set_scheduling_release(bool scheduling_release);
 
   virtual void send_final_acks (const RepoId& readerid);
-  
-  virtual ACE_Event_Handler::Reference_Count add_reference();
-  virtual ACE_Event_Handler::Reference_Count remove_reference();
 
 protected:
 

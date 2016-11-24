@@ -31,7 +31,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : pending_assoc_timer_(new PendingAssocTimer (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()))
+  : pending_assoc_timer_(new PendingAssocTimer (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()), keep_count())
   , expected_transaction_id_(1)
   , max_transaction_id_seen_(0)
   , max_transaction_tail_(0)
@@ -285,7 +285,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc_rch(new PendingAssoc()))).first;
+    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc_rch(new PendingAssoc(), keep_count()))).first;
 
     GuidConverter tc_assoc(repo_id_);
     GuidConverter remote_new(data.remote_id_);

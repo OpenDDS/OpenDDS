@@ -68,12 +68,12 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
-    end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    remove_association_sweeper_(new RemoveAssociationSweeper<DataReaderImpl>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this), keep_count()),
+    remove_association_sweeper_(new RemoveAssociationSweeper<DataReaderImpl>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this),keep_count()),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
-    liveliness_timer_(new LivelinessTimer(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    liveliness_timer_(new LivelinessTimer(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this), keep_count()),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -983,7 +983,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
                 this,
                 this->dr_local_objref_.in(),
                 this->requested_deadline_missed_status_,
-                this->last_deadline_missed_total_count_));
+                this->last_deadline_missed_total_count_), keep_count());
 
       } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
           && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
@@ -1285,7 +1285,7 @@ DataReaderImpl::enable()
   // period is not the default (infinite).
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
 
-  if (this->watchdog_ == 0
+  if (!this->watchdog_
       && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
           || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
     this->watchdog_.reset(
@@ -1295,7 +1295,7 @@ DataReaderImpl::enable()
             this,
             this->dr_local_objref_.in(),
             this->requested_deadline_missed_status_,
-            this->last_deadline_missed_total_count_));
+            this->last_deadline_missed_total_count_), keep_count());
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);

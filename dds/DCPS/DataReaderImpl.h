@@ -682,8 +682,8 @@ private:
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
-  RcEventHandler<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
-  RcEventHandler<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
+  RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
+  RcHandle<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -792,12 +792,12 @@ private:
       }
     };
   };
-  RcEventHandler<LivelinessTimer> liveliness_timer_;
+  RcHandle<LivelinessTimer> liveliness_timer_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  RcEventHandler<RequestedDeadlineWatchdog> watchdog_;
+  RcHandle<RequestedDeadlineWatchdog> watchdog_;
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.

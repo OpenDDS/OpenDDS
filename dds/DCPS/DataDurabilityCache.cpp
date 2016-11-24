@@ -20,6 +20,7 @@
 #include "debug.h"
 #include "SafetyProfileStreams.h"
 #include "Service_Participant.h"
+#include "RcEventHandler.h"
 
 #include "ace/Reactor.h"
 #include "ace/Message_Block.h"
@@ -59,7 +60,7 @@ void cleanup_directory(const OPENDDS_VECTOR(OPENDDS_STRING) & path,
  * @brief Event handler that is called when @c service_cleanup_delay
  *        period expires.
  */
-class Cleanup_Handler : public ACE_Event_Handler {
+class Cleanup_Handler : public OpenDDS::DCPS::RcEventHandler {
 public:
 
   typedef
@@ -79,9 +80,8 @@ public:
   , tid_(-1)
   , timer_ids_(0)
   , path_(path)
-  , data_dir_(data_dir) {
-    this->reference_counting_policy().value(
-      ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  , data_dir_(data_dir)
+  {
   }
 
   virtual int handle_timeout(ACE_Time_Value const & /* current_time */,

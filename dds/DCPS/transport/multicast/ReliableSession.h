@@ -81,7 +81,7 @@ public:
   virtual void syn_hook(const SequenceNumber& seq);
 
 private:
-  RcEventHandler<NakWatchdog> nak_watchdog_;
+  RcHandle<NakWatchdog> nak_watchdog_;
 
   DisjointSequence nak_sequence_;
 
