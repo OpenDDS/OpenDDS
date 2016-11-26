@@ -54,10 +54,8 @@ public:
   void configure(MulticastInst* config,
                  TransportReactorTask* reactor_task);
 
-  void send_strategy(MulticastSendStrategy* send_strategy);
   MulticastSendStrategy* send_strategy();
 
-  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
   MulticastReceiveStrategy* receive_strategy();
 
   SingleSendBuffer* send_buffer();

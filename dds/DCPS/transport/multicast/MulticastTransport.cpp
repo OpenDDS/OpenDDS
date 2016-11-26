@@ -79,14 +79,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
 
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask(reactor_task());
-  //link->configure(this->config().in(), rtask.in());
   link->configure(conf, rtask.in());
-
-  // Assign send strategy:
-  link->send_strategy(new MulticastSendStrategy(link.in()));
-
-  // Assign receive strategy:
-  link->receive_strategy(new MulticastReceiveStrategy(link.in()));
 
   // Join multicast group:
   if (!link->join(conf->group_address_)) {

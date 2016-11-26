@@ -8,6 +8,9 @@
 #include "UdpDataLink.h"
 #include "UdpTransport.h"
 #include "UdpInst.h"
+#include "UdpSendStrategy.h"
+#include "UdpReceiveStrategy.h"
+
 
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
@@ -33,7 +36,9 @@ UdpDataLink::UdpDataLink(const UdpTransport_rch& transport,
              active),// is_active
     active_(active),
     config_(0),
-    reactor_task_(0)
+    reactor_task_(0),
+    send_strategy_(new UdpSendStrategy(this, transport->config())),
+    recv_strategy_(new UdpReceiveStrategy(this))
 {
 }
 

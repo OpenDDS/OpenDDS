@@ -41,8 +41,8 @@ public:
   void configure(UdpInst* config,
                  TransportReactorTask* reactor_task);
 
-  void send_strategy(UdpSendStrategy* send_strategy);
-  void receive_strategy(UdpReceiveStrategy* recv_strategy);
+  // void send_strategy(UdpSendStrategy* send_strategy);
+  // void receive_strategy(UdpReceiveStrategy* recv_strategy);
 
   bool active() const;
 

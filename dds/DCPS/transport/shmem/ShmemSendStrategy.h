@@ -22,12 +22,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ShmemDataLink;
+class ShmemInst;
 struct ShmemData;
 
 class OpenDDS_Shmem_Export ShmemSendStrategy
   : public TransportSendStrategy {
 public:
-  explicit ShmemSendStrategy(ShmemDataLink* link);
+  ShmemSendStrategy(ShmemDataLink* link, ShmemInst* inst);
 
   virtual bool start_i();
   virtual void stop_i();

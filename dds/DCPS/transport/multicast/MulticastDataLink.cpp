@@ -9,6 +9,8 @@
 #include "MulticastSession.h"
 #include "MulticastSessionFactory.h"
 #include "MulticastTransport.h"
+#include "MulticastSendStrategy.h"
+#include "MulticastReceiveStrategy.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Global_Macros.h"
@@ -42,8 +44,18 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
   local_peer_(local_peer),
   config_(0),
   reactor_task_(0),
+  send_strategy_(new MulticastSendStrategy(this, transport->config())),
+  recv_strategy_(new MulticastReceiveStrategy(this)),
   send_buffer_(0)
 {
+  MulticastInst* config = transport->config();
+  // A send buffer may be bound to the send strategy to ensure a
+  // configured number of most-recent datagrams are retained:
+  if (this->session_factory_->requires_send_buffer()) {
+    this->send_buffer_ = new SingleSendBuffer(config->nak_depth_,
+                                              config->max_samples_per_packet_);
+    this->send_strategy_->send_buffer(this->send_buffer_);
+  }
 }
 
 MulticastDataLink::~MulticastDataLink()
@@ -60,33 +72,6 @@ MulticastDataLink::configure(MulticastInst* config,
 {
   this->config_ = config;
   this->reactor_task_ = reactor_task;
-}
-
-void
-MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
-{
-  // A send buffer may be bound to the send strategy to ensure a
-  // configured number of most-recent datagrams are retained:
-  if (this->session_factory_->requires_send_buffer()) {
-    ACE_NEW_NORETURN(this->send_buffer_,
-        SingleSendBuffer(this->config_->nak_depth_,
-            this->config_->max_samples_per_packet_));
-    if (!this->send_buffer_) {
-      ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("MulticastDataLink::send_strategy: ")
-          ACE_TEXT("failed to create SingleSendBuffer!\n")));
-      return;
-    }
-    send_strategy->send_buffer(this->send_buffer_);
-  }
-  this->send_strategy_.reset(send_strategy);
-}
-
-void
-MulticastDataLink::receive_strategy(MulticastReceiveStrategy* recv_strategy)
-{
-  this->recv_strategy_.reset(recv_strategy);
 }
 
 bool

@@ -50,12 +50,6 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
   TransportReactorTask_rch rtask (reactor_task());
   link->configure(config(), rtask.in());
 
-  // Assign send strategy:
-  link->send_strategy(new UdpSendStrategy(link.in()));
-
-  // Assign receive strategy:
-  link->receive_strategy(new UdpReceiveStrategy(link.in()));
-
   // Open logical connection:
   if (link->open(remote_address)) {
     return link;

@@ -8,6 +8,8 @@
 #include "ShmemDataLink.h"
 #include "ShmemTransport.h"
 #include "ShmemInst.h"
+#include "ShmemSendStrategy.h"
+#include "ShmemReceiveStrategy.h"
 
 #include "ace/Log_Msg.h"
 
@@ -28,6 +30,8 @@ ShmemDataLink::ShmemDataLink(const ShmemTransport_rch& transport)
              false, // is_loopback,
              false) // is_active
   , config_(0)
+  , send_strategy_( new ShmemSendStrategy(this, transport->config()))
+  , recv_strategy_( new ShmemReceiveStrategy(this))
   , peer_alloc_(0)
 {
 }

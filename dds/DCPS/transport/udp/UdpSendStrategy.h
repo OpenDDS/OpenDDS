@@ -22,7 +22,7 @@ class UdpDataLink;
 class OpenDDS_Udp_Export UdpSendStrategy
   : public TransportSendStrategy {
 public:
-  explicit UdpSendStrategy(UdpDataLink* link);
+  explicit UdpSendStrategy(UdpDataLink* link, TransportInst* inst);
 
   virtual void stop_i();
 

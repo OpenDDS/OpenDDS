@@ -49,10 +49,10 @@ ShmemTransport::make_datalink(const std::string& remote_address)
   link->configure(this->config());
 
   // Assign send strategy:
-  link->send_strategy(new ShmemSendStrategy(link.in()));
+  //link->send_strategy(new ShmemSendStrategy(link.in()));
 
   // Assign receive strategy:
-  link->receive_strategy(new ShmemReceiveStrategy(link.in()));
+  //link->receive_strategy(new ShmemReceiveStrategy(link.in()));
 
   // Open logical connection:
   if (!link->open(remote_address)) {

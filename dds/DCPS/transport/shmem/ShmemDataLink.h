@@ -75,8 +75,8 @@ public:
 
   void configure(ShmemInst* config);
 
-  void send_strategy(ShmemSendStrategy* send_strategy);
-  void receive_strategy(ShmemReceiveStrategy* recv_strategy);
+  // void send_strategy(ShmemSendStrategy* send_strategy);
+  // void receive_strategy(ShmemReceiveStrategy* recv_strategy);
 
   ShmemInst* config();
 

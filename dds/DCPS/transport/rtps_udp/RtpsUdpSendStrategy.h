@@ -26,7 +26,9 @@ class RtpsUdpDataLink;
 class OpenDDS_Rtps_Udp_Export RtpsUdpSendStrategy
   : public TransportSendStrategy {
 public:
-  explicit RtpsUdpSendStrategy(RtpsUdpDataLink* link);
+  RtpsUdpSendStrategy(RtpsUdpDataLink* link,
+                      TransportInst* inst,
+                      const GuidPrefix_t& local_prefix);
 
   virtual void stop_i();
 

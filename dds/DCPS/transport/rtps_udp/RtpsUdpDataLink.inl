@@ -10,18 +10,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE void
-RtpsUdpDataLink::send_strategy(RtpsUdpSendStrategy* send_strategy)
-{
-  send_strategy_.reset(send_strategy);
-}
-
-ACE_INLINE void
-RtpsUdpDataLink::receive_strategy(RtpsUdpReceiveStrategy* recv_strategy)
-{
-  recv_strategy_.reset(recv_strategy);
-}
-
 ACE_INLINE RtpsUdpInst*
 RtpsUdpDataLink::config()
 {

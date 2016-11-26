@@ -8,6 +8,8 @@
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpTransport.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpSendStrategy.h"
+#include "RtpsUdpReceiveStrategy.h"
 
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -60,6 +62,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
              false),    // is_active
     config_(config),
     reactor_task_(reactor_task, false),
+    send_strategy_(new RtpsUdpSendStrategy(this, config, local_prefix)),
+    recv_strategy_(new RtpsUdpReceiveStrategy(this, local_prefix)),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
     best_effort_heartbeat_count_(0),
