@@ -25,7 +25,7 @@ namespace DCPS {
 
 class ShmemInst;
 
-class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
+class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl, public EnableSharedFromThis<ShmemTransport> {
 public:
   explicit ShmemTransport(const TransportInst_rch& inst);
 

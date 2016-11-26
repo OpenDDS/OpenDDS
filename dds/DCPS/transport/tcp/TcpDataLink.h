@@ -25,7 +25,7 @@ class TcpDataLink : public DataLink {
 public:
 
   TcpDataLink(const ACE_INET_Addr& remote_address,
-                    TcpTransport*  transport_impl,
+                    const TcpTransport_rch&  transport_impl,
                     Priority          priority,
                     bool                 is_loopback,
                     bool                 is_active);

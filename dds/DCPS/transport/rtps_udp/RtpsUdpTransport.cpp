@@ -48,7 +48,7 @@ RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   TransportReactorTask_rch rt (reactor_task());
-  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this, local_prefix, config(), rt.in()));
+  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this->shared_from_this(), local_prefix, config(), rt.in()));
   link->send_strategy(new RtpsUdpSendStrategy(link.in()));
   link->receive_strategy(new RtpsUdpReceiveStrategy(link.in()));
 

@@ -80,7 +80,7 @@ public:
   /// created this DataLink.  The ability to specify a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl* impl, Priority priority, bool is_loopback, bool is_active);
+  DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
   //Reactor invokes this after being notified in schedule_stop or cancel_release

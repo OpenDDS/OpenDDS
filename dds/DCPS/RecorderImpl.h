@@ -180,7 +180,7 @@ private:
   DDS::StatusMask listener_mask_;
   RecorderListener_rch listener_;
   DDS::DomainId_t domain_id_;
-  RemoveAssociationSweeper<RecorderImpl>* remove_association_sweeper_;
+  RcEventHandler<RemoveAssociationSweeper<RecorderImpl> > remove_association_sweeper_;
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 

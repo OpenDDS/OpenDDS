@@ -39,11 +39,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 /// Only called by our TransportImpl object.
-DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
+DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
     scheduled_to_stop_at_(ACE_Time_Value::zero),
     default_listener_(0),
+    impl_(impl),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
     scheduling_release_(false),
@@ -56,9 +57,6 @@ DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
     send_response_listener_("DataLink")
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
-
-  impl->_add_ref();
-  this->impl_.reset(impl);
 
   datalink_release_delay_.sec(this->impl_->config_->datalink_release_delay_ / 1000);
   datalink_release_delay_.usec(this->impl_->config_->datalink_release_delay_ % 1000 * 1000);

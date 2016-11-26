@@ -24,7 +24,7 @@ namespace DCPS {
 class MulticastInst;
 class MulticastSession;
 
-class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
+class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl, public EnableSharedFromThis<MulticastTransport> {
 public:
   explicit MulticastTransport(const TransportInst_rch& inst);
   ~MulticastTransport();

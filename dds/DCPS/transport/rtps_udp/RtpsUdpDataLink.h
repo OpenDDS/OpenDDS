@@ -45,10 +45,12 @@ class RtpsUdpInst;
 class RtpsUdpTransport;
 class ReceivedDataSample;
 
+typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
+
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink {
 public:
 
-  RtpsUdpDataLink(RtpsUdpTransport* transport,
+  RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                   const GuidPrefix_t& local_prefix,
                   RtpsUdpInst* config,
                   TransportReactorTask* reactor_task);

@@ -50,7 +50,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
+RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                                  const GuidPrefix_t& local_prefix,
                                  RtpsUdpInst* config,
                                  TransportReactorTask* reactor_task)

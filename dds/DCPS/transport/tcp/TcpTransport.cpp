@@ -101,7 +101,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link._retn());
     }
 
-    link.reset(new TcpDataLink(key.address(), this, attribs.priority_,
+    link.reset(new TcpDataLink(key.address(), this->shared_from_this(), attribs.priority_,
                            key.is_loopback(), true /*active*/));
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
@@ -269,7 +269,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link._retn());
 
     } else {
-      link.reset( new TcpDataLink(key.address(), this, key.priority(),
+      link.reset( new TcpDataLink(key.address(), this->shared_from_this(), key.priority(),
                              key.is_loopback(), key.is_active()));
 
       if (links_.bind(key, link) != 0 /*OK*/) {

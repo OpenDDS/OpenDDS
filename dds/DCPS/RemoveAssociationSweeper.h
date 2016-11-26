@@ -122,6 +122,7 @@ int RemoveAssociationSweeper<T>::handle_timeout(
     const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));
   info->remove_association_timer_ = WriterInfo::NO_TIMER;
   const PublicationId pub_id = info->writer_id_;
+
   info->_remove_ref();
 
   if (DCPS_debug_level >= 1) {

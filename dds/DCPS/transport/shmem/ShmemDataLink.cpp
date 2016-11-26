@@ -22,7 +22,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemDataLink::ShmemDataLink(ShmemTransport* transport)
+ShmemDataLink::ShmemDataLink(const ShmemTransport_rch& transport)
   : DataLink(transport,
              0,     // priority
              false, // is_loopback,

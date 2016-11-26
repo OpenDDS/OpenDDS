@@ -29,11 +29,12 @@ namespace DCPS {
 class UdpInst;
 class UdpTransport;
 class ReceivedDataSample;
+typedef RcHandle<UdpTransport> UdpTransport_rch;
 
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
 public:
-  UdpDataLink(UdpTransport* transport,
+  UdpDataLink(const UdpTransport_rch& transport,
               Priority   priority,
               bool          active);
 

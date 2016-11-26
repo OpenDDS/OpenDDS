@@ -32,12 +32,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
+MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
     MulticastSessionFactory* session_factory,
     MulticastPeer local_peer,
     bool is_active)
 : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
-  transport_(transport),
+  transport_(transport.in()),
   session_factory_(session_factory, false),
   local_peer_(local_peer),
   config_(0),

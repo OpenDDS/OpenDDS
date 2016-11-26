@@ -24,7 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-UdpDataLink::UdpDataLink(UdpTransport* transport,
+UdpDataLink::UdpDataLink(const UdpTransport_rch& transport,
                          Priority   priority,
                          bool          active)
   : DataLink(transport,

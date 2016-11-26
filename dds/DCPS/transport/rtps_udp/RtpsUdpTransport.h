@@ -25,7 +25,7 @@ namespace DCPS {
 
 class RtpsUdpInst;
 
-class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
+class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public EnableSharedFromThis<RtpsUdpTransport> {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
   RtpsUdpInst* config() const;
