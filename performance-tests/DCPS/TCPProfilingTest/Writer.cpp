@@ -5,6 +5,8 @@
 #include "testMessageTypeSupportC.h"
 #include "testMessageTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
+
+#include "ace/Condition_T.h"
 #include "ace/OS_NS_unistd.h"
 
 extern ACE_Condition<ACE_Recursive_Thread_Mutex> done_condition_;
@@ -138,4 +140,3 @@ Writer::is_finished () const
 {
   return finished_sending_;
 }
-

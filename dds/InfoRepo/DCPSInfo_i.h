@@ -415,7 +415,7 @@ private:
   CORBA::ORB_var dispatchingOrb_;
 
   const TAO_DDS_DCPSFederationId& federation_;
-  RepoIdGenerator participantIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator participantIdGenerator_;
 
   Update::Manager* um_;
   bool reincarnate_;

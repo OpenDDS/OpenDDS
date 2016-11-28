@@ -16,6 +16,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/Condition_T.h"
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Task.h"
 #include "ace/Unbounded_Queue.h"

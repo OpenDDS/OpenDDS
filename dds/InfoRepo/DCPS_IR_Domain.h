@@ -60,7 +60,7 @@ class DCPS_IR_Publication;
  */
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain {
 public:
-  DCPS_IR_Domain(DDS::DomainId_t id, RepoIdGenerator& generator);
+  DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator);
 
   ~DCPS_IR_Domain();
 
@@ -202,7 +202,7 @@ private:
 
   // Participant GUID Id generator.  The remaining Entities have their
   // values generated within the containing Participant.
-  RepoIdGenerator& participantIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator& participantIdGenerator_;
 
   /// all the participants
   DCPS_IR_Participant_Map participants_;

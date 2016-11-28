@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_LOANER_H
 
 #include "dds/Versioned_Namespace.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -19,11 +20,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class ReceivedDataElement;
+
 class Loaner
 {
 public:
-  Loaner () {}
-  virtual ~Loaner () {};
+  Loaner() {}
+  virtual ~Loaner() {}
 
   /**
    * This method provides virtual access to type specific code

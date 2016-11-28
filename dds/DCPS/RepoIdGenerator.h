@@ -18,6 +18,8 @@
 #include "dcps_export.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+namespace OpenDDS {
+namespace DCPS {
 
 /**
  * @class RepoIdGenerator
@@ -89,9 +91,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
  */
 class OpenDDS_Dcps_Export RepoIdGenerator {
 public:
-  static const unsigned KeyBits;
+  static const unsigned int KeyBits;
 
-  static const unsigned KeyMask;
+  static const unsigned int KeyMask;
 
   /**
    * @brief construct with at least a FederationId value.
@@ -108,13 +110,13 @@ public:
   RepoIdGenerator(
     long federation,
     long participant = 0,
-    OpenDDS::DCPS::EntityKind kind = OpenDDS::DCPS::KIND_PARTICIPANT);
+    EntityKind kind = KIND_PARTICIPANT);
 
   /// Virtual destructor.
   virtual ~RepoIdGenerator();
 
   /// Obtain the next RepoId value.
-  OpenDDS::DCPS::RepoId next();
+  RepoId next();
 
   /**
    * Set the minimum of the last key (or participant) value used.
@@ -128,7 +130,7 @@ public:
 
 private:
   /// Type of Entity to generate GUID values for.
-  OpenDDS::DCPS::EntityKind kind_;
+  EntityKind kind_;
 
   /// Unique identifier for the repository.
   long federation_;
@@ -140,6 +142,8 @@ private:
   long lastKey_;
 };
 
+} // namespace DCPS
+} // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* REPOIDGENERATOR_H  */

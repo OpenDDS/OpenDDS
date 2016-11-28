@@ -5,6 +5,7 @@
 #include "dds/DCPS/GuardCondition.h"
 #include "dds/DCPS/WaitSet.h"
 
+#include "ace/Condition_T.h"
 #include "ace/Synch_Traits.h"
 
 #include <string>
