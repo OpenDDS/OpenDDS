@@ -213,9 +213,9 @@ private:
   ACE_SYNCH_MUTEX ownerLock_;
 
   // Entity GUID Id generators.
-  RepoIdGenerator topicIdGenerator_;
-  RepoIdGenerator publicationIdGenerator_;
-  RepoIdGenerator subscriptionIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator topicIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator publicationIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator subscriptionIdGenerator_;
 
   DCPS_IR_Subscription_Map subscriptions_;
   DCPS_IR_Publication_Map publications_;

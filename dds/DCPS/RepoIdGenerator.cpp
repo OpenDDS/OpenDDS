@@ -12,18 +12,18 @@
 #include "ace/Log_Msg.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+namespace OpenDDS {
+namespace DCPS {
 
-const unsigned RepoIdGenerator::KeyBits = 24;
+const unsigned int RepoIdGenerator::KeyBits = 24;
 
-const unsigned RepoIdGenerator::KeyMask = (1 << KeyBits) - 1;
+const unsigned int RepoIdGenerator::KeyMask = (1 << KeyBits) - 1;
 
-RepoIdGenerator::RepoIdGenerator(
-  long                      federation,
-  long                      participant,
-  OpenDDS::DCPS::EntityKind kind) : kind_(kind),
-    federation_(federation),
-    participant_(participant),
-    lastKey_(0)
+RepoIdGenerator::RepoIdGenerator(long federation, long participant, EntityKind kind)
+  : kind_(kind)
+  , federation_(federation)
+  , participant_(participant)
+  , lastKey_(0)
 {
 }
 
@@ -31,20 +31,20 @@ RepoIdGenerator::~RepoIdGenerator()
 {
 }
 
-OpenDDS::DCPS::RepoId
+RepoId
 RepoIdGenerator::next()
 {
   // Generate a new key value.
-  ++this->lastKey_;
+  ++lastKey_;
 
-  OpenDDS::DCPS::RepoIdBuilder builder;
+  RepoIdBuilder builder;
   builder.federationId(federation_);
 
   // Generate a Participant GUID value.
-  if (this->kind_ == OpenDDS::DCPS::KIND_PARTICIPANT) {
+  if (kind_ == KIND_PARTICIPANT) {
 
     // Rudimentary validity checking.
-    if (this->lastKey_ == 0) {
+    if (lastKey_ == 0) {
       // We have rolled over and there can now exist objects with
       // the same key.
       ACE_ERROR((LM_ERROR,
@@ -54,14 +54,14 @@ RepoIdGenerator::next()
     }
 
     builder.participantId(lastKey_);
-    builder.entityId(OpenDDS::DCPS::ENTITYID_PARTICIPANT);
+    builder.entityId(ENTITYID_PARTICIPANT);
 
     // Generate an Entity GUID value.
 
   } else {
 
     // Rudimentary validity checking.
-    if ((this->lastKey_ & ~KeyMask) != 0) {
+    if ((lastKey_ & ~KeyMask) != 0) {
       // We have rolled over and there can now exist objects with
       // the same key.
       ACE_ERROR((LM_ERROR,
@@ -75,15 +75,17 @@ RepoIdGenerator::next()
     builder.entityKind(kind_);
   }
 
-  return OpenDDS::DCPS::RepoId(builder);
+  return RepoId(builder);
 }
 
 void
 RepoIdGenerator::last(long key)
 {
-  if (key > this->lastKey_) {
-    this->lastKey_ = key;
+  if (key > lastKey_) {
+    lastKey_ = key;
   }
 }
 
+} // namespace DCPS
+} // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -51,7 +51,7 @@ private:
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-DCPS_IR_Domain::DCPS_IR_Domain(DDS::DomainId_t id, RepoIdGenerator& generator)
+DCPS_IR_Domain::DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator)
   : id_(id),
     participantIdGenerator_(generator),
     useBIT_(false)
