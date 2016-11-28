@@ -7,6 +7,7 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Condition_T.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "ace/OS_NS_unistd.h"
 
 extern ACE_Condition<ACE_Recursive_Thread_Mutex> done_condition_;
