@@ -8,9 +8,7 @@
 #include "dds/DCPS/Serializer.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
-
-
-
+#include "ace/OS_NS_unistd.h"
 
 template<class Tseq, class R, class R_var, class R_ptr>
 ::DDS::ReturnCode_t read (TestStats* stats,

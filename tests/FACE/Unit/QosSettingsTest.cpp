@@ -9,6 +9,7 @@
 unsigned int assertions = 0;
 unsigned int failed = 0;
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class QosSettingsAccessor {
@@ -25,8 +26,9 @@ private:
 };
 
 } } }
-
 using namespace OpenDDS::FaceTSS::config;
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 
 /////// Publisher tests
 void test_set_publisher_single_partition() {

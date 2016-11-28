@@ -39,6 +39,7 @@
 #include "PoolAllocator.h"
 #include "RemoveAssociationSweeper.h"
 #include "RcEventHandler.h"
+#include "Loaner.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -190,6 +191,7 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportReceiveListener,
+    public virtual Loaner,
     private WriterInfoListener {
 public:
   friend class RequestedDeadlineWatchdog;
@@ -417,26 +419,11 @@ public:
 
   bool is_bit() const;
 
-  /** This method provides virtual access to type specific code
-   * that is used when loans are automatically returned.
-   * The destructor of the sequence supporing zero-copy read calls this
-   * method on the datareader that provided the loan.
-   *
-   * @param seq - The sequence of loaned values.
-   *
-   * @returns Always RETCODE_OK.
-   *
-   * thows NONE.
-   */
-  virtual DDS::ReturnCode_t auto_return_loan(void* seq) = 0;
-
   /** This method is used for a precondition check of delete_datareader.
    *
    * @returns the number of outstanding zero-copy samples loaned out.
    */
   virtual int num_zero_copies();
-
-  virtual void dec_ref_data_element(ReceivedDataElement* r) = 0;
 
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
@@ -535,7 +522,7 @@ public:
   void set_subscriber_qos(const DDS::SubscriberQos & qos);
 
   // Set the instance related writers to reevaluate the owner.
-  void reset_ownership (::DDS::InstanceHandle_t instance);
+  void reset_ownership (DDS::InstanceHandle_t instance);
 
   virtual EntityImpl* parent() const;
 

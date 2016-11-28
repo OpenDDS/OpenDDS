@@ -5,6 +5,7 @@
 #include "TestTypeSupportC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
+#include "ace/OS_NS_unistd.h"
 
 #include <sstream>
 

@@ -19,6 +19,8 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
+#include "ace/OS_NS_unistd.h"
+
 #include <vector>
 #include <algorithm>
 #include <iostream>

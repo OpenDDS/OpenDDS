@@ -15,6 +15,7 @@
 
 #include <ace/Arg_Shifter.h>
 #include <ace/OS_NS_sys_stat.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <fstream>
 #include <cstring>

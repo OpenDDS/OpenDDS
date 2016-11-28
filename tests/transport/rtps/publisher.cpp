@@ -33,6 +33,7 @@
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_sys_time.h>
 #include <ace/OS_NS_time.h>
+#include "ace/OS_NS_unistd.h"
 
 #include <iostream>
 #include <sstream>

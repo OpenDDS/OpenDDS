@@ -20,6 +20,7 @@
 #include <ace/Atomic_Op_T.h>
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <memory>
 #include <stdexcept>

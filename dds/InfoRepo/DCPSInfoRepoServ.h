@@ -20,6 +20,7 @@
 #include "ShutdownInterface.h"
 
 #include "ace/Event_Handler.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo
   : public ShutdownInterface, public ACE_Event_Handler {

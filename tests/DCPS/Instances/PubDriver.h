@@ -11,6 +11,7 @@
 #include "ace/Task.h"
 #include "ace/String_Base.h"
 #include "ace/Atomic_Op_T.h"
+#include "ace/OS_NS_unistd.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"

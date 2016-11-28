@@ -10,6 +10,7 @@
 #include <ace/OS_NS_stdlib.h>
 #include "ace/Arg_Shifter.h"
 #include "ace/Process.h"
+#include "ace/OS_NS_unistd.h"
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>

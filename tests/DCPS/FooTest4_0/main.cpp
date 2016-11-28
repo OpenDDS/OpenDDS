@@ -18,10 +18,12 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_unistd.h"
 
 OpenDDS::DCPS::TransportImpl_rch reader_transport_impl;
 OpenDDS::DCPS::TransportImpl_rch writer_transport_impl;

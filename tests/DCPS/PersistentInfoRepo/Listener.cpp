@@ -6,6 +6,7 @@
  */
 
 #include "Listener.h"
+#include "ace/OS_NS_unistd.h"
 
 Listener::Listener() :
   sample_count_(-1), expected_count_(0), expected_seq_(0)

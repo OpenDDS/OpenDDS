@@ -6,8 +6,7 @@
 #include "../common/TestSupport.h"
 #include "../FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/WaitSet.h"
-
-
+#include "ace/OS_NS_unistd.h"
 
 Pusher::Pusher(const Factory& f,
                const DDS::DomainParticipantFactory_var& factory,

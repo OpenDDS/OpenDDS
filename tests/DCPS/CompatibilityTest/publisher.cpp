@@ -26,6 +26,7 @@
 #endif
 
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_unistd.h"
 #include "ace/Reactor.h"
 
 #include "common.h"

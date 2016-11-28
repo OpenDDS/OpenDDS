@@ -7,8 +7,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/OS_NS_unistd.h"
 
-
-
 // throttle by spinning;  ACE_OS::sleep() minimum sleep is 10 miliseconds
 #define THROTTLE \
   if (throttle_factor_) { \

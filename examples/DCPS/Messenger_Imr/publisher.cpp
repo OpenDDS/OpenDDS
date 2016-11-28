@@ -19,6 +19,7 @@
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
+#include "ace/OS_NS_unistd.h"
 
 using namespace Messenger;
 

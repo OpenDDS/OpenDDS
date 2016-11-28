@@ -23,7 +23,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class DataReaderImpl;
+class Loaner;
 class ReceivedDataElement;
 
 } // namespace DCPS
@@ -126,7 +126,7 @@ public:
       seq_.internal_set_length(len);
     }
 
-    void set_loaner(::OpenDDS::DCPS::DataReaderImpl* loaner) {
+    void set_loaner(::OpenDDS::DCPS::Loaner* loaner) {
       seq_.set_loaner(loaner);
     }
 
@@ -176,7 +176,7 @@ private:
 
   void internal_set_length(CORBA::ULong len);
 
-  void set_loaner(OpenDDS::DCPS::DataReaderImpl* loaner);
+  void set_loaner(OpenDDS::DCPS::Loaner* loaner);
 
   void assign_ptr(CORBA::ULong ii, OpenDDS::DCPS::ReceivedDataElement* item);
 
@@ -188,8 +188,8 @@ private:
 
   void make_single_copy(CORBA::ULong maximum);
 
-  /// The datareader that loaned its samples.
-  OpenDDS::DCPS::DataReaderImpl* loaner_;
+  /// The loaner that loaned its samples.
+  OpenDDS::DCPS::Loaner* loaner_;
 
   /// the default allocator
   OpenDDS::DCPS::FirstTimeFastAllocator<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX>

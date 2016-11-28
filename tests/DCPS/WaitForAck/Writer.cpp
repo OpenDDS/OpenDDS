@@ -5,6 +5,8 @@
 
 #include "dds/DCPS/DataWriterImpl.h"
 
+#include "ace/OS_NS_unistd.h"
+
 #include <sstream>
 
 /// Control the spew.

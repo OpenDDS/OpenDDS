@@ -2,6 +2,7 @@
 #include "DataReaderListener.h"
 #include "TestTypeSupportC.h"
 #include "TestTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 
 Test::DataReaderListener::DataReaderListener( const bool verbose)
  : verbose_( verbose),

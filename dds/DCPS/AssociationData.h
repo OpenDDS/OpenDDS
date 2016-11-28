@@ -10,6 +10,7 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "ace/INET_Addr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -20,7 +21,7 @@ namespace DCPS {
 struct AssociationData {
   RepoId               remote_id_;
   TransportLocatorSeq  remote_data_;
-  Priority          publication_transport_priority_;
+  Priority             publication_transport_priority_;
   bool                 remote_reliable_, remote_durable_;
 
   AssociationData()

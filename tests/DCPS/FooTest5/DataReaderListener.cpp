@@ -6,6 +6,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>
 int read (::DDS::DataReader_ptr reader)
