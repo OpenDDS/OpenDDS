@@ -33,7 +33,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TcpTransport::TcpTransport(const TransportInst_rch& inst)
-  : acceptor_(new TcpAcceptor(this)),
+  : acceptor_(new TcpAcceptor(this->shared_from_this())),
     con_checker_(new TcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
@@ -98,7 +98,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink link[%@]\n", link.in()), 0);
       return link.is_nil()
         ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
-        : AcceptConnectResult(link._retn());
+        : AcceptConnectResult(link);
     }
 
     link.reset(new TcpDataLink(key.address(), this->shared_from_this(), attribs.priority_,
@@ -158,14 +158,14 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     // connect() completed synchronously and called TcpConnection::active_open().
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink "
               "completed synchronously.\n"), 0);
-    return AcceptConnectResult(link._retn());
+    return AcceptConnectResult(link);
   }
 
   if (!link->add_on_start_callback(client, remote.repo_id_)) {
     // link was started by the reactor thread before we could add a callback
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 0);
-    return AcceptConnectResult(link._retn());
+    return AcceptConnectResult(link);
   }
 
   GuardType connections_guard(connections_lock_);
@@ -266,7 +266,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
       return link.is_nil()
         ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
-        : AcceptConnectResult(link._retn());
+        : AcceptConnectResult(link);
 
     } else {
       link.reset( new TcpDataLink(key.address(), this->shared_from_this(), key.priority(),
@@ -294,7 +294,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     if (!link->add_on_start_callback(client, remote.repo_id_)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
                 "got started link %@.\n", link.in()), 0);
-      return AcceptConnectResult(link._retn());
+      return AcceptConnectResult(link);
     }
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
@@ -316,7 +316,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
             "connected link %@.\n", link.in()), 2);
-  return AcceptConnectResult(link._retn());
+  return AcceptConnectResult(link);
 }
 
 void

@@ -146,7 +146,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   return true;
 }
 
-MulticastSession*
+MulticastSession_rch
 MulticastDataLink::find_session(MulticastPeer remote_peer)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
@@ -156,13 +156,12 @@ MulticastDataLink::find_session(MulticastPeer remote_peer)
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
-    MulticastSession_rch sess = it->second;
-    return sess._retn();
+    return it->second;
   }
   else return 0;
 }
 
-MulticastSession*
+MulticastSession_rch
 MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
@@ -172,8 +171,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
-    MulticastSession_rch sess = it->second;
-    return sess._retn();
+    return it->second;
   }
 
   MulticastSession_rch session(
@@ -199,7 +197,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
         (unsigned int) remote_peer),
         0);
   }
-  return session._retn();
+  return session;
 }
 
 bool

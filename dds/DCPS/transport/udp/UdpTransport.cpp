@@ -84,7 +84,7 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
   const UdpDataLinkMap::iterator it(client_links_.find(key));
   if (it != client_links_.end()) {
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink found\n"));
-    return AcceptConnectResult(UdpDataLink_rch(it->second)._retn());
+    return AcceptConnectResult(UdpDataLink_rch(it->second));
   }
 
   // Create new DataLink for logical connection:
@@ -97,7 +97,7 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink connected\n"));
   }
 
-  return AcceptConnectResult(link._retn());
+  return AcceptConnectResult(link);
 }
 
 TransportImpl::AcceptConnectResult
@@ -111,14 +111,14 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
                                       attribs.priority_, config()->local_address(), false /* !active */);
   if (server_link_keys_.count(key)) {
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
-    return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
+    return AcceptConnectResult(UdpDataLink_rch(server_link_));
   }
 
   else if (pending_server_link_keys_.count(key)) {
     pending_server_link_keys_.erase(key);
     server_link_keys_.insert(key);
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink completed\n"));
-    return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
+    return AcceptConnectResult(UdpDataLink_rch(server_link_));
   } else {
     const DataLink::OnStartCallback callback(client, remote.repo_id_);
     pending_connections_[key].push_back(callback);

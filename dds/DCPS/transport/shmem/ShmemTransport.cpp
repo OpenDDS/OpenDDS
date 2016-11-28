@@ -48,12 +48,6 @@ ShmemTransport::make_datalink(const std::string& remote_address)
 
   link->configure(this->config());
 
-  // Assign send strategy:
-  //link->send_strategy(new ShmemSendStrategy(link.in()));
-
-  // Assign receive strategy:
-  //link->receive_strategy(new ShmemReceiveStrategy(link.in()));
-
   // Open logical connection:
   if (!link->open(remote_address)) {
     ACE_DEBUG((LM_ERROR,
@@ -81,19 +75,19 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
     ShmemDataLink_rch link = iter->second;
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
               ACE_TEXT("link found.\n")), 2);
-    return AcceptConnectResult(link._retn());
+    return AcceptConnectResult(link);
   }
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
               ACE_TEXT("new link.\n")), 2);
   return AcceptConnectResult(add_datalink(key.second));
 }
 
-DataLink*
+DataLink_rch
 ShmemTransport::add_datalink(const std::string& remote_address)
 {
   ShmemDataLink_rch link = make_datalink(remote_address);
   links_.insert(ShmemDataLinkMap::value_type(remote_address, link));
-  return link._retn();
+  return link;
 }
 
 TransportImpl::AcceptConnectResult

@@ -45,16 +45,15 @@ OpenDDS::DCPS::DataLinkSet::~DataLinkSet()
 }
 
 int
-OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
+OpenDDS::DCPS::DataLinkSet::insert_link(DataLink_rch link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",6);
-  DataLink_rch mylink(link, false);
   GuardType guard(this->lock_);
-  return OpenDDS::DCPS::bind(map_, mylink->id(), mylink);
+  return OpenDDS::DCPS::bind(map_, link->id(), link);
 }
 
 void
-OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
+OpenDDS::DCPS::DataLinkSet::remove_link(DataLink_rch link)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_link", 6);
   GuardType guard1(this->lock_);
@@ -67,7 +66,7 @@ OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
   }
 }
 
-OpenDDS::DCPS::DataLinkSet*
+OpenDDS::DCPS::DataLinkSet_rch
 OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
                                          const CORBA::ULong num_targets)
 {
@@ -87,7 +86,7 @@ OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
     }
   }
 
-  return selected_links._retn();
+  return selected_links;
 }
 
 bool

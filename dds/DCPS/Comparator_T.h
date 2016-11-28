@@ -79,7 +79,7 @@ template <class Sample, class Field>
 ComparatorBase::Ptr make_field_cmp(Field Sample::* mp,
                                    ComparatorBase::Ptr next)
 {
-  return ComparatorBase::Ptr(new FieldComparator<Sample, Field>(mp, next));
+  return ComparatorBase::Ptr(new FieldComparator<Sample, Field>(mp, next), true);
 }
 
 /** deal with nested structs, for example:
@@ -122,7 +122,7 @@ ComparatorBase::Ptr make_struct_cmp(Field Sample::* mp,
                                     ComparatorBase::Ptr delegate,
                                     ComparatorBase::Ptr next)
 {
-  return ComparatorBase::Ptr(new StructComparator<Sample, Field>(mp, delegate, next));
+  return ComparatorBase::Ptr(new StructComparator<Sample, Field>(mp, delegate, next),true);
 }
 
 } // namespace DCPS

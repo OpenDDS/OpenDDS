@@ -97,7 +97,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   return link;
 }
 
-MulticastSession*
+MulticastSession_rch
 MulticastTransport::start_session(const MulticastDataLink_rch& link,
                                   MulticastPeer remote_peer, bool active)
 {
@@ -136,7 +136,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                      0);
   }
 
-  return session._retn();
+  return session;
 }
 
 static bool
@@ -191,7 +191,7 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     }
     return AcceptConnectResult();
   }
-  return AcceptConnectResult(link._retn());
+  return AcceptConnectResult(link);
 }
 
 TransportImpl::AcceptConnectResult
@@ -238,7 +238,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
     if (session.is_nil()) {
       link.reset();
     }
-    return AcceptConnectResult(link._retn());
+    return AcceptConnectResult(link);
 
   } else {
 

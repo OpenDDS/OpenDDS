@@ -608,7 +608,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 void
 TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 {
-  links_.insert_link(link.in());
+  links_.insert_link(link);
   data_link_index_[peer] = link;
 
   TransportReceiveListener* trl = get_receive_listener();
@@ -840,7 +840,7 @@ TransportClient::send_response(const RepoId& peer,
   }
 
   DataLinkSet singular;
-  singular.insert_link(found->second.in());
+  singular.insert_link(found->second);
   singular.send_response(peer, header, payload);
   return true;
 }
@@ -960,7 +960,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
                 subset.reset(new DataLinkSet);
               }
 
-              subset->insert_link(itr->second.in());
+              subset->insert_link(itr->second);
               cur->filter_per_link_[itr->first] = ti._retn();
 
             } else {
@@ -1060,7 +1060,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
       return SEND_CONTROL_ERROR;
     }
 
-    singular.insert_link(found->second.in());
+    singular.insert_link(found->second);
   }
   return singular.send_control(repo_id_, get_send_listener(), header, msg,
                                &links_.tsce_allocator());

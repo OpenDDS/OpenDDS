@@ -70,8 +70,8 @@ public:
 
   bool join(const ACE_INET_Addr& group_address);
 
-  MulticastSession* find_or_create_session(MulticastPeer remote_peer);
-  MulticastSession* find_session(MulticastPeer remote_peer);
+  MulticastSession_rch find_or_create_session(MulticastPeer remote_peer);
+  MulticastSession_rch find_session(MulticastPeer remote_peer);
 
   bool check_header(const TransportHeader& header);
   bool check_header(const DataSampleHeader& header);

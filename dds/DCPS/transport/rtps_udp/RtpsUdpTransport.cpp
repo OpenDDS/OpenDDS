@@ -88,17 +88,17 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   if (0 == std::memcmp(attribs.local_id_.guidPrefix, remote.repo_id_.guidPrefix,
                        sizeof(GuidPrefix_t))) {
-    return AcceptConnectResult(link._retn()); // "loopback" connection return link right away
+    return AcceptConnectResult(link); // "loopback" connection return link right away
   }
 
   if (link->check_handshake_complete(attribs.local_id_, remote.repo_id_)){
-    return AcceptConnectResult(link._retn());
+    return AcceptConnectResult(link);
   }
 
   if (!link->add_on_start_callback(client, remote.repo_id_)) {
      // link was started by the reactor thread before we could add a callback
      VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink got link.\n"), 2);
-     return AcceptConnectResult(link._retn());
+     return AcceptConnectResult(link);
   }
 
   GuardType guard(connections_lock_);
@@ -124,7 +124,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
   use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_,
                attribs.local_reliable_, remote.reliable_,
                attribs.local_durable_, remote.durable_);
-  return AcceptConnectResult(link._retn());
+  return AcceptConnectResult(link);
 }
 
 

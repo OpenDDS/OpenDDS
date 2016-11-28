@@ -130,7 +130,7 @@ public:
     enum Status { ACR_SUCCESS, ACR_FAILED };
     explicit AcceptConnectResult(Status ok = ACR_FAILED)
       : success_(ok == ACR_SUCCESS), link_(0) {}
-    explicit AcceptConnectResult(DataLink* link)
+    AcceptConnectResult(const DataLink_rch& link)
       : success_(link), link_(link) {}
     /// If false, the accept or connect has failed and link_ is ignored.
     bool success_;

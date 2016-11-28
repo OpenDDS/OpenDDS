@@ -17,8 +17,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 // TcpTransport available in order to call add_ref(), and that
 // gets a bit circular in the dependencies.  Oh well.
 OpenDDS::DCPS::TcpAcceptor::TcpAcceptor
-(TcpTransport* transport_impl)
-  : transport_(transport_impl, false)
+(const TcpTransport_rch& transport_impl)
+  : transport_(transport_impl)
 {
   DBG_ENTRY_LVL("TcpAcceptor","TcpAcceptor",6);
 }
@@ -34,14 +34,11 @@ OpenDDS::DCPS::TcpAcceptor::get_configuration()
   return this->transport_->config();
 }
 
-OpenDDS::DCPS::TcpTransport*
+OpenDDS::DCPS::TcpTransport_rch
 OpenDDS::DCPS::TcpAcceptor::transport()
 {
   DBG_ENTRY_LVL("TcpAcceptor","transport",6);
-  // Return a new reference to the caller (the caller is responsible for
-  // the reference).
-  TcpTransport_rch tmp = this->transport_;
-  return tmp._retn();
+  return this->transport_;
 }
 
 void

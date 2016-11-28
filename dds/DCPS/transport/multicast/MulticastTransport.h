@@ -23,6 +23,7 @@ namespace DCPS {
 
 class MulticastInst;
 class MulticastSession;
+typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl, public EnableSharedFromThis<MulticastTransport> {
 public:
@@ -67,8 +68,8 @@ private:
                                       Priority priority,
                                       bool active);
 
-  MulticastSession* start_session(const MulticastDataLink_rch& link,
-                                  MulticastPeer remote_peer, bool active);
+  MulticastSession_rch start_session(const MulticastDataLink_rch& link,
+                                     MulticastPeer remote_peer, bool active);
 
   //RcHandle<MulticastInst> config_i_;
 
