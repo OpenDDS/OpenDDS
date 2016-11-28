@@ -110,7 +110,7 @@ public:
 
   /// Cache the reference to the datalink object for lost connection
   /// callbacks.
-  void set_datalink(TcpDataLink* link);
+  void set_datalink(const TcpDataLink_rch& link);
 
   void notify_lost_on_backpressure_timeout();
 

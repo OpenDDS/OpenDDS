@@ -27,7 +27,7 @@ public:
   {
   }
 
-  explicit RcHandle(T* p, bool take_ownership = true)
+  explicit RcHandle(T* p, bool take_ownership)
     : ptr_(p)
   {
     if (!take_ownership) {
@@ -53,9 +53,15 @@ public:
     this->bump_down();
   }
 
-  void reset(T* p=0)
+  void reset()
   {
-    RcHandle tmp(p);
+    RcHandle tmp;
+    swap(tmp);
+  }
+
+  void reset(T* p, bool take_ownership)
+  {
+    RcHandle tmp(p, take_ownership);
     swap(tmp);
   }
 

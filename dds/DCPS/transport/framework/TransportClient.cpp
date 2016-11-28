@@ -957,7 +957,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
 
             if (ti.ptr() == 0 || ti->length() != n_subs) {
               if (!subset.in()) {
-                subset.reset(new DataLinkSet);
+                subset.reset(new DataLinkSet, true);
               }
 
               subset->insert_link(itr->second);

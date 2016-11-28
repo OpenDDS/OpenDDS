@@ -29,7 +29,7 @@ ShmemTransport::ShmemTransport(const TransportInst_rch& inst)
   , read_task_(0)
 {
   if (!inst.is_nil()) {
-    if (!configure(inst.in())) {
+    if (!configure(inst)) {
       throw Transport::UnableToCreate();
     }
   }
@@ -44,7 +44,7 @@ ShmemTransport::config() const
 ShmemDataLink_rch
 ShmemTransport::make_datalink(const std::string& remote_address)
 {
-  ShmemDataLink_rch link(new ShmemDataLink(this->shared_from_this()));
+  ShmemDataLink_rch link(new ShmemDataLink(this->shared_from_this()), true);
 
   link->configure(this->config());
 

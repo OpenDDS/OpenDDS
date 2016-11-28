@@ -103,13 +103,13 @@ TransportImpl::shutdown()
 }
 
 bool
-TransportImpl::configure(TransportInst* config)
+TransportImpl::configure(const TransportInst_rch& config)
 {
   DBG_ENTRY_LVL("TransportImpl","configure",6);
 
   GuardType guard(this->lock_);
 
-  if (config == 0) {
+  if (!config) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: invalid configuration.\n"),
                      false);
@@ -123,11 +123,10 @@ TransportImpl::configure(TransportInst* config)
                      false);
   }
 
-  config->_add_ref();
-  this->config_.reset( config );
+  this->config_ = config;
 
   // Let our subclass take a shot at the configuration object.
-  if (this->configure_i(config) == false) {
+  if (this->configure_i(config.in()) == false) {
     if (Transport_debug_level > 0) {
       dump();
     }
@@ -179,7 +178,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend)
     return;
   }
 
-  this->reactor_task_.reset( new TransportReactorTask(useAsyncSend) );
+  this->reactor_task_.reset( new TransportReactorTask(useAsyncSend) , true);
   if (0 != this->reactor_task_->open(0)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }

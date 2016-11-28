@@ -62,8 +62,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
              false),    // is_active
     config_(config),
     reactor_task_(reactor_task, false),
-    send_strategy_(new RtpsUdpSendStrategy(this, config, local_prefix)),
-    recv_strategy_(new RtpsUdpReceiveStrategy(this, local_prefix)),
+    send_strategy_(new RtpsUdpSendStrategy(this, config, local_prefix), true),
+    recv_strategy_(new RtpsUdpReceiveStrategy(this, local_prefix), true),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
     best_effort_heartbeat_count_(0),
@@ -575,7 +575,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   RcHandle<SingleSendBuffer>& send_buff = wi->second.send_buff_;
 
   if (send_buff.is_nil()) {
-    send_buff.reset( new SingleSendBuffer(SingleSendBuffer::UNLIMITED, 1 /*mspp*/) );
+    send_buff.reset( new SingleSendBuffer(SingleSendBuffer::UNLIMITED, 1 /*mspp*/) , true);
 
     send_buff->bind(outer_->send_strategy_.in());
   }

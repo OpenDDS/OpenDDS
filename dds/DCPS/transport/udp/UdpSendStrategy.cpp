@@ -19,7 +19,7 @@ UdpSendStrategy::UdpSendStrategy(UdpDataLink* link, TransportInst* inst)
   : TransportSendStrategy(0, TransportInst_rch(inst, false),
                           0,  // synch_resource
                           link->transport_priority(),
-                          ThreadSynchStrategy_rch(new NullSynchStrategy)),
+                          ThreadSynchStrategy_rch(new NullSynchStrategy, true)),
     link_(link)
 {
 }

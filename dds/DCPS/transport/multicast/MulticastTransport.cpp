@@ -30,7 +30,7 @@ namespace DCPS {
 MulticastTransport::MulticastTransport(const TransportInst_rch& inst)
 {
   if (!inst.is_nil()) {
-    if (!configure(inst.in())) {
+    if (!configure(inst)) {
       throw Transport::UnableToCreate();
     }
   }
@@ -58,10 +58,10 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   MulticastInst* conf = this->config();
 
   if (conf->is_reliable()) {
-    session_factory.reset(new ReliableSessionFactory);
+    session_factory.reset(new ReliableSessionFactory, true);
 
   } else {
-    session_factory.reset(new BestEffortSessionFactory);
+    session_factory.reset(new BestEffortSessionFactory, true);
   }
 
   MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(local_id).federationId() << 32
@@ -75,7 +75,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   MulticastDataLink_rch link(new MulticastDataLink(this->shared_from_this(),
                                    session_factory.in(),
                                    local_peer,
-                                   active));
+                                   active), true);
 
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask(reactor_task());

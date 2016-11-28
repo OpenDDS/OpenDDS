@@ -51,11 +51,10 @@ OpenDDS::DCPS::TcpConnection::is_connected() const
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::TcpConnection::set_datalink(OpenDDS::DCPS::TcpDataLink* link)
+OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch& link)
 {
   // Keep a "copy" of the reference to the data link for ourselves.
-  link->_add_ref();
-  this->link_.reset(link);
+  this->link_ = link;
 }
 
 ACE_INLINE ACE_INET_Addr

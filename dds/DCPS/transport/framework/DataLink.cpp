@@ -314,7 +314,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_subscription_id];
 
     if (rls.is_nil())
-      rls.reset(new ReceiveListenerSet);
+      rls.reset(new ReceiveListenerSet, true);
     rls->insert(local_publication_id, 0);
 
     if (send_listeners_.insert(std::make_pair(local_publication_id,
@@ -354,7 +354,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_publication_id];
 
     if (rls.is_nil())
-      rls.reset(new ReceiveListenerSet);
+      rls.reset(new ReceiveListenerSet, true);
     rls->insert(local_subscription_id, receive_listener);
 
     if (recv_listeners_.insert(std::make_pair(local_subscription_id,
@@ -434,7 +434,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   if (ris.size() == 1) {
     DataLinkSet_rch& links = released_locals[local_id];
     if (links.is_nil())
-      links.reset(new DataLinkSet);
+      links.reset(new DataLinkSet, true);
     links->insert_link(this->shared_from_this());
     {
       GuardType guard(this->released_assoc_by_local_lock_);

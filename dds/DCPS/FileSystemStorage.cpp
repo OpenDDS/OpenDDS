@@ -516,7 +516,7 @@ OPENDDS_STRING File::name() const
 
 /*static*/ Directory::Ptr Directory::create(const char* dirname)
 {
-  return Directory::Ptr(new Directory(ACE_TEXT_CHAR_TO_TCHAR(dirname), ACE_TEXT(""), 0));
+  return Directory::Ptr(new Directory(ACE_TEXT_CHAR_TO_TCHAR(dirname), ACE_TEXT(""), 0), true);
 }
 
 ACE_TString Directory::full_path(const ACE_TString& relative) const
@@ -547,7 +547,7 @@ File::Ptr Directory::get_file(const char* name)
     return make_new_file(t_name);
 
   } else {
-    return File::Ptr(new File(full_path(it->second), it->first, this));
+    return File::Ptr(new File(full_path(it->second), it->first, this), true);
   }
 }
 
@@ -568,7 +568,7 @@ File::Ptr Directory::make_new_file(const ACE_TString& t_name)
   if (!fh) throw std::runtime_error("Can't create the file");
 
   std::fclose(fh);
-  return File::Ptr(new File(physical_dirname_ + phys, t_name, this));
+  return File::Ptr(new File(physical_dirname_ + phys, t_name, this), true);
 }
 
 File::Ptr Directory::create_next_file()
@@ -621,7 +621,7 @@ Directory::Ptr Directory::get_subdir(const char* name)
     return make_new_subdir(t_name);
 
   } else {
-    return Directory::Ptr(new Directory(full_path(it->second), it->first, this));
+    return Directory::Ptr(new Directory(full_path(it->second), it->first, this), true);
   }
 }
 
@@ -687,7 +687,7 @@ Directory::Ptr Directory::make_new_subdir(const ACE_TString& t_name)
     std::ofstream fn("_fullname");
     fn << t_name << '\n';
   }
-  return Directory::Ptr(new Directory(physical_dirname_ + phys, t_name, this));
+  return Directory::Ptr(new Directory(physical_dirname_ + phys, t_name, this), true);
 }
 
 ACE_TString Directory::add_entry()

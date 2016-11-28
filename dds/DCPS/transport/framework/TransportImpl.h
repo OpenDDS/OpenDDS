@@ -143,7 +143,7 @@ public:
 protected:
   TransportImpl();
 
-  bool configure(TransportInst* config);
+  bool configure(const TransportInst_rch& config);
 
   /// connect_datalink() is called from TransportClient to initiate an
   /// association as the active peer.  A DataLink may be returned if

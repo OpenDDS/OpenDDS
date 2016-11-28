@@ -38,7 +38,7 @@ RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   if (initialized) return 0;  // already initialized
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(TransportType_rch(new RtpsUdpType));
+  registry->register_type(TransportType_rch(new RtpsUdpType, true));
   // Don't create a default for RTPS.  At least for the initial implementation,
   // the user needs to explicitly configure it...
 #ifdef OPENDDS_SAFETY_PROFILE

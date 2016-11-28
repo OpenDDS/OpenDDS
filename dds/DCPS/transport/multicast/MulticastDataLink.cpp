@@ -44,8 +44,8 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
   local_peer_(local_peer),
   config_(0),
   reactor_task_(0),
-  send_strategy_(new MulticastSendStrategy(this, transport->config())),
-  recv_strategy_(new MulticastReceiveStrategy(this)),
+  send_strategy_(new MulticastSendStrategy(this, transport->config()), true),
+  recv_strategy_(new MulticastReceiveStrategy(this), true),
   send_buffer_(0)
 {
   MulticastInst* config = transport->config();
@@ -174,8 +174,8 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
     return it->second;
   }
 
-  MulticastSession_rch session(
-    this->session_factory_->create(transport()->reactor(), transport()->reactor_owner(), this, remote_peer));
+  MulticastSession_rch session =
+    this->session_factory_->create(transport()->reactor(), transport()->reactor_owner(), this, remote_peer);
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")

@@ -30,8 +30,8 @@ ShmemDataLink::ShmemDataLink(const ShmemTransport_rch& transport)
              false, // is_loopback,
              false) // is_active
   , config_(0)
-  , send_strategy_( new ShmemSendStrategy(this, transport->config()))
-  , recv_strategy_( new ShmemReceiveStrategy(this))
+  , send_strategy_( new ShmemSendStrategy(this, transport->config()), true)
+  , recv_strategy_( new ShmemReceiveStrategy(this), true)
   , peer_alloc_(0)
 {
 }

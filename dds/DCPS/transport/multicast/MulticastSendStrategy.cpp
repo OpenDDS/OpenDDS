@@ -19,7 +19,7 @@ MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link, TransportI
   : TransportSendStrategy(0, TransportInst_rch(inst, false),
                           0,  // synch_resource
                           link->transport_priority(),
-                          ThreadSynchStrategy_rch(new NullSynchStrategy)),
+                          ThreadSynchStrategy_rch(new NullSynchStrategy, true)),
     link_(link)
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   , async_init_(false)

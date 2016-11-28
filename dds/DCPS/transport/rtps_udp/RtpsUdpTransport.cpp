@@ -32,7 +32,7 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
   : default_listener_(0)
 {
   if (!inst.is_nil()) {
-    if (!configure(inst.in())) {
+    if (!configure(inst)) {
       throw Transport::UnableToCreate();
     }
   }
@@ -48,7 +48,7 @@ RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   TransportReactorTask_rch rt (reactor_task());
-  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this->shared_from_this(), local_prefix, config(), rt.in()));
+  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this->shared_from_this(), local_prefix, config(), rt.in()), true);
 
   if (!link->open(unicast_socket_)) {
     ACE_DEBUG((LM_ERROR,

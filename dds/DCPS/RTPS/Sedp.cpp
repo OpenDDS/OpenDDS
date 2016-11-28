@@ -181,13 +181,13 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
                         *this)
   , publications_reader_(new Reader(make_id(participant_id,
                                             ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
-                                    *this))
+                                    *this), true)
   , subscriptions_reader_(new Reader(make_id(participant_id,
                                              ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
-                                     *this))
+                                     *this), true)
   , participant_message_reader_(new Reader(make_id(participant_id,
                                                    ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
-                                           *this))
+                                           *this), true)
   , task_(this)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())

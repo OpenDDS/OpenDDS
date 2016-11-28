@@ -134,8 +134,7 @@ OpenDDS::DCPS::TcpConnection::set_receive_strategy
   DBG_ENTRY_LVL("TcpConnection","set_receive_strategy",6);
 
   // Make a "copy" for ourselves
-  receive_strategy->_add_ref();
-  this->receive_strategy_.reset(receive_strategy);
+  this->receive_strategy_ = TcpReceiveStrategy_rch(receive_strategy, false);
 }
 
 void
@@ -145,8 +144,7 @@ OpenDDS::DCPS::TcpConnection::set_send_strategy
   DBG_ENTRY_LVL("TcpConnection","set_send_strategy",6);
 
   // Make a "copy" for ourselves
-  send_strategy->_add_ref();
-  this->send_strategy_.reset(send_strategy);
+  this->send_strategy_ = TcpSendStrategy_rch(send_strategy, false);
 }
 
 int
@@ -158,7 +156,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open active.\n"), 2);
     // Take over the refcount from TcpTransport::connect_datalink().
-    const TcpConnection_rch self(this);
+    const TcpConnection_rch self(this, true);
     const TcpTransport_rch transport = link_->get_transport_impl();
 
     const bool is_loop(local_address_ == remote_address_);
