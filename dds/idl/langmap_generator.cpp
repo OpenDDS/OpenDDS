@@ -504,7 +504,7 @@ public:
       "  void _reset();\n"
       "};\n\n";
 
-    be_global->add_include("dds/DCPS/PoolAllocationBase.h");
+    be_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
 
     be_global->lang_header_ <<
@@ -720,7 +720,7 @@ public:
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
-    be_global->add_include("dds/DCPS/PoolAllocationBase.h");
+    be_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
 
     if (size == AST_Type::VARIABLE) {
@@ -952,7 +952,7 @@ public:
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
-    be_global->add_include("dds/DCPS/PoolAllocationBase.h");
+    be_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
 
     if (size == AST_Type::VARIABLE) {
