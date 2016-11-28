@@ -5,6 +5,8 @@
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
+
+#include "ace/Condition_T.h"
 #include "ace/OS_NS_unistd.h"
 
 // throttle by spinning;  ACE_OS::sleep() minimum sleep is 10 miliseconds
@@ -216,4 +218,3 @@ Writer::is_finished () const
 {
   return finished_sending_;
 }
-

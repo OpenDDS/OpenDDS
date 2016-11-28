@@ -13,6 +13,7 @@
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"
+#include "ace/Condition_T.h"
 #include "ace/Condition_Thread_Mutex.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -3,6 +3,8 @@
 
 #include "model_export.h"
 #include "dds/DdsDcpsC.h"
+
+#include <ace/Condition_T.h>
 #include <ace/Condition_Thread_Mutex.h>
 
 #if defined _MSC_VER && _MSC_VER >= 1900
