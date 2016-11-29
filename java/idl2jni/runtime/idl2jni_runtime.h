@@ -18,6 +18,8 @@
 #include <vector>
 #include <string>
 
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace TAO {
 
 template<typename charT> class String_Manager_T;
@@ -52,6 +54,8 @@ typedef Object *Object_ptr;
 typedef TAO::String_var<CORBA::Char> String_var;
 
 } // namespace CORBA
+
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 idl2jni_runtime_Export
 void copyToCxx(JNIEnv *jni, TAO::String_Manager &target, jobject source);
