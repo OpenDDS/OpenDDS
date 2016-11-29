@@ -15,6 +15,7 @@
 
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
