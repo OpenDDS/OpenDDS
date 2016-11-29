@@ -487,6 +487,9 @@ elsif (-r 'ACE_wrappers/ace/ACE.h') {
 elsif (-r 'ATCD/ACE/ace/ACE.h') {
   $ace_src = 'ATCD/ACE';
 }
+elsif (-r 'ACE_TAO/ACE/ace/ACE.h') {
+  $ace_src = 'ACE_TAO/ACE';
+}
 
 $ace_src = normalizePath($ace_src);
 
