@@ -83,7 +83,7 @@ TransportClient::~TransportClient()
 
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(this, it->second->data_.remote_id_);
+      impls_[i]->stop_accepting_or_connecting(this->shared_from_this(), it->second->data_.remote_id_);
     }
 
     pending_assoc_timer_->cancel_timer(this, it->second);
@@ -94,7 +94,7 @@ TransportClient::~TransportClient()
   for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
 
-    (*it)->detach_client(this);
+    (*it)->detach_client(this->shared_from_this());
   }
 }
 
@@ -168,7 +168,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
       TransportImpl_rch impl = inst->impl();
 
       if (!impl.is_nil()) {
-        impl->attach_client(this);
+        impl->attach_client(this->shared_from_this());
         impls_.push_back(impl);
         const CORBA::ULong len = conn_info_.length();
         conn_info_.length(len + 1);
@@ -237,7 +237,7 @@ TransportClient::transport_detached(TransportImpl* which)
 
       for (PendingMap::iterator it2 = pending_.begin();
            it2 != pending_.end(); ++it2) {
-        which->stop_accepting_or_connecting(this, it2->first);
+        which->stop_accepting_or_connecting(this->shared_from_this(), it2->first);
       }
 
       break;
@@ -350,7 +350,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impls_[i]->accept_datalink(remote, pend->attribs_, this);
+            res = impls_[i]->accept_datalink(remote, pend->attribs_, this->shared_from_this());
           }
 
           //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
@@ -418,7 +418,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
                         "attempt to connect_datalink between local %C and remote %C\n",
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
-    result = impl->connect_datalink(remote, attribs_, this);
+    result = impl->connect_datalink(remote, attribs_, this->shared_from_this());
     guard.acquire();
     if (!result.success_) {
       if (DCPS_debug_level) {
@@ -592,7 +592,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   if (!pend->active_) {
 
     for (size_t i = 0; i < pend->impls_.size(); ++i) {
-      pend->impls_[i]->stop_accepting_or_connecting(this, pend->data_.remote_id_);
+      pend->impls_[i]->stop_accepting_or_connecting(this->shared_from_this(), pend->data_.remote_id_);
     }
   }
 

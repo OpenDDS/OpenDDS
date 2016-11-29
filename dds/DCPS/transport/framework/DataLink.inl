@@ -159,7 +159,7 @@ DataLink::send_stop_i(RepoId repoId)
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy = 0;
+  TransportSendStrategy_rch strategy;
   {
     GuardType guard(this->strategy_lock_);
 
@@ -281,30 +281,6 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
   return 0;
 }
 
-ACE_INLINE
-bool
-DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
-{
-  GuardType guard(strategy_lock_);
-
-  if (started_ && !send_strategy_.is_nil()) {
-    return false; // link already started
-  }
-  on_start_callbacks_.push_back(std::make_pair(client, remote));
-
-  return true;
-}
-
-ACE_INLINE
-void
-DataLink::remove_on_start_callback(TransportClient* client, const RepoId& remote)
-{
-  GuardType guard(strategy_lock_);
-  on_start_callbacks_.erase(std::remove(on_start_callbacks_.begin(),
-                                        on_start_callbacks_.end(),
-                                        std::make_pair(client, remote)),
-                            on_start_callbacks_.end());
-}
 
 ACE_INLINE
 const char*

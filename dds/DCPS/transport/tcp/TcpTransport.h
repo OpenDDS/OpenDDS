@@ -59,13 +59,13 @@ public:
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
-                                               TransportClient* client);
+                                               const TransportClient_rch& client);
 
   virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
                                               const ConnectionAttribs& attribs,
-                                              TransportClient* client);
+                                              const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(TransportClient* client,
+  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
                                             const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
@@ -97,7 +97,7 @@ private:
                           const TcpConnection_rch& connection);
 
   bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
-                       TransportClient* client, const RepoId& remote_id);
+                       const TransportClient_rch& client, const RepoId& remote_id);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
