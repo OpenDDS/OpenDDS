@@ -53,7 +53,7 @@ TransportClient::~TransportClient()
                OPENDDS_STRING(converter).c_str()));
   }
 
-  this->stop_associating();
+  stop_associating();
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -83,7 +83,7 @@ TransportClient::~TransportClient()
 
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(this->shared_from_this(), it->second->data_.remote_id_);
+      impls_[i]->stop_accepting_or_connecting(shared_from_this(), it->second->data_.remote_id_);
     }
 
     pending_assoc_timer_->cancel_timer(this, it->second);
@@ -94,7 +94,7 @@ TransportClient::~TransportClient()
   for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
 
-    (*it)->detach_client(this->shared_from_this());
+    (*it)->detach_client(shared_from_this());
   }
 }
 
@@ -168,7 +168,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
       TransportImpl_rch impl = inst->impl();
 
       if (!impl.is_nil()) {
-        impl->attach_client(this->shared_from_this());
+        impl->attach_client(shared_from_this());
         impls_.push_back(impl);
         const CORBA::ULong len = conn_info_.length();
         conn_info_.length(len + 1);
@@ -237,7 +237,7 @@ TransportClient::transport_detached(TransportImpl* which)
 
       for (PendingMap::iterator it2 = pending_.begin();
            it2 != pending_.end(); ++it2) {
-        which->stop_accepting_or_connecting(this->shared_from_this(), it2->first);
+        which->stop_accepting_or_connecting(shared_from_this(), it2->first);
       }
 
       break;
@@ -260,7 +260,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(this->repo_id_);
+      GuidConverter writer_converter(repo_id_);
       GuidConverter reader_converter(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C no available impls\n"),
@@ -280,7 +280,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (all_impls_shut_down) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(this->repo_id_);
+      GuidConverter writer_converter(repo_id_);
       GuidConverter reader_converter(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C all available impls previously shutdown\n"),
@@ -296,7 +296,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     RepoId remote_copy(data.remote_id_);
     iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc_rch(new PendingAssoc()))).first;
 
-    GuidConverter tc_assoc(this->repo_id_);
+    GuidConverter tc_assoc(repo_id_);
     GuidConverter remote_new(data.remote_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate added PendingAssoc "
               "between %C and remote %C\n",
@@ -350,7 +350,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impls_[i]->accept_datalink(remote, pend->attribs_, this->shared_from_this());
+            res = impls_[i]->accept_datalink(remote, pend->attribs_, shared_from_this());
           }
 
           //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
@@ -418,7 +418,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
                         "attempt to connect_datalink between local %C and remote %C\n",
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
-    result = impl->connect_datalink(remote, attribs_, this->shared_from_this());
+    result = impl->connect_datalink(remote, attribs_, shared_from_this());
     guard.acquire();
     if (!result.success_) {
       if (DCPS_debug_level) {
@@ -447,7 +447,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                                                 Guard& guard)
 {
   GuidConverter local(tc->repo_id_);
-  GuidConverter remote(this->data_.remote_id_);
+  GuidConverter remote(data_.remote_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                       "between %C and remote %C\n",
                       OPENDDS_STRING(local).c_str(),
@@ -466,13 +466,13 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
         TransportImpl::AcceptConnectResult res;
         GuidConverter tmp_local(tc->repo_id_);
-        GuidConverter tmp_remote(this->data_.remote_id_);
+        GuidConverter tmp_remote(data_.remote_id_);
         if (!tc->initiate_connect_i(res, impl, remote, attribs_, guard)) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
           if (res.success_ ) {
             GuidConverter local(tc->repo_id_);
-            GuidConverter remote(this->data_.remote_id_);
+            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) PendingAssoc::initiate_connect - ")
                                 ACE_TEXT("between %C and remote %C success\n"),
                                 OPENDDS_STRING(local).c_str(),
@@ -496,7 +496,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
             tc->use_datalink_i(data_.remote_id_, res.link_, guard);
           } else {
             GuidConverter local(tc->repo_id_);
-            GuidConverter remote(this->data_.remote_id_);
+            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
                                 OPENDDS_STRING(local).c_str(),
@@ -506,7 +506,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           return true;
         } else {
           GuidConverter local(tc->repo_id_);
-          GuidConverter remote(this->data_.remote_id_);
+          GuidConverter remote(data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                               "result of initiate_connect_i (local: %C to remote: %C) was not success \n",
                               OPENDDS_STRING(local).c_str(),
@@ -592,7 +592,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   if (!pend->active_) {
 
     for (size_t i = 0; i < pend->impls_.size(); ++i) {
-      pend->impls_[i]->stop_accepting_or_connecting(this->shared_from_this(), pend->data_.remote_id_);
+      pend->impls_[i]->stop_accepting_or_connecting(shared_from_this(), pend->data_.remote_id_);
     }
   }
 
@@ -1016,7 +1016,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     // The reason that the send_links_ set is cleared is because we continually
     // reuse the same send_links_ object over and over for each call to this
     // send method.
-    RepoId pub_id(this->repo_id_);
+    RepoId pub_id(repo_id_);
     send_links.send_stop(pub_id);
     if (transaction_id != 0)
       expected_transaction_id_ = max_transaction_id_seen_ + 1;

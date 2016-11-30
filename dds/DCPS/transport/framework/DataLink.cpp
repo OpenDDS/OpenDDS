@@ -158,10 +158,6 @@ DataLink::invoke_on_start_callbacks(bool success)
     OnStartCallback last_callback = on_start_callbacks_.back();
     on_start_callbacks_.pop_back();
 
-    // Need increment the reference count before release the lock;
-    // otherwise, the callback object may be deleted before it is used.
-    //RcHandle<TransportClient> client(last_callback.first, false);
-
     guard.release();
     last_callback.first->use_datalink(last_callback.second, link);
   }

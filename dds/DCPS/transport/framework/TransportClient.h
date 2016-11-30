@@ -58,8 +58,9 @@ public:
 
   // values for flags parameter of transport_assoc_done():
   enum { ASSOC_OK = 1, ASSOC_ACTIVE = 2 };
-  virtual void _add_ref(){};
-  virtual void _remove_ref(){};
+
+  virtual void _add_ref() {}
+  virtual void _remove_ref() {}
 
 protected:
   TransportClient();

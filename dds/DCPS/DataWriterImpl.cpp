@@ -1351,7 +1351,6 @@ DataWriterImpl::enable()
 
     } else {
       cancel_timer_ = true;
-      //this->_add_ref();
     }
   }
 
@@ -2364,10 +2363,8 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
 }
 
 int
-DataWriterImpl::handle_close(ACE_HANDLE,
-                             ACE_Reactor_Mask)
+DataWriterImpl::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
-  //this->_remove_ref();
   return 0;
 }
 
