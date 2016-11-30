@@ -169,7 +169,7 @@ TransportImpl::configure(TransportInst* config)
 void
 TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink* link)
 {
-  pending_connections_.insert( std::make_pair(client, DataLink_rch(link, false)));
+  pending_connections_.insert( PendConnMap::value_type(client, DataLink_rch(link, false)));
 }
 
 void
