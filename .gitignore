@@ -26,4 +26,5 @@ lib*.dylib
 /build
 /ipch
 /ACE_wrappers
+/ACE_TAO
 .idea/
