@@ -115,6 +115,8 @@ DataWriterImpl::DataWriterImpl()
     TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
 
   db_lock_pool_ = new DataBlockLockPool((unsigned long)n_chunks_);
+
+  ACE_Event_Handler::reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
 
 // This method is called when there are no longer any reference to the
@@ -365,7 +367,7 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
   , filter_class_name_(filterClassName)
   , filter_(filter)
   , expression_params_(params)
-  , eval_(*filter ? participant->get_filter_eval(filter) : 0)
+  , eval_(*filter ? participant->get_filter_eval(filter) : RcHandle<FilterEvaluator>())
   , expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
 {}
@@ -1349,7 +1351,6 @@ DataWriterImpl::enable()
 
     } else {
       cancel_timer_ = true;
-      this->_add_ref();
     }
   }
 
@@ -2362,10 +2363,8 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
 }
 
 int
-DataWriterImpl::handle_close(ACE_HANDLE,
-                             ACE_Reactor_Mask)
+DataWriterImpl::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
-  this->_remove_ref();
   return 0;
 }
 
@@ -2656,6 +2655,45 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
 
   return status;
 }
+
+void
+DataWriterImpl::_add_ref()
+{
+  CORBA::Object::_add_ref();
+}
+
+void
+DataWriterImpl::_remove_ref()
+{
+  CORBA::Object::_remove_ref();
+}
+
+ACE_Event_Handler::Reference_Count
+DataWriterImpl::add_reference()
+{
+  CORBA::Object::_add_ref();
+  return 1;
+}
+
+ACE_Event_Handler::Reference_Count
+DataWriterImpl::remove_reference()
+{
+  CORBA::Object::_remove_ref();
+  return 1;
+}
+
+void
+DataWriterImpl::listener_add_ref()
+{
+  CORBA::Object::_add_ref();
+}
+
+void
+DataWriterImpl::listener_remove_ref()
+{
+  CORBA::Object::_remove_ref();
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

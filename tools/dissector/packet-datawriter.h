@@ -27,6 +27,8 @@ extern "C" {
 #include "ace/Synch.h"
 #include "ace/Hash_Map_Manager.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS
 {
   namespace DCPS
@@ -67,8 +69,6 @@ namespace OpenDDS
 } // namespace OpenDDS
 
 
-//----
-
-
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif //  _PACKET_DATA_WRITER_H_

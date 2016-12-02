@@ -109,3 +109,16 @@ TAO_DDS_DCPSDataWriter_i::update_subscription_params(
   }
   received_.received(DiscReceivedCalls::UPDATE_SUB_PARAMS);
 }
+
+
+void
+TAO_DDS_DCPSDataWriter_i::_add_ref()
+{
+  OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref();
+}
+
+void
+TAO_DDS_DCPSDataWriter_i::_remove_ref()
+{
+  OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref();
+}
