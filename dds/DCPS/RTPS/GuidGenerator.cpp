@@ -85,11 +85,11 @@ GuidGenerator::mac_interface(const char* interface)
       std::strncpy(ifr.ifr_name, interface, IFNAMSIZ);
       const ACE_HANDLE h = ACE_OS::socket(PF_INET, SOCK_DGRAM, 0);
       if (h == ACE_INVALID_HANDLE) {
-	return -1;
+        return -1;
       }
       if (ACE_OS::ioctl(h, SIOCGIFHWADDR, &ifr) < 0) {
-	ACE_OS::close(h);
-	return -1;
+        ACE_OS::close(h);
+        return -1;
       }
       ACE_OS::close(h);
       std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
