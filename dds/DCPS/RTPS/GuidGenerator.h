@@ -42,6 +42,10 @@ public:
   /// Default constructor - initializes pid and MAC address values
   GuidGenerator();
 
+  /// override the MAC address to use a specific network interface
+  /// instead of just the first (non-loopback) interface
+  int mac_interface(const char* interface);
+
   /// populate a GUID container with a unique ID. This will increment
   /// the counter, and use a lock (if compiled with MT ACE) while
   /// doing so.

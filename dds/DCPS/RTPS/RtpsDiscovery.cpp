@@ -96,7 +96,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       unsigned char ttl;
       AddrVec spdp_send_addrs;
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
-      OPENDDS_STRING mi, sla;
+      OPENDDS_STRING mi, sla, gi;
       OPENDDS_STRING spdpaddr;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
@@ -212,6 +212,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           sla = it->second;
         } else if (name == "SpdpLocalAddress") {
           spdpaddr = it->second;
+        } else if (name == "GuidInterface") {
+          gi = it->second;
         } else if (name == "InteropMulticastOverride") {
           /// FUTURE: handle > 1 group.
           default_multicast_group = it->second;
@@ -244,9 +246,10 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       if (has_ttl) discovery->ttl(ttl);
       if (has_sm) discovery->sedp_multicast(sm);
       discovery->multicast_interface(mi);
-      discovery->default_multicast_group( default_multicast_group);
+      discovery->default_multicast_group(default_multicast_group);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
       discovery->sedp_local_address(sla);
+      discovery->guid_interface(gi);
       discovery->spdp_local_address(spdpaddr);
       TheServiceParticipant->add_discovery(
         DCPS::static_rchandle_cast<Discovery>(discovery));
@@ -273,6 +276,11 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
 {
   DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
+  if (!guid_interface_.empty()) {
+    if (guid_gen_.mac_interface(guid_interface_.c_str()) != 0) {
+      //TODO: warning
+    }
+  }
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
