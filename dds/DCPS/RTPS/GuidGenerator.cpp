@@ -15,6 +15,12 @@
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_netdb.h"
 #include "ace/OS_NS_sys_time.h"
+#include <cstring>
+
+#ifdef ACE_LINUX
+# include <sys/types.h>
+# include <ifaddrs.h>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -51,6 +57,54 @@ GuidGenerator::getCount()
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(this->counter_lock_);
   return counter_++;
+}
+
+int
+GuidGenerator::mac_interface(const char* interface)
+{
+  // See ace/OS_NS_netdb.cpp ACE_OS::getmacaddress()
+#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
+  //TODO: Win32
+#elif defined sun
+  //TODO: Solaris
+#elif defined ACE_LINUX
+
+  ifaddrs* addrs;
+  if (::getifaddrs(&addrs) != 0) {
+    return -1;
+  }
+
+  bool found = false;
+  for (ifaddrs* addr = addrs; addr && !found; addr = addr->ifa_next) {
+    if (addr->ifa_addr == 0) {
+      continue;
+    }
+    if (std::strcmp(addr->ifa_name, interface) == 0) {
+      found = true;
+      ifreq ifr;
+      std::strncpy(ifr.ifr_name, interface, IFNAMSIZ);
+      const ACE_HANDLE h = ACE_OS::socket(PF_INET, SOCK_DGRAM, 0);
+      if (h == ACE_INVALID_HANDLE) {
+	return -1;
+      }
+      if (ACE_OS::ioctl(h, SIOCGIFHWADDR, &ifr) < 0) {
+	ACE_OS::close(h);
+	return -1;
+      }
+      ACE_OS::close(h);
+      std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
+    }
+  }
+
+  ::freeifaddrs(addrs);
+  return found ? 0 : -1;
+
+#elif defined ACE_HAS_SIOCGIFCONF
+  //TODO: MacOSX uses this
+#else
+  ACE_UNUSED_ARG(interface);
+  return -1;
+#endif
 }
 
 void
