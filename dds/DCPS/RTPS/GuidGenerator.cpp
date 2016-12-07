@@ -65,8 +65,10 @@ GuidGenerator::mac_interface(const char* interface)
   // See ace/OS_NS_netdb.cpp ACE_OS::getmacaddress()
 #if defined ACE_WIN32 && !defined ACE_HAS_WINCE
   //TODO: Win32
+  return -1;
 #elif defined sun
   //TODO: Solaris
+  return -1;
 #elif defined ACE_LINUX
 
   ifaddrs* addrs;
@@ -101,6 +103,7 @@ GuidGenerator::mac_interface(const char* interface)
 
 #elif defined ACE_HAS_SIOCGIFCONF
   //TODO: MacOSX uses this
+  return -1;
 #else
   ACE_UNUSED_ARG(interface);
   return -1;
