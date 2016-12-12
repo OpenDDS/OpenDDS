@@ -375,7 +375,7 @@ private:
    * in a state such that they could only be used for durability
    * purposes (see reenqueue_all).
    * "n" is determined by max_durable_per_instance_, so these samples
-   * are truely unneeded -- there are max_durable_per_instance_ newer
+   * are truly unneeded -- there are max_durable_per_instance_ newer
    * samples available in the instance.
    */
   void remove_excess_durable();
