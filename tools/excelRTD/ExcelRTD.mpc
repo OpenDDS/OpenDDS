@@ -5,7 +5,7 @@ project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monit
 
   macros += _USRDLL RTDServer_EXPORTS
 
-  specific (vc9, vc10, vc11, vc12, vc14) {
+  specific (vc9, vc10, vc11, vc12, vc14, nmake) {
     compile_flags += /bigobj
   }
 
@@ -24,7 +24,7 @@ project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monit
 
   sharedname = OpenDDS_ExcelRTD
   dllout  = $(DDS_ROOT)/lib
-  libs  += OpenDDS_monitor 
+  libs  += OpenDDS_monitor
 
   MOC_Files {
     gendir = .
