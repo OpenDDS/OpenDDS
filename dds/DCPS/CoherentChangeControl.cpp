@@ -32,19 +32,25 @@ namespace DCPS {
 ACE_CDR::Boolean
 operator<<(Serializer& serializer, CoherentChangeControl& value)
 {
-  serializer << value.coherent_samples_.num_samples_;
-  serializer << value.coherent_samples_.last_sample_;
-  serializer << ACE_OutputCDR::from_boolean(value.group_coherent_);
+  if (!(serializer << value.coherent_samples_.num_samples_) ||
+      !(serializer << value.coherent_samples_.last_sample_) ||
+      !(serializer << ACE_OutputCDR::from_boolean(value.group_coherent_))) {
+    return false;
+  }
 
   if (value.group_coherent_) {
-    serializer << value.publisher_id_;
-    serializer << static_cast<ACE_UINT32>(value.group_coherent_samples_.size());
+    if (!(serializer << value.publisher_id_) ||
+        !(serializer << static_cast<ACE_UINT32>(value.group_coherent_samples_.size()))) {
+      return false;
+    }
     GroupCoherentSamples::iterator itEnd = value.group_coherent_samples_.end();
     for (GroupCoherentSamples::iterator it =
            value.group_coherent_samples_.begin(); it != itEnd; ++it) {
-      serializer << it->first;
-      serializer << it->second.num_samples_;
-      serializer << it->second.last_sample_;
+      if (!(serializer << it->first) ||
+          !(serializer << it->second.num_samples_) ||
+          !(serializer << it->second.last_sample_)) {
+        return false;
+      }
     }
   }
 
@@ -54,34 +60,29 @@ operator<<(Serializer& serializer, CoherentChangeControl& value)
 ACE_CDR::Boolean
 operator>>(Serializer& serializer, CoherentChangeControl& value)
 {
-  serializer >> value.coherent_samples_.num_samples_;
-  if (!serializer.good_bit()) return false;
-
-  serializer >> value.coherent_samples_.last_sample_;
-  if (!serializer.good_bit()) return false;
-
-  serializer >> ACE_InputCDR::to_boolean(value.group_coherent_);
-  if (!serializer.good_bit()) return false;
+  if (!(serializer >> value.coherent_samples_.num_samples_) ||
+      !(serializer >> value.coherent_samples_.last_sample_) ||
+      !(serializer >> ACE_InputCDR::to_boolean(value.group_coherent_))) {
+    return false;
+  }
 
   if (value.group_coherent_) {
-    serializer >> value.publisher_id_;
-    if (!serializer.good_bit()) return false;
-
     ACE_UINT32 sz = 0;
-    serializer >> sz;
-    if (!serializer.good_bit()) return false;
+    if (!(serializer >> value.publisher_id_) ||
+        !(serializer >> sz)) {
+      return false;
+    }
 
     for (ACE_UINT32 i = 0; i < sz; ++i) {
       PublicationId writer(GUID_UNKNOWN);
       ACE_UINT32 num_sample = 0;
       ACE_INT16 last_sample = 0;
 
-      serializer >> writer;
-      if (!serializer.good_bit()) return false;
-      serializer >> num_sample;
-      if (!serializer.good_bit()) return false;
-      serializer >> last_sample;
-      if (!serializer.good_bit()) return false;
+      if (!(serializer >> writer) ||
+          !(serializer >> num_sample) ||
+          !(serializer >> last_sample)) {
+        return false;
+      }
 
       std::pair<GroupCoherentSamples::iterator, bool> pair =
         value.group_coherent_samples_.insert(GroupCoherentSamples::value_type(
@@ -92,7 +93,7 @@ operator>>(Serializer& serializer, CoherentChangeControl& value)
     }
   }
 
-  return true;
+  return serializer.good_bit();
 }
 
 /// Message header insertion onto an ostream.
