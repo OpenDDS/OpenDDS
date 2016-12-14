@@ -135,7 +135,7 @@ private:
                         const DDS::StatusMask &            mask,
                         bool                               federated = false);
 
-  ///Destructor
+  /// Destructor
   virtual ~DomainParticipantImpl();
 
   virtual DDS::InstanceHandle_t get_instance_handle();
