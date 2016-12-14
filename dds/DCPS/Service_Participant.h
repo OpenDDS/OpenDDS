@@ -62,10 +62,8 @@ public:
   /// Domain value for the default repository IOR.
   enum { ANY_DOMAIN = -1 };
 
-  /// Constructor.
   Service_Participant();
 
-  /// Destructor.
   ~Service_Participant();
 
   /// Return a singleton instance of this class.

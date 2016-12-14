@@ -31,10 +31,8 @@ public:
   //    Storage of global data specific to the compiler back end
   //
   BE_GlobalData();
-  // Constructor.
 
   virtual ~BE_GlobalData();
-  // Destructor.
 
   // Data accessors.
 

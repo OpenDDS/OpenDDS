@@ -21,10 +21,8 @@ class QuoteDataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  //Constructor
   QuoteDataReaderListenerImpl ();
 
-  //Destructor
   virtual ~QuoteDataReaderListenerImpl (void);
 
   virtual void on_requested_deadline_missed (

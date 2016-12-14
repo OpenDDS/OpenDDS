@@ -24,7 +24,6 @@ QuoteDataReaderListenerImpl::~QuoteDataReaderListenerImpl ()
 }
 
 void QuoteDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
   try {
     StockQuoter::QuoteDataReader_var quote_dr

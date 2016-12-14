@@ -26,10 +26,8 @@ class DDSWrapper_Export DataReader_Listener_Base
   : public DDS::DataReaderListener
 {
 public:
-  //Constructor
   DataReader_Listener_Base ();
 
-  //Destructor
   virtual ~DataReader_Listener_Base (void);
 
   /// this callback is called when data for a topic arrives outside of the

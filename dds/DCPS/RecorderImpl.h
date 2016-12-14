@@ -46,11 +46,8 @@ class OpenDDS_Dcps_Export RecorderImpl
   , private WriterInfoListener
 {
 public:
-
-  //Constructor
   RecorderImpl();
 
-  //Destructor
   virtual ~RecorderImpl();
 
   /**

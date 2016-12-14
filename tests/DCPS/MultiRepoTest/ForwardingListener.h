@@ -12,16 +12,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
-//Class ForwardingListenerImpl
 class ForwardingListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  //Constructor
   ForwardingListenerImpl( OpenDDS::DCPS::Discovery::RepoKey repo);
 
-  //Destructor
   virtual ~ForwardingListenerImpl();
 
   /// Writer to forward data on.

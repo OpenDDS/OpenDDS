@@ -11,7 +11,6 @@
 
 LONG g_cOb = 0; //global count of the number of objects created.
 
-//Constructor
 RTDServer::RTDServer(IUnknown* pUnkOuter)
 {
   m_refCount = 0;
@@ -32,7 +31,6 @@ RTDServer::RTDServer(IUnknown* pUnkOuter)
   InterlockedIncrement( &g_cOb );
 }
 
-//Destructor
 RTDServer::~RTDServer()
 {
   //Clean up the type information

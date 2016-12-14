@@ -33,7 +33,6 @@ ExchangeEventDataReaderListenerImpl::is_exchange_closed_received()
 
 
 void ExchangeEventDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
   try {
     StockQuoter::ExchangeEventDataReader_var exchange_evt_dr

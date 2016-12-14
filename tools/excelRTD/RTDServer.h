@@ -53,9 +53,7 @@ private:
    Monitor::RTDMonitor* getMonitor(const RTDServer::TopicData& topicData) const;
 
 public:
-   //Constructor
    RTDServer(IUnknown* pUnkOuter);
-   //Destructor
    ~RTDServer();
 
    STDMETHODIMP LoadTypeInfo(ITypeInfo** pptinfo, REFCLSID clsid,

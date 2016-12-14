@@ -39,7 +39,6 @@ namespace OpenDDS {
       cdr_header_size = 4
     };
 
-    /// Constructor
     DataWriterImpl_T (void)
       : marshaled_size_ (0)
       , key_marshaled_size_ (0)
@@ -49,7 +48,6 @@ namespace OpenDDS {
     {
     }
 
-    /// Destructor
     virtual ~DataWriterImpl_T (void)
     {
       delete data_allocator_;

@@ -22,10 +22,8 @@ class ExchangeEventDataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  //Constructor
   ExchangeEventDataReaderListenerImpl ();
 
-  //Destructor
   virtual ~ExchangeEventDataReaderListenerImpl (void);
 
   // app-specific

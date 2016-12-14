@@ -203,10 +203,8 @@ public:
   /// Type of collection of statistics for writers to this reader.
   typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
-  //Constructor
   DataReaderImpl();
 
-  //Destructor
   virtual ~DataReaderImpl();
 
   virtual DDS::InstanceHandle_t get_instance_handle();

@@ -41,10 +41,8 @@ namespace Federator {
  */
 class OpenDDS_Federator_Export InfoRepoMulticastResponder : public ACE_Event_Handler {
 public:
-  /// Constructor.
   InfoRepoMulticastResponder();
 
-  /// Destructor.
   virtual ~InfoRepoMulticastResponder();
 
   /// Initialization method.

@@ -126,7 +126,6 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
-  ///Constructor
   DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
                         const DDS::DomainId_t&             domain_id,
                         const RepoId&                      dp_id,
@@ -135,7 +134,6 @@ private:
                         const DDS::StatusMask &            mask,
                         bool                               federated = false);
 
-  /// Destructor
   virtual ~DomainParticipantImpl();
 
   virtual DDS::InstanceHandle_t get_instance_handle();

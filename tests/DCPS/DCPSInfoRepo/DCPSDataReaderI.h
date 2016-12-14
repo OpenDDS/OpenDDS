@@ -37,28 +37,24 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//Class TAO_DDS_DCPSDataReader_i
 class TAO_DDS_DCPSDataReader_i
   : public OpenDDS::DCPS::DataReaderCallbacks
 {
 public:
   enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS };
-  //Constructor
+
   TAO_DDS_DCPSDataReader_i (void);
 
-  //Destructor
   virtual ~TAO_DDS_DCPSDataReader_i (void);
 
 
   virtual ::DDS::ReturnCode_t enable_specific (
       ) { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
-
   virtual void add_association (
       const ::OpenDDS::DCPS::RepoId& yourId,
       const OpenDDS::DCPS::WriterAssociation& writer,
-      bool active
-    );
+      bool active);
 
   virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
 
