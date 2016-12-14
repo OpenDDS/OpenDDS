@@ -59,7 +59,7 @@ GuidGenerator::populate(DCPS::GUID_t &container)
   container.guidPrefix[0] = DCPS::VENDORID_OCI[0];
   container.guidPrefix[1] = DCPS::VENDORID_OCI[1];
 
-  ACE_UINT16 count = this->getCount();
+  const ACE_UINT16 count = this->getCount();
   ACE_OS::memcpy(&container.guidPrefix[2], node_id_, NODE_ID_SIZE);
   container.guidPrefix[8] = static_cast<CORBA::Octet>(this->pid_ >> 8);
   container.guidPrefix[9] = static_cast<CORBA::Octet>(this->pid_ & 0xFF);
