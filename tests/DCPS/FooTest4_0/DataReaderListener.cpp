@@ -2,14 +2,12 @@
 //
 #include "DataReaderListener.h"
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
   }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,

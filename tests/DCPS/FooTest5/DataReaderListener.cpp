@@ -82,14 +82,12 @@ int read (::DDS::DataReader_ptr reader)
 }
 
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl ()
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
   }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,

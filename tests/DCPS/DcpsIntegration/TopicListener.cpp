@@ -23,14 +23,12 @@
 
 #include "TopicListener.h"
 
-// Implementation skeleton constructor
 OPENDDS_DCPS_TopicListener_i::OPENDDS_DCPS_TopicListener_i (void)
   {
     last_status_.total_count = 0;
     last_status_.total_count_change = 0;
   }
 
-// Implementation skeleton destructor
 OPENDDS_DCPS_TopicListener_i::~OPENDDS_DCPS_TopicListener_i (void)
   {
   }

@@ -12,13 +12,10 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
-
-// Implementation skeleton constructor
 QuoteDataReaderListenerImpl::QuoteDataReaderListenerImpl()
 {
 }
 
-// Implementation skeleton destructor
 QuoteDataReaderListenerImpl::~QuoteDataReaderListenerImpl ()
 {
 }

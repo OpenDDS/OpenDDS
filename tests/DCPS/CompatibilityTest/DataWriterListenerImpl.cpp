@@ -9,7 +9,6 @@ DataWriterListenerImpl::DataWriterListenerImpl ()
 {
 }
 
-// Implementation skeleton destructor
 DataWriterListenerImpl::~DataWriterListenerImpl ()
 {
 }

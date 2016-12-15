@@ -51,8 +51,6 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
   return 0;
 }
 
-
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl( int expected)
  : samples_( 0),
    expected_( expected),
@@ -63,7 +61,6 @@ DataReaderListenerImpl::DataReaderListenerImpl( int expected)
   ));
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
 {
   ACE_DEBUG((LM_DEBUG,

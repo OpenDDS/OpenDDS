@@ -55,7 +55,6 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   }
 }
 
-//  destructor
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 {
 }

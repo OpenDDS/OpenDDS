@@ -33,9 +33,7 @@ const int DOMAINID = 411;
 class AbstractionLayer
 {
 public:
-  /** Constructor **/
   AbstractionLayer();
-  /** Destructor **/
   virtual ~AbstractionLayer();
 
   /**

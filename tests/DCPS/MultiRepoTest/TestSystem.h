@@ -27,7 +27,6 @@ class TestSystem {
     /// Construct from command line.
     TestSystem( int argc, ACE_TCHAR** argv, char** envp);
 
-    /// Virtual destructor.
     virtual ~TestSystem();
 
     /// Main actions occur here.

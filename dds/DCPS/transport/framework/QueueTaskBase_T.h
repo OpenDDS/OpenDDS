@@ -36,8 +36,6 @@ namespace DCPS {
 template <typename T>
 class QueueTaskBase : public ACE_Task_Base {
 public:
-
-  /// Constructor.
   QueueTaskBase()
   : work_available_(lock_),
       shutdown_initiated_(false),
@@ -46,7 +44,6 @@ public:
     DBG_ENTRY("QueueTaskBase","QueueTaskBase");
   }
 
-  /// Virtual Destructor.
   virtual ~QueueTaskBase() {
     DBG_ENTRY("QueueTaskBase","~QueueTaskBase");
   }

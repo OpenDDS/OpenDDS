@@ -44,7 +44,6 @@ public:
   /// Construct with a priority value.
   DirectPriorityMapper(Priority priority = 0);
 
-  /// Virtual destructor.
   virtual ~DirectPriorityMapper();
 
   /// Access the mapped DiffServ codepoint value.

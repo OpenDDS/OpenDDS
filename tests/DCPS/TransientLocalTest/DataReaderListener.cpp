@@ -10,14 +10,12 @@
 using namespace Messenger;
 using namespace std;
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : ok_(true), num_reads_(0), last_non_durable_(0)
 {
   ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl[%@]\n", this));
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl ()
 {
 }

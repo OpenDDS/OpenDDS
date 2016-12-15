@@ -41,7 +41,6 @@ public:
   /// Construct with a priority value.
   PriorityMapper(Priority priority = 0);
 
-  /// Virtual destructor.
   virtual ~PriorityMapper();
 
   /// Accessors for the TRANSPORT_PRIORITY value.

@@ -46,7 +46,6 @@ struct OpenDDS_Dcps_Export CoherentChangeControl {
   RepoId                publisher_id_;
   GroupCoherentSamples  group_coherent_samples_;
 
-  /// Default constructor.
   CoherentChangeControl() ;
 
   /// Similar to IDL compiler generated methods.

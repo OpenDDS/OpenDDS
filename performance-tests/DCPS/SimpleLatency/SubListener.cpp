@@ -8,7 +8,6 @@
 
 using namespace DDSPerfTest;
 
-// Implementation skeleton constructor
 PubDataReaderListenerImpl::PubDataReaderListenerImpl()
   : writer_ (),
     reader_ (),
@@ -38,7 +37,6 @@ void PubDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
     PubMessageDataReader::_unchecked_narrow(this->reader_.in());
 }
 
-// Implementation skeleton destructor
 PubDataReaderListenerImpl::~PubDataReaderListenerImpl ()
 {
 }

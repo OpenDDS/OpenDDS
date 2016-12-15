@@ -32,7 +32,6 @@ class PublicationProfile  {
       int min       = 800
     );
 
-    /// Virtual destructor.
     virtual ~PublicationProfile();
 
     /// This publications identification.

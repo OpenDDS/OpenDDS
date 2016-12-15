@@ -18,7 +18,6 @@ class Publisher {
     /// Construct from command line.
     Publisher( int argc, ACE_TCHAR** argv, char** envp);
 
-    /// Virtual destructor.
     virtual ~Publisher();
 
     /// Main actions occur here.

@@ -20,14 +20,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 DomainParticipantFactoryImpl::DomainParticipantFactoryImpl()
   : qos_(TheServiceParticipant->initial_DomainParticipantFactoryQos()),
     default_participant_qos_(TheServiceParticipant->initial_DomainParticipantQos())
 {
 }
 
-// Implementation skeleton destructor
 DomainParticipantFactoryImpl::~DomainParticipantFactoryImpl()
 {
   if (DCPS_debug_level > 0) {

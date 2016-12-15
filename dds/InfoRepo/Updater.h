@@ -18,7 +18,6 @@ namespace Update {
 
 class Updater {
 public:
-  // Virtual destructor.
   virtual ~Updater();
 
   // Request an image refresh to be sent to
