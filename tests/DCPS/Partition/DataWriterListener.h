@@ -20,7 +20,6 @@ namespace Test
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
   {
   public:
-    //Constructor
     DataWriterListener (long expected_matches);
 
     virtual void on_offered_deadline_missed (
@@ -55,7 +54,6 @@ namespace Test
 
   protected:
 
-    // Destructor
     virtual ~DataWriterListener (void);
 
   private:

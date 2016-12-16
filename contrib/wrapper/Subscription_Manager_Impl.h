@@ -34,7 +34,6 @@ typedef class ACE_Refcounted_Auto_Ptr <Subscription_Manager_Impl,
 class Subscription_Manager_Impl
 {
  public:
-  /// destructor
   virtual ~Subscription_Manager_Impl ();
 
   /// will create a topic instance using the domain manager

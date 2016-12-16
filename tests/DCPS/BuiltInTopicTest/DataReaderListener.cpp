@@ -13,7 +13,6 @@
 using namespace std;
 
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
     publication_handle_ (::DDS::HANDLE_NIL),
@@ -22,7 +21,6 @@ DataReaderListenerImpl::DataReaderListenerImpl()
 {
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl ()
 {
 }

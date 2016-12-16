@@ -39,7 +39,6 @@ public:
   /// Default constructor.
   Config(int argc, ACE_TCHAR** argv);
 
-  /// Virtual destructor.
   virtual ~Config();
 
   /// Access the enhanced argv.

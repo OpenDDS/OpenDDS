@@ -54,14 +54,12 @@ class  OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSInfo_i
   : public virtual POA_OpenDDS::DCPS::DCPSInfo,
     public ACE_Event_Handler {
 public:
-  //Constructor
   TAO_DDS_DCPSInfo_i(
     CORBA::ORB_ptr orb,
     bool reincarnate,
     ShutdownInterface* shutdown,
     const TAO_DDS_DCPSFederationId& federation);
 
-  //Destructor
   virtual ~TAO_DDS_DCPSInfo_i();
 
   virtual int handle_timeout(const ACE_Time_Value& now,

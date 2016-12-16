@@ -39,11 +39,8 @@ class TcpTransport;
  */
 class TcpConnectionReplaceTask : public QueueTaskBase <TcpConnection_rch> {
 public:
-
-  /// Constructor.
   TcpConnectionReplaceTask(TcpTransport* trans);
 
-  /// Virtual Destructor.
   virtual ~TcpConnectionReplaceTask();
 
   /// Handle the request.

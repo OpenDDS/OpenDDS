@@ -16,10 +16,8 @@ class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  //Constructor
   DataReaderListenerImpl( int expected);
 
-  //Destructor
   virtual ~DataReaderListenerImpl();
 
   /// Wait for signal from the receiving thread executing on_data_available().

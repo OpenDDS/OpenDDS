@@ -7,8 +7,6 @@
 DataWriterListenerImpl::DataWriterListenerImpl()
         : publication_matched_(false) { }
 
-// Implementation skeleton destructor
-
 DataWriterListenerImpl::~DataWriterListenerImpl() { }
 
 void DataWriterListenerImpl::on_offered_deadline_missed(::DDS::DataWriter_ptr writer,

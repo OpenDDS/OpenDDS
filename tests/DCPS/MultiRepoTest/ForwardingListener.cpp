@@ -70,7 +70,6 @@ int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
 }
 
 
-// Implementation skeleton constructor
 ForwardingListenerImpl::ForwardingListenerImpl(
   OpenDDS::DCPS::Discovery::RepoKey repo
 ) : samples_( 0),
@@ -84,7 +83,6 @@ ForwardingListenerImpl::ForwardingListenerImpl(
   ));
 }
 
-// Implementation skeleton destructor
 ForwardingListenerImpl::~ForwardingListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,

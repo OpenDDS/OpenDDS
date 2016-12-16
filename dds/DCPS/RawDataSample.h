@@ -36,7 +36,7 @@ public:
   ~RawDataSample();
   RawDataSample& operator=(const RawDataSample&);
 
-  /// The enum inidicating the message type
+  /// The enum indicating the message type
   MessageId message_id_;
   /// The timestamp the sender put on the sample
   DDS::Time_t source_timestamp_;

@@ -19,8 +19,6 @@ namespace Test {
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
   {
   public:
-
-    //Constructor
     DataReaderListener( const bool verbose = false);
 
     virtual void on_requested_deadline_missed (
@@ -84,10 +82,9 @@ namespace Test {
     /// The data was received and it was valid.
     bool passed() const;
 
-    // Destructor
     virtual ~DataReaderListener (void);
 
-    private:
+  private:
       /// Verbosity flag.
       bool verbose_;
 

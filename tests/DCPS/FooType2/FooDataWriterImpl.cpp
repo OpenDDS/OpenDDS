@@ -8,7 +8,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
 
-// Implementation skeleton constructor
 FooDataWriterImpl::FooDataWriterImpl (void)
 : foo_allocator_ (0),
   mb_allocator_ (0),
@@ -16,7 +15,6 @@ FooDataWriterImpl::FooDataWriterImpl (void)
 {
 }
 
-// Implementation skeleton destructor
 FooDataWriterImpl::~FooDataWriterImpl (void)
 {
   delete foo_allocator_;

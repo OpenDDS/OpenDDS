@@ -10,7 +10,6 @@
 using namespace Messenger;
 using namespace std;
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
     num_received_dispose_(0),
@@ -19,7 +18,6 @@ DataReaderListenerImpl::DataReaderListenerImpl()
 {
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl ()
 {
 }

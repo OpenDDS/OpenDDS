@@ -12,16 +12,14 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//Class AckDataReaderListenerImpl
 class AckDataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  //Constructor
   AckDataReaderListenerImpl (CORBA::Long size);
 
   void init (DDS::DataReader_ptr dr, DDS::DataWriter_ptr dw, bool use_zero_copy_read);
-  //Destructor
+
   virtual ~AckDataReaderListenerImpl (void);
 
   virtual void on_requested_deadline_missed (

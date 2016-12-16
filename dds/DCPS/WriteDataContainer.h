@@ -151,9 +151,6 @@ public:
     /// maximum total number of samples, 0 for unlimited
     CORBA::Long      max_total_samples);
 
-  /**
-   * Default destructor.
-   */
   ~WriteDataContainer();
 
   DDS::ReturnCode_t

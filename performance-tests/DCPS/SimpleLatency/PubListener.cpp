@@ -89,7 +89,6 @@ static stats_type round_trip;
 #define TOTAL_PRIMER_SAMPLES      500
 extern long total_samples;
 
-// Implementation skeleton constructor
 AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long /*size*/)
   :writer_ (),
    reader_ (),
@@ -107,7 +106,6 @@ AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long /*size*/)
 
 }
 
-// Implementation skeleton destructor
 AckDataReaderListenerImpl::~AckDataReaderListenerImpl ()
 {
 }

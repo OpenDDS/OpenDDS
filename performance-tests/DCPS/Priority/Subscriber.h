@@ -26,7 +26,6 @@ class Subscriber {
     /// Construct with option information.
     Subscriber( const Options& options);
 
-    /// Destructor.
     ~Subscriber();
 
     /// Execute the test.

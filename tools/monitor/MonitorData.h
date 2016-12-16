@@ -63,7 +63,6 @@ class MonitorData {
     /// Construct with an IOR only.
     MonitorData( const Options& options, MonitorDataModel* model, bool mapExistingIORKeys = true);
 
-    /// Virtual destructor.
     virtual ~MonitorData();
 
     /// Disable operation for orderly shutdown.

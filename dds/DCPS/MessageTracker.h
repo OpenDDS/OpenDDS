@@ -53,7 +53,7 @@ namespace DCPS {
 
     /**
      * Provide a timestamp for the passed in time.
-     * DEPRECATED: remove and replace with ACE::timestamp
+     * @deprecated Remove and replace with ACE::timestamp
      * once TAO 1.6a is no longer supported
      */
     static ACE_TCHAR*

@@ -16,17 +16,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
-//Class SubscriberListenerImpl
 class SubscriberListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::SubscriberListener> {
 
 public:
-
-  //Constructor
   SubscriberListenerImpl();
 
-  //Destructor
   virtual ~SubscriberListenerImpl();
 
   virtual void on_data_on_readers(

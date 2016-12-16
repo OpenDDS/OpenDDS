@@ -34,10 +34,8 @@ namespace Federator {
 template<class DataType>
 class  UpdateProcessor {
 public:
-  /// Default constructor.
   UpdateProcessor();
 
-  /// Virtual destructor
   virtual ~UpdateProcessor();
 
   //

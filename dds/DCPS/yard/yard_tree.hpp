@@ -60,7 +60,6 @@ namespace yard
                 mbCompleted = false;
             }
 
-            // destructor
             virtual ~AbstractNode()
             {
                 if (mpNext)

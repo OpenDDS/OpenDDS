@@ -14,7 +14,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class ShutdownInterface {
 public:
-  // Virtual destructor.
   virtual ~ShutdownInterface();
 
   // Request to shutdown.

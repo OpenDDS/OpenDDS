@@ -19,14 +19,12 @@ const CORBA::WChar* wstr = (const CORBA::WChar*)(L"I'm wstring");
 
 const int num_expected_messages = 10;
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
     passed_count_ (0)
 {
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl ()
 {
 }

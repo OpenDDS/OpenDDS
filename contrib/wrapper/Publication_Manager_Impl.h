@@ -33,7 +33,6 @@ typedef class ACE_Refcounted_Auto_Ptr <Publication_Manager_Impl,
 class Publication_Manager_Impl
 {
  public:
-  /// destructor
   virtual ~Publication_Manager_Impl ();
 
   /// will create a topic instance using the domain manager

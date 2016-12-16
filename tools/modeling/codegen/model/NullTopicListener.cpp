@@ -13,7 +13,6 @@ OpenDDS::Model::NullTopicListener::NullTopicListener()
   }
 }
 
-// Implementation skeleton destructor
 OpenDDS::Model::NullTopicListener::~NullTopicListener()
 {
   if( OpenDDS::DCPS::DCPS_debug_level > 4) {

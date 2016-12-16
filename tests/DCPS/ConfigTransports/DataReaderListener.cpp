@@ -10,15 +10,11 @@
 #include "../FooType4/FooDefTypeSupportImpl.h"
 #include "DDSTEST.h"
 
-// Implementation skeleton constructor
-
 DataReaderListenerImpl::DataReaderListenerImpl(const Options& opt) :
         subscription_matched_(false),
         configopt_(opt),
         last_si_()
         { }
-
-// Implementation skeleton destructor
 
 DataReaderListenerImpl::~DataReaderListenerImpl(void) { }
 

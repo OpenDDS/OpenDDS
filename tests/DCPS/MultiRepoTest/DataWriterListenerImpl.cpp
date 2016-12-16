@@ -3,7 +3,6 @@
 #include "DataWriterListenerImpl.h"
 
 
-// Implementation skeleton constructor
 DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Discovery::RepoKey repo)
   : repo_( repo)
 {
@@ -13,7 +12,6 @@ DataWriterListenerImpl::DataWriterListenerImpl ( OpenDDS::DCPS::Discovery::RepoK
   ));
 }
 
-// Implementation skeleton destructor
 DataWriterListenerImpl::~DataWriterListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,

@@ -4,12 +4,10 @@
 
 extern int offered_incompatible_qos_called_on_pub;
 
-// Implementation skeleton constructor
 PublisherListenerImpl::PublisherListenerImpl (void)
   {
   }
 
-// Implementation skeleton destructor
 PublisherListenerImpl::~PublisherListenerImpl (void)
   {
   }

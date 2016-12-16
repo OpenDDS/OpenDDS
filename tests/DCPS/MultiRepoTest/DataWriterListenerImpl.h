@@ -11,16 +11,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
-//Class DataWriterListenerImpl
 class DataWriterListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataWriterListener>
 {
 public:
-  //Constructor
   DataWriterListenerImpl ( OpenDDS::DCPS::Discovery::RepoKey repo);
 
-  //Destructor
   virtual ~DataWriterListenerImpl (void);
 
   virtual void on_offered_deadline_missed (

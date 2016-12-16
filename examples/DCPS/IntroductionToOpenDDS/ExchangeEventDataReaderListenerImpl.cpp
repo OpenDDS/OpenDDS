@@ -12,13 +12,11 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
 
-// Implementation skeleton constructor
 ExchangeEventDataReaderListenerImpl::ExchangeEventDataReaderListenerImpl()
-: is_exchange_closed_received_( 0 )
+: is_exchange_closed_received_(0)
 {
 }
 
-// Implementation skeleton destructor
 ExchangeEventDataReaderListenerImpl::~ExchangeEventDataReaderListenerImpl ()
 {
 }

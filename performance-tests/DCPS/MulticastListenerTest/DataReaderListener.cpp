@@ -71,15 +71,6 @@ template<class Tseq, class R, class R_ptr, class R_var>
   return samples_recvd;
 }
 
-
-
-
-
-
-
-
-
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,

@@ -19,7 +19,6 @@ namespace Test {
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
   {
   public:
-    //Constructor
     DataReaderListener( const bool verbose = false);
 
     virtual void on_requested_deadline_missed (
@@ -92,7 +91,6 @@ namespace Test {
     /// Priorities for the writers we received samples from.
     const std::map< long, long>& priorities() const;
 
-    // Destructor
     virtual ~DataReaderListener (void);
 
     private:

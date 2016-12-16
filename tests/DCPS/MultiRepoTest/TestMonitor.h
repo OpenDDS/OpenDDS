@@ -29,7 +29,6 @@ class TestMonitor {
     /// Construct from command line.
     TestMonitor( int argc, ACE_TCHAR** argv, char** envp);
 
-    /// Virtual destructor.
     virtual ~TestMonitor();
 
     /// Main actions occur here.

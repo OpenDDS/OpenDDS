@@ -23,16 +23,13 @@ namespace Test {
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
   {
     public:
-      //Constructor
       DataReaderListener(
         bool collectData = false,
         int rawDataBound = 0,
         OpenDDS::DCPS::DataCollector< double>::OnFull rawDataType
           = OpenDDS::DCPS::DataCollector< double>::KeepOldest,
-        bool verbose = false
-      );
+        bool verbose = false);
 
-      // Destructor
       virtual ~DataReaderListener (void);
 
       virtual void on_requested_deadline_missed (

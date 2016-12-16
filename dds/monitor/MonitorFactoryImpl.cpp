@@ -30,13 +30,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-
-// Implementation skeleton constructor
 MonitorFactoryImpl::MonitorFactoryImpl()
 {
 }
 
-// Implementation skeleton destructor
 MonitorFactoryImpl::~MonitorFactoryImpl()
 {
 }

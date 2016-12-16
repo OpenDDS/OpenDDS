@@ -4,12 +4,10 @@
 #include "DCPSDataWriterI.h"
 #include <dds/DCPS/RepoIdConverter.h>
 
-// Implementation skeleton constructor
 TAO_DDS_DCPSDataWriter_i::TAO_DDS_DCPSDataWriter_i (void)
   {
   }
 
-// Implementation skeleton destructor
 TAO_DDS_DCPSDataWriter_i::~TAO_DDS_DCPSDataWriter_i (void)
   {
   }

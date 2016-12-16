@@ -10,13 +10,11 @@ extern int num_reads_before_crash;
 extern int read_delay_ms;
 extern int actual_lost_sub_notification;
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)
 {
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl ()
 {
 }

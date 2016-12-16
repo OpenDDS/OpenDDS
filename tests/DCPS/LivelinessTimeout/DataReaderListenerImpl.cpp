@@ -8,13 +8,11 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
   deadline_missed_(0)
 {
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
   }
