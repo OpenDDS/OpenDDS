@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
+
 OpenDDS is an open-source C++ implementation of the Object Management Group's
 specification "Data Distribution Service for Real-time Systems".  Although
 OpenDDS is itself developed in C++, Java and JMS bindings are provided so
