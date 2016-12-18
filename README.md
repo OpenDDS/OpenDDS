@@ -17,8 +17,7 @@ terms as ACE, TAO and MPC.  See the LICENSE file for details.
 This directory structure contains OpenDDS
 
 
-======================================================================
-* Documentation
+# Documentation
 
 The OpenDDS Developer's Guide is freely downloadable at:
 http://download.ociweb.com/OpenDDS/
@@ -27,8 +26,7 @@ The TAO Developer's Guide book set may also be purchased from:
 http://www.theaceorb.com/purchase/index.html
 
 
-======================================================================
-* Support
+# Support
 
 OCI strives to make OpenDDS as bug free as possible.  If you encounter
 any problems with this release please fill out the PROBLEM-REPORT-FORM
@@ -45,16 +43,15 @@ find out more about the support options available, please contact
 sales@ociweb.com.
 
 
-======================================================================
-* Features
+# Features
 
 This release of OpenDDS is based on the DDS Specification formal/2015-04-10
 (version 1.4).  It features the following transport protocols:
 
-** TCP/IP
-** UDP/IP
-** IP multicast
-** RTPS over UDP/IP (unicast and multicast)
+* TCP/IP
+* UDP/IP
+* IP multicast
+* RTPS over UDP/IP (unicast and multicast)
 
 RTPS (Interoperability) features are based on the DDS-RTPS Specification
 formal/2014-09-01 (version 2.2).  See the OpenDDS Developer's Guide and
@@ -76,10 +73,9 @@ found below.  If you would like have OCI add a feature to OpenDDS
 please see the Support section for contact information.
 
 
-======================================================================
-* Dependencies
+# Dependencies
 
-** TAO
+## TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo.  If you will be using the "configure" script for OpenDDS
@@ -89,9 +85,9 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-*** TAO 2.0a patch 7
-*** TAO 2.2a patch 10
-*** TAO 2.4.0 (DOC Group)
+* TAO 2.0a patch 7
+* TAO 2.2a patch 10
+* TAO 2.4.0 (DOC Group)
 
 Note that the 2.0a and 2.2a releases are from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -99,43 +95,43 @@ http://download.dre.vanderbilt.edu/.
 
 OpenDDS Safety Profile requires TAO from the 2.2a or DOC Group release series.
 
-** GNU Make
+## GNU Make
 
 GNU Make 3.80+ was used for automating the compiling and linking of OpenDDS
 on Unix and Linux systems.
 
-** Perl
+## Perl
 
 Perl is used for running the automated tests and examples included in this
 source tree and generating Makefiles or Visual Studio project files.  On Windows
 we recommend the use of ActiveState Perl.  The configure script also uses Perl.
 
-* Operating Systems
+# Operating Systems
 
 This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
-** Red Hat EL 5 and 5.3, x86_64
-** Red Hat EL and CentOS 6.6 and 6.8, x86_64
-** Red Hat EL 7, x86_64
-** Fedora Core 6, x86
-** Fedora 24 x86_64
-** Ubuntu 16.04 LTS, x86_64
-** openSUSE 42.1, x86_64
+* Red Hat EL 5 and 5.3, x86_64
+* Red Hat EL and CentOS 6.6 and 6.8, x86_64
+* Red Hat EL 7, x86_64
+* Fedora Core 6, x86
+* Fedora 24 x86_64
+* Ubuntu 16.04 LTS, x86_64
+* openSUSE 42.1, x86_64
 
 Windows family:
-** Windows 7 (32-bit, 64-bit)
-** Windows Server 2012 R2 (64-bit)
+* Windows 7 (32-bit, 64-bit)
+* Windows Server 2012 R2 (64-bit)
 
 Others:
-** SunOS 5.10 (Solaris 10) (SPARC)
-** Mac OSX 10.11 (El Capitan)
+* SunOS 5.10 (Solaris 10) (SPARC)
+* Mac OSX 10.11 (El Capitan)
 
 Embedded/Mobile/IoT:
-** LynxOS-178 (OpenDDS Safety Profile)
-** VxWorks 6.9 and 7 (see below)
-** Linux on Raspberry Pi and Intel Edison
-** Android NDK r12b (ARM)
+* LynxOS-178 (OpenDDS Safety Profile)
+* VxWorks 6.9 and 7 (see below)
+* Linux on Raspberry Pi and Intel Edison
+* Android NDK r12b (ARM)
 
 We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
 system and performance tests (but not the entire regression test suite).
@@ -146,34 +142,31 @@ Marketplace at:
 https://marketplace.windriver.com/index.php?partners&on=details&id=33
 
 
-======================================================================
-* Compilers
+# Compilers
 
 This release of OpenDDS has been tested using the following compilers:
 
-** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
-** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
-** Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
-** Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
-** Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-** gcc 4.1.x
-** gcc 4.4.x
-** gcc 4.8.x
-** gcc 4.9.x
-** gcc 5.4
-** gcc 6.2
-** Clang 3.8 (llvm.org) and 7.3 (Apple)
-** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
+* Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
+* Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
+* Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
+* Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
+* Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
+* gcc 4.1.x
+* gcc 4.4.x
+* gcc 4.8.x
+* gcc 4.9.x
+* gcc 5.4
+* gcc 6.2
+* Clang 3.8 (llvm.org) and 7.3 (Apple)
+* Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 
-* Building and Installing
+# Building and Installing
 
 For building and installation instructions
 see the INSTALL file in this directory.
 
 
-======================================================================
-* OpenDDS Compliance with the DDS Specification
+# OpenDDS Compliance with the DDS Specification
 
 See http://www.opendds.org and the OpenDDS Developer's Guide at:
 http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
-
