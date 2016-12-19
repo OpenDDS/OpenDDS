@@ -1,7 +1,7 @@
 #ifndef _DDSSHAPEDYNAMICS_HPP
 #define _DDSSHAPEDYNAMICS_HPP
 
-#include "ShapeTypeTypeSupportImpl.h"
+#include "ShapeTypeTypeSupportC.h"
 #include <ShapeDynamics.hpp>
 #include <QtCore/QRect>
 #include <QtGui/QtGui>
