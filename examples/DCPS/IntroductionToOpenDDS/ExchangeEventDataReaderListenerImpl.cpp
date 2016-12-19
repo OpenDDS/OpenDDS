@@ -31,7 +31,6 @@ ExchangeEventDataReaderListenerImpl::is_exchange_closed_received()
 
 
 void ExchangeEventDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
   try {
     StockQuoter::ExchangeEventDataReader_var exchange_evt_dr
@@ -93,7 +92,6 @@ void ExchangeEventDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr 
 void ExchangeEventDataReaderListenerImpl::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "ExchangeEventDataReaderListenerImpl::on_requested_deadline_missed" << endl;
 }
@@ -101,7 +99,6 @@ void ExchangeEventDataReaderListenerImpl::on_requested_deadline_missed (
 void ExchangeEventDataReaderListenerImpl::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "ExchangeEventDataReaderListenerImpl::on_requested_incompatible_qos" << endl;
 }
@@ -109,7 +106,6 @@ void ExchangeEventDataReaderListenerImpl::on_requested_incompatible_qos (
 void ExchangeEventDataReaderListenerImpl::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "ExchangeEventDataReaderListenerImpl::on_liveliness_changed" << endl;
 }
@@ -117,7 +113,6 @@ void ExchangeEventDataReaderListenerImpl::on_liveliness_changed (
 void ExchangeEventDataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "ExchangeEventDataReaderListenerImpl::on_subscription_matched" << endl;
 }
@@ -125,7 +120,6 @@ void ExchangeEventDataReaderListenerImpl::on_subscription_matched (
 void ExchangeEventDataReaderListenerImpl::on_sample_rejected(
     DDS::DataReader_ptr,
     const DDS::SampleRejectedStatus&)
-  throw (CORBA::SystemException)
 {
   cerr << "ExchangeEventDataReaderListenerImpl::on_sample_rejected" << endl;
 }
@@ -133,7 +127,6 @@ void ExchangeEventDataReaderListenerImpl::on_sample_rejected(
 void ExchangeEventDataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-  throw (CORBA::SystemException)
 {
   cerr << "ExchangeEventDataReaderListenerImpl::on_sample_lost" << endl;
 }

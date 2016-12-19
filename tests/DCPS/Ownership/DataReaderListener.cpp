@@ -51,7 +51,7 @@ throw(CORBA::SystemException)
 
     DDS::ReturnCode_t status = DDS::RETCODE_OK;
     while (status == DDS::RETCODE_OK) {
-      num_reads_ ++;
+      ++num_reads_;
       Messenger::Message message;
       DDS::SampleInfo si;
 

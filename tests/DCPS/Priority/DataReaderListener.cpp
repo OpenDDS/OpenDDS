@@ -7,7 +7,7 @@
 Test::DataReaderListener::DataReaderListener( const bool verbose)
  : verbose_( verbose),
    count_( 0),
-   recieved_samples_invalid_( false),
+   received_samples_invalid_( false),
    priority_sample_( NOT_RECEIVED)
 {
 }
@@ -25,12 +25,11 @@ Test::DataReaderListener::count() const
 bool
 Test::DataReaderListener::passed() const
 {
-  return !recieved_samples_invalid_ && priority_sample_ == RECEIVED_VALID;
+  return !received_samples_invalid_ && priority_sample_ == RECEIVED_VALID;
 }
 
 void
 Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
   Test::DataDataReader_var dr = Test::DataDataReader::_narrow (reader);
   if (CORBA::is_nil (dr.in ())) {
@@ -75,10 +74,10 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
                      ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
                      ACE_TEXT("Received multiple high priority samples.\n")));
         }
-        else if (recieved_samples_.count(data.before_value)) {
+        else if (received_samples_.count(data.before_value)) {
           priority_sample_ = RECEIVED_INVALID;
           // (there is at least one entry so rbegin is valid)
-          const long highest = *recieved_samples_.rbegin();
+          const long highest = *received_samples_.rbegin();
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
                      ACE_TEXT("Did not receive high priority sample before low priority ")
@@ -89,22 +88,22 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
         else
           priority_sample_ = RECEIVED_VALID;
       }
-      else if (!recieved_samples_.insert(data.value).second) {
-        recieved_samples_invalid_ = true;
+      else if (!received_samples_.insert(data.value).second) {
+        received_samples_invalid_ = true;
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
                    ACE_TEXT("Received duplicate sample %d.\n"),
                    data.value));
       }
-      else if (data.value > 1 && !recieved_samples_.count(data.value - 1)) {
-        recieved_samples_invalid_ = true;
+      else if (data.value > 1 && !received_samples_.count(data.value - 1)) {
+        received_samples_invalid_ = true;
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
                    ACE_TEXT("Received the sample %d before the previous sample.\n"),
                    data.value));
       }
-      else if (recieved_samples_.count(data.value + 1)) {
-        recieved_samples_invalid_ = true;
+      else if (received_samples_.count(data.value + 1)) {
+        received_samples_invalid_ = true;
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
                    ACE_TEXT("Received the sample %d after the next sample.\n"),
@@ -134,7 +133,6 @@ void
 Test::DataReaderListener::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -142,7 +140,6 @@ void
 Test::DataReaderListener::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -150,7 +147,6 @@ void
 Test::DataReaderListener::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
-  throw (CORBA::SystemException)
 {
   if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
@@ -163,7 +159,6 @@ void
 Test::DataReaderListener::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -171,14 +166,12 @@ void
 Test::DataReaderListener::on_sample_rejected (
     DDS::DataReader_ptr,
     DDS::SampleRejectedStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
 void
 Test::DataReaderListener::on_sample_lost (DDS::DataReader_ptr,
                                           DDS::SampleLostStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -186,7 +179,6 @@ void
 Test::DataReaderListener::on_subscription_disconnected (
     DDS::DataReader_ptr,
     ::OpenDDS::DCPS::SubscriptionDisconnectedStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -194,7 +186,6 @@ void
 Test::DataReaderListener::on_subscription_reconnected (
     DDS::DataReader_ptr,
     ::OpenDDS::DCPS::SubscriptionReconnectedStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -202,7 +193,6 @@ void
 Test::DataReaderListener::on_subscription_lost (
     DDS::DataReader_ptr,
     ::OpenDDS::DCPS::SubscriptionLostStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -210,13 +200,11 @@ void
 Test::DataReaderListener::on_budget_exceeded (
     DDS::DataReader_ptr,
     const ::OpenDDS::DCPS::BudgetExceededStatus&)
-  throw (CORBA::SystemException)
 {
 }
 
 void
 Test::DataReaderListener::on_connection_deleted (DDS::DataReader_ptr)
-  throw (CORBA::SystemException)
 {
 }
 

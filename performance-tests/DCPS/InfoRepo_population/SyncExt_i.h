@@ -15,8 +15,7 @@ class SyncExt_i : public virtual POA_SyncExt::Collector,
 
   virtual void publish (SyncExt::Role rol
                         , ::CORBA::Long instances
-                        , ::CORBA::Long msecs)
-    throw (CORBA::SystemException);
+                        , ::CORBA::Long msecs);
 
   void print_results (void);
 

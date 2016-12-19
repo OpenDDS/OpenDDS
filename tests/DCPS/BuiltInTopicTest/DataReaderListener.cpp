@@ -26,9 +26,8 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
-  num_reads_ ++;
+  ++num_reads_;
 
   try {
     ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
@@ -83,7 +82,6 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 void DataReaderListenerImpl::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_requested_deadline_missed" << endl;
 }
@@ -91,7 +89,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_requested_incompatible_qos" << endl;
 }
@@ -99,7 +96,6 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 void DataReaderListenerImpl::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_liveliness_changed" << endl;
 }
@@ -107,7 +103,6 @@ void DataReaderListenerImpl::on_liveliness_changed (
 void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus & status)
-  throw (CORBA::SystemException)
 {
   if (this->publication_handle_ == ::DDS::HANDLE_NIL) {
     this->publication_handle_ = status.last_publication_handle;
@@ -151,7 +146,6 @@ void DataReaderListenerImpl::on_subscription_matched (
 void DataReaderListenerImpl::on_sample_rejected(
     DDS::DataReader_ptr,
     const DDS::SampleRejectedStatus&)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_sample_rejected" << endl;
 }
@@ -159,7 +153,6 @@ void DataReaderListenerImpl::on_sample_rejected(
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_sample_lost" << endl;
 }
@@ -167,7 +160,6 @@ void DataReaderListenerImpl::on_sample_lost(
 void DataReaderListenerImpl::on_subscription_disconnected (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_subscription_disconnected" << endl;
 }
@@ -175,7 +167,6 @@ void DataReaderListenerImpl::on_subscription_disconnected (
 void DataReaderListenerImpl::on_subscription_reconnected (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionReconnectedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_subscription_reconnected" << endl;
 }
@@ -183,14 +174,12 @@ void DataReaderListenerImpl::on_subscription_reconnected (
 void DataReaderListenerImpl::on_subscription_lost (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionLostStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
 }
 
 void DataReaderListenerImpl::on_connection_deleted (
   DDS::DataReader_ptr)
-  throw (CORBA::SystemException)
 {
   cerr << "DataReaderListenerImpl::on_connection_deleted" << endl;
 }

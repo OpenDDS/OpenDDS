@@ -42,8 +42,7 @@ class Sync_Export SyncClient_i : public POA_Sync::Client, public ACE_Task_Base
   virtual int svc (void);
 
   // notification from SyncServer
-  virtual void proceed (void)
-    throw (CORBA::SystemException);
+  virtual void proceed (void);
 
   // cleans up the notification pipeline.
   // Invoke this before notifying the SyncServer.

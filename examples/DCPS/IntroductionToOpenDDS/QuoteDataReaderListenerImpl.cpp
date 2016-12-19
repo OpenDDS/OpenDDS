@@ -22,7 +22,6 @@ QuoteDataReaderListenerImpl::~QuoteDataReaderListenerImpl ()
 }
 
 void QuoteDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
   try {
     StockQuoter::QuoteDataReader_var quote_dr
@@ -65,7 +64,6 @@ void QuoteDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 void QuoteDataReaderListenerImpl::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "QuoteDataReaderListenerImpl::on_requested_deadline_missed" << endl;
 }
@@ -73,7 +71,6 @@ void QuoteDataReaderListenerImpl::on_requested_deadline_missed (
 void QuoteDataReaderListenerImpl::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "QuoteDataReaderListenerImpl::on_requested_incompatible_qos" << endl;
 }
@@ -81,7 +78,6 @@ void QuoteDataReaderListenerImpl::on_requested_incompatible_qos (
 void QuoteDataReaderListenerImpl::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "QuoteDataReaderListenerImpl::on_liveliness_changed" << endl;
 }
@@ -89,7 +85,6 @@ void QuoteDataReaderListenerImpl::on_liveliness_changed (
 void QuoteDataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
-  throw (CORBA::SystemException)
 {
   cerr << "QuoteDataReaderListenerImpl::on_subscription_matched" << endl;
 }
@@ -97,7 +92,6 @@ void QuoteDataReaderListenerImpl::on_subscription_matched (
 void QuoteDataReaderListenerImpl::on_sample_rejected(
     DDS::DataReader_ptr,
     const DDS::SampleRejectedStatus&)
-  throw (CORBA::SystemException)
 {
   cerr << "QuoteDataReaderListenerImpl::on_sample_rejected" << endl;
 }
@@ -105,7 +99,6 @@ void QuoteDataReaderListenerImpl::on_sample_rejected(
 void QuoteDataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-  throw (CORBA::SystemException)
 {
   cerr << "QuoteDataReaderListenerImpl::on_sample_lost" << endl;
 }

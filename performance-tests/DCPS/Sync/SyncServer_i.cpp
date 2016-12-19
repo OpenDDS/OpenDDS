@@ -79,7 +79,6 @@ SyncServer_i::~SyncServer_i (void)
 void
 SyncServer_i::register_me (::Sync::Role role, ::Sync::Client_ptr callback,
                            ::Sync::Id_out id)
-  throw (CORBA::SystemException)
 {
   //ACE_DEBUG ((LM_DEBUG, "(%P|%t) SyncServer_i::register_me\n"));
   try{
@@ -134,7 +133,6 @@ SyncServer_i::register_me (::Sync::Role role, ::Sync::Client_ptr callback,
 
 void
 SyncServer_i::unregister (::Sync::Id id)
-  throw (CORBA::SystemException)
 {
   //ACE_DEBUG ((LM_DEBUG, "(%P|%t) SyncServer_i::unregister\n"));
   if (subs_.find (id) != subs_.end()) {
@@ -161,7 +159,6 @@ SyncServer_i::unregister (::Sync::Id id)
 void
 SyncServer_i::way_point_reached (::Sync::Id id,
                                  ::Sync::WayPoint way_point)
-  throw (CORBA::SystemException)
 {
   //ACE_DEBUG ((LM_DEBUG, "(%P|%t) SyncServer_i::way_point_reached\n"));
 
