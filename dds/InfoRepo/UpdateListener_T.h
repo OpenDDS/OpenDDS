@@ -16,6 +16,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -24,10 +26,8 @@ template<class DataType, class ReaderType>
 class UpdateListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  /// Default constructor
   UpdateListener(UpdateProcessor<DataType>& processor);
 
-  /// Virtual destructor
   virtual ~UpdateListener();
 
   virtual void on_requested_deadline_missed(
@@ -75,6 +75,8 @@ private:
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateListener_T.cpp"

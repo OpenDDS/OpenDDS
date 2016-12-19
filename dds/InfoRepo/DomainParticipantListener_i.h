@@ -16,14 +16,11 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//Class OPENDDS_DCPS_DomainParticipantListener_i
 class OpenDDS_InfoRepoLib_Export OPENDDS_DCPS_DomainParticipantListener_i
   : public virtual DDS::DomainParticipantListener {
 public:
-  //Constructor
   OPENDDS_DCPS_DomainParticipantListener_i();
 
-  //Destructor
   virtual ~OPENDDS_DCPS_DomainParticipantListener_i();
 
   virtual void on_inconsistent_topic(

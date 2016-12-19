@@ -19,12 +19,13 @@
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Reactor_Timer_Interface.h"
 
 #include <algorithm>
 #include <iterator>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -52,7 +53,7 @@ TransportClient::~TransportClient()
                OPENDDS_STRING(converter).c_str()));
   }
 
-  this->stop_associating();
+  stop_associating();
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -82,19 +83,18 @@ TransportClient::~TransportClient()
 
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(this, it->second->data_.remote_id_);
+      impls_[i]->stop_accepting_or_connecting(shared_from_this(), it->second->data_.remote_id_);
     }
 
     pending_assoc_timer_->cancel_timer(this, it->second);
   }
 
   pending_assoc_timer_->wait();
-  pending_assoc_timer_->destroy();
 
   for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
 
-    (*it)->detach_client(this);
+    (*it)->detach_client(shared_from_this());
   }
 }
 
@@ -168,7 +168,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
       TransportImpl_rch impl = inst->impl();
 
       if (!impl.is_nil()) {
-        impl->attach_client(this);
+        impl->attach_client(shared_from_this());
         impls_.push_back(impl);
         const CORBA::ULong len = conn_info_.length();
         conn_info_.length(len + 1);
@@ -237,7 +237,7 @@ TransportClient::transport_detached(TransportImpl* which)
 
       for (PendingMap::iterator it2 = pending_.begin();
            it2 != pending_.end(); ++it2) {
-        which->stop_accepting_or_connecting(this, it2->first);
+        which->stop_accepting_or_connecting(shared_from_this(), it2->first);
       }
 
       break;
@@ -260,7 +260,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(this->repo_id_);
+      GuidConverter writer_converter(repo_id_);
       GuidConverter reader_converter(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C no available impls\n"),
@@ -280,7 +280,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (all_impls_shut_down) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(this->repo_id_);
+      GuidConverter writer_converter(repo_id_);
       GuidConverter reader_converter(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C all available impls previously shutdown\n"),
@@ -294,58 +294,46 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, new PendingAssoc())).first;
+    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc_rch(new PendingAssoc()))).first;
 
-    GuidConverter tc_assoc(this->repo_id_);
+    GuidConverter tc_assoc(repo_id_);
     GuidConverter remote_new(data.remote_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate added PendingAssoc "
               "between %C and remote %C\n",
               OPENDDS_STRING(tc_assoc).c_str(),
               OPENDDS_STRING(remote_new).c_str()), 0);
   } else {
-    if (iter->second->removed_) {
-      iter->second->removed_ = false;
-      GuidConverter tc_assoc(this->repo_id_);
-      GuidConverter remote_new(data.remote_id_);
-      VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate found existing PendingAssoc "
-                "between %C and remote %C, set removed to false to continue using this pending association\n",
-                OPENDDS_STRING(tc_assoc).c_str(),
-                OPENDDS_STRING(remote_new).c_str()), 0);
-    } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: TransportClient::associate ")
-                 ACE_TEXT("already associating with remote.\n")));
 
-      return false;
-    }
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TransportClient::associate ")
+               ACE_TEXT("already associating with remote.\n")));
+
+    return false;
+
   }
 
-  PendingAssoc& pend = *(iter->second);
-  pend.active_ = active;
-  pend.impls_.clear();
-  pend.blob_index_ = 0;
-  pend.data_ = data;
-  pend.attribs_.local_id_ = repo_id_;
-  pend.attribs_.priority_ = get_priority_value(data);
-  pend.attribs_.local_reliable_ = reliable_;
-  pend.attribs_.local_durable_ = durable_;
+  PendingAssoc_rch pend = iter->second;
+  pend->active_ = active;
+  pend->impls_.clear();
+  pend->blob_index_ = 0;
+  pend->data_ = data;
+  pend->attribs_.local_id_ = repo_id_;
+  pend->attribs_.priority_ = get_priority_value(data);
+  pend->attribs_.local_reliable_ = reliable_;
+  pend->attribs_.local_durable_ = durable_;
 
   if (active) {
-    pend.impls_.reserve(impls_.size());
+    pend->impls_.reserve(impls_.size());
     std::reverse_copy(impls_.begin(), impls_.end(),
-                      std::back_inserter(pend.impls_));
+                      std::back_inserter(pend->impls_));
 
-    pend.initiate_connect(this, guard);
-
-    //Revisit if this should be used instead of always returning true.
-    //return pend.initiate_connect(this, guard);
-    return true;
+    return pend->initiate_connect(this, guard);
 
   } else { // passive
 
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
-      pend.impls_.push_back(impls_[i]);
+      pend->impls_.push_back(impls_[i]);
       const OPENDDS_STRING type = impls_[i]->transport_type();
 
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
@@ -362,7 +350,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
+            res = impls_[i]->accept_datalink(remote, pend->attribs_, shared_from_this());
           }
 
           //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
@@ -383,7 +371,7 @@ TransportClient::associate(const AssociationData& data, bool active)
         }
       }
 
-      //pend.impls_.push_back(impls_[i]);
+      //pend->impls_.push_back(impls_[i]);
     }
 
     pending_assoc_timer_->schedule_timer(this, iter->second);
@@ -398,7 +386,7 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
 {
   TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
 
-  tc->use_datalink(data_.remote_id_, 0);
+  tc->use_datalink(data_.remote_id_, DataLink_rch());
 
   return 0;
 }
@@ -430,7 +418,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
                         "attempt to connect_datalink between local %C and remote %C\n",
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
-    result = impl->connect_datalink(remote, attribs_, this);
+    result = impl->connect_datalink(remote, attribs_, shared_from_this());
+    guard.acquire();
     if (!result.success_) {
       if (DCPS_debug_level) {
         GuidConverter writer_converter(repo_id_);
@@ -442,40 +431,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
       }
       return false;
     }
-    guard.acquire();
   }
 
-  //Check to make sure the pending assoc still exists in the map and hasn't been slated for removal
-  //figure out how to respond to these possible results that occurred while lock was released to connect
-  PendingMap::iterator iter = pending_.find(remote.repo_id_);
-
-  if (iter == pending_.end()) {
-    GuidConverter local(repo_id_);
-    GuidConverter remote_conv(remote.repo_id_);
-    VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
-                        "cannot find pending association after connecting datalink between local %C and remote %C\n",
-                        OPENDDS_STRING(local).c_str(),
-                        OPENDDS_STRING(remote_conv).c_str()), 0);
-    return false;
-    //log some sort of error message...
-    //PendingAssoc's are only erased from pending_ in use_datalink_i after
-
-  } else {
-    if (iter->second->removed_) {
-      GuidConverter local(repo_id_);
-      GuidConverter remote_conv(remote.repo_id_);
-      VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
-                          "pending association marked for removal already, after connecting datalink between local %C and remote %C\n",
-                          OPENDDS_STRING(local).c_str(),
-                          OPENDDS_STRING(remote_conv).c_str()), 0);
-      //this occurs if the transport client was told to disassociate while connecting
-      //disassociate cleans up everything except this local AcceptConnectResult whose destructor
-      //should take care of it because link has not been shifted into links_ by use_datalink_i
-      return false;
-
-    }
-
-  }
   GuidConverter local(repo_id_);
   GuidConverter remote_conv(remote.repo_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
@@ -490,7 +447,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                                                 Guard& guard)
 {
   GuidConverter local(tc->repo_id_);
-  GuidConverter remote(this->data_.remote_id_);
+  GuidConverter remote(data_.remote_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                       "between %C and remote %C\n",
                       OPENDDS_STRING(local).c_str(),
@@ -509,13 +466,13 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
         TransportImpl::AcceptConnectResult res;
         GuidConverter tmp_local(tc->repo_id_);
-        GuidConverter tmp_remote(this->data_.remote_id_);
+        GuidConverter tmp_remote(data_.remote_id_);
         if (!tc->initiate_connect_i(res, impl, remote, attribs_, guard)) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
-          if (res.success_ && !this->removed_) {
+          if (res.success_ ) {
             GuidConverter local(tc->repo_id_);
-            GuidConverter remote(this->data_.remote_id_);
+            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) PendingAssoc::initiate_connect - ")
                                 ACE_TEXT("between %C and remote %C success\n"),
                                 OPENDDS_STRING(local).c_str(),
@@ -527,7 +484,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                               "between %C and remote %C unsuccessful\n",
                               OPENDDS_STRING(tmp_local).c_str(),
                               OPENDDS_STRING(tmp_remote).c_str()), 0);
-          return false;
+          break;
         }
 
         if (res.success_) {
@@ -539,7 +496,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
             tc->use_datalink_i(data_.remote_id_, res.link_, guard);
           } else {
             GuidConverter local(tc->repo_id_);
-            GuidConverter remote(this->data_.remote_id_);
+            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
                                 OPENDDS_STRING(local).c_str(),
@@ -549,7 +506,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           return true;
         } else {
           GuidConverter local(tc->repo_id_);
-          GuidConverter remote(this->data_.remote_id_);
+          GuidConverter remote(data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                               "result of initiate_connect_i (local: %C to remote: %C) was not success \n",
                               OPENDDS_STRING(local).c_str(),
@@ -604,18 +561,11 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     return;
   }
 
-  PendingAssoc* pend = iter->second;
+  PendingAssoc_rch pend = iter->second;
   const int active_flag = pend->active_ ? ASSOC_ACTIVE : 0;
   bool ok = false;
 
-  if (pend->removed_) { // no-op
-    VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
-                        "TransportClient(%@) using datalink[%@] pending association to remote %C was removed\n",
-                        this,
-                        link.in(),
-                        OPENDDS_STRING(peerId_conv).c_str()), 0);
-    return;
-  } else if (link.is_nil()) {
+  if (link.is_nil()) {
 
     if (pend->active_ && pend->initiate_connect(this, guard)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
@@ -642,17 +592,15 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   if (!pend->active_) {
 
     for (size_t i = 0; i < pend->impls_.size(); ++i) {
-      pend->impls_[i]->stop_accepting_or_connecting(this, pend->data_.remote_id_);
+      pend->impls_[i]->stop_accepting_or_connecting(shared_from_this(), pend->data_.remote_id_);
     }
   }
 
   pending_.erase(iter);
-  pend->removed_ = true;
 
   guard.release();
 
   pending_assoc_timer_->cancel_timer(this, pend);
-  pending_assoc_timer_->delete_pending_assoc(pend);
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
 }
@@ -712,13 +660,7 @@ void
 TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-
-  PendingMap::iterator iter = pending_.begin();
-
-  while (iter != pending_.end()) {
-    iter->second->removed_ = true;
-    ++iter;
-  }
+  pending_.clear();
 }
 
 void
@@ -730,11 +672,7 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
     return;
   } else {
     for (CORBA::ULong i = 0; i < length; ++i) {
-      PendingMap::iterator iter = pending_.find(repos[i]);
-
-      if (iter != pending_.end()) {
-        iter->second->removed_ = true;
-      }
+      pending_.erase(repos[i]);
     }
   }
 }
@@ -756,10 +694,7 @@ TransportClient::disassociate(const RepoId& peerId)
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  const PendingMap::iterator iter = pending_.find(peerId);
-
-  if (iter != pending_.end()) {
-    iter->second->removed_ = true;
+  if (pending_.erase(peerId)) {
     return;
   }
 
@@ -973,7 +908,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
       }
       DataLinkSet_rch pub_links =
         (cur->get_num_subs() > 0)
-        ? links_.select_links(cur->get_sub_ids(), cur->get_num_subs())
+        ? DataLinkSet_rch(links_.select_links(cur->get_sub_ids(), cur->get_num_subs()))
         : DataLinkSet_rch(&links_, false);
 
       if (pub_links.is_nil() || pub_links->empty()) {
@@ -1081,7 +1016,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     // The reason that the send_links_ set is cleared is because we continually
     // reuse the same send_links_ object over and over for each call to this
     // send method.
-    RepoId pub_id(this->repo_id_);
+    RepoId pub_id(repo_id_);
     send_links.send_stop(pub_id);
     if (transaction_id != 0)
       expected_transaction_id_ = max_transaction_id_seen_ + 1;
@@ -1145,3 +1080,5 @@ TransportClient::remove_all_msgs()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

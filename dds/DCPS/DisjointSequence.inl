@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -81,3 +83,5 @@ DisjointSequence::insert(const SequenceRange& range,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

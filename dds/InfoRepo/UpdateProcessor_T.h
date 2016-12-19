@@ -12,6 +12,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
 
 struct SampleInfo;
@@ -32,10 +34,8 @@ namespace Federator {
 template<class DataType>
 class  UpdateProcessor {
 public:
-  /// Default constructor.
   UpdateProcessor();
 
-  /// Virtual destructor
   virtual ~UpdateProcessor();
 
   //
@@ -81,6 +81,8 @@ public:
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateProcessor_T.cpp"

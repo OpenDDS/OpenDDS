@@ -20,10 +20,13 @@
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
+#include "dds/DCPS/RcEventHandler.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
 ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -123,14 +126,17 @@ protected:
 
 private:
   ACE_Thread_Mutex ack_lock_;
-  SynWatchdog* syn_watchdog_;
+  RcEventHandler<SynWatchdog> syn_watchdog_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #ifdef __ACE_INLINE__
 # include "MulticastSession.inl"
 #endif  /* __ACE_INLINE__ */
 
 #endif  /* DCPS_MULTICASTSESSION_H */
+

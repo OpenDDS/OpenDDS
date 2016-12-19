@@ -116,7 +116,6 @@ SyncClient_i::svc (void)
 
 void
 SyncClient_i::proceed (void)
-  throw (CORBA::SystemException)
 {
   ACE_GUARD( ACE_SYNCH_MUTEX, guard, this->lock_);
   notification_ = true;

@@ -25,6 +25,8 @@
 
 class DDS_TEST;
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -156,5 +158,7 @@ typedef OpenDDS::DCPS::RcHandle<RtpsDiscovery> RtpsDiscovery_rch;
 
 } // namespace RTPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_RTPSDISCOVERY_H  */

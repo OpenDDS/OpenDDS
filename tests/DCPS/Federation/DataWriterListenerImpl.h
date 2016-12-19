@@ -11,7 +11,6 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-//Class DataWriterListenerImpl
 class DataWriterListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
 {

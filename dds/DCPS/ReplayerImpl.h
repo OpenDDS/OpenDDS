@@ -27,7 +27,6 @@
 
 #include "ace/Event_Handler.h"
 #include "ace/OS_NS_sys_time.h"
-#include "ace/Condition_T.h"
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <memory>
@@ -39,6 +38,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 class DDS_TEST;
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -50,7 +52,7 @@ class DataSampleElement;
  *
  * @brief Implementation of Replayer functionality
  *
- * This class is the implmentation of the Replayer.
+ * This class is the implementation of the Replayer.
  * Inheritance is used to limit the applications access to
  * underlying system methods.
  */
@@ -91,7 +93,7 @@ public:
                                              const RawDataSample&  sample );
   virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t    subscription,
                                              const RawDataSampleList& samples );
-  virtual DDS::ReturnCode_t set_qos (const ::DDS::PublisherQos & publisher_qos,
+  virtual DDS::ReturnCode_t set_qos (const DDS::PublisherQos & publisher_qos,
                                      const DDS::DataWriterQos &  datawriter_qos);
   virtual DDS::ReturnCode_t get_qos (DDS::PublisherQos &  publisher_qos,
                                      DDS::DataWriterQos & datawriter_qos);
@@ -331,5 +333,7 @@ private:
 
 } // namespace DCPS
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* end of include guard: OPENDDS_DCPS_REPLAYERIMPL_H */

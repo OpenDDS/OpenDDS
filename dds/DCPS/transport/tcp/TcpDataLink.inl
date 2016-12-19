@@ -9,6 +9,8 @@
 #include "TcpConnection.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE const ACE_INET_Addr&
 OpenDDS::DCPS::TcpDataLink::remote_address() const
 {
@@ -34,3 +36,5 @@ OpenDDS::DCPS::TcpDataLink::issues_on_deleted_callback() const
 {
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

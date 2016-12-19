@@ -22,6 +22,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -44,7 +46,6 @@ struct OpenDDS_Dcps_Export CoherentChangeControl {
   RepoId                publisher_id_;
   GroupCoherentSamples  group_coherent_samples_;
 
-  /// Default constructor.
   CoherentChangeControl() ;
 
   /// Similar to IDL compiler generated methods.
@@ -69,6 +70,8 @@ std::ostream& operator<<(std::ostream& str, const OpenDDS::DCPS::CoherentChangeC
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined(__ACE_INLINE__)
 #include "CoherentChangeControl.inl"

@@ -7,6 +7,8 @@
 
 #include "DataReaderListenerImpl.h"
 #include "Boilerplate.h"
+#include "ace/OS_NS_unistd.h"
+#include <iostream>
 
 using namespace examples::boilerplate;
 

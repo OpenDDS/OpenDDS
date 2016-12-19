@@ -8,6 +8,8 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dcps_export.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace DCPS {
 
@@ -27,8 +29,9 @@ namespace OpenDDS {
   {
   public:
     typedef DDSTraits<MessageType> TraitsType;
+    typedef MarshalTraits<MessageType> MarshalTraitsType;
 
-    typedef OPENDDS_MAP_CMP(MessageType, ::DDS::InstanceHandle_t,
+    typedef OPENDDS_MAP_CMP(MessageType, DDS::InstanceHandle_t,
                             typename TraitsType::LessThanType) InstanceMap;
     typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>  DataAllocator;
 
@@ -36,7 +39,6 @@ namespace OpenDDS {
       cdr_header_size = 4
     };
 
-    /// Constructor
     DataWriterImpl_T (void)
       : marshaled_size_ (0)
       , key_marshaled_size_ (0)
@@ -46,7 +48,6 @@ namespace OpenDDS {
     {
     }
 
-    /// Destructor
     virtual ~DataWriterImpl_T (void)
     {
       delete data_allocator_;
@@ -54,25 +55,25 @@ namespace OpenDDS {
       delete db_allocator_;
     }
 
-  virtual ::DDS::InstanceHandle_t register_instance (
+  virtual DDS::InstanceHandle_t register_instance (
       const MessageType & instance)
     {
-      ::DDS::Time_t const timestamp =
+      DDS::Time_t const timestamp =
         ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
       return register_instance_w_timestamp (instance, timestamp);
     }
 
-  virtual ::DDS::InstanceHandle_t register_instance_w_timestamp (
+  virtual DDS::InstanceHandle_t register_instance_w_timestamp (
       const MessageType & instance,
-      const ::DDS::Time_t & timestamp)
+      const DDS::Time_t & timestamp)
     {
-      ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
+      DDS::InstanceHandle_t registered_handle = DDS::HANDLE_NIL;
 
-      ::DDS::ReturnCode_t const ret
+      DDS::ReturnCode_t const ret
           = this->get_or_create_instance_handle(registered_handle,
                                                 instance,
                                                 timestamp);
-      if (ret != ::DDS::RETCODE_OK)
+      if (ret != DDS::RETCODE_OK)
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
@@ -86,11 +87,11 @@ namespace OpenDDS {
       return registered_handle;
     }
 
-  virtual ::DDS::ReturnCode_t unregister_instance (
+  virtual DDS::ReturnCode_t unregister_instance (
       const MessageType & instance,
-      ::DDS::InstanceHandle_t handle)
+      DDS::InstanceHandle_t handle)
     {
-      ::DDS::Time_t const timestamp =
+      DDS::Time_t const timestamp =
         ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
 
       return unregister_instance_w_timestamp (instance,
@@ -98,15 +99,15 @@ namespace OpenDDS {
                                               timestamp);
     }
 
-  virtual ::DDS::ReturnCode_t unregister_instance_w_timestamp (
+  virtual DDS::ReturnCode_t unregister_instance_w_timestamp (
       const MessageType & instance,
-      ::DDS::InstanceHandle_t handle,
-      const ::DDS::Time_t & timestamp)
+      DDS::InstanceHandle_t handle,
+      const DDS::Time_t & timestamp)
     {
-      ::DDS::InstanceHandle_t const registered_handle =
+      DDS::InstanceHandle_t const registered_handle =
         this->lookup_instance(instance);
 
-      if (registered_handle == ::DDS::HANDLE_NIL)
+      if (registered_handle == DDS::HANDLE_NIL)
         {
           // This case could be the instance is not registered yet or
           // already unregistered.
@@ -116,9 +117,9 @@ namespace OpenDDS {
                              ACE_TEXT("unregister_instance_w_timestamp, ")
                              ACE_TEXT("The instance is not registered.\n"),
                              TraitsType::type_name()),
-                            ::DDS::RETCODE_ERROR);
+                            DDS::RETCODE_ERROR);
         }
-      else if (handle != ::DDS::HANDLE_NIL && handle != registered_handle)
+      else if (handle != DDS::HANDLE_NIL && handle != registered_handle)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ")
@@ -128,7 +129,7 @@ namespace OpenDDS {
                              ACE_TEXT("registered handle=%X.\n"),
                              TraitsType::type_name(),
                              handle, registered_handle),
-                            ::DDS::RETCODE_ERROR);
+                            DDS::RETCODE_ERROR);
         }
 
       // DataWriterImpl::unregister_instance_i will call back to inform the
@@ -141,11 +142,11 @@ namespace OpenDDS {
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual ::DDS::ReturnCode_t write (
+  virtual DDS::ReturnCode_t write (
       const MessageType & instance_data,
-      ::DDS::InstanceHandle_t handle)
+      DDS::InstanceHandle_t handle)
     {
-      ::DDS::Time_t const source_timestamp =
+      DDS::Time_t const source_timestamp =
         ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
       return write_w_timestamp (instance_data,
                                 handle,
@@ -156,21 +157,21 @@ namespace OpenDDS {
   //WARNING: If the handle is non-nil and the instance is not registered
   //         then this operation may cause an access violation.
   //         This lack of safety helps performance.
-  virtual ::DDS::ReturnCode_t write_w_timestamp (
+  virtual DDS::ReturnCode_t write_w_timestamp (
       const MessageType & instance_data,
-      ::DDS::InstanceHandle_t handle,
-      const ::DDS::Time_t & source_timestamp)
+      DDS::InstanceHandle_t handle,
+      const DDS::Time_t & source_timestamp)
     {
       //  This operation assumes the provided handle is valid. The handle
       //  provided will not be verified.
 
-      if (handle == ::DDS::HANDLE_NIL) {
-        ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
-        ::DDS::ReturnCode_t ret
+      if (handle == DDS::HANDLE_NIL) {
+        DDS::InstanceHandle_t registered_handle = DDS::HANDLE_NIL;
+        DDS::ReturnCode_t ret
             = this->get_or_create_instance_handle(registered_handle,
                                                   instance_data,
                                                   source_timestamp);
-        if (ret != ::DDS::RETCODE_OK) {
+        if (ret != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ")
                             ACE_TEXT("%CDataWriterImpl::write, ")
@@ -187,7 +188,7 @@ namespace OpenDDS {
       OpenDDS::DCPS::GUIDSeq_var filter_out;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
       if (TheServiceParticipant->publisher_content_filter()) {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, ::DDS::RETCODE_ERROR);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, DDS::RETCODE_ERROR);
         for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
                end = reader_info_.end(); iter != end; ++iter) {
           const ReaderInfo& ri = iter->second;
@@ -211,33 +212,33 @@ namespace OpenDDS {
                                                   filter_out._retn());
     }
 
-  virtual ::DDS::ReturnCode_t dispose (
+  virtual DDS::ReturnCode_t dispose (
       const MessageType & instance_data,
-      ::DDS::InstanceHandle_t instance_handle)
+      DDS::InstanceHandle_t instance_handle)
     {
-      ::DDS::Time_t const source_timestamp =
+      DDS::Time_t const source_timestamp =
         ::OpenDDS::DCPS::time_value_to_time (ACE_OS::gettimeofday ());
       return dispose_w_timestamp (instance_data,
                                   instance_handle,
                                   source_timestamp);
     }
 
-  virtual ::DDS::ReturnCode_t dispose_w_timestamp (
+  virtual DDS::ReturnCode_t dispose_w_timestamp (
       const MessageType & instance_data,
-      ::DDS::InstanceHandle_t instance_handle,
-      const ::DDS::Time_t & source_timestamp)
+      DDS::InstanceHandle_t instance_handle,
+      const DDS::Time_t & source_timestamp)
     {
-      if(instance_handle == ::DDS::HANDLE_NIL)
+      if(instance_handle == DDS::HANDLE_NIL)
         {
           instance_handle = this->lookup_instance(instance_data);
-          if (instance_handle == ::DDS::HANDLE_NIL)
+          if (instance_handle == DDS::HANDLE_NIL)
             {
               ACE_ERROR_RETURN ((LM_ERROR,
                                  ACE_TEXT("(%P|%t) ")
                                  ACE_TEXT("%CDataWriterImpl::dispose, ")
                                  ACE_TEXT("The instance sample is not registered.\n"),
                                  TraitsType::type_name()),
-                                ::DDS::RETCODE_ERROR);
+                                DDS::RETCODE_ERROR);
             }
         }
 
@@ -245,14 +246,14 @@ namespace OpenDDS {
                                                     source_timestamp);
     }
 
-  virtual ::DDS::ReturnCode_t get_key_value (
+  virtual DDS::ReturnCode_t get_key_value (
       MessageType & key_holder,
-      ::DDS::InstanceHandle_t handle)
+      DDS::InstanceHandle_t handle)
     {
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         guard,
                         get_lock (),
-                        ::DDS::RETCODE_ERROR);
+                        DDS::RETCODE_ERROR);
 
       typename InstanceMap::iterator const the_end = instance_map_.end ();
       for (typename InstanceMap::iterator it = instance_map_.begin ();
@@ -262,26 +263,26 @@ namespace OpenDDS {
           if (it->second == handle)
             {
               key_holder = it->first;
-              return ::DDS::RETCODE_OK;
+              return DDS::RETCODE_OK;
             }
         }
 
-      return ::DDS::RETCODE_ERROR;
+      return DDS::RETCODE_ERROR;
     }
 
-  virtual ::DDS::InstanceHandle_t lookup_instance (
+  virtual DDS::InstanceHandle_t lookup_instance (
       const MessageType & instance_data)
     {
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         guard,
                         get_lock (),
-                        ::DDS::RETCODE_ERROR);
+                        DDS::RETCODE_ERROR);
 
       typename InstanceMap::const_iterator const it = instance_map_.find(instance_data);
 
       if (it == instance_map_.end())
         {
-          return ::DDS::HANDLE_NIL;
+          return DDS::HANDLE_NIL;
         }
       else
         {
@@ -294,14 +295,14 @@ namespace OpenDDS {
    * Initialize the DataWriter object.
    * Called as part of create_datawriter.
    */
-    virtual void init (::DDS::Topic_ptr                       topic,
+    virtual void init (DDS::Topic_ptr                       topic,
                        OpenDDS::DCPS::TopicImpl*              topic_servant,
-                       const ::DDS::DataWriterQos &           qos,
-                       ::DDS::DataWriterListener_ptr          a_listener,
-                       const ::DDS::StatusMask &              mask,
+                       const DDS::DataWriterQos &           qos,
+                       DDS::DataWriterListener_ptr          a_listener,
+                       const DDS::StatusMask &              mask,
                        OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
                        OpenDDS::DCPS::PublisherImpl*          publisher_servant,
-                       ::DDS::DataWriter_ptr                  dw_objref)
+                       DDS::DataWriter_ptr                  dw_objref)
     {
       OpenDDS::DCPS::DataWriterImpl::init (topic,
                                            topic_servant,
@@ -313,14 +314,14 @@ namespace OpenDDS {
                                            dw_objref);
 
       MessageType data;
-      if (TraitsType::gen_is_bounded_size(data)) {
+      if (MarshalTraitsType::gen_is_bounded_size()) {
         marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(data, true);
         // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
         marshaled_size_ = 0; // should use gen_find_size when marshaling
       }
-      OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
-      if (TraitsType::gen_is_bounded_size(ko)) {
+      if (MarshalTraitsType::gen_is_bounded_key_size()) {
+        OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
         key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
         // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
@@ -332,10 +333,9 @@ namespace OpenDDS {
    * Do parts of enable specific to the datatype.
    * Called by DataWriterImpl::enable().
    */
-    virtual ::DDS::ReturnCode_t enable_specific ()
+    virtual DDS::ReturnCode_t enable_specific ()
     {
-      MessageType data;
-      if (TraitsType::gen_is_bounded_size (data))
+      if (MarshalTraitsType::gen_is_bounded_size ())
         {
           data_allocator_ = new DataAllocator (n_chunks_, marshaled_size_);
           if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
@@ -381,14 +381,14 @@ namespace OpenDDS {
                      n_chunks_));
         }
 
-      return ::DDS::RETCODE_OK;
+      return DDS::RETCODE_OK;
     }
 
   /**
    * The framework has completed its part of unregistering the
    * given instance.
    */
-  virtual void unregistered(::DDS::InstanceHandle_t instance_handle)
+  virtual void unregistered(DDS::InstanceHandle_t instance_handle)
   {
     ACE_UNUSED_ARG(instance_handle);
     // Previously this method removed the instance from the instance_map_.
@@ -521,17 +521,17 @@ private:
    * the data type's key(s).  If the instance does not already exist
    * create a new instance handle for it.
    */
-  ::DDS::ReturnCode_t get_or_create_instance_handle(
-    ::DDS::InstanceHandle_t& handle,
+  DDS::ReturnCode_t get_or_create_instance_handle(
+    DDS::InstanceHandle_t& handle,
     const MessageType& instance_data,
-    const ::DDS::Time_t & source_timestamp)
+    const DDS::Time_t & source_timestamp)
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                        guard,
                        get_lock(),
-                       ::DDS::RETCODE_ERROR);
+                       DDS::RETCODE_ERROR);
 
-      handle = ::DDS::HANDLE_NIL;
+      handle = DDS::HANDLE_NIL;
       typename InstanceMap::const_iterator it = instance_map_.find(instance_data);
 
       bool needs_creation = true;
@@ -559,14 +559,14 @@ private:
                               OpenDDS::DCPS::KEY_ONLY_MARSHALING);
 
           // tell DataWriterLocal and Publisher about the instance.
-          ::DDS::ReturnCode_t ret = register_instance_i(handle, marshalled, source_timestamp);
+          DDS::ReturnCode_t ret = register_instance_i(handle, marshalled, source_timestamp);
           // note: the WriteDataContainer/PublicationInstance maintains ownership
           // of the marshalled sample.
 
-          if (ret != ::DDS::RETCODE_OK)
+          if (ret != DDS::RETCODE_OK)
             {
               marshalled->release ();
-              handle = ::DDS::HANDLE_NIL;
+              handle = DDS::HANDLE_NIL;
               return ret;
             }
 
@@ -577,14 +577,14 @@ private:
 
               if (pair.second == false)
                 {
-                  handle = ::DDS::HANDLE_NIL;
+                  handle = DDS::HANDLE_NIL;
                   ACE_ERROR_RETURN ((LM_ERROR,
                                      ACE_TEXT("(%P|%t) ")
                                      ACE_TEXT("%CDataWriterImpl::")
                                      ACE_TEXT("get_or_create_instance_handle, ")
                                      ACE_TEXT("insert %s failed. \n"),
                                      TraitsType::type_name(), TraitsType::type_name()),
-                                    ::DDS::RETCODE_ERROR);
+                                    DDS::RETCODE_ERROR);
                 }
             } // end of if (needs_creation)
 
@@ -592,7 +592,7 @@ private:
 
         } // end of if (needs_registration)
 
-      return ::DDS::RETCODE_OK;
+      return DDS::RETCODE_OK;
     }
 
     InstanceMap  instance_map_;
@@ -609,5 +609,7 @@ private:
 
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_DataWriterImpl_T_h */

@@ -11,6 +11,8 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/QueryConditionImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -68,3 +70,5 @@ GroupRakeData::get_data()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

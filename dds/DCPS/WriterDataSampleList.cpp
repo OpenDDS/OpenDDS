@@ -8,14 +8,12 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "WriterDataSampleList.h"
 #include "DataSampleElement.h"
-#include "Definitions.h"
-#include "PublicationInstance.h"
-
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
 
 #if !defined (__ACE_INLINE__)
 #include "WriterDataSampleList.inl"
 #endif /* __ACE_INLINE__ */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -86,3 +84,5 @@ WriterDataSampleList::dequeue(const DataSampleElement* stale)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

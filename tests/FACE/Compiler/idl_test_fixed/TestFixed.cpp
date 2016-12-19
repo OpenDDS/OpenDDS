@@ -2,6 +2,7 @@
 
 #include "ace/OS_main.h"
 #include "ace/CDR_Base.h"
+#include <sstream>
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {

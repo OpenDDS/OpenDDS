@@ -20,6 +20,8 @@
 
 #include <cstdlib>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -70,7 +72,6 @@ ReliableSession::~ReliableSession()
 {
   nak_watchdog_->cancel();
   nak_watchdog_->wait();
-  nak_watchdog_->destroy();
 }
 
 bool
@@ -734,3 +735,5 @@ ReliableSession::stop()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

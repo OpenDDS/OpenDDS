@@ -4,10 +4,11 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 
 extern long subscriber_delay_msec; // from common.h
 
-template<class Tseq, class Iseq, class R, class R_ptr, class R_var, class Rimpl>
+template<class Tseq, class Iseq, class R, class R_ptr, class R_var>
 int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 {
   // Since our listener is on the DataReader we always know
@@ -77,7 +78,6 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 }
 
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,
@@ -272,8 +272,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::DDS::SampleInfoSeq,
                       ::Xyz::Pt128DataReader,
                       ::Xyz::Pt128DataReader_ptr,
-                      ::Xyz::Pt128DataReader_var,
-                      ::Xyz::Pt128DataReaderImpl>
+                      ::Xyz::Pt128DataReader_var>
                           (reader, use_zero_copy_reads_);
       }
       break;
@@ -284,8 +283,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::DDS::SampleInfoSeq,
                       ::Xyz::Pt512DataReader,
                       ::Xyz::Pt512DataReader_ptr,
-                      ::Xyz::Pt512DataReader_var,
-                      ::Xyz::Pt512DataReaderImpl>
+                      ::Xyz::Pt512DataReader_var>
                           (reader, use_zero_copy_reads_);
       }
       break;
@@ -296,8 +294,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::DDS::SampleInfoSeq,
                       ::Xyz::Pt2048DataReader,
                       ::Xyz::Pt2048DataReader_ptr,
-                      ::Xyz::Pt2048DataReader_var,
-                      ::Xyz::Pt2048DataReaderImpl>
+                      ::Xyz::Pt2048DataReader_var>
                           (reader, use_zero_copy_reads_);
       }
       break;
@@ -308,8 +305,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
                         ::DDS::SampleInfoSeq,
                       ::Xyz::Pt8192DataReader,
                       ::Xyz::Pt8192DataReader_ptr,
-                      ::Xyz::Pt8192DataReader_var,
-                      ::Xyz::Pt8192DataReaderImpl>
+                      ::Xyz::Pt8192DataReader_var>
                           (reader, use_zero_copy_reads_);
       }
       break;

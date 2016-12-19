@@ -5,6 +5,7 @@
 #include "tests/Utils/Options.h"
 #include "tests/Utils/ListenerRecorder.h"
 #include "model/Sync.h"
+#include "ace/OS_NS_unistd.h"
 #include <vector>
 
 // Set data reader QOS to use topic QOS

@@ -29,6 +29,7 @@
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Atomic_Op_T.h"
+#include "ace/OS_NS_unistd.h"
 
 #include "common.h"
 
@@ -119,7 +120,7 @@ create_writer(const DDS::Publisher_var& pub, const char* topicName,
   const DDS::DataWriterListener_var& listener = 0,
   const DDS::StatusMask& mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
 {
-  const DDS::TypeSupport_var ts = new ::OpenDDS::DCPS::TypeSupportImpl_T<MessageType>();
+  const DDS::TypeSupport_var ts = new typename ::OpenDDS::DCPS::DDSTraits<MessageType>::TypeSupportTypeImpl();
   const DDS::DomainParticipant_var dp = pub->get_participant();
   const CORBA::String_var typeName = ts->get_type_name();
   (void) ts->register_type(dp, typeName); // may have been registered before

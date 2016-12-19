@@ -8,6 +8,8 @@
 #include "ReceivedDataElementList.h"
 #include "ace/OS_NS_sys_time.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 OpenDDS::DCPS::DataReaderImpl*
 OpenDDS::DCPS::InstanceState::data_reader() const
@@ -168,3 +170,4 @@ OpenDDS::DCPS::InstanceState::no_writer () const
   return this->writers_.size () == 0;
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

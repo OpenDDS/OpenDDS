@@ -8,18 +8,15 @@
 #ifndef OPENDDS_DCPS_WRITERDATASAMPLELIST_H
 #define OPENDDS_DCPS_WRITERDATASAMPLELIST_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "Definitions.h"
-#include "transport/framework/TransportDefs.h"
-#include "Dynamic_Cached_Allocator_With_Overflow_T.h"
+#include "dcps_export.h"
+#include <cstring>
 
-#include <iterator>
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
 class DataSampleElement;
-
 
 /**
 * A list of DataSampleElement pointers to be queued by the order the
@@ -66,6 +63,8 @@ class OpenDDS_Dcps_Export WriterDataSampleList {
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined(__ACE_INLINE__)
 #include "WriterDataSampleList.inl"

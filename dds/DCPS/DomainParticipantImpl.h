@@ -8,12 +8,6 @@
 #ifndef OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 #define OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 
-#include "EntityImpl.h"
-#include "Definitions.h"
-#include "TopicImpl.h"
-#include "InstanceHandle.h"
-#include "OwnershipManager.h"
-#include "GuidBuilder.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DdsDcpsTopicC.h"
@@ -26,19 +20,29 @@
 #include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
+#include "EntityImpl.h"
+#include "Definitions.h"
+#include "TopicImpl.h"
+#include "InstanceHandle.h"
+#include "OwnershipManager.h"
+#include "GuidBuilder.h"
+
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
-#include "ace/Null_Mutex.h"
-#include "ace/Recursive_Thread_Mutex.h"
-#include "ace/Condition_T.h"
 
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "Recorder.h"
 #include "Replayer.h"
 
+#include "ace/Null_Mutex.h"
+#include "ace/Condition_Thread_Mutex.h"
+#include "ace/Recursive_Thread_Mutex.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -122,7 +126,6 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
-  ///Constructor
   DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
                         const DDS::DomainId_t&             domain_id,
                         const RepoId&                      dp_id,
@@ -131,7 +134,6 @@ private:
                         const DDS::StatusMask &            mask,
                         bool                               federated = false);
 
-  ///Destructor
   virtual ~DomainParticipantImpl();
 
   virtual DDS::InstanceHandle_t get_instance_handle();
@@ -549,5 +551,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H  */

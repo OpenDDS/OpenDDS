@@ -27,6 +27,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // forward declarations
 class DCPS_IR_Domain;
 class TAO_DDS_DCPSFederationId;
@@ -211,9 +213,9 @@ private:
   ACE_SYNCH_MUTEX ownerLock_;
 
   // Entity GUID Id generators.
-  RepoIdGenerator topicIdGenerator_;
-  RepoIdGenerator publicationIdGenerator_;
-  RepoIdGenerator subscriptionIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator topicIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator publicationIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator subscriptionIdGenerator_;
 
   DCPS_IR_Subscription_Map subscriptions_;
   DCPS_IR_Publication_Map publications_;
@@ -235,5 +237,7 @@ private:
   /// Flag indicating this participant publishes built-in topics.
   bool isBitPublisher_;
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_IR_PARTICIPANT_H */

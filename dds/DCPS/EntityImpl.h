@@ -18,6 +18,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -33,10 +35,8 @@ namespace DCPS {
 class OpenDDS_Dcps_Export EntityImpl
   : public virtual LocalObject<DDS::Entity> {
 public:
-  ///Constructor
   EntityImpl();
 
-  ///Destructor
   virtual ~EntityImpl();
 
   virtual DDS::ReturnCode_t set_enabled();
@@ -87,5 +87,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_ENTITY_IMPL_H */

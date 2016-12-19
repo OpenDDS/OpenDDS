@@ -6,7 +6,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "tests/Utils/ExceptionStreams.h"
 
-template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
+template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>
 int read (::DDS::DataReader_ptr reader, DT& foo)
 {
   try
@@ -20,13 +20,8 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
       throw BadReaderException() ;
     }
 
-    DR_impl* dr_servant = dynamic_cast<DR_impl*> (foo_dr.in ());
-
     ::DDS::SampleInfo si ;
-
-    DDS::ReturnCode_t status  ;
-
-    status = dr_servant->read_next_sample(foo, si) ;
+    DDS::ReturnCode_t const status = foo_dr->read_next_sample(foo, si) ;
 
     if (status == ::DDS::RETCODE_OK)
     {
@@ -56,8 +51,6 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
   return 0;
 }
 
-
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl( int expected)
  : samples_( 0),
    expected_( expected),
@@ -68,7 +61,6 @@ DataReaderListenerImpl::DataReaderListenerImpl( int expected)
   ));
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
 {
   ACE_DEBUG((LM_DEBUG,
@@ -161,8 +153,7 @@ void DataReaderListenerImpl::on_data_available(
       ::Xyz::FooNoKeySeq,
       ::Xyz::FooNoKeyDataReader,
       ::Xyz::FooNoKeyDataReader_ptr,
-      ::Xyz::FooNoKeyDataReader_var,
-      ::Xyz::FooNoKeyDataReaderImpl> (reader, foo);
+      ::Xyz::FooNoKeyDataReader_var> (reader, foo);
 
   if (ret != 0)
   {

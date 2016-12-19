@@ -19,6 +19,8 @@
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/PoolAllocator.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -114,5 +116,7 @@ operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 
 } // namespace
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_GUIDCONVERTER_H */

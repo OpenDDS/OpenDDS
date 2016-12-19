@@ -19,6 +19,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -45,10 +47,8 @@ public:
   typedef OPENDDS_SET(Participant_Pair) DPSet;
   typedef OPENDDS_MAP(DDS::DomainId_t, DPSet) DPMap;
 
-  /** Constructor **/
   DomainParticipantFactoryImpl();
 
-  /** Destructor **/
   virtual ~DomainParticipantFactoryImpl();
 
   virtual DDS::DomainParticipant_ptr create_participant(
@@ -98,5 +98,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_DOMAIN_PARTICIPANT_FACTORY_IMPL_H  */

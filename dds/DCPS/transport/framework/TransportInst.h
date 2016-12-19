@@ -14,19 +14,19 @@
 #endif
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
-#include "dds/DCPS/RcObject_T.h"
-
-#include "ace/Synch.h"
-
-#include "dds/DCPS/PoolAllocator.h"
+#include "ace/Synch_Traits.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
 class ACE_Configuration_Section_Key;
 ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -133,6 +133,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined(__ACE_INLINE__)
 #include "TransportInst.inl"

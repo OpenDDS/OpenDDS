@@ -8,7 +8,6 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
   liveliness_changed_count_(0)
   {
@@ -30,7 +29,6 @@ DataReaderListenerImpl::DataReaderListenerImpl (void) :
 
   }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
@@ -155,16 +153,13 @@ void DataReaderListenerImpl::on_subscription_matched (
                ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
       }
 
-    ::Xyz::FooDataReaderImpl* dr_servant
-      = dynamic_cast< ::Xyz::FooDataReaderImpl*>(foo_dr.in());
-
     ::Xyz::FooSeq foo(num_ops_per_thread) ;
     ::DDS::SampleInfoSeq si(num_ops_per_thread) ;
 
     DDS::ReturnCode_t status  ;
     if (use_take)
       {
-        status = dr_servant->take(foo, si,
+        status = foo_dr->take(foo, si,
                               num_ops_per_thread,
                               ::DDS::NOT_READ_SAMPLE_STATE,
                               ::DDS::ANY_VIEW_STATE,
@@ -172,7 +167,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       }
     else
       {
-        status = dr_servant->read(foo, si,
+        status = foo_dr->read(foo, si,
                               num_ops_per_thread,
                               ::DDS::NOT_READ_SAMPLE_STATE,
                               ::DDS::ANY_VIEW_STATE,

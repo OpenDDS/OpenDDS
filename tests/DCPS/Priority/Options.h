@@ -34,10 +34,8 @@ class Options  {
     };
     friend std::ostream& operator<<( std::ostream& str, TransportType value);
 
-    /// Default constructor.
     Options( int argc, ACE_TCHAR** argv, char** envp = 0);
 
-    /// Virtual destructor.
     virtual ~Options();
 
     /// Test verbosity.

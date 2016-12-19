@@ -8,6 +8,7 @@
 #include "Boilerplate.h"
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <iostream>
 
 namespace examples { namespace boilerplate {
 

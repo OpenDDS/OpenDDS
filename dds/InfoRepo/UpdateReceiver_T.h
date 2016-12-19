@@ -12,10 +12,11 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "ace/Condition_T.h"
 #include "ace/Task.h"
 
 #include <list>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace DDS {
 
@@ -35,7 +36,6 @@ public:
   /// Construct with a processor reference.
   UpdateReceiver(UpdateProcessor<DataType>& processor);
 
-  /// Virtual destructor.
   virtual ~UpdateReceiver();
 
   // ACE_Task_Base methods.
@@ -80,6 +80,8 @@ private:
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "UpdateReceiver_T.cpp"

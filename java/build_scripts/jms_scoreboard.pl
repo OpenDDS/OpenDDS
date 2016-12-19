@@ -97,7 +97,7 @@ for my $tgt (@targets) {
                     print "auto_run_tests: $testclass\n$_\n";
                 }
                 elsif ($1 eq 'Tests') {
-                    $2 =~ /^run: \d+, Failures: (\d+), Errors: (\d+), Time elapsed: (\d+)/;
+                    $2 =~ /^run: \d+, Failures: (\d+), Errors: (\d+),.* Time elapsed: (\d+)/;
                     my $t = $3 . 's';
                     my $r = $1 + $2;
                     $overall_status += $r;

@@ -1,6 +1,7 @@
 #include "../Idl/FaceHeaderTestMsg_TS.hpp"
 #include "../Idl/FaceHeaderTestMsgTypeSupportImpl.h"
 #include "dds/DCPS/TypeSupportImpl.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/FACE/FaceTSS.h"
 
 #ifdef ACE_AS_STATIC_LIBS

@@ -10,15 +10,11 @@
 #include "../FooType4/FooDefTypeSupportImpl.h"
 #include "DDSTEST.h"
 
-// Implementation skeleton constructor
-
 DataReaderListenerImpl::DataReaderListenerImpl(const Options& opt) :
         subscription_matched_(false),
         configopt_(opt),
         last_si_()
         { }
-
-// Implementation skeleton destructor
 
 DataReaderListenerImpl::~DataReaderListenerImpl(void) { }
 
@@ -77,19 +73,16 @@ void DataReaderListenerImpl::on_data_available(::DDS::DataReader_ptr reader)
                  ACE_TEXT("(%P|%t) ::Xyz::FooDataReader::_narrow failed.\n")));
     }
 
-  ::Xyz::FooDataReaderImpl* dr_servant
-          = dynamic_cast< ::Xyz::FooDataReaderImpl*> (foo_dr.in());
-
   const int num_ops_per_thread = 100;
   ::Xyz::FooSeq foo(num_ops_per_thread);
   ::DDS::SampleInfoSeq si(num_ops_per_thread);
 
   DDS::ReturnCode_t status;
-  status = dr_servant->read(foo, si,
-                            num_ops_per_thread,
-                            ::DDS::NOT_READ_SAMPLE_STATE,
-                            ::DDS::ANY_VIEW_STATE,
-                            ::DDS::ANY_INSTANCE_STATE);
+  status = foo_dr->read(foo, si,
+                        num_ops_per_thread,
+                        ::DDS::NOT_READ_SAMPLE_STATE,
+                        ::DDS::ANY_VIEW_STATE,
+                        ::DDS::ANY_INSTANCE_STATE);
 
   if (status == ::DDS::RETCODE_OK)
     {

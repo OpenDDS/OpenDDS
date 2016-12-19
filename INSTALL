@@ -69,20 +69,20 @@ BUILDING OpenDDS
   that's under the installation prefix directory.  It comes with a one-line
   shell script in <prefix>/share/dds/dds-devel.sh that sets a DDS_ROOT which
   is used for building an application using this installed OpenDDS.  The
-  analogous files for ACE and TAO are in <prefix>/share/ace/ace-devel.sh and 
+  analogous files for ACE and TAO are in <prefix>/share/ace/ace-devel.sh and
   <prefix>/share/tao/tao-devel.sh.
 
 
 * Cross Compiling:
 
   Use the configure script, and set the target platform to one different than
-  the host.
+  the host.  For example:
 
   ./configure --target=lynxos-178
 
-  Supported targets include lynxos-178 and vxworks.
-  In this setup, configure will clone the DDS and TAO source trees for host and 
-  target builds.  It will do a static build of the host tools (such as
+  Run configure with "--target-help" for details on the supported targets.
+  In this setup, configure will clone the DDS and ACE+TAO source trees for host
+  and target builds.  It will do a static build of the host tools (such as
   opendds_idl and tao_idl) in the host environment, and a full build in the
   target environment.  Most parameters to configure are then assumed to be
   target parameters.
@@ -106,14 +106,5 @@ BUILDING OpenDDS
   one subscriber.  Note that the command lines used to spawn these processes
   are echoed back to standard output.  The options and config files used here
   are helpful starting points for developing and running your own OpenDDS
-  applcations.
+  applications.
 
-
-* Platform specific notes:
-
- Android:
-  Currently there is only support for building with Standalone compiler
-  toolchain of the Android Native Development Kit.  The standard NDK compiler
-  is not identified as supporting exceptions or RTTI, as of NDK r5c.
-  Compilation on Windows can fail due to cygwin/Windows not differentiating
-  between the ACE file Signal.h and the system file signal.h.

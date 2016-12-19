@@ -8,6 +8,10 @@
 #ifndef MONITORDATA_H
 #define MONITORDATA_H
 
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace DCPS {
   struct GUID_t;
   struct ServiceParticipantReport;
@@ -30,6 +34,8 @@ namespace DDS {
   struct SubscriptionBuiltinTopicData;
 
 } // End of namespace DDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 class QString;
 template< class T> class QList;
@@ -57,7 +63,6 @@ class MonitorData {
     /// Construct with an IOR only.
     MonitorData( const Options& options, MonitorDataModel* model, bool mapExistingIORKeys = true);
 
-    /// Virtual destructor.
     virtual ~MonitorData();
 
     /// Disable operation for orderly shutdown.
@@ -149,4 +154,3 @@ class MonitorData {
 } // End of namespace Monitor
 
 #endif /* MONITORDATA_H */
-

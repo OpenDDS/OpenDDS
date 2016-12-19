@@ -10,6 +10,9 @@
 #define OPENDDS_TCPRECEIVESTRATEGY_RCH_H
 
 #include "dds/DCPS/RcHandle_T.h"
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -20,5 +23,7 @@ typedef RcHandle<TcpReceiveStrategy> TcpReceiveStrategy_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_TCPRECEIVESTRATEGY_RCH_H */

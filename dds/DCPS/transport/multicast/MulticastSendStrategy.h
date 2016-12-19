@@ -13,6 +13,8 @@
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 #include "ace/Asynch_IO.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -58,5 +60,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_MULTICASTSENDSTRATEGY_H */

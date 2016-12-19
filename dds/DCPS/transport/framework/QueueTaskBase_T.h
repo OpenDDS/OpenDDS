@@ -16,11 +16,14 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "ace/Condition_T.h"
+#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Task.h"
-#include "ace/Synch.h"
 #include "ace/Unbounded_Queue.h"
 #include "ace/INET_Addr.h"
-#include "ace/Condition_T.h"
+#include "ace/Synch_Traits.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -33,8 +36,6 @@ namespace DCPS {
 template <typename T>
 class QueueTaskBase : public ACE_Task_Base {
 public:
-
-  /// Constructor.
   QueueTaskBase()
   : work_available_(lock_),
       shutdown_initiated_(false),
@@ -43,7 +44,6 @@ public:
     DBG_ENTRY("QueueTaskBase","QueueTaskBase");
   }
 
-  /// Virtual Destructor.
   virtual ~QueueTaskBase() {
     DBG_ENTRY("QueueTaskBase","~QueueTaskBase");
   }
@@ -200,6 +200,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

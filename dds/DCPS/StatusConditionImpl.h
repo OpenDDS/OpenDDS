@@ -15,6 +15,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -40,13 +42,15 @@ public:
   virtual DDS::Entity_ptr get_entity();
 
 private:
-  //deliberately not a _var, don't hold a reference to the parent since
-  //it is guaranteed to outlive us and we don't want a cyclical reference
+  /// Deliberately not a _var, don't hold a reference to the parent since
+  /// it is guaranteed to outlive us and we don't want a cyclical reference
   EntityImpl* parent_;
   DDS::StatusMask mask_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

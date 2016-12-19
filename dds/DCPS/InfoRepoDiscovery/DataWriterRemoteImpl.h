@@ -10,12 +10,15 @@
 
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteS.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 #include "ace/Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -52,11 +55,13 @@ public:
   void detach_parent();
 
 private:
-  DataWriterCallbacks* parent_;
+  RcHandle<DataWriterCallbacks> parent_;
   ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

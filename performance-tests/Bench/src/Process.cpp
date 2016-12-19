@@ -8,7 +8,7 @@
 #include "Publication.h"
 #include "Subscription.h"
 #include "TestTypeSupportImpl.h"
-
+#include "ace/OS_NS_unistd.h"
 
 #include <iostream>
 #include <fstream>

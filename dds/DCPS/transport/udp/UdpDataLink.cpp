@@ -19,6 +19,8 @@
 # include "UdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -279,3 +281,5 @@ UdpDataLink::stop_i()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -10,14 +10,18 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
-#include "ace/Condition_T.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Condition_T.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
 class ACE_Reactor;
 ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -68,6 +72,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "TransportReactorTask.inl"

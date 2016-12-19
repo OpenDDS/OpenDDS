@@ -890,7 +890,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
-    if (gen_is_bounded_size (foo1))
+    if (MarshalTraits< ::Xyz::Foo>::gen_is_bounded_size ())
     {
       TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
@@ -913,7 +913,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
-    if (gen_is_bounded_size (foo1))
+    if (MarshalTraits< ::Xyz::Foo>::gen_is_bounded_size ())
     {
       TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == static_cast<unsigned long>(i));

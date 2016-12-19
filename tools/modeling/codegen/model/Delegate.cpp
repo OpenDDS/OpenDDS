@@ -5,6 +5,8 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/Service_Participant.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::Model::Delegate::Delegate()
   : service_(0)
 {
@@ -21,8 +23,7 @@ OpenDDS::Model::Delegate::createParticipant(
   unsigned long             domain,
   const DDS::DomainParticipantQos& participantQos,
   DDS::StatusMask           mask,
-  const OPENDDS_STRING&     transportConfig
-)
+  const OPENDDS_STRING&     transportConfig)
 {
   DDS::DomainParticipantFactory_var pfact = TheParticipantFactory;
   DDS::DomainParticipant_var participant
@@ -50,8 +51,7 @@ OpenDDS::Model::Delegate::createTopic(
   const OPENDDS_STRING&   topicName,
   const OPENDDS_STRING&   typeName,
   const DDS::TopicQos&    topicQos,
-  DDS::StatusMask         mask
-)
+  DDS::StatusMask         mask)
 {
   DDS::Topic* topic
     = participant->create_topic(
@@ -69,8 +69,7 @@ OpenDDS::Model::Delegate::createPublisher(
   DDS::DomainParticipant*       participant,
   const DDS::PublisherQos&      publisherQos,
   DDS::StatusMask               mask,
-  const OPENDDS_STRING&         transportConfig
-)
+  const OPENDDS_STRING&         transportConfig)
 {
   DDS::Publisher* publisher
     = participant->create_publisher(
@@ -100,8 +99,7 @@ OpenDDS::Model::Delegate::createSubscriber(
   DDS::DomainParticipant*       participant,
   const DDS::SubscriberQos&     subscriberQos,
   DDS::StatusMask               mask,
-  const OPENDDS_STRING&         transportConfig
-)
+  const OPENDDS_STRING&         transportConfig)
 {
   DDS::Subscriber* subscriber
     = participant->create_subscriber(
@@ -134,8 +132,7 @@ OpenDDS::Model::Delegate::createPublication(
   const DDS::DataWriterQos& writerQos,
   DDS::StatusMask           mask,
   const OPENDDS_STRING&     transportConfig,
-  bool                      copyQosFromTopic
-)
+  bool                      copyQosFromTopic)
 {
   if( !this->service_) {
     return 0;
@@ -164,8 +161,7 @@ OpenDDS::Model::Delegate::createWriter(
   DDS::Topic*               topic,
   const DDS::DataWriterQos& writerQos,
   DDS::StatusMask           mask,
-  const OPENDDS_STRING&     transportConfig
-)
+  const OPENDDS_STRING&     transportConfig)
 {
   // If we specify a transport and have autoenable modeled,
   // temporarily turn off autoenabling
@@ -204,8 +200,7 @@ OpenDDS::Model::Delegate::createSubscription(
   const DDS::DataReaderQos& readerQos,
   DDS::StatusMask        mask,
   const OPENDDS_STRING&  transportConfig,
-  bool                   copyQosFromTopic
-)
+  bool                   copyQosFromTopic)
 {
   if( !this->service_) {
     return 0;
@@ -247,8 +242,7 @@ OpenDDS::Model::Delegate::createReader(
   DDS::TopicDescription* topic,
   const DDS::DataReaderQos& readerQos,
   DDS::StatusMask        mask,
-  const OPENDDS_STRING&  transportConfig
-)
+  const OPENDDS_STRING&  transportConfig)
 {
   // If we specify a transport and have autoenable modeled,
   // temporarily turn off autoenabling
@@ -280,8 +274,7 @@ OpenDDS::Model::Delegate::createReader(
 
 bool
 OpenDDS::Model::Delegate::override_autoenabled_qos(
-  DDS::Publisher* publisher
-)
+  DDS::Publisher* publisher)
 {
   DDS::PublisherQos pub_qos;
   publisher->get_qos(pub_qos);
@@ -297,8 +290,7 @@ OpenDDS::Model::Delegate::override_autoenabled_qos(
 
 bool
 OpenDDS::Model::Delegate::override_autoenabled_qos(
-  DDS::Subscriber* subscriber
-)
+  DDS::Subscriber* subscriber)
 {
   DDS::SubscriberQos sub_qos;
   subscriber->get_qos(sub_qos);
@@ -314,8 +306,7 @@ OpenDDS::Model::Delegate::override_autoenabled_qos(
 
 void
 OpenDDS::Model::Delegate::restore_autoenabled_qos(
-  DDS::Publisher* publisher
-)
+  DDS::Publisher* publisher)
 {
   DDS::PublisherQos pub_qos;
   publisher->get_qos(pub_qos);
@@ -325,11 +316,12 @@ OpenDDS::Model::Delegate::restore_autoenabled_qos(
 
 void
 OpenDDS::Model::Delegate::restore_autoenabled_qos(
-  DDS::Subscriber* subscriber
-)
+  DDS::Subscriber* subscriber)
 {
   DDS::SubscriberQos sub_qos;
   subscriber->get_qos(sub_qos);
   sub_qos.entity_factory.autoenable_created_entities = true;
   subscriber->set_qos(sub_qos);
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

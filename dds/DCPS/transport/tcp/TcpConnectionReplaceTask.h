@@ -17,6 +17,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -37,11 +39,8 @@ class TcpTransport;
  */
 class TcpConnectionReplaceTask : public QueueTaskBase <TcpConnection_rch> {
 public:
-
-  /// Constructor.
   TcpConnectionReplaceTask(TcpTransport* trans);
 
-  /// Virtual Destructor.
   virtual ~TcpConnectionReplaceTask();
 
   /// Handle the request.
@@ -54,6 +53,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

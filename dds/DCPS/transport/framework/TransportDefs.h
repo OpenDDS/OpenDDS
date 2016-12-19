@@ -13,6 +13,7 @@
 #include "dds/DCPS/debug.h"
 #include "ace/Basic_Types.h"
 #include "ace/CDR_Base.h"
+#include "ace/Synch_Traits.h"
 #include "TransportDebug.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -157,6 +158,8 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     if (tv != -1) VALUE.msec(tv);                                                \
   }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -230,5 +233,7 @@ typedef ACE_CDR::Long Priority;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_TRANSPORTDEFS_H */

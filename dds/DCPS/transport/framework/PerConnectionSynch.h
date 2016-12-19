@@ -9,9 +9,13 @@
 #define OPENDDS_DCPS_PERCONNECTIONSYNCH_H
 
 #include "ThreadSynch.h"
-#include "ace/Task.h"
-#include "ace/Synch.h"
+
 #include "ace/Condition_T.h"
+#include "ace/Condition_Thread_Mutex.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Task.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -52,6 +56,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "PerConnectionSynch.inl"

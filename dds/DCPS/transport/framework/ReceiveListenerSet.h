@@ -12,8 +12,10 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Mutex.h"
 
-#include "ace/Synch.h"
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -75,6 +77,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "ReceiveListenerSet.inl"

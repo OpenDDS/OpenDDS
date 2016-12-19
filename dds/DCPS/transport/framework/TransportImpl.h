@@ -20,9 +20,11 @@
 #include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
 #include "DataLinkCleanupTask.h"
-#include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
+#include "ace/Synch_Traits.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -32,6 +34,7 @@ class TransportReceiveListener;
 class DataLink;
 class Monitor;
 struct AssociationData;
+typedef RcHandle<TransportClient> TransportClient_rch;
 
 /** The TransportImpl class includes the abstract methods that must be implemented
 *   by any implementation to provide data delivery service to the DCPS implementation.
@@ -150,7 +153,7 @@ protected:
   /// transport calls back to TransportClient::use_datalink().
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
-                                               TransportClient* client) = 0;
+                                               const TransportClient_rch& client) = 0;
 
   /// accept_datalink() is called from TransportClient to initiate an
   /// association as the passive peer.  A DataLink may be returned if
@@ -161,7 +164,7 @@ protected:
   /// transport calls back to TransportClient::use_datalink().
   virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
                                               const ConnectionAttribs& attribs,
-                                              TransportClient* client) = 0;
+                                              const TransportClient_rch& client) = 0;
 
   /// stop_accepting_or_connecting() is called from TransportClient
   /// to terminate the accepting process begun by accept_datalink()
@@ -169,7 +172,7 @@ protected:
   /// up any resources associated with this pending connection.
   /// The TransportClient* passed in to accept or connect is not
   /// valid after this method is called.
-  virtual void stop_accepting_or_connecting(TransportClient* client,
+  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
                                             const RepoId& remote_id) = 0;
 
   /// Concrete subclass gets a shot at the config object.  The subclass
@@ -191,8 +194,9 @@ protected:
   /// returned.
   TransportReactorTask* reactor_task();
 
-  OPENDDS_MULTIMAP(TransportClient*, DataLink_rch) pending_connections_;
-  void add_pending_connection(TransportClient* client, DataLink* link);
+  typedef OPENDDS_MULTIMAP(TransportClient_rch, DataLink_rch) PendConnMap;
+  PendConnMap pending_connections_;
+  void add_pending_connection(const TransportClient_rch& client, DataLink* link);
 
 private:
   /// We have a few friends in the transport framework so that they
@@ -215,9 +219,9 @@ private:
   /// any other threads while we perform this release.
   virtual void release_datalink(DataLink* link) = 0;
 
-  void attach_client(TransportClient* client);
-  void detach_client(TransportClient* client);
-  virtual void pre_detach(TransportClient*) {}
+  void attach_client(const TransportClient_rch& client);
+  void detach_client(const TransportClient_rch& client);
+  virtual void pre_detach(const TransportClient_rch&) {}
 
   DataLink* find_connect_i(const RepoId& local_id,
                            const AssociationData& remote_association,
@@ -253,7 +257,7 @@ public:
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;
 
-  OPENDDS_SET(TransportClient*) clients_;
+  OPENDDS_SET(TransportClient_rch) clients_;
 
   /// A reference (via a smart pointer) to the TransportInst
   /// object that was supplied to us during our configure() method.
@@ -277,6 +281,8 @@ protected:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "TransportImpl.inl"

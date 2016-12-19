@@ -116,7 +116,6 @@ class MonitorDataStorage {
     /// Construct with a reference to the model facade.
     MonitorDataStorage( MonitorData* model);
 
-    /// Virtual destructor.
     virtual ~MonitorDataStorage();
 
     /// Clean contents from all storage and restart the generators.

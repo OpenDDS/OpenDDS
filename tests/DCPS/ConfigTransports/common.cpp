@@ -24,6 +24,7 @@
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #endif
+#include "dds/DCPS/transport/framework/TransportClient.h"
 
 ACE_Thread_Mutex shutdown_lock;
 bool shutdown_flag = false;

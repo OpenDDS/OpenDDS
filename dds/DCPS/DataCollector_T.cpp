@@ -12,6 +12,7 @@
 #include "DataCollector_T.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -95,3 +96,5 @@ DataCollector<DatumType>::insert(std::ostream& str) const
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

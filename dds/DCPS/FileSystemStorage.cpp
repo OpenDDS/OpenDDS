@@ -232,6 +232,8 @@ void recursive_remove(const ACE_TString& dirname)
 
 } // namespace
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace FileSystemStorage {
 
@@ -926,5 +928,7 @@ ACE_TString b32h_decode(const ACE_TCHAR* encoded)
 
 } // namespace FileSystemStorage
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

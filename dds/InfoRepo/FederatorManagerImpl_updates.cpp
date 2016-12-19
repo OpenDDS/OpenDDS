@@ -13,6 +13,8 @@
 
 #include "dds/DCPS/RepoIdConverter.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -1380,3 +1382,5 @@ ManagerImpl::pushState(Manager_ptr peer)
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

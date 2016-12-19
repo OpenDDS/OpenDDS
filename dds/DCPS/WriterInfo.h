@@ -9,14 +9,16 @@
 #ifndef OPENDDS_DCPS_WRITERINFO_H
 #define OPENDDS_DCPS_WRITERINFO_H
 
-#include "dds/DCPS/PoolAllocator.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-// #include "RcHandle_T.h"
+#include "dds/DdsDcpsCoreC.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "RcObject_T.h"
 #include "Definitions.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
 #include "transport/framework/ReceivedDataSample.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -77,7 +79,7 @@ public:
 
   WriterInfo(WriterInfoListener*         reader,
              const PublicationId&        writer_id,
-             const ::DDS::DataWriterQos& writer_qos);
+             const DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
   /// @param now next time this DataWriter will become not active (not alive)
@@ -117,8 +119,8 @@ public:
 #endif
 
   void clear_owner_evaluated ();
-  void set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag);
-  bool is_owner_evaluated (::DDS::InstanceHandle_t instance);
+  void set_owner_evaluated (DDS::InstanceHandle_t instance, bool flag);
+  bool is_owner_evaluated (DDS::InstanceHandle_t instance);
 
   //private:
 
@@ -161,16 +163,16 @@ public:
   PublicationId writer_id_;
 
   /// Writer qos
-  ::DDS::DataWriterQos writer_qos_;
+  DDS::DataWriterQos writer_qos_;
 
   /// The publication entity instance handle.
-  ::DDS::InstanceHandle_t handle_;
+  DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
-  typedef OPENDDS_MAP( ::DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;
   OwnerEvaluateFlags owner_evaluated_;
 
   /// Data to support GROUP access scope.
@@ -201,5 +203,7 @@ OpenDDS::DCPS::WriterInfo::received_activity(const ACE_Time_Value& when)
 
 } // namespace DCPS
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* end of include guard: OPENDDS_DCPS_WRITERINFO_H */

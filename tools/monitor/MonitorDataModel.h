@@ -34,7 +34,6 @@ class MonitorDataModel : public QAbstractItemModel {
      */
     MonitorDataModel( QObject* parent = 0);
 
-    /// Virtual destructor.
     virtual ~MonitorDataModel();
 
     /* Exposing data from the model */

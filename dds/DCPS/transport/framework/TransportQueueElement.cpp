@@ -15,6 +15,8 @@
 # include "TransportQueueElement.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -116,3 +118,5 @@ TransportQueueElement::MatchOnDataPayload::~MatchOnDataPayload()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

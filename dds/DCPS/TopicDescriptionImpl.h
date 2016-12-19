@@ -19,6 +19,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -36,14 +38,11 @@ class DomainParticipantImpl;
 class OpenDDS_Dcps_Export TopicDescriptionImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::TopicDescription> {
 public:
-
-  //Constructor
   TopicDescriptionImpl(const char*            topic_name,
                        const char*            type_name,
                        TypeSupport_ptr        type_support,
                        DomainParticipantImpl* participant);
 
-  //Destructor
   virtual ~TopicDescriptionImpl();
 
   virtual char * get_type_name();
@@ -90,5 +89,7 @@ protected:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_TOPIC_DESCRIPTION_IMPL_H  */

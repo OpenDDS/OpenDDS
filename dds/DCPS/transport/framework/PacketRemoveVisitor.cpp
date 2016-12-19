@@ -14,6 +14,8 @@
 #include "PacketRemoveVisitor.inl"
 #endif /* __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -487,3 +489,5 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

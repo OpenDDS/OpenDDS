@@ -11,6 +11,8 @@
 #include "ace/Basic_Types.h"
 #include "ace/Thread_Mutex.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
   namespace RTPS {
 
@@ -45,7 +47,7 @@ public:
   /// populate a GUID container with a unique ID. This will increment
   /// the counter, and use a lock (if compiled with MT ACE) while
   /// doing so.
-  void populate(DCPS::GUID_t& container);
+  void populate(OpenDDS::DCPS::GUID_t& container);
 
 private:
   ACE_UINT16 getCount();
@@ -58,3 +60,5 @@ private:
 
 } // namespace RTPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

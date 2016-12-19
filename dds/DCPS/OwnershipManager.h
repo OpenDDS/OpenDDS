@@ -19,6 +19,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -77,7 +79,7 @@ public:
 
   /**
   * Acquire/release lock for type instance map.
-  * The following functions are synchnorized by instance_lock_.
+  * The following functions are synchronized by instance_lock_.
   */
   int instance_lock_acquire();
   int instance_lock_release();
@@ -175,6 +177,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE */
 

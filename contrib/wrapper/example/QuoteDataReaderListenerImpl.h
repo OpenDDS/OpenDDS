@@ -20,16 +20,11 @@ class QuoteDataReaderListenerImpl
   : public DataReader_Listener_Base
 {
 public:
-  //Constructor
   QuoteDataReaderListenerImpl ();
 
-  //Destructor
   virtual ~QuoteDataReaderListenerImpl (void);
 
-  virtual void on_data_available(
-    DDS::DataReader_ptr reader
-  )
-  throw (CORBA::SystemException);
+  virtual void on_data_available(DDS::DataReader_ptr reader);
 
 };
 

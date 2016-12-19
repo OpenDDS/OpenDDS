@@ -18,8 +18,9 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "TransportInst.h"
 #include "TransportInst_rch.h"
+#include "ace/Synch_Traits.h"
 
-#include <ace/Synch_Traits.h>
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -59,8 +60,6 @@ private:
 }
 }
 
-#if defined(__ACE_INLINE__)
-#include "TransportConfig.inl"
-#endif /* __ACE_INLINE__ */
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_TRANSPORTCONFIG_H */

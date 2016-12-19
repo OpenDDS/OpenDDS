@@ -20,6 +20,8 @@ namespace {
   const char TCP_NAME[] = "tcp";
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -78,3 +80,5 @@ ACE_STATIC_SVC_DEFINE(TcpLoader,
                       0)
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

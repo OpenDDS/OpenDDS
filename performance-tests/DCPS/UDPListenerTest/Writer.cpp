@@ -4,9 +4,10 @@
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
+
+#include "ace/Condition_T.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "ace/OS_NS_unistd.h"
-
-
 
 extern ACE_Condition<ACE_Recursive_Thread_Mutex> done_condition_;
 
@@ -22,7 +23,7 @@ extern ACE_Condition<ACE_Recursive_Thread_Mutex> done_condition_;
 
 
 
-template<class T, class W, class W_var, class W_ptr, class Wimpl>
+template<class T, class W, class W_var, class W_ptr>
 void write (long id,
             int size,
             int num_messages,
@@ -42,8 +43,6 @@ void write (long id,
     = W::_narrow(writer);
   ACE_ASSERT (! CORBA::is_nil (pt_dw.in ()));
 
-  Wimpl* pt_servant = dynamic_cast<Wimpl*> (pt_dw.in ());
-
   //SHH remove this kludge when the transport is fixed.
   ACE_OS::sleep(2); // ensure that the connection has been fully established
   ACE_DEBUG((LM_DEBUG,
@@ -56,8 +55,7 @@ void write (long id,
   for (int i = 0; i < num_messages; i ++)
     {
       data.sequence_num = i;
-      pt_servant->write(data,
-                        handle);
+      pt_dw->write(data, handle);
       THROTTLE
     }
   }
@@ -65,8 +63,7 @@ void write (long id,
   for (int j = 0; j < 1000; j ++)
     {
       data.sequence_num = -1;
-      pt_servant->write(data,
-                        handle);
+      pt_dw->write(data, handle);
       // throttle twice to slow the rate to ensure one gets sent.
       THROTTLE
       THROTTLE
@@ -139,8 +136,7 @@ Writer::svc ()
         write < ::Xyz::Pt128,
                ::Xyz::Pt128DataWriter,
                ::Xyz::Pt128DataWriter_var,
-               ::Xyz::Pt128DataWriter_ptr,
-               ::Xyz::Pt128DataWriterImpl>
+               ::Xyz::Pt128DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -154,8 +150,7 @@ Writer::svc ()
         write < ::Xyz::Pt512,
                ::Xyz::Pt512DataWriter,
                ::Xyz::Pt512DataWriter_var,
-               ::Xyz::Pt512DataWriter_ptr,
-               ::Xyz::Pt512DataWriterImpl>
+               ::Xyz::Pt512DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -169,8 +164,7 @@ Writer::svc ()
         write < ::Xyz::Pt2048,
                ::Xyz::Pt2048DataWriter,
                ::Xyz::Pt2048DataWriter_var,
-               ::Xyz::Pt2048DataWriter_ptr,
-               ::Xyz::Pt2048DataWriterImpl>
+               ::Xyz::Pt2048DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -184,8 +178,7 @@ Writer::svc ()
         write < ::Xyz::Pt8192,
                ::Xyz::Pt8192DataWriter,
                ::Xyz::Pt8192DataWriter_var,
-               ::Xyz::Pt8192DataWriter_ptr,
-               ::Xyz::Pt8192DataWriterImpl>
+               ::Xyz::Pt8192DataWriter_ptr>
                  (writer_id_,
                   data_size_,
                   num_messages_,
@@ -236,4 +229,3 @@ Writer::is_finished () const
 {
   return finished_sending_;
 }
-

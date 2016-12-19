@@ -11,9 +11,10 @@
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
-
 
 DPMonitorImpl::DPMonitorImpl(DomainParticipantImpl* dp,
               OpenDDS::DCPS::DomainParticipantReportDataWriter_ptr dp_writer)
@@ -55,3 +56,4 @@ DPMonitorImpl::report() {
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

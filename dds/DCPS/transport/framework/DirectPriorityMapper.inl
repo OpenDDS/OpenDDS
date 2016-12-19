@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -16,3 +18,5 @@ DirectPriorityMapper::DirectPriorityMapper(Priority priority)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

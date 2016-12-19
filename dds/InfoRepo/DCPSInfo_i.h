@@ -9,6 +9,11 @@
 #define DCPSINFO_I_H
 
 #include  "inforepo_export.h"
+
+#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
+#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
+
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
 #include /**/ "DCPS_IR_Participant.h"
@@ -19,17 +24,13 @@
 #include "FederationId.h"
 #include "UpdateManager.h"
 
-#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
-#include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
-#include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
-
-#include "tao/ORB_Core.h"
-
 #include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // typedef declarations
 typedef std::map<DDS::DomainId_t, DCPS_IR_Domain*> DCPS_IR_Domain_Map;
@@ -53,14 +54,12 @@ class  OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSInfo_i
   : public virtual POA_OpenDDS::DCPS::DCPSInfo,
     public ACE_Event_Handler {
 public:
-  //Constructor
   TAO_DDS_DCPSInfo_i(
     CORBA::ORB_ptr orb,
     bool reincarnate,
     ShutdownInterface* shutdown,
     const TAO_DDS_DCPSFederationId& federation);
 
-  //Destructor
   virtual ~TAO_DDS_DCPSInfo_i();
 
   virtual int handle_timeout(const ACE_Time_Value& now,
@@ -414,7 +413,7 @@ private:
   CORBA::ORB_var dispatchingOrb_;
 
   const TAO_DDS_DCPSFederationId& federation_;
-  RepoIdGenerator participantIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator participantIdGenerator_;
 
   Update::Manager* um_;
   bool reincarnate_;
@@ -444,5 +443,7 @@ private:
   };
 #endif
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPSINFO_I_H */

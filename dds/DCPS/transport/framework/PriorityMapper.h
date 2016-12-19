@@ -12,6 +12,8 @@
 
 #include "TransportDefs.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -39,7 +41,6 @@ public:
   /// Construct with a priority value.
   PriorityMapper(Priority priority = 0);
 
-  /// Virtual destructor.
   virtual ~PriorityMapper();
 
   /// Accessors for the TRANSPORT_PRIORITY value.
@@ -59,6 +60,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "PriorityMapper.inl"

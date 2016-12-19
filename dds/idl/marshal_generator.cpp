@@ -1142,17 +1142,12 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   if (info != 0) {
     bool is_bounded_struct = true;
     {
-      Function is_bounded("gen_is_bounded_size", "bool");
-      is_bounded.addArg("", "const " + cxx + "&");
-      is_bounded.endArgs();
       for (size_t i = 0; i < fields.size(); ++i) {
         if (!is_bounded_type(fields[i]->field_type())) {
           is_bounded_struct = false;
           break;
         }
       }
-      be_global->impl_ << "  return "
-                       << (is_bounded_struct ? "true" : "false") << ";\n";
     }
     {
       Function max_marsh("gen_max_marshaled_size", "size_t");
@@ -1180,10 +1175,6 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     // Generate key-related marshaling code
     bool bounded_key = true;
     {
-      Function is_bounded("gen_is_bounded_size", "bool");
-      is_bounded.addArg("", "KeyOnly<const " + cxx + ">");
-      is_bounded.endArgs();
-
       IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
       for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
         string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
@@ -1200,9 +1191,6 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
           break;
         }
       }
-
-      be_global->impl_ << "  return "
-                       << (bounded_key ? "true" : "false") << ";\n";
     }
 
     {
@@ -1315,6 +1303,13 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       if (first) be_global->impl_ << intro << "  return true;\n";
       else be_global->impl_ << intro << "  return " << expr << ";\n";
     }
+
+    be_global->header_ <<
+      "template <>\n"
+      "struct MarshalTraits<" << cxx << "> {\n"
+      "  static bool gen_is_bounded_size() { return " << (is_bounded_struct ? "true" : "false") << "; }\n"
+      "  static bool gen_is_bounded_key_size() { return " << (bounded_key ? "true" : "false") << "; }\n"
+      "};\n";
   }
 
   return true;

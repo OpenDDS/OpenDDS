@@ -15,6 +15,8 @@
 # include "Config.inl"
 #endif /* ! __ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace { // anonymous namespace for file scope.
   //
   // Default values.
@@ -2519,3 +2521,4 @@ Config::loadReader(
 
 } } // End of namespace OpenDDS::Model
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

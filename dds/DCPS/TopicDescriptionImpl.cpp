@@ -11,10 +11,11 @@
 #include "TopicImpl.h"
 #include "Service_Participant.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 TopicDescriptionImpl::TopicDescriptionImpl(const char*            topic_name,
                                            const char*            type_name,
                                            TypeSupport_ptr        type_support,
@@ -30,7 +31,6 @@ TopicDescriptionImpl::TopicDescriptionImpl(const char*            topic_name,
     type_support_->_add_ref();
 }
 
-// Implementation skeleton destructor
 TopicDescriptionImpl::~TopicDescriptionImpl()
 {
   // were finished with the type_support
@@ -64,3 +64,5 @@ TopicDescriptionImpl::get_type_support()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

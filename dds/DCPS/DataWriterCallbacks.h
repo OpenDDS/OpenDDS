@@ -15,6 +15,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -56,9 +58,14 @@ public:
   virtual void unregister_for_reader(const RepoId& /*participant*/,
                                      const RepoId& /*writerid*/,
                                      const RepoId& /*readerid*/) { }
+
+  virtual void _add_ref() = 0;
+  virtual void _remove_ref() = 0;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_DATAWRITERCALLBACKS_H  */

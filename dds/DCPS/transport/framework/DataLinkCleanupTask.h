@@ -18,6 +18,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -31,10 +33,8 @@ class TransportImpl;
  */
 class OpenDDS_Dcps_Export DataLinkCleanupTask : public QueueTaskBase <DataLink_rch> {
 public:
-  /// Constructor.
   DataLinkCleanupTask();
 
-  /// Virtual Destructor.
   virtual ~DataLinkCleanupTask();
 
   /// Handle reconnect requests.
@@ -43,6 +43,8 @@ public:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

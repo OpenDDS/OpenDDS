@@ -35,10 +35,11 @@
 
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
                                const DDS::SubscriberQos &  qos,
                                DDS::SubscriberListener_ptr a_listener,
@@ -61,7 +62,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
   monitor_ = TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this);
 }
 
-// Implementation skeleton destructor
 SubscriberImpl::~SubscriberImpl()
 {
   //
@@ -1020,3 +1020,5 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -22,6 +22,8 @@
 
 #include <algorithm>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace {
   void assign(Update::BinSeq& to, const Update::BinSeq& from,
               Update::PersistenceUpdater::ALLOCATOR* allocator)
@@ -1066,3 +1068,5 @@ ACE_STATIC_SVC_DEFINE(PersistenceUpdaterSvc,
                       0)
 
 ACE_STATIC_SVC_REQUIRE(PersistenceUpdaterSvc)
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

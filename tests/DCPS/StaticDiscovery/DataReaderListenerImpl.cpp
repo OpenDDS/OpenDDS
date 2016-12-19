@@ -1,7 +1,4 @@
 /*
- * $Id$
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -12,6 +9,9 @@
 #include "DataReaderListenerImpl.h"
 #include "TestMsgTypeSupportC.h"
 #include "TestMsgTypeSupportImpl.h"
+#if !defined (DDS_HAS_MINIMUM_BIT)
+#include "dds/DdsDcpsCoreTypeSupportC.h"
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include <iostream>
 

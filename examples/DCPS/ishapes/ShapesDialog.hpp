@@ -2,7 +2,7 @@
 #ifndef _ISHAPESFORM_HPP
 #define _ISHAPESFORM_HPP
 
-#include "ShapeTypeTypeSupportImpl.h"
+#include "ShapeTypeTypeSupportC.h"
 
 #include <QtGui/QtGui>
 

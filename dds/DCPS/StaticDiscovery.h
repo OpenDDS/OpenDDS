@@ -6,9 +6,10 @@
 #ifndef OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H
 #define OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H
 
-#include "dds/DCPS/DiscoveryBase.h"
-#include "dds/DCPS/Service_Participant.h"
 #include "dcps_export.h"
+
+#include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/DiscoveryBase.h"
 
 #ifdef DDS_HAS_MINIMUM_BIT
 #include "dds/DCPS/DataReaderImpl_T.h"
@@ -22,6 +23,8 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -197,8 +200,8 @@ public:
   virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
   virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid);
 #ifndef DDS_HAS_MINIMUM_BIT
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+  OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+  OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 
@@ -263,5 +266,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H */

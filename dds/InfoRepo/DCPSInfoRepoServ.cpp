@@ -6,6 +6,7 @@
  */
 
 #include "DcpsInfo_pch.h"
+#include "tao/ORB_Core.h"
 #include "DCPSInfo_i.h"
 #include "DCPSInfoRepoServ.h"
 #include "FederatorConfig.h"
@@ -22,7 +23,6 @@
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #endif
 
-#include "tao/ORB_Core.h"
 #include "tao/IORTable/IORTable.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
 

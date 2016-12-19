@@ -18,17 +18,14 @@
 
 #include <map>
 
-//Class DataReaderListenerImpl
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  //Constructor
   DataReaderListenerImpl(const Options& options,
                          const std::string& process,
                          unsigned int participant,
                          unsigned int writer);
 
-  //Destructor
   virtual ~DataReaderListenerImpl();
 
   virtual void on_requested_deadline_missed(

@@ -55,6 +55,8 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -470,3 +472,5 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
 }
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

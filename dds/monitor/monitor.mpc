@@ -1,15 +1,17 @@
-project(OpenDDS_monitor) : dcpslib, install {
+project(OpenDDS_monitor) : dcpslib, install, dds_versioning_idl_defaults {
   requires += no_opendds_safety_profile
   sharedname   = OpenDDS_monitor
   dynamicflags = MONITOR_BUILD_DLL
 
-  specific (vc9, vc10, vc11, vc12, vc14) {
+  specific (vc9, vc10, vc11, vc12, vc14, nmake) {
     compile_flags += /bigobj
   }
 
   idlflags    += -Wb,export_macro=OpenDDS_monitor_Export -Wb,export_include=monitor_export.h
   dynamicflags = OPENDDS_MONITOR_BUILD_DLL
-  dcps_ts_flags += -Wb,export_macro=OpenDDS_monitor_Export
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_monitor_Export \
+                   -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
   TypeSupport_Files {
     monitor.idl

@@ -6,14 +6,12 @@
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
 
 
-template<class Tseq, class R, class R_ptr, class Rimpl>
+template<class Tseq, class R, class R_ptr, class R_var>
 ::DDS::ReturnCode_t read (::DDS::DataReader_ptr reader,
                           ACE_Array<bool>& pub_finished)
 {
-  R_ptr pt_dr
+  R_var var_dr
     = R::_narrow(reader);
-
-  Rimpl* dr_servant = dynamic_cast<Rimpl*> (pt_dr);
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);
@@ -23,7 +21,7 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
   DDS::ReturnCode_t status;
   // initialize to zero.
 
-  status = dr_servant->read (
+  status = var_dr->read (
     samples,
     infos,
     max_read_samples,
@@ -65,15 +63,6 @@ template<class Tseq, class R, class R_ptr, class Rimpl>
   return samples_recvd;
 }
 
-
-
-
-
-
-
-
-
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,
@@ -245,7 +234,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Xyz::Pt128Seq,
                       ::Xyz::Pt128DataReader,
                       ::Xyz::Pt128DataReader_ptr,
-                      ::Xyz::Pt128DataReaderImpl>
+                      ::Xyz::Pt128DataReader_var>
                         (
                         reader,
                         pub_finished_);
@@ -257,7 +246,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Xyz::Pt512Seq,
                       ::Xyz::Pt512DataReader,
                       ::Xyz::Pt512DataReader_ptr,
-                      ::Xyz::Pt512DataReaderImpl>
+                      ::Xyz::Pt512DataReader_var>
                         (
                         reader,
                         pub_finished_);
@@ -269,7 +258,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Xyz::Pt2048Seq,
                       ::Xyz::Pt2048DataReader,
                       ::Xyz::Pt2048DataReader_ptr,
-                      ::Xyz::Pt2048DataReaderImpl>
+                      ::Xyz::Pt2048DataReader_var>
                         (
                         reader,
                         pub_finished_);
@@ -281,7 +270,7 @@ int DataReaderListenerImpl::read_samples (::DDS::DataReader_ptr reader)
       num_read = read < ::Xyz::Pt8192Seq,
                       ::Xyz::Pt8192DataReader,
                       ::Xyz::Pt8192DataReader_ptr,
-                      ::Xyz::Pt8192DataReaderImpl>
+                      ::Xyz::Pt8192DataReader_var>
                         (
                         reader,
                         pub_finished_);

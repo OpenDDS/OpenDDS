@@ -1,12 +1,14 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #ifndef OPENDDS_RCHANDLE_T_H
 #define OPENDDS_RCHANDLE_T_H
+
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -29,6 +31,13 @@ public:
     }
   }
 
+  template <typename U>
+  RcHandle(const RcHandle<U>& other)
+    : ptr_(other.in())
+  {
+    this->bump_up();
+  }
+
   RcHandle(const RcHandle& b)
     : ptr_(b.ptr_)
   {
@@ -40,16 +49,30 @@ public:
     this->bump_down();
   }
 
-  RcHandle& operator=(T* p)
+
+  void reset(T* p=0)
   {
     RcHandle tmp(p);
     swap(tmp);
+  }
+
+  RcHandle& operator=(T* p)
+  {
+    this->reset(p);
     return *this;
   }
 
   RcHandle& operator=(const RcHandle& b)
   {
     RcHandle tmp(b);
+    swap(tmp);
+    return *this;
+  }
+
+  template <class U>
+  RcHandle& operator=(const RcHandle<U>& b)
+  {
+    RcHandle<T> tmp(b);
     swap(tmp);
     return *this;
   }
@@ -99,14 +122,19 @@ public:
     return retval;
   }
 
-  bool operator==(const RcHandle& rhs)
+  bool operator==(const RcHandle& rhs) const
   {
     return in() == rhs.in();
   }
 
-  bool operator!=(const RcHandle& rhs)
+  bool operator!=(const RcHandle& rhs) const
   {
     return in() != rhs.in();
+  }
+
+  bool operator < (const RcHandle& rhs) const
+  {
+    return in() < rhs.in();
   }
 
 private:
@@ -157,5 +185,7 @@ RcHandle<T> dynamic_rchandle_cast(const RcHandle<U>& h)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_RCHANDLE_T_H */

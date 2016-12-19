@@ -42,9 +42,6 @@ Reader::start ()
       throw TestException() ;
     }
 
-    Xyz::FooDataReaderImpl* dr_servant =
-      dynamic_cast< ::Xyz::FooDataReaderImpl*> (foo_dr.in ());
-
     char action[5] ;
     if (use_take_)
     {
@@ -62,11 +59,11 @@ Reader::start ()
       DDS::ReturnCode_t status  ;
       if (use_take_)
       {
-        status = dr_servant->take_next_sample(foo, si) ;
+        status = foo_dr->take_next_sample(foo, si) ;
       }
       else
       {
-        status = dr_servant->read_next_sample(foo, si) ;
+        status = foo_dr->read_next_sample(foo, si) ;
       }
 
       if (status == ::DDS::RETCODE_OK)
@@ -99,7 +96,7 @@ Reader::start ()
       ACE_OS::printf ("release: %d\n", foo.release()) ;
 
       DDS::ReturnCode_t status ;
-      status = dr_servant->read(foo, si,
+      status = foo_dr->read(foo, si,
                   1,
                   ::DDS::READ_SAMPLE_STATE | ::DDS::NOT_READ_SAMPLE_STATE,
                   ::DDS::ANY_VIEW_STATE,
@@ -143,9 +140,6 @@ Reader::start1 ()
       throw TestException() ;
     }
 
-    Xyz::FooDataReaderImpl* dr_servant =
-      dynamic_cast<Xyz::FooDataReaderImpl*> (foo_dr.in ());
-
     char action[14] ;
     if (use_take_)
     {
@@ -165,7 +159,7 @@ Reader::start1 ()
     int num_print(0) ;
     if (use_take_)
     {
-      status = dr_servant->take_next_instance(foo, si,
+      status = foo_dr->take_next_instance(foo, si,
                   1,
                   handle,
                   ::DDS::NOT_READ_SAMPLE_STATE,
@@ -183,7 +177,7 @@ Reader::start1 ()
 
       PrintSampleInfo(si[0]);
 
-      dr_servant->get_key_value(key_holder, si[0].instance_handle) ;
+      foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
 
       PrintSampleInfo(si[0]) ;
 
@@ -192,7 +186,7 @@ Reader::start1 ()
       if ((num_reads_per_thread_ > 1) || multiple_instances_)
       {
         handle = si[0].instance_handle ;
-        status = dr_servant->take_instance(foo, si, num_reads_per_thread_,
+        status = foo_dr->take_instance(foo, si, num_reads_per_thread_,
                   handle,
                   ::DDS::READ_SAMPLE_STATE | ::DDS::NOT_READ_SAMPLE_STATE,
                   ::DDS::ANY_VIEW_STATE,
@@ -204,7 +198,7 @@ Reader::start1 ()
           while (status != ::DDS::RETCODE_NO_DATA)
           {
             handle = ::DDS::HANDLE_NIL ;
-            status = dr_servant->take_next_instance(foo, si,
+            status = foo_dr->take_next_instance(foo, si,
                   1,
                   handle,
                   ::DDS::NOT_READ_SAMPLE_STATE,
@@ -218,7 +212,7 @@ Reader::start1 ()
 
               PrintSampleInfo(si[0]);
 
-              dr_servant->get_key_value(key_holder, si[0].instance_handle) ;
+              foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
               ACE_OS::printf (
                   "get_key_value: handle = %d foo.x = %f foo.y = %f, foo.key = %d\n",
                   si[0].instance_handle,
@@ -243,7 +237,7 @@ Reader::start1 ()
     }
     else
     {
-      status = dr_servant->read_next_instance(foo, si,
+      status = foo_dr->read_next_instance(foo, si,
                   1,
                   handle,
                   ::DDS::NOT_READ_SAMPLE_STATE,
@@ -261,7 +255,7 @@ Reader::start1 ()
 
       PrintSampleInfo(si[0]);
 
-      dr_servant->get_key_value(key_holder, si[0].instance_handle) ;
+      foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
 
       ACE_OS::printf (
           "get_key_value: handle = %d foo.x = %f foo.y = %f, foo.key = %d\n",
@@ -271,7 +265,7 @@ Reader::start1 ()
       if ((num_reads_per_thread_ > 1) || multiple_instances_)
       {
         handle = si[0].instance_handle ;
-        status = dr_servant->read_instance(foo, si, num_reads_per_thread_,
+        status = foo_dr->read_instance(foo, si, num_reads_per_thread_,
                   handle,
                   ::DDS::NOT_READ_SAMPLE_STATE,
                   ::DDS::ANY_VIEW_STATE,
@@ -283,7 +277,7 @@ Reader::start1 ()
           while (status != ::DDS::RETCODE_NO_DATA)
           {
             handle = ::DDS::HANDLE_NIL ;
-            status = dr_servant->read_next_instance(foo, si,
+            status = foo_dr->read_next_instance(foo, si,
                   1,
                   handle,
                   ::DDS::NOT_READ_SAMPLE_STATE,
@@ -297,7 +291,7 @@ Reader::start1 ()
 
               PrintSampleInfo(si[0]);
 
-              dr_servant->get_key_value(key_holder, si[0].instance_handle) ;
+              foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
               ACE_OS::printf (
                   "get_key_value: handle = %d foo.x = %f foo.y = %f, foo.key = %d\n",
                   si[0].instance_handle,
@@ -339,7 +333,7 @@ Reader::start1 ()
       ::DDS::SampleInfoSeq si(1) ;
 
       DDS::ReturnCode_t status ;
-      status = dr_servant->read(foo, si,
+      status = foo_dr->read(foo, si,
                   1,
                   ::DDS::READ_SAMPLE_STATE | ::DDS::NOT_READ_SAMPLE_STATE,
                   ::DDS::ANY_VIEW_STATE,
@@ -383,14 +377,11 @@ Reader::start2 ()
       throw TestException() ;
     }
 
-    Xyz::FooDataReaderImpl* dr_servant =
-      dynamic_cast<Xyz::FooDataReaderImpl*> (foo_dr.in ());
-
     ::Xyz::FooSeq foo;
     ::DDS::SampleInfoSeq si ;
     DDS::ReturnCode_t status  ;
 
-    status = dr_servant->read(foo, si,
+    status = foo_dr->read(foo, si,
                               num_reads_per_thread_,
                               ::DDS::NOT_READ_SAMPLE_STATE,
                               ::DDS::ANY_VIEW_STATE,
@@ -407,7 +398,7 @@ Reader::start2 ()
         PrintSampleInfo(si[i]) ;
       }
 
-      status = dr_servant->return_loan(foo, si) ;
+      status = foo_dr->return_loan(foo, si) ;
       if (status != ::DDS::RETCODE_OK)
       {
         ACE_OS::printf ("return_loan: Error %d\n", status) ;

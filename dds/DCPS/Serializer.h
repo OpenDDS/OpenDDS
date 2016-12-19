@@ -23,6 +23,8 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -68,16 +70,16 @@ public:
 
   virtual ~Serializer();
 
-  /// Establish byte swaping behavior.
+  /// Establish byte swapping behavior.
   void swap_bytes(bool do_swap);
 
-  /// Examine byte swaping behavior.
+  /// Examine byte swapping behavior.
   bool swap_bytes() const;
 
   /// Examine alignment behavior.
   Alignment alignment() const;
 
-  /// Reset aligment as if a new instance were created
+  /// Reset alignment as if a new instance were created
   void reset_alignment();
 
   /// Examine the state of the stream abstraction.
@@ -259,7 +261,7 @@ private:
   /// an instance method to match the swapcpy semantics.
   void smemcpy(char* to, const char* from, size_t n);
 
-  /// Efficient swaping copy for quad words and shorter.  This is an
+  /// Efficient swapping copy for quad words and shorter.  This is an
   /// instance method to allow clearing the good_bit_ on error.
   void swapcpy(char* to, const char* from, size_t n);
 
@@ -320,11 +322,15 @@ template<typename T> struct KeyOnly {
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #if defined (__ACE_INLINE__)
 # include "Serializer.inl"
 #else  /* __ACE_INLINE__ */
 
 #include <ace/CDR_Stream.h>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -377,6 +383,9 @@ void find_size_ulong(size_t& size, size_t& padding);
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 
 #endif  /* __ACE_INLINE__ */
 

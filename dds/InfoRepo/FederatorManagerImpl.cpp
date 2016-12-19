@@ -6,6 +6,7 @@
  */
 
 #include "DcpsInfo_pch.h"
+#include "tao/ORB_Core.h"
 #include "FederatorManagerImpl.h"
 #include "DCPSInfo_i.h"
 #include "DefaultValues.h"
@@ -18,7 +19,6 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/Tcp.h"
-#include "tao/ORB_Core.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
 
@@ -30,6 +30,8 @@
 #if !defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"
 #endif /* !__ACE_INLINE__ */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Federator {
@@ -1160,3 +1162,5 @@ ManagerImpl::initializeSubscription(
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

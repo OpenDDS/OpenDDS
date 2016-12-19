@@ -20,6 +20,8 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -76,7 +78,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
 TransportImpl::AcceptConnectResult
 UdpTransport::connect_datalink(const RemoteTransport& remote,
                                const ConnectionAttribs& attribs,
-                               TransportClient* )
+                               const TransportClient_rch& )
 {
   UdpInst_rch tmp_config(this->config_i_.in(), false);
   if (this->is_shut_down() || this->config_i_.is_nil()) {
@@ -113,7 +115,7 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
 TransportImpl::AcceptConnectResult
 UdpTransport::accept_datalink(const RemoteTransport& remote,
                               const ConnectionAttribs& attribs,
-                              TransportClient* client)
+                              const TransportClient_rch& client)
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
   //GuardType guard(connections_lock_);
@@ -139,7 +141,7 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
 }
 
 void
-UdpTransport::stop_accepting_or_connecting(TransportClient* client,
+UdpTransport::stop_accepting_or_connecting(const TransportClient_rch& client,
                                            const RepoId& remote_id)
 {
   VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting_or_connecting\n"));
@@ -326,7 +328,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                                   pend->second.end(),
                                                   tmp.at(i));
         if (tmp_iter != pend->second.end()) {
-          TransportClient* pend_client = tmp.at(i).first;
+          TransportClient_rch pend_client = tmp.at(i).first;
           RepoId remote_repo = tmp.at(i).second;
           guard.release();
           pend_client->use_datalink(remote_repo, link);
@@ -346,3 +348,5 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

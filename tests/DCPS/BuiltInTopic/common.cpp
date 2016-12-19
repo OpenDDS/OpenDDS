@@ -5,6 +5,7 @@
 #include "tests/DCPS/common/TestSupport.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 #include <string>
 
 #include <sstream>
@@ -256,9 +257,6 @@ int read (int expect_success)
                  -1);
     }
 
-    ::Xyz::FooDataReaderImpl* dr_servant =
-      dynamic_cast< ::Xyz::FooDataReaderImpl*> (foo_dr.in ());
-
     int num_reads = 0;
     int num_received = 0;
 
@@ -271,7 +269,7 @@ int read (int expect_success)
       ::Xyz::Foo foo;
       ::DDS::SampleInfo si ;
 
-      DDS::ReturnCode_t status = dr_servant->read_next_sample(foo, si) ;
+      DDS::ReturnCode_t status = foo_dr->read_next_sample(foo, si) ;
       num_reads ++;
 
       if (status == ::DDS::RETCODE_OK)

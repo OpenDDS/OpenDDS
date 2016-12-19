@@ -22,10 +22,11 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "tao/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
     RepoId                     id,
     const DDS::PublisherQos&   qos,
@@ -52,7 +53,6 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
 }
 
-// Implementation skeleton destructor
 PublisherImpl::~PublisherImpl()
 {
   //The datawriters should be deleted already before calling delete
@@ -928,6 +928,7 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
   return true;
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 } // namespace DCPS
 } // namespace OpenDDS

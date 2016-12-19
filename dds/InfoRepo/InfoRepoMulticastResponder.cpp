@@ -17,6 +17,8 @@
 
 #include <string>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -340,3 +342,5 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

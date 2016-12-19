@@ -19,6 +19,10 @@
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
 
+#include /**/ "ace/OS_NS_unistd.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
                                          DCPS_IR_Participant* participant,
                                          DCPS_IR_Topic* topic,
@@ -784,17 +788,4 @@ DCPS_IR_Publication::dump_to_string(const std::string& prefix, int depth) const
   return str;
 }
 
-
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class ACE_Node<DCPS_IR_Subscription*>;
-template class ACE_Unbounded_Set<DCPS_IR_Subscription*>;
-template class ACE_Unbounded_Set_Iterator<DCPS_IR_Subscription*>;
-
-#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Node<DCPS_IR_Subscription*>
-#pragma instantiate ACE_Unbounded_Set<DCPS_IR_Subscription*>
-#pragma instantiate ACE_Unbounded_Set_Iterator<DCPS_IR_Subscription*>
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

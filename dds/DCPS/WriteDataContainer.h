@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsCoreC.h"
 #include "DataSampleElement.h"
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
@@ -16,18 +17,18 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 
+#include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
-#include "Service_Participant.h"
-
-#include "ace/Null_Mutex.h"
-#include "ace/Thread_Mutex.h"
-#include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Condition_Thread_Mutex.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -129,7 +130,7 @@ public:
     /// Max durable samples sent for each instance
     CORBA::Long      max_durable_per_instance,
     /// The timeout for write.
-    ::DDS::Duration_t max_blocking_time,
+    DDS::Duration_t max_blocking_time,
     /// The number of chunks that the DataSampleElementAllocator
     /// needs allocate.
     size_t           n_chunks,
@@ -150,9 +151,6 @@ public:
     /// maximum total number of samples, 0 for unlimited
     CORBA::Long      max_total_samples);
 
-  /**
-   * Default destructor.
-   */
   ~WriteDataContainer();
 
   DDS::ReturnCode_t
@@ -374,7 +372,7 @@ private:
    * in a state such that they could only be used for durability
    * purposes (see reenqueue_all).
    * "n" is determined by max_durable_per_instance_, so these samples
-   * are truely unneeded -- there are max_durable_per_instance_ newer
+   * are truly unneeded -- there are max_durable_per_instance_ newer
    * samples available in the instance.
    */
   void remove_excess_durable();
@@ -467,7 +465,7 @@ private:
 
   /// The maximum time to block on write operation.
   /// This comes from DataWriter's QoS HISTORY.max_blocking_time
-  ::DDS::Duration_t               max_blocking_time_;
+  DDS::Duration_t               max_blocking_time_;
 
   /// The block waiting flag.
   bool                            waiting_on_release_;
@@ -537,5 +535,7 @@ private:
 
 } /// namespace OpenDDS
 } /// namespace DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_WRITE_DATA_CONTAINER_H */

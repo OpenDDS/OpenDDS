@@ -6,8 +6,8 @@ compiler:
 
 env:
   global:
-    - ACE_ROOT=$TRAVIS_BUILD_DIR/ext/ATCD/ACE
-    - TAO_ROOT=$TRAVIS_BUILD_DIR/ext/ATCD/TAO
+    - ACE_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/ACE
+    - TAO_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/TAO
     - DDS_ROOT=$TRAVIS_BUILD_DIR
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
@@ -15,7 +15,7 @@ env:
 before_install:
   - mkdir ext
   - cd ext && git clone --depth 1 git://github.com/DOCGroup/MPC.git
-  - git clone -b Latest_Beta --depth 1 git://github.com/DOCGroup/ATCD.git
+  - git clone -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
   - cd ..
 
 branches:

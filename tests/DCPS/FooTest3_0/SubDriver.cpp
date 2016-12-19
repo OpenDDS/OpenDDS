@@ -10,9 +10,11 @@
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <string>
 #include <sstream>
+#include <iostream>
 
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "foo";

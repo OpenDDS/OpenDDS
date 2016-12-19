@@ -7,6 +7,7 @@
 
 #include "ZeroCopyReaderListenerImpl.h"
 #include "Boilerplate.h"
+#include <iostream>
 
 using namespace examples::boilerplate;
 

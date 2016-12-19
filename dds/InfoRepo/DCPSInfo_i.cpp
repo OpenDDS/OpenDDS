@@ -7,6 +7,8 @@
 
 #include "DcpsInfo_pch.h"
 
+#include "tao/ORB_Core.h"
+
 #include /**/ "DCPSInfo_i.h"
 
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
@@ -30,6 +32,8 @@
 #include "ace/Dynamic_Service.h"
 #include "ace/Reactor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
                                        , bool reincarnate
@@ -51,7 +55,6 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   }
 }
 
-//  destructor
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 {
 }
@@ -2484,3 +2487,5 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
   return CORBA::string_dup(dump.c_str());
 
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

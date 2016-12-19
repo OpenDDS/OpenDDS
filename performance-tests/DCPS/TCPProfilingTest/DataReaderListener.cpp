@@ -4,21 +4,15 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "testMessageTypeSupportC.h"
 #include "testMessageTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 
 extern long subscriber_delay_msec; // from common.h
 
 
 int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
 {
-  // TWF: There is an optimization to the test by
-  // using a pointer to the known servant and
-  // static_casting it to the servant
   ::profilingTest::testMsgDataReader_var var_dr
     = ::profilingTest::testMsgDataReader::_narrow(reader);
-
-  ::profilingTest::testMsgDataReader_ptr pt_dr = var_dr.ptr();
-  ::profilingTest::testMsgDataReaderImpl* dr_servant =
-      dynamic_cast< ::profilingTest::testMsgDataReaderImpl*>(pt_dr);
 
   if (subscriber_delay_msec)
     {
@@ -29,13 +23,12 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
 
   const ::CORBA::Long max_read_samples = 100;
   int samples_recvd = 0;
-  DDS::ReturnCode_t status;
   // initialize to zero.
 
   ::profilingTest::testMsgSeq samples(useZeroCopy ? 0 : max_read_samples, max_read_samples);
   ::DDS::SampleInfoSeq        infos  (useZeroCopy ? 0 : max_read_samples, max_read_samples, 0);
 
-  status = dr_servant->read (
+  DDS::ReturnCode_t status = var_dr->read (
     samples,
     infos,
     max_read_samples,
@@ -59,17 +52,6 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
   return samples_recvd;
 }
 
-
-
-
-
-
-
-
-
-
-
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,

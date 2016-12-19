@@ -37,9 +37,11 @@
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -96,7 +98,6 @@ RecorderImpl::~RecorderImpl()
   }
 
   remove_association_sweeper_->wait();
-  remove_association_sweeper_->destroy();
 }
 
 
@@ -1103,3 +1104,5 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
 
 } // namespace DCPS
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

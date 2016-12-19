@@ -13,6 +13,8 @@
 
 #include "ace/Reactor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE OpenDDS::DCPS::TransportInst*
 OpenDDS::DCPS::TransportImpl::config() const
 {
@@ -58,3 +60,5 @@ OpenDDS::DCPS::TransportImpl::pre_shutdown_i()
 {
   //noop
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

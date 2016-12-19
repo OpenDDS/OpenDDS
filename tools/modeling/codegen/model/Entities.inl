@@ -1,6 +1,7 @@
 // -*- C++ -*-
 //
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE
 void
@@ -64,3 +65,4 @@ OpenDDS::Model::Entities::add(
   this->typeSupport_[ participant].push( support);
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

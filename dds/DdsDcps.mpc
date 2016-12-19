@@ -1,7 +1,7 @@
 project(OpenDDS_Dcps): core, coverage_optional, \
         dcps_optional_features, dcps_optional_safety, dds_macros, \
         dds_suppress_any_support, dds_taolib, gen_ostream, install, valgrind, \
-        dds_vc_warnings {
+        dds_vc_warnings, dds_versioning_idl_defaults {
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
@@ -34,6 +34,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 
   Header_Files {
     Version.h
+    Versioned_Namespace.h
     DCPS
     DCPS/transport/framework
     DCPS/yard
@@ -80,9 +81,9 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   }
 
   verbatim(gnuace, postinstall) {
-"	echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(INSTALL_PREFIX)/share/dds/dds-devel.sh"
-"	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
-"	ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
+"	echo export DDS_ROOT=$(DESTDIR)$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
+"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
+"	ln -sf $(DESTDIR)$(INSTALL_PREFIX)/include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
   }
 
 }

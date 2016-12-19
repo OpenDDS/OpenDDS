@@ -8,9 +8,12 @@
 #ifndef SHUTDOWNINTERFACE_H
 #define SHUTDOWNINTERFACE_H
 
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class ShutdownInterface {
 public:
-  // Virtual destructor.
   virtual ~ShutdownInterface();
 
   // Request to shutdown.
@@ -21,5 +24,7 @@ inline
 ShutdownInterface::~ShutdownInterface()
 {
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* SHUTDOWNINTERFACE_H */

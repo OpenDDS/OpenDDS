@@ -11,6 +11,8 @@
 #include "TcpSendStrategy.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TcpReconnectTask::TcpReconnectTask(
   OpenDDS::DCPS::TcpConnection* connection)
   : connection_(connection)
@@ -42,3 +44,5 @@ void OpenDDS::DCPS::TcpReconnectTask::execute(ReconnectOpType& op)
   } else
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpReconnectTask::svc unknown operation %d\n", op));
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

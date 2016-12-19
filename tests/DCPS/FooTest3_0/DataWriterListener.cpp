@@ -4,12 +4,10 @@
 
 extern int offered_incompatible_qos_called_on_dw;
 
-// Implementation skeleton constructor
 DataWriterListenerImpl::DataWriterListenerImpl (void)
   {
   }
 
-// Implementation skeleton destructor
 DataWriterListenerImpl::~DataWriterListenerImpl (void)
   {
   }

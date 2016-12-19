@@ -45,6 +45,8 @@ struct LifespanQosPolicy;
 
 } // namespace DDS
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -183,13 +185,11 @@ public:
   sample_list_type *> sample_map_type;
   typedef OPENDDS_LIST(long) timer_id_list_type;
 
-  /// Constructors.
   DataDurabilityCache(DDS::DurabilityQosPolicyKind kind);
 
   DataDurabilityCache(DDS::DurabilityQosPolicyKind kind,
                       ACE_CString & data_dir);
 
-  /// Destructor.
   ~DataDurabilityCache();
 
   /// Insert the samples corresponding to the given topic instance
@@ -253,6 +253,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_NO_PERSISTENCE_PROFILE */
 

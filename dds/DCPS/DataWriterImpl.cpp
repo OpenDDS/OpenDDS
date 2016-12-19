@@ -40,11 +40,12 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
-#include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 
 #include <stdexcept>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -114,6 +115,8 @@ DataWriterImpl::DataWriterImpl()
     TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
 
   db_lock_pool_ = new DataBlockLockPool((unsigned long)n_chunks_);
+
+  ACE_Event_Handler::reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }
 
 // This method is called when there are no longer any reference to the
@@ -364,7 +367,7 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
   , filter_class_name_(filterClassName)
   , filter_(filter)
   , expression_params_(params)
-  , eval_(*filter ? participant->get_filter_eval(filter) : 0)
+  , eval_(*filter ? participant->get_filter_eval(filter) : RcHandle<FilterEvaluator>())
   , expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
 {}
@@ -930,20 +933,19 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
           || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
         if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
             && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-          this->watchdog_ =
+          this->watchdog_.reset(
                              new OfferedDeadlineWatchdog(
                                this->lock_,
                                qos.deadline,
                                this,
                                this->dw_local_objref_.in(),
                                this->offered_deadline_missed_status_,
-                               this->last_deadline_missed_total_count_);
+                               this->last_deadline_missed_total_count_));
 
         } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
                    && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
           this->watchdog_->cancel_all();
-          this->watchdog_->destroy();
-          this->watchdog_ = 0;
+          this->watchdog_.reset();
 
         } else {
           this->watchdog_->reset_interval(
@@ -1349,7 +1351,6 @@ DataWriterImpl::enable()
 
     } else {
       cancel_timer_ = true;
-      this->_add_ref();
     }
   }
 
@@ -1361,13 +1362,13 @@ DataWriterImpl::enable()
 
   if (deadline_period.sec != DDS::DURATION_INFINITE_SEC
       || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    this->watchdog_ = new OfferedDeadlineWatchdog(
+    this->watchdog_.reset( new OfferedDeadlineWatchdog(
                          this->lock_,
                          this->qos_.deadline,
                          this,
                          this->dw_local_objref_.in(),
                          this->offered_deadline_missed_status_,
-                         this->last_deadline_missed_total_count_);
+                         this->last_deadline_missed_total_count_));
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
@@ -1528,7 +1529,7 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    get_lock(),
-                   ::DDS::RETCODE_ERROR);
+                   DDS::RETCODE_ERROR);
 
   DDS::ReturnCode_t ret = register_instance_i(handle, data, source_timestamp);
   if (ret != DDS::RETCODE_OK) {
@@ -1695,7 +1696,7 @@ DataWriterImpl::write(DataSample* data,
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                     guard,
                     get_lock (),
-                    ::DDS::RETCODE_ERROR);
+                    DDS::RETCODE_ERROR);
 
   // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
   GUIDSeq_var filter_out_var(filter_out);
@@ -1843,7 +1844,7 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DDS::ReturnCode_t ret = ::DDS::RETCODE_ERROR;
+  DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
 
@@ -2362,10 +2363,8 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
 }
 
 int
-DataWriterImpl::handle_close(ACE_HANDLE,
-                             ACE_Reactor_Mask)
+DataWriterImpl::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
-  this->_remove_ref();
   return 0;
 }
 
@@ -2577,7 +2576,7 @@ DataWriterImpl::persist_data()
 void
 DataWriterImpl::reschedule_deadline()
 {
-  if (this->watchdog_ != 0) {
+  if (this->watchdog_.in()) {
     this->data_container_->reschedule_deadline();
   }
 }
@@ -2657,5 +2656,46 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
   return status;
 }
 
+void
+DataWriterImpl::_add_ref()
+{
+  CORBA::Object::_add_ref();
+}
+
+void
+DataWriterImpl::_remove_ref()
+{
+  CORBA::Object::_remove_ref();
+}
+
+ACE_Event_Handler::Reference_Count
+DataWriterImpl::add_reference()
+{
+  CORBA::Object::_add_ref();
+  return 1;
+}
+
+ACE_Event_Handler::Reference_Count
+DataWriterImpl::remove_reference()
+{
+  CORBA::Object::_remove_ref();
+  return 1;
+}
+
+void
+DataWriterImpl::listener_add_ref()
+{
+  CORBA::Object::_add_ref();
+}
+
+void
+DataWriterImpl::listener_remove_ref()
+{
+  CORBA::Object::_remove_ref();
+}
+
+
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

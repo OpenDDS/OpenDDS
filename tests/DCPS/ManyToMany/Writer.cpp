@@ -31,7 +31,7 @@ namespace {
     ws->attach_condition(condition);
 
     DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+      { 120, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};

@@ -20,6 +20,8 @@ namespace {
   const OpenDDS::DCPS::SequenceNumber dummy;
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -53,3 +55,5 @@ RtpsTransportHeader::sequence()
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

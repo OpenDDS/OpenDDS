@@ -19,6 +19,8 @@
 
 #include "ace/Reverse_Lock_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -40,7 +42,6 @@ public:
   typedef ACE_Recursive_Thread_Mutex  lock_type;
   typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;
 
-  /// Constructor
   RequestedDeadlineWatchdog(
     lock_type & lock,
     DDS::DeadlineQosPolicy qos,
@@ -49,7 +50,6 @@ public:
     DDS::RequestedDeadlineMissedStatus & status,
     CORBA::Long & last_total_count);
 
-  /// Destructor
   virtual ~RequestedDeadlineWatchdog();
 
   // Schedule timer for the supplied instance.
@@ -94,5 +94,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_REQUESTED_DEADLINE_WATCHDOG_H */

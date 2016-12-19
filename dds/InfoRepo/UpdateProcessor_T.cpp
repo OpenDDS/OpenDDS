@@ -16,6 +16,8 @@
 #include "dds/DCPS/debug.h"
 #include "UpdateProcessor_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -102,5 +104,7 @@ UpdateProcessor<DataType>::processUpdateFilterExpressionParams(
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UPDATEPROCESSOR_T_CPP */

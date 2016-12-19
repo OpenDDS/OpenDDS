@@ -6,6 +6,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 ConnectionSettings::ConnectionSettings()
@@ -133,3 +135,6 @@ ConnectionSettings::config_set() const
 }
 
 } } }
+
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

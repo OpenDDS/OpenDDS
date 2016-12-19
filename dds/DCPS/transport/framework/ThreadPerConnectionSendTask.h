@@ -11,16 +11,19 @@
 #include /**/ "ace/pre.h"
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 #include "BasicQueue_T.h"
 #include "TransportDefs.h"
-#include "ace/Task.h"
-#include "ace/Synch.h"
+
 #include "ace/Condition_T.h"
-#include "dds/DCPS/PoolAllocationBase.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Task.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -54,11 +57,8 @@ struct SendRequest : public PoolAllocationBase {
  */
 class OpenDDS_Dcps_Export ThreadPerConnectionSendTask : public ACE_Task_Base {
 public:
-
-  /// Constructor.
   ThreadPerConnectionSendTask(DataLink* link);
 
-  /// Virtual Destructor.
   virtual ~ThreadPerConnectionSendTask();
 
   /// Put the request to the request queue.
@@ -116,6 +116,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

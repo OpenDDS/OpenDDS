@@ -21,10 +21,12 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "ace/Condition_T.h"
+#include "ace/Synch_Traits.h"
 
 #include <list>
 #include <map>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 class TAO_DDS_DCPSInfo_i;
 
@@ -40,10 +42,8 @@ class OpenDDS_Federator_Export ManagerImpl
     public virtual UpdateProcessor<SubscriptionUpdate>,
     public virtual UpdateProcessor<PublicationUpdate> {
 public:
-  /// Default constructor.
   ManagerImpl(Config& config);
 
-  /// Virtual destructor.
   virtual ~ManagerImpl();
 
   // IDL methods.
@@ -296,6 +296,8 @@ private:
 
 }
 } // End namespace OpenDDS::Federator
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"

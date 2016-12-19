@@ -10,6 +10,8 @@
 #include "UdpInst.h"
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -36,3 +38,5 @@ UdpSendStrategy::stop_i()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

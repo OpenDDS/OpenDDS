@@ -16,6 +16,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -37,11 +39,8 @@ enum ReconnectOpType {
  */
 class TcpReconnectTask : public QueueTaskBase <ReconnectOpType> {
 public:
-
-  /// Constructor.
   TcpReconnectTask(TcpConnection* con);
 
-  /// Virtual Destructor.
   virtual ~TcpReconnectTask();
 
   /// Handle reconnect requests.
@@ -55,6 +54,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

@@ -19,6 +19,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -38,12 +40,10 @@ class ReceivedDataElement;
  */
 class OpenDDS_Dcps_Export InstanceState : public ACE_Event_Handler {
 public:
-  /// Constructor.
   InstanceState(DataReaderImpl* reader,
                 ACE_Recursive_Thread_Mutex& lock,
                 DDS::InstanceHandle_t handle);
 
-  /// Destructor
   virtual ~InstanceState();
 
   /// Populate the SampleInfo structure
@@ -64,14 +64,14 @@ public:
 
   /// DISPOSE message received for this instance.
   /// Return flag indicates whether the instance state was changed.
-  /// This flag is used by concreate DataReader to determine whether
+  /// This flag is used by concrete DataReader to determine whether
   /// it should notify listener. If state is not changed, the dispose
   /// message is ignored.
   bool dispose_was_received(const PublicationId& writer_id);
 
   /// UNREGISTER message received for this instance.
   /// Return flag indicates whether the instance state was changed.
-  /// This flag is used by concreate DataReader to determine whether
+  /// This flag is used by concrete DataReader to determine whether
   /// it should notify listener. If state is not changed, the unregister
   /// message is ignored.
   bool unregister_was_received(const PublicationId& writer_id);
@@ -126,7 +126,7 @@ public:
 
   bool no_writer () const;
 
-  void reset_ownership (::DDS::InstanceHandle_t instance);
+  void reset_ownership (DDS::InstanceHandle_t instance);
 
   DDS::InstanceHandle_t instance_handle() const { return handle_; }
 
@@ -198,13 +198,15 @@ private:
   RepoIdSet writers_;
   PublicationId owner_;
   bool exclusive_;
-  /// registered with participant so it can be calledback as
+  /// registered with participant so it can be called back as
   /// the owner is updated.
   bool registered_;
 };
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "InstanceState.inl"

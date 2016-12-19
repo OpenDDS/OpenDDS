@@ -1,7 +1,7 @@
 // -*- MPC -*-
 
 // This file contains a number of optional features that disable VC
-// warnings regarding various items that specific versions of VC turned 
+// warnings regarding various items that specific versions of VC turned
 // into warnings that were not present in earlier versions. These
 // warnings are disabled by default. To enable them, generate your projects
 // with the feature set to 0.
@@ -31,5 +31,8 @@ feature(vc_avoid_this_in_initializer_warnings) {
 feature(vc_avoid_name_len_exceeded_warnings) {
   specific(vc10, vc11, vc12, vc14) {
     DisableSpecificWarnings += 4503
+  }
+  specific(nmake) {
+    compile_flags += /wd4503
   }
 }

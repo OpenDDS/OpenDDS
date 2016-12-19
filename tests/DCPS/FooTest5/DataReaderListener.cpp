@@ -6,8 +6,9 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 
-template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
+template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>
 int read (::DDS::DataReader_ptr reader)
 {
   try
@@ -21,13 +22,10 @@ int read (::DDS::DataReader_ptr reader)
       throw TestException() ;
     }
 
-    DR_impl* dr_servant =
-      dynamic_cast<DR_impl*> (foo_dr.in ());
-
     DT foo;
     ::DDS::SampleInfo si ;
 
-    DDS::ReturnCode_t status = dr_servant->take_next_sample(foo, si) ;
+    DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
 
     if (status == ::DDS::RETCODE_OK)
     {
@@ -84,14 +82,12 @@ int read (::DDS::DataReader_ptr reader)
 }
 
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl ()
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
   }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
@@ -173,8 +169,7 @@ void DataReaderListenerImpl::on_subscription_matched (
             ::Xyz::FooNoKeySeq,
             ::Xyz::FooNoKeyDataReader,
             ::Xyz::FooNoKeyDataReader_ptr,
-            ::Xyz::FooNoKeyDataReader_var,
-            ::Xyz::FooNoKeyDataReaderImpl> (reader);
+            ::Xyz::FooNoKeyDataReader_var> (reader);
     }
     else
     {
@@ -182,8 +177,7 @@ void DataReaderListenerImpl::on_subscription_matched (
         ::Xyz::FooSeq,
         ::Xyz::FooDataReader,
         ::Xyz::FooDataReader_ptr,
-        ::Xyz::FooDataReader_var,
-        ::Xyz::FooDataReaderImpl> (reader);
+        ::Xyz::FooDataReader_var> (reader);
     }
 
     if (ret != 0)

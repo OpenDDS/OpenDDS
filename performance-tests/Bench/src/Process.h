@@ -5,8 +5,8 @@
 #include "dds/DCPS/GuardCondition.h"
 #include "dds/DCPS/WaitSet.h"
 
-#include "ace/Synch.h"
 #include "ace/Condition_T.h"
+#include "ace/Synch_Traits.h"
 
 #include <string>
 #include <map>
@@ -23,7 +23,6 @@ class Process {
     /// Construct with option information.
     Process( const Options& options);
 
-    /// Destructor.
     ~Process();
 
     /// Execute the test.

@@ -8,22 +8,21 @@
 #ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
-#include "ace/config-macros.h"
-#include "DomainParticipantFactoryImpl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "DomainParticipantFactoryImpl.h"
-#include "ace/Barrier.h"
+
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Discovery.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/DomainParticipantFactoryImpl.h"
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
 #include "ace/Time_Value.h"
 #include "ace/ARGV.h"
+#include "ace/Barrier.h"
 
 #include "Recorder.h"
 #include "Replayer.h"
@@ -32,6 +31,8 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -61,10 +62,8 @@ public:
   /// Domain value for the default repository IOR.
   enum { ANY_DOMAIN = -1 };
 
-  /// Constructor.
   Service_Participant();
 
-  /// Destructor.
   ~Service_Participant();
 
   /// Return a singleton instance of this class.
@@ -609,6 +608,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined(__ACE_INLINE__)
 #include "Service_Participant.inl"

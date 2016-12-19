@@ -1,6 +1,8 @@
 #ifndef OPENDDS_DCPS_V8TYPECONVERTER_H
 #define OPENDDS_DCPS_V8TYPECONVERTER_H
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace v8 {
   class Value;
 }
@@ -13,5 +15,7 @@ namespace DCPS {
   };
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

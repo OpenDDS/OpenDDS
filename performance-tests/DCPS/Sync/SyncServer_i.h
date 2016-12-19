@@ -27,16 +27,12 @@ class Sync_Export SyncServer_i : public virtual POA_Sync::Server, public ACE_Tas
   virtual int svc (void);
 
   virtual void register_me (::Sync::Role rol, ::Sync::Client_ptr callback,
-                            ::Sync::Id_out ide)
-    throw (CORBA::SystemException);
+                            ::Sync::Id_out ide);
 
-  virtual void unregister (::Sync::Id ide)
-    throw (CORBA::SystemException);
+  virtual void unregister (::Sync::Id ide);
 
   virtual void way_point_reached (::Sync::Id ide,
-                                  ::Sync::WayPoint way_point)
-    throw (CORBA::SystemException);
-
+                                  ::Sync::WayPoint way_point);
  private:
   typedef struct Cl
   {

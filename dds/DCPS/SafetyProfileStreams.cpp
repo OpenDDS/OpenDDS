@@ -8,6 +8,8 @@
 
 #include "dds/DCPS/SafetyProfileStreams.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -102,3 +104,5 @@ to_dds_string(unsigned long to_convert, bool as_hex)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

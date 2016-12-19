@@ -539,7 +539,7 @@ public:
       be_global->impl_ <<
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n"
-        "  if (this->_discriminator != rhs._discriminator) return false;";
+        "  if (this->_discriminator != rhs._discriminator) return false;\n";
       generateSwitchForUnion("this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "    return false;\n"
@@ -1263,7 +1263,7 @@ namespace {
     std::string zeros;
     for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) zeros += "[0]";
     be_global->lang_header_ <<
-      "namespace TAO {\n"
+      "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace TAO {\n"
       "template <>\n"
       "struct " << exporter() << "Array_Traits<" << nm << "_forany>\n"
       "{\n"
@@ -1297,7 +1297,7 @@ namespace {
       "  {\n"
       "    " << nm << "_fini_i(slice" << zeros << ");\n"
       "  }\n"
-      "};\n}\n\n";
+      "};\n}\nTAO_END_VERSIONED_NAMESPACE_DECL\n\n";
   }
 
 #ifdef ACE_HAS_CDR_FIXED

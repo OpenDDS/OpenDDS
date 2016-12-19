@@ -14,16 +14,16 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/LocalObject.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
 class OpenDDS_Model_Export NullReaderListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  //Constructor
   NullReaderListener();
 
-  //Destructor
   virtual ~NullReaderListener();
 
   virtual void on_requested_deadline_missed (
@@ -63,5 +63,7 @@ public:
 };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* NULLREADERLISTENER_H  */

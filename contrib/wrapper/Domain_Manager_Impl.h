@@ -33,7 +33,6 @@ typedef class ACE_Refcounted_Auto_Ptr <Domain_Manager_Impl,
 class Domain_Manager_Impl
 {
  public:
-  /// destructor
   virtual ~Domain_Manager_Impl ();
 
   /// this call blocks the thread until a SIGINT signal for the process is received

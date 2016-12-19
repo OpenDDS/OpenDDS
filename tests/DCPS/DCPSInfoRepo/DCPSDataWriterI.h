@@ -34,39 +34,33 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "DiscReceivedCalls.h"
+#include "dds/DCPS/RcObject_T.h"
 
-//Class TAO_DDS_DCPSDataWriter_i
 class TAO_DDS_DCPSDataWriter_i
   : public OpenDDS::DCPS::DataWriterCallbacks
+  , public OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>
 {
 public:
-  //Constructor
   TAO_DDS_DCPSDataWriter_i (void);
 
-  //Destructor
   virtual ~TAO_DDS_DCPSDataWriter_i (void);
 
   virtual ::DDS::ReturnCode_t enable_specific (
       ) { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
-
-
   virtual void add_association (
       const ::OpenDDS::DCPS::RepoId& yourId,
       const OpenDDS::DCPS::ReaderAssociation& reader,
-      bool active
-    );
+      bool active);
 
   virtual void association_complete(const OpenDDS::DCPS::RepoId& /*remote_id*/) { received_.received(DiscReceivedCalls::ASSOC_COMPLETE); }
 
   virtual void remove_associations (
       const OpenDDS::DCPS::ReaderIdSeq & readers,
-      ::CORBA::Boolean notify_lost
-    );
+      ::CORBA::Boolean notify_lost);
 
   virtual void update_incompatible_qos (
-      const OpenDDS::DCPS::IncompatibleQosStatus & status
-    );
+      const OpenDDS::DCPS::IncompatibleQosStatus & status);
 
   virtual void update_subscription_params(
     const OpenDDS::DCPS::RepoId&, const DDS::StringSeq &);
@@ -77,6 +71,9 @@ public:
     {
       return received_;
     }
+
+  void _add_ref();
+  void _remove_ref();
 private:
   DiscReceivedCalls received_;
 };

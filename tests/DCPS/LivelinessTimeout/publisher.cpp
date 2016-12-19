@@ -23,7 +23,6 @@
 
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
-#include "tao/ORB_Core.h"
 
 #include "common.h"
 

@@ -23,7 +23,7 @@
 
 #include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/transport/tcp/TcpTransport.h"
-
+#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
 #include /**/ "ace/Unbounded_Set.h"
 
 #include <set>
@@ -32,6 +32,8 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // forward declarations
 class DCPS_IR_Topic_Description;
@@ -58,7 +60,7 @@ class DCPS_IR_Publication;
  */
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain {
 public:
-  DCPS_IR_Domain(DDS::DomainId_t id, RepoIdGenerator& generator);
+  DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator);
 
   ~DCPS_IR_Domain();
 
@@ -200,7 +202,7 @@ private:
 
   // Participant GUID Id generator.  The remaining Entities have their
   // values generated within the containing Participant.
-  RepoIdGenerator& participantIdGenerator_;
+  OpenDDS::DCPS::RepoIdGenerator& participantIdGenerator_;
 
   /// all the participants
   DCPS_IR_Participant_Map participants_;
@@ -244,5 +246,7 @@ private:
   DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* DCPS_IR_DOMAIN_H */

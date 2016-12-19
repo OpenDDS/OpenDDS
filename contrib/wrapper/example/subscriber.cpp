@@ -11,6 +11,7 @@
 #include "ExchangeEventDataReaderListenerImpl.h"
 #include <dds/DCPS/SubscriberImpl.h>
 #include <ace/streams.h>
+#include <ace/OS_NS_unistd.h>
 #include <orbsvcs/Time_Utilities.h>
 
 #include "Domain_Manager.h"

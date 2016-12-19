@@ -12,6 +12,8 @@
 #include "TcpSendStrategy.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::TcpConnectionReplaceTask::TcpConnectionReplaceTask(
   TcpTransport* trans)
   : trans_(trans)
@@ -30,3 +32,5 @@ void OpenDDS::DCPS::TcpConnectionReplaceTask::execute(TcpConnection_rch& con)
 
   this->trans_->fresh_link(con);
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -12,6 +12,9 @@
 #include "model_export.h"
 #include <exception>
 #include <stdexcept>
+#include <dds/Versioned_Namespace.h>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS { namespace Model {
 
@@ -76,6 +79,8 @@ class OutOfBoundsException : public Exception {
 };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

@@ -25,7 +25,6 @@ class Options  {
     /// Default constructor.
     Options( int argc, ACE_TCHAR** argv, char** envp = 0);
 
-    /// Virtual destructor.
     virtual ~Options();
 
     /// Check validity of command line.

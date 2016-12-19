@@ -21,6 +21,7 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_unistd.h"
 
 #include <string.h>
 
@@ -530,9 +531,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1; // failure
       }
 
-      Test::SimpleDataWriterImpl* fast_dw =
-        dynamic_cast<Test::SimpleDataWriterImpl*>(foo_dw.in ());
-
       Test::SimpleDataReader_var foo_dr
         = Test::SimpleDataReader::_narrow(dr.in ());
       if (CORBA::is_nil (foo_dr.in ()))
@@ -542,10 +540,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1; // failure
       }
 
-      Test::SimpleDataReaderImpl* fast_dr =
-        dynamic_cast<Test::SimpleDataReaderImpl*>(foo_dr.in ());
-
-
       // wait for association establishement before writing.
       // -- replaced this sleep with the while loop below;
       //    waiting on the one association we expect.
@@ -553,7 +547,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::InstanceHandleSeq handles;
       while (1)
       {
-          fast_dw->get_matched_subscriptions(handles);
+          foo_dw->get_matched_subscriptions(handles);
           if (handles.length() > 0)
               break;
           else
@@ -595,9 +589,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       writer_instance_handle
-          = fast_dw->register_instance(foo);
+          = foo_dw->register_instance(foo);
 
-      fast_dw->write(foo,
+      foo_dw->write(foo,
                      writer_instance_handle);
 
 
@@ -623,7 +617,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::ReturnCode_t status  ;
         if (do_by_instance)
           {
-            status = fast_dr->read ( data1
+            status = foo_dr->read ( data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -634,7 +628,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read ( data1
+            status = foo_dr->read ( data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -651,7 +645,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ::DDS::SampleInfoSeq info2;
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data2
+            status = foo_dr->read_instance(  data2
                                     , info2
                                     , max_samples
                                     , reader_instance_handle
@@ -661,7 +655,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data2
+            status = foo_dr->read(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -697,7 +691,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             test_failed = 1;
           }
 
-        status = fast_dr->return_loan(copy, copyInfo );
+        status = foo_dr->return_loan(copy, copyInfo );
 
         check_return_loan_status(status, copy, 0, 0, "t1 return_loan copy");
 
@@ -709,7 +703,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
 
-        status = fast_dr->return_loan(data2, info2 );
+        status = foo_dr->return_loan(data2, info2 );
 
         check_return_loan_status(status, data2, 0, 0, "t1 return_loan2");
 
@@ -719,7 +713,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                 ACE_TEXT("(%P|%t) t4 ERROR: bad ref count %d expecting 2\n"), item->ref_count() ));
             test_failed = 1;
         }
-        status = fast_dr->return_loan(data1, info1 );
+        status = foo_dr->return_loan(data1, info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t1 return_loan1");
 
@@ -746,7 +740,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::ReturnCode_t status  ;
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data1
+            status = foo_dr->read_instance(  data1
                                     , info1
                                     , max_samples
                                     , reader_instance_handle
@@ -756,7 +750,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data1
+            status = foo_dr->read(  data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -774,7 +768,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ::DDS::SampleInfoSeq info2 (max_samples);
         if (do_by_instance)
           {
-            status = fast_dr->read_instance ( data2
+            status = foo_dr->read_instance ( data2
                                     , info2
                                     , max_samples
                                     , reader_instance_handle
@@ -784,7 +778,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data2
+            status = foo_dr->read(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -825,16 +819,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             test_failed = 1;
           }
 
-        status = fast_dr->return_loan(copy, copyInfo );
+        status = foo_dr->return_loan(copy, copyInfo );
 
         check_return_loan_status(status, copy, 1, max_samples, "t2 return_loan copy");
 
-        status = fast_dr->return_loan(  data2
+        status = foo_dr->return_loan(  data2
                                       , info2 );
 
         check_return_loan_status(status, data2, 1, max_samples, "t2 return_loan2");
 
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 1, max_samples, "t2 return_loan1");
@@ -869,7 +863,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo,
+        foo_dw->write(foo,
                         writer_instance_handle);
 
         // wait for write to propogate
@@ -881,7 +875,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::ReturnCode_t status  ;
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data1
+            status = foo_dr->read_instance(  data1
                                     , info1
                                     , max_samples
                                     , reader_instance_handle
@@ -891,7 +885,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data1
+            status = foo_dr->read(  data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -916,7 +910,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo,
+        foo_dw->write(foo,
                         writer_instance_handle);
 
         // wait for write to propogate
@@ -930,7 +924,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data2
+            status = foo_dr->read_instance(  data2
                                     , info2
                                     , max_samples
                                     , reader_instance_handle
@@ -940,7 +934,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data2
+            status = foo_dr->read(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -967,7 +961,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             test_failed = 1;
 
         }
-        status = fast_dr->return_loan(  data2
+        status = foo_dr->return_loan(  data2
                                         , info2 );
 
         check_return_loan_status(status, data2, 0, 0, "t3 return_loan2");
@@ -981,7 +975,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // Note: the info sequence data is not destroyed/freed until
         //       the info1 object goes out of scope -- so it can
         //       be reused without alloc & free.
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                         , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t3 return_loan1");
@@ -1001,7 +995,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::ReturnCode_t status  ;
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data1
+            status = foo_dr->read_instance(  data1
                                     , info1
                                     , max_samples
                                     , reader_instance_handle
@@ -1011,7 +1005,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data1
+            status = foo_dr->read(  data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -1029,7 +1023,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             ::DDS::SampleInfoSeq info2;
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data2
+            status = foo_dr->read_instance(  data2
                                     , info2
                                     , max_samples
                                     , reader_instance_handle
@@ -1039,7 +1033,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data2
+            status = foo_dr->read(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -1098,7 +1092,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, writer_instance_handle);
+        foo_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1109,7 +1103,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::ReturnCode_t status  ;
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data1
+            status = foo_dr->read_instance(  data1
                                     , info1
                                     , max_samples
                                     , reader_instance_handle
@@ -1119,7 +1113,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data1
+            status = foo_dr->read(  data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -1144,7 +1138,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, writer_instance_handle);
+        foo_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1152,14 +1146,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             ACE_TEXT("(%P|%t) t5 ERROR: timeout waiting for data.\n")),
                             1);
 
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                         , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
 
         if (do_by_instance)
           {
-            status = fast_dr->read_instance(  data1
+            status = foo_dr->read_instance(  data1
                                     , info1
                                     , max_samples
                                     , reader_instance_handle
@@ -1169,7 +1163,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->read(  data1
+            status = foo_dr->read(  data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -1187,7 +1181,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                         , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t5 return_loan1");
@@ -1209,7 +1203,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, writer_instance_handle);
+        foo_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1220,7 +1214,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         DDS::ReturnCode_t status  ;
         if (do_by_instance)
           {
-            status = fast_dr->take_instance(  data1
+            status = foo_dr->take_instance(  data1
                                     , info1
                                     , max_samples
                                     , reader_instance_handle
@@ -1230,7 +1224,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->take(  data1
+            status = foo_dr->take(  data1
                                     , info1
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -1255,7 +1249,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ::DDS::SampleInfoSeq info2(max_samples, 0, 0); //testing alternate ctor
         if (do_by_instance)
           {
-            status = fast_dr->take_instance ( data2
+            status = foo_dr->take_instance ( data2
                                     , info2
                                     , max_samples
                                     , reader_instance_handle
@@ -1265,7 +1259,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         else
           {
-            status = fast_dr->take(  data2
+            status = foo_dr->take(  data2
                                     , info2
                                     , max_samples
                                     , ::DDS::ANY_SAMPLE_STATE
@@ -1283,12 +1277,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         // ?OK to return an empty loan?
-        status = fast_dr->return_loan(  data2
+        status = foo_dr->return_loan(  data2
                                       , info2 );
 
         check_return_loan_status(status, data2, 0, 0, "t6 return_loan2");
 
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t6 return_loan1");
@@ -1313,7 +1307,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo,  ::DDS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
+        foo_dw->write(foo,  ::DDS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1322,7 +1316,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
+        status = foo_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
@@ -1352,7 +1346,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples);
         ::DDS::SampleInfoSeq info2;
-        status = fast_dr->take(  data2
+        status = foo_dr->take(  data2
                                 , info2
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
@@ -1377,12 +1371,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data2
+        status = foo_dr->return_loan(  data2
                                       , info2 );
 
         check_return_loan_status(status, data2, 0, 0, "t7 return_loan2");
 
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t7 return_loan1");
@@ -1411,7 +1405,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, writer_instance_handle);
+        foo_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1420,7 +1414,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data1
+        status = foo_dr->read(  data1
                                 , info1
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
@@ -1450,7 +1444,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples, &the_allocator);
         ::DDS::SampleInfoSeq info2;
-        status = fast_dr->take(  data2
+        status = foo_dr->take(  data2
                                 , info2
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
@@ -1475,7 +1469,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         }
 
-        status = fast_dr->return_loan(  data2
+        status = foo_dr->return_loan(  data2
                                       , info2 );
 
         // Note: the samples are freed in return_loan (if not reference by something else)
@@ -1484,7 +1478,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         check_return_loan_status(status, data2, 0, 0, "t8 return_loan2");
 
 
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t8 return_loan1");
@@ -1586,7 +1580,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // since depth=1 the previous sample will be "lost"
         // from the instance container.
-        fast_dw->write(foo, writer_instance_handle);
+        foo_dw->write(foo, writer_instance_handle);
 
         // wait for write to propogate
         if (!wait_for_data(sub.in (), 5))
@@ -1595,7 +1589,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                             1);
 
         DDS::ReturnCode_t status  ;
-        status = fast_dr->read(  data0
+        status = foo_dr->read(  data0
                                 , info0
                                 , max_samples
                                 , ::DDS::ANY_SAMPLE_STATE
@@ -1625,13 +1619,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         // Return the "loan" of read samples to datareader.
-        status = fast_dr->return_loan(  data0
+        status = foo_dr->return_loan(  data0
                                       , info0 );
 
         check_return_loan_status(status, data0, 0, 0, "t10 return_loan");
 
         // Return the "loan" of copied samples to the datareader.
-        status = fast_dr->return_loan(  data1
+        status = foo_dr->return_loan(  data1
                                       , info1 );
 
         check_return_loan_status(status, data1, 0, 0, "t10 return_loan");

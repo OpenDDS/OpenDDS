@@ -32,14 +32,15 @@
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "ace/Task_Ex_T.h"
-#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Thread_Mutex.h"
+#include "ace/Condition_Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
-
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
@@ -233,6 +234,9 @@ private:
     void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
+    virtual void _add_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref(); }
+    virtual void _remove_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref(); }
+
     void listener_add_ref() { _add_ref(); }
     void listener_remove_ref() { _remove_ref(); }
 
@@ -281,9 +285,9 @@ private:
   DCPS::TransportInst_rch transport_inst_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+  OpenDDS::DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
+  OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+  OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   void populate_discovered_writer_msg(
@@ -393,5 +397,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_RTPS_SEDP_H

@@ -4,12 +4,10 @@
 #include "DCPSDataWriterI.h"
 #include <dds/DCPS/RepoIdConverter.h>
 
-// Implementation skeleton constructor
 TAO_DDS_DCPSDataWriter_i::TAO_DDS_DCPSDataWriter_i (void)
   {
   }
 
-// Implementation skeleton destructor
 TAO_DDS_DCPSDataWriter_i::~TAO_DDS_DCPSDataWriter_i (void)
   {
   }
@@ -108,4 +106,17 @@ TAO_DDS_DCPSDataWriter_i::update_subscription_params(
     ACE_DEBUG((LM_INFO, ACE_TEXT("\tparams[%d] = %C\n"), i, params[i].in()));
   }
   received_.received(DiscReceivedCalls::UPDATE_SUB_PARAMS);
+}
+
+
+void
+TAO_DDS_DCPSDataWriter_i::_add_ref()
+{
+  OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref();
+}
+
+void
+TAO_DDS_DCPSDataWriter_i::_remove_ref()
+{
+  OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref();
 }

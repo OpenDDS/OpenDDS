@@ -66,7 +66,7 @@ project(*Serv): dcpslib, dcps_inforepodiscovery, iortable, bidir_giop, DCPSInfoR
 }
 
 
-project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, install {
+project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, install, dds_versioning_idl_defaults {
   sharedname = OpenDDS_Federator
   dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
   includes  += $(DDS_ROOT)
@@ -76,7 +76,9 @@ project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, instal
 
   idlflags    += -Wb,export_macro=OpenDDS_Federator_Export -Wb,export_include=federator_export.h -Wb,pch_include=DcpsInfo_pch.h
   dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
-  dcps_ts_flags += -Wb,export_macro=OpenDDS_Federator_Export -Wb,pch_include=DcpsInfo_pch.h
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Federator_Export -Wb,pch_include=DcpsInfo_pch.h \
+                   -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
   pch_header   =
   pch_source   =

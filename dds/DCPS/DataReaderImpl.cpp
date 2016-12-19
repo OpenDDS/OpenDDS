@@ -45,6 +45,8 @@
 # include "DataReaderImpl.inl"
 #endif /* !__ACE_INLINE__ */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -145,14 +147,11 @@ DataReaderImpl::~DataReaderImpl()
   }
 
   end_historic_sweeper_->wait();
-  end_historic_sweeper_->destroy();
 
   remove_association_sweeper_->wait();
-  remove_association_sweeper_->destroy();
 
   liveliness_timer_->cancel_timer();
   liveliness_timer_->wait();
-  liveliness_timer_->destroy();
 
   if (initialized_) {
     delete rd_allocator_;
@@ -179,7 +178,7 @@ DataReaderImpl::cleanup()
       iter != instances_.end();
       ++iter) {
     SubscriptionInstance *ptr = iter->second;
-    if (this->watchdog_ && ptr->deadline_timer_id_ != -1) {
+    if (this->watchdog_.in() && ptr->deadline_timer_id_ != -1) {
       this->watchdog_->cancel_timer(ptr);
     }
   }
@@ -977,21 +976,19 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
         || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
       if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
           && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-        this->watchdog_ =
+        this->watchdog_.reset(
             new RequestedDeadlineWatchdog(
                 this->sample_lock_,
                 qos.deadline,
                 this,
                 this->dr_local_objref_.in(),
                 this->requested_deadline_missed_status_,
-                this->last_deadline_missed_total_count_);
+                this->last_deadline_missed_total_count_));
 
       } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
           && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
         this->watchdog_->cancel_all();
-        this->watchdog_->destroy();
-        this->watchdog_ = 0;
-
+        this->watchdog_.reset();
       } else {
         this->watchdog_->reset_interval(
             duration_to_time_value(qos.deadline.period));
@@ -1291,14 +1288,14 @@ DataReaderImpl::enable()
   if (this->watchdog_ == 0
       && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
           || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
-    this->watchdog_ =
+    this->watchdog_.reset(
         new RequestedDeadlineWatchdog(
             this->sample_lock_,
             this->qos_.deadline,
             this,
             this->dr_local_objref_.in(),
             this->requested_deadline_missed_status_,
-            this->last_deadline_missed_total_count_);
+            this->last_deadline_missed_total_count_));
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -1560,7 +1557,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
 #endif
 
-    if (this->watchdog_) {
+    if (this->watchdog_.in()) {
       instance->last_sample_tv_ = instance->cur_sample_tv_;
       instance->cur_sample_tv_ = ACE_OS::gettimeofday();
 
@@ -1662,7 +1659,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
-    if (this->watchdog_) {
+    if (this->watchdog_.in()) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1691,7 +1688,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
-    if (this->watchdog_) {
+    if (this->watchdog_.in()) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1720,7 +1717,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
-    if (this->watchdog_) {
+    if (this->watchdog_.in()) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -2929,7 +2926,7 @@ void DataReaderImpl::post_read_or_take()
 
 void DataReaderImpl::reschedule_deadline()
 {
-  if (this->watchdog_) {
+  if (this->watchdog_.in()) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
     for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
         iter != this->instances_.end();
@@ -3381,6 +3378,18 @@ DataReaderImpl::unregister_for_writer(const RepoId& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
+
+void DataReaderImpl::_add_ref()
+{
+  CORBA::Object::_add_ref();
+}
+
+void DataReaderImpl::_remove_ref()
+{
+  CORBA::Object::_remove_ref();
+}
+
+
 EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                                                  ACE_thread_t owner,
                                                                  DataReaderImpl* reader)
@@ -3453,3 +3462,5 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

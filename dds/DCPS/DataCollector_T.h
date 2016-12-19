@@ -19,6 +19,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -45,10 +46,10 @@ public:
    * @param onFull - behavior of collector when bound is reached.
    *
    * OnFull == KeepOldest: The buffer is limited to the amount of data
-   *                       specified by the bouund parameter and only
+   *                       specified by the bound parameter and only
    *                       the data collected first is retained.
    * OnFull == KeepNewest: The buffer is limited to the amount of data
-   *                       specified by the bouund parameter and only
+   *                       specified by the bound parameter and only
    *                       the most recently collected data is
    *                       retained.
    * OnFull == Unbounded:  The buffer contains all collected data and
@@ -110,6 +111,8 @@ std::ostream& operator<<(
 } // namespace DCPS
 } // namespace OpenDDS
 
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"

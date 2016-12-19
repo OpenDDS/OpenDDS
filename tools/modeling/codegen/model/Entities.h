@@ -20,6 +20,8 @@
 
 #include <string>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace Model {
 
 /**
@@ -166,6 +168,8 @@ class OpenDDS_Model_Export Entities  {
 };
 
 } } // End of namespace OpenDDS::Model
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "Entities.inl"

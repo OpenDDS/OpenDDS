@@ -12,6 +12,8 @@
 #include "Qos_Helper.h"
 #include "ace/Recursive_Thread_Mutex.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 OpenDDS::DCPS::OfferedDeadlineWatchdog::OfferedDeadlineWatchdog(
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
@@ -120,3 +122,5 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::reschedule_deadline()
 {
   this->writer_impl_->reschedule_deadline();
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

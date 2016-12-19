@@ -28,6 +28,8 @@
     return; \
   }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {  namespace DCPS {
 
 AllocHeader::AllocHeader()
@@ -706,3 +708,5 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
 #endif
 
 }}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

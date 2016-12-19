@@ -34,6 +34,8 @@ extern "C" {
 #include <string>
 #include <map>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS
 {
   namespace DCPS
@@ -61,5 +63,7 @@ namespace OpenDDS
     };
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif //  _SAMPLE_MANAGE_H_

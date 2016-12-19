@@ -16,6 +16,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -171,9 +173,10 @@ private:
   typename TypedDataReader::Interface::_var_type typed_reader_;
 };
 
+}
+}
 
-}
-}
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #ifdef ACE_TEMPLATES_REQUIRE_SOURCE
 #include "dds/DCPS/MultiTopicDataReader_T.cpp"

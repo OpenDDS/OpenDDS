@@ -3,7 +3,10 @@
 
 #include "FACE/TS_common.hpp"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/Versioned_Namespace.h"
 #include "FACE/OpenDDS_FACE_Export.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
@@ -40,5 +43,7 @@ public:
 typedef OPENDDS_MAP(OPENDDS_STRING, ConnectionSettings) ConnectionMap;
 
 } } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

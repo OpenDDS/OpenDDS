@@ -8,11 +8,9 @@
 #include "dds/DCPS/Serializer.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportImpl.h"
+#include "ace/OS_NS_unistd.h"
 
-
-
-
-template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
+template<class Tseq, class R, class R_var, class R_ptr>
 ::DDS::ReturnCode_t read (TestStats* stats,
                           ::DDS::Subscriber_ptr subscriber,
                           ::DDS::DataReader_ptr reader)
@@ -25,8 +23,6 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
                 ACE_TEXT("(%P|%t) _narrow failed.\n")));
       throw TestException() ;
     }
-
-  Rimpl* dr_servant = dynamic_cast<Rimpl*> (pt_dr.in ());
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(max_read_samples);
@@ -50,7 +46,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
   int zero_reads = 0;
   DDS::ReturnCode_t status;
   ::DDS::SampleRejectedStatus rejected;
-  if (dr_servant->get_sample_rejected_status (rejected) != ::DDS::RETCODE_OK)
+  if (pt_dr->get_sample_rejected_status (rejected) != ::DDS::RETCODE_OK)
   {
     ACE_ERROR_RETURN((LM_ERROR,
       "ERROR: failed to get sample rejected status\n"),
@@ -58,7 +54,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
   }
 
   ::DDS::SampleLostStatus lost;
-  if (dr_servant->get_sample_lost_status (lost) != ::DDS::RETCODE_OK)
+  if (pt_dr->get_sample_lost_status (lost) != ::DDS::RETCODE_OK)
   {
     ACE_ERROR_RETURN((LM_ERROR,
       "ERROR: failed to get sample lost status\n"),
@@ -71,9 +67,9 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
   while ( !stats->all_packets_received () && ! end_messages )
     {
 
-      // very slow status = dr_servant->read_next_sample(sample, si) ;
+      // very slow status = pt_dr->read_next_sample(sample, si) ;
 
-      status = dr_servant->read (
+      status = pt_dr->read (
         samples,
         infos,
         max_read_samples,
@@ -130,7 +126,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
 
           //ACE_DEBUG((LM_DEBUG,"got RETCODE_NO_DATA\n"));
-          ::DDS::ReturnCode_t ret = dr_servant->get_sample_rejected_status (rejected);
+          ::DDS::ReturnCode_t ret = pt_dr->get_sample_rejected_status (rejected);
           if (ret != ::DDS::RETCODE_OK)
           {
             ACE_ERROR_RETURN ((LM_ERROR,
@@ -144,7 +140,7 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
               stats->samples_received(rejected.total_count_change);
             }
 
-          ret = dr_servant->get_sample_lost_status (lost);
+          ret = pt_dr->get_sample_lost_status (lost);
           if (ret != ::DDS::RETCODE_OK)
           {
             ACE_ERROR_RETURN ((LM_ERROR,
@@ -175,9 +171,6 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
           //    ACE_OS::exit (7);
           //  }
 
-
-
-
         }
     }
 
@@ -187,14 +180,6 @@ template<class Tseq, class R, class R_var, class R_ptr, class Rimpl>
 
   return ::DDS::RETCODE_OK;
 }
-
-
-
-
-
-
-
-
 
 Reader::Reader(::DDS::Subscriber_ptr subscriber,
                ::DDS::DataReader_ptr reader,
@@ -258,8 +243,7 @@ Reader::svc ()
         status = read < ::Xyz::Pt128Seq,
                        ::Xyz::Pt128DataReader,
                        ::Xyz::Pt128DataReader_var,
-                       ::Xyz::Pt128DataReader_ptr,
-                       ::Xyz::Pt128DataReaderImpl>
+                       ::Xyz::Pt128DataReader_ptr>
                          (
                           &stats_,
                           subscriber_.in (),
@@ -274,8 +258,7 @@ Reader::svc ()
         status = read < ::Xyz::Pt512Seq,
                        ::Xyz::Pt512DataReader,
                        ::Xyz::Pt512DataReader_var,
-                       ::Xyz::Pt512DataReader_ptr,
-                       ::Xyz::Pt512DataReaderImpl>
+                       ::Xyz::Pt512DataReader_ptr>
                          (
                           &stats_,
                           subscriber_.in (),
@@ -290,8 +273,7 @@ Reader::svc ()
         status = read < ::Xyz::Pt2048Seq,
                        ::Xyz::Pt2048DataReader,
                        ::Xyz::Pt2048DataReader_var,
-                       ::Xyz::Pt2048DataReader_ptr,
-                       ::Xyz::Pt2048DataReaderImpl>
+                       ::Xyz::Pt2048DataReader_ptr>
                          (
                           &stats_,
                           subscriber_.in (),
@@ -306,8 +288,7 @@ Reader::svc ()
         status = read < ::Xyz::Pt8192Seq,
                        ::Xyz::Pt8192DataReader,
                        ::Xyz::Pt8192DataReader_var,
-                       ::Xyz::Pt8192DataReader_ptr,
-                       ::Xyz::Pt8192DataReaderImpl>
+                       ::Xyz::Pt8192DataReader_ptr>
                          (
                           &stats_,
                           subscriber_.in (),

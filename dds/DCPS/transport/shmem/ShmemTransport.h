@@ -10,13 +10,15 @@
 
 #include "Shmem_Export.h"
 
-#include "ShmemDataLink.h"
 #include "ShmemDataLink_rch.h"
-
+#include "ShmemDataLink.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+
 #include "dds/DCPS/PoolAllocator.h"
 
 #include <string>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -35,13 +37,13 @@ public:
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
-                                               TransportClient* client);
+                                               const TransportClient_rch& client);
 
   virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
                                               const ConnectionAttribs& attribs,
-                                              TransportClient* client);
+                                              const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(TransportClient* client,
+  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
                                             const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
@@ -94,5 +96,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_SHMEMTRANSPORT_H */

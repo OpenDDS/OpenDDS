@@ -8,6 +8,8 @@
 #include "ace/Message_Block.h"
 #include "EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -55,3 +57,5 @@ swap(ReceivedDataSample& a, ReceivedDataSample& b)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

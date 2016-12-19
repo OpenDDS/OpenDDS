@@ -10,7 +10,7 @@
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
 
-#include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/ZeroCopySeq_T.h"
 #include "dds/DCPS/MultiTopicImpl.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -19,8 +19,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
+
+class SubscriberImpl;
 
 class OpenDDS_Dcps_Export MultiTopicDataReaderBase
   : public virtual LocalObject<DataReaderEx> {
@@ -181,6 +185,8 @@ protected:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
 #endif

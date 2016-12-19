@@ -9,10 +9,11 @@
 #include "StatusConditionImpl.h"
 #include "dds/DCPS/transport/framework/TransportConfig.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 EntityImpl::EntityImpl()
   : enabled_(false),
     entity_deleted_(false),
@@ -21,7 +22,6 @@ EntityImpl::EntityImpl()
 {
 }
 
-// Implementation skeleton destructor
 EntityImpl::~EntityImpl()
 {
 }
@@ -112,3 +112,5 @@ EntityImpl::transport_config() const
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

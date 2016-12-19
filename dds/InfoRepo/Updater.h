@@ -10,13 +10,14 @@
 
 #include "UpdateDataTypes.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace Update {
 
 class Updater {
 public:
-  // Virtual destructor.
   virtual ~Updater();
 
   // Request an image refresh to be sent to
@@ -49,5 +50,7 @@ Updater::~Updater()
 }
 
 } // namespace Update
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UPDATER_H */

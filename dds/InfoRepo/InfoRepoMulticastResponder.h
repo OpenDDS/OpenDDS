@@ -22,6 +22,10 @@
 #include "ace/Reactor.h"
 #include "ace/SString.h"
 
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -37,10 +41,8 @@ namespace Federator {
  */
 class OpenDDS_Federator_Export InfoRepoMulticastResponder : public ACE_Event_Handler {
 public:
-  /// Constructor.
   InfoRepoMulticastResponder();
 
-  /// Destructor.
   virtual ~InfoRepoMulticastResponder();
 
   /// Initialization method.
@@ -93,6 +95,8 @@ private:
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 

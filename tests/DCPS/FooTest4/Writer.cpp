@@ -8,6 +8,7 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/DataReaderImpl.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 

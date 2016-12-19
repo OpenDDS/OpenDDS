@@ -23,6 +23,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Sock_Connect.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -70,7 +72,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
-                                   TransportClient* client )
+                                   const TransportClient_rch& client )
 {
   GuardThreadType guard_links(this->links_lock_);
   RtpsUdpDataLink_rch link = link_;
@@ -109,7 +111,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
-                                  TransportClient* )
+                                  const TransportClient_rch& )
 {
   GuardThreadType guard_links(this->links_lock_);
   RtpsUdpDataLink_rch link = link_;
@@ -127,11 +129,11 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
 
 void
-RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* client,
+RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_rch& client,
                                                const RepoId& remote_id)
 {
   GuardType guard(connections_lock_);
-  typedef OPENDDS_MULTIMAP(TransportClient*, DataLink_rch)::iterator iter_t;
+  typedef PendConnMap::iterator iter_t;
   const std::pair<iter_t, iter_t> range =
         pending_connections_.equal_range(client);
   for (iter_t iter = range.first; iter != range.second; ++iter) {
@@ -337,3 +339,5 @@ RtpsUdpTransport::map_ipv4_to_ipv6() const
 }
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

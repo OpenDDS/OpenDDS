@@ -16,6 +16,7 @@
 #include "dds/DCPS/transport/multicast/MulticastInst.h"
 
 #include "ace/High_Res_Timer.h"
+#include "ace/OS_NS_unistd.h"
 
 #include <sstream>
 

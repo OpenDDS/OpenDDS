@@ -17,12 +17,16 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
 class MetaStruct;
 
 template <typename Message> struct DDSTraits;
+
+template <typename Message> struct MarshalTraits;
 
 class OpenDDS_Dcps_Export TypeSupportImpl
   : public virtual LocalObject<TypeSupport> {
@@ -50,5 +54,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

@@ -9,9 +9,9 @@
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+#include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsTypeSupportExtC.h"
 #include "DataDurabilityCache.h"
-#include "Service_Participant.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "WriteDataContainer.h"
@@ -19,8 +19,7 @@
 #include "Qos_Helper.h"
 #include "debug.h"
 #include "SafetyProfileStreams.h"
-
-#include "tao/ORB_Core.h"
+#include "Service_Participant.h"
 
 #include "ace/Reactor.h"
 #include "ace/Message_Block.h"

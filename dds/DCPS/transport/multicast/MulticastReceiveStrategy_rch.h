@@ -10,6 +10,8 @@
 
 #include "dds/DCPS/RcHandle_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -19,5 +21,7 @@ typedef RcHandle<MulticastReceiveStrategy> MulticastReceiveStrategy_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* DCPS_MULTICASTRECEIVESTRATEGY_RCH_H */

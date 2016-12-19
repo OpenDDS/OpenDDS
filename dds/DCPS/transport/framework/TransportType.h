@@ -13,7 +13,9 @@
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include "ace/Synch.h"
+#include "ace/Synch_Traits.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -45,5 +47,7 @@ protected:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

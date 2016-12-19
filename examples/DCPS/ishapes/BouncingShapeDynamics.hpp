@@ -1,7 +1,7 @@
 #ifndef _BOUNCINGSHAPEDYNAMICS_HPP
 #define _BOUNCINGSHAPEDYNAMICS_HPP
 
-#include "ShapeTypeTypeSupportImpl.h"
+#include "ShapeTypeTypeSupportC.h"
 
 #include <ShapeDynamics.hpp>
 #include <QtCore/QRect>

@@ -28,6 +28,8 @@
 
 #include "ace/Auto_Ptr.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -72,7 +74,7 @@ WriteDataContainer::WriteDataContainer(
   DataWriterImpl* writer,
   CORBA::Long max_samples_per_instance,
   CORBA::Long max_durable_per_instance,
-  ::DDS::Duration_t max_blocking_time,
+  DDS::Duration_t max_blocking_time,
   size_t         n_chunks,
   DDS::DomainId_t domain_id,
   char const * topic_name,
@@ -189,7 +191,7 @@ WriteDataContainer::enqueue(
   // Extract the instance queue.
   InstanceDataSampleList& instance_list = instance->samples_;
 
-  if (this->writer_->watchdog_) {
+  if (this->writer_->watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
     this->writer_->watchdog_->execute(instance, false);
@@ -329,7 +331,7 @@ WriteDataContainer::register_instance(
   // The registered_sample is shallow copied.
   registered_sample = instance->registered_sample_->duplicate();
 
-  if (this->writer_->watchdog_) {
+  if (this->writer_->watchdog_.in()) {
     this->writer_->watchdog_->schedule_timer(instance);
   }
 
@@ -368,7 +370,7 @@ WriteDataContainer::unregister(
   // Unregister the instance with typed DataWriter.
   this->writer_->unregistered(instance_handle);
 
-  if (this->writer_->watchdog_)
+  if (this->writer_->watchdog_.in())
     this->writer_->watchdog_->cancel_timer(instance);
 
   return DDS::RETCODE_OK;
@@ -424,7 +426,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
     }
   }
 
-  if (this->writer_->watchdog_)
+  if (this->writer_->watchdog_.in())
     this->writer_->watchdog_->cancel_timer(instance);
   return DDS::RETCODE_OK;
 }
@@ -1508,3 +1510,5 @@ WriteDataContainer::log_send_state_lists (OPENDDS_STRING description)
 
 } // namespace OpenDDS
 } // namespace DCPS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

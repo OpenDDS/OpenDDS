@@ -45,6 +45,8 @@ bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
 
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -65,8 +67,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config->heartbeat_response_delay_),
-  heartbeat_(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats),
-  heartbeatchecker_(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)
+  heartbeat_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
+  heartbeatchecker_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
@@ -257,7 +259,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   g.release();
   if (enable_heartbeat) {
-    heartbeat_.schedule_enable();
+    heartbeat_->schedule_enable();
   }
 }
 
@@ -296,7 +298,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   heartbeat_counts_[writerid] = 0;
   g.release();
   if (enableheartbeat) {
-    heartbeat_.schedule_enable();
+    heartbeat_->schedule_enable();
   }
 }
 
@@ -340,7 +342,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
   interesting_writers_.insert(InterestingRemoteMapType::value_type(writerid, InterestingRemote(readerid, address, listener)));
   g.release();
   if (enableheartbeatchecker) {
-    heartbeatchecker_.schedule_enable();
+    heartbeatchecker_->schedule_enable();
   }
 }
 
@@ -528,7 +530,7 @@ RtpsUdpDataLink::stop_i()
 {
   nack_reply_.cancel();
   heartbeat_reply_.cancel();
-  heartbeat_.disable();
+  heartbeat_->disable();
   unicast_socket_.close();
   multicast_socket_.close();
 }
@@ -2195,7 +2197,7 @@ RtpsUdpDataLink::send_heartbeats()
   ACE_GUARD(ACE_Thread_Mutex, c, reader_no_longer_exists_lock_);
 
   if (writers_.empty() && interesting_readers_.empty()) {
-    heartbeat_.disable();
+    heartbeat_->disable();
   }
 
   using namespace OpenDDS::RTPS;
@@ -2561,6 +2563,7 @@ RtpsUdpDataLink::HeartBeat::disable()
 void
 RtpsUdpDataLink::send_final_acks (const RepoId& readerid)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   RtpsReaderMap::iterator rr = readers_.find (readerid);
   if (rr != readers_.end ()) {
     send_ack_nacks (rr, true);
@@ -2569,3 +2572,5 @@ RtpsUdpDataLink::send_final_acks (const RepoId& readerid)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

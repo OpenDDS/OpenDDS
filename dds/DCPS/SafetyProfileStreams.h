@@ -14,6 +14,8 @@
 #include <sstream>
 #endif //OPENDDS_SAFETY_PROFILE
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -38,5 +40,7 @@ to_dds_string(const T* to_convert)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif //SAFETY_PROFILE_STREAMS_H

@@ -31,8 +31,12 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/RcEventHandler.h"
+
 
 class DDS_TEST;
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -418,7 +422,9 @@ private:
       HeartBeat* heartbeat_;
     };
 
-  } heartbeat_, heartbeatchecker_;
+  };
+
+  RcEventHandler<HeartBeat> heartbeat_, heartbeatchecker_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
@@ -485,6 +491,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #ifdef __ACE_INLINE__
 # include "RtpsUdpDataLink.inl"

@@ -6,7 +6,7 @@
  */
 
 #include "dds/DCPS/ReceivedDataElementList.h"
-#include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/Loaner.h"
 #include "ace/Truncate.h"
 
 #include <utility>
@@ -262,7 +262,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::internal_set_length(CORBA::ULong len)
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::set_loaner(
-  OpenDDS::DCPS::DataReaderImpl* loaner)
+  OpenDDS::DCPS::Loaner* loaner)
 {
   loaner_ = loaner;
 }

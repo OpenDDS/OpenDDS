@@ -5,14 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-/*
-ACE_INLINE
-void
-OpenDDS::Federator::ManagerImpl::id(RepoKey val)
-{
-  this->config_.federationId(val);
-}
-*/
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE
 const TAO_DDS_DCPSFederationId&
@@ -55,3 +48,5 @@ OpenDDS::Federator::ManagerImpl::orb(CORBA::ORB_ptr value)
 {
   this->orb_ = CORBA::ORB::_duplicate(value);
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

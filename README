@@ -90,15 +90,14 @@ At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
 *** TAO 2.0a patch 7
-*** TAO 2.2a patch 8
-*** TAO 2.3.3 (DOC Group)
+*** TAO 2.2a patch 10
+*** TAO 2.4.0 (DOC Group)
 
 Note that the 2.0a and 2.2a releases are from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
 
-OpenDDS Safety Profile requires OCI TAO 2.2a patch 8 or
-DOC Group TAO from GitHub master (after 2.3.3 release).
+OpenDDS Safety Profile requires TAO from the 2.2a or DOC Group release series.
 
 ** GNU Make
 
@@ -117,27 +116,34 @@ This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
 ** Red Hat EL 5 and 5.3, x86_64
-** Red Hat EL and CentOS 6.6, x86_64
-** Red Hat EL 7.1, x86_64
+** Red Hat EL and CentOS 6.6 and 6.8, x86_64
+** Red Hat EL 7, x86_64
 ** Fedora Core 6, x86
-** Fedora 12 x86_64
-** Ubuntu 14.04 LTS, x86_64
-** openSUSE 11.4, x86_64
+** Fedora 24 x86_64
+** Ubuntu 16.04 LTS, x86_64
+** openSUSE 42.1, x86_64
 
 Windows family:
-** Windows Server 2003
-** Windows 7 (64-bit)
-** Windows Server 2008 R2 (64-bit)
+** Windows 7 (32-bit, 64-bit)
+** Windows Server 2012 R2 (64-bit)
 
 Others:
 ** SunOS 5.10 (Solaris 10) (SPARC)
-** Mac OSX 10.10 (Yosemite)
-** LynxOS-178 (OpenDDS Safety Profile)
+** Mac OSX 10.11 (El Capitan)
 
-We have also built OpenDDS for VxWorks 6.9 and 7 and have run basic
+Embedded/Mobile/IoT:
+** LynxOS-178 (OpenDDS Safety Profile)
+** VxWorks 6.9 and 7 (see below)
+** Linux on Raspberry Pi and Intel Edison
+** Android NDK r12b (ARM)
+
+We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
 system and performance tests (but not the entire regression test suite).
 Please contact sales@ociweb.com or opendds-main@lists.sourceforge.net for
 more information on support for ACE, TAO, and OpenDDS on VxWorks.
+OCI's packages for ACE, TAO, and OpenDDS can be obtained on the Wind River
+Marketplace at:
+https://marketplace.windriver.com/index.php?partners&on=details&id=33
 
 
 ======================================================================
@@ -147,15 +153,16 @@ This release of OpenDDS has been tested using the following compilers:
 
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
-** Microsoft Visual C++ 11 (Visual Studio 2012)
-** Microsoft Visual C++ 12 (Visual Studio 2013)
-** Microsoft Visual C++ 14 (Visual Studio 2015)
+** Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
+** Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
+** Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
 ** gcc 4.1.x
 ** gcc 4.4.x
-** gcc 4.5.x
 ** gcc 4.8.x
-** gcc 5.3
-** Clang 3.7 (llvm.org) and 6.10 (Apple)
+** gcc 4.9.x
+** gcc 5.4
+** gcc 6.2
+** Clang 3.8 (llvm.org) and 7.3 (Apple)
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 
 * Building and Installing

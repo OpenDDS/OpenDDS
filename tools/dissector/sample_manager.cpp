@@ -28,6 +28,8 @@
 #include <fstream>
 #include <string>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS
 {
   namespace DCPS
@@ -342,3 +344,5 @@ namespace OpenDDS
     }
   }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

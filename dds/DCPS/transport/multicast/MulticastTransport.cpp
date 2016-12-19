@@ -22,6 +22,8 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -162,7 +164,7 @@ get_remote_reliability(const TransportImpl::RemoteTransport& remote)
 TransportImpl::AcceptConnectResult
 MulticastTransport::connect_datalink(const RemoteTransport& remote,
                                      const ConnectionAttribs& attribs,
-                                     TransportClient*)
+                                     const TransportClient_rch&)
 {
   // Check that the remote reliability matches.
   if (get_remote_reliability(remote) != this->config_i_->is_reliable()) {
@@ -202,7 +204,7 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
 TransportImpl::AcceptConnectResult
 MulticastTransport::accept_datalink(const RemoteTransport& remote,
                                     const ConnectionAttribs& attribs,
-                                    TransportClient* client)
+                                    const TransportClient_rch& client)
 {
   // Check that the remote reliability matches.
   if (get_remote_reliability(remote) != this->config_i_->is_reliable()) {
@@ -248,7 +250,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
   } else {
 
     this->pending_connections_[std::make_pair(remote_peer, local_peer)].
-    push_back(std::pair<TransportClient*, RepoId>(client, remote.repo_id_));
+    push_back(std::make_pair(client, remote.repo_id_));
     //can't call start session with connections_lock_ due to reactor
     //call in session->start which could deadlock with passive_connection
     guard.release();
@@ -261,7 +263,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 }
 
 void
-MulticastTransport::stop_accepting_or_connecting(TransportClient* client,
+MulticastTransport::stop_accepting_or_connecting(const TransportClient_rch& client,
                                                  const RepoId& remote_id)
 {
   VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::stop_accepting_or_connecting\n"));
@@ -323,7 +325,7 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
                                                   pend->second.end(),
                                                   tmp.at(i));
         if (tmp_iter != pend->second.end()) {
-          TransportClient* pend_client = tmp.at(i).first;
+          TransportClient_rch pend_client = tmp.at(i).first;
           RepoId remote_repo = tmp.at(i).second;
           guard.release();
           pend_client->use_datalink(remote_repo, link);
@@ -411,3 +413,5 @@ MulticastTransport::release_datalink(DataLink* /*link*/)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

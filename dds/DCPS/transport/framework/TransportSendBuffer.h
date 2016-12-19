@@ -17,11 +17,14 @@
 #include "dds/DCPS/Definitions.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include "ace/Synch_Traits.h"
 #include <utility>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -128,6 +131,8 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #ifdef __ACE_INLINE__
 # include "TransportSendBuffer.inl"

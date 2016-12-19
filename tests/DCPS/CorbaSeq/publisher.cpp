@@ -14,6 +14,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <ace/streams.h>
+#include "ace/OS_NS_unistd.h"
 #include "tests/Utils/ExceptionStreams.h"
 
 #include "dds/DCPS/StaticIncludes.h"

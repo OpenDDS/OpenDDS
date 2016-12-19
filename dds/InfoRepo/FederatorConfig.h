@@ -18,6 +18,8 @@
 
 #include <string>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Federator {
 
@@ -37,7 +39,6 @@ public:
   /// Default constructor.
   Config(int argc, ACE_TCHAR** argv);
 
-  /// Virtual destructor.
   virtual ~Config();
 
   /// Access the enhanced argv.
@@ -99,6 +100,8 @@ private:
 
 } // namespace Federator
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 # include "FederatorConfig.inl"

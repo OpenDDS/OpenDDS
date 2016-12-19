@@ -17,11 +17,10 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
-
-//class ReceivedDataElement;
-//class SubscriptionInstance;
 
 /// Rake is an abbreviation for "read or take".  This struct holds the
 /// data used by the data structures in RakeResults<T>.
@@ -33,5 +32,7 @@ struct OpenDDS_Dcps_Export RakeData {
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

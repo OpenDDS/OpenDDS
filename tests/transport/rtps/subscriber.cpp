@@ -20,6 +20,7 @@
 #include <ace/String_Base.h>
 #include <ace/Get_Opt.h>
 #include <ace/OS_NS_time.h>
+#include "ace/OS_NS_unistd.h"
 
 #include <cstdio>
 #include <cstring>

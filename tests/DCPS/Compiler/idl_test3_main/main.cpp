@@ -21,7 +21,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
                    size_t expected_pad, size_t expected_ms_align,
                    const char* name)
 {
-  CORBA::Boolean bounded = OpenDDS::DCPS::gen_is_bounded_size(in_foo);
+  CORBA::Boolean bounded = OpenDDS::DCPS::MarshalTraits<FOO>::gen_is_bounded_size();
   size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(in_foo, false);
   size_t ms_align = OpenDDS::DCPS::gen_max_marshaled_size(in_foo, true);
   size_t cs = 0, padding = 0;
@@ -588,10 +588,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   foo2.ooo[2] = 0x3d;
   foo2.theString = "four";
 
+  std::map<Xyz::Foo, Xyz::Foo*, Xyz::Foo_OpenDDS_KeyLessThan> foomap;
 
-  std::map<Xyz::Foo, Xyz::Foo*, Xyz::OpenDDSGenerated::Foo_KeyLessThan> foomap;
-
-  if (OpenDDS::DCPS::gen_has_key(my_foo)) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::gen_has_key()) {
     foomap[my_foo] = &my_foo;
     foomap[foo2] = &foo2;
 

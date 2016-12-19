@@ -22,6 +22,7 @@
 #include "Recorder.h"
 #include "RemoveAssociationSweeper.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -31,7 +32,7 @@ namespace DCPS {
  *
  * @brief Implementation of Recorder functionality
  *
- * This class is the implmentation of the Recorder.
+ * This class is the implementation of the Recorder.
  * Inheritance is used to limit the applications access to
  * underlying system methods.
  */
@@ -45,11 +46,8 @@ class OpenDDS_Dcps_Export RecorderImpl
   , private WriterInfoListener
 {
 public:
-
-  //Constructor
   RecorderImpl();
 
-  //Destructor
   virtual ~RecorderImpl();
 
   /**
@@ -106,8 +104,8 @@ public:
    * Set the Quality of Service settings for the Recorder.
    *
    */
-  DDS::ReturnCode_t set_qos (const ::DDS::SubscriberQos & subscriber_qos,
-                             const DDS::DataReaderQos &   datareader_qos);
+  DDS::ReturnCode_t set_qos (const DDS::SubscriberQos & subscriber_qos,
+                             const DDS::DataReaderQos & datareader_qos);
 
   /**
    * Get the Quality of Service settings for the Recorder.
@@ -205,5 +203,7 @@ private:
 
 } // namespace DCPS
 } // namespace
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* end of include guard: OPENDDS_DCPS_RECORDERIMPL_H */

@@ -9,9 +9,12 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include <ctype.h>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -113,7 +116,7 @@ void StaticEndpointManager::init_bit()
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = writer.publisher_qos.group_data;
 #ifndef DDS_HAS_MINIMUM_BIT
-      DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+      OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
@@ -157,7 +160,7 @@ void StaticEndpointManager::init_bit()
       data.group_data = reader.subscriber_qos.group_data;
 
 #ifndef DDS_HAS_MINIMUM_BIT
-      DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+      OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
@@ -569,7 +572,7 @@ StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoI
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-DDS::PublicationBuiltinTopicDataDataReaderImpl*
+OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl*
 StaticEndpointManager::pub_bit()
 {
   DDS::Subscriber_var sub = participant_.bit_subscriber();
@@ -577,10 +580,10 @@ StaticEndpointManager::pub_bit()
     return 0;
 
   DDS::DataReader_var d = sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-  return dynamic_cast<DDS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
+  return dynamic_cast<OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
-DDS::SubscriptionBuiltinTopicDataDataReaderImpl*
+OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*
 StaticEndpointManager::sub_bit()
 {
   DDS::Subscriber_var sub = participant_.bit_subscriber();
@@ -588,7 +591,7 @@ StaticEndpointManager::sub_bit()
     return 0;
 
   DDS::DataReader_var d = sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
-  return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
+  return dynamic_cast<OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -1820,3 +1823,4 @@ StaticDiscovery_rch StaticDiscovery::instance_(new StaticDiscovery(Discovery::DE
 }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

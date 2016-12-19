@@ -19,6 +19,8 @@
 #include <sstream>
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -74,7 +76,7 @@ ShmemTransport::make_datalink(const std::string& remote_address)
 TransportImpl::AcceptConnectResult
 ShmemTransport::connect_datalink(const RemoteTransport& remote,
                                  const ConnectionAttribs&,
-                                 TransportClient*)
+                                 const TransportClient_rch&)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
   if (key.first != this->config_i_->hostname()) {
@@ -104,13 +106,13 @@ ShmemTransport::add_datalink(const std::string& remote_address)
 TransportImpl::AcceptConnectResult
 ShmemTransport::accept_datalink(const RemoteTransport& remote,
                                 const ConnectionAttribs& attribs,
-                                TransportClient* client)
+                                const TransportClient_rch& client)
 {
   return connect_datalink(remote, attribs, client);
 }
 
 void
-ShmemTransport::stop_accepting_or_connecting(TransportClient*, const RepoId&)
+ShmemTransport::stop_accepting_or_connecting(const TransportClient_rch&, const RepoId&)
 {
   // no-op: accept and connect either complete or fail immediately
 }
@@ -328,3 +330,5 @@ ShmemTransport::address()
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -13,6 +13,9 @@
 #include "ace/Global_Macros.h"
 #include "ace/Service_Config.h"
 #include "ace/Service_Object.h"
+#include "dds/Versioned_Namespace.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -28,5 +31,7 @@ ACE_FACTORY_DECLARE(OpenDDS_Multicast, MulticastLoader)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* DCPS_MULTICASTLOADER_H */

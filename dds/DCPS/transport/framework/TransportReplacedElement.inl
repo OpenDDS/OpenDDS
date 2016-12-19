@@ -7,6 +7,8 @@
 
 #include "EntryExit.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 ACE_INLINE
 OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
 (TransportQueueElement* orig_elem,
@@ -59,3 +61,5 @@ OpenDDS::DCPS::TransportReplacedElement::owned_by_transport ()
 {
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

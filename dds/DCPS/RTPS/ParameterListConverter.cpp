@@ -13,6 +13,8 @@
 
 #include <cstring>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS { namespace RTPS {
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -21,7 +23,7 @@ using DCPS::operator!=;
 
 namespace {
   void add_param(ParameterList& param_list, const Parameter& param) {
-    CORBA::ULong length = param_list.length();
+    const CORBA::ULong length = param_list.length();
     param_list.length(length + 1);
     param_list[length] = param;
   }
@@ -29,7 +31,7 @@ namespace {
   void add_param_locator_seq(ParameterList& param_list,
                              const OpenDDS::DCPS::LocatorSeq& locator_seq,
                              const ParameterId_t pid) {
-    CORBA::ULong length = locator_seq.length();
+    const CORBA::ULong length = locator_seq.length();
     for (CORBA::ULong i = 0; i < length; ++i) {
       Parameter param;
       param.locator(locator_seq[i]);
@@ -78,7 +80,7 @@ namespace {
   }
 
   void append_locator(OpenDDS::DCPS::LocatorSeq& list, const OpenDDS::DCPS::Locator_t& locator) {
-    CORBA::ULong length = list.length();
+    const CORBA::ULong length = list.length();
     list.length(length + 1);
     list[length] = locator;
   }
@@ -86,7 +88,7 @@ namespace {
   void append_locator(
       OpenDDS::DCPS::TransportLocatorSeq& list,
       const OpenDDS::DCPS::TransportLocator& locator) {
-    CORBA::ULong length = list.length();
+    const CORBA::ULong length = list.length();
     list.length(length + 1);
     list[length] = locator;
   }
@@ -95,7 +97,7 @@ namespace {
       OpenDDS::DCPS::TransportLocatorSeq& list,
       const OpenDDS::DCPS::LocatorSeq& rtps_udp_locators) {
     if (rtps_udp_locators.length()) {
-      CORBA::ULong length = list.length();
+      const CORBA::ULong length = list.length();
       list.length(length + 1);
       list[length].transport_type = "rtps_udp";
       locators_to_blob(rtps_udp_locators, list[length].data);
@@ -111,7 +113,7 @@ namespace {
   void append_associated_writer(OpenDDS::DCPS::DiscoveredReaderData& reader_data,
                                 const Parameter& param)
   {
-    CORBA::ULong len = reader_data.readerProxy.associatedWriters.length();
+    const CORBA::ULong len = reader_data.readerProxy.associatedWriters.length();
     reader_data.readerProxy.associatedWriters.length(len + 1);
     reader_data.readerProxy.associatedWriters[len] = param.guid();
   }
@@ -119,7 +121,7 @@ namespace {
   void set_ipaddress(OpenDDS::DCPS::LocatorSeq& locators,
                      LocatorState& last_state,
                      const unsigned long addr) {
-    CORBA::ULong length = locators.length();
+    const CORBA::ULong length = locators.length();
     // Update last locator if the last state is port only
     if (last_state == locator_port_only && length > 0) {
       // Update last locator
@@ -144,7 +146,7 @@ namespace {
   void set_port(OpenDDS::DCPS::LocatorSeq& locators,
                 LocatorState& last_state,
                 const unsigned long port) {
-    CORBA::ULong length = locators.length();
+    const CORBA::ULong length = locators.length();
     // Update last locator if the last state is address only
     if (last_state == locator_address_only && length > 0) {
       // Update last locator
@@ -1130,3 +1132,5 @@ int from_param_list(const ParameterList& param_list,
 }
 
 } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

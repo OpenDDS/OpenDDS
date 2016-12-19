@@ -3,7 +3,9 @@
 
 #include <ace/CDR_Base.h>
 #include "OpenDDS_FACE_Export.h"
+#include "dds/Versioned_Namespace.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
   namespace FaceTypes {
     template<typename CharT> class String_var;
@@ -11,6 +13,7 @@ namespace OpenDDS {
     template<typename CharT> class StringManager;
   }
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 namespace FACE {
   typedef ACE_CDR::Boolean Boolean;
@@ -55,11 +58,13 @@ namespace FACE {
   OpenDDS_FACE_Export void wstring_free(WChar* str);
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
   namespace FaceTypes {
     typedef StringManager<FACE::Char> String_mgr;
     typedef StringManager<FACE::WChar> WString_mgr;
   }
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* FACE_TYPES_HPP_HEADER_FILE */

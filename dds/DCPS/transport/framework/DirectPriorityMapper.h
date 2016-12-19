@@ -13,6 +13,8 @@
 #include "PriorityMapper.h"
 #include "ace/OS_NS_Thread.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -42,7 +44,6 @@ public:
   /// Construct with a priority value.
   DirectPriorityMapper(Priority priority = 0);
 
-  /// Virtual destructor.
   virtual ~DirectPriorityMapper();
 
   /// Access the mapped DiffServ codepoint value.
@@ -54,6 +55,8 @@ public:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "DirectPriorityMapper.inl"

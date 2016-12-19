@@ -9,12 +9,10 @@
 #include "FooDataWriterImpl.h"
 #include "FooDataReaderImpl.h"
 
-// Implementation skeleton constructor
 FooTypeSupportImpl::FooTypeSupportImpl (void)
   {
   }
 
-// Implementation skeleton destructor
 FooTypeSupportImpl::~FooTypeSupportImpl (void)
   {
   }

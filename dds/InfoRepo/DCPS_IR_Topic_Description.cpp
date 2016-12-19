@@ -20,6 +20,8 @@
 
 #include /**/ "dds/DCPS/RepoIdConverter.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 DCPS_IR_Topic_Description::DCPS_IR_Topic_Description(DCPS_IR_Domain* domain,
                                                      const char* name,
                                                      const char* dataTypeName)
@@ -501,24 +503,4 @@ DCPS_IR_Topic_Description::dump_to_string(const std::string& prefix,
   return str;
 }
 
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class ACE_Node<DCPS_IR_Subscription*>;
-template class ACE_Unbounded_Set<DCPS_IR_Subscription*>;
-template class ACE_Unbounded_Set_Iterator<DCPS_IR_Subscription*>;
-
-template class ACE_Node<DCPS_IR_Topic*>;
-template class ACE_Unbounded_Set<DCPS_IR_Topic*>;
-template class ACE_Unbounded_Set_Iterator<DCPS_IR_Topic*>;
-
-#elif defined (ACE_HAS_TEMPLATE_INSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Node<DCPS_IR_Subscription*>
-#pragma instantiate ACE_Unbounded_Set<DCPS_IR_Subscription*>
-#pragma instantiate ACE_Unbounded_Set_Iterator<DCPS_IR_Subscription*>
-
-#pragma instantiate ACE_Node<DCPS_IR_Topic*>
-#pragma instantiate ACE_Unbounded_Set<DCPS_IR_Topic*>
-#pragma instantiate ACE_Unbounded_Set_Iterator<DCPS_IR_Topic*>
-
-#endif /* ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

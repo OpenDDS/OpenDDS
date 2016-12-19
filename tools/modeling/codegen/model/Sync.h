@@ -3,13 +3,17 @@
 
 #include "model_export.h"
 #include "dds/DdsDcpsC.h"
+
 #include <ace/Condition_T.h>
+#include <ace/Condition_Thread_Mutex.h>
 
 #if defined _MSC_VER && _MSC_VER >= 1900
 #define OPENDDS_NOEXCEPT_FALSE noexcept(false)
 #else
 #define OPENDDS_NOEXCEPT_FALSE
 #endif
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
   namespace Model {
@@ -49,5 +53,7 @@ namespace OpenDDS {
     };
   };
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

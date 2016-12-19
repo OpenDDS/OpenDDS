@@ -32,6 +32,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -80,7 +82,7 @@ private:
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
+  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : ACE_Event_Handler, public OpenDDS::DCPS::PoolAllocationBase {
@@ -127,5 +129,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_RTPS_SPDP_H

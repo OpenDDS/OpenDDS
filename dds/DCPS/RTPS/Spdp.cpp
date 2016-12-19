@@ -25,6 +25,8 @@
 #include <cstring>
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
@@ -165,7 +167,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     participants_[guid] = DiscoveredParticipant(pdata, time);
     DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
 #ifndef DDS_HAS_MINIMUM_BIT
-    DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
     if (bit) {
       ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
       bit_instance_handle =
@@ -203,7 +205,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
       iter->second.pdata_.ddsParticipantData.user_data =
         pdata.ddsParticipantData.user_data;
 #ifndef DDS_HAS_MINIMUM_BIT
-      DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+      DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
       if (bit) {
         ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->store_synthetic_data(pdata.ddsParticipantData,
@@ -273,7 +275,7 @@ Spdp::fini_bit()
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-DDS::ParticipantBuiltinTopicDataDataReaderImpl*
+DCPS::ParticipantBuiltinTopicDataDataReaderImpl*
 Spdp::part_bit()
 {
   if (!bit_subscriber_.in())
@@ -281,7 +283,7 @@ Spdp::part_bit()
 
   DDS::DataReader_var d =
     bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-  return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
+  return dynamic_cast<DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -835,3 +837,5 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

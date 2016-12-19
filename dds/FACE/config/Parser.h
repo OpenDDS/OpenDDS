@@ -2,12 +2,16 @@
 #define FACE_CONFIG_PARSER_H
 
 #include "FACE/OpenDDS_FACE_Export.h"
-#include "ConnectionSettings.h"
 #include "QosSettings.h"
+#include "ConnectionSettings.h"
 #include "TopicSettings.h"
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
 class ACE_Configuration_Section_Key;
+ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
@@ -40,5 +44,7 @@ private:
 };
 
 } } }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

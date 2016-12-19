@@ -25,8 +25,8 @@
 #include "TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/QueueTaskBase_T.h"
 
-#include "ace/Synch.h"
 #include "ace/Event_Handler.h"
+#include "ace/Synch_Traits.h"
 
 #include <utility>
 
@@ -35,6 +35,8 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_SOCK;
 ACE_END_VERSIONED_NAMESPACE_DECL
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -243,10 +245,10 @@ public:
 
   void default_listener(TransportReceiveListener* trl);
   TransportReceiveListener* default_listener() const;
-
-  typedef std::pair<TransportClient*, RepoId> OnStartCallback;
-  bool add_on_start_callback(TransportClient* client, const RepoId& remote);
-  void remove_on_start_callback(TransportClient* client, const RepoId& remote);
+  typedef RcHandle<TransportClient> TransportClient_rch;
+  typedef std::pair<TransportClient_rch, RepoId> OnStartCallback;
+  bool add_on_start_callback(const TransportClient_rch& client, const RepoId& remote);
+  void remove_on_start_callback(const TransportClient_rch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
 
   void set_scheduling_release(bool scheduling_release);
@@ -421,6 +423,8 @@ protected:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
 #include "DataLink.inl"

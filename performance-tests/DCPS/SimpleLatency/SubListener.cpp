@@ -8,12 +8,11 @@
 
 using namespace DDSPerfTest;
 
-// Implementation skeleton constructor
 PubDataReaderListenerImpl::PubDataReaderListenerImpl()
   : writer_ (),
     reader_ (),
-    dr_servant_(0),
-    dw_servant_(0),
+    dr_servant_(),
+    dw_servant_(),
     handle_(),
     sample_num_(1),
     done_ (0),
@@ -29,26 +28,20 @@ void PubDataReaderListenerImpl::init(DDS::DataReader_ptr dr,
   this->reader_ = DDS::DataReader::_duplicate (dr);
   use_zero_copy_ = use_zero_copy_read;
 
-  AckMessageDataWriter_var ackmessage_dw =
-    AckMessageDataWriter::_narrow (this->writer_.in ());
   this->dw_servant_ =
-    dynamic_cast<AckMessageDataWriterImpl*>(ackmessage_dw.in());
+    AckMessageDataWriter::_narrow (this->writer_.in ());
   DDSPerfTest::AckMessage msg;
   this->handle_ = this->dw_servant_->register_instance(msg);
 
-  PubMessageDataReader_var pubmessage_dr =
-    PubMessageDataReader::_unchecked_narrow(this->reader_.in());
   this->dr_servant_ =
-    dynamic_cast<PubMessageDataReaderImpl*>(pubmessage_dr.in());
+    PubMessageDataReader::_unchecked_narrow(this->reader_.in());
 }
 
-// Implementation skeleton destructor
 PubDataReaderListenerImpl::~PubDataReaderListenerImpl ()
 {
 }
 
 void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
-  throw (CORBA::SystemException)
 {
     CORBA::Long seqnum;
 
@@ -104,41 +97,35 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 void PubDataReaderListenerImpl::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
 void PubDataReaderListenerImpl::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
 void PubDataReaderListenerImpl::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
 void PubDataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
 void PubDataReaderListenerImpl::on_sample_rejected(
     DDS::DataReader_ptr,
     const DDS::SampleRejectedStatus&)
-  throw (CORBA::SystemException)
 {
 }
 
 void PubDataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-  throw (CORBA::SystemException)
 {
 }

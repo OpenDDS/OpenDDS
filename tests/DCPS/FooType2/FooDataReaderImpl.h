@@ -33,12 +33,9 @@ class FooType_Export FooDataReaderImpl : public virtual POA_FooDataReader,
   public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
-  //Constructor
   FooDataReaderImpl (void);
 
-  //Destructor
   virtual ~FooDataReaderImpl (void);
-
 
   virtual ::DDS::ReturnCode_t read (
       FooSeq & received_data,

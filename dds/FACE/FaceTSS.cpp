@@ -1,6 +1,5 @@
-#include "ace/config-macros.h"
-#include "FACE/TS.hpp"
 #include "FaceTSS.h"
+#include "FACE/TS.hpp"
 #include "config/Parser.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -10,6 +9,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/SafetyProfilePool.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -650,6 +650,8 @@ namespace {
 
 }}
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace FaceTSS {
 
@@ -882,3 +884,5 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   return_code = FACE::RC_NO_ERROR;
 }
 }}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

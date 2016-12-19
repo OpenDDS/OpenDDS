@@ -1,4 +1,4 @@
-project : dds_suppress_any_support, dcps_ts_defaults {
+project : dds_suppress_any_support, dcps_ts_defaults, dds_versioning_idl_defaults {
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
               -Wb,export_macro=OpenDDS_Dcps_Export \
               -Wb,export_include=dds/DCPS/dcps_export.h \
@@ -7,10 +7,13 @@ project : dds_suppress_any_support, dcps_ts_defaults {
 
   dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
                    -Wb,export_macro=OpenDDS_Dcps_Export \
-                   -Wb,export_include=dds/DCPS/dcps_export.h
+                   -Wb,export_include=dds/DCPS/dcps_export.h \
+                   -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_name=OPENDDS_VERSIONED_NAMESPACE_NAME
 }
 
-feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
+feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults, dds_versioning_idl_defaults {
   // Process with tao_idl for the InfoRepo.
   IDL_Files {
     DdsDcpsGuid.idl
@@ -58,7 +61,7 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
   }
 }
 
-feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
+feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support, dcps_ts_defaults, dds_versioning_idl_defaults {
   // Process with tao_idl for the InfoRepo.
 
   IDL_Files {
@@ -103,7 +106,7 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
   }
 }
 
-feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
+feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults, dds_versioning_idl_defaults {
   TypeSupport_Files {
     dcps_ts_flags += -SI -Lspcpp
     DdsDcpsGuid.idl

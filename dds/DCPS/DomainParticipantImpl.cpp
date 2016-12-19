@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DomainParticipantImpl.h"
+#include "dds/DdsDcpsGuidC.h"
 #include "FeatureDisabledQosCheck.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
@@ -20,7 +21,6 @@
 #include "DomainParticipantFactoryImpl.h"
 #include "Util.h"
 #include "MonitorFactory.h"
-#include "dds/DdsDcpsGuidC.h"
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
@@ -37,6 +37,7 @@
 
 #include "tao/debug.h"
 #include "ace/Reactor.h"
+#include "ace/OS_NS_unistd.h"
 
 namespace Util {
 
@@ -59,6 +60,8 @@ int find(
 
 } // namespace Util
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -66,7 +69,6 @@ namespace DCPS {
 //      Currently this is not needed because auto_enable_created_entities
 //      cannot be false.
 
-// Implementation skeleton constructor
 DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
                                              const DDS::DomainId_t&             domain_id,
                                              const RepoId&                        dp_id,
@@ -93,7 +95,6 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
 }
 
-// Implementation skeleton destructor
 DomainParticipantImpl::~DomainParticipantImpl()
 {
 }
@@ -2234,3 +2235,5 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

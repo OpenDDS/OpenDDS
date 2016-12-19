@@ -1,0 +1,9 @@
+// -*- MPC -*-
+// This base project is only meant to be used by the core OpenDDS
+// libraries
+
+project : taoidldefaults {
+  idlflags += -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
+              -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
+              -Wb,versioning_include=dds/Versioned_Namespace.h
+}

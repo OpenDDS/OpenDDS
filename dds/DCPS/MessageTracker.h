@@ -8,11 +8,12 @@
 #ifndef OPENDDS_DCPS_MESSAGETRACKER_H
 #define OPENDDS_DCPS_MESSAGETRACKER_H
 
-#include <dds/DCPS/dcps_export.h>
-#include <ace/Thread_Mutex.h>
-#include <ace/Condition_Thread_Mutex.h>
-
+#include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "ace/Thread_Mutex.h"
+#include "ace/Condition_Thread_Mutex.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -52,7 +53,7 @@ namespace DCPS {
 
     /**
      * Provide a timestamp for the passed in time.
-     * DEPRECATED: remove and replace with ACE::timestamp
+     * @deprecated Remove and replace with ACE::timestamp
      * once TAO 1.6a is no longer supported
      */
     static ACE_TCHAR*
@@ -76,12 +77,12 @@ namespace DCPS {
 
     /// All messages have been transported condition variable.
     ACE_Condition_Thread_Mutex done_condition_;
-
   };
 
 } // namespace DCPS
 } // namespace OpenDDS
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
 

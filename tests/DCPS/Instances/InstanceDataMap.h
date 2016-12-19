@@ -4,7 +4,7 @@
 #define INSTANCE_DATA_MAP_H
 
 #include  "dds/DdsDcpsInfoUtilsC.h"
-#include  "ace/Synch.h"
+#include  "ace/Thread_Mutex.h"
 
 #include <set>
 #include <map>

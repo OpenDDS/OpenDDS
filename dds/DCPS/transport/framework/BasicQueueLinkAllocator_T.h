@@ -14,6 +14,8 @@
 #include "ace/Null_Mutex.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -27,8 +29,6 @@ private:
   typedef ACE_Locked_Free_List<NodeType, ACE_Null_Mutex> FreeListType;
 
 public:
-
-  /// Constructor.
   BasicQueueLinkAllocator(size_t chunk_size, size_t initial_chunks)
     : chunk_size_(chunk_size),
       head_chunk_(0),
@@ -39,7 +39,6 @@ public:
     }
   }
 
-  /// Virtual Destructor.
   virtual ~BasicQueueLinkAllocator() {
     ChunkType* chunk = this->head_chunk_;
 
@@ -145,5 +144,7 @@ private:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif  /* OPENDDS_DCPS_BASICQUEUELINKALLOCATOR_T_H */

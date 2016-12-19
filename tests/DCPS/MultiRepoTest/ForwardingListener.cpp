@@ -6,7 +6,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 
-template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var, class DR_impl>
+template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>
 int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
 {
   try
@@ -20,14 +20,9 @@ int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
       throw BadReaderException() ;
     }
 
-    DR_impl* dr_servant =
-      dynamic_cast<DR_impl*> (foo_dr.in ());
-
     ::DDS::SampleInfo si ;
 
-    DDS::ReturnCode_t status  ;
-
-    status = dr_servant->read_next_sample(foo, si) ;
+    DDS::ReturnCode_t const status = foo_dr->read_next_sample(foo, si) ;
 
     if (status == ::DDS::RETCODE_OK)
     {
@@ -75,7 +70,6 @@ int read (::DDS::DataReader_ptr reader, DT& foo, bool& valid_data)
 }
 
 
-// Implementation skeleton constructor
 ForwardingListenerImpl::ForwardingListenerImpl(
   OpenDDS::DCPS::Discovery::RepoKey repo
 ) : samples_( 0),
@@ -89,7 +83,6 @@ ForwardingListenerImpl::ForwardingListenerImpl(
   ));
 }
 
-// Implementation skeleton destructor
 ForwardingListenerImpl::~ForwardingListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,
@@ -198,8 +191,7 @@ void ForwardingListenerImpl::on_subscription_matched (
         ::Xyz::FooNoKeySeq,
         ::Xyz::FooNoKeyDataReader,
         ::Xyz::FooNoKeyDataReader_ptr,
-        ::Xyz::FooNoKeyDataReader_var,
-        ::Xyz::FooNoKeyDataReaderImpl> (reader, foo, valid_data);
+        ::Xyz::FooNoKeyDataReader_var> (reader, foo, valid_data);
 
     if (ret != 0)
     {

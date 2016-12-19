@@ -16,6 +16,8 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -34,7 +36,7 @@ public:
   ~RawDataSample();
   RawDataSample& operator=(const RawDataSample&);
 
-  /// The enum inidicating the message type
+  /// The enum indicating the message type
   MessageId message_id_;
   /// The timestamp the sender put on the sample
   DDS::Time_t source_timestamp_;
@@ -49,5 +51,7 @@ public:
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
