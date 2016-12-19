@@ -51,7 +51,6 @@ Test::DataReaderListener::priorities() const
 
 void
 Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
   Test::DataDataReader_var dr = Test::DataDataReader::_narrow (reader);
   if (CORBA::is_nil (dr.in ())) {
@@ -168,7 +167,6 @@ void
 Test::DataReaderListener::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -176,7 +174,6 @@ void
 Test::DataReaderListener::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -184,7 +181,6 @@ void
 Test::DataReaderListener::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
-  throw (CORBA::SystemException)
 {
   if( this->verbose_) {
     ACE_DEBUG((LM_DEBUG,
@@ -197,7 +193,6 @@ void
 Test::DataReaderListener::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -205,14 +200,12 @@ void
 Test::DataReaderListener::on_sample_rejected (
     DDS::DataReader_ptr,
     DDS::SampleRejectedStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
 void
 Test::DataReaderListener::on_sample_lost (DDS::DataReader_ptr,
                                           DDS::SampleLostStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -220,7 +213,6 @@ void
 Test::DataReaderListener::on_subscription_disconnected (
     DDS::DataReader_ptr,
     ::OpenDDS::DCPS::SubscriptionDisconnectedStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -228,7 +220,6 @@ void
 Test::DataReaderListener::on_subscription_reconnected (
     DDS::DataReader_ptr,
     ::OpenDDS::DCPS::SubscriptionReconnectedStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -236,7 +227,6 @@ void
 Test::DataReaderListener::on_subscription_lost (
     DDS::DataReader_ptr,
     ::OpenDDS::DCPS::SubscriptionLostStatus const &)
-  throw (CORBA::SystemException)
 {
 }
 
@@ -244,13 +234,11 @@ void
 Test::DataReaderListener::on_budget_exceeded (
     DDS::DataReader_ptr,
     const ::OpenDDS::DCPS::BudgetExceededStatus&)
-  throw (CORBA::SystemException)
 {
 }
 
 void
 Test::DataReaderListener::on_connection_deleted (DDS::DataReader_ptr)
-  throw (CORBA::SystemException)
 {
 }
 
