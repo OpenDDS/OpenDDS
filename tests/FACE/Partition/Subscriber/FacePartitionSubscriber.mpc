@@ -3,7 +3,7 @@ project: dcps_rtps_udp, opendds_face {
   after += FacePartitionIdl
   libs  += FacePartitionIdl
   libpaths += ../Idl
-  includes += ../
+  includes += ..
 
   Source_Files {
     Subscriber.cpp
