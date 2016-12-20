@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 
 OpenDDS is an open-source C++ implementation of the Object Management Group's
 specification "Data Distribution Service for Real-time Systems".  Although
