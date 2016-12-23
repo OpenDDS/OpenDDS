@@ -68,7 +68,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     gendir = .
     ../MPC
     ../AUTHORS
-    ../README
+    ../README.md
     ../VERSION
     ../LICENSE
     ../NEWS.md
