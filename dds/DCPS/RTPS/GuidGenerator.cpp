@@ -106,36 +106,19 @@ GuidGenerator::interfaceName(const char* iface)
   //TODO: Solaris
   return -1;
 #elif defined ACE_LINUX
-
-  ifaddrs* addrs;
-  if (::getifaddrs(&addrs) != 0) {
+  ifreq ifr;
+  std::strncpy(ifr.ifr_name, iface, IFNAMSIZ);
+  const ACE_HANDLE h = ACE_OS::socket(PF_INET, SOCK_DGRAM, 0);
+  if (h == ACE_INVALID_HANDLE) {
     return -1;
   }
-
-  bool found = false;
-  for (ifaddrs* addr = addrs; addr && !found; addr = addr->ifa_next) {
-    if (addr->ifa_addr == 0) {
-      continue;
-    }
-    if (addr->ifa_name == interface_name_) {
-      found = true;
-      ifreq ifr;
-      std::strncpy(ifr.ifr_name, iface, IFNAMSIZ);
-      const ACE_HANDLE h = ACE_OS::socket(PF_INET, SOCK_DGRAM, 0);
-      if (h == ACE_INVALID_HANDLE) {
-        return -1;
-      }
-      if (ACE_OS::ioctl(h, SIOCGIFHWADDR, &ifr) < 0) {
-        ACE_OS::close(h);
-        return -1;
-      }
-      ACE_OS::close(h);
-      std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
-    }
+  if (ACE_OS::ioctl(h, SIOCGIFHWADDR, &ifr) < 0) {
+    ACE_OS::close(h);
+    return -1;
   }
-
-  ::freeifaddrs(addrs);
-  return found ? 0 : -1;
+  ACE_OS::close(h);
+  std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
+  return 0;
 
 #elif defined ACE_HAS_SIOCGIFCONF
   //TODO: MacOSX uses this
