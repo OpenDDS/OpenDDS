@@ -51,7 +51,7 @@ namespace OpenDDS {
       for (typename InstanceMap::iterator it = instance_map_.begin();
            it != instance_map_.end(); ++it)
         {
-          OpenDDS::DCPS::SubscriptionInstance* ptr =
+          OpenDDS::DCPS::SubscriptionInstance_rch ptr =
             get_handle_instance(it->second);
           this->purge_data(ptr);
         }
@@ -211,7 +211,7 @@ namespace OpenDDS {
          ++it)
       {
         DDS::InstanceHandle_t handle = it->second;
-        OpenDDS::DCPS::SubscriptionInstance* ptr = get_handle_instance(handle);
+        OpenDDS::DCPS::SubscriptionInstance_rch ptr = get_handle_instance(handle);
 
         bool mrg = false; //most_recent_generation
 
@@ -282,7 +282,7 @@ namespace OpenDDS {
          ++it)
       {
         DDS::InstanceHandle_t handle = it->second;
-        OpenDDS::DCPS::SubscriptionInstance* ptr = get_handle_instance(handle);
+        OpenDDS::DCPS::SubscriptionInstance_rch ptr = get_handle_instance(handle);
 
         bool mrg = false; //most_recent_generation
 
@@ -801,7 +801,7 @@ namespace OpenDDS {
 
     DDS::InstanceHandle_t inst = lookup_instance(sample);
     bool filtered;
-    SubscriptionInstance* instance = 0;
+    SubscriptionInstance_rch instance;
 
     // Call store_instance_data() once or twice, depending on if we need to
     // process the INSTANCE_REGISTRATION.  In either case, store_instance_data()
@@ -835,7 +835,7 @@ namespace OpenDDS {
     using namespace OpenDDS::DCPS;
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-    SubscriptionInstance* si = get_handle_instance(instance);
+    SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
       DataSampleHeader header;
       header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
@@ -852,7 +852,7 @@ namespace OpenDDS {
   }
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                               OpenDDS::DCPS::SubscriptionInstance*& instance)
+                               OpenDDS::DCPS::SubscriptionInstance_rch& instance)
   {
     //!!! caller should already have the sample_lock_
 
@@ -898,7 +898,7 @@ namespace OpenDDS {
 protected:
 
   virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                             OpenDDS::DCPS::SubscriptionInstance*& instance,
+                             OpenDDS::DCPS::SubscriptionInstance_rch& instance,
                              bool & just_registered,
                              bool & filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
@@ -951,7 +951,7 @@ protected:
   }
 
   virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                                  OpenDDS::DCPS::SubscriptionInstance*& instance)
+                                  OpenDDS::DCPS::SubscriptionInstance_rch& instance)
   {
     //!!! caller should already have the sample_lock_
 
@@ -968,7 +968,7 @@ protected:
     this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
   }
 
-  virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance* instance)
+  virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch instance)
   {
     instance->instance_state_.cancel_release();
 
@@ -978,8 +978,6 @@ protected:
           instance->rcvd_samples_.remove_head();
         dec_ref_data_element(head);
       }
-
-    delete instance;
   }
 
   virtual void release_instance_i (DDS::InstanceHandle_t handle)
@@ -1052,7 +1050,7 @@ private:
       {
         DDS::InstanceHandle_t handle = it->second;
 
-        OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(handle);
+        OpenDDS::DCPS::SubscriptionInstance_rch inst = get_handle_instance(handle);
 
         if ((inst->instance_state_.view_state() & view_states) &&
             (inst->instance_state_.instance_state() & instance_states))
@@ -1149,7 +1147,7 @@ DDS::ReturnCode_t take_i (
       {
         DDS::InstanceHandle_t handle = it->second;
 
-        OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(handle);
+        OpenDDS::DCPS::SubscriptionInstance_rch inst = get_handle_instance(handle);
 
         if ((inst->instance_state_.view_state() & view_states) &&
             (inst->instance_state_.instance_state() & instance_states))
@@ -1221,8 +1219,8 @@ int ignored)
 #endif
             OpenDDS::DCPS::DDS_OPERATION_READ);
 
-  OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
-  if (inst == 0) return DDS::RETCODE_BAD_PARAMETER;
+  OpenDDS::DCPS::SubscriptionInstance_rch inst = get_handle_instance(a_handle);
+  if (!inst) return DDS::RETCODE_BAD_PARAMETER;
 
   if ((inst->instance_state_.view_state() & view_states) &&
       (inst->instance_state_.instance_state() & instance_states))
@@ -1286,7 +1284,7 @@ DDS::ReturnCode_t take_instance_i (
 #endif
             OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
-  OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
+  OpenDDS::DCPS::SubscriptionInstance_rch inst = get_handle_instance(a_handle);
 
   if ((inst->instance_state_.view_state() & view_states) &&
       (inst->instance_state_.instance_state() & instance_states))
@@ -1459,7 +1457,7 @@ return DDS::RETCODE_NO_DATA;
 void store_instance_data(
                          MessageType *instance_data,
                          const OpenDDS::DCPS::DataSampleHeader& header,
-                         OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
+                         OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr,
                          bool & just_registered,
                          bool & filtered)
 {
@@ -1557,14 +1555,13 @@ void store_instance_data(
 #endif
 
       just_registered = true;
-      OpenDDS::DCPS::SubscriptionInstance* instance = 0;
       DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(instance_data);
       handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
-      ACE_NEW (instance,
-               OpenDDS::DCPS::SubscriptionInstance(this,
-                                                   this->qos_,
-                                                   this->instances_lock_,
-                                                   handle));
+      OpenDDS::DCPS::SubscriptionInstance_rch instance(
+         new OpenDDS::DCPS::SubscriptionInstance(this,
+                                                 this->qos_,
+                                                 this->instances_lock_,
+                                                 handle), true);
 
       instance->instance_handle_ = handle;
 
@@ -1716,7 +1713,7 @@ void store_instance_data(
             for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
                  iter != instances_.end();
                  ++iter) {
-              OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
+              OpenDDS::DCPS::SubscriptionInstance_rch ptr = iter->second;
 
               total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
             }

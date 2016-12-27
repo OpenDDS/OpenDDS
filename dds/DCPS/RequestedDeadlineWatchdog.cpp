@@ -39,38 +39,46 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::~RequestedDeadlineWatchdog()
 
 void
 OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer(
-  OpenDDS::DCPS::SubscriptionInstance* instance)
+  OpenDDS::DCPS::SubscriptionInstance_rch instance)
 {
   if (instance->deadline_timer_id_ == -1) {
-    instance->deadline_timer_id_ = Watchdog::schedule_timer((void*)instance, this->interval_);
+    instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(instance->instance_handle_), this->interval_);
   }
   if (instance->deadline_timer_id_ == -1) {
     ACE_ERROR((LM_ERROR,
                "ERROR Timer for instance %X should be scheduled, but is %d\n",
-               instance, instance->deadline_timer_id_));
+               instance.in(), instance->deadline_timer_id_));
   } else if (DCPS_debug_level > 5) {
-    ACE_DEBUG((LM_INFO, "Timer for instance %X scheduled \n", instance));
+    ACE_DEBUG((LM_INFO, "Timer for instance %X scheduled \n", instance.in()));
   }
 }
 
 void
 OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
-  OpenDDS::DCPS::SubscriptionInstance* instance)
+  OpenDDS::DCPS::SubscriptionInstance_rch instance)
 {
   if (instance->deadline_timer_id_ != -1) {
     Watchdog::cancel_timer(instance->deadline_timer_id_);
     instance->deadline_timer_id_ = -1;
     if (DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_INFO, "Timer for instance %X cancelled \n", instance));
+      ACE_DEBUG((LM_INFO, "Timer for instance %X cancelled \n", instance.in()));
     }
   }
 }
 
-void
-OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_called)
+int
+OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, void* act)
 {
-  SubscriptionInstance * instance = (SubscriptionInstance *)act;
+  DDS::InstanceHandle_t handle = *reinterpret_cast<intptr_t*>(act);
+  SubscriptionInstance_rch instance = this->reader_impl_->get_handle_instance(handle);
+  if (instance)
+    execute(instance, true);
+  return 0;
+}
 
+void
+OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch instance, bool timer_called)
+{
   if (instance->deadline_timer_id_ != -1) {
     bool missed = false;
 

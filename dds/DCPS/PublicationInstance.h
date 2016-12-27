@@ -12,6 +12,8 @@
 #include "InstanceDataSampleList.h"
 #include "DataSampleElement.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "ace/Synch_Traits.h"
+#include "dds/DCPS/RcObject_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -32,7 +34,7 @@ namespace DCPS {
   *        from typed datawriter. The data will be duplicated for the register,
   *        unregister and dispose control message.
   */
-struct OpenDDS_Dcps_Export PublicationInstance : public PoolAllocationBase {
+struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject<ACE_SYNCH_MUTEX> {
 
   PublicationInstance(DataSample* registered_sample)
     : sequence_(),
@@ -77,6 +79,8 @@ struct OpenDDS_Dcps_Export PublicationInstance : public PoolAllocationBase {
   /// Only used by WriteDataContainer::reenqueue_all() while WDC is locked.
   ssize_t durable_samples_remaining_;
 };
+
+typedef RcHandle<PublicationInstance> PublicationInstance_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

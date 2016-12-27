@@ -77,7 +77,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
 
 template <class SampleSeq>
 bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
-                                           SubscriptionInstance* instance,
+                                           SubscriptionInstance_rch instance,
                                            size_t index_in_instance)
 {
 #ifndef OPENDDS_NO_QUERY_CONDITION

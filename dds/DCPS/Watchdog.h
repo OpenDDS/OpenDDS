@@ -40,16 +40,6 @@ protected:
   virtual ~Watchdog();
 
 private:
-  int handle_timeout(const ACE_Time_Value&, const void* act)
-  {
-    return execute(act, true), 0;
-  }
-
-  /// Operation to be executed when the associated timer expires
-  /// or whenever samples are received/sent.
-  /// The @c timer_called flag indicates if it's called from
-  /// reator handle_timeout() or upon a sample receiving/sending.
-  virtual void execute(const void* act, bool timer_called) = 0;
 
   /// Re-schedule timer with new interval.
   virtual void reschedule_deadline() = 0;

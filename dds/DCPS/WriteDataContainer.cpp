@@ -186,7 +186,7 @@ WriteDataContainer::enqueue(
   DDS::InstanceHandle_t instance_handle)
 {
   // Get the PublicationInstance pointer from InstanceHandle_t.
-  PublicationInstance* const instance =
+  PublicationInstance_rch instance =
     get_handle_instance(instance_handle);
   // Extract the instance queue.
   InstanceDataSampleList& instance_list = instance->samples_;
@@ -274,10 +274,9 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 DDS::ReturnCode_t
 WriteDataContainer::register_instance(
   DDS::InstanceHandle_t&      instance_handle,
-  DataSample*&                  registered_sample)
+  DataSample*&                registered_sample)
 {
-  PublicationInstance* instance = 0;
-  std::auto_ptr<PublicationInstance> safe_instance;
+  PublicationInstance_rch instance;
 
   if (instance_handle == DDS::HANDLE_NIL) {
     if (max_num_instances_ > 0
@@ -286,11 +285,7 @@ WriteDataContainer::register_instance(
     }
 
     // registered the instance for the first time.
-    ACE_NEW_RETURN(instance,
-                   PublicationInstance(registered_sample),
-                   DDS::RETCODE_ERROR);
-
-    ACE_auto_ptr_reset(safe_instance, instance);
+    instance.reset(new PublicationInstance(registered_sample), true);
 
     instance_handle = this->writer_->get_next_handle();
 
@@ -301,15 +296,15 @@ WriteDataContainer::register_instance(
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("WriteDataContainer::register_instance, ")
                  ACE_TEXT("failed to insert instance handle=%X\n"),
-                 instance));
+                 instance.in()));
       return DDS::RETCODE_ERROR;
     } // if (0 != insert_attempt)
 
     instance->instance_handle_ = instance_handle;
 
   } else {
+
     int const find_attempt = find(instances_, instance_handle, instance);
-    ACE_auto_ptr_reset(safe_instance, instance);
 
     if (0 != find_attempt) {
       ACE_ERROR((LM_ERROR,
@@ -335,8 +330,6 @@ WriteDataContainer::register_instance(
     this->writer_->watchdog_->schedule_timer(instance);
   }
 
-  safe_instance.release();  // Safe to relinquish ownership.
-
   return DDS::RETCODE_OK;
 }
 
@@ -346,7 +339,7 @@ WriteDataContainer::unregister(
   DataSample*&            registered_sample,
   bool                    dup_registered_sample)
 {
-  PublicationInstance* instance = 0;
+  PublicationInstance_rch instance;
 
   int const find_attempt = find(instances_, instance_handle, instance);
 
@@ -386,7 +379,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
                    this->lock_,
                    DDS::RETCODE_ERROR);
 
-  PublicationInstance* instance = 0;
+  PublicationInstance_rch instance;
 
   int const find_attempt = find(instances_, instance_handle, instance);
 
@@ -439,7 +432,7 @@ WriteDataContainer::num_samples(DDS::InstanceHandle_t handle,
                    guard,
                    this->lock_,
                    DDS::RETCODE_ERROR);
-  PublicationInstance* instance = 0;
+  PublicationInstance_rch instance;
 
   int const find_attempt = find(instances_, handle, instance);
 
@@ -651,7 +644,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
     } else {
       if (InstanceDataSampleList::on_some_list(sample)) {
-        PublicationInstance* const inst = sample->get_handle();
+        PublicationInstance_rch inst = sample->get_handle();
         inst->samples_.dequeue(sample);
       }
       release_buffer(stale);
@@ -1029,7 +1022,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
   remove_excess_durable();
 
-  PublicationInstance* instance = get_handle_instance(handle);
+  PublicationInstance_rch instance = get_handle_instance(handle);
 
   if (!instance) {
     return DDS::RETCODE_BAD_PARAMETER;
@@ -1237,10 +1230,6 @@ WriteDataContainer::unregister_all()
                  it->first));
     }
 
-    PublicationInstance* instance = it->second;
-
-    delete instance;
-
     // Get the next iterator before erase the instance handle.
     PublicationInstanceMapType::iterator it_next = it;
     ++it_next;
@@ -1252,10 +1241,10 @@ WriteDataContainer::unregister_all()
   ACE_UNUSED_ARG(registered_sample);
 }
 
-PublicationInstance*
+PublicationInstance_rch
 WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
 {
-  PublicationInstance* instance = 0;
+  PublicationInstance_rch instance;
 
   if (0 != find(instances_, handle, instance)) {
     ACE_ERROR((LM_ERROR,
@@ -1291,7 +1280,7 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
       continue;
 #endif
 
-    PublicationInstance* const inst = cur->get_handle();
+    PublicationInstance_rch inst = cur->get_handle();
     if (inst->durable_samples_remaining_ == 0)
       continue;
     --inst->durable_samples_remaining_;

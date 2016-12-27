@@ -13,39 +13,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE
-TransportSendControlElement::TransportSendControlElement(int initial_count,
-                                                         const RepoId& publisher_id,
-                                                         TransportSendListener* listener,
-                                                         const DataSampleHeader& header,
-                                                         ACE_Message_Block* msg_block,
-                                                         TransportSendControlElementAllocator* allocator)
-  : TransportQueueElement(initial_count),
-    publisher_id_(publisher_id),
-    listener_(listener),
-    header_(header),
-    msg_(msg_block),
-    dcps_elem_(0),
-    allocator_(allocator)
-{
-  DBG_ENTRY_LVL("TransportSendControlElement","TransportSendControlElement",6);
-}
-
-ACE_INLINE
-TransportSendControlElement::TransportSendControlElement(int initial_count,
-                                                         const DataSampleElement* dcps_elem,
-                                                         TransportSendControlElementAllocator* allocator)
-  : TransportQueueElement(initial_count)
-  , publisher_id_(dcps_elem->get_pub_id())
-  , listener_(dcps_elem->get_send_listener())
-  , header_(dcps_elem->get_header())
-  , msg_(dcps_elem->get_sample())
-  , dcps_elem_(dcps_elem)
-  , allocator_(allocator)
-{
-  DBG_ENTRY_LVL("TransportSendControlElement", "TransportSendControlElement", 6);
-}
-
 ACE_INLINE /*static*/
 TransportSendControlElement*
 TransportSendControlElement::alloc(int initial_count,

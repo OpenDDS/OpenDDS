@@ -12,6 +12,8 @@
 #include "ace/Service_Config.h"
 #include "tao/corba.h"
 #include "dcps_export.h"
+#include "dds/DCPS/PublicationInstance.h"
+
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

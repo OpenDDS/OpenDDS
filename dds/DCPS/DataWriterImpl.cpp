@@ -2028,7 +2028,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                                            const DDS::Time_t& source_timestamp,
                                            bool content_filter)
 {
-  PublicationInstance* const instance =
+  PublicationInstance_rch instance =
     data_container_->get_handle_instance(instance_handle);
 
   if (0 == instance) {
@@ -2401,16 +2401,15 @@ DataWriterImpl::prepare_to_delete()
   this->stop_associating();
 }
 
-PublicationInstance*
+PublicationInstance_rch
 DataWriterImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 {
-  PublicationInstance* instance = 0;
 
   if (0 != data_container_) {
-    instance = data_container_->get_handle_instance(handle);
+    return data_container_->get_handle_instance(handle);
   }
 
-  return instance;
+  return PublicationInstance_rch();
 }
 
 void

@@ -482,6 +482,13 @@ public:
     return db_lock_pool_->get_lock();
   }
 
+ /**
+  *  Attempt to locate an existing instance for the given handle.
+  */
+ PublicationInstance_rch get_handle_instance(
+   DDS::InstanceHandle_t handle);
+
+
 protected:
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
@@ -497,11 +504,6 @@ protected:
   /// The multiplier for allocators affected by associations
   size_t                     association_chunk_multiplier_;
 
-  /**
-   *  Attempt to locate an existing instance for the given handle.
-   */
-  PublicationInstance* get_handle_instance(
-    DDS::InstanceHandle_t handle);
 
   /// The type name of associated topic.
   CORBA::String_var               type_name_;

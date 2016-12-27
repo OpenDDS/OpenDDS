@@ -40,7 +40,7 @@ class DataDurabilityCache;
 #endif
 class FilterEvaluator;
 
-typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance*)
+typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance_rch)
   PublicationInstanceMapType;
 
 /**
@@ -316,7 +316,7 @@ public:
   /**
    * @todo remove/document this!
    */
-  PublicationInstance* get_handle_instance(
+  PublicationInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
