@@ -1238,6 +1238,55 @@ sub remedy_email_dds_release_announce {
 }
 
 ############################################################################
+sub verify_news_template_file_section {
+  my $settings = shift();
+  my $status = open(NEWS, 'NEWS');
+  my $has_news_template = 0;
+  while (<NEWS>) {
+    if ($_ =~ /Version X.Y of OpenDDS\./) {
+      $has_news_template = 1;
+    }
+  }
+  close(NEWS);
+
+  return ($has_news_template);
+}
+
+sub message_news_template_file_section {
+  my $settings = shift();
+  # my $version = $settings->{version};
+  return "next NEWS file release X.Y section missing";
+}
+
+sub remedy_news_template_file_section {
+  my $settings = shift();
+  print "  >> Adding next version template section to NEWS\n";
+  print "  !! Manual update to NEWS needed\n";
+  open(NEWS, "+< NEWS") or die "Opening: $!";
+  my $out = "Version X.Y of OpenDDS.\n" . <<"ENDOUT";
+
+Additions:
+  TODO: Add your features here
+
+Fixes:
+  TODO: Add your fixes here
+
+Notes:
+  TODO: Add your notes here
+
+======================================================================
+
+ENDOUT
+
+  $out .= join("", <NEWS>);
+  seek(NEWS,0,0)            or die "Seeking: $!";
+  print NEWS $out           or die "Printing: $!";
+  truncate(NEWS,tell(NEWS)) or die "Truncating: $!";
+  close(NEWS)               or die "Closing: $!";
+  return 1;
+}
+
+############################################################################
 sub ignore_step {
   my $step = shift;
   print "  Ignoring step $step\n";
@@ -1374,7 +1423,17 @@ my %release_step_hash  = (
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
     message => sub{remedy_email_dds_release_announce(@_)}
+  },
+ 'Add NEWS Template Section' => {
+    verify  => sub{verify_news_template_file_section(@_)},
+    message => sub{message_news_template_file_section(@_)},
+    remedy  => sub{remedy_news_template_file_section(@_)},
+  },
+  'Commit NEWS Template Section' => {
+    verify  => sub{verify_git_status_clean(@_, 1)},
+    message => sub{message_commit_git_changes(@_)}
   }
+
 );
 
 my @ordered_steps = (
@@ -1402,6 +1461,8 @@ my @ordered_steps = (
   'Upload to GitHub',
   'Release Website',
   'Email DDS-Release-Announce list',
+  'Add NEWS Template Section',
+  'Commit NEWS Template Section',
 );
 
 sub any_arg_is {
