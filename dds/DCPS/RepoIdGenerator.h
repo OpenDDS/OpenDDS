@@ -112,7 +112,6 @@ public:
     long participant = 0,
     EntityKind kind = KIND_PARTICIPANT);
 
-  /// Virtual destructor.
   virtual ~RepoIdGenerator();
 
   /// Obtain the next RepoId value.

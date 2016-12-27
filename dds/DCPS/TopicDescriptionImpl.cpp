@@ -16,7 +16,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 TopicDescriptionImpl::TopicDescriptionImpl(const char*            topic_name,
                                            const char*            type_name,
                                            TypeSupport_ptr        type_support,
@@ -32,7 +31,6 @@ TopicDescriptionImpl::TopicDescriptionImpl(const char*            topic_name,
     type_support_->_add_ref();
 }
 
-// Implementation skeleton destructor
 TopicDescriptionImpl::~TopicDescriptionImpl()
 {
   // were finished with the type_support

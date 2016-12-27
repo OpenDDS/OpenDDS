@@ -19,7 +19,6 @@ DataReader_Listener_Base::DataReader_Listener_Base()
 {
 }
 
-// Implementation skeleton destructor
 DataReader_Listener_Base::~DataReader_Listener_Base ()
 {
 }

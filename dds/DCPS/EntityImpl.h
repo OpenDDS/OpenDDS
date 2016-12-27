@@ -35,10 +35,8 @@ namespace DCPS {
 class OpenDDS_Dcps_Export EntityImpl
   : public virtual LocalObject<DDS::Entity> {
 public:
-  ///Constructor
   EntityImpl();
 
-  ///Destructor
   virtual ~EntityImpl();
 
   virtual DDS::ReturnCode_t set_enabled();

@@ -52,14 +52,9 @@ class FooType_Export FooDataWriterImpl : public virtual POA_FooDataWriter,
   typedef std::map<Foo, DDS::InstanceHandle_t, FooLess> FooMap;
   typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<Foo, ACE_Null_Mutex>  FooAllocator;
 
-
-
-  //Constructor
   FooDataWriterImpl (void);
 
-  //Destructor
   virtual ~FooDataWriterImpl (void);
-
 
   virtual ::DDS::InstanceHandle_t register_instance (
       const Foo & instance_data

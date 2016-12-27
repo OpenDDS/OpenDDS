@@ -97,7 +97,6 @@ public:
   /// Construct with command line arguments only.
   Options(int argc, ACE_TCHAR** argv);
 
-  /// Virtual destructor.
   virtual ~Options() { }
 
   /// Access the commmand line invocation name.

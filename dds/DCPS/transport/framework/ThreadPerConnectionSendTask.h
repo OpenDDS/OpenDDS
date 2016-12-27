@@ -57,11 +57,8 @@ struct SendRequest : public PoolAllocationBase {
  */
 class OpenDDS_Dcps_Export ThreadPerConnectionSendTask : public ACE_Task_Base {
 public:
-
-  /// Constructor.
   ThreadPerConnectionSendTask(DataLink* link);
 
-  /// Virtual Destructor.
   virtual ~ThreadPerConnectionSendTask();
 
   /// Put the request to the request queue.

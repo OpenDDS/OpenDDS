@@ -42,7 +42,6 @@ public:
   typedef ACE_Recursive_Thread_Mutex  lock_type;
   typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;
 
-  /// Constructor
   RequestedDeadlineWatchdog(
     lock_type & lock,
     DDS::DeadlineQosPolicy qos,
@@ -51,7 +50,6 @@ public:
     DDS::RequestedDeadlineMissedStatus & status,
     CORBA::Long & last_total_count);
 
-  /// Destructor
   virtual ~RequestedDeadlineWatchdog();
 
   // Schedule timer for the supplied instance.

@@ -22,10 +22,8 @@ class OpenDDS_Model_Export NullReaderListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  //Constructor
   NullReaderListener();
 
-  //Destructor
   virtual ~NullReaderListener();
 
   virtual void on_requested_deadline_missed (

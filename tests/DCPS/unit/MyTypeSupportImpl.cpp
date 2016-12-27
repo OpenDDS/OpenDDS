@@ -11,12 +11,10 @@
 
 #include <stdexcept>
 
-// Implementation skeleton constructor
 MyTypeSupportImpl::MyTypeSupportImpl (void)
   {
   }
 
-// Implementation skeleton destructor
 MyTypeSupportImpl::~MyTypeSupportImpl (void)
   {
   }

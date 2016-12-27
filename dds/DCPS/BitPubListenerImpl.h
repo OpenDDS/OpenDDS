@@ -25,14 +25,11 @@ namespace DCPS {
 
 class DomainParticipantImpl;
 
-//Class BitPubListenerImpl
 class BitPubListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  //Constructor
   BitPubListenerImpl(DomainParticipantImpl* partipant);
 
-  //Destructor
   virtual ~BitPubListenerImpl();
 
   virtual void on_requested_deadline_missed(

@@ -36,7 +36,6 @@ public:
   /// Construct with a processor reference.
   UpdateReceiver(UpdateProcessor<DataType>& processor);
 
-  /// Virtual destructor.
   virtual ~UpdateReceiver();
 
   // ACE_Task_Base methods.

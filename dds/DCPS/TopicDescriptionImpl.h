@@ -38,14 +38,11 @@ class DomainParticipantImpl;
 class OpenDDS_Dcps_Export TopicDescriptionImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::TopicDescription> {
 public:
-
-  //Constructor
   TopicDescriptionImpl(const char*            topic_name,
                        const char*            type_name,
                        TypeSupport_ptr        type_support,
                        DomainParticipantImpl* participant);
 
-  //Destructor
   virtual ~TopicDescriptionImpl();
 
   virtual char * get_type_name();

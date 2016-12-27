@@ -17,7 +17,6 @@ class Writer : public ACE_Task_Base {
       bool                  verbose = false
     );
 
-    /// Virtual destructor.
     virtual ~Writer();
 
     //

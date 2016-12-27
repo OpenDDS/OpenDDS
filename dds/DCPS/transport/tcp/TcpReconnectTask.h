@@ -39,11 +39,8 @@ enum ReconnectOpType {
  */
 class TcpReconnectTask : public QueueTaskBase <ReconnectOpType> {
 public:
-
-  /// Constructor.
   TcpReconnectTask(TcpConnection* con);
 
-  /// Virtual Destructor.
   virtual ~TcpReconnectTask();
 
   /// Handle reconnect requests.

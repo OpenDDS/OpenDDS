@@ -23,12 +23,10 @@
 
 #include "DomainParticipantListener.h"
 
-// Implementation skeleton constructor
 OPENDDS_DCPS_DomainParticipantListener_i::OPENDDS_DCPS_DomainParticipantListener_i (void)
   {
   }
 
-// Implementation skeleton destructor
 OPENDDS_DCPS_DomainParticipantListener_i::~OPENDDS_DCPS_DomainParticipantListener_i (void)
   {
   }

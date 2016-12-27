@@ -47,10 +47,8 @@ public:
   typedef OPENDDS_SET(Participant_Pair) DPSet;
   typedef OPENDDS_MAP(DDS::DomainId_t, DPSet) DPMap;
 
-  /** Constructor **/
   DomainParticipantFactoryImpl();
 
-  /** Destructor **/
   virtual ~DomainParticipantFactoryImpl();
 
   virtual DDS::DomainParticipant_ptr create_participant(

@@ -28,12 +28,9 @@
 class FooType_Export FooTypeSupportImpl : public virtual POA_FooTypeSupport
 {
 public:
-  //Constructor
   FooTypeSupportImpl (void);
 
-  //Destructor
   virtual ~FooTypeSupportImpl (void);
-
 
   virtual ::DDS::ReturnCode_t register_type (
       ::DDS::DomainParticipant_ptr participant,

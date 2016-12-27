@@ -109,10 +109,8 @@ public:
     }
   };
 
-  ///Constructor
   DataWriterImpl();
 
-  ///Destructor
   virtual ~DataWriterImpl();
 
   virtual DDS::InstanceHandle_t get_instance_handle();

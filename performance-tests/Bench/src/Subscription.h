@@ -26,7 +26,6 @@ class Subscription {
       bool verbose = false
     );
 
-    /// Virtual destructor.
     virtual ~Subscription();
 
     /// Resource management.

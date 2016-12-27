@@ -27,7 +27,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
     RepoId                     id,
     const DDS::PublisherQos&   qos,
@@ -54,7 +53,6 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
 }
 
-// Implementation skeleton destructor
 PublisherImpl::~PublisherImpl()
 {
   //The datawriters should be deleted already before calling delete

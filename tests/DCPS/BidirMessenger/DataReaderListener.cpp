@@ -52,7 +52,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       if (si.valid_data) {
         ACE_Guard<ACE_Mutex> guard(this->lock_);
-        num_reads_ ++;
+        ++num_reads_;
 #if 0
         std::cout << "Message: subject    = " << message.subject.in() << std::endl
                   << "         subject_id = " << message.subject_id   << std::endl

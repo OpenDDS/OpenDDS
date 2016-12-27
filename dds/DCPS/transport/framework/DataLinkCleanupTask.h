@@ -33,10 +33,8 @@ class TransportImpl;
  */
 class OpenDDS_Dcps_Export DataLinkCleanupTask : public QueueTaskBase <DataLink_rch> {
 public:
-  /// Constructor.
   DataLinkCleanupTask();
 
-  /// Virtual Destructor.
   virtual ~DataLinkCleanupTask();
 
   /// Handle reconnect requests.

@@ -52,17 +52,6 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
   return samples_recvd;
 }
 
-
-
-
-
-
-
-
-
-
-
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,

@@ -10,7 +10,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//Class TAO_DDS_DCPSSubscriber_i
 class TAO_DDS_DCPSSubscriber_i
   : public virtual OpenDDS::DCPS::LocalObject< ::DDS::Subscriber>
 {

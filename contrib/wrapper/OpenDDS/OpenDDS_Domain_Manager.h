@@ -42,7 +42,6 @@ class OpenDDS_Domain_Manager : public Domain_Manager_Impl
                           DDS::DomainId_t domain_id,
                           const DDS::DomainParticipantQos & qos);
 
-  /// destructor
   virtual ~OpenDDS_Domain_Manager ();
 
   /// this call blocks the thread until a SIGINT signal for the process is received

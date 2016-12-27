@@ -69,7 +69,6 @@ namespace DCPS {
 //      Currently this is not needed because auto_enable_created_entities
 //      cannot be false.
 
-// Implementation skeleton constructor
 DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
                                              const DDS::DomainId_t&             domain_id,
                                              const RepoId&                        dp_id,
@@ -96,7 +95,6 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
 }
 
-// Implementation skeleton destructor
 DomainParticipantImpl::~DomainParticipantImpl()
 {
 }

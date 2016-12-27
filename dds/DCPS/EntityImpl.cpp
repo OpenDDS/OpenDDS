@@ -14,7 +14,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Implementation skeleton constructor
 EntityImpl::EntityImpl()
   : enabled_(false),
     entity_deleted_(false),
@@ -23,7 +22,6 @@ EntityImpl::EntityImpl()
 {
 }
 
-// Implementation skeleton destructor
 EntityImpl::~EntityImpl()
 {
 }

@@ -4,12 +4,10 @@
 
 extern int offered_incompatible_qos_called_on_dp;
 
-// Implementation skeleton constructor
 DomainParticipantListenerImpl::DomainParticipantListenerImpl (void)
   {
   }
 
-// Implementation skeleton destructor
 DomainParticipantListenerImpl::~DomainParticipantListenerImpl (void)
   {
   }
