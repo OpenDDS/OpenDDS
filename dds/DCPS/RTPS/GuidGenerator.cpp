@@ -119,10 +119,38 @@ GuidGenerator::interfaceName(const char* iface)
   ACE_OS::close(h);
   std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
   return 0;
+#elif defined ACE_HAS_SIOCGIFCONF || defined ACE_HAS_MAC_OSX
+  const ACE_HANDLE h = ACE_OS::socket(AF_INET, SOCK_DGRAM, 0);
+  if (h == ACE_INVALID_HANDLE) {
+    return -1;
+  }
 
-#elif defined ACE_HAS_SIOCGIFCONF
-  //TODO: MacOSX uses this
-  return -1;
+  const int BUFFERSIZE = 4000;
+  char buffer[BUFFERSIZE];
+  ifconf ifc;
+  ifc.ifc_len = BUFFERSIZE;
+  ifc.ifc_buf = buffer;
+
+  if (ACE_OS::ioctl(h, SIOCGIFCONF, &ifc) < 0) {
+    ACE_OS::close(h);
+    return -1;
+  }
+
+  bool found = false;
+  for (const char* ptr = buffer; !found && ptr < buffer + ifc.ifc_len;) {
+    const ifreq* ifr = reinterpret_cast<const ifreq*>(ptr);
+    if (ifr->ifr_addr.sa_family == AF_LINK && ifr->ifr_name == interface_name_) {
+      const sockaddr_dl* sdl =
+        reinterpret_cast<const sockaddr_dl*>(&ifr->ifr_addr);
+      std::memcpy(node_id_, LLADDR(sdl), sizeof node_id_);
+    }
+
+    ptr += sizeof ifr->ifr_name + std::max(sizeof ifr->ifr_addr,
+      static_cast<size_t>(ifr->ifr_addr.sa_len));
+  }
+
+  ACE_OS::close(h);
+  return found ? 0 : -1;
 #else
   return -1;
 #endif
