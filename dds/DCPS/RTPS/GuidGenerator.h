@@ -6,6 +6,7 @@
  */
 
 #include "dds/DdsDcpsGuidC.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/RTPS/rtps_export.h"
 
 #include "ace/Basic_Types.h"
@@ -35,31 +36,31 @@ namespace OpenDDS {
  */
 class OpenDDS_Rtps_Export GuidGenerator {
 public:
-  /// Borrowed from ACE::UUID_Node, definition of the
-  /// MAC address holder type
-
-  enum {NODE_ID_SIZE = 6};
-  typedef unsigned char Node_ID[NODE_ID_SIZE];
-
-  /// Default constructor - initializes pid and MAC address values
   GuidGenerator();
 
   /// override the MAC address to use a specific network interface
   /// instead of just the first (non-loopback) interface
-  int mac_interface(const char* interface);
+  int interfaceName(const char* interface);
 
   /// populate a GUID container with a unique ID. This will increment
   /// the counter, and use a lock (if compiled with MT ACE) while
   /// doing so.
-  void populate(OpenDDS::DCPS::GUID_t& container);
+  void populate(DCPS::GUID_t& container);
 
 private:
+  enum {NODE_ID_SIZE = 6};
+
+  /// Borrowed from ACE::UUID_Node, definition of the
+  /// MAC address holder type
+  typedef unsigned char Node_ID[NODE_ID_SIZE];
+
   ACE_UINT16 getCount();
 
   Node_ID node_id_;
   pid_t pid_;
   ACE_Thread_Mutex counter_lock_;
   ACE_UINT16 counter_;
+  OPENDDS_STRING interface_name_;
 };
 
 } // namespace RTPS

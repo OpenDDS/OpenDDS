@@ -26,6 +26,11 @@
 # include <ifaddrs.h>
 #endif
 
+#if defined ACE_WIN32 && !defined ACE_HAS_WINCE
+# include <WinSock2.h>
+# include <Iphlpapi.h>
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -47,29 +52,56 @@ GuidGenerator::GuidGenerator()
   if (-1 != result) {
     ACE_OS::memcpy(node_id_, macaddress.node, NODE_ID_SIZE);
   } else {
-    node_id_[0] = static_cast<unsigned char>(ACE_OS::rand());
-    node_id_[1] = static_cast<unsigned char>(ACE_OS::rand());
-    node_id_[2] = static_cast<unsigned char>(ACE_OS::rand());
-    node_id_[3] = static_cast<unsigned char>(ACE_OS::rand());
-    node_id_[4] = static_cast<unsigned char>(ACE_OS::rand());
-    node_id_[5] = static_cast<unsigned char>(ACE_OS::rand());
+    for (int i = 0; i < NODE_ID_SIZE; ++i) {
+      node_id_[i] = static_cast<unsigned char>(ACE_OS::rand());
+    }
   }
 }
 
 ACE_UINT16
 GuidGenerator::getCount()
 {
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(this->counter_lock_);
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(counter_lock_);
   return counter_++;
 }
 
 int
-GuidGenerator::mac_interface(const char* interface)
+GuidGenerator::interfaceName(const char* iface)
 {
+  if (interface_name_ == iface) {
+    return 0;
+  }
+  interface_name_ = iface;
   // See ace/OS_NS_netdb.cpp ACE_OS::getmacaddress()
 #if defined ACE_WIN32 && !defined ACE_HAS_WINCE
-  //TODO: Win32
-  return -1;
+  ULONG size;
+  if (::GetAdaptersAddresses(AF_UNSPEC, 0, 0, 0, &size)
+      != ERROR_BUFFER_OVERFLOW) {
+    return -1;
+  }
+  ACE_Allocator* const alloc = DCPS::SafetyProfilePool::instance();
+  IP_ADAPTER_ADDRESSES* const addrs =
+    static_cast<IP_ADAPTER_ADDRESSES*>(alloc->malloc(size));
+  if (!addrs) {
+    return -1;
+  }
+  if (::GetAdaptersAddresses(AF_UNSPEC, 0, 0, addrs, &size) != NO_ERROR) {
+    alloc->free(addrs);
+    return -1;
+  }
+
+  bool found = false;
+  for (IP_ADAPTER_ADDRESSES* iter = addrs; iter && !found; iter = iter->Next) {
+    if (std::strcmp(iter->AdapterName, iface) == 0) {
+      std::memcpy(node_id_, iter->PhysicalAddress,
+                  std::min(static_cast<size_t>(iter->PhysicalAddressLength),
+                           sizeof node_id_));
+      found = true;
+    }
+  }
+
+  alloc->free(addrs);
+  return found ? 0 : -1;
 #elif defined sun
   //TODO: Solaris
   return -1;
@@ -85,10 +117,10 @@ GuidGenerator::mac_interface(const char* interface)
     if (addr->ifa_addr == 0) {
       continue;
     }
-    if (std::strcmp(addr->ifa_name, interface) == 0) {
+    if (std::strcmp(addr->ifa_name, iface) == 0) {
       found = true;
       ifreq ifr;
-      std::strncpy(ifr.ifr_name, interface, IFNAMSIZ);
+      std::strncpy(ifr.ifr_name, iface, IFNAMSIZ);
       const ACE_HANDLE h = ACE_OS::socket(PF_INET, SOCK_DGRAM, 0);
       if (h == ACE_INVALID_HANDLE) {
         return -1;
@@ -109,7 +141,6 @@ GuidGenerator::mac_interface(const char* interface)
   //TODO: MacOSX uses this
   return -1;
 #else
-  ACE_UNUSED_ARG(interface);
   return -1;
 #endif
 }
@@ -120,10 +151,10 @@ GuidGenerator::populate(DCPS::GUID_t &container)
   container.guidPrefix[0] = DCPS::VENDORID_OCI[0];
   container.guidPrefix[1] = DCPS::VENDORID_OCI[1];
 
-  ACE_UINT16 count = this->getCount();
+  const ACE_UINT16 count = getCount();
   ACE_OS::memcpy(&container.guidPrefix[2], node_id_, NODE_ID_SIZE);
-  container.guidPrefix[8] = static_cast<CORBA::Octet>(this->pid_ >> 8);
-  container.guidPrefix[9] = static_cast<CORBA::Octet>(this->pid_ & 0xFF);
+  container.guidPrefix[8] = static_cast<CORBA::Octet>(pid_ >> 8);
+  container.guidPrefix[9] = static_cast<CORBA::Octet>(pid_ & 0xFF);
   container.guidPrefix[10] = static_cast<CORBA::Octet>(count >> 8);
   container.guidPrefix[11] = static_cast<CORBA::Octet>(count & 0xFF);
 }

@@ -279,8 +279,12 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
   if (!guid_interface_.empty()) {
-    if (guid_gen_.mac_interface(guid_interface_.c_str()) != 0) {
-      //TODO: warning
+    if (guid_gen_.interfaceName(guid_interface_.c_str()) != 0) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
+                   " - attempt to use specific network interface's MAC addr for"
+                   " GUID generation failed.\n"));
+      }
     }
   }
   guid_gen_.populate(ads.id);
