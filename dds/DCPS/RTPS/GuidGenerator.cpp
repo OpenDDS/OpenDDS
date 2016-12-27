@@ -92,7 +92,7 @@ GuidGenerator::interfaceName(const char* iface)
 
   bool found = false;
   for (IP_ADAPTER_ADDRESSES* iter = addrs; iter && !found; iter = iter->Next) {
-    if (std::strcmp(iter->AdapterName, iface) == 0) {
+    if (ACE_Wide_To_Ascii(iter->FriendlyName).char_rep() == interface_name_) {
       std::memcpy(node_id_, iter->PhysicalAddress,
                   std::min(static_cast<size_t>(iter->PhysicalAddressLength),
                            sizeof node_id_));
@@ -117,7 +117,7 @@ GuidGenerator::interfaceName(const char* iface)
     if (addr->ifa_addr == 0) {
       continue;
     }
-    if (std::strcmp(addr->ifa_name, iface) == 0) {
+    if (addr->ifa_name == interface_name_) {
       found = true;
       ifreq ifr;
       std::strncpy(ifr.ifr_name, iface, IFNAMSIZ);
