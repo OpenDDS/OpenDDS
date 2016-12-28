@@ -44,7 +44,7 @@ ShmemTransport::config() const
 ShmemDataLink_rch
 ShmemTransport::make_datalink(const std::string& remote_address)
 {
-  ShmemDataLink_rch link(new ShmemDataLink(this->shared_from_this()), true);
+  ShmemDataLink_rch link(new ShmemDataLink(this->shared_from_this()), keep_count());
 
   link->configure(this->config());
 

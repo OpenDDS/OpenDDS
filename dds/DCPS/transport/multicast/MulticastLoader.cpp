@@ -38,7 +38,7 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   if (initialized) return 0;  // already initialized
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(TransportType_rch(new MulticastType, true));
+  registry->register_type(TransportType_rch(new MulticastType, keep_count()));
   TransportConfig_rch cfg =
     registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME);
 

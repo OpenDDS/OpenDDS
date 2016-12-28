@@ -92,7 +92,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::RTPS::RtpsDiscovery_rch disc (
-        new OpenDDS::RTPS::RtpsDiscovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS), true);
+        new OpenDDS::RTPS::RtpsDiscovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS), OpenDDS::DCPS::keep_count());
 
       // The recommended value for the resend period is 2 seconds for
       // the current implementation of OpenDDS.

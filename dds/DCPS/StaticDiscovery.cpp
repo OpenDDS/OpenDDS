@@ -681,7 +681,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
     return ads;
   }
 
-  const RcHandle<StaticParticipant> participant (new StaticParticipant(id, qos, registry), true);
+  const RcHandle<StaticParticipant> participant (new StaticParticipant(id, qos, registry), keep_count());
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
@@ -1818,7 +1818,7 @@ void StaticDiscovery::pre_reader(DataReaderImpl* reader)
   }
 }
 
-StaticDiscovery_rch StaticDiscovery::instance_(new StaticDiscovery(Discovery::DEFAULT_STATIC), true);
+StaticDiscovery_rch StaticDiscovery::instance_(new StaticDiscovery(Discovery::DEFAULT_STATIC), keep_count());
 
 }
 }

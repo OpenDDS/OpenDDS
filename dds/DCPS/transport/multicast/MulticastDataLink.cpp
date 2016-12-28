@@ -40,12 +40,12 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
     bool is_active)
 : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
   transport_(transport.in()),
-  session_factory_(session_factory, false),
+  session_factory_(session_factory, inc_count()),
   local_peer_(local_peer),
   config_(0),
   reactor_task_(0),
-  send_strategy_(new MulticastSendStrategy(this, transport->config()), true),
-  recv_strategy_(new MulticastReceiveStrategy(this), true),
+  send_strategy_(new MulticastSendStrategy(this, transport->config()), keep_count()),
+  recv_strategy_(new MulticastReceiveStrategy(this), keep_count()),
   send_buffer_(0)
 {
   MulticastInst* config = transport->config();
@@ -152,13 +152,13 @@ MulticastDataLink::find_session(MulticastPeer remote_peer)
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
       guard,
       this->session_lock_,
-      0);
+      MulticastSession_rch());
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
     return it->second;
   }
-  else return 0;
+  else return MulticastSession_rch();
 }
 
 MulticastSession_rch
@@ -167,7 +167,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
       guard,
       this->session_lock_,
-      0);
+      MulticastSession_rch());
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
@@ -183,7 +183,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
         ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
         (unsigned int) (remote_peer >> 32),
         (unsigned int) remote_peer),
-        0);
+        MulticastSession_rch());
   }
 
   std::pair<MulticastSessionMap::iterator, bool> pair = this->sessions_.insert(
@@ -195,7 +195,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
         ACE_TEXT("failed to insert session for remote peer: %#08x%08x!\n"),
         (unsigned int) (remote_peer >> 32),
         (unsigned int) remote_peer),
-        0);
+        MulticastSession_rch());
   }
   return session;
 }

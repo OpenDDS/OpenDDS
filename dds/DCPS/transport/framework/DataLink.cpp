@@ -144,7 +144,7 @@ DataLink::remove_on_start_callback(const TransportClient_rch& client, const Repo
 void
 DataLink::invoke_on_start_callbacks(bool success)
 {
-  const DataLink_rch link(success ? this : 0, false);
+  const DataLink_rch link(success ? this : 0, inc_count());
 
   while (true) {
     GuardType guard(strategy_lock_);
@@ -257,10 +257,10 @@ DataLink::stop()
     if (this->stopped_) return;
 
     send_strategy = this->send_strategy_;
-    this->send_strategy_ = 0;
+    this->send_strategy_.reset();
 
     recv_strategy = this->receive_strategy_;
-    this->receive_strategy_ = 0;
+    this->receive_strategy_.reset();
   }
 
   if (!send_strategy.is_nil()) {
@@ -314,7 +314,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_subscription_id];
 
     if (rls.is_nil())
-      rls.reset(new ReceiveListenerSet, true);
+      rls.reset(new ReceiveListenerSet, keep_count());
     rls->insert(local_publication_id, 0);
 
     if (send_listeners_.insert(std::make_pair(local_publication_id,
@@ -354,7 +354,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_publication_id];
 
     if (rls.is_nil())
-      rls.reset(new ReceiveListenerSet, true);
+      rls.reset(new ReceiveListenerSet, keep_count());
     rls->insert(local_subscription_id, receive_listener);
 
     if (recv_listeners_.insert(std::make_pair(local_subscription_id,
@@ -434,7 +434,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   if (ris.size() == 1) {
     DataLinkSet_rch& links = released_locals[local_id];
     if (links.is_nil())
-      links.reset(new DataLinkSet, true);
+      links.reset(new DataLinkSet, keep_count());
     links->insert_link(this->shared_from_this());
     {
       GuardType guard(this->released_assoc_by_local_lock_);
@@ -710,7 +710,7 @@ DataLink::transport_shutdown()
   this->stop();
 
   // Drop our reference to the TransportImpl object
-  this->impl_ = 0;
+  this->impl_.reset();
 }
 
 void

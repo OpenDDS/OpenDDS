@@ -47,7 +47,7 @@ OpenDDS::DCPS::TcpAcceptor::transport_shutdown()
   DBG_ENTRY_LVL("TcpAcceptor","transport_shutdown",6);
 
   // Drop the reference to the TcpTransport object.
-  this->transport_ = 0;
+  this->transport_.reset();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

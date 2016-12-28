@@ -70,13 +70,13 @@ namespace DCPS {
 //      cannot be false.
 
 // Implementation skeleton constructor
-DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
+DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
                                              const DDS::DomainId_t&             domain_id,
-                                             const RepoId&                        dp_id,
+                                             const RepoId&                      dp_id,
                                              const DDS::DomainParticipantQos &  qos,
                                              DDS::DomainParticipantListener_ptr a_listener,
                                              const DDS::StatusMask &            mask,
-                                             bool                                 federated)
+                                             bool                               federated)
   : factory_(factory),
     default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
@@ -851,7 +851,7 @@ DomainParticipantImpl::get_filter_eval(const char* filter)
 
   RcHandle<FilterEvaluator>& result = filter_cache_[filter];
   if (!result)
-    result.reset(new FilterEvaluator(filter, false), true);
+    result.reset(new FilterEvaluator(filter, false), keep_count());
 
   return result;
 }

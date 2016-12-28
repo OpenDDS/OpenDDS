@@ -1676,8 +1676,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       //done above - in the tests sub->delete_datareader(dr.in ());
       dp->delete_subscriber(sub.in ());
 
-      reader_transport_impl = 0;
-      writer_transport_impl = 0;
+      reader_transport_impl.reset();
+      writer_transport_impl.reset();
 
       // clean up common objects
       dp->delete_topic(topic.in ());

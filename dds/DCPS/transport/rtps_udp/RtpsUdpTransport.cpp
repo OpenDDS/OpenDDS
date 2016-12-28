@@ -48,7 +48,7 @@ RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   TransportReactorTask_rch rt (reactor_task());
-  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this->shared_from_this(), local_prefix, config(), rt.in()), true);
+  RtpsUdpDataLink_rch link(new RtpsUdpDataLink(this->shared_from_this(), local_prefix, config(), rt.in()), keep_count());
 
   if (!link->open(unicast_socket_)) {
     ACE_DEBUG((LM_ERROR,
@@ -306,7 +306,7 @@ RtpsUdpTransport::shutdown_i()
   if (!link_.is_nil()) {
     link_->transport_shutdown();
   }
-  link_ = 0;
+  link_.reset();
 }
 
 void

@@ -909,7 +909,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
       DataLinkSet_rch pub_links =
         (cur->get_num_subs() > 0)
         ? DataLinkSet_rch(links_.select_links(cur->get_sub_ids(), cur->get_num_subs()))
-        : DataLinkSet_rch(&links_, false);
+        : DataLinkSet_rch(&links_, inc_count());
 
       if (pub_links.is_nil() || pub_links->empty()) {
         // NOTE: This is the "local publisher id is not currently
@@ -957,7 +957,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
 
             if (ti.ptr() == 0 || ti->length() != n_subs) {
               if (!subset.in()) {
-                subset.reset(new DataLinkSet, true);
+                subset.reset(new DataLinkSet, keep_count());
               }
 
               subset->insert_link(itr->second);

@@ -437,8 +437,8 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   TransportSendElementAllocator alloc(2, sizeof(TransportSendElementAllocator));
   DataSampleElement elements[] = {
-    DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
-    DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
+    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch(), &alloc, 0),  // Data Sample
+    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch(), &alloc, 0),  // Data Sample (key=99 means end)
   };
   SendStateDataSampleList list;
   list.head_ = elements;

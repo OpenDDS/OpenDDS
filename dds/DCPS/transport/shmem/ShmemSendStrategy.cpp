@@ -19,10 +19,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link, ShmemInst* inst)
-  : TransportSendStrategy(0, TransportInst_rch(inst, false),
+  : TransportSendStrategy(0, TransportInst_rch(inst, inc_count()),
                           0,  // synch_resource
                           link->transport_priority(),
-                          ThreadSynchStrategy_rch(new NullSynchStrategy, true))
+                          ThreadSynchStrategy_rch(new NullSynchStrategy, keep_count()))
   , link_(link)
   , current_data_(0)
 {

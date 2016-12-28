@@ -185,7 +185,7 @@ void shutdown ()
   topic[0] = ::DDS::Topic::_nil ();
   topic[1] = ::DDS::Topic::_nil ();
   publisher = ::DDS::Publisher::_nil ();
-  writer_impl = 0;
+  writer_impl.reset();
   datawriter[0] = ::DDS::DataWriter::_nil ();
   datawriter[1] = ::DDS::DataWriter::_nil ();
 

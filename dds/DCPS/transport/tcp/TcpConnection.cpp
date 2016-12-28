@@ -134,7 +134,7 @@ OpenDDS::DCPS::TcpConnection::set_receive_strategy
   DBG_ENTRY_LVL("TcpConnection","set_receive_strategy",6);
 
   // Make a "copy" for ourselves
-  this->receive_strategy_ = TcpReceiveStrategy_rch(receive_strategy, false);
+  this->receive_strategy_ = TcpReceiveStrategy_rch(receive_strategy, inc_count());
 }
 
 void
@@ -144,7 +144,7 @@ OpenDDS::DCPS::TcpConnection::set_send_strategy
   DBG_ENTRY_LVL("TcpConnection","set_send_strategy",6);
 
   // Make a "copy" for ourselves
-  this->send_strategy_ = TcpSendStrategy_rch(send_strategy, false);
+  this->send_strategy_ = TcpSendStrategy_rch(send_strategy, inc_count());
 }
 
 int
@@ -156,7 +156,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open active.\n"), 2);
     // Take over the refcount from TcpTransport::connect_datalink().
-    const TcpConnection_rch self(this, true);
+    const TcpConnection_rch self(this, keep_count());
     const TcpTransport_rch transport = link_->get_transport_impl();
 
     const bool is_loop(local_address_ == remote_address_);
@@ -293,10 +293,10 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
               "remove_handler failed %m.\n"));
       }
 
-      const TcpConnection_rch self(this, false);
+      const TcpConnection_rch self(this, inc_count());
 
       transport_during_setup_->passive_connection(remote_address_, self);
-      transport_during_setup_ = 0;
+      transport_during_setup_.reset();
       connected_ = true;
 
       return 0;

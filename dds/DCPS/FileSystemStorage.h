@@ -125,14 +125,14 @@ private:
 
     Iterator& operator++() {
       ++delegate_;
-      item_ = 0;
+      item_.reset();
       return *this;
     }
 
     Iterator operator++(int) {
       Iterator tmp(*this);
       ++delegate_;
-      item_ = 0;
+      item_.reset();
       return tmp;
     }
 
@@ -149,13 +149,13 @@ private:
     typedef Map::iterator IterDelegate;
     Iterator(const IterDelegate& del, Directory* outer)
         : delegate_(del)
-        , outer_(outer, false)
+        , outer_(outer, OpenDDS::DCPS::inc_count())
         , item_() {}
 
     typename Item::Ptr deref() const {
       if (item_.is_nil()) {
         item_.reset( new Item(outer_->full_path(delegate_->second),
-                         delegate_->first, outer_.in()), true);
+                         delegate_->first, outer_.in()), OpenDDS::DCPS::keep_count());
       }
 
       return item_;

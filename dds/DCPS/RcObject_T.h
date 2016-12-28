@@ -81,7 +81,7 @@ struct EnableSharedFromThis
 {
   RcHandle<T> shared_from_this()
   {
-    return RcHandle<T>(static_cast<T*>(this), false);
+    return RcHandle<T>(static_cast<T*>(this), inc_count());
   }
 };
 

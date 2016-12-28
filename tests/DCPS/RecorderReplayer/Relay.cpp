@@ -194,7 +194,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
 
 
 
-      OpenDDS::DCPS::ReplayerListener_rch rpl_handle(replayer_listener, true);
+      OpenDDS::DCPS::ReplayerListener_rch rpl_handle(replayer_listener, OpenDDS::DCPS::keep_count());
 
 
       ACE_DEBUG((LM_DEBUG, "Creating replayer\n"));
@@ -228,7 +228,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
 
       MessengerRecorderListener* recorder_listener;
       ACE_NEW_NORETURN(recorder_listener, MessengerRecorderListener(replayer));
-      OpenDDS::DCPS::RecorderListener_rch rcl_handle(recorder_listener,true);
+      OpenDDS::DCPS::RecorderListener_rch rcl_handle(recorder_listener,OpenDDS::DCPS::keep_count());
 
       if (recorder_listener == 0) {
         ACE_ERROR_RETURN((LM_ERROR,

@@ -37,7 +37,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0) {
     // It wasn't found.  Create one and insert it.
-    listener_set.reset( new ReceiveListenerSet(), true );
+    listener_set.reset( new ReceiveListenerSet(), keep_count() );
 
     if (OpenDDS::DCPS::bind(map_, publisher_id, listener_set) != 0) {
       ACE_ERROR((LM_ERROR,

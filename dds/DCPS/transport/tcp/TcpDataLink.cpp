@@ -57,7 +57,7 @@ OpenDDS::DCPS::TcpDataLink::stop_i()
     this->connection_->disconnect();
 
     // Drop our reference to the connection object.
-    this->connection_ = 0;
+    this->connection_.reset();
   }
 }
 
@@ -116,7 +116,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
   }
 
   // Let connection know the datalink for callbacks upon reconnect failure.
-  this->connection_->set_datalink(TcpDataLink_rch(this, false));
+  this->connection_->set_datalink(TcpDataLink_rch(this, inc_count()));
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
@@ -126,7 +126,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
     // that an error has taken place.
 
     // Drop our reference to the connection object.
-    this->connection_ = 0;
+    this->connection_.reset();
 
     return -1;
   }
@@ -162,7 +162,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
     TransportSendStrategy_rch bss;
 
     if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
-      this->connection_ = 0;
+      this->connection_.reset();
       return -1;
     } else {
       brs = this->receive_strategy_;
@@ -218,7 +218,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
 
     if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
       released = true;
-      this->connection_ = 0;
+      this->connection_.reset();
 
     } else {
       brs = this->receive_strategy_;
@@ -226,10 +226,10 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
     }
   }
 
-  TcpConnection_rch conn_rch(connection, false);
+  TcpConnection_rch conn_rch(connection, inc_count());
 
   if (released) {
-    TcpDataLink_rch this_rch(this, false);
+    TcpDataLink_rch this_rch(this, inc_count());
     return this->transport_->connect_tcp_datalink(this_rch, conn_rch);
   }
 

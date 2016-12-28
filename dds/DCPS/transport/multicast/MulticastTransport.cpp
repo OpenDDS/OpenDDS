@@ -58,10 +58,10 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   MulticastInst* conf = this->config();
 
   if (conf->is_reliable()) {
-    session_factory.reset(new ReliableSessionFactory, true);
+    session_factory.reset(new ReliableSessionFactory, keep_count());
 
   } else {
-    session_factory.reset(new BestEffortSessionFactory, true);
+    session_factory.reset(new BestEffortSessionFactory, keep_count());
   }
 
   MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(local_id).federationId() << 32
@@ -75,7 +75,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   MulticastDataLink_rch link(new MulticastDataLink(this->shared_from_this(),
                                    session_factory.in(),
                                    local_peer,
-                                   active), true);
+                                   active), keep_count());
 
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask(reactor_task());
@@ -107,7 +107,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")
                       ACE_TEXT("link is nil\n"),
                       this->config()->name().c_str()),
-                     0);
+                     MulticastSession_rch());
   }
 
   MulticastSession_rch session(link->find_or_create_session(remote_peer));
@@ -120,7 +120,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                       this->config()->name().c_str(),
                       (unsigned int)(remote_peer >> 32),
                       (unsigned int) remote_peer),
-                     0);
+                     MulticastSession_rch());
   }
 
   const bool acked = this->connections_.count(std::make_pair(remote_peer, link->local_peer()));
@@ -133,7 +133,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                       this->config()->name().c_str(),
                       (unsigned int)(remote_peer >> 32),
                       (unsigned int) remote_peer),
-                     0);
+                     MulticastSession_rch());
   }
 
   return session;

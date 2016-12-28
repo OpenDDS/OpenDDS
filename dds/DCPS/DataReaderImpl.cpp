@@ -332,7 +332,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
-    RcHandle<WriterInfo> info (new WriterInfo(this, writer_id, writer.writerQos), true);
+    RcHandle<WriterInfo> info (new WriterInfo(this, writer_id, writer.writerQos), keep_count());
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -1677,7 +1677,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
 #endif
     }
-    instance = 0;
+    instance.reset();
     this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
@@ -1706,7 +1706,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif
       }
     }
-    instance = 0;
+    instance.reset();
     this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
@@ -2534,7 +2534,7 @@ DataReaderImpl::prepare_to_delete()
 SubscriptionInstance_rch
 DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, 0);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, SubscriptionInstance_rch());
 
   SubscriptionInstanceMapType::iterator iter = instances_.find(handle);
   if (iter == instances_.end()) {

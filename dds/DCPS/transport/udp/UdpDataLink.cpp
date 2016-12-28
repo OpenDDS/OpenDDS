@@ -37,8 +37,8 @@ UdpDataLink::UdpDataLink(const UdpTransport_rch& transport,
     active_(active),
     config_(0),
     reactor_task_(0),
-    send_strategy_(new UdpSendStrategy(this, transport->config()), true),
-    recv_strategy_(new UdpReceiveStrategy(this), true)
+    send_strategy_(new UdpSendStrategy(this, transport->config()), keep_count()),
+    recv_strategy_(new UdpReceiveStrategy(this), keep_count())
 {
 }
 

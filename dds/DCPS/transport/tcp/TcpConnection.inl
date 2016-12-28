@@ -27,7 +27,7 @@ OpenDDS::DCPS::TcpConnection::remove_receive_strategy()
 {
   DBG_ENTRY_LVL("TcpConnection","remove_receive_strategy",6);
 
-  this->receive_strategy_ = 0;
+  this->receive_strategy_.reset();
 }
 
 ACE_INLINE void
@@ -35,7 +35,7 @@ OpenDDS::DCPS::TcpConnection::remove_send_strategy()
 {
   DBG_ENTRY_LVL("TcpConnection","remove_send_strategy",6);
 
-  this->send_strategy_ = 0;
+  this->send_strategy_.reset();
 }
 
 ACE_INLINE bool

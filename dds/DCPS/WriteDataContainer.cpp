@@ -285,7 +285,7 @@ WriteDataContainer::register_instance(
     }
 
     // registered the instance for the first time.
-    instance.reset(new PublicationInstance(registered_sample), true);
+    instance.reset(new PublicationInstance(registered_sample), keep_count());
 
     instance_handle = this->writer_->get_next_handle();
 
@@ -1005,10 +1005,10 @@ WriteDataContainer::obtain_buffer_for_control(DataSampleElement*& element)
       sample_list_element_allocator_.malloc(
         sizeof(DataSampleElement))),
     DataSampleElement(publication_id_,
-                          this->writer_,
-                          0,
-                          &transport_send_element_allocator_,
-                          &transport_customized_element_allocator_),
+                      this->writer_,
+                      PublicationInstance_rch(),
+                      &transport_send_element_allocator_,
+                      &transport_customized_element_allocator_),
     DDS::RETCODE_ERROR);
 
   return DDS::RETCODE_OK;

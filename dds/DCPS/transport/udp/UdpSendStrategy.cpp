@@ -16,10 +16,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 UdpSendStrategy::UdpSendStrategy(UdpDataLink* link, TransportInst* inst)
-  : TransportSendStrategy(0, TransportInst_rch(inst, false),
+  : TransportSendStrategy(0, TransportInst_rch(inst, inc_count()),
                           0,  // synch_resource
                           link->transport_priority(),
-                          ThreadSynchStrategy_rch(new NullSynchStrategy, true)),
+                          ThreadSynchStrategy_rch(new NullSynchStrategy, keep_count())),
     link_(link)
 {
 }

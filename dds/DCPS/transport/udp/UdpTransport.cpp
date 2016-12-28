@@ -45,7 +45,7 @@ UdpDataLink_rch
 UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
                             Priority priority, bool active)
 {
-  UdpDataLink_rch link(new UdpDataLink(this->shared_from_this(), priority, active), true);
+  UdpDataLink_rch link(new UdpDataLink(this->shared_from_this(), priority, active), keep_count());
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask (reactor_task());
   link->configure(config(), rtask.in());
@@ -192,7 +192,7 @@ UdpTransport::shutdown_i()
   client_links_.clear();
 
   server_link_->transport_shutdown();
-  server_link_ = 0;
+  server_link_.reset();
 }
 
 bool

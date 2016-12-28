@@ -12,6 +12,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+  
+struct inc_count {};
+struct keep_count {};
 
 /// Templated Reference counted handle to a pointer.
 /// A non-DDS specific helper class.
@@ -22,17 +25,17 @@ public:
   RcHandle()
     : ptr_(0)
   {}
-
-  RcHandle(int) : ptr_(0)
-  {
-  }
-
-  explicit RcHandle(T* p, bool take_ownership)
+    
+  RcHandle(T* p, keep_count)
     : ptr_(p)
   {
-    if (!take_ownership) {
-      this->bump_up();
-    }
+  }
+  
+
+  RcHandle(T* p, inc_count)
+    : ptr_(p)
+  {
+    this->bump_up();
   }
 
   template <typename U>
@@ -59,9 +62,10 @@ public:
     swap(tmp);
   }
 
-  void reset(T* p, bool take_ownership)
+  template <typename U>
+  void reset(T* p, U counting_strategy)
   {
-    RcHandle tmp(p, take_ownership);
+    RcHandle tmp(p, counting_strategy);
     swap(tmp);
   }
 
@@ -177,19 +181,19 @@ void swap(RcHandle<T>& lhs, RcHandle<T>& rhs)
 template <typename T, typename U>
 RcHandle<T> static_rchandle_cast(const RcHandle<U>& h)
 {
-  return RcHandle<T>(static_cast<T*>(h.in()), false);
+  return RcHandle<T>(static_cast<T*>(h.in()), inc_count());
 }
 
 template <typename T, typename U>
 RcHandle<T> const_rchandle_cast(const RcHandle<U>& h)
 {
-  return RcHandle<T>(const_cast<T*>(h.in()), false);
+  return RcHandle<T>(const_cast<T*>(h.in()), inc_count());
 }
 
 template <typename T, typename U>
 RcHandle<T> dynamic_rchandle_cast(const RcHandle<U>& h)
 {
-  return RcHandle<T>(dynamic_cast<T*>(h.in()), false);
+  return RcHandle<T>(dynamic_cast<T*>(h.in()), inc_count());
 }
 
 } // namespace DCPS

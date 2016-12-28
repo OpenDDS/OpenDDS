@@ -559,7 +559,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
                      ACE_TEXT("data: %C\n"), ex.what()));
         }
 
-        dir = 0;
+        dir.reset();
       }
     }
 

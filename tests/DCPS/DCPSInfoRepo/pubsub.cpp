@@ -88,7 +88,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   OpenDDS::DCPS::RepoId pubPartId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId pubId = OpenDDS::DCPS::GUID_UNKNOWN;
-  OpenDDS::DCPS::RcHandle<TAO_DDS_DCPSDataWriter_i> dwImpl(new TAO_DDS_DCPSDataWriter_i, true);
+  OpenDDS::DCPS::RcHandle<TAO_DDS_DCPSDataWriter_i> dwImpl(new TAO_DDS_DCPSDataWriter_i, OpenDDS::DCPS::keep_count());
 
   TheServiceParticipant->get_domain_participant_factory();
 
@@ -387,7 +387,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::Discovery_rch disc;
 
       if (use_rtps) {
-        OpenDDS::RTPS::RtpsDiscovery_rch rtpsDisc(new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery"), true);
+        OpenDDS::RTPS::RtpsDiscovery_rch rtpsDisc(new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery"), OpenDDS::DCPS::keep_count());
         rtpsDisc->resend_period(ACE_Time_Value(1));
         rtpsDisc->sedp_multicast(false);
         disc = rtpsDisc;
@@ -397,7 +397,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         OpenDDS::DCPS::DCPSInfo_var info =
           OpenDDS::DCPS::DCPSInfo::_narrow (tmp.in ());
         OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::InfoRepoDiscovery> ird(
-          new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info), true);
+          new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info), OpenDDS::DCPS::keep_count());
         disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::Discovery>(ird);
         ird->set_ORB(orb);
       }
@@ -422,7 +422,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           return 1;
         }
 
-      disc = 0;
+      disc.reset();
       obj = 0;
       poa = 0;
       mgr = 0;

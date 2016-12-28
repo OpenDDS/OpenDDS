@@ -26,6 +26,9 @@
 typedef size_t String_Index_t;
 
 namespace {
+  
+using OpenDDS::DCPS::keep_count;
+using OpenDDS::DCPS::inc_count;
 
 const size_t FSS_MAX_FILE_NAME = 150, FSS_MAX_FILE_NAME_ENCODED = 240,
   FSS_MAX_OVERFLOW_DIR = 9999;
@@ -461,7 +464,7 @@ File::File(const ACE_TString& fname_phys, const ACE_TString& logical,
   : physical_file_()
   , physical_dir_()
   , logical_relative_(logical)
-  , parent_(parent, false)
+  , parent_(parent, inc_count())
 {
   String_Index_t last_slash = fname_phys.rfind(ACE_TEXT('/'));
 
@@ -516,7 +519,7 @@ OPENDDS_STRING File::name() const
 
 /*static*/ Directory::Ptr Directory::create(const char* dirname)
 {
-  return Directory::Ptr(new Directory(ACE_TEXT_CHAR_TO_TCHAR(dirname), ACE_TEXT(""), 0), true);
+  return Directory::Ptr(new Directory(ACE_TEXT_CHAR_TO_TCHAR(dirname), ACE_TEXT(""), 0), keep_count());
 }
 
 ACE_TString Directory::full_path(const ACE_TString& relative) const
@@ -547,7 +550,7 @@ File::Ptr Directory::get_file(const char* name)
     return make_new_file(t_name);
 
   } else {
-    return File::Ptr(new File(full_path(it->second), it->first, this), true);
+    return File::Ptr(new File(full_path(it->second), it->first, this), keep_count());
   }
 }
 
@@ -568,7 +571,7 @@ File::Ptr Directory::make_new_file(const ACE_TString& t_name)
   if (!fh) throw std::runtime_error("Can't create the file");
 
   std::fclose(fh);
-  return File::Ptr(new File(physical_dirname_ + phys, t_name, this), true);
+  return File::Ptr(new File(physical_dirname_ + phys, t_name, this), keep_count());
 }
 
 File::Ptr Directory::create_next_file()
@@ -602,7 +605,7 @@ Directory::DirectoryIterator Directory::end_dirs()
 
 Directory::Ptr Directory::get_dir(const OPENDDS_VECTOR(OPENDDS_STRING)& path)
 {
-  Directory::Ptr dir(this, false);
+  Directory::Ptr dir(this, inc_count());
   typedef OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator iterator;
 
   for (iterator iter = path.begin(), end = path.end(); iter != end; ++iter) {
@@ -621,7 +624,7 @@ Directory::Ptr Directory::get_subdir(const char* name)
     return make_new_subdir(t_name);
 
   } else {
-    return Directory::Ptr(new Directory(full_path(it->second), it->first, this), true);
+    return Directory::Ptr(new Directory(full_path(it->second), it->first, this), keep_count());
   }
 }
 
@@ -687,7 +690,7 @@ Directory::Ptr Directory::make_new_subdir(const ACE_TString& t_name)
     std::ofstream fn("_fullname");
     fn << t_name << '\n';
   }
-  return Directory::Ptr(new Directory(physical_dirname_ + phys, t_name, this), true);
+  return Directory::Ptr(new Directory(physical_dirname_ + phys, t_name, this), keep_count());
 }
 
 ACE_TString Directory::add_entry()
@@ -743,7 +746,7 @@ void Directory::remove()
 {
   if (!parent_.is_nil()) parent_->removing(logical_dirname_, false);
 
-  parent_ = 0;
+  parent_.reset();
   recursive_remove(physical_dirname_);
   overflow_.clear();
   files_.clear();
@@ -758,7 +761,7 @@ OPENDDS_STRING Directory::name() const
 
 Directory::Directory(const ACE_TString& dirname, const ACE_TString& logical,
                      Directory* parent)
-  : parent_(parent, false)
+  : parent_(parent, inc_count())
   , physical_dirname_(dirname)
   , logical_dirname_(logical)
 {

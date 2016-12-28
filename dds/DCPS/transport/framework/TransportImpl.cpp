@@ -93,12 +93,12 @@ TransportImpl::shutdown()
 
   {
     GuardType guard(this->lock_);
-    this->reactor_task_ = 0;
+    this->reactor_task_.reset();
     // The shutdown_i() path may access the configuration so remove configuration
     // reference after shutdown is performed.
 
     // Drop our references to the config_.
-    this->config_ = 0;
+    this->config_.reset();
   }
 }
 
@@ -168,7 +168,7 @@ TransportImpl::configure(const TransportInst_rch& config)
 void
 TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink* link)
 {
-  pending_connections_.insert( PendConnMap::value_type(client, DataLink_rch(link, false)));
+  pending_connections_.insert( PendConnMap::value_type(client, DataLink_rch(link, inc_count())));
 }
 
 void
@@ -178,7 +178,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend)
     return;
   }
 
-  this->reactor_task_.reset( new TransportReactorTask(useAsyncSend) , true);
+  this->reactor_task_.reset( new TransportReactorTask(useAsyncSend) , keep_count());
   if (0 != this->reactor_task_->open(0)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }
@@ -216,7 +216,7 @@ TransportImpl::release_link_resources(DataLink* link)
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
   // Create a smart pointer without ownership (bumps up ref count)
-  DataLink_rch dl(link, false);
+  DataLink_rch dl(link, inc_count());
 
   dl_clean_task_.add(dl);
 

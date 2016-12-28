@@ -31,7 +31,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
                           synch_resource, priority,
                           RcHandle<ReactorSynchStrategy>(new ReactorSynchStrategy(
                                 this,
-                                task->get_reactor()), true))
+                                task->get_reactor()), keep_count()))
   , connection_(connection)
   , link_(link)
   , reactor_task_(task)
@@ -95,8 +95,7 @@ OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection, bool reset_mode
   this->connection_->remove_send_strategy();
 
   // Replace with a new connection.
-  connection->_add_ref();
-  this->connection_ .reset( connection , true);
+  this->connection_ .reset( connection , inc_count());
 
   // Tell the TcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
@@ -168,7 +167,7 @@ OpenDDS::DCPS::TcpSendStrategy::stop_i()
   this->connection_->remove_send_strategy();
 
   // Take back the "copy" of connection object given. (see constructor).
-  this->connection_ = 0;
+  this->connection_.reset();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -28,10 +28,10 @@ namespace DCPS {
 RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
                                          TransportInst* inst,
                                          const GuidPrefix_t& local_prefix)
-  : TransportSendStrategy(0, TransportInst_rch(inst, false),
+  : TransportSendStrategy(0, TransportInst_rch(inst, inc_count()),
                           0,  // synch_resource
                           link->transport_priority(),
-                          ThreadSynchStrategy_rch(new NullSynchStrategy, true)),
+                          ThreadSynchStrategy_rch(new NullSynchStrategy, keep_count())),
     link_(link),
     override_dest_(0),
     override_single_dest_(0),

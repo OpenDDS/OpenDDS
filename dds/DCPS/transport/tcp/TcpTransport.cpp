@@ -102,7 +102,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     }
 
     link.reset(new TcpDataLink(key.address(), this->shared_from_this(), attribs.priority_,
-                           key.is_loopback(), true /*active*/), true);
+                           key.is_loopback(), true /*active*/), keep_count());
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
@@ -113,7 +113,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   }
 
   TcpConnection_rch connection(
-    new TcpConnection(key.address(), link->transport_priority(), config()->shared_from_this() ), true);
+    new TcpConnection(key.address(), link->transport_priority(), config()->shared_from_this() ), keep_count());
   connection->set_datalink(link);
 
   TcpConnection* pConn = connection.in();
@@ -211,7 +211,7 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
               ACE_TEXT("link[%@] found, add to pending connections.\n"), link.in()), 0);
     add_pending_connection(client, link.in());
-    link = 0; // don't return link to TransportClient
+    link.reset(); // don't return link to TransportClient
     return true;
 
   } else if (pending_release_links_.find(key, link) == 0 /*OK*/) {
@@ -230,7 +230,7 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
       VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
                 ACE_TEXT("found link[%@] in pending release list but was unable to cancel release.\n"), link.in()), 0);
     }
-    link = 0; // don't return link to TransportClient
+    link.reset(); // don't return link to TransportClient
     return false;
   }
 
@@ -270,7 +270,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 
     } else {
       link.reset( new TcpDataLink(key.address(), this->shared_from_this(), key.priority(),
-                             key.is_loopback(), key.is_active()), true);
+                             key.is_loopback(), key.is_active()), keep_count());
 
       if (links_.bind(key, link) != 0 /*OK*/) {
         ACE_ERROR((LM_ERROR,
@@ -311,7 +311,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   if (connect_tcp_datalink(link, connection) == -1) {
     GuardType guard(links_lock_);
     links_.unbind(key);
-    link = 0;
+    link.reset();
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
@@ -703,10 +703,10 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
     new TcpSendStrategy(last_link_, link, this->config()->shared_from_this(), connection,
                         new TcpSynchResource(connection,
                                              this->config()->max_output_pause_period_),
-                        this->reactor_task(), link->transport_priority()), true);
+                        this->reactor_task(), link->transport_priority()), keep_count());
 
   TransportStrategy_rch receive_strategy(
-    new TcpReceiveStrategy(link, connection, this->reactor_task()), true);
+    new TcpReceiveStrategy(link, connection, this->reactor_task()), keep_count());
 
   if (link->connect(connection, send_strategy, receive_strategy) != 0) {
     return -1;

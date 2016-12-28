@@ -16,10 +16,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link, TransportInst* inst)
-  : TransportSendStrategy(0, TransportInst_rch(inst, false),
+  : TransportSendStrategy(0, TransportInst_rch(inst, inc_count()),
                           0,  // synch_resource
                           link->transport_priority(),
-                          ThreadSynchStrategy_rch(new NullSynchStrategy, true)),
+                          ThreadSynchStrategy_rch(new NullSynchStrategy, keep_count())),
     link_(link)
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   , async_init_(false)

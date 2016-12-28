@@ -38,7 +38,7 @@ UdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   if (initialized) return 0;  // already initialized
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(TransportType_rch(new UdpType, true));
+  registry->register_type(TransportType_rch(new UdpType, keep_count()));
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           std::string("0300_UDP"), UDP_NAME);

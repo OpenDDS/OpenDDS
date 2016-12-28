@@ -1150,7 +1150,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
                      domain));
         }
 
-        return 0;
+        return Discovery_rch();
 
       } else {
         // Found the default!
@@ -1173,7 +1173,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
                    domain));
       }
 
-      return 0;
+      return Discovery_rch();
     }
   }
 

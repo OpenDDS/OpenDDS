@@ -889,7 +889,7 @@ namespace OpenDDS {
     }
 
     if (handle == DDS::HANDLE_NIL) {
-      instance = 0;
+      instance.reset();
     } else {
       instance = get_handle_instance(handle);
     }
@@ -1561,7 +1561,7 @@ void store_instance_data(
          new OpenDDS::DCPS::SubscriptionInstance(this,
                                                  this->qos_,
                                                  this->instances_lock_,
-                                                 handle), true);
+                                                 handle), keep_count());
 
       instance->instance_handle_ = handle;
 

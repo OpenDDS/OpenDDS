@@ -151,8 +151,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::reset(TcpConnection* connection)
   this->connection_->remove_receive_strategy();
 
   // Replace with a new connection.
-  connection->_add_ref();
-  this->connection_.reset(connection, true);
+  this->connection_.reset(connection, inc_count());
 
   // Tell the TcpConnection that we are the object that it should
   // call when it receives a handle_input() "event", and we will carry
@@ -194,7 +193,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::stop_i()
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();
 
-  this->connection_ = 0;
+  this->connection_.reset();
 }
 
 void
