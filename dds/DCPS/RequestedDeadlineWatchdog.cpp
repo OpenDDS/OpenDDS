@@ -42,7 +42,9 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer(
   OpenDDS::DCPS::SubscriptionInstance_rch instance)
 {
   if (instance->deadline_timer_id_ == -1) {
-    instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(instance->instance_handle_), this->interval_);
+    intptr_t handle = instance->instance_handle_;
+    ACE_DEBUG((LM_DEBUG, "*** OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer() handle=%Q\n", handle));
+    instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(handle), this->interval_);
   }
   if (instance->deadline_timer_id_ == -1) {
     ACE_ERROR((LM_ERROR,
@@ -58,7 +60,6 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
   OpenDDS::DCPS::SubscriptionInstance_rch instance)
 {
   if (instance->deadline_timer_id_ != -1) {
-    Watchdog::cancel_timer(instance->deadline_timer_id_);
     instance->deadline_timer_id_ = -1;
     if (DCPS_debug_level > 5) {
       ACE_DEBUG((LM_INFO, "Timer for instance %X cancelled \n", instance.in()));
@@ -67,11 +68,11 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
 }
 
 int
-OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, void* act)
+OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
 {
-  DDS::InstanceHandle_t handle = *reinterpret_cast<intptr_t*>(act);
+  DDS::InstanceHandle_t handle = reinterpret_cast<intptr_t>(act);
   SubscriptionInstance_rch instance = this->reader_impl_->get_handle_instance(handle);
-  if (instance)
+  if (instance) 
     execute(instance, true);
   return 0;
 }

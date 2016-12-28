@@ -39,7 +39,8 @@ void
 OpenDDS::DCPS::OfferedDeadlineWatchdog::schedule_timer(OpenDDS::DCPS::PublicationInstance_rch instance)
 {
   if (instance->deadline_timer_id_ == -1) {
-    instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(instance->instance_handle_), this->interval_);
+		intptr_t handle = instance->instance_handle_;
+    instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(handle), this->interval_);
   }
 }
 
@@ -53,9 +54,9 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::cancel_timer(OpenDDS::DCPS::PublicationI
 }
 
 int
-OpenDDS::DCPS::OfferedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, void* act)
+OpenDDS::DCPS::OfferedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
 {
-  DDS::InstanceHandle_t handle =  *reinterpret_cast<intptr_t*>(act);
+  DDS::InstanceHandle_t handle = reinterpret_cast<intptr_t>(act);
   OpenDDS::DCPS::PublicationInstance_rch instance =
     writer_impl_->get_handle_instance(handle);
   if (instance)

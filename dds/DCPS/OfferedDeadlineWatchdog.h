@@ -55,7 +55,7 @@ public:
   virtual ~OfferedDeadlineWatchdog();
 
 
-  virtual int handle_timeout(const ACE_Time_Value&, void* act);
+  virtual int handle_timeout(const ACE_Time_Value&, const void* act);
 
 
   /// Operation to be executed when the associated timer expires.

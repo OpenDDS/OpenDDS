@@ -60,7 +60,7 @@ public:
   // Cancel timer for the supplied instance.
   void cancel_timer(OpenDDS::DCPS::SubscriptionInstance_rch instance);
 
-  virtual int handle_timeout(const ACE_Time_Value&, void* act);
+  virtual int handle_timeout(const ACE_Time_Value&, const void* act);
 
   /// Operation to be executed when the associated timer expires.
   /**
