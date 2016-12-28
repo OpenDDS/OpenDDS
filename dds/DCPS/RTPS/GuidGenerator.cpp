@@ -31,6 +31,10 @@
 # include <Iphlpapi.h>
 #endif
 
+#ifdef ACE_VXWORKS
+# include "ace/os_include/sys/os_sysctl.h"
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -102,9 +106,6 @@ GuidGenerator::interfaceName(const char* iface)
 
   alloc->free(addrs);
   return found ? 0 : -1;
-#elif defined sun
-  //TODO: Solaris
-  return -1;
 #elif defined ACE_LINUX
   ifreq ifr;
   std::strncpy(ifr.ifr_name, iface, IFNAMSIZ);
@@ -151,6 +152,48 @@ GuidGenerator::interfaceName(const char* iface)
 
   ACE_OS::close(h);
   return found ? 0 : -1;
+#elif defined ACE_VXWORKS
+  int name[] = {CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST, 0};
+  static const size_t name_elts = sizeof name / sizeof name[0];
+
+  size_t result_sz = 0u;
+  if (sysctl(name, name_elts, 0, &result_sz, 0, 0u) != 0) {
+    return -1;
+  }
+
+  ACE_Allocator* const alloc = DCPS::SafetyProfilePool::instance();
+  char* const result = static_cast<char*>(alloc->malloc(result_sz));
+
+  if (sysctl(name, name_elts, result, &result_sz, 0, 0u) != 0) {
+    alloc->free(result);
+    return -1;
+  }
+
+  for (size_t pos = 0, n; pos + sizeof(if_msghdr) < result_sz; pos += n) {
+    if_msghdr* const hdr = reinterpret_cast<if_msghdr*>(result + pos);
+    n = hdr->ifm_msglen;
+    sockaddr_dl* const addr =
+      reinterpret_cast<sockaddr_dl*>(result + pos + sizeof(if_msghdr));
+
+    if (hdr->ifm_type == RTM_IFINFO && (hdr->ifm_addrs & RTA_IFP)
+        && std::memcmp(addr->sdl_data, iface, addr->sdl_nlen) == 0
+        && addr->sdl_alen >= sizeof node_id_) {
+      std::memcpy(node_id_, LLADDR(addr), sizeof node_id_);
+      alloc->free(result);
+      return 0;
+    }
+
+    while (pos + n < result_sz) {
+      if_msghdr* const nxt = reinterpret_cast<if_msghdr*>(result + pos + n);
+      if (nxt->ifm_type != RTM_NEWADDR) {
+        break;
+      }
+      n += nxt->ifm_msglen;
+    }
+  }
+
+  alloc->free(result);
+  return -1;
 #else
   return -1;
 #endif
