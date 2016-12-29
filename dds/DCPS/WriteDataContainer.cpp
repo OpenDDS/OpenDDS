@@ -1247,11 +1247,10 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
   PublicationInstance_rch instance;
 
   if (0 != find(instances_, handle, instance)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) ")
                ACE_TEXT("WriteDataContainer::get_handle_instance, ")
-               ACE_TEXT("lookup for %d failed\n"),
-               handle));
+               ACE_TEXT("lookup for %d failed\n")));
   }
 
   return instance;
