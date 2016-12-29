@@ -111,7 +111,7 @@ GuidGenerator::interfaceName(const char* iface)
 
   alloc->free(addrs);
   return found ? 0 : -1;
-#elif defined ACE_LINUX
+#elif defined ACE_LINUX || defined __ANDROID_API__
   ifreq ifr;
   std::strncpy(ifr.ifr_name, iface, IFNAMSIZ);
   const ACE_HANDLE h = ACE_OS::socket(PF_INET, SOCK_DGRAM, 0);
