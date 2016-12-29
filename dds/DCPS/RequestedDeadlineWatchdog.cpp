@@ -43,7 +43,6 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer(
 {
   if (instance->deadline_timer_id_ == -1) {
     intptr_t handle = instance->instance_handle_;
-    ACE_DEBUG((LM_DEBUG, "*** OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer() handle=%Q\n", handle));
     instance->deadline_timer_id_ = Watchdog::schedule_timer(reinterpret_cast<const void*>(handle), this->interval_);
   }
   if (instance->deadline_timer_id_ == -1) {

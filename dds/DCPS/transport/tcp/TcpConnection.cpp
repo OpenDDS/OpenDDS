@@ -83,6 +83,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , passive_setup_(false)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
+  this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
   // Open the reconnect task
   if (this->reconnect_task_.open()) {
