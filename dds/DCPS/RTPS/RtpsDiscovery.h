@@ -125,6 +125,10 @@ public:
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
 
+  OPENDDS_STRING guid_interface() const { return guid_interface_; }
+  void guid_interface(const OPENDDS_STRING& gi) {
+    guid_interface_ = gi;
+  }
 private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -132,6 +136,7 @@ private:
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_, sedp_local_address_, spdp_local_address_;
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
+  OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
 
   /// Guids will be unique within this RTPS configuration
