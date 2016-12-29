@@ -512,7 +512,7 @@ sub process {
     $self->_info("TestFramework::process appending "
       . "\"-DCPSConfigFile <transport>.ini\" to process's parameters. Set "
       . "<TestFramework>->{add_transport_config} = 0 to prevent this.\n");
-    my $ini_file = $self->_ini_file();
+    my $ini_file = $self->_ini_file($name);
     $params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
   }
 
@@ -767,6 +767,7 @@ sub _alternate_transport {
 
 sub _ini_file {
   my $self = shift;
+  my $name = shift;
   if ($self->{transport} eq "") {
     print STDERR "ERROR: TestFramework::_ini_file should not be called if no "
       . "transport has been identified.\n";
@@ -778,6 +779,9 @@ sub _ini_file {
     my $alternate = _alternate_transport($transport);
     if ($alternate ne "" && -e "$alternate.ini") {
       $transport = $alternate;
+    } elsif (-e "${name}_${transport}.ini") {
+
+      $transport = $name . '_' . $transport;
     } else {
       my $transports = "$transport.ini";
       if ($alternate ne "") {
