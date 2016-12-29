@@ -5,7 +5,6 @@
 #include "MessengerTypeSupportC.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
-#include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
 using namespace std;
@@ -94,7 +93,7 @@ Writer::svc ()
         break;
       case 3:
         message.e = other1;
-        message.u.u_f (3.14);
+        message.u.u_f (3.14f);
         break;
       }
 

@@ -18,7 +18,6 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include <ace/streams.h>
-#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 using namespace Messenger;
