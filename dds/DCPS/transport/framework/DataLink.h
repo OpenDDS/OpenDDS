@@ -257,6 +257,9 @@ public:
   void set_scheduling_release(bool scheduling_release);
 
   virtual void send_final_acks (const RepoId& readerid);
+  
+  virtual ACE_Event_Handler::Reference_Count add_reference();
+  virtual ACE_Event_Handler::Reference_Count remove_reference();
 
 protected:
 
