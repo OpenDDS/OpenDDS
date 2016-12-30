@@ -62,8 +62,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
              false),    // is_active
     config_(config),
     reactor_task_(reactor_task, inc_count()),
-    send_strategy_(new RtpsUdpSendStrategy(this, config, local_prefix), keep_count()),
-    recv_strategy_(new RtpsUdpReceiveStrategy(this, local_prefix), keep_count()),
+    send_strategy_(make_rch<RtpsUdpSendStrategy>(this, config, local_prefix)),
+    recv_strategy_(make_rch<RtpsUdpReceiveStrategy>(this, local_prefix)),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
     best_effort_heartbeat_count_(0),
@@ -71,8 +71,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config->heartbeat_response_delay_),
-  heartbeat_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats), keep_count()),
-  heartbeatchecker_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats), keep_count())
+  heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
+  heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
@@ -575,7 +575,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   RcHandle<SingleSendBuffer>& send_buff = wi->second.send_buff_;
 
   if (send_buff.is_nil()) {
-    send_buff.reset( new SingleSendBuffer(SingleSendBuffer::UNLIMITED, 1 /*mspp*/) , keep_count());
+    send_buff = make_rch<SingleSendBuffer>(SingleSendBuffer::UNLIMITED, 1 /*mspp*/);
 
     send_buff->bind(outer_->send_strategy_.in());
   }

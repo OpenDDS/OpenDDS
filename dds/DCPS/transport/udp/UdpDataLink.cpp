@@ -29,7 +29,7 @@ namespace DCPS {
 
 UdpDataLink::UdpDataLink(const UdpTransport_rch& transport,
                          Priority   priority,
-                         bool          active)
+                         bool       active)
   : DataLink(transport,
              priority,
              false, // is_loopback,
@@ -37,8 +37,8 @@ UdpDataLink::UdpDataLink(const UdpTransport_rch& transport,
     active_(active),
     config_(0),
     reactor_task_(0),
-    send_strategy_(new UdpSendStrategy(this, transport->config()), keep_count()),
-    recv_strategy_(new UdpReceiveStrategy(this), keep_count())
+    send_strategy_(make_rch<UdpSendStrategy>(this, transport->config())),
+    recv_strategy_(make_rch<UdpReceiveStrategy>(this))
 {
 }
 

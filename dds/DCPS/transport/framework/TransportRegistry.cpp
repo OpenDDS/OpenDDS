@@ -59,7 +59,7 @@ const char TransportRegistry::DEFAULT_CONFIG_NAME[] = "_OPENDDS_DEFAULT_CONFIG";
 const char TransportRegistry::DEFAULT_INST_PREFIX[] = "_OPENDDS_";
 
 TransportRegistry::TransportRegistry()
-  : global_config_(new TransportConfig(DEFAULT_CONFIG_NAME), keep_count())
+  : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
@@ -364,7 +364,7 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
                name.c_str()));
     return TransportInst_rch();
   }
-  TransportInst_rch inst (type->new_inst(name), keep_count());
+  TransportInst_rch inst (type->new_inst(name));
   inst_map_[name] = inst;
   return inst;
 }
@@ -395,7 +395,7 @@ TransportRegistry::create_config(const OPENDDS_STRING& name)
     return TransportConfig_rch();
   }
 
-  TransportConfig_rch inst ( new TransportConfig(name) , keep_count());
+  TransportConfig_rch inst  (make_rch<TransportConfig>(name));
   config_map_[name] = inst;
   return inst;
 }

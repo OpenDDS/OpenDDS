@@ -25,7 +25,7 @@ ReliableSessionFactory::create(ACE_Reactor* reactor,
                                MulticastDataLink* link,
                                MulticastPeer remote_peer)
 {
-  return MulticastSession_rch(new ReliableSession(reactor, owner, link, remote_peer), keep_count());
+  return make_rch<ReliableSession>(reactor, owner, link, remote_peer);
 }
 
 } // namespace DCPS

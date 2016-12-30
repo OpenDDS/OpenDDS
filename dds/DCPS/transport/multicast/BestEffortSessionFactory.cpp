@@ -25,7 +25,7 @@ BestEffortSessionFactory::create(ACE_Reactor* reactor,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
 {
-  return MulticastSession_rch(new BestEffortSession(reactor, owner, link, remote_peer), keep_count());
+  return make_rch<BestEffortSession>(reactor, owner, link, remote_peer);
 }
 
 } // namespace DCPS

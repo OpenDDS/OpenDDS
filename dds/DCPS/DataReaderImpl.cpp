@@ -68,12 +68,12 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
-    end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this), keep_count()),
-    remove_association_sweeper_(new RemoveAssociationSweeper<DataReaderImpl>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this),keep_count()),
+    end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
-    liveliness_timer_(new LivelinessTimer(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this), keep_count()),
+    liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -332,7 +332,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
-    RcHandle<WriterInfo> info (new WriterInfo(this, writer_id, writer.writerQos), keep_count());
+    RcHandle<WriterInfo> info = make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -976,14 +976,13 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
         || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
       if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
           && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-        this->watchdog_.reset(
-            new RequestedDeadlineWatchdog(
-                this->sample_lock_,
+        this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
+                ref(this->sample_lock_),
                 qos.deadline,
                 this,
                 this->dr_local_objref_.in(),
-                this->requested_deadline_missed_status_,
-                this->last_deadline_missed_total_count_), keep_count());
+                ref(this->requested_deadline_missed_status_),
+                ref(this->last_deadline_missed_total_count_));
 
       } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
           && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
@@ -1288,14 +1287,13 @@ DataReaderImpl::enable()
   if (!this->watchdog_
       && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
           || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
-    this->watchdog_.reset(
-        new RequestedDeadlineWatchdog(
-            this->sample_lock_,
+    this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
+            ref(this->sample_lock_),
             this->qos_.deadline,
             this,
             this->dr_local_objref_.in(),
-            this->requested_deadline_missed_status_,
-            this->last_deadline_missed_total_count_), keep_count());
+            ref(this->requested_deadline_missed_status_),
+            ref(this->last_deadline_missed_total_count_));
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);

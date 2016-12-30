@@ -119,11 +119,13 @@ public:
 
 private:
   friend class MulticastType;
+  template <typename T, typename U>
+  friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit MulticastInst(const std::string& name);
 
   void default_group_address(ACE_INET_Addr& group_address);
 
-  MulticastTransport* new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl(const TransportInst_rch& inst);
 };
 
 } // namespace DCPS

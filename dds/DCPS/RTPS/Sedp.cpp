@@ -164,7 +164,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
-using DCPS::keep_count;
+using DCPS::make_rch;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
@@ -180,15 +180,12 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , participant_message_writer_(make_id(participant_id,
                                         ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER),
                         *this)
-  , publications_reader_(new Reader(make_id(participant_id,
-                                            ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
-                                    *this), keep_count())
-  , subscriptions_reader_(new Reader(make_id(participant_id,
-                                             ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
-                                     *this), keep_count())
-  , participant_message_reader_(new Reader(make_id(participant_id,
-                                                   ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
-                                           *this), keep_count())
+  , publications_reader_(make_rch<Reader>(make_id(participant_id,ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
+                                         ref(*this)))
+  , subscriptions_reader_(make_rch<Reader>(make_id(participant_id,ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
+                                          ref(*this)))
+  , participant_message_reader_(make_rch<Reader>(make_id(participant_id,ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
+                                                ref(*this)))
   , task_(this)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())

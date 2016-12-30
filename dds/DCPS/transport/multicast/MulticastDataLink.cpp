@@ -43,8 +43,8 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
   local_peer_(local_peer),
   config_(0),
   reactor_task_(0),
-  send_strategy_(new MulticastSendStrategy(this, transport->config()), keep_count()),
-  recv_strategy_(new MulticastReceiveStrategy(this), keep_count()),
+  send_strategy_(make_rch<MulticastSendStrategy>(this, transport->config())),
+  recv_strategy_(make_rch<MulticastReceiveStrategy>(this)),
   send_buffer_(0)
 {
   MulticastInst* config = transport->config();

@@ -90,7 +90,7 @@ MulticastSession::MulticastSession(ACE_Reactor* reactor,
   , started_(false)
   , active_(true)
   , acked_(false)
-  , syn_watchdog_(new SynWatchdog (reactor, owner, this), keep_count())
+  , syn_watchdog_(make_rch<SynWatchdog> (reactor, owner, this))
 {
 }
 

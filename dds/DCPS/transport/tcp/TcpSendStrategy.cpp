@@ -29,9 +29,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   Priority priority)
   : TransportSendStrategy(id, static_rchandle_cast<TransportInst>(config),
                           synch_resource, priority,
-                          RcHandle<ReactorSynchStrategy>(new ReactorSynchStrategy(
-                                this,
-                                task->get_reactor()), keep_count()))
+                          make_rch<ReactorSynchStrategy>(this,task->get_reactor()))
   , connection_(connection)
   , link_(link)
   , reactor_task_(task)

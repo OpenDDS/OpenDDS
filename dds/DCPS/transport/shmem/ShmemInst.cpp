@@ -33,10 +33,10 @@ ShmemInst::ShmemInst(const std::string& name)
 
 }
 
-ShmemTransport*
+TransportImpl_rch
 ShmemInst::new_impl(const TransportInst_rch& inst)
 {
-  return new ShmemTransport(inst);
+  return make_rch<ShmemTransport>(inst);
 }
 
 int

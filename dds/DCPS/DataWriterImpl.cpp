@@ -931,14 +931,13 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
           || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
         if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
             && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-          this->watchdog_.reset(
-                             new OfferedDeadlineWatchdog(
-                               this->lock_,
+          this->watchdog_= make_rch<OfferedDeadlineWatchdog>(
+                               ref(this->lock_),
                                qos.deadline,
                                this,
                                this->dw_local_objref_.in(),
-                               this->offered_deadline_missed_status_,
-                               this->last_deadline_missed_total_count_), keep_count());
+                               ref(this->offered_deadline_missed_status_),
+                               ref(this->last_deadline_missed_total_count_));
 
         } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
                    && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
@@ -1360,13 +1359,13 @@ DataWriterImpl::enable()
 
   if (deadline_period.sec != DDS::DURATION_INFINITE_SEC
       || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    this->watchdog_.reset( new OfferedDeadlineWatchdog(
-                           this->lock_,
+    this->watchdog_ = make_rch<OfferedDeadlineWatchdog>(
+                           ref(this->lock_),
                            this->qos_.deadline,
                            this,
                            this->dw_local_objref_.in(),
-                           this->offered_deadline_missed_status_,
-                           this->last_deadline_missed_total_count_), keep_count());
+                           ref(this->offered_deadline_missed_status_),
+                           ref(this->last_deadline_missed_total_count_));
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);

@@ -58,10 +58,10 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   MulticastInst* conf = this->config();
 
   if (conf->is_reliable()) {
-    session_factory.reset(new ReliableSessionFactory, keep_count());
+    session_factory = make_rch<ReliableSessionFactory>();
 
   } else {
-    session_factory.reset(new BestEffortSessionFactory, keep_count());
+    session_factory = make_rch<BestEffortSessionFactory>();
   }
 
   MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(local_id).federationId() << 32
@@ -72,10 +72,10 @@ MulticastTransport::make_datalink(const RepoId& local_id,
             conf->name().c_str(), (unsigned int)(local_peer >> 32), (unsigned int)local_peer,
             priority, active), 2);
 
-  MulticastDataLink_rch link(new MulticastDataLink(this->shared_from_this(),
+  MulticastDataLink_rch link(make_rch<MulticastDataLink>(this->shared_from_this(),
                                    session_factory.in(),
                                    local_peer,
-                                   active), keep_count());
+                                   active));
 
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask(reactor_task());
@@ -85,7 +85,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
   if (!link->join(conf->group_address_)) {
     ACE_TCHAR str[64];
     conf->group_address_.addr_to_string(str,
-                                                   sizeof(str)/sizeof(str[0]));
+                                        sizeof(str)/sizeof(str[0]));
     ACE_DEBUG((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: ")
                     ACE_TEXT("MulticastTransport::make_datalink: ")

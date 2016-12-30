@@ -1557,11 +1557,12 @@ void store_instance_data(
       just_registered = true;
       DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(instance_data);
       handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
-      OpenDDS::DCPS::SubscriptionInstance_rch instance(
-         new OpenDDS::DCPS::SubscriptionInstance(this,
-                                                 this->qos_,
-                                                 this->instances_lock_,
-                                                 handle), keep_count());
+      OpenDDS::DCPS::SubscriptionInstance_rch instance =
+        OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
+          this,
+          this->qos_,
+          ref(this->instances_lock_),
+          handle);
 
       instance->instance_handle_ = handle;
 

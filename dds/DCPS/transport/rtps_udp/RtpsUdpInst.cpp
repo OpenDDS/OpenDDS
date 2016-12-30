@@ -37,10 +37,10 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
 {
 }
 
-TransportImpl*
+TransportImpl_rch
 RtpsUdpInst::new_impl(const TransportInst_rch& inst)
 {
-  return new RtpsUdpTransport(inst);
+  return make_rch<RtpsUdpTransport>(inst);
 }
 
 int

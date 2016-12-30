@@ -154,8 +154,8 @@ private:
 
     typename Item::Ptr deref() const {
       if (item_.is_nil()) {
-        item_.reset( new Item(outer_->full_path(delegate_->second),
-                         delegate_->first, outer_.in()), OpenDDS::DCPS::keep_count());
+        item_ = OpenDDS::DCPS::make_rch<Item>(outer_->full_path(delegate_->second),
+                              delegate_->first, outer_.in());
       }
 
       return item_;
@@ -196,6 +196,9 @@ public:
 
 private:
   friend class File;
+  template <typename T, typename U0, typename U1, typename U2>
+  friend RcHandle<T> OpenDDS::DCPS::make_rch(const U0&, const U1&, const U2&);
+  
   Directory(const ACE_TString& root_path, const ACE_TString& logical,
             Directory* parent);
   void scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
@@ -230,6 +233,8 @@ public:
 
 private:
   friend class Directory;
+  template <typename T, typename U0, typename U1, typename U2>
+  friend OpenDDS::DCPS::RcHandle<T> OpenDDS::DCPS::make_rch(const U0&, const U1&, const U2&);
   template <typename Item> friend class Directory::Iterator;
   File(const ACE_TString& fname_phys, const ACE_TString& logical,
        Directory* parent);

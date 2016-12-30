@@ -143,10 +143,10 @@ MulticastInst::default_group_address(ACE_INET_Addr& group_address)
   }
 }
 
-MulticastTransport*
+TransportImpl_rch
 MulticastInst::new_impl(const TransportInst_rch& inst)
 {
-  return new MulticastTransport(inst);
+  return make_rch<MulticastTransport>(inst);
 }
 
 OPENDDS_STRING

@@ -101,8 +101,8 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link);
     }
 
-    link.reset(new TcpDataLink(key.address(), this->shared_from_this(), attribs.priority_,
-                           key.is_loopback(), true /*active*/), keep_count());
+    link = make_rch<TcpDataLink>(key.address(), this->shared_from_this(), attribs.priority_,
+                                key.is_loopback(), true /*active*/);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
@@ -113,7 +113,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   }
 
   TcpConnection_rch connection(
-    new TcpConnection(key.address(), link->transport_priority(), config()->shared_from_this() ), keep_count());
+    make_rch<TcpConnection>(key.address(), link->transport_priority(), config()->shared_from_this()));
   connection->set_datalink(link);
 
   TcpConnection* pConn = connection.in();
@@ -269,8 +269,8 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link);
 
     } else {
-      link.reset( new TcpDataLink(key.address(), this->shared_from_this(), key.priority(),
-                             key.is_loopback(), key.is_active()), keep_count());
+      link = make_rch<TcpDataLink>(key.address(), this->shared_from_this(), key.priority(),
+                                  key.is_loopback(), key.is_active());
 
       if (links_.bind(key, link) != 0 /*OK*/) {
         ACE_ERROR((LM_ERROR,
@@ -700,13 +700,13 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
   connection->id() = last_link_;
 
   TransportSendStrategy_rch send_strategy (
-    new TcpSendStrategy(last_link_, link, this->config()->shared_from_this(), connection,
-                        new TcpSynchResource(connection,
-                                             this->config()->max_output_pause_period_),
-                        this->reactor_task(), link->transport_priority()), keep_count());
+    make_rch<TcpSendStrategy>(last_link_, link, this->config()->shared_from_this(), connection,
+                             new TcpSynchResource(connection,
+                                                  this->config()->max_output_pause_period_),
+                             this->reactor_task(), link->transport_priority()));
 
   TransportStrategy_rch receive_strategy(
-    new TcpReceiveStrategy(link, connection, this->reactor_task()), keep_count());
+    make_rch<TcpReceiveStrategy>(link, connection, this->reactor_task()));
 
   if (link->connect(connection, send_strategy, receive_strategy) != 0) {
     return -1;

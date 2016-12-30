@@ -178,7 +178,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend)
     return;
   }
 
-  this->reactor_task_.reset( new TransportReactorTask(useAsyncSend) , keep_count());
+  this->reactor_task_= make_rch<TransportReactorTask>(useAsyncSend);
   if (0 != this->reactor_task_->open(0)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }

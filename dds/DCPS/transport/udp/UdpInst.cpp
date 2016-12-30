@@ -33,10 +33,10 @@ UdpInst::UdpInst(const std::string& name)
 {
 }
 
-UdpTransport*
+TransportImpl_rch
 UdpInst::new_impl(const TransportInst_rch& inst)
 {
-  return new UdpTransport(inst);
+  return make_rch<UdpTransport>(inst);
 }
 
 int

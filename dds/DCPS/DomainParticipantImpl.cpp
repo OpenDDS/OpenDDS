@@ -851,7 +851,7 @@ DomainParticipantImpl::get_filter_eval(const char* filter)
 
   RcHandle<FilterEvaluator>& result = filter_cache_[filter];
   if (!result)
-    result.reset(new FilterEvaluator(filter, false), keep_count());
+    result = make_rch<FilterEvaluator>(filter, false);
 
   return result;
 }
