@@ -316,7 +316,6 @@ DataLink::remove_listener(const RepoId& local_id)
   {
     IdToSendListenerMap::iterator pos = send_listeners_.find(local_id);
     if (pos != send_listeners_.end()) {
-      pos->second->_remove_ref();
       send_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
         GuidConverter converter(local_id);
@@ -331,7 +330,6 @@ DataLink::remove_listener(const RepoId& local_id)
   {
     IdToRecvListenerMap::iterator pos = recv_listeners_.find(local_id);
     if (pos != recv_listeners_.end()) {
-      pos->second->_remove_ref();
       recv_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
         GuidConverter converter(local_id);
