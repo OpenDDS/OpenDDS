@@ -192,13 +192,14 @@ ShmemTransport::shutdown_i()
 {
   // Shutdown reserved datalinks and release configuration:
   GuardType guard(links_lock_);
+  if (read_task_) read_task_->stop();
+  
   for (ShmemDataLinkMap::iterator it(links_.begin());
        it != links_.end(); ++it) {
     it->second->transport_shutdown();
   }
   links_.clear();
-
-  if (read_task_) read_task_->stop();
+  
   delete read_task_;
   read_task_ = 0;
 
@@ -289,8 +290,7 @@ ShmemTransport::read_from_links()
     GuardType guard(links_lock_);
     typedef ShmemDataLinkMap::iterator iter_t;
     for (iter_t it = links_.begin(); it != links_.end(); ++it) {
-      ShmemDataLink_rch link = it->second;
-      dl_copies.push_back(link);
+      dl_copies.push_back(it->second);
     }
   }
 
