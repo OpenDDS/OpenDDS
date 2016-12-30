@@ -31,7 +31,7 @@
 # include <Iphlpapi.h>
 # include "ace/Version.h"
 // older versions of ACE don't link to IPHlpApi.Lib, see acedefaults.mpb
-# if ACE_MAJOR_VERSION == 6 && ACE_MINOR_VERSION == 0 && defined __MSC_VER
+# if ACE_MAJOR_VERSION == 6 && ACE_MINOR_VERSION == 0 && defined _MSC_VER
 #  pragma comment(lib, "IPHlpApi.Lib")
 # endif
 #endif
