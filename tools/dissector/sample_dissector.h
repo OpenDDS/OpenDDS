@@ -312,6 +312,7 @@ namespace OpenDDS
 
     protected:
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
+      virtual size_t compute_length (guint8 *data) { return base_->compute_length(data); }
 
       Sample_Dissector *base_;
     };

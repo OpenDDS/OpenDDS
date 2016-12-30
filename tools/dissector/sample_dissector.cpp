@@ -583,6 +583,7 @@ namespace OpenDDS
         {
           sp.index = ndx;
           sp.offset = params.offset + (gint)data_pos;
+          sp.use_index = true;
           data_pos += element_->dissect_i (sp, label);
         }
       return data_pos;

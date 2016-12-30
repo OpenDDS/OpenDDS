@@ -614,8 +614,6 @@ namespace OpenDDS
           this->dissect ();
         }
 
-
-      dissect_dds(tvb_, pinfo_, tree_);
       return true;
     }
 
