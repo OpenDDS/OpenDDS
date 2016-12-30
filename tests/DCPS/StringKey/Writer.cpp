@@ -67,35 +67,40 @@ Writer::svc ()
     }
 
     Messenger::Message message;
-    message.subject_id = CORBA::string_dup ("OpenDDS");
+    message.subject_id = "OpenDDS";
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+    message.from       = "Comic Book Guy";
+    message.subject    = "Review";
+    message.text       = "Worst. Movie. Ever.";
     message.count      = 0;
+
+    message.e[0] = d;
+    message.e[1] = s;
+    message.e[2] = b;
+
+    message.seq.length(2);
+    message.seq[0] = other2;
+    message.seq[1] = other1;
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++) {
-      switch (i % 4) {
-      case 0:
-        message.e = b;
-        message.u.u_b (true);
-        break;
-      case 1:
-        message.e = s;
-        message.u.u_s (534);
-        break;
-      case 2:
-        message.e = d;
-        message.u.u_d (1.345);
-        break;
-      case 3:
-        message.e = other1;
-        message.u.u_f (3.14f);
-        break;
-      }
+    //  switch (i % 4) {
+    //  case 0:
+    //    message.u.u_b (true);
+    //    break;
+    //  case 1:
+    //    message.u.u_s (534);
+    //    break;
+    //  case 2:
+    //    message.u.u_d (1.345);
+    //    break;
+    //  case 3:
+    //    message.u.u_f (3.14f);
+    //    message.u._d (other2);
+    //    break;
+    //  }
 
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 

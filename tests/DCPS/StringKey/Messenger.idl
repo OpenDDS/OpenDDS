@@ -13,13 +13,18 @@ module Messenger {
     default: float u_f;
   };
 
+  typedef MyEnum Enums[3];
+  typedef MyEnum AnEnum;
+  typedef sequence<AnEnum> EnumSeq;
+
   struct Message {
     string from;
     string subject;
     string subject_id;
     string text;
     long   count;
-    MyEnum e;
-    MyUnion u;
+    Enums e;
+  //  MyUnion u;
+    EnumSeq seq;
   };
 };
