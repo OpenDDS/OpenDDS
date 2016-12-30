@@ -110,18 +110,12 @@ namespace OpenDDS
                                    const std::string &label,
                                    u_int &value)
     {
-#ifdef NEWCODE
       std::string val;
       const int result = get_string_value(config, base, label, val);
       if (result == 0) {
         return convertToInteger(val, value) ? 0 : -1;
       }
       return result;
-#else
-      return config->get_integer_value (base,
-        ACE_TEXT_CHAR_TO_TCHAR(label.c_str()),
-        value);
-#endif
     }
 
     void
@@ -362,13 +356,7 @@ namespace OpenDDS
       size_t pos = key.find (typesupport);
       if (pos == std::string::npos)
         {
-          pos = key.rfind (
-#ifdef NEWCODE
-            ":1.0"
-#else
-            ':'
-#endif
-            );
+          pos = key.rfind (":1.0");
         }
       key = key.substr (0,pos);
 
