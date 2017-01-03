@@ -24,7 +24,7 @@ module Messenger {
     string text;
     long   count;
     Enums e;
-  //  MyUnion u;
+    MyUnion u;
     EnumSeq seq;
   };
 };
