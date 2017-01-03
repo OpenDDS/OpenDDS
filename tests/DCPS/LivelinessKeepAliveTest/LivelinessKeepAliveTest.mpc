@@ -1,0 +1,37 @@
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=LivelinessKeepAliveTest_export.h \
+                   -Wb,stub_export_macro=LivelinessKeepAliveTest_Export -SS
+  dcps_ts_flags += -Wb,export_macro=LivelinessKeepAliveTest_Export
+  dynamicflags  += LIVELINESSKEEPALIVETEST_BUILD_DLL
+
+  TypeSupport_Files {
+    Satellite.idl
+  }
+}
+
+project(LivelinessKeepAliveTestPublisher): dcpsexe, dcps_transports_for_test {
+  exename   = publisher
+  libpaths += ../common
+  libs     += common DDS*idl
+  after    += DDS*idl common
+  
+  Source_Files {
+    common.cpp
+    publisher.cpp
+  }
+}
+
+
+project(LivelinessKeepAliveTestSubscriber): dcpsexe, dcps_transports_for_test {
+  exename   = subscriber
+  libpaths += ../common
+  libs     += common DDS*idl
+  after    += DDS*idl common
+  
+  Source_Files {
+    common.cpp
+    subscriber.cpp
+    AlertDataReaderListenerImpl.cpp
+  }
+}
+

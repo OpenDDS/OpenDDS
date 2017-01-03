@@ -1,0 +1,6 @@
+A basic liveliness test of DDS to test that the liveliness period is properly
+reset when a write occurs.
+
+run_test.pl
+  Run a separate publisher and subscriber process.
+

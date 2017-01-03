@@ -1,0 +1,17 @@
+/publisher
+/subscriber
+/SatelliteTypeSupport.idl
+/SatelliteTypeSupportC.h
+/SatelliteTypeSupportC.inl
+/SatelliteTypeSupportC.cpp
+/SatelliteTypeSupportImpl.cpp
+/SatelliteTypeSupportImpl.h
+/SatelliteC.h
+/SatelliteC.inl
+/SatelliteC.cpp
+/SatelliteTypeSupportS.h
+/SatelliteTypeSupportS.inl
+/SatelliteTypeSupportS.cpp
+/SatelliteS.h
+/SatelliteS.inl
+/SatelliteS.cpp
