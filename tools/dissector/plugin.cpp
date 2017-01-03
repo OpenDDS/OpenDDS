@@ -21,6 +21,8 @@ extern "C" {
 #include "tools/dissector/packet-repo.h"
 #include "tools/dissector/packet-datawriter.h"
 
+#include <fstream>
+
 #ifndef ACE_AS_STATIC_LIBS
 extern "C"
 dissector_Export const gchar version[] = DDS_VERSION;
@@ -29,10 +31,13 @@ extern "C"
 dissector_Export void
 plugin_register()
 {
+  if (ACE_OS::getenv("OPENDDS_DISSECTOR_LOG")) {
+    ACE_LOG_MSG->msg_ostream(new std::ofstream("OpenDDS_wireshark.log"), 1);
+    ACE_LOG_MSG->set_flags(ACE_Log_Msg::OSTREAM);
+  }
   OpenDDS::DCPS::DDS_Dissector::instance().init ();
   OpenDDS::DCPS::InfoRepo_Dissector::instance().init ();
   OpenDDS::DCPS::DataWriterRemote_Dissector::instance().init ();
-
 }
 
 extern "C"
