@@ -17,7 +17,7 @@
 #include "common.h"
 
 
-int main (int argc, char *argv[]) 
+int main (int argc, char *argv[])
 {
   int status = 0;
 
@@ -53,7 +53,7 @@ int main (int argc, char *argv[])
     // (same as publisher)
     Satellite::AlertTypeSupport_var alert_ts = new Satellite::AlertTypeSupportImpl();
     if (DDS::RETCODE_OK != alert_ts->register_type(participant,
-                                                   SATELLITE_ALERT_TYPE)) 
+                                                   SATELLITE_ALERT_TYPE))
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) register_type for %C failed.\n"), SATELLITE_ALERT_TYPE));
@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
     // Create DataReaders and DataReaderListeners for the topic
 
     // Create the Alert listener servant
-    DDS::DataReaderListener_var alert_listener = 
+    DDS::DataReaderListener_var alert_listener =
       new AlertDataReaderListenerImpl();
 
     // Create the Alert DataReader
@@ -98,7 +98,7 @@ int main (int argc, char *argv[])
 
     // Create the data reader (Alert)
     // and attach the listener
-    DDS::DataReader_var alert_dr = 
+    DDS::DataReader_var alert_dr =
       sub->create_datareader(alert_topic,
                              dr_qos,
                              alert_listener,
@@ -107,7 +107,7 @@ int main (int argc, char *argv[])
     // Wait for events from the Publisher;
     // shut down when "System Shutdown" received and publisher is finished
     ACE_DEBUG((LM_DEBUG, "Subscriber: waiting for events\n"));
-    
+
     // Indicate that the subscriber is ready
     FILE* readers_ready = ACE_OS::fopen((temp_file_prefix + sub_ready_filename).c_str(), ACE_TEXT("w"));
     if (readers_ready == 0)

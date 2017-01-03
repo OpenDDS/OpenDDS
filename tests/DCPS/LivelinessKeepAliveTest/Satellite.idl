@@ -5,7 +5,7 @@
 
 module Satellite
 {
-  struct Vector 
+  struct Vector
   {
     long long x;
     long long y;
@@ -40,7 +40,7 @@ module Satellite
   struct Alert
   {
     string satellite;
-    
+
     ItemCode  item;
     AlertCode code;
     string    message;

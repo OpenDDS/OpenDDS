@@ -16,7 +16,7 @@
 
 #include "common.h"
 
-int main (int argc, char *argv[]) 
+int main (int argc, char *argv[])
 {
   try {
     // Initialize, and create a DomainParticipant
@@ -58,10 +58,10 @@ int main (int argc, char *argv[])
     }
 
     // Create and register the Alert type support object
-    Satellite::AlertTypeSupport_var alert_ts = 
+    Satellite::AlertTypeSupport_var alert_ts =
       new Satellite::AlertTypeSupportImpl();
     if (DDS::RETCODE_OK != alert_ts->register_type(participant,
-                                                   SATELLITE_ALERT_TYPE)) 
+                                                   SATELLITE_ALERT_TYPE))
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) register_type for %C failed.\n"), SATELLITE_ALERT_TYPE));
@@ -131,9 +131,9 @@ int main (int argc, char *argv[])
     ACE_OS::fclose(writers_ready);
     ACE_OS::fclose(readers_ready);
 
-    // Then, narrow the DataWriter created above to an AlertDataWriter, 
+    // Then, narrow the DataWriter created above to an AlertDataWriter,
     // and make sure the narrow's result is non-nil.
-    Satellite::AlertDataWriter_var alert_dw = 
+    Satellite::AlertDataWriter_var alert_dw =
       Satellite::AlertDataWriter::_narrow(alert_base_dw);
     if (CORBA::is_nil(alert_dw.in()))
     {
@@ -162,11 +162,11 @@ int main (int argc, char *argv[])
 
       // Publish Alerts periodically
 
-      if ( i % 6 == 0 ) 
+      if ( i % 6 == 0 )
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) %C : Publishing Low Fuel Alert\n", satellite_name.c_str()));
 
-        // Publish a Low Fuel alert on the fuel_alert struct.  Check the return 
+        // Publish a Low Fuel alert on the fuel_alert struct.  Check the return
         // value of the write() call to make sure the publication succeeded.
         Satellite::Alert fuel_alert;
         fuel_alert.satellite = satellite_name.c_str();
@@ -175,27 +175,27 @@ int main (int argc, char *argv[])
         fuel_alert.index = i/6;
         fuel_alert.message = CORBA::string_dup("Your fuel is low");
         ret = alert_dw->write(fuel_alert, fuel_alert_handle);
-        if (ret != ::DDS::RETCODE_OK) 
+        if (ret != ::DDS::RETCODE_OK)
         {
           ACE_ERROR((LM_ERROR, "(%P|%t) Fuel Alert write returned error code %d\n", ret));
         }
       }
 
-      if ( i % 15 == 0 ) 
+      if ( i % 15 == 0 )
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) %C : Publishing Dead Battery Alert\n", satellite_name.c_str()));
 
-        // Publish a Dead Battery alert on the battery_alert struct.   Check the  
+        // Publish a Dead Battery alert on the battery_alert struct.   Check the
         // return value of the write() call to make sure the publication succeeded.
         Satellite::Alert battery_alert;
         battery_alert.satellite = satellite_name.c_str();
         battery_alert.item = Satellite::BATTERY;
         battery_alert.code = Satellite::DEAD;
         battery_alert.index = i/15;
-        battery_alert.message = 
+        battery_alert.message =
           CORBA::string_dup("Your battery is dead; re-orient the solar panels to recharge");
         ret = alert_dw->write(battery_alert, battery_alert_handle);
-        if (ret != ::DDS::RETCODE_OK) 
+        if (ret != ::DDS::RETCODE_OK)
         {
           ACE_ERROR((LM_ERROR, "(%P|%t) Battery Alert write returned error code %d\n", ret));
         }
@@ -211,14 +211,14 @@ int main (int argc, char *argv[])
     ::DDS::InstanceHandle_t shutdown_alert_handle = alert_dw->register_instance(shutdown_alert);
     shutdown_alert.code = Satellite::SYSTEM_SHUTDOWN;
     shutdown_alert.index = 9999;
-    shutdown_alert.message = 
+    shutdown_alert.message =
       CORBA::string_dup("The Satellite is being shut down");
     DDS::ReturnCode_t retcode = alert_dw->write(shutdown_alert, shutdown_alert_handle);
-    if (retcode != ::DDS::RETCODE_OK) 
+    if (retcode != ::DDS::RETCODE_OK)
     {
       ACE_ERROR((LM_ERROR, "(%P|%t) System Shutdown write returned error code %d\n", retcode));
     }
-    
+
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T Writers are finished\n")));
 
     // Indicate that the publisher is done
@@ -245,7 +245,7 @@ int main (int argc, char *argv[])
     ACE_OS::fclose(readers_completed);
 
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T Readers are finished\n")));
-    
+
     // Clean up publisher objects
     pub->delete_contained_entities();
 
@@ -264,7 +264,7 @@ int main (int argc, char *argv[])
     TheServiceParticipant->shutdown ();
 
     ACE_DEBUG((LM_DEBUG, "Exiting...\n"));
-  } 
+  }
   catch (const TestException&)
   {
     ACE_ERROR((LM_ERROR, "Exception caught in main.cpp: %C\n"));

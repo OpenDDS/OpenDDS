@@ -40,7 +40,7 @@ void AlertDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     DDS::SampleInfo si ;
     DDS::ReturnCode_t status = alert_dr->take_next_sample(alert, si);
 
-    if (status == DDS::RETCODE_OK) 
+    if (status == DDS::RETCODE_OK)
     {
       if (si.valid_data) {
         ACE_DEBUG((LM_DEBUG, "\n======================\n"
@@ -62,7 +62,7 @@ void AlertDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           expected_status_.not_alive_count = 1;
           expected_status_.not_alive_count_change = 1;
         }
-      } 
+      }
     }
     else if (status == ::DDS::RETCODE_NO_DATA)
     {
@@ -112,7 +112,7 @@ void AlertDataReaderListenerImpl::on_liveliness_changed (
     liveliness_changed_count_, status.alive_count, status.not_alive_count,
     status.alive_count_change, status.not_alive_count_change));
 
-  if (last_status_.alive_count == 0 
+  if (last_status_.alive_count == 0
     && last_status_.alive_count_change == -1
     && last_status_.not_alive_count == 1
     && last_status_.not_alive_count_change == 1)
