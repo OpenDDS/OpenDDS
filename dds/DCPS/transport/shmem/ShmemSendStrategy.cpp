@@ -18,8 +18,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link, ShmemInst* inst)
-  : TransportSendStrategy(0, TransportInst_rch(inst, inc_count()),
+ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link, const ShmemInst_rch& inst)
+  : TransportSendStrategy(0, inst,
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>())

@@ -24,6 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class UdpInst;
+typedef RcHandle<UdpInst> UdpInst_rch;
 
 class OpenDDS_Udp_Export UdpTransport : public TransportImpl, public EnableSharedFromThis<UdpTransport> {
 public:
@@ -31,7 +32,7 @@ public:
 
   void passive_connection(const ACE_INET_Addr& remote_address,
                           ACE_Message_Block* data);
-  UdpInst* config() const;
+  UdpInst_rch config() const;
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,

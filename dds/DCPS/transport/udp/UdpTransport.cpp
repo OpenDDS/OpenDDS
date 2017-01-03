@@ -34,10 +34,10 @@ UdpTransport::UdpTransport(const TransportInst_rch& inst)
   }
 }
 
-UdpInst*
+UdpInst_rch
 UdpTransport::config() const
 {
-  return static_cast<UdpInst*>(TransportImpl::config());
+  return static_rchandle_cast<UdpInst>(TransportImpl::config());
 }
 
 
@@ -48,7 +48,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
   UdpDataLink_rch link(make_rch<UdpDataLink>(this->shared_from_this(), priority, active));
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask (reactor_task());
-  link->configure(config(), rtask.in());
+  link->configure(config().in(), rtask.in());
 
   // Open logical connection:
   if (link->open(remote_address)) {

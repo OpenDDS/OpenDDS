@@ -54,14 +54,14 @@ namespace DCPS {
 
 RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                                  const GuidPrefix_t& local_prefix,
-                                 RtpsUdpInst* config,
-                                 TransportReactorTask* reactor_task)
+                                 const RtpsUdpInst_rch& config,
+                                 const TransportReactorTask_rch& reactor_task)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
              false),    // is_active
     config_(config),
-    reactor_task_(reactor_task, inc_count()),
+    reactor_task_(reactor_task),
     send_strategy_(make_rch<RtpsUdpSendStrategy>(this, config, local_prefix)),
     recv_strategy_(make_rch<RtpsUdpReceiveStrategy>(this, local_prefix)),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
@@ -75,6 +75,12 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
   heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
+}
+
+RtpsUdpInst_rch
+RtpsUdpDataLink::config() const
+{
+  return config_;
 }
 
 bool

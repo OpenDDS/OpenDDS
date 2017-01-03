@@ -98,7 +98,7 @@ using OpenDDS::DCPS::RcHandle;
 
 class File;
 
-class OpenDDS_Dcps_Export Directory : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export Directory : public RcObject<ACE_SYNCH_MUTEX>, public OpenDDS::DCPS::EnableSharedFromThis<Directory> {
 public:
   typedef RcHandle<Directory> Ptr;
 
@@ -147,15 +147,15 @@ private:
   private:
     friend class Directory;
     typedef Map::iterator IterDelegate;
-    Iterator(const IterDelegate& del, Directory* outer)
+    Iterator(const IterDelegate& del, const Directory::Ptr& outer)
         : delegate_(del)
-        , outer_(outer, OpenDDS::DCPS::inc_count())
+        , outer_(outer)
         , item_() {}
 
     typename Item::Ptr deref() const {
       if (item_.is_nil()) {
         item_ = OpenDDS::DCPS::make_rch<Item>(outer_->full_path(delegate_->second),
-                              delegate_->first, outer_.in());
+                              delegate_->first, outer_);
       }
 
       return item_;
@@ -200,7 +200,7 @@ private:
   friend RcHandle<T> OpenDDS::DCPS::make_rch(const U0&, const U1&, const U2&);
   
   Directory(const ACE_TString& root_path, const ACE_TString& logical,
-            Directory* parent);
+            const Directory::Ptr& parent);
   void scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
                 unsigned int overflow_index);
   RcHandle<File> make_new_file(const ACE_TString& t_name);
@@ -237,7 +237,7 @@ private:
   friend OpenDDS::DCPS::RcHandle<T> OpenDDS::DCPS::make_rch(const U0&, const U1&, const U2&);
   template <typename Item> friend class Directory::Iterator;
   File(const ACE_TString& fname_phys, const ACE_TString& logical,
-       Directory* parent);
+       const Directory::Ptr& parent);
 
   ACE_TString physical_file_, physical_dir_, logical_relative_;
   Directory::Ptr parent_;

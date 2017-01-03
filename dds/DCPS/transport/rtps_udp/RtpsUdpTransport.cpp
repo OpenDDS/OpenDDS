@@ -37,17 +37,16 @@ RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
   }
 }
 
-RtpsUdpInst*
+RtpsUdpInst_rch
 RtpsUdpTransport::config() const
 {
-  return static_cast<RtpsUdpInst*>(TransportImpl::config());
+  return static_rchandle_cast<RtpsUdpInst>(TransportImpl::config());
 }
 
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  TransportReactorTask_rch rt (reactor_task());
-  RtpsUdpDataLink_rch link(make_rch<RtpsUdpDataLink>(this->shared_from_this(), local_prefix, config(), rt.in()));
+  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(this->shared_from_this(), local_prefix, config(), reactor_task());
 
   if (!link->open(unicast_socket_)) {
     ACE_DEBUG((LM_ERROR,
@@ -101,7 +100,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
   }
 
   GuardType guard(connections_lock_);
-  add_pending_connection(client, link.in());
+  add_pending_connection(client, link);
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink pending.\n"), 2);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 }

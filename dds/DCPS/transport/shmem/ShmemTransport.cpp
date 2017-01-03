@@ -35,18 +35,18 @@ ShmemTransport::ShmemTransport(const TransportInst_rch& inst)
   }
 }
 
-ShmemInst*
+ShmemInst_rch
 ShmemTransport::config() const
 {
-  return static_cast<ShmemInst*>(TransportImpl::config());
+  return static_rchandle_cast<ShmemInst>(TransportImpl::config());
 }
 
 ShmemDataLink_rch
 ShmemTransport::make_datalink(const std::string& remote_address)
 {
-  ShmemDataLink_rch link(make_rch<ShmemDataLink>(this->shared_from_this()));
+  ShmemDataLink_rch link = make_rch<ShmemDataLink>(this->shared_from_this());
 
-  link->configure(this->config());
+  link->configure(this->config().in());
 
   // Open logical connection:
   if (!link->open(remote_address)) {

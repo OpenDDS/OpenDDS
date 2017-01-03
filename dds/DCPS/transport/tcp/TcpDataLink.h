@@ -42,7 +42,7 @@ public:
               const TransportStrategy_rch& receive_strategy);
 
   int reuse_existing_connection(const TcpConnection_rch& connection);
-  int reconnect(TcpConnection* connection);
+  int reconnect(const TcpConnection_rch& connection);
 
   TcpConnection_rch get_connection();
   TcpTransport_rch get_transport_impl();

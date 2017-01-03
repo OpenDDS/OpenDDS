@@ -10,11 +10,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE RtpsUdpInst*
-RtpsUdpDataLink::config()
-{
-  return config_;
-}
+
 
 ACE_INLINE ACE_Reactor*
 RtpsUdpDataLink::get_reactor()

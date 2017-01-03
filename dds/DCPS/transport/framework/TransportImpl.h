@@ -68,7 +68,7 @@ public:
 
   /// Expose the configuration information so others can see what
   /// we can do.
-  TransportInst* config() const;
+  TransportInst_rch config() const;
 
   /// Called by our connection_info() method to allow the concrete
   /// TransportImpl subclass to do the dirty work since it really
@@ -196,7 +196,7 @@ protected:
 
   typedef OPENDDS_MULTIMAP(TransportClient_rch, DataLink_rch) PendConnMap;
   PendConnMap pending_connections_;
-  void add_pending_connection(const TransportClient_rch& client, DataLink* link);
+  void add_pending_connection(const TransportClient_rch& client, DataLink_rch link);
 
 private:
   /// We have a few friends in the transport framework so that they

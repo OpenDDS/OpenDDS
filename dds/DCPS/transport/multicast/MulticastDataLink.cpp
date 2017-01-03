@@ -35,11 +35,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
-    MulticastSessionFactory* session_factory,
+    const MulticastSessionFactory_rch& session_factory,
     MulticastPeer local_peer,
     bool is_active)
 : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
-  session_factory_(session_factory, inc_count()),
+  session_factory_(session_factory),
   local_peer_(local_peer),
   config_(0),
   reactor_task_(0),
@@ -47,7 +47,7 @@ MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
   recv_strategy_(make_rch<MulticastReceiveStrategy>(this)),
   send_buffer_(0)
 {
-  MulticastInst* config = transport->config();
+  MulticastInst_rch config = transport->config();
   // A send buffer may be bound to the send strategy to ensure a
   // configured number of most-recent datagrams are retained:
   if (this->session_factory_->requires_send_buffer()) {

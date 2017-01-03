@@ -56,7 +56,7 @@ public:
   int fresh_link(TcpConnection_rch connection);
 
   virtual void unbind_link(DataLink* link);
-  TcpInst* config() const;
+  TcpInst_rch config() const;
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,

@@ -22,6 +22,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MulticastInst;
+typedef RcHandle<MulticastInst> MulticastInst_rch;
+
 class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
@@ -32,7 +34,7 @@ public:
 
   void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);
 
-  MulticastInst* config() const;
+  MulticastInst_rch config() const;
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,

@@ -15,8 +15,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link, TransportInst* inst)
-  : TransportSendStrategy(0, TransportInst_rch(inst, inc_count()),
+MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link, const TransportInst_rch& inst)
+  : TransportSendStrategy(0, inst,
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>()),

@@ -43,7 +43,7 @@ class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
   MulticastDataLink(const MulticastTransport_rch& transport,
-                    MulticastSessionFactory* session_factory,
+                    const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
                     bool is_active);
   virtual ~MulticastDataLink();

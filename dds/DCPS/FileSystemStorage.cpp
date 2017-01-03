@@ -460,11 +460,11 @@ DDS_Dirent::~DDS_Dirent()
 // File
 
 File::File(const ACE_TString& fname_phys, const ACE_TString& logical,
-           Directory* parent)
+           const Directory::Ptr& parent)
   : physical_file_()
   , physical_dir_()
   , logical_relative_(logical)
-  , parent_(parent, inc_count())
+  , parent_(parent)
 {
   String_Index_t last_slash = fname_phys.rfind(ACE_TEXT('/'));
 
@@ -519,7 +519,7 @@ OPENDDS_STRING File::name() const
 
 /*static*/ Directory::Ptr Directory::create(const char* dirname)
 {
-  return DCPS::make_rch<Directory>(ACE_TEXT_CHAR_TO_TCHAR(dirname), ACE_TEXT(""), static_cast<Directory*>(0));
+  return DCPS::make_rch<Directory>(ACE_TEXT_CHAR_TO_TCHAR(dirname), ACE_TEXT(""), Directory::Ptr ());
 }
 
 ACE_TString Directory::full_path(const ACE_TString& relative) const
@@ -529,12 +529,12 @@ ACE_TString Directory::full_path(const ACE_TString& relative) const
 
 Directory::FileIterator Directory::begin_files()
 {
-  return FileIterator(files_.begin(), this);
+  return FileIterator(files_.begin(), this->shared_from_this());
 }
 
 Directory::FileIterator Directory::end_files()
 {
-  return FileIterator(files_.end(), this);
+  return FileIterator(files_.end(),  this->shared_from_this());
 }
 
 File::Ptr Directory::get_file(const char* name)
@@ -550,7 +550,7 @@ File::Ptr Directory::get_file(const char* name)
     return make_new_file(t_name);
 
   } else {
-    return DCPS::make_rch<File>(full_path(it->second), it->first, this);
+    return DCPS::make_rch<File>(full_path(it->second), it->first, this->shared_from_this());
   }
 }
 
@@ -571,7 +571,7 @@ File::Ptr Directory::make_new_file(const ACE_TString& t_name)
   if (!fh) throw std::runtime_error("Can't create the file");
 
   std::fclose(fh);
-  return DCPS::make_rch<File>(physical_dirname_ + phys, t_name, this);
+  return DCPS::make_rch<File>(physical_dirname_ + phys, t_name,  this->shared_from_this());
 }
 
 File::Ptr Directory::create_next_file()
@@ -595,17 +595,17 @@ File::Ptr Directory::create_next_file()
 
 Directory::DirectoryIterator Directory::begin_dirs()
 {
-  return DirectoryIterator(dirs_.begin(), this);
+  return DirectoryIterator(dirs_.begin(),  this->shared_from_this());
 }
 
 Directory::DirectoryIterator Directory::end_dirs()
 {
-  return DirectoryIterator(dirs_.end(), this);
+  return DirectoryIterator(dirs_.end(),  this->shared_from_this());
 }
 
 Directory::Ptr Directory::get_dir(const OPENDDS_VECTOR(OPENDDS_STRING)& path)
 {
-  Directory::Ptr dir(this, inc_count());
+  Directory::Ptr dir = this->shared_from_this();
   typedef OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator iterator;
 
   for (iterator iter = path.begin(), end = path.end(); iter != end; ++iter) {
@@ -624,7 +624,7 @@ Directory::Ptr Directory::get_subdir(const char* name)
     return make_new_subdir(t_name);
 
   } else {
-    return DCPS::make_rch<Directory>(full_path(it->second), it->first, this);
+    return DCPS::make_rch<Directory>(full_path(it->second), it->first,  this->shared_from_this());
   }
 }
 
@@ -690,7 +690,7 @@ Directory::Ptr Directory::make_new_subdir(const ACE_TString& t_name)
     std::ofstream fn("_fullname");
     fn << t_name << '\n';
   }
-  return DCPS::make_rch<Directory>(physical_dirname_ + phys, t_name, this);
+  return DCPS::make_rch<Directory>(physical_dirname_ + phys, t_name,  this->shared_from_this());
 }
 
 ACE_TString Directory::add_entry()
@@ -760,8 +760,8 @@ OPENDDS_STRING Directory::name() const
 }
 
 Directory::Directory(const ACE_TString& dirname, const ACE_TString& logical,
-                     Directory* parent)
-  : parent_(parent, inc_count())
+                     const Directory::Ptr& parent)
+  : parent_(parent)
   , physical_dirname_(dirname)
   , logical_dirname_(logical)
 {

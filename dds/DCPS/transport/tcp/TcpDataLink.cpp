@@ -195,7 +195,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
 /// connection object and the "old" connection object is replaced by
 /// the new connection object.
 int
-OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
+OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpDataLink","reconnect",6);
 
@@ -207,7 +207,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
     return -1;
   }
 
-  this->connection_->transfer(connection);
+  this->connection_->transfer(connection.in());
 
   bool released = false;
   TransportStrategy_rch brs;
@@ -226,14 +226,12 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
     }
   }
 
-  TcpConnection_rch conn_rch(connection, inc_count());
-
   if (released) {
     TcpDataLink_rch this_rch(this, inc_count());
-    return this->transport_->connect_tcp_datalink(this_rch, conn_rch);
+    return this->transport_->connect_tcp_datalink(this_rch, connection);
   }
 
-  this->connection_.swap(conn_rch);
+  this->connection_ = connection;
 
   TcpReceiveStrategy* rs = static_cast<TcpReceiveStrategy*>(brs.in());
 

@@ -24,11 +24,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 class RtpsUdpInst;
+typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public EnableSharedFromThis<RtpsUdpTransport> {
 public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
-  RtpsUdpInst* config() const;
+  RtpsUdpInst_rch config() const;
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,

@@ -24,6 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ShmemInst;
+typedef RcHandle<ShmemInst> ShmemInst_rch;
 
 class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl, public EnableSharedFromThis<ShmemTransport> {
 public:
@@ -34,7 +35,7 @@ public:
   std::string address();
   void signal_semaphore();
 
-  ShmemInst* config() const;
+  ShmemInst_rch config() const;
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,

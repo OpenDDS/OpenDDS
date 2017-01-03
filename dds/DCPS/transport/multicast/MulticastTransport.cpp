@@ -42,10 +42,10 @@ MulticastTransport::~MulticastTransport()
 }
 
 
-MulticastInst*
+MulticastInst_rch
 MulticastTransport::config() const
 {
-  return static_cast<MulticastInst*>(TransportImpl::config());
+  return static_rchandle_cast<MulticastInst>(TransportImpl::config());
 }
 
 MulticastDataLink_rch
@@ -55,7 +55,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
 {
 
   RcHandle<MulticastSessionFactory> session_factory;
-  MulticastInst* conf = this->config();
+  MulticastInst_rch conf = this->config();
 
   if (conf->is_reliable()) {
     session_factory = make_rch<ReliableSessionFactory>();
@@ -73,13 +73,13 @@ MulticastTransport::make_datalink(const RepoId& local_id,
             priority, active), 2);
 
   MulticastDataLink_rch link(make_rch<MulticastDataLink>(this->shared_from_this(),
-                                   session_factory.in(),
+                                   session_factory,
                                    local_peer,
                                    active));
 
   // Configure link with transport configuration and reactor task:
   TransportReactorTask_rch rtask(reactor_task());
-  link->configure(conf, rtask.in());
+  link->configure(conf.in(), rtask.in());
 
   // Join multicast group:
   if (!link->join(conf->group_address_)) {
@@ -332,7 +332,7 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
 bool
 MulticastTransport::configure_i(TransportInst*)
 {
-  MulticastInst* conf = dynamic_cast<MulticastInst*>(TransportImpl::config());
+  MulticastInst_rch conf = dynamic_rchandle_cast<MulticastInst>(TransportImpl::config());
 
   if (!conf) {
     ACE_ERROR_RETURN((LM_ERROR,

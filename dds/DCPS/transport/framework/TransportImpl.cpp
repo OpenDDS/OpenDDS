@@ -166,9 +166,9 @@ TransportImpl::configure(const TransportInst_rch& config)
 }
 
 void
-TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink* link)
+TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink_rch link)
 {
-  pending_connections_.insert( PendConnMap::value_type(client, DataLink_rch(link, inc_count())));
+  pending_connections_.insert( PendConnMap::value_type(client, link));
 }
 
 void

@@ -57,10 +57,10 @@ TcpTransport::~TcpTransport()
 }
 
 
-TcpInst*
+TcpInst_rch
 TcpTransport::config() const
 {
-  return static_cast<TcpInst*>(TransportImpl::config());
+  return static_rchandle_cast<TcpInst>(TransportImpl::config());
 }
 
 PriorityKey
@@ -170,7 +170,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
   GuardType connections_guard(connections_lock_);
 
-  add_pending_connection(client, link.in());
+  add_pending_connection(client, link);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 0);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 }
@@ -210,7 +210,7 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
 
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
               ACE_TEXT("link[%@] found, add to pending connections.\n"), link.in()), 0);
-    add_pending_connection(client, link.in());
+    add_pending_connection(client, link);
     link.reset(); // don't return link to TransportClient
     return true;
 
@@ -300,7 +300,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
               "no existing TcpConnection.\n"), 0);
 
-    add_pending_connection(client, link.in());
+    add_pending_connection(client, link);
 
     // no link ready, passive_connection will complete later
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -744,7 +744,7 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
     if (old_con.in() != connection.in())
       // Replace the "old" connection object with the "new" connection object.
     {
-      return link->reconnect(connection.in());
+      return link->reconnect(connection);
     }
   }
 

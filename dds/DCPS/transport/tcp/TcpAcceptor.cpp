@@ -9,6 +9,7 @@
 #include "TcpAcceptor.h"
 #include "TcpTransport.h"
 #include "TcpSendStrategy.h"
+#include "TcpInst.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -28,7 +29,7 @@ OpenDDS::DCPS::TcpAcceptor::~TcpAcceptor()
   DBG_ENTRY_LVL("TcpAcceptor","~TcpAcceptor",6);
 }
 
-OpenDDS::DCPS::TcpInst*
+OpenDDS::DCPS::TcpInst_rch
 OpenDDS::DCPS::TcpAcceptor::get_configuration()
 {
   return this->transport_->config();

@@ -34,7 +34,7 @@ public:
   // TcpTransport object.
   void transport_shutdown();
 
-  TcpInst* get_configuration();
+  TcpInst_rch get_configuration();
 
 private:
 
