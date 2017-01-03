@@ -1,21 +1,22 @@
 Version 3.9 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Updated how DataWriter QoS is interpreted by internal data structures:
-  - RESOURCE_LIMITS.max_samples_per_instance controls total samples that can be
+  - RESOURCE\_LIMITS.max\_samples\_per\_instance controls total samples that can be
     stored per instance, independent of HISTORY
   - HISTORY.depth controls number of samples (per instance) that will be made
     available to late-joining readers if DURABILITY is enabled
-    - KEEP_ALL history uses max_samples_per_instance as its depth
+    - KEEP\_ALL history uses max\_samples\_per\_instance as its depth
   - WriteDataContainer is more eager to remove samples that are no longer needed
   - WriteDataContainer will not remove samples that are required to implement
     DURABILITY, hence if RELIABILITY is enabled this can block a write() just
-    like other "no resource available" scenarios
+    like other “no resource available” scenarios
 
 - Fixed an RTPS interoperability issue with the new ParticipantMessageData
   messages (used for liveliness)
 
 - Enhanced RTPS support for DURABILITY QoS enabling faster reader/writer
-  associations when DURABILITY is in use (set to TRANSIENT_LOCAL)
+  associations when DURABILITY is in use (set to TRANSIENT\_LOCAL)
 
 - RTPS Discovery has a new option "SpdpLocalAddress" which can be used to
   bind SPDP's socket to a particular network interface
@@ -41,9 +42,8 @@ Version 3.9 of OpenDDS.
 - cross-compilation now works with Java bindings, including use of JRE compact1
 
 
-========================================================================
-
 Version 3.8 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Improved support for Safety Profile
 
@@ -56,11 +56,10 @@ Version 3.8 of OpenDDS.
   discovery, and the Liveliness and Durability QoS policies
 
 
-========================================================================
-
 Version 3.7 of OpenDDS.
+-------------------------------------------------------------------------------
 
-Additions:
+##### Additions:
 - Implements FACE Transport Services API v2.1, FACE safety base and
   FACE safety extended profiles (Future Airborne Capability Environment).
 - Implements DDS 1.4 and RTPS 2.2.
@@ -68,38 +67,38 @@ Additions:
   standard library containers and strings, as well as TAO sequences that
   allocate from this pool.
 - To support FACE TS, the IDL struct DDS::SampleInfo has a new field
-  "opendds_reserved_publication_seq" as an extension to the DDS specification.
-- Updated opendds_idl for FACE support, moving some of the code-generation
-  from tao_idl to opendds_idl when targeting FACE TS.
-- Support IDL fixed type inside of DCPS_DATA_TYPE (used with FACE TS).
+  opendds\_reserved\_publication\_seq as an extension to the DDS specification.
+- Updated opendds\_idl for FACE support, moving some of the code-generation
+  from tao\_idl to opendds\_idl when targeting FACE TS.
+- Support IDL fixed type inside of DCPS\_DATA\_TYPE (used with FACE TS).
 - Type-specific DataWriterImpl and DataReaderImpl are now templates.  Code
   generation now introduces a typedef of these.
 - Content filtering now supports modulus (MOD) operator as an extension.
 - Added a static (configuration-based) discovery mechanism.
 - RTPS Discovery is now supported when OpenDDS is built without built-in topics.
 - RTPS Discovery has a new configuration parameter SedpLocalAddress which
-  configures the rtps_udp transport used internally by discovery in the same way
-  that local_address configures a user-created rtps_udp transport instance.
-- Support non-default liveliness QOS in rtps_udp transport.
-- Support wait_for_acknowledgements in rtps_udp transport.
+  configures the rtps\_udp transport used internally by discovery in the same way
+  that local\_address configures a user-created rtps\_udp transport instance.
+- Support non-default liveliness QOS in rtps\_udp transport.
+- Support wait\_for\_acknowledgements in rtps\_udp transport.
 - Support command line option -DCPSRTISerialization when integrating with RTI
   DDS using RTPS, to account for a different serialization algorithm.
 - Configure script handles some cross-compile builds and safety profile.
 - Support for new Visual Studio compilers (vc11, vc12, and vc14).
 - Support for clang builds on Mac OS X.
 - Removed support for old GCC compilers (<= 3.3).
-- opendds_idl command-line option -Gitl is a replacement for -Gws.  Wireshark
+- opendds\_idl command-line option -Gitl is a replacement for -Gws.  Wireshark
   dissector now reads ITL files, rather than .ini files.
 
-Fixes:
+##### Fixes:
 - Fixed many tests for minimum profile builds.
 - Enforced correct behavior of a reliable data writer when history QoS
-  is set to KEEP_LAST with depth=1.
-- opendds_idl can now be specified in user_macros.GNU instead of always
-  assuming it is in $DDS_ROOT/bin (for -type gnuace builds).
+  is set to KEEP\_LAST with depth=1.
+- opendds\_idl can now be specified in user\_macros.GNU instead of always
+  assuming it is in $DDS\_ROOT/bin (for -type gnuace builds).
 - Fixed initial IPv6 support in windows builds.
 - Fixed disassociate handling of local entities on loopback interface.
-- Corrected wait_for_acknowedgements for non-reliable writers to return
+- Corrected wait\_for\_acknowedgements for non-reliable writers to return
   success immediately.
 - Allow disassociating readers to finish processing messages from active writer
   before removing.
@@ -107,24 +106,23 @@ Fixes:
   datalink would remain and would be seen as a fully-connected datalink by new
   associations.
 - DCPSTransportDebugLevel 1 messages are now association-oriented.
-- Fixed durable resend out-of-order handling for rtps_udp transport.
-- Fixed handling of acknowledgements during shutdown of rtps_udp data link.
+- Fixed durable resend out-of-order handling for rtps\_udp transport.
+- Fixed handling of acknowledgements during shutdown of rtps\_udp data link.
 - RTPS Discovery now ignores 'RTPX' messages seen during RTI integration.
 - Dissection of unions in wireshark dissector (requires ITL).
 - Corrected reference counting scheme for Recorder and Replayer objects:
-  the reference-counted handle types changed from _rch to _var.
+  the reference-counted handle types changed from \_rch to \_var.
 
-Notes:
+##### Notes:
 - OCI no longer builds with vc71, vc8, and GCC 4.1.1.  If you require support
   of these older platforms contact sales@ociweb.com.
 - The project repository is now at https://github.com/objectcomputing/OpenDDS
 
 
-========================================================================
-
 Version 3.6 of OpenDDS.
+-------------------------------------------------------------------------------
 
-Notes:
+##### Notes:
 - The discovery framework of OpenDDS has been refactored to be more
   asynchronous.  This should make discovery faster and more reliable
   for both publishing and subscribing clients, regardless of the
@@ -135,28 +133,28 @@ Notes:
 
 - Improved DDS specification compliance with regards to reliability,
   resource limits, and history qos settings.  Specifically, reliable
-  data writers may block for max_blocking_time and potentially return
-  DDS::RETCODE_TIMEOUT in situations where they would have simply
+  data writers may block for max\_blocking\_time and potentially return
+  DDS::RETCODE\_TIMEOUT in situations where they would have simply
   written the data in older version of OpenDDS.  The new behavior
   is required by the DDS specification, see section 2.2.2.4.2.11
   of the version 1.4 specification for details.  This change affects
   various operations of the data writer interface including the
   write and register operations.
 
-Additions:
+##### Additions:
 - The wireshark dissector now supports wireshark versions 1.8.x, 1.10.x,
   1.12.x, and 1.99.1.
 
 - The modeling framework now support Eclipse 4.4 (Luna) and GMF 3.1.x
 
-- Added a public_address option for the tcp transport.  This option
-  allows a tcp transport instance to listen on one address (local_address)
-  while advertising another address (public_address) to discovery.
+- Added a public\_address option for the tcp transport.  This option
+  allows a tcp transport instance to listen on one address (local\_address)
+  while advertising another address (public\_address) to discovery.
   This feature was used to allow a proxy process between the subscriber
   and publisher in the TcpReconnect test, but may also be useful in
   other deployment scenarios, especially using OpenDDS through a firewall.
 
-Fixes:
+##### Fixes:
 - There were a number of concurrency and thread utilization improvements.
   These changes fixed a number of threading issues as well as improving
   the efficiency of publication.
@@ -172,7 +170,7 @@ Fixes:
 
 - Fixed memory leak at shutdown time in modeling library.
 
-Tests:
+##### Tests:
 - Many updates to make test results more complete and deterministic.
 
 - Added a TcpReconnect test that exercised the ability of the tcp
@@ -187,21 +185,20 @@ Tests:
 
 - Added a packet reassembly unit test.
 
-
-========================================================================
-
 Version 3.5.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
-Notes: Due to addition control messages in the 3.5.1 release, mixing 3.5.0
+##### Notes:
+ 
+  - Due to addition control messages in the 3.5.1 release, mixing 3.5.0
   and 3.5.1 releases should work properly, but the 3.5.0 data readers can emit
   the following error message when associating with a durable 3.5.1 data
-  writer:
+  writer: 
+    ERROR: DataReaderImpl::data\_received unexpected message\_id = 11
+    Upgrade all endpoints to 3.5.1 to remove this error message.
 
-  ERROR: DataReaderImpl::data_received unexpected message_id = 11
+##### Additions:
 
-  Upgrade all endpoints to 3.5.1 to remove this error message.
-
-Additions:
 - Support later (>= 4.7) versions of GCC compilers, and later (>= 2.0a)
   builds of TAO. Configure script now downloads 2.2a by default.
 
@@ -210,18 +207,18 @@ Additions:
 
 - Updated UML design diagrams to reflect current code base.
 
-Fixes:
+##### Fixes:
 
 - DCPSInfoRepo no longer informs a subscriber about a crashed or killed
   publisher.  This made associations of current publishers and subscribers
   delayed until timeout was reached.
 
-- Fixed deadlock condition in send_delayed_notifications() resulting from
+- Fixed deadlock condition in send\_delayed\_notifications() resulting from
   multiple datawriters.
 
-- Fixed deadlock in DataLinkSet::send_control().
+- Fixed deadlock in DataLinkSet::send\_control().
 
-- Fixed deadlock in WaitSet::wait() and DataReaderImpl::data_received().
+- Fixed deadlock in WaitSet::wait() and DataReaderImpl::data\_received().
 
 - Fixed multicast transport with multiple participants in a single process.
 
@@ -230,8 +227,8 @@ Fixes:
 - Fixed crash of long-lived zero-copy sequence when it is destroyed and
   crash of zero-copy sequence accessing released instances.
 
-- Fixed unprotected access to DataWriterImpl::reader_info_,  and
-  TransportSendStrategy::pkt_chain_.
+- Fixed unprotected access to DataWriterImpl::reader\_info\_,  and
+  TransportSendStrategy::pkt\_chain\_.
 
 - Fixed multiple RTPS crashes when participant is being deleted.
 
@@ -261,7 +258,7 @@ Fixes:
   TransportSendControlElement will delete itself before it reports to the listener
   that the message has been delivered/dropped.
 
-Tests:
+##### Tests:
 
 - Many updates to make test results more deterministic.
 
@@ -278,10 +275,8 @@ Tests:
 
 - Rewrite LargeSample test to make it verify message contents are as expected.
 
-
-========================================================================
-
 Version 3.5 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Updates to RTPS support resulting from both interoperability
   testing (March 2013 OMG meeting) and user feedback.
@@ -295,17 +290,15 @@ Version 3.5 of OpenDDS.
 - Added config options to bind RTPS-related multicast sockets to
   specific network interfaces.  See the ChangeLog for details.
 
-- Fixed an opendds_idl code generated bug when typedefs of basic
+- Fixed an opendds\_idl code generated bug when typedefs of basic
   types are used as fields of structs.
 
 - Corrected a number of other bugs related to discovery and scaling.
 
-
-========================================================================
-
 Version 3.4.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
-- Added a new option to opendds_idl, -Wb,v8, which generates type support
+- Added a new option to opendds\_idl, -Wb,v8, which generates type support
   for copying DCPS structs from C++ objects to JavaScript objects -- requires
   the V8 JavaScript engine.  See https://npmjs.org/package/opendds for OpenDDS
   integration with Node.js.
@@ -315,21 +308,19 @@ Version 3.4.1 of OpenDDS.
 
 - Clang 3.2 is now a supported compiler.
 
-- Fixed a bug in the rtps_udp transport, in certain cases an invalid Gap
+- Fixed a bug in the rtps\_udp transport, in certain cases an invalid Gap
   submessage was sent which can result in data samples not being received.
 
-
-========================================================================
-
 Version 3.4 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Added new OpenDDS-specific APIs for sending and receiving untyped data,
   (does not require code generation from IDL data structures).  See the
   Recorder and Replayer classes and the test in tests/DCPS/RecorderReplayer.
 
-- Implemented the ability to send fragmented data with the rtps_udp transport.
+- Implemented the ability to send fragmented data with the rtps\_udp transport.
 
-- Fixed a bug in copy_from_topic_qos(): the Ownership policy is now copied.
+- Fixed a bug in copy\_from\_topic\_qos(): the Ownership policy is now copied.
 
 - The optimization of publisher-side content filtering now applies to durable
   data in addition to newly written data samples.
@@ -341,13 +332,11 @@ Version 3.4 of OpenDDS.
 - Added a new option for per-domain default transport configurations.
 
 - Corrected IDL string constants for QoS policy names which were wrong in the
-  DDS spec (GROUPDATA and TRANSPORTPRIORITY ..._QOS_POLICY_NAME).  These are
+  DDS spec (GROUPDATA and TRANSPORTPRIORITY ...\_QOS\_POLICY\_NAME).  These are
   not used anywhere in OpenDDS.
 
-
-========================================================================
-
 Version 3.3 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - If an instance of a transport can't be set up, an exception is thrown so
   that different configuration parameters can be attempted by the user.
@@ -373,17 +362,15 @@ Version 3.3 of OpenDDS.
 - The support for the generation of the DDS4CCM needed LEM library has been
   moved to CIAO DDS4CCM. This removed the optional dependency on CIAO.
 
-
-========================================================================
-
 Version 3.2 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Added a new transport type: Shared Memory
-  Use "shmem" as the short name (in place of "tcp", "udp", "multicast", etc.).
+  Use shmem as the short name (in place of "tcp", "udp", "multicast", etc.).
   See dds/DCPS/transport/shmem/ShmemInst.h for configurable parameters.
 
 - The udp transport now supports setting IP DSCP (DiffServ CodePoint) based on
-  the writer's TRANSPORT_PRIORITY QoS value.
+  the writer's TRANSPORT\_PRIORITY QoS value.
 
 - Fixed bugs in udp and multicast transports, including reassembly of fragments.
 
@@ -391,11 +378,11 @@ Version 3.2 of OpenDDS.
   this version DDS4CCM has support for OpenDDS as DDS vendor. Check the CIAO
   release notes for details on what has been ported.
 
-- Added new QOS_XML library with which QoS settings can be done through an XML
+- Added new QOS\_XML library with which QoS settings can be done through an XML
   file. Used at this moment by the CIAO DDS4CCM implementation.
 
-- Implemented rejection of samples due to exceeding max_instances and
-  max_samples.
+- Implemented rejection of samples due to exceeding max\_instances and
+  max\_samples.
 
 - Made the RTPS discovery and transport code more robust.
 
@@ -412,43 +399,45 @@ Version 3.2 of OpenDDS.
   profiles discussed in the Compliance section of the DDS spec. See
   section 1.3.3 in the Developer's Guide for more information.
 
-
-========================================================================
-
 Version 3.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - This release includes the initial implementation of DDS Interoperability
   in OpenDDS, using the DDS-RTPS spec v2.1 from the OMG (formal/2010-11-01).
+  
   RTPS support in OpenDDS consists of two main features:
-    - A pluggable transport implementation, known as "rtps_udp" because it
+  
+    - A pluggable transport implementation, known as "rtps\_udp" because it
       implements the UDP PSM of the DDS-RTPS spec.  This is a peer of the
       existing OpenDDS-native transports: "tcp", "udp", and "multicast".
+  
     - A new discovery mechanism for RTPS's distributed discovery.  This can
       replace the DCPSInfoRepo in existing OpenDDS deployments.
+  
   Neither of these features is enabled by default.  See the OpenDDS Developer's
   Guide chapter 7 for configuration details.  Also, note that not every OpenDDS
   feature (for example, certain QoS values) is supported with RTPS in the
   initial implementation.  These exceptions are documented in the Developer's
   Guide sections 7.3.3 and 7.4.5.5.
 
-- Changed set_qos() of DataWriter, DataReader, Publisher and Subscriber so
+- Changed set\_qos() of DataWriter, DataReader, Publisher and Subscriber so
   when provided a QoS value incompatible with an existing association, that the
-  value will be changed, association will be broken, and RETCODE_OK returned.
+  value will be changed, association will be broken, and RETCODE\_OK returned.
   Previously, if any association would be broken, no change would take place
   and false would be returned.  New version is compatible with DDS spec.
 
 - OpenDDS udp transport enhancements:
-    - Added send_buffer_size and rcv_buffer_size parameters to the udp
+    - Added send\_buffer\_size and rcv\_buffer\_size parameters to the udp
       transport configuration.
     - The default local address will use DNS host names instead of IP
       addresses.
     - Added support for IPv6 when ACE is built with IPv6 support.
 
 - OpenDDS multicast transport enhancements:
-    - Added a configuration parameter "async_send" (defaults to false)
+    - Added a configuration parameter "async\_send" (defaults to false)
       that will send multicast datagrams using async I/O if supported
       by the platform.  As of now this is only implemented on Windows.
-      It could be extended to Unix aio_*() functions in theory, but these
+      It could be extended to Unix aio\_*() functions in theory, but these
       are generally not preferred and the regular socket functions are
       sufficiently fast.
 
@@ -457,18 +446,16 @@ Version 3.1 of OpenDDS.
   setting to get the DURABILITY QoS behavior matching that of OpenDDS v1.2
   and earlier.  It was not being used in any OpenDDS code.
 
-
-========================================================================
-
 Version 3.0.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - The DCPSInfoRepo reassociates Built in Topic connections for existing
   datareaders and datawriters when restarted from persistence.
 
-- The opendds_idl compiler will now print a warning about not including TAO's
+- The opendds\_idl compiler will now print a warning about not including TAO's
   orb.idl file when a file named orb.idl is included.
 
-- Fixed a bug where the timeout for passive_connect_duration was ignored.
+- Fixed a bug where the timeout for passive\_connect\_duration was ignored.
 
 - Fixed multiple bugs in fragmentation/reassembly used for udp and multicast.
 
@@ -480,15 +467,13 @@ Version 3.0.1 of OpenDDS.
 - New example Messenger.minimal - which is like messenger, but streamlined
   for new users to understand the whole easier.
 
-
-========================================================================
-
 Version 3.0 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Transport configuration has undergone a major redesign and any existing
   transport application code or transport configuration files need to be
   updated.  See the Developer's Guide for details of the design.  See
-  $DDS_ROOT/docs/OpenDDS_3.0_Transition.txt for a description on how
+  $DDS\_ROOT/docs/OpenDDS\_3.0\_Transition.txt for a description on how
   to migrate your applications to the OpenDDS 3.0 design.  As a part of
   this design OpenDDS gains the following capabilities:
     - Most applications can do all transport configuration via
@@ -499,7 +484,7 @@ Version 3.0 of OpenDDS.
 - The simpleTcp transport was renamed to tcp (the directory containing
   its source code was also renamed).
 
-- The udp transport no longer required a local_address when being
+- The udp transport no longer required a local\_address when being
   configured.  If not specified, the property defaults to a value
   selected by the operating system (similar to the tcp transport).
 
@@ -517,16 +502,14 @@ Version 3.0 of OpenDDS.
 
 - Wireshark dissector improvements include removal of the restriction
   that inforepo IOR be placed in a special file.  Dissector config
-  files can now be generated by opendds_idl.
+  files can now be generated by opendds\_idl.
 
 - The monitor tool has a new view which is an alternate to the Graphviz
   view.  The Node view uses Qt gui elements to model the OpenDDS system.
   Users can manipulate Node view graphs before saving them to PNG files.
 
-
-========================================================================
-
 Version 2.4 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - This will be the final release of OpenDDS that will build with the current
   patch level of TAO 1.5a.  This release is compatible with (the current patch
@@ -541,10 +524,10 @@ Version 2.4 of OpenDDS.
   equivalent setting in the [common] section of the configuration file.
   When using non-default DEADLINE or LIVELINESS QoS policy values, special
   consideration needs to be given to how these "missing" samples impact the
-  QoS behavior, see the document in docs/design/CONTENT_SUBSCRIPTION.
+  QoS behavior, see the document in docs/design/CONTENT\_SUBSCRIPTION.
 
 - DisjointSequence, an internal class used to track sequence numbers for both
-  multicast and wait_for_acks, was enhanced to store contiguous ranges instead
+  multicast and wait\_for\_acks, was enhanced to store contiguous ranges instead
   of individual values.  Thus it will not require so much memory in cases where
   there are gaps in the sequence numbers.
 
@@ -563,9 +546,9 @@ Version 2.4 of OpenDDS.
   monitor tool will run on systems without Graphviz installed but will
   not be able to generate .png files.
 
-- Enhanced the Wireshark packet dissector to inspect SAMPLE_DATA message
+- Enhanced the Wireshark packet dissector to inspect SAMPLE\_DATA message
   contents. This requires a data model expressed in an .ini file (documented
-  in tools/dissector/README).  In order to associate a SAMPLE_DATA message
+  in tools/dissector/README).  In order to associate a SAMPLE\_DATA message
   with a type, the publication ID is harvested from InfoRepo GIOP messages.
   In order to detect InfoRepo GIOP messages, the IOR for the InfoRepo must
   be written in a file called "IOR.txt" in the current working directory when
@@ -582,10 +565,8 @@ Version 2.4 of OpenDDS.
     * For more, see the Eclipse online help, under "OpenDDS Modeling
       SDK Guide > Getting Started"
 
-
-========================================================================
-
 Version 2.3 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - First release of the OpenDDS Modeling SDK, a modeling tool that can be
   used by the application developer to define the required middleware
@@ -601,7 +582,7 @@ Version 2.3 of OpenDDS.
   Built-In Topics.  The DCPSInfoRepo process will take care of loading
   SimpleTCP (if it's not already loaded).
 
-- Fixed method signature of DataWriter::register_instance_w_timestamp()
+- Fixed method signature of DataWriter::register\_instance\_w\_timestamp()
   to have two arguments per the latest spec, not three.
 
 - "make install" is now available on platforms using GNU Make and when
@@ -609,10 +590,8 @@ Version 2.3 of OpenDDS.
 
 - Added support for Microsoft Visual Studio 2010 (vc10).
 
-
-========================================================================
-
 Version 2.2 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Completed the implementation of the Content-Subscription Profile (which
   was begun in version 1.3 of OpenDDS).  This includes:
@@ -620,25 +599,25 @@ Version 2.2 of OpenDDS.
   - ContentFilteredTopic
   - MultiTopic
   The content-subscription profile can be disabled at compile-time in order
-  to reduce footprint: set the MPC feature "content_subscription" to 0.
+  to reduce footprint: set the MPC feature "content\_subscription" to 0.
 
 - The code generation tools for OpenDDS have changed in this release.  The
-  Perl script "dcps_ts.pl" is no longer used and instead the OpenDDS IDL
-  Compiler "opendds_idl" takes its place.  opendds_idl also includes the
-  functionality which used to be in tao_idl and enabled with -Gdcps.
+  Perl script "dcps\_ts.pl" is no longer used and instead the OpenDDS IDL
+  Compiler "opendds\_idl" takes its place.  opendds\_idl also includes the
+  functionality which used to be in tao\_idl and enabled with -Gdcps.
   Existing applications that use MPC do not need to make any changes unless
-  they happen to depend on some rarely-used arguments to dcps_ts.pl.  See the
-  OpenDDS Developer's Guide for the list of arguments accepted by opendds_idl.
+  they happen to depend on some rarely-used arguments to dcps\_ts.pl.  See the
+  OpenDDS Developer's Guide for the list of arguments accepted by opendds\_idl.
 
-- Renamed odds_repoctl command to repoctl.  Add a decorator if needed when
+- Renamed odds\_repoctl command to repoctl.  Add a decorator if needed when
   installing external to the OpenDDS directories.
 
-- Renamed odds_monitor command to monitor.  Add a decorator if needed when
+- Renamed odds\_monitor command to monitor.  Add a decorator if needed when
   installing external to the OpenDDS directories.
 
-- Renamed Wireshark dissector 'odds' library to 'OpenDDS_Dissector'.
-  The source directory was renamed from $DDS_ROOT/tools/odds_dissector
-  to $DDS_ROOT/tools/dissector.
+- Renamed Wireshark dissector 'odds' library to 'OpenDDS\_Dissector'.
+  The source directory was renamed from $DDS\_ROOT/tools/odds\_dissector
+  to $DDS\_ROOT/tools/dissector.
 
 - Fixed transport so it now allows associations between datareaders and
   datawriters attached to the same transport to work.
@@ -646,24 +625,22 @@ Version 2.2 of OpenDDS.
 - Fixed a bug that causes samples larger than 64K to not work correctly with
   the SimpleTCP transport.
 
-- Added nak_delay_intervals and nak_max configuration options for reliable
+- Added nak\_delay\_intervals and nak\_max configuration options for reliable
   multicast to help reduce naks.
 
 - Added support for Ownership qos.
 
 - Added support for GROUP presentation.
 
-- Changed the default DataWriterQos reliability max_blocking_time from infinite
+- Changed the default DataWriterQos reliability max\_blocking\_time from infinite
   to be 100ms to be consistent with spec 1.2.
 
 - A new "configure" script is available to assist with setting up prerequisites
   for OpenDDS compilation, including optionally downloading ACE+TAO.  See the
   INSTALL file for details.
 
-
-========================================================================
-
 Version 2.1.3 of OpenDDS.
+-------------------------------------------------------------------------------
 
 - Various fixes for memory management issue on transport framework.
 
@@ -679,29 +656,27 @@ Version 2.1.3 of OpenDDS.
 - Extended the capabilities of the OpenDDS-Bench performance test
   framework.  This consists mostly of expanded pre-configured tests as
   well as additional execution and plotting scripts.  The user guide at
-  performance-tests/Bench/doc/user_guide.html contains the details.
+  performance-tests/Bench/doc/user\_guide.html contains the details.
 
 - Masked interrupts in threads created by OpenDDS to avoid failures
   while in system calls.
-  Example: ERROR: ACE::handle_write_ready return -1 while waiting
-                  to unclog. handle_write_ready: Interrupted system call
+  Example: ERROR: ACE::handle\_write\_ready return -1 while waiting
+                  to unclog. handle\_write\_ready: Interrupted system call
 
 - Added support to set the TTL for multicast transports.
 
-
-========================================================================
-
 Version 2.1.2 of OpenDDS.
+-------------------------------------------------------------------------------
 
-* This is a bugfix release to account for issues introduced by the
-  previous version.
+- **This is a bugfix release to account for issues introduced by the
+  previous version.**
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - Various bugfixes for locking issues during sample removal.
 
-- Fixed a bug in obtain_buffer() that did not return the TIMEOUT error
-  code when max_blocking_time is 0 or a very small period.
+- Fixed a bug in obtain\_buffer() that did not return the TIMEOUT error
+  code when max\_blocking\_time is 0 or a very small period.
 
 - Fixed a deadlock in the new IP multicast transport caused when data
   is received while a reliable session is handshaking.
@@ -712,58 +687,54 @@ New to this version are the following changes:
 - Enhanced the experimental UDP/IP transport to support multiplexing
   samples to unique endpoints rather than unique entities.
 
-
-========================================================================
-
 Version 2.1.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
-* This is a bugfix release to account for issues introduced by the
-  previous version.
+- **This is a bugfix release to account for issues introduced by the
+  previous version.**
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - Various bugfixes have been applied to the new IP multicast transport
   and the Extensible Transport Framework (ETF) to improve stability.
 
 - Added IDL for ContentFilteredTopic and MultiTopic, but they are not yet
-  implemented (operations will return NULL or RETCODE_UNSUPPORTED).
+  implemented (operations will return NULL or RETCODE\_UNSUPPORTED).
 
 - A Wireshark 1.2.x compatible dissector is included in this release.
-  See $DDS_ROOT/tools/odds_dissector/README for details.
-
-
-========================================================================
+  See $DDS\_ROOT/tools/odds\_dissector/README for details.
 
 Version 2.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - The OpenDDS-Bench performance testing framework has been enhanced to
   include the following:
-    * extended to allow fixed rate testing;
-    * added predefined latency test configuration files;
-    * added data reduction scripts to post process test results;
-    * added data visualization scripts using gnuplot to create charts
+    - extended to allow fixed rate testing;
+    - added predefined latency test configuration files;
+    - added data reduction scripts to post process test results;
+    - added data visualization scripts using gnuplot to create charts
       from reduced test data.
-  Documentation is located at: $DDS_ROOT/performance-tests/Bench/doc.
+  Documentation is located at: $DDS\_ROOT/performance-tests/Bench/doc.
 
 - The monitor library introduces a new instrumentation mechanism for
   reporting OpenDDS run-time information.  This information is
   intended to supplement that provided by the standard-defined
-  Built-In-Topics.  See $DDS_ROOT/dds/monitor/README for further
+  Built-In-Topics.  See $DDS\_ROOT/dds/monitor/README for further
   details.
 
 - A new instrumentation application is available to view executing
-  OpenDDS service Entities.  This is located at: $DDS_ROOT/tools/odds_monitor.
+  OpenDDS service Entities.  This is located at: $DDS\_ROOT/tools/odds\_monitor.
 
-- The opendds_repo_ctl tool has been moved from $DDS_ROOT/dds/tools to
-  $DDS_ROOT/tools.  The name has also been changed to odds_repoctl to
+- The opendds\_repo\_ctl tool has been moved from $DDS\_ROOT/dds/tools to
+  $DDS\_ROOT/tools.  The name has also been changed to odds\_repoctl to
   reflect changes in naming conventions in this release.
 
 - A new multicast transport is available which replaces the older
   ReliableMulticast and SimpleMcast transports.  For a detailed description
   of the design, configuration, known issues, and potential enhancements,
-  see: $DDS_ROOT/docs/html/multicast/multicast.html.
+  see: $DDS\_ROOT/docs/html/multicast/multicast.html.
 
 - A new udp transport is available which replaces the older SimpleUdp
   transport.  Like SimpleUdp, udp provides best-effort reliablity only;
@@ -772,44 +743,40 @@ New to this version are the following changes:
 - Numerous bugs in the Extensible Transport Framework (ETF) have been
   addressed to improve the stability of new and existing transports.
 
-- Formal ranges of DDS::DomainId_t values are now specified; users have
+- Formal ranges of DDS::DomainId\_t values are now specified; users have
   full access to all DomainId values between 0x0 and 0x7fffffff.  All other
   values are reserved for use by the implementation.
 
-
-=========================================================================
-
 Version 2.0.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
-* This is a bugfix release to account for issues introduced by the 2.0
-  integration process.  No new features have been added in this release.
+- **This is a bugfix release to account for issues introduced by the 2.0
+  integration process.  No new features have been added in this release.**
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - Bugfixes for STLport support using Sun CC compilers.
 
 - Corrected default ReliablityQoS policy for DataWriter entities.
 
-- Bugfixes to Java language bindings including TAO_IDL interface changes
+- Bugfixes to Java language bindings including TAO\_IDL interface changes
   introduced in DOC TAO 1.7.4 and incorrectly generated project files.
 
-
-=========================================================================
-
 Version 2.0 of OpenDDS.
+-------------------------------------------------------------------------------
 
-* This is the first release of OpenDDS that conforms to the minimum
+- **This is the first release of OpenDDS that conforms to the minimum
   compliance profile as documented in formal/07-01-01 (version 1.2).
   Near-complete support for the persistence profile and initial support
-  for the content-subscription profile is also provided in this release.
+  for the content-subscription profile is also provided in this release.**
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - Updated support for DataWriter::unregister() and DataWriter::dispose()
   to properly release resources after all samples in a marked instance
   are removed.
 
-- Implemented Publisher::wait_for_acknowledgments() as defined in
+- Implemented Publisher::wait\_for\_acknowledgments() as defined in
   formal/07-01-01.
 
 - Fixed an issue in QueryCondition where applying filters on non-valid
@@ -819,89 +786,88 @@ New to this version are the following changes:
 - Implemented PRESENTATION QoS policy as defined in formal/07-01-01.
   Currently, GROUP access is not supported.
 
-- Implemented MANUAL_BY_TOPIC and MANUAL_BY_PARTICIPANT LIVELINESS QoS
+- Implemented MANUAL\_BY\_TOPIC and MANUAL\_BY\_PARTICIPANT LIVELINESS QoS
   policy kinds.
 
-- Implemented BY_SOURCE_TIMESTAMP DESTINATION_ORDER QoS policy kind.
+- Implemented BY\_SOURCE\_TIMESTAMP DESTINATION\_ORDER QoS policy kind.
   Samples may now be ordered based on reception or source times on a per
   instance basis.
 
-- Implemented ENTITY_FACTORY auto_enable support in formal/07-01-01.
+- Implemented ENTITY\_FACTORY auto\_enable support in formal/07-01-01.
   Entities may now be enabled manually by setting this value to false.
 
-- Implemented WRITER_DATA_LIFECYCLE as defined in formal/07-01-01.
+- Implemented WRITER\_DATA\_LIFECYCLE as defined in formal/07-01-01.
   Instances will now be properly unregistered/disposed when a DataWriter
   is deleted.
 
-- Implemented READER_DATA_LIFECYCLE as defined in formal/07-01-01.
+- Implemented READER\_DATA\_LIFECYCLE as defined in formal/07-01-01.
 
-- Implemented TIME_BASED_FILTER as defined in formal/07-01-01.
+- Implemented TIME\_BASED\_FILTER as defined in formal/07-01-01.
 
-- create_*() functions now take a StatusMask argument.  A new constant
-  named OpenDDS::DCPS::DEFAULT_STATUS_MASK has been introduced as a
+- create\_*() functions now take a StatusMask argument.  A new constant
+  named OpenDDS::DCPS::DEFAULT\_STATUS\_MASK has been introduced as a
   convenience to indicate interest in all status changes.
 
 - Implemented the following new methods on DomainParticipant as defined
   in formal/07-01-01:
-    * get_discovered_participants()
-    * get_discovered_participant_data()
-    * get_discovered_topics()
-    * get_discovered_topic_data()
+    - get\_discovered\_participants()
+    - get\_discovered\_participant\_data()
+    - get\_discovered\_topics()
+    - get\_discovered\_topic\_data()
 
 - Constant name changes:
-    * PUBLICATION_MATCH_STATUS  => PUBLICATION_MATCHED_STATUS
-    * DURATION_INFINITY_SEC     => DURATION_INFINITE_SEC
-    * DURATION_INFINITY_NSEC    => DURATION_INFINITE_NSEC
-    * TIMESTAMP_INVALID_SEC     => TIME_INVALID_SEC
-    * TIMESTAMP_INVALID_NSEC    => TIME_INVALID_NSEC
+    - PUBLICATION\_MATCH\_STATUS  => PUBLICATION\_MATCHED\_STATUS
+    - DURATION\_INFINITY\_SEC     => DURATION\_INFINITE\_SEC
+    - DURATION\_INFINITY\_NSEC    => DURATION\_INFINITE\_NSEC
+    - TIMESTAMP\_INVALID\_SEC     => TIME\_INVALID\_SEC
+    - TIMESTAMP\_INVALID\_NSEC    => TIME\_INVALID\_NSEC
 
 - Removed constants:
-    * TRANSPORTPRIORITY_QOS_POLICY_NAME
+    - TRANSPORTPRIORITY\_QOS\_POLICY\_NAME
 
 - Type name changes:
-    * StatusKindMask            => StatusMask
-    * SubscriptionMatchStatus   => SubscriptionMatchedStatus
-    * PublicationMatchStatus    => PublicationMatchedStatus
+    - StatusKindMask            => StatusMask
+    - SubscriptionMatchStatus   => SubscriptionMatchedStatus
+    - PublicationMatchStatus    => PublicationMatchedStatus
 
 - Removed types:
-    * SampleStateSeq
-    * ViewStateSeq
-    * OctetSeq
+    - SampleStateSeq
+    - ViewStateSeq
+    - OctetSeq
 
 - Other type changes:
-    * BuiltinTopicKey_t is now a struct containing an array rather
-      than a bare array type.  This allows passing a BuiltinTopicKey_t
+    - BuiltinTopicKey\_t is now a struct containing an array rather
+      than a bare array type.  This allows passing a BuiltinTopicKey\_t
       by reference.
-    * Ownership is now indicated in DataReaderQos and DataWriterQos as
+    - Ownership is now indicated in DataReaderQos and DataWriterQos as
       well as PublicationBuiltinTopicData and SubscriptionBuiltinTopicData.
-    * Removed sevice_cleanup_delay from DurabilityQosPolicy.
+    - Removed sevice\_cleanup\_delay from DurabilityQosPolicy.
 
 - Method name changes:
-    * register()/_cxx_register()  => register_instance()
-    * register_w_timestamp()      => register_instance_w_timestamp()
-    * unregister()                => unregister_instance()
-    * unregister_w_timestamp()    => unregister_instance_w_timestamp()
-    * on_subscription_match()     => on_subscription_matched()
-    * on_publication_match()      => on_publication_matched()
+    - register()/\_cxx\_register()  => register\_instance()
+    - register\_w\_timestamp()      => register\_instance\_w\_timestamp()
+    - unregister()                => unregister\_instance()
+    - unregister\_w\_timestamp()    => unregister\_instance\_w\_timestamp()
+    - on\_subscription\_match()     => on\_subscription\_matched()
+    - on\_publication\_match()      => on\_publication\_matched()
 
 - Other method changes:
-    * set_qos(), get_qos(), get_*_status() and assert_liveliness() now
+    - set\_qos(), get\_qos(), get\_*\_status() and assert\_liveliness() now
       return error codes as specified in formal/07-01-01.
-    * Subscriber::get_datareaders() reader parameter has changed from out
+    - Subscriber::get\_datareaders() reader parameter has changed from out
       to inout.
 
 
-=========================================================================
-
 Version 1.3 of OpenDDS.
+-------------------------------------------------------------------------------
 
-* This will be the final release of OpenDDS that will build with the current
+- **This will be the final release of OpenDDS that will build with the current
   patch level of TAO 1.4a.  This release is compatible with (the current patch
   levels of) TAO 1.4a, 1.5a, and 1.6a, as well as the current DOC Group
   beta/micro release.  Future releases will be compatible with TAO 1.5a, 1.6a
-  and the DOC group -- see the README file for details on TAO versions.
+  and the DOC group -- see the README file for details on TAO versions.**
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - Implemented the Communication Status entity structures and behaviors to
   conform with the version 1.2 specification (formal/07-01-01).  This
@@ -910,20 +876,20 @@ New to this version are the following changes:
   adding new members to the PublicationMatchStatus and
   SubscriptionMatchStatus structures.
 
-- Implemented the TRANSPORT_PRIORITY Quality of service policy using the
+- Implemented the TRANSPORT\_PRIORITY Quality of service policy using the
   policy value to set thread priorities and DiffServ codepoint values.
   The current implementation does not honor the Changeable behavior of
   the policy.  Only the intially established policy value is honored for
   any given DataWriter Entity.  Thread priorities are not currently set
   on Windows systems.
 
-- Implemented the LATENCY_BUDGET Quality of service policy as a
+- Implemented the LATENCY\_BUDGET Quality of service policy as a
   monitoring feature with an extended listener callback for exceeded
   budget values.  Statistics for latency are made available via an
   OpenDDS-specific extended API as well.
 
 - Implemented the ReadCondition interface and associated operations
-  on the DataReader (such as read_w_condition).
+  on the DataReader (such as read\_w\_condition).
 
 - Implemented the QueryCondition interface, but only queries of the form
   "ORDER BY a[, b, c...]" have any effect.  In other words, it's a mechanism
@@ -942,7 +908,7 @@ New to this version are the following changes:
 - The DURABILITY QoS implementation was corrected so that readers requesting
   the VOLATLIE kind will not receive historic samples from writers.  Since
   there were some use-cases for the old behavior, it is available through an
-  OpenDDS-specific interface -- see $DDS_ROOT/dds/DdsDcpsSubscriptionExt.idl.
+  OpenDDS-specific interface -- see $DDS\_ROOT/dds/DdsDcpsSubscriptionExt.idl.
 
 - When the writer's DURABILITY QoS is PERSISTENT, the format of the
   data stored on the filesystem has changed.  Instead of a single file in the
@@ -950,10 +916,10 @@ New to this version are the following changes:
   using the option -DCPSPersistentDataDir.
 
 - A Java Message Service 1.1 (JMS) provider built on top of OpenDDS is now
-  available in $DDS_ROOT/java/jms.  JMS Topics are supported (not queuing).
+  available in $DDS\_ROOT/java/jms.  JMS Topics are supported (not queuing).
   See the README in that directory for more info.
 
-- The $DDS_ROOT/bin/federation utility has been renamed to opendds_repo_ctl
+- The $DDS\_ROOT/bin/federation utility has been renamed to opendds\_repo\_ctl
   and now supports shutting down a remote non-federated DCPSInfoRepo process.
 
 - Deleting a DataWriter from a Publisher now blocks until pending samples have
@@ -962,24 +928,23 @@ New to this version are the following changes:
   specify a number of seconds to block with the -DCPSPendingTimeout option.
 
 - Instance handles are now compliant with version 1.2 of the DDS
-  specification.  Additionally, the contains_entity and get_instance_handle
+  specification.  Additionally, the contains\_entity and get\_instance\_handle
   operations have been implemented.
 
-- Implemented DataWriter::wait_for_acknowledgments() from formal/07-01-01.
+- Implemented DataWriter::wait\_for\_acknowledgments() from formal/07-01-01.
 
-- Added support for Windows Mobile 6 (WinCE) Standard SDK, and ACE_USES_WCHAR
+- Added support for Windows Mobile 6 (WinCE) Standard SDK, and ACE\_USES\_WCHAR
   builds in general.  See docs/design/wchar.txt.
 
-=========================================================================
-
 Version 1.2 of OpenDDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - Implemented the WaitSet, GuardCondition, and StatusCondition interfaces
   from the OMG DDS specification.
 
-- Implemented DomainParticipant::get_current_time() from formal/07-01-01.
+- Implemented DomainParticipant::get\_current\_time() from formal/07-01-01.
 
 - Added the ability for using multiple repositories to provide redundant
   service metadata management.
@@ -1000,7 +965,7 @@ New to this version are the following changes:
   These internal identifiers were previously 32 bits.  The 128 format
   follows the format of OMG Specification formal/08-04-09 (The Real-time
   Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol
-  Specification, Version 2.0) GUID_t unique identifier type.
+  Specification, Version 2.0) GUID\_t unique identifier type.
 
   OpenDDS places the identifier value for the DataWriter Entity of a
   publication on the wire to identify the source of data samples.  This
@@ -1010,15 +975,15 @@ New to this version are the following changes:
 
 - Java Bindings for OpenDDS
 
-  See $DDS_ROOT/java/README, $DDS_ROOT/java/INSTALL, $DDS_ROOT/java/FAQ
+  See $DDS\_ROOT/java/README, $DDS\_ROOT/java/INSTALL, $DDS\_ROOT/java/FAQ
 
-- dcps_ts.pl changes
+- dcps\_ts.pl changes
 
   Modified this script to create a single idl, header, and source file
   no matter how many types are contained within the input idl file.  This
   allows the output file names to be based upon the input file name (instead
   of the types found in the idl file).  Users of prior OpenDDS versions can
-  use the script $DDS_ROOT/bin/update_dcps.pl to assist with this transition.
+  use the script $DDS\_ROOT/bin/update\_dcps.pl to assist with this transition.
 
   Added a command line argument to allow an output directory to be
   specified.  All output files will be placed into this directory if
@@ -1029,38 +994,38 @@ New to this version are the following changes:
 
   A new library has been introduced (libDCPSInfoRepoServ) which provides
   the neccessary hooks for running the DCPSInfoRepo within another process.
-  For example usage, see: $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo.cpp.
-
+  For example usage, see: $DDS\_ROOT/dds/InfoRepo/DCPSInfoRepo.cpp.
+  
+  
 - Fixed bug in DCPSInfoRepo that did not re-evaluate the compatibility and
   associations when QoS change is made.
 
 - Fixed bugs that affected connection establishment.
 
-  Fixed DataWriterImpl to handle the case that remove_association is called
-  before fully_associated is called.
+  Fixed DataWriterImpl to handle the case that remove\_association is called
+  before fully\_associated is called.
 
   Fixed a race condition that connection delay deletion removes new assocaitions.
 
   Corrected fully association ack verification to fix issues when multiple
   associations of a datalink are added simultaneously.
 
-- Added datalink_release_delay and removed keep_link configuration.
+- Added datalink\_release\_delay and removed keep\_link configuration.
 
-  The datalink_release_delay is the delay for datalink release after no
+  The datalink\_release\_delay is the delay for datalink release after no
   associations. It defaults to 10 seconds. This is to fix disconnect
   problem happened when removing and adding association related to
   same datalink during short period.
 
-  Removed keep_link which can be replaced with a big value of
-  datalink_release_delay.
+  Removed keep\_link which can be replaced with a big value of
+  datalink\_release\_delay.
 
 - Fixed a potential deadlock in reliable multicast transport.
 
-=========================================================================
-
 Version 1.1 of OpenDDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - Added support for PARTITION QoS policy.
 
@@ -1073,7 +1038,7 @@ New to this version are the following changes:
 
   The DEADLINE QoS policy allows the application to detect when data
   is not written or read within a specified amount of time.  The
-  {Offered,Requested}DeadlineMissesStatus::last_instance_handle is
+  {Offered,Requested}DeadlineMissesStatus::last\_instance\_handle is
   currently not updated.
 
 - Added support for LIFESPAN QoS policy.
@@ -1095,13 +1060,13 @@ New to this version are the following changes:
   TRANSIENT DURABILITY, except that cached data will survive process
   destruction.
 
-- Added support for the DURABILITY_SERVICE QoS policy.
+- Added support for the DURABILITY\_SERVICE QoS policy.
 
   This QoS policy provides a way to specify resource limits for
   domain/topic/type-specific data in a TRANSIENT or PERSISTENT
   DURABILITY cache.  The resource limits in question are analogous to,
   although independent of, those found in the HISTORY and
-  RESOURCE_LIMITS policies.
+  RESOURCE\_LIMITS policies.
 
 - Added a new command-line option, "-DCPSTransportDebugLevel".
 
@@ -1121,7 +1086,7 @@ New to this version are the following changes:
 - Added QoS propagation.
 
   The client applications can change the qos of DCPS entity via
-  set_qos() call. The qos updates are propagated to DCPSInfoRepo which
+  set\_qos() call. The qos updates are propagated to DCPSInfoRepo which
   publishes the updated qos to corresponding BIT datawriter and also
   save it to persistent repository.
 
@@ -1132,9 +1097,9 @@ New to this version are the following changes:
   reloading from persistent file maps the subscriber/datareader as
   publisher/datawriter.
 
-  Fixed a bug in qos serialization. The TAO_OutputCDR stream was not
+  Fixed a bug in qos serialization. The TAO\_OutputCDR stream was not
   fully copied to buffer when the qos contains sequence data. The
-  TAO_OutputCDR stream needs be consolidated before memcpy.
+  TAO\_OutputCDR stream needs be consolidated before memcpy.
 
 - Fixed compliance with qos RxO.
 
@@ -1154,7 +1119,7 @@ New to this version are the following changes:
   needs be resolved as IPv6 address as it is used by default configuration
   to support BuiltInTopic.
 
-  The local_address in the configuration file should use IPv6 decimal
+  The local\_address in the configuration file should use IPv6 decimal
   address or hostname that can be resolved as IPv6 address.
 
 - Used the address string instead of 4-byte IP address and port number
@@ -1166,50 +1131,53 @@ New to this version are the following changes:
   The default address string is "host:port". The "host" is the fully qualified
   domain name and the "port" is picked randomly by OS.
 
-- Fixed a problem that the default local_address does not work when hostname
+- Fixed a problem that the default local\_address does not work when hostname
   is resolved as the loopback ip address.
 
-  With the default local_address, the acceptor now is listening on IPv4/IPv6
+  With the default local\_address, the acceptor now is listening on IPv4/IPv6
   ANY, but use the fully qualified hostname for address advertisement.
 
 - Added default configuration for the reliable multicast transport type.
 
-  The multicast_group_address defaults to the ACE default multicast address
+  The multicast\_group\_address defaults to the ACE default multicast address
   (224.9.9.2:20001 for IPv4 and ff05:0::ff01:1:20001 for IPv6) and the
-  local_address defaults to ANY with a random port picked by the OS.
+  local\_address defaults to ANY with a random port picked by the OS.
+  
 
-- Fixed a bug in DataReaderImpl::remove_associations() and
-  DataWriterImpl::remove_associations() that should not attempt to remove
+- Fixed a bug in DataReaderImpl::remove\_associations() and
+  DataWriterImpl::remove\_associations() that should not attempt to remove
   the already removed writer/reader.
 
 - Fixed a bug in SimpleTCP that an active disconnect due to the peer
   graceful disconnect does not terminate send. This bug made the re-established
   connection fail on send strategy state check.
 
+
 - Added dispose() and unregister() notifications.  When dispose()
   is explicitly called on the DataWriter side, the DataReader listener
-  on_data_available() callback should receive a sample with the valid_data
-  flag == 0 and the instance state == NOT_ALIVE_DISPOSED_INSTANCE_STATE.
+  on\_data\_available() callback should receive a sample with the valid\_data
+  flag == 0 and the instance state == NOT\_ALIVE\_DISPOSED\_INSTANCE\_STATE.
 
   When unregister() is explicitly called on the DataWriter side,
-  the DataReader listener on_data_available() callback should receive a
-  sample with the valid_data flag == 0 and the instance state ==
-  NOT_ALIVE_NO_WRITERS_INSTANCE_STATE.
+  the DataReader listener on\_data\_available() callback should receive a
+  sample with the valid\_data flag == 0 and the instance state ==
+  NOT\_ALIVE\_NO\_WRITERS\_INSTANCE\_STATE.
 
-- Moved TRANSPORTTYPE_QOS_POLICY_NAME and TRANSPORTTYPE_QOS_POLICY_ID
+
+- Moved TRANSPORTTYPE\_QOS\_POLICY\_NAME and TRANSPORTTYPE\_QOS\_POLICY\_ID
   from DDS namespace to OpenDDS namespace since they are specific to
   OpenDDS.
 
-=========================================================================
 
 Version 1.0 of OpenDDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - This product has been renamed to OpenDDS from "TAO DDS"
 
   Namespace and module names have been changed accordingly, except for a few
-  cases where we are counting on certain names being generated by the TAO_IDL
+  cases where we are counting on certain names being generated by the TAO\_IDL
   compiler.
 
 
@@ -1224,46 +1192,45 @@ New to this version are the following changes:
 
   Projects that use DDS no longer need to explicitly list "portableserver" as a
   base project.  It will be included by the "dcps*" base projects such as
-  "dcpsexe" and "dcpsexe_with_tcp".  Also, an .mpb file is provided for each of
-  the transport libraries (dcps_tcp.mpb, dcps_unreliable_dgram.mpb,
-  dcps_reliable_multicast.mpb).
+  "dcpsexe" and "dcpsexe\_with\_tcp".  Also, an .mpb file is provided for each of
+  the transport libraries (dcps\_tcp.mpb, dcps\_unreliable\_dgram.mpb,
+  dcps\_reliable\_multicast.mpb).
 
 
 - Supported built-in sequences (the CORBA::*Seq sequences).
 
-  Implementation details:
+##### Implementation details:
+  - DDS keeps copies of the $TAO\_ROOT/tao/*Seq.pidl in $DDS\_ROOT/dds/CorbaSeq
+    directory and renamed to *.idl files. These idl files are compiled with a 
+    new IDL option -Gdcpsonly to just generate the DDS specific code for built 
+    in sequences. The DDS CORBA::*Seq generated code will include the 
+    TAO CORBA::*Seq generated code so both TAO and DDS functions will be available.
 
-    DDS keeps copies of the $TAO_ROOT/tao/*Seq.pidl in
-    $DDS_ROOT/dds/CorbaSeq directory and renamed to *.idl files.
-    These idl files are compiled with a new IDL option -Gdcpsonly to
-    just generate the DDS specific code for built in sequences. The
-    DDS CORBA::*Seq generated code will include the TAO CORBA::*Seq
-    generated code so both TAO and DDS functions will be available.
 
-    When a DDS application contains an idl file that includes
-    $TAO_ROOT/tao/*Seq*.pidl, the generated code will include the DDS
-    specific built in sequences code(under $DDS_ROOT/dds/ directory)
+  - When a DDS application contains an idl file that includes
+    $TAO\_ROOT/tao/*Seq*.pidl, the generated code will include the DDS
+    specific built in sequences code(under $DDS\_ROOT/dds/ directory)
     instead of TAO specific built in sequences code(under
-    $TAO_ROOT/tao/ directory).
+    $TAO\_ROOT/tao/ directory).
 
-  Notes:
+##### Notes:
 
-    - The idl files in $DDS_ROOT/dds/CorbaSeq directory are internally
-      used by DDS and CAN NOT be included in your idl files.
+  - The idl files in $DDS\_ROOT/dds/CorbaSeq directory are internally
+     used by DDS and CAN NOT be included in your idl files.
 
-    - Currently the CORBA::AnySeq is not supported since DDS does not
-      support serialization of Any type data.
-
+  - Currently the CORBA::AnySeq is not supported since DDS does not
+    support serialization of Any type data.
 
 - The DDS entities (e.g. DomainParticipant, FooDataReader) have changed from
   *remote* IDL types to *local* IDL types and the data sequence and info
   sequence types have changed from normal IDL sequences to types with extra
   functionality required to support zero-copy reads.
 
-   *** This change requires changes to DDS user code. ***
+   ***This change requires changes to DDS user code.***
 
-   --- impacts on user code ---
-   1) The <Foo>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq no longer exist.
+   ##### impacts on user code
+   
+   1. The <Foo>ZCSeq and ::TAO::DCPS::SampleInfoZCSeq no longer exist.
         The <Foo>Seq and DDS::SampleInfoSeq have been changed
         to support both single-copy reads (as before) and zero-copy reads
         (like <Foo>ZCSeq should have).
@@ -1274,122 +1241,126 @@ New to this version are the following changes:
         The default constructor for <Foo>Seq enables zero-copy reads.
         Constructing a <Foo>Seq(num) with num > 0 enables single-copy reads.
 
-   2) Listeners will now inherit from DDS::<enity>Listner instead of
-        POA_DDS::<entity> or POA_TAO::DCPS::DataReader/WriterListener and
+   2. Listeners will now inherit from DDS::<enity>Listner instead of
+        POA\_DDS::<entity> or POA\_TAO::DCPS::DataReader/WriterListener and
         should inherit as a local object (not a servant).  DDS provides a
         helper template that adds reference counting.  Use of this template
         (as shown below) is highly recommended.
+   
+      For example:
 
-        for example:
+            class DataReaderListenerImpl
+            : public virtual POA\_DDS::DataReaderListener,
+                    public virtual PortableServer::RefCountServantBase
+            {...};
 
-                class DataReaderListenerImpl
-                : public virtual POA_DDS::DataReaderListener,
-                        public virtual PortableServer::RefCountServantBase
-                {...};
+      Will become:
 
-        will become:
+            class DataReaderListenerImpl
+            : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
+            {...};
 
-                class DataReaderListenerImpl
-                : public virtual TAO::DCPS::LocalObject<DDS::DataReaderListener>
-                {...};
+      But the header and implementation should require no other changes.
 
-        but the header and implementation should require no other changes.
+      **NOTE: if you are implementing the TAO specific reconnection callbacks,
+      on\*disconnected, on\_\*\_reconnected, on\_\*\_lost, on\_connection\_deleted
+      then you should change inheritance from
+            POA\_TAO::DCPS::DataReaderListener
+                to
+            TAO::DCPS::LocalObject\<TAO::DCPS::DataReaderListener\>
+      and remove inheritance from PortableServer::RefCountServantBase**
 
-        NOTE: if you are implementing the TAO specific reconnection callbacks,
-        on*disconnected, on_*_reconnected, on_*_lost, on_connection_deleted
-        then you should change inheritance from
-                POA_TAO::DCPS::DataReaderListener
-                       to
-                TAO::DCPS::LocalObject<TAO::DCPS::DataReaderListener>
-        and remove inheritance from PortableServer::RefCountServantBase
+   3. Implementation reference counting cleanup code is no longer used
 
-   3) Implemenation reference counting cleanup code is no longer used
+	For example:
+       
+            SimpleTypeSupportImpl sts_servant = new SimpleTypeSupportImpl;
+            PortableServer::ServantBase_var safe_servant = sts_servant;
+    
+            SimpleTypeSupport_var fts =
+                    TAO::DCPS::servant_to_reference (sts_servant);
+    
+            if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
 
-       For example:
-                SimpleTypeSupportImpl sts_servant = new SimpleTypeSupportImpl;
-                PortableServer::ServantBase_var safe_servant = sts_servant;
+    becomes:
 
-                SimpleTypeSupport_var fts =
-                        TAO::DCPS::servant_to_reference (sts_servant);
+            SimpleTypeSupport_var fts = new SimpleTypeSupportImpl;
 
-                if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
+            if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
 
-       becomes:
-
-                SimpleTypeSupport_var fts = new SimpleTypeSupportImpl;
-
-                if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
-
-       although the old style is discurraged it will still work.
+	**Note: Although the old style is discouraged it will still work.**
 
 
-    4) Since the DCPS interfaces are now local, there is very little
-       performance gain to convert from _var to a servant pointer (using
-       reference_to_servant).
+   4. Since the DCPS interfaces are now local, there is very little
+       performance gain to convert from \_var to a servant pointer (using
+       reference\_to\_servant).
 
-       For example:
-           ::DDS::DataWriter_var dw =
-                 pub->create_datawriter(topic.in (),
-                                        dw_qos,
-                                        ::DDS::DataWriterListener::_nil());
+      For example:
 
-                        Test::SimpleDataWriter_var foo_dw
-                                = Test::SimpleDataWriter::_narrow(dw.in ());
+    ```
+        ::DDS::DataWriter_var dw = pub->create_datawriter(
+        topic.in (),
+        dw_qos,
+        ::DDS::DataWriterListener::_nil());
+        
+        Test::SimpleDataWriter_var foo_dw = Test::SimpleDataWriter::_narrow(dw.in ());
+        
+        // This is unnecessary but will still work.
+        // Previously fast_dw was used to increase the
+        // performance of writing samples.
+        Test::SimpleDataWriterImpl* fast_dw =  
+        TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>(foo_dw.in());
+        
+    ```
 
-                        // This is unnesesary but will still work.
-                        // Previously fast_dw was used to increase the
-                        // performance of writing samples.
-                        Test::SimpleDataWriterImpl* fast_dw =
-                            TAO::DCPS::reference_to_servant<Test::SimpleDataWriterImpl>
-                            (foo_dw.in ());
+ Also, a pointer to the servant is no longer needed for making calls on zero-copy
+  read supporting overloaded methods.
 
-                Also, a pointer to the servant is no longer needed for making
-                calls on zero-copy read supporting overloaded methods.
-
-   5) If the user defined DDS type is in a module then the generated types will
+   5. If the user defined DDS type is in a module then the generated types will
       also be in that same module.
 
-                        Given a "Foo" DDS type defined in the module "Test":
-                                  old           new
-                                  --------      ------------
-                        type      Test::Foo     Test::Foo
-                        sequence  FooSeq        Test::FooSeq
-                        reader    FooDataReader Test::FooDataReader
-                        writer    FooDataWriter Test::FooDataWriter
+            Given a "Foo" DDS type defined in the module "Test":
+                      old           new
+                      --------      ------------
+            type      Test::Foo     Test::Foo
+            sequence  FooSeq        Test::FooSeq
+            reader    FooDataReader Test::FooDataReader
+            writer    FooDataWriter Test::FooDataWriter
 
-   6) The --module option to dcps_ts.pl is no longer supported.
+   6. The --module option to dcps\_ts.pl is no longer supported.
            The module is set as described in point #5 above.
 
-   7) What did not change.
+   7. What did not change.
         You may use the following:
-        <entity>_var, <entity>_ptr
-        <entity>::_narrrow()    // might use this for a listener
-        <entity>::_duplicate()
-        TAO::DCPS::servant_to_reference()
-        TAO::DCPS::reference_to_servant()
+        <entity>\_var, <entity>\_ptr
+        <entity>::\_narrrow()    // might use this for a listener
+        <entity>::\_duplicate()
+        TAO::DCPS::servant\_to\_reference()
+        TAO::DCPS::reference\_to\_servant()
         TAO::DCPS::deactivate() // now a no-op
 
-        Note: if you used
-                                        TAO::DCPS::servant_to_reference(),
-                                        TAO::DCPS::reference_to_servant(), or
-                                        TAO::DCPS::deactivate_object
-                for non-DDS interfaces then you may change to:
-                                        remote_reference_to_servant
-                                        servant_to_remote_reference
-                                        deactivate_remote_object
+##### Note: 
+- if you used:
+    - TAO::DCPS::servant\_to\_reference()
+    - TAO::DCPS::reference\_to\_servant()
+    - TAO::DCPS::deactivate\_object
+- for non-DDS interfaces then you may change to:
+    - remote\_reference\_to\_servant
+    - servant\_to\_remote\_reference
+    - deactivate\_remote\_object
 
-        --- end of local interface impact to users ---
-
+##### End of local interface impact to users
 
   - Made the sub/pub repo id generated by DCPSInfoRepo to be unique
     per DCPSInfoRepo instance instead of being unique per domain.
     This would allow multiple domains in the same process(connect
     to the same DCPSInfoRepo instance) share the same transport.
 
-=========================================================================
-Version 0.12 of TAO DDS.
 
-New to this version are the following changes:
+Version 0.12 of TAO DDS.
+-------------------------------------------------------------------------------
+
+#### New to this version are the following changes:
 
 - The default participant setting for BITs is now "on".
 
@@ -1409,41 +1380,46 @@ New to this version are the following changes:
 
 - It is now possible to build DDS without Built-In-Topic (BIT) support in order
   to reduce the footprint of DDS.
-    # Generate the makefiles/projects like:
-    mwc.pl -type <yourtype> -features built_in_topics=0 DDS.mwc
-  Also, if <yourtype> happens to be gnuace, add "built_in_topics=0" to the
-  platform_macros.GNU file or the MAKEFLAGS environment variable.
+    
+    - Generate the makefiles/projects like:
+    
+      mwc.pl -type <yourtype> -features built\_in\_topics=0 DDS.mwc
+    
+     Also, if <yourtype> happens to be gnuace, add built\_in\_topics=0 to the
+  platform\_macros.GNU file or the MAKEFLAGS environment variable.
 
   If you are building against TAO 1.5a (patch level "0") and are NOT disabling
-  the built_in_topics, you will need to add "built_in_topics=1" to the
-  platform_macros.GNU file or the MAKEFLAGS environemnt variable since the
+  the built\_in\_topics, you will need to add built\_in\_topics=1 to the
+  platform\_macros.GNU file or the MAKEFLAGS environment variable since the
   inclusion of rules.dds.GNU does not work with that version of ACE+TAO.
 
-- The reliable multicast transport was added.  See the DDS developers guide
+- The reliable multicast transport was added. See the DDS developers guide
   for details.
+  
   NOTE: The reliable multicast (unlike the unreliable multicast) transport
         currently doesn't provide a default configuration.  The use of the
-        transport IDs TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_SUB_ID and
-        TAO::DCPS::DEFAULT_RELIABLE_MULTICAST_PUB_ID is unsupported.
+        transport IDs TAO::DCPS::DEFAULT\_RELIABLE\_MULTICAST\_SUB\_ID and
+        TAO::DCPS::DEFAULT\_RELIABLE\_MULTICAST\_PUB\_ID is unsupported.
 
 - Fixed an issue with GCC 4 "hidden visibility" for shared libraries.
 
-- Support for Built-In-Topics and the TRANSIENT_LOCAL value for DURABILITY QoS
+- Support for Built-In-Topics and the TRANSIENT\_LOCAL value for DURABILITY QoS
   is now complete.  This means that BITs will now work as specified.
 
 - Implemented support for zero-copy read.
 
-  Per the spec, when the sequences given to read/take have max_len = 0
+  Per the spec, when the sequences given to read/take have max\_len = 0
   the samples are not copied but are loaned to the application.
 
   Each data type has a <type>Seq and a <type>ZCSeq sequence.
   The <type>ZCSeq supports zero-copy reads but the <type>Seq does not.
 
   The default <type>ZCSeq constructor enables zero-copy read/take.
-  The first parameter of the constructor defines the max_len.
-  If max_len == 0 then zero-copy reading/taking is enabled.
-  If max_len > 0 then single-copy reading/taking is enabled.
-  See dds/DCPS/ZeroCopySeq_T.h for more details.
+  The first parameter of the constructor defines the max\_len.
+  If max\_len == 0 then zero-copy reading/taking is enabled.
+  If max\_len > 0 then single-copy reading/taking is enabled.
+  
+  See dds/DCPS/ZeroCopySeq\_T.h for more details.
 
   In the next release there will be just one data sequence type
   per DDS type, <type>Seq, that supports single-copy and
@@ -1457,31 +1433,31 @@ New to this version are the following changes:
   smaller sized samples.
 
   Note: zero-copy read is supported by the read and take methods but
-  it should also be supported by the read_instance and take_instance
+  it should also be supported by the read\_instance and take\_instance
   methods.  This will be fixed in the next release.
 
-=========================================================================
 
 Version 0.11 of TAO DDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
 - None, Version 0.11 was just a re-release of 0.10 with the version numbers
   corrected.
 
-=========================================================================
 
 Version 0.10 of TAO DDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
-- The DCPSInfoRepo executable is now moved to $DDS_ROOT/bin.  It was previously
-  located in $DDS_ROOT/dds/InfoRepo.
+- The DCPSInfoRepo executable is now moved to $DDS\_ROOT/bin.  It was previously
+  located in $DDS\_ROOT/dds/InfoRepo.
 
 - Allow configurations to specify a transport that is not in a loaded
-  library.  This will print a warning to ACE_ERROR but will not fail
+  library.  This will print a warning to ACE\_ERROR but will not fail
   until the user attempts to attach the transport to a reader/writer.
-  This is useful for tests, we can now unify sub.ini and sub_udp.ini,
+  This is useful for tests, we can now unify sub.ini and sub\_udp.ini,
   for example.
 
 - Fix a deadlock in the DCPSInfoRepo server related to
@@ -1493,7 +1469,7 @@ New to this version are the following changes:
   disconnection. This is used among other places for cleaning
   up resources upon remote side crash.
 
-- New configuration option 'passive_connect_duration' to set
+- New configuration option 'passive\_connect\_duration' to set
   timeout on initial passive connection establishment. Setting
   this prevents deadlock when the InfoRepo directs subscriber
   to connect with a bogus/dead publisher. See the DDS Programmer's
@@ -1510,7 +1486,7 @@ New to this version are the following changes:
 
 - Fix race condition involving Reconnection task.
   Fix race-condition in sending graceful disconnect message.
-  Fix race condition in 'send_delayed_notifications'.
+  Fix race condition in 'send\_delayed\_notifications'.
 
 - Increase performance by making thread synchronization more
   fine grained.
@@ -1524,16 +1500,16 @@ New to this version are the following changes:
   into MPC/config, to make them consistent with
   the location of similar files in TAO and CIAO.
   Now the TAO version has to have an
-  $ACE_wrappers/bin/MakeProjectCreator/config/MPC.cfg to
+  $ACE\_wrappers/bin/MakeProjectCreator/config/MPC.cfg to
   make MPC run success for DDS.
 
 - Fixed memory grow in the thread-per-connection when datawriter writes too
-  fast and continuously requests remove_sample. The problem is the samples
+  fast and continuously requests remove\_sample. The problem is the samples
   in thread-per-connection queue are not removed and cause memory grow.
 
 - Supported the datareader and datawriter restart up without shutdown transport.
 
-  Made the DCPS entity servants deleted upon delete_*()
+  Made the DCPS entity servants deleted upon delete\_*()
   call instead of upon orb shutdown. This would make the create/delete
   DCPS entity multiple times in a single process without shutdown
   Service Participant.
@@ -1542,70 +1518,74 @@ New to this version are the following changes:
   A dedicated task belonging to the TransportImpl object is used to clean up
   any resources associated with the DataLink.
 
-  Added keep_link configuration to indicate whether a datalink should
+  Added keep\_link configuration to indicate whether a datalink should
   be maintained when all associations are removed. This would allow
   the datareader/datawriter restart in same endpoint reconnect reuse
   the same connection.
 
-- Fixed a problem that the send_start could send on a nil datalink.
+- Fixed a problem that the send\_start could send on a nil datalink.
   The problem is a datalink insertion and finding are not sychnorized.
 
 - Supported the default transport id for SimpleTcp and SimpleUdp.
   The range 0xFFFFFF00 to 0xFFFFFFFF is reserved for
-  DEFAULT_<transport>_CONFIG values. Each specific transport
-  has its default id in that range such as DEFAULT_SIMPLE_TCP_ID = 0xFFFFFF00
-  and DEFAULT_SIMPLE_UDP_ID = 0xFFFFFF01. Note the default transports can not
+  DEFAULT\_<transport>\_CONFIG values. Each specific transport
+  has its default id in that range such as DEFAULT\_SIMPLE\_TCP\_ID = 0xFFFFFF00
+  and DEFAULT\_SIMPLE\_UDP\_ID = 0xFFFFFF01. Note the default transports can not
   be configured by the users.
 
-- Added on_connection_deleted to TAO::DCPS::DataWriterListener/DataReaderListener
+- Added on\_connection\_deleted to TAO::DCPS::DataWriterListener/DataReaderListener
   for testing connection object memory leak.
 
-- Fixed a bug that uses a platform dependent type - size_t in FULLY_ASSOICIATION
+- Fixed a bug that uses a platform dependent type - size\_t in FULLY\_ASSOICIATION
   message. This would make publisher and subscriber not fully associated
   in inter-host test such as tests between windowsXP and Linux.
 
-=== known problem ===
-1. $DDS_ROOT/DevGuideExamples/DDS/Messenger/run_*_test.pl is not configured
-correctly for SimpleTCP.
-$DDS_ROOT/DevGuideExamples/DDS/Messenger/run_test.pl, however, is set up for
-the new SimpleTCP implementation.
+##### Known problem
+
+1. $DDS\_ROOT/DevGuideExamples/DDS/Messenger/run\_*\_test.pl is not configured
+correctly for SimpleTCP. $DDS\_ROOT/DevGuideExamples/DDS/Messenger/run\_test.pl,
+however, is set up for the new SimpleTCP implementation.
 
 2. With certain combinations of DDS version, TAO version, and compiler
 version, singletons stopped working across shared-lib boundaries (code from
 each shared lib would get a different singleton).
 
-Note: #1 and #2 are resolved in the next release.
-
-=========================================================================
+- Note: #1 and #2 are resolved in the next release.
 
 Version 0.9 of TAO DDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
   - Supported DDS build on VS6, gcc 4.1 and gcc 3.3.3.
 
   - Fixed a potential deadlock in SimpleTcpReconnectTask which could
     happen when shutdown() is invoked by the reconnect thread.
 
-  - Fixed a deadlock situation on linux when the direct_send()
+  - Fixed a deadlock situation on linux when the direct\_send()
     detects a lost connection and calls the relink(). The problem is
     a non-recursive lock in send strategy is recursively acquired.
 
   - Added fully association establishment support. This should fix the
     problem:
-      "create_meteorite() does not wait for full association establishment
+    
+    
+      "create\_meteorite() does not wait for full association establishment
       so even if there are waiting subscribers,  a write shortly after
       creating the datawriter may be dropped on the publisher side because
-      add_associations() has not completed on the publisher side.
+      add\_associations() has not completed on the publisher side.
       The sample may also be dropped on the subscriber side because the
       connection exists between the publisher and subscriber but the
       associations have not been mapped on the subscriber side."
-
-  - Supported thread-per-connection send. A new configuration
-     "thread_per_connection" is added to turn on and turn off(default) this
-     new feature. With this new feature, the samples are sent to different
-     connections in parallel.
-
+	
+	
+  - Supported thread-per-connection send.
+   
+     - A new configuration "thread\_per\_connection" is added to turn on and turn
+     off(default) this new feature. With this new feature, the samples are sent
+     to different connections in parallel .
+     
+     ```
       # Determine if the transport needs create a new thread for a
       # datalink/connection to send samples under normal traffic (no backpressure).
       # If thread_per_connection is 1, the publisher creates a supered thread
@@ -1613,58 +1593,67 @@ New to this version are the following changes:
       # thread to send to different dealing's/connections sequentially.
       # The default value is 0 (using same thread send to all datalinks)
       thread_per_connection=
+     ```
 
---- more notes and limitations ---
+##### More notes and limitations
 
-    - Current transport on receiving side does not handle a packet with
-      a single control message with no data such as GRACEFUL_DISCONNECT
-      message. To work around with this problem, some bogus data is sent
-      with the message.
+  - Current transport on receiving side does not handle a packet with
+  a single control message with no data such as GRACEFUL\_DISCONNECT
+  message. To work around with this problem, some bogus data is sent
+  with the message.
 
---- status of nightly build tests ---
+##### Status of nightly build tests
 
-    - The built-in topic tests failure are expected since the builtin topic was not
-      supported and tested.
+  - The built-in topic tests failure are expected since the builtin topic was not
+    supported and tested.
 
-    - tests failed intermittently
-
-      tests/DCPS/Compiler/idl_test1_main/run_test.pl
-      [Details] ERROR: <idl_test1> exited with coredump from signal 11 : SEXY
-
-      tests/DCPS/FooTest5_0/run_test.pl udp
-      [Details] (24994|1084229984) DataReaderImpl::remove_associations: ERROR: Unable to remove writer publisher_id 5.
-      [Details] (24994|1084229984) ERROR: DataReaderImpl::add_associations, invalid liveliness_changed_status inactive count.
-
-      tests/DCPS/Reconnect/run_test.pl bp_timeout
-      [Details] test FAILED. Please see the /tao_builds/taoadmin/BETA/ACE_wrappers/TAO/DDS/tests/DCPS/Reconnect/test.log for details.
-      [Details] Error: tests/DCPS/Reconnect/run_test.pl bp_timeout returned with status 2
-
-=========================================================================
+  - tests failed intermittently 
+  
+  ```  
+  tests/DCPS/Compiler/idl_test1_main/run_test.pl
+  [Details] ERROR: <idl_test1> exited with coredump from signal 11 : SEXY
+    
+  tests/DCPS/FooTest5_0/run_test.pl udp
+  [Details] (24994|1084229984) DataReaderImpl::remove_associations: 
+   ERROR: Unable to remove writer publisher_id 5.
+  [Details] (24994|1084229984) ERROR: DataReaderImpl::add_associations, invalid 
+  liveliness_changed_status inactive count.
+    
+  tests/DCPS/Reconnect/run_test.pl bp_timeout
+[Details] test FAILED. Please see the /tao\_builds/taoadmin/BETA/ACE_wrappers/
+TAO/DDS/tests/DCPS/Reconnect/test.log for details.
+[Details] Error: tests/DCPS/Reconnect/run_test.pl bp_timeout returned with
+ status 2
+  ```
+  
 
 Version 0.8 of TAO DDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
+##### New to this version are the following changes:
 
   - Added configuration of DCPS and transports via configuration files.
     This also simplified the code related to creating and configuring
     transports.
-    See file://TAO_DDS_Configuration_Settings.html for more information.
+    See file://TAO\_DDS\_Configuration\_Settings.html for more information.
 
-  - fixed a possible deadlock.
+  - Fixed a possible deadlock.
+  
     The scenario it was found in was:
-    * Start a subscriber with two readers.
-    * start a publisher with two corresponding writers.
-    * the subscriber would deadlock between the ORB and transport
+    
+    - Start a subscriber with two readers.
+    - Start a publisher with two corresponding writers.
+    - The subscriber would deadlock between the ORB and transport
       threads.
-    * If the publisher started first, it would not deadlock.
+    - If the publisher started first, it would not deadlock.
 
-  - changed some heap allocations to cached allocator allocations.
+  - Changed some heap allocations to cached allocator allocations.
     No heap allocations are in the write -> read code path for
     value types containing scalars (no arrays, sequences or strings).
 
   - Uninlined some unnecessary inlines to reduce the footprint.
 
-  - Added DDS_HAS_MINIMUM_BIT macro to build without Built In Topic
+  - Added DDS\_HAS\_MINIMUM\_BIT macro to build without Built In Topic
     support. Defining the macro will NOT build BIT support.
 
   - Made the DCPSInfoRepo register with IOR table as well as providing
@@ -1675,97 +1664,101 @@ New to this version are the following changes:
   - Added an option -DCPSInfoRepo to replace -DCPSInfo option and deprecated
     -DCPSInfo option.
 
-  - Fixed a bug in Registered_Data_Types that caused multiple domain participants
-    within the same domain in a process to not register same data types.
+  - Fixed a bug in Registered\_Data\_Types that caused multiple domain
+   participants within the same domain in a process to not register same data
+   types.
 
-  - Fixed DDS application failure between the publisher and subscriber
-    on different endianess machines. The byte order is set upon data
-    serializing and de-serializing.
-    The swap_bytes configuration value per TransportImpl instance is now
-    appropriately used to allow different transports use different setting
-    of swap_bytes.
+  - Fixed DDS application failure between the publisher and subscriber on
+   different endianess machines. The byte order is set upon data serializing and
+    de-serializing. The swap\_bytes configuration value per TransportImpl
+     instance is now appropriately used to allow different transports use
+      different setting of swap\_bytes.
 
-  - Added TypeSupport::get_type_name() support. If a nil type name is supplied
-    by user to register type support then the default type name - the interface
+  - Added TypeSupport::get\_type\_name() support. If a nil type name is supplied
+   by user to register type support then the default type name - the interface
     repository id is used.
 
   - Supported the SimpleTCP connection re-establishment and
-    disconnected/lost/reconnected publication and subscription callbacks.
-    The disconnected callback is called just before reconnect is attempted.
-    If reconnect fails, the connection lost callback is called.
-    If reconnect succeeds, the reconnected callback is called. During
-    reconnecting, the messages are queued until the reconnecting is done.
+   disconnected/lost/reconnected publication and subscription callbacks.
+   The disconnected callback is called just before reconnect is attempted.
+   If reconnect fails, the connection lost callback is called.
+   If reconnect succeeds, the reconnected callback is called. 
+   During reconnecting, the messages are queued until the reconnecting is done.
+
+
     If the reconnecting succeeds, the queued messages are sent out.
     Otherwise the messages are discarded.
 
     The main changes are:
 
-    1) Added new idl interfaces - TAO::DataReaderListener and
-       TAO::DataWriterListener to support on_*_disconnected,
-       on_*_lost and on_*_reconnected callbacks.
+ - Added new idl interfaces 
+   - TAO::DataReaderListener and TAO::DataWriterListener to support 
+   on\_\*\_disconnected, on\_\*\_lost and on\_*\_reconnected callbacks.
 
-    2) New configuration values are added to support the
-       reconnect strategy.
+   - New configuration values are added to support the reconnect strategy.
 
-        ###=== Configurations for connector side during reconnecting===
+	```
+    ###=== Configurations for connector side during reconnecting===
+    
+    # The initial retry delay in milliseconds.
+    # The first connection retry will be when the loss of connection
+    # is detected.  The second try will be after this delay.
+    # The default is 500 miliseconds.
+    conn_retry_initial_delay=
+    
+    # The backoff multiplier for reconnection strategy.
+    # The third and so on reconnect will be this value * the previous delay.
+    # Hence with conn_retry_initial_delay=500 and conn_retry_backoff_multiplier=1.5
+    # the second reconnect attempt will be at 0.5 seconds after first retry connect
+    # fails; the third attempt will be 0.75 seconds after the second retry connect
+    # fails; the fourth attempt will be 1.125 seconds after the third retry connect
+    # fails.
+    # The default value is 2.0.
+    conn_retry_backoff_multiplier=
+    
+    # Number of attemps to reconnect before giving up and calling
+    # on_publication_lost() and on_subscription_lost() callbacks.
+    # The default is 3.
+    conn_retry_attempts=
+    
+    # Maximum period (in milliseconds) of not being able to send queued
+    # messages. If there are samples queued and no output for longer
+    # than this period then the connection will be closed and on\_*\_lost()
+    # callbacks will be called. If the value is zero, the default, then
+    # this check will not be made.
+    max_output_pause_period=
+    
+    ###=== Configurations for acceptor side during reconnecting===
+    
+    # The time period in milliseconds for the acceptor side
+    # of a connection to wait for the connection to be reconnected.
+    # If not reconnected within this period then
+    # on\_publication\_lost() and on\_subscription\_lost() callbacks
+    # will be called.
+    # The default is 2 seconds (2000 millseconds).
+    passive_reconnect_duration=
+    ```
+    
+##### Implemenation details:
 
-        # The initial retry delay in milliseconds.
-        # The first connection retry will be when the loss of connection
-        # is detected.  The second try will be after this delay.
-        # The default is 500 miliseconds.
-        conn_retry_initial_delay=
+- A new interface - relink() is added to both receive
+    and send strategy. The relink () is called whenever send or
+    recv call fails. The acceptor/connector role of a connection
+    object represents does not change during reconnecting. The
+    connector side actively tries to reconnect and the acceptor
+    side passively waits for the new connection coming.
+    
+  - Added a new test $DDS\_ROOT/tests/DCPS/Reconnect to test
+    the on\_*\_lost callback and the connection re-establishment.
 
-        # The backoff multiplier for reconnection strategy.
-        # The third and so on reconnect will be this value * the previous delay.
-        # Hence with conn_retry_initial_delay=500 and conn_retry_backoff_multiplier=1.5
-        # the second reconnect attempt will be at 0.5 seconds after first retry connect
-        # fails; the third attempt will be 0.75 seconds after the second retry connect
-        # fails; the fourth attempt will be 1.125 seconds after the third retry connect
-        # fails.
-        # The default value is 2.0.
-        conn_retry_backoff_multiplier=
-
-        # Number of attemps to reconnect before giving up and calling
-        # on_publication_lost() and on_subscription_lost() callbacks.
-        # The default is 3.
-        conn_retry_attempts=
-
-        # Maximum period (in milliseconds) of not being able to send queued
-        # messages. If there are samples queued and no output for longer
-        # than this period then the connection will be closed and on_*_lost()
-        # callbacks will be called. If the value is zero, the default, then
-        # this check will not be made.
-        max_output_pause_period=
-
-        ###=== Configurations for acceptor side during reconnecting===
-
-        # The time period in milliseconds for the acceptor side
-        # of a connection to wait for the connection to be reconnected.
-        # If not reconnected within this period then
-        # on_publication_lost() and on_subscription_lost() callbacks
-        # will be called.
-        # The default is 2 seconds (2000 millseconds).
-        passive_reconnect_duration=
-
-    Implemenation details:
-     a) A new interface - relink() is added to both receive
-       and send strategy. The relink () is called whenever send or
-       recv call fails. The acceptor/connector role of a connection
-       object represents does not change during reconnecting. The
-       connector side actively tries to reconnect and the acceptor
-       side passively waits for the new connection coming.
-
-
-     b) Added a new test $DDS_ROOT/tests/DCPS/Reconnect to test
-        the on_*_lost callback and the connection re-establishment.
-
-  - Fixed a problem that add_association() failed when multiple
+  - Fixed a problem that add\_association() failed when multiple
     publishers/subscribers start simultaneously. Added a lock
     to protect the internal map in DataLinkSetMap to fix the
     problem.
 
---- more notes and limitations ---
-  This section adds on to the "KNOWN LIMITATIONS" section at the bottom
+##### More notes and limitations
+
+  - This section adds on to the "KNOWN LIMITATIONS" section at the bottom
   of this document.
 
   - A transport instance may only be used by publications and subscriptions
@@ -1777,65 +1770,67 @@ New to this version are the following changes:
     datareaders and datawriters associated with the same transport in the same
     process. To work around this limitation, the datareader and the datawriter
     need use different TransportImpl objects. Otherwise, there are such errors:
-
+	
+	```
     (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
     (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
+    ```
 
-=========================================================================
 
 Version 0.7 of TAO DDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
-  - Added a configuration parameter to control the use of the Nagle
-    algorithm for the SimpleTCP protocol.  By default, the Nagle
-    algorithm is now disabled.
+##### New to this version are the following changes:
+
+  - Added a configuration parameter to control the use of the Nagle algorithm 
+  for the SimpleTCP protocol.  By default, the Nagle algorithm is now disabled.
   - Improved VC6 support.
   - Fixed some memory leaks.
   - Added support for 64 bit architectures.
 
-=========================================================================
-
 Version 0.6 of TAO DDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
-  - Changed the default ior file name for DCPSInfoRepo from dcps_ir.ior
+##### New to this version are the following changes:
+
+  - Changed the default ior file name for DCPSInfoRepo from dcps\_ir.ior
     to repo.ior.
   - Changed the packet and sample length fields to 32 bit integers so
     we can support samples larger than 64 KB.
   - Improved support for MS VC6
 
-=========================================================================
-
 Version 0.5 of TAO DDS.
+-------------------------------------------------------------------------------
 
-New to this version are the following changes:
-  - Many memory leaks have been removed.
-  - A memory allocation bug has been corrected.
-  - The -a option of DCPSInfoRepo now works as documented.
+##### New to this version are the following changes:
 
-=========================================================================
+- Many memory leaks have been removed.
 
-This is the first release of a Data Distribution Service (DDS).
+- A memory allocation bug has been corrected.
 
-See the User's Guide for an user introduction to the service.
+- The -a option of DCPSInfoRepo now works as documented.
 
-TAO's DDS implementation consists of the following:
-* Implementation of the interfaces in the DDS spec and
-  $DDS_ROOT/dds/DCPS
+- **This is the first release of a Data Distribution Service (DDS).**
 
-* A service repository driver in $DDS_ROOT/dds/InfoRepo
+- **See the User's Guide for an user introduction to the service.** 
 
-* Type support generator, dcps_ts.pl, is in $DDS_ROOT/bin
-  and its templates are in $DDS_ROOT/bin/DCPS.
+- TAO's DDS implementation consists of the following:
 
-* You must use DDS with a version of TAO that has had its
-  TAO_IDL compiler modified to support DDS type definition
-  using the -Gdcps option.  Any OCI version later than
-  TAO 1.4a P4 or DOC group version later than 1.4.6 should
-  work.
+    - Implementation of the interfaces in the DDS spec and $DDS\_ROOT/dds/DCPS
+    
+    - A service repository driver in $DDS\_ROOT/dds/InfoRepo
+    
+    - Type support generator, dcps\_ts.pl, is in $DDS\_ROOT/bin and its
+     templates are in $DDS\_ROOT/bin/DCPS.
+    
+    - You must use DDS with a version of TAO that has had its TAO\_IDL compiler
+     modified to support DDS type definition using the -Gdcps option. 
+     Any OCI version later than TAO 1.4a P4 or DOC group version later than
+      1.4.6 should work.
+    
+- An example in $DDS\_ROOT/DevGuideExamples/DDS
 
-* An example in $DDS_ROOT/DevGuideExamples/DDS
+- Functional tests in $DDS\_ROOT/tests
 
-* Functional tests in $DDS_ROOT/tests
+- Performance tests in $DDS\_ROOT/performance-tests
 
-* Performance tests in $DDS_ROOT/performance-tests
