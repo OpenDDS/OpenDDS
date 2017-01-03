@@ -322,15 +322,20 @@ namespace OpenDDS
     Sample_Manager::find (const char *repo_id)
     {
       std::string key(repo_id);
-      // some requests come in for the "TypeSupport" helper object,
-      // If this is a type support object, pull that off as well as the
-      // version identifier
-      std::string typesupport ("TypeSupport");
-      size_t pos = key.find (typesupport);
-      if (pos != std::string::npos)
-        {
-          key.erase(pos, typesupport.size());
+      const std::string typesupport("TypeSupport");
+      const size_t pos = key.find(typesupport);
+      if (pos != std::string::npos) {
+        key.erase(pos, typesupport.size());
+      }
+
+      const std::string prefix("IDL:");
+      if (key.find(prefix) != 0) {
+        for (size_t iter = key.find("::"); iter != std::string::npos;
+             iter = key.find("::", iter)) {
+          key.replace(iter, 2, 1, '/');
         }
+        key = prefix + key + ":1.0";
+      }
 
       DissectorsType::const_iterator dpos = dissectors_.find(key);
       if (dpos != dissectors_.end()) {
