@@ -10,25 +10,22 @@ extern int num_reads_before_crash;
 extern int read_delay_ms;
 extern int actual_lost_sub_notification;
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)
 {
 }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl ()
 {
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-  throw (CORBA::SystemException)
 {
   if (read_delay_ms > 0)
     ACE_OS::sleep (ACE_Time_Value (read_delay_ms/1000,
                                    read_delay_ms%1000*1000));
 
-  num_reads_ ++;
+  ++num_reads_;
 
   try {
     Messenger::MessageDataReader_var message_dr = Messenger::MessageDataReader::_narrow(reader);
@@ -71,7 +68,6 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 void DataReaderListenerImpl::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
-  throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed\n"));
@@ -80,7 +76,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
-  throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos\n"));
@@ -89,7 +84,6 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 void DataReaderListenerImpl::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
-  throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataReaderListenerImpl::on_liveliness_changed\n"));
@@ -98,7 +92,6 @@ void DataReaderListenerImpl::on_liveliness_changed (
 void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
-  throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataReaderListenerImpl::on_subscription_matched\n"));
@@ -107,7 +100,6 @@ void DataReaderListenerImpl::on_subscription_matched (
 void DataReaderListenerImpl::on_sample_rejected(
     DDS::DataReader_ptr,
     const DDS::SampleRejectedStatus&)
-  throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataReaderListenerImpl::on_sample_rejected\n"));
@@ -116,7 +108,6 @@ void DataReaderListenerImpl::on_sample_rejected(
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-  throw (CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataReaderListenerImpl::on_sample_lost\n"));
@@ -126,7 +117,6 @@ void DataReaderListenerImpl::on_sample_lost(
 void DataReaderListenerImpl::on_subscription_disconnected (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus & status)
-  throw (CORBA::SystemException)
 {
   CORBA::ULong len = status.publication_handles.length ();
   for (CORBA::ULong i = 0; i < len; ++i)
@@ -141,7 +131,6 @@ void DataReaderListenerImpl::on_subscription_disconnected (
 void DataReaderListenerImpl::on_subscription_reconnected (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionReconnectedStatus & status)
-  throw (CORBA::SystemException)
 {
   CORBA::ULong len = status.publication_handles.length ();
   for (CORBA::ULong i = 0; i < len; ++i)
@@ -156,9 +145,8 @@ void DataReaderListenerImpl::on_subscription_reconnected (
 void DataReaderListenerImpl::on_subscription_lost (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionLostStatus & status)
-  throw (CORBA::SystemException)
 {
-  ++ actual_lost_sub_notification;
+  ++actual_lost_sub_notification;
 
   CORBA::ULong len = status.publication_handles.length ();
   for (CORBA::ULong i = 0; i < len; ++i)
@@ -173,7 +161,6 @@ void DataReaderListenerImpl::on_subscription_lost (
 void DataReaderListenerImpl::on_budget_exceeded (
   ::DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::BudgetExceededStatus&)
-  throw (::CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
 }
@@ -181,7 +168,6 @@ void DataReaderListenerImpl::on_budget_exceeded (
 
 void DataReaderListenerImpl::on_connection_deleted (
   ::DDS::DataReader_ptr)
-  throw (::CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
 }

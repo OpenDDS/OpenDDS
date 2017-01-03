@@ -12,6 +12,7 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 
 #include "ace/config-all.h"
+#include "ShapeTypeTypeSupportImpl.h"
 
 #ifdef ACE_HAS_CPP11
 # include <string>

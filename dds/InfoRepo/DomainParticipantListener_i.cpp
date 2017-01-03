@@ -9,12 +9,10 @@
 
 #include "DomainParticipantListener_i.h"
 
-// Implementation skeleton constructor
 OPENDDS_DCPS_DomainParticipantListener_i::OPENDDS_DCPS_DomainParticipantListener_i()
 {
 }
 
-// Implementation skeleton destructor
 OPENDDS_DCPS_DomainParticipantListener_i::~OPENDDS_DCPS_DomainParticipantListener_i()
 {
 }

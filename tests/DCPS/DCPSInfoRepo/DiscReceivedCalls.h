@@ -10,12 +10,11 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//Class DiscReceivedCalls
 class DiscReceivedCalls
 {
 public:
   enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS, UPDATE_SUB_PARAMS };
-  //Constructor
+
   DiscReceivedCalls ();
 
   bool expect(CORBA::ORB_var& orb, const unsigned int maxDelay, const std::vector<Called>& expected);

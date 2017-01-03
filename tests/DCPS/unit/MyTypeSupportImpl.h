@@ -31,10 +31,8 @@ class MyTypeSupportImpl : public virtual OpenDDS::DCPS::LocalObject<MyTypeSuppor
 {
 
 public:
-  //Constructor
   MyTypeSupportImpl (void);
 
-  //Destructor
   virtual ~MyTypeSupportImpl (void);
 
 

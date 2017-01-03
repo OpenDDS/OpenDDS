@@ -53,7 +53,6 @@ class TreeNode {
      */
     TreeNode( const QList<QVariant>& data, TreeNode* parent = 0);
 
-    /// Virtual destructor.
     virtual ~TreeNode();
 
     /// Update with new data.

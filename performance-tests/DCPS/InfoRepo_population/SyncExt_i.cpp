@@ -22,7 +22,6 @@ void
 SyncExt_i::publish (SyncExt::Role role
                   , ::CORBA::Long instances
                   , ::CORBA::Long msecs)
-  throw (CORBA::SystemException)
 {
   if (role > SyncExt::Subscriber) {
     return;

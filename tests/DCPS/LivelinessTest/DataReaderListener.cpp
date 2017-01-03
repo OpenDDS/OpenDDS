@@ -8,7 +8,6 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
   liveliness_changed_count_(0)
   {
@@ -30,7 +29,6 @@ DataReaderListenerImpl::DataReaderListenerImpl (void) :
 
   }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
     ACE_DEBUG((LM_DEBUG,

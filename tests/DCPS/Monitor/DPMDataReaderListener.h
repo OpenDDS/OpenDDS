@@ -14,14 +14,11 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//Class DPMDataReaderListenerImpl
 class DPMDataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  //Constructor
   DPMDataReaderListenerImpl();
 
-  //Destructor
   virtual ~DPMDataReaderListenerImpl();
 
   virtual void on_requested_deadline_missed(

@@ -40,12 +40,10 @@ class ReceivedDataElement;
  */
 class OpenDDS_Dcps_Export InstanceState : public ACE_Event_Handler {
 public:
-  /// Constructor.
   InstanceState(DataReaderImpl* reader,
                 ACE_Recursive_Thread_Mutex& lock,
                 DDS::InstanceHandle_t handle);
 
-  /// Destructor
   virtual ~InstanceState();
 
   /// Populate the SampleInfo structure

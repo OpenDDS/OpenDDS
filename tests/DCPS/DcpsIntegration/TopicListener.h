@@ -32,29 +32,19 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-
-//Class OPENDDS_DCPS_TopicListener_i
 class OPENDDS_DCPS_TopicListener_i
   : public virtual OpenDDS::DCPS::LocalObject<DDS::TopicListener>
 {
 public:
-  //Constructor
   OPENDDS_DCPS_TopicListener_i (void);
 
-  //Destructor
   virtual ~OPENDDS_DCPS_TopicListener_i (void);
 
-
-
-virtual void on_inconsistent_topic (
+  virtual void on_inconsistent_topic (
     ::DDS::Topic_ptr the_topic,
-    const ::DDS::InconsistentTopicStatus & status
-  );
-
-
+    const ::DDS::InconsistentTopicStatus & status);
 
   ::DDS::InconsistentTopicStatus last_status_;
-
 };
 
 

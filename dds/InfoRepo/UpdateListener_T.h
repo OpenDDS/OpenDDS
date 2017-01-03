@@ -26,10 +26,8 @@ template<class DataType, class ReaderType>
 class UpdateListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  /// Default constructor
   UpdateListener(UpdateProcessor<DataType>& processor);
 
-  /// Virtual destructor
   virtual ~UpdateListener();
 
   virtual void on_requested_deadline_missed(

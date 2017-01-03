@@ -51,41 +51,38 @@ public:
 class OpenDDS_Dcps_Export MonitorFactory
   : public ACE_Service_Object {
 public:
-
-  //Constructor
   MonitorFactory();
 
-  //Destructor
   virtual ~MonitorFactory();
 
-  ///Factory function to create a service participant monitor object
+  /// Factory function to create a service participant monitor object
   virtual Monitor* create_sp_monitor(Service_Participant* sp);
 
-  ///Factory function to create a domain participant monitor object
+  /// Factory function to create a domain participant monitor object
   virtual Monitor* create_dp_monitor(DomainParticipantImpl* dp);
 
-  ///Factory function to create a topic monitor object
+  /// Factory function to create a topic monitor object
   virtual Monitor* create_topic_monitor(TopicImpl* topic);
 
-  ///Factory function to create a publisher monitor object
+  /// Factory function to create a publisher monitor object
   virtual Monitor* create_publisher_monitor(PublisherImpl* publisher);
 
-  ///Factory function to create a subscriber monitor object
+  /// Factory function to create a subscriber monitor object
   virtual Monitor* create_subscriber_monitor(SubscriberImpl* subscriber);
 
-  ///Factory function to create a data writer monitor object
+  /// Factory function to create a data writer monitor object
   virtual Monitor* create_data_writer_monitor(DataWriterImpl* dw);
 
-  ///Factory function to create a data writer periodic monitor object
+  /// Factory function to create a data writer periodic monitor object
   virtual Monitor* create_data_writer_periodic_monitor(DataWriterImpl* dw);
 
-  ///Factory function to create a data reader monitor object
+  /// Factory function to create a data reader monitor object
   virtual Monitor* create_data_reader_monitor(DataReaderImpl* dr);
 
-  ///Factory function to create a data reader periodic monitor object
+  /// Factory function to create a data reader periodic monitor object
   virtual Monitor* create_data_reader_periodic_monitor(DataReaderImpl* dr);
 
-  ///Factory function to create a transport monitor object
+  /// Factory function to create a transport monitor object
   virtual Monitor* create_transport_monitor(TransportImpl* transport);
 
   ///Initialize the monitor (required to report data)

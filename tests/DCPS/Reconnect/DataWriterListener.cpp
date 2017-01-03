@@ -10,12 +10,10 @@ extern int num_reads_before_crash;
 extern int actual_lost_pub_notification;
 extern int num_deleted_connections;
 
-// Implementation skeleton constructor
 DataWriterListenerImpl::DataWriterListenerImpl()
 {
 }
 
-// Implementation skeleton destructor
 DataWriterListenerImpl::~DataWriterListenerImpl ()
 {
 }

@@ -78,7 +78,6 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 }
 
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (int num_publishers,
                                                 int num_samples,
                                                 int data_size,

@@ -4,7 +4,6 @@
 #include "DCPSDataReaderI.h"
 #include "dds/DCPS/RepoIdConverter.h"
 
-// Implementation skeleton constructor
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
   :
   disco_(0),
@@ -13,7 +12,6 @@ TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
   {
   }
 
-// Implementation skeleton destructor
 TAO_DDS_DCPSDataReader_i::~TAO_DDS_DCPSDataReader_i (void)
   {
   }

@@ -69,7 +69,7 @@ BUILDING OpenDDS
   that's under the installation prefix directory.  It comes with a one-line
   shell script in <prefix>/share/dds/dds-devel.sh that sets a DDS_ROOT which
   is used for building an application using this installed OpenDDS.  The
-  analogous files for ACE and TAO are in <prefix>/share/ace/ace-devel.sh and 
+  analogous files for ACE and TAO are in <prefix>/share/ace/ace-devel.sh and
   <prefix>/share/tao/tao-devel.sh.
 
 
@@ -106,5 +106,5 @@ BUILDING OpenDDS
   one subscriber.  Note that the command lines used to spawn these processes
   are echoed back to standard output.  The options and config files used here
   are helpful starting points for developing and running your own OpenDDS
-  applcations.
+  applications.
 

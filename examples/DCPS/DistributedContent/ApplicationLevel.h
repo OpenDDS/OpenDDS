@@ -29,7 +29,7 @@ public:
   ApplicationLevel(AbstractionLayer*  abstract,
                    const ACE_TString& directory,
                    const ACE_TString& nodename);
-  /** Destructor **/
+
   virtual ~ApplicationLevel();
 
   /**

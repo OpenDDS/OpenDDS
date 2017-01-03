@@ -21,19 +21,14 @@ class ExchangeEventDataReaderListenerImpl
   : public DataReader_Listener_Base
 {
 public:
-  //Constructor
   ExchangeEventDataReaderListenerImpl ();
 
-  //Destructor
   virtual ~ExchangeEventDataReaderListenerImpl (void);
 
   // app-specific
   CORBA::Boolean is_exchange_closed_received();
 
-  virtual void on_data_available(
-    DDS::DataReader_ptr reader
-  )
-  throw (CORBA::SystemException);
+  virtual void on_data_available(DDS::DataReader_ptr reader);
 
 private:
   CORBA::Boolean is_exchange_closed_received_;

@@ -96,7 +96,6 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
 }
 
-// Implementation skeleton destructor
 DomainParticipantImpl::~DomainParticipantImpl()
 {
 }

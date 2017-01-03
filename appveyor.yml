@@ -2,15 +2,19 @@ branches:
   only:
     - master
 
+os: Visual Studio 2015
+
+clone_depth: 15
+
 install:
   - mkdir ext && cd ext
   - git clone --depth 1 git://github.com/DOCGroup/MPC.git
   - git clone -q -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
   - cd ..
   - set MPC_ROOT=%CD%\ext\MPC
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
   - call configure --no-tests --ace=ext\ACE_TAO\ACE
-  - ext\ACE_TAO\ACE\bin\mwc.pl -type vc12 tests\DCPS\Messenger
+  - ext\ACE_TAO\ACE\bin\mwc.pl -type vc14 tests\DCPS\Messenger
 
 platform:
   - x64

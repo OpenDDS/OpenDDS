@@ -8,13 +8,11 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-// Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
   subscription_matched_(false)
   {
   }
 
-// Implementation skeleton destructor
 DataReaderListenerImpl::~DataReaderListenerImpl (void)
   {
   }

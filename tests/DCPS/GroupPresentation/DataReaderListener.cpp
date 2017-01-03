@@ -31,7 +31,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 throw(CORBA::SystemException)
 {
-  num_reads_ ++;
+  ++num_reads_;
 
   try {
     Messenger::MessageDataReader_var message_dr =

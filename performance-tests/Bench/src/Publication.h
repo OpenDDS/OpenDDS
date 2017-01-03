@@ -23,7 +23,6 @@ class Publication : public ACE_Task_Base {
       bool verbose = false
     );
 
-    /// Virtual destructor.
     virtual ~Publication();
 
     /// @name Task_Base interfaces.

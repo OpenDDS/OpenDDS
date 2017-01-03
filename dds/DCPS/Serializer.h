@@ -70,16 +70,16 @@ public:
 
   virtual ~Serializer();
 
-  /// Establish byte swaping behavior.
+  /// Establish byte swapping behavior.
   void swap_bytes(bool do_swap);
 
-  /// Examine byte swaping behavior.
+  /// Examine byte swapping behavior.
   bool swap_bytes() const;
 
   /// Examine alignment behavior.
   Alignment alignment() const;
 
-  /// Reset aligment as if a new instance were created
+  /// Reset alignment as if a new instance were created
   void reset_alignment();
 
   /// Examine the state of the stream abstraction.
@@ -261,7 +261,7 @@ private:
   /// an instance method to match the swapcpy semantics.
   void smemcpy(char* to, const char* from, size_t n);
 
-  /// Efficient swaping copy for quad words and shorter.  This is an
+  /// Efficient swapping copy for quad words and shorter.  This is an
   /// instance method to allow clearing the good_bit_ on error.
   void swapcpy(char* to, const char* from, size_t n);
 

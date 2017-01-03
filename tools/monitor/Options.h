@@ -53,10 +53,8 @@ namespace Monitor {
  */
 class Options  {
   public:
-    /// Default constructor.
     Options( int argc, ACE_TCHAR** argv, char** envp = 0);
 
-    /// Virtual destructor.
     virtual ~Options();
 
     /// Indication of configuration status.

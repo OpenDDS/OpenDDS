@@ -39,13 +39,11 @@ namespace OpenDDS {
 
     typedef typename TraitsType::DataReaderType Interface;
 
-    /// Constructor
     DataReaderImpl_T (void)
       : data_allocator_ (0)
     {
     }
 
-    /// Destructor
     virtual ~DataReaderImpl_T (void)
     {
       for (typename InstanceMap::iterator it = instance_map_.begin();

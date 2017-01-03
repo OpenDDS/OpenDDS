@@ -1,6 +1,6 @@
 Version 3.9 of OpenDDS.
 
-- Updated how DataWriter QoS is interpreted by internal data strucutres:
+- Updated how DataWriter QoS is interpreted by internal data structures:
   - RESOURCE_LIMITS.max_samples_per_instance controls total samples that can be
     stored per instance, independent of HISTORY
   - HISTORY.depth controls number of samples (per instance) that will be made
@@ -65,7 +65,7 @@ Additions:
   FACE safety extended profiles (Future Airborne Capability Environment).
 - Implements DDS 1.4 and RTPS 2.2.
 - Support allocations from memory pool in safety profile builds.  Introduced
-  standard library containers and strings, as well as TAO sequences that 
+  standard library containers and strings, as well as TAO sequences that
   allocate from this pool.
 - To support FACE TS, the IDL struct DDS::SampleInfo has a new field
   "opendds_reserved_publication_seq" as an extension to the DDS specification.
@@ -103,7 +103,7 @@ Fixes:
   success immediately.
 - Allow disassociating readers to finish processing messages from active writer
   before removing.
-- Remove TcpDataLink from DataLinkSet when connect() fails.  Previously, the 
+- Remove TcpDataLink from DataLinkSet when connect() fails.  Previously, the
   datalink would remain and would be seen as a fully-connected datalink by new
   associations.
 - DCPSTransportDebugLevel 1 messages are now association-oriented.

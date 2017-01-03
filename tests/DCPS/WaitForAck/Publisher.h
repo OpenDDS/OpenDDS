@@ -19,7 +19,6 @@ class Publisher {
     /// Construct with option information.
     Publisher( const Options& options);
 
-    /// Destructor.
     ~Publisher();
 
     /// Execute the test.

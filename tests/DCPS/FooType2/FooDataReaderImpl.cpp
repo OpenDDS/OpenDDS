@@ -8,7 +8,6 @@
 #include "dds/DdsDcpsDomainC.h"
 
 
-// Implementation skeleton constructor
 FooDataReaderImpl::FooDataReaderImpl (void)
 #ifdef WIN32
 : pos_ (0)
@@ -16,7 +15,6 @@ FooDataReaderImpl::FooDataReaderImpl (void)
   {
   }
 
-// Implementation skeleton destructor
 FooDataReaderImpl::~FooDataReaderImpl (void)
   {
   }

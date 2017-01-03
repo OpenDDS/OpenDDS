@@ -16,7 +16,6 @@ class Subscriber {
     /// Construct from command line.
     Subscriber( int argc, ACE_TCHAR** argv, char** envp);
 
-    /// Virtual destructor.
     virtual ~Subscriber();
 
     /// Main actions occur here.

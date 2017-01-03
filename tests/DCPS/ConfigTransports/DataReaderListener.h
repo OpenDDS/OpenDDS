@@ -13,15 +13,12 @@
 
 class Options;
 
-//Class DataReaderListenerImpl
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
-  //Constructor
   DataReaderListenerImpl (const Options&);
 
-  //Destructor
   virtual ~DataReaderListenerImpl (void);
 
   virtual void on_requested_deadline_missed (

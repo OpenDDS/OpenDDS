@@ -19,7 +19,6 @@ class TestConfig {
      */
     TestConfig( int argc, ACE_TCHAR** argv, char** envp);
 
-    /// Virtual destructor.
     virtual ~TestConfig();
 
     /// Spew indicator.

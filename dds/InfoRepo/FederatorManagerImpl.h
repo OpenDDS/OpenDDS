@@ -42,10 +42,8 @@ class OpenDDS_Federator_Export ManagerImpl
     public virtual UpdateProcessor<SubscriptionUpdate>,
     public virtual UpdateProcessor<PublicationUpdate> {
 public:
-  /// Default constructor.
   ManagerImpl(Config& config);
 
-  /// Virtual destructor.
   virtual ~ManagerImpl();
 
   // IDL methods.

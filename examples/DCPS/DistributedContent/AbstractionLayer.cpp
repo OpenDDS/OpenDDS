@@ -1,15 +1,11 @@
 #include "AbstractionLayer.h"
 
-
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 
 #include "FileInfoListener.h"
 #include "ApplicationLevel.h"
-
-
-
 
 AbstractionLayer::AbstractionLayer()
 : handle_(0)

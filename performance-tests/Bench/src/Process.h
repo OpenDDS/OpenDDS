@@ -23,7 +23,6 @@ class Process {
     /// Construct with option information.
     Process( const Options& options);
 
-    /// Destructor.
     ~Process();
 
     /// Execute the test.
