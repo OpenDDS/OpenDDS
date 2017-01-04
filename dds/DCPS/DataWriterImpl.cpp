@@ -1336,8 +1336,6 @@ DataWriterImpl::enable()
       liveliness_check_interval_ = ACE_Time_Value (0, 1);
     }
 
-    last_liveliness_check_time_ = ACE_OS::gettimeofday();
-
     if (reactor_->schedule_timer(this,
                                  0,
                                  liveliness_check_interval_,
@@ -2290,22 +2288,6 @@ int
 DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
                                const void * /* arg */)
 {
-  const ACE_Time_Value delta = tv - last_liveliness_check_time_;
-  if (delta < liveliness_check_interval_) {
-    // Too early.  Reschedule.
-    if (reactor_->cancel_timer(this) == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
-                 ACE_TEXT("cancel_timer")));
-    }
-    if (reactor_->schedule_timer(this, 0, liveliness_check_interval_ - delta, liveliness_check_interval_) == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
-                 ACE_TEXT("schedule_timer")));
-    }
-    return 0;
-  }
-
   bool liveliness_lost = false;
 
   ACE_Time_Value elapsed = tv - last_liveliness_activity_time_;
@@ -2332,9 +2314,24 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
       break;
     }
   }
+  else {
+    // Reschedule.
+    if (reactor_->cancel_timer(this) == -1) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
+        ACE_TEXT("cancel_timer")));
+    }
+    if (reactor_->schedule_timer(this, 0, liveliness_check_interval_ - elapsed,
+      liveliness_check_interval_) == -1)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
+        ACE_TEXT("schedule_timer")));
+    }
+    return 0;
+  }
 
   liveliness_asserted_ = false;
-  last_liveliness_check_time_ = tv;
   elapsed = tv - last_liveliness_activity_time_;
 
   // Have we lost liveliness?

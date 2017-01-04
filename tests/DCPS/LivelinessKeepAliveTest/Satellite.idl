@@ -1,0 +1,50 @@
+//
+// (c) Copyright 2008, Object Computing, Inc.
+// All Rights Reserved.
+//
+
+module Satellite
+{
+  struct Vector
+  {
+    long long x;
+    long long y;
+    long long z;
+  };
+
+#pragma DCPS_DATA_TYPE "Satellite::Telemetry"
+#pragma DCPS_DATA_KEY "Satellite::Telemetry satellite"
+  struct Telemetry
+  {
+    string satellite;
+
+    long message_number;
+
+    Vector position;
+    Vector velocity;
+  };
+
+  typedef string ItemCode;
+  const ItemCode FUEL      = "Fuel";
+  const ItemCode BATTERY   = "Battery";
+  const ItemCode SYSTEM    = "System";
+
+  typedef string AlertCode;
+  const AlertCode LOW = "Low";
+  const AlertCode DEAD = "Dead";
+  const AlertCode SYSTEM_SHUTDOWN = "System Shutdown";
+
+#pragma DCPS_DATA_TYPE "Satellite::Alert"
+#pragma DCPS_DATA_KEY "Satellite::Alert satellite"
+#pragma DCPS_DATA_KEY "Satellite::Alert item"
+  struct Alert
+  {
+    string satellite;
+
+    ItemCode  item;
+    AlertCode code;
+    string    message;
+    long      index;
+  };
+};
+

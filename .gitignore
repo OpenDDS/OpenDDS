@@ -1,6 +1,15 @@
 .depend.*
 GNUmakefile*
+*.vcxproj*
+*.tlog
 *.log
+*.obj
+*.ilk
+*.exe
+*.dll
+*.lib
+*.exp
+*.[ip]db
 *.ior
 .obj/
 .shobj/
@@ -11,8 +20,10 @@ lib*.dylib
 *.opensdf
 *.sdf
 *.sln
+*.pch
 *.suo
 .*.swp
+*.res
 *.VC.db
 *.VC.opendb
 
