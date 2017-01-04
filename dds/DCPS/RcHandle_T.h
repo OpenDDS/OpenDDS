@@ -289,7 +289,7 @@ RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 
 template<typename T>
 RcHandle<T> rchandle_from(T* pointer)
 {
-  return RcHandle<T>(static_cast<T*>(pointer), inc_count());
+  return RcHandle<T>(pointer, inc_count());
 }
 
 } // namespace DCPS
