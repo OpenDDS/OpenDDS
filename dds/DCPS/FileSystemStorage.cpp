@@ -26,7 +26,7 @@
 typedef size_t String_Index_t;
 
 namespace {
-  
+
 using OpenDDS::DCPS::keep_count;
 using OpenDDS::DCPS::inc_count;
 

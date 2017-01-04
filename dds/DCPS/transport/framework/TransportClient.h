@@ -49,7 +49,7 @@ class SendStateDataSampleListIterator;
  * communication mechanisms and the DataLink objects that represent the
  * currently active communication channels to peers.
  */
-class OpenDDS_Dcps_Export TransportClient 
+class OpenDDS_Dcps_Export TransportClient
 {
 public:
   // Used by TransportImpl to complete associate() processing:

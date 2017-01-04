@@ -12,7 +12,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-  
+
 struct inc_count {};
 struct keep_count {};
 
@@ -25,12 +25,12 @@ public:
   RcHandle()
     : ptr_(0)
   {}
-    
+
   RcHandle(T* p, keep_count)
     : ptr_(p)
   {
   }
-  
+
 
   RcHandle(T* p, inc_count)
     : ptr_(p)
@@ -202,13 +202,13 @@ class reference_wrapper{
 public:
   // types
   typedef T type;
- 
+
   // construct/copy/destroy
-  reference_wrapper(T& ref): _ptr(&ref) {} 
+  reference_wrapper(T& ref): _ptr(&ref) {}
   // access
   operator T& () const { return *_ptr; }
   T& get() const { return *_ptr; }
- 
+
 private:
   T* _ptr;
 };

@@ -18,8 +18,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-	
-	
+
+
 TransportSendControlElement::TransportSendControlElement(int initial_count,
                                                          const RepoId& publisher_id,
                                                          TransportSendListener* listener,

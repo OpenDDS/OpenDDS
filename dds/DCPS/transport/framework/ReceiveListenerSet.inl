@@ -51,8 +51,8 @@ ReceiveListenerSet::insert(RepoId subscriber_id,
   if (!r.second) {
     // subscriber_id is already in the map
     if (!r.first->second) {
-        // subscriber_id is in the map with a null listener, update it.
-    	r.first->second = listener;
+      // subscriber_id is in the map with a null listener, update it.
+      r.first->second = listener;
     }
     return 1; // 1 ==> key already existed in map
   }

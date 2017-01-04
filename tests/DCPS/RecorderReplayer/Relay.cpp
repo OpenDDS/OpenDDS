@@ -154,7 +154,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
     }
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Start relay\n"));
-    
+
     using namespace OpenDDS::DCPS;
 
     {

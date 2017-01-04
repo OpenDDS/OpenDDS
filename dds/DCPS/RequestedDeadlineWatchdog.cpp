@@ -72,7 +72,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, 
 {
   DDS::InstanceHandle_t handle = reinterpret_cast<intptr_t>(act);
   SubscriptionInstance_rch instance = this->reader_impl_->get_handle_instance(handle);
-  if (instance) 
+  if (instance)
     execute(instance, true);
   return 0;
 }

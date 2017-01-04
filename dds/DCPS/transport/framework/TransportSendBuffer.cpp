@@ -26,7 +26,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-  
+
 
 TransportSendBuffer::~TransportSendBuffer()
 {
