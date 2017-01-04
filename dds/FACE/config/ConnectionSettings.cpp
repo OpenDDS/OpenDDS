@@ -35,15 +35,45 @@ ConnectionSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "domain")) {
     domain_id_ = atoi(value);
   } else if (!std::strcmp(name, "topic")) {
-    std::strncpy(topic_name_, value, sizeof(topic_name_));
+    if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("topic name %C exceeds allowable length,"
+        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+      status = 1;
+    } else {
+      std::strncpy(topic_name_, value, sizeof(topic_name_));
+    }
   } else if (!std::strcmp(name, "datawriterqos")) {
-    std::strncpy(datawriter_qos_name_, value, sizeof(datawriter_qos_name_));
+    if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("datawriterqos name %C exceeds allowable length,"
+        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+      status = 1;
+    } else {
+      std::strncpy(datawriter_qos_name_, value, sizeof(datawriter_qos_name_));
+    }
   } else if (!std::strcmp(name, "datareaderqos")) {
-    std::strncpy(datareader_qos_name_, value, sizeof(datareader_qos_name_));
+    if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("datareaderqos name %C exceeds allowable length,"
+        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+      status = 1;
+    } else {
+      std::strncpy(datareader_qos_name_, value, sizeof(datareader_qos_name_));
+    }
   } else if (!std::strcmp(name, "publisherqos")) {
-    std::strncpy(publisher_qos_name_, value, sizeof(publisher_qos_name_));
+    if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("publisherqos name %C exceeds allowable length,"
+        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+      status = 1;
+    } else {
+      std::strncpy(publisher_qos_name_, value, sizeof(publisher_qos_name_));
+    }
   } else if (!std::strcmp(name, "subscriberqos")) {
-    std::strncpy(subscriber_qos_name_, value, sizeof(subscriber_qos_name_));
+    if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("subscriberqos name %C exceeds allowable length,"
+        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+      status = 1;
+    } else {
+      std::strncpy(subscriber_qos_name_, value, sizeof(subscriber_qos_name_));
+    }
   } else if (!std::strcmp(name, "direction")) {
     if (!std::strcmp(value, "source") ||
         !std::strcmp(value, "one_way_request_source") ||
@@ -64,7 +94,13 @@ ConnectionSettings::set(const char* name, const char* value)
       status = 1;
     }
   } else if (!std::strcmp(name, "config")) {
-    std::strncpy(config_name_, value, sizeof(config_name_));
+    if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("config name %C exceeds allowable length,"
+        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+      status = 1;
+    } else {
+      std::strncpy(config_name_, value, sizeof(config_name_));
+    }
   } else {
     // no match
     ACE_ERROR((LM_ERROR, ACE_TEXT("Don't know of setting %C\n"), name));
