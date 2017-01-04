@@ -12,8 +12,7 @@
 /// support the NullSynch case.
 ACE_INLINE
 OpenDDS::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
-  : worker_(0),
-    resource_(resource)
+  : resource_(resource)
 {
   DBG_ENTRY_LVL("ThreadSynch","ThreadSynch",6);
 }
@@ -22,11 +21,11 @@ ACE_INLINE
 OpenDDS::DCPS::ThreadSynchWorker*
 OpenDDS::DCPS::ThreadSynch::worker()
 {
-  return worker_;
+  return worker_.in();
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::ThreadSynch::register_worker(ThreadSynchWorker* worker)
+OpenDDS::DCPS::ThreadSynch::register_worker(const ThreadSynchWorker_rch& worker)
 {
   DBG_ENTRY_LVL("ThreadSynch","register_worker",6);
   this->worker_ = worker;
@@ -38,7 +37,7 @@ OpenDDS::DCPS::ThreadSynch::unregister_worker()
 {
   DBG_ENTRY_LVL("ThreadSynch","unregister_worker",6);
   this->unregister_worker_i();
-  this->worker_ = 0;
+  this->worker_.reset();
   delete this->resource_;
   this->resource_ = 0;
 }
