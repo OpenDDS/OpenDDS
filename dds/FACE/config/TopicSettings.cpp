@@ -19,7 +19,13 @@ TopicSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "max_message_size")) {
     max_message_size_ = atoi(value);
   } else if (!std::strcmp(name, "type_name")) {
-    std::strncpy(type_name_, value, sizeof(type_name_));
+    if (std::strlen(value) >= TYPE_NAME_LEN) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Type name %C exceeds allowable length,"
+        "must be < %d \n"), value, TYPE_NAME_LEN));
+      status = 1;
+    } else {
+      std::strncpy(type_name_, value, sizeof(type_name_));
+    }
   } else {
     // no match
     ACE_ERROR((LM_ERROR, ACE_TEXT("Don't know of setting %C\n"), name));
