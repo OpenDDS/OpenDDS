@@ -198,7 +198,7 @@ private:
   friend class File;
   template <typename T, typename U0, typename U1, typename U2>
   friend RcHandle<T> OpenDDS::DCPS::make_rch(const U0&, const U1&, const U2&);
-  
+
   Directory(const ACE_TString& root_path, const ACE_TString& logical,
             const Directory::Ptr& parent);
   void scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
