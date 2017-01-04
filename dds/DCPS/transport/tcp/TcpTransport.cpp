@@ -33,7 +33,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TcpTransport::TcpTransport(const TransportInst_rch& inst)
-  : acceptor_(new TcpAcceptor(this->shared_from_this())),
+  : acceptor_(new TcpAcceptor(rchandle_from(this))),
     con_checker_(new TcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
@@ -101,7 +101,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link);
     }
 
-    link = make_rch<TcpDataLink>(key.address(), this->shared_from_this(), attribs.priority_,
+    link = make_rch<TcpDataLink>(key.address(), rchandle_from(this), attribs.priority_,
                                 key.is_loopback(), true /*active*/);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
@@ -113,7 +113,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   }
 
   TcpConnection_rch connection(
-    make_rch<TcpConnection>(key.address(), link->transport_priority(), config()->shared_from_this()));
+    make_rch<TcpConnection>(key.address(), link->transport_priority(), this->config()));
   connection->set_datalink(link);
 
   TcpConnection* pConn = connection.in();
@@ -269,7 +269,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
         : AcceptConnectResult(link);
 
     } else {
-      link = make_rch<TcpDataLink>(key.address(), this->shared_from_this(), key.priority(),
+      link = make_rch<TcpDataLink>(key.address(), rchandle_from(this), key.priority(),
                                   key.is_loopback(), key.is_active());
 
       if (links_.bind(key, link) != 0 /*OK*/) {
@@ -700,7 +700,7 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
   connection->id() = last_link_;
 
   TransportSendStrategy_rch send_strategy (
-    make_rch<TcpSendStrategy>(last_link_, link, this->config()->shared_from_this(), connection,
+    make_rch<TcpSendStrategy>(last_link_, link, this->config(), connection,
                              new TcpSynchResource(connection,
                                                   this->config()->max_output_pause_period_),
                              this->reactor_task(), link->transport_priority()));

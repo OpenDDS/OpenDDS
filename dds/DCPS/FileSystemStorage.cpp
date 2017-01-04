@@ -529,12 +529,12 @@ ACE_TString Directory::full_path(const ACE_TString& relative) const
 
 Directory::FileIterator Directory::begin_files()
 {
-  return FileIterator(files_.begin(), this->shared_from_this());
+  return FileIterator(files_.begin(), rchandle_from(this));
 }
 
 Directory::FileIterator Directory::end_files()
 {
-  return FileIterator(files_.end(),  this->shared_from_this());
+  return FileIterator(files_.end(),  rchandle_from(this));
 }
 
 File::Ptr Directory::get_file(const char* name)
@@ -550,7 +550,7 @@ File::Ptr Directory::get_file(const char* name)
     return make_new_file(t_name);
 
   } else {
-    return DCPS::make_rch<File>(full_path(it->second), it->first, this->shared_from_this());
+    return DCPS::make_rch<File>(full_path(it->second), it->first, rchandle_from(this));
   }
 }
 
@@ -571,7 +571,7 @@ File::Ptr Directory::make_new_file(const ACE_TString& t_name)
   if (!fh) throw std::runtime_error("Can't create the file");
 
   std::fclose(fh);
-  return DCPS::make_rch<File>(physical_dirname_ + phys, t_name,  this->shared_from_this());
+  return DCPS::make_rch<File>(physical_dirname_ + phys, t_name,  rchandle_from(this));
 }
 
 File::Ptr Directory::create_next_file()
@@ -595,17 +595,17 @@ File::Ptr Directory::create_next_file()
 
 Directory::DirectoryIterator Directory::begin_dirs()
 {
-  return DirectoryIterator(dirs_.begin(),  this->shared_from_this());
+  return DirectoryIterator(dirs_.begin(),  rchandle_from(this));
 }
 
 Directory::DirectoryIterator Directory::end_dirs()
 {
-  return DirectoryIterator(dirs_.end(),  this->shared_from_this());
+  return DirectoryIterator(dirs_.end(),  rchandle_from(this));
 }
 
 Directory::Ptr Directory::get_dir(const OPENDDS_VECTOR(OPENDDS_STRING)& path)
 {
-  Directory::Ptr dir = this->shared_from_this();
+  Directory::Ptr dir = rchandle_from(this);
   typedef OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator iterator;
 
   for (iterator iter = path.begin(), end = path.end(); iter != end; ++iter) {
@@ -624,7 +624,7 @@ Directory::Ptr Directory::get_subdir(const char* name)
     return make_new_subdir(t_name);
 
   } else {
-    return DCPS::make_rch<Directory>(full_path(it->second), it->first,  this->shared_from_this());
+    return DCPS::make_rch<Directory>(full_path(it->second), it->first,  rchandle_from(this));
   }
 }
 
@@ -690,7 +690,7 @@ Directory::Ptr Directory::make_new_subdir(const ACE_TString& t_name)
     std::ofstream fn("_fullname");
     fn << t_name << '\n';
   }
-  return DCPS::make_rch<Directory>(physical_dirname_ + phys, t_name,  this->shared_from_this());
+  return DCPS::make_rch<Directory>(physical_dirname_ + phys, t_name,  rchandle_from(this));
 }
 
 ACE_TString Directory::add_entry()

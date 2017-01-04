@@ -216,9 +216,7 @@ TransportImpl::release_link_resources(DataLink* link)
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
   // Create a smart pointer without ownership (bumps up ref count)
-  DataLink_rch dl(link, inc_count());
-
-  dl_clean_task_.add(dl);
+  dl_clean_task_.add(rchandle_from(link));
 
   return true;
 }

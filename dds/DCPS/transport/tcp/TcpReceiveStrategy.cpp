@@ -79,7 +79,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
   // call when it receives a handle_input() "event", and we will carry
   // it out.  The TcpConnection object will make a "copy" of the
   // reference (to this object) that we pass-in here.
-  this->connection_->set_receive_strategy(this->shared_from_this());
+  this->connection_->set_receive_strategy(rchandle_from(this));
 
   if (connection_->is_connector()) {
     // Give the reactor its own reference to the connection object.
@@ -153,7 +153,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::reset(const TcpConnection_rch& connection)
   // call when it receives a handle_input() "event", and we will carry
   // it out.  The TcpConnection object will make a "copy" of the
   // reference (to this object) that we pass-in here.
-  this->connection_->set_receive_strategy(this->shared_from_this());
+  this->connection_->set_receive_strategy(rchandle_from(this));
 
   // Give the reactor its own "copy" of the reference to the connection object.
 

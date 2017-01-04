@@ -116,7 +116,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
   }
 
   // Let connection know the datalink for callbacks upon reconnect failure.
-  this->connection_->set_datalink(TcpDataLink_rch(this, inc_count()));
+  this->connection_->set_datalink(rchandle_from(this));
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
@@ -227,8 +227,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
   }
 
   if (released) {
-    TcpDataLink_rch this_rch(this, inc_count());
-    return this->transport_->connect_tcp_datalink(this_rch, connection);
+    return this->transport_->connect_tcp_datalink(rchandle_from(this), connection);
   }
 
   this->connection_ = connection;

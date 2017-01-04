@@ -294,9 +294,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
               "remove_handler failed %m.\n"));
       }
 
-      const TcpConnection_rch self(this, inc_count());
-
-      transport_during_setup_->passive_connection(remote_address_, self);
+      transport_during_setup_->passive_connection(remote_address_, rchandle_from(this));
       transport_during_setup_.reset();
       connected_ = true;
 

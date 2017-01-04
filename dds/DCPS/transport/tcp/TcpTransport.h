@@ -46,7 +46,6 @@ class TcpConnectionReplaceTask;
 
 class OpenDDS_Tcp_Export TcpTransport
   : public TransportImpl
-  , public EnableSharedFromThis<TcpTransport>
 {
 public:
 

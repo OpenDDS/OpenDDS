@@ -98,7 +98,7 @@ using OpenDDS::DCPS::RcHandle;
 
 class File;
 
-class OpenDDS_Dcps_Export Directory : public RcObject<ACE_SYNCH_MUTEX>, public OpenDDS::DCPS::EnableSharedFromThis<Directory> {
+class OpenDDS_Dcps_Export Directory : public RcObject<ACE_SYNCH_MUTEX> {
 public:
   typedef RcHandle<Directory> Ptr;
 

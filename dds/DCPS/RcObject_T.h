@@ -76,14 +76,6 @@ private:
   RcObject& operator=(const RcObject&);
 };
 
-template <class T>
-struct EnableSharedFromThis
-{
-  RcHandle<T> shared_from_this()
-  {
-    return RcHandle<T>(static_cast<T*>(this), inc_count());
-  }
-};
 
 } // namespace DCPS
 } // namespace OpenDDS

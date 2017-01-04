@@ -27,7 +27,7 @@ typedef RcHandle<MulticastInst> MulticastInst_rch;
 class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
-class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl, public EnableSharedFromThis<MulticastTransport> {
+class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
   explicit MulticastTransport(const TransportInst_rch& inst);
   ~MulticastTransport();

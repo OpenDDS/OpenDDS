@@ -46,7 +46,7 @@ RtpsUdpTransport::config() const
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(this->shared_from_this(), local_prefix, config(), reactor_task());
+  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task());
 
   if (!link->open(unicast_socket_)) {
     ACE_DEBUG((LM_ERROR,

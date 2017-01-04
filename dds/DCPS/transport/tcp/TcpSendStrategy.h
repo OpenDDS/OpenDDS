@@ -22,7 +22,7 @@ namespace DCPS {
 
 class TcpSynchResource;
 
-class TcpSendStrategy : public TransportSendStrategy, public EnableSharedFromThis<TcpSendStrategy> {
+class TcpSendStrategy : public TransportSendStrategy {
 public:
 
   TcpSendStrategy(std::size_t id,

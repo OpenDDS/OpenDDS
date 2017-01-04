@@ -26,7 +26,7 @@ namespace DCPS {
 class ShmemInst;
 typedef RcHandle<ShmemInst> ShmemInst_rch;
 
-class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl, public EnableSharedFromThis<ShmemTransport> {
+class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
 public:
   explicit ShmemTransport(const TransportInst_rch& inst);
 

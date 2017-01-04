@@ -429,7 +429,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
     DataLinkSet_rch& links = released_locals[local_id];
     if (links.is_nil())
       links = make_rch<DataLinkSet>();
-    links->insert_link(this->shared_from_this());
+    links->insert_link(rchandle_from(this));
     {
       GuardType guard(this->released_assoc_by_local_lock_);
       released_assoc_by_local_[local_id].insert(remote_id);

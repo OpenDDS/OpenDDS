@@ -116,7 +116,7 @@ OpenDDS::DCPS::TransportInst::impl()
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
   if (this->impl_.is_nil()) {
     try {
-      this->impl_ = this->new_impl(TransportInst_rch(this, inc_count()));
+      this->impl_ = this->new_impl(rchandle_from(this));
     } catch (const OpenDDS::DCPS::Transport::UnableToCreate& ) {
       return TransportImpl_rch();
     }

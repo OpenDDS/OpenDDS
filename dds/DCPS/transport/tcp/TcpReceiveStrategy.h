@@ -20,7 +20,7 @@ namespace DCPS {
 
 class TcpConnection;
 
-class TcpReceiveStrategy : public TransportReceiveStrategy<>, public EnableSharedFromThis<TcpReceiveStrategy> {
+class TcpReceiveStrategy : public TransportReceiveStrategy<> {
 public:
 
   TcpReceiveStrategy(const TcpDataLink_rch& link,

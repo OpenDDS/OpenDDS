@@ -27,7 +27,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Tcp_Export TcpInst
-  : public TransportInst, public EnableSharedFromThis<TcpInst> {
+  : public TransportInst {
 public:
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);

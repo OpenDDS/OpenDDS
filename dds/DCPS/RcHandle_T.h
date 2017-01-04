@@ -286,8 +286,11 @@ RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 
   return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5), unwrap_reference(u6), unwrap_reference(u7)), keep_count());
 }
 
-
-
+template<typename T>
+RcHandle<T> rchandle_from(T* pointer)
+{
+  return RcHandle<T>(static_cast<T*>(pointer), inc_count());
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

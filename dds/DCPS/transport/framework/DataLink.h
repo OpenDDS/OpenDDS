@@ -63,8 +63,7 @@ typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetM
  */
 class OpenDDS_Dcps_Export DataLink
   : public RcEventHandler,
-    public PoolAllocationBase,
-    public EnableSharedFromThis<DataLink> {
+    public PoolAllocationBase {
 
   friend class DataLinkCleanupTask;
 
