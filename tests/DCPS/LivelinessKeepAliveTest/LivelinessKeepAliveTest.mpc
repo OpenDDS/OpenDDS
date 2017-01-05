@@ -7,14 +7,18 @@ project(DDS*idl): dcps_test_lib {
   TypeSupport_Files {
     Satellite.idl
   }
+
+
 }
 
 project(LivelinessKeepAliveTestPublisher): dcpsexe, dcps_transports_for_test {
   exename   = publisher
-  libpaths += ../common
-  libs     += common DDS*idl
-  after    += DDS*idl common
-  
+  libs     += DDS*idl
+  after    += DDS*idl
+
+  Idl_Files {
+  }
+
   Source_Files {
     common.cpp
     publisher.cpp
@@ -24,10 +28,12 @@ project(LivelinessKeepAliveTestPublisher): dcpsexe, dcps_transports_for_test {
 
 project(LivelinessKeepAliveTestSubscriber): dcpsexe, dcps_transports_for_test {
   exename   = subscriber
-  libpaths += ../common
-  libs     += common DDS*idl
-  after    += DDS*idl common
-  
+  libs     += DDS*idl
+  after    += DDS*idl
+
+  Idl_Files {
+  }
+
   Source_Files {
     common.cpp
     subscriber.cpp
