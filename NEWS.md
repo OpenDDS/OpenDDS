@@ -10,7 +10,7 @@ Version 3.9 of OpenDDS.
   - WriteDataContainer is more eager to remove samples that are no longer needed
   - WriteDataContainer will not remove samples that are required to implement
     DURABILITY, hence if RELIABILITY is enabled this can block a write() just
-    like other “no resource available” scenarios
+    like other "no resource available" scenarios
 
 - Fixed an RTPS interoperability issue with the new ParticipantMessageData
   messages (used for liveliness)
