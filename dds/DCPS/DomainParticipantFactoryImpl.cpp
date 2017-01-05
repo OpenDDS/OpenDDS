@@ -79,7 +79,7 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  DomainParticipantImpl* dp;
+  DomainParticipantImpl* dp = 0;
 
   ACE_NEW_RETURN(dp,
                  DomainParticipantImpl(this, domainId, value.id, qos, a_listener,
@@ -100,7 +100,7 @@ DomainParticipantFactoryImpl::create_participant(
   // needed for the built in topics during enable.
   dp->set_object_reference(dp_obj);  //xxx no change
 
-  if (qos_.entity_factory.autoenable_created_entities == 1) {
+  if (qos_.entity_factory.autoenable_created_entities == true) {
     dp->enable();
   }
 
@@ -113,7 +113,7 @@ DomainParticipantFactoryImpl::create_participant(
   // new DomainParticipantImpl (NO_DUP, so this takes over mem)
   Participant_Pair pair(dp, dp_obj, NO_DUP);
 
-  DPSet* entry;
+  DPSet* entry = 0;
 
   if (find(participants_, domainId, entry) == -1) {
     DPSet set;

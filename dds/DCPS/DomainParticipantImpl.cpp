@@ -122,7 +122,7 @@ DomainParticipantImpl::create_publisher(
                                this),
                  DDS::Publisher::_nil());
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1)) {
+  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == true)) {
     pub->enable();
   }
 
@@ -204,7 +204,7 @@ DomainParticipantImpl::create_subscriber(
                                 this),
                  DDS::Subscriber::_nil());
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1)) {
+  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == true)) {
     sub->enable();
   }
 
@@ -1518,7 +1518,7 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
-  if (qos.entity_factory.autoenable_created_entities == 0) {
+  if (qos.entity_factory.autoenable_created_entities == false) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -1638,7 +1638,7 @@ DomainParticipantImpl::create_new_topic(
                  DDS::Topic::_nil());
 
   if ((enabled_ == true)
-      && (qos_.entity_factory.autoenable_created_entities == 1)) {
+      && (qos_.entity_factory.autoenable_created_entities == true)) {
     topic_servant->enable();
   }
 
@@ -1857,7 +1857,7 @@ DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
     dr_qos, a_listener,
     mask, this, subscriber_qos);
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == 1)) {
+  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities == true)) {
     recorder->enable();
   }
 
@@ -1901,7 +1901,7 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
   replayer->init(a_topic, topic_servant, dw_qos, a_listener, mask, this, pub_qos);
 
   if (this->enabled_ == true
-      && qos_.entity_factory.autoenable_created_entities == 1) {
+      && qos_.entity_factory.autoenable_created_entities == true) {
 
     DDS::ReturnCode_t ret = replayer->enable();
 

@@ -132,7 +132,7 @@ PublisherImpl::create_datawriter(
       dw_obj.in());
 
   if (this->enabled_ == true
-      && qos_.entity_factory.autoenable_created_entities == 1) {
+      && qos_.entity_factory.autoenable_created_entities == true) {
 
     DDS::ReturnCode_t ret = dw_servant->enable();
 
