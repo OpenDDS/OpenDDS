@@ -184,7 +184,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "Publisher NOT using MULTICAST transport.\n"));
   }
 
-  // Indicates sucessful parsing of the command line
+  // Indicates successful parsing of the command line
   return 0;
 }
 
