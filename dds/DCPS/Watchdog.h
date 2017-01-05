@@ -70,6 +70,10 @@ public:
   /// recurring timer expirations.
   long schedule_timer(const void* act, const ACE_Time_Value& interval);
 
+  /// Schedule with the @c Watchdog timer delay and timer interval,
+  /// i.e. time between recurring timer expirations.
+  long schedule_timer(const void* act, const ACE_Time_Value& delay, const ACE_Time_Value& interval);
+
   /// Cancel a specific timer.
   int cancel_timer(long timer_id);
 
