@@ -159,10 +159,6 @@ int DCPS_IR_Publication::remove_associated_subscription(DCPS_IR_Subscription* su
   bool marked_dead = false;
 
   if (sendNotify) {
-    OpenDDS::DCPS::ReaderIdSeq idSeq(1);
-    idSeq.length(1);
-    idSeq[0]= sub->get_id();
-
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -171,6 +167,10 @@ int DCPS_IR_Publication::remove_associated_subscription(DCPS_IR_Subscription* su
                      ACE_TEXT(" calling pub %d with sub %d\n"),
                      id_, sub->get_id()));
         }
+
+        OpenDDS::DCPS::ReaderIdSeq idSeq(1);
+        idSeq.length(1);
+        idSeq[0] = sub->get_id();
 
         writer_->remove_associations(idSeq, notify_lost);
 
@@ -181,7 +181,7 @@ int DCPS_IR_Publication::remove_associated_subscription(DCPS_IR_Subscription* su
       } catch (const CORBA::Exception& ex) {
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ex._tao_print_exception(
-            "(%P|%t) ERROR: Exception caught in DCPS_IR_Publication::remove_associated_publication:");
+            "(%P|%t) ERROR: Exception caught in DCPS_IR_Publication::remove_associated_subscription:");
         }
 
         participant_->mark_dead();

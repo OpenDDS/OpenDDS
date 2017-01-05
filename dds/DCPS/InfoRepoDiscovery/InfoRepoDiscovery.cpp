@@ -164,7 +164,16 @@ InfoRepoDiscovery::~InfoRepoDiscovery()
 {
   if (!orb_from_user_ && orb_runner_) {
     if (0 == --orb_runner_->use_count_) {
-      orb_runner_->shutdown();
+      try {
+        orb_runner_->shutdown();
+      }
+      catch (CORBA::Exception& ex) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("ERROR: InfoRepoDiscovery::~InfoRepoDiscovery - ")
+          ACE_TEXT("Exception caught during ORB shutdown: %C.\n"),
+          ex._info().c_str()));
+      }
+
       delete orb_runner_;
       orb_runner_ = 0;
     }

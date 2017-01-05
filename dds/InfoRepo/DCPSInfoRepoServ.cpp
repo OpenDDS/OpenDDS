@@ -100,7 +100,12 @@ InfoRepo::finalize()
   TheServiceParticipant->shutdown();
 
   if (!CORBA::is_nil(this->orb_)) {
-    this->orb_->destroy();
+    try {
+      this->orb_->destroy();
+    }
+    catch (CORBA::OBJECT_NOT_EXIST) {
+      //finalizing anyway, not an issue.
+    }
   }
 
   this->finalized_ = true;
