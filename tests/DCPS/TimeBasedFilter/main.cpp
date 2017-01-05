@@ -25,8 +25,9 @@
 namespace
 {
 static DDS::Duration_t minimum_separation = { 5, 0 };
+static bool reliable = false;
 
-static const size_t EXPECTED_SAMPLES = 2;
+static const size_t NUM_INSTANCES = 2;
 static const size_t SAMPLES_PER_CYCLE = 5;
 
 void
@@ -43,6 +44,11 @@ parse_args(int& argc, ACE_TCHAR** argv)
       minimum_separation.sec = ACE_OS::atoi(arg);
       shifter.consume_arg();
     }
+    else if (strcmp(shifter.get_current(), (ACE_TEXT("-r"))) == 0)
+    {
+      reliable = true;
+      shifter.consume_arg();
+    }
     else
     {
       shifter.ignore_arg();
@@ -51,6 +57,104 @@ parse_args(int& argc, ACE_TCHAR** argv)
 }
 
 } // namespace
+
+typedef std::pair<Foo, DDS::SampleInfo> FooInfo;
+typedef std::vector<FooInfo> Foos;
+typedef std::map<::CORBA::Long, Foos> SampleMap;
+
+bool verify_unreliable(FooDataReader_var reader_i, const size_t expected_samples, SampleMap& samples)
+{
+  bool valid = true;
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("%N:%l main()")
+    ACE_TEXT(" INFO: Expecting %d instances...\n"),
+    NUM_INSTANCES));
+  for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j)
+  {
+    const Foos& foos = samples[j];
+    size_t seen = foos.size();
+    if (seen != expected_samples)
+    {
+      valid = false;
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("%N:%l main()")
+        ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
+        j, seen, expected_samples));
+    }
+    else
+    {
+      for (size_t i = 0; i < expected_samples; ++i)
+      {
+        const FooInfo& fooInfo = foos[i];
+        if (fooInfo.first.x != 0.0f)
+        {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("%N:%l main()")
+            ACE_TEXT(" ERROR: for key %d received x=%f, expected 0.0!\n"),
+            j, fooInfo.first.x));
+        }
+      }
+    }
+  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("%N:%l main()")
+    ACE_TEXT(" INFO: valid=%d ...\n"),
+    valid));
+  return valid;
+}
+
+
+bool verify_reliable(FooDataReader_var reader_i, const size_t expected_samples, SampleMap& samples)
+{
+  bool valid = true;
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("%N:%l main()")
+    ACE_TEXT(" INFO: Expecting %d instances...\n"),
+    NUM_INSTANCES));
+  for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j)
+  {
+    const Foos& foos = samples[j];
+    size_t seen = foos.size();
+    // each delay should result in 2 samples being seen, the first one and the last one in the filter window
+    if (seen != expected_samples * 2)
+    {
+      valid = false;
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("%N:%l main()")
+        ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
+        j, seen, expected_samples));
+    }
+    else
+    {
+      for (size_t i = 0; i < expected_samples * 2; ++i)
+      {
+        const FooInfo& fooInfo = foos[i];
+        // each successive sample was sent with x = 0.0 to x = (SAMPLES_PER_CYCLE - 1)
+        const float expected = (i % 2) == 0 ? 0.0f : (float)(SAMPLES_PER_CYCLE - 1);
+        if (fooInfo.first.x != expected)
+        {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("%N:%l main()")
+            ACE_TEXT(" ERROR: for key %d received x=%f, expected %f!\n"),
+            j, fooInfo.first.x, expected));
+        }
+        else
+        {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("%N:%l main()")
+            ACE_TEXT(" for key %d received x=%f, expected %f!\n"),
+            j, fooInfo.first.x, expected));
+        }
+      }
+    }
+  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("%N:%l main()")
+    ACE_TEXT(" INFO: valid=%d ...\n"),
+    valid));
+  return valid;
+}
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
@@ -64,6 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                       ACE_TEXT(" ERROR: minimum_separation must be non-zero!\n")), -1);
   }
 
+  bool valid = true;
   try
   {
     DDS::DomainParticipantFactory_var dpf =
@@ -134,21 +239,28 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Create DataReader
-    DDS::DataReaderQos qos;
+    DDS::DataReaderQos dr_qos;
 
-    if (subscriber->get_default_datareader_qos(qos) != DDS::RETCODE_OK)
+    if (subscriber->get_default_datareader_qos(dr_qos) != DDS::RETCODE_OK)
     {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
     }
 
-    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-    qos.time_based_filter.minimum_separation = minimum_separation;
+    dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    dr_qos.time_based_filter.minimum_separation = minimum_separation;
+
+    if (reliable)
+    {
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+      dr_qos.history.depth = 50;
+    }
 
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
-                                    qos,
+                                    dr_qos,
                                     DDS::DataReaderListener::_nil(),
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -167,10 +279,22 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                         ACE_TEXT(" ERROR: _narrow failed!\n")), -1);
     }
 
+    DDS::DataWriterQos dw_qos;
+    publisher->get_default_datawriter_qos(dw_qos);
+    if (reliable)
+    {
+      dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      dw_qos.reliability.max_blocking_time.sec = 1;
+      dw_qos.reliability.max_blocking_time.nanosec = 0;
+      dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+      dw_qos.resource_limits.max_samples = 100;
+      dw_qos.resource_limits.max_samples_per_instance = 50;
+    }
+
     // Create DataWriter
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic.in(),
-                                   DATAWRITER_QOS_DEFAULT,
+                                   dw_qos,
                                    DDS::DataWriterListener::_nil(),
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -227,25 +351,30 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // time, and then verify we receive the expected number
     // of samples.
     //
-    size_t seen = 0;
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing %d second minimum separation...\n"),
                minimum_separation.sec));
 
+    const size_t expected_samples = reliable ? 5 : 2;
+
     // We expect to receive up to one sample per
     // cycle (all others should be filtered).
-    for (size_t i = 0; i < EXPECTED_SAMPLES; ++i)
+    for (size_t i = 0; i < expected_samples; ++i)
     {
-      for (size_t j = 0; j < SAMPLES_PER_CYCLE; ++j)
+      for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j)
       {
-        Foo foo = { 0, 0, 0, 0 }; // same instance required!
-        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+        for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k)
         {
+          ::CORBA::Float x = (CORBA::Float)k;
+          Foo foo = { j, x, 0, 0 }; // same instance required for repeated samples
+          if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+          {
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("%N:%l main()")
-                              ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+              ACE_TEXT("%N:%l main()")
+              ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+          }
         }
       }
 
@@ -253,6 +382,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ACE_OS::sleep(2 * minimum_separation.sec);
     }
 
+    SampleMap samples;
     for (;;)
     {
       Foo foo;
@@ -262,7 +392,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       if (error == DDS::RETCODE_OK)
       {
         if (info.valid_data) {
-          seen++;
+          samples[foo.key].push_back(std::make_pair(foo, info));
         }
       }
       else if (error == DDS::RETCODE_NO_DATA)
@@ -278,12 +408,17 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       }
     }
 
-    if (seen != EXPECTED_SAMPLES)
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("%N:%l main()")
+      ACE_TEXT(" INFO: reliable=%d ...\n"),
+      reliable));
+    if (!reliable)
     {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: received %d sample(s), expected %d!\n"),
-                        seen, EXPECTED_SAMPLES), -1);
+      valid = verify_unreliable(reader_i, expected_samples, samples);
+    }
+    else
+    {
+      valid = verify_reliable(reader_i, expected_samples, samples);
     }
 
     // Clean-up!
@@ -294,8 +429,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
   catch (const CORBA::Exception& e)
   {
     e._tao_print_exception("Caught in main()");
-    return -1;
+    valid = false;
   }
 
-  return 0;
+  return valid ? 0 : -1;
 }
