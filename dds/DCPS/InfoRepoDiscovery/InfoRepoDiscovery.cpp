@@ -167,7 +167,7 @@ InfoRepoDiscovery::~InfoRepoDiscovery()
       try {
         orb_runner_->shutdown();
       }
-      catch (CORBA::Exception& ex) {
+      catch (const CORBA::Exception& ex) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("ERROR: InfoRepoDiscovery::~InfoRepoDiscovery - ")
           ACE_TEXT("Exception caught during ORB shutdown: %C.\n"),

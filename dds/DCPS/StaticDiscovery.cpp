@@ -1315,11 +1315,12 @@ StaticDiscovery::parse_publisherqos(ACE_Configuration_Heap& cf)
         try {
           parse_list(publisherqos.partition, value);
         }
-        catch (CORBA::BAD_PARAM) {
+        catch (const CORBA::Exception& ex) {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
-            ACE_TEXT("Exception caught while parsing partition.name (%C) in [publisherqos/%C] section.\n"),
-            value.c_str(), publisherqos_name.c_str()),
+            ACE_TEXT("Exception caught while parsing partition.name (%C) ")
+            ACE_TEXT("in [publisherqos/%C] section: %C.\n"),
+            value.c_str(), publisherqos_name.c_str(), ex._info().c_str()),
             -1);
         }
       } else {

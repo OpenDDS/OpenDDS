@@ -103,7 +103,7 @@ InfoRepo::finalize()
     try {
       this->orb_->destroy();
     }
-    catch (CORBA::OBJECT_NOT_EXIST) {
+    catch (const CORBA::Exception&) {
       //finalizing anyway, not an issue.
     }
   }

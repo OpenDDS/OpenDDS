@@ -425,9 +425,12 @@ Spdp::SpdpTransport::~SpdpTransport()
   try {
     dispose_unregister();
   }
-  catch (CORBA::BAD_PARAM) {
+  catch (const CORBA::Exception& ex) {
     if (DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Exception caught in SpdpTransport::~SpdpTransport\n")));
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: Exception caught in ")
+        ACE_TEXT("SpdpTransport::~SpdpTransport: %C\n"),
+        ex._info().c_str()));
     }
   }
   {
