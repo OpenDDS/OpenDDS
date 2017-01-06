@@ -429,6 +429,16 @@ DomainParticipantImpl::create_topic_i(
     if (0 == topic_mask) {
        // creating a topic with compile time type
       type_support = Registered_Data_Types->lookup(this, type_name);
+      if (CORBA::is_nil(type_support)) {
+        if (DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                       ACE_TEXT("DomainParticipantImpl::create_topic, ")
+                       ACE_TEXT("can't create a topic=%C type_name=%C ")
+                       ACE_TEXT("is not registered.\n"),
+                       topic_name, type_name));
+        }
+        return DDS::Topic::_nil();
+      }
       has_keys = type_support->has_dcps_key();
     }
     RepoId topic_id;
