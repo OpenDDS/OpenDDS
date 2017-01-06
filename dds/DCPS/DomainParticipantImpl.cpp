@@ -430,7 +430,7 @@ DomainParticipantImpl::create_topic_i(
        // creating a topic with compile time type
       type_support = Registered_Data_Types->lookup(this, type_name);
       if (CORBA::is_nil(type_support)) {
-        if (DCPS_debug_level) {
+        if (DCPS_debug_level >= 1) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                        ACE_TEXT("DomainParticipantImpl::create_topic, ")
                        ACE_TEXT("can't create a topic=%C type_name=%C ")
