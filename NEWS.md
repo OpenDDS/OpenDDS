@@ -1,3 +1,15 @@
+Version X.Y of OpenDDS.
+-------------------------------------------------------------------------------
+
+##### Additions:
+- TODO: Add your features here
+
+##### Fixes:
+- TODO: Add your fixes here
+
+##### Notes:
+- TODO: Add your notes here
+_______________________________________________________________________________
 Version 3.9 of OpenDDS.
 -------------------------------------------------------------------------------
 
@@ -529,5 +541,14 @@ Version 3.0 of OpenDDS.
 - The monitor tool has a new view which is an alternate to the Graphviz
   view.  The Node view uses Qt gui elements to model the OpenDDS system.
   Users can manipulate Node view graphs before saving them to PNG files.
+
+_______________________________________________________________________________
+
+NEWS for Previous Major Versions
+-------------------------------------------------------------------------------
+
+- NEWS for OpenDDS release 2.X versions are archived in [docs/history/NEWS-2.md](docs/history/NEWS-2.md)
+- NEWS for OpenDDS release 1.X versions are archived in [docs/history/NEWS-1.md](docs/history/NEWS-1.md)
+- NEWS for OpenDDS release 0.X versions are archived in [docs/history/NEWS-0.md](docs/history/NEWS-0.md)
 
 _______________________________________________________________________________

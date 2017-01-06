@@ -1534,7 +1534,7 @@ my %settings = (
     ftp_password => $ENV{FTP_PASSWD},
     ftp_host     => $ENV{FTP_HOST},
     changelog    => "docs/history/ChangeLog-$version",
-    modified     => {"NEWS" => 1,
+    modified     => {"NEWS.md" => 1,
         "PROBLEM-REPORT-FORM" => 1,
         "VERSION" => 1,
         "dds/Version.h" => 1,
