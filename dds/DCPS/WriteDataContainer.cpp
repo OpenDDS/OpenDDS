@@ -642,6 +642,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  OPENDDS_STRING(converter).c_str()));
     }
     release_buffer(stale);
+    stale = 0;
     writer_->controlTracker.message_delivered();
   } else {
 
@@ -655,6 +656,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
         inst->samples_.dequeue(sample);
       }
       release_buffer(stale);
+      stale = 0;
     }
 
     if (DCPS_debug_level > 9) {

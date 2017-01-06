@@ -12,9 +12,11 @@ namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class OpenDDS_FACE_Export TopicSettings {
 public:
+  static const int TYPE_NAME_LEN = 128;
+
   int set(const char* name, const char* value);
 
-  char type_name_[128];
+  char type_name_[TYPE_NAME_LEN];
   FACE::MESSAGE_TYPE_GUID platform_view_guid_;
   FACE::MESSAGE_SIZE_TYPE max_message_size_;
 };
