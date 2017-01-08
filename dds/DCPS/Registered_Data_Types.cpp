@@ -59,6 +59,32 @@ DDS::ReturnCode_t Data_Types_Register::register_type(
   return DDS::RETCODE_ERROR;
 }
 
+DDS::ReturnCode_t Data_Types_Register::unregister_type(
+    DDS::DomainParticipant_ptr domain_participant,
+    const char* type_name,
+    TypeSupport_ptr the_type)
+{
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, lock_, DDS::RETCODE_ERROR);
+
+  TypeSupportMap& tsm = participants_[domain_participant];
+  const TypeSupport_var typeSupport = TypeSupport::_duplicate(the_type);
+
+  TypeSupportMap::iterator iter = tsm.find(type_name);
+  if (iter == tsm.end()) {
+    // Not in the map, can't delete
+    // Intent is for the type to not be present so return success
+    return DDS::RETCODE_OK;
+  }
+  else {
+    if (std::strcmp(typeSupport->_interface_repository_id(),
+      iter->second->_interface_repository_id()) == 0) {
+      tsm.erase(iter);
+      return DDS::RETCODE_OK;
+    }
+    return DDS::RETCODE_ERROR;
+  }
+}
+
 DDS::ReturnCode_t Data_Types_Register::unregister_participant(
   DDS::DomainParticipant_ptr domain_participant)
 {
