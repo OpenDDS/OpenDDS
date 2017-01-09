@@ -12,12 +12,16 @@ AlertDataReaderListenerImpl::AlertDataReaderListenerImpl() :
 {
   // expect the alive_count either 0 or 1
   expected_status_.alive_count = 1;
+  expected_status_.alive_count_change = 0;
   expected_status_.not_alive_count = 0;
+  expected_status_.not_alive_count_change = 0;
+  expected_status_.last_publication_handle = DDS::HANDLE_NIL;
 
   last_status_.alive_count = 0;
-  last_status_.not_alive_count = 0;
   last_status_.alive_count_change = 0;
+  last_status_.not_alive_count = 0;
   last_status_.not_alive_count_change = 0;
+  last_status_.last_publication_handle = DDS::HANDLE_NIL;
 }
 
 AlertDataReaderListenerImpl::~AlertDataReaderListenerImpl ()
