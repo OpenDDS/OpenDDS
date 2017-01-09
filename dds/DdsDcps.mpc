@@ -71,7 +71,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     ../README
     ../VERSION
     ../LICENSE
-    ../NEWS
+    ../NEWS.md
     ../rules.dds.GNU
   }
 
