@@ -43,7 +43,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // was set to false for Pub
-    if (pub_qos.entity_factory.autoenable_created_entities == true) {
+    if (pub_qos.entity_factory.autoenable_created_entities) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" publisher has wrong autoenable value!\n")),

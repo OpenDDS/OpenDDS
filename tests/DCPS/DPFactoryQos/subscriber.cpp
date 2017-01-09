@@ -41,7 +41,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
-      if (fqos.entity_factory.autoenable_created_entities == false)
+      if (!fqos.entity_factory.autoenable_created_entities)
       {
         cerr << "The DomainParticipantFactory defaults to autoenable upon entities creation." << endl;
         return 1;

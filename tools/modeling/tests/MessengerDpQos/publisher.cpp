@@ -43,7 +43,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
                          -1);
     }
     // was set to false for DP
-    if (part_qos.entity_factory.autoenable_created_entities == true) {
+    if (part_qos.entity_factory.autoenable_created_entities) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: %N:%l: main() -")
                           ACE_TEXT(" participant has wrong autoenable value!\n")),

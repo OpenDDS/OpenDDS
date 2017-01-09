@@ -100,7 +100,7 @@ DomainParticipantFactoryImpl::create_participant(
   // needed for the built in topics during enable.
   dp->set_object_reference(dp_obj);  //xxx no change
 
-  if (qos_.entity_factory.autoenable_created_entities == true) {
+  if (qos_.entity_factory.autoenable_created_entities) {
     dp->enable();
   }
 
