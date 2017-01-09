@@ -38,6 +38,7 @@
 
 #ifdef ACE_VXWORKS
 # include "ace/os_include/sys/os_sysctl.h"
+# include <net/route.h>
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
