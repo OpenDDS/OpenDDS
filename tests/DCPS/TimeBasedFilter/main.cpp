@@ -60,7 +60,7 @@ parse_args(int& argc, ACE_TCHAR** argv)
 
 typedef std::pair<Foo, DDS::SampleInfo> FooInfo;
 typedef std::vector<FooInfo> Foos;
-typedef std::map<::CORBA::Long, Foos> SampleMap;
+typedef std::map< ::CORBA::Long, Foos> SampleMap;
 
 bool verify_unreliable(FooDataReader_var reader_i, const size_t EXPECTED_SAMPLES, SampleMap& samples)
 {
