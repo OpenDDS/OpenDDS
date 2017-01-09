@@ -2118,7 +2118,7 @@ public:
     // sample_lock_ should already be held
 
     DataSampleHeader_ptr hdr(new OpenDDS::DCPS::DataSampleHeader(header));
-    std::pair<FilterDelayedSampleMap::iterator, bool> result =
+    std::pair<typename FilterDelayedSampleMap::iterator, bool> result =
       map_.insert(std::make_pair(instance_ptr, FilterDelayedSample(instance_data, hdr, just_registered)));
     FilterDelayedSample& sample = result.first->second;
     if (result.second)
@@ -2144,7 +2144,7 @@ public:
   {
     // sample_lock_ should already be held
 
-    FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
+    typename FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
     if (sample != map_.end())
     {
       // leave the entry in the container, so that the key remains valid if the reactor is waiting on this lock while this is occurring
@@ -2156,7 +2156,7 @@ public:
   {
     // sample_lock_ should already be held
 
-    FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
+    typename FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
     if (sample != map_.end())
     {
       clear_message(sample->second.message);
@@ -2172,7 +2172,7 @@ private:
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dataReaderImpl_.sample_lock_);
 
     SubscriptionInstance* instance_ptr = (SubscriptionInstance *)arg;
-    FilterDelayedSampleMap::iterator data = map_.find(instance_ptr);
+    typename FilterDelayedSampleMap::iterator data = map_.find(instance_ptr);
     if (data == map_.end())
     {
       return;
@@ -2209,7 +2209,7 @@ private:
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dataReaderImpl_.sample_lock_);
 
-    for (FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample)
+    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample)
     {
       reset_timer_interval(sample->second.timer_id);
     }
@@ -2219,7 +2219,7 @@ private:
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dataReaderImpl_.sample_lock_);
     // insure instance_ptrs get freed
-    for (FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample)
+    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample)
     {
       clear_message(sample->second.message);
     }
