@@ -214,10 +214,8 @@ SubscriberImpl::create_datareader(
                    this,
                    dr_obj.in());
 
-  if ((this->enabled_ == true)
-      && (qos_.entity_factory.autoenable_created_entities == 1)) {
-    DDS::ReturnCode_t ret
-      = dr_servant->enable();
+  if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
+    const DDS::ReturnCode_t ret = dr_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
@@ -231,7 +229,6 @@ SubscriberImpl::create_datareader(
   // add created data reader to this' data reader container -
   // done in enable_reader
   return DDS::DataReader::_duplicate(dr_obj.in());
-
 }
 
 DDS::ReturnCode_t

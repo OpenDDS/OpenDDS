@@ -36,14 +36,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         return 1;
       }
 
-      if (fqos.entity_factory.autoenable_created_entities == 0)
+      if (!fqos.entity_factory.autoenable_created_entities)
       {
         cerr << "The DomainParticipantFactory defaults to autoenable upon entities creation." << endl;
         return 1;
       }
 
       // Now disable DomainParticipantFactory autoenable
-      fqos.entity_factory.autoenable_created_entities = 0;
+      fqos.entity_factory.autoenable_created_entities = false;
       if (dpf->set_qos (fqos) != ::DDS::RETCODE_OK)
       {
         cerr << "DomainParticipantFactory set_qos failed." << endl;
@@ -125,7 +125,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
 
       // Now enable DomainParticipantFactory autoenable
-      fqos.entity_factory.autoenable_created_entities = 1;
+      fqos.entity_factory.autoenable_created_entities = true;
       if (dpf->set_qos (fqos) != ::DDS::RETCODE_OK)
       {
         cerr << "DomainParticipantFactory set_qos failed." << endl;
