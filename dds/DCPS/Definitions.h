@@ -41,7 +41,7 @@
 #endif
 
 #if defined (ACE_DES_FREE_THIS)
-#define OPENDDS_DES_FREE_THIS ACE_DES_FEE_THIS
+#define OPENDDS_DES_FREE_THIS ACE_DES_FREE_THIS
 #else
 // This macro is part of ACE 6.4.2 or newer, define it within OpenDDS at the
 // moment we compile against an older ACE version
