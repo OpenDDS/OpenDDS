@@ -40,10 +40,12 @@
   ACE_UNIMPLEMENTED_FUNC(CLASS& operator=(const CLASS&))
 #endif
 
-#if !defined  (ACE_DES_FREE_THIS)
+#if defined (ACE_DES_FREE_THIS)
+#define OPENDDS_DES_FREE_THIS ACE_DES_FEE_THIS
+#else
 // This macro is part of ACE 6.4.2 or newer, define it within OpenDDS at the
 // moment we compile against an older ACE version
-# define ACE_DES_FREE_THIS(DEALLOCATOR,CLASS) \
+# define OPENDDS_DES_FREE_THIS(DEALLOCATOR,CLASS) \
    do { \
         this->~CLASS (); \
         DEALLOCATOR (this); \
