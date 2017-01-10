@@ -2095,16 +2095,12 @@ public:
   {
   }
 
-  ~FilterDelayedHandler()
+  virtual ~FilterDelayedHandler()
   {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("OpenDDS (%P|%t) FilterDelayedHandler::~FilterDelayedHandler -")));
   }
 
   void cancel()
   {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("OpenDDS (%P|%t) FilterDelayedHandler::cancel -")));
     cancel_all();
     cleanup();
   }
