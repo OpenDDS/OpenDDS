@@ -40,6 +40,18 @@
   ACE_UNIMPLEMENTED_FUNC(CLASS& operator=(const CLASS&))
 #endif
 
+#if !defined  (ACE_DES_FREE_THIS)
+// This macro is part of ACE 6.4.2 or newer, define it within OpenDDS at the
+// moment we compile against an older ACE version
+# define ACE_DES_FREE_THIS(DEALLOCATOR,CLASS) \
+   do { \
+        this->~CLASS (); \
+        DEALLOCATOR (this); \
+      } \
+   while (0)
+#endif /* ACE_DES_FREE_THIS */
+
+
 // If features content_filtered_topic, multi_topic, and query_condition
 // are all disabled, define a macro to indicate common code these
 // three features depend on should not be built.
