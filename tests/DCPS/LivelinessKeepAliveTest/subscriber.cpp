@@ -169,7 +169,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     AlertDataReaderListenerImpl* drl_servant =
       dynamic_cast<AlertDataReaderListenerImpl*>(alert_listener.in());
 
-    if (CORBA::is_nil(drl_servant))
+    if (!drl_servant)
     {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) Get Alert Data Reader Listener Impl failed.\n")));
