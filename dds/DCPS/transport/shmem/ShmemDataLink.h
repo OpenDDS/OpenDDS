@@ -36,8 +36,6 @@ class ShmemTransport;
 class ReceivedDataSample;
 typedef RcHandle<ShmemTransport> ShmemTransport_rch;
 
-typedef RcHandle<ShmemTransport> ShmemTransport_rch;
-
 #ifdef ACE_WIN32
   typedef ACE_Pagefile_Memory_Pool ShmemPool;
 #elif !defined ACE_LACKS_SYSV_SHMEM
@@ -77,9 +75,6 @@ public:
   ShmemDataLink(const ShmemTransport_rch& transport);
 
   void configure(ShmemInst* config);
-
-  // void send_strategy(ShmemSendStrategy* send_strategy);
-  // void receive_strategy(ShmemReceiveStrategy* recv_strategy);
 
   ShmemInst* config();
 
