@@ -1,7 +1,7 @@
 Starting with release 1.2, OpenDDS provides Java bindings.  Java applications
 can make use of the complete OpenDDS middleware just like C++ applications.
 
-See the README file in the $DDS_ROOT directory (one level above here) for a
+See the README.md file in the $DDS_ROOT directory (one level above here) for a
 general overview of OpenDDS.  Also see the release notes, DDS_release_notes.txt
 in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
 
