@@ -80,6 +80,9 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
     OpenDDS/DCPS/transport/TransportConfig.java
     OpenDDS/DCPS/transport/TransportException.java
     OpenDDS/DCPS/transport/UnableToCreateException.java
+    
+    // Forcing java files to be generated to satisfy interdependency of DdsDcpsTopic and DdsDcpsDomain
+    DDS/TopicDescriptionOperations.java << DDS/DomainParticipant.java
   }
 
   // This list should match the Java_Files list above, but these are the .class
