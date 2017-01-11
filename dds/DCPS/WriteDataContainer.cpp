@@ -1252,7 +1252,7 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ")
                ACE_TEXT("WriteDataContainer::get_handle_instance, ")
-               ACE_TEXT("lookup for %d failed\n")));
+               ACE_TEXT("lookup for %d failed\n"), handle));
   }
 
   return instance;

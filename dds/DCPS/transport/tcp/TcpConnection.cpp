@@ -874,7 +874,6 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
     } else
       passive_reconnect_timer_id_ = -1;
 
-    // this->_remove_ref();
     notify_reconnect = true;
   }
   break;

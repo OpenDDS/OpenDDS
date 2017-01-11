@@ -32,22 +32,11 @@ ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet_rch
 OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","find_or_create",6);
-  ReceiveListenerSet_rch listener_set;
 
-  if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0) {
-    // It wasn't found.  Create one and insert it.
-    listener_set.reset( new ReceiveListenerSet(), keep_count() );
-
-    if (OpenDDS::DCPS::bind(map_, publisher_id, listener_set) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Unable to insert ReceiveListenerSet into the "
-                 "ReceiveListenerSetMap for publisher_id %C.\n",
-                 LogGuid(publisher_id).c_str()));
-      // Return a 'nil' ReceiveListenerSet*
-      return ReceiveListenerSet_rch();
-    }
+  ReceiveListenerSet_rch& listener_set = map_[publisher_id];
+  if (!listener_set) {
+    listener_set = make_rch<ReceiveListenerSet>();
   }
-
   return listener_set;
 }
 

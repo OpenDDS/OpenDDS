@@ -23,7 +23,7 @@ typedef RcHandle<UdpDataLink> UdpDataLink_rch;
 class OpenDDS_Udp_Export UdpSendStrategy
   : public TransportSendStrategy {
 public:
-  explicit UdpSendStrategy(UdpDataLink* link, const TransportInst_rch& inst);
+  UdpSendStrategy(UdpDataLink* link, const TransportInst_rch& inst);
 
   virtual void stop_i();
 

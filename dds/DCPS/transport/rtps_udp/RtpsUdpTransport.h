@@ -30,7 +30,7 @@ typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
-  explicit RtpsUdpTransport(const TransportInst_rch& inst);
+  RtpsUdpTransport(const TransportInst_rch& inst);
   RtpsUdpInst_rch config() const;
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,

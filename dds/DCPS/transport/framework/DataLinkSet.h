@@ -35,9 +35,9 @@ public:
 
   // Returns 0 for success, -1 for failure, and 1 for failure due
   // to duplicate entry (link is already a member of the set).
-  int insert_link(DataLink_rch link);
+  int insert_link(const DataLink_rch& link);
 
-  void remove_link(DataLink_rch link);
+  void remove_link(const DataLink_rch& link);
 
   /// Send to each DataLink in the set.
   void send(DataSampleElement* sample);

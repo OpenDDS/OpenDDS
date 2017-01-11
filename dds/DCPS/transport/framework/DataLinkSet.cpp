@@ -45,7 +45,7 @@ OpenDDS::DCPS::DataLinkSet::~DataLinkSet()
 }
 
 int
-OpenDDS::DCPS::DataLinkSet::insert_link(DataLink_rch link)
+OpenDDS::DCPS::DataLinkSet::insert_link(const DataLink_rch& link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",6);
   GuardType guard(this->lock_);
@@ -53,7 +53,7 @@ OpenDDS::DCPS::DataLinkSet::insert_link(DataLink_rch link)
 }
 
 void
-OpenDDS::DCPS::DataLinkSet::remove_link(DataLink_rch link)
+OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_link", 6);
   GuardType guard1(this->lock_);
