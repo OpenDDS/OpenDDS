@@ -413,6 +413,86 @@ namespace OpenDDS {
                            sample_states, view_states, instance_states, 0);
   }
 
+  virtual DDS::ReturnCode_t read_instance_w_condition (
+                                                       MessageSequenceType & received_data,
+                                                       DDS::SampleInfoSeq & info_seq,
+                                                       ::CORBA::Long max_samples,
+                                                       DDS::InstanceHandle_t a_handle,
+                                                       DDS::ReadCondition_ptr a_condition)
+  {
+    DDS::ReturnCode_t const precond =
+      check_inputs("read_instance_w_condition", received_data, info_seq,
+                   max_samples);
+    if (DDS::RETCODE_OK != precond)
+      {
+        return precond;
+      }
+
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+                      DDS::RETCODE_ERROR);
+
+    if (!has_readcondition(a_condition))
+      {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+#ifndef OPENDDS_NO_QUERY_CONDITION
+    DDS::QueryCondition_ptr query_condition =
+        dynamic_cast< DDS::QueryCondition_ptr >(a_condition);
+#endif
+
+    return read_instance_i(received_data, info_seq, max_samples, a_handle,
+                           a_condition->get_sample_state_mask(),
+                           a_condition->get_view_state_mask(),
+                           a_condition->get_instance_state_mask(),
+#ifndef OPENDDS_NO_QUERY_CONDITION
+                           query_condition
+#else
+                           0
+#endif
+                           );
+  }
+
+  virtual DDS::ReturnCode_t take_instance_w_condition (
+                                                       MessageSequenceType & received_data,
+                                                       DDS::SampleInfoSeq & info_seq,
+                                                       ::CORBA::Long max_samples,
+                                                       DDS::InstanceHandle_t a_handle,
+                                                       DDS::ReadCondition_ptr a_condition)
+  {
+    DDS::ReturnCode_t const precond =
+      check_inputs("take_instance_w_condition", received_data, info_seq,
+                   max_samples);
+    if (DDS::RETCODE_OK != precond)
+      {
+        return precond;
+      }
+
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+                      DDS::RETCODE_ERROR);
+
+    if (!has_readcondition(a_condition))
+      {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+#ifndef OPENDDS_NO_QUERY_CONDITION
+    DDS::QueryCondition_ptr query_condition =
+        dynamic_cast< DDS::QueryCondition_ptr >(a_condition);
+#endif
+
+    return take_instance_i(received_data, info_seq, max_samples, a_handle,
+                           a_condition->get_sample_state_mask(),
+                           a_condition->get_view_state_mask(),
+                           a_condition->get_instance_state_mask(),
+#ifndef OPENDDS_NO_QUERY_CONDITION
+                           query_condition
+#else
+                           0
+#endif
+                           );
+  }
+
   virtual DDS::ReturnCode_t read_next_instance (
                                                   MessageSequenceType & received_data,
                                                   DDS::SampleInfoSeq & info_seq,

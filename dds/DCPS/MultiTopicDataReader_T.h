@@ -67,6 +67,14 @@ public:
     DDS::InstanceHandle_t a_handle, DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states);
 
+  DDS::ReturnCode_t read_instance_w_condition(SampleSeq& data_values,
+    DDS::SampleInfoSeq& sample_infos, CORBA::Long max_samples,
+    DDS::InstanceHandle_t handle, DDS::ReadCondition_ptr a_condition);
+
+  DDS::ReturnCode_t take_instance_w_condition(SampleSeq& data_values,
+    DDS::SampleInfoSeq & sample_infos, CORBA::Long max_samples,
+    DDS::InstanceHandle_t handle, DDS::ReadCondition_ptr a_condition);
+
   DDS::ReturnCode_t read_next_instance(SampleSeq& received_data,
     DDS::SampleInfoSeq& info_seq, CORBA::Long max_samples,
     DDS::InstanceHandle_t a_handle, DDS::SampleStateMask sample_states,
