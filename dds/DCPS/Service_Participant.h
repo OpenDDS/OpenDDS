@@ -100,7 +100,7 @@ public:
    */
   void shutdown();
 
-  ///Accessor for if the participant has been shutdown
+  /// Accessor for if the participant has been shutdown
   bool is_shut_down() const;
 
   /// Accessor of the Discovery object for a given domain.

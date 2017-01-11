@@ -1,7 +1,7 @@
 Starting with release 1.2, OpenDDS provides Java bindings.  Java applications
 can make use of the complete OpenDDS middleware just like C++ applications.
 
-See the README file in the $DDS_ROOT directory (one level above here) for a
+See the README.md file in the $DDS_ROOT directory (one level above here) for a
 general overview of OpenDDS.
 
 
@@ -82,7 +82,7 @@ general overview of OpenDDS.
     From each branch only the current patch release (OCI) or beta/micro release
     (DOC) is supported.  The "current" releases are the latest public releases
     of TAO at the time of the OpenDDS release.  These are listed in the "TAO"
-    section of the OpenDDS README file (in the parent directory).
+    section of the OpenDDS README.md file (in the parent directory).
 
     For responsive support from OCI it is recommended that the latest version
     of the OCI release of TAO used for OpenDDS development and testing be used.
@@ -135,5 +135,5 @@ general overview of OpenDDS.
 ======================================================================
 * Next Steps: Developing Java applications with OpenDDS
 
-  See the README file in this directory.
+  See the README.md file in this directory.
 

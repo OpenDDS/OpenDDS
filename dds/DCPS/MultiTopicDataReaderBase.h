@@ -180,7 +180,7 @@ protected:
   // key: topicName for this reader
   OPENDDS_MAP(OPENDDS_STRING, QueryPlan) query_plans_;
 
-  OPENDDS_DELETED_COPY_CTOR_ASSIGN(MultiTopicDataReaderBase)
+  OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(MultiTopicDataReaderBase)
 };
 
 }

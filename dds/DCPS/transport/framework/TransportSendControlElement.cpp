@@ -72,7 +72,7 @@ TransportSendControlElement::release_element(bool dropped_by_transport)
   const DataSampleElement* const dcps_elem = dcps_elem_;
 
   if (allocator_) {
-    ACE_DES_FREE(this, allocator_->free, TransportSendControlElement);
+    OPENDDS_DES_FREE_THIS(allocator_->free, TransportSendControlElement);
   }
 
   // reporting the message w/o using "this" pointer
