@@ -3345,7 +3345,7 @@ void DataReaderImpl::_remove_ref()
   CORBA::Object::_remove_ref();
 }
 
-void DataReaderImpl::accept_sample_processing(SubscriptionInstance* instance, const OpenDDS::DCPS::DataSampleHeader& header, bool is_new_instance)
+void DataReaderImpl::accept_sample_processing(SubscriptionInstance* instance, const DataSampleHeader& header, bool is_new_instance)
 {
   bool accepted = true;
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE

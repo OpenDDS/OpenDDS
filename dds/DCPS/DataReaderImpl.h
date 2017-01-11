@@ -596,7 +596,7 @@ protected:
   bool time_based_filter_instance(SubscriptionInstance* instance,
                                   ACE_Time_Value& filter_time_expired);
 
-  void accept_sample_processing(SubscriptionInstance* instance, const OpenDDS::DCPS::DataSampleHeader& header, bool is_new_instance);
+  void accept_sample_processing(SubscriptionInstance* instance, const DataSampleHeader& header, bool is_new_instance);
 
   virtual void qos_change(const DDS::DataReaderQos & qos);
 
