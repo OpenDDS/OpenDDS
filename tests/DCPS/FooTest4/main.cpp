@@ -95,7 +95,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       arg_shifter.ignore_arg ();
     }
   }
-  // Indicates sucessful parsing of the command line
+  // Indicates successful parsing of the command line
   return 0;
 }
 
@@ -283,8 +283,23 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1 ;
       }
 
-      ::DDS::Subscriber_var sub_got
-          = datareader->get_subscriber ();
+      CORBA::String_var topic_typename = topic_description_got->get_type_name ();
+      CORBA::String_var topic_name = topic_description_got->get_name ();
+      if (strcmp (topic_typename.in (), MY_TYPE) != 0)
+      {
+        ACE_ERROR ((LM_ERROR,
+                   ACE_TEXT("(%P|%t) get_topicdescription typename incorrect <%C> <%C>.\n"), topic_typename.in(), MY_TYPE));
+        return 1 ;
+      }
+
+      if (strcmp (topic_name.in (), MY_TOPIC) != 0)
+      {
+        ACE_ERROR ((LM_ERROR,
+                   ACE_TEXT("(%P|%t) get_topicdescription name incorrect <%C> <%C>.\n"), topic_name.in(), MY_TOPIC));
+        return 1 ;
+      }
+
+      ::DDS::Subscriber_var sub_got = datareader->get_subscriber ();
 
       if (sub_got.in () != sub.in ())
       {

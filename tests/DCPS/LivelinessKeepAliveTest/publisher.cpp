@@ -26,7 +26,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Get the Satellite Name from the argument list
     std::string satellite_name;
     if ( argc > 1 ) {
-      satellite_name = argv[1];
+      satellite_name = ACE_TEXT_ALWAYS_CHAR (argv[1]);
     } else {
       satellite_name = "Default Satellite";
     }

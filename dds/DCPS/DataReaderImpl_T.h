@@ -820,7 +820,7 @@ namespace OpenDDS {
 
     if (!filtered) {
       if (view == DDS::NOT_NEW_VIEW_STATE) {
-        instance->instance_state_.accessed();
+        if (instance) instance->instance_state_.accessed();
       }
       notify_read_conditions();
     }

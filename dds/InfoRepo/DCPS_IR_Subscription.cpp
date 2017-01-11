@@ -160,9 +160,6 @@ int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub
   bool marked_dead = false;
 
   if (sendNotify) {
-    OpenDDS::DCPS::WriterIdSeq idSeq(5);
-    idSeq.length(1);
-    idSeq[0] = pub->get_id();
 
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
@@ -172,6 +169,10 @@ int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub
                      ACE_TEXT(" calling sub %d with pub %d\n"),
                      id_, pub->get_id()));
         }
+
+        OpenDDS::DCPS::WriterIdSeq idSeq(5);
+        idSeq.length(1);
+        idSeq[0] = pub->get_id();
 
         reader_->remove_associations(idSeq, notify_lost);
 

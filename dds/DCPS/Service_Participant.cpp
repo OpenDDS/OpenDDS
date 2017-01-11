@@ -379,7 +379,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // initialized so we have no influence over its
       // scheduling or thread priority(ies).
 
-      /// @TODO: Move ORB intitialization to after the
+      /// @TODO: Move ORB initialization to after the
       ///        configuration file is processed and the
       ///        initial scheduling policy and priority are
       ///        established.
@@ -564,7 +564,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     }
   }
 
-  // Indicates sucessful parsing of the command line
+  // Indicates successful parsing of the command line
   return 0;
 }
 

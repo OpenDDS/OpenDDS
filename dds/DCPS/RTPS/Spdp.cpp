@@ -420,7 +420,17 @@ Spdp::SpdpTransport::~SpdpTransport()
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::~SpdpTransport\n")));
   }
-  dispose_unregister();
+  try {
+    dispose_unregister();
+  }
+  catch (const CORBA::Exception& ex) {
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: Exception caught in ")
+        ACE_TEXT("SpdpTransport::~SpdpTransport: %C\n"),
+        ex._info().c_str()));
+    }
+  }
   {
     // Acquire lock for modification of condition variable
     ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);

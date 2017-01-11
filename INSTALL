@@ -7,7 +7,7 @@ BUILDING OpenDDS
 * Supported platforms:
 
   We have built OpenDDS on number of different platforms and compilers.  See
-  $DDS_ROOT/README for a complete description of supported platforms.
+  $DDS_ROOT/README.md for a complete description of supported platforms.
 
 
 * Compiling:

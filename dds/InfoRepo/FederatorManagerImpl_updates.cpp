@@ -1231,6 +1231,12 @@ ManagerImpl::processDelete(const TopicUpdate* sample, const DDS::SampleInfo* /* 
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( TopicUpdate): ")
                  ACE_TEXT("the participant was already removed.\n")));
     }
+  } catch (OpenDDS::DCPS::Invalid_Domain&) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( TopicUpdate): ")
+                 ACE_TEXT("the domain %d no longer exists.\n"),sample->domain));
+    }
   }
 }
 

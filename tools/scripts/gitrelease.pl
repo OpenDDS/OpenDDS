@@ -433,7 +433,7 @@ sub message_authors {
 sub verify_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
-  my $status = open(NEWS, 'NEWS');
+  my $status = open(NEWS, 'NEWS.md');
   my $metaversion = quotemeta($version);
   my $has_version = 0;
   while (<NEWS>) {
@@ -449,25 +449,29 @@ sub verify_news_file_section {
 sub message_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
-  return "NEWS file release $version section needs updating";
+  return "NEWS.md file release $version section needs updating";
 }
 
 sub remedy_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
-  print "  >> Adding $version section to NEWS\n";
-  print "  !! Manual update to NEWS needed\n";
+  print "  >> Adding $version section to NEWS.md\n";
+  print "  !! Manual update to NEWS.md needed\n";
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
-  open(NEWS, "+< NEWS")                 or die "Opening: $!";
+  open(NEWS, "+< NEWS.md")                 or die "Opening: $!";
   my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
+-------------------------------------------------------------------------------
 
-Additions:
-  TODO: Add your features here
+##### Additions:
+- TODO: Add your features here
 
-Fixes:
-  TODO: Add your fixes here
+##### Fixes:
+- TODO: Add your fixes here
 
+##### Notes:
+- TODO: Add your notes here
+_______________________________________________________________________________
 ENDOUT
 
   $out .= join("", <NEWS>);
@@ -481,7 +485,7 @@ ENDOUT
 sub verify_update_news_file {
   my $settings = shift();
   my $version = $settings->{version};
-  my $status = open(NEWS, 'NEWS');
+  my $status = open(NEWS, 'NEWS.md');
   my $metaversion = quotemeta($version);
   my $has_version = 0;
   my $corrected_features = 1;
@@ -501,7 +505,7 @@ sub verify_update_news_file {
 }
 
 sub message_update_news_file {
-  return "NEWS file needs updating with current version release notes";
+  return "NEWS.md file needs updating with current version release notes";
 }
 ############################################################################
 sub verify_update_version_h_file {
@@ -1139,9 +1143,9 @@ sub remedy_github_upload {
       token => $settings->{github_token}
   );
   my @lines;
-  open(my $news, "NEWS") or die "Can't read NEWS file";
+  open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
   while (<$news>) {
-    if (/^=====/) {
+    if (/^_____/) {
       last;
     }
     push (@lines, $_);
@@ -1235,6 +1239,54 @@ sub remedy_email_dds_release_announce {
   "Approved: postthisrelease\n\n" .
   email_announce_contents($settings) .
   news_contents_excerpt($settings);
+}
+
+############################################################################
+sub verify_news_template_file_section {
+  my $settings = shift();
+  my $status = open(NEWS, 'NEWS.md');
+  my $has_news_template = 0;
+  while (<NEWS>) {
+    if ($_ =~ /Version X.Y of OpenDDS\./) {
+      $has_news_template = 1;
+    }
+  }
+  close(NEWS);
+
+  return ($has_news_template);
+}
+
+sub message_news_template_file_section {
+  my $settings = shift();
+  # my $version = $settings->{version};
+  return "next NEWS.md file release X.Y section missing";
+}
+
+sub remedy_news_template_file_section {
+  my $settings = shift();
+  print "  >> Adding next version template section to NEWS.md\n";
+  print "  !! Manual update to NEWS.md needed\n";
+  open(NEWS, "+< NEWS.md") or die "Opening: $!";
+  my $out = "Version X.Y of OpenDDS.\n" . <<"ENDOUT";
+-------------------------------------------------------------------------------
+
+##### Additions:
+- TODO: Add your features here
+
+##### Fixes:
+- TODO: Add your fixes here
+
+##### Notes:
+- TODO: Add your notes here
+_______________________________________________________________________________
+ENDOUT
+
+  $out .= join("", <NEWS>);
+  seek(NEWS,0,0)            or die "Seeking: $!";
+  print NEWS $out           or die "Printing: $!";
+  truncate(NEWS,tell(NEWS)) or die "Truncating: $!";
+  close(NEWS)               or die "Closing: $!";
+  return 1;
 }
 
 ############################################################################
@@ -1374,7 +1426,17 @@ my %release_step_hash  = (
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
     message => sub{remedy_email_dds_release_announce(@_)}
+  },
+ 'Add NEWS Template Section' => {
+    verify  => sub{verify_news_template_file_section(@_)},
+    message => sub{message_news_template_file_section(@_)},
+    remedy  => sub{remedy_news_template_file_section(@_)},
+  },
+  'Commit NEWS Template Section' => {
+    verify  => sub{verify_git_status_clean(@_, 1)},
+    message => sub{message_commit_git_changes(@_)}
   }
+
 );
 
 my @ordered_steps = (
@@ -1402,6 +1464,8 @@ my @ordered_steps = (
   'Upload to GitHub',
   'Release Website',
   'Email DDS-Release-Announce list',
+  'Add NEWS Template Section',
+  'Commit NEWS Template Section',
 );
 
 sub any_arg_is {
@@ -1470,7 +1534,7 @@ my %settings = (
     ftp_password => $ENV{FTP_PASSWD},
     ftp_host     => $ENV{FTP_HOST},
     changelog    => "docs/history/ChangeLog-$version",
-    modified     => {"NEWS" => 1,
+    modified     => {"NEWS.md" => 1,
         "PROBLEM-REPORT-FORM" => 1,
         "VERSION" => 1,
         "dds/Version.h" => 1,

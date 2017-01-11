@@ -169,6 +169,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     AlertDataReaderListenerImpl* drl_servant =
       dynamic_cast<AlertDataReaderListenerImpl*>(alert_listener.in());
 
+    if (!drl_servant)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) Get Alert Data Reader Listener Impl failed.\n")));
+      return 1;
+    }
+
     if (drl_servant->liveliness_changed_count() < 3) {
       status = 1;
       // Some error condition.
