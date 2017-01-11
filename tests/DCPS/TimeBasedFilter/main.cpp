@@ -62,7 +62,7 @@ typedef std::pair<Foo, DDS::SampleInfo> FooInfo;
 typedef std::vector<FooInfo> Foos;
 typedef std::map< ::CORBA::Long, Foos> SampleMap;
 
-bool verify_unreliable(FooDataReader_var reader_i, const size_t EXPECTED_SAMPLES, SampleMap& samples)
+bool verify_unreliable(FooDataReader_var reader_i, const size_t expected_samples, SampleMap& samples)
 {
   bool valid = true;
 
@@ -74,17 +74,17 @@ bool verify_unreliable(FooDataReader_var reader_i, const size_t EXPECTED_SAMPLES
   {
     const Foos& foos = samples[j];
     size_t seen = foos.size();
-    if (seen != EXPECTED_SAMPLES)
+    if (seen != expected_samples)
     {
       valid = false;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
-        j, seen, EXPECTED_SAMPLES));
+        j, seen, expected_samples));
     }
     else
     {
-      for (size_t i = 0; i < EXPECTED_SAMPLES; ++i)
+      for (size_t i = 0; i < expected_samples; ++i)
       {
         const FooInfo& fooInfo = foos[i];
         if (fooInfo.first.x != 0.0f)
@@ -101,7 +101,7 @@ bool verify_unreliable(FooDataReader_var reader_i, const size_t EXPECTED_SAMPLES
 }
 
 
-bool verify_reliable(FooDataReader_var reader_i, const size_t EXPECTED_SAMPLES, SampleMap& samples)
+bool verify_reliable(FooDataReader_var reader_i, const size_t expected_samples, SampleMap& samples)
 {
   bool valid = true;
   for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j)
@@ -109,17 +109,17 @@ bool verify_reliable(FooDataReader_var reader_i, const size_t EXPECTED_SAMPLES, 
     const Foos& foos = samples[j];
     size_t seen = foos.size();
     // each delay should result in 2 samples being seen, the first one and the last one in the filter window
-    if (seen != EXPECTED_SAMPLES * 2)
+    if (seen != expected_samples * 2)
     {
       valid = false;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
-        j, seen, EXPECTED_SAMPLES));
+        j, seen, expected_samples));
     }
     else
     {
-      for (size_t i = 0; i < EXPECTED_SAMPLES * 2; ++i)
+      for (size_t i = 0; i < expected_samples * 2; ++i)
       {
         const FooInfo& fooInfo = foos[i];
         // each successive sample was sent with x = 0.0 to x = (SAMPLES_PER_CYCLE - 1)
