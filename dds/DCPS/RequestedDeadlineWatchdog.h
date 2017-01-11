@@ -66,7 +66,7 @@ public:
    * @c DDS::RequestedDeadlineMissed structure, and calls
    * @c DataReaderListener::on_requested_deadline_missed().
    */
-  virtual void execute(OpenDDS::DCPS::SubscriptionInstance_rch, bool timer_called);
+  void execute(OpenDDS::DCPS::SubscriptionInstance_rch, bool timer_called);
 
   /// Re-schedule timer for all instances of the DataReader.
   virtual void reschedule_deadline();

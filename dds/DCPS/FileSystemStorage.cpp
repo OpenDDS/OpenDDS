@@ -27,9 +27,6 @@ typedef size_t String_Index_t;
 
 namespace {
 
-using OpenDDS::DCPS::keep_count;
-using OpenDDS::DCPS::inc_count;
-
 const size_t FSS_MAX_FILE_NAME = 150, FSS_MAX_FILE_NAME_ENCODED = 240,
   FSS_MAX_OVERFLOW_DIR = 9999;
 const ACE_TCHAR FSS_DEFAULT_FILE_NAME[] = ACE_TEXT("F00000000000000");
