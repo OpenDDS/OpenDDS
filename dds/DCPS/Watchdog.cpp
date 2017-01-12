@@ -23,11 +23,14 @@ namespace {
   };
 
   struct ScheduleCommand : CommandBase {
-    ScheduleCommand(ReactorInterceptor* inter, const void* act,
+    ScheduleCommand(ReactorInterceptor* inter,
+                    const void* act,
+                    const ACE_Time_Value& delay,
                     const ACE_Time_Value& interval,
                     long* timer_id)
     : CommandBase(inter)
     , act_(act)
+    , delay_(delay)
     , interval_(interval)
     , timer_id_(timer_id)
     {}
@@ -35,10 +38,11 @@ namespace {
     void execute()
     {
       *timer_id_ = interceptor_->reactor()->schedule_timer(interceptor_, act_,
-                                                           interval_, interval_);
+                                                           delay_, interval_);
     }
 
     const void* const act_;
+    const ACE_Time_Value delay_;
     const ACE_Time_Value interval_;
     long* timer_id_;
   };
@@ -105,8 +109,13 @@ void Watchdog::reset_interval(const ACE_Time_Value& interval)
 
 long Watchdog::schedule_timer(const void* act, const ACE_Time_Value& interval)
 {
+  return schedule_timer(act, interval, interval);
+}
+
+long Watchdog::schedule_timer(const void* act, const ACE_Time_Value& delay, const ACE_Time_Value& interval)
+{
   long timer_id = -1;
-  ScheduleCommand c(this, act, interval, &timer_id);
+  ScheduleCommand c(this, act, delay, interval, &timer_id);
   execute_or_enqueue(c);
   wait();
   return timer_id;

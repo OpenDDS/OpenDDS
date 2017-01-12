@@ -971,35 +971,41 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
       }
     }
 
-    // Reset the deadline timer if the period has changed.
-    if (qos_.deadline.period.sec != qos.deadline.period.sec
-        || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
-      if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
-          && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-        this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
-                ref(this->sample_lock_),
-                qos.deadline,
-                this,
-                this->dr_local_objref_.in(),
-                ref(this->requested_deadline_missed_status_),
-                ref(this->last_deadline_missed_total_count_));
 
-      } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
-          && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-        this->watchdog_->cancel_all();
-        this->watchdog_.reset();
-      } else {
-        this->watchdog_->reset_interval(
-            duration_to_time_value(qos.deadline.period));
-      }
-    }
-
+    qos_change(qos);
     qos_ = qos;
 
     return DDS::RETCODE_OK;
 
   } else {
     return DDS::RETCODE_INCONSISTENT_POLICY;
+  }
+}
+
+void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
+{
+  // Reset the deadline timer if the period has changed.
+  if (qos_.deadline.period.sec != qos.deadline.period.sec ||
+      qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
+    if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
+        qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
+
+          this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
+                  ref(this->sample_lock_),
+                  qos.deadline,
+                  this,
+                  this->dr_local_objref_.in(),
+                  ref(this->requested_deadline_missed_status_),
+                  ref(this->last_deadline_missed_total_count_));
+
+    } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
+               qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
+      watchdog_->cancel_all();
+      watchdog_.reset();
+    } else {
+      watchdog_->reset_interval(
+        duration_to_time_value(qos.deadline.period));
+    }
   }
 }
 
@@ -1512,66 +1518,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
 
     if (filtered) break; // sample filtered from instance
-    bool accepted = true;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-    bool verify_coherent = false;
-#endif
-    RcHandle<WriterInfo> writer;
 
-    if (header.publication_id_.entityId.entityKind
-        != OpenDDS::DCPS::ENTITYKIND_OPENDDS_NIL_WRITER) {
-      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-
-      WriterMapType::iterator where
-      = this->writers_.find(header.publication_id_);
-
-      if (where != this->writers_.end()) {
-        if (header.coherent_change_) {
-
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-          // Received coherent change
-          where->second->group_coherent_ = header.group_coherent_;
-          where->second->publisher_id_ = header.publisher_id_;
-          ++where->second->coherent_samples_;
-          verify_coherent = true;
-#endif
-          writer = where->second;
-        }
-      } else {
-        GuidConverter subscriptionBuffer(this->subscription_id_);
-        GuidConverter publicationBuffer(header.publication_id_);
-        ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
-            ACE_TEXT("subscription %C failed to find ")
-            ACE_TEXT("publication data for %C.\n"),
-            OPENDDS_STRING(subscriptionBuffer).c_str(),
-            OPENDDS_STRING(publicationBuffer).c_str()));
-      }
-    }
-
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-    if (verify_coherent) {
-      accepted = this->verify_coherent_changes_completion(writer.in());
-    }
-#endif
-
-    if (this->watchdog_.in()) {
-      instance->last_sample_tv_ = instance->cur_sample_tv_;
-      instance->cur_sample_tv_ = ACE_OS::gettimeofday();
-
-      // Watchdog can't be called with sample_lock_ due to reactor deadlock
-      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-      if (is_new_instance) {
-        this->watchdog_->schedule_timer(instance);
-
-      } else {
-        this->watchdog_->execute(instance, false);
-      }
-    }
-
-    if (accepted) {
-      this->notify_read_conditions();
-    }
+    accept_sample_processing(instance, header, is_new_instance);
   }
   break;
 
@@ -2751,8 +2699,9 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 }
 
 bool
-DataReaderImpl::filter_instance(SubscriptionInstance_rch instance,
-    const PublicationId& pubid)
+
+DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instance,
+  const PublicationId& pubid)
 {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
@@ -2767,10 +2716,10 @@ DataReaderImpl::filter_instance(SubscriptionInstance_rch instance,
         GuidConverter reader_converter(subscription_id_);
         GuidConverter writer_converter(pubid);
         ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
-            ACE_TEXT("reader %C is not associated with writer %C.\n"),
-            OPENDDS_STRING(reader_converter).c_str(),
-            OPENDDS_STRING(writer_converter).c_str()));
+                   ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
+                   ACE_TEXT("reader %C is not associated with writer %C.\n"),
+                   OPENDDS_STRING(reader_converter).c_str(),
+                   OPENDDS_STRING(writer_converter).c_str()));
       }
       return true;
     }
@@ -2781,10 +2730,10 @@ DataReaderImpl::filter_instance(SubscriptionInstance_rch instance,
     if ( instance->instance_state_.get_owner () == GUID_UNKNOWN
         || ! iter->second->is_owner_evaluated (instance->instance_handle_)) {
       bool is_owner = this->owner_manager_->select_owner (
-          instance->instance_handle_,
-          iter->second->writer_id_,
-          iter->second->writer_qos_.ownership_strength.value,
-          &instance->instance_state_);
+        instance->instance_handle_,
+        iter->second->writer_id_,
+        iter->second->writer_qos_.ownership_strength.value,
+        &instance->instance_state_);
       iter->second->set_owner_evaluated (instance->instance_handle_, true);
 
       if (! is_owner) {
@@ -2793,11 +2742,11 @@ DataReaderImpl::filter_instance(SubscriptionInstance_rch instance,
           GuidConverter writer_converter(pubid);
           GuidConverter owner_converter (instance->instance_state_.get_owner ());
           ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
-              ACE_TEXT("reader %C writer %C is not elected as owner %C\n"),
-              OPENDDS_STRING(reader_converter).c_str(),
-              OPENDDS_STRING(writer_converter).c_str(),
-              OPENDDS_STRING(owner_converter).c_str()));
+                     ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
+                     ACE_TEXT("reader %C writer %C is not elected as owner %C\n"),
+                     OPENDDS_STRING(reader_converter).c_str(),
+                     OPENDDS_STRING(writer_converter).c_str(),
+                     OPENDDS_STRING(owner_converter).c_str()));
         }
         return true;
       }
@@ -2808,11 +2757,11 @@ DataReaderImpl::filter_instance(SubscriptionInstance_rch instance,
         GuidConverter writer_converter(pubid);
         GuidConverter owner_converter (instance->instance_state_.get_owner ());
         ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
-            ACE_TEXT("reader %C writer %C is not owner %C\n"),
-            OPENDDS_STRING(reader_converter).c_str(),
-            OPENDDS_STRING(writer_converter).c_str(),
-            OPENDDS_STRING(owner_converter).c_str()));
+                   ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
+                   ACE_TEXT("reader %C writer %C is not owner %C\n"),
+                   OPENDDS_STRING(reader_converter).c_str(),
+                   OPENDDS_STRING(writer_converter).c_str(),
+                   OPENDDS_STRING(owner_converter).c_str()));
       }
       return true;
     }
@@ -2820,18 +2769,23 @@ DataReaderImpl::filter_instance(SubscriptionInstance_rch instance,
 #else
   ACE_UNUSED_ARG(pubid);
 #endif
+  return false;
+}
 
+bool
+DataReaderImpl::time_based_filter_instance(const SubscriptionInstance_rch& instance, ACE_Time_Value& filter_time_expired)
+{
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
   // TIME_BASED_FILTER processing; expire data samples
   // if minimum separation is not met for instance.
   const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
 
-  if (this->qos_.time_based_filter.minimum_separation > zero) {
-    DDS::Duration_t separation =
-        time_value_to_duration(now - instance->last_accepted_);
+  if (qos_.time_based_filter.minimum_separation > zero) {
+    filter_time_expired = now - instance->last_accepted_;
+    DDS::Duration_t separation = time_value_to_duration(filter_time_expired);
 
-    if (separation < this->qos_.time_based_filter.minimum_separation) {
+    if (separation < qos_.time_based_filter.minimum_separation) {
       return true;  // Data filtered.
     }
   }
@@ -3385,6 +3339,68 @@ void DataReaderImpl::_add_ref()
 void DataReaderImpl::_remove_ref()
 {
   CORBA::Object::_remove_ref();
+}
+
+void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)
+{
+  bool accepted = true;
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  bool verify_coherent = false;
+#endif
+  RcHandle<WriterInfo> writer;
+
+  if (header.publication_id_.entityId.entityKind != ENTITYKIND_OPENDDS_NIL_WRITER) {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+
+    WriterMapType::iterator where = writers_.find(header.publication_id_);
+
+    if (where != writers_.end()) {
+      if (header.coherent_change_) {
+
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+        // Received coherent change
+        where->second->group_coherent_ = header.group_coherent_;
+        where->second->publisher_id_ = header.publisher_id_;
+        ++where->second->coherent_samples_;
+        verify_coherent = true;
+#endif
+        writer = where->second;
+      }
+    }
+    else {
+      GuidConverter subscriptionBuffer(subscription_id_);
+      GuidConverter publicationBuffer(header.publication_id_);
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+        ACE_TEXT("subscription %C failed to find ")
+        ACE_TEXT("publication data for %C.\n"),
+        OPENDDS_STRING(subscriptionBuffer).c_str(),
+        OPENDDS_STRING(publicationBuffer).c_str()));
+    }
+  }
+
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  if (verify_coherent) {
+    accepted = verify_coherent_changes_completion(writer.in());
+  }
+#endif
+
+  if (watchdog_.in()) {
+    instance->last_sample_tv_ = instance->cur_sample_tv_;
+    instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+
+    // Watchdog can't be called with sample_lock_ due to reactor deadlock
+    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+    if (is_new_instance) {
+      watchdog_->schedule_timer(instance);
+    } else {
+      watchdog_->execute(instance, false);
+    }
+  }
+
+  if (accepted) {
+    notify_read_conditions();
+  }
 }
 
 
