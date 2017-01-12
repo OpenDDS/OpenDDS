@@ -1365,6 +1365,7 @@ DDS::ReturnCode_t take_instance_i (
             OpenDDS::DCPS::DDS_OPERATION_TAKE);
 
   OpenDDS::DCPS::SubscriptionInstance* inst = get_handle_instance(a_handle);
+  if (inst == 0) return DDS::RETCODE_BAD_PARAMETER;
 
   if ((inst->instance_state_.view_state() & view_states) &&
       (inst->instance_state_.instance_state() & instance_states))
