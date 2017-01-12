@@ -1490,7 +1490,7 @@ WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
 void
 WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
 {
-  if (stale && waiting_on_release_) {
+  if (!stale && waiting_on_release_) {
     waiting_on_release_ = false;
 
     condition_.broadcast();
