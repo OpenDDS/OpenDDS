@@ -44,8 +44,8 @@ namespace OpenDDS {
     typedef typename TraitsType::DataReaderType Interface;
 
     DataReaderImpl_T (void)
-    : filterDelayedHandler_(new FilterDelayedHandler(*this)),
-      data_allocator_ (0)
+    : filter_delayed_handler_(new FilterDelayedHandler(this))
+    , data_allocator_ (0)
     {
     }
 
@@ -903,29 +903,29 @@ namespace OpenDDS {
 
   virtual void cleanup()
   {
-    filterDelayedHandler_->cancel();
+    if (filter_delayed_handler_.in()) {
+      filter_delayed_handler_->cancel();
+      filter_delayed_handler_.reset();
+    }
     DataReaderImpl::cleanup();
   }
 
-  virtual void qos_change(
-    const DDS::DataReaderQos & qos)
+  virtual void qos_change(const DDS::DataReaderQos& qos)
   {
     // reliability is not changeable, just time_based_filter
-    if (qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS)
-    {
-      if (qos.time_based_filter.minimum_separation != this->qos_.time_based_filter.minimum_separation)
-      {
+    if (qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+      if (qos.time_based_filter.minimum_separation != qos_.time_based_filter.minimum_separation) {
         const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
-        if (this->qos_.time_based_filter.minimum_separation != zero)
-        {
-          if (qos.time_based_filter.minimum_separation != zero)
-          {
+        if (qos_.time_based_filter.minimum_separation != zero) {
+          if (qos.time_based_filter.minimum_separation != zero) {
             const ACE_Time_Value new_interval = duration_to_time_value(qos.time_based_filter.minimum_separation);
-            filterDelayedHandler_->reset_interval(new_interval);
-          }
-          else
-          {
-            filterDelayedHandler_->cancel();
+            if (filter_delayed_handler_.in()) {
+              filter_delayed_handler_->reset_interval(new_interval);
+            }
+          } else {
+            if (filter_delayed_handler_.in()) {
+              filter_delayed_handler_->cancel();
+            }
           }
         }
         // else no existing timers to change/cancel
@@ -1011,7 +1011,9 @@ protected:
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance* instance)
   {
-    filterDelayedHandler_->drop_sample(instance);
+    if (filter_delayed_handler_.in()) {
+      filter_delayed_handler_->drop_sample(instance);
+    }
 
     instance->instance_state_.cancel_release();
 
@@ -1643,7 +1645,7 @@ void store_instance_data(
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%CDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("insert to participant scope %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
+                      ACE_TEXT("insert to participant scope %C failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
           return;
         }
       }
@@ -1668,7 +1670,7 @@ void store_instance_data(
                   ACE_TEXT("(%P|%t) ")
                   ACE_TEXT("%CDataReaderImpl::")
                   ACE_TEXT("store_instance_data, ")
-                  ACE_TEXT("insert %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
+                  ACE_TEXT("insert %C failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
       return;
     }
   }
@@ -1684,25 +1686,24 @@ void store_instance_data(
 
     if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA)
     {
-      // Check instance based QoS policy filters
-      // (i.e. OWNERSHIP, TIME_BASED_FILTER)
-      filtered = this->ownership_filter_instance(instance_ptr, header.publication_id_);
+      filtered = ownership_filter_instance(instance_ptr, header.publication_id_);
 
-      ACE_Time_Value filter_time_remaining;
+      ACE_Time_Value filter_time_expired;
       if (!filtered &&
-          this->time_based_filter_instance(instance_ptr, filter_time_remaining))
-      {
+          time_based_filter_instance(instance_ptr, filter_time_expired)) {
         filtered = true;
         if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
-          filterDelayedHandler_->delay_sample(instance_ptr, instance_data, header, just_registered, filter_time_remaining);
-          // handed off to filterDelayedHandler_, so do not free
+          if (filter_delayed_handler_.in()) {
+            filter_delayed_handler_->delay_sample(instance_ptr, instance_data, header, just_registered, filter_time_expired);
+          }
+          // handed off to filter_delayed_handler_, so do not free
           instance_data = 0;
         }
-      }
-      else
-      {
+      } else {
         // nothing time based filtered now
-        filterDelayedHandler_->clear_sample(instance_ptr);
+        if (filter_delayed_handler_.in()) {
+          filter_delayed_handler_->clear_sample(instance_ptr);
+        }
       }
 
       if (filtered)
@@ -1726,141 +1727,136 @@ void store_instance_data(
   }
 }
 
-void finish_store_instance_data(
-                                MessageType* instance_data,
-                                const OpenDDS::DCPS::DataSampleHeader& header,
-                                OpenDDS::DCPS::SubscriptionInstance* instance_ptr,
-                                bool is_dispose_msg,
-                                bool is_unregister_msg
-                                )
+void finish_store_instance_data(MessageType* instance_data, const DataSampleHeader& header,
+  SubscriptionInstance* instance_ptr, bool is_dispose_msg, bool is_unregister_msg )
 {
   if ((this->qos_.resource_limits.max_samples_per_instance !=
         DDS::LENGTH_UNLIMITED) &&
       (instance_ptr->rcvd_samples_.size_ >=
-        this->qos_.resource_limits.max_samples_per_instance))
-    {
+        this->qos_.resource_limits.max_samples_per_instance)) {
 
+    // According to spec 1.2, Samples that contain no data do not
+    // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
+    // so do not remove the oldest sample when unregister/dispose
+    // message arrives.
+
+    if (!is_dispose_msg && !is_unregister_msg
+      && instance_ptr->rcvd_samples_.head_->sample_state_
+      == DDS::NOT_READ_SAMPLE_STATE)
+    {
+      // for now the implemented QoS means that if the head sample
+      // is NOT_READ then none are read.
+      // TBD - in future we will reads may not read in order so
+      //       just looking at the head will not be enough.
+      DDS::DataReaderListener_var listener
+        = listener_for(DDS::SAMPLE_REJECTED_STATUS);
+
+      set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
+
+      sample_rejected_status_.last_reason =
+        DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
+      ++sample_rejected_status_.total_count;
+      ++sample_rejected_status_.total_count_change;
+      sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
+
+      DDS::DataReader_var dr = get_dr_obj_ref();
+      if (!CORBA::is_nil(listener.in()))
+      {
+        ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+        listener->on_sample_rejected(dr.in(),
+          sample_rejected_status_);
+      }  // do we want to do something if listener is nil???
+      notify_status_condition_no_sample_lock();
+
+      ACE_DES_FREE(instance_data,
+        data_allocator_->free,
+        MessageType);
+
+      return;
+    }
+    else if (!is_dispose_msg && !is_unregister_msg)
+    {
+      // Discard the oldest previously-read sample
+      OpenDDS::DCPS::ReceivedDataElement *item =
+        instance_ptr->rcvd_samples_.head_;
+      instance_ptr->rcvd_samples_.remove(item);
+      dec_ref_data_element(item);
+    }
+  }
+  else if (this->qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
+  {
+    CORBA::Long total_samples = 0;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
+        iter != instances_.end();
+        ++iter) {
+        OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
+
+        total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
+      }
+    }
+
+    if (total_samples >= this->qos_.resource_limits.max_samples)
+    {
       // According to spec 1.2, Samples that contain no data do not
       // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
       // so do not remove the oldest sample when unregister/dispose
       // message arrives.
 
-      if  (! is_dispose_msg  && ! is_unregister_msg
-            && instance_ptr->rcvd_samples_.head_->sample_state_
-            == DDS::NOT_READ_SAMPLE_STATE)
+      if (!is_dispose_msg && !is_unregister_msg
+        && instance_ptr->rcvd_samples_.head_->sample_state_
+        == DDS::NOT_READ_SAMPLE_STATE)
+      {
+        // for now the implemented QoS means that if the head sample
+        // is NOT_READ then none are read.
+        // TBD - in future we will reads may not read in order so
+        //       just looking at the head will not be enough.
+        DDS::DataReaderListener_var listener
+          = listener_for(DDS::SAMPLE_REJECTED_STATUS);
+
+        set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
+
+        sample_rejected_status_.last_reason =
+          DDS::REJECTED_BY_SAMPLES_LIMIT;
+        ++sample_rejected_status_.total_count;
+        ++sample_rejected_status_.total_count_change;
+        sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
+        DDS::DataReader_var dr = get_dr_obj_ref();
+        if (!CORBA::is_nil(listener.in()))
         {
-          // for now the implemented QoS means that if the head sample
-          // is NOT_READ then none are read.
-          // TBD - in future we will reads may not read in order so
-          //       just looking at the head will not be enough.
-          DDS::DataReaderListener_var listener
-            = listener_for (DDS::SAMPLE_REJECTED_STATUS);
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
+          listener->on_sample_rejected(dr.in(),
+            sample_rejected_status_);
+        }  // do we want to do something if listener is nil???
+        notify_status_condition_no_sample_lock();
 
-          sample_rejected_status_.last_reason =
-            DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
-          ++sample_rejected_status_.total_count;
-          ++sample_rejected_status_.total_count_change;
-          sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
+        ACE_DES_FREE(instance_data,
+          data_allocator_->free,
+          MessageType);
 
-          DDS::DataReader_var dr = get_dr_obj_ref();
-          if (!CORBA::is_nil(listener.in()))
-            {
-              ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-              listener->on_sample_rejected(dr.in (),
-                                            sample_rejected_status_);
-            }  // do we want to do something if listener is nil???
-          notify_status_condition_no_sample_lock();
-
-          ACE_DES_FREE (instance_data,
-                        data_allocator_->free,
-                        MessageType );
-
-          return;
-        }
-      else if (! is_dispose_msg  && ! is_unregister_msg)
-        {
-          // Discard the oldest previously-read sample
-          OpenDDS::DCPS::ReceivedDataElement *item =
-            instance_ptr->rcvd_samples_.head_;
-          instance_ptr->rcvd_samples_.remove(item);
-          dec_ref_data_element(item);
-        }
-    }
-  else if (this->qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
-    {
-      CORBA::Long total_samples = 0;
-      { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-        for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
-              iter != instances_.end();
-              ++iter) {
-          OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
-
-          total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
-        }
+        return;
       }
-
-      if(total_samples >= this->qos_.resource_limits.max_samples)
-        {
-          // According to spec 1.2, Samples that contain no data do not
-          // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
-          // so do not remove the oldest sample when unregister/dispose
-          // message arrives.
-
-          if  (! is_dispose_msg  && ! is_unregister_msg
-                && instance_ptr->rcvd_samples_.head_->sample_state_
-                == DDS::NOT_READ_SAMPLE_STATE)
-            {
-              // for now the implemented QoS means that if the head sample
-              // is NOT_READ then none are read.
-              // TBD - in future we will reads may not read in order so
-              //       just looking at the head will not be enough.
-              DDS::DataReaderListener_var listener
-                = listener_for (DDS::SAMPLE_REJECTED_STATUS);
-
-              set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
-
-              sample_rejected_status_.last_reason =
-                DDS::REJECTED_BY_SAMPLES_LIMIT;
-              ++sample_rejected_status_.total_count;
-              ++sample_rejected_status_.total_count_change;
-              sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
-              DDS::DataReader_var dr = get_dr_obj_ref();
-              if (!CORBA::is_nil(listener.in()))
-                {
-                  ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-                  listener->on_sample_rejected(dr.in (),
-                                                sample_rejected_status_);
-                }  // do we want to do something if listener is nil???
-              notify_status_condition_no_sample_lock();
-
-              ACE_DES_FREE (instance_data,
-                            data_allocator_->free,
-                            MessageType );
-
-              return;
-            }
-          else if (! is_dispose_msg  && ! is_unregister_msg)
-            {
-              // Discard the oldest previously-read sample
-              OpenDDS::DCPS::ReceivedDataElement *item =
-                instance_ptr->rcvd_samples_.head_;
-              instance_ptr->rcvd_samples_.remove(item);
-              dec_ref_data_element(item);
-            }
-        }
+      else if (!is_dispose_msg && !is_unregister_msg)
+      {
+        // Discard the oldest previously-read sample
+        OpenDDS::DCPS::ReceivedDataElement *item =
+          instance_ptr->rcvd_samples_.head_;
+        instance_ptr->rcvd_samples_.remove(item);
+        dec_ref_data_element(item);
+      }
     }
+  }
 
   if (is_dispose_msg || is_unregister_msg)
-    {
-      ACE_DES_FREE (instance_data,
-                    data_allocator_->free,
-                    MessageType );
-      instance_data = 0;
-    }
+  {
+    ACE_DES_FREE(instance_data,
+      data_allocator_->free,
+      MessageType);
+    instance_data = 0;
+  }
 
   bool event_notify = false;
 
@@ -2088,11 +2084,12 @@ DDS::ReturnCode_t check_inputs (
 
 class FilterDelayedHandler : public Watchdog {
 public:
-  FilterDelayedHandler(DataReaderImpl_T<MessageType>& dataReaderImpl)
-  // Watchdog's interval_ only used for reseting current intervals
-  : Watchdog(ACE_Time_Value(0)),
-    dataReaderImpl_(dataReaderImpl)
+  FilterDelayedHandler(DataReaderImpl_T<MessageType>* data_reader_impl)
+  // Watchdog's interval_ only used for resetting current intervals
+  : Watchdog(ACE_Time_Value(0))
+  , data_reader_impl_(data_reader_impl)
   {
+    data_reader_var_.reset(data_reader_impl);
   }
 
   virtual ~FilterDelayedHandler()
@@ -2117,15 +2114,12 @@ public:
     std::pair<typename FilterDelayedSampleMap::iterator, bool> result =
       map_.insert(std::make_pair(instance_ptr, FilterDelayedSample(instance_data, hdr, just_registered)));
     FilterDelayedSample& sample = result.first->second;
-    if (result.second)
-    {
-      const ACE_Time_Value interval = duration_to_time_value(dataReaderImpl_.qos_.time_based_filter.minimum_separation);
+    if (result.second) {
+      const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_.qos_.time_based_filter.minimum_separation);
       const void* key_ptr = reinterpret_cast<const void*>(instance_ptr);
-      const ACE_Time_Value filter_time_remaining = duration_to_time_value(dataReaderImpl_.qos_.time_based_filter.minimum_separation) - filter_time_expired;
+      const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl_.qos_.time_based_filter.minimum_separation) - filter_time_expired;
       sample.timer_id = schedule_timer(key_ptr, filter_time_remaining, interval);
-    }
-    else
-    {
+    } else {
       // we only care about the most recently filtered sample, so clean up the last one
       clear_message(sample.message);
 
@@ -2141,8 +2135,7 @@ public:
     // sample_lock_ should already be held
 
     typename FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
-    if (sample != map_.end())
-    {
+    if (sample != map_.end()) {
       // leave the entry in the container, so that the key remains valid if the reactor is waiting on this lock while this is occurring
       clear_message(sample->second.message);
     }
@@ -2153,8 +2146,7 @@ public:
     // sample_lock_ should already be held
 
     typename FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
-    if (sample != map_.end())
-    {
+    if (sample != map_.end()) {
       clear_message(sample->second.message);
       cancel_timer(sample->second.timer_id);
       map_.erase(sample);
@@ -2162,20 +2154,17 @@ public:
   }
 
 private:
-  virtual void execute(const void* arg, bool timer_called)
+  virtual void execute(const void* arg, bool )
   {
-    ACE_UNUSED_ARG(timer_called);
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dataReaderImpl_.sample_lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_.sample_lock_);
 
-    SubscriptionInstance* instance_ptr = (SubscriptionInstance *)arg;
+    SubscriptionInstance* instance_ptr = (SubscriptionInstance*)arg;
     typename FilterDelayedSampleMap::iterator data = map_.find(instance_ptr);
-    if (data == map_.end())
-    {
+    if (data == map_.end()) {
       return;
     }
 
-    if (data->second.message)
-    {
+    if (data->second.message) {
       const bool NOT_DISPOSE_MSG = false;
       const bool NOT_UNREGISTER_MSG = false;
       // clear the message, since ownership is being transfered to finish_store_instance_data.
@@ -2186,12 +2175,10 @@ private:
       const bool new_instance = data->second.new_instance;
 
       // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-      dataReaderImpl_.finish_store_instance_data(instance_data, *header, instance_ptr, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
+      data_reader_impl_.finish_store_instance_data(instance_data, *header, instance_ptr, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
 
-      dataReaderImpl_.accept_sample_processing(instance_ptr, *header, new_instance);
-    }
-    else
-    {
+      data_reader_impl_.accept_sample_processing(instance_ptr, *header, new_instance);
+    } else {
       const long timer_id = data->second.timer_id;
       // no new data to process, so remove from container
       map_.erase(data);
@@ -2203,20 +2190,18 @@ private:
 
   virtual void reschedule_deadline()
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dataReaderImpl_.sample_lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_.sample_lock_);
 
-    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample)
-    {
+    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
       reset_timer_interval(sample->second.timer_id);
     }
   }
 
   void cleanup()
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dataReaderImpl_.sample_lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_.sample_lock_);
     // insure instance_ptrs get freed
-    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample)
-    {
+    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
       clear_message(sample->second.message);
     }
 
@@ -2226,29 +2211,28 @@ private:
   void clear_message(MessageType*& message)
   {
     ACE_DES_FREE(message,
-      dataReaderImpl_.data_allocator_->free,
+      data_reader_impl_.data_allocator_->free,
       MessageType);
     message = 0;
   }
 
-  DataReaderImpl_T<MessageType>& dataReaderImpl_;
+  DataReaderImpl_T<MessageType>* data_reader_impl_;
+  DDS::DataReader_var data_reader_var_;
 
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
 
   struct FilterDelayedSample {
-    FilterDelayedSample(MessageType*         msg,
-                        DataSampleHeader_ptr hdr,
-                        bool                 new_inst)
-    : message(msg),
-      header(hdr),
-      new_instance(new_inst),
-      timer_id(-1) {
+    FilterDelayedSample(MessageType* msg, DataSampleHeader_ptr hdr, bool new_inst)
+    : message(msg)
+    , header(hdr)
+    , new_instance(new_inst)
+    , timer_id(-1) {
     }
 
-    MessageType*         message;
+    MessageType* message;
     DataSampleHeader_ptr header;
-    bool                 new_instance;
-    long                 timer_id;
+    bool new_instance;
+    long timer_id;
   };
 
   typedef OPENDDS_MAP(SubscriptionInstance*, FilterDelayedSample) FilterDelayedSampleMap;
@@ -2256,7 +2240,7 @@ private:
   FilterDelayedSampleMap map_;
 };
 
-RcEventHandler<FilterDelayedHandler> filterDelayedHandler_;
+RcEventHandler<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap  instance_map_;
 DataAllocator* data_allocator_;

@@ -982,31 +982,23 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
   }
 }
 
-void DataReaderImpl::qos_change(
-  const DDS::DataReaderQos & qos)
+void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
 {
   // Reset the deadline timer if the period has changed.
-  if (qos_.deadline.period.sec != qos.deadline.period.sec
-    || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
-    if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
-      && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-      this->watchdog_.reset(
-        new RequestedDeadlineWatchdog(
-          this->sample_lock_,
-          qos.deadline,
-          this,
-          this->dr_local_objref_.in(),
-          this->requested_deadline_missed_status_,
-          this->last_deadline_missed_total_count_));
-
-    }
-    else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
-      && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-      this->watchdog_->cancel_all();
-      this->watchdog_.reset();
-    }
-    else {
-      this->watchdog_->reset_interval(
+  if (qos_.deadline.period.sec != qos.deadline.period.sec ||
+      qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
+    if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
+        qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
+      watchdog_.reset(
+        new RequestedDeadlineWatchdog(sample_lock_, qos.deadline, this,
+          dr_local_objref_.in(), requested_deadline_missed_status_,
+          last_deadline_missed_total_count_));
+    } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
+               qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
+      watchdog_->cancel_all();
+      watchdog_.reset();
+    } else {
+      watchdog_->reset_interval(
         duration_to_time_value(qos.deadline.period));
     }
   }
@@ -2776,8 +2768,7 @@ DataReaderImpl::ownership_filter_instance(SubscriptionInstance* instance,
 }
 
 bool
-DataReaderImpl::time_based_filter_instance(SubscriptionInstance* instance,
-                                           ACE_Time_Value& filter_time_expired)
+DataReaderImpl::time_based_filter_instance(SubscriptionInstance* instance, ACE_Time_Value& filter_time_expired)
 {
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
@@ -2785,11 +2776,11 @@ DataReaderImpl::time_based_filter_instance(SubscriptionInstance* instance,
   // if minimum separation is not met for instance.
   const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
 
-  if (this->qos_.time_based_filter.minimum_separation > zero) {
+  if (qos_.time_based_filter.minimum_separation > zero) {
     filter_time_expired = now - instance->last_accepted_;
     DDS::Duration_t separation = time_value_to_duration(filter_time_expired);
 
-    if (separation < this->qos_.time_based_filter.minimum_separation) {
+    if (separation < qos_.time_based_filter.minimum_separation) {
       return true;  // Data filtered.
     }
   }
@@ -3353,14 +3344,12 @@ void DataReaderImpl::accept_sample_processing(SubscriptionInstance* instance, co
 #endif
   RcHandle<WriterInfo> writer;
 
-  if (header.publication_id_.entityId.entityKind
-    != OpenDDS::DCPS::ENTITYKIND_OPENDDS_NIL_WRITER) {
-    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+  if (header.publication_id_.entityId.entityKind != ENTITYKIND_OPENDDS_NIL_WRITER) {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
 
-    WriterMapType::iterator where
-      = this->writers_.find(header.publication_id_);
+    WriterMapType::iterator where = writers_.find(header.publication_id_);
 
-    if (where != this->writers_.end()) {
+    if (where != writers_.end()) {
       if (header.coherent_change_) {
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -3374,7 +3363,7 @@ void DataReaderImpl::accept_sample_processing(SubscriptionInstance* instance, co
       }
     }
     else {
-      GuidConverter subscriptionBuffer(this->subscription_id_);
+      GuidConverter subscriptionBuffer(subscription_id_);
       GuidConverter publicationBuffer(header.publication_id_);
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
@@ -3387,27 +3376,25 @@ void DataReaderImpl::accept_sample_processing(SubscriptionInstance* instance, co
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (verify_coherent) {
-    accepted = this->verify_coherent_changes_completion(writer.in());
+    accepted = verify_coherent_changes_completion(writer.in());
   }
 #endif
 
-  if (this->watchdog_.in()) {
+  if (watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
 
     // Watchdog can't be called with sample_lock_ due to reactor deadlock
     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
     if (is_new_instance) {
-      this->watchdog_->schedule_timer(instance);
-
-    }
-    else {
-      this->watchdog_->execute(instance, false);
+      watchdog_->schedule_timer(instance);
+    } else {
+      watchdog_->execute(instance, false);
     }
   }
 
   if (accepted) {
-    this->notify_read_conditions();
+    notify_read_conditions();
   }
 }
 

@@ -252,9 +252,7 @@ public:
 
   virtual void _add_ref();
   virtual void _remove_ref();
-  /**
-   * cleanup the DataWriter.
-   */
+
   virtual void cleanup();
 
   void init(
@@ -598,7 +596,7 @@ protected:
 
   void accept_sample_processing(SubscriptionInstance* instance, const DataSampleHeader& header, bool is_new_instance);
 
-  virtual void qos_change(const DDS::DataReaderQos & qos);
+  virtual void qos_change(const DDS::DataReaderQos& qos);
 
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
