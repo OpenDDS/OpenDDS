@@ -14,6 +14,8 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <iostream>
 
+#include "dds/DCPS/StaticIncludes.h"
+
 #include "common.h"
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
