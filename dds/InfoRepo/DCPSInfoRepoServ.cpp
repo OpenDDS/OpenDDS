@@ -346,7 +346,7 @@ InfoRepo::init()
   }
 
   // Initialize persistence _after_ initializing the participant factory
-  // and intializing the transport.
+  // and initializing the transport.
   if (!this->info_servant_->init_persistence()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize persistence.\n")));
