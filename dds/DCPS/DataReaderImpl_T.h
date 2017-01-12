@@ -904,7 +904,7 @@ namespace OpenDDS {
   virtual void cleanup()
   {
     if (filter_delayed_handler_.in()) {
-      filter_delayed_handler_->cancel();
+      filter_delayed_handler_->detatch();
       filter_delayed_handler_.reset();
     }
     DataReaderImpl::cleanup();
@@ -2088,12 +2088,18 @@ public:
   // Watchdog's interval_ only used for resetting current intervals
   : Watchdog(ACE_Time_Value(0))
   , data_reader_impl_(data_reader_impl)
+  , data_reader_var_(DDS::DataReader::_duplicate(data_reader_impl))
   {
-    data_reader_var_.reset(data_reader_impl);
   }
 
   virtual ~FilterDelayedHandler()
   {
+  }
+
+  void detatch()
+  {
+    cancel();
+    data_reader_var_ = DDS::DataReader_var();
   }
 
   void cancel()
@@ -2109,15 +2115,18 @@ public:
                     const ACE_Time_Value& filter_time_expired)
   {
     // sample_lock_ should already be held
+    if (!data_reader_var_.in()) {
+      return;
+    }
 
     DataSampleHeader_ptr hdr(new OpenDDS::DCPS::DataSampleHeader(header));
     std::pair<typename FilterDelayedSampleMap::iterator, bool> result =
       map_.insert(std::make_pair(instance_ptr, FilterDelayedSample(instance_data, hdr, just_registered)));
     FilterDelayedSample& sample = result.first->second;
     if (result.second) {
-      const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_.qos_.time_based_filter.minimum_separation);
+      const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation);
       const void* key_ptr = reinterpret_cast<const void*>(instance_ptr);
-      const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl_.qos_.time_based_filter.minimum_separation) - filter_time_expired;
+      const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation) - filter_time_expired;
       sample.timer_id = schedule_timer(key_ptr, filter_time_remaining, interval);
     } else {
       // we only care about the most recently filtered sample, so clean up the last one
@@ -2156,7 +2165,11 @@ public:
 private:
   virtual void execute(const void* arg, bool )
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_.sample_lock_);
+    if (!data_reader_var_.in()) {
+      return;
+    }
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
 
     SubscriptionInstance* instance_ptr = (SubscriptionInstance*)arg;
     typename FilterDelayedSampleMap::iterator data = map_.find(instance_ptr);
@@ -2175,9 +2188,9 @@ private:
       const bool new_instance = data->second.new_instance;
 
       // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-      data_reader_impl_.finish_store_instance_data(instance_data, *header, instance_ptr, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
+      data_reader_impl_->finish_store_instance_data(instance_data, *header, instance_ptr, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
 
-      data_reader_impl_.accept_sample_processing(instance_ptr, *header, new_instance);
+      data_reader_impl_->accept_sample_processing(instance_ptr, *header, new_instance);
     } else {
       const long timer_id = data->second.timer_id;
       // no new data to process, so remove from container
@@ -2190,7 +2203,11 @@ private:
 
   virtual void reschedule_deadline()
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_.sample_lock_);
+    if (!data_reader_var_.in()) {
+      return;
+    }
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
 
     for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
       reset_timer_interval(sample->second.timer_id);
@@ -2199,7 +2216,11 @@ private:
 
   void cleanup()
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_.sample_lock_);
+    if (!data_reader_var_.in()) {
+      return;
+    }
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
     // insure instance_ptrs get freed
     for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
       clear_message(sample->second.message);
@@ -2210,10 +2231,12 @@ private:
 
   void clear_message(MessageType*& message)
   {
-    ACE_DES_FREE(message,
-      data_reader_impl_.data_allocator_->free,
-      MessageType);
-    message = 0;
+    if (data_reader_var_.in()) {
+      ACE_DES_FREE(message,
+        data_reader_impl_->data_allocator_->free,
+        MessageType);
+      message = 0;
+    }
   }
 
   DataReaderImpl_T<MessageType>* data_reader_impl_;
