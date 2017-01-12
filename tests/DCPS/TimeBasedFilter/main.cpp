@@ -78,6 +78,8 @@ bool verify_unreliable(FooDataReader_var reader_i, const size_t expected_samples
     } else {
       for (size_t i = 0; i < expected_samples; ++i) {
         const FooInfo& fooInfo = foos[i];
+        // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first sent
+        // message will also be the first received message in the data reader
         if (fooInfo.first.x != 0.0f) {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("%N:%l main()")
@@ -108,6 +110,8 @@ bool verify_reliable(FooDataReader_var reader_i, const size_t expected_samples, 
       for (size_t i = 0; i < expected_samples * 2; ++i) {
         const FooInfo& fooInfo = foos[i];
         // each successive sample was sent with x = 0.0 to x = (SAMPLES_PER_CYCLE - 1)
+        // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first and last sent
+        // message will also be the first and last received message in the data reader
         const float expected = (i % 2) == 0 ? 0.0f : (float)(SAMPLES_PER_CYCLE - 1);
         if (fooInfo.first.x != expected) {
           ACE_ERROR((LM_ERROR,
@@ -183,9 +187,10 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     // Create Topic (FooTopic)
+    CORBA::String_var type_name = ts->get_type_name();
     DDS::Topic_var topic =
       participant->create_topic("FooTopic",
-        ts->get_type_name(),
+        type_name,
         TOPIC_QOS_DEFAULT,
         DDS::TopicListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
