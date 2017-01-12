@@ -44,7 +44,7 @@ parse_args(int& argc, ACE_TCHAR** argv)
       minimum_separation.sec = ACE_OS::atoi(arg);
       shifter.consume_arg();
     }
-    else if (strcmp(shifter.get_current(), (ACE_TEXT("-r"))) == 0)
+    else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-r")) == 0)
     {
       reliable = true;
       shifter.consume_arg();
