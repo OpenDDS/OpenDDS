@@ -183,7 +183,7 @@ InfoRepoDiscovery::~InfoRepoDiscovery()
 bool
 InfoRepoDiscovery::set_ORB(CORBA::ORB_ptr orb)
 {
-  if (orb_.in() || !orb) {
+  if (!CORBA::is_nil (orb_.in()) || CORBA::is_nil (orb)) {
     return false;
   }
 
