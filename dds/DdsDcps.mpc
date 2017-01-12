@@ -10,6 +10,10 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   pch_source   = DCPS/DdsDcps_pch.cpp
   macros      += NOMINMAX         //don't #define min and max in Win32 headers
 
+  specific (vc9, vc10, vc11, vc12, vc14, nmake) {
+    compile_flags += /bigobj
+  }
+
   //The following is only to make the PCH work, client projects should not have
   //this as an include path.
   includes += $(DDS_ROOT)/dds

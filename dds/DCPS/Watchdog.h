@@ -32,7 +32,7 @@ namespace DCPS {
  * owner, for example, to run the @c ACE_Reactor event loop.
  * The @c Watchdog timer will not fire, otherwise.
  */
-class Watchdog : public ReactorInterceptor {
+class OpenDDS_Dcps_Export Watchdog : public ReactorInterceptor {
 protected:
 
   explicit Watchdog(const ACE_Time_Value& interval);
@@ -69,6 +69,10 @@ public:
   /// Schedule with the @c Watchdog timer interval, i.e. time between
   /// recurring timer expirations.
   long schedule_timer(const void* act, const ACE_Time_Value& interval);
+
+  /// Schedule with the @c Watchdog timer delay and timer interval,
+  /// i.e. time between recurring timer expirations.
+  long schedule_timer(const void* act, const ACE_Time_Value& delay, const ACE_Time_Value& interval);
 
   /// Cancel a specific timer.
   int cancel_timer(long timer_id);

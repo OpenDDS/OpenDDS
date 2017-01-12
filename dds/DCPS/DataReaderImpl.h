@@ -252,10 +252,8 @@ public:
 
   virtual void _add_ref();
   virtual void _remove_ref();
-  /**
-   * cleanup the DataWriter.
-   */
-  void cleanup();
+
+  virtual void cleanup();
 
   void init(
     TopicDescriptionImpl* a_topic_desc,
@@ -591,8 +589,14 @@ protected:
    *       QoS policy or DataReader's TIME_BASED_FILTER QoS policy.
    */
   bool filter_sample(const DataSampleHeader& header);
-  bool filter_instance(SubscriptionInstance* instance,
-                       const PublicationId& pubid);
+  bool ownership_filter_instance(SubscriptionInstance* instance,
+                                 const PublicationId& pubid);
+  bool time_based_filter_instance(SubscriptionInstance* instance,
+                                  ACE_Time_Value& filter_time_expired);
+
+  void accept_sample_processing(SubscriptionInstance* instance, const DataSampleHeader& header, bool is_new_instance);
+
+  virtual void qos_change(const DDS::DataReaderQos& qos);
 
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
@@ -633,7 +637,7 @@ protected:
   DDS::SubscriberQos subqos_;
 
 protected:
-    virtual void add_link(const DataLink_rch& link, const RepoId& peer);
+  virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
 

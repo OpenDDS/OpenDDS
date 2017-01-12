@@ -7,7 +7,11 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/TypeSupportImpl.h"
+#include "dds/DCPS/Watchdog.h"
 #include "dcps_export.h"
+
+#include "ace/Bound_Ptr.h"
+#include "ace/Time_Value.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -40,7 +44,8 @@ namespace OpenDDS {
     typedef typename TraitsType::DataReaderType Interface;
 
     DataReaderImpl_T (void)
-      : data_allocator_ (0)
+    : filter_delayed_handler_(new FilterDelayedHandler(this))
+    , data_allocator_ (0)
     {
     }
 
@@ -845,7 +850,10 @@ namespace OpenDDS {
                               MessageType);
       get_key_value(*data, instance);
       store_instance_data(data, header, si, just_registered, filtered);
-      notify_read_conditions();
+      if (!filtered)
+      {
+        notify_read_conditions();
+      }
     }
   }
 
@@ -891,6 +899,41 @@ namespace OpenDDS {
     } else {
       instance = get_handle_instance(handle);
     }
+  }
+
+  virtual void cleanup()
+  {
+    if (filter_delayed_handler_.in()) {
+      filter_delayed_handler_->detatch();
+      filter_delayed_handler_.reset();
+    }
+    DataReaderImpl::cleanup();
+  }
+
+  virtual void qos_change(const DDS::DataReaderQos& qos)
+  {
+    // reliability is not changeable, just time_based_filter
+    if (qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+      if (qos.time_based_filter.minimum_separation != qos_.time_based_filter.minimum_separation) {
+        const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
+        if (qos_.time_based_filter.minimum_separation != zero) {
+          if (qos.time_based_filter.minimum_separation != zero) {
+            const ACE_Time_Value new_interval = duration_to_time_value(qos.time_based_filter.minimum_separation);
+            if (filter_delayed_handler_.in()) {
+              filter_delayed_handler_->reset_interval(new_interval);
+            }
+          } else {
+            if (filter_delayed_handler_.in()) {
+              filter_delayed_handler_->cancel();
+            }
+          }
+        }
+        // else no existing timers to change/cancel
+      }
+      // else no qos change so nothing to change
+    }
+
+    DataReaderImpl::qos_change(qos);
   }
 
 protected:
@@ -968,6 +1011,10 @@ protected:
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance* instance)
   {
+    if (filter_delayed_handler_.in()) {
+      filter_delayed_handler_->drop_sample(instance);
+    }
+
     instance->instance_state_.cancel_release();
 
     while (instance->rcvd_samples_.size_ > 0)
@@ -1476,430 +1523,452 @@ void store_instance_data(
   typename InstanceMap::const_iterator const it = instance_map_.find(*instance_data);
 
   if ((is_dispose_msg || is_unregister_msg) && it == instance_map_.end())
-    {
-      ACE_DES_FREE (instance_data,
-                    data_allocator_->free,
-                    MessageType );
-      instance_data = 0;
-      return;
-    }
+  {
+    ACE_DES_FREE (instance_data,
+                  data_allocator_->free,
+                  MessageType );
+    instance_data = 0;
+    return;
+  }
 
 
   if (it == instance_map_.end())
+  {
+    std::size_t instances_size = 0;
+    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      instances_size = instances_.size();
+    }
+    if ((this->qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
+      ((::CORBA::Long) instances_size >= this->qos_.resource_limits.max_instances))
     {
-      std::size_t instances_size = 0;
-      { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-        instances_size = instances_.size();
+
+      DDS::DataReaderListener_var listener
+        = listener_for (DDS::SAMPLE_REJECTED_STATUS);
+
+      set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
+
+      sample_rejected_status_.last_reason =
+        DDS::REJECTED_BY_INSTANCES_LIMIT;
+      ++sample_rejected_status_.total_count;
+      ++sample_rejected_status_.total_count_change;
+      sample_rejected_status_.last_instance_handle = handle;
+
+      DDS::DataReader_var dr = get_dr_obj_ref();
+      if (!CORBA::is_nil(listener.in()))
+      {
+        ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+        listener->on_sample_rejected(dr.in (),
+                                     sample_rejected_status_);
+      }  // do we want to do something if listener is nil???
+      notify_status_condition_no_sample_lock();
+
+      ACE_DES_FREE (instance_data,
+                    data_allocator_->free,
+                    MessageType );
+
+      return;
+    }
+
+    // first find the instance mapin the participant instance map.
+    // if the instance map for the type is not registered, then
+    // create the instance map.
+    // if the instance map for the type exists, then find the
+    // handle of the instance. If the instance is not registered
+    //
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+    InstanceMap* inst = 0;
+    bool new_handle = true;
+    if (this->is_exclusive_ownership_) {
+      if (this->owner_manager_->instance_lock_acquire () != 0) {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ")
+                    ACE_TEXT("%CDataReaderImpl::")
+                    ACE_TEXT("store_instance_data, ")
+                    ACE_TEXT("acquire instance_lock failed. \n"), TraitsType::type_name()));
+        return;
       }
-      if ((this->qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
-          ((::CORBA::Long) instances_size >= this->qos_.resource_limits.max_instances))
+
+      inst = (InstanceMap*)(
+        this->owner_manager_->get_instance_map(this->topic_servant_->type_name(), this));
+      if (inst != 0) {
+        typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
+        if (iter != inst->end ()) {
+          handle = iter->second;
+          new_handle = false;
+        }
+      }
+    }
+#endif
+
+    just_registered = true;
+    OpenDDS::DCPS::SubscriptionInstance* instance = 0;
+    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(instance_data);
+    handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
+    ACE_NEW (instance,
+             OpenDDS::DCPS::SubscriptionInstance(this,
+                                                 this->qos_,
+                                                 this->instances_lock_,
+                                                 handle));
+
+    instance->instance_handle_ = handle;
+
+    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
+
+      if (ret != 0)
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ")
+                    ACE_TEXT("%CDataReaderImpl::")
+                    ACE_TEXT("store_instance_data, ")
+                    ACE_TEXT("insert handle failed. \n"), TraitsType::type_name()));
+        return;
+      }
+    }
+
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+    if (this->is_exclusive_ownership_) {
+      if (inst == 0) {
+        inst = new InstanceMap ();
+        this->owner_manager_->set_instance_map(
+          this->topic_servant_->type_name(), reinterpret_cast <void* > (inst), this);
+      }
+
+      if (new_handle) {
+        std::pair<typename InstanceMap::iterator, bool> bpair =
+          inst->insert(typename InstanceMap::value_type(*instance_data,
+            handle));
+        if (bpair.second == false)
         {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("%CDataReaderImpl::")
+                      ACE_TEXT("store_instance_data, ")
+                      ACE_TEXT("insert to participant scope %C failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
+          return;
+        }
+      }
 
+      if (this->owner_manager_->instance_lock_release () != 0) {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ")
+                    ACE_TEXT("%CDataReaderImpl::")
+                    ACE_TEXT("store_instance_data, ")
+                    ACE_TEXT("release instance_lock failed. \n"), TraitsType::type_name()));
+        return;
+      }
+    }
+#endif
+
+    std::pair<typename InstanceMap::iterator, bool> bpair =
+      instance_map_.insert(typename InstanceMap::value_type(*instance_data,
+        handle));
+    if (bpair.second == false)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ")
+                  ACE_TEXT("%CDataReaderImpl::")
+                  ACE_TEXT("store_instance_data, ")
+                  ACE_TEXT("insert %C failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
+      return;
+    }
+  }
+  else
+  {
+    just_registered = false;
+    handle = it->second;
+  }
+
+  if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
+  {
+    instance_ptr = get_handle_instance(handle);
+
+    if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA)
+    {
+      filtered = ownership_filter_instance(instance_ptr, header.publication_id_);
+
+      ACE_Time_Value filter_time_expired;
+      if (!filtered &&
+          time_based_filter_instance(instance_ptr, filter_time_expired)) {
+        filtered = true;
+        if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+          if (filter_delayed_handler_.in()) {
+            filter_delayed_handler_->delay_sample(instance_ptr, instance_data, header, just_registered, filter_time_expired);
+          }
+          // handed off to filter_delayed_handler_, so do not free
+          instance_data = 0;
+        }
+      } else {
+        // nothing time based filtered now
+        if (filter_delayed_handler_.in()) {
+          filter_delayed_handler_->clear_sample(instance_ptr);
+        }
+      }
+
+      if (filtered)
+      {
+        ACE_DES_FREE (instance_data,
+                      data_allocator_->free,
+                      MessageType );
+        return;
+      }
+    }
+
+    finish_store_instance_data(instance_data, header, instance_ptr, is_dispose_msg, is_unregister_msg);
+  }
+  else
+  {
+    instance_ptr = this->get_handle_instance(handle);
+    instance_ptr->instance_state_.lively(header.publication_id_);
+    ACE_DES_FREE(instance_data,
+                 data_allocator_->free,
+                 MessageType);
+  }
+}
+
+void finish_store_instance_data(MessageType* instance_data, const DataSampleHeader& header,
+  SubscriptionInstance* instance_ptr, bool is_dispose_msg, bool is_unregister_msg )
+{
+  if ((this->qos_.resource_limits.max_samples_per_instance !=
+        DDS::LENGTH_UNLIMITED) &&
+      (instance_ptr->rcvd_samples_.size_ >=
+        this->qos_.resource_limits.max_samples_per_instance)) {
+
+    // According to spec 1.2, Samples that contain no data do not
+    // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
+    // so do not remove the oldest sample when unregister/dispose
+    // message arrives.
+
+    if (!is_dispose_msg && !is_unregister_msg
+      && instance_ptr->rcvd_samples_.head_->sample_state_
+      == DDS::NOT_READ_SAMPLE_STATE)
+    {
+      // for now the implemented QoS means that if the head sample
+      // is NOT_READ then none are read.
+      // TBD - in future we will reads may not read in order so
+      //       just looking at the head will not be enough.
+      DDS::DataReaderListener_var listener
+        = listener_for(DDS::SAMPLE_REJECTED_STATUS);
+
+      set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
+
+      sample_rejected_status_.last_reason =
+        DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
+      ++sample_rejected_status_.total_count;
+      ++sample_rejected_status_.total_count_change;
+      sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
+
+      DDS::DataReader_var dr = get_dr_obj_ref();
+      if (!CORBA::is_nil(listener.in()))
+      {
+        ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+        listener->on_sample_rejected(dr.in(),
+          sample_rejected_status_);
+      }  // do we want to do something if listener is nil???
+      notify_status_condition_no_sample_lock();
+
+      ACE_DES_FREE(instance_data,
+        data_allocator_->free,
+        MessageType);
+
+      return;
+    }
+    else if (!is_dispose_msg && !is_unregister_msg)
+    {
+      // Discard the oldest previously-read sample
+      OpenDDS::DCPS::ReceivedDataElement *item =
+        instance_ptr->rcvd_samples_.head_;
+      instance_ptr->rcvd_samples_.remove(item);
+      dec_ref_data_element(item);
+    }
+  }
+  else if (this->qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
+  {
+    CORBA::Long total_samples = 0;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
+        iter != instances_.end();
+        ++iter) {
+        OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
+
+        total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
+      }
+    }
+
+    if (total_samples >= this->qos_.resource_limits.max_samples)
+    {
+      // According to spec 1.2, Samples that contain no data do not
+      // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
+      // so do not remove the oldest sample when unregister/dispose
+      // message arrives.
+
+      if (!is_dispose_msg && !is_unregister_msg
+        && instance_ptr->rcvd_samples_.head_->sample_state_
+        == DDS::NOT_READ_SAMPLE_STATE)
+      {
+        // for now the implemented QoS means that if the head sample
+        // is NOT_READ then none are read.
+        // TBD - in future we will reads may not read in order so
+        //       just looking at the head will not be enough.
+        DDS::DataReaderListener_var listener
+          = listener_for(DDS::SAMPLE_REJECTED_STATUS);
+
+        set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
+
+        sample_rejected_status_.last_reason =
+          DDS::REJECTED_BY_SAMPLES_LIMIT;
+        ++sample_rejected_status_.total_count;
+        ++sample_rejected_status_.total_count_change;
+        sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
+        DDS::DataReader_var dr = get_dr_obj_ref();
+        if (!CORBA::is_nil(listener.in()))
+        {
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+          listener->on_sample_rejected(dr.in(),
+            sample_rejected_status_);
+        }  // do we want to do something if listener is nil???
+        notify_status_condition_no_sample_lock();
+
+        ACE_DES_FREE(instance_data,
+          data_allocator_->free,
+          MessageType);
+
+        return;
+      }
+      else if (!is_dispose_msg && !is_unregister_msg)
+      {
+        // Discard the oldest previously-read sample
+        OpenDDS::DCPS::ReceivedDataElement *item =
+          instance_ptr->rcvd_samples_.head_;
+        instance_ptr->rcvd_samples_.remove(item);
+        dec_ref_data_element(item);
+      }
+    }
+  }
+
+  if (is_dispose_msg || is_unregister_msg)
+  {
+    ACE_DES_FREE(instance_data,
+      data_allocator_->free,
+      MessageType);
+    instance_data = 0;
+  }
+
+  bool event_notify = false;
+
+  if (is_dispose_msg) {
+    event_notify = instance_ptr->instance_state_.dispose_was_received(header.publication_id_);
+  }
+
+  if (is_unregister_msg) {
+    if (instance_ptr->instance_state_.unregister_was_received(header.publication_id_)) {
+      event_notify = true;
+    }
+  }
+
+  if (!is_dispose_msg && !is_unregister_msg) {
+    event_notify = true;
+    instance_ptr->instance_state_.data_was_received(header.publication_id_);
+  }
+
+  if (!event_notify) {
+    return;
+  }
+
+  OpenDDS::DCPS::ReceivedDataElement *ptr;
+  ACE_NEW_MALLOC (ptr,
+                  static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
+                                                                      rd_allocator_->malloc (
+                                                                                            sizeof (OpenDDS::DCPS::ReceivedDataElement))),
+                  OpenDDS::DCPS::ReceivedDataElement(header,
+                                                      instance_data));
+
+  ptr->disposed_generation_count_ =
+    instance_ptr->instance_state_.disposed_generation_count();
+  ptr->no_writers_generation_count_ =
+    instance_ptr->instance_state_.no_writers_generation_count();
+
+  instance_ptr->last_sequence_ = header.sequence_;
+
+  instance_ptr->rcvd_strategy_->add(ptr);
+
+  if (! is_dispose_msg  && ! is_unregister_msg
+      && instance_ptr->rcvd_samples_.size_ > get_depth())
+    {
+      OpenDDS::DCPS::ReceivedDataElement* head_ptr =
+        instance_ptr->rcvd_samples_.head_;
+
+      instance_ptr->rcvd_samples_.remove(head_ptr);
+
+      if (head_ptr->sample_state_ == DDS::NOT_READ_SAMPLE_STATE)
+        {
           DDS::DataReaderListener_var listener
-            = listener_for (DDS::SAMPLE_REJECTED_STATUS);
+            = listener_for (DDS::SAMPLE_LOST_STATUS);
 
-          set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
+          ++sample_lost_status_.total_count;
+          ++sample_lost_status_.total_count_change;
 
-          sample_rejected_status_.last_reason =
-            DDS::REJECTED_BY_INSTANCES_LIMIT;
-          ++sample_rejected_status_.total_count;
-          ++sample_rejected_status_.total_count_change;
-          sample_rejected_status_.last_instance_handle = handle;
+          set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, true);
 
           DDS::DataReader_var dr = get_dr_obj_ref();
           if (!CORBA::is_nil(listener.in()))
             {
               ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-              listener->on_sample_rejected(dr.in (),
-                                           sample_rejected_status_);
-            }  // do we want to do something if listener is nil???
+              listener->on_sample_lost(dr.in (), sample_lost_status_);
+            }
+
           notify_status_condition_no_sample_lock();
-
-          ACE_DES_FREE (instance_data,
-                        data_allocator_->free,
-                        MessageType );
-
-          return;
         }
 
-      // first find the instance mapin the participant instance map.
-      // if the instance map for the type is not registered, then
-      // create the instance map.
-      // if the instance map for the type exists, then find the
-      // handle of the instance. If the instance is not registered
-      //
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      InstanceMap* inst = 0;
-      bool new_handle = true;
-      if (this->is_exclusive_ownership_) {
-        if (this->owner_manager_->instance_lock_acquire () != 0) {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%CDataReaderImpl::")
-                      ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("acquire instance_lock failed. \n"), TraitsType::type_name()));
-          return;
-        }
-
-        inst = (InstanceMap*)(
-                              this->owner_manager_->get_instance_map(this->topic_servant_->type_name(), this));
-        if (inst != 0) {
-          typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
-          if (iter != inst->end ()) {
-            handle = iter->second;
-            new_handle = false;
-          }
-        }
-      }
-#endif
-
-      just_registered = true;
-      OpenDDS::DCPS::SubscriptionInstance* instance = 0;
-      DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(instance_data);
-      handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
-      ACE_NEW (instance,
-               OpenDDS::DCPS::SubscriptionInstance(this,
-                                                   this->qos_,
-                                                   this->instances_lock_,
-                                                   handle));
-
-      instance->instance_handle_ = handle;
-
-      { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-        int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
-
-        if (ret != 0)
-          {
-            ACE_ERROR ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("%CDataReaderImpl::")
-                        ACE_TEXT("store_instance_data, ")
-                        ACE_TEXT("insert handle failed. \n"), TraitsType::type_name()));
-            return;
-          }
-      }
-
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      if (this->is_exclusive_ownership_) {
-        if (inst == 0) {
-          inst = new InstanceMap ();
-          this->owner_manager_->set_instance_map(
-                                                 this->topic_servant_->type_name(), reinterpret_cast <void* > (inst), this);
-        }
-
-        if (new_handle) {
-          std::pair<typename InstanceMap::iterator, bool> bpair =
-            inst->insert(typename InstanceMap::value_type(*instance_data,
-                                                 handle));
-          if (bpair.second == false)
-            {
-              ACE_ERROR ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ")
-                          ACE_TEXT("%CDataReaderImpl::")
-                          ACE_TEXT("store_instance_data, ")
-                          ACE_TEXT("insert to participant scope %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
-              return;
-            }
-        }
-
-        if (this->owner_manager_->instance_lock_release () != 0) {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%CDataReaderImpl::")
-                      ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("release instance_lock failed. \n"), TraitsType::type_name()));
-          return;
-        }
-      }
-#endif
-
-      std::pair<typename InstanceMap::iterator, bool> bpair =
-        instance_map_.insert(typename InstanceMap::value_type(*instance_data,
-                                                     handle));
-      if (bpair.second == false)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%CDataReaderImpl::")
-                      ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("insert %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
-          return;
-        }
+      dec_ref_data_element(head_ptr);
     }
-  else
-    {
-      just_registered = false;
-      handle = it->second;
-    }
-
-  if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
-    {
-      instance_ptr = get_handle_instance(handle);
-
-      if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA)
-        {
-          // Check instance based QoS policy filters
-          // (i.e. OWNERSHIP, TIME_BASED_FILTER)
-          filtered = this->filter_instance(instance_ptr,header.publication_id_);
-
-          if (filtered)
-            {
-              ACE_DES_FREE (instance_data,
-                            data_allocator_->free,
-                            MessageType );
-              return;
-            }
-        }
-
-      if ((this->qos_.resource_limits.max_samples_per_instance !=
-           DDS::LENGTH_UNLIMITED) &&
-          (instance_ptr->rcvd_samples_.size_ >=
-           this->qos_.resource_limits.max_samples_per_instance))
-        {
-
-          // According to spec 1.2, Samples that contain no data do not
-          // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
-          // so do not remove the oldest sample when unregister/dispose
-          // message arrives.
-
-          if  (! is_dispose_msg  && ! is_unregister_msg
-               && instance_ptr->rcvd_samples_.head_->sample_state_
-               == DDS::NOT_READ_SAMPLE_STATE)
-            {
-              // for now the implemented QoS means that if the head sample
-              // is NOT_READ then none are read.
-              // TBD - in future we will reads may not read in order so
-              //       just looking at the head will not be enough.
-              DDS::DataReaderListener_var listener
-                = listener_for (DDS::SAMPLE_REJECTED_STATUS);
-
-              set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
-
-              sample_rejected_status_.last_reason =
-                DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
-              ++sample_rejected_status_.total_count;
-              ++sample_rejected_status_.total_count_change;
-              sample_rejected_status_.last_instance_handle = handle;
-
-              DDS::DataReader_var dr = get_dr_obj_ref();
-              if (!CORBA::is_nil(listener.in()))
-                {
-                  ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-                  listener->on_sample_rejected(dr.in (),
-                                               sample_rejected_status_);
-                }  // do we want to do something if listener is nil???
-              notify_status_condition_no_sample_lock();
-
-              ACE_DES_FREE (instance_data,
-                            data_allocator_->free,
-                            MessageType );
-
-              return;
-            }
-          else if (! is_dispose_msg  && ! is_unregister_msg)
-            {
-              // Discard the oldest previously-read sample
-              OpenDDS::DCPS::ReceivedDataElement *item =
-                instance_ptr->rcvd_samples_.head_;
-              instance_ptr->rcvd_samples_.remove(item);
-              dec_ref_data_element(item);
-            }
-        }
-      else if (this->qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
-        {
-          CORBA::Long total_samples = 0;
-          { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-            for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
-                 iter != instances_.end();
-                 ++iter) {
-              OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
-
-              total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
-            }
-          }
-
-          if(total_samples >= this->qos_.resource_limits.max_samples)
-            {
-              // According to spec 1.2, Samples that contain no data do not
-              // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
-              // so do not remove the oldest sample when unregister/dispose
-              // message arrives.
-
-              if  (! is_dispose_msg  && ! is_unregister_msg
-                   && instance_ptr->rcvd_samples_.head_->sample_state_
-                   == DDS::NOT_READ_SAMPLE_STATE)
-                {
-                  // for now the implemented QoS means that if the head sample
-                  // is NOT_READ then none are read.
-                  // TBD - in future we will reads may not read in order so
-                  //       just looking at the head will not be enough.
-                  DDS::DataReaderListener_var listener
-                    = listener_for (DDS::SAMPLE_REJECTED_STATUS);
-
-                  set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
-
-                  sample_rejected_status_.last_reason =
-                    DDS::REJECTED_BY_SAMPLES_LIMIT;
-                  ++sample_rejected_status_.total_count;
-                  ++sample_rejected_status_.total_count_change;
-                  sample_rejected_status_.last_instance_handle = handle;
-                  DDS::DataReader_var dr = get_dr_obj_ref();
-                  if (!CORBA::is_nil(listener.in()))
-                    {
-                      ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-                      listener->on_sample_rejected(dr.in (),
-                                                   sample_rejected_status_);
-                    }  // do we want to do something if listener is nil???
-                  notify_status_condition_no_sample_lock();
-
-                  ACE_DES_FREE (instance_data,
-                                data_allocator_->free,
-                                MessageType );
-
-                  return;
-                }
-              else if (! is_dispose_msg  && ! is_unregister_msg)
-                {
-                  // Discard the oldest previously-read sample
-                  OpenDDS::DCPS::ReceivedDataElement *item =
-                    instance_ptr->rcvd_samples_.head_;
-                  instance_ptr->rcvd_samples_.remove(item);
-                  dec_ref_data_element(item);
-                }
-            }
-        }
-
-      if (is_dispose_msg || is_unregister_msg)
-        {
-          ACE_DES_FREE (instance_data,
-                        data_allocator_->free,
-                        MessageType );
-          instance_data = 0;
-        }
-
-      bool event_notify = false;
-
-      if (is_dispose_msg) {
-        event_notify = instance_ptr->instance_state_.dispose_was_received(header.publication_id_);
-      }
-
-      if (is_unregister_msg) {
-        if (instance_ptr->instance_state_.unregister_was_received(header.publication_id_)) {
-          event_notify = true;
-        }
-      }
-
-      if (!is_dispose_msg && !is_unregister_msg) {
-        event_notify = true;
-        instance_ptr->instance_state_.data_was_received(header.publication_id_);
-      }
-
-      if (!event_notify) {
-        return;
-      }
-
-      OpenDDS::DCPS::ReceivedDataElement *ptr;
-      ACE_NEW_MALLOC (ptr,
-                      static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
-                                                                         rd_allocator_->malloc (
-                                                                                                sizeof (OpenDDS::DCPS::ReceivedDataElement))),
-                      OpenDDS::DCPS::ReceivedDataElement(header,
-                                                         instance_data));
-
-      ptr->disposed_generation_count_ =
-        instance_ptr->instance_state_.disposed_generation_count();
-      ptr->no_writers_generation_count_ =
-        instance_ptr->instance_state_.no_writers_generation_count();
-
-      instance_ptr->last_sequence_ = header.sequence_;
-
-      instance_ptr->rcvd_strategy_->add(ptr);
-
-      if (! is_dispose_msg  && ! is_unregister_msg
-          && instance_ptr->rcvd_samples_.size_ > get_depth())
-        {
-          OpenDDS::DCPS::ReceivedDataElement* head_ptr =
-            instance_ptr->rcvd_samples_.head_;
-
-          instance_ptr->rcvd_samples_.remove(head_ptr);
-
-          if (head_ptr->sample_state_ == DDS::NOT_READ_SAMPLE_STATE)
-            {
-              DDS::DataReaderListener_var listener
-                = listener_for (DDS::SAMPLE_LOST_STATUS);
-
-              ++sample_lost_status_.total_count;
-              ++sample_lost_status_.total_count_change;
-
-              set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, true);
-
-              DDS::DataReader_var dr = get_dr_obj_ref();
-              if (!CORBA::is_nil(listener.in()))
-                {
-                  ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-                  listener->on_sample_lost(dr.in (), sample_lost_status_);
-                }
-
-              notify_status_condition_no_sample_lock();
-            }
-
-          dec_ref_data_element(head_ptr);
-        }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-      if (! ptr->coherent_change_) {
+  if (! ptr->coherent_change_) {
 #endif
-        OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
+    OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
 
-        sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
-        set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, true);
+    sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
+    set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, true);
 
-        DDS::SubscriberListener_var sub_listener =
-            sub->listener_for(DDS::DATA_ON_READERS_STATUS);
-        if (!CORBA::is_nil(sub_listener.in()) && !this->coherent_)
+    DDS::SubscriberListener_var sub_listener =
+        sub->listener_for(DDS::DATA_ON_READERS_STATUS);
+    if (!CORBA::is_nil(sub_listener.in()) && !this->coherent_)
+      {
+        ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+        sub_listener->on_data_on_readers(sub);
+        sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+      }
+    else
+      {
+        sub->notify_status_condition();
+
+        DDS::DataReaderListener_var listener =
+            listener_for (DDS::DATA_AVAILABLE_STATUS);
+
+        DDS::DataReader_var dr = get_dr_obj_ref();
+        if (!CORBA::is_nil(listener.in()))
           {
             ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-            sub_listener->on_data_on_readers(sub);
+            listener->on_data_available(dr.in ());
+            set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
             sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
           }
         else
           {
-            sub->notify_status_condition();
-
-            DDS::DataReaderListener_var listener =
-                listener_for (DDS::DATA_AVAILABLE_STATUS);
-
-            DDS::DataReader_var dr = get_dr_obj_ref();
-            if (!CORBA::is_nil(listener.in()))
-              {
-                ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-                listener->on_data_available(dr.in ());
-                set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
-                sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
-              }
-            else
-              {
-                notify_status_condition_no_sample_lock();
-              }
+            notify_status_condition_no_sample_lock();
           }
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       }
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  }
 #endif
-    }
-  else
-    {
-      instance_ptr = this->get_handle_instance (handle);
-      instance_ptr->instance_state_.lively(header.publication_id_);
-      ACE_DES_FREE (instance_data,
-                    data_allocator_->free,
-                    MessageType );
-    }
 }
 
 /// Release sample_lock_ during status notifications in store_instance_data()
@@ -2013,6 +2082,188 @@ DDS::ReturnCode_t check_inputs (
   return DDS::RETCODE_OK;
 }
 
+class FilterDelayedHandler : public Watchdog {
+public:
+  FilterDelayedHandler(DataReaderImpl_T<MessageType>* data_reader_impl)
+  // Watchdog's interval_ only used for resetting current intervals
+  : Watchdog(ACE_Time_Value(0))
+  , data_reader_impl_(data_reader_impl)
+  , data_reader_var_(DDS::DataReader::_duplicate(data_reader_impl))
+  {
+  }
+
+  virtual ~FilterDelayedHandler()
+  {
+  }
+
+  void detatch()
+  {
+    cancel();
+    data_reader_var_ = DDS::DataReader_var();
+  }
+
+  void cancel()
+  {
+    cancel_all();
+    cleanup();
+  }
+
+  void delay_sample(OpenDDS::DCPS::SubscriptionInstance* instance_ptr,
+                    MessageType* instance_data,
+                    const OpenDDS::DCPS::DataSampleHeader& header,
+                    const bool just_registered,
+                    const ACE_Time_Value& filter_time_expired)
+  {
+    // sample_lock_ should already be held
+    if (!data_reader_var_.in()) {
+      return;
+    }
+
+    DataSampleHeader_ptr hdr(new OpenDDS::DCPS::DataSampleHeader(header));
+    std::pair<typename FilterDelayedSampleMap::iterator, bool> result =
+      map_.insert(std::make_pair(instance_ptr, FilterDelayedSample(instance_data, hdr, just_registered)));
+    FilterDelayedSample& sample = result.first->second;
+    if (result.second) {
+      const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation);
+      const void* key_ptr = reinterpret_cast<const void*>(instance_ptr);
+      const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation) - filter_time_expired;
+      sample.timer_id = schedule_timer(key_ptr, filter_time_remaining, interval);
+    } else {
+      // we only care about the most recently filtered sample, so clean up the last one
+      clear_message(sample.message);
+
+      sample.message = instance_data;
+      sample.header = hdr;
+      sample.new_instance = just_registered;
+      // already scheduled for timeout at the desired time
+    }
+  }
+
+  void clear_sample(OpenDDS::DCPS::SubscriptionInstance* instance_ptr)
+  {
+    // sample_lock_ should already be held
+
+    typename FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
+    if (sample != map_.end()) {
+      // leave the entry in the container, so that the key remains valid if the reactor is waiting on this lock while this is occurring
+      clear_message(sample->second.message);
+    }
+  }
+
+  void drop_sample(OpenDDS::DCPS::SubscriptionInstance* instance_ptr)
+  {
+    // sample_lock_ should already be held
+
+    typename FilterDelayedSampleMap::iterator sample = map_.find(instance_ptr);
+    if (sample != map_.end()) {
+      clear_message(sample->second.message);
+      cancel_timer(sample->second.timer_id);
+      map_.erase(sample);
+    }
+  }
+
+private:
+  virtual void execute(const void* arg, bool )
+  {
+    if (!data_reader_var_.in()) {
+      return;
+    }
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
+
+    SubscriptionInstance* instance_ptr = (SubscriptionInstance*)arg;
+    typename FilterDelayedSampleMap::iterator data = map_.find(instance_ptr);
+    if (data == map_.end()) {
+      return;
+    }
+
+    if (data->second.message) {
+      const bool NOT_DISPOSE_MSG = false;
+      const bool NOT_UNREGISTER_MSG = false;
+      // clear the message, since ownership is being transfered to finish_store_instance_data.
+      MessageType* const instance_data = data->second.message;
+      data->second.message = 0;
+      instance_ptr->last_accepted_ = ACE_OS::gettimeofday();
+      const DataSampleHeader_ptr header = data->second.header;
+      const bool new_instance = data->second.new_instance;
+
+      // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
+      data_reader_impl_->finish_store_instance_data(instance_data, *header, instance_ptr, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
+
+      data_reader_impl_->accept_sample_processing(instance_ptr, *header, new_instance);
+    } else {
+      const long timer_id = data->second.timer_id;
+      // no new data to process, so remove from container
+      map_.erase(data);
+
+      // nothing to process, so unregister this handle for timeout
+      cancel_timer(timer_id);
+    }
+  }
+
+  virtual void reschedule_deadline()
+  {
+    if (!data_reader_var_.in()) {
+      return;
+    }
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
+
+    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
+      reset_timer_interval(sample->second.timer_id);
+    }
+  }
+
+  void cleanup()
+  {
+    if (!data_reader_var_.in()) {
+      return;
+    }
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
+    // insure instance_ptrs get freed
+    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
+      clear_message(sample->second.message);
+    }
+
+    map_.clear();
+  }
+
+  void clear_message(MessageType*& message)
+  {
+    if (data_reader_var_.in()) {
+      ACE_DES_FREE(message,
+        data_reader_impl_->data_allocator_->free,
+        MessageType);
+      message = 0;
+    }
+  }
+
+  DataReaderImpl_T<MessageType>* data_reader_impl_;
+  DDS::DataReader_var data_reader_var_;
+
+  typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
+
+  struct FilterDelayedSample {
+    FilterDelayedSample(MessageType* msg, DataSampleHeader_ptr hdr, bool new_inst)
+    : message(msg)
+    , header(hdr)
+    , new_instance(new_inst)
+    , timer_id(-1) {
+    }
+
+    MessageType* message;
+    DataSampleHeader_ptr header;
+    bool new_instance;
+    long timer_id;
+  };
+
+  typedef OPENDDS_MAP(SubscriptionInstance*, FilterDelayedSample) FilterDelayedSampleMap;
+
+  FilterDelayedSampleMap map_;
+};
+
+RcEventHandler<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap  instance_map_;
 DataAllocator* data_allocator_;
