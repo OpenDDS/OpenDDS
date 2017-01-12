@@ -66,29 +66,19 @@ bool verify_unreliable(FooDataReader_var reader_i, const size_t expected_samples
 {
   bool valid = true;
 
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%N:%l main()")
-    ACE_TEXT(" INFO: Expecting %d instances...\n"),
-    NUM_INSTANCES));
-  for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j)
-  {
+  for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
     const Foos& foos = samples[j];
     size_t seen = foos.size();
-    if (seen != expected_samples)
-    {
+    if (seen != expected_samples) {
       valid = false;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
         j, seen, expected_samples));
-    }
-    else
-    {
-      for (size_t i = 0; i < expected_samples; ++i)
-      {
+    } else {
+      for (size_t i = 0; i < expected_samples; ++i) {
         const FooInfo& fooInfo = foos[i];
-        if (fooInfo.first.x != 0.0f)
-        {
+        if (fooInfo.first.x != 0.0f) {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("%N:%l main()")
             ACE_TEXT(" ERROR: for key %d received x=%f, expected 0.0!\n"),
@@ -104,28 +94,22 @@ bool verify_unreliable(FooDataReader_var reader_i, const size_t expected_samples
 bool verify_reliable(FooDataReader_var reader_i, const size_t expected_samples, SampleMap& samples)
 {
   bool valid = true;
-  for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j)
-  {
+  for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
     const Foos& foos = samples[j];
     size_t seen = foos.size();
     // each delay should result in 2 samples being seen, the first one and the last one in the filter window
-    if (seen != expected_samples * 2)
-    {
+    if (seen != expected_samples * 2) {
       valid = false;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
         j, seen, expected_samples));
-    }
-    else
-    {
-      for (size_t i = 0; i < expected_samples * 2; ++i)
-      {
+    } else {
+      for (size_t i = 0; i < expected_samples * 2; ++i) {
         const FooInfo& fooInfo = foos[i];
         // each successive sample was sent with x = 0.0 to x = (SAMPLES_PER_CYCLE - 1)
         const float expected = (i % 2) == 0 ? 0.0f : (float)(SAMPLES_PER_CYCLE - 1);
-        if (fooInfo.first.x != expected)
-        {
+        if (fooInfo.first.x != expected) {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("%N:%l main()")
             ACE_TEXT(" ERROR: for key %d received x=%f, expected %f!\n"),
@@ -142,16 +126,14 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   parse_args(argc, argv);
 
-  if (minimum_separation.sec < 1)
-  {
+  if (minimum_separation.sec < 1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l main()")
                       ACE_TEXT(" ERROR: minimum_separation must be non-zero!\n")), -1);
   }
 
   bool valid = true;
-  try
-  {
+  try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
@@ -162,8 +144,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         DDS::DomainParticipantListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(participant.in()))
-    {
+    if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: create_participant failed!\n")), -1);
@@ -175,8 +156,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         DDS::SubscriberListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(subscriber.in()))
-    {
+    if (CORBA::is_nil(subscriber.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: create_subscriber failed!\n")), -1);
@@ -188,8 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         DDS::PublisherListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(publisher.in()))
-    {
+    if (CORBA::is_nil(publisher.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: create_publisher failed!\n")), -1);
@@ -197,8 +176,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
-    {
+    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: register_type failed!\n")), -1);
@@ -212,8 +190,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         DDS::TopicListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(topic.in()))
-    {
+    if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: create_topic failed!\n")), -1);
@@ -222,8 +199,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Create DataReader
     DDS::DataReaderQos dr_qos;
 
-    if (subscriber->get_default_datareader_qos(dr_qos) != DDS::RETCODE_OK)
-    {
+    if (subscriber->get_default_datareader_qos(dr_qos) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
@@ -232,8 +208,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     dr_qos.time_based_filter.minimum_separation = minimum_separation;
 
-    if (reliable)
-    {
+    if (reliable) {
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
       dr_qos.history.depth = 50;
@@ -245,16 +220,14 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         DDS::DataReaderListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(reader.in()))
-    {
+    if (CORBA::is_nil(reader.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: create_datareader failed!\n")), -1);
     }
 
     FooDataReader_var reader_i = FooDataReader::_narrow(reader);
-    if (CORBA::is_nil(reader_i))
-    {
+    if (CORBA::is_nil(reader_i)) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: _narrow failed!\n")), -1);
@@ -262,8 +235,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::DataWriterQos dw_qos;
     publisher->get_default_datawriter_qos(dw_qos);
-    if (reliable)
-    {
+    if (reliable) {
       dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       dw_qos.reliability.max_blocking_time.sec = 1;
       dw_qos.reliability.max_blocking_time.nanosec = 0;
@@ -279,16 +251,14 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         DDS::DataWriterListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(writer.in()))
-    {
+    if (CORBA::is_nil(writer.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: create_datawriter failed!\n")), -1);
     }
 
     FooDataWriter_var writer_i = FooDataWriter::_narrow(writer);
-    if (CORBA::is_nil(writer_i))
-    {
+    if (CORBA::is_nil(writer_i)) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: _narrow failed!\n")), -1);
@@ -301,22 +271,18 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(cond);
 
-    DDS::Duration_t timeout =
-    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
-    do
-    {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-      {
+    do {
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
           ACE_TEXT("%N:%l main()")
           ACE_TEXT(" ERROR: wait failed!\n")), -1);
       }
 
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
-      {
+      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
           ACE_TEXT("%N:%l main()")
           ACE_TEXT(" ERROR: Failed to get publication match status!\n")), -1);
@@ -342,16 +308,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // We expect to receive up to one sample per
     // cycle (all others should be filtered).
-    for (size_t i = 0; i < EXPECTED_SAMPLES; ++i)
-    {
-      for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j)
-      {
-        for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k)
-        {
+    for (size_t i = 0; i < EXPECTED_SAMPLES; ++i) {
+      for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
+        for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k) {
           ::CORBA::Float x = (CORBA::Float)k;
           Foo foo = { j, x, 0, 0 }; // same instance required for repeated samples
-          if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
-          {
+          if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("%N:%l main()")
               ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
@@ -364,24 +326,18 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     SampleMap samples;
-    for (;;)
-    {
+    for (;;) {
       Foo foo;
       DDS::SampleInfo info;
 
       DDS::ReturnCode_t error = reader_i->take_next_sample(foo, info);
-      if (error == DDS::RETCODE_OK)
-      {
+      if (error == DDS::RETCODE_OK) {
         if (info.valid_data) {
           samples[foo.key].push_back(std::make_pair(foo, info));
         }
-      }
-      else if (error == DDS::RETCODE_NO_DATA)
-      {
+      } else if (error == DDS::RETCODE_NO_DATA) {
         break; // done!
-      }
-      else
-      {
+      } else {
         ACE_ERROR_RETURN((
           LM_ERROR,
           ACE_TEXT("%N:%l main()")
@@ -389,13 +345,10 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       }
     }
 
-    if (!reliable)
-    {
-      valid = verify_unreliable(reader_i, EXPECTED_SAMPLES, samples);
-    }
-    else
-    {
+    if (reliable) {
       valid = verify_reliable(reader_i, EXPECTED_SAMPLES, samples);
+    } else {
+      valid = verify_unreliable(reader_i, EXPECTED_SAMPLES, samples);
     }
 
     // Clean-up!
