@@ -62,15 +62,13 @@ RawDataSample::operator=(const RawDataSample& other)
   return *this;
 }
 
-void
-RawDataSample::swap(RawDataSample& other)
+void swap(RawDataSample& lhs, RawDataSample& rhs)
 {
-  std::swap(message_id_, other.message_id_);
-  std::swap(publication_id_, other.publication_id_);
-  std::swap(sample_byte_order_, other.sample_byte_order_);
-  std::swap(sample_, other.sample_);
+  std::swap(lhs.message_id_, rhs.message_id_);
+  std::swap(lhs.publication_id_, rhs.publication_id_);
+  std::swap(lhs.sample_byte_order_, rhs.sample_byte_order_);
+  std::swap(lhs.sample_, rhs.sample_);
 }
-
 
 } // namespace DCPS
 } // namespace OpenDDS

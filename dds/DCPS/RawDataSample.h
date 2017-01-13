@@ -47,9 +47,9 @@ public:
   bool sample_byte_order_;
   /// The data in unspecified format
   ACE_Message_Block*       sample_;
-
-  void swap(RawDataSample& other);
 };
+
+void swap(RawDataSample& lhs, RawDataSample& rhs);
 
 } // namespace DCPS
 } // namespace OpenDDS
