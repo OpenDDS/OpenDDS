@@ -37,11 +37,8 @@ DDS::ReturnCode_t
 TypeSupportImpl::unregister_type(DDS::DomainParticipant_ptr participant,
     const char* type_name)
 {
-  if (this->type_name_ == 0 || this->type_name_[0] == '\0') {
-    if (strcmp(this->type_name_.in(), this->get_type_name()) == 0) {
-      return Registered_Data_Types->unregister_type(participant, this->type_name_.in(), this);
-    }
-    return DDS::RETCODE_BAD_PARAMETER;
+  if (type_name == 0 || type_name[0] == '\0') {
+      return DDS::RETCODE_BAD_PARAMETER;
   }
   else {
     return Registered_Data_Types->unregister_type(participant, type_name, this);
