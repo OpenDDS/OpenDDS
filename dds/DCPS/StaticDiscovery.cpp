@@ -1427,7 +1427,17 @@ StaticDiscovery::parse_subscriberqos(ACE_Configuration_Heap& cf)
                             -1);
         }
       } else if (name == "partition.name") {
-        parse_list(subscriberqos.partition, value);
+        try {
+          parse_list(subscriberqos.partition, value);
+        }
+        catch (const CORBA::Exception& ex) {
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
+            ACE_TEXT("Exception caught while parsing partition.name (%C) ")
+            ACE_TEXT("in [subscriberqos/%C] section: %C.\n"),
+            value.c_str(), subscriberqos_name.c_str(), ex._info().c_str()),
+            -1);
+        }
       } else {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
