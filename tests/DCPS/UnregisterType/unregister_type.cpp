@@ -43,7 +43,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       bool dcpsKeyCheck = false;
       dcpsKeyCheck = tts->has_dcps_key();
       TEST_CHECK(dcpsKeyCheck);
-      
+
       CORBA::String_var type_name = tts->get_type_name();
       TEST_CHECK(ACE_OS::strcmp(type_name.in(), TEST_TYPE_NAME) == 0);
 
