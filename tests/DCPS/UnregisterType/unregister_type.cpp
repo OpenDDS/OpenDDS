@@ -16,6 +16,8 @@
 const long  TEST_DOMAIN_NUMBER   = 17;
 const char* TEST_TOPIC_NAME    = "test-topic-name";
 const char* TEST_TYPE_NAME     = "test-type-name";
+const char* BAD_TYPE_NAME = "bad-type-name";
+const char* NULL_TYPE_NAME = 0;
 
 Ex::Test test1;
 Ex::Test test2;
@@ -36,102 +38,33 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       Ex::TestTypeSupport_var tts(new Ex::TestTypeSupportImpl());
 
-      DDS::ReturnCode_t registerResult = tts->register_type(dp.in(), TEST_TYPE_NAME);
-      TEST_CHECK(registerResult == DDS::RETCODE_OK);
+      ::DDS::ReturnCode_t registerResult = tts->register_type(dp.in(), TEST_TYPE_NAME);
+      TEST_CHECK(registerResult == ::DDS::RETCODE_OK);
 
-      std::string type_name = tts->get_type_name();
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s\n"), type_name.c_str()));
+      ::DDS::Topic_var topic = dp->create_topic(TEST_TOPIC_NAME, TEST_TYPE_NAME, TOPIC_QOS_DEFAULT, ::DDS::TopicListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      TEST_CHECK(!CORBA::is_nil(topic.in()));
 
-      DDS::ReturnCode_t unregisterResult = tts->unregister_type(dp.in(), TEST_TYPE_NAME);
+      bool dcpsKeyCheck = false;
+      dcpsKeyCheck = tts->has_dcps_key();
+      TEST_CHECK(dcpsKeyCheck);
+      
+      CORBA::String_var type_name = tts->get_type_name();
+      TEST_CHECK(ACE_OS::strcmp(type_name.in(), TEST_TYPE_NAME) == 0);
+
+      ::DDS::ReturnCode_t topicDeletionResult = dp->delete_topic(topic.in());
+      TEST_CHECK(topicDeletionResult == ::DDS::RETCODE_OK);
+
+      ::DDS::ReturnCode_t unregisterResult = tts->unregister_type(dp.in(), TEST_TYPE_NAME);
       TEST_CHECK(unregisterResult == DDS::RETCODE_OK);
 
-      bool check = false;
-      check = tts->has_dcps_key();
-      if (check) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("Test\n")));
-      }
+      ::DDS::ReturnCode_t nullUnregisterResult = tts->unregister_type(dp.in(), NULL_TYPE_NAME);
+      TEST_CHECK(nullUnregisterResult == ::DDS::RETCODE_BAD_PARAMETER);
 
+      ::DDS::ReturnCode_t badUnregisterResult = tts->unregister_type(dp.in(), BAD_TYPE_NAME);
+      TEST_CHECK(badUnregisterResult == ::DDS::RETCODE_ERROR);
 
-      if (::DDS::RETCODE_OK != tts->register_type(dp.in (), TEST_TYPE_NAME))
-        {
-          ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("Failed to register the FooTypeSupport.")));
-          return 1;
-        }
-
-
-      ::DDS::TopicQos topic_qos;
-      dp->get_default_topic_qos(topic_qos);
-
-      ::DDS::Topic_var topic =
-        dp->create_topic (TEST_TOPIC_NAME,
-                          TEST_TYPE_NAME,
-                          topic_qos,
-                          ::DDS::TopicListener::_nil(),
-                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      TEST_CHECK (! CORBA::is_nil (topic.in ()));
-
-      ::DDS::Publisher_var pub =
-        dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                             ::DDS::PublisherListener::_nil(),
-                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      TEST_CHECK (! CORBA::is_nil (pub.in ()));
-
-      ::DDS::DataWriterQos dw_qos;
-      pub->get_default_datawriter_qos (dw_qos);
-
-      dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
-      dw_qos.reliability.max_blocking_time.sec = 10;
-      dw_qos.reliability.max_blocking_time.nanosec = 0;
-      dw_qos.resource_limits.max_instances = 1;
-
-      ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
-                                 dw_qos,
-                                 ::DDS::DataWriterListener::_nil(),
-                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      TEST_CHECK (! CORBA::is_nil (dw.in ()));
-
-      Ex::TestDataWriter_var test_dw = Ex::TestDataWriter::_narrow(dw.in ());
-      TEST_CHECK (! CORBA::is_nil (test_dw.in ()));
-
-
-      test1.key = 101010;
-      test1.x = (float) 123.456;
-      test1.y = (float) 987.654;
-
-      ::DDS::InstanceHandle_t handle1
-        = test_dw->register_instance(test1);
-
-      TEST_CHECK (handle1 != ::DDS::HANDLE_NIL);
-
-      test2.key = 202020;
-      test2.x = (float) 123.456;
-      test2.y = (float) 987.654;
-
-      ::DDS::ReturnCode_t ret = test_dw->write (test2, ::DDS::HANDLE_NIL);
-
-      // write an unregistered instance. This should fail
-      // (spec 1.2 section 7.1.2.4.2.11)
-      TEST_CHECK (ret == ::DDS::RETCODE_OUT_OF_RESOURCES);
-
-      // Check whether the instance resides in DDS.
-      ::DDS::InstanceHandle_t hnd = test_dw->lookup_instance (test2);
-
-      TEST_CHECK (hnd == ::DDS::HANDLE_NIL);
-
-      ::DDS::InstanceHandle_t handle2
-        = test_dw->register_instance(test2);
-
-      // Assume that this handle (handl2) is NIL since
-      // max_instances is set to 1.
-      TEST_CHECK (handle2 == ::DDS::HANDLE_NIL);
-
-      // clean up the objects
-      pub->delete_datawriter(dw.in ());
-      dp->delete_publisher(pub.in ());
-
-      dp->delete_topic(topic.in ());
+      // Clean up the domain participant
+      dp->delete_contained_entities();
       dpf->delete_participant(dp.in ());
 
       TheServiceParticipant->shutdown ();

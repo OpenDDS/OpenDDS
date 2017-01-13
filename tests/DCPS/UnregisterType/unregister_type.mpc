@@ -1,8 +1,6 @@
 project(UnregisterTypeTest): dcpsexe, dcps_rtps_udp {
   exename   = unregister_type_test
-  // libs     += DcpsFooType4
-  // libpaths += ../FooType4
-  // after    += DcpsFooType4
+  exeout    = .
 
   TypeSupport_Files {
     Test.idl

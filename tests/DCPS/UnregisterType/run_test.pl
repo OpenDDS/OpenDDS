@@ -21,16 +21,12 @@ my $logfile = 'output.log';
 
 unlink $logfile;
 
-PerlDDS::add_lib_path('../FooType4');
-
 $options = "-DCPSConfigFile rtps_disc.ini -ORBLogFile $logfile";
 
 my $test = new PerlDDS::TestFramework();
-$test->ignore_error("register instance with container failed");
-$test->ignore_error("register failed");
 
-$test->process("register_instance_test", "register_instance_test", "$options");
-$test->start_process("register_instance_test");
+$test->process("unregister_type_test", "unregister_type_test", "$options");
+$test->start_process("unregister_type_test");
 $result = $test->finish(60);
 
 if ($result != 0) {
