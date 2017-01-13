@@ -72,16 +72,16 @@ DDS::ReturnCode_t Data_Types_Register::unregister_type(
   TypeSupportMap::iterator iter = tsm.find(type_name);
   if (iter == tsm.end()) {
     // Not in the map, can't delete
-    // Intent is for the type to not be present so return success
-    return DDS::RETCODE_OK;
+    return DDS::RETCODE_ERROR;
   }
   else {
-    if (std::strcmp(typeSupport->_interface_repository_id(),
-      iter->second->_interface_repository_id()) == 0) {
+    if (std::strcmp(typeSupport->_interface_repository_id(), iter->second->_interface_repository_id()) == 0) {
       tsm.erase(iter);
       return DDS::RETCODE_OK;
     }
-    return DDS::RETCODE_ERROR;
+    else {
+      return DDS::RETCODE_ERROR;
+    }
   }
 }
 

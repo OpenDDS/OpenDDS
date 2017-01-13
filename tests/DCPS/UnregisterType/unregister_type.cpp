@@ -9,8 +9,6 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
-#include "ace/Arg_Shifter.h"
-
 
 // const data declarations
 const long  TEST_DOMAIN_NUMBER   = 17;
@@ -19,8 +17,6 @@ const char* TEST_TYPE_NAME     = "test-type-name";
 const char* BAD_TYPE_NAME = "bad-type-name";
 const char* NULL_TYPE_NAME = 0;
 
-Ex::Test test1;
-Ex::Test test2;
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -72,7 +68,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
   catch (const CORBA::Exception& ex)
     {
-      ex._tao_print_exception ("Exception caught in client.cpp:");
+      ex._tao_print_exception ("Exception caught in unregister_type.cpp:");
       return 1;
     }
 
