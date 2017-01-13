@@ -94,7 +94,9 @@ ConnectionSettings::set(const char* name, const char* value)
       status = 1;
     }
   } else if (!std::strcmp(name, "config")) {
-    if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
+    // Guarantee that value will fit in config_name_ and still be null terminated
+    // config_name_ is sized to ALLOWABLE_NAME_LEN
+    if (std::strlen(value) >= sizeof(config_name_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("config name %C exceeds allowable length,"
         "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
       status = 1;
