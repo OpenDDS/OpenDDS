@@ -47,6 +47,8 @@ public:
   bool sample_byte_order_;
   /// The data in unspecified format
   ACE_Message_Block*       sample_;
+
+  void swap(RawDataSample& other);
 };
 
 } // namespace DCPS
