@@ -79,6 +79,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , transport_priority_(priority)
   , shutdown_(false)
   , passive_setup_(false)
+  , id_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
