@@ -23,18 +23,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
   const ACE_INET_Addr& remote_address,
-  OpenDDS::DCPS::TcpTransport*  transport_impl,
+  const OpenDDS::DCPS::TcpTransport_rch&  transport_impl,
   Priority priority,
   bool        is_loopback,
   bool        is_active)
   : DataLink(transport_impl, priority, is_loopback, is_active),
     remote_address_(remote_address),
+    transport_(transport_impl),
     graceful_disconnect_sent_(false),
     release_is_pending_(false)
 {
   DBG_ENTRY_LVL("TcpDataLink","TcpDataLink",6);
-  transport_impl->_add_ref();
-  this->transport_ = transport_impl;
 }
 
 OpenDDS::DCPS::TcpDataLink::~TcpDataLink()
@@ -58,7 +57,7 @@ OpenDDS::DCPS::TcpDataLink::stop_i()
     this->connection_->disconnect();
 
     // Drop our reference to the connection object.
-    this->connection_ = 0;
+    this->connection_.reset();
   }
 }
 
@@ -117,7 +116,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
   }
 
   // Let connection know the datalink for callbacks upon reconnect failure.
-  this->connection_->set_datalink(this);
+  this->connection_->set_datalink(rchandle_from(this));
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
@@ -127,7 +126,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
     // that an error has taken place.
 
     // Drop our reference to the connection object.
-    this->connection_ = 0;
+    this->connection_.reset();
 
     return -1;
   }
@@ -163,7 +162,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
     TransportSendStrategy_rch bss;
 
     if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
-      this->connection_ = 0;
+      this->connection_.reset();
       return -1;
     } else {
       brs = this->receive_strategy_;
@@ -177,11 +176,11 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
 
       // Associate the new connection object with the receiving strategy and disassociate
       // the old connection object with the receiving strategy.
-      int rs_result = rs->reset(this->connection_.in());
+      int rs_result = rs->reset(this->connection_);
 
       // Associate the new connection object with the sending strategy and disassociate
       // the old connection object with the sending strategy.
-      int ss_result = ss->reset(this->connection_.in(), true);
+      int ss_result = ss->reset(this->connection_, true);
 
       if (rs_result == 0 && ss_result == 0) {
         return 0;
@@ -196,7 +195,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
 /// connection object and the "old" connection object is replaced by
 /// the new connection object.
 int
-OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
+OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpDataLink","reconnect",6);
 
@@ -208,7 +207,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
     return -1;
   }
 
-  this->connection_->transfer(connection);
+  this->connection_->transfer(connection.in());
 
   bool released = false;
   TransportStrategy_rch brs;
@@ -219,7 +218,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
 
     if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
       released = true;
-      this->connection_ = 0;
+      this->connection_.reset();
 
     } else {
       brs = this->receive_strategy_;
@@ -227,14 +226,11 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
     }
   }
 
-  TcpConnection_rch conn_rch(connection, false);
-
   if (released) {
-    TcpDataLink_rch this_rch(this, false);
-    return this->transport_->connect_tcp_datalink(this_rch, conn_rch);
+    return this->transport_->connect_tcp_datalink(rchandle_from(this), connection);
   }
 
-  this->connection_ = conn_rch._retn();
+  this->connection_ = connection;
 
   TcpReceiveStrategy* rs = static_cast<TcpReceiveStrategy*>(brs.in());
 
@@ -242,11 +238,11 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
 
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
-  int rs_result = rs->reset(this->connection_.in());
+  int rs_result = rs->reset(this->connection_);
 
   // Associate the new connection object with the sending strategy and disassociate
   // the old connection object with the sending strategy.
-  int ss_result = ss->reset(this->connection_.in());
+  int ss_result = ss->reset(this->connection_);
 
   if (rs_result == 0 && ss_result == 0) {
     return 0;
@@ -272,7 +268,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   // can be used.
 
   //header_data.byte_order_
-  //  = this->transport_->get_configuration()->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
+  //  = this->transport_->config()->swap_bytes() ? !TAO_ENCAP_BYTE_ORDER : TAO_ENCAP_BYTE_ORDER;
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //DDS::Time_t source_timestamp

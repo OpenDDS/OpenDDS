@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -33,13 +34,15 @@ public:
 
   virtual void remove_associations(const WriterIdSeq& pubids, bool notify) = 0;
 
-  virtual void listener_add_ref() = 0;
-  virtual void listener_remove_ref() = 0;
+  virtual void _add_ref() = 0;
+  virtual void _remove_ref() = 0;
 
 protected:
 
   TransportReceiveListener();
 };
+
+typedef RcHandle<TransportReceiveListener> TransportReceiveListener_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

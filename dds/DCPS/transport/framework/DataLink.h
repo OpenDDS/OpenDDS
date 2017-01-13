@@ -12,6 +12,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/RcEventHandler.h"
 #include "ReceiveListenerSetMap.h"
 #include "SendResponseListener.h"
 #include "TransportDefs.h"
@@ -41,8 +42,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class  TransportReceiveListener;
-class  TransportSendListener;
+
 class  TransportQueueElement;
 class  ReceivedDataSample;
 class  DataSampleElement;
@@ -62,8 +62,8 @@ typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetM
  *    is enabled.
  */
 class OpenDDS_Dcps_Export DataLink
-  : public RcObject<ACE_SYNCH_MUTEX>,
-    public ACE_Event_Handler {
+  : public RcEventHandler,
+    public PoolAllocationBase {
 
   friend class DataLinkCleanupTask;
 
@@ -80,8 +80,10 @@ public:
   /// created this DataLink.  The ability to specify a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl* impl, Priority priority, bool is_loopback, bool is_active);
+  DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
+
+  TransportImpl* transport();
 
   //Reactor invokes this after being notified in schedule_stop or cancel_release
   int handle_exception(ACE_HANDLE /* fd */);
@@ -103,7 +105,7 @@ public:
   ///              -1 means failure.
   int make_reservation(const RepoId& remote_subscription_id,
                        const RepoId& local_publication_id,
-                       TransportSendListener* send_listener);
+                       const TransportSendListener_rch& send_listener);
 
   /// Only called by our TransportImpl object.
   ///
@@ -111,7 +113,7 @@ public:
   ///              -1 means failure.
   int make_reservation(const RepoId& remote_publication_id,
                        const RepoId& local_subcription_id,
-                       TransportReceiveListener* receive_listener);
+                       const TransportReceiveListener_rch& receive_listener);
 
   // ciju: Called by LinkSet with locks held
   /// This will release reservations that were made by one of the
@@ -243,8 +245,8 @@ public:
 
   TransportImpl_rch impl() const;
 
-  void default_listener(TransportReceiveListener* trl);
-  TransportReceiveListener* default_listener() const;
+  void default_listener(const TransportReceiveListener_rch& trl);
+  const TransportReceiveListener_rch& default_listener() const;
   typedef RcHandle<TransportClient> TransportClient_rch;
   typedef std::pair<TransportClient_rch, RepoId> OnStartCallback;
   bool add_on_start_callback(const TransportClient_rch& client, const RepoId& remote);
@@ -306,8 +308,8 @@ private:
   /// Helper function to output the enum as a string to help debugging.
   const char* connection_notice_as_str(ConnectionNotice notice);
 
-  TransportSendListener* send_listener_for(const RepoId& pub_id) const;
-  TransportReceiveListener* recv_listener_for(const RepoId& sub_id) const;
+  TransportSendListener_rch send_listener_for(const RepoId& pub_id) const;
+  TransportReceiveListener_rch recv_listener_for(const RepoId& sub_id) const;
 
   /// Save current sub and pub association maps for releasing and create
   /// empty maps for new associations.
@@ -346,17 +348,17 @@ private:
   ACE_Time_Value scheduled_to_stop_at_;
 
   /// Map publication Id value to TransportSendListener.
-  typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener*, GUID_tKeyLessThan) IdToSendListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener_rch, GUID_tKeyLessThan) IdToSendListenerMap;
   IdToSendListenerMap send_listeners_;
 
   /// Map subscription Id value to TransportReceieveListener.
-  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener*, GUID_tKeyLessThan) IdToRecvListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener_rch, GUID_tKeyLessThan) IdToRecvListenerMap;
   IdToRecvListenerMap recv_listeners_;
 
   /// If default_listener_ is not null and this DataLink receives a sample
   /// from a publication GUID that's not in pub_map_, it will call
   /// data_received() on the default_listener_.
-  TransportReceiveListener* default_listener_;
+  TransportReceiveListener_rch default_listener_;
 
   mutable LockType pub_sub_maps_lock_;
 

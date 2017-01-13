@@ -125,14 +125,14 @@ private:
 
     Iterator& operator++() {
       ++delegate_;
-      item_ = 0;
+      item_.reset();
       return *this;
     }
 
     Iterator operator++(int) {
       Iterator tmp(*this);
       ++delegate_;
-      item_ = 0;
+      item_.reset();
       return tmp;
     }
 
@@ -147,15 +147,15 @@ private:
   private:
     friend class Directory;
     typedef Map::iterator IterDelegate;
-    Iterator(const IterDelegate& del, Directory* outer)
+    Iterator(const IterDelegate& del, const Directory::Ptr& outer)
         : delegate_(del)
-        , outer_(outer, false)
+        , outer_(outer)
         , item_() {}
 
     typename Item::Ptr deref() const {
       if (item_.is_nil()) {
-        item_ = new Item(outer_->full_path(delegate_->second),
-                         delegate_->first, outer_.in());
+        item_ = OpenDDS::DCPS::make_rch<Item>(outer_->full_path(delegate_->second),
+                              delegate_->first, outer_);
       }
 
       return item_;
@@ -196,8 +196,11 @@ public:
 
 private:
   friend class File;
+  template <typename T, typename U0, typename U1, typename U2>
+  friend RcHandle<T> OpenDDS::DCPS::make_rch(const U0&, const U1&, const U2&);
+
   Directory(const ACE_TString& root_path, const ACE_TString& logical,
-            Directory* parent);
+            const Directory::Ptr& parent);
   void scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
                 unsigned int overflow_index);
   RcHandle<File> make_new_file(const ACE_TString& t_name);
@@ -230,9 +233,11 @@ public:
 
 private:
   friend class Directory;
+  template <typename T, typename U0, typename U1, typename U2>
+  friend OpenDDS::DCPS::RcHandle<T> OpenDDS::DCPS::make_rch(const U0&, const U1&, const U2&);
   template <typename Item> friend class Directory::Iterator;
   File(const ACE_TString& fname_phys, const ACE_TString& logical,
-       Directory* parent);
+       const Directory::Ptr& parent);
 
   ACE_TString physical_file_, physical_dir_, logical_relative_;
   Directory::Ptr parent_;

@@ -49,8 +49,7 @@ class SendStateDataSampleListIterator;
  * communication mechanisms and the DataLink objects that represent the
  * currently active communication channels to peers.
  */
-class OpenDDS_Dcps_Export TransportClient :
-  public EnableSharedFromThis<TransportClient>
+class OpenDDS_Dcps_Export TransportClient
 {
 public:
   // Used by TransportImpl to complete associate() processing:
@@ -152,8 +151,8 @@ private:
   void use_datalink_i(const RepoId& remote_id,
                       const DataLink_rch& link,
                       Guard& guard);
-  TransportSendListener* get_send_listener();
-  TransportReceiveListener* get_receive_listener();
+  TransportSendListener_rch get_send_listener();
+  TransportReceiveListener_rch get_receive_listener();
 
   //helper for initiating connection, called by PendingAssoc objects
   //allows PendingAssoc to temporarily release lock_ to allow
@@ -173,7 +172,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
 
-  struct PendingAssoc : ACE_Event_Handler, PoolAllocationBase {
+  struct PendingAssoc : RcEventHandler, PoolAllocationBase {
     bool active_, removed_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
@@ -188,7 +187,7 @@ private:
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
 
-  typedef RcEventHandler<PendingAssoc> PendingAssoc_rch;
+  typedef RcHandle<PendingAssoc> PendingAssoc_rch;
 
   typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc_rch, GUID_tKeyLessThan) PendingMap;
 
@@ -263,7 +262,7 @@ private:
       }
     };
   };
-  RcEventHandler<PendingAssocTimer> pending_assoc_timer_;
+  RcHandle<PendingAssocTimer> pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 

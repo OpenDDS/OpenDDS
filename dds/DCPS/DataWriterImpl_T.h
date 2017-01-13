@@ -542,7 +542,7 @@ private:
           needs_creation = false;
 
           handle = it->second;
-          OpenDDS::DCPS::PublicationInstance* instance = get_handle_instance(handle);
+          OpenDDS::DCPS::PublicationInstance_rch instance = get_handle_instance(handle);
 
           if (instance->unregistered_ == false)
             {

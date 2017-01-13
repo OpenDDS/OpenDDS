@@ -47,8 +47,7 @@ class PacketRemoveVisitor;
  *    of samples in queue.
  */
 class OpenDDS_Dcps_Export TransportSendStrategy
-  : public RcObject<ACE_SYNCH_MUTEX>,
-    public ThreadSynchWorker {
+  : public ThreadSynchWorker {
 public:
   virtual ~TransportSendStrategy();
 

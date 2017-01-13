@@ -217,7 +217,7 @@ DDS_TEST::run(int num_messages, int msg_size)
 
     ACE_NEW_MALLOC_RETURN(element,
       static_cast<OpenDDS::DCPS::DataSampleElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleElement))),
-      OpenDDS::DCPS::DataSampleElement(this->pub_id_, this, 0, &trans_allocator, 0), 1);
+      OpenDDS::DCPS::DataSampleElement(this->pub_id_, this, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0), 1);
 
     // The Sample Element will hold on to the chain of blocks (header + data).
     element->sample_ = header_block;

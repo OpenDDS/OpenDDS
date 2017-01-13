@@ -999,7 +999,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
           sizeof(DataSampleElement))),
       DataSampleElement(publication_id_,
                             this,
-                            0,
+                            PublicationInstance_rch(),
                             transport_send_element_allocator_.get(),
                             transport_customized_element_allocator_.get()),
       DDS::RETCODE_ERROR);

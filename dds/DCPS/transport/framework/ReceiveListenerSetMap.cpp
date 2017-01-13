@@ -23,10 +23,10 @@ int
 OpenDDS::DCPS::ReceiveListenerSetMap::insert
 (RepoId                    publisher_id,
  RepoId                    subscriber_id,
- TransportReceiveListener* receive_listener)
+ const TransportReceiveListener_rch& receive_listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","insert",6);
-  ReceiveListenerSet_rch listener_set = this->find_or_create(publisher_id);
+  ReceiveListenerSet_rch listener_set (this->find_or_create(publisher_id));
 
   if (listener_set.is_nil()) {
     // find_or_create failure

@@ -43,18 +43,19 @@ class TcpConnectionReplaceTask;
  *    and TcpConnectionReplaceTask object(used during reconnecting).
  * 2) Reference to TransportReactorTask object owned by base class.
  */
-class OpenDDS_Tcp_Export TcpTransport : public TransportImpl {
+
+class OpenDDS_Tcp_Export TcpTransport
+  : public TransportImpl
+{
 public:
 
   explicit TcpTransport(const TransportInst_rch& inst);
   virtual ~TcpTransport();
 
-  TcpInst* get_configuration();
-
   int fresh_link(TcpConnection_rch connection);
 
   virtual void unbind_link(DataLink* link);
-
+  TcpInst_rch config() const;
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -142,9 +143,6 @@ private:
   /// Open TcpConnections using non-blocking connect.
   ACE_Connector<TcpConnection, ACE_SOCK_Connector> connector_;
 
-  /// Our configuration object, supplied to us in config_i().
-  TcpInst_rch tcp_config_;
-
   /// This is the map of connected DataLinks.
   AddrLinkMap links_;
   AddrLinkMap pending_release_links_;
@@ -159,9 +157,6 @@ private:
   /// This protects the connections_ and the pending_connections_
   /// data members.
   LockType connections_lock_;
-
-  /// We need the reactor for our Acceptor.
-  TransportReactorTask_rch reactor_task_;
 
   /// This task is used to resolve some deadlock situation
   /// during reconnecting.

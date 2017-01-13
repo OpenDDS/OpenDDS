@@ -48,7 +48,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
     do_sort_ = order_bys.size() > 0;
 
     if (do_sort_) {
-      ComparatorBase::Ptr cmp = 0;
+      ComparatorBase::Ptr cmp;
 
       // Iterate in reverse over the comma-separated fields so that the
       // top-level comparison is the leftmost.  The others will be chained.
@@ -77,7 +77,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
 
 template <class SampleSeq>
 bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
-                                           SubscriptionInstance* instance,
+                                           SubscriptionInstance_rch instance,
                                            size_t index_in_instance)
 {
 #ifndef OPENDDS_NO_QUERY_CONDITION

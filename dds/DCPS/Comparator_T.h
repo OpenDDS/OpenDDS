@@ -29,7 +29,8 @@ class ComparatorBase : public RcObject<ACE_SYNCH_MUTEX> {
 public:
   typedef RcHandle<ComparatorBase> Ptr;
 
-  explicit ComparatorBase(Ptr next = 0) : next_(next) {}
+  ComparatorBase(){}
+  explicit ComparatorBase(Ptr next) : next_(next) {}
 
   virtual ~ComparatorBase() {}
 
@@ -78,7 +79,7 @@ template <class Sample, class Field>
 ComparatorBase::Ptr make_field_cmp(Field Sample::* mp,
                                    ComparatorBase::Ptr next)
 {
-  return new FieldComparator<Sample, Field>(mp, next);
+  return make_rch<FieldComparator<Sample, Field> >(mp, next);
 }
 
 /** deal with nested structs, for example:
@@ -121,7 +122,7 @@ ComparatorBase::Ptr make_struct_cmp(Field Sample::* mp,
                                     ComparatorBase::Ptr delegate,
                                     ComparatorBase::Ptr next)
 {
-  return new StructComparator<Sample, Field>(mp, delegate, next);
+  return make_rch<StructComparator<Sample, Field> >(mp, delegate, next);
 }
 
 } // namespace DCPS

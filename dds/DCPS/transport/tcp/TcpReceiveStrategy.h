@@ -29,7 +29,7 @@ public:
 
   virtual ~TcpReceiveStrategy();
 
-  int reset(TcpConnection* connection);
+  int reset(const TcpConnection_rch& connection);
 
   ACE_Reactor* get_reactor();
 

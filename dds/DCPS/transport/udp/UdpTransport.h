@@ -24,6 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class UdpInst;
+typedef RcHandle<UdpInst> UdpInst_rch;
 
 class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
 public:
@@ -31,7 +32,7 @@ public:
 
   void passive_connection(const ACE_INET_Addr& remote_address,
                           ACE_Message_Block* data);
-
+  UdpInst_rch config() const;
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -56,13 +57,11 @@ protected:
   virtual std::string transport_type() const { return "udp"; }
 
 private:
-  UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address,
+  UdpDataLink_rch make_datalink(const ACE_INET_Addr& remote_address,
                              Priority priority, bool active);
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
                           Priority priority, ACE_INET_Addr local_addr, bool active);
-
-  RcHandle<UdpInst> config_i_;
 
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;

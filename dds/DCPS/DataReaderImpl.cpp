@@ -68,12 +68,12 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
-    end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    remove_association_sweeper_(new RemoveAssociationSweeper<DataReaderImpl>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
-    liveliness_timer_(new LivelinessTimer(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -177,7 +177,7 @@ DataReaderImpl::cleanup()
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
       ++iter) {
-    SubscriptionInstance *ptr = iter->second;
+    SubscriptionInstance_rch ptr = iter->second;
     if (this->watchdog_.in() && ptr->deadline_timer_id_ != -1) {
       this->watchdog_->cancel_timer(ptr);
     }
@@ -332,7 +332,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
-    RcHandle<WriterInfo> info = new WriterInfo(this, writer_id, writer.writerQos);
+    RcHandle<WriterInfo> info = make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -867,7 +867,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
       for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
            iter != instances_.end();
            ++iter) {
-        SubscriptionInstance *ptr = iter->second;
+        SubscriptionInstance_rch ptr = iter->second;
         ptr->instance_state_.lively(pos->first);
       }
     }
@@ -971,8 +971,8 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
       }
     }
 
-    qos_change(qos);
 
+    qos_change(qos);
     qos_ = qos;
 
     return DDS::RETCODE_OK;
@@ -989,10 +989,15 @@ void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
       qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
     if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
         qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-      watchdog_.reset(
-        new RequestedDeadlineWatchdog(sample_lock_, qos.deadline, this,
-          dr_local_objref_.in(), requested_deadline_missed_status_,
-          last_deadline_missed_total_count_));
+
+          this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
+                  ref(this->sample_lock_),
+                  qos.deadline,
+                  this,
+                  this->dr_local_objref_.in(),
+                  ref(this->requested_deadline_missed_status_),
+                  ref(this->last_deadline_missed_total_count_));
+
     } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
                qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
       watchdog_->cancel_all();
@@ -1285,17 +1290,16 @@ DataReaderImpl::enable()
   // period is not the default (infinite).
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
 
-  if (this->watchdog_ == 0
+  if (!this->watchdog_
       && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
           || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
-    this->watchdog_.reset(
-        new RequestedDeadlineWatchdog(
-            this->sample_lock_,
+    this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
+            ref(this->sample_lock_),
             this->qos_.deadline,
             this,
             this->dr_local_objref_.in(),
-            this->requested_deadline_missed_status_,
-            this->last_deadline_missed_total_count_));
+            ref(this->requested_deadline_missed_status_),
+            ref(this->last_deadline_missed_total_count_));
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -1490,7 +1494,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     // This also adds to the sample container and makes any callbacks
     // and condition modifications.
 
-    SubscriptionInstance* instance = 0;
+    SubscriptionInstance_rch instance;
     bool is_new_instance = false;
     bool filtered = false;
     if (sample.header_.key_fields_only_) {
@@ -1587,7 +1591,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
         iter != instances_.end();
         ++iter) {
-      SubscriptionInstance *ptr = iter->second;
+      SubscriptionInstance_rch ptr = iter->second;
 
       ptr->instance_state_.lively(sample.header_.publication_id_);
     }
@@ -1599,7 +1603,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case DISPOSE_INSTANCE: {
     if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
-    SubscriptionInstance* instance = 0;
+    SubscriptionInstance_rch instance;
 
     if (this->watchdog_.in()) {
       // Find the instance first for timer cancellation since
@@ -1610,7 +1614,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
           || (this->is_exclusive_ownership_
-              && (instance != 0 )
+              && (instance)
               && (this->owner_manager_->is_owner (instance->instance_handle_,
                   sample.header_.publication_id_)))) {
 #endif
@@ -1619,7 +1623,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
 #endif
     }
-    instance = 0;
+    instance.reset();
     this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
@@ -1628,7 +1632,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case UNREGISTER_INSTANCE: {
     if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
-    SubscriptionInstance* instance = 0;
+    SubscriptionInstance_rch instance;
 
     if (this->watchdog_.in()) {
       // Find the instance first for timer cancellation since
@@ -1636,7 +1640,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-      if( instance != 0) {
+      if( instance ) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         if (! this->is_exclusive_ownership_
             || (this->is_exclusive_ownership_
@@ -1648,7 +1652,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif
       }
     }
-    instance = 0;
+    instance.reset();
     this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
@@ -1657,7 +1661,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   case DISPOSE_UNREGISTER_INSTANCE: {
     if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
-    SubscriptionInstance* instance = 0;
+    SubscriptionInstance_rch instance;
 
     if (this->watchdog_.in()) {
       // Find the instance first for timer cancellation since
@@ -1668,11 +1672,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       if (! this->is_exclusive_ownership_
           || (this->is_exclusive_ownership_
-              && (instance != 0 )
+              && (instance)
               && (this->owner_manager_->is_owner (instance->instance_handle_,
                   sample.header_.publication_id_)))
                   || (this->is_exclusive_ownership_
-                      && (instance != 0 )
+                      && (instance)
                       && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
         this->watchdog_->cancel_timer(instance);
@@ -1680,7 +1684,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
 #endif
     }
-    instance = 0;
+    instance.reset();
     this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
@@ -1773,7 +1777,7 @@ bool DataReaderImpl::have_sample_states(
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
       ++iter) {
-    SubscriptionInstance *ptr = iter->second;
+    SubscriptionInstance_rch ptr = iter->second;
 
     for (ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
@@ -1796,7 +1800,7 @@ DataReaderImpl::have_view_states(DDS::ViewStateMask view_states) const
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
       ++iter) {
-    SubscriptionInstance *ptr = iter->second;
+    SubscriptionInstance_rch ptr = iter->second;
 
     if (ptr->instance_state_.view_state() & view_states) {
       return true;
@@ -1816,7 +1820,7 @@ bool DataReaderImpl::have_instance_states(
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
       ++iter) {
-    SubscriptionInstance *ptr = iter->second;
+    SubscriptionInstance_rch ptr = iter->second;
 
     if (ptr->instance_state_.instance_state() & instance_states) {
       return true;
@@ -1911,7 +1915,7 @@ CORBA::Long DataReaderImpl::total_samples() const
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
       ++iter) {
-    SubscriptionInstance *ptr = iter->second;
+    SubscriptionInstance_rch ptr = iter->second;
 
     count += static_cast<CORBA::Long>(ptr->rcvd_samples_.size_);
   }
@@ -2047,9 +2051,9 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 #endif
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
-  SubscriptionInstance* instance = this->get_handle_instance(handle);
+  SubscriptionInstance_rch instance = this->get_handle_instance(handle);
 
-  if (instance == 0) {
+  if (!instance) {
     ACE_ERROR((LM_ERROR, "(%P|%t) DataReaderImpl::release_instance "
         "could not find the instance by handle 0x%x\n", handle));
     return;
@@ -2330,7 +2334,7 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
-                                        SubscriptionInstance*&)
+                                        SubscriptionInstance_rch&)
 {
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose_unregister()\n"));
@@ -2473,10 +2477,10 @@ DataReaderImpl::prepare_to_delete()
   this->send_final_acks();
 }
 
-SubscriptionInstance*
+SubscriptionInstance_rch
 DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, 0);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, SubscriptionInstance_rch());
 
   SubscriptionInstanceMapType::iterator iter = instances_.find(handle);
   if (iter == instances_.end()) {
@@ -2485,7 +2489,7 @@ DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
         ACE_TEXT("DataReaderImpl::get_handle_instance: ")
         ACE_TEXT("lookup for 0x%x failed\n"),
         handle));
-    return 0;
+    return SubscriptionInstance_rch();
   } // if (0 != instances_.find(handle, instance))
 
   return iter->second;
@@ -2695,7 +2699,8 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 }
 
 bool
-DataReaderImpl::ownership_filter_instance(SubscriptionInstance* instance,
+
+DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instance,
   const PublicationId& pubid)
 {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2768,7 +2773,7 @@ DataReaderImpl::ownership_filter_instance(SubscriptionInstance* instance,
 }
 
 bool
-DataReaderImpl::time_based_filter_instance(SubscriptionInstance* instance, ACE_Time_Value& filter_time_expired)
+DataReaderImpl::time_based_filter_instance(const SubscriptionInstance_rch& instance, ACE_Time_Value& filter_time_expired)
 {
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
@@ -2808,7 +2813,7 @@ DataReaderImpl::num_zero_copies()
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
       ++iter) {
-    SubscriptionInstance *ptr = iter->second;
+    SubscriptionInstance_rch ptr = iter->second;
 
     for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
@@ -3169,7 +3174,7 @@ void DataReaderImpl::get_ordered_data (GroupRakeData& data,
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end(); ++iter) {
-    SubscriptionInstance *ptr = iter->second;
+    SubscriptionInstance_rch ptr = iter->second;
     if ((ptr->instance_state_.view_state() & view_states) &&
         (ptr->instance_state_.instance_state() & instance_states)) {
       size_t i(0);
@@ -3336,7 +3341,7 @@ void DataReaderImpl::_remove_ref()
   CORBA::Object::_remove_ref();
 }
 
-void DataReaderImpl::accept_sample_processing(SubscriptionInstance* instance, const DataSampleHeader& header, bool is_new_instance)
+void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)
 {
   bool accepted = true;
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE

@@ -96,8 +96,8 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const WriterIdSeq&, bool) {}
 
-  void listener_add_ref() {}
-  void listener_remove_ref() {}
+  void _add_ref() {}
+  void _remove_ref() {}
 
   DisjointSequence recvd_;
   bool have_frag_;
@@ -120,7 +120,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   explicit SimpleDataWriter(const RepoId& pub_id)
     : SimpleTC(pub_id)
     , alloc_(2, sizeof(TransportSendElementAllocator))
-    , dsle_(pub_id, this, 0, &alloc_, 0)
+    , dsle_(pub_id, this, OpenDDS::DCPS::PublicationInstance_rch(), &alloc_, 0)
   {
     DDS_TEST::list_set(dsle_, list_);
     dsle_.get_header().message_id_ = SAMPLE_DATA;
@@ -154,8 +154,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const ReaderIdSeq&, bool) {}
-  void listener_add_ref() {}
-  void listener_remove_ref() {}
+  void _add_ref() {}
+  void _remove_ref() {}
 
   TransportSendElementAllocator alloc_;
   SendStateDataSampleList list_;

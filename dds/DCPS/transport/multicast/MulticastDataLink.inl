@@ -13,7 +13,7 @@ namespace DCPS {
 ACE_INLINE MulticastTransport*
 MulticastDataLink::transport()
 {
-  return this->transport_;
+  return static_cast<MulticastTransport*>(DataLink::transport());
 }
 
 ACE_INLINE MulticastPeer

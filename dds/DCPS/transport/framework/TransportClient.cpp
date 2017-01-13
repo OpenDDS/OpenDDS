@@ -31,7 +31,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : pending_assoc_timer_(new PendingAssocTimer (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()))
+  : pending_assoc_timer_(make_rch<PendingAssocTimer> (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()))
   , expected_transaction_id_(1)
   , max_transaction_id_seen_(0)
   , max_transaction_tail_(0)
@@ -83,7 +83,7 @@ TransportClient::~TransportClient()
 
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(shared_from_this(), it->second->data_.remote_id_);
+      impls_[i]->stop_accepting_or_connecting(rchandle_from(this), it->second->data_.remote_id_);
     }
 
     pending_assoc_timer_->cancel_timer(this, it->second);
@@ -94,7 +94,7 @@ TransportClient::~TransportClient()
   for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
 
-    (*it)->detach_client(shared_from_this());
+    (*it)->detach_client(rchandle_from(this));
   }
 }
 
@@ -168,7 +168,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
       TransportImpl_rch impl = inst->impl();
 
       if (!impl.is_nil()) {
-        impl->attach_client(shared_from_this());
+        impl->attach_client(rchandle_from(this));
         impls_.push_back(impl);
         const CORBA::ULong len = conn_info_.length();
         conn_info_.length(len + 1);
@@ -189,12 +189,9 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 void
 TransportClient::transport_detached(TransportImpl* which)
 {
-  TransportSendListener* const this_tsl = get_send_listener();
-  TransportReceiveListener* const this_trl = get_receive_listener();
-  if (this_tsl)
-    this_tsl->listener_add_ref();
-  else if (this_trl)
-    this_trl->listener_add_ref();
+  TransportSendListener_rch this_tsl = get_send_listener();
+  TransportReceiveListener_rch this_trl = get_receive_listener();
+
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -237,18 +234,12 @@ TransportClient::transport_detached(TransportImpl* which)
 
       for (PendingMap::iterator it2 = pending_.begin();
            it2 != pending_.end(); ++it2) {
-        which->stop_accepting_or_connecting(shared_from_this(), it2->first);
+        which->stop_accepting_or_connecting(rchandle_from(this), it2->first);
       }
 
       break;
     }
   }
-
-  guard.release();
-  if (this_tsl)
-    this_tsl->listener_remove_ref();
-  else if (this_trl)
-    this_trl->listener_remove_ref();
 }
 
 bool
@@ -294,7 +285,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc_rch(new PendingAssoc()))).first;
+    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>())).first;
 
     GuidConverter tc_assoc(repo_id_);
     GuidConverter remote_new(data.remote_id_);
@@ -350,7 +341,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impls_[i]->accept_datalink(remote, pend->attribs_, shared_from_this());
+            res = impls_[i]->accept_datalink(remote, pend->attribs_, rchandle_from(this));
           }
 
           //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
@@ -418,7 +409,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
                         "attempt to connect_datalink between local %C and remote %C\n",
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
-    result = impl->connect_datalink(remote, attribs_, shared_from_this());
+    result = impl->connect_datalink(remote, attribs_, rchandle_from(this));
     guard.acquire();
     if (!result.success_) {
       if (DCPS_debug_level) {
@@ -592,7 +583,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   if (!pend->active_) {
 
     for (size_t i = 0; i < pend->impls_.size(); ++i) {
-      pend->impls_[i]->stop_accepting_or_connecting(shared_from_this(), pend->data_.remote_id_);
+      pend->impls_[i]->stop_accepting_or_connecting(rchandle_from(this), pend->data_.remote_id_);
     }
   }
 
@@ -608,10 +599,10 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 void
 TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 {
-  links_.insert_link(link.in());
+  links_.insert_link(link);
   data_link_index_[peer] = link;
 
-  TransportReceiveListener* trl = get_receive_listener();
+  TransportReceiveListener_rch trl = get_receive_listener();
 
   if (trl) {
     link->make_reservation(peer, repo_id_, trl);
@@ -840,7 +831,7 @@ TransportClient::send_response(const RepoId& peer,
   }
 
   DataLinkSet singular;
-  singular.insert_link(found->second.in());
+  singular.insert_link(found->second);
   singular.send_response(peer, header, payload);
   return true;
 }
@@ -909,7 +900,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
       DataLinkSet_rch pub_links =
         (cur->get_num_subs() > 0)
         ? DataLinkSet_rch(links_.select_links(cur->get_sub_ids(), cur->get_num_subs()))
-        : DataLinkSet_rch(&links_, false);
+        : DataLinkSet_rch(&links_, inc_count());
 
       if (pub_links.is_nil() || pub_links->empty()) {
         // NOTE: This is the "local publisher id is not currently
@@ -957,10 +948,10 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
 
             if (ti.ptr() == 0 || ti->length() != n_subs) {
               if (!subset.in()) {
-                subset = new DataLinkSet;
+                subset = make_rch<DataLinkSet>();
               }
 
-              subset->insert_link(itr->second.in());
+              subset->insert_link(itr->second);
               cur->filter_per_link_[itr->first] = ti._retn();
 
             } else {
@@ -1024,25 +1015,23 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
   }
 }
 
-TransportSendListener*
+TransportSendListener_rch
 TransportClient::get_send_listener()
 {
-  return dynamic_cast<TransportSendListener*>(this);
+  return rchandle_from(dynamic_cast<TransportSendListener*>(this));
 }
 
-TransportReceiveListener*
+TransportReceiveListener_rch
 TransportClient::get_receive_listener()
 {
-  return dynamic_cast<TransportReceiveListener*>(this);
+  return rchandle_from(dynamic_cast<TransportReceiveListener*>(this));
 }
 
 SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
                               ACE_Message_Block* msg)
 {
-  TransportSendListener* listener = get_send_listener();
-
-  return links_.send_control(repo_id_, listener, header, msg);
+  return links_.send_control(repo_id_, get_send_listener(), header, msg);
 }
 
 SendControlStatus
@@ -1060,7 +1049,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
       return SEND_CONTROL_ERROR;
     }
 
-    singular.insert_link(found->second.in());
+    singular.insert_link(found->second);
   }
   return singular.send_control(repo_id_, get_send_listener(), header, msg,
                                &links_.tsce_allocator());

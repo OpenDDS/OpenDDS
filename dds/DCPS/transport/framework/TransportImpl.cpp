@@ -93,23 +93,23 @@ TransportImpl::shutdown()
 
   {
     GuardType guard(this->lock_);
-    this->reactor_task_ = 0;
+    this->reactor_task_.reset();
     // The shutdown_i() path may access the configuration so remove configuration
     // reference after shutdown is performed.
 
     // Drop our references to the config_.
-    this->config_ = 0;
+    this->config_.reset();
   }
 }
 
 bool
-TransportImpl::configure(TransportInst* config)
+TransportImpl::configure(const TransportInst_rch& config)
 {
   DBG_ENTRY_LVL("TransportImpl","configure",6);
 
   GuardType guard(this->lock_);
 
-  if (config == 0) {
+  if (!config) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: invalid configuration.\n"),
                      false);
@@ -123,11 +123,10 @@ TransportImpl::configure(TransportInst* config)
                      false);
   }
 
-  config->_add_ref();
   this->config_ = config;
 
   // Let our subclass take a shot at the configuration object.
-  if (this->configure_i(config) == false) {
+  if (this->configure_i(config.in()) == false) {
     if (Transport_debug_level > 0) {
       dump();
     }
@@ -167,9 +166,9 @@ TransportImpl::configure(TransportInst* config)
 }
 
 void
-TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink* link)
+TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLink_rch link)
 {
-  pending_connections_.insert( PendConnMap::value_type(client, DataLink_rch(link, false)));
+  pending_connections_.insert( PendConnMap::value_type(client, link));
 }
 
 void
@@ -179,7 +178,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend)
     return;
   }
 
-  this->reactor_task_ = new TransportReactorTask(useAsyncSend);
+  this->reactor_task_= make_rch<TransportReactorTask>(useAsyncSend);
   if (0 != this->reactor_task_->open(0)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }
@@ -217,9 +216,7 @@ TransportImpl::release_link_resources(DataLink* link)
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
   // Create a smart pointer without ownership (bumps up ref count)
-  DataLink_rch dl(link, false);
-
-  dl_clean_task_.add(dl);
+  dl_clean_task_.add(rchandle_from(link));
 
   return true;
 }

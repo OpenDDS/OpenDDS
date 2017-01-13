@@ -24,7 +24,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
  , dataReader_(0)
  , dataWriter_(0)
  , listener_(0)
- , transport_(0)
+ , transport_()
 {
   // Grab a local reference to the factory to ensure that we perform the
   // operations - they should not get optimized away!  Note that this

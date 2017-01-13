@@ -19,15 +19,13 @@ BestEffortSessionFactory::requires_send_buffer() const
   return 0;
 }
 
-MulticastSession*
+MulticastSession_rch
 BestEffortSessionFactory::create(ACE_Reactor* reactor,
                                  ACE_thread_t owner,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
 {
-  BestEffortSession* session;
-  ACE_NEW_RETURN(session, BestEffortSession(reactor, owner, link, remote_peer), 0);
-  return session;
+  return make_rch<BestEffortSession>(reactor, owner, link, remote_peer);
 }
 
 } // namespace DCPS

@@ -8,6 +8,8 @@
 #include "ShmemDataLink.h"
 #include "ShmemTransport.h"
 #include "ShmemInst.h"
+#include "ShmemSendStrategy.h"
+#include "ShmemReceiveStrategy.h"
 
 #include "ace/Log_Msg.h"
 
@@ -22,12 +24,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemDataLink::ShmemDataLink(ShmemTransport* transport)
+ShmemDataLink::ShmemDataLink(const ShmemTransport_rch& transport)
   : DataLink(transport,
              0,     // priority
              false, // is_loopback,
              false) // is_active
   , config_(0)
+  , send_strategy_( make_rch<ShmemSendStrategy>(this, transport->config()))
+  , recv_strategy_( make_rch<ShmemReceiveStrategy>(this))
   , peer_alloc_(0)
 {
 }

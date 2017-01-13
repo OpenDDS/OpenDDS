@@ -19,7 +19,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MulticastDataLink;
-
+typedef RcHandle<MulticastDataLink> MulticastDataLink_rch;
 class OpenDDS_Multicast_Export MulticastSendStrategy
   : public TransportSendStrategy
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
@@ -28,7 +28,7 @@ class OpenDDS_Multicast_Export MulticastSendStrategy
   {
 #endif
 public:
-  explicit MulticastSendStrategy(MulticastDataLink* link);
+  MulticastSendStrategy(MulticastDataLink* link, const TransportInst_rch& inst);
 
   virtual void stop_i();
 

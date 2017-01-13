@@ -26,7 +26,7 @@ namespace DCPS {
 /// data used by the data structures in RakeResults<T>.
 struct OpenDDS_Dcps_Export RakeData {
   ReceivedDataElement* rde_;
-  SubscriptionInstance* si_;
+  SubscriptionInstance_rch si_;
   size_t index_in_instance_;
 };
 

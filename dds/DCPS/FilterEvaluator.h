@@ -164,6 +164,9 @@ public:
   virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
     ComparatorBase::Ptr next) const = 0;
 
+  ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec) const
+  { return create_qc_comparator(fieldSpec, ComparatorBase::Ptr()); }
+
   virtual const char** getFieldNames() const = 0;
 
   virtual size_t numDcpsKeys() const = 0;

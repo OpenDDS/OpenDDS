@@ -37,12 +37,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MulticastTransport;
+typedef RcHandle<MulticastTransport> MulticastTransport_rch;
 
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
-  MulticastDataLink(MulticastTransport* transport,
-                    MulticastSessionFactory* session_factory,
+  MulticastDataLink(const MulticastTransport_rch& transport,
+                    const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
                     bool is_active);
   virtual ~MulticastDataLink();
@@ -54,10 +55,8 @@ public:
   void configure(MulticastInst* config,
                  TransportReactorTask* reactor_task);
 
-  void send_strategy(MulticastSendStrategy* send_strategy);
   MulticastSendStrategy* send_strategy();
 
-  void receive_strategy(MulticastReceiveStrategy* recv_strategy);
   MulticastReceiveStrategy* receive_strategy();
 
   SingleSendBuffer* send_buffer();
@@ -72,8 +71,8 @@ public:
 
   bool join(const ACE_INET_Addr& group_address);
 
-  MulticastSession* find_or_create_session(MulticastPeer remote_peer);
-  MulticastSession* find_session(MulticastPeer remote_peer);
+  MulticastSession_rch find_or_create_session(MulticastPeer remote_peer);
+  MulticastSession_rch find_session(MulticastPeer remote_peer);
 
   bool check_header(const TransportHeader& header);
   bool check_header(const DataSampleHeader& header);
@@ -82,7 +81,6 @@ public:
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
 
 private:
-  MulticastTransport* transport_;
 
   MulticastSessionFactory_rch session_factory_;
 

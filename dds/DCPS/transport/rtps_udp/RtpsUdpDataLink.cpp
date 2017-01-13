@@ -8,6 +8,8 @@
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpTransport.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpSendStrategy.h"
+#include "RtpsUdpReceiveStrategy.h"
 
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -50,16 +52,18 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
+RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                                  const GuidPrefix_t& local_prefix,
-                                 RtpsUdpInst* config,
-                                 TransportReactorTask* reactor_task)
+                                 const RtpsUdpInst_rch& config,
+                                 const TransportReactorTask_rch& reactor_task)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
              false),    // is_active
     config_(config),
-    reactor_task_(reactor_task, false),
+    reactor_task_(reactor_task),
+    send_strategy_(make_rch<RtpsUdpSendStrategy>(this, config, local_prefix)),
+    recv_strategy_(make_rch<RtpsUdpReceiveStrategy>(this, local_prefix)),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
     best_effort_heartbeat_count_(0),
@@ -67,10 +71,16 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config->heartbeat_response_delay_),
-  heartbeat_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
-  heartbeatchecker_(new HeartBeat(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
+  heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
+  heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
+}
+
+RtpsUdpInst_rch
+RtpsUdpDataLink::config() const
+{
+  return config_;
 }
 
 bool
@@ -571,7 +581,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   RcHandle<SingleSendBuffer>& send_buff = wi->second.send_buff_;
 
   if (send_buff.is_nil()) {
-    send_buff = new SingleSendBuffer(SingleSendBuffer::UNLIMITED, 1 /*mspp*/);
+    send_buff = make_rch<SingleSendBuffer>(SingleSendBuffer::UNLIMITED, 1 /*mspp*/);
 
     send_buff->bind(outer_->send_strategy_.in());
   }

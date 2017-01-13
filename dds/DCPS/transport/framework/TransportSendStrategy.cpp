@@ -863,12 +863,9 @@ TransportSendStrategy::start()
   // to give a "copy" of a reference to ourselves to the synch_ object here.
   // We will do the reverse when we unregister ourselves (as a worker) from
   // the synch_ object.
-  //MJM: The synch thingie knows to not "delete" us, right?
-  this->_add_ref();
 
-  if (this->synch_->register_worker(this) == -1) {
-    // Take back our "copy".
-    this->_remove_ref();
+  if (this->synch_->register_worker(rchandle_from(this)) == -1) {
+
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportSendStrategy failed to register "
                       "as a worker with the ThreadSynch object.\n"),
@@ -889,10 +886,6 @@ TransportSendStrategy::stop()
   }
 
   this->synch_->unregister_worker();
-
-  // Since we gave the synch_ a "copy" of a reference to ourselves, we need
-  // to take it back now.
-  this->_remove_ref();
 
   {
     GuardType guard(this->lock_);

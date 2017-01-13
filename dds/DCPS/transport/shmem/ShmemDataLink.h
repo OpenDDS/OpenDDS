@@ -34,6 +34,7 @@ namespace DCPS {
 class ShmemInst;
 class ShmemTransport;
 class ReceivedDataSample;
+typedef RcHandle<ShmemTransport> ShmemTransport_rch;
 
 #ifdef ACE_WIN32
   typedef ACE_Pagefile_Memory_Pool ShmemPool;
@@ -70,12 +71,10 @@ enum { // values for ShmemData::status_
 class OpenDDS_Shmem_Export ShmemDataLink
   : public DataLink {
 public:
-  explicit ShmemDataLink(ShmemTransport* transport);
+
+  ShmemDataLink(const ShmemTransport_rch& transport);
 
   void configure(ShmemInst* config);
-
-  void send_strategy(ShmemSendStrategy* send_strategy);
-  void receive_strategy(ShmemReceiveStrategy* recv_strategy);
 
   ShmemInst* config();
 
