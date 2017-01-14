@@ -42,7 +42,8 @@ struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject<ACE_SYNCH_MUTE
       registered_sample_(registered_sample),
       unregistered_(false),
       instance_handle_(0),
-      deadline_timer_id_(-1) {
+      deadline_timer_id_(-1),
+      durable_samples_remaining_(0) {
   }
 
   ~PublicationInstance() {
