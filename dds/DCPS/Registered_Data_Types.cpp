@@ -67,15 +67,14 @@ DDS::ReturnCode_t Data_Types_Register::unregister_type(
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, lock_, DDS::RETCODE_ERROR);
 
   TypeSupportMap& tsm = participants_[domain_participant];
-  const TypeSupport_var typeSupport = TypeSupport::_duplicate(the_type);
-
+  
   TypeSupportMap::iterator iter = tsm.find(type_name);
   if (iter == tsm.end()) {
     // Not in the map, can't delete
     return DDS::RETCODE_ERROR;
   }
   else {
-    if (std::strcmp(typeSupport->_interface_repository_id(), iter->second->_interface_repository_id()) == 0) {
+    if (std::strcmp(the_type->_interface_repository_id(), iter->second->_interface_repository_id()) == 0) {
       tsm.erase(iter);
       return DDS::RETCODE_OK;
     }
