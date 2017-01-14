@@ -67,7 +67,7 @@ DDS::ReturnCode_t Data_Types_Register::unregister_type(
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, lock_, DDS::RETCODE_ERROR);
 
   TypeSupportMap& tsm = participants_[domain_participant];
-  
+
   TypeSupportMap::iterator iter = tsm.find(type_name);
   if (iter == tsm.end()) {
     // Not in the map, can't delete
