@@ -126,6 +126,7 @@ Linux family:
 Windows family:
 * Windows 7 (32-bit, 64-bit)
 * Windows Server 2012 R2 (64-bit)
+* Windows 10 (64-bit)
 
 Others:
 * SunOS 5.10 (Solaris 10) (SPARC)
@@ -161,6 +162,7 @@ This release of OpenDDS has been tested using the following compilers:
 * gcc 4.9.x
 * gcc 5.4
 * gcc 6.2
+* gcc 6.3
 * Clang 3.8 (llvm.org) and 7.3 (Apple)
 * Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 
