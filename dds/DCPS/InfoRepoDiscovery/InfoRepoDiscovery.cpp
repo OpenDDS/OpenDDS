@@ -296,7 +296,7 @@ InfoRepoDiscovery::bit_config()
   }
   return bit_config_;
 #else
-  return 0;
+  return TransportConfig_rch();
 #endif
 }
 
