@@ -49,6 +49,8 @@ public:
   ACE_Message_Block*       sample_;
 };
 
+void swap(RawDataSample& lhs, RawDataSample& rhs);
+
 } // namespace DCPS
 } // namespace OpenDDS
 
