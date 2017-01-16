@@ -15,11 +15,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-UdpSendStrategy::UdpSendStrategy(UdpDataLink* link)
-  : TransportSendStrategy(0, TransportInst_rch(link->config(), false),
+UdpSendStrategy::UdpSendStrategy(UdpDataLink* link, const TransportInst_rch& inst)
+  : TransportSendStrategy(0, inst,
                           0,  // synch_resource
                           link->transport_priority(),
-                          new NullSynchStrategy),
+                          make_rch<NullSynchStrategy>()),
     link_(link)
 {
 }

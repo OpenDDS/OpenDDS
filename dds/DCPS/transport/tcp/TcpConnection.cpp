@@ -56,6 +56,8 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
+  this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+
   if (this->reconnect_task_.open()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Reconnect task failed to open : %p\n"),
@@ -79,8 +81,10 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , transport_priority_(priority)
   , shutdown_(false)
   , passive_setup_(false)
+  , id_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
+  this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
   // Open the reconnect task
   if (this->reconnect_task_.open()) {
@@ -129,23 +133,21 @@ OpenDDS::DCPS::TcpConnection::disconnect()
 // visibility into the receive strategy to call add_ref().  Oh well.
 void
 OpenDDS::DCPS::TcpConnection::set_receive_strategy
-(TcpReceiveStrategy* receive_strategy)
+(const TcpReceiveStrategy_rch& receive_strategy)
 {
   DBG_ENTRY_LVL("TcpConnection","set_receive_strategy",6);
 
   // Make a "copy" for ourselves
-  receive_strategy->_add_ref();
   this->receive_strategy_ = receive_strategy;
 }
 
 void
 OpenDDS::DCPS::TcpConnection::set_send_strategy
-(TcpSendStrategy* send_strategy)
+(const TcpSendStrategy_rch& send_strategy)
 {
   DBG_ENTRY_LVL("TcpConnection","set_send_strategy",6);
 
   // Make a "copy" for ourselves
-  send_strategy->_add_ref();
   this->send_strategy_ = send_strategy;
 }
 
@@ -158,7 +160,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open active.\n"), 2);
     // Take over the refcount from TcpTransport::connect_datalink().
-    const TcpConnection_rch self(this);
+    const TcpConnection_rch self(this, keep_count());
     const TcpTransport_rch transport = link_->get_transport_impl();
 
     const bool is_loop(local_address_ == remote_address_);
@@ -197,7 +199,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   // Now we need to ask the TcpAcceptor object to provide us with
   // a pointer to the TcpTransport object that "owns" the acceptor.
-  TcpTransport_rch transport = acceptor->transport();
+  TcpTransport_rch transport(acceptor->transport());
 
   if (transport.is_nil()) {
     // The acceptor gave us a nil transport (smart) pointer.
@@ -207,12 +209,9 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
                      -1);
   }
 
-  TcpInst* tcp_config = acceptor->get_configuration();
-
   // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
-  tcp_config->_add_ref();
-  tcp_config_ = tcp_config;
+  tcp_config_ =  acceptor->get_configuration();
   local_address_ = tcp_config_->local_address();
 
   set_sock_options(tcp_config_.in());
@@ -296,10 +295,8 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
               "remove_handler failed %m.\n"));
       }
 
-      const TcpConnection_rch self(this, false);
-
-      transport_during_setup_->passive_connection(remote_address_, self);
-      transport_during_setup_ = 0;
+      transport_during_setup_->passive_connection(remote_address_, rchandle_from(this));
+      transport_during_setup_.reset();
       connected_ = true;
 
       return 0;
@@ -653,11 +650,9 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
         = dynamic_cast <TcpReceiveStrategy*>(this->receive_strategy_.in());
 
       // Give a copy to reactor.
-      this->_add_ref();
       this->passive_reconnect_timer_id_ = rs->get_reactor()->schedule_timer(this, 0, timeout);
 
       if (this->passive_reconnect_timer_id_ == -1) {
-        this->_remove_ref();
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: TcpConnection::passive_reconnect_i")
                           ACE_TEXT(", %p.\n"), ACE_TEXT("schedule_timer")),
@@ -831,9 +826,6 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
     break;
   }
 
-  // Take back the "copy" we gave to reactor when we schedule the timer.
-  this->_remove_ref();
-
   return 0;
 }
 
@@ -883,7 +875,6 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
     } else
       passive_reconnect_timer_id_ = -1;
 
-    this->_remove_ref();
     notify_reconnect = true;
   }
   break;
@@ -994,6 +985,20 @@ OpenDDS::DCPS::TcpConnection::shutdown()
   this->shutdown_ = true;
 
   this->reconnect_task_.close(1);
+}
+
+ACE_Event_Handler::Reference_Count
+OpenDDS::DCPS::TcpConnection::add_reference()
+{
+  RcObject<ACE_SYNCH_MUTEX>::_add_ref();
+  return 1;
+}
+
+ACE_Event_Handler::Reference_Count
+OpenDDS::DCPS::TcpConnection::remove_reference()
+{
+  RcObject<ACE_SYNCH_MUTEX>::_remove_ref();
+  return 1;
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

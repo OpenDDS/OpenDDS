@@ -68,7 +68,7 @@ public:
 
   /// Expose the configuration information so others can see what
   /// we can do.
-  TransportInst* config() const;
+  TransportInst_rch config() const;
 
   /// Called by our connection_info() method to allow the concrete
   /// TransportImpl subclass to do the dirty work since it really
@@ -129,8 +129,8 @@ public:
   struct AcceptConnectResult {
     enum Status { ACR_SUCCESS, ACR_FAILED };
     explicit AcceptConnectResult(Status ok = ACR_FAILED)
-      : success_(ok == ACR_SUCCESS), link_(0) {}
-    explicit AcceptConnectResult(DataLink* link)
+      : success_(ok == ACR_SUCCESS), link_() {}
+    AcceptConnectResult(const DataLink_rch& link)
       : success_(link), link_(link) {}
     /// If false, the accept or connect has failed and link_ is ignored.
     bool success_;
@@ -143,7 +143,7 @@ public:
 protected:
   TransportImpl();
 
-  bool configure(TransportInst* config);
+  bool configure(const TransportInst_rch& config);
 
   /// connect_datalink() is called from TransportClient to initiate an
   /// association as the active peer.  A DataLink may be returned if
@@ -192,11 +192,11 @@ protected:
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
   /// returned.
-  TransportReactorTask* reactor_task();
+  TransportReactorTask_rch reactor_task();
 
   typedef OPENDDS_MULTIMAP(TransportClient_rch, DataLink_rch) PendConnMap;
   PendConnMap pending_connections_;
-  void add_pending_connection(const TransportClient_rch& client, DataLink* link);
+  void add_pending_connection(const TransportClient_rch& client, DataLink_rch link);
 
 private:
   /// We have a few friends in the transport framework so that they

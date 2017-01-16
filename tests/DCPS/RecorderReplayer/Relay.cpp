@@ -155,6 +155,8 @@ int run_test(int argc, ACE_TCHAR *argv[]){
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Start relay\n"));
 
+    using namespace OpenDDS::DCPS;
+
     {
       // Create Topic (Movie Discussion List)
       DDS::Topic_var topic =
@@ -182,19 +184,8 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       my_partition2[0] = "Two";
       pub_qos.partition.name = my_partition2;
 
-      MessengerReplayerListener* replayer_listener;
-      ACE_NEW_NORETURN(replayer_listener, MessengerReplayerListener);
 
-      if (replayer_listener == 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" new MessengerReplayerListener failed!\n")),
-                         -1);
-      }
-
-
-
-      OpenDDS::DCPS::ReplayerListener_rch rpl_handle(replayer_listener);
+      RcHandle<MessengerReplayerListener> replayer_listener = make_rch<MessengerReplayerListener>();
 
 
       ACE_DEBUG((LM_DEBUG, "Creating replayer\n"));
@@ -205,7 +196,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                                  topic.in(),
                                  pub_qos,
                                  DATAWRITER_QOS_DEFAULT,
-                                 rpl_handle);
+                                 replayer_listener);
 
       if (!replayer.in()) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -225,17 +216,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       }
       ACE_DEBUG((LM_DEBUG, "replayer listener wait done\n"));
 
-
-      MessengerRecorderListener* recorder_listener;
-      ACE_NEW_NORETURN(recorder_listener, MessengerRecorderListener(replayer));
-      OpenDDS::DCPS::RecorderListener_rch rcl_handle(recorder_listener);
-
-      if (recorder_listener == 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" new MessengerRecorderListener failed!\n")),
-                         -1);
-      }
+      RcHandle<MessengerRecorderListener> recorder_listener = make_rch<MessengerRecorderListener> (replayer);
 
       // setup partition
       DDS::SubscriberQos sub_qos;
@@ -257,7 +238,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                                  topic.in(),
                                  sub_qos,
                                  dr_qos,
-                                 rcl_handle);
+                                 recorder_listener);
 
       if (!recorder.in()) {
         ACE_ERROR_RETURN((LM_ERROR,

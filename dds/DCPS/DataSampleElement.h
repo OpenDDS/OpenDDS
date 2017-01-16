@@ -12,6 +12,7 @@
 #include "DataSampleHeader.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 class DDS_TEST;
 
@@ -35,6 +36,7 @@ typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
 
 class TransportSendListener;
 struct PublicationInstance;
+typedef RcHandle<PublicationInstance> PublicationInstance_rch;
 
 /**
 * Currently we contain entire messages in a single ACE_Message_Block
@@ -60,7 +62,7 @@ class OpenDDS_Dcps_Export DataSampleElement : public PoolAllocationBase {
 public:
   DataSampleElement(PublicationId                   publication_id,
                     TransportSendListener*          send_listener,
-                    PublicationInstance*            handle,
+                    PublicationInstance_rch         handle,
                     TransportSendElementAllocator*  tse_allocator,
                     TransportCustomizedElementAllocator* tce_allocator);
 
@@ -91,7 +93,7 @@ public:
   TransportSendListener* get_send_listener() const;
   TransportSendListener* get_send_listener();
 
-  PublicationInstance* get_handle() const;
+  PublicationInstance_rch get_handle() const;
 
   TransportSendElementAllocator* get_transport_send_element_allocator() const;
 
@@ -132,7 +134,7 @@ private:
   /// The pointer to the object that contains the instance information
   /// and data sample list.
   /// The client holds this as an InstanceHandle_t.
-  PublicationInstance*   handle_;
+  PublicationInstance_rch   handle_;
 
   /// Allocator for the TransportSendElement.
   TransportSendElementAllocator* transport_send_element_allocator_;

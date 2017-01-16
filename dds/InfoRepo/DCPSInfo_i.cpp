@@ -1218,81 +1218,82 @@ TAO_DDS_DCPSInfo_i::remove_by_owner(
   for (unsigned int index = 0; index < candidates.size(); ++index) {
     DCPS_IR_Participant* participant
     = where->second->participant(candidates[index]);
+    if (participant) {
+      std::vector<OpenDDS::DCPS::RepoId> keylist;
 
-    std::vector<OpenDDS::DCPS::RepoId> keylist;
-
-    // Remove Subscriptions
-    for (DCPS_IR_Subscription_Map::const_iterator
-         current = participant->subscriptions().begin();
-         current != participant->subscriptions().end();
-         ++current) {
-      keylist.push_back(current->second->get_id());
-    }
-
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
-                 ACE_TEXT("%d subscriptions to remove from participant %C.\n"),
-                 keylist.size(),
-                 std::string(converter).c_str()));
-    }
-
-    for (unsigned int key = 0; key < keylist.size(); ++key) {
-      if (participant->remove_subscription(keylist[ key]) != 0) {
-        status = false;
+      // Remove Subscriptions
+      for (DCPS_IR_Subscription_Map::const_iterator
+        current = participant->subscriptions().begin();
+        current != participant->subscriptions().end();
+        ++current) {
+        keylist.push_back(current->second->get_id());
       }
-    }
 
-    // Remove Publications
-    keylist.clear();
-
-    for (DCPS_IR_Publication_Map::const_iterator
-         current = participant->publications().begin();
-         current != participant->publications().end();
-         ++current) {
-      keylist.push_back(current->second->get_id());
-    }
-
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
-                 ACE_TEXT("%d publications to remove from participant %C.\n"),
-                 keylist.size(),
-                 std::string(converter).c_str()));
-    }
-
-    for (unsigned int key = 0; key < keylist.size(); ++key) {
-      if (participant->remove_publication(keylist[ key]) != 0) {
-        status = false;
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
+          ACE_TEXT("%d subscriptions to remove from participant %C.\n"),
+          keylist.size(),
+          std::string(converter).c_str()));
       }
-    }
 
-    // Remove Topics
-    keylist.clear();
+      for (unsigned int key = 0; key < keylist.size(); ++key) {
+        if (participant->remove_subscription(keylist[key]) != 0) {
+          status = false;
+        }
+      }
 
-    for (DCPS_IR_Topic_Map::const_iterator
-         current = participant->topics().begin();
-         current != participant->topics().end();
-         ++current) {
-      keylist.push_back(current->second->get_id());
-    }
+      // Remove Publications
+      keylist.clear();
 
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
-                 ACE_TEXT("%d topics to remove from participant %C.\n"),
-                 keylist.size(),
-                 std::string(converter).c_str()));
-    }
+      for (DCPS_IR_Publication_Map::const_iterator
+        current = participant->publications().begin();
+        current != participant->publications().end();
+        ++current) {
+        keylist.push_back(current->second->get_id());
+      }
 
-    for (unsigned int key = 0; key < keylist.size(); ++key) {
-      DCPS_IR_Topic* discard;
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
+          ACE_TEXT("%d publications to remove from participant %C.\n"),
+          keylist.size(),
+          std::string(converter).c_str()));
+      }
 
-      if (participant->remove_topic_reference(keylist[ key], discard) != 0) {
-        status = false;
+      for (unsigned int key = 0; key < keylist.size(); ++key) {
+        if (participant->remove_publication(keylist[key]) != 0) {
+          status = false;
+        }
+      }
+
+      // Remove Topics
+      keylist.clear();
+
+      for (DCPS_IR_Topic_Map::const_iterator
+        current = participant->topics().begin();
+        current != participant->topics().end();
+        ++current) {
+        keylist.push_back(current->second->get_id());
+      }
+
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        OpenDDS::DCPS::RepoIdConverter converter(candidates[index]);
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) (bool)TAO_DDS_DCPSInfo_i::remove_by_owner: ")
+          ACE_TEXT("%d topics to remove from participant %C.\n"),
+          keylist.size(),
+          std::string(converter).c_str()));
+      }
+
+      for (unsigned int key = 0; key < keylist.size(); ++key) {
+        DCPS_IR_Topic* discard;
+
+        if (participant->remove_topic_reference(keylist[key], discard) != 0) {
+          status = false;
+        }
       }
     }
 

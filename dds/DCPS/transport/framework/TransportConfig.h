@@ -51,6 +51,8 @@ public:
 
 private:
   friend class TransportRegistry;
+  template <typename T, typename U>
+  friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit TransportConfig(const OPENDDS_STRING& name);
   ~TransportConfig();
 

@@ -237,7 +237,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         }
       }
 
-      RtpsDiscovery_rch discovery = new RtpsDiscovery(rtps_name);
+      RtpsDiscovery_rch discovery (OpenDDS::DCPS::make_rch<RtpsDiscovery>(rtps_name));
       if (has_resend) discovery->resend_period(ACE_Time_Value(resend));
       if (has_pb) discovery->pb(pb);
       if (has_dg) discovery->dg(dg);
@@ -253,8 +253,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       discovery->sedp_local_address(sla);
       discovery->guid_interface(gi);
       discovery->spdp_local_address(spdpaddr);
-      TheServiceParticipant->add_discovery(
-        DCPS::static_rchandle_cast<Discovery>(discovery));
+      TheServiceParticipant->add_discovery(discovery);
     }
   }
 
@@ -262,9 +261,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
   // instantiate it now.
   const DCPS::Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
   if (discoveryMap.find(Discovery::DEFAULT_RTPS) == discoveryMap.end()) {
-    RtpsDiscovery_rch discovery = new RtpsDiscovery(Discovery::DEFAULT_RTPS);
-    TheServiceParticipant->add_discovery(
-      DCPS::static_rchandle_cast<Discovery>(discovery));
+    TheServiceParticipant->add_discovery(OpenDDS::DCPS::make_rch<RtpsDiscovery>(Discovery::DEFAULT_RTPS));
   }
 
   return 0;
@@ -290,7 +287,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp = new Spdp(domain, ads.id, qos, this);
+    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
     // ads.id may change during Spdp constructor
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {

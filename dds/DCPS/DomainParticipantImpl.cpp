@@ -69,13 +69,14 @@ namespace DCPS {
 //      Currently this is not needed because auto_enable_created_entities
 //      cannot be false.
 
-DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *       factory,
+// Implementation skeleton constructor
+DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
                                              const DDS::DomainId_t&             domain_id,
-                                             const RepoId&                        dp_id,
+                                             const RepoId&                      dp_id,
                                              const DDS::DomainParticipantQos &  qos,
                                              DDS::DomainParticipantListener_ptr a_listener,
                                              const DDS::StatusMask &            mask,
-                                             bool                                 federated)
+                                             bool                               federated)
   : factory_(factory),
     default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
@@ -856,12 +857,12 @@ DomainParticipantImpl::get_filter_eval(const char* filter)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, filter_cache_lock_,
                    RcHandle<FilterEvaluator>());
-  typedef std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > Map;
-  Map::iterator iter = filter_cache_.find(filter);
-  if (iter == filter_cache_.end()) {
-    return filter_cache_[filter] = new FilterEvaluator(filter, false);
-  }
-  return iter->second;
+
+  RcHandle<FilterEvaluator>& result = filter_cache_[filter];
+  if (!result)
+    result = make_rch<FilterEvaluator>(filter, false);
+
+  return result;
 }
 
 void

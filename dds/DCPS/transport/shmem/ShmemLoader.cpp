@@ -24,9 +24,9 @@ class ShmemType : public TransportType {
 public:
   const char* name() { return SHMEM_NAME; }
 
-  TransportInst* new_inst(const std::string& name)
+  TransportInst_rch new_inst(const std::string& name)
   {
-    return new ShmemInst(name);
+    return make_rch<ShmemInst>(name);
   }
 };
 
@@ -38,7 +38,7 @@ ShmemLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   if (initialized) return 0;  // already initialized
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(new ShmemType);
+  registry->register_type(make_rch<ShmemType>());
 
   //FUTURE: when we're ready, add a ShmemInst to the default config, like so:
   /*

@@ -53,10 +53,12 @@ public:
   virtual ~RequestedDeadlineWatchdog();
 
   // Schedule timer for the supplied instance.
-  void schedule_timer(OpenDDS::DCPS::SubscriptionInstance* instance);
+  void schedule_timer(OpenDDS::DCPS::SubscriptionInstance_rch instance);
 
   // Cancel timer for the supplied instance.
-  void cancel_timer(OpenDDS::DCPS::SubscriptionInstance* instance);
+  void cancel_timer(OpenDDS::DCPS::SubscriptionInstance_rch instance);
+
+  virtual int handle_timeout(const ACE_Time_Value&, const void* act);
 
   /// Operation to be executed when the associated timer expires.
   /**
@@ -64,7 +66,7 @@ public:
    * @c DDS::RequestedDeadlineMissed structure, and calls
    * @c DataReaderListener::on_requested_deadline_missed().
    */
-  virtual void execute(void const * act, bool timer_called);
+  void execute(OpenDDS::DCPS::SubscriptionInstance_rch, bool timer_called);
 
   /// Re-schedule timer for all instances of the DataReader.
   virtual void reschedule_deadline();

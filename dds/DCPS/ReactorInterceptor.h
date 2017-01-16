@@ -13,6 +13,7 @@
 #include "ace/Reactor.h"
 #include "ace/Thread.h"
 #include "ace/Condition_Thread_Mutex.h"
+#include "RcEventHandler.h"
 #include "dcps_export.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -20,7 +21,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ReactorInterceptor : public ACE_Event_Handler, public PoolAllocationBase {
+class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler, public PoolAllocationBase {
 public:
 
   class Command : public PoolAllocationBase {

@@ -17,6 +17,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
+TransportImpl*
+DataLink::transport()
+{
+  return this->impl_.in();
+}
+
+ACE_INLINE
 bool
 DataLink::issues_on_deleted_callback() const
 {
@@ -309,7 +316,6 @@ DataLink::remove_listener(const RepoId& local_id)
   {
     IdToSendListenerMap::iterator pos = send_listeners_.find(local_id);
     if (pos != send_listeners_.end()) {
-      pos->second->listener_remove_ref();
       send_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
         GuidConverter converter(local_id);
@@ -324,7 +330,6 @@ DataLink::remove_listener(const RepoId& local_id)
   {
     IdToRecvListenerMap::iterator pos = recv_listeners_.find(local_id);
     if (pos != recv_listeners_.end()) {
-      pos->second->listener_remove_ref();
       recv_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
         GuidConverter converter(local_id);
@@ -339,7 +344,7 @@ DataLink::remove_listener(const RepoId& local_id)
 }
 
 ACE_INLINE
-TransportSendListener*
+TransportSendListener_rch
 DataLink::send_listener_for(const RepoId& pub_id) const
 {
   // pub_map_ (and send_listeners_) are already locked when entering this
@@ -347,13 +352,13 @@ DataLink::send_listener_for(const RepoId& pub_id) const
   IdToSendListenerMap::const_iterator found =
     this->send_listeners_.find(pub_id);
   if (found == this->send_listeners_.end()) {
-    return 0;
+    return TransportSendListener_rch();
   }
   return found->second;
 }
 
 ACE_INLINE
-TransportReceiveListener*
+TransportReceiveListener_rch
 DataLink::recv_listener_for(const RepoId& sub_id) const
 {
   // sub_map_ (and recv_listeners_) are already locked when entering this
@@ -361,21 +366,21 @@ DataLink::recv_listener_for(const RepoId& sub_id) const
   IdToRecvListenerMap::const_iterator found =
     this->recv_listeners_.find(sub_id);
   if (found == this->recv_listeners_.end()) {
-    return 0;
+    return TransportReceiveListener_rch();
   }
   return found->second;
 }
 
 ACE_INLINE
 void
-DataLink::default_listener(TransportReceiveListener* trl)
+DataLink::default_listener(const TransportReceiveListener_rch& trl)
 {
   GuardType guard(this->pub_sub_maps_lock_);
   this->default_listener_ = trl;
 }
 
 ACE_INLINE
-TransportReceiveListener*
+const TransportReceiveListener_rch&
 DataLink::default_listener() const
 {
   GuardType guard(this->pub_sub_maps_lock_);

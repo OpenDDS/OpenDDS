@@ -38,7 +38,7 @@ public:
   /// The worker must introduce himself to this ThreadSynch object.
   /// It is the worker object that "owns" this ThreadSynch object.
   /// Returns 0 for success, -1 for failure.
-  int register_worker(ThreadSynchWorker* worker);
+  int register_worker(const ThreadSynchWorker_rch& worker);
 
   /// Our owner, the worker_, is breaking our relationship.
   void unregister_worker();
@@ -83,7 +83,7 @@ protected:
 
 private:
 
-  ThreadSynchWorker* worker_;
+  ThreadSynchWorker_rch worker_;
   ThreadSynchResource* resource_;
 };
 

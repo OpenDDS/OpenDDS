@@ -148,8 +148,6 @@ private:
   bool lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void listener_add_ref() { EntityImpl::_add_ref(); }
-  void listener_remove_ref() { EntityImpl::_remove_ref(); }
   void _add_ref() { EntityImpl::_add_ref(); }
   void _remove_ref() { EntityImpl::_remove_ref(); }
 
@@ -177,7 +175,7 @@ private:
   DDS::StatusMask listener_mask_;
   RecorderListener_rch listener_;
   DDS::DomainId_t domain_id_;
-  RemoveAssociationSweeper<RecorderImpl>* remove_association_sweeper_;
+  RcHandle<RemoveAssociationSweeper<RecorderImpl> > remove_association_sweeper_;
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 

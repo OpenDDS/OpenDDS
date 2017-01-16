@@ -15,6 +15,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcHandle_T.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
@@ -27,6 +28,7 @@ namespace DCPS {
 
 class MulticastDataLink;
 class MulticastSession;
+typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastSessionFactory
   : public RcObject<ACE_SYNCH_MUTEX> {
@@ -35,10 +37,10 @@ public:
 
   virtual int requires_send_buffer() const = 0;
 
-  virtual MulticastSession* create(ACE_Reactor* reactor,
-                                   ACE_thread_t owner,
-                                   MulticastDataLink* link,
-                                   MulticastPeer remote_peer) = 0;
+  virtual MulticastSession_rch create(ACE_Reactor* reactor,
+                                      ACE_thread_t owner,
+                                      MulticastDataLink* link,
+                                      MulticastPeer remote_peer) = 0;
 };
 
 } // namespace DCPS

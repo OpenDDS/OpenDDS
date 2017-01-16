@@ -15,6 +15,7 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/RcEventHandler.h"
 
 #include "RtpsCoreC.h"
 #include "Sedp.h"
@@ -85,7 +86,7 @@ private:
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  struct SpdpTransport : ACE_Event_Handler, public OpenDDS::DCPS::PoolAllocationBase {
+  struct SpdpTransport : public OpenDDS::DCPS::RcEventHandler, public OpenDDS::DCPS::PoolAllocationBase {
     explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();
 

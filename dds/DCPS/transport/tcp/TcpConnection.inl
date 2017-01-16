@@ -27,7 +27,7 @@ OpenDDS::DCPS::TcpConnection::remove_receive_strategy()
 {
   DBG_ENTRY_LVL("TcpConnection","remove_receive_strategy",6);
 
-  this->receive_strategy_ = 0;
+  this->receive_strategy_.reset();
 }
 
 ACE_INLINE void
@@ -35,7 +35,7 @@ OpenDDS::DCPS::TcpConnection::remove_send_strategy()
 {
   DBG_ENTRY_LVL("TcpConnection","remove_send_strategy",6);
 
-  this->send_strategy_ = 0;
+  this->send_strategy_.reset();
 }
 
 ACE_INLINE bool
@@ -51,10 +51,9 @@ OpenDDS::DCPS::TcpConnection::is_connected() const
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::TcpConnection::set_datalink(OpenDDS::DCPS::TcpDataLink* link)
+OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch& link)
 {
   // Keep a "copy" of the reference to the data link for ourselves.
-  link->_add_ref();
   this->link_ = link;
 }
 

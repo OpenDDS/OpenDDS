@@ -19,15 +19,13 @@ ReliableSessionFactory::requires_send_buffer() const
   return 1; // require send buffer
 }
 
-MulticastSession*
+MulticastSession_rch
 ReliableSessionFactory::create(ACE_Reactor* reactor,
                                ACE_thread_t owner,
                                MulticastDataLink* link,
                                MulticastPeer remote_peer)
 {
-  ReliableSession* session;
-  ACE_NEW_RETURN(session, ReliableSession(reactor, owner, link, remote_peer), 0);
-  return session;
+  return make_rch<ReliableSession>(reactor, owner, link, remote_peer);
 }
 
 } // namespace DCPS

@@ -164,6 +164,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 using DCPS::RepoId;
+using DCPS::make_rch;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
@@ -179,15 +180,12 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , participant_message_writer_(make_id(participant_id,
                                         ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER),
                         *this)
-  , publications_reader_(new Reader(make_id(participant_id,
-                                            ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
-                                    *this))
-  , subscriptions_reader_(new Reader(make_id(participant_id,
-                                             ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
-                                     *this))
-  , participant_message_reader_(new Reader(make_id(participant_id,
-                                                   ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
-                                           *this))
+  , publications_reader_(make_rch<Reader>(make_id(participant_id,ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
+                                         ref(*this)))
+  , subscriptions_reader_(make_rch<Reader>(make_id(participant_id,ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
+                                          ref(*this)))
+  , participant_message_reader_(make_rch<Reader>(make_id(participant_id,ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
+                                                ref(*this)))
   , task_(this)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
@@ -263,7 +261,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   transport_cfg->instances_.push_back(transport_inst_);
 
   // Configure and enable each reader/writer
-  rtps_inst->opendds_discovery_default_listener_ = publications_reader_.in();
+  rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
   const bool reliability = true, durability = true;
   publications_writer_.enable_transport_using_config(reliability, durability,
@@ -1462,7 +1460,7 @@ Sedp::Writer::write_sample(const ParameterList& plist,
   if (result == DDS::RETCODE_OK) {
     // Send sample
     DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
+      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
     list_el->set_sample(new ACE_Message_Block(size));
@@ -1513,7 +1511,7 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
   if (result == DDS::RETCODE_OK) {
     // Send sample
     DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
+      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
     list_el->set_sample(new ACE_Message_Block(size));

@@ -11,6 +11,10 @@ project: idl2jni, conditional_idlflags {
     $(TAO_ROOT)/tests/Hello/Test.idl
   }
 
+  Java_Files {
+      Client.java << Test/Hello.java
+  }
+
   specific {
     jarname  = hello_java_client
   }

@@ -14,6 +14,8 @@
 #include "RtpsUdpDataLink_rch.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/transport/framework/TransportClient.h"
+
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
@@ -24,11 +26,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 class RtpsUdpInst;
+typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
-  explicit RtpsUdpTransport(const TransportInst_rch& inst);
-
+  RtpsUdpTransport(const TransportInst_rch& inst);
+  RtpsUdpInst_rch config() const;
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -70,19 +73,17 @@ private:
                                     bool& requires_inline_qos) const;
 
   virtual void release_datalink(DataLink* link);
-  void pre_detach(TransportClient* client);
+  void pre_detach(const TransportClient_rch& client);
 
   virtual OPENDDS_STRING transport_type() const { return "rtps_udp"; }
 
-  RtpsUdpDataLink* make_datalink(const GuidPrefix_t& local_prefix);
+  RtpsUdpDataLink_rch make_datalink(const GuidPrefix_t& local_prefix);
 
   void use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
                     bool local_reliable, bool remote_reliable,
                     bool local_durable, bool remote_durable);
-
-  RcHandle<RtpsUdpInst> config_i_;
 
   //protects access to link_ for duration of make_datalink
   typedef ACE_Thread_Mutex         ThreadLockType;
@@ -105,7 +106,7 @@ private:
 
   ACE_SOCK_Dgram unicast_socket_;
 
-  TransportClient* default_listener_;
+  TransportClient_rch default_listener_;
 };
 
 } // namespace DCPS

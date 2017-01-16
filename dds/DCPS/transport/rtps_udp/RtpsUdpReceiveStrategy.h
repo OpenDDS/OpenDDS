@@ -33,7 +33,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
   : public TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>,
     public ACE_Event_Handler {
 public:
-  explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link);
+  explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
 
   virtual int handle_input(ACE_HANDLE fd);
 

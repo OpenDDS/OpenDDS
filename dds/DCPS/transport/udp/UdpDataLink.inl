@@ -18,18 +18,6 @@ UdpDataLink::configure(UdpInst* config,
   this->reactor_task_ = reactor_task;
 }
 
-ACE_INLINE void
-UdpDataLink::send_strategy(UdpSendStrategy* send_strategy)
-{
-  this->send_strategy_ = send_strategy;
-}
-
-ACE_INLINE void
-UdpDataLink::receive_strategy(UdpReceiveStrategy* recv_strategy)
-{
-  this->recv_strategy_ = recv_strategy;
-}
-
 ACE_INLINE bool
 UdpDataLink::active() const
 {

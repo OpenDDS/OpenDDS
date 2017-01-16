@@ -291,6 +291,14 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
         return DDS::RETCODE_OK;
       }
 #endif
+      if (!dr_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: ")
+                          ACE_TEXT("SubscriberImpl::delete_datareader: ")
+                          ACE_TEXT("datareader(topic_name=%C)")
+                          ACE_TEXT("for unknown repo id not found.\n"),
+                          topic_name.in()), ::DDS::RETCODE_ERROR);
+      }
       RepoId id = dr_servant->get_subscription_id();
       GuidConverter converter(id);
       ACE_ERROR_RETURN((LM_ERROR,
@@ -298,7 +306,8 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                         ACE_TEXT("SubscriberImpl::delete_datareader: ")
                         ACE_TEXT("datareader(topic_name=%C) %C not found.\n"),
                         topic_name.in(),
-                        OPENDDS_STRING(converter).c_str()),::DDS::RETCODE_ERROR);
+                        OPENDDS_STRING(converter).c_str()),
+                        ::DDS::RETCODE_ERROR);
     }
 
     datareader_map_.erase(it);
@@ -309,7 +318,15 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     this->monitor_->report();
   }
 
-  RepoId subscription_id  = dr_servant->get_subscription_id();
+  if (!dr_servant) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("SubscriberImpl::delete_datareader: ")
+                      ACE_TEXT("could not remove unknown subscription.\n")),
+                      ::DDS::RETCODE_ERROR);
+  }
+
+  RepoId subscription_id = dr_servant->get_subscription_id();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   participant_->get_id(),
@@ -318,7 +335,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("SubscriberImpl::delete_datareader: ")
                       ACE_TEXT(" could not remove subscription from discovery.\n")),
-                     ::DDS::RETCODE_ERROR);
+                      ::DDS::RETCODE_ERROR);
   }
 
   // Call remove association before unregistering the datareader from the transport,

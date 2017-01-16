@@ -114,13 +114,15 @@ GuidGenerator::interfaceName(const char* iface)
   return found ? 0 : -1;
 #elif defined ACE_LINUX || defined __ANDROID_API__
   ifreq ifr;
-  if (std::strlen(iface) >= IFNAMSIZ) {
+  // Guarantee that iface will fit in ifr.ifr_name and still be null terminated
+  // ifr.ifr_name is sized to IFNAMSIZ
+  if (std::strlen(iface) >= sizeof(ifr.ifr_name)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("Interface name %C exceeds max allowable length, must be < %d."),
       iface, IFNAMSIZ));
     return -1;
   }
-  std::strncpy(ifr.ifr_name, iface, IFNAMSIZ);
+  std::strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name));
   const ACE_HANDLE h = ACE_OS::socket(PF_INET, SOCK_DGRAM, 0);
   if (h == ACE_INVALID_HANDLE) {
     return -1;

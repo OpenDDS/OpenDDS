@@ -938,8 +938,8 @@ InfoRepoDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         // name as the repo key
         repoKey = repo_name;
       }
-      InfoRepoDiscovery_rch discovery =
-        new InfoRepoDiscovery(repoKey, repoIor.c_str());
+      InfoRepoDiscovery_rch discovery(
+        make_rch<InfoRepoDiscovery>(repoKey, repoIor.c_str()));
       if (bitPortSpecified) discovery->bit_transport_port(bitPort);
       if (bitIpSpecified) discovery->bit_transport_ip(bitIp);
       TheServiceParticipant->add_discovery(
