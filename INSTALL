@@ -25,7 +25,7 @@ BUILDING OpenDDS
   Optionally add "--help" to the command line to see the advanced options
   available for this script.  The configure script will download ACE+TAO and
   configure it for your platform.  To use an existing ACE+TAO installation,
-  either set the ACE_ROOT and TAO_ROOT enviornment variables or pass the --ace
+  either set the ACE_ROOT and TAO_ROOT environment variables or pass the --ace
   and --tao (if TAO is not at $ACE_ROOT/TAO) options to configure.
   If configure runs successfully it will end with a message about the next
   steps for compiling OpenDDS.
