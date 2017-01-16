@@ -261,7 +261,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
   // instantiate it now.
   const DCPS::Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
   if (discoveryMap.find(Discovery::DEFAULT_RTPS) == discoveryMap.end()) {
-    TheServiceParticipant->add_discovery(OpenDDS::DCPS::make_rch<RtpsDiscovery>(Discovery::DEFAULT_RTPS));
+    TheServiceParticipant->add_discovery(OpenDDS::DCPS::make_rch<RtpsDiscovery>(RepoKey(Discovery::DEFAULT_RTPS)));
   }
 
   return 0;
