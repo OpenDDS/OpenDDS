@@ -24,9 +24,9 @@ class RtpsUdpType : public TransportType {
 public:
   const char* name() { return RTPS_UDP_NAME; }
 
-  TransportInst* new_inst(const OPENDDS_STRING& name)
+  TransportInst_rch new_inst(const OPENDDS_STRING& name)
   {
-    return new RtpsUdpInst(name);
+    return make_rch<RtpsUdpInst>(name);
   }
 };
 
@@ -38,7 +38,7 @@ RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   if (initialized) return 0;  // already initialized
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(new RtpsUdpType);
+  registry->register_type(make_rch<RtpsUdpType>());
   // Don't create a default for RTPS.  At least for the initial implementation,
   // the user needs to explicitly configure it...
 #ifdef OPENDDS_SAFETY_PROFILE

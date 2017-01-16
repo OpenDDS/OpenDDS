@@ -14,6 +14,8 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <iostream>
 
+#include "dds/DCPS/StaticIncludes.h"
+
 #include "common.h"
 
 

@@ -50,8 +50,8 @@ public:
   void track_message();
 
 private:
-  void listener_add_ref() {}
-  void listener_remove_ref() {}
+  void _add_ref() {}
+  void _remove_ref() {}
 
   MessageTracker tracker_;
 };

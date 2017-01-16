@@ -205,8 +205,8 @@ void shutdown ()
   topic[1] = 0;
   subscriber[0] = 0;
   subscriber[1] = 0;
-  reader_impl[0] = 0;
-  reader_impl[1] = 0;
+  reader_impl[0].reset();
+  reader_impl[1].reset();
   listener[0] = 0;
   listener[1] = 0;
   datareader[0] = 0;

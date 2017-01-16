@@ -246,7 +246,7 @@ void run_sample_list_test ()
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     sample[i]
-      = new DataSampleElement(repoId, 0, 0, 0, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), 0, 0);
     list.enqueue_tail(sample[i]);
   }
   TEST_CHECK( list.begin() != list.end() );
@@ -334,7 +334,7 @@ void run_next_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -426,7 +426,7 @@ void run_next_send_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
     list.enqueue_tail (sample);
   }
 
@@ -434,7 +434,7 @@ void run_next_send_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -531,7 +531,7 @@ void run_next_instance_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;

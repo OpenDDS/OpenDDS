@@ -80,7 +80,7 @@ class OpenDDS_Dcps_Export DataWriterImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportSendListener,
-    private ACE_Event_Handler {
+    private RcEventHandler {
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
@@ -480,6 +480,13 @@ public:
     return db_lock_pool_->get_lock();
   }
 
+ /**
+  *  Attempt to locate an existing instance for the given handle.
+  */
+ PublicationInstance_rch get_handle_instance(
+   DDS::InstanceHandle_t handle);
+
+
 protected:
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
@@ -495,11 +502,6 @@ protected:
   /// The multiplier for allocators affected by associations
   size_t                     association_chunk_multiplier_;
 
-  /**
-   *  Attempt to locate an existing instance for the given handle.
-   */
-  PublicationInstance* get_handle_instance(
-    DDS::InstanceHandle_t handle);
 
   /// The type name of associated topic.
   CORBA::String_var               type_name_;
@@ -588,9 +590,6 @@ private:
 
   void association_complete_i(const RepoId& remote_id);
 
-  void listener_add_ref();
-  void listener_remove_ref();
-
   friend class ::DDS_TEST; // allows tests to get at privates
 
   /// The name of associated topic.
@@ -676,7 +675,7 @@ private:
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  RcEventHandler<OfferedDeadlineWatchdog> watchdog_;
+  RcHandle<OfferedDeadlineWatchdog> watchdog_;
   /// The flag indicates whether the liveliness timer is scheduled and
   /// needs be cancelled.
   bool                       cancel_timer_;

@@ -126,7 +126,7 @@ protected:
 
 private:
   ACE_Thread_Mutex ack_lock_;
-  RcEventHandler<SynWatchdog> syn_watchdog_;
+  RcHandle<SynWatchdog> syn_watchdog_;
 };
 
 } // namespace DCPS

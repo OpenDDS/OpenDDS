@@ -24,6 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ShmemInst;
+typedef RcHandle<ShmemInst> ShmemInst_rch;
 
 class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
 public:
@@ -33,6 +34,8 @@ public:
   ShmemAllocator* alloc() { return alloc_; }
   std::string address();
   void signal_semaphore();
+
+  ShmemInst_rch config() const;
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -59,16 +62,14 @@ protected:
 private:
 
   /// Create a new link (using make_datalink) and add it to the map
-  DataLink* add_datalink(const std::string& remote_address);
+  DataLink_rch add_datalink(const std::string& remote_address);
 
   /// Create the DataLink object and start it
-  ShmemDataLink* make_datalink(const std::string& remote_address);
+  ShmemDataLink_rch make_datalink(const std::string& remote_address);
 
   std::pair<std::string, std::string> blob_to_key(const TransportBLOB& blob);
 
   void read_from_links(); // callback from ReadTask
-
-  RcHandle<ShmemInst> config_i_;
 
   typedef ACE_Thread_Mutex        LockType;
   typedef ACE_Guard<LockType>     GuardType;

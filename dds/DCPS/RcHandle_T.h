@@ -13,6 +13,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+struct inc_count {};
+struct keep_count {};
+
 /// Templated Reference counted handle to a pointer.
 /// A non-DDS specific helper class.
 template <typename T>
@@ -23,12 +26,16 @@ public:
     : ptr_(0)
   {}
 
-  RcHandle(T* p, bool take_ownership = true)
+  RcHandle(T* p, keep_count)
     : ptr_(p)
   {
-    if (!take_ownership) {
-      this->bump_up();
-    }
+  }
+
+
+  RcHandle(T* p, inc_count)
+    : ptr_(p)
+  {
+    this->bump_up();
   }
 
   template <typename U>
@@ -49,17 +56,17 @@ public:
     this->bump_down();
   }
 
-
-  void reset(T* p=0)
+  void reset()
   {
-    RcHandle tmp(p);
+    RcHandle tmp;
     swap(tmp);
   }
 
-  RcHandle& operator=(T* p)
+  template <typename U>
+  void reset(T* p, U counting_strategy)
   {
-    this->reset(p);
-    return *this;
+    RcHandle tmp(p, counting_strategy);
+    swap(tmp);
   }
 
   RcHandle& operator=(const RcHandle& b)
@@ -122,6 +129,12 @@ public:
     return retval;
   }
 
+
+  operator bool() const
+  {
+    return in() != 0;
+  }
+
   bool operator==(const RcHandle& rhs) const
   {
     return in() == rhs.in();
@@ -168,19 +181,115 @@ void swap(RcHandle<T>& lhs, RcHandle<T>& rhs)
 template <typename T, typename U>
 RcHandle<T> static_rchandle_cast(const RcHandle<U>& h)
 {
-  return RcHandle<T>(static_cast<T*>(h.in()), false);
+  return RcHandle<T>(static_cast<T*>(h.in()), inc_count());
 }
 
 template <typename T, typename U>
 RcHandle<T> const_rchandle_cast(const RcHandle<U>& h)
 {
-  return RcHandle<T>(const_cast<T*>(h.in()), false);
+  return RcHandle<T>(const_cast<T*>(h.in()), inc_count());
 }
 
 template <typename T, typename U>
 RcHandle<T> dynamic_rchandle_cast(const RcHandle<U>& h)
 {
-  return RcHandle<T>(dynamic_cast<T*>(h.in()), false);
+  return RcHandle<T>(dynamic_cast<T*>(h.in()), inc_count());
+}
+
+
+template< class T >
+class reference_wrapper{
+public:
+  // types
+  typedef T type;
+
+  // construct/copy/destroy
+  reference_wrapper(T& ref): _ptr(&ref) {}
+  // access
+  operator T& () const { return *_ptr; }
+  T& get() const { return *_ptr; }
+
+private:
+  T* _ptr;
+};
+
+template <typename T>
+reference_wrapper<T> ref(T& r)
+{
+  return reference_wrapper<T>(r);
+}
+
+template <typename T>
+T const& unwrap_reference(T const& t)
+{
+  return t;
+}
+
+template <typename T>
+T& unwrap_reference(reference_wrapper<T> const& t)
+{
+  return t.get();
+}
+
+
+template <typename T>
+RcHandle<T> make_rch()
+{
+  return RcHandle<T>(new T(), keep_count());
+}
+
+template <typename T, typename U>
+RcHandle<T> make_rch(U const& u)
+{
+  return RcHandle<T>(new T(unwrap_reference(u)), keep_count());
+}
+
+template <typename T, typename U0, typename U1>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2, typename U3>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2, typename U3, typename U4>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 const& u4)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2, typename U3, typename U4, typename U5>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 const& u4, U5 const& u5)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2, typename U3, typename U4, typename U5, typename U6>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 const& u4, U5 const& u5, U6 const& u6)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5), unwrap_reference(u6)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 const& u4, U5 const& u5, U6 const& u6, U7 const& u7)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5), unwrap_reference(u6), unwrap_reference(u7)), keep_count());
+}
+
+template<typename T>
+RcHandle<T> rchandle_from(T* pointer)
+{
+  return RcHandle<T>(pointer, inc_count());
 }
 
 } // namespace DCPS

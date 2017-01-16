@@ -24,6 +24,8 @@ namespace DCPS {
 
 class TransportSendListener;
 class DataSampleElement;
+class DataLinkSet;
+typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
 class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX> {
 public:
@@ -33,7 +35,7 @@ public:
 
   // Returns 0 for success, -1 for failure, and 1 for failure due
   // to duplicate entry (link is already a member of the set).
-  int insert_link(DataLink* link);
+  int insert_link(const DataLink_rch& link);
 
   void remove_link(const DataLink_rch& link);
 
@@ -44,10 +46,10 @@ public:
   void send_control(DataSampleElement* sample);
 
   /// Send control message to each DataLink in the set.
-  SendControlStatus send_control(RepoId                  pub_id,
-                                 TransportSendListener*  listener,
-                                 const DataSampleHeader& header,
-                                 ACE_Message_Block*      msg,
+  SendControlStatus send_control(RepoId                           pub_id,
+                                 const TransportSendListener_rch& listener,
+                                 const DataSampleHeader&          header,
+                                 ACE_Message_Block*               msg,
                                  TransportSendControlElementAllocator* allocator = 0);
 
   void send_response(RepoId sub_id,
@@ -66,8 +68,8 @@ public:
   /// clears the set.
   void send_stop(RepoId repoId);
 
-  DataLinkSet* select_links(const RepoId* remoteIds,
-                            const CORBA::ULong num_targets);
+  DataLinkSet_rch select_links(const RepoId* remoteIds,
+                               const CORBA::ULong num_targets);
 
   bool empty();
 

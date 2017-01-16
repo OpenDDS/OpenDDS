@@ -30,11 +30,11 @@ public:
   ReceiveListenerSetMap();
   virtual ~ReceiveListenerSetMap();
 
-  int insert(RepoId                    publisher_id,
-             RepoId                    subscriber_id,
-             TransportReceiveListener* receive_listener);
+  int insert(RepoId                              publisher_id,
+             RepoId                              subscriber_id,
+             const TransportReceiveListener_rch& receive_listener);
 
-  ReceiveListenerSet* find(RepoId publisher_id) const;
+  ReceiveListenerSet_rch find(RepoId publisher_id) const;
 
   int remove(RepoId publisher_id, RepoId subscriber_id);
 
@@ -47,7 +47,7 @@ public:
   /// also means it's element was removed from our map_).
   int release_subscriber(RepoId publisher_id, RepoId subscriber_id);
 
-  ReceiveListenerSet* remove_set(RepoId publisher_id);
+  ReceiveListenerSet_rch remove_set(RepoId publisher_id);
 
   ssize_t size() const;
 
@@ -61,7 +61,7 @@ public:
 
 private:
 
-  ReceiveListenerSet* find_or_create(RepoId publisher_id);
+  ReceiveListenerSet_rch find_or_create(RepoId publisher_id);
 
   MapType map_;
 };

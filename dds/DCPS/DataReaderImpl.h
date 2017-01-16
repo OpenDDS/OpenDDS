@@ -198,7 +198,7 @@ public:
   friend class QueryConditionImpl;
   friend class SubscriberImpl;
 
-  typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance*) SubscriptionInstanceMapType;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance_rch) SubscriptionInstanceMapType;
 
   /// Type of collection of statistics for writers to this reader.
   typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
@@ -252,10 +252,8 @@ public:
 
   virtual void _add_ref();
   virtual void _remove_ref();
-  /**
-   * cleanup the DataWriter.
-   */
-  void cleanup();
+
+  virtual void cleanup();
 
   void init(
     TopicDescriptionImpl* a_topic_desc,
@@ -389,13 +387,13 @@ public:
 #endif
 
   virtual void dds_demarshal(const ReceivedDataSample& sample,
-                             SubscriptionInstance*& instance,
+                             SubscriptionInstance_rch& instance,
                              bool & is_new_instance,
                              bool & filtered,
                              MarshalingType marshaling_type)= 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
-                                  SubscriptionInstance*& instance);
+                                  SubscriptionInstance_rch& instance);
 
   void process_latency(const ReceivedDataSample& sample);
   void notify_latency(PublicationId writer);
@@ -451,7 +449,7 @@ public:
 
   virtual void delete_instance_map (void* map) = 0;
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                               OpenDDS::DCPS::SubscriptionInstance*& instance) = 0;
+                               OpenDDS::DCPS::SubscriptionInstance_rch& instance) = 0;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -561,7 +559,7 @@ protected:
     const DDS::SampleRejectedStatus& status);
 
 //remove document this!
-  SubscriptionInstance* get_handle_instance(
+  SubscriptionInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
   /**
@@ -569,7 +567,7 @@ protected:
   */
   DDS::InstanceHandle_t get_next_handle(const DDS::BuiltinTopicKey_t& key);
 
-  virtual void purge_data(SubscriptionInstance* instance) = 0;
+  virtual void purge_data(SubscriptionInstance_rch instance) = 0;
 
   virtual void release_instance_i(DDS::InstanceHandle_t handle) = 0;
 
@@ -591,8 +589,15 @@ protected:
    *       QoS policy or DataReader's TIME_BASED_FILTER QoS policy.
    */
   bool filter_sample(const DataSampleHeader& header);
-  bool filter_instance(SubscriptionInstance* instance,
-                       const PublicationId& pubid);
+
+  bool ownership_filter_instance(const SubscriptionInstance_rch& instance,
+                                 const PublicationId& pubid);
+  bool time_based_filter_instance(const SubscriptionInstance_rch& instance,
+                                  ACE_Time_Value& filter_time_expired);
+
+  void accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance);
+
+  virtual void qos_change(const DDS::DataReaderQos& qos);
 
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
@@ -633,7 +638,7 @@ protected:
   DDS::SubscriberQos subqos_;
 
 protected:
-    virtual void add_link(const DataLink_rch& link, const RepoId& peer);
+  virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
 
@@ -668,9 +673,6 @@ private:
   /// deliver samples that were held by check_historic()
   void deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& samples);
 
-  void listener_add_ref() { EntityImpl::_add_ref(); }
-  void listener_remove_ref() { EntityImpl::_remove_ref(); }
-
   friend class InstanceState;
   friend class EndHistoricSamplesMissedSweeper;
   friend class RemoveAssociationSweeper<DataReaderImpl>;
@@ -683,8 +685,8 @@ private:
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
-  RcEventHandler<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
-  RcEventHandler<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
+  RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
+  RcHandle<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -793,12 +795,12 @@ private:
       }
     };
   };
-  RcEventHandler<LivelinessTimer> liveliness_timer_;
+  RcHandle<LivelinessTimer> liveliness_timer_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  RcEventHandler<RequestedDeadlineWatchdog> watchdog_;
+  RcHandle<RequestedDeadlineWatchdog> watchdog_;
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.

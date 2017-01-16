@@ -123,7 +123,7 @@ private:
 
   friend class TransportClient;
   TransportImpl_rch impl();
-  virtual TransportImpl* new_impl(const RcHandle<TransportInst>& inst) = 0;
+  virtual TransportImpl_rch new_impl(const RcHandle<TransportInst>& inst) = 0;
 
   const OPENDDS_STRING name_;
 

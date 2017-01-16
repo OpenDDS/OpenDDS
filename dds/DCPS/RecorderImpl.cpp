@@ -61,7 +61,7 @@ RecorderImpl::RecorderImpl()
   listener_mask_(DEFAULT_STATUS_MASK),
   domain_id_(0),
   remove_association_sweeper_(
-    new RemoveAssociationSweeper<RecorderImpl>(TheServiceParticipant->reactor(),
+    make_rch<RemoveAssociationSweeper<RecorderImpl> >(TheServiceParticipant->reactor(),
                                          TheServiceParticipant->reactor_owner(),
                                          this)),
   is_bit_(false)
@@ -334,7 +334,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       const PublicationId& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info = new WriterInfo(this, writer_id, writer.writerQos);
+      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos));
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       this->writers_.insert(
         // This insertion is idempotent.

@@ -52,19 +52,23 @@ public:
 
   virtual ~OfferedDeadlineWatchdog();
 
+
+  virtual int handle_timeout(const ACE_Time_Value&, const void* act);
+
+
   /// Operation to be executed when the associated timer expires.
   /**
    * This @c Watchdog object updates the
    * @c DDS::OfferedDeadlineMissed structure, and calls
    * @c DataWriterListener::on_requested_deadline_missed().
    */
-  virtual void execute(void const * act, bool timer_called);
+  void execute(PublicationInstance_rch instance, bool timer_called);
 
   // Schedule timer for the supplied instance.
-  void schedule_timer(PublicationInstance* instance);
+  void schedule_timer(PublicationInstance_rch instance);
 
   // Cancel timer for the supplied instance.
-  void cancel_timer(PublicationInstance* instance);
+  void cancel_timer(PublicationInstance_rch instance);
 
   /// Re-schedule timer for all instances of the DataWriter.
   virtual void reschedule_deadline();

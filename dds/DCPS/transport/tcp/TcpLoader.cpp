@@ -39,9 +39,9 @@ class TcpType : public TransportType {
 public:
   const char* name() { return TCP_NAME; }
 
-  TransportInst* new_inst(const std::string& name)
+  TransportInst_rch new_inst(const std::string& name)
   {
-    return new TcpInst(name);
+    return make_rch<TcpInst>(name);
   }
 };
 
@@ -57,7 +57,7 @@ TcpLoader::init(int, ACE_TCHAR*[])
     return 0;
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(new TcpType);
+  registry->register_type(make_rch<TcpType>());
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           std::string("0500_TCP"), TCP_NAME);

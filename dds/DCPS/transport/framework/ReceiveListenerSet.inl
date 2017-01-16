@@ -39,26 +39,26 @@ ReceiveListenerSet::operator=(const ReceiveListenerSet& rhs)
   return *this;
 }
 
+
 ACE_INLINE int
 ReceiveListenerSet::insert(RepoId subscriber_id,
-                           TransportReceiveListener* listener)
+                           const TransportReceiveListener_rch& listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "insert", 6);
   GuardType guard(this->lock_);
-  MapType::iterator iter = map_.find(subscriber_id);
-  if (iter != map_.end()) {
-    if (!listener && iter->second) {
-      // subscriber_id is already in the map with a non-null listener,
-      // and this call to insert() is trying to make it null.
-      return 1; // 1 ==> key already existed in map
-    } else if (listener && !iter->second) {
+
+  std::pair<MapType::iterator,bool> r = map_.insert(std::make_pair(subscriber_id,listener));
+  if (!r.second) {
+    // subscriber_id is already in the map
+    if (!r.first->second) {
       // subscriber_id is in the map with a null listener, update it.
-      iter->second = listener;
-      return 1;
+      r.first->second = listener;
     }
+    return 1; // 1 ==> key already existed in map
   }
-  return OpenDDS::DCPS::bind(map_, subscriber_id, listener);
+  return 0;
 }
+
 
 ACE_INLINE int
 ReceiveListenerSet::remove(RepoId subscriber_id)

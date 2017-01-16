@@ -26,10 +26,10 @@ OpenDDS::DCPS::TcpInst::~TcpInst()
   DBG_ENTRY_LVL("TcpInst","~TcpInst",6);
 }
 
-OpenDDS::DCPS::TcpTransport*
+OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TcpInst::new_impl(const TransportInst_rch& inst)
 {
-  return new TcpTransport(inst);
+  return make_rch<TcpTransport>(inst);
 }
 
 int

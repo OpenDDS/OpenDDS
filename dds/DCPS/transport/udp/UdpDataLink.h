@@ -29,19 +29,18 @@ namespace DCPS {
 class UdpInst;
 class UdpTransport;
 class ReceivedDataSample;
+typedef RcHandle<UdpTransport> UdpTransport_rch;
 
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
 public:
-  UdpDataLink(UdpTransport* transport,
+  UdpDataLink(const UdpTransport_rch& transport,
               Priority   priority,
               bool          active);
 
   void configure(UdpInst* config,
                  TransportReactorTask* reactor_task);
 
-  void send_strategy(UdpSendStrategy* send_strategy);
-  void receive_strategy(UdpReceiveStrategy* recv_strategy);
 
   bool active() const;
 

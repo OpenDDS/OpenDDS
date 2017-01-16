@@ -9,6 +9,9 @@
 #define OPENDDS_DCPS_THREADSYNCHWORKER_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcHandle_T.h"
+#include "ace/Synch_Traits.h"
 #include <cstddef>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -16,7 +19,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ThreadSynchWorker {
+class OpenDDS_Dcps_Export ThreadSynchWorker
+  : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
   virtual ~ThreadSynchWorker();
@@ -43,6 +47,8 @@ protected:
 private:
   std::size_t id_;
 };
+
+typedef RcHandle<ThreadSynchWorker> ThreadSynchWorker_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -681,7 +681,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
     return ads;
   }
 
-  const RcHandle<StaticParticipant> participant = new StaticParticipant(id, qos, registry);
+  const RcHandle<StaticParticipant> participant (make_rch<StaticParticipant>(ref(id), qos, registry));
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
@@ -1427,7 +1427,17 @@ StaticDiscovery::parse_subscriberqos(ACE_Configuration_Heap& cf)
                             -1);
         }
       } else if (name == "partition.name") {
-        parse_list(subscriberqos.partition, value);
+        try {
+          parse_list(subscriberqos.partition, value);
+        }
+        catch (const CORBA::Exception& ex) {
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
+            ACE_TEXT("Exception caught while parsing partition.name (%C) ")
+            ACE_TEXT("in [subscriberqos/%C] section: %C.\n"),
+            value.c_str(), subscriberqos_name.c_str(), ex._info().c_str()),
+            -1);
+        }
       } else {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
@@ -1829,7 +1839,7 @@ void StaticDiscovery::pre_reader(DataReaderImpl* reader)
   }
 }
 
-StaticDiscovery_rch StaticDiscovery::instance_(new StaticDiscovery(Discovery::DEFAULT_STATIC));
+StaticDiscovery_rch StaticDiscovery::instance_(make_rch<StaticDiscovery>(Discovery::DEFAULT_STATIC));
 
 }
 }

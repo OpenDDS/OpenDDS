@@ -64,7 +64,7 @@ ReliableSession::ReliableSession(ACE_Reactor* reactor,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(reactor, owner, link, remote_peer),
-    nak_watchdog_(new NakWatchdog (reactor, owner, this))
+    nak_watchdog_(make_rch<NakWatchdog> (reactor, owner, this))
 {
 }
 

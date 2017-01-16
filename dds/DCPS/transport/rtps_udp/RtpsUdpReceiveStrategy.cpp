@@ -21,11 +21,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link)
+RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
   : link_(link)
   , last_received_()
   , recvd_sample_(0)
-  , receiver_(link->local_prefix())
+  , receiver_(local_prefix)
 {
 }
 

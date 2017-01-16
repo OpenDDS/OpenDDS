@@ -44,9 +44,11 @@ public:
 
 private:
   friend class ShmemType;
+  template <typename T, typename U>
+  friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit ShmemInst(const std::string& name);
 
-  ShmemTransport* new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl(const TransportInst_rch& inst);
   std::string hostname_;
   std::string poolname_;
 };

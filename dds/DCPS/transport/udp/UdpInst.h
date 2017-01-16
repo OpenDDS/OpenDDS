@@ -59,9 +59,11 @@ public:
 private:
   friend class UdpType;
   friend class UdpDataLink;
+  template <typename T, typename U>
+  friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit UdpInst(const std::string& name);
 
-  UdpTransport* new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl(const TransportInst_rch& inst);
 
   /// The address from which to send/receive data.
   /// The default value is: none.

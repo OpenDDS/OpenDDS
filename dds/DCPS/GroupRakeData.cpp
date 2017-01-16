@@ -22,7 +22,7 @@ GroupRakeData::GroupRakeData()
 
 
 bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
-                                  SubscriptionInstance* instance,
+                                  SubscriptionInstance_rch instance,
                                   size_t index_in_instance)
 {
   // Ignore DISPOSE and UNREGISTER messages in case they are sent

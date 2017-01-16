@@ -73,10 +73,10 @@ public:
     return ::DDS::RETCODE_ERROR;
   }
 
-  virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance*) {}
+  virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch) {}
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
   virtual void dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
-                             OpenDDS::DCPS::SubscriptionInstance *&,
+                             OpenDDS::DCPS::SubscriptionInstance_rch &,
                              bool &,
                              bool &,
                              OpenDDS::DCPS::MarshalingType) {}
@@ -86,7 +86,7 @@ public:
     DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&,
     const DDS::StringSeq&) { return true; }
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample&,
-                               OpenDDS::DCPS::SubscriptionInstance*&) {}
+                               OpenDDS::DCPS::SubscriptionInstance_rch&) {}
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::ReturnCode_t read_generic(

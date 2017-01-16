@@ -24,17 +24,17 @@ class TcpAcceptor : public ACE_Acceptor<TcpConnection,
       ACE_SOCK_ACCEPTOR> {
 public:
 
-  TcpAcceptor(TcpTransport* transport_impl);
+  TcpAcceptor(const TcpTransport_rch& transport_impl);
   virtual ~TcpAcceptor();
 
   // Returns a reference that the caller becomes responsible for.
-  TcpTransport* transport();
+  TcpTransport_rch transport();
 
   // This causes the Acceptor to drop its reference to the
   // TcpTransport object.
   void transport_shutdown();
 
-  TcpInst* get_configuration();
+  TcpInst_rch get_configuration();
 
 private:
 

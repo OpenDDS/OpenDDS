@@ -20,60 +20,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-namespace {
-
-  struct ReceiveListenerHandle {
-    explicit ReceiveListenerHandle(TransportReceiveListener* trl)
-      : listener_(trl)
-    {
-      if (listener_) listener_->listener_add_ref();
-    }
-
-    ReceiveListenerHandle(const ReceiveListenerHandle& rhs)
-      : listener_(rhs.listener_)
-    {
-      if (listener_) listener_->listener_add_ref();
-    }
-
-    ReceiveListenerHandle& operator=(const ReceiveListenerHandle& rhs);
-
-    ~ReceiveListenerHandle()
-    {
-      if (listener_) listener_->listener_remove_ref();
-    }
-
-  private:
-    typedef void (ReceiveListenerHandle::*bool_t)() const;
-    void no_implicit_conversion() const {}
-
-  public:
-    operator bool_t() const
-    {
-      return listener_ ? &ReceiveListenerHandle::no_implicit_conversion : 0;
-    }
-
-    TransportReceiveListener* operator->() const
-    {
-      return listener_;
-    }
-
-    TransportReceiveListener* listener_;
-  };
-
-  void swap(ReceiveListenerHandle& lhs, ReceiveListenerHandle& rhs)
-  {
-    std::swap(lhs.listener_, rhs.listener_);
-  }
-
-  ReceiveListenerHandle&
-  ReceiveListenerHandle::operator=(const ReceiveListenerHandle& rhs)
-  {
-    ReceiveListenerHandle cpy(rhs);
-    swap(*this, cpy);
-    return *this;
-  }
-}
-
 ReceiveListenerSet::~ReceiveListenerSet()
 {
   DBG_ENTRY_LVL("ReceiveListenerSet","~ReceiveListenerSet",6);
@@ -86,7 +32,7 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
 
   last = true;
 
-  TransportReceiveListener* listener = 0;
+  TransportReceiveListener_rch listener;
 
   if (find(map_, local_id, listener) == -1) {
     GuidConverter converter(local_id);
@@ -98,7 +44,7 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
     return false;
   }
 
-  if (listener == 0) {
+  if (!listener) {
     GuidConverter converter(local_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
@@ -128,7 +74,7 @@ ReceiveListenerSet::exist(const RepoId& local_id)
 {
   GuardType guard(this->lock_);
 
-  TransportReceiveListener* listener = 0;
+  TransportReceiveListener_rch listener;
   return (find(map_, local_id, listener) == -1 ? false : true);
 }
 
@@ -145,17 +91,17 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
                                   ConstrainReceiveSet constrain)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);
-  OPENDDS_VECTOR(ReceiveListenerHandle) handles;
+  OPENDDS_VECTOR(RcHandle<TransportReceiveListener>) handles;
   {
     GuardType guard(this->lock_);
     for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
       if (constrain == ReceiveListenerSet::SET_EXCLUDED) {
         if (itr->second && incl_excl.count(itr->first) == 0) {
-          handles.push_back(ReceiveListenerHandle(itr->second));
+          handles.push_back(itr->second);
         }
       } else if (constrain == ReceiveListenerSet::SET_INCLUDED) { //SET_INCLUDED
         if (itr->second && incl_excl.count(itr->first) != 0) {
-          handles.push_back(ReceiveListenerHandle(itr->second));
+          handles.push_back(itr->second);
         }
       } else {
         ACE_DEBUG((LM_ERROR, "(%P|%t) ERROR: ReceiveListenerSet::data_received - NOTHING\n"));
@@ -180,12 +126,12 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
                                   const RepoId& readerId)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received(sample, readerId)", 6);
-  ReceiveListenerHandle h(0);
+  RcHandle<TransportReceiveListener> h;
   {
     GuardType guard(this->lock_);
     MapType::iterator itr = map_.find(readerId);
     if (itr != map_.end() && itr->second) {
-      h = ReceiveListenerHandle(itr->second);
+      h = itr->second;
     }
   }
   if (h) h->data_received(sample);

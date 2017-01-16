@@ -16,6 +16,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -75,14 +76,6 @@ private:
   RcObject& operator=(const RcObject&);
 };
 
-template <class T>
-struct EnableSharedFromThis
-{
-  RcHandle<T> shared_from_this()
-  {
-    return RcHandle<T>(static_cast<T*>(this), false);
-  }
-};
 
 } // namespace DCPS
 } // namespace OpenDDS

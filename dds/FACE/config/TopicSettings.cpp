@@ -19,7 +19,9 @@ TopicSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "max_message_size")) {
     max_message_size_ = atoi(value);
   } else if (!std::strcmp(name, "type_name")) {
-    if (std::strlen(value) >= TYPE_NAME_LEN) {
+    // Guarantee that value will fit in type_name_ and still be null terminated
+    // type_name_ is sized to TYPE_NAME_LEN
+    if (std::strlen(value) >= sizeof(type_name_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Type name %C exceeds allowable length,"
         "must be < %d \n"), value, TYPE_NAME_LEN));
       status = 1;

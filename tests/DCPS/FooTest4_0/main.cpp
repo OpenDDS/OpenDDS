@@ -440,8 +440,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dp->delete_topic(topic.in ());
       dpf->delete_participant(dp.in ());
 
-      writer_transport_impl = 0;
-      reader_transport_impl = 0;
+      writer_transport_impl.reset();
+      reader_transport_impl.reset();
 
       TheServiceParticipant->shutdown ();
 

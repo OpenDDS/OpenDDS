@@ -204,8 +204,8 @@ private:
                            DCPS::SequenceNumber& sequence,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
-    void listener_add_ref() {}
-    void listener_remove_ref() {}
+    void _add_ref() {}
+    void _remove_ref() {}
 
   } publications_writer_, subscriptions_writer_, participant_message_writer_;
 
@@ -236,9 +236,6 @@ private:
 
     virtual void _add_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref(); }
     virtual void _remove_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref(); }
-
-    void listener_add_ref() { _add_ref(); }
-    void listener_remove_ref() { _remove_ref(); }
 
     ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> shutting_down_;
   };

@@ -37,7 +37,7 @@ public:
 
   virtual const char* name() = 0;
 
-  virtual TransportInst* new_inst(const OPENDDS_STRING& name) = 0;
+  virtual TransportInst_rch new_inst(const OPENDDS_STRING& name) = 0;
 
 protected:
 

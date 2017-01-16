@@ -15,7 +15,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 DataWriterRemoteImpl::DataWriterRemoteImpl(DataWriterCallbacks* parent)
-  : parent_(parent, false)
+  : parent_(rchandle_from(parent))
 {
 }
 
@@ -28,7 +28,7 @@ DataWriterRemoteImpl::~DataWriterRemoteImpl()
 void
 DataWriterRemoteImpl::detach_parent()
 {
-  this->parent_ = 0;
+  this->parent_.reset();
 }
 
 void

@@ -228,7 +228,7 @@ namespace {
         ") == 0) {\n"
         "      return make_struct_cmp(&T::" << fieldName <<
         ", getMetaStruct<" << fieldType << ">().create_qc_comparator("
-        "field + " << n << ", 0), next);\n"
+        "field + " << n << "), next);\n"
         "    }\n";
     }
   }

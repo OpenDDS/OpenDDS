@@ -17,6 +17,8 @@
 #include "ReceivedDataStrategy.h"
 #include "InstanceState.h"
 #include "PoolAllocationBase.h"
+#include "RcObject_T.h"
+#include "ace/Synch_Traits.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -35,7 +37,7 @@ class DataReaderImpl;
   * @brief Struct that has information about an instance and the instance
   *        sample list.
   */
-class SubscriptionInstance : public PoolAllocationBase {
+class SubscriptionInstance : public RcObject<ACE_SYNCH_MUTEX> {
 public:
   SubscriptionInstance(DataReaderImpl *reader,
                        const DDS::DataReaderQos& qos,
@@ -95,6 +97,8 @@ public:
 
   ACE_Time_Value   last_accepted_;
 };
+
+typedef RcHandle<SubscriptionInstance> SubscriptionInstance_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

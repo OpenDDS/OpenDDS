@@ -91,14 +91,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
 
 #ifndef DDS_HAS_MINIMUM_BIT
-      OpenDDS::RTPS::RtpsDiscovery_rch disc =
-        new OpenDDS::RTPS::RtpsDiscovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
+      OpenDDS::RTPS::RtpsDiscovery_rch disc = OpenDDS::DCPS::make_rch<OpenDDS::RTPS::RtpsDiscovery>(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
 
       // The recommended value for the resend period is 2 seconds for
       // the current implementation of OpenDDS.
       disc->resend_period(ACE_Time_Value(2));
 
-      TheServiceParticipant->add_discovery(OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::Discovery>(disc));
+      TheServiceParticipant->add_discovery(disc);
       TheServiceParticipant->set_repo_domain(11, disc->key());
 #endif
       TheServiceParticipant->set_default_discovery (OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
