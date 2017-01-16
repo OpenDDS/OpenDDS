@@ -276,7 +276,9 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   // framework (TransportHeader, DataSampleHeader,
   // ReceiveStrategy).
   const char ack_data = 23;
-  server_link_->socket().send(&ack_data, 1, remote_address);
+  if (server_link_->socket().send(&ack_data, 1, remote_address) <= 0) {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection failed to send ack\n"));
+  }
 
   const PriorityKey key = blob_to_key(blob, priority, config()->local_address(), false /* passive */);
 
