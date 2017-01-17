@@ -859,9 +859,19 @@ DomainParticipantImpl::get_filter_eval(const char* filter)
                    RcHandle<FilterEvaluator>());
 
   RcHandle<FilterEvaluator>& result = filter_cache_[filter];
-  if (!result)
-    result = make_rch<FilterEvaluator>(filter, false);
-
+  if (!result) {
+    try {
+      result = make_rch<FilterEvaluator>(filter, false);
+    } catch (const std::exception& e) {
+      filter_cache_.erase(filter);
+      if (DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DomainParticipantImpl::get_filter_eval, ")
+                   ACE_TEXT("can't create a writer-side content filter due to ")
+                   ACE_TEXT("runtime error: %C.\n"), e.what()));
+      }
+    }
+  }
   return result;
 }
 
