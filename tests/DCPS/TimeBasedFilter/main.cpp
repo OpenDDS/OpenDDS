@@ -27,7 +27,7 @@ namespace
 static DDS::Duration_t minimum_separation = { 5, 0 };
 static bool reliable = false;
 
-static const size_t NUM_INSTANCES = 2;
+static const ::CORBA::Long NUM_INSTANCES = 2;
 static const size_t SAMPLES_PER_CYCLE = 5;
 
 void
@@ -62,7 +62,7 @@ typedef std::pair<Foo, DDS::SampleInfo> FooInfo;
 typedef std::vector<FooInfo> Foos;
 typedef std::map< ::CORBA::Long, Foos> SampleMap;
 
-bool verify_unreliable(FooDataReader_var reader_i, const size_t expected_samples, SampleMap& samples)
+bool verify_unreliable(const size_t expected_samples, SampleMap& samples)
 {
   bool valid = true;
 
@@ -93,7 +93,7 @@ bool verify_unreliable(FooDataReader_var reader_i, const size_t expected_samples
 }
 
 
-bool verify_reliable(FooDataReader_var reader_i, const size_t expected_samples, SampleMap& samples)
+bool verify_reliable(const size_t expected_samples, SampleMap& samples)
 {
   bool valid = true;
   for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
@@ -351,9 +351,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     }
 
     if (reliable) {
-      valid = verify_reliable(reader_i, EXPECTED_SAMPLES, samples);
+      valid = verify_reliable(EXPECTED_SAMPLES, samples);
     } else {
-      valid = verify_unreliable(reader_i, EXPECTED_SAMPLES, samples);
+      valid = verify_unreliable(EXPECTED_SAMPLES, samples);
     }
 
     // Clean-up!
