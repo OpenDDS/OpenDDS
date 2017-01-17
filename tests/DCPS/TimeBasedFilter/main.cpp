@@ -18,9 +18,11 @@
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 
 #include "FooTypeTypeSupportImpl.h"
+#include "FooTypeTypeSupportC.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #include "ace/OS_NS_unistd.h"
+#include "ace/Condition_T.h"
 
 namespace
 {
@@ -29,6 +31,7 @@ static bool reliable = false;
 
 static const ::CORBA::Long NUM_INSTANCES = 2;
 static const size_t SAMPLES_PER_CYCLE = 5;
+static const size_t SEPARATION_MULTIPLIER = 2;
 
 void
 parse_args(int& argc, ACE_TCHAR** argv)
@@ -58,16 +61,168 @@ parse_args(int& argc, ACE_TCHAR** argv)
 
 } // namespace
 
-typedef std::pair<Foo, DDS::SampleInfo> FooInfo;
+typedef std::pair<Foo, ACE_Time_Value> FooInfo;
 typedef std::vector<FooInfo> Foos;
 typedef std::map< ::CORBA::Long, Foos> SampleMap;
 
-bool verify_unreliable(const size_t expected_samples, SampleMap& samples)
+class DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
+public:
+  DataReaderListenerImpl(unsigned int expected_num_samples)
+  : condition_(lock_)
+  , expected_num_samples_(expected_num_samples)
+  , num_samples_(0)
+  , valid_(true)
+  {
+  }
+
+  virtual ~DataReaderListenerImpl()
+  {
+  }
+
+  void on_data_available(DDS::DataReader_ptr reader)
+  {
+    try {
+      FooDataReader_var message_dr =
+        FooDataReader::_narrow(reader);
+
+      if (CORBA::is_nil(message_dr.in())) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%T %N:%l: on_data_available()")
+          ACE_TEXT(" ERROR: _narrow failed!\n")));
+        ACE_OS::exit(-1);
+      }
+
+      FooSeq foos;
+      DDS::SampleInfoSeq info;
+
+      DDS::ReturnCode_t error = message_dr->take(foos, info, DDS::LENGTH_UNLIMITED,
+        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+      ACE_Time_Value now(ACE_OS::gettimeofday());
+
+      ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
+      if (error == DDS::RETCODE_OK) {
+        for (unsigned int i = 0; i < foos.length(); ++i) {
+          const DDS::SampleInfo& si = info[i];
+          if (si.valid_data) {
+            const Foo& foo = foos[i];
+            map_[foo.key].push_back(std::make_pair(foo, now));
+            ++num_samples_;
+          }
+          else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: instance is disposed\n")));
+          }
+          else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: instance is unregistered\n")));
+
+          }
+          else {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("%T %N:%l: on_data_available()")
+              ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+              si.instance_state));
+          }
+        }
+      }
+      else {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%T %N:%l: on_data_available()")
+          ACE_TEXT(" ERROR: unexpected status: %d\n"),
+          error));
+      }
+
+      if (complete()) {
+        condition_.signal();
+      }
+    }
+    catch (const CORBA::Exception& e) {
+      e._tao_print_exception("Exception caught in on_data_available():");
+      ACE_OS::exit(-1);
+    }
+  }
+
+  void on_requested_deadline_missed(DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus& status)
+  {
+    valid_ = false;
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("%T %N:%l: on_requested_deadline_missed()")
+      ACE_TEXT(" ERROR: should not occur\n")));
+  }
+
+  void on_requested_incompatible_qos(DDS::DataReader_ptr reader, const DDS::RequestedIncompatibleQosStatus& status)
+  {
+    valid_ = false;
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("%T %N:%l: on_requested_incompatible_qos()")
+      ACE_TEXT(" ERROR: should not occur\n")));
+  }
+
+  void on_liveliness_changed(DDS::DataReader_ptr reader, const DDS::LivelinessChangedStatus& status)
+  {
+  }
+
+  void on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status)
+  {
+  }
+
+  void on_sample_rejected(DDS::DataReader_ptr reader, const DDS::SampleRejectedStatus& status)
+  {
+    valid_ = false;
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("%T %N:%l: on_sample_rejected()")
+      ACE_TEXT(" ERROR: should not occur\n")));
+  }
+
+  void on_sample_lost(DDS::DataReader_ptr reader, const DDS::SampleLostStatus& status)
+  {
+    valid_ = false;
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("%T %N:%l: on_sample_lost()")
+      ACE_TEXT(" ERROR: should not occur\n")));
+  }
+
+  void wait_for_completion()
+  {
+    ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
+    ACE_Time_Value start(ACE_OS::gettimeofday());
+    ACE_Time_Value wait_time(180);
+    do {
+      condition_.wait(&wait_time);
+    } while (!complete() && (ACE_OS::gettimeofday() - start >= wait_time));
+  }
+
+  SampleMap map_;
+  bool valid_;
+
+private:
+
+  bool complete() const
+  {
+    return expected_num_samples_ >= num_samples_;
+  }
+
+  ACE_SYNCH_MUTEX lock_;
+  ACE_Condition<ACE_SYNCH_MUTEX> condition_;
+  unsigned int num_samples_;
+  const unsigned int expected_num_samples_;
+};
+
+void validate(const float expected, const float actual, const int key, const char* loc, bool& valid)
+{
+  if (expected != actual) {
+    valid = false;
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("%N:%l main()")
+      ACE_TEXT(" ERROR: for key %d received %C=%f, expected %f!\n"),
+      key, loc, actual, expected));
+  }
+}
+
+bool verify_unreliable(const size_t expected_samples, SampleMap& rcvd_samples)
 {
   bool valid = true;
 
   for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
-    const Foos& foos = samples[j];
+    const Foos& foos = rcvd_samples[j];
     size_t seen = foos.size();
     if (seen != expected_samples) {
       valid = false;
@@ -80,45 +235,112 @@ bool verify_unreliable(const size_t expected_samples, SampleMap& samples)
         const FooInfo& fooInfo = foos[i];
         // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first sent
         // message will also be the first received message in the data reader
-        if (fooInfo.first.x != 0.0f) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("%N:%l main()")
-            ACE_TEXT(" ERROR: for key %d received x=%f, expected 0.0!\n"),
-            j, fooInfo.first.x));
-        }
+        validate(fooInfo.first.x, 0.0f, j, "x", valid);
       }
     }
   }
   return valid;
 }
 
-
-bool verify_reliable(const size_t expected_samples, SampleMap& samples)
+bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, SampleMap& sent_samples)
 {
   bool valid = true;
   for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
-    const Foos& foos = samples[j];
+    const Foos& foos = rcvd_samples[j];
+    const Foos& sent_foos = sent_samples[j];
     size_t seen = foos.size();
     // each delay should result in 2 samples being seen, the first one and the last one in the filter window
-    if (seen != expected_samples * 2) {
+    if (seen != expected_samples) {
       valid = false;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
         j, seen, expected_samples));
     } else {
-      for (size_t i = 0; i < expected_samples * 2; ++i) {
-        const FooInfo& fooInfo = foos[i];
+      const float LAST_SAMPLE_X = (float)(SAMPLES_PER_CYCLE - 1);
         // each successive sample was sent with x = 0.0 to x = (SAMPLES_PER_CYCLE - 1)
         // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first and last sent
         // message will also be the first and last received message in the data reader
-        const float expected = (i % 2) == 0 ? 0.0f : (float)(SAMPLES_PER_CYCLE - 1);
-        if (fooInfo.first.x != expected) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("%N:%l main()")
-            ACE_TEXT(" ERROR: for key %d received x=%f, expected %f!\n"),
-            j, fooInfo.first.x, expected));
-        }
+      const FooInfo* foo_info = &foos[0];
+      validate(foo_info->first.x, 0.0f, 0, "x", valid);
+      validate(foo_info->first.y, 0.0f, 0, "y", valid);
+      ACE_Time_Value diff = foo_info->second - sent_foos[0].second;
+      if (diff.sec() > minimum_separation.sec) {
+        valid = false;
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+        ACE_TEXT(" ERROR: Test setup incorrectly, sending and receiving samples should not take %d seconds!\n"),
+        diff.sec()));
+      }
+
+      foo_info = &foos[1];
+      validate(foo_info->first.x, LAST_SAMPLE_X, 1, "x", valid);
+      validate(foo_info->first.y, 0.0f, 1, "y", valid);
+
+      diff = foo_info->second - foos[0].second;
+      if (diff.sec() < (minimum_separation.sec * 0.75) ||
+          diff.sec() > (minimum_separation.sec * 1.5)) {
+        valid = false;
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: The time between the 1st and 2nd sample should be about %d seconds, but it was %d seconds!\n"),
+          minimum_separation.sec, diff.sec()));
+      }
+
+      foo_info = &foos[2];
+      validate(foo_info->first.x, LAST_SAMPLE_X, 2, "x", valid);
+      validate(foo_info->first.y, 1.0f, 2, "y", valid);
+
+      diff = foo_info->second - foos[1].second;
+      if (diff.sec() < (minimum_separation.sec * 0.75) ||
+        diff.sec() > (minimum_separation.sec * 1.5)) {
+        valid = false;
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: The time between the 2nd and 3rd sample should be about %d seconds, but it was %d seconds!\n"),
+          minimum_separation.sec, diff.sec()));
+      }
+
+      foo_info = &foos[3];
+      validate(foo_info->first.x, 0.0f, 3, "x", valid);
+      validate(foo_info->first.y, 0.0f, 3, "y", valid);
+
+      diff = foo_info->second - foos[2].second;
+      if (diff.sec() < (minimum_separation.sec * 1.5) ||
+          diff.sec() >= (minimum_separation.sec * 3)) {
+        valid = false;
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: The time between the 3rd and 4th sample should be about %d seconds, but it was %d seconds!\n"),
+          SEPARATION_MULTIPLIER * minimum_separation.sec, diff.sec()));
+      }
+
+      foo_info = &foos[4];
+      validate(foo_info->first.x, LAST_SAMPLE_X, 4, "x", valid);
+      validate(foo_info->first.y, 0.0f, 4, "y", valid);
+
+      diff = foo_info->second - foos[3].second;
+      if (diff.sec() < (minimum_separation.sec * 0.75) ||
+        diff.sec() > (minimum_separation.sec * 1.5)) {
+        valid = false;
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: The time between the 4th and 5th sample should be about %d seconds, but it was %d seconds!\n"),
+          minimum_separation.sec, diff.sec()));
+      }
+
+      foo_info = &foos[5];
+      validate(foo_info->first.x, LAST_SAMPLE_X, 5, "x", valid);
+      validate(foo_info->first.y, 1.0f, 5, "y", valid);
+
+      diff = foo_info->second - foos[4].second;
+      if (diff.sec() < (minimum_separation.sec * 0.75) ||
+        diff.sec() > (minimum_separation.sec * 1.5)) {
+        valid = false;
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: The time between the 5th and 6th sample should be about %d seconds, but it was %d seconds!\n"),
+          minimum_separation.sec, diff.sec()));
       }
     }
   }
@@ -219,10 +441,16 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       dr_qos.history.depth = 50;
     }
 
+    const size_t EXPECTED_ITERATIONS = 2;
+    const size_t TOTAL_SAMPLES_PER_INSTANCE = (reliable ? 3 : 1) * EXPECTED_ITERATIONS;
+
+    DataReaderListenerImpl* listener_impl = new DataReaderListenerImpl(TOTAL_SAMPLES_PER_INSTANCE * NUM_INSTANCES);
+    DDS::DataReaderListener_var listener = listener_impl;
+
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
         dr_qos,
-        DDS::DataReaderListener::_nil(),
+        listener,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(reader.in())) {
@@ -308,53 +536,49 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ACE_TEXT(" INFO: Testing %d second minimum separation...\n"),
       minimum_separation.sec));
 
-    const size_t EXPECTED_SAMPLES = reliable ? 5 : 2;
-    const size_t SEPARATION_MULTIPLIER = reliable ? 4 : 2;
+    SampleMap send_map;
 
     // We expect to receive up to one sample per
     // cycle (all others should be filtered).
-    for (size_t i = 0; i < EXPECTED_SAMPLES; ++i) {
+    for (size_t i = 0; i < EXPECTED_ITERATIONS; ++i) {
       for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
+        Foo foo = { j, 0, 0, 0 }; // same instance required for repeated samples
+        const ACE_Time_Value start = ACE_OS::gettimeofday();
         for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k) {
-          ::CORBA::Float x = (CORBA::Float)k;
-          Foo foo = { j, x, 0, 0 }; // same instance required for repeated samples
+          foo.x = (CORBA::Float)k;
+          send_map[foo.key].push_back(std::make_pair(foo, ACE_OS::gettimeofday()));
           if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("%N:%l main()")
               ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
           }
         }
+
+        if (reliable) {
+          ACE_OS::sleep(minimum_separation.sec);
+          foo.y = 1.0f;
+          for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k) {
+            foo.x = (CORBA::Float)k;
+            send_map[foo.key].push_back(std::make_pair(foo, ACE_OS::gettimeofday()));
+            if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                ACE_TEXT("%N:%l main()")
+                ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
+            }
+          }
+        }
       }
 
-      // Wait for at least two minimum_separation cycles
       ACE_OS::sleep(SEPARATION_MULTIPLIER * minimum_separation.sec);
     }
 
-    SampleMap samples;
-    for (;;) {
-      Foo foo;
-      DDS::SampleInfo info;
-
-      DDS::ReturnCode_t error = reader_i->take_next_sample(foo, info);
-      if (error == DDS::RETCODE_OK) {
-        if (info.valid_data) {
-          samples[foo.key].push_back(std::make_pair(foo, info));
-        }
-      } else if (error == DDS::RETCODE_NO_DATA) {
-        break; // done!
-      } else {
-        ACE_ERROR_RETURN((
-          LM_ERROR,
-          ACE_TEXT("%N:%l main()")
-          ACE_TEXT(" ERROR: Unable to take sample, error %d!\n"), error), -1);
-      }
-    }
-
+    listener_impl->wait_for_completion();
     if (reliable) {
-      valid = verify_reliable(EXPECTED_SAMPLES, samples);
+      valid = verify_reliable(TOTAL_SAMPLES_PER_INSTANCE, listener_impl->map_, send_map);
     } else {
-      valid = verify_unreliable(EXPECTED_SAMPLES, samples);
+      valid = verify_unreliable(TOTAL_SAMPLES_PER_INSTANCE, listener_impl->map_);
     }
+    valid &= listener_impl->valid_;
 
     // Clean-up!
     participant->delete_contained_entities();
