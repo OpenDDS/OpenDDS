@@ -12,7 +12,7 @@ AlertDataReaderListenerImpl::AlertDataReaderListenerImpl() :
 {
   // expect the alive_count either 0 or 1
   expected_status_.alive_count = 1;
-  expected_status_.alive_count_change = 0;
+  expected_status_.alive_count_change = 1;
   expected_status_.not_alive_count = 0;
   expected_status_.not_alive_count_change = 0;
   expected_status_.last_publication_handle = DDS::HANDLE_NIL;
@@ -61,10 +61,15 @@ void AlertDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) AlertDataReaderListenerImpl::on_data_available:\n"
             "Received SYSTEM_SHUTDOWN message, udpating expected liveliness values\n"));
+          if (last_status_.alive_count != 1)
+          {
+            ACE_ERROR((LM_ERROR,
+              "ERROR: AlertDataReaderListenerImpl::on_data_available"
+              " Received SYSTEM_SHUTDOWN message and expected/got last alive_count %d/%d \n",
+              expected_status_.alive_count, last_status_.alive_count));
+            error_occurred_ = true;
+          }
           expected_status_.alive_count = 0;
-          expected_status_.alive_count_change = -1;
-          expected_status_.not_alive_count = 1;
-          expected_status_.not_alive_count_change = 1;
         }
       }
     }
@@ -113,27 +118,15 @@ void AlertDataReaderListenerImpl::on_liveliness_changed (
     "    Not Alive Count        = %d\n"
     "    Not Alive Count Change = %d\n"
     "==================================================\n\n",
-    liveliness_changed_count_, status.alive_count, status.not_alive_count,
-    status.alive_count_change, status.not_alive_count_change));
+    liveliness_changed_count_, status.alive_count, status.alive_count_change,
+    status.not_alive_count, status.not_alive_count_change));
 
-  if (last_status_.alive_count == 0
-    && last_status_.alive_count_change == -1
-    && last_status_.not_alive_count == 1
-    && last_status_.not_alive_count_change == 1)
-  {
-    expected_status_.alive_count_change = 0;
-    expected_status_.not_alive_count = 0;
-    expected_status_.not_alive_count_change = -1;
-  }
-
-  if (status.alive_count != expected_status_.alive_count
-    || status.not_alive_count != expected_status_.not_alive_count)
+  if (status.alive_count != expected_status_.alive_count)
   {
     ACE_ERROR((LM_ERROR,
       "ERROR: AlertDataReaderListenerImpl::on_liveliness_changed"
-      " expected/got alive_count %d/%d not_alive_count %d/%d \n",
-      expected_status_.alive_count, status.alive_count,
-      expected_status_.not_alive_count, status.not_alive_count));
+      " expected/got alive_count %d/%d\n",
+      expected_status_.alive_count, status.alive_count));
     error_occurred_ = true;
   }
 
