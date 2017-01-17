@@ -41,7 +41,6 @@ TransportSendBuffer::resend_one(const BufferType& buffer)
 
 
 // class SingleSendBuffer
-const size_t SingleSendBuffer::UNLIMITED;
 
 SingleSendBuffer::SingleSendBuffer(size_t capacity,
                                    size_t max_samples_per_packet)
