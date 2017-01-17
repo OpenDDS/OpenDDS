@@ -1513,8 +1513,8 @@ void store_instance_data(
     header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE ||
     header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
 
-  // default to filtering, since most paths don't store data
-  filtered = true;
+  // not filtering any data, except what is specifically identified as filtered below
+  filtered = false;
 
   DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
 
@@ -1714,8 +1714,6 @@ void store_instance_data(
                       MessageType );
         return;
       }
-    } else {
-      filtered = false;
     }
 
     finish_store_instance_data(instance_data, header, instance_ptr, is_dispose_msg, is_unregister_msg);
