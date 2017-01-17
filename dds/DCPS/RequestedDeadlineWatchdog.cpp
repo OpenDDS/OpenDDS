@@ -70,7 +70,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
 int
 OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
 {
-  DDS::InstanceHandle_t handle = reinterpret_cast<intptr_t>(act);
+  DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
   SubscriptionInstance_rch instance = this->reader_impl_->get_handle_instance(handle);
   if (instance)
     execute(instance, true);
