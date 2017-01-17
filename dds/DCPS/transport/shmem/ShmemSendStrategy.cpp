@@ -27,8 +27,7 @@ ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link, const ShmemInst_rch& i
   , current_data_(0)
 {
 #ifdef ACE_HAS_POSIX_SEM
-  peer_semaphore_.name_ = 0;
-  peer_semaphore_.sema_ = 0;
+  memset(&peer_semaphore_, 0, sizeof(peer_semaphore_));
 #endif
 }
 

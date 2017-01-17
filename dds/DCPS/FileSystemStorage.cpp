@@ -175,10 +175,9 @@ inline int dds_rmdir(const ACE_TCHAR* path)
 
 ACE_TString overflow_dir_name(unsigned int n)
 {
-  ACE_TString of_name = ACE_TEXT("_overflow.    /");
-  ACE_TCHAR* buf = &of_name[10];
-  ACE_OS::snprintf(buf, 5, ACE_TEXT("%04u"), n);
-  of_name[14] = L'/'; // snprintf has clobbered / with a null
+  const size_t buf_size=32;
+  ACE_TCHAR of_name[buf_size];
+  ACE_OS::snprintf(of_name, buf_size, ACE_TEXT("_overflow.%04u/"), n);
   return of_name;
 }
 
