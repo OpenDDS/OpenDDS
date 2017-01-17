@@ -10,22 +10,12 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
-$status = 0;
-
-my $options = '';
-my $DCPSREPO;
-
-# The test results in error output from attempting to register
-# more instances than allowed. Capture it to prevent false alarms.
-my $logfile = 'output.log';
-
-unlink $logfile;
-
-$options = "-DCPSConfigFile rtps_disc.ini -ORBLogFile $logfile";
+my $status = 0;
+my $options = "-DcpsBits 0";
 
 my $test = new PerlDDS::TestFramework();
-
 $test->process("unregister_type_test", "unregister_type_test", "$options");
+$test->setup_discovery("-NOBITS");
 $test->start_process("unregister_type_test");
 $result = $test->finish(60);
 
