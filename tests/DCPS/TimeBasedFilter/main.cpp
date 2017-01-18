@@ -47,7 +47,7 @@ parse_args(int& argc, ACE_TCHAR** argv)
       minimum_separation.sec = ACE_OS::atoi(arg);
       shifter.consume_arg();
     }
-    else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-r")) == 0)
+    else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-reliable")) == 0)
     {
       reliable = true;
       shifter.consume_arg();
@@ -68,10 +68,10 @@ typedef std::map< ::CORBA::Long, Foos> SampleMap;
 class DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
   DataReaderListenerImpl(unsigned int expected_num_samples)
-  : condition_(lock_)
-  , expected_num_samples_(expected_num_samples)
+  : valid_(true)
+  , condition_(lock_)
   , num_samples_(0)
-  , valid_(true)
+  , expected_num_samples_(expected_num_samples)
   {
   }
 
@@ -140,7 +140,7 @@ public:
     }
   }
 
-  void on_requested_deadline_missed(DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus& status)
+  void on_requested_deadline_missed(DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
@@ -148,7 +148,7 @@ public:
       ACE_TEXT(" ERROR: should not occur\n")));
   }
 
-  void on_requested_incompatible_qos(DDS::DataReader_ptr reader, const DDS::RequestedIncompatibleQosStatus& status)
+  void on_requested_incompatible_qos(DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
@@ -156,15 +156,15 @@ public:
       ACE_TEXT(" ERROR: should not occur\n")));
   }
 
-  void on_liveliness_changed(DDS::DataReader_ptr reader, const DDS::LivelinessChangedStatus& status)
+  void on_liveliness_changed(DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&)
   {
   }
 
-  void on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status)
+  void on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus&)
   {
   }
 
-  void on_sample_rejected(DDS::DataReader_ptr reader, const DDS::SampleRejectedStatus& status)
+  void on_sample_rejected(DDS::DataReader_ptr, const DDS::SampleRejectedStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
@@ -172,7 +172,7 @@ public:
       ACE_TEXT(" ERROR: should not occur\n")));
   }
 
-  void on_sample_lost(DDS::DataReader_ptr reader, const DDS::SampleLostStatus& status)
+  void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
@@ -211,8 +211,13 @@ void validate(const float expected, const float actual, const int key, const cha
   if (expected != actual) {
     valid = false;
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("%N:%l main()")
+      ACE_TEXT("%N:%l validate()")
       ACE_TEXT(" ERROR: for key %d received %C=%f, expected %f!\n"),
+      key, loc, actual, expected));
+  }
+  else {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l validate() - ")
+      ACE_TEXT("received message with key %d received %C=%f, expected %f!\n"),
       key, loc, actual, expected));
   }
 }
@@ -235,7 +240,7 @@ bool verify_unreliable(const size_t expected_samples, SampleMap& rcvd_samples)
         const FooInfo& fooInfo = foos[i];
         // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first sent
         // message will also be the first received message in the data reader
-        validate(fooInfo.first.x, 0.0f, j, "x", valid);
+        validate(0.0f, fooInfo.first.x, j, "x", valid);
       }
     }
   }
@@ -262,8 +267,8 @@ bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, Sam
         // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first and last sent
         // message will also be the first and last received message in the data reader
       const FooInfo* foo_info = &foos[0];
-      validate(foo_info->first.x, 0.0f, 0, "x", valid);
-      validate(foo_info->first.y, 0.0f, 0, "y", valid);
+      validate(0.0f, foo_info->first.x, foo_info->first.key, "x", valid);
+      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
       ACE_Time_Value diff = foo_info->second - sent_foos[0].second;
       if (diff.sec() > minimum_separation.sec) {
         valid = false;
@@ -274,8 +279,8 @@ bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, Sam
       }
 
       foo_info = &foos[1];
-      validate(foo_info->first.x, LAST_SAMPLE_X, 1, "x", valid);
-      validate(foo_info->first.y, 0.0f, 1, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, foo_info->first.key, "x", valid);
+      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
 
       diff = foo_info->second - foos[0].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
@@ -288,8 +293,8 @@ bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, Sam
       }
 
       foo_info = &foos[2];
-      validate(foo_info->first.x, LAST_SAMPLE_X, 2, "x", valid);
-      validate(foo_info->first.y, 1.0f, 2, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x,  foo_info->first.key, "x", valid);
+      validate(1.0f, foo_info->first.y, foo_info->first.key, "y", valid);
 
       diff = foo_info->second - foos[1].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
@@ -302,8 +307,8 @@ bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, Sam
       }
 
       foo_info = &foos[3];
-      validate(foo_info->first.x, 0.0f, 3, "x", valid);
-      validate(foo_info->first.y, 0.0f, 3, "y", valid);
+      validate(0.0f, foo_info->first.x, foo_info->first.key, "x", valid);
+      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
 
       diff = foo_info->second - foos[2].second;
       if (diff.sec() < (minimum_separation.sec * 1.5) ||
@@ -316,8 +321,8 @@ bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, Sam
       }
 
       foo_info = &foos[4];
-      validate(foo_info->first.x, LAST_SAMPLE_X, 4, "x", valid);
-      validate(foo_info->first.y, 0.0f, 4, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, foo_info->first.key, "x", valid);
+      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
 
       diff = foo_info->second - foos[3].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
@@ -330,8 +335,8 @@ bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, Sam
       }
 
       foo_info = &foos[5];
-      validate(foo_info->first.x, LAST_SAMPLE_X, 5, "x", valid);
-      validate(foo_info->first.y, 1.0f, 5, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, foo_info->first.key, "x", valid);
+      validate(1.0f, foo_info->first.y, foo_info->first.key, "y", valid);
 
       diff = foo_info->second - foos[4].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
@@ -552,9 +557,15 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
               ACE_TEXT("%N:%l main()")
               ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
           }
+          else {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l main() - ")
+              ACE_TEXT("wrote sample with key: %d and x: %f y: %f \n"), foo.key, foo.x, foo.y));
+          }
         }
 
         if (reliable) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l main() - ")
+            ACE_TEXT("reliable, so waiting minimum_separation (%d)seconds.\n"), minimum_separation.sec));
           ACE_OS::sleep(minimum_separation.sec);
           foo.y = 1.0f;
           for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k) {
@@ -565,10 +576,17 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
                 ACE_TEXT("%N:%l main()")
                 ACE_TEXT(" ERROR: Unable to write sample!\n")), -1);
             }
+            else {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l main() - ")
+                ACE_TEXT("wrote sample with key: %d and x: %f y: %f \n"), foo.key, foo.x, foo.y));
+            }
           }
         }
       }
 
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l main() - ")
+        ACE_TEXT("waiting iteration separation time - %d seconds.\n"),
+        SEPARATION_MULTIPLIER * minimum_separation.sec));
       ACE_OS::sleep(SEPARATION_MULTIPLIER * minimum_separation.sec);
     }
 
