@@ -10,6 +10,7 @@
 
 #include "Definitions.h"
 #include "GuidUtils.h"
+#include "PoolAllocationBase.h"
 
 #include <iosfwd>
 
@@ -69,7 +70,7 @@ enum DataSampleHeaderFlag2 {
 /// The header message of a data sample.
 /// This header and the data sample are in different
 /// message block and will be chained together.
-struct OpenDDS_Dcps_Export DataSampleHeader {
+struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   enum {
     MESSAGE_ID_OFFSET = 0,
     SUBMESSAGE_ID_OFFSET = 1,
