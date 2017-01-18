@@ -22,9 +22,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const char Discovery::DEFAULT_REPO[] = "DEFAULT_REPO";
-const char Discovery::DEFAULT_RTPS[] = "DEFAULT_RTPS";
-const char Discovery::DEFAULT_STATIC[] = "DEFAULT_STATIC";
+const char* Discovery::DEFAULT_REPO = "DEFAULT_REPO";
+const char* Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";
+const char* Discovery::DEFAULT_STATIC = "DEFAULT_STATIC";
 
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)
