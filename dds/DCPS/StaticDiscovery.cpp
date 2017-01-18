@@ -1848,7 +1848,7 @@ void StaticDiscovery::pre_reader(DataReaderImpl* reader)
   }
 }
 
-StaticDiscovery_rch StaticDiscovery::instance_(make_rch<StaticDiscovery>(RepoKey(Discovery::DEFAULT_STATIC)));
+StaticDiscovery_rch StaticDiscovery::instance_(make_rch<StaticDiscovery>(Discovery::DEFAULT_STATIC));
 
 }
 }
