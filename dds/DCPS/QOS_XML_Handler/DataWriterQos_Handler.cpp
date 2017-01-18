@@ -2,6 +2,8 @@
 #include "QOS_DataWriter_T.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 bool
 DataWriterQos_Handler::get_datawriter_qos (DDS::DataWriterQos& dw_qos,
                                            dds::qosProfile * profile,
@@ -55,3 +57,5 @@ DataWriterQos_Handler::get_datawriter_qos (DDS::DataWriterQos& dw_qos,
 
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

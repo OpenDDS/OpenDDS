@@ -17,6 +17,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds_qos.hpp"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class QosCommon
 {
 public:
@@ -59,6 +61,8 @@ public:
   static ::CORBA::Long get_qos_long (const ACE_TCHAR * value);
 
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* QOS_COMMON_H */

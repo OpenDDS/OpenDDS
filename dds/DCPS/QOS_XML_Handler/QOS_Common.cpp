@@ -1,5 +1,6 @@
-
 #include "QOS_Common.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 void
 QosCommon::get_durability_kind (const ::dds::durabilityKind kind,
@@ -178,3 +179,5 @@ QosCommon::get_ownership_kind (const ::dds::ownershipKind kind,
       break;
     }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

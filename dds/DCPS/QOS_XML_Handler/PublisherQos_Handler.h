@@ -15,6 +15,8 @@
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class PublisherQos_Handler
 {
 public:
@@ -32,6 +34,8 @@ private:
   static bool get_publisher_qos (DDS::PublisherQos& pub_qos,
                                  dds::publisherQos * pub);
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* PUBLISHER_QOS_HANDLER_H */

@@ -15,6 +15,8 @@
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class SubscriberQos_Handler
 {
 public:
@@ -32,6 +34,8 @@ private:
   static bool get_subscriber_qos (DDS::SubscriberQos& sub_qos,
                                   dds::subscriberQos * sub);
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* SUBSCRIBER_QOS_HANDLER_H */

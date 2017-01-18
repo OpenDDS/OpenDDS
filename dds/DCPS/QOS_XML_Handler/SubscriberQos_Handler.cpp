@@ -2,6 +2,8 @@
 #include "SubscriberQos_Handler.h"
 #include "QOS_PubSub_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 bool
 SubscriberQos_Handler::get_subscriber_qos (DDS::SubscriberQos& sub_qos,
                                       dds::qosProfile * profile,
@@ -55,3 +57,5 @@ SubscriberQos_Handler::get_subscriber_qos (DDS::SubscriberQos& sub_qos,
 
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -17,6 +17,8 @@
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class XML_QOS_Handler_Export TopicQos_Handler
 {
 public:
@@ -34,6 +36,8 @@ private:
   static bool get_topic_qos (DDS::TopicQos& tp_qos,
                                   dds::topicQos * tp);
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* TOPIC_QOS_HANDLER_H */
