@@ -68,10 +68,10 @@ typedef std::map< ::CORBA::Long, Foos> SampleMap;
 class DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
   DataReaderListenerImpl(unsigned int expected_num_samples)
-  : condition_(lock_)
-  , expected_num_samples_(expected_num_samples)
+  : valid_(true)
+  , condition_(lock_)
   , num_samples_(0)
-  , valid_(true)
+  , expected_num_samples_(expected_num_samples)
   {
   }
 
@@ -140,7 +140,7 @@ public:
     }
   }
 
-  void on_requested_deadline_missed(DDS::DataReader_ptr reader, const DDS::RequestedDeadlineMissedStatus& status)
+  void on_requested_deadline_missed(DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
@@ -148,7 +148,7 @@ public:
       ACE_TEXT(" ERROR: should not occur\n")));
   }
 
-  void on_requested_incompatible_qos(DDS::DataReader_ptr reader, const DDS::RequestedIncompatibleQosStatus& status)
+  void on_requested_incompatible_qos(DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
@@ -156,15 +156,15 @@ public:
       ACE_TEXT(" ERROR: should not occur\n")));
   }
 
-  void on_liveliness_changed(DDS::DataReader_ptr reader, const DDS::LivelinessChangedStatus& status)
+  void on_liveliness_changed(DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&)
   {
   }
 
-  void on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status)
+  void on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus&)
   {
   }
 
-  void on_sample_rejected(DDS::DataReader_ptr reader, const DDS::SampleRejectedStatus& status)
+  void on_sample_rejected(DDS::DataReader_ptr, const DDS::SampleRejectedStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
@@ -172,7 +172,7 @@ public:
       ACE_TEXT(" ERROR: should not occur\n")));
   }
 
-  void on_sample_lost(DDS::DataReader_ptr reader, const DDS::SampleLostStatus& status)
+  void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus&)
   {
     valid_ = false;
     ACE_ERROR((LM_ERROR,
