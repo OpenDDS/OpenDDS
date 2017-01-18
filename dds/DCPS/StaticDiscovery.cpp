@@ -1722,7 +1722,16 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       config = TheTransportRegistry->global_config();
     }
 
-    config->populate_locators(trans_info);
+    try {
+      config->populate_locators(trans_info);
+    }
+    catch (const CORBA::Exception& ex) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                        ACE_TEXT("Exception caught while populating locators for [endpoint/%C] section. %C\n"),
+                        endpoint_name.c_str(), ex._info().c_str()),
+                        -1);
+    }
     if (trans_info.length() == 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
