@@ -1821,7 +1821,6 @@ Service_Participant::get_data_durability_cache(
                        0);
 
       if (this->transient_data_cache_ == 0) {
-        delete this->transient_data_cache_;
         this->transient_data_cache_ = new DataDurabilityCache(kind);
       }
     }
@@ -1837,7 +1836,6 @@ Service_Participant::get_data_durability_cache(
 
       try {
         if (this->persistent_data_cache_ == 0) {
-          delete this->persistent_data_cache_;
           this->persistent_data_cache_ = new DataDurabilityCache(kind,
                                                                  this->persistent_data_dir_);
         }
