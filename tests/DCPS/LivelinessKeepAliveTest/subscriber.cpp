@@ -178,14 +178,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-    if (drl_servant->liveliness_changed_count() < 3) {
+    if (drl_servant->liveliness_changed_count() < 2 ||
+        drl_servant->liveliness_changed_count() > 3) {
       status = 1;
       // Some error condition.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed expected liveliness change count check.\n")
         ));
-
     }
     else if (!drl_servant->verify_last_liveliness_status()) {
       status = 1;
