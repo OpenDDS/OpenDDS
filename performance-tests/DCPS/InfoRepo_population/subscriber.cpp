@@ -16,6 +16,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/scoped_ptr.h"
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
@@ -52,7 +53,7 @@ private:
   std::vector<DDS::Subscriber_var> subs_;
   std::vector<DDS::DataReader_var> dr_;
 
-  std::auto_ptr<SyncClientExt_i> sync_client_;
+  OpenDDS::DCPS::scoped_ptr<SyncClientExt_i> sync_client_;
 };
 
 
