@@ -574,10 +574,10 @@ private:
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
   /// The @c TRANSIENT data durability cache.
-  std::auto_ptr<DataDurabilityCache> transient_data_cache_;
+  DataDurabilityCache* transient_data_cache_;
 
   /// The @c PERSISTENT data durability cache.
-  std::auto_ptr<DataDurabilityCache> persistent_data_cache_;
+  DataDurabilityCache* persistent_data_cache_;
 
   /// The @c PERSISTENT data durability directory.
   ACE_CString persistent_data_dir_;

@@ -183,8 +183,8 @@ Service_Participant::Service_Participant()
     priority_max_(0),
     publisher_content_filter_(true),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    transient_data_cache_(),
-    persistent_data_cache_(),
+    transient_data_cache_(0),
+    persistent_data_cache_(0),
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
     pending_timeout_(ACE_Time_Value::zero),
@@ -204,6 +204,8 @@ Service_Participant::~Service_Participant()
   }
   delete monitor_;
   delete reactor_;
+  delete transient_data_cache_;
+  delete persistent_data_cache_;
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -268,8 +270,10 @@ Service_Participant::shutdown()
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    transient_data_cache_.reset();
-    persistent_data_cache_.reset();
+    delete transient_data_cache_;
+    transient_data_cache_ = 0;
+    delete persistent_data_cache_;
+    persistent_data_cache_ = 0;
 #endif
 
     typedef OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter;
@@ -1816,13 +1820,13 @@ Service_Participant::get_data_durability_cache(
                        this->factory_lock_,
                        0);
 
-      if (this->transient_data_cache_.get() == 0) {
-        ACE_auto_ptr_reset(this->transient_data_cache_,
-                           new DataDurabilityCache(kind));
+      if (this->transient_data_cache_ == 0) {
+        delete this->transient_data_cache_;
+        this->transient_data_cache_ = new DataDurabilityCache(kind);
       }
     }
 
-    cache = this->transient_data_cache_.get();
+    cache = this->transient_data_cache_;
 
   } else if (kind == DDS::PERSISTENT_DURABILITY_QOS) {
     {
@@ -1832,10 +1836,10 @@ Service_Participant::get_data_durability_cache(
                        0);
 
       try {
-        if (this->persistent_data_cache_.get() == 0) {
-          ACE_auto_ptr_reset(this->persistent_data_cache_,
-                             new DataDurabilityCache(kind,
-                                                     this->persistent_data_dir_));
+        if (this->persistent_data_cache_ == 0) {
+          delete this->persistent_data_cache_;
+          this->persistent_data_cache_ = new DataDurabilityCache(kind,
+                                                                 this->persistent_data_dir_);
         }
 
       } catch (const std::exception& ex) {
@@ -1846,12 +1850,12 @@ Service_Participant::get_data_durability_cache(
                      ACE_TEXT("TRANSIENT behavior: %C\n"), ex.what()));
         }
 
-        ACE_auto_ptr_reset(this->persistent_data_cache_,
-                           new DataDurabilityCache(DDS::TRANSIENT_DURABILITY_QOS));
+        delete this->persistent_data_cache_;
+        this->persistent_data_cache_ = new DataDurabilityCache(DDS::TRANSIENT_DURABILITY_QOS);
       }
     }
 
-    cache = this->persistent_data_cache_.get();
+    cache = this->persistent_data_cache_;
   }
 
   return cache;
