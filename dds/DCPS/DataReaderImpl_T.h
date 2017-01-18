@@ -1513,6 +1513,9 @@ void store_instance_data(
     header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE ||
     header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
 
+  // not filtering any data, except what is specifically identified as filtered below
+  filtered = false;
+
   DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
 
   //!!! caller should already have the sample_lock_
@@ -2125,8 +2128,19 @@ public:
       const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation);
 
       const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation) - filter_time_expired;
-      sample.timer_id = schedule_timer(reinterpret_cast<const void*>(intptr_t(handle)),
-                                       filter_time_remaining, interval);
+
+      long timer_id = -1;
+
+      {
+        ACE_GUARD(Reverse_Lock_t, unlock_guard, data_reader_impl_->reverse_sample_lock_);
+        timer_id = schedule_timer(reinterpret_cast<const void*>(intptr_t(handle)),
+          filter_time_remaining, interval);
+      }
+
+      // ensure that another sample has not replaced this while the lock was released
+      if (instance_data == sample.message) {
+        sample.timer_id = timer_id;
+      }
     } else {
       // we only care about the most recently filtered sample, so clean up the last one
       clear_message(sample.message);
@@ -2156,8 +2170,14 @@ public:
     typename FilterDelayedSampleMap::iterator sample = map_.find(handle);
     if (sample != map_.end()) {
       clear_message(sample->second.message);
-      cancel_timer(sample->second.timer_id);
-      map_.erase(sample);
+
+      {
+        ACE_GUARD(Reverse_Lock_t, unlock_guard, data_reader_impl_->reverse_sample_lock_);
+        cancel_timer(sample->second.timer_id);
+      }
+
+      // use the handle to erase, since the sample lock was released
+      map_.erase(handle);
     }
   }
 
@@ -2176,34 +2196,45 @@ private:
     if (!instance)
       return 0;
 
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_, -1);
+    long cancel_timer_id = -1;
 
-    typename FilterDelayedSampleMap::iterator data = map_.find(handle);
-    if (data == map_.end()) {
-      return 0;
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_, -1);
+
+      typename FilterDelayedSampleMap::iterator data = map_.find(handle);
+      if (data == map_.end()) {
+        return 0;
+      }
+
+      if (data->second.message) {
+        const bool NOT_DISPOSE_MSG = false;
+        const bool NOT_UNREGISTER_MSG = false;
+        // clear the message, since ownership is being transfered to finish_store_instance_data.
+        MessageType* const instance_data = data->second.message;
+        data->second.message = 0;
+        instance->last_accepted_ = ACE_OS::gettimeofday();
+        const DataSampleHeader_ptr header = data->second.header;
+        const bool new_instance = data->second.new_instance;
+
+        // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
+        data_reader_impl_->finish_store_instance_data(instance_data, *header, instance, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
+
+        data_reader_impl_->accept_sample_processing(instance, *header, new_instance);
+      } else {
+        // this check is performed to handle the corner case where store_instance_data received and delivered a sample, while this
+        // method was waiting for the lock
+        const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation);
+        if (ACE_OS::gettimeofday() - instance->last_sample_tv_ >= interval) {
+          // nothing to process, so unregister this handle for timeout
+          cancel_timer_id = data->second.timer_id;
+          // no new data to process, so remove from container
+          map_.erase(data);
+        }
+      }
     }
 
-    if (data->second.message) {
-      const bool NOT_DISPOSE_MSG = false;
-      const bool NOT_UNREGISTER_MSG = false;
-      // clear the message, since ownership is being transfered to finish_store_instance_data.
-      MessageType* const instance_data = data->second.message;
-      data->second.message = 0;
-      instance->last_accepted_ = ACE_OS::gettimeofday();
-      const DataSampleHeader_ptr header = data->second.header;
-      const bool new_instance = data->second.new_instance;
-
-      // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-      data_reader_impl_->finish_store_instance_data(instance_data, *header, instance, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
-
-      data_reader_impl_->accept_sample_processing(instance, *header, new_instance);
-    } else {
-      const long timer_id = data->second.timer_id;
-      // no new data to process, so remove from container
-      map_.erase(data);
-
-      // nothing to process, so unregister this handle for timeout
-      cancel_timer(timer_id);
+    if (cancel_timer_id != -1) {
+      cancel_timer(cancel_timer_id);
     }
     return 0;
   }
