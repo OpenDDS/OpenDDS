@@ -5,12 +5,18 @@ compiler:
   - clang
 
 env:
+  matrix:
+    - FUZZ=1
+    - NO_INLINE=1
+    - NO_BIT=1
+    - STATIC=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/ACE
     - TAO_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/TAO
     - DDS_ROOT=$TRAVIS_BUILD_DIR
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
+    - CONFIG_PARAMS=
 
 addons:
   apt:
@@ -31,9 +37,11 @@ before_script:
   - export
   - tar czf modeling_plugins.tar.gz tools/modeling/plugins
   - rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson
-  - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
-  - if [ "$CXX" == "g++" ]; then ./configure --xerces3; fi
-  - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ --no-inline; fi
+  - if [ "$NO_INLINE" == "1"]; then export CONFIG_PARAMS="$CONFIG_PARAMS --no-inline"; fi
+  - if [ "$NO_BIT" == "1"]; then export CONFIG_PARAMS="$CONFIG_PARAMS --no-built-in-topics"; fi
+  - if [ "$STATIC" == "1"]; then export CONFIG_PARAMS="$CONFIG_PARAMS --static"; fi
+  - if [ "$CXX" == "g++" ]; then ./configure --xerces3 $CONFIG_PARAMS; fi
+  - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $CONFIG_PARAMS; fi
   - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
   - cat $ACE_ROOT/ace/config.h
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
@@ -41,5 +49,6 @@ before_script:
   - rm modeling_plugins.tar.gz
 
 script:
+  - if [ "$FUZZ" == "1" ]; then exec perl $DDS_ROOT/tools/scripts/dds_fuzz.pl; fi
   - make -j2
   - cd tests/DCPS/Messenger && ./run_test.pl all
