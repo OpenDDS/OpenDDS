@@ -34,6 +34,13 @@ class scoped_ptr {
        ptr_ = p;
      }
 
+     T * release()
+     {
+       T* p = ptr_;
+       ptr_ = 0;
+       return p;
+     }
+
      T & operator*() const // never throws
      {
        return *get();

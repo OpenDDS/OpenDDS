@@ -788,7 +788,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
   if (ret != DDS::RETCODE_OK)
     return false;
 
-  registration_sample.reset();
+  registration_sample.release();
 
   typedef DurabilityQueue<sample_data_type> data_queue_type;
   size_t const len = sample_list.size();
