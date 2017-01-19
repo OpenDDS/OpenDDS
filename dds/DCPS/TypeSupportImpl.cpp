@@ -33,6 +33,18 @@ TypeSupportImpl::register_type(DDS::DomainParticipant_ptr participant,
                                               this->type_name_.in(), this);
 }
 
+DDS::ReturnCode_t
+TypeSupportImpl::unregister_type(DDS::DomainParticipant_ptr participant,
+    const char* type_name)
+{
+  if (type_name == 0 || type_name[0] == '\0') {
+      return DDS::RETCODE_BAD_PARAMETER;
+  }
+  else {
+    return Registered_Data_Types->unregister_type(participant, type_name, this);
+  }
+}
+
 char*
 TypeSupportImpl::get_type_name()
 {
