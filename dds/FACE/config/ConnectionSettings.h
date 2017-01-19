@@ -12,7 +12,7 @@ namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class OpenDDS_FACE_Export ConnectionSettings {
 public:
-  static const int ALLOWABLE_NAME_LEN = 64;
+  static const size_t ALLOWABLE_NAME_LEN = 64;
 
   ConnectionSettings();
 
