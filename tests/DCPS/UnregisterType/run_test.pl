@@ -11,7 +11,7 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 
 my $status = 0;
-my $options = "-DcpsBits 0";
+my $options = "-DCPSBit 0";
 
 my $test = new PerlDDS::TestFramework();
 $test->process("unregister_type_test", "unregister_type_test", "$options");
