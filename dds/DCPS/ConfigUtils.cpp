@@ -7,7 +7,6 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "debug.h"
 #include "ConfigUtils.h"
 #include "ace/SString.h"
 
@@ -27,10 +26,6 @@ namespace OpenDDS { namespace DCPS {
       ACE_TString value;
       if (type == ACE_Configuration::STRING) {
         cf.get_string_value( key, name.c_str(), value );
-        if (DCPS_debug_level > 8) {
-          ACE_DEBUG((LM_INFO, "Configuration %s=%s\n",
-                              name.c_str(), value.c_str()));
-        }
         values[ACE_TEXT_ALWAYS_CHAR(name.c_str())] =
           ACE_TEXT_ALWAYS_CHAR(value.c_str());
       } else {
