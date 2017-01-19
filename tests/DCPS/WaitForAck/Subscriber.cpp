@@ -65,12 +65,13 @@ Subscriber::Subscriber( const Options& options)
 
   // Create and register the type support.
   DataTypeSupportImpl* testData = new DataTypeSupportImpl();
+  CORBA::String_var type_name = testData->get_type_name();
   if( ::DDS::RETCODE_OK
    != testData->register_type( this->participant_.in(), 0)) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
       ACE_TEXT("unable to install type %C support.\n"),
-      testData->get_type_name()
+      type_name.in()
     ));
     throw BadTypeSupportException ();
 
@@ -78,14 +79,14 @@ Subscriber::Subscriber( const Options& options)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
       ACE_TEXT("created type %C support.\n"),
-      testData->get_type_name()
+      type_name.in()
     ));
   }
 
   // Create the topic.
   DDS::Topic_var topic = this->participant_->create_topic(
                            this->options_.topicName().c_str(),
-                           testData->get_type_name(),
+                           type_name,
                            TOPIC_QOS_DEFAULT,
                            ::DDS::TopicListener::_nil(),
                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK

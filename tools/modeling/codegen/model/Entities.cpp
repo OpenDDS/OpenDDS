@@ -44,7 +44,7 @@ OpenDDS::Model::Entities::registerTypes( const OPENDDS_STRING& participant,
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Entities::registerTypes() - ")
         ACE_TEXT("Registering type [%C] in participant [%C].\n"),
-        queue.front()->get_type_name(),
+        CORBA::String_var(queue.front()->get_type_name()).in(),
         participant.c_str()
       ));
     }

@@ -59,10 +59,11 @@ OpenDDS::Model::Entities::add(
 {
   // Create a Type Support object and grab the type name from it.
   TypeSupport* support = new TypeSupport;
-  this->typeNameByString_[ name] = support->get_type_name();
+  const CORBA::String_var type_name = support->get_type_name();
+  typeNameByString_[name] = type_name;
 
   // Save the TypeSupport object to register it later.
-  this->typeSupport_[ participant].push( support);
+  typeSupport_[participant].push(support);
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
