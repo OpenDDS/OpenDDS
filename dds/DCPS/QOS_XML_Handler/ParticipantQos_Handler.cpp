@@ -2,6 +2,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 bool
 ParticipantQos_Handler::get_participant_qos (DDS::DomainParticipantQos& dp_qos,
                                            dds::qosProfile * profile,
@@ -84,3 +86,5 @@ ParticipantQos_Handler::get_participant_qos (DDS::DomainParticipantQos& dp_qos,
     }
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

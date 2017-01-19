@@ -3,9 +3,13 @@ Version X.Y of OpenDDS.
 
 ##### Additions:
 - TODO: Add your features here
-
+- Add support for versioned namespaces
+- Rework type support implementation in order to expose less internal header
+  and classes to user code
+ 
 ##### Fixes:
 - TODO: Add your fixes here
+- Resolve compiler warnings with gcc 6.3
 
 ##### Notes:
 - TODO: Add your notes here

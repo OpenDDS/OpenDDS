@@ -16,6 +16,8 @@
 #ifndef QOS_PUBSUB_T_H_
 #define QOS_PUBSUB_T_H_
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
 class QOS_PubSub_T
 {
@@ -26,6 +28,8 @@ public:
   void read_qos (DDS_QOS_TYPE&, const XML_QOS_TYPE);
 
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include "dds/DCPS/QOS_XML_Handler/QOS_PubSub_T.cpp"
 

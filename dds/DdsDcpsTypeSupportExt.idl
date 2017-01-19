@@ -39,6 +39,11 @@ module OpenDDS {
   #endif
 
       boolean has_dcps_key();
+
+      ::DDS::ReturnCode_t unregister_type(
+          in ::DDS::DomainParticipant domain,
+          in string type_name);
+
     };
   };
 };

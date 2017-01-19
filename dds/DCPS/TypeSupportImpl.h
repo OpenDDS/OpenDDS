@@ -42,6 +42,9 @@ public:
   virtual DDS::ReturnCode_t register_type(DDS::DomainParticipant_ptr participant,
                                           const char* type_name);
 
+  virtual DDS::ReturnCode_t unregister_type(DDS::DomainParticipant_ptr participant,
+                                          const char* type_name);
+
   virtual char* get_type_name();
 
 private:

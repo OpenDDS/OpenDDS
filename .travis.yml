@@ -12,6 +12,11 @@ env:
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
 
+addons:
+  apt:
+    packages:
+    - libxerces-c-dev
+
 before_install:
   - mkdir ext
   - cd ext && git clone --depth 1 git://github.com/DOCGroup/MPC.git
@@ -27,9 +32,9 @@ before_script:
   - tar czf modeling_plugins.tar.gz tools/modeling/plugins
   - rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson
   - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
-  - if [ "$CXX" == "g++" ]; then ./configure; fi
-  - if [ "$CXX" == "clang++" ]; then ./configure --compiler=clang++ --no-inline; fi
-#  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
+  - if [ "$CXX" == "g++" ]; then ./configure --xerces3; fi
+  - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ --no-inline; fi
+  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
   - cat $ACE_ROOT/ace/config.h
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
   - tar xzf modeling_plugins.tar.gz

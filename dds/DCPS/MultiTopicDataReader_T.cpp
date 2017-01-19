@@ -415,6 +415,28 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::take_instance(
 
 template<typename Sample, typename TypedDataReader>
 DDS::ReturnCode_t
+MultiTopicDataReader_T<Sample, TypedDataReader>::read_instance_w_condition(
+  SampleSeq& data_values, DDS::SampleInfoSeq& sample_infos,
+  CORBA::Long max_samples, DDS::InstanceHandle_t handle,
+  DDS::ReadCondition_ptr a_condition)
+{
+  return typed_reader_->read_instance_w_condition(data_values,
+    sample_infos, max_samples, handle, a_condition);
+}
+
+template<typename Sample, typename TypedDataReader>
+DDS::ReturnCode_t
+MultiTopicDataReader_T<Sample, TypedDataReader>::take_instance_w_condition(
+  SampleSeq& data_values, DDS::SampleInfoSeq& sample_infos,
+  CORBA::Long max_samples, DDS::InstanceHandle_t handle,
+  DDS::ReadCondition_ptr a_condition)
+{
+  return typed_reader_->take_instance_w_condition(data_values,
+    sample_infos, max_samples, handle, a_condition);
+}
+
+template<typename Sample, typename TypedDataReader>
+DDS::ReturnCode_t
 MultiTopicDataReader_T<Sample, TypedDataReader>::read_next_instance(
   SampleSeq& received_data, DDS::SampleInfoSeq& info_seq,
   CORBA::Long max_samples, DDS::InstanceHandle_t a_handle,

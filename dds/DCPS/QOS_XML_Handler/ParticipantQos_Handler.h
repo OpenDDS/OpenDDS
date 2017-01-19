@@ -15,6 +15,8 @@
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class ParticipantQos_Handler
 {
 public:
@@ -32,6 +34,8 @@ private:
   static bool get_participant_qos (DDS::DomainParticipantQos& dp_qos,
                                   dds::domainparticipantQos * dp);
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* PARTICIPANT_QOS_HANDLER_H */

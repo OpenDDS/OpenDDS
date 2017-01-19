@@ -53,6 +53,17 @@ public:
                                   const char* type_name,
                                   TypeSupport_ptr the_type);
 
+  /**
+   * Unregister a type.
+   *
+   * @returns RETCODE_OK if the type_name has been removed or if the type_name
+   *        cannot be found in the map associated with the domain_participant.
+   *        Otherwise returns RETCODE_ERROR
+   */
+  DDS::ReturnCode_t unregister_type(DDS::DomainParticipant_ptr domain_participant,
+                                    const char* type_name,
+                                    TypeSupport_ptr the_type);
+
   DDS::ReturnCode_t unregister_participant(DDS::DomainParticipant_ptr domain_participant);
 
   /**

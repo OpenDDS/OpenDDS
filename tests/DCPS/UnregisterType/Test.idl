@@ -1,0 +1,13 @@
+module Ex {
+
+#pragma DCPS_DATA_TYPE "Ex::Test"
+#pragma DCPS_DATA_KEY "Ex::Test key"
+
+  struct Test {
+    long key;  // the instance key
+    char  c;
+    float x;
+    float y;
+  };
+
+};

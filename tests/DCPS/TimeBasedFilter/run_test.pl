@@ -15,6 +15,8 @@ PerlDDS::add_lib_path('../FooType');
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 
+$test->enable_console_logging();
+
 $test->process('test', 'test', "@ARGV");
 $test->start_process('test');
 

@@ -2768,6 +2768,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
   }
 #else
   ACE_UNUSED_ARG(pubid);
+  ACE_UNUSED_ARG(instance);
 #endif
   return false;
 }

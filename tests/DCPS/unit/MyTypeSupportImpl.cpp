@@ -37,6 +37,23 @@ MyTypeSupportImpl::register_type (
 }
 
 
+DDS::ReturnCode_t
+MyTypeSupportImpl::unregister_type (
+    ::DDS::DomainParticipant_ptr participant,
+    const char * type_name
+  )
+{
+  if (type_name == 0 || type_name[0] == '\0') {
+     return DDS::RETCODE_BAD_PARAMETER;
+  }
+  else {
+     return ::OpenDDS::DCPS::Registered_Data_Types->unregister_type(participant,
+                                                            type_name,
+                                                            this);
+  }
+}
+
+
 char *
 MyTypeSupportImpl::get_type_name (
   )

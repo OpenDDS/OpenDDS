@@ -73,9 +73,9 @@ my %platforminfo =
                                 ],
                     },
    'freebsd' => {
-		 'compilers' => ['clang++'],
-		 'libpath' => 'LD_LIBRARY_PATH',
-		},
+                    'compilers' => ['clang++'],
+                    'libpath' => 'LD_LIBRARY_PATH',
+    },
    'lynxos-178' => {
                     'libpath' => 'LD_LIBRARY_PATH',
                     'no_host' => 1,
@@ -158,6 +158,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
+    'xerces3', 'Xerces3 for QoS XML handling (optional)',
    ],
    ['Minimizing OpenDDS:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -814,6 +815,7 @@ my %optdep =
    'rapidjson' => [undef,           undef,                       'no_itl=0'],
    'qt' =>        ['QTDIR',         '',                          'qt4'],
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp', 'boost'],
+   'xerces3' =>   ['XERCESCROOT',   '',                          'xerces3'],
   );
 
 if (exists $opts{'java'}) {

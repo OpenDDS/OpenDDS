@@ -24,6 +24,8 @@ namespace XML
   class XML_Typedef;
 }
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -112,6 +114,8 @@ namespace DCPS {
   };
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 
