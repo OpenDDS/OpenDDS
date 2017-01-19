@@ -36,9 +36,9 @@ before_script:
   - export
   - tar czf modeling_plugins.tar.gz tools/modeling/plugins
   - rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson
-  - if [ "$NO_INLINE" == "1"]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-inline"; fi
-  - if [ "$NO_BIT" == "1"]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-built-in-topics"; fi
-  - if [ "$STATIC" == "1"]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
+  - if [ "$NO_INLINE" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-inline"; fi
+  - if [ "$NO_BIT" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-built-in-topics"; fi
+  - if [ "$STATIC" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
   - if [ "$CXX" == "g++" ]; then ./configure --xerces3 $DDS_CONFIGURE_PARAMS; fi
   - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $DDS_CONFIGURE_PARAMS; fi
   - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
