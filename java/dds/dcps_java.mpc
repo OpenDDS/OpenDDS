@@ -26,7 +26,6 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
     $(DDS_ROOT)/dds/DdsDcpsCore.idl
     $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl << DdsDcpsConditionSeqJC.h
     $(DDS_ROOT)/dds/DdsDcpsDomain.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionJC.h DdsDcpsPublicationJC.h
-    $(DDS_ROOT)/dds/DdsDcpsTypeSupportExt.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionExtJC.h DdsDcpsPublicationJC.h DdsDcpsDomainJC.h
     $(DDS_ROOT)/dds/DdsDcpsGuid.idl
   }
 
@@ -43,6 +42,7 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcp
   Idl2Jni_Files {
     idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsDomainC.h
     $(DDS_ROOT)/dds/DdsDcpsTopic.idl << DdsDcpsCoreJC.h DdsDcpsInfrastructureJC.h
+    $(DDS_ROOT)/dds/DdsDcpsTypeSupportExt.idl << DdsDcpsTopicJC.h DdsDcpsSubscriptionExtJC.h DdsDcpsPublicationJC.h DdsDcpsDomainJC.h
   }
 
   Idl2Jni_Files {
