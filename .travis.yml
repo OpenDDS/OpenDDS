@@ -41,6 +41,7 @@ before_script:
   - if [ "$STATIC" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
   - if [ "$CXX" == "g++" ]; then ./configure --xerces3 $DDS_CONFIGURE_PARAMS; fi
   - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $DDS_CONFIGURE_PARAMS; fi
+  - cat $DDS_ROOT/setenv.sh
   - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
   - cat $ACE_ROOT/ace/config.h
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
