@@ -15,8 +15,9 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <tools/modeling/codegen/model/Sync.h>
-
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/scoped_ptr.h"
+
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -107,7 +108,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // cache handle for first reader.
       ::DDS::InstanceHandle_t handle = -1;
       {
-        std::auto_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on A partition." << std::endl;
         if (OpenDDS::Model::WriterSync::wait_match(dw)) {
@@ -159,7 +160,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // Now DataWriter is in PARTITION B, the second DataReader in PARTITION B
       // should receive the messages.
       {
-        std::auto_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on B partition." << std::endl;
         if (OpenDDS::Model::WriterSync::wait_match(dw)) {
@@ -193,7 +194,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // Wait for first reader to switch from PARTITION A to B so
       // both two readers will receive the messages.
       {
-        std::auto_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
 
         attempts = 1;
         while (attempts != max_attempts)

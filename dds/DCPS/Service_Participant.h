@@ -17,6 +17,8 @@
 #include "dds/DCPS/Discovery.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DomainParticipantFactoryImpl.h"
+#include "dds/DCPS/scoped_ptr.h"
+
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -574,10 +576,10 @@ private:
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
   /// The @c TRANSIENT data durability cache.
-  std::auto_ptr<DataDurabilityCache> transient_data_cache_;
+  scoped_ptr<DataDurabilityCache> transient_data_cache_;
 
   /// The @c PERSISTENT data durability cache.
-  std::auto_ptr<DataDurabilityCache> persistent_data_cache_;
+  scoped_ptr<DataDurabilityCache> persistent_data_cache_;
 
   /// The @c PERSISTENT data durability directory.
   ACE_CString persistent_data_dir_;
