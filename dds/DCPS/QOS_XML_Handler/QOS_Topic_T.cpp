@@ -2,6 +2,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "QOS_Common.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
 QOS_Topic_T<XML_QOS_TYPE, DDS_QOS_TYPE>::QOS_Topic_T (void)
 {
@@ -37,3 +39,5 @@ QOS_Topic_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, const 
 //         *xml_qos->topic_data ()->value ();
 //     }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

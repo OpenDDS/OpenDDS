@@ -3,6 +3,8 @@
 #include "QOS_Common.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
 QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::QOS_DwDrTp_Base_T (void)
 {
@@ -242,3 +244,5 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, 
         }
     }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

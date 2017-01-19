@@ -1,6 +1,8 @@
 #include "TopicQos_Handler.h"
 #include "QOS_Topic_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 bool
 TopicQos_Handler::get_topic_qos (DDS::TopicQos& tp_qos,
                                       dds::qosProfile * profile,
@@ -54,3 +56,5 @@ TopicQos_Handler::get_topic_qos (DDS::TopicQos& tp_qos,
 
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

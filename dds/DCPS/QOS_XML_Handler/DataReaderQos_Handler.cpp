@@ -2,6 +2,8 @@
 #include "QOS_DataReader_T.h"
 #include "dds/DCPS/debug.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 bool
 DataReaderQos_Handler::get_datareader_qos (DDS::DataReaderQos& dr_qos,
                                            dds::qosProfile * profile,
@@ -55,3 +57,5 @@ DataReaderQos_Handler::get_datareader_qos (DDS::DataReaderQos& dr_qos,
 
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

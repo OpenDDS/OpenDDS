@@ -15,6 +15,8 @@
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class DataReaderQos_Handler
 {
 public:
@@ -32,6 +34,8 @@ private:
   static bool get_datareader_qos (DDS::DataReaderQos& dr_qos,
                                   dds::datareaderQos * dr);
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* DATAREADER_QOS_HANDLER_H */

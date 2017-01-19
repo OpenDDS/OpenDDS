@@ -12,6 +12,8 @@
 #include "dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h"
 #include "dds/DCPS/QOS_XML_Handler/XML_File_Intf.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -88,4 +90,7 @@ namespace DCPS {
   };
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #endif /* QOS_XML_LOADER_H */

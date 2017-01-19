@@ -130,6 +130,20 @@ local interface <%TYPE%>DataReader : OpenDDS::DCPS::DataReaderEx {
                 in ::DDS::ViewStateMask view_states,
                 in ::DDS::InstanceStateMask instance_states);
 
+    ::DDS::ReturnCode_t read_instance_w_condition(
+                inout <%TYPE%><%SEQ%> received_data,
+                inout ::DDS::SampleInfoSeq sample_infos,
+                in long max_samples,
+                in ::DDS::InstanceHandle_t a_handle,
+                in ::DDS::ReadCondition a_condition);
+
+    ::DDS::ReturnCode_t take_instance_w_condition(
+                inout <%TYPE%><%SEQ%> received_data,
+                inout ::DDS::SampleInfoSeq sample_infos,
+                in long max_samples,
+                in ::DDS::InstanceHandle_t a_handle,
+                in ::DDS::ReadCondition a_condition);
+
     ::DDS::ReturnCode_t read_next_instance(
                 inout <%TYPE%><%SEQ%> received_data,
                 inout ::DDS::SampleInfoSeq info_seq,

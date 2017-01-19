@@ -1,8 +1,9 @@
-
 #include "dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h"
 #include "dds/DCPS/QOS_XML_Handler/XML_File_Intf.h"
 #include "ace/Tokenizer_T.h"
 #include "dds/DCPS/debug.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -453,3 +454,5 @@ namespace DCPS {
   }
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

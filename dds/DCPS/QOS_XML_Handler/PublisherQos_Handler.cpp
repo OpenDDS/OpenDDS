@@ -1,6 +1,8 @@
 #include "PublisherQos_Handler.h"
 #include "QOS_PubSub_T.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 bool
 PublisherQos_Handler::get_publisher_qos (DDS::PublisherQos& pub_qos,
                                       dds::qosProfile * profile,
@@ -54,3 +56,5 @@ PublisherQos_Handler::get_publisher_qos (DDS::PublisherQos& pub_qos,
 
   return true;
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

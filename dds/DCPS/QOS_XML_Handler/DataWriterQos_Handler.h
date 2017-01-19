@@ -15,6 +15,8 @@
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 class DataWriterQos_Handler
 {
 public:
@@ -32,6 +34,8 @@ private:
   static bool get_datawriter_qos (DDS::DataWriterQos& dw_qos,
                                   dds::datawriterQos * dw);
 };
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 #endif /* DATAWRITER_QOS_HANDLER_H */
