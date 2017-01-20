@@ -13,7 +13,7 @@ my $test = new PerlDDS::TestFramework();
 $test->{'nobits'} = 1;
 
 $test->setup_discovery();
-$test->process('rc', 'ReadConditionTest');
+$test->process('rc', 'ReadConditionTest', '-DCPSConfigFile dcps.ini');
 $test->start_process('rc');
 
 exit $test->finish(60);
