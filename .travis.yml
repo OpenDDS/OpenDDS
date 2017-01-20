@@ -67,15 +67,6 @@ before_script:
   - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $DDS_CONFIGURE_PARAMS; fi
 
   - if [ "$SAFETY_PROFILE" == "1" ]; then
-        # echo "host environment:";
-        # cat $DDS_ROOT/build/host/setenv.sh;
-        # cat $DDS_ROOT/build/host/ACE_wrappers/ace/config.h;
-        # cat $DDS_ROOT/build/host/ACE_wrappers/include/makeinclude/platform_macros.GNU;
-        # echo "target environment:";
-        # cat $DDS_ROOT/build/target/setenv.sh;
-        # cat $DDS_ROOT/build/target/ACE_wrappers/bin/MakeProjectCreator/config/default.features;
-        # cat $DDS_ROOT/build/target/ACE_wrappers/ace/config.h;
-        # cat $DDS_ROOT/build/target/ACE_wrappers/include/makeinclude/platform_macros.GNU;
     else
         cat $DDS_ROOT/setenv.sh;
         cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features;
