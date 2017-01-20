@@ -109,8 +109,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           exit(1);
         }
 
-      CORBA::String_var type_name = mts->get_type_name ();
-
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);
 
@@ -120,7 +118,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       topic_qos.topic_data.value.replace (topic_data_len, topic_data_len, reinterpret_cast<CORBA::Octet*>(TOPIC_DATA));
 
       DDS::Topic_var topic = participant->create_topic("Movie Discussion List",
-                                                        type_name.in (),
+                                                       "Messenger",
                                                         topic_qos,
                                                         DDS::TopicListener::_nil(),
                                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);

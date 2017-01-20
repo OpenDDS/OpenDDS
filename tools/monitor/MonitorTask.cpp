@@ -542,7 +542,7 @@ Monitor::MonitorTask::createSubscription(
   typeSupport->register_type( this->participant_.in(), 0);
   topic = this->participant_->create_topic(
             topicName,
-            typeSupport->get_type_name(),
+            CORBA::String_var(typeSupport->get_type_name()),
             TOPIC_QOS_DEFAULT,
             DDS::TopicListener::_nil(),
             OpenDDS::DCPS::DEFAULT_STATUS_MASK

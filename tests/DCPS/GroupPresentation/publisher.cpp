@@ -84,7 +84,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create Topic
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
-                                mts->get_type_name(),
+                                CORBA::String_var(mts->get_type_name()),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
