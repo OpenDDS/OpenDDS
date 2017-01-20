@@ -91,5 +91,5 @@ script:
         ./run_test.pl static;
         ./run_test.pl static callback;
     else
-        cd tests/DCPS/Messenger && ./run_test.pl all
+        cd tests/DCPS/Messenger && ./run_test.pl all;
     fi
