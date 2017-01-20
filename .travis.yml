@@ -39,9 +39,9 @@ branches:
 before_script:
   - export
   - if [ "$FUZZ" == "1" ]; then
-        tar czf modeling_plugins.tar.gz tools/modeling/plugins
-        rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson
-        perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
+        tar czf modeling_plugins.tar.gz tools/modeling/plugins;
+        rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson;
+        perl $DDS_ROOT/tools/scripts/dds_fuzz.pl;
     fi
   - if [ "$NO_INLINE" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-inline"; fi
   - if [ "$NO_BIT" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-built-in-topics"; fi
@@ -55,8 +55,8 @@ before_script:
   - cat $ACE_ROOT/ace/config.h
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
   - if [ "$FUZZ" == "1" ]; then
-        tar xzf modeling_plugins.tar.gz
-        rm modeling_plugins.tar.gz
+        tar xzf modeling_plugins.tar.gz;
+        rm modeling_plugins.tar.gz;
     fi
 
 script:
