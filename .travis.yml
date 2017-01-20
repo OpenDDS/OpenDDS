@@ -21,6 +21,7 @@ env:
 matrix:
   include:
     - compiler: clang
+      env: FUZZ=0
 
 addons:
   apt:
