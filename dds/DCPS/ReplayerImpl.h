@@ -20,6 +20,7 @@
 #include "Qos_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
+#include "scoped_ptr.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #include "FilterEvaluator.h"
@@ -276,23 +277,23 @@ private:
   // PublicationReconnectingStatus       publication_reconnecting_status_;
 
   // The message block allocator.
-  std::auto_ptr<MessageBlockAllocator>     mb_allocator_;
+  scoped_ptr<MessageBlockAllocator>     mb_allocator_;
   // The data block allocator.
-  std::auto_ptr<DataBlockAllocator>        db_allocator_;
+  scoped_ptr<DataBlockAllocator>        db_allocator_;
   // The header data allocator.
-  std::auto_ptr<DataSampleHeaderAllocator> header_allocator_;
+  scoped_ptr<DataSampleHeaderAllocator> header_allocator_;
 
   /// The cached allocator to allocate DataSampleElement
   /// objects.
-  std::auto_ptr<DataSampleElementAllocator> sample_list_element_allocator_;
+  scoped_ptr<DataSampleElementAllocator> sample_list_element_allocator_;
 
   /// The allocator for TransportSendElement.
   /// The TransportSendElement allocator is put here because it
   /// needs the number of chunks information that WriteDataContainer
   /// has.
-  std::auto_ptr<TransportSendElementAllocator>  transport_send_element_allocator_;
+  scoped_ptr<TransportSendElementAllocator>  transport_send_element_allocator_;
 
-  std::auto_ptr<TransportCustomizedElementAllocator> transport_customized_element_allocator_;
+  scoped_ptr<TransportCustomizedElementAllocator> transport_customized_element_allocator_;
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
@@ -306,7 +307,7 @@ private:
   // CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  // std::auto_ptr<OfferedDeadlineWatchdog> watchdog_;
+  // scoped_ptr<OfferedDeadlineWatchdog> watchdog_;
   /// The flag indicates whether the liveliness timer is scheduled and
   /// needs be cancelled.
   // bool                       cancel_timer_;

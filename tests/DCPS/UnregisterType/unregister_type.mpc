@@ -1,6 +1,7 @@
 project(UnregisterTypeTest): dcpsexe, dcps_rtps_udp {
   exename   = unregister_type_test
   exeout    = .
+  idlflags += -SS
 
   TypeSupport_Files {
     Test.idl

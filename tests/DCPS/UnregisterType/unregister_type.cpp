@@ -1,13 +1,9 @@
 #include "TestTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/StaticIncludes.h"
 
 #include "tests/DCPS/common/TestSupport.h"
-
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/RTPS/RtpsDiscovery.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
-#endif
 
 
 // const data declarations

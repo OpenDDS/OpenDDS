@@ -283,7 +283,7 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::set_allocator(
 
 OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(
   DDS::DurabilityQosPolicyKind kind)
-  : allocator_(make_allocator(kind))
+  : allocator_(new ACE_New_Allocator)
   , kind_(kind)
   , samples_(0)
   , cleanup_timer_ids_()
@@ -296,7 +296,7 @@ OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(
 OpenDDS::DCPS::DataDurabilityCache::DataDurabilityCache(
   DDS::DurabilityQosPolicyKind kind,
   ACE_CString & data_dir)
-  : allocator_(make_allocator(kind))
+  : allocator_(new ACE_New_Allocator)
   , kind_(kind)
   , data_dir_(data_dir)
   , samples_(0)
@@ -759,7 +759,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
 
   // Don't use the cached allocator for the registered sample message
   // block.
-  std::auto_ptr<DataSample> registration_sample(
+  scoped_ptr<DataSample> registration_sample(
     new ACE_Message_Block(marshaled_sample_length,
                           ACE_Message_Block::MB_DATA,
                           0, //cont
@@ -866,16 +866,6 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
     }
   }
   return true;
-}
-
-std::auto_ptr<ACE_Allocator>
-OpenDDS::DCPS::DataDurabilityCache::make_allocator(
-  DDS::DurabilityQosPolicyKind)
-{
-  // The use of other Allocators has been removed but this function
-  // remains for the time being.
-  // TODO: clean up all the ACE_Allocator-related code
-  return std::auto_ptr<ACE_Allocator> (new ACE_New_Allocator);
 }
 
 #endif // OPENDDS_NO_PERSISTENCE_PROFILE

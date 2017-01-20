@@ -206,43 +206,62 @@ private:
   const unsigned int expected_num_samples_;
 };
 
-void validate(const float expected, const float actual, const int key, const char* loc, bool& valid)
+void validate(const float expected_x, const float actual_x,
+              const float expected_y, const float actual_y,
+              const int key, bool& valid)
 {
-  if (expected != actual) {
+  if (expected_x != actual_x || expected_y != actual_y) {
     valid = false;
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("%N:%l validate()")
-      ACE_TEXT(" ERROR: for key %d received %C=%f, expected %f!\n"),
-      key, loc, actual, expected));
+      ACE_TEXT(" ERROR: for key %d received sample x=%f y=%f")
+      ACE_TEXT("but expected x=%f y=%f!\n"),
+      key, actual_x, actual_y, expected_x, expected_y));
   }
   else {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l validate() - ")
-      ACE_TEXT("received message with key %d received %C=%f, expected %f!\n"),
-      key, loc, actual, expected));
+      ACE_TEXT("received message with key %d received sample x=%f y=%f")
+      ACE_TEXT("but expected x=%f y=%f!\n"),
+      key, actual_x, actual_y, expected_x, expected_y));
   }
 }
 
 bool verify_unreliable(const size_t expected_samples, SampleMap& rcvd_samples)
 {
   bool valid = true;
+  float LAST_SAMPLE_X = 0;
 
   for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
     const Foos& foos = rcvd_samples[j];
     size_t seen = foos.size();
+
+    ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("%N:%l verify_reliable() - ")
+        ACE_TEXT("Instance %d messages received:\n"), j));
+    for (size_t recvd = 0; recvd < foos.size(); recvd++)
+    {
+      const FooInfo& fooInfo = foos[recvd];
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("\tkey: %d x: %f y: %f\n"),
+        fooInfo.first.key, fooInfo.first.x, fooInfo.first.y));
+    }
+
     if (seen != expected_samples) {
       valid = false;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%N:%l main()")
+        ACE_TEXT("%N:%l verify_unreliable()")
         ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
         j, seen, expected_samples));
     } else {
       for (size_t i = 0; i < expected_samples; ++i) {
         const FooInfo& fooInfo = foos[i];
-        // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first sent
+        // NOTE: spec does not enforce ordering, but relying on the fact
+        // that this is TCP and that the first sent
         // message will also be the first received message in the data reader
-        validate(0.0f, fooInfo.first.x, j, "x", valid);
+        validate(LAST_SAMPLE_X, fooInfo.first.x, 0.0f, fooInfo.first.y, j, valid);
+        LAST_SAMPLE_X += (float)(NUM_INSTANCES * SAMPLES_PER_CYCLE);
       }
     }
+    LAST_SAMPLE_X = (float)((j+1)*SAMPLES_PER_CYCLE);
   }
   return valid;
 }
@@ -250,104 +269,118 @@ bool verify_unreliable(const size_t expected_samples, SampleMap& rcvd_samples)
 bool verify_reliable(const size_t expected_samples, SampleMap& rcvd_samples, SampleMap& sent_samples)
 {
   bool valid = true;
+  float LAST_SAMPLE_X = 0;
+
   for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
     const Foos& foos = rcvd_samples[j];
     const Foos& sent_foos = sent_samples[j];
     size_t seen = foos.size();
-    // each delay should result in 2 samples being seen, the first one and the last one in the filter window
+
+    ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("%N:%l verify_reliable() - ")
+        ACE_TEXT("Instance %d messages received:\n"), j));
+    for (size_t recvd = 0; recvd < foos.size(); recvd++)
+    {
+      const FooInfo& fooInfo = foos[recvd];
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("\tkey: %d x: %f y: %f\n"),
+        fooInfo.first.key, fooInfo.first.x, fooInfo.first.y));
+    }
+
+    // each delay should result in 2 samples being seen,
+    // the first one and the last one in the filter window
     if (seen != expected_samples) {
       valid = false;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("%N:%l main()")
+        ACE_TEXT("%N:%l verify_reliable()")
         ACE_TEXT(" ERROR: for key %d received %d sample(s), expected %d!\n"),
         j, seen, expected_samples));
     } else {
-      const float LAST_SAMPLE_X = (float)(SAMPLES_PER_CYCLE - 1);
         // each successive sample was sent with x = 0.0 to x = (SAMPLES_PER_CYCLE - 1)
-        // NOTE: spec does not enforce ordering, but relying on the fact that this is TCP and that the first and last sent
-        // message will also be the first and last received message in the data reader
+        // NOTE: spec does not enforce ordering, but relying on the fact that
+        // this is TCP and that the first and last sent message will also be
+        // the first and last received message in the data reader
       const FooInfo* foo_info = &foos[0];
-      validate(0.0f, foo_info->first.x, foo_info->first.key, "x", valid);
-      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, 0.0f, foo_info->first.y, foo_info->first.key, valid);
       ACE_Time_Value diff = foo_info->second - sent_foos[0].second;
       if (diff.sec() > minimum_separation.sec) {
         valid = false;
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("%N:%l verify_reliable()")
         ACE_TEXT(" ERROR: Test setup incorrectly, sending and receiving samples should not take %d seconds!\n"),
         diff.sec()));
       }
 
+      LAST_SAMPLE_X += SAMPLES_PER_CYCLE - 1;
       foo_info = &foos[1];
-      validate(LAST_SAMPLE_X, foo_info->first.x, foo_info->first.key, "x", valid);
-      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, 0.0f, foo_info->first.y, foo_info->first.key, valid);
 
       diff = foo_info->second - foos[0].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
           diff.sec() > (minimum_separation.sec * 1.5)) {
         valid = false;
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("%N:%l verify_reliable()")
           ACE_TEXT(" ERROR: The time between the 1st and 2nd sample should be about %d seconds, but it was %d seconds!\n"),
           minimum_separation.sec, diff.sec()));
       }
 
+      LAST_SAMPLE_X += SAMPLES_PER_CYCLE;
       foo_info = &foos[2];
-      validate(LAST_SAMPLE_X, foo_info->first.x,  foo_info->first.key, "x", valid);
-      validate(1.0f, foo_info->first.y, foo_info->first.key, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, 1.0f, foo_info->first.y, foo_info->first.key, valid);
 
       diff = foo_info->second - foos[1].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
         diff.sec() > (minimum_separation.sec * 1.5)) {
         valid = false;
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("%N:%l verify_reliable()")
           ACE_TEXT(" ERROR: The time between the 2nd and 3rd sample should be about %d seconds, but it was %d seconds!\n"),
           minimum_separation.sec, diff.sec()));
       }
 
+      LAST_SAMPLE_X += (NUM_INSTANCES)*SAMPLES_PER_CYCLE + 1;
       foo_info = &foos[3];
-      validate(0.0f, foo_info->first.x, foo_info->first.key, "x", valid);
-      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, 0.0f, foo_info->first.y, foo_info->first.key, valid);
 
       diff = foo_info->second - foos[2].second;
       if (diff.sec() < (minimum_separation.sec * 1.5) ||
           diff.sec() >= (minimum_separation.sec * 3)) {
         valid = false;
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("%N:%l verify_reliable()")
           ACE_TEXT(" ERROR: The time between the 3rd and 4th sample should be about %d seconds, but it was %d seconds!\n"),
           SEPARATION_MULTIPLIER * minimum_separation.sec, diff.sec()));
       }
 
+      LAST_SAMPLE_X += SAMPLES_PER_CYCLE -1;
       foo_info = &foos[4];
-      validate(LAST_SAMPLE_X, foo_info->first.x, foo_info->first.key, "x", valid);
-      validate(0.0f, foo_info->first.y, foo_info->first.key, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, 0.0f, foo_info->first.y, foo_info->first.key, valid);
 
       diff = foo_info->second - foos[3].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
         diff.sec() > (minimum_separation.sec * 1.5)) {
         valid = false;
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("%N:%l verify_reliable()")
           ACE_TEXT(" ERROR: The time between the 4th and 5th sample should be about %d seconds, but it was %d seconds!\n"),
           minimum_separation.sec, diff.sec()));
       }
 
+      LAST_SAMPLE_X += SAMPLES_PER_CYCLE;
       foo_info = &foos[5];
-      validate(LAST_SAMPLE_X, foo_info->first.x, foo_info->first.key, "x", valid);
-      validate(1.0f, foo_info->first.y, foo_info->first.key, "y", valid);
+      validate(LAST_SAMPLE_X, foo_info->first.x, 1.0f, foo_info->first.y, foo_info->first.key, valid);
 
       diff = foo_info->second - foos[4].second;
       if (diff.sec() < (minimum_separation.sec * 0.75) ||
         diff.sec() > (minimum_separation.sec * 1.5)) {
         valid = false;
         ACE_ERROR((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("%N:%l verify_reliable()")
           ACE_TEXT(" ERROR: The time between the 5th and 6th sample should be about %d seconds, but it was %d seconds!\n"),
           minimum_separation.sec, diff.sec()));
       }
     }
+    LAST_SAMPLE_X = (float)((NUM_INSTANCES-j)*SAMPLES_PER_CYCLE + j*SAMPLES_PER_CYCLE);
   }
   return valid;
 }
@@ -545,13 +578,15 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // We expect to receive up to one sample per
     // cycle (all others should be filtered).
+    size_t global_sent_msg_counter = 0;
     for (size_t i = 0; i < EXPECTED_ITERATIONS; ++i) {
       for (::CORBA::Long j = 0; j < NUM_INSTANCES; ++j) {
         Foo foo = { j, 0, 0, 0 }; // same instance required for repeated samples
         const ACE_Time_Value start = ACE_OS::gettimeofday();
         for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k) {
-          foo.x = (CORBA::Float)k;
-          send_map[foo.key].push_back(std::make_pair(foo, ACE_OS::gettimeofday()));
+          foo.x = (CORBA::Float)global_sent_msg_counter++;
+
+          send_map[foo.key].push_back(std::make_pair(foo, ACE_OS::gettimeofday ()));
           if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("%N:%l main()")
@@ -565,12 +600,12 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
         if (reliable) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l main() - ")
-            ACE_TEXT("reliable, so waiting minimum_separation (%d)seconds.\n"), minimum_separation.sec));
-          ACE_OS::sleep(minimum_separation.sec);
+            ACE_TEXT("reliable, so waiting minimum_separation + 1 = %d seconds.\n"), minimum_separation.sec + 1));
+          ACE_OS::sleep(minimum_separation.sec + 1);
           foo.y = 1.0f;
           for (size_t k = 0; k < SAMPLES_PER_CYCLE; ++k) {
-            foo.x = (CORBA::Float)k;
-            send_map[foo.key].push_back(std::make_pair(foo, ACE_OS::gettimeofday()));
+            foo.x = (CORBA::Float)global_sent_msg_counter++;
+            send_map[foo.key].push_back(std::make_pair(foo, ACE_OS::gettimeofday ()));
             if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
               ACE_ERROR_RETURN((LM_ERROR,
                 ACE_TEXT("%N:%l main()")
