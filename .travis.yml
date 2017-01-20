@@ -29,6 +29,40 @@ matrix:
       env: FUZZ=1 USE_JAVA=1
     - compiler: clang
       env: FUZZ=0
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env: USE_ALT_COMPILER=1 COMPILER=g++-4.9 FUZZ=0
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: USE_ALT_COMPILER=1 COMPILER=g++-5 FUZZ=0
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang++-3.6
+      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.6 FUZZ=0
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang++-3.7
+      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.7 FUZZ=0
 
 addons:
   apt:
@@ -62,6 +96,7 @@ before_script:
         if [ "$USES_WCHAR" == "1" ]; then export ADDL_DEFAULT_FEATURES="uses_wchar=1 $ADDL_DEFAULT_FEATURES"; fi;
         export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=\"$ADDL_DEFAULT_FEATURES\"";
     fi
+  - if [ "$USE_ALT_COMPILER" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --compiler=$COMPILER"; fi
   - if [ "$CXX" == "g++" ]; then ./configure --xerces3 $DDS_CONFIGURE_PARAMS; fi
   - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $DDS_CONFIGURE_PARAMS; fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then
