@@ -2,7 +2,6 @@ language: cpp
 
 compiler:
   - gcc
-  - clang
 
 env:
   matrix:
@@ -19,15 +18,8 @@ env:
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
 
 matrix:
-  exclude:
+  include:
     - compiler: clang
-      env: NO_INLINE=1
-    - compiler: clang
-      env: NO_BIT=1
-    - compiler: clang
-      env: STATIC=1
-    - compiler: clang
-      env: SAFETY_PROFILE=1
 
 addons:
   apt:
