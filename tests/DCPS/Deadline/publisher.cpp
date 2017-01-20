@@ -15,6 +15,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/scoped_ptr.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -134,8 +135,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
       {
         // Two threads use same datawriter to write different instances.
-        std::auto_ptr<Writer> writer1 (new Writer (dw.in (), 99, SLEEP_DURATION));
-        std::auto_ptr<Writer> writer2 (new Writer (dw.in (), 100, SLEEP_DURATION));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer1 (new Writer (dw.in (), 99, SLEEP_DURATION));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer2 (new Writer (dw.in (), 100, SLEEP_DURATION));
 
         writer1->start ();
         writer2->start ();

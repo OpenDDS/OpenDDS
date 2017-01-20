@@ -14,8 +14,8 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/scoped_ptr.h"
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
@@ -99,7 +99,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       {
-        std::auto_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
 
         writer->start ();
         while ( !writer->is_finished())

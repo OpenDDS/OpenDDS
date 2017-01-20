@@ -20,6 +20,8 @@
 #include "dds/DCPS/DurabilityQueue.h"
 #include "dds/DCPS/FileSystemStorage.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/scoped_ptr.h"
+
 
 #include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Array_Base.h"
@@ -219,15 +221,10 @@ private:
 
   void init();
 
-  /// Make allocator suitable to support specified kind of
-  /// @c DURABILITY.
-  static std::auto_ptr<ACE_Allocator>
-  make_allocator(DDS::DurabilityQosPolicyKind kind);
-
 private:
 
   /// Allocator used to allocate memory for sample map and lists.
-  std::auto_ptr<ACE_Allocator> const allocator_;
+  scoped_ptr<ACE_Allocator> const allocator_;
 
   DDS::DurabilityQosPolicyKind kind_;
 

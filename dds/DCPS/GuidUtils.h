@@ -155,9 +155,9 @@ operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
 #endif
 
 struct EntityIdConverter {
-  EntityIdConverter (const unsigned char o[4])
+  explicit EntityIdConverter(const unsigned char (&o)[4])
   {
-    std::memcpy(&entityId, &o, sizeof(EntityId_t));
+    std::memcpy(&entityId, o, sizeof(EntityId_t));
   }
 
   operator EntityId_t() const { return entityId; }

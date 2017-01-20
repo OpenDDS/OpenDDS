@@ -16,6 +16,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/scoped_ptr.h"
 
 #include <ace/streams.h>
 #include "ace/High_Res_Timer.h"
@@ -52,7 +53,7 @@ private:
   std::vector<DDS::Publisher_var> pub_;
   std::vector<DDS::DataWriter_var> dw_;
 
-  std::auto_ptr<SyncClientExt_i> sync_client_;
+  OpenDDS::DCPS::scoped_ptr<SyncClientExt_i> sync_client_;
 };
 
 bool
@@ -271,20 +272,6 @@ Publisher::run (void)
       //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d publishers in %d secs.\n"
       //, writer_count_, tv.sec()));
 
-
-      /*
-        std::auto_ptr<Writer> writer (new Writer(dw_[0].in()));
-
-        writer->start ();
-        while ( !writer->is_finished()) {
-        ACE_Time_Value small(0,250000);
-        ACE_OS::sleep (small);
-        }
-
-        // Cleanup
-        writer->end ();
-        //delete writer;
-        */
 
       for (size_t count = 0; count < participant_count_; count++)
         {

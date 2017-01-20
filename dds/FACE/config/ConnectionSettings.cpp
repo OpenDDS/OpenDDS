@@ -37,7 +37,7 @@ ConnectionSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "topic")) {
     if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("topic name %C exceeds allowable length,"
-        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+        "must be < %B \n"), value, ALLOWABLE_NAME_LEN));
       status = 1;
     } else {
       std::strncpy(topic_name_, value, sizeof(topic_name_));
@@ -45,7 +45,7 @@ ConnectionSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "datawriterqos")) {
     if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("datawriterqos name %C exceeds allowable length,"
-        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+        "must be < %B \n"), value, ALLOWABLE_NAME_LEN));
       status = 1;
     } else {
       std::strncpy(datawriter_qos_name_, value, sizeof(datawriter_qos_name_));
@@ -53,7 +53,7 @@ ConnectionSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "datareaderqos")) {
     if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("datareaderqos name %C exceeds allowable length,"
-        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+        "must be < %B \n"), value, ALLOWABLE_NAME_LEN));
       status = 1;
     } else {
       std::strncpy(datareader_qos_name_, value, sizeof(datareader_qos_name_));
@@ -61,7 +61,7 @@ ConnectionSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "publisherqos")) {
     if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("publisherqos name %C exceeds allowable length,"
-        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+        "must be < %B \n"), value, ALLOWABLE_NAME_LEN));
       status = 1;
     } else {
       std::strncpy(publisher_qos_name_, value, sizeof(publisher_qos_name_));
@@ -69,7 +69,7 @@ ConnectionSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "subscriberqos")) {
     if (std::strlen(value) >= ALLOWABLE_NAME_LEN) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("subscriberqos name %C exceeds allowable length,"
-        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+        "must be < %B \n"), value, ALLOWABLE_NAME_LEN));
       status = 1;
     } else {
       std::strncpy(subscriber_qos_name_, value, sizeof(subscriber_qos_name_));
@@ -98,7 +98,7 @@ ConnectionSettings::set(const char* name, const char* value)
     // config_name_ is sized to ALLOWABLE_NAME_LEN
     if (std::strlen(value) >= sizeof(config_name_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("config name %C exceeds allowable length,"
-        "must be < %d \n"), value, ALLOWABLE_NAME_LEN));
+        "must be < %B \n"), value, ALLOWABLE_NAME_LEN));
       status = 1;
     } else {
       std::strncpy(config_name_, value, sizeof(config_name_));

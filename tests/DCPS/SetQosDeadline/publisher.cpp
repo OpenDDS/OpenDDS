@@ -15,8 +15,9 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/WaitSet.h>
-
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/scoped_ptr.h"
+
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -98,7 +99,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       int attempts = 1;
       {
         // Wait for both first DataReader connect and write messages.
-        std::auto_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
 
         while (attempts != max_attempts)
         {
@@ -191,7 +192,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       {
         // Wait for both second DataReader connect which changed deadline period
         // from 3 seconds to 5 seconds.
-        std::auto_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
         attempts = 1;
         while (attempts != max_attempts)
         {
