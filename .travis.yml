@@ -83,4 +83,13 @@ before_script:
 
 script:
   - make -j2
-  - cd tests/DCPS/Messenger && ./run_test.pl all
+  - if [ "$SAFETY_PROFILE" == "1" ]; then
+        cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
+        cd $DDS_ROOT/build/target/tests/FACE/Messenger;
+        ./run_test.pl;
+        ./run_test.pl callback;
+        ./run_test.pl static;
+        ./run_test.pl static callback;
+    else
+        cd tests/DCPS/Messenger && ./run_test.pl all
+    fi
