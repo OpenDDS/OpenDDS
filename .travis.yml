@@ -12,7 +12,6 @@ env:
     - STATIC=1 NO_DEBUG=1
     - SAFETY_PROFILE=1
     - MOD_DEFAULT_FEATURES=1 USES_WCHAR=1
-    - FUZZ=1 USE_JAVA=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
     - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
@@ -22,6 +21,12 @@ env:
 
 matrix:
   include:
+    - compiler: gcc
+      addons:
+        apt:
+          packages:
+            - openjdk-7-jdk
+      env: FUZZ=1 USE_JAVA=1
     - compiler: clang
       env: FUZZ=0
 
@@ -29,7 +34,6 @@ addons:
   apt:
     packages:
     - libxerces-c-dev
-    - openjdk-7-jdk
 
 before_install:
   - mkdir ext
