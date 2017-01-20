@@ -12,9 +12,10 @@ env:
     - STATIC=1 NO_DEBUG=1
     - SAFETY_PROFILE=1
     - MOD_DEFAULT_FEATURES=1 USES_WCHAR=1
+    - FUZZ=1 JAVA=1
   global:
-    - ACE_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/ACE
-    - TAO_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/TAO
+    - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
+    - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
     - DDS_ROOT=$TRAVIS_BUILD_DIR
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
@@ -23,20 +24,18 @@ matrix:
   include:
     - compiler: clang
       env: FUZZ=0
-    - language: cpp java
-      compiler: gcc
-      env: FUZZ=1 JAVA=1
 
 addons:
   apt:
     packages:
     - libxerces-c-dev
+    - openjdk-7-jdk
 
 before_install:
   - mkdir ext
   - cd ext && git clone --depth 1 git://github.com/DOCGroup/MPC.git
-  - git clone -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
   - cd ..
+  - git clone -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
 
 branches:
   only:
@@ -44,13 +43,11 @@ branches:
 
 before_script:
   - export
-
   - if [ "$FUZZ" == "1" ]; then
         tar czf modeling_plugins.tar.gz tools/modeling/plugins;
         rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson;
         perl $DDS_ROOT/tools/scripts/dds_fuzz.pl;
     fi
-
   - if [ "$NO_INLINE" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-inline"; fi
   - if [ "$NO_BIT" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-built-in-topics"; fi
   - if [ "$STATIC" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
@@ -62,31 +59,29 @@ before_script:
         if [ "$USES_WCHAR" == "1" ]; then export ADDL_DEFAULT_FEATURES="uses_wchar=1 $ADDL_DEFAULT_FEATURES"; fi;
         export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=\"$ADDL_DEFAULT_FEATURES\"";
     fi
-
   - if [ "$CXX" == "g++" ]; then ./configure --xerces3 $DDS_CONFIGURE_PARAMS; fi
   - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $DDS_CONFIGURE_PARAMS; fi
-
-  - if [ "$FUZZ" == "1" ]; then
-        tar xzf modeling_plugins.tar.gz;
-        rm modeling_plugins.tar.gz;
-    fi
-
-script:
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         echo "host environment:";
         cat $DDS_ROOT/build/host/setenv.sh;
-        cat $DDS_ROOT/build/host/ACE_wrappers/ace/config.h;
-        cat $DDS_ROOT/build/host/ACE_wrappers/include/makeinclude/platform_macros.GNU;
+        cat $DDS_ROOT/build/host/ACE_TAO/ACE/ace/config.h;
+        cat $DDS_ROOT/build/host/ACE_TAO/ACE/include/makeinclude/platform_macros.GNU;
         echo "target environment:";
         cat $DDS_ROOT/build/target/setenv.sh;
-        cat $DDS_ROOT/build/target/ACE_wrappers/bin/MakeProjectCreator/config/default.features;
-        cat $DDS_ROOT/build/target/ACE_wrappers/ace/config.h;
-        cat $DDS_ROOT/build/target/ACE_wrappers/include/makeinclude/platform_macros.GNU;
+        cat $DDS_ROOT/build/target/ACE_TAO/ACE/bin/MakeProjectCreator/config/default.features;
+        cat $DDS_ROOT/build/target/ACE_TAO/ACE/ace/config.h;
+        cat $DDS_ROOT/build/target/ACE_TAO/ACE/include/makeinclude/platform_macros.GNU;
     else
         cat $DDS_ROOT/setenv.sh;
         cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features;
         cat $ACE_ROOT/ace/config.h;
         cat $ACE_ROOT/include/makeinclude/platform_macros.GNU;
     fi
+  - if [ "$FUZZ" == "1" ]; then
+        tar xzf modeling_plugins.tar.gz;
+        rm modeling_plugins.tar.gz;
+    fi
+
+script:
   - make -j2
   - cd tests/DCPS/Messenger && ./run_test.pl all
