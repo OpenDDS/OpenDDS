@@ -2,6 +2,7 @@
 
 workspace {
   $(ACE_ROOT)/ace/ace.mpc
+  $(ACE_ROOT)/ace/XML_Utils/XML.mpc
   $(ACE_ROOT)/apps/gperf/src
   $(TAO_ROOT)/TAO_IDL
   $(TAO_ROOT)/tao/tao.mpc
