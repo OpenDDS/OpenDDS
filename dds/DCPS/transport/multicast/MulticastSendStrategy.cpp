@@ -92,7 +92,7 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
                                       this->link_->config()->group_address_);
 
   if (result < 0) {
-    mb->release();
+    if (mb) mb->release();
     return result;
   }
 
