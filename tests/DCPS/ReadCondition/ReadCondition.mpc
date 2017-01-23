@@ -1,9 +1,31 @@
-project: dcpsexe, dcps_transports_for_test {
-  exename = ReadConditionTest
-  idlflags += -SS -o GeneratedCode
-  dcps_ts_flags += -o GeneratedCode
+// Use a separate project to run the opendds_idl compiler which has to generate
+// sources but also MessengerTypeSupport.idl which we need to compile in the second
+// step
+project(*typesupport) : dcps_ts_defaults {
   TypeSupport_Files {
     gendir = GeneratedCode
+    dcps_ts_flags += -o GeneratedCode
     Messenger.idl
+  }
+  custom_only = 1
+}
+
+// This project compiles all IDL with tao_idl and compiles the generated sources
+// with the test program into an exe
+project: dcpsexe, dcps_transports_for_test {
+  exename = ReadConditionTest
+  includes += GeneratedCode
+  after += *typesupport
+  TypeSupport_Files {
+  }
+  IDL_Files {
+    gendir = GeneratedCode
+    idlflags += -SS -o GeneratedCode
+    Messenger.idl
+    GeneratedCode/MessengerTypeSupport.idl
+  }
+  Source_Files {
+    GeneratedCode/MessengerTypeSupportImpl.cpp
+    ReadConditionTest.cpp
   }
 }
