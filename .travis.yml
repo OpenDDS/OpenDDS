@@ -28,7 +28,6 @@ matrix:
             - openjdk-7-jdk
       env: FUZZ=1 USE_JAVA=1
     - compiler: clang
-      env: FUZZ=0
     - compiler: gcc
       addons:
         apt:
@@ -36,7 +35,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-      env: USE_ALT_COMPILER=1 COMPILER=g++-4.9 FUZZ=0
+      env: USE_ALT_COMPILER=1 COMPILER=g++-4.9
     - compiler: gcc
       addons:
         apt:
@@ -44,7 +43,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-5
-      env: USE_ALT_COMPILER=1 COMPILER=g++-5 FUZZ=0
+      env: USE_ALT_COMPILER=1 COMPILER=g++-5
     - compiler: clang
       addons:
         apt:
@@ -53,7 +52,7 @@ matrix:
             - llvm-toolchain-precise-3.6
           packages:
             - clang++-3.6
-      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.6 FUZZ=0
+      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.6
     - compiler: clang
       addons:
         apt:
@@ -62,7 +61,7 @@ matrix:
             - llvm-toolchain-precise-3.7
           packages:
             - clang++-3.7
-      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.7 FUZZ=0
+      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.7
 
 addons:
   apt:
