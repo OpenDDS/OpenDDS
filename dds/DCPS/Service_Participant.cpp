@@ -152,6 +152,7 @@ Service_Participant::Service_Participant()
     ORB_argv_(false /*substitute_env_args*/),
 #endif
     reactor_(0),
+    reactor_owner_(0),
     dp_factory_servant_(0),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
