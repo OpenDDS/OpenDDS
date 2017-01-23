@@ -24,7 +24,6 @@ public:
 
   int get_timeout_writes () const;
 
-
 private:
 
   ::DDS::DataWriter_var writer_;
