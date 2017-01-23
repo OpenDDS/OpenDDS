@@ -1,3 +1,5 @@
+// -*- MPC -*-
+
 project: dcps_ts_defaults {
 
   dcps_ts_flags += -Wb,v8

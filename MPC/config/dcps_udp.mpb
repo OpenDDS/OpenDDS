@@ -1,5 +1,4 @@
-//
-//
+// -*- MPC -*-
 
 project {
   libs        += OpenDDS_Udp

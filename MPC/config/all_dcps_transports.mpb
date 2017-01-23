@@ -1,2 +1,4 @@
+// -*- MPC -*-
+
 project : dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem {
 }
