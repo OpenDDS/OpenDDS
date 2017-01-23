@@ -86,6 +86,7 @@ WriteDataContainer::WriteDataContainer(
   CORBA::Long     max_instances,
   CORBA::Long     max_total_samples)
   : transaction_id_(0),
+    publication_id_(GUID_UNKNOWN),
     writer_(writer),
     max_samples_per_instance_(max_samples_per_instance),
     max_durable_per_instance_(max_durable_per_instance),
