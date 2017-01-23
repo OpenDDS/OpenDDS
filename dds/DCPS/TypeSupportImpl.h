@@ -43,14 +43,12 @@ public:
                                           const char* type_name);
 
   virtual DDS::ReturnCode_t unregister_type(DDS::DomainParticipant_ptr participant,
-                                          const char* type_name);
+                                            const char* type_name);
 
   virtual char* get_type_name();
 
 private:
   virtual const char* default_type_name() const = 0;
-
-  CORBA::String_var type_name_;
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };

@@ -106,6 +106,7 @@ int run_test_instance (int argc, ACE_TCHAR *argv[])
                  << ret << endl;
             passed = false;
             done = true;
+            break;
           }
           received_data(data, mdw, msg);
         }

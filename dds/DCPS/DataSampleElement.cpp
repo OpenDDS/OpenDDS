@@ -49,7 +49,7 @@ DataSampleElement::DataSampleElement(
 DataSampleElement::DataSampleElement(const DataSampleElement& elem)
   : transaction_id_(elem.transaction_id_)
   , header_(elem.header_)
-  , sample_(elem.sample_->duplicate())
+  , sample_(elem.sample_ ? elem.sample_->duplicate() : 0)
   , publication_id_(elem.publication_id_)
   , num_subs_(elem.num_subs_)
   , send_listener_(elem.send_listener_)

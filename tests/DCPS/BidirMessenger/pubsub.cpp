@@ -135,7 +135,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       s << "Movie Discussion List " << i << std::ends;
 
       topic[i] = participant->create_topic(s.str().c_str(),
-                                           mts->get_type_name(),
+                                           CORBA::String_var(mts->get_type_name()),
                                            TOPIC_QOS_DEFAULT,
                                            DDS::TopicListener::_nil(),
                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
