@@ -100,6 +100,7 @@ before_script:
   - if [ "$CXX" == "g++" ]; then ./configure --xerces3 $DDS_CONFIGURE_PARAMS; fi
   - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $DDS_CONFIGURE_PARAMS; fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then
+        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$TRAVIS_BUILD_DIR/build/target/ACE_TAO/ACE/lib:$TRAVIS_BUILD_DIR/build/target/lib;
         echo "host environment:";
         cat $DDS_ROOT/build/host/setenv.sh;
         cat $DDS_ROOT/build/host/ACE_TAO/ACE/ace/config.h;
