@@ -91,12 +91,13 @@ Process::Process( const Options& options)
     // this here since there is only a single data type defined for the
     // verification test framework at this time.
     DataTypeSupportImpl* testData = new DataTypeSupportImpl();
+    CORBA::String_var type_name = testData->get_type_name();
     if( ::DDS::RETCODE_OK
      != testData->register_type( this->participants_[ current->first].in(), 0)) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Process::Process() - ")
         ACE_TEXT("unable to install type %C support into participant %C.\n"),
-        testData->get_type_name(),
+        type_name.in(),
         current->first.c_str()
       ));
       throw BadTypeSupportException ();
@@ -105,14 +106,14 @@ Process::Process( const Options& options)
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Process::Process() - ")
         ACE_TEXT("created type %C support in participant %C.\n"),
-        testData->get_type_name(),
+        type_name.in(),
         current->first.c_str()
       ));
     }
 
     // Save the data type name for later use in creating Topics.
     if( this->dataTypeName_.empty()) {
-      this->dataTypeName_ = testData->get_type_name();
+      this->dataTypeName_ = type_name;
     }
   }
 

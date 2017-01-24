@@ -75,10 +75,9 @@
       }
 
       // Create Topic (Movie Discussion List)
-      CORBA::String_var type_name = ts->get_type_name();
       DDS::Topic_var topic =
         participant->create_topic("Movie Discussion List",
-                                  type_name,
+                                  "Messenger",
                                   TOPIC_QOS_DEFAULT,
                                   0,
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);

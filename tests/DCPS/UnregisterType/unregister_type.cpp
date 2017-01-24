@@ -36,12 +36,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::Topic_var topic = dp->create_topic(TEST_TOPIC_NAME, TEST_TYPE_NAME, TOPIC_QOS_DEFAULT, ::DDS::TopicListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       TEST_CHECK(!CORBA::is_nil(topic.in()));
 
-      bool dcpsKeyCheck = false;
-      dcpsKeyCheck = tts->has_dcps_key();
+      bool dcpsKeyCheck = tts->has_dcps_key();
       TEST_CHECK(dcpsKeyCheck);
-
-      CORBA::String_var type_name = tts->get_type_name();
-      TEST_CHECK(ACE_OS::strcmp(type_name.in(), TEST_TYPE_NAME) == 0);
 
       ::DDS::ReturnCode_t topicDeletionResult = dp->delete_topic(topic.in());
       TEST_CHECK(topicDeletionResult == ::DDS::RETCODE_OK);
