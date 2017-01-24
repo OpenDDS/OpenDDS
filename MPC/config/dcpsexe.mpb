@@ -1,4 +1,2 @@
-// -*- MPC -*-
-
 project : dds_taolib, dcps, dcps_default_discovery {
 }
