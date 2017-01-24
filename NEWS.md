@@ -6,10 +6,67 @@ Version X.Y of OpenDDS.
 - Add support for versioned namespaces
 - Rework type support implementation in order to expose less internal header
   and classes to user code
+- Add read/take_instance_w_condition
+- Time Based Filter QoS 
+- C++11 Updates
+  - When C++11 is enabled make use of C++11 shared_ptr and to_string instead of using boost 
+  - Added configure and MPC support for C++11 version of ishapes 
+  - When C++11 is enabled use noexcept(false) 
+- Extend OpenDDS type support to provide user-initiated unregistering of types from a
+  domain participant. This has been included as a type support extension because
+  unregister_type is not required by the DDS specification.
+- Removed dependency on the dds4ccm_opendds feature and let configure also add a line
+  to platform_macros.GNU when xerces3 is enabled 
+- RtpsDiscovery Update: allow config to specify which interface's MAC addr is used in GUIDs 
+- Added script to create cross-distribution linux idl compiler binaries 
+- Added nmake to the specific list to use /bigobj
+- Updated Appveyor CI builds to use msvc14 and reduced clone depth 
+- Updated Travis-CI and Appveyor to use ATCD Latest_Micro tag and corrected ATCD repo name 
+- Updated release process:
+  - Add NEWS Template Creation Steps to Release Process 
+  - Convert Readme to markdown and added Travis continuous integration badge 
+- Refactored OpenDDS to make use of RcHandle for automatic handling of reference counting
+  to alleviate errors in manual reference counting.
+- Liveliness qos updates 
+- Liveliness qos updates 
+- Wireshark dissector updates 
+- Support for versioned namespaces 
+- Make use of OPENDDS_DES_FREE_THIS
  
 ##### Fixes:
 - TODO: Add your fixes here
 - Resolve compiler warnings with gcc 6.3
+- Fixed RTPS ParticipantMessageData entityIds 
+- Fixed the missing lock in RtpsUpdDataLink which causes Sigfault in some tests.
+- Added handling of case where MPC is not installed inside ACE_wrappers directory and
+  needing to utilize clone_build_tree.pl to create a separate clone of the build tree
+  inside a docker container.
+- Fixed the memory allocation problem when safety profile is enabled 
+- ishapes: include required header when using boost lexical_cast 
+- Fixed an issue where a DataWriterImpl object was being registered to a DataLink
+  object for callbacks but the reference counts were not incremented allowing the
+  DataWriterImpl object to be deleted while the DataLink still had reference to it.
+- Added ACE includes to fix static linking problem for performance-tests
+- Fixed make install problem when DESTDIR is specified 
+- Check the return value of the serializer calls to fix issue in CoherentChangeControl 
+- Fixed memory access problem for the copy constructor of DataSampleElement 
+
+##### Stability Improvements:
+- Fixed many issues included in recent Coverity Scan defect reports. 
+- TransportClient - allow fallback to next transport impl when active side fails
+  to connect on the first
+- Use ACE_Event_Handler reference counting policy for ReactorInterceptor object lifetime.
+- Rework type support implementation and some of the generated marshal helper methods
+  - The type support implementation is reworked to use a C++ class instead of a C++ template.
+    The big advantage of this is that the implementation of the type support, type specific 
+    data reader, type specific data writer and a lot of dependent templates is now not seen
+    anymore in the user code.
+  - Introduced a new MarshalTraits<> which we specialize for each type. Using this new trait
+    it is possible to retrieve whether the type and its key are bounded or not without the
+    need to create an instance of the type. This saves some unnecessary temporary objects
+    but did lead to some more work in unit tests which check the validated code.
+- Moved RepoIdGenerator to the proper namespace
+- Updated TypeSupport::get_type_name() to match DDS spec. 
 
 ##### Notes:
 - TODO: Add your notes here
