@@ -25,15 +25,21 @@ matrix:
     - compiler: gcc
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
+            - libxerces-c-dev
+            - g++-5
             - openjdk-7-jdk
       env: USE_JAVA=1
     - compiler: clang
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.7
           packages:
+            - libxerces-c-dev
             - clang++-3.7
       env: COMPILER=clang++-3.7
 
