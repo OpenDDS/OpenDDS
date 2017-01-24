@@ -1,27 +1,60 @@
+sudo: false
 language: cpp
 
 compiler:
   - gcc
-  - clang
 
 env:
+  matrix:
+    - FUZZ=1
+    - NO_INLINE=1
+    - NO_BIT=1
+    - STATIC=1 NO_DEBUG=1
+    - SAFETY_PROFILE=1
+    - USES_WCHAR=1
   global:
-    - ACE_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/ACE
-    - TAO_ROOT=$TRAVIS_BUILD_DIR/ext/ACE_TAO/TAO
+    - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
+    - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
     - DDS_ROOT=$TRAVIS_BUILD_DIR
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
+    - COMPILER=g++-5
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libxerces-c-dev
+            - g++-5
+            - openjdk-7-jdk
+      env: USE_JAVA=1
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - libxerces-c-dev
+            - clang++-3.7
+      env: COMPILER=clang++-3.7
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libxerces-c-dev
+      - libxerces-c-dev
+      - g++-5
 
 before_install:
   - mkdir ext
   - cd ext && git clone --depth 1 git://github.com/DOCGroup/MPC.git
-  - git clone -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
-  - cd ..
+  - cd .. && git clone -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
 
 branches:
   only:
@@ -29,17 +62,50 @@ branches:
 
 before_script:
   - export
-  - tar czf modeling_plugins.tar.gz tools/modeling/plugins
-  - rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson
-  - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
-  - if [ "$CXX" == "g++" ]; then ./configure --xerces3; fi
-  - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ --no-inline; fi
-  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
-  - cat $ACE_ROOT/ace/config.h
-  - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
-  - tar xzf modeling_plugins.tar.gz
-  - rm modeling_plugins.tar.gz
+  - if [ "$FUZZ" == "1" ]; then
+        tar czf modeling_plugins.tar.gz tools/modeling/plugins;
+        rm -rf tools/modeling/plugins tools/IntermediateTypeLang/cpp/rapidjson;
+        perl $DDS_ROOT/tools/scripts/dds_fuzz.pl;
+    fi
+  - if [ "$NO_INLINE" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-inline"; fi
+  - if [ "$NO_BIT" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-built-in-topics"; fi
+  - if [ "$STATIC" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
+  - if [ "$NO_DEBUG" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-debug"; fi
+  - if [ "$SAFETY_PROFILE" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --safety-profile"; fi
+  - if [ "$USE_JAVA" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --java"; fi
+  - if [ "$USES_WCHAR" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=\"uses_wchar=1\""; fi
+  - ./configure --xerces3 --compiler=$COMPILER $DDS_CONFIGURE_PARAMS
+  - if [ "$SAFETY_PROFILE" == "1" ]; then
+        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$TRAVIS_BUILD_DIR/build/target/ACE_TAO/ACE/lib:$TRAVIS_BUILD_DIR/build/target/lib;
+        echo "host environment:";
+        cat $DDS_ROOT/build/host/setenv.sh;
+        cat $DDS_ROOT/build/host/ACE_TAO/ACE/ace/config.h;
+        cat $DDS_ROOT/build/host/ACE_TAO/ACE/include/makeinclude/platform_macros.GNU;
+        echo "target environment:";
+        cat $DDS_ROOT/build/target/setenv.sh;
+        cat $DDS_ROOT/build/target/ACE_TAO/ACE/bin/MakeProjectCreator/config/default.features;
+        cat $DDS_ROOT/build/target/ACE_TAO/ACE/ace/config.h;
+        cat $DDS_ROOT/build/target/ACE_TAO/ACE/include/makeinclude/platform_macros.GNU;
+    else
+        cat $DDS_ROOT/setenv.sh;
+        cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features;
+        cat $ACE_ROOT/ace/config.h;
+        cat $ACE_ROOT/include/makeinclude/platform_macros.GNU;
+    fi
+  - if [ "$FUZZ" == "1" ]; then
+        tar xzf modeling_plugins.tar.gz;
+        rm modeling_plugins.tar.gz;
+    fi
 
 script:
   - make -j2
-  - cd tests/DCPS/Messenger && ./run_test.pl all
+  - if [ "$SAFETY_PROFILE" == "1" ]; then
+        cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
+        cd $DDS_ROOT/build/target/tests/FACE/Messenger;
+        ./run_test.pl;
+        ./run_test.pl callback;
+        ./run_test.pl static;
+        ./run_test.pl static callback;
+    else
+        cd tests/DCPS/Messenger && ./run_test.pl all;
+    fi
