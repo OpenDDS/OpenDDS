@@ -20,13 +20,6 @@ env:
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
     - COMPILER=g++-5
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-5
-
 matrix:
   include:
     - compiler: gcc
@@ -46,8 +39,11 @@ matrix:
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libxerces-c-dev
+      - libxerces-c-dev
+      - g++-5
 
 before_install:
   - mkdir ext
