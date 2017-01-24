@@ -11,13 +11,21 @@ env:
     - NO_BIT=1
     - STATIC=1 NO_DEBUG=1
     - SAFETY_PROFILE=1
-    - MOD_DEFAULT_FEATURES=1 USES_WCHAR=1
+    - USES_WCHAR=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
     - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
     - DDS_ROOT=$TRAVIS_BUILD_DIR
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
+    - COMPILER=g++-5
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
 
 matrix:
   include:
@@ -26,42 +34,15 @@ matrix:
         apt:
           packages:
             - openjdk-7-jdk
-      env: FUZZ=1 USE_JAVA=1
-    - compiler: clang
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-4.9
-      env: USE_ALT_COMPILER=1 COMPILER=g++-4.9
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env: USE_ALT_COMPILER=1 COMPILER=g++-5
+      env: USE_JAVA=1
     - compiler: clang
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-          packages:
-            - clang++-3.6
-      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.6
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
             - llvm-toolchain-precise-3.7
           packages:
             - clang++-3.7
-      env: USE_ALT_COMPILER=1 COMPILER=clang++-3.7
+      env: COMPILER=clang++-3.7
 
 addons:
   apt:
@@ -90,14 +71,8 @@ before_script:
   - if [ "$NO_DEBUG" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-debug"; fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --safety-profile"; fi
   - if [ "$USE_JAVA" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --java"; fi
-
-  - if [ "$MOD_DEFAULT_FEATURES" == "1" ]; then
-        if [ "$USES_WCHAR" == "1" ]; then export ADDL_DEFAULT_FEATURES="uses_wchar=1 $ADDL_DEFAULT_FEATURES"; fi;
-        export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=\"$ADDL_DEFAULT_FEATURES\"";
-    fi
-  - if [ "$USE_ALT_COMPILER" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --compiler=$COMPILER"; fi
-  - if [ "$CXX" == "g++" ]; then ./configure --xerces3 $DDS_CONFIGURE_PARAMS; fi
-  - if [ "$CXX" == "clang++" ]; then ./configure --xerces3 --compiler=clang++ $DDS_CONFIGURE_PARAMS; fi
+  - if [ "$USES_WCHAR" == "1" ]; then export DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=\"uses_wchar=1\""; fi
+  - ./configure --xerces3 --compiler=$COMPILER $DDS_CONFIGURE_PARAMS
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$TRAVIS_BUILD_DIR/build/target/ACE_TAO/ACE/lib:$TRAVIS_BUILD_DIR/build/target/lib;
         echo "host environment:";
