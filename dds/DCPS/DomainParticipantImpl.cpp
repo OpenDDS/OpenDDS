@@ -469,7 +469,7 @@ DomainParticipantImpl::create_topic_i(
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
-                 ACE_TEXT("assert_topic failed.\n")));
+                 ACE_TEXT("assert_topic failed with return value %d.\n"), status));
       return DDS::Topic::_nil();
     }
   }
@@ -542,7 +542,7 @@ DomainParticipantImpl::delete_topic_i(
         if (status != REMOVED) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                            ACE_TEXT("remove_topic failed\n")),
+                            ACE_TEXT("remove_topic failed with return value %d\n"), status),
                            DDS::RETCODE_ERROR);
         }
 
@@ -581,11 +581,11 @@ DomainParticipantImpl::find_topic(
   ACE_Time_Value timeout_tv
   = ACE_OS::gettimeofday() + ACE_Time_Value(timeout.sec, timeout.nanosec/1000);
 
-  int first_time = 1;
+  bool first_time = true;
 
   while (first_time || ACE_OS::gettimeofday() < timeout_tv) {
     if (first_time) {
-      first_time = 0;
+      first_time = false;
     }
 
     TopicMap::mapped_type* entry = 0;
