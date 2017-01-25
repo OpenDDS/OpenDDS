@@ -7,7 +7,7 @@ Version X.Y of OpenDDS.
 - Rework type support implementation in order to expose less internal header
   and classes to user code
 - Add read/take_instance_w_condition
-- Time Based Filter QoS 
+- Time Based Filter QoS support for Reliable Data Readers
 - C++11 Updates
   - When C++11 is enabled make use of C++11 shared_ptr and to_string instead of using boost 
   - Added configure and MPC support for C++11 version of ishapes 
@@ -15,8 +15,6 @@ Version X.Y of OpenDDS.
 - Extend OpenDDS type support to provide user-initiated unregistering of types from a
   domain participant. This has been included as a type support extension because
   unregister_type is not required by the DDS specification.
-- Removed dependency on the dds4ccm_opendds feature and let configure also add a line
-  to platform_macros.GNU when xerces3 is enabled 
 - RtpsDiscovery Update: allow config to specify which interface's MAC addr is used in GUIDs 
 - Added script to create cross-distribution linux idl compiler binaries 
 - Added nmake to the specific list to use /bigobj
@@ -27,7 +25,6 @@ Version X.Y of OpenDDS.
   - Convert Readme to markdown and added Travis continuous integration badge 
 - Refactored OpenDDS to make use of RcHandle for automatic handling of reference counting
   to alleviate errors in manual reference counting.
-- Liveliness qos updates 
 - Liveliness qos updates 
 - Wireshark dissector updates 
 - Support for versioned namespaces 
