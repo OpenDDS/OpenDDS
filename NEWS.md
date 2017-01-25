@@ -19,7 +19,8 @@ Version X.Y of OpenDDS.
 - Added script to create cross-distribution linux idl compiler binaries 
 - Added nmake to the specific list to use /bigobj
 - Updated Appveyor CI builds to use msvc14 and reduced clone depth 
-- Updated Travis-CI and Appveyor to use ATCD Latest_Micro tag and corrected ATCD repo name 
+- Updated Travis-CI and Appveyor to use ATCD Latest_Micro tag and corrected ATCD repo name
+- Extended Travis-CI coverage to provide more feedback on pull requests.
 - Updated release process:
   - Add NEWS Template Creation Steps to Release Process 
   - Convert Readme to markdown and added Travis continuous integration badge 
