@@ -1,8 +1,7 @@
-Version X.Y of OpenDDS.
+Version 3.10 of OpenDDS.
 -------------------------------------------------------------------------------
 
 ##### Additions:
-- TODO: Add your features here
 - Add support for versioned namespaces
 - Rework type support implementation in order to expose less internal header
   and classes to user code
@@ -32,7 +31,6 @@ Version X.Y of OpenDDS.
 - Make use of OPENDDS_DES_FREE_THIS
  
 ##### Fixes:
-- TODO: Add your fixes here
 - Resolve compiler warnings with gcc 6.3
 - Fixed RTPS ParticipantMessageData entityIds 
 - Fixed the missing lock in RtpsUpdDataLink which causes Sigfault in some tests.
@@ -67,7 +65,7 @@ Version X.Y of OpenDDS.
 - Updated TypeSupport::get_type_name() to match DDS spec. 
 
 ##### Notes:
-- TODO: Add your notes here
+
 _______________________________________________________________________________
 Version 3.9 of OpenDDS.
 -------------------------------------------------------------------------------
