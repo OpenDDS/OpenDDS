@@ -460,7 +460,7 @@ sub remedy_news_file_section {
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   open(NEWS, "+< NEWS.md")                 or die "Opening: $!";
-  my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
+  my $out = "Version $version of OpenDDS\n" . <<"ENDOUT";
 -------------------------------------------------------------------------------
 
 ##### Additions:
