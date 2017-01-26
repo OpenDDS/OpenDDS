@@ -1282,6 +1282,12 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
 #endif
 
     PublicationInstance_rch inst = cur->get_handle();
+
+    if (!inst) {
+      // *cur is a control message, just skip it
+      continue;
+    }
+
     if (inst->durable_samples_remaining_ == 0)
       continue;
     --inst->durable_samples_remaining_;
