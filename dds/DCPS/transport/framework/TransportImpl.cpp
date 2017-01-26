@@ -72,14 +72,7 @@ TransportImpl::shutdown()
   {
     GuardType guard(this->lock_);
 
-    if (this->config_.is_nil()) {
-      // This TransportImpl is already shutdown.
-//MJM: So, I read here that config_i() actually "starts" us?
-      return;
-    }
-
     local_clients.swap(this->clients_);
-
     // We can release our lock_ now.
   }
 
@@ -94,11 +87,6 @@ TransportImpl::shutdown()
   {
     GuardType guard(this->lock_);
     this->reactor_task_.reset();
-    // The shutdown_i() path may access the configuration so remove configuration
-    // reference after shutdown is performed.
-
-    // Drop our references to the config_.
-    this->config_.reset();
   }
 }
 
@@ -115,7 +103,7 @@ TransportImpl::configure(const TransportInst_rch& config)
                      false);
   }
 
-  if (!this->config_.is_nil()) {
+  if (this->config_) {
     // We are rejecting this configuration attempt since this
     // TransportImpl object has already been configured.
     ACE_ERROR_RETURN((LM_ERROR,
