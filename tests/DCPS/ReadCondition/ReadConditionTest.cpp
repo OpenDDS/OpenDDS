@@ -82,15 +82,20 @@ int run_test_instance(DDS::DomainParticipant_ptr dp)
         MessageSeq data;
         SampleInfoSeq info;
         ret = mdr->take_w_condition(data, info, 3, dr_rc);
-        if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+        if (ret == RETCODE_NO_DATA) break;
+        if (ret != RETCODE_OK) {
           cout << "ERROR: take_w_condition returned " << ret << endl;
           passed = false;
           done = true;
         }
         InstanceHandle_t handle = HANDLE_NIL;
-        if (ret == RETCODE_OK) {
-          received_data(data, mdw, msg);
-          handle = info[info.length() - 1].instance_handle;
+        received_data(data, mdw, msg);
+        handle = info[info.length() - 1].instance_handle;
+        if (handle == HANDLE_NIL) {
+          cout << "ERROR: instance handle is nil" << endl;
+          passed = false;
+          done = true;
+          break;
         }
         cout << "testing take_instance_w_condition" << endl;
         while (true) {
