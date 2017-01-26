@@ -300,7 +300,7 @@ PubDriver::run()
     }
 
   if (shmem_) {
-    for (ACE_stat filestat; 0 == ACE_OS::stat("sub-pid.txt", &filestat) || filestat.st_size == 0;
+    for (ACE_stat filestat; 0 == ACE_OS::stat("sub-pid.txt", &filestat);
          ACE_OS::sleep(1)) {/*empty loop*/}
   }
 
