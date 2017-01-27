@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use strict;
 use warnings;
 use Time::Piece;
@@ -437,7 +438,7 @@ sub verify_news_file_section {
   my $metaversion = quotemeta($version);
   my $has_version = 0;
   while (<NEWS>) {
-    if ($_ =~ /Version $metaversion of OpenDDS\./) {
+    if ($_ =~ /Version $metaversion of OpenDDS/) {
       $has_version = 1;
     }
   }
@@ -491,7 +492,7 @@ sub verify_update_news_file {
   my $corrected_features = 1;
   my $corrected_fixes = 1;
   while (<NEWS>) {
-    if ($_ =~ /Version $metaversion of OpenDDS\./) {
+    if ($_ =~ /Version $metaversion of OpenDDS/) {
       $has_version = 1;
     } elsif ($_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
