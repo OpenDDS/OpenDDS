@@ -106,6 +106,10 @@ script:
         ./run_test.pl callback;
         ./run_test.pl static;
         ./run_test.pl static callback;
+    elif [ "$USE_JAVA" == "1" ]; then
+        cd java/tests/messenger;
+        ./run_test.pl tcp;
+        ./run_test.pl rtps;
     else
         cd tests/DCPS/Messenger && ./run_test.pl all;
     fi
