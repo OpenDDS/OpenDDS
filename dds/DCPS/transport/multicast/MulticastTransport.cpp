@@ -250,7 +250,9 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
     MulticastSession_rch session(
       this->start_session(link, remote_peer, false /*!active*/));
 
-    return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
+    return AcceptConnectResult(
+      session ? AcceptConnectResult::ACR_SUCCESS : AcceptConnectResult::ACR_FAILED
+    );
 
   }
 }
