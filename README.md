@@ -1,8 +1,8 @@
 [![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/objectcomputing/OpenDDS?svg=true)](https://ci.appveyor.com/project/mitza-oci/opendds/branch/master)
-<!-- [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds) -->
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 
-OpenDDS is an open-source C++ implementation of the Object Management Group's
+OpenDDS is an open-source C\++ implementation of the Object Management Group's
 specification "Data Distribution Service for Real-time Systems".  Although
 OpenDDS is itself developed in C++, Java and JMS bindings are provided so
 that Java applications can use OpenDDS -- see java/README and java/jms/README
@@ -89,9 +89,9 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-* TAO 2.0a patch 7
-* TAO 2.2a patch 10
-* TAO 2.4.0 (DOC Group)
+* TAO 2.0a patch 7 (this is the last OpenDDS version that we will test with 2.0a)
+* TAO 2.2a patch 11
+* TAO 2.4.2 (DOC Group)
 
 Note that the 2.0a and 2.2a releases are from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -117,9 +117,9 @@ This release of OpenDDS has been tested under the following platforms:
 Linux family:
 * Red Hat EL 5 and 5.3, x86_64
 * Red Hat EL and CentOS 6.6 and 6.8, x86_64
-* Red Hat EL 7, x86_64
+* Red Hat EL and CentOS 7.2 and 7.3, x86_64
 * Fedora Core 6, x86
-* Fedora 24 x86_64
+* Fedora 24, x86_64
 * Ubuntu 16.04 LTS, x86_64
 * openSUSE 42.1, x86_64
 
@@ -163,7 +163,7 @@ This release of OpenDDS has been tested using the following compilers:
 * gcc 5.4
 * gcc 6.2
 * gcc 6.3
-* Clang 3.8 (llvm.org) and 7.3 (Apple)
+* Clang 3.9 (llvm.org) and 7.3 (Apple)
 * Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 
 # Building and Installing

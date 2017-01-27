@@ -1,20 +1,33 @@
-Version X.Y of OpenDDS.
+Version 3.10 of OpenDDS
 -------------------------------------------------------------------------------
 
 ##### Additions:
-- TODO: Add your features here
-- Add support for versioned namespaces
-- Rework type support implementation in order to expose less internal header
-  and classes to user code
- 
+- Added support for versioned namespaces
+- Reworked TypeSupport implementation in order to reduce exposure of internal headers to user code
+- Added `read/take_instance_w_condition` (not in DDS spec)
+- Time Based Filter QoS: fixed GitHub issue #268, samples can now be held and delivered after the timeout
+- C\++11 updates to the ishapes example: make use of C++11 `shared_ptr` and `to_string` instead of using boost
+- When C++11 is enabled, use noexcept(false) where necessary
+- Extended TypeSupport to allow unregistering of types from a domain participant (not in DDS spec)
+- RtpsDiscovery: allow config to specify which interface's MAC addr is used in GUIDs
+- Wireshark dissector updates: support for more IDL constructs in data sample dissection
+
 ##### Fixes:
-- TODO: Add your fixes here
-- Resolve compiler warnings with gcc 6.3
+- Liveliness QoS: fixed incorrect "liveliness lost" for automatic liveliness with sporadic writers
+- Fixed RTPS ParticipantMessageData entityIds used by automatic and by-participant liveliness
+- Fixed make install problem when DESTDIR is specified
+- Allow fallback to next transport implementation when active side fails to connect using the first one
+- Updated `TypeSupport::get_type_name()` to match the DDS spec
+
+##### Stability Improvements:
+- Fixed many issues included in recent Coverity Scan defect reports
+- Fixed a few reference counting issues in internal classes
 
 ##### Notes:
-- TODO: Add your notes here
+- This is the final version we will test with TAO 2.0a, please upgrade to a newer TAO (see README.md)
+
 _______________________________________________________________________________
-Version 3.9 of OpenDDS.
+Version 3.9 of OpenDDS
 -------------------------------------------------------------------------------
 
 - Updated how DataWriter QoS is interpreted by internal data structures:
@@ -60,7 +73,7 @@ Version 3.9 of OpenDDS.
 _______________________________________________________________________________
 
 
-Version 3.8 of OpenDDS.
+Version 3.8 of OpenDDS
 -------------------------------------------------------------------------------
 
 - Improved support for Safety Profile
@@ -75,7 +88,7 @@ Version 3.8 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.7 of OpenDDS.
+Version 3.7 of OpenDDS
 -------------------------------------------------------------------------------
 
 ##### Additions:
@@ -139,7 +152,7 @@ Version 3.7 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.6 of OpenDDS.
+Version 3.6 of OpenDDS
 -------------------------------------------------------------------------------
 
 ##### Notes:
@@ -207,7 +220,7 @@ Version 3.6 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.5.1 of OpenDDS.
+Version 3.5.1 of OpenDDS
 -------------------------------------------------------------------------------
 
 ##### Notes:
@@ -299,7 +312,7 @@ Version 3.5.1 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.5 of OpenDDS.
+Version 3.5 of OpenDDS
 -------------------------------------------------------------------------------
 
 - Updates to RTPS support resulting from both interoperability
@@ -321,7 +334,7 @@ Version 3.5 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.4.1 of OpenDDS.
+Version 3.4.1 of OpenDDS
 -------------------------------------------------------------------------------
 
 - Added a new option to opendds\_idl, -Wb,v8, which generates type support
@@ -339,7 +352,7 @@ Version 3.4.1 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.4 of OpenDDS.
+Version 3.4 of OpenDDS
 -------------------------------------------------------------------------------
 
 - Added new OpenDDS-specific APIs for sending and receiving untyped data,
@@ -365,7 +378,7 @@ Version 3.4 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.3 of OpenDDS.
+Version 3.3 of OpenDDS
 -------------------------------------------------------------------------------
 
 - If an instance of a transport can't be set up, an exception is thrown so
@@ -394,7 +407,7 @@ Version 3.3 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.2 of OpenDDS.
+Version 3.2 of OpenDDS
 -------------------------------------------------------------------------------
 
 - Added a new transport type: Shared Memory
@@ -433,7 +446,7 @@ Version 3.2 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.1 of OpenDDS.
+Version 3.1 of OpenDDS
 -------------------------------------------------------------------------------
 
 - This release includes the initial implementation of DDS Interoperability
@@ -482,7 +495,7 @@ Version 3.1 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.0.1 of OpenDDS.
+Version 3.0.1 of OpenDDS
 -------------------------------------------------------------------------------
 
 - The DCPSInfoRepo reassociates Built in Topic connections for existing
@@ -505,7 +518,7 @@ Version 3.0.1 of OpenDDS.
 
 _______________________________________________________________________________
 
-Version 3.0 of OpenDDS.
+Version 3.0 of OpenDDS
 -------------------------------------------------------------------------------
 
 - Transport configuration has undergone a major redesign and any existing
