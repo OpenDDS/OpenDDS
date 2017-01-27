@@ -642,7 +642,7 @@ sub verify_git_changes_pushed {
   my $settings = shift();
   my $found = 0;
   my $target = "refs/tags/$settings->{git_tag}\$";
-  open(GIT, "git ls-remote --tags |") or die "Opening $!";
+  open(GIT, "git ls-remote --tags $settings->{remote} |") or die "Opening $!";
   while (<GIT>) {
     chomp;
     if (/$target/) {
@@ -867,7 +867,7 @@ sub message_md5_checksum{
 
 sub remedy_md5_checksum{
   my $settings = shift();
-  print "Creating file $settings-{md5_src}\n";
+  print "Creating file $settings->{md5_src}\n";
   my $md5_file = join("/", $settings->{parent_dir}, $settings->{md5_src});
   my $tgz_file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
   my $zip_file = join("/", $settings->{parent_dir}, $settings->{zip_src});
@@ -1193,7 +1193,9 @@ sub remedy_github_upload {
 ############################################################################
 sub verify_website_release {
   # verify there are no differences between website-next-release branch and gh-pages branch
-  my $status = open(GITDIFF, 'git diff origin/website-next-release origin/gh-pages|');
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  my $status = open(GITDIFF, 'git diff ' . $remote  . '/website-next-release ' . $remote . '/gh-pages|');
   my $delta = "";
   while (<GITDIFF>) {
     if (/^...(.*)/) {
@@ -1207,7 +1209,9 @@ sub verify_website_release {
 }
 
 sub message_website_release {
-  return 'origin/website-next-release branch needs to merge into origin/gh-pages branch';
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  return "$remote/website-next-release branch needs to merge into $remote/gh-pages branch";
 }
 
 sub remedy_website_release {
@@ -1248,7 +1252,7 @@ sub verify_news_template_file_section {
   my $status = open(NEWS, 'NEWS.md');
   my $has_news_template = 0;
   while (<NEWS>) {
-    if ($_ =~ /Version X.Y of OpenDDS\./) {
+    if ($_ =~ /Version X.Y of OpenDDS/) {
       $has_news_template = 1;
     }
   }
@@ -1268,7 +1272,7 @@ sub remedy_news_template_file_section {
   print "  >> Adding next version template section to NEWS.md\n";
   print "  !! Manual update to NEWS.md needed\n";
   open(NEWS, "+< NEWS.md") or die "Opening: $!";
-  my $out = "Version X.Y of OpenDDS.\n" . <<"ENDOUT";
+  my $out = "Version X.Y of OpenDDS\n" . <<"ENDOUT";
 -------------------------------------------------------------------------------
 
 ##### Additions:
