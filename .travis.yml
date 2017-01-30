@@ -59,6 +59,7 @@ before_install:
 branches:
   only:
     - master
+    - gh-pages
 
 before_script:
   - export
