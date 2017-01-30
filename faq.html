@@ -35,7 +35,7 @@ categories: [opendds]
     {% unless entry[0] == "_category" %}
       {% assign entnum = entry[0] | split: "_" | first | append: "_" %}
       {% assign entname = entry[0] | remove_first: entnum %}
-    <li id="{{catname]}}-{{entname}}">
+    <li id="{{catname}}-{{entname}}">
       <p class="faq_q">{{entry[1].Q}}
         <a href="#{{catname}}-{{entname}}">&#8882;</a></p>
       <div class="faq_a">{{entry[1].A}}</div>
