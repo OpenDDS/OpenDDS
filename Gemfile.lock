@@ -212,6 +212,7 @@ DEPENDENCIES
   github-pages
   jekyll-github-metadata
   jekyll-redirect-from
+  minima
 
 BUNDLED WITH
    1.14.3

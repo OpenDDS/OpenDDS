@@ -5,6 +5,8 @@ description: OpenDDS is an open source C++ implementation of the Object Manageme
 twitter_username: ObjectComputing
 github_username:  objectcomputing
 
+theme: minima
+
 # github-metadata
 repository: objectcomputing/OpenDDS
 gems: ['jekyll-github-metadata', 'jekyll-redirect-from']
