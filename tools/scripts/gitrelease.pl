@@ -62,7 +62,7 @@ sub news_contents_excerpt {
 sub parse_version {
   my $version = shift;
   my %result = ();
-  if ($version =~ /([0-9])+\.([0-9])+\.?([0-9]+)?/) {
+  if ($version =~ /([0-9]+)\.([0-9]+)\.?([0-9]+)?/) {
     $result{major} = $1;
     $result{minor} = $2;
     if ($3) {
@@ -1262,8 +1262,6 @@ sub verify_news_template_file_section {
 }
 
 sub message_news_template_file_section {
-  my $settings = shift();
-  # my $version = $settings->{version};
   return "next NEWS.md file release X.Y section missing";
 }
 
