@@ -2,7 +2,7 @@
 
 ##############################################################################
 # This script is used to create dds and tao IDL binaries which link only on
-# libc.so , libm.so, linux-gate.so and ld-linux.so at runtime.
+# libc.so, libm.so, linux-gate.so and ld-linux.so at runtime.
 #
 # Prerequesite: docker
 ##############################################################################
@@ -31,7 +31,7 @@ if [ ! -d ACE_wrappers/MPC ]; then
     EXTRA_DOCKER_FLAGS="-v $MPC_ROOT:/MPC -e MPC_ROOT=/MPC"
   fi
 else
-  EXTRA_DOCKER_FLAGS=" -e MPC_ROOT=$MOUNT_DIR/ACE_Wrappers/MPC"
+  EXTRA_DOCKER_FLAGS=" -e MPC_ROOT=$MOUNT_DIR/ACE_wrappers/MPC"
 fi
 
 
@@ -119,5 +119,4 @@ docker run -it --rm -u $UID -e "buildbits=$buildbits" -v $PWD:$MOUNT_DIR $EXTRA_
 echo ""
 echo "build is done, all binaries are in the $PWD/build/install/bin directory"
 
-rm -rf build/universal_linux_idls_build
-
+rm -rf build/universal_linux_idls_build build_tao_dds_idl.sh
