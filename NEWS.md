@@ -1,4 +1,4 @@
-## Version X.Y of OpenDDS
+Version X.Y of OpenDDS
 
 ##### Additions:
 - TODO: Add your features here
@@ -9,7 +9,7 @@
 ##### Notes:
 - TODO: Add your notes here
 _______________________________________________________________________________
-## Version 3.10 of OpenDDS
+Version 3.10 of OpenDDS
 
 ##### Additions:
 - Added support for versioned namespaces
@@ -37,7 +37,7 @@ _______________________________________________________________________________
 - This is the final version we will test with TAO 2.0a, please upgrade to a newer TAO (see README.md)
 
 _______________________________________________________________________________
-## Version 3.9 of OpenDDS
+Version 3.9 of OpenDDS
 
 - Updated how DataWriter QoS is interpreted by internal data structures:
   - RESOURCE\_LIMITS.max\_samples\_per\_instance controls total samples that can be
@@ -82,7 +82,7 @@ _______________________________________________________________________________
 _______________________________________________________________________________
 
 
-## Version 3.8 of OpenDDS
+Version 3.8 of OpenDDS
 
 - Improved support for Safety Profile
 
@@ -96,7 +96,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.7 of OpenDDS
+Version 3.7 of OpenDDS
 
 ##### Additions:
 - Implements FACE Transport Services API v2.1, FACE safety base and
@@ -159,7 +159,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.6 of OpenDDS
+Version 3.6 of OpenDDS
 
 ##### Notes:
 - The discovery framework of OpenDDS has been refactored to be more
@@ -226,7 +226,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.5.1 of OpenDDS
+Version 3.5.1 of OpenDDS
 
 ##### Notes:
  
@@ -317,7 +317,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.5 of OpenDDS
+Version 3.5 of OpenDDS
 
 - Updates to RTPS support resulting from both interoperability
   testing (March 2013 OMG meeting) and user feedback.
@@ -338,7 +338,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.4.1 of OpenDDS
+Version 3.4.1 of OpenDDS
 
 - Added a new option to opendds\_idl, -Wb,v8, which generates type support
   for copying DCPS structs from C++ objects to JavaScript objects -- requires
@@ -355,7 +355,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.4 of OpenDDS
+Version 3.4 of OpenDDS
 
 - Added new OpenDDS-specific APIs for sending and receiving untyped data,
   (does not require code generation from IDL data structures).  See the
@@ -380,7 +380,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.3 of OpenDDS
+Version 3.3 of OpenDDS
 
 - If an instance of a transport can't be set up, an exception is thrown so
   that different configuration parameters can be attempted by the user.
@@ -408,7 +408,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.2 of OpenDDS
+Version 3.2 of OpenDDS
 
 - Added a new transport type: Shared Memory
   Use shmem as the short name (in place of "tcp", "udp", "multicast", etc.).
@@ -446,7 +446,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.1 of OpenDDS
+Version 3.1 of OpenDDS
 
 - This release includes the initial implementation of DDS Interoperability
   in OpenDDS, using the DDS-RTPS spec v2.1 from the OMG (formal/2010-11-01).
@@ -494,7 +494,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.0.1 of OpenDDS
+Version 3.0.1 of OpenDDS
 
 - The DCPSInfoRepo reassociates Built in Topic connections for existing
   datareaders and datawriters when restarted from persistence.
@@ -516,7 +516,7 @@ _______________________________________________________________________________
 
 _______________________________________________________________________________
 
-## Version 3.0 of OpenDDS
+Version 3.0 of OpenDDS
 
 - Transport configuration has undergone a major redesign and any existing
   transport application code or transport configuration files need to be

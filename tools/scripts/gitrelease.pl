@@ -438,7 +438,7 @@ sub verify_news_file_section {
   my $metaversion = quotemeta($version);
   my $has_version = 0;
   while (<NEWS>) {
-    if ($_ =~ /## Version $metaversion of OpenDDS/) {
+    if ($_ =~ /Version $metaversion of OpenDDS/) {
       $has_version = 1;
     }
   }
@@ -461,7 +461,7 @@ sub remedy_news_file_section {
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   open(NEWS, "+< NEWS.md")                 or die "Opening: $!";
-  my $out = "## Version $version of OpenDDS\n" . <<"ENDOUT";
+  my $out = "Version $version of OpenDDS\n" . <<"ENDOUT";
 
 ##### Additions:
 - TODO: Add your features here
@@ -491,7 +491,7 @@ sub verify_update_news_file {
   my $corrected_features = 1;
   my $corrected_fixes = 1;
   while (<NEWS>) {
-    if ($_ =~ /## Version $metaversion of OpenDDS/) {
+    if ($_ =~ /Version $metaversion of OpenDDS/) {
       $has_version = 1;
     } elsif ($_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
@@ -1254,7 +1254,7 @@ sub verify_news_template_file_section {
   my $status = open(NEWS, 'NEWS.md');
   my $has_news_template = 0;
   while (<NEWS>) {
-    if ($_ =~ /## Version X.Y of OpenDDS/) {
+    if ($_ =~ /Version X.Y of OpenDDS/) {
       $has_news_template = 1;
     }
   }
@@ -1274,7 +1274,7 @@ sub remedy_news_template_file_section {
   print "  >> Adding next version template section to NEWS.md\n";
   print "  !! Manual update to NEWS.md needed\n";
   open(NEWS, "+< NEWS.md") or die "Opening: $!";
-  my $out = "## Version X.Y of OpenDDS\n" . <<"ENDOUT";
+  my $out = "Version X.Y of OpenDDS\n" . <<"ENDOUT";
 
 ##### Additions:
 - TODO: Add your features here
