@@ -1,0 +1,221 @@
+---
+layout: page
+title: Shapes Demo
+categories: [opendds]
+tags: []
+order: 13
+---
+The goal of this guide is to help you download and run a DDS Interoperability Shapes demo program.  The demo is a graphical application that will help you visualize some of the overarching DDS concepts that OpenDDS supports without needing to interact with the code required to do so.  The application allows you to dynamically create publishers and subscribers of topics represented by data payloads shown as simple shapes and see the results of the different quality of service options provided.
+
+<div class="bodytext" align="justify">
+  <a name="Environment Prerequisites"><span class="headertext">Environment Prerequisites</span></a>
+  <ol>
+    <li><p>Ensure that your environment has:</p>
+      <ul>
+        <li>Qt4</li>
+      </ul>
+    </li>
+    <li>Download the latest Shapes demo for your OS from <a href="http://download.ociweb.com/OpenDDS/">download site</a></li>
+    <ul><li>Alternatively, the Shapes demo can be run from a build of OpenDDS with qt and boost enabled.  Boost is not required if building with a compiler that supports C++11. The demo resides in the <code>examples/DCPS/ishapes</code> directory. See <a href="../documents/building.html">Building</a> for a complete list of dependencies and supported platforms.</li></ul>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Running the Shapes Demo"><span class="headertext">Running the Shapes Demo</span></a>
+  <ol>
+    <li>
+      <p>Locate and run the Shapes demo and you should see a GUI window open up that looks like this:</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/default.png"/></a>
+    </li>
+    <li>
+      <p>The most basic example would be to simply click the <code>Publish</code> button to begin publishing a circle and then click <code>Subscribe</code> to begin subscribing to the same circle topic you are publishing -- this may seem like a less than interesting example.  As soon as you begin publishing, you should see a green circle bouncing around the display area with a white center.  This indicates that this is a published object, originating at this application.</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/pub-circle-unmatched.png"/></a>
+    </li>
+    <li>
+      <p> After clicking <code>Subscribe</code>, as soon as the subscriber goes live and finds a match in the published circle topic, the center of the circle will go dark to indicate it is an instance of subscribed data, which in this case is being rendered over top the initial published instance.</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/pub-circle-matched.png"/></a>
+    </li>
+    <li>
+      <p>Now that we have confirmed the ability to run an instance of the Shapes demo, let's understand some of the DDS concepts seen at work even in this simple example.  Each of the available shapes in the drop down menu are DDS Topics that can be published on or subscribed to.  Each instance on the topic has an instance key represented by the shape's color and the shape itself is a DDS Data type comprised of x and y coordinates as well as a size.  What may not be apparent in this simple example is that the center of the circle going from white to dark is actually demonstrating the process of discovery, matching, and subscription between two DDS entities.  Lets try another example that will include multiple instances running concurrently to help demonstrate the capabilities better.</p>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Multiple Instances Example"><span class="headertext">Multiple Instances Example</span></a>
+  <ol>
+    <li>
+      <p>Start up two instances of the Shapes Demo for this example.  You should be able to see two application windows like so:</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/two-instances.png"/></a>
+    </li>
+    <li>
+      <p><b>Publish</b> - Let's change it up and begin this example by publishing a triangle by selecting <code>Triangle</code> from the top left Shape dropdown menu.  Then click the <code>Publish</code> button.  You should observe a green triangle bouncing around the application window's display area.  The triangle, from a DDS perspective, is a piece of information that is being published, or rather communicated out into the rest of the system for other entities to receive if they are set up to be interested in all things triangle related.</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/two-instances-pub-triangle.png"/></a>
+    </li>
+    <li>
+      <p><b>Subscribe</b> - In the other application window, select <code>Triangle</code> from the bottom left Shape dropdown menu.  Then click the <code>Subscribe</code> button.  You should observe the green triangle, published by the first application instance, now bouncing around the display area in the application window you chose to subscribe in.  This exemplifies the DDS publish-subscribe system for a single publisher to single subscriber system.  The first application has a single publisher sending information out into the system and the second application has a single subscriber receiving that information.</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/pub-sub-triangle.png"/></a>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Reliability - Request/Offered QoS Example"><span class="headertext">Reliability - Request/Offered QoS Example</span></a>
+  <ol>
+    <li>
+      <p>In this example we will begin to look at the DDS concept of reliability as it relates to a publisher's offered quality of service (QoS) and a subscriber's requested QoS.  As in the last example, start up two instances of the Shapes Demo.</p>
+    </li>
+    <li>
+      <p><b>Publisher/Subscriber QoS</b> - In this example we will publish 3 separate topics, each being configured with QoS settings to demonstrate reliability Qos compatibility.  Use the upper <code>QoS</code> button to open a window that will provide you with QoS configuration options for the publisher. Here you should see the Reliability Qos settings, which defaults to reliable. Likewise, if you click the lower <code>QoS</code> button, a window will open which provides configuration options for the subscriber. As you can see, the subscriber reliability QoS defaults to best effort.</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/publisher-qos-menu.png"/></a>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/subscriber-qos-menu.png"/></a>
+    </li>
+    <li>
+      <p> In the first application window, publish one instance of each of the following topics using the QoS menu to set the reliability accordingly:</p>
+      <ul>
+        <li><p> Square -- RELIABLE</p></li>
+        <li><p> Circle -- BEST_EFFORT</p></li>
+        <li><p> Triangle -- BEST_EFFORT</p></li>
+      </ul>
+    </li>
+    <li>
+      <p> In the second application window, subscribe to one instance of each of the following topics using the QoS menu to set the reliability accordingly:</p>
+      <ul>
+        <li><p> Square -- RELIABLE</p></li>
+        <li><p> Circle -- BEST_EFFORT</p></li>
+        <li><p> Triangle -- RELIABLE</p></li>
+      </ul>
+    </li>
+    <li>
+      <p><b>Results</b> - You should observe in the subscriber application's display window that there are only 2 matched topics - Square and Circle.  The subscriber for the Triangle topic did not find a match due to requesting a quality of service of reliable, but the only available publisher was only offering BEST_EFFORT.  Your two application windows should be similary to the following:</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/reliability-example.png"/></a>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Durability Example"><span class="headertext">Durability Example</span></a>
+  <ol>
+    <li>
+      <p>In this example we will begin to look at the DDS concept of durability as it relates to a publisher's offered quality of service (QoS) and a subscriber's requested QoS.  As in the last example, start up two instances of the Shapes Demo.</p>
+    </li>
+    <li>
+      <p> In the first application window, configure the publisher's QoS by opening the QoS menu and setting the following:</p>
+      <ul>
+        <li>Durability QoS -- TRANSIENT_LOCAL</li>
+      </ul>
+      <p>Then publish one instance of Square.</p>
+    </li>
+    <li>
+      <p> In the second application window, configure the subscriber's QoS by opening the lower QoS menu and setting the following:</p>
+      <ul>
+        <li>Reliability QoS -- Reliable</li>
+        <li>History QoS Depth -- 100</li>
+        <li>Durability QoS -- TRANSIENT_LOCAL</li>
+      </ul>
+      <p>Then subscribe to one instance of Square.</p>
+    </li>
+    <li>
+      <p><b>Results</b> - You should observe a Square with 100 trailing squares bouncing around the subscriber application's display window.  This demonstrates that the subscriber is being provided with the durable data that the publisher has made available.  The example application windows should look like this (publisher on the left, subscriber on the right):</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/durability-example.png"/></a>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Ownership Example"><span class="headertext">Ownership Example</span></a>
+  <ol>
+    <li>
+      <p>In this example we will begin to look at the DDS concept of ownership QoS.  In this example 3 instances of the Shapes Demo application will need to be running simultaneously.</p>
+    </li>
+    <li>
+      <p> Subscriber: Start an instance of the Shapes demo.  You may leave all the Qos menu items defaulted.</p>
+    </li>
+    <li>
+      <p> Second publisher: Start an instance of the Shapes demo passing it a command line argument of <code>-partition "B"</code>.  Then have this application instance publish a Circle.  You may leave all the Qos menu items defaulted.</p>
+    </li>
+    <li>
+      <p> Third publisher: Start an instance of the Shapes demo passing it a command line argument of <code>-partition "*"</code>.  Then have this application instance publish a Triangle.  You may leave all the Qos menu items defaulted.</p>
+    </li>
+    <li>
+      <p> Subscriber (fourth instance): Start an instance of the Shapes demo passing it a command line argument of <code>-partition "A"</code>.  Then have this application instance subscribe to Square, Circle, and Triangle.  You may leave all the Qos menu items defaulted.</p>
+    </li>
+    <li>
+      <p><b>Results</b> - You should observe that only the Square and Triangle appear in the subscriber application's display area.  This is because this subscriber instance matches to both partition 'A' and '*'.  The example application windows should look like this (subscriber on the bottom right):</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/partition-example.png"/></a>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Partition Example"><span class="headertext">Partition Example</span></a>
+  <ol>
+    <li>
+      <p>In this example we will begin to look at the DDS concept of partitions.  In this example 4 instances of the Shapes Demo application will need to be running simultaneously, each instance passed initial parameters to help configure the application's partition.  Each step below will describe how one of the instances should be started and configured for publishing/subscribing.</p>
+    </li>
+    <li>
+      <p> In the first application window, subscribe to one instance of Square after using the QoS menu to set the Ownership QoS accordingly:</p>
+      <ul>
+        <li><p> Ownership QoS -- EXCLUSIVE</p></li>
+      </ul>
+    </li>
+    <li>
+      <p> Now start a second instance of the shapes demo.  In this application window, publish one instance of Square after using the QoS menu to set the Ownership QoS accordingly:</p>
+      <ul>
+        <li><p> Ownership QoS -- EXCLUSIVE</p></li>
+        <li><p> Ownership QoS Strength -- 50</p></li>
+      </ul>
+    </li>
+    <li>
+      <p><b>Initial Results</b> - At this point you should observe that the Square has appeared in the subscriber application's display area matching the color, size, and location of the square in the publisher's display area. The example application windows should look like this (publisher on the left, subscriber on the right):</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/ownership-example-initial.png"/></a>
+    </li>
+    <li>
+      <p> Now start a third instance of the shapes demo.  In this application window, publish one instance of Square after using the QoS menu to set the Ownership QoS accordingly:</p>
+      <ul>
+        <li><p> Ownership QoS -- EXCLUSIVE</p></li>
+        <li><p> Ownership QoS Strength -- 75</p></li>
+        <li>
+          <p><b> Before clicking <code>Publish</code> increase the size of the Square using the size slider.</b> This will help make the changes more visible.</p>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <p><b>Final Results</b> - At this point you should observe that the larger Square has appeared in the subscriber application's display area.  Since the Onwership QoS has been set to exclusive, only one instance of the topic -- the instance with the highest strength -- will find its way to the subscriber. The example application windows should look like this (initial publisher on the left, subscriber on the right, *new* publisher on the right):</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/ownership-example-final.png"/></a>
+    </li>
+    <li>
+      <p><b>Note</b> - At this point you could simulate a higher strength publisher leaving the system by closing the second publisher application window.  Then you should observe the subscriber failing over to the initial publisher's smaller instance of the Square that had a lower ownership strength.</p>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Time Based Filter Example"><span class="headertext">Time Based Filter Example</span></a>
+  <ol>
+    <li>
+      <p>In this example we will begin to look at the DDS concept of Time Based Filter QoS.  In this example only 2 instances of the Shapes Demo application will be necessary.</p>
+    </li>
+    <li>
+      <p> In the first application window publisher 4 topic instances, 2 each of Circle and Square, but vary the colors to be unique. QoS settings on the publisher can be left defaulted.  For this demonstration we will publish:</p>
+      <ul>
+        <li>Circle - Green</li>
+        <li>Circle - Red</li>
+        <li>Square - Green</li>
+        <li>Square - Blue</li>
+      </ul>
+    </li>
+    <li>
+      <p> In the second application window subscribe to the Square topic using the default QoS settings.  Then subscribe to Circle by first configuring the QoS from the configuration menu to set the following:</p>
+      <ul>
+        <li>Time Based Filter Qos - Minimum Separation: 2</li>
+      </ul>
+    </li>
+    <li>
+      <p><b>Results</b> - Both samples of Square should appear fluidly bouncing around the subscriber's application window at this point.  However, you will notice, the Circle samples are being sub-sampled based on the time filter that was configured and thus only the most recent sample within the minimum separation is displayed in the subscriber's window. You should notice that each time the time based filter meets its required minimum separation the circle samples are updated and for an instant should have the same location as the publisher's window.  Notice, however, in the following graphics how the circles do not match up perfectly with the position of the circles in the publisher.  Here are a couple examples of what your application windows might look like at this point (publisher on the left, subscriber on the right):</p>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/time-based-filter-example-1.png"/></a>
+      <a href="http://opendds.org"><img src="{{site.baseurl}}/images/shapes-demo/time-based-filter-example-2.png"/></a>
+    </li>
+  </ol>
+</div>
+
