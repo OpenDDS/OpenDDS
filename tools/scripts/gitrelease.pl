@@ -1145,6 +1145,9 @@ sub remedy_github_upload {
   my @lines;
   open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
   while (<$news>) {
+    if (/^Version/) {
+      next;
+    }
     if (/^_____/) {
       last;
     }
