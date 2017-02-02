@@ -462,7 +462,6 @@ sub remedy_news_file_section {
   my $outline = "This is OpenDDS version $version, released $timestamp";
   open(NEWS, "+< NEWS.md")                 or die "Opening: $!";
   my $out = "Version $version of OpenDDS\n" . <<"ENDOUT";
--------------------------------------------------------------------------------
 
 ##### Additions:
 - TODO: Add your features here
@@ -1146,6 +1145,9 @@ sub remedy_github_upload {
   my @lines;
   open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
   while (<$news>) {
+    if (/^Version/) {
+      next;
+    }
     if (/^_____/) {
       last;
     }
@@ -1273,7 +1275,6 @@ sub remedy_news_template_file_section {
   print "  !! Manual update to NEWS.md needed\n";
   open(NEWS, "+< NEWS.md") or die "Opening: $!";
   my $out = "Version X.Y of OpenDDS\n" . <<"ENDOUT";
--------------------------------------------------------------------------------
 
 ##### Additions:
 - TODO: Add your features here
