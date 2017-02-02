@@ -17,6 +17,18 @@ namespace {
     OpenDDS::DCPS::gen_find_size(data, size, padding);
     return size;
   }
+
+  unsigned int bcd(unsigned int i)
+  {
+    return i / 10 * 16 + i % 10;
+  }
+
+  unsigned int convert_version(int maj, int min, int micro)
+  {
+    return bcd(static_cast<unsigned int>(maj)) << 16
+      | bcd(static_cast<unsigned int>(min)) << 8
+      | bcd(static_cast<unsigned int>(micro));
+  }
 }
 
 // this test tests the opendds_idl generated code for type XyZ::Foo from idl_test1_lib.
@@ -25,8 +37,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int failed = false;
   bool dump_buffer = false;
 
-  const unsigned int vers = (DDS_MAJOR_VERSION << 16) | (DDS_MINOR_VERSION << 8)
-    | DDS_MICRO_VERSION;
+  const unsigned int vers = convert_version(DDS_MAJOR_VERSION,
+                                            DDS_MINOR_VERSION,
+                                            DDS_MICRO_VERSION);
   if (vers != dds_version) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("Expected dds_version 0x%06x, actual 0x%06x\n"),
