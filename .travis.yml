@@ -31,7 +31,7 @@ matrix:
             - libxerces-c-dev
             - g++-6
             - openjdk-7-jdk
-      env: USE_JAVA=1
+      env: USE_JAVA=1 NO_DEBUG=1
     - compiler: clang
       addons:
         apt:
