@@ -86,6 +86,7 @@ WriteDataContainer::WriteDataContainer(
   CORBA::Long     max_instances,
   CORBA::Long     max_total_samples)
   : transaction_id_(0),
+    publication_id_(GUID_UNKNOWN),
     writer_(writer),
     max_samples_per_instance_(max_samples_per_instance),
     max_durable_per_instance_(max_durable_per_instance),
@@ -1282,6 +1283,12 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
 #endif
 
     PublicationInstance_rch inst = cur->get_handle();
+
+    if (!inst) {
+      // *cur is a control message, just skip it
+      continue;
+    }
+
     if (inst->durable_samples_remaining_ == 0)
       continue;
     --inst->durable_samples_remaining_;

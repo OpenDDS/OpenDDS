@@ -1,2 +1,3 @@
 project : dcps_qos_xml_handler_base, dynamicany, typecodefactory {
+  requires += dds4ccm_opendds
 }
