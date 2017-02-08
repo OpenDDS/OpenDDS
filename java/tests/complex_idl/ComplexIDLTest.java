@@ -50,8 +50,9 @@ public class ComplexIDLTest extends QuoteSupport {
         int result = typeSupport.register_type(participant, "Complex::Data");
         assert (result != RETCODE_ERROR.value);
 
-        topic = participant.create_topic("Complex::Topic", typeSupport.get_type_name(),
-                                         TOPIC_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
+        topic = participant.create_topic("Complex::Topic", "Complex::Data",
+                                         TOPIC_QOS_DEFAULT.get(), null,
+                                         DEFAULT_STATUS_MASK.value);
         assert (topic != null);
 
         publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);

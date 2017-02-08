@@ -20,17 +20,13 @@ void received_data(const Messenger::MessageSeq& data,
   }
 }
 
-int run_test_instance (int argc, ACE_TCHAR *argv[])
+int run_test_instance(DDS::DomainParticipant_ptr dp)
 {
   using namespace DDS;
   using namespace OpenDDS::DCPS;
   using namespace Messenger;
   WaitSet_var ws = new WaitSet;
-  DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  DomainParticipant_var dp = dpf->create_participant(23,
-    PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
-  // leave type name not specified would register it with _interface_repository_id
   ts->register_type(dp, "");
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp->create_topic("MyTopic", type_name,
@@ -86,15 +82,20 @@ int run_test_instance (int argc, ACE_TCHAR *argv[])
         MessageSeq data;
         SampleInfoSeq info;
         ret = mdr->take_w_condition(data, info, 3, dr_rc);
-        if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+        if (ret == RETCODE_NO_DATA) break;
+        if (ret != RETCODE_OK) {
           cout << "ERROR: take_w_condition returned " << ret << endl;
           passed = false;
           done = true;
         }
         InstanceHandle_t handle = HANDLE_NIL;
-        if (ret == RETCODE_OK) {
-          received_data(data, mdw, msg);
-          handle = info[info.length() - 1].instance_handle;
+        received_data(data, mdw, msg);
+        handle = info[info.length() - 1].instance_handle;
+        if (handle == HANDLE_NIL) {
+          cout << "ERROR: instance handle is nil" << endl;
+          passed = false;
+          done = true;
+          break;
         }
         cout << "testing take_instance_w_condition" << endl;
         while (true) {
@@ -117,28 +118,19 @@ int run_test_instance (int argc, ACE_TCHAR *argv[])
     }
   }
   ws->detach_condition(dr_rc);
-  dr->delete_readcondition(dr_rc);
   ws->detach_condition(dr_rc2);
 
-  // Instead of: dr->delete_readcondition(dr_rc2);
-  dr->delete_contained_entities();
-
   dp->delete_contained_entities();
-  dpf->delete_participant(dp);
   return passed ? 0 : 1;
 }
 
-int run_test_next_instance (int argc, ACE_TCHAR *argv[])
+int run_test_next_instance(DDS::DomainParticipant_ptr dp)
 {
   using namespace DDS;
   using namespace OpenDDS::DCPS;
   using namespace Messenger;
   WaitSet_var ws = new WaitSet;
-  DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  DomainParticipant_var dp = dpf->create_participant(23,
-    PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
-  // leave type name not specified would register it with _interface_repository_id
   ts->register_type(dp, "");
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp->create_topic("MyTopic", type_name,
@@ -224,21 +216,23 @@ int run_test_next_instance (int argc, ACE_TCHAR *argv[])
     }
   }
   ws->detach_condition(dr_rc);
-  dr->delete_readcondition(dr_rc);
   ws->detach_condition(dr_rc2);
 
-  // Instead of: dr->delete_readcondition(dr_rc2);
-  dr->delete_contained_entities();
-
   dp->delete_contained_entities();
-  dpf->delete_participant(dp);
   return passed ? 0 : 1;
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = run_test_next_instance(argc, argv);
-  ret += run_test_instance(argc, argv);
+  using namespace DDS;
+  DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+  DomainParticipant_var dp = dpf->create_participant(23,
+    PARTICIPANT_QOS_DEFAULT, 0, ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  int ret = run_test_next_instance(dp);
+  ret += run_test_instance(dp);
+
+  dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();
   return ret;

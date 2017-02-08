@@ -253,7 +253,7 @@ PubDriver::run()
     ofs << ACE_OS::getpid() << std::endl;
     ofs.close();
 
-    for (ACE_stat filestat; -1 == ACE_OS::stat("sub-pid.txt", &filestat);
+    for (ACE_stat filestat; -1 == ACE_OS::stat("sub-pid.txt", &filestat) || filestat.st_size == 0;
          ACE_OS::sleep(1)) {/*empty loop*/}
 
     std::ifstream ifs("sub-pid.txt");
