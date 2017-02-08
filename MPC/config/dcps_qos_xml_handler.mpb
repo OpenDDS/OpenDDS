@@ -1,4 +1,5 @@
-// -*- MPC -*-
-
-project : dcps_qos_xml_handler_base, dynamicany, typecodefactory {
+project : dynamicany, typecodefactory, dcps {
+  after += OpenDDS_QOS_XML_XSC_Handler
+  libs  += OpenDDS_QOS_XML_XSC_Handler
+  macros   += XML_USE_PTHREADS
 }
