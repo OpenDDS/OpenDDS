@@ -277,7 +277,10 @@ namespace java_ts_generator {
       if (tmp != "" && sn->tail()) {
         jpackage += tmp;
         file += tmp;
-        ACE_OS::mkdir(file.c_str());
+        if (ACE_OS::mkdir(file.c_str()) != 0 && errno != EEXIST) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: java_ts_generator::generate - ")
+            ACE_TEXT("unable to create specified directory: %C"), file.c_str()));
+        }
       }
       for (size_t i = tmp.find('_'); i < tmp.length();
           i = tmp.find('_', i + 1)) {

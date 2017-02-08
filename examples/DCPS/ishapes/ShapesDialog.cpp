@@ -66,11 +66,11 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
   ShapeTypeTypeSupport_var ts =
     new ShapeTypeTypeSupportImpl;
 
-  if (ts->register_type(participant, "ShapeType") != DDS::RETCODE_OK) {
+  CORBA::String_var type_name = "ShapeType";
+  if (ts->register_type(participant, type_name) != DDS::RETCODE_OK) {
       std::cerr << "Could not register type " << std::endl;
   }
 
-  CORBA::String_var type_name = ts->get_type_name();
   circleTopic_ =
     participant->create_topic(circleTopicName.c_str(),
                               type_name,

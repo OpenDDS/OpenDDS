@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use strict;
 use warnings;
 use Time::Piece;
@@ -61,7 +62,7 @@ sub news_contents_excerpt {
 sub parse_version {
   my $version = shift;
   my %result = ();
-  if ($version =~ /([0-9])+\.([0-9])+\.?([0-9]+)?/) {
+  if ($version =~ /([0-9]+)\.([0-9]+)\.?([0-9]+)?/) {
     $result{major} = $1;
     $result{minor} = $2;
     if ($3) {
@@ -437,7 +438,7 @@ sub verify_news_file_section {
   my $metaversion = quotemeta($version);
   my $has_version = 0;
   while (<NEWS>) {
-    if ($_ =~ /Version $metaversion of OpenDDS\./) {
+    if ($_ =~ /Version $metaversion of OpenDDS/) {
       $has_version = 1;
     }
   }
@@ -460,8 +461,7 @@ sub remedy_news_file_section {
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   open(NEWS, "+< NEWS.md")                 or die "Opening: $!";
-  my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
--------------------------------------------------------------------------------
+  my $out = "Version $version of OpenDDS\n" . <<"ENDOUT";
 
 ##### Additions:
 - TODO: Add your features here
@@ -491,7 +491,7 @@ sub verify_update_news_file {
   my $corrected_features = 1;
   my $corrected_fixes = 1;
   while (<NEWS>) {
-    if ($_ =~ /Version $metaversion of OpenDDS\./) {
+    if ($_ =~ /Version $metaversion of OpenDDS/) {
       $has_version = 1;
     } elsif ($_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
@@ -641,7 +641,7 @@ sub verify_git_changes_pushed {
   my $settings = shift();
   my $found = 0;
   my $target = "refs/tags/$settings->{git_tag}\$";
-  open(GIT, "git ls-remote --tags |") or die "Opening $!";
+  open(GIT, "git ls-remote --tags $settings->{remote} |") or die "Opening $!";
   while (<GIT>) {
     chomp;
     if (/$target/) {
@@ -866,7 +866,7 @@ sub message_md5_checksum{
 
 sub remedy_md5_checksum{
   my $settings = shift();
-  print "Creating file $settings-{md5_src}\n";
+  print "Creating file $settings->{md5_src}\n";
   my $md5_file = join("/", $settings->{parent_dir}, $settings->{md5_src});
   my $tgz_file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
   my $zip_file = join("/", $settings->{parent_dir}, $settings->{zip_src});
@@ -1145,6 +1145,9 @@ sub remedy_github_upload {
   my @lines;
   open(my $news, "NEWS.md") or die "Can't read NEWS.md file";
   while (<$news>) {
+    if (/^Version/) {
+      next;
+    }
     if (/^_____/) {
       last;
     }
@@ -1192,7 +1195,9 @@ sub remedy_github_upload {
 ############################################################################
 sub verify_website_release {
   # verify there are no differences between website-next-release branch and gh-pages branch
-  my $status = open(GITDIFF, 'git diff origin/website-next-release origin/gh-pages|');
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  my $status = open(GITDIFF, 'git diff ' . $remote  . '/website-next-release ' . $remote . '/gh-pages|');
   my $delta = "";
   while (<GITDIFF>) {
     if (/^...(.*)/) {
@@ -1206,7 +1211,9 @@ sub verify_website_release {
 }
 
 sub message_website_release {
-  return 'origin/website-next-release branch needs to merge into origin/gh-pages branch';
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  return "$remote/website-next-release branch needs to merge into $remote/gh-pages branch";
 }
 
 sub remedy_website_release {
@@ -1247,7 +1254,7 @@ sub verify_news_template_file_section {
   my $status = open(NEWS, 'NEWS.md');
   my $has_news_template = 0;
   while (<NEWS>) {
-    if ($_ =~ /Version X.Y of OpenDDS\./) {
+    if ($_ =~ /Version X.Y of OpenDDS/) {
       $has_news_template = 1;
     }
   }
@@ -1257,8 +1264,6 @@ sub verify_news_template_file_section {
 }
 
 sub message_news_template_file_section {
-  my $settings = shift();
-  # my $version = $settings->{version};
   return "next NEWS.md file release X.Y section missing";
 }
 
@@ -1267,8 +1272,7 @@ sub remedy_news_template_file_section {
   print "  >> Adding next version template section to NEWS.md\n";
   print "  !! Manual update to NEWS.md needed\n";
   open(NEWS, "+< NEWS.md") or die "Opening: $!";
-  my $out = "Version X.Y of OpenDDS.\n" . <<"ENDOUT";
--------------------------------------------------------------------------------
+  my $out = "Version X.Y of OpenDDS\n" . <<"ENDOUT";
 
 ##### Additions:
 - TODO: Add your features here
