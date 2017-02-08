@@ -1,5 +1,5 @@
 
-// note the following perdefined types often have special cases:
+// note the following predefined types often have special cases:
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
 
