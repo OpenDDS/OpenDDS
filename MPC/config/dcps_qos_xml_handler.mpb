@@ -1,4 +1,4 @@
-project : dynamicany, typecodefactory, dcps {
+project : ace_xml_utils, anytypecode, dcps {
   after += OpenDDS_QOS_XML_XSC_Handler
   libs  += OpenDDS_QOS_XML_XSC_Handler
   macros   += XML_USE_PTHREADS
