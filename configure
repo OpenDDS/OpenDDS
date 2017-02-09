@@ -33,8 +33,8 @@ sub perlOS_to_host {
 }
 
 sub perlOS_to_java_platform {
-    return 'win32' if $^O eq 'MSWin32';
-    return $^O;
+  return 'win32' if $^O eq 'MSWin32';
+  return $^O;
 }
 
 my %platforminfo =
@@ -75,7 +75,7 @@ my %platforminfo =
    'freebsd' => {
                     'compilers' => ['clang++'],
                     'libpath' => 'LD_LIBRARY_PATH',
-    },
+                },
    'lynxos-178' => {
                     'libpath' => 'LD_LIBRARY_PATH',
                     'no_host' => 1,
@@ -158,7 +158,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
-    'xerces3', 'Xerces3 for QoS XML handling (optional)',
+    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling (optional)',
    ],
    ['Minimizing OpenDDS:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -809,16 +809,16 @@ sub write_platform_macros {
 ## Optional OpenDDS dependencies
 
 my %optdep =
-# %opts key =>    [env var,         sanity check,                MPC feature  , platform_macros feature]
-  ('java' =>      ['JAVA_HOME',     'include/jni.h',             'java',        undef],
-   'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar',      undef,         undef],
-   'ant' =>       ['ANT_HOME',      'bin/ant',                   undef,         undef],
-   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',             'wireshark',   undef],
-   'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h',   undef,         undef],
-   'rapidjson' => [undef,           undef,                       'no_itl=0',    undef],
-   'qt' =>        ['QTDIR',         '',                          'qt4',         undef],
-   'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp', 'boost',       undef],
-   'xerces3' =>   ['XERCESCROOT',   '',                          'xerces3',     'xerces3'],
+# %opts key =>    [env var,         sanity check,                  MPC feature]
+  ('java' =>      ['JAVA_HOME',     'include/jni.h',               'java'],
+   'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
+   'ant' =>       ['ANT_HOME',      'bin/ant'],
+   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
+   'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
+   'rapidjson' => [undef,           undef,                         'no_itl=0'],
+   'qt' =>        ['QTDIR',         '',                            'qt4'],
+   'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
+   'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
   );
 
 if (exists $opts{'java'}) {
@@ -831,9 +831,9 @@ if (exists $opts{'java'}) {
 $opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
 $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt boost/;
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3/;
 my %use_win_default = ('boost' => 'c:\\Boost');
-
+my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
 sub default_java_home {
   my $host = $opts{'host'};
@@ -930,13 +930,13 @@ my @features;
 for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
-    my ($e, $s, $m, $p) = @{$optdep{$key}};
+    my ($e, $s, $m) = @{$optdep{$key}};
     env_from_opt($key, $e) if defined $e;
     if ($s && !-r $targetEnv{$e} . '/' . $s) {
       die "Can't find $key at $targetEnv{$e} (using $s)\n";
     }
     push(@features, $m) if $m;
-    push(@platformmacros, $p) if $p;
+    push(@platformmacros, $m) if $need_platform_macros{$key};
   }
 }
 
@@ -1081,7 +1081,10 @@ sub generate_workspace {
         if $opts{'verbose'};
       my $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
       for my $feat (@features) {
-        print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
+        my $key = $feat;
+        $key =~ s/=.*//;
+        print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n"
+          unless $need_platform_macros{$key};
       }
       if ($cross_compile) {
         print $UM <<'EOT';
