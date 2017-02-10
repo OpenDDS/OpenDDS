@@ -40,8 +40,6 @@
 
     .arrow { font-size: 11px; }
 
-    .page-link { line-height: $base-line-height; }
-
     ul {
         padding: 0 10px;
         line-height: 18px;
@@ -62,7 +60,6 @@
             padding-left: 15px;
             padding-right: 15px;
             border-top: 3px solid transparent;
-            min-height: 22px;
             font-weight: bold;
             position: relative;
         }
@@ -151,7 +148,7 @@
 
         .toggle ~ a { display: none; }
 
-        .toggle { 
+        .toggle {
             display: block;
             color: hsl(205, 100%, 32%);
         }

@@ -1,0 +1,26 @@
+---
+layout: page
+title: Multiple Instances
+categories: [opendds]
+tags: []
+order: 101
+sitemap: false
+---
+<div class="bodytext" align="justify">
+  <a name="Multiple Instances Example"><span class="headertext">Multiple Instances Example</span></a>
+  <ol>
+    <li>
+      <p>Start up two instances of the Shapes Demo for this example. You should be able to see two application windows like so:</p>
+      <img src="{{site.baseurl}}/images/shapes-demo/two-instances.png"/>
+    </li>
+    <li>
+      <p><b>Publish</b> - Let's change it up and begin this example by publishing a triangle by selecting <code>Triangle</code> from the top Shape dropdown menu. Then click the <code>Publish</code> button. You should observe a green triangle bouncing around the application window's display area. The triangle, from a DDS perspective, is a piece of information that is being published to the rest of the system for other entities to receive if they are set up to be interested in triangles.</p>
+      <img src="{{site.baseurl}}/images/shapes-demo/two-instances-pub-triangle.png"/>
+    </li>
+    <li>
+      <p><b>Subscribe</b> - In the other application window, select <code>Triangle</code> from the bottom Shape dropdown menu. Then click the <code>Subscribe</code> button. You should observe the green triangle, published by the first application instance bouncing around the display area in the application window you chose to subscribe in. This exemplifies the DDS publish/subscribe paradigm for a single publisher to single subscriber. The first application has a single publisher sending information out into the system and the second application has a single subscriber receiving that information.</p>
+      <img src="{{site.baseurl}}/images/shapes-demo/pub-sub-triangle.png"/>
+    </li>
+  </ol>
+</div>
+<a href="../GettingStartedShapesDemo.html#Example_Scenarios">Return to the list of example scenarios</a>

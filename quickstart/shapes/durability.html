@@ -1,0 +1,37 @@
+---
+layout: page
+title: Durability
+categories: [opendds]
+tags: []
+order: 102
+sitemap: false
+---
+<div class="bodytext" align="justify">
+  <a name="Durability Example"><span class="headertext">Durability Example</span></a>
+  <ol>
+    <li>
+      <p>In this example we will begin to look at the DDS concept of durability as it relates to a publisher's offered quality of service (QoS) and a subscriber's requested QoS. Durability allows messages sent before a subscriber came online to be delivered to that subscriber. As in the last example, start up two instances of the Shapes Demo.</p>
+    </li>
+    <li>
+      <p>In the first application window, configure the publisher's QoS by opening the QoS menu and setting the following:</p>
+      <ul>
+        <li>Durability QoS: TRANSIENT_LOCAL</li>
+      </ul>
+      <p>Then publish one instance of Square.</p>
+    </li>
+    <li>
+      <p>In the second application window, configure the subscriber's QoS by opening the lower QoS menu and setting the following:</p>
+      <ul>
+        <li>Reliability QoS: Reliable</li>
+        <li>History QoS Depth: 100</li>
+        <li>Durability QoS: TRANSIENT_LOCAL</li>
+      </ul>
+      <p>Then subscribe to one instance of Square.</p>
+    </li>
+    <li>
+      <p><b>Results</b> - You should observe a Square with 100 trailing squares bouncing around the subscriber application's display window. This demonstrates that the subscriber is being provided with the durable data that the publisher has made available. The example application windows should look like this (publisher on the left, subscriber on the right):</p>
+      <img src="{{site.baseurl}}/images/shapes-demo/durability-example.png"/>
+    </li>
+  </ol>
+</div>
+<a href="../GettingStartedShapesDemo.html#Example_Scenarios">Return to the list of example scenarios</a>
