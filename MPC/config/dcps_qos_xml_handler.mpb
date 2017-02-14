@@ -1,5 +1,4 @@
-// -*- MPC -*-
-
-project : dcps_qos_xml_handler_base, dynamicany, typecodefactory {
-  requires += dds4ccm_opendds
+project: ace_xml_utils, dcps {
+  after += OpenDDS_QOS_XML_XSC_Handler
+  libs  += OpenDDS_QOS_XML_XSC_Handler
 }

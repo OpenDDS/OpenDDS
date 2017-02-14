@@ -1,0 +1,30 @@
+The ishapes program is intended to be used alongside the Shapes Demo
+walkthrough on the OpenDDS website (link below).  The examples there
+provide help to begin to familiarize one with some Data Distribution
+Service (DDS) concepts by making use of the included application.
+
+The demo application code has been adapted from The Simple DDS API
+(SIMD http://code.google.com/p/simd-cxx), and can be used to demonstrate
+OpenDDS RTPS interoperability with other DDS vendors.
+
+------------------------------------------------------------------------
+System Requirements:
+
+* Qt 4 - Qt 4.8.6 was used to create the provided application.
+
+------------------------------------------------------------------------
+Shapes Demo link:
+
+http://opendds.org/quickstart/GettingStartedShapesDemo.html
+
+Demo Application:
+
+ishapes - QT GUI application for testing OpenDDS RTPS interoperability.
+
+  * ishapes program can accept a command line argument to specify the
+    partition to be used by this instance of the application by using
+
+    -partition "<VAL>"  where <VAL> should be replaced with the partition
+                        for instance "A" or alternatively "*" can be
+                        used to specify inclusion in all partitions.
+------------------------------------------------------------------------
