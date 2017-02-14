@@ -66,6 +66,7 @@ module Bound {
   typedef boolean BooleanArray[10];
   typedef octet OctetArray[10];
   typedef EnumType EnumTypeArray[10];
+  typedef double MultiDoubleArray[2][2];
 
   struct SimpleBoundedArrayMessage {
     ShortArray short_array;
