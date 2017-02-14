@@ -53,7 +53,7 @@ module Bound {
 #pragma DCPS_DATA_TYPE "Bound::SimpleBoundedArrayMessage"
 
   typedef short ShortArray[10];
-  typedef short MultiShortArray[10][10];
+  typedef short MultiShortArray[10][10][2];
   typedef unsigned short UnsignedShortArray[10];
   typedef unsigned short MultiUnsignedShortArray[10][10];
   typedef long LongArray[10];

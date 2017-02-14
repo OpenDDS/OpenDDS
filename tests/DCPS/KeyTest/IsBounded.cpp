@@ -45,7 +45,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     TEST_CHECK(MarshalTraits<Bound::SimpleBoundedArrayMessage>::gen_is_bounded_size());
     std::cout << gen_max_marshaled_size(message, false /*align*/) << std::endl;
-    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 660);
+    TEST_CHECK(gen_max_marshaled_size(message, false /*align*/) == 7460);
   }
 
   {
