@@ -48,7 +48,10 @@ UdpInst::load(ACE_Configuration_Heap& cf,
   ACE_TString local_address_s;
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
-  this->local_address(ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str()));
+
+  if (!local_address_s.empty()) {
+    local_address(ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str()));
+  }
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
 

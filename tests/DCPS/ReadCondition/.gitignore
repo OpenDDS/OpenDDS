@@ -1,16 +1,2 @@
 /ReadConditionTest
-/MessengerTypeSupportImpl.cpp
-/MessengerTypeSupport.idl
-/MessengerTypeSupportImpl.h
-/MessengerTypeSupportC.h
-/MessengerC.h
-/MessengerTypeSupportS.cpp
-/MessengerTypeSupportS.inl
-/MessengerS.inl
-/MessengerS.cpp
-/MessengerTypeSupportS.h
-/MessengerS.h
-/MessengerTypeSupportC.inl
-/MessengerTypeSupportC.cpp
-/MessengerC.inl
-/MessengerC.cpp
+/GeneratedCode
