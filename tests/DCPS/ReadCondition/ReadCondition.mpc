@@ -1,7 +1,14 @@
-project: dcpsexe, dcps_transports_for_test {
+project: dcpsexe, dcps_transports_for_test, dcps_ts_subdir {
   exename = ReadConditionTest
-  idlflags += -SS
+  idlflags += -SS -o GeneratedCode
+
   TypeSupport_Files {
+    gendir = GeneratedCode
+    Messenger.idl
+  }
+
+  IDL_Files {
+    gendir = GeneratedCode
     Messenger.idl
   }
 }
