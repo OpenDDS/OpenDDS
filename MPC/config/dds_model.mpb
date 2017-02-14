@@ -1,5 +1,3 @@
-// -*- MPC -*-
-
 feature(dds_model) {
   includes  += $(DDS_ROOT)/tools/modeling/codegen
   libs      += OpenDDS_Model

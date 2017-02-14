@@ -13,11 +13,9 @@ class FileInfoListener
 
 public:
 
-
   FileInfoListener(AbstractionLayer* monitor);
 
   virtual ~FileInfoListener();
-
 
   virtual void on_requested_deadline_missed (
     ::DDS::DataReader_ptr reader,
@@ -31,8 +29,7 @@ public:
 
   virtual void on_sample_rejected (
     ::DDS::DataReader_ptr reader,
-    const ::DDS::SampleRejectedStatus & status
-    );
+    const ::DDS::SampleRejectedStatus & status);
 
 
   virtual void on_liveliness_changed (
@@ -57,7 +54,6 @@ private:
 
   // Pointer to the change monitor.  This class does not take ownership.
   AbstractionLayer* change_monitor_;
-
 };
 
 #endif

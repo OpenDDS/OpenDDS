@@ -77,8 +77,7 @@ void FileInfoListener::on_requested_incompatible_qos (
 
 void FileInfoListener::on_sample_rejected (
                          ::DDS::DataReader_ptr,
-                         const ::DDS::SampleRejectedStatus &
-                         )
+                         const ::DDS::SampleRejectedStatus &)
 {
 }
 

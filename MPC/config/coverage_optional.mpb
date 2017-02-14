@@ -1,4 +1,4 @@
-// this feature is used to turn on coverage insturmentation (for gcov)
+// this feature is used to turn on coverage instrumentation (for gcov)
 // the flag is in the negative, so that is only needs to be addressed
 // when we do a coverage build and defaults to off otherwise
 

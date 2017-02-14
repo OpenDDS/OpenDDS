@@ -1,5 +1,3 @@
-// -*- MPC -*-
-
 project: dds_taolib, dcps_ts_defaults, dcps_optional_features, dds_suppress_any_support, taoidldefaults, coverage_optional, dds_macros, dds_vc_warnings {
   libs        += OpenDDS_Dcps
   after       += OpenDDS_Dcps

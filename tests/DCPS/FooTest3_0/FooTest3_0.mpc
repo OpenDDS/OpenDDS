@@ -1,6 +1,3 @@
-// -*- MPC -*-
-//
-
 project(*Publisher): dcpsexe, dcps_transports_for_test {
   exename = FooTest3_publisher
   after       += DcpsFooType3

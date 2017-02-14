@@ -1,5 +1,3 @@
-// -*- MPC -*-
-
 project : dds_macros {
 
   after += opendds_idl
