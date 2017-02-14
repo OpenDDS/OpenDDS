@@ -1,6 +1,3 @@
-//
-//
-
 project {
   libs        += OpenDDS_Udp
   after       += OpenDDS_Udp

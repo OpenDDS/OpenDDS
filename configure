@@ -145,7 +145,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'configh=s@', 'Extra text for config.h',
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
-    'mpcopts=s', 'Extra command-line args for MPC (if MPC is run)',
+    'mpcopts=s@', 'Extra command-line args for MPC (if MPC is run)',
    ],
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -1162,7 +1162,7 @@ EOT
   mergeToEnv($buildEnv);
 
   my $mwcargs = "-type $mpctype $buildEnv->{'DDS_ROOT'}$slash$ws $static";
-  $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
+  $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
   print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
@@ -1176,7 +1176,7 @@ EOT
   if (defined $opts{'no-opendds-safety-profile'}) {
     # Generate ACE workspace separately, to exclude TAO
     my $mwcargs = "-type $mpctype $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
-    $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
+    $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
     print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
     if (!$opts{'dry-run'}) {

@@ -1,7 +1,3 @@
-// -*- MPC -*-
-//
-
-
 project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,export_macro=InstancesLib_Export -Wb,export_include=instanceslib_export.h -SS
   dcps_ts_flags += -Wb,export_macro=InstancesLib_Export

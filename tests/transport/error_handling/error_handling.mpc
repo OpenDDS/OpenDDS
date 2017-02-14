@@ -1,5 +1,3 @@
-// -*- MPC -*-
-
 project: dcpsexe, dcps_tcp {
   requires += no_opendds_safety_profile
 }

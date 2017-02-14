@@ -1,5 +1,3 @@
-// -*- MPC -*-
-
 project(*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=SimpleLatency_export.h \
                    -Wb,stub_export_macro=SimpleLatency_Export -SS
