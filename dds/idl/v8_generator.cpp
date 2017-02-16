@@ -12,20 +12,14 @@
 
 using namespace AstTypeClassification;
 
-void v8_generator::fwd_decl()
+void v8_generator::gen_includes()
 {
-  if (first_) {
-    be_global->add_include("<v8.h>", BE_GlobalData::STREAM_CPP);
-    first_ = false;
-    be_global->header_ <<
-      "namespace v8 {\n"
-      "  class Value;\n"
-      "}\n\n";
-  }
+  be_global->add_include("<v8.h>", BE_GlobalData::STREAM_H);
+  be_global->add_include("<nan.h>", BE_GlobalData::STREAM_CPP);
 }
 
-bool v8_generator::gen_enum(AST_Enum*, UTL_ScopedName*, const std::vector<AST_EnumVal*>&,
-                            const char*)
+bool v8_generator::gen_enum(AST_Enum*, UTL_ScopedName*,
+                            const std::vector<AST_EnumVal*>&, const char*)
 {
   return true;
 }
@@ -79,7 +73,7 @@ namespace {
       propName = std::string(tgt) + "->Set(" + prop + ", ";
 
     if (cls & CL_SCALAR) {
-      std::string prefix, suffix, v8fn = "New";
+      std::string prefix, suffix, postNew;
 
       if (cls & CL_ENUM) {
         const std::string underscores =
@@ -88,6 +82,7 @@ namespace {
         prefix = '(' + std::string(src) + " >= sizeof(" + array + ")/sizeof(" +
           array + "[0])) ? \"<<invalid>>\" : " + array + "[static_cast<int>(";
         suffix = ")]";
+        postNew = ".ToLocalChecked()";
 
       } else if (cls & CL_STRING) {
         if (cls & CL_WIDE) {
@@ -98,18 +93,19 @@ namespace {
             "    for (size_t i = 0; i <= len; ++i) {\n"
             "      str[i] = " << src << "[i];\n"
             "    }\n"
-            "    " << propName << "v8::String::New(str));\n"
+            "    " << propName << "Nan::New(str).ToLocalChecked());\n"
             "    delete[] str;\n"
             "  }\n";
           return;
         }
         suffix = ".in()";
+        postNew = ".ToLocalChecked()";
 
       } else if (pt == AST_PredefinedType::PT_char) {
         be_global->impl_ <<
           "  {\n"
           "    const char str[] = {" << src << ", 0};\n"
-          "    " << propName << "v8::String::New(str));\n"
+          "    " << propName << "Nan::New(str).ToLocalChecked());\n"
           "  }\n";
         return;
 
@@ -117,17 +113,18 @@ namespace {
         be_global->impl_ <<
           "  {\n"
           "    const uint16_t str[] = {" << src << ", 0};\n"
-          "    " << propName << "v8::String::New(str));\n"
+          "    " << propName << "Nan::New(str).ToLocalChecked());\n"
           "  }\n";
         return;
 
-      } else if (pt == AST_PredefinedType::PT_ulong) {
-        v8fn = "NewFromUnsigned";
+      } else if (v8Type == "Number") {
+        prefix = "static_cast<double>(";
+        suffix = ")";
       }
 
       be_global->impl_ <<
-        "  " << propName << "v8::" << v8Type << "::" << v8fn << '('
-             << prefix << src << suffix << "));\n";
+        "  " << propName << "Nan::New(" << prefix << src << suffix << ")"
+             << postNew << ");\n";
 
     } else if ((cls & CL_SEQUENCE) && builtInSeq(type)) {
       AST_Type* real_type = resolveActualType(type);
@@ -135,7 +132,7 @@ namespace {
       AST_Type* elem = seq->base_type();
       be_global->impl_ <<
         "  {\n"
-        "    const v8::Local<v8::Array> seq = v8::Array::New(" << src
+        "    const v8::Local<v8::Array> seq = Nan::New<v8::Array>(" << src
                        << ".length());\n"
         "    for (CORBA::ULong j = 0; j < " << src << ".length(); ++j) {\n";
       gen_copyto("seq", (std::string(src) + "[j]").c_str(), elem, "j");
@@ -146,8 +143,7 @@ namespace {
 
     } else { // struct, sequence, etc.
       be_global->impl_ <<
-        "  " << propName << "v8::Handle<v8::Value>(copyToV8("
-             << src << ")));\n";
+        "  " << propName << "copyToV8(" << src << "));\n";
     }
   }
 
@@ -158,7 +154,7 @@ namespace {
     {
       const std::string fieldName = field->local_name()->get_string(),
         source = src_ + '.' + fieldName,
-        prop = "v8::String::NewSymbol(\"" + fieldName + "\")";
+        prop = "Nan::New<v8::String>(\"" + fieldName + "\").ToLocalChecked()";
       gen_copyto(tgt_.c_str(), source.c_str(),
                  field->field_type(), prop.c_str());
     }
@@ -169,20 +165,20 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                               const std::vector<AST_Field*>& fields,
                               AST_Type::SIZE_TYPE, const char*)
 {
-  fwd_decl();
+  gen_includes();
   {
     NamespaceGuard ng;
     const std::string clazz = scoped(name);
     {
-      Function ctv("copyToV8", "v8::Value*");
+      Function ctv("copyToV8", "v8::Local<v8::Object>");
       ctv.addArg("src", "const " + clazz + '&');
       ctv.endArgs();
       be_global->impl_ <<
-        "  const v8::Local<v8::Object> stru = v8::Object::New();\n";
+        "  const v8::Local<v8::Object> stru = Nan::New<v8::Object>();\n";
       std::for_each(fields.begin(), fields.end(),
                     gen_field_copyto("stru", "src"));
       be_global->impl_ <<
-        "  return *stru;\n";
+        "  return stru;\n";
     }
   }
 
@@ -196,10 +192,10 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "class " << tsv8 << "\n"
       "  : public virtual " << lname << "TypeSupportImpl\n"
       "  , public virtual OpenDDS::DCPS::V8TypeConverter {\n\n"
-      "  v8::Value* toV8(const void* source) const\n"
+      "  v8::Local<v8::Object> toV8(const void* source) const\n"
       "  {\n"
       "    return OpenDDS::DCPS::copyToV8(*static_cast<const " << lname
-                 << "*>(source));\n"
+               << "*>(source));\n"
       "  }\n\n"
       "public:\n"
       "  struct Initializer {\n"
@@ -215,10 +211,10 @@ bool v8_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   return true;
 }
 
-bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* type,
-                               const char* /*repoid*/)
+bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
+                               AST_Type* type, const char* /*repoid*/)
 {
-  fwd_decl();
+  gen_includes();
   switch (type->node_type()) {
   case AST_Decl::NT_sequence: {
     NamespaceGuard ng;
@@ -226,17 +222,17 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* typ
     const std::string cxx = scoped(name);
     AST_Type* elem = seq->base_type();
     {
-      Function ctv("copyToV8", "v8::Value*");
+      Function ctv("copyToV8", "v8::Local<v8::Object>");
       ctv.addArg("src", "const " + cxx + '&');
       ctv.endArgs();
       be_global->impl_ <<
-        "  const v8::Local<v8::Array> tgt = v8::Array::New(src.length());\n"
+        "  const v8::Local<v8::Array> tgt(Nan::New<v8::Array>(src.length()));\n"
         "  for (CORBA::ULong i = 0; i < src.length(); ++i) {\n"
         "  ";
       gen_copyto("tgt", "src[i]", elem, "i");
       be_global->impl_ <<
         "  }\n"
-        "  return *tgt;\n";
+        "  return tgt;\n";
     }
     break;
   }
@@ -254,6 +250,6 @@ bool v8_generator::gen_union(AST_Union*, UTL_ScopedName* /*name*/,
                              const std::vector<AST_UnionBranch*>& /*branches*/,
                              AST_Type* /*type*/, const char* /*repoid*/)
 {
-  fwd_decl();
+  //  gen_includes();
   return true;
 }
