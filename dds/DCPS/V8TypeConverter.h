@@ -1,17 +1,16 @@
 #ifndef OPENDDS_DCPS_V8TYPECONVERTER_H
 #define OPENDDS_DCPS_V8TYPECONVERTER_H
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+#include <v8.h>
 
-namespace v8 {
-  class Value;
-}
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
   class V8TypeConverter {
   public:
-    virtual v8::Value* toV8(const void* source) const = 0;
+    virtual v8::Local<v8::Object> toV8(const void* source) const = 0;
+    virtual ~V8TypeConverter() {}
   };
 }
 }
