@@ -1053,6 +1053,12 @@ protected:
       ser >> *data;
     }
 
+    if (!ser.good_bit()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+                 ACE_TEXT("deserialization failed, dropping sample.\n"),
+                 TraitsType::type_name()));
+      return;
+    }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     if (!sample.header_.content_filter_) { // if this is true, the writer has already filtered
