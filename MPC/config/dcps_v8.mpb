@@ -5,9 +5,9 @@ project: dcps_ts_defaults {
   includes += $(V8_ROOT)/include/node $(NAN_ROOT)
 
   specific(prop:microsoft) {
-    lit_libs += v8
-    Debug::libpaths += $(V8_ROOT)/build/Debug/lib
-    Release::libpaths += $(V8_ROOT)/build/Release/lib
+    lit_libs += node
+    x64::libpaths += $(V8_ROOT)/x64
+    Win32::libpaths += $(V8_ROOT)/ia32
   }
 
 }
