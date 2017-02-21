@@ -114,6 +114,11 @@ DataLink::send(TransportQueueElement* element)
 {
   DBG_ENTRY_LVL("DataLink","send",6);
 
+  if (element->is_request_ack() &&
+      this->handle_send_request_ack(element)) {
+    return;
+  }
+
   element = this->customize_queue_element(element);
   if (!element) {
     return;

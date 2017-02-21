@@ -82,6 +82,8 @@ public:
   virtual bool is_control(RepoId pub_id) const;
   virtual bool owned_by_transport ();
 
+  virtual bool is_request_ack() const { return header_.message_id_ == REQUEST_ACK; }
+
 protected:
 
   virtual void release_element(bool dropped_by_transport);

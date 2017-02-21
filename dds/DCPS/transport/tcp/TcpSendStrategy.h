@@ -42,6 +42,7 @@ public:
 
   /// Enable or disable output processing by the reactor according to mode.
   virtual void schedule_output();
+  void add_delayed_notification_on_ack_received(TransportQueueElement* element);
 
 protected:
 
@@ -54,7 +55,7 @@ protected:
   virtual void relink(bool do_suspend = true);
 
   virtual void stop_i();
-
+  virtual void add_delayed_notification(TransportQueueElement* element);
 private:
   TcpConnection_rch connection_;
   TcpDataLink_rch   link_;

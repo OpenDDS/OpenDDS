@@ -331,14 +331,107 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   this->send_i(send_element, false);
 }
 
-void OpenDDS::DCPS::TcpDataLink::set_release_pending(bool flag)
+void
+OpenDDS::DCPS::TcpDataLink::set_release_pending(bool flag)
 {
   this->release_is_pending_ = flag;
 }
 
-bool OpenDDS::DCPS::TcpDataLink::is_release_pending() const
+bool
+OpenDDS::DCPS::TcpDataLink::is_release_pending() const
 {
   return this->release_is_pending_.value();
+}
+
+bool
+OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* element)
+{
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::handle_send_request_ack() sequence number %q\n",
+      element->sequence().getValue()));
+  }
+
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
+  pending_request_acks_.push_back(element);
+  return false;
+}
+
+
+void
+OpenDDS::DCPS::TcpDataLink::ack_received(ReceivedDataSample& sample)
+{
+  SequenceNumber sequence = sample.header_.sequence_;
+
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::ack_received() received sequence number %q\n",
+      sequence.getValue()));
+  }
+
+  TransportQueueElement* elem=0;
+  {
+    // find the pending request with the same sequence number.
+    ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
+    PendingRequestAcks::iterator it;
+    for (it = pending_request_acks_.begin(); it != pending_request_acks_.end(); ++it){
+      if ((*it)->sequence() == sequence) {
+        elem = *it;
+        pending_request_acks_.erase(it);
+        break;
+      }
+    }
+  }
+
+  if (elem) {
+    static_cast<TcpSendStrategy*>(this->send_strategy_.in())->add_delayed_notification_on_ack_received(elem);
+  }
+  else {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::ack_received() received unknown sequence number %q\n",
+      sequence.getValue()));
+  }
+}
+
+void
+OpenDDS::DCPS::TcpDataLink::request_ack_received(ReceivedDataSample& sample)
+{
+  DataSampleHeader header_data;
+  // The message_id_ is the most important value for the DataSampleHeader.
+  header_data.message_id_ = SAMPLE_ACK;
+
+  // Other data in the DataSampleHeader are not necessary set. The bogus values
+  // can be used.
+
+  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
+  header_data.message_length_ = 0;
+  header_data.sequence_ = sample.header_.sequence_;
+
+  ACE_Message_Block* message;
+  size_t max_marshaled_size = header_data.max_marshaled_size();
+
+  ACE_NEW(message,
+          ACE_Message_Block(max_marshaled_size,
+                            ACE_Message_Block::MB_DATA,
+                            0, //cont
+                            0, //data
+                            0, //allocator_strategy
+                            0, //locking_strategy
+                            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                            ACE_Time_Value::zero,
+                            ACE_Time_Value::max_time,
+                            0,
+                            0));
+
+  *message << header_data;
+
+  TransportControlElement* send_element = 0;
+
+  ACE_NEW(send_element, TransportControlElement(message));
+
+  // give the message block ownership to TransportControlElement
+  message->release();
+
+  // I don't want to rebuild a connection in order to send
+  // a sample ack message
+  this->send_i(send_element, false);
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

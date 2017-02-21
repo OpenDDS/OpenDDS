@@ -1015,13 +1015,33 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 {
   if (this->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
     return DDS::RETCODE_OK;
+
+  // send RequestAct message
+
+  DataSampleHeader header;
+
+  DDS::Time_t t = time_value_to_time( ACE_OS::gettimeofday() );
+  ACE_Message_Block* msg =
+    this->create_control_message(REQUEST_ACK, header, 0, t);
+
+  if (this->send_control(header, msg) == SEND_CONTROL_ERROR) {
+    ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::wait_for_acknowledgments: ")
+              ACE_TEXT(" send_control failed. \n")));
+    return DDS::RETCODE_ERROR;
+  }
+
   DataWriterImpl::AckToken token = create_ack_token(max_wait);
   if (DCPS_debug_level) {
     ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments")
                           ACE_TEXT(" waiting for acknowledgment of sequence %q at %T\n"),
                           token.sequence_.getValue()));
   }
-  return wait_for_specific_ack(token);
+  DDS::ReturnCode_t ret = wait_for_specific_ack(token);
+  if (DCPS_debug_level) {
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments done\n")));
+  }
+  return ret;
 }
 
 DDS::ReturnCode_t
@@ -1957,7 +1977,8 @@ DataWriterImpl::create_control_message(MessageId message_id,
   if (message_id == INSTANCE_REGISTRATION
       || message_id == DISPOSE_INSTANCE
       || message_id == UNREGISTER_INSTANCE
-      || message_id == DISPOSE_UNREGISTER_INSTANCE) {
+      || message_id == DISPOSE_UNREGISTER_INSTANCE
+      || message_id == REQUEST_ACK) {
 
     header_data.sequence_repair_ = need_sequence_repair();
 
