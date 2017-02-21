@@ -156,23 +156,34 @@ namespace {
   class LiteralInt : public FilterEvaluator::Operand {
   public:
     explicit LiteralInt(AstNode* fnNode)
+      : value_(0, true)
     {
-      OPENDDS_STRING strVal = toString(fnNode);
+      const OPENDDS_STRING strVal = toString(fnNode);
       if (strVal.length() > 2 && strVal[0] == '0'
           && (strVal[1] == 'x' || strVal[1] == 'X')) {
         std::istringstream is(strVal.c_str() + 2);
-        is >> std::hex >> value_;
+        ACE_UINT64 val;
+        is >> std::hex >> val;
+        value_ = Value(val, true);
+      } else if (!strVal.empty() && strVal[0] == '-') {
+        ACE_INT64 val;
+        std::istringstream is(strVal.c_str());
+        is >> val;
+        value_ = Value(val, true);
       } else {
-        value_ = std::atoi(strVal.c_str());
+        ACE_UINT64 val;
+        std::istringstream is(strVal.c_str());
+        is >> val;
+        value_ = Value(val, true);
       }
     }
 
     Value eval(FilterEvaluator::DataForEval&)
     {
-      return Value(value_, true);
+      return value_;
     }
 
-    int value_;
+    Value value_;
   };
 
   class LiteralChar : public FilterEvaluator::Operand {
