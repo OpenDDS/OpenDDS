@@ -179,6 +179,7 @@ OpenDDS::DCPS::TcpSendStrategy::add_delayed_notification_on_ack_received(Transpo
 {
   // Used to indicate REQUEST_ACK has been recevied by the peer when the  SAMPLE_ACK is received
   TransportSendStrategy::add_delayed_notification(element);
+  send_delayed_notifications();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

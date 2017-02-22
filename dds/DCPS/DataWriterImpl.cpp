@@ -1010,26 +1010,61 @@ DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
   return AckToken(max_wait, this->sequence_number_);
 }
 
+
+
+DDS::ReturnCode_t
+DataWriterImpl::send_request_ack()
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   get_lock(),
+                   DDS::RETCODE_ERROR);
+
+
+  DataSampleElement* element = 0;
+  DDS::ReturnCode_t ret = this->data_container_->obtain_buffer_for_control(element);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DataWriterImpl::send_request_ack: ")
+                      ACE_TEXT("obtain_buffer_for_control returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  // Add header with the registration sample data.
+  element->set_sample(create_control_message(REQUEST_ACK,
+                                             element->get_header(),
+                                             0,
+                                             time_value_to_time( ACE_OS::gettimeofday() )));
+
+  ret = this->data_container_->enqueue_control(element);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DataWriterImpl::send_request_ack: ")
+                      ACE_TEXT("enqueue_control failed.\n")),
+                     ret);
+  }
+
+
+  send_all_to_flush_control(guard);
+
+  return DDS::RETCODE_OK;
+}
+
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 {
   if (this->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
     return DDS::RETCODE_OK;
 
-  // send RequestAct message
+  DDS::ReturnCode_t ret = send_request_ack();
 
-  DataSampleHeader header;
-
-  DDS::Time_t t = time_value_to_time( ACE_OS::gettimeofday() );
-  ACE_Message_Block* msg =
-    this->create_control_message(REQUEST_ACK, header, 0, t);
-
-  if (this->send_control(header, msg) == SEND_CONTROL_ERROR) {
-    ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::wait_for_acknowledgments: ")
-              ACE_TEXT(" send_control failed. \n")));
-    return DDS::RETCODE_ERROR;
-  }
+  if (ret != DDS::RETCODE_OK)
+    return ret;
 
   DataWriterImpl::AckToken token = create_ack_token(max_wait);
   if (DCPS_debug_level) {
@@ -1037,11 +1072,7 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
                           ACE_TEXT(" waiting for acknowledgment of sequence %q at %T\n"),
                           token.sequence_.getValue()));
   }
-  DDS::ReturnCode_t ret = wait_for_specific_ack(token);
-  if (DCPS_debug_level) {
-    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments done\n")));
-  }
-  return ret;
+  return wait_for_specific_ack(token);
 }
 
 DDS::ReturnCode_t

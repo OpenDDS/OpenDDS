@@ -186,6 +186,12 @@ protected:
 
   virtual void add_delayed_notification(TransportQueueElement* element);
 
+  /// If delayed notifications were queued up, issue those callbacks here.
+  /// The default match is "match all", otherwise match can be used to specify
+  /// either a certain individual packet or a publication id.
+  /// Returns true if anything in the delayed notification list matched.
+  bool send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
+
 private:
 
   enum SendPacketOutcome {
@@ -242,11 +248,6 @@ private:
   /// the entire packet was not sent.
   int adjust_packet_after_send(ssize_t num_bytes_sent);
 
-  /// If delayed notifications were queued up, issue those callbacks here.
-  /// The default match is "match all", otherwise match can be used to specify
-  /// either a certain individual packet or a publication id.
-  /// Returns true if anything in the delayed notification list matched.
-  bool send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
 
   /// How much space is available in the current packet before we reach one
   /// of the limits: max_message_size() [transport's inherent limitation]
