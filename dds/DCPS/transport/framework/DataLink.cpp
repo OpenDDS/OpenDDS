@@ -1092,6 +1092,13 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
 #endif
 }
 
+bool
+DataLink::handle_send_request_ack(TransportQueueElement* element)
+{
+  element->data_delivered();
+  return true;
+}
+
 #ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)

@@ -165,4 +165,21 @@ OpenDDS::DCPS::TcpSendStrategy::stop_i()
   this->connection_.reset();
 }
 
+void
+OpenDDS::DCPS::TcpSendStrategy::add_delayed_notification(TransportQueueElement* element)
+{
+  if (!element->is_request_ack()) {
+    // only add the notification when we are not sending REQUEST_ACK message
+    TransportSendStrategy::add_delayed_notification(element);
+  }
+}
+
+void
+OpenDDS::DCPS::TcpSendStrategy::add_delayed_notification_on_ack_received(TransportQueueElement* element)
+{
+  // Used to indicate REQUEST_ACK has been recevied by the peer when the  SAMPLE_ACK is received
+  TransportSendStrategy::add_delayed_notification(element);
+  send_delayed_notifications();
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
