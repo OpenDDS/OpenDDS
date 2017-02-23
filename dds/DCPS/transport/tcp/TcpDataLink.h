@@ -58,6 +58,7 @@ public:
 
   void ack_received(ReceivedDataSample& sample);
   void request_ack_received(ReceivedDataSample& sample);
+  void drop_pending_request_acks();
 
 protected:
 

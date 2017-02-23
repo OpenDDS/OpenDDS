@@ -346,7 +346,7 @@ OpenDDS::DCPS::TcpDataLink::is_release_pending() const
 bool
 OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* element)
 {
-  if (DCPS_debug_level >= 1) {
+  if (Transport_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::handle_send_request_ack() sequence number %q\n",
       element->sequence().getValue()));
   }
@@ -362,7 +362,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(ReceivedDataSample& sample)
 {
   SequenceNumber sequence = sample.header_.sequence_;
 
-  if (DCPS_debug_level >= 1) {
+  if (Transport_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::ack_received() received sequence number %q\n",
       sequence.getValue()));
   }
@@ -432,6 +432,17 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(ReceivedDataSample& sample)
   // I don't want to rebuild a connection in order to send
   // a sample ack message
   this->send_i(send_element, false);
+}
+
+void
+OpenDDS::DCPS::TcpDataLink::drop_pending_request_acks()
+{
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
+  PendingRequestAcks::iterator it;
+  for (it = pending_request_acks_.begin(); it != pending_request_acks_.end(); ++it){
+    (*it)->data_dropped(true);
+  }
+  pending_request_acks_.clear();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

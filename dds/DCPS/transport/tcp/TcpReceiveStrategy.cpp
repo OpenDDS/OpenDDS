@@ -149,7 +149,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::reset(const TcpConnection_rch& connection)
    ACE_Event_Handler::READ_MASK |
    ACE_Event_Handler::DONT_CALL);
 
-
+  this->link_->drop_pending_request_acks();
   // This will cause the connection_ object to drop its reference to this
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();
@@ -188,6 +188,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::stop_i()
    ACE_Event_Handler::READ_MASK |
    ACE_Event_Handler::DONT_CALL);
 
+  this->link_->drop_pending_request_acks();
   // This will cause the connection_ object to drop its reference to this
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();
