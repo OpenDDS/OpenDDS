@@ -16,6 +16,13 @@
 
 #include <cstdlib>
 #include <iostream>
+
+#if defined __GNUC__ && __GNUC__ == 4 && __GNUC_MINOR__ <= 1
+# define INT64_LITERAL_SUFFIX(X) X ## ll
+#else
+# define INT64_LITERAL_SUFFIX(X) X
+#endif
+
 using namespace std;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
@@ -255,7 +262,7 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
   ws->detach_condition(dw_sc);
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message sample = {0, 1485441228338};
+  Message sample = {0, INT64_LITERAL_SUFFIX(1485441228338)};
   for (; sample.key < 3; ++sample.key, ++sample.ull)
     mdw->write(sample, HANDLE_NIL);
 
@@ -278,7 +285,7 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
       if (infoseq[i].valid_data) {
         ++count;
         cout << dr << " received data with ull == " << data[i].ull << endl;
-        if (data[i].ull != 1485441228339) {
+        if (data[i].ull != INT64_LITERAL_SUFFIX(1485441228339)) {
           cout << "ERROR: received unexpected value\n";
           return false;
         }
