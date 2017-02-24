@@ -541,7 +541,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered")
-                          ACE_TEXT(" %X \n"), sample));
+                          ACE_TEXT(" %@\n"), sample));
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
