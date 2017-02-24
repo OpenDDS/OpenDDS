@@ -259,7 +259,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     enum {
       READER,
       WRITER
-    } mode;
+    } mode = READER;
     bool toggle = false;
 
     {

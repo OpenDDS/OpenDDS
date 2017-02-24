@@ -315,6 +315,8 @@ private:
   /// empty maps for new associations.
   void prepare_release();
 
+  virtual bool handle_send_request_ack(TransportQueueElement* element);
+
   /// Allow derived classes to provide an alternate "customized" queue element
   /// for this DataLink (not shared with other links in the DataLinkSet).
   virtual TransportQueueElement* customize_queue_element(

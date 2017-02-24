@@ -125,6 +125,10 @@ OpenDDS::DCPS::TcpConnection::disconnect()
                                                            ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
   }
 
+  if (this->link_) {
+    this->link_->drop_pending_request_acks();
+  }
+
   this->peer().close();
 
 }

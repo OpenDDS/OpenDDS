@@ -62,11 +62,6 @@ pod2usage( -verbose => 2) if $man ;
 
 print "Priority==$priority\n" if $verbose;
 
-$orbVerbose = 1;
-$verbose = 1;
-$debug = 5;
-$repoDebug = 5;
-
 # Verbosity.
 print "Debug==$debug\n"                         if $verbose and $debug;
 print "RepoDebug==$repoDebug\n"                 if $verbose and $repoDebug;

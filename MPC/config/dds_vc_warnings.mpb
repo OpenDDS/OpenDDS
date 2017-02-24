@@ -1,11 +1,8 @@
-// -*- MPC -*-
-
 // This file contains a number of optional features that disable VC
 // warnings regarding various items that specific versions of VC turned
 // into warnings that were not present in earlier versions. These
 // warnings are disabled by default. To enable them, generate your projects
 // with the feature set to 0.
-
 
 feature(vc_avoid_crt_secure_warnings) {
   specific(vc8, nmake) {

@@ -16,6 +16,13 @@
 
 #include <cstdlib>
 #include <iostream>
+
+#if defined __GNUC__ && __GNUC__ == 4 && __GNUC_MINOR__ <= 1
+# define INT64_LITERAL_SUFFIX(X) X ## ll
+#else
+# define INT64_LITERAL_SUFFIX(X) X
+#endif
+
 using namespace std;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
@@ -72,8 +79,7 @@ size_t takeSamples(const DataReader_var& dr, F filter)
 
 bool run_filtering_test(const DomainParticipant_var& dp,
   const MessageTypeSupport_var& ts, const Publisher_var& pub,
-  const Subscriber_var& sub, const Subscriber_var& sub2,
-  bool should_wait_for_ack)
+  const Subscriber_var& sub, const Subscriber_var& sub2)
 {
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp->create_topic("MyTopic", type_name,
@@ -88,7 +94,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   DataWriter_var dw =
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-  Message sample = {0};
+  Message sample = {0, 0};
   mdw->write(sample, HANDLE_NIL); // durable, filtered
   sample.key = 99;
   mdw->write(sample, HANDLE_NIL); // durable, not filtered
@@ -183,11 +189,9 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
 
   Duration_t wfa = {60 /*seconds*/, 0 /*nanoseconds*/};
-  if (should_wait_for_ack) {
-    if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
-      cout << "ERROR: wait_for_acknowledgments 1" << endl;
-      return false;
-    }
+  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
+    cout << "ERROR: wait_for_acknowledgments 1" << endl;
+    return false;
   }
 
   // To set up a more difficult wait_for_acknowledgements() scenario,
@@ -196,11 +200,9 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   sample.key = 2;
   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
 
-  if (should_wait_for_ack) {
-    if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
-      cout << "ERROR: wait_for_acknowledgments 2" << endl;
-      return false;
-    }
+  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
+    cout << "ERROR: wait_for_acknowledgments 2" << endl;
+    return false;
   }
 
   if (dp->delete_contentfilteredtopic(cft) != RETCODE_PRECONDITION_NOT_MET) {
@@ -228,15 +230,78 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   return true;
 }
 
+bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub, const Subscriber_var& sub)
+{
+  CORBA::String_var type_name = ts->get_type_name();
+  Topic_var topic = dp->create_topic("MyTopic2", type_name,
+                                     TOPIC_QOS_DEFAULT, 0,
+                                     DEFAULT_STATUS_MASK);
+  DataWriter_var dw =
+    pub->create_datawriter(topic, DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+
+  DDS::StringSeq params(1);
+  params.length(1);
+  params[0] = "1485441228338";
+  ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
+    "MyTopic2-Filtered", topic, "ull > %0 AND ull < 1485441228340", params);
+  DataReader_var dr =
+    sub->create_datareader(cft, DATAREADER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+
+  StatusCondition_var dw_sc = dw->get_statuscondition();
+  dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dw_sc);
+  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
+  PublicationMatchedStatus status;
+  while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
+         && status.current_count < 1) {
+    ConditionSeq active;
+    ws->wait(active, infinite);
+  }
+  ws->detach_condition(dw_sc);
+
+  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Message sample = {0, INT64_LITERAL_SUFFIX(1485441228338)};
+  for (; sample.key < 3; ++sample.key, ++sample.ull)
+    mdw->write(sample, HANDLE_NIL);
+
+  if (!waitForSample(dr)) return false;
+  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  size_t count(0);
+  while (true) {
+    MessageSeq data;
+    SampleInfoSeq infoseq;
+    ReturnCode_t ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
+                                 ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    if (ret == RETCODE_NO_DATA) {
+      break;
+    }
+    if (ret != RETCODE_OK) {
+      cout << "ERROR: take() should have returned some data" << endl;
+      return 0;
+    }
+    for (CORBA::ULong i(0); i < data.length(); ++i) {
+      if (infoseq[i].valid_data) {
+        ++count;
+        cout << dr << " received data with ull == " << data[i].ull << endl;
+        if (data[i].ull != INT64_LITERAL_SUFFIX(1485441228339)) {
+          cout << "ERROR: received unexpected value\n";
+          return false;
+        }
+      }
+    }
+  }
+  if (count != 1) {
+    cout << "ERROR: expected 1 message, received " << count << endl;
+    return false;
+  }
+  return true;
+}
 
 int run_test(int argc, ACE_TCHAR *argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-
-  // RTPS has not yet implemented wait_for_acknowledgements
-  TransportConfig_rch using_rtps =
-      TheTransportRegistry->get_config("using_rtps");
-  bool should_wait_for_ack = using_rtps.is_nil();
 
   DomainParticipant_var dp =
     dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
@@ -259,7 +324,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   TransportRegistry::instance()->bind_config("c3", sub2);
 
-  bool passed = run_filtering_test(dp, ts, pub, sub, sub2, should_wait_for_ack);
+  bool passed = run_filtering_test(dp, ts, pub, sub, sub2);
+  passed &= run_unsignedlonglong_test(dp, ts, pub, sub);
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);

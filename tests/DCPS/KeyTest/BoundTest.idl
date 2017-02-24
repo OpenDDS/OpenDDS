@@ -53,35 +53,63 @@ module Bound {
 #pragma DCPS_DATA_TYPE "Bound::SimpleBoundedArrayMessage"
 
   typedef short ShortArray[10];
+  typedef short MultiShortArray[10][10][2];
   typedef unsigned short UnsignedShortArray[10];
+  typedef unsigned short MultiUnsignedShortArray[10][10];
   typedef long LongArray[10];
+  typedef long MultiLongArray[10][10];
   typedef unsigned long UnsignedLongArray[10];
+  typedef unsigned long MultiUnsignedLongArray[10][10];
   typedef long long LongLongArray[10];
+  typedef long long MultiLongLongArray[10][10];
   typedef unsigned long long UnsignedLongLongArray[10];
+  typedef unsigned long long MultiUnsignedLongLongArray[10][10];
   typedef char CharArray[10];
+  typedef char MultiCharArray[10][10];
   typedef wchar WCharArray[10];
+  typedef wchar MultiWCharArray[10][10];
   typedef float FloatArray[10];
+  typedef float MultiFloatArray[10][10];
   typedef double DoubleArray[10];
+  typedef double MultiDoubleArray[10][10];
   typedef long double LongDoubleArray[10];
+  typedef long double MultiLongDoubleArray[10][10];
   typedef boolean BooleanArray[10];
+  typedef boolean MultiBooleanArray[10][10];
   typedef octet OctetArray[10];
+  typedef octet MultiOctetArray[10][10];
   typedef EnumType EnumTypeArray[10];
+  typedef EnumType MultiEnumTypeArray[10][10];
 
   struct SimpleBoundedArrayMessage {
     ShortArray short_array;
+    MultiShortArray multi_short_array;
     UnsignedShortArray unsigned_short_array;
+    MultiUnsignedShortArray multi_unsigned_short_array;
     LongArray long_array;
+    MultiLongArray multi_long_array;
     UnsignedLongArray unsigned_long_array;
+    MultiUnsignedLongArray multi_unsigned_long_array;
     LongLongArray long_long_array;
+    MultiLongLongArray multi_long_long_array;
     UnsignedLongLongArray unsigned_long_long_array;
+    MultiUnsignedLongLongArray multi_unsigned_long_long_array;
     CharArray char_array;
+    MultiCharArray multi_char_array;
     WCharArray wchar_array;
+    MultiWCharArray multi_wchar_array;
     FloatArray float_array;
+    MultiFloatArray multi_float_array;
     DoubleArray double_array;
+    MultiDoubleArray multi_double_array;
     LongDoubleArray long_double_array;
+    MultiLongDoubleArray multi_long_double_array;
     BooleanArray boolean_array;
+    MultiBooleanArray multi_boolean_array;
     OctetArray octet_array;
+    MultiOctetArray multi_octet_array;
     EnumTypeArray enum_array;
+    MultiEnumTypeArray multi_enum_array;
   };
 
   // string array field should cause struct to be unbounded

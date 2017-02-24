@@ -56,6 +56,10 @@ public:
   /// Get release pending flag.
   bool is_release_pending() const;
 
+  void ack_received(ReceivedDataSample& sample);
+  void request_ack_received(ReceivedDataSample& sample);
+  void drop_pending_request_acks();
+
 protected:
 
   /// Called when the DataLink is self-releasing because all of its
@@ -64,7 +68,7 @@ protected:
   virtual void stop_i();
 
 private:
-
+  bool handle_send_request_ack(TransportQueueElement* element);
   void send_graceful_disconnect_message();
 
   ACE_INET_Addr           remote_address_;
@@ -72,6 +76,9 @@ private:
   TcpTransport_rch  transport_;
   bool graceful_disconnect_sent_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
+  typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;
+  ACE_SYNCH_MUTEX pending_request_acks_lock_;
+  PendingRequestAcks pending_request_acks_;
 };
 
 } // namespace DCPS

@@ -1,8 +1,6 @@
-// -*- MPC -*-
-
 // Base project for internal OpenDDS libraries.
 // External: Use base dcps to depend on the OpenDDS_Dcps shared library
-// Internal: Use this base dcpslib to build depend on the library and 
+// Internal: Use this base dcpslib to build depend on the library and
 //           place libraries in correct destination
 project : dcps {
   libout      = $(DDS_ROOT)/lib

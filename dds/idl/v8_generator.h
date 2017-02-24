@@ -13,7 +13,7 @@
 class v8_generator : public dds_generator {
 
 public:
-  v8_generator() : first_(true) {}
+  v8_generator() {}
 
 private:
   bool gen_enum(AST_Enum*, UTL_ScopedName* name,
@@ -23,15 +23,14 @@ private:
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
 
-  bool gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* type, const char* repoid);
+  bool gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* type,
+                   const char* repoid);
 
   bool gen_union(AST_Union*, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
 
-  void fwd_decl();
-
-  bool first_;
+  void gen_includes();
 };
 
 #endif

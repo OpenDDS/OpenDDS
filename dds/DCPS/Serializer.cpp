@@ -144,6 +144,9 @@ Serializer::read_string(ACE_CDR::Char*& dest,
       str_free(dest);
       dest = 0;
     }
+
+  } else {
+    good_bit_ = false;
   }
 }
 
@@ -208,6 +211,9 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
       str_free(dest);
       dest = 0;
     }
+
+  } else {
+    good_bit_ = false;
   }
 }
 

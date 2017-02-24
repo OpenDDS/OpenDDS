@@ -63,7 +63,7 @@ public:
    * This method is called by the DDS system code.
    * This method will try to call the Application Level code.
    *
-   * @param diff - FileDiff recevied by the DDS subscriber.
+   * @param diff - FileDiff received by the DDS subscriber.
    */
   void receive_diff(const DistributedContent::FileDiff& diff);
   /**

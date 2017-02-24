@@ -476,9 +476,12 @@ namespace {
       insertion.addArg("arr", "const " + cxx + "_forany&");
       insertion.endArgs();
       if (elem_cls & CL_PRIMITIVE) {
+        std::string suffix;
+        for (unsigned int i = 1; i < arr->n_dims(); ++i)
+          suffix += "[0]";
         be_global->impl_ <<
           "  return strm.write_" << getSerializerName(elem)
-          << "_array(arr.in(), " << n_elems << ");\n";
+          << "_array(arr.in()" << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         {
           string indent = "  ";
@@ -504,9 +507,12 @@ namespace {
       extraction.addArg("arr", cxx + "_forany&");
       extraction.endArgs();
       if (elem_cls & CL_PRIMITIVE) {
+        std::string suffix;
+        for (unsigned int i = 1; i < arr->n_dims(); ++i)
+          suffix += "[0]";
         be_global->impl_ <<
           "  return strm.read_" << getSerializerName(elem)
-          << "_array(arr.out(), " << n_elems << ");\n";
+          << "_array(arr.out()" << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         {
           string indent = "  ";
