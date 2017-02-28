@@ -34,6 +34,16 @@ namespace {
   template <typename T>
   bool mb_copy(T& dest, const ACE_Message_Block& mb, size_t offset, bool swap)
   {
+    if (mb.length() >= sizeof(T)) {
+      // Avoid creating ACE_Message_Block from the heap if we just need one.
+      ACE_Message_Block temp(mb.data_block (), ACE_Message_Block::DONT_DELETE);
+      temp.rd_ptr(mb.rd_ptr()+offset);
+      temp.wr_ptr(mb.wr_ptr());
+      OpenDDS::DCPS::Serializer ser(&temp, swap);
+      ser.buffer_read(reinterpret_cast<char*>(&dest), sizeof(T), swap);
+      return true;
+    }
+
     ACE_Message_Block* temp = mb.duplicate();
     if (!temp) { // couldn't allocate
       return false;
