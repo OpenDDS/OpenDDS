@@ -14,6 +14,7 @@ use PerlDDS::Run_Test;
 
 PerlDDS::add_lib_path('../FooType');
 
+my $debug_level = 0;
 my $pub_opts = "";
 my $sub_opts = "";
 # $pub_opts .= "-DCPSChunks 1 ";
@@ -42,6 +43,12 @@ if ($arg eq 'low') {
 } else { # default (i.e. lazy)
   $pub_opts .= "-t 1 -s 1024";
   $sub_opts .= "-t 1 -n 1024";
+}
+
+if ($debug_level) {
+  unlink 'publisher.log' , 'subscriber.log';
+  $pub_opts .= " -DCPSDebugLevel $debug_level -DCPSTransportDebugLevel $debug_level -ORBLogFile publisher.log";
+  $sub_opts .= " -DCPSDebugLevel $debug_level -DCPSTransportDebugLevel $debug_level -ORBLogFile subscriber.log";
 }
 
 my $ini_file = "thrasher.ini";
