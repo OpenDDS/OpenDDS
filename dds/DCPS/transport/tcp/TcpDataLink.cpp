@@ -13,6 +13,7 @@
 #include "dds/DCPS/transport/framework/TransportControlElement.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/DataSampleHeader.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "ace/Log_Msg.h"
 
 #if !defined (__ACE_INLINE__)
