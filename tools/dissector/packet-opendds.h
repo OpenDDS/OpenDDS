@@ -82,11 +82,11 @@ namespace OpenDDS
 
 
     extern "C" {
-      dissector_Export guint get_pdu_len (packet_info *, tvbuff_t *, int);
+      dissector_Export guint get_pdu_len (packet_info *, tvbuff_t *, int WS_GET_PDU_LEN_EXTRA_PARAM);
       dissector_Export WS_DISSECTOR_T_RETURN_TYPE dissect_common (
                              tvbuff_t*, packet_info*,
                              proto_tree* WS_DISSECTOR_T_EXTRA_PARAM);
-      dissector_Export void dissect_dds (tvbuff_t*, packet_info*, proto_tree*);
+      dissector_Export WS_DISSECTOR_RETURN_TYPE dissect_dds (tvbuff_t*, packet_info*, proto_tree* WS_DISSECTOR_EXTRA_PARAM);
       dissector_Export gboolean dissect_dds_heur (tvbuff_t*, packet_info*,
                                                   proto_tree* WS_HEUR_DISSECTOR_T_EXTRA_PARAM);
     }

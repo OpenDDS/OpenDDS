@@ -34,7 +34,7 @@ namespace OpenDDS
     guint8 *
     Wireshark_Bundle::get_remainder ()
     {
-      gint remainder = tvb_length(tvb) - offset;
+      gint remainder = ws_tvb_length(tvb) - offset;
       return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
     }
 

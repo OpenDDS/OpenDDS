@@ -542,7 +542,7 @@ namespace OpenDDS
 
         this->dissect_transport_header (trans_tree, trans, offset);
 
-        while (offset < gint(tvb_length(tvb_)))
+        while (offset < gint(ws_tvb_length(tvb_)))
           {
             DataSampleHeader sample =
               demarshal_data<DataSampleHeader>(tvb_, offset);
@@ -609,7 +609,7 @@ namespace OpenDDS
               ::conversation_set_dissector(conv, dcps_tcp_handle);
             }
 
-          dissect_dds (tvb_, pinfo_, tree_);
+          dissect_dds (tvb_, pinfo_, tree_ WS_DISSECTOR_EXTRA_ARG);
         }
       else
         {
@@ -622,7 +622,7 @@ namespace OpenDDS
     // function passed to tcp pdu parser for computing packet length
     extern "C"
     guint
-    get_pdu_len(packet_info *, tvbuff_t *tvb, int offset)
+    get_pdu_len(packet_info *, tvbuff_t *tvb, int offset WS_GET_PDU_LEN_EXTRA_PARAM)
     {
       if ( tvb_memeql(tvb, 0, reinterpret_cast<const guint8*>(DCPS_MAGIC) ,4) != 0)
         return 0;
@@ -647,8 +647,8 @@ namespace OpenDDS
     }
 
     extern "C"
-    void
-    dissect_dds (tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+    WS_DISSECTOR_RETURN_TYPE
+    dissect_dds (tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree WS_DISSECTOR_EXTRA_PARAM)
     {
       // this can filter between DCPS and RTPS as needed.
       tcp_dissect_pdus(tvb,
@@ -659,6 +659,7 @@ namespace OpenDDS
                        get_pdu_len,
                        dissect_common
                        WS_TCP_DISSECT_PDUS_EXTRA_ARG);
+      WS_DISSECTOR_RETURN_VALUE
     }
 
     extern "C"
@@ -859,10 +860,12 @@ namespace OpenDDS
     {
       dcps_tcp_handle = create_dissector_handle(dissect_dds, proto_opendds);
 
-      heur_dissector_add("tcp", dissect_dds_heur, proto_opendds);
-      heur_dissector_add("udp", dissect_dds_heur, proto_opendds);
+      heur_dissector_add("tcp", dissect_dds_heur, WS_HEUR_DISSECTOR_EXTRA_ARGS1(TCP, tcp)
+                         proto_opendds WS_HEUR_DISSECTOR_EXTRA_ARGS2);
+      heur_dissector_add("udp", dissect_dds_heur, WS_HEUR_DISSECTOR_EXTRA_ARGS1(UDP, udp)
+                         proto_opendds WS_HEUR_DISSECTOR_EXTRA_ARGS2);
 
-      dissector_add_handle("tcp.port", dcps_tcp_handle);  /* for "decode-as" */
+      ws_dissector_add_handle("tcp.port", dcps_tcp_handle);  /* for "decode-as" */
     }
 
   }
