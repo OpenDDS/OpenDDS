@@ -24,8 +24,12 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 /**
  * Guard the allocations for the underlying memory management of the
  * receive processing with the following:
+ *
+ * Notice that even we have only one thread for receiving per transport, the underly message blocks
+ * would interact with the threads from EndHistoricSamplesMissedSweeper which are different from the
+ * receiving threads. Therefore, we cannot use ACE_SYNCH_NULL_MUTEX here.
  */
-#define RECEIVE_SYNCH ACE_SYNCH_NULL_MUTEX
+#define RECEIVE_SYNCH ACE_SYNCH_MUTEX
 
 /// Macro to get the individual configuration value
 ///  from ACE_Configuration_Heap and cast to the specific

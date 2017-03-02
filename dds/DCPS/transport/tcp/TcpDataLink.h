@@ -56,8 +56,8 @@ public:
   /// Get release pending flag.
   bool is_release_pending() const;
 
-  void ack_received(ReceivedDataSample& sample);
-  void request_ack_received(ReceivedDataSample& sample);
+  void ack_received(const ReceivedDataSample& sample);
+  void request_ack_received(const ReceivedDataSample& sample);
   void drop_pending_request_acks();
 
 protected:

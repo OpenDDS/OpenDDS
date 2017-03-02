@@ -13,6 +13,7 @@
 #include "dds/DCPS/transport/framework/TransportControlElement.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/DataSampleHeader.h"
+#include "dds/DCPS/GuidConverter.h"
 #include "ace/Log_Msg.h"
 
 #if !defined (__ACE_INLINE__)
@@ -347,8 +348,9 @@ bool
 OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* element)
 {
   if (Transport_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::handle_send_request_ack() sequence number %q\n",
-      element->sequence().getValue()));
+    const GuidConverter converter(element->publication_id());
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::handle_send_request_ack() sequence number %q, publication_id=%s\n"),
+      element->sequence().getValue(), OPENDDS_STRING(converter).c_str()));
   }
 
   ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
@@ -358,13 +360,14 @@ OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* eleme
 
 
 void
-OpenDDS::DCPS::TcpDataLink::ack_received(ReceivedDataSample& sample)
+OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 {
   SequenceNumber sequence = sample.header_.sequence_;
 
   if (Transport_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::ack_received() received sequence number %q\n",
-      sequence.getValue()));
+    const GuidConverter converter(sample.header_.publication_id_);
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received sequence number %q, publiction_id=%s\n"),
+      sequence.getValue(), OPENDDS_STRING(converter).c_str()));
   }
 
   TransportQueueElement* elem=0;
@@ -373,7 +376,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(ReceivedDataSample& sample)
     ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
     PendingRequestAcks::iterator it;
     for (it = pending_request_acks_.begin(); it != pending_request_acks_.end(); ++it){
-      if ((*it)->sequence() == sequence) {
+      if ((*it)->sequence() == sequence && (*it)->publication_id() == sample.header_.publication_id_) {
         elem = *it;
         pending_request_acks_.erase(it);
         break;
@@ -382,16 +385,20 @@ OpenDDS::DCPS::TcpDataLink::ack_received(ReceivedDataSample& sample)
   }
 
   if (elem) {
+    if (Transport_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() found matching element %@\n"),
+        elem));
+    }
     static_cast<TcpSendStrategy*>(this->send_strategy_.in())->add_delayed_notification_on_ack_received(elem);
   }
   else {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::ack_received() received unknown sequence number %q\n",
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received unknown sequence number %q\n"),
       sequence.getValue()));
   }
 }
 
 void
-OpenDDS::DCPS::TcpDataLink::request_ack_received(ReceivedDataSample& sample)
+OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sample)
 {
   DataSampleHeader header_data;
   // The message_id_ is the most important value for the DataSampleHeader.
@@ -403,6 +410,8 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(ReceivedDataSample& sample)
   header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
   header_data.message_length_ = 0;
   header_data.sequence_ = sample.header_.sequence_;
+  header_data.publication_id_ = sample.header_.publication_id_;
+  header_data.publisher_id_ = sample.header_.publisher_id_;
 
   ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size();
