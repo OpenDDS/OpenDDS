@@ -1,5 +1,5 @@
 Q: Does OpenDDS support broadcast or multicast? If so, how do you set it up?
 
 A: Reliable multicast has been available in OpenDDS since the
- 0.12 release (unreliable multicast since 0.11 release). A broadcast based transport is currently not available. Please see the section on "Transports" in the DDS Developer's Guide (<a href="http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf">http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf</a>) for how to setup using the multicast transport. Or you can look the $DDS_ROOT/tests/DDS/Messenger. The "run_test.pl multicast" runs the test with multicast transport configuration. Also see the RTPS (interoperability) support which is capable of multicast, but can also work with unicast.
+ 0.12 release (unreliable multicast since 0.11 release). A broadcast based transport is currently not available. Please see the section on "Transports" in the DDS Developer's Guide (<a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf</a>) for how to setup using the multicast transport. Or you can look the $DDS_ROOT/tests/DDS/Messenger. The "run_test.pl multicast" runs the test with multicast transport configuration. Also see the RTPS (interoperability) support which is capable of multicast, but can also work with unicast.
 

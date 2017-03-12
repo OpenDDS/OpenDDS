@@ -4,3 +4,4 @@ _site
 .*.swp
 .idea/
 *.iml
+vendor

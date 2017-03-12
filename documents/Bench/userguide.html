@@ -609,7 +609,7 @@ The data reduction steps performed for throughput testing include the following:
 <div title="Data Visualization" modifier="MikeMartinez" created="201008121704" modified="201008122157" tags="publish" changecount="16">
 <pre>Once performance tests have been executed and the data reduced, the results can be visualized by plotting the data.  Several plotting scripts are available for the reduced data.  These are based on using the GNUPlot tool and create various different views of the data.
 
-A summary of the available plots and how to interpret them is available as a Middleware News Brief: [[Interpreting OpenDDS Performance Testing Results|http://mnb.ociweb.com/mnb/MiddlewareNewsBrief-201003.html]]
+A summary of the available plots and how to interpret them is available as a Middleware News Brief: [[Interpreting OpenDDS Performance Testing Results|http://mnb.objectcomputing.com/mnb/MiddlewareNewsBrief-201003.html]]
 
 A plotting script for bash shells is available that performs plotting of the reduced data for the pre-configured latency and throughput tests:
 {{indent{
@@ -958,7 +958,7 @@ file (CSV), with the following fields:&lt;/p&gt;
 <div title="FAQ" modifier="MikeMartinez" created="201003022001" modified="201008122246" tags="publish faq" changecount="7">
 <pre>#''What kind of document is this?''&lt;br&gt;{{indent{This is a TiddlyWiki document.}}}
 #''What is the latency data output file format?''&lt;br&gt;{{indent{The output files generated when gathering latency data is: [[latency file format|LatencyDataFileFormat]].}}}
-#''What are all these charts?''&lt;br&gt;{{indent{They are described in a a Middleware News Brief: [[Interpreting OpenDDS Performance Testing Results|http://mnb.ociweb.com/mnb/MiddlewareNewsBrief-201003.html]].}}}
+#''What are all these charts?''&lt;br&gt;{{indent{They are described in a a Middleware News Brief: [[Interpreting OpenDDS Performance Testing Results|http://mnb.objectcomputing.com/mnb/MiddlewareNewsBrief-201003.html]].}}}
 #''What are all these scripts for?''&lt;br&gt;{{indent{The script usage is spread throughout this document; with a [[synopsis|Script Summary]] included.}}}</pre>
 </div>
 <div title="GNUPlot" modifier="MikeMartinez" created="201003082221" modified="201008111450" changecount="5">
@@ -1255,7 +1255,7 @@ This script is intended to be called with the following parameters:
 $0: datafilename
 $1: statsfilename
 $2: outputfilename
-$3: multiplot title 
+$3: multiplot title
 }}}
 
 The output of this script will be a single output file in PNG format named by the //'$2'// parameter that contains a quad plot of the data read from the input file named by the //'$0'// parameter.  The statistics information located in the file named by the //'$1'// parameter is used as a labels on the charts.  The //'$3'// parameter is used as a label for the whole multiplot chart.
@@ -1635,7 +1635,7 @@ from the input file.&lt;/p&gt;
 <div title="OpenDDS" modifier="OpenDDS" created="200911302157" tags="OpenDDS" changecount="1">
 <pre>OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). OpenDDS also supports Java bindings through JNI and can be included with JBoss (ESB) frameworks by means of a JMS wrapper. OpenDDS leverages the ADAPTIVE Communication Environment (ACE) to provide a cross platform environment.
 
-OpenDDS is supported by [[Object Computing, Inc.|http://www.ociweb.com/]]</pre>
+OpenDDS is supported by [[Object Computing, Inc.|http://www.objectcomputing.com/]]</pre>
 </div>
 <div title="OpenDDS-Bench" modifier="MikeMartinez" created="201002182000" modified="201008121406" tags="publish" changecount="22">
 <pre>OpenDDS-Bench is a testing framework for specifying and executing performance testing of OpenDDS.  It supports testing on one or more hosts; each host with one or more processes.  Any test process may contain any number of DDS service publications or subscriptions.
@@ -2026,7 +2026,7 @@ config.shadowTiddlers.PublishIndexTemplate = '&lt;div class=\'viewer\' id=\'cont
 config.macros.doPublish.handler = function(place)
  {
  if (!readOnly)
- createTiddlyButton(place, this.label, this.prompt, 
+ createTiddlyButton(place, this.label, this.prompt,
  function() {
   doPublish();
   return false;
@@ -2039,7 +2039,7 @@ config.macros.publishTiddler = {
  prompt : 'Publish this tiddler as an HTML file.',
  handler : function(place,macroName,params,wikifier,paramString,tiddler)
  {
-  var btn = createTiddlyButton(place, this.label, this.prompt, 
+  var btn = createTiddlyButton(place, this.label, this.prompt,
   function(e) {
    if(!e) var e = window.event;
    publishTiddler(this.getAttribute('tiddler'))
@@ -2051,25 +2051,25 @@ config.macros.publishTiddler = {
 config.commands.publishTiddler = {handler : function(event,src,title) {publishTiddler(title);},text: &quot;publish&quot;, tooltip: &quot;Publish this tiddler as HTML&quot;};
 function publishTiddler(title) {
  //debugger
- 
+
  var PublishFolder = getWikiPath('publish');
  var place = document.getElementById(story.container)
  var HTMLTemplateHead = store.getTiddlerText(&quot;PublishTemplateHead&quot;);
  var HTMLTemplateBody = store.getTiddlerText(&quot;PublishTemplateBodySingle&quot;) || store.getTiddlerText(&quot;PublishTemplateBody&quot;);
  HTMLTemplateBody = renderTemplate(HTMLTemplateBody)
  HTMLTemplateBody = wiki2Web(HTMLTemplateBody);
- 
+
  var tiddler = store.getTiddler(title);
  var tiddlerText = store.getValue(tiddler, 'text');
  var tiddlerHTML = wikifyStatic(tiddlerText);
  var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
  HTML = HTML.format([
-  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
-  tiddler.title.htmlEncode(), 
-  wiki2Web(tiddlerHTML), 
-  tiddler.tags.join(&quot;, &quot;), 
-  tiddler.modifier, 
-  tiddler.modified.toLocaleString(), 
+  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(),
+  tiddler.title.htmlEncode(),
+  wiki2Web(tiddlerHTML),
+  tiddler.tags.join(&quot;, &quot;),
+  tiddler.modifier,
+  tiddler.modified.toLocaleString(),
   tiddler.created.toLocaleString(),
   tiddlerText
  ]);
@@ -2106,12 +2106,12 @@ function doPublish() {
    var tiddlerHTML = wikifyStatic(tiddlerText);
    var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
    HTML = HTML.format([
-   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
-   tiddler.title.htmlEncode(), 
-   wiki2Web(tiddlerHTML), 
-   tiddler.tags.join(&quot;, &quot;), 
-   tiddler.modifier, 
-   tiddler.modified.toLocaleString(), 
+   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(),
+   tiddler.title.htmlEncode(),
+   wiki2Web(tiddlerHTML),
+   tiddler.tags.join(&quot;, &quot;),
+   tiddler.modifier,
+   tiddler.modified.toLocaleString(),
    tiddler.created.toLocaleString(),
   tiddlerText
    ]);
@@ -2153,11 +2153,11 @@ function wiki2Web(wikiHTML) {
  if (result) {
   for (i = 0; i &lt; result.length; i++) {
    var className = result[i].match(/ class=&quot;(.*?)&quot;/i) ? result[i].match(/ class=&quot;(.*?)&quot;/i)[1] : &quot;&quot;;
-   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1]; 
-   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;; 
-   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1]; 
-   if (!className.match(/tiddlyLinkNonExisting/i)) 
-   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;); 
+   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1];
+   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;;
+   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1];
+   if (!className.match(/tiddlyLinkNonExisting/i))
+   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;);
    else
    wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; title=\&quot;Page does not exist\&quot; href=\&quot;#\&quot;&gt;&quot; + tiddlerName + &quot;&lt;/a&gt;&quot;);
 
@@ -2267,7 +2267,7 @@ The following steps need to be performed on each host for each test.  The ''&lt;
 &lt;&lt;&lt;
  shell&gt; mkdir -p &lt;testdir&gt;
  shell&gt; cd &lt;testdir&gt;
- shell&gt; $BASEDIR/bin/run_test -P -h &lt;host&gt;:&lt;port&gt; -i &lt;transportconfig&gt; -s &lt;testconfig&gt; 
+ shell&gt; $BASEDIR/bin/run_test -P -h &lt;host&gt;:&lt;port&gt; -i &lt;transportconfig&gt; -s &lt;testconfig&gt;
 &lt;&lt;&lt;
 Note that it is important to start the tests within 60 seconds of each other.  This is due to the script timeout value, which is set to 60 seconds after the specified duration.  The test execution does not start until the entire test is connected, so if any host is not started within the 60 seconds interval processes that were started first will time out before the test is complete.
 }}}</pre>
@@ -2786,7 +2786,7 @@ filenames will appear as: &lt;code&gt;system-&amp;lt;host&amp;gt;-&amp;lt;time&a
 <pre>OpenDDS-Bench</pre>
 </div>
 <div title="SiteUrl" modifier="OpenDDS" created="200911302027" changecount="1">
-<pre>http://www.ociweb.com/</pre>
+<pre>http://www.objectcomputing.com/</pre>
 </div>
 <div title="StyleSheet" modifier="MikeMartinez" created="200911302014" modified="201003192115" changecount="82">
 <pre>a:hover {
@@ -3112,7 +3112,7 @@ This process creates the DDS Participants, Topics, Publications, and Subscriptio
 <div title="Test Specification" modifier="MikeMartinez" created="201003031725" modified="201003032303" tags="publish" changecount="32">
 <pre>Distributed tests executed by the framework will consist of many processes executing on many hosts.  There will be one process running the [[repository|DCPSInfoRepo]] for the OpenDDS service.  The transports used by the publications and subscriptions comprising the tests will be entirely specified by OpenDDS configuration files.  The DDS Participants, Topics, Publications, and Subscriptions are specified in a series of test specification files.  Each process will have a specification file defining its structure and behavior.  A single specification file can be used for more than one test process, as long as each process is identical during the testing.
 
-The specification of transports and other service configuration aspects is described in the OpenDDS [[Developers Guide|http://downloads.ociweb.com/OpenDDS/OpenDDS-latest.pdf]].  The test structures and behavior are described below.
+The specification of transports and other service configuration aspects is described in the OpenDDS [[Developers Guide|http://downloads.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf]].  The test structures and behavior are described below.
 
 In general, each DDS Entity type specified, Participant, Topic, Publication, and Subscription will have Quality of Service policy values as well as test management properties specified.  The test specification files are in the format of //ini// files, where each section is delimited using a section header within square brackets.  Within each section are a series of ''Key'' / ''Value'' pair assignments that are used to specify parameter values for the Entity.
 
@@ -5495,8 +5495,8 @@ config.macros.tags.handler = function(place,macroName,params,wikifier,paramStrin
 	var prompt = tiddler.tags.length == 0 ? lingo.labelNoTags : lingo.labelTags;
 	createTiddlyElement(ul,"li",null,"listTitle",prompt.format([tiddler.title]));
 	for(var t=0; t<tiddler.tags.length; t++) {
-		var tag = store.getTiddler(tiddler.tags[t]); 
-		if(!tag || !tag.tags.contains("excludeLists")) { 
+		var tag = store.getTiddler(tiddler.tags[t]);
+		if(!tag || !tag.tags.contains("excludeLists")) {
 			createTagButton(createTiddlyElement(ul,"li"),tiddler.tags[t],tiddler.title);
 			if(t<tiddler.tags.length-1)
 				createTiddlyText(ul,sep);

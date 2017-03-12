@@ -1,2 +1,2 @@
 File screenshot_main_diagram.png is a copy of
-svn+ssh://svn.ociweb.com/education/training/tracks/DistributedComputing/OpenDDSModelingSDK/images/screenshot_main_diagram.png
+svn+ssh://svn.objectcomputing.com/education/training/tracks/DistributedComputing/OpenDDSModelingSDK/images/screenshot_main_diagram.png

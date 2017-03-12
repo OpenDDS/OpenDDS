@@ -1,9 +1,9 @@
 # Site settings
 title: OpenDDS
-email: info@ociweb.com
+email: mesnierp@objectcomputing.com
 description: OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). OpenDDS also supports Java bindings through JNI.
 twitter_username: ObjectComputing
-github_username:  objectcomputing
+github_username:  pmesnier
 
 theme: minima
 

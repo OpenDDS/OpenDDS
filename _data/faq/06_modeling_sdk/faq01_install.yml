@@ -1,6 +1,6 @@
 Q: How do I obtain the OpenDDS Modeling SDK?
 
 A: >
- Please refer to the <a href="http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf">OpenDDS Developer's Guide</a> for complete installation instructions (Chapter: OpenDDS Modeling SDK, Section: Installation and Getting Started).
+ Please refer to the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">OpenDDS Developer's Guide</a> for complete installation instructions (Chapter: OpenDDS Modeling SDK, Section: Installation and Getting Started).
  <p/>
  Make sure that Eclipse's list of Available Software Sites contains an enabled site for the Eclipse release itself.  Version 3.5 uses URL: http://download.eclipse.org/releases/galileo.  If not, you need to add the correct update site for your version of Eclipse.

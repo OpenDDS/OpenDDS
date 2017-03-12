@@ -1,3 +1,3 @@
 File screenshot_code_gen_build_paths_tab.png is a copy of
-svn+ssh://svn.ociweb.com/education/training/tracks/DistributedComputing/OpenDDSModelingSDK/images/screenshot_code_gen_build_paths_tab.png
+svn+ssh://svn.objectcomputing.com/education/training/tracks/DistributedComputing/OpenDDSModelingSDK/images/screenshot_code_gen_build_paths_tab.png
 
