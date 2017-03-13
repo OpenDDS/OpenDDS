@@ -1164,8 +1164,7 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
     // For the non-durable reader, the first received HB or DATA establishes
     // a baseline of the lowest sequence number we'd ever need to NACK.
     if (recvd.empty() || recvd.low() >= last) {
-      recvd.insert(SequenceRange(zero,
-                                 (last > starting) ? last.previous() : zero));
+      recvd.insert(SequenceRange(zero, last));
     } else {
       recvd.insert(SequenceRange(zero, recvd.low()));
     }
