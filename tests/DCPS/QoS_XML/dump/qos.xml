@@ -113,8 +113,8 @@
               <kind>BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS</kind>
           </destination_order>
           <history>
-               <kind>KEEP_LAST_HISTORY_QOS</kind>
-               <depth>1</depth>
+               <kind>KEEP_ALL_HISTORY_QOS</kind>
+               <depth>5</depth>
           </history>
           <resource_limits>
                <max_samples>LENGTH_UNLIMITED</max_samples>
