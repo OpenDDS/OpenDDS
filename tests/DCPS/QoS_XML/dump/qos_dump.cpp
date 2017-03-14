@@ -4,6 +4,7 @@
 
 int ACE_TMAIN (int, ACE_TCHAR *[])
 {
+  int retval = 0;
   try
     {
       OpenDDS::DCPS::QOS_XML_Loader xml_loader;
@@ -19,8 +20,21 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
-                "get_datawriter_qos return an error. Retcode <%d>",
+                "get_datawriter_qos return an error. Retcode <%d>\n",
                 retcode_qos));
+              ++retval;
+            }
+          if (dw_qos.history.kind != ::DDS::KEEP_ALL_HISTORY_QOS)
+            {
+              ACE_ERROR ((LM_ERROR, "MAIN - "
+                "get_datawriter_qos return an invalid history kind.\n"));
+              ++retval;
+            }
+          if (dw_qos.history.depth != 5)
+            {
+              ACE_ERROR ((LM_ERROR, "MAIN - "
+                "get_datawriter_qos return an invalid history depth.\n"));
+              ++retval;
             }
 
           ::DDS::DataReaderQos dr_qos;
@@ -31,8 +45,9 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
-                "get_datareader_qos return an error. Retcode <%d>",
+                "get_datareader_qos return an error. Retcode <%d>\n",
                 retcode_qos));
+              ++retval;
             }
 
           ::DDS::TopicQos tp_qos;
@@ -43,8 +58,9 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
-                "get_topic_qos return an error. Retcode <%d>",
+                "get_topic_qos return an error. Retcode <%d>\n",
                 retcode_qos));
+              ++retval;
             }
 
           ::DDS::PublisherQos pub_qos;
@@ -54,8 +70,9 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
-                "get_publisher_qos return an error. Retcode <%d>",
+                "get_publisher_qos return an error. Retcode <%d>\n",
                 retcode_qos));
+              ++retval;
             }
 
           ::DDS::SubscriberQos sub_qos;
@@ -65,8 +82,9 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
-                "get_subscriber_qos return an error. Retcode <%d>",
+                "get_subscriber_qos return an error. Retcode <%d>\n",
                 retcode_qos));
+              ++retval;
             }
 
           ::DDS::DomainParticipantQos dp_qos;
@@ -76,13 +94,17 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           if (retcode_qos != DDS::RETCODE_OK)
             {
               ACE_ERROR ((LM_ERROR, "MAIN - "
-                "get_participant_qos return an error. Retcode <%d>",
+                "get_participant_qos return an error. Retcode <%d>\n",
                 retcode_qos));
+              ++retval;
             }
         }
       else
-        ACE_ERROR ((LM_ERROR, "MAIN - Init return an error. Retcode <%d>",
-          retcode));
+        {
+          ACE_ERROR ((LM_ERROR, "MAIN - Init return an error. Retcode <%d>\n",
+            retcode));
+          ++retval;
+        }
     }
   catch (const CORBA::Exception& ex)
     {
@@ -95,5 +117,5 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
       return 1;
     }
 
-  return 0;
+  return retval;
 }
