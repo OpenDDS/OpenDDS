@@ -172,6 +172,36 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
                      false);
   }
 
+  if (this->config_->send_buffer_size_ > 0) {
+    int snd_size = this->config_->send_buffer_size_;
+    if (this->unicast_socket_.set_option(SOL_SOCKET,
+                                SO_SNDBUF,
+                                (void *) &snd_size,
+                                sizeof(snd_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the send buffer size to %d errno %m\n"),
+                        snd_size),
+                       false);
+    }
+  }
+
+  if (this->config_->rcv_buffer_size_ > 0) {
+    int rcv_size = this->config_->rcv_buffer_size_;
+    if (this->unicast_socket_.set_option(SOL_SOCKET,
+                                SO_RCVBUF,
+                                (void *) &rcv_size,
+                                sizeof(int)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m \n"),
+                        rcv_size),
+                       false);
+    }
+  }
+
   send_strategy_->send_buffer(&multi_buff_);
 
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),

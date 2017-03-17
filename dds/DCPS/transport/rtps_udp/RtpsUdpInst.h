@@ -27,6 +27,8 @@ typedef RcHandle<TransportReceiveListener> TransportReceiveListener_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
+  ACE_INT32 send_buffer_size_;
+  ACE_INT32 rcv_buffer_size_;
 
   bool use_multicast_;
   unsigned char ttl_;
