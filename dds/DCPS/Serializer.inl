@@ -732,6 +732,7 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
 #else
   const ACE_UINT16 as_utf16 = static_cast<ACE_UINT16>(x.val_);
   if (as_utf16 != x.val_) { // not currently handling surrogates
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) operator<<(Serializer&, ACE_OutputCDR::from_wchar): failure to convert UTF-32 to UTF-16.")));
     s.good_bit_ = false;
   } else {
     s.buffer_write(reinterpret_cast<const char*>(&as_utf16), Serializer::WCHAR_SIZE, Serializer::SWAP_BE);
