@@ -1,6 +1,6 @@
 .site-header {
     font-weight: bold;
-    background-color: hsl(205, 100%, 32%);
+    background-color: $brand-color;
     position: relative;
     a { color: white; text-decoration: none; }
 }
@@ -82,7 +82,7 @@
             padding: 3px 20px;
             position: relative;
             white-space: nowrap;
-            a { color: hsl(205, 100%, 32%); }
+            a { color: $brand-color; }
         }
         ul {
             position: absolute;
@@ -105,16 +105,16 @@
             > li:hover {
                 > a {
                     background-color: white;
-                    border-top-color: hsl(39, 63%, 56%);
-                    color: hsl(205, 100%, 32%);
+                    border-top-color: $underseg-color;
+                    color: $underseg-color;
                 }
-                > a:hover { color: hsl(37, 54%, 43%); }
+                > a:hover { color: $underseg-color; }
                 .sub-menu { display: block; }
             }
         }
 
         .sub-menu {
-            li:hover > a { color: rgb(169, 123, 50); }
+            li:hover > a { color: $brand-color2; }
             .mobile { display: none; }
         }
     }
@@ -140,17 +140,17 @@
             > svg {
                 width: 18px;
                 height: 15px;
-                path { fill: hsl(205, 100%, 32%); }
+                path { fill: $brand-color; }
             }
         }
 
-        #drop:checked ~ label path { fill: rgb(169, 123, 50); }
+        #drop:checked ~ label path { fill: $brand-color2; }
 
         .toggle ~ a { display: none; }
 
         .toggle {
             display: block;
-            color: hsl(205, 100%, 32%);
+            color: $brand-color;
         }
 
         [id^="drop"]:checked {
@@ -159,7 +159,7 @@
                 visibility: visible;
                 opacity: 1;
             }
-            ~ label { color: rgb(169, 123, 50); }
+            ~ label { color: $brand-color2; }
         }
 
         .trigger {
@@ -175,7 +175,7 @@
                 padding: 5px 10px;
                 margin: 0;
                 a {
-                    color: hsl(205, 100%, 32%);
+                    color: $brand-color;
                     border-top: 0;
                     padding: 0;
                 }
@@ -209,7 +209,7 @@
 .faq_q {
     margin: 10px 0;
     font-weight: bold;
-    color: hsl(205, 100%, 32%)
+    color: $brand-color;
 }
 
 .faq_a {
