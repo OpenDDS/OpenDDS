@@ -105,10 +105,10 @@
             > li:hover {
                 > a {
                     background-color: white;
-                    border-top-color: $underseg-color;
-                    color: $underseg-color;
+                    border-top-color: $brand-color2;
+                    color: $brand-color;
                 }
-                > a:hover { color: $underseg-color; }
+                > a:hover { color: $brand-color; }
                 .sub-menu { display: block; }
             }
         }
