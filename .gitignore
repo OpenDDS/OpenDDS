@@ -2,3 +2,6 @@ _site
 .sass-cache
 *~
 .*.swp
+.idea/
+*.iml
+vendor

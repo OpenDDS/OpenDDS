@@ -8,7 +8,7 @@ order: 97
 <div id="contenttext">
   <div class="bodytext" align="justify">
     <span class="headertext">Latest Release</span>
-    <p>The latest release is available at the OpenDDS download site: <a href="http://download.ociweb.com/OpenDDS/">http://download.ociweb.com/OpenDDS/</a> and from GitHub: <ul>
+    <p>The latest release is available at the OpenDDS download site: <a href="http://download.objectcomputing.com/OpenDDS/">http://download.objectcomputing.com/OpenDDS/</a> and from GitHub: <ul>
 {% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
 {% assign latest_rel = sorted_rel | first %}
 {% assign assets = latest_rel.assets | sort: "name" | reverse %}
@@ -23,7 +23,7 @@ order: 97
 {% endfor %}
 </ul></p>
     <span class="headertext">Previous Releases</span>
-    <p style="text-align: left;">Previous releases are available in the previous releases section of the OpenDDS download site: <a href="http://download.ociweb.com/OpenDDS/previous-releases/">http://download.ociweb.com/OpenDDS/previous-releases/</a> or on the <a href="{{site.github.releases_url}}">GitHub releases page</a>. </p>
+    <p style="text-align: left;">Previous releases are available in the previous releases section of the OpenDDS download site: <a href="http://download.objectcomputing.com/OpenDDS/previous-releases/">http://download.objectcomputing.com/OpenDDS/previous-releases/</a> or on the <a href="{{site.github.releases_url}}">GitHub releases page</a>. </p>
 
     <span class="headertext">Support</span>
     <p>See <a href="support.html">the OpenDDS support page</a> for support options.</p>

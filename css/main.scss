@@ -13,13 +13,17 @@ $base-line-height: 1.5;
 
 $spacing-unit:     15px;
 
+$maincolor-oci:    #255aa8;
+$maincolor-train:  #66d8e0;
+$maincolor-under:  #feb672;
+
+$grey-color:       #a5a4a8;
+$grey-color-light: #c5c5c3;
+$grey-color-dark:  #7b7c81;
+
 $text-color:       #3f3f3f;
 $background-color: #fdfdfd;
-$brand-color:      #0062a3;
-
-$grey-color:       #828282;
-$grey-color-light: lighten($grey-color, 40%);
-$grey-color-dark:  darken($grey-color, 25%);
+$brand-color:      $maincolor-oci;
 
 $on-palm:          850px;
 $on-laptop:        800px;
