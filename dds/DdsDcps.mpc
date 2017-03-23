@@ -10,7 +10,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   pch_source   = DCPS/DdsDcps_pch.cpp
   macros      += NOMINMAX         //don't #define min and max in Win32 headers
 
-  specific (vc9, vc10, vc11, vc12, vc14, vc15, nmake) {
+  specific (vc9, vc10, vc11, vc12, vc14, vs2017, nmake) {
     compile_flags += /bigobj
   }
 
@@ -85,9 +85,9 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   }
 
   verbatim(gnuace, postinstall) {
-"	echo export DDS_ROOT=$(DESTDIR)$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
-"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
-"	ln -sf $(DESTDIR)$(INSTALL_PREFIX)/include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
+"  echo export DDS_ROOT=$(DESTDIR)$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
+"  @$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
+"  ln -sf $(DESTDIR)$(INSTALL_PREFIX)/include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
   }
 
 }
