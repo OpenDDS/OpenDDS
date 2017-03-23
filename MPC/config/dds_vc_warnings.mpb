@@ -11,7 +11,7 @@ feature(vc_avoid_crt_secure_warnings) {
 }
 
 feature(vc_avoid_scl_secure_warnings) {
-  specific(vc14, nmake) {
+  specific(vc14, vs2017, nmake) {
     macros += _SCL_SECURE_NO_WARNINGS
   }
 }
