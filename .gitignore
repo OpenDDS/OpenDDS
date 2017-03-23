@@ -39,3 +39,4 @@ lib*.dylib
 /ACE_wrappers
 /ACE_TAO
 .idea/
+.vs/
