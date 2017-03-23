@@ -43,7 +43,7 @@ my %platforminfo =
                'libpath' => 'PATH',
                'cl_versions' => {13 => 'vc71', 14 => 'vc8', 15 => 'vc9',
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
-                                 19 => 'vc14'},
+                                 19 => 'vc14', 19.1 => 'vs2017'},
               },
    'macosx' => {
                 'compilers' => ['g++'],
@@ -389,12 +389,15 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
-    if (/compiler version (\d+)\./i) { # match i18n version strings
-      if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$1}) {
-        die "Unknown or unsupported Visual C++ compiler version: $1\nStopped";
+    if (/compiler version (\d+)\.(\d+)/i) { # match i18n version strings
+      my $ver = ($2 == 0) ? $1 : "$1.$2";
+      $ver =~ s/0+$// unless $2 == 0;
+      if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
+        die "Unknown or unsupported Visual C++ compiler version: $ver\nStopped";
       }
-      $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$1};
-      if ($1 >= 19) {
+      $opts{'compiler_version'} =
+        $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+      if ($ver >= 19) {
         push(@{$opts{'features'}}, 'no_cxx11=0');
         print "VC++ has C++11 support\n" if $opts{'verbose'};
       }
