@@ -1,6 +1,6 @@
 Q: Is OpenDDS interoperable with other DDS implementations?
 
 A: Starting with version 3.1, OpenDDS contains an implementation of the RTPS (Real Time Publish-Subscribe)
-   specifciation required for interoperability.  It is not enabled by default.  See the OpenDDS Developer's
+   specification required for interoperability.  It is not enabled by default.  See the OpenDDS Developer's
    Guide chapter 7 for configuration details.
 
