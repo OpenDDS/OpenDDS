@@ -104,9 +104,9 @@ public:
   }
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);
-    size_t pos = local_address_str_.find_last_of(":");
-    OPENDDS_STRING host_name = local_address_str_.substr(0, pos);
-    local_address_str_ = host_name + ":" + to_dds_string(port_number);
+    char buf[1024];
+    local_address_.addr_to_string(buf, 1024);
+    local_address_str_ = buf;
   }
 
 private:
