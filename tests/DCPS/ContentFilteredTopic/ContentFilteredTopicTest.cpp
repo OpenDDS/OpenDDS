@@ -149,10 +149,26 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
+  // Try to set expression parameters that have a parameter too much
+  // compared to the expression, this should fail
+  DDS::StringSeq params_invalid(2);
+  params_invalid.length(2);
+  params_invalid[0] = "2";
+  params_invalid[1] = "2";
+  if (cft2->set_expression_parameters(params_invalid) != RETCODE_ERROR) {
+    cout << "ERROR: setting too much parameters should return an error"
+         << endl;
+    return false;
+  }
+
   DDS::StringSeq params(1);
   params.length(1);
   params[0] = "2";
-  cft2->set_expression_parameters(params);
+  if (cft2->set_expression_parameters(params) != RETCODE_OK) {
+    cout << "ERROR: setting expression parameters failed"
+         << endl;
+    return false;
+  }
 
   for (sample.key = 1; sample.key < 4; ++sample.key) {
     if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
