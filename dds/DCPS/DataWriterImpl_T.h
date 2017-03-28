@@ -510,7 +510,14 @@ private:
           // Start counting byte-offset AFTER header
           serializer.reset_alignment();
         }
-        serializer << instance_data;
+
+        if (! (serializer << instance_data)) {
+          mb->release();
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) OpenDDS::DCPS::DataWriterImpl::dds_marshal(), ")
+            ACE_TEXT("instance_data serialization error.\n")),
+            0);
+        }
       }
 
       return mb;
