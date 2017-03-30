@@ -243,7 +243,9 @@ namespace {
       return Value(data.params_[param_], true);
     }
 
-    int param_;
+    size_t param () { return param_; }
+
+    size_t param_;
   };
 
   class Comparison : public FilterEvaluator::EvalNode {
@@ -489,7 +491,10 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
   } else if (node->TypeMatches<StrVal>()) {
     return new LiteralString(node);
   } else if (node->TypeMatches<ParamVal>()) {
-    return new Parameter(node);
+    Parameter* retval =  new Parameter(node);
+    // Keep track of the highest parameter number
+    if (retval->param () > maximum_number_parameter_) maximum_number_parameter_ = retval->param ();
+    return retval;
   } else if (node->TypeMatches<CallDef>()) {
     if (arity(node) == 1) {
       return walkOperand(child(node, 0));

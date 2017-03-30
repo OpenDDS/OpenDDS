@@ -59,6 +59,18 @@ ContentFilteredTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
     DDS::RETCODE_OUT_OF_RESOURCES);
 
   const CORBA::ULong len = p.length();
+
+  // Check sequence of strings that give values to the ‘parameters’ (i.e., "%n" tokens)
+  // in the filter_expression matches the size of the parameter sequence
+  if (len != filter_eval_.maximum_number_parameter ()) {
+    if (DCPS_debug_level > 1) {
+      ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) ContentFilteredTopicImpl::set_expression_parameters() - ")
+                ACE_TEXT("passed incorrect set of filter parameters\n")));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
   if (len == expression_parameters_.length()) {
     const char* const* p_buf = p.get_buffer();
     char* const* e_buf = expression_parameters_.get_buffer();

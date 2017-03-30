@@ -90,6 +90,8 @@ public:
 
   bool usesExtendedGrammar() const { return extended_grammar_; }
 
+  size_t maximum_number_parameter() const { return maximum_number_parameter_; }
+
   template<typename T>
   bool eval(const T& sample, const DDS::StringSeq& params) const
   {
@@ -152,6 +154,9 @@ private:
   bool extended_grammar_;
   EvalNode* filter_root_;
   OPENDDS_VECTOR(OPENDDS_STRING) order_bys_;
+  /// Maximum number of parameter used in the filter, this should
+  /// match the number of values passed when evaluating the filter
+  size_t maximum_number_parameter_;
 };
 
 class OpenDDS_Dcps_Export MetaStruct {
