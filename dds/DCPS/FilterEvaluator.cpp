@@ -493,7 +493,7 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
   } else if (node->TypeMatches<ParamVal>()) {
     Parameter* retval =  new Parameter(node);
     // Keep track of the highest parameter number
-    if (retval->param () > maximum_number_parameter_) maximum_number_parameter_ = retval->param ();
+    if (retval->param () + 1 > number_parameters_) number_parameters_ = retval->param () + 1;
     return retval;
   } else if (node->TypeMatches<CallDef>()) {
     if (arity(node) == 1) {
