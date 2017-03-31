@@ -122,8 +122,9 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   DataReader_var sub2_dr =
     sub2->create_datareader(cft, dr_qos, 0, DEFAULT_STATUS_MASK);
+  DDS::StringSeq mytopicfiltered2_params(1);
   ContentFilteredTopic_var cft2 = dp->create_contentfilteredtopic(
-    "MyTopic-Filtered2", topic, "key > %0", StringSeq());
+    "MyTopic-Filtered2", topic, "key > %0", mytopicfiltered2_params);
   DataReader_var sub2_dr2 =
     sub2->create_datareader(cft2, dr_qos, 0, DEFAULT_STATUS_MASK);
   const int N_MATCHES = 4; // each writer matches 4 readers
@@ -149,14 +150,31 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
+  // Create a cft where the parameter sequence doesn't match the size
+  DDS::StringSeq paramssize(2);
+  ContentFilteredTopic_var cft3 = dp->create_contentfilteredtopic(
+    "MyTopic-Filtered3", topic, "key > %0", paramssize);
+  if (cft3) {
+    cout << "ERROR: creating cft3 with invalid parameter size should fail"
+         << endl;
+    return false;
+  }
+
   // Try to set expression parameters that have a parameter too much
   // compared to the expression, this should fail
-  DDS::StringSeq params_invalid(2);
-  params_invalid.length(2);
-  params_invalid[0] = "2";
-  params_invalid[1] = "2";
-  if (cft2->set_expression_parameters(params_invalid) != RETCODE_ERROR) {
+  DDS::StringSeq params_large(2);
+  params_large.length(2);
+  params_large[0] = "2";
+  params_large[1] = "2";
+  if (cft2->set_expression_parameters(params_large) != RETCODE_ERROR) {
     cout << "ERROR: setting too much parameters should return an error"
+         << endl;
+    return false;
+  }
+
+  DDS::StringSeq params_empty(0);
+  if (cft2->set_expression_parameters(params_empty) != RETCODE_ERROR) {
+    cout << "ERROR: setting empty parameters should return an error"
          << endl;
     return false;
   }

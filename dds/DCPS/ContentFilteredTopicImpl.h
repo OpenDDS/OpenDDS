@@ -30,8 +30,7 @@ class OpenDDS_Dcps_Export ContentFilteredTopicImpl
   , public virtual TopicDescriptionImpl {
 public:
   ContentFilteredTopicImpl(const char* name, DDS::Topic_ptr related_topic,
-    const char* filter_expression, const DDS::StringSeq& expression_parameters,
-    DomainParticipantImpl* participant);
+    const char* filter_expression, DomainParticipantImpl* participant);
 
   virtual ~ContentFilteredTopicImpl() {}
 

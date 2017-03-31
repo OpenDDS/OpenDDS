@@ -707,10 +707,10 @@ DomainParticipantImpl::create_contentfilteredtopic(
         ACE_TEXT("can't create a content-filtered topic due to null related ")
         ACE_TEXT("topic.\n")));
     }
-    return 0;
+    return DDS::ContentFilteredTopic::_nil ();
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_, 0);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_, DDS::ContentFilteredTopic::_nil ());
 
   if (topics_.count(name)) {
     if (DCPS_debug_level > 3) {
@@ -719,7 +719,7 @@ DomainParticipantImpl::create_contentfilteredtopic(
         ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
         ACE_TEXT("already in use by a Topic.\n"), name));
     }
-    return 0;
+    return DDS::ContentFilteredTopic::_nil ();
   }
 
   if (topic_descrs_.count(name)) {
@@ -729,13 +729,19 @@ DomainParticipantImpl::create_contentfilteredtopic(
         ACE_TEXT("can't create a content-filtered topic due to name \"%C\" ")
         ACE_TEXT("already in use by a TopicDescription.\n"), name));
     }
-    return 0;
+    return DDS::ContentFilteredTopic::_nil ();
   }
 
   DDS::ContentFilteredTopic_var cft;
   try {
+    // Create the cft in two steps so that we only have one place to
+    // check the expression parameters
     cft = new ContentFilteredTopicImpl(name,
-      related_topic, filter_expression, expression_parameters, this);
+      related_topic, filter_expression, this);
+    if (cft->set_expression_parameters (expression_parameters) != DDS::RETCODE_OK)
+      {
+        return DDS::ContentFilteredTopic::_nil ();
+      }
   } catch (const std::exception& e) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -743,7 +749,7 @@ DomainParticipantImpl::create_contentfilteredtopic(
         ACE_TEXT("can't create a content-filtered topic due to runtime error: ")
         ACE_TEXT("%C.\n"), e.what()));
     }
-    return 0;
+    return DDS::ContentFilteredTopic::_nil ();
   }
   DDS::TopicDescription_var td = DDS::TopicDescription::_duplicate(cft);
   topic_descrs_[name] = td;

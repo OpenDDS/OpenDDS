@@ -20,7 +20,6 @@ namespace DCPS {
 
 ContentFilteredTopicImpl::ContentFilteredTopicImpl(const char* name,
   DDS::Topic_ptr related_topic, const char* filter_expression,
-  const DDS::StringSeq& expression_parameters,
   DomainParticipantImpl* participant)
   : TopicDescriptionImpl(name,
       CORBA::String_var(related_topic->get_type_name()),
@@ -28,14 +27,13 @@ ContentFilteredTopicImpl::ContentFilteredTopicImpl(const char* name,
       participant)
   , filter_expression_(filter_expression)
   , filter_eval_(filter_expression, false /*allowOrderBy*/)
-  , expression_parameters_(expression_parameters)
   , related_topic_(DDS::Topic::_duplicate(related_topic))
 {
   if (DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) ContentFilteredTopicImpl::ContentFilteredTopicImpl() - ")
-                ACE_TEXT("Creating cft with filter <%C> which requires <%d> parameters\n"),
-                filter_expression, filter_eval_.number_parameters ()));
+    ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) ContentFilteredTopicImpl::ContentFilteredTopicImpl() - ")
+              ACE_TEXT("Creating cft with filter <%C> which requires <%d> parameters\n"),
+              filter_expression, filter_eval_.number_parameters ()));
   }
 }
 

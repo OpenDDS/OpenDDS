@@ -43,6 +43,7 @@ FilterEvaluator::DeserializedForEval::~DeserializedForEval()
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : extended_grammar_(false)
   , filter_root_(0)
+  , number_parameters_ (0)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
