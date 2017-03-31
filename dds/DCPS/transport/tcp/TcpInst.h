@@ -104,9 +104,9 @@ public:
   }
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);
-    char buf[1024];
+    ACE_TCHAR buf[1024];
     local_address_.addr_to_string(buf, 1024);
-    local_address_str_ = buf;
+    local_address_str_ = ACE_Wide_To_Ascii(buf).char_rep();
   }
 
 private:
