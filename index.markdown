@@ -3,7 +3,7 @@ layout: page
 categories: [opendds]
 ---
 
-OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). Java applications can use OpenDDS through JNI bindings. OpenDDS is supported by [OCI](http://www.objectcomputing.com) and the source code is hosted on [GitHub]({{site.github.repository_url}}).
+OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). Java applications can use OpenDDS through JNI bindings. OpenDDS was developed and open sourced by [OCI](http://www.objectcomputing.com). We welcome community contributions to the project. Commercial support is also available; see the [support page](support.html) for more information.
 
 {% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
 {% assign latest_rel = sorted_rel | first %}
