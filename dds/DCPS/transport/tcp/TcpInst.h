@@ -106,7 +106,7 @@ public:
     local_address_.set_port_number(port_number);
     ACE_TCHAR buf[1024];
     local_address_.addr_to_string(buf, 1024);
-    local_address_str_ = ACE_Wide_To_Ascii(buf).char_rep();
+    local_address_str_ = ACE_TEXT_ALWAYS_CHAR(buf);
   }
 
 private:
