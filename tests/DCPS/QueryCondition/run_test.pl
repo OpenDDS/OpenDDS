@@ -9,9 +9,16 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-
+my $opts = '';
 my $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
+
+while (scalar @ARGV) {
+  if ($ARGV[0] =~ /^-d/i) {
+    shift;
+    $opts .= " -DCPSTransportDebugLevel 6 -DCPSDebugLevel 10";
+  }
+}
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                         "-NOBITS -o $dcpsrepo_ior");
@@ -25,7 +32,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 my $TEST = PerlDDS::create_process ('QueryConditionTest',
-                                    "-DCPSConfigFile dcps.ini -DCPSBit 0 ");
+                                    "-DCPSConfigFile dcps.ini -DCPSBit 0 $opts");
 print STDERR $TEST->CommandLine () . "\n";
 my $result = $TEST->SpawnWaitKill(60);
 if ($result != 0) {

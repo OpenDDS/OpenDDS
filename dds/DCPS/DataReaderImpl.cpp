@@ -897,7 +897,11 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
   try {
     DDS::QueryCondition_var qc = new QueryConditionImpl(this, sample_states,
-        view_states, instance_states, query_expression, query_parameters);
+        view_states, instance_states, query_expression);
+    if (qc->set_query_parameters (query_parameters) != DDS::RETCODE_OK)
+      {
+        return DDS::QueryCondition::_nil ();
+      }
     DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(qc);
     read_conditions_.insert(rc);
     return qc._retn();
@@ -907,8 +911,8 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
           ACE_TEXT("DataReaderImpl::create_querycondition - %C\n"),
           e.what()));
     }
-    return 0;
   }
+  return DDS::QueryCondition::_nil ();
 }
 #endif
 

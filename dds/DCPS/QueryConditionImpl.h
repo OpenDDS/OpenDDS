@@ -34,11 +34,7 @@ class OpenDDS_Dcps_Export QueryConditionImpl
 public:
   QueryConditionImpl(DataReaderImpl* dr, DDS::SampleStateMask sample_states,
                      DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states,
-                     const char* query_expression, const DDS::StringSeq& query_parameters)
-  : ReadConditionImpl(dr, sample_states, view_states, instance_states)
-  , query_expression_(query_expression)
-  , query_parameters_(query_parameters)
-  , evaluator_(query_expression, true) {}
+                     const char* query_expression);
 
   virtual ~QueryConditionImpl() {}
 

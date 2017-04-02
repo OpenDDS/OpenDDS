@@ -79,7 +79,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key > 1", DDS::StringSeq());
-  if (!dr_qc.in()) {
+  if (CORBA::is_nil(dr_qc.in())) {
     cout << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
@@ -167,6 +167,10 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "ORDER BY name, nest.value",
     empty_query_params);
+  if (CORBA::is_nil(dr_qc.in())) {
+    cout << "ERROR: failed to create QueryCondition" << endl;
+    return false;
+  }
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
@@ -242,12 +246,32 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) return false;
   if (!waitForSample(dr)) return false;
 
+  DDS::StringSeq params_empty(0);
+  params_empty.length(0);
+  ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
+    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_empty);
+  if (!CORBA::is_nil (dr_qc.in())) {
+    cout << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed " << endl;
+    return false;
+  }
+
+  DDS::StringSeq params_two(2);
+  params_two.length(2);
+  params_two[0] = "2";
+  params_two[1] = "2";
+  dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
+    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_two);
+  if (!CORBA::is_nil (dr_qc.in())) {
+    cout << "ERROR: Creating QueryCondition with 1 token and 2 parameters should have failed " << endl;
+    return false;
+  }
+
   DDS::StringSeq params(1);
   params.length(1);
   params[0] = "2";
-  ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
+  dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params);
-  if (!dr_qc.in()) {
+  if (CORBA::is_nil(dr_qc.in())) {
     cout << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
@@ -287,6 +311,16 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_NO_DATA) {
     cout << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
+    return false;
+  }
+
+  if (query_cond->set_query_parameters(params_empty) != RETCODE_ERROR) {
+    cout << "ERROR: Setting 0 parameters for query condition with 1 token should have failed " << endl;
+    return false;
+  }
+
+  if (query_cond->set_query_parameters(params_two) != RETCODE_ERROR) {
+    cout << "ERROR: Setting 2 parameters for query condition with 1 token should have failed " << endl;
     return false;
   }
 
