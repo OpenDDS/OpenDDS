@@ -226,14 +226,14 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   params.length (2);
   params[0] = "5";
   params[1] = "10";
-  ReadCondition_var dr_qc1 = dr1->create_querycondition(ANY_SAMPLE_STATE,
-    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "( (iteration > %0) AND (iteration < %1) )", params);
+  QueryCondition_var dr_qc1 = dr1->create_querycondition(NOT_READ_SAMPLE_STATE,
+    NEW_VIEW_STATE | NOT_NEW_VIEW_STATE, ANY_INSTANCE_STATE, "( (iteration > %0) AND (iteration < %1) )", params);
   if (CORBA::is_nil(dr_qc1.in())) {
     cout << "ERROR: failed to create QueryCondition 1" << endl;
     return false;
   }
-  ReadCondition_var dr_qc2 = dr2->create_querycondition(ANY_SAMPLE_STATE,
-    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "( (iteration < %0) OR (iteration > %1) )", params);
+  QueryCondition_var dr_qc2 = dr2->create_querycondition(NOT_READ_SAMPLE_STATE,
+    NEW_VIEW_STATE | NOT_NEW_VIEW_STATE, ANY_INSTANCE_STATE, "( (iteration < %0) OR (iteration > %1) )", params);
   if (CORBA::is_nil(dr_qc2.in())) {
     cout << "ERROR: failed to create QueryCondition 2" << endl;
     return false;
