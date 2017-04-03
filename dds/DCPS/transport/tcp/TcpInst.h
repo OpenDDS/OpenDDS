@@ -105,8 +105,13 @@ public:
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);
     ACE_TCHAR buf[1024];
-    local_address_.addr_to_string(buf, 1024);
-    local_address_str_ = ACE_TEXT_ALWAYS_CHAR(buf);
+    if (local_address_.addr_to_string(buf, 1024) == 0) {
+      local_address_str_ = ACE_TEXT_ALWAYS_CHAR(buf);
+    }
+    else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TcpInst::local_address_set_port():")
+                           ACE_TEXT(" failure to convert local IP address to text representation\n")));
+    }
   }
 
 private:
