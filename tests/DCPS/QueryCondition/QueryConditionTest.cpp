@@ -268,33 +268,15 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
     }
   }
 
-//   sample.key = 2;
-//   if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
-//   if (!waitForSample(dr)) return false;
-//
-//   ws->attach_condition(dr_qc);
-//   ret = ws->wait(active, three_sec);
-//   if (ret != RETCODE_OK) {
-//     cout << "ERROR: wait(qc) should not time out" << endl;
-//     return false;
-//   }
-//   ws->detach_condition(dr_qc);
-//
-//   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
-//   if (ret != RETCODE_OK) {
-//     cout << "ERROR: take_w_condition(qc) should have returned data" << endl;
-//     return false;
-//   }
-
   for (CORBA::Long i = 0; i < 6; i++) {
     for (CORBA::Long j = 0; j < 15; j++) {
       sample.key = i;
-      sample.iteration = j;
       DDS::InstanceHandle_t const hnd = mdw->lookup_instance(sample);
       if (hnd == HANDLE_NIL) {
         cout << "ERROR: Lookup instance failed" << endl;
         return false;
       }
+      sample.iteration = j;
       if (mdw->write(sample, hnd) != RETCODE_OK) return false;
     }
   }
