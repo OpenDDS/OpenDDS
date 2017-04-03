@@ -73,7 +73,7 @@ public:
       return true;
     }
     else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TcpInst::local_address_set_port():")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpInst::local_address_set_port():")
                            ACE_TEXT(" failure to convert local IP address to text representation\n")));
       return false;
     }
