@@ -1039,7 +1039,12 @@ protected:
 
     if (cdr) {
       ACE_CDR::ULong header;
-      ser >> header;
+      if (!(ser >> header)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+                  ACE_TEXT("deserialization header failed, dropping sample.\n"),
+                  TraitsType::type_name()));
+        return;
+      }
     }
 
     if (cdr && Serializer::use_rti_serialization()) {
