@@ -666,8 +666,7 @@ namespace OpenDDS {
     return DDS::RETCODE_ERROR;
   }
 
-  virtual DDS::InstanceHandle_t lookup_instance (
-                                                   const MessageType & instance_data)
+  virtual DDS::InstanceHandle_t lookup_instance (const MessageType & instance_data)
   {
     typename InstanceMap::const_iterator const it = instance_map_.find(instance_data);
 
@@ -1629,7 +1628,6 @@ void store_instance_data(
     if ((this->qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
       ((::CORBA::Long) instances_size >= this->qos_.resource_limits.max_instances))
     {
-
       DDS::DataReaderListener_var listener
         = listener_for (DDS::SAMPLE_REJECTED_STATUS);
 
