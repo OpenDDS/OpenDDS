@@ -16,8 +16,15 @@ $pub_opts = "-DCPSConfigFile pub.ini";
 $sub_opts = "-DCPSConfigFile sub.ini";
 
 $dcpsrepo_ior = "repo.ior";
-
 unlink $dcpsrepo_ior;
+
+while (scalar @ARGV) {
+  if ($ARGV[0] =~ /^-d/i) {
+    shift;
+    $pub_opts .= " -DCPSTransportDebugLevel 6 -DCPSDebugLevel 10";
+    $sub_opts .= " -DCPSTransportDebugLevel 6 -DCPSDebugLevel 10";
+  }
+}
 
 $DCPSREPO =
   PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
