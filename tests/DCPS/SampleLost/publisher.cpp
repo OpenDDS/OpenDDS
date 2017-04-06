@@ -75,17 +75,19 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
 
       // Configure DataWriter QoS policies.
+      DDS::Duration_t max_block_time = {2, 0};
+      DDS::Duration_t deadline_time = {3, 0};
       DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
       dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
-      dw_qos.reliability.max_blocking_time = DDS::Duration_t {2, 0};
+      dw_qos.reliability.max_blocking_time = max_block_time;
       dw_qos.durability.kind = DDS::TRANSIENT_DURABILITY_QOS;
       dw_qos.durability_service.history_kind = ::DDS::KEEP_LAST_HISTORY_QOS;
       dw_qos.durability_service.history_depth = 10;
       dw_qos.durability_service.max_samples = 10;
       dw_qos.durability_service.max_samples_per_instance = 10;
       dw_qos.durability_service.max_instances = 2;
-      dw_qos.deadline.period = DDS::Duration_t {3, 0};
+      dw_qos.deadline.period = deadline_time;
 
       // Create a DataWriter.
       ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> publication_matched;
