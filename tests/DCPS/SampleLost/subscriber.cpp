@@ -90,6 +90,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;
+      DDS::Duration_t deadline_time = {3, 0};
       sub->get_default_datareader_qos (dr_qos);
       dr_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
       dr_qos.history.kind  = ::DDS::KEEP_LAST_HISTORY_QOS;
@@ -97,7 +98,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.resource_limits.max_samples = 10;
       dr_qos.resource_limits.max_instances = 1;
       dr_qos.resource_limits.max_samples_per_instance = 10;
-      dr_qos.deadline.period = DDS::Duration_t {3, 0};
+      dr_qos.deadline.period = deadline_time;
 
       DDS::DataReader_var dr = sub->create_datareader (topic.in (),
                                                        dr_qos,
