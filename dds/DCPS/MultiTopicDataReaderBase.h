@@ -29,7 +29,7 @@ class SubscriberImpl;
 class OpenDDS_Dcps_Export MultiTopicDataReaderBase
   : public virtual LocalObject<DataReaderEx> {
 public:
-  MultiTopicDataReaderBase() {}
+  MultiTopicDataReaderBase(): listener_(this) {}
 
   void init(const DDS::DataReaderQos& dr_qos,
     DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask,
@@ -154,11 +154,20 @@ private:
     void on_sample_lost(DDS::DataReader_ptr reader,
       const DDS::SampleLostStatus& status);
 
+    /// Increment the reference count.
+    virtual void _add_ref (void);
+
+    /// Decrement the reference count.
+    virtual void _remove_ref (void);
+
+    /// Get the refcount
+    virtual CORBA::ULong _refcount_value (void) const;
+
   private:
     MultiTopicDataReaderBase* outer_;
   };
 
-  DDS::DataReaderListener_var listener_;
+  Listener listener_;
   DataReaderEx_var resulting_reader_;
 
 protected:
