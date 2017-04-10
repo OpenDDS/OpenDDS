@@ -29,9 +29,7 @@ EntityImpl::~EntityImpl()
 DDS::ReturnCode_t
 EntityImpl::set_enabled()
 {
-  if (enabled_ == false) {
-    enabled_ = true;
-  }
+  enabled_ = true;
 
   return DDS::RETCODE_OK;
 }
