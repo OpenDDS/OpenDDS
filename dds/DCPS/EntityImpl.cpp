@@ -71,9 +71,7 @@ EntityImpl::set_status_changed_flag(
 void
 EntityImpl::set_deleted(bool state)
 {
-  if (entity_deleted_ != state) {
-    entity_deleted_ = state;
-  }
+  entity_deleted_ = state;
 }
 
 bool
