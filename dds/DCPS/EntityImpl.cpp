@@ -79,13 +79,7 @@ EntityImpl::set_deleted(bool state)
 bool
 EntityImpl::get_deleted()
 {
-  bool deleted_state = true;
-
-  if (entity_deleted_ != true) {
-    deleted_state = false;
-  }
-
-  return deleted_state;
+  return this->entity_deleted_.value();
 }
 
 void
