@@ -589,7 +589,7 @@ private:
                                      ACE_TEXT("(%P|%t) ")
                                      ACE_TEXT("%CDataWriterImpl::")
                                      ACE_TEXT("get_or_create_instance_handle, ")
-                                     ACE_TEXT("insert %s failed. \n"),
+                                     ACE_TEXT("insert %C failed. \n"),
                                      TraitsType::type_name(), TraitsType::type_name()),
                                     DDS::RETCODE_ERROR);
                 }
