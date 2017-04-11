@@ -28,7 +28,7 @@ configuration:
 
 build_script:
   - msbuild DDS_TAOv2.sln /m /p:Configuration=Debug;Platform=x64
-  - msbuild tests\DCPS\Messenger\Messenger.sln /m /p:Configuration=Debug;Platform=x64
+  - msbuild tests/DCPS/Messenger/Messenger.sln /m /p:Configuration=Debug;Platform=x64
 
 after_build:
   - cd tests\DCPS\Messenger && run_test.pl rtps
