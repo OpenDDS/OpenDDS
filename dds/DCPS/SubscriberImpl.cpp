@@ -65,7 +65,7 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
 SubscriberImpl::~SubscriberImpl()
 {
   //
-  // The datareders should be deleted already before calling delete
+  // The datareaders should be deleted already before calling delete
   // subscriber.
   if (!is_clean()) {
     ACE_ERROR((LM_ERROR,
