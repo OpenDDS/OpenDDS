@@ -491,8 +491,7 @@ SubscriberImpl::get_datareaders(
 #endif
 
   // Return set of datareaders.
-  int count(0);
-  readers.length(count);
+  readers.length(0);
 
   for (DataReaderSet::const_iterator pos = datareader_set_.begin();
        pos != datareader_set_.end(); ++pos) {
@@ -500,7 +499,6 @@ SubscriberImpl::get_datareaders(
         (*pos)->have_view_states(view_states) &&
         (*pos)->have_instance_states(instance_states)) {
       push_back(readers, (*pos)->get_dr_obj_ref());
-      ++count;
     }
   }
 
