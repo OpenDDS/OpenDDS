@@ -375,7 +375,7 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::RepoId id)
 
       if (participant_->is_alive() && this->participant_->isOwner()) {
         try {
-          CORBA::Boolean dont_notify_lost = 0;
+          CORBA::Boolean dont_notify_lost = false;
           reader_->remove_associations(idSeq, dont_notify_lost);
 
         } catch (const CORBA::Exception& ex) {
