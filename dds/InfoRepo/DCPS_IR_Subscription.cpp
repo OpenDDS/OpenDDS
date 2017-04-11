@@ -486,10 +486,9 @@ CORBA::Boolean DCPS_IR_Subscription::is_publication_ignored(OpenDDS::DCPS::RepoI
                                                             OpenDDS::DCPS::RepoId topicId,
                                                             OpenDDS::DCPS::RepoId pubId)
 {
-  CORBA::Boolean ignored;
-  ignored = (participant_->is_participant_ignored(partId) ||
-             participant_->is_topic_ignored(topicId) ||
-             participant_->is_publication_ignored(pubId));
+  CORBA::Boolean ignored = (participant_->is_participant_ignored(partId) ||
+                            participant_->is_topic_ignored(topicId) ||
+                            participant_->is_publication_ignored(pubId));
 
   return ignored;
 }
