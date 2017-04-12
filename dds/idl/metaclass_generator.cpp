@@ -66,8 +66,11 @@ namespace {
       "    }" << (skip ? "" : "\n");
     if (skip) {
       be_global->impl_ << " else {\n"
-        "      gen_skip_over(" << firstArg << ", static_cast<" << fieldType
-        << "*>(0));\n"
+        "      if (!(gen_skip_over(" << firstArg << ", static_cast<" << fieldType
+        << "*>(0)))) {\n"
+        "        throw std::runtime_error(\"Field '" << fieldName <<
+        "' could not be skipped\");\n"
+        "      }\n"
         "    }\n";
     }
   }
@@ -186,7 +189,10 @@ namespace {
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      ser.skip(len);\n";
+          "      if (!(ser.skip(len))) {\n"
+          "        throw std::runtime_error(\"String '" << fieldName <<
+          "' length could not be skipped\");\n"
+          "      }\n";
       } else if (cls & CL_WIDE) {
         be_global->impl_ <<
           "      ACE_CDR::Octet len;\n"
@@ -194,10 +200,16 @@ namespace {
           "        throw std::runtime_error(\"WChar '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      ser.skip(len);\n";
+          "      if (!(ser.skip(len))) {\n"
+          "        throw std::runtime_error(\"WChar '" << fieldName <<
+          "' length could not be skipped\");\n"
+          "      }\n";
       } else {
         be_global->impl_ <<
-          "      ser.skip(1, " << size << ");\n";
+          "      if (!(ser.skip(1, " << size << "))) {\n"
+          "        throw std::runtime_error(\"Field '" << fieldName <<
+          "' could not be skipped\");\n"
+          "      }\n";
       }
       be_global->impl_ <<
         "    }\n";
@@ -205,8 +217,11 @@ namespace {
       delegateToNested(fieldName, field, "ser", true);
     } else { // array, sequence, union:
       be_global->impl_ <<
-        "    gen_skip_over(ser, static_cast<" << cxx_type
-        << ((cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
+        "    if (!(gen_skip_over(ser, static_cast<" << cxx_type
+        << ((cls & CL_ARRAY) ? "_forany" : "") << "*>(0)))) {\n"
+        "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
+        " could not be skipped\");\n"
+        "    }\n";
     }
   }
 
@@ -436,12 +451,13 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  return msi;\n"
     "}\n\n";
   {
-    Function f("gen_skip_over", "void");
+    Function f("gen_skip_over", "bool");
     f.addArg("ser", "Serializer&");
     f.addArg("", clazz + "*");
     f.endArgs();
     be_global->impl_ <<
-      "  MetaStructImpl<" << clazz << ">().getValue(ser, \"\");\n";
+      "  MetaStructImpl<" << clazz << ">().getValue(ser, \"\");\n"
+      "  return true;\n";
   }
   return true;
 }
@@ -459,7 +475,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   const std::string clazz = scoped(name);
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
-  Function f("gen_skip_over", "void");
+  Function f("gen_skip_over", "bool");
   f.addArg("ser", "Serializer&");
   f.addArg("", clazz + ((cls & CL_ARRAY) ? "_forany*" : "*"));
   f.endArgs();
@@ -480,7 +496,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
     elem = seq->base_type();
     be_global->impl_ <<
       "  ACE_CDR::ULong length;\n"
-      "  ser >> length;\n";
+      "  if (!(ser >> length)) return false;\n";
     len = "length";
   }
 
@@ -493,27 +509,29 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
     int sz = 1;
     to_cxx_type(elem, sz);
     be_global->impl_ <<
-      "  ser.skip(" << len << ", " << sz << ");\n";
+      "  return ser.skip(" << len << ", " << sz << ");\n";
   } else {
     be_global->impl_ <<
       "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
     if ((elem_cls & CL_PRIMITIVE) && (elem_cls & CL_WIDE)) {
       be_global->impl_ <<
         "    ACE_CDR::Octet o;\n"
-        "    ser >> ACE_InputCDR::to_octet(o);\n"
-        "    ser.skip(o);\n";
+        "    if (!(ser >> ACE_InputCDR::to_octet(o))) return false;\n"
+        "    if (!(ser.skip(o))) return false;\n";
     } else if (elem_cls & CL_STRING) {
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
-        "    ser >> strlength;\n"
-        "    ser.skip(strlength);\n";
+        "    if (!(ser >> strlength)) return false;\n"
+        "    if (!(ser.skip(strlength))) return false;\n";
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
       be_global->impl_ <<
-        "    gen_skip_over(ser, static_cast<" << cxx_elem
-        << ((elem_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
+        "    if (!(gen_skip_over(ser, static_cast<" << cxx_elem
+        << ((elem_cls & CL_ARRAY) ? "_forany" : "") << "*>(0)))) return false;\n";
     }
     be_global->impl_ <<
       "  }\n";
+    be_global->impl_ <<
+      "  return true;\n";
   }
 
   return true;
@@ -530,22 +548,22 @@ static std::string func(const std::string&,
   if (br_cls & CL_STRING) {
     ss <<
       "      ACE_CDR::ULong len;\n"
-      "      ser >> len;\n"
-      "      ser.skip(len);\n";
+      "      if (!(ser >> len)) return false;\n"
+      "      if (!(ser.skip(len))) return false;\n";
   } else if (br_cls & CL_WIDE) {
     ss <<
       "      ACE_CDR::Octet len;\n"
-      "      ser >> ACE_InputCDR::to_octet(len);\n"
-      "      ser.skip(len);\n";
+      "      if (!(ser >> ACE_InputCDR::to_octet(len))) return false;\n"
+      "      if (!(ser.skip(len))) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     int sz = 1;
     to_cxx_type(br_type, sz);
     ss <<
-      "    ser.skip(1, " << sz << ");\n";
+      "      if (!(ser.skip(1, " << sz << "))) return false;\n";
   } else {
     ss <<
-      "    gen_skip_over(ser, static_cast<" << scoped(br_type->name())
-                                            << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
+      "      if (!(gen_skip_over(ser, static_cast<" << scoped(br_type->name())
+                                            << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0)))) return false;\n";
   }
 
   return ss.str();
@@ -559,15 +577,17 @@ metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   const std::string clazz = scoped(name);
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
-  Function f("gen_skip_over", "void");
+  Function f("gen_skip_over", "bool");
   f.addArg("ser", "Serializer&");
   f.addArg("", clazz + "*");
   f.endArgs();
   be_global->impl_ <<
     "  " << scoped(discriminator->name()) << " disc;\n"
     "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
-    "    return;\n"
+    "    return false;\n"
     "  }\n";
   generateSwitchForUnion("disc", func, branches, discriminator, "");
+  be_global->impl_ <<
+    "  return true;\n";
   return true;
 }
