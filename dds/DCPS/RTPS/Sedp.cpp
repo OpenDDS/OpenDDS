@@ -1656,17 +1656,16 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
                       const ACE_CDR::Octet& encap,
                       ParameterList& data)
 {
-  bool ok = true;
-  if (ok && sample.header_.key_fields_only_ && encap < 2) {
+  if (sample.header_.key_fields_only_ && encap < 2) {
     GUID_t guid;
-    ok &= (ser >> guid);
+    if (!(ser >> guid)) return false;
     data.length(1);
     data[0].guid(guid);
     data[0]._d(PID_ENDPOINT_GUID);
   } else {
-    ok &= (ser >> data);
+    return (ser >> data);
   }
-  return ok;
+  return true;
 }
 
 void
