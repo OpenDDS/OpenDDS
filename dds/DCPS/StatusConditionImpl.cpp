@@ -16,6 +16,8 @@ namespace DCPS {
 
 CORBA::Boolean StatusConditionImpl::get_trigger_value()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_, false);
+
   if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) StatusConditionImpl::get_trigger_value() - ")
@@ -24,7 +26,6 @@ CORBA::Boolean StatusConditionImpl::get_trigger_value()
                this->parent_->get_status_changes()));
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_, false);
   return (parent_->get_status_changes() & mask_) > 0;
 }
 
