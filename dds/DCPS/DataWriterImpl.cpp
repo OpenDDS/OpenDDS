@@ -1319,11 +1319,12 @@ DataWriterImpl::enable()
   if (reliable && qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
     max_instances = qos_.resource_limits.max_instances;
 
+  const CORBA::Long history_depth =
+    (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS ||
+     qos_.history.depth == DDS::LENGTH_UNLIMITED) ? 0x7fffffff : qos_.history.depth;
+
   const CORBA::Long max_durable_per_instance =
-    qos_.durability.kind == DDS::VOLATILE_DURABILITY_QOS ? 0 :
-    qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS ? max_samples_per_instance :
-    qos_.history.depth == DDS::LENGTH_UNLIMITED ? 0x7fffffff :
-    qos_.history.depth;
+    qos_.durability.kind == DDS::VOLATILE_DURABILITY_QOS ? 0 : history_depth;
 
   // enable the type specific part of this DataWriter
   this->enable_specific();
@@ -1339,6 +1340,7 @@ DataWriterImpl::enable()
   // it is OK that we cannot change the size of our allocators.
   data_container_ = new WriteDataContainer(this,
                                            max_samples_per_instance,
+                                           history_depth,
                                            max_durable_per_instance,
                                            qos_.reliability.max_blocking_time,
                                            n_chunks_,
