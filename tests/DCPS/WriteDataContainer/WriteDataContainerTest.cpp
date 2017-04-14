@@ -57,7 +57,7 @@ public:
 
   virtual ~TestParticipantImpl() {};
 
-  virtual DDS::InstanceHandle_t get_instance_handle() { return this->participant_handles_.next();}
+  virtual DDS::InstanceHandle_t get_instance_handle() { return participant_handles_.next(); }
 
 private:
   InstanceHandleGenerator participant_handles_;
@@ -74,32 +74,40 @@ public:
   DDS_TEST()
     : delayed_deliver_container_(0)
     , element_to_deliver_(0)
-  {};
+  {}
 
-  ~DDS_TEST() {};
-  void substitute_dw_particpant (DataWriterImpl* dw, TestParticipantImpl* tp) { dw->participant_servant_ = tp;}
+  ~DDS_TEST() {}
+
+  void substitute_dw_particpant(DataWriterImpl* dw, TestParticipantImpl* tp)
+  {
+    dw->participant_servant_ = tp;
+  }
 
   ACE_Message_Block* dds_marshal(Test::SimpleDataWriterImpl* dw,
-                                 const ::Test::Simple& instance_data,
-                                 OpenDDS::DCPS::MarshalingType marshaling_type) {return dw->dds_marshal(instance_data, marshaling_type);}
+                                 const Test::Simple& instance_data,
+                                 OpenDDS::DCPS::MarshalingType marshaling_type)
+  {
+    return dw->dds_marshal(instance_data, marshaling_type);
+  }
 
-  void prep_delayed_deliver(WriteDataContainer* wdc, DataSampleElement* element) {
+  void prep_delayed_deliver(WriteDataContainer* wdc, DataSampleElement* element)
+  {
     this->element_to_deliver_ = element;
     this->delayed_deliver_container_ = wdc;
   }
 
-
-  void delayed_deliver () {
+  void delayed_deliver()
+  {
     ACE_GUARD (ACE_Recursive_Thread_Mutex,
         guard,
         this->lock_wdc(delayed_deliver_container_));
 
     this->delayed_deliver_container_->data_delivered(this->element_to_deliver_);
     this->log_send_state_lists("DDS_TEST data_delivered complete:", this->delayed_deliver_container_);
-
   }
 
-  void log_send_state_lists (std::string description, WriteDataContainer* wdc) const {
+  void log_send_state_lists (std::string description, WriteDataContainer* wdc) const
+  {
     ACE_DEBUG((LM_DEBUG, "\n%T %C\n\tTest Data Container send state lists: unsent(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
                description.c_str(),
                wdc->unsent_data_.size(),
@@ -109,14 +117,16 @@ public:
                wdc->instances_.size()));
   }
 
-  void log_perceived_qos_limits (WriteDataContainer* wdc) const {
+  void log_perceived_qos_limits (WriteDataContainer* wdc) const
+  {
     ACE_DEBUG((LM_DEBUG, "Test Data Container perceived qos limits: max_samples_per_instance(%d), max_num_instances(%d), max_num_samples(%d)\n",
                wdc->max_samples_per_instance_,
                wdc->max_num_instances_,
                wdc->max_num_samples_));
   }
 
-  void log_dw_qos_limits (DataWriterQos& qos) const {
+  void log_dw_qos_limits (DataWriterQos& qos) const
+  {
     ACE_DEBUG((LM_DEBUG, "DW qos limits: history_depth(%d) <= max_samples_per_instance(%d) <= max_samples(%d), max_instances(%d)\n",
                qos.history.depth,
                qos.resource_limits.max_samples_per_instance,
@@ -124,64 +134,68 @@ public:
                qos.resource_limits.max_instances));
   }
 
-  ACE_Recursive_Thread_Mutex& lock_wdc(WriteDataContainer* wdc) {return wdc->lock_;}
+  ACE_Recursive_Thread_Mutex& lock_wdc(WriteDataContainer* wdc) { return wdc->lock_; }
 
   WriteDataContainer* get_test_data_container(::DDS::DataWriterQos dw_qos, Test::SimpleDataWriterImpl* fast_dw)
   {
     const bool reliable = dw_qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
-              bool resource_blocking = false;
+    bool resource_blocking = false;
 
-              size_t n_chunks = TheServiceParticipant->n_chunks();
-              int depth = dw_qos.resource_limits.max_samples_per_instance;
-              if (depth == DDS::LENGTH_UNLIMITED)
-                depth = 0x7fffffff;
+    size_t n_chunks = TheServiceParticipant->n_chunks();
 
-              if (dw_qos.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-                n_chunks = dw_qos.resource_limits.max_samples;
+    int mspi = dw_qos.resource_limits.max_samples_per_instance;
+    if (mspi == DDS::LENGTH_UNLIMITED)
+      mspi = 0x7fffffff;
 
-                if (dw_qos.resource_limits.max_instances == DDS::LENGTH_UNLIMITED) {
-                  resource_blocking = true;
+    int depth = (dw_qos.history.kind == DDS::KEEP_ALL_HISTORY_QOS ||
+                 dw_qos.history.depth == DDS::LENGTH_UNLIMITED) ? 0x7fffffff : dw_qos.history.depth;
 
-                } else {
-                  resource_blocking =
-                    (dw_qos.resource_limits.max_samples < dw_qos.resource_limits.max_instances)
-                    || (dw_qos.resource_limits.max_samples <
-                        (dw_qos.resource_limits.max_instances * depth));
-                }
-              }
-            #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-              // Get data durability cache if DataWriter QoS requires durable
-              // samples.  Publisher servant retains ownership of the cache.
-              DataDurabilityCache* const durability_cache =
-                TheServiceParticipant->get_data_durability_cache(dw_qos.durability);
-            #endif
+    if (dw_qos.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
+      n_chunks = dw_qos.resource_limits.max_samples;
 
-              CORBA::Long max_instances = 0;
+      if (dw_qos.resource_limits.max_instances == DDS::LENGTH_UNLIMITED) {
+        resource_blocking = true;
 
-              if (reliable && dw_qos.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
-                max_instances = dw_qos.resource_limits.max_instances;
+      } else {
+        resource_blocking =
+          (dw_qos.resource_limits.max_samples < dw_qos.resource_limits.max_instances)
+          || (dw_qos.resource_limits.max_samples <
+          (dw_qos.resource_limits.max_instances * depth));
+      }
+    }
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+  // Get data durability cache if DataWriter QoS requires durable
+  // samples.  Publisher servant retains ownership of the cache.
+    DataDurabilityCache* const durability_cache =
+      TheServiceParticipant->get_data_durability_cache(dw_qos.durability);
+#endif
 
-              CORBA::Long max_total_samples = 10;
+    CORBA::Long max_instances = 0;
 
-              if (reliable && resource_blocking)
-                max_total_samples = dw_qos.resource_limits.max_samples;
+    if (reliable && dw_qos.resource_limits.max_instances != DDS::LENGTH_UNLIMITED)
+      max_instances = dw_qos.resource_limits.max_instances;
 
-              return new WriteDataContainer(fast_dw,
-                                            depth,
-                                            depth,
-                                            dw_qos.reliability.max_blocking_time,
-                                            n_chunks,
-                                            MY_DOMAIN,
-                                            MY_TOPIC,
-                                            MY_TYPE,
-                                    #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-                                            durability_cache,
-                                            dw_qos.durability_service,
-                                    #endif
-                                            max_instances,
-                                            max_total_samples);
+    CORBA::Long max_total_samples = 10;
 
+    if (reliable && resource_blocking)
+      max_total_samples = dw_qos.resource_limits.max_samples;
+
+    return new WriteDataContainer(fast_dw,
+                                  mspi,
+                                  depth,
+                                  mspi,
+                                  dw_qos.reliability.max_blocking_time,
+                                  n_chunks,
+                                  MY_DOMAIN,
+                                  MY_TOPIC,
+                                  MY_TYPE,
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+                                  durability_cache,
+                                  dw_qos.durability_service,
+#endif
+                                  max_instances,
+                                  max_total_samples);
   }
 
   void get_default_datawriter_qos(::DDS::DataWriterQos& initial_DataWriterQos_) {
@@ -735,10 +749,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           test->get_default_datawriter_qos(dw_qos);
 
-          dw_qos.history.depth = 2;
+          dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
           dw_qos.resource_limits.max_samples = MAX_SAMPLES;
-          dw_qos.resource_limits.max_samples_per_instance = dw_qos.history.depth;
+          dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
 
           Test::SimpleDataWriterImpl* fast_dw = new Test::SimpleDataWriterImpl();
           test->substitute_dw_particpant(fast_dw, tpi);
