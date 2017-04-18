@@ -2379,20 +2379,18 @@ RtpsUdpDataLink::send_heartbeats()
       send_strategy_->send_rtps_control(mb, recipients);
     }
   }
+
+  OPENDDS_VECTOR(CallbackType) tmp_readerDoesNotExistCallbacks;
+  tmp_readerDoesNotExistCallbacks.swap(readerDoesNotExistCallbacks_);
+
   c.release();
   g.release();
 
-  while(true) {
-    c.acquire();
-    if (readerDoesNotExistCallbacks_.empty()) {
-      break;
-    }
-    OPENDDS_VECTOR(CallbackType)::iterator iter = readerDoesNotExistCallbacks_.begin();
-    const RepoId& rid = iter->first;
-    const InterestingRemote& remote = iter->second;
-    readerDoesNotExistCallbacks_.erase(iter);
-    c.release();
-    remote.listener->reader_does_not_exist(rid, remote.localid);
+  for (OPENDDS_VECTOR(CallbackType)::iterator iter = tmp_readerDoesNotExistCallbacks.begin();
+       iter != tmp_readerDoesNotExistCallbacks.end(); ++iter ) {
+     const RepoId& rid = iter->first;
+     const InterestingRemote& remote = iter->second;
+     remote.listener->reader_does_not_exist(rid, remote.localid);
   }
 
   for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
