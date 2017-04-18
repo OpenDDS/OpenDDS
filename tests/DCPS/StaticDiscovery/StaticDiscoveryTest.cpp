@@ -172,14 +172,6 @@ public:
       }
     }
 
-    // ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is waiting for acknowledgements\n", writers_[thread_id].c_str()));
-    // DDS::Duration_t timeout = { 30, 0 };
-    // message_writer->wait_for_acknowledgments(timeout);
-    // // With static discovery, it's not an error for wait_for_acks to fail
-    // // since the peer process may have terminated before sending acks.
-    // ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is done\n", writers_[thread_id].c_str()));
-
-
     while (true) {
       ACE_OS::sleep(1);
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
@@ -192,14 +184,6 @@ public:
       if (matches.current_count == 0) {
         break;
       }
-
-      // DDS::Duration_t timeout = { 30, 0 };
-      // if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-      //   ACE_ERROR_RETURN((LM_ERROR,
-      //                     ACE_TEXT("ERROR: %N:%l: main() -")
-      //                     ACE_TEXT(" wait failed!\n")),
-      //                    -1);
-      // }
     }
     ws->detach_condition(condition);
 
