@@ -527,6 +527,8 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         }
         heartbeat_counts_.erase(rw->first);
         writers_.erase(rw);
+      } else {
+        process_acked_by_all_i(g, local_id);
       }
     }
 
