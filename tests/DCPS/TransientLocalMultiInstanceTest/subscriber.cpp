@@ -142,7 +142,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   }
   catch (CORBA::Exception& e) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SUB: Exception caught in main(): %C\n"), e));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SUB: Exception caught in main(): %C\n"), e._info().c_str()));
     return 1;
   }
 

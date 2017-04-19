@@ -63,7 +63,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       }
     }
   } catch (CORBA::Exception& e) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Exception caught in read:\n%C\n"), e));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Exception caught in read:\n%C\n"), e._info().c_str()));
     exit(1);
   }
 }

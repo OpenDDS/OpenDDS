@@ -296,7 +296,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   catch (CORBA::Exception& e) {
 
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PUB: Exception caught in main.cpp: %C\n"), e));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PUB: Exception caught in main.cpp: %C\n"), e._info().c_str()));
     exit(1);
   }
 
