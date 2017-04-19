@@ -93,11 +93,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       listener1,
       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(dr1)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datareader durable failed.\n")));;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datareader dr1 durable failed.\n")));;
       exit(1);
     }
     else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader durable success.\n")));;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader dr1 durable success.\n")));;
     }
 
     //Now create the publisher
@@ -118,17 +118,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     dw_qos.history.depth = 1;
     dw_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
 
-    DDS::DataWriter_var dw =
+    DDS::DataWriter_var dw1 =
       pub->create_datawriter(topic,
         dw_qos,
         0,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(dw)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+    if (CORBA::is_nil(dw1)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datawriter dw1 failed.\n")));
       exit(1);
     }
 
-    MessageDataWriter_var message_dw = MessageDataWriter::_narrow(dw);
+    MessageDataWriter_var message_dw = MessageDataWriter::_narrow(dw1);
 
     const ACE_Time_Value writer_delay(0, 100 * 1000);
 
@@ -179,7 +179,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         0,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(dw2)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datawriter dw2 failed.\n")));
       exit(1);
     }
 
@@ -255,11 +255,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       listener2,
       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(dr2)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datareader durable failed.\n")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datareader dr2 durable failed.\n")));
       exit(1);
     }
     else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader durable success.\n")));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader dr2 durable success.\n")));
     }
 
     while (listener_servant2->num_reads() < expected) {
@@ -278,7 +278,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     while (true) {
       DDS::PublicationMatchedStatus pubmatched, pubmatched2;
-      if (dw->get_publication_matched_status(pubmatched) != DDS::RETCODE_OK || dw2->get_publication_matched_status(pubmatched2) != DDS::RETCODE_OK) {
+      if (dw1->get_publication_matched_status(pubmatched) != DDS::RETCODE_OK || dw2->get_publication_matched_status(pubmatched2) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status\n")));
         break;
