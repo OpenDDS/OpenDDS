@@ -132,14 +132,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     const ACE_Time_Value writer_delay(0, 100 * 1000);
 
-    Message message;
-    message.subject_id = 11111;
-    DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+    Message message_instance1;
+    message_instance1.subject_id = 11111;
+    DDS::InstanceHandle_t handle_instance1 = message_dw->register_instance(message_instance1);
 
-    message.from = "Comic Book Guy";
-    message.subject = "Review";
-    message.text = "Worst. Movie. Ever.";
-    message.count = 1;
+    message_instance1.from = "Comic Book Guy";
+    message_instance1.subject = "Review";
+    message_instance1.text = "Worst. Movie. Ever.";
+    message_instance1.count = 1;
 
     Message message_instance2;
     message_instance2.subject_id = 22222;
@@ -150,27 +150,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     message_instance2.text = "Worst. Movie. Ever. - Instance 2";
     message_instance2.count = 2;
 
-    DDS::ReturnCode_t ret = message_dw->write(message, handle);
+    DDS::ReturnCode_t ret = message_dw->write(message_instance1, handle_instance1);
 
-    if (ret != DDS::RETCODE_OK)
-    {
+    if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: %dth write() returned %d.\n"),
-        message.count, ret));
-    }
-    else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote message : %d\n"), message.count));
+        ACE_TEXT("(%P|%t) ERROR: instance: %d message: %d - write() returned %d.\n"),
+        message_instance1.subject_id, message_instance1.count, ret));
+    } else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote instance: %d message : %d\n"),
+        message_instance1.subject_id, message_instance1.count));
     }
 
     ret = message_dw->write(message_instance2, handle_instance2);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: %dth write() returned %d.\n"),
+        ACE_TEXT("(%P|%t) ERROR: instance: %d message: %d - write() returned %d.\n"),
         message_instance2.count, ret));
-    }
-    else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote message_instance2: %d\n"), message_instance2.count));
+    } else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote instance: %d message : %d\n"),
+        message_instance2.subject_id, message_instance2.count));
     }
 
     DDS::DataWriter_var dw2 =
@@ -205,26 +204,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     ret = message_dw2->write(message_instance3, handle_instance3);
 
-    if (ret != DDS::RETCODE_OK)
-    {
+    if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: %dth write() returned %d.\n"),
-        message_instance3.count, ret));
-    }
-    else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote message_instance3: %d\n"), message_instance3.count));
+        ACE_TEXT("(%P|%t) ERROR: instance: %d message: %d - write() returned %d.\n"),
+        message_instance3.subject_id, message_instance3.count, ret));
+    } else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote instance: %d message : %d\n"),
+        message_instance3.subject_id, message_instance3.count));
     }
 
     ret = message_dw2->write(message_instance4, handle_instance4);
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: %dth write() returned %d.\n"),
-        message_instance4.count, ret));
+        ACE_TEXT("(%P|%t) ERROR: instance: %d message: %d - write() returned %d.\n"),
+        message_instance4.subject_id, message_instance4.count, ret));
+    } else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote instance: %d message : %d\n"),
+        message_instance4.subject_id, message_instance4.count));
     }
-    else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) wrote message_instance4: %d\n"), message_instance4.count));
-    }
+
     const int expected = 4;
     while (listener_servant1->num_reads() < expected) {
       ACE_OS::sleep(1);
@@ -233,8 +232,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ok = listener_servant1->ok_;
     if (ok) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Reader 1 in pub process received all samples\n")));
-    }
-    else {
+    } else {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Reader 1 in pub process failed to receive expected number of samples\n")));
     }
@@ -257,8 +255,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (CORBA::is_nil(dr2)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datareader dr2 durable failed.\n")));
       exit(1);
-    }
-    else {
+    } else {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader dr2 durable success.\n")));
     }
 
@@ -270,8 +267,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ok = listener_servant2->ok_;
       if (ok) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Reader 2 in pub process received all samples\n")));
-      }
-      else {
+      } else {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: Reader 2 in pub process failed to receive expected number of samples\n")));
       }
@@ -292,10 +288,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
     TheServiceParticipant->shutdown();
-
   }
   catch (CORBA::Exception& e) {
-
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PUB: Exception caught in main.cpp: %C\n"), e._info().c_str()));
     exit(1);
   }
