@@ -51,7 +51,7 @@ public:
   bool ok_;
 
 private:
-  long num_reads_, last_non_durable_;
+  long num_reads_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

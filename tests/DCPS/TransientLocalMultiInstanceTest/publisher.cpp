@@ -126,7 +126,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     const ACE_Time_Value writer_delay(0, 100 * 1000);
 
     Message message_instance1;
-    message_instance1.subject_id = 11111;
+    message_instance1.subject_id = 1;
     DDS::InstanceHandle_t handle_instance1 = message_dw->register_instance(message_instance1);
 
     message_instance1.from = "Comic Book Guy";
@@ -135,7 +135,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     message_instance1.count = 1;
 
     Message message_instance2;
-    message_instance2.subject_id = 22222;
+    message_instance2.subject_id = 2;
     DDS::InstanceHandle_t handle_instance2 = message_dw->register_instance(message_instance2);
 
     message_instance2.from = "Comic Book Guy - Instance 2";
@@ -178,7 +178,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     MessageDataWriter_var message_dw2 = MessageDataWriter::_narrow(dw2);
 
     Message message_instance3;
-    message_instance3.subject_id = 33333;
+    message_instance3.subject_id = 3;
     DDS::InstanceHandle_t handle_instance3 = message_dw2->register_instance(message_instance3);
 
     message_instance3.from = "Comic Book Guy - Instance 3";
@@ -187,7 +187,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     message_instance3.count = 3;
 
     Message message_instance4;
-    message_instance4.subject_id = 44444;
+    message_instance4.subject_id = 4;
     DDS::InstanceHandle_t handle_instance4 = message_dw2->register_instance(message_instance4);
 
     message_instance4.from = "Comic Book Guy - Instance 4";
@@ -265,7 +265,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           ACE_TEXT("(%P|%t) ERROR: Reader 2 in pub process failed to receive expected number of samples\n")));
       }
     }
+
+    int ten = 0;
     while (true) {
+      ++ten;
       DDS::PublicationMatchedStatus pubmatched, pubmatched2;
       if (dw1->get_publication_matched_status(pubmatched) != DDS::RETCODE_OK || dw2->get_publication_matched_status(pubmatched2) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
@@ -276,7 +279,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         // subscriber has come and gone
         break;
       }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) pubmatched current_count : %d total_count : %d pubmatched2 current_count : %d total_count : %d\n"), pubmatched.current_count, pubmatched.total_count, pubmatched2.current_count, pubmatched2.total_count));
+      if (ten % 100000 == 0) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) pubmatched current_count : %d total_count : %d pubmatched2 current_count : %d total_count : %d\n"),
+          pubmatched.current_count, pubmatched.total_count, pubmatched2.current_count, pubmatched2.total_count));
+      }
     }
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
