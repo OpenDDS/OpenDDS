@@ -1,0 +1,8 @@
+A test for TRANSIENT_LOCAL_DURABILITY_QOS implementation when multiple
+instances are being published.  Tests whether an early joining sub in
+a separate process from the pub, an early joining sub in the same
+process as the pub, a late joining sub in the same process as the pub,
+and a late joining sub in a separate process will all receive the
+single message from each of the 4 published instances.
+The datawriter with the TRANSIENT_LOCAL_DURABILITY_QOS durability should
+resend the sending and sent samples to the newly associated datareaders.
