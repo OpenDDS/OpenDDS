@@ -112,6 +112,8 @@ protected:
 
   virtual ~TransportInst();
 
+  void set_port_in_addr_string(OPENDDS_STRING& addr_str, ushort port_number);
+
 private:
 
   /// Adjust the configuration values which gives warning on adjusted

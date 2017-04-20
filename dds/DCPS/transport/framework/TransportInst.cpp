@@ -124,4 +124,27 @@ OpenDDS::DCPS::TransportInst::impl()
   return this->impl_;
 }
 
+void
+OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, ushort port_number)
+{
+  const int BUFSIZE=1024;
+  char result[BUFSIZE];
+
+  if (std::count(addr_str.begin(), addr_str.end(), ':') < 2) {
+    OPENDDS_STRING::size_type pos = addr_str.find_last_of(":");
+    snprintf(result, BUFSIZE, "%.*s:%hu", static_cast<int>(pos), addr_str.c_str(), port_number);
+  }
+  else {
+    // this is the numeric form of ipv6 address because it has more than one ':'
+    if (addr_str[0] != '[') {
+      snprintf(result, BUFSIZE, "[%s]:%hu", addr_str.c_str(), port_number);
+    }
+    else {
+      OPENDDS_STRING::size_type pos = addr_str.find_last_of("]");
+      snprintf(result, BUFSIZE, "%.*s:%hu", static_cast<int>(pos+1), addr_str.c_str(), port_number);
+    }
+  }
+  addr_str = result;
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
