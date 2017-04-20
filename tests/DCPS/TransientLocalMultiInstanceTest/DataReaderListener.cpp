@@ -53,7 +53,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: reader received DDS::RETCODE_NO_DATA!\n")));
         ok_ = false;
       } else {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: read Message: Error: %C\n"), status));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: read Message: Error: %d\n"), status));
         ok_ = false;
       }
     }
