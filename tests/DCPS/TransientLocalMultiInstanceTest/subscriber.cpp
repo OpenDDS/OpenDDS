@@ -92,7 +92,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     const int expected = 4;
-    while (listener_servant->num_reads() < expected) {
+    while (listener_servant->num_reads() < expected || !listener_servant->received_all_expected_messages()) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) listener current has read: %d samples. (waiting for %d)\n"), listener_servant->num_reads(), expected));
       ACE_OS::sleep(1);
     }

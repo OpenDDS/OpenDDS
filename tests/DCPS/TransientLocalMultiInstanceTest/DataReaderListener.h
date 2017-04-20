@@ -5,6 +5,7 @@
 
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DCPS/LocalObject.h>
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -44,14 +45,14 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  long num_reads() const {
-    return num_reads_;
-  }
+  long num_reads() const;
+
+  bool received_all_expected_messages() const;
 
   bool ok_;
 
 private:
-  long num_reads_;
+  std::map<int, int> read_intances_message_count_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

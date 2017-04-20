@@ -11,7 +11,7 @@ using namespace Messenger;
 using namespace std;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : ok_(true), num_reads_(0)
+  : ok_(true), read_intances_message_count_()
 {
   ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl[%@]\n", this));
 }
@@ -36,13 +36,17 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     if (si.valid_data) {
       if (status == DDS::RETCODE_OK) {
 
-        ++num_reads_;
-
+        if (read_intances_message_count_.count(message.subject_id)) {
+          ++read_intances_message_count_.at(message.subject_id);
+        }
+        else {
+          read_intances_message_count_.insert(std::make_pair(message.subject_id, 1));
+        }
         ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListenerImpl[%@]::on_data_available - instance: %d count = %d\n", this,
               message.subject_id, message.count));
         if (message.count != message.subject_id) {
           ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received wrong data (instance: %d msg count = %d and num_reads = %d)\n",
-            message.subject_id, message.count, num_reads_));
+            message.subject_id, message.count, num_reads()));
           ok_ = false;
         }
       } else if (status == DDS::RETCODE_NO_DATA) {
@@ -99,4 +103,29 @@ void DataReaderListenerImpl::on_sample_lost(
   const DDS::SampleLostStatus&)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
+}
+
+long DataReaderListenerImpl::num_reads() const
+{
+  long num_reads = 0;
+  std::map<int, int>::const_iterator map_iter = read_intances_message_count_.begin();
+  for (; map_iter != read_intances_message_count_.end(); ++map_iter) {
+    num_reads += map_iter->second;
+  }
+  return num_reads;
+}
+
+bool DataReaderListenerImpl::received_all_expected_messages() const
+{
+  for (int i = 0; i < 4; ++i) {
+    int message_instance = i + 1;
+    if (!read_intances_message_count_.count(message_instance))
+    {
+      return false;
+    }
+    else if(!(read_intances_message_count_.at(message_instance) == 1)){
+      return false;
+    }
+  }
+  return true;
 }

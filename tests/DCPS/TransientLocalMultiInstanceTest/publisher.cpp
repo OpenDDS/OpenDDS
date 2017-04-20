@@ -218,7 +218,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     const int expected = 4;
-    while (listener_servant1->num_reads() < expected) {
+    while (listener_servant1->num_reads() < expected || !listener_servant1->received_all_expected_messages()) {
       ACE_OS::sleep(1);
     }
 
@@ -252,7 +252,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader dr2 durable success.\n")));
     }
 
-    while (listener_servant2->num_reads() < expected) {
+    while (listener_servant2->num_reads() < expected || !listener_servant2->received_all_expected_messages()) {
       ACE_OS::sleep(1);
     }
 
