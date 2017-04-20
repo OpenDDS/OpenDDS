@@ -102,18 +102,11 @@ public:
     local_address_str_ += ":" + to_dds_string(port_number);
     local_address_.set(port_number, host_name);
   }
-  bool local_address_set_port(u_short port_number) {
+  void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);
-    ACE_TCHAR buf[1024];
-    if (local_address_.addr_to_string(buf, 1024) == 0) {
-      local_address_str_ = ACE_TEXT_ALWAYS_CHAR(buf);
-      return true;
-    }
-    else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TcpInst::local_address_set_port():")
-                           ACE_TEXT(" failure to convert local IP address to text representation\n")));
-      return false;
-    }
+    size_t pos = local_address_str_.find_last_of(":");
+    OPENDDS_STRING host_name = local_address_str_.substr(0, pos);
+    local_address_str_ = host_name + ":" + to_dds_string(port_number);
   }
 
 private:

@@ -97,8 +97,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) UdpDataLink::open listening on port %hu\n"),
               port), 2);
-    if (!this->config_->local_address_set_port(port))
-      return false;
+    this->config_->local_address_set_port(port);
   }
 
   if (this->config_->send_buffer_size_ > 0) {

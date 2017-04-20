@@ -417,7 +417,7 @@ TcpTransport::configure_i(TransportInst* config)
   // Now we got the actual listening port. Update the port number in the configuration
   // if it's 0 originally.
   else if (tcp_config->local_address().get_port_number() == 0) {
-    return tcp_config->local_address_set_port(port);
+    tcp_config->local_address_set_port(port);
   }
 
   // Ahhh...  The sweet smell of success!
