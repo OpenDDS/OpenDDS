@@ -37,7 +37,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       if (status == DDS::RETCODE_OK) {
 
         if (read_intances_message_count_.count(message.subject_id)) {
-          ++read_intances_message_count_.at(message.subject_id);
+          read_intances_message_count_[message.subject_id] += 1;
         }
         else {
           read_intances_message_count_.insert(std::make_pair(message.subject_id, 1));
@@ -123,8 +123,11 @@ bool DataReaderListenerImpl::received_all_expected_messages() const
     {
       return false;
     }
-    else if(!(read_intances_message_count_.at(message_instance) == 1)){
-      return false;
+    else {
+      std::map<int, int>::const_iterator search = read_intances_message_count_.find(message_instance);
+      if (search == read_intances_message_count_.end() || 1 != search->second) {
+        return false;
+      }
     }
   }
   return true;
