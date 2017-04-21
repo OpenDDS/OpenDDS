@@ -898,10 +898,9 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
   try {
     DDS::QueryCondition_var qc = new QueryConditionImpl(this, sample_states,
         view_states, instance_states, query_expression);
-    if (qc->set_query_parameters (query_parameters) != DDS::RETCODE_OK)
-      {
-        return DDS::QueryCondition::_nil ();
-      }
+    if (qc->set_query_parameters(query_parameters) != DDS::RETCODE_OK) {
+      return 0;
+    }
     DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(qc);
     read_conditions_.insert(rc);
     return qc._retn();
@@ -912,7 +911,7 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
           e.what()));
     }
   }
-  return DDS::QueryCondition::_nil ();
+  return 0;
 }
 #endif
 
