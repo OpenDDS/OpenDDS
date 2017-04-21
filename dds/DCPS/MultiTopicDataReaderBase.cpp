@@ -50,7 +50,6 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     resulting_reader_);
 
   init_typed(resulting_reader_);
-  listener_ = new Listener(this);
 
   std::map<OPENDDS_STRING, OPENDDS_STRING> fieldToTopic;
 
@@ -68,7 +67,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     }
 
     DDS::DataReader_var incoming =
-      parent->create_datareader(t, dr_qos, listener_, ALL_STATUS_MASK);
+      parent->create_datareader(t, dr_qos, &listener_, ALL_STATUS_MASK);
     if (!incoming.in()) {
       throw runtime_error("Could not create incoming DataReader "
         + selection[i]);
@@ -238,6 +237,21 @@ void MultiTopicDataReaderBase::Listener::on_subscription_matched(
 void MultiTopicDataReaderBase::Listener::on_sample_lost(DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
 {
+}
+
+void MultiTopicDataReaderBase::Listener::_add_ref (void)
+{
+  outer_->_add_ref();
+}
+
+void MultiTopicDataReaderBase::Listener::_remove_ref (void)
+{
+  outer_->_remove_ref();
+}
+
+CORBA::ULong MultiTopicDataReaderBase::Listener::_refcount_value (void) const
+{
+  return outer_->_refcount_value();
 }
 
 void MultiTopicDataReaderBase::set_status_changed_flag(DDS::StatusKind status,
