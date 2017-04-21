@@ -112,7 +112,7 @@ protected:
 
   virtual ~TransportInst();
 
-  void set_port_in_addr_string(OPENDDS_STRING& addr_str, ushort port_number);
+  void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
 
 private:
 
