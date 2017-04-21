@@ -336,7 +336,7 @@ private:
 
   void notify_reactor();
 
-  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_SYNCH_RECURSIVE_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.
 #ifndef OPENDDS_SAFETY_PROFILE
