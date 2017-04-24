@@ -101,7 +101,7 @@ before_script:
     fi
 
 script:
-  - travis_wait 40 make -s -j 6
+  - travis_wait 45 make -s -j 6
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
         cd $DDS_ROOT/build/target/tests/FACE/Messenger;
