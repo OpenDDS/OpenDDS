@@ -58,7 +58,7 @@ void
 OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
   OpenDDS::DCPS::SubscriptionInstance_rch instance)
 {
-  if (instance->deadline_timer_id_ != -1) {
+  if (instance && instance->deadline_timer_id_ != -1) {
     Watchdog::cancel_timer(instance->deadline_timer_id_);
     instance->deadline_timer_id_ = -1;
     if (DCPS_debug_level > 5) {

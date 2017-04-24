@@ -1519,7 +1519,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     if (filtered) break; // sample filtered from instance
 
-    accept_sample_processing(instance, header, is_new_instance);
+    if (instance) accept_sample_processing(instance, header, is_new_instance);
   }
   break;
 
