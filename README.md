@@ -14,7 +14,7 @@ capabilities of TAO (http://www.theaceorb.com/), such as its IDL compiler
 and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 
 The primary development of OpenDDS was done by the ACE/TAO development
-team at Object Computing, Incorporated (http://www.ociweb.com) in
+team at Object Computing, Incorporated (http://www.objectcomputing.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
@@ -24,7 +24,7 @@ This directory structure contains OpenDDS
 # Documentation
 
 The OpenDDS Developer's Guide is freely downloadable at:
-http://download.ociweb.com/OpenDDS/
+http://download.objectcomputing.com/OpenDDS/
 
 The TAO Developer's Guide book set may also be purchased from:
 http://www.theaceorb.com/purchase/index.html
@@ -34,7 +34,7 @@ http://www.theaceorb.com/purchase/index.html
 
 OCI strives to make OpenDDS as bug free as possible.  If you encounter
 any problems with this release please fill out the PROBLEM-REPORT-FORM
-file found in this directory and send to support@ociweb.com.
+file found in this directory and send to support@objectcomputing.com.
 
 If you desire responsive commercial support for OCI on any problems
 you encounter, we strongly recommend that you set up an account before
@@ -44,8 +44,10 @@ However, we do offer premium level accounts for customers with
 specific support and enhancement needs, and there may be ongoing
 charges for such premium service.  To set up a support account or to
 find out more about the support options available, please contact
-sales@ociweb.com.
+sales@objectcomputing.com.
 
+Please find additional information and support options at:
+http://opendds.org/support.html
 
 # Features
 
@@ -140,7 +142,7 @@ Embedded/Mobile/IoT:
 
 We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
 system and performance tests (but not the entire regression test suite).
-Please contact sales@ociweb.com or opendds-main@lists.sourceforge.net for
+Please contact sales@objectcomputing.com or opendds-main@lists.sourceforge.net for
 more information on support for ACE, TAO, and OpenDDS on VxWorks.
 OCI's packages for ACE, TAO, and OpenDDS can be obtained on the Wind River
 Marketplace at:
@@ -176,4 +178,4 @@ see the INSTALL file in this directory.
 # OpenDDS Compliance with the DDS Specification
 
 See http://www.opendds.org and the OpenDDS Developer's Guide at:
-http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
+http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf

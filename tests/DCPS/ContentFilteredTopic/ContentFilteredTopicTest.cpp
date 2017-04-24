@@ -109,16 +109,15 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   dr_qos_durable.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
     "MyTopic-Filtered", topic, "key > 1", StringSeq());
-  if (CORBA::is_nil (cft.in ())) {
-    cout << "ERROR: creating cft failed"
-         << endl;
+  if (!cft) {
+    cout << "ERROR: creating cft failed" << endl;
     return false;
   }
   DataReader_var dr =
     sub->create_datareader(cft, dr_qos_durable, 0, DEFAULT_STATUS_MASK);
   TopicDescription_var td = dr->get_topicdescription();
   ContentFilteredTopic_var cft_from_td = ContentFilteredTopic::_narrow(td);
-  if (CORBA::is_nil (cft_from_td.in ())) {
+  if (!cft_from_td) {
     cout << "ERROR: get_topicdescription() did not return the CFT\n";
     return false;
   }
@@ -128,7 +127,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   DataReader_var sub2_dr =
     sub2->create_datareader(cft, dr_qos, 0, DEFAULT_STATUS_MASK);
   DDS::StringSeq mytopicfiltered2_params(1);
-  mytopicfiltered2_params.length (1);
+  mytopicfiltered2_params.length(1);
   ContentFilteredTopic_var cft2 = dp->create_contentfilteredtopic(
     "MyTopic-Filtered2", topic, "key > %0", mytopicfiltered2_params);
   DataReader_var sub2_dr2 =
@@ -158,7 +157,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   // Create a cft where the parameter sequence doesn't match the size
   DDS::StringSeq paramssize(2);
-  paramssize.length (2);
+  paramssize.length(2);
   ContentFilteredTopic_var cft3 = dp->create_contentfilteredtopic(
     "MyTopic-Filtered3", topic, "key > %0", paramssize);
   if (cft3) {
@@ -180,7 +179,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   }
 
   DDS::StringSeq params_empty(0);
-  params_empty.length (0);
+  params_empty.length(0);
   if (cft2->set_expression_parameters(params_empty) != RETCODE_ERROR) {
     cout << "ERROR: setting empty parameters should return an error"
          << endl;

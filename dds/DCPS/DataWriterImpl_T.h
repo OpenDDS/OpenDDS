@@ -174,7 +174,7 @@ namespace OpenDDS {
         if (ret != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ")
-                            ACE_TEXT("%CDataWriterImpl::write, ")
+                            ACE_TEXT("%CDataWriterImpl::write_w_timestamp, ")
                             ACE_TEXT("register failed err=%d.\n"),
                             TraitsType::type_name(),
                             ret),

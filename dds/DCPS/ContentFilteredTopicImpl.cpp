@@ -31,9 +31,9 @@ ContentFilteredTopicImpl::ContentFilteredTopicImpl(const char* name,
 {
   if (DCPS_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) ContentFilteredTopicImpl::ContentFilteredTopicImpl() - ")
-              ACE_TEXT("Creating cft with filter <%C> which requires <%d> parameters\n"),
-              filter_expression, filter_eval_.number_parameters ()));
+      ACE_TEXT("(%P|%t) ContentFilteredTopicImpl::ContentFilteredTopicImpl() - ")
+      ACE_TEXT("Creating cft with filter <%C> which requires <%d> parameters\n"),
+      filter_expression, filter_eval_.number_parameters()));
   }
 }
 
@@ -65,16 +65,16 @@ ContentFilteredTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
 
   const CORBA::ULong len = p.length();
 
-  // Check sequence of strings that give values to the ‘parameters’ (i.e., "%n" tokens)
+  // Check sequence of strings that give values to the 'parameters' (i.e., "%n" tokens)
   // in the filter_expression matches the size of the parameter sequence.
   // The tokens start with 0 which means that when the maximum number used is 1 we need
-  // two parameters, (zero and one)
-  if (len != filter_eval_.number_parameters ()) {
+  // two parameters: %0 and %1
+  if (len != filter_eval_.number_parameters()) {
     if (DCPS_debug_level > 1) {
         ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ContentFilteredTopicImpl::set_expression_parameters() - ")
-                  ACE_TEXT("passed incorrect set of filter parameters, expected %d received %d\n"),
-                  filter_eval_.number_parameters (), len));
+          ACE_TEXT("(%P|%t) ContentFilteredTopicImpl::set_expression_parameters() - ")
+          ACE_TEXT("passed incorrect set of filter parameters, expected %d received %d\n"),
+          filter_eval_.number_parameters(), len));
     }
     return DDS::RETCODE_ERROR;
   }

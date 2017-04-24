@@ -197,3 +197,44 @@ bool composite_generator::gen_union_fwd(AST_UnionFwd* uf, UTL_ScopedName* name,
 
   return true;
 }
+
+NestedForLoops::NestedForLoops(const char* type, const char* prefix,
+                               AST_Array* arr, std::string& indent,
+                               bool followTypedefs)
+  : n_(arr->n_dims())
+  , indent_(indent)
+{
+  std::ostringstream index_oss;
+  size_t i = 0, j = 0;
+  while (true) {
+    for (; i < n_; ++i) {
+      be_global->impl_ <<
+        indent << "for (" << type << ' ' << prefix << i << " = 0; " <<
+        prefix << i << " < " << arr->dims()[i - j]->ev()->u.ulval << "; ++" <<
+        prefix << i << ") {\n";
+      indent += "  ";
+      index_oss << "[" << prefix << i << "]";
+    }
+    if (!followTypedefs) {
+      break;
+    }
+    AST_Type* const base =
+      AstTypeClassification::resolveActualType(arr->base_type());
+    if (base->node_type() == AST_Decl::NT_array) {
+      arr = AST_Array::narrow_from_decl(base);
+      n_ += arr->n_dims();
+      j = i;
+    } else {
+      break;
+    }
+  }
+  index_ = index_oss.str();
+}
+
+NestedForLoops::~NestedForLoops()
+{
+  for (size_t i = 0; i < n_; ++i) {
+    indent_.resize(indent_.size() - 2);
+    be_global->impl_ << indent_ << "}\n";
+  }
+}
