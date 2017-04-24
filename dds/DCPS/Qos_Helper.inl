@@ -1087,25 +1087,93 @@ bool Qos_Helper::valid(const DDS::TopicQos& qos)
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
 {
-  return
-    valid(qos.durability)
+  if (!valid(qos.durability))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid durability qos.\n")), false);
+
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    && valid(qos.durability_service)
+  if (!valid(qos.durability_service))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid durability_service qos.\n")), false);
 #endif
-    && valid(qos.deadline)
-    && valid(qos.latency_budget)
-    && valid(qos.liveliness)
-    && valid(qos.destination_order)
-    && valid(qos.history)
-    && valid(qos.resource_limits)
-    && valid(qos.transport_priority)
-    && valid(qos.lifespan)
-    && valid(qos.user_data)
-    && valid(qos.ownership)
+  if (!valid(qos.deadline))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid deadline qos.\n")), false);
+
+  if (!valid(qos.latency_budget))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid latency_budget qos.\n")), false);
+
+  if (!valid(qos.liveliness))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid liveliness qos.\n")), false);
+
+  if (!valid(qos.destination_order))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid destination_order qos.\n")), false);
+
+  if (!valid(qos.history))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid history qos.\n")), false);
+
+  if (!valid(qos.resource_limits))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid resource_limits qos.\n")), false);
+
+  if (!valid(qos.transport_priority))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid transport_priority qos.\n")), false);
+
+  if (!valid(qos.lifespan))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid lifespan qos.\n")), false);
+
+  if (!valid(qos.user_data))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid user_data qos.\n")), false);
+
+  if (!valid(qos.ownership))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid ownership qos.\n")), false);
+
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    && valid(qos.ownership_strength)
+  if (!valid(qos.ownership_strength))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid ownership_strength qos.\n")), false);
 #endif
-    && valid(qos.writer_data_lifecycle);
+  if (!valid(qos.writer_data_lifecycle))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid writer_data_lifecycle qos.\n")), false);
+
+  return true;
 }
 
 ACE_INLINE

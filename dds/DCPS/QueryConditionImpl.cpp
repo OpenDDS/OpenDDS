@@ -26,9 +26,9 @@ QueryConditionImpl::QueryConditionImpl(
 {
   if (DCPS_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) QueryConditionImpl::QueryConditionImpl() - ")
-              ACE_TEXT("Creating qc with query <%C> which requires <%d> parameters\n"),
-              query_expression, evaluator_.number_parameters ()));
+      ACE_TEXT("(%P|%t) QueryConditionImpl::QueryConditionImpl() - ")
+      ACE_TEXT("Creating qc with query <%C> which requires <%d> parameters\n"),
+      query_expression, evaluator_.number_parameters()));
   }
 }
 
@@ -54,12 +54,12 @@ QueryConditionImpl::set_query_parameters(const DDS::StringSeq& query_parameters)
   // in the query_expression matches the size of the parameter sequence.
   // The tokens start with 0 which means that when the maximum number used is 1 we need
   // two parameters, (zero and one)
-  if (query_parameters.length() != evaluator_.number_parameters ()) {
+  if (query_parameters.length() != evaluator_.number_parameters()) {
     if (DCPS_debug_level > 1) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) QueryConditionImpl::set_expression_parameters() - ")
-                  ACE_TEXT("passed incorrect set of query parameters, expected %d received %d\n"),
-                  evaluator_.number_parameters (), query_parameters.length ()));
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) QueryConditionImpl::set_expression_parameters() - ")
+        ACE_TEXT("passed incorrect set of query parameters, expected %d received %d\n"),
+        evaluator_.number_parameters (), query_parameters.length()));
     }
     return DDS::RETCODE_ERROR;
   }

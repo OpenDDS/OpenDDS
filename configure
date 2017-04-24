@@ -389,7 +389,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
-    if (/compiler version (\d+)\.(\d+)/i) { # match i18n version strings
+    if (/version (\d+)\.(\d+)/i) { # match i18n version strings
       my $ver = ($2 == 0) ? $1 : "$1.$2";
       $ver =~ s/0+$// unless $2 == 0;
       if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {

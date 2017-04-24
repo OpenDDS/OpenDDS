@@ -752,7 +752,7 @@ namespace OpenDDS {
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
               && !item->coherent_change_
 #endif
-              ) {
+              && item->registered_data_) {
             if (evaluator.eval(*static_cast< MessageType* >(item->registered_data_), params)) {
               return true;
             }

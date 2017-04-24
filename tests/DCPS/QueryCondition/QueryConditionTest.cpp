@@ -18,21 +18,23 @@ class MessengerListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  MessengerListener(DDS::ReadCondition_ptr rd) : rc_ (DDS::ReadCondition::_duplicate(rd))  {};
+  MessengerListener(DDS::ReadCondition_ptr rd)
+    : rc_(DDS::ReadCondition::_duplicate(rd))
+  {}
 
-  virtual void on_requested_deadline_missed (
+  virtual void on_requested_deadline_missed(
     DDS::DataReader_ptr /*reader*/,
     const DDS::RequestedDeadlineMissedStatus & /*status*/) {}
 
-  virtual void on_requested_incompatible_qos (
+  virtual void on_requested_incompatible_qos(
     DDS::DataReader_ptr /*reader*/,
     const DDS::RequestedIncompatibleQosStatus & /*status*/) {}
 
-  virtual void on_liveliness_changed (
+  virtual void on_liveliness_changed(
     DDS::DataReader_ptr /*reader*/,
     const DDS::LivelinessChangedStatus & /*status*/) {}
 
-  virtual void on_subscription_matched (
+  virtual void on_subscription_matched(
     DDS::DataReader_ptr /*reader*/,
     const DDS::SubscriptionMatchedStatus & /*status*/) {}
 
@@ -45,7 +47,7 @@ public:
     MessageDataReader_var mdr = MessageDataReader::_narrow(reader);
     MessageSeq data;
     SampleInfoSeq infoseq;
-    if (mdr->read_w_condition (data, infoseq, LENGTH_UNLIMITED, rc_.in ()) == RETCODE_ERROR) {
+    if (mdr->read_w_condition(data, infoseq, LENGTH_UNLIMITED, rc_) == RETCODE_ERROR) {
       cout << "ERROR: read_w_condition failed" << endl;
     }
   }
@@ -106,7 +108,7 @@ void complex_test_setup(const DomainParticipant_var& dp,
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
-  dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS  ;
+  dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dr1 = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
   dr2 = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
@@ -156,7 +158,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key > 1", DDS::StringSeq());
-  if (CORBA::is_nil(dr_qc.in())) {
+  if (!dr_qc) {
     cout << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
@@ -218,36 +220,32 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   DataReader_var dr2;
   complex_test_setup(dp, ts, pub, sub, "MyTopicComplex", dw, dr1, dr2);
 
-  ReturnCode_t ret;// = mdw->write(sample, HANDLE_NIL);
-//  if (ret != RETCODE_OK) return false;
-//   if (!waitForSample(dr)) return false;
-
   DDS::StringSeq params(2);
   params.length (2);
   params[0] = "5";
   params[1] = "10";
   QueryCondition_var dr_qc1 = dr1->create_querycondition(NOT_READ_SAMPLE_STATE,
     NEW_VIEW_STATE | NOT_NEW_VIEW_STATE, ANY_INSTANCE_STATE, "( (iteration > %0) AND (iteration < %1) )", params);
-  if (CORBA::is_nil(dr_qc1.in())) {
+  if (!dr_qc1) {
     cout << "ERROR: failed to create QueryCondition 1" << endl;
     return false;
   }
   QueryCondition_var dr_qc2 = dr2->create_querycondition(NOT_READ_SAMPLE_STATE,
     NEW_VIEW_STATE | NOT_NEW_VIEW_STATE, ANY_INSTANCE_STATE, "( (iteration < %0) OR (iteration > %1) )", params);
-  if (CORBA::is_nil(dr_qc2.in())) {
+  if (!dr_qc2) {
     cout << "ERROR: failed to create QueryCondition 2" << endl;
     return false;
   }
 
-  DDS::DataReaderListener_var ml1 = new MessengerListener(dr_qc1.in ());
-  DDS::DataReaderListener_var ml2 = new MessengerListener(dr_qc2.in ());
+  DDS::DataReaderListener_var ml1 = new MessengerListener(dr_qc1);
+  DDS::DataReaderListener_var ml2 = new MessengerListener(dr_qc2);
   MessageDataReader_var mdr1 = MessageDataReader::_narrow(dr1);
   MessageDataReader_var mdr2 = MessageDataReader::_narrow(dr2);
-  mdr1->set_listener (ml1.in (), DDS::DATA_AVAILABLE_STATUS);
-  mdr2->set_listener (ml2.in (), DDS::DATA_AVAILABLE_STATUS);
+  mdr1->set_listener(ml1, DDS::DATA_AVAILABLE_STATUS);
+  mdr2->set_listener(ml2, DDS::DATA_AVAILABLE_STATUS);
   MessageSeq data;
   SampleInfoSeq infoseq;
-  ret = mdr1->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc1);
+  ReturnCode_t ret = mdr1->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc1);
   if (ret != RETCODE_NO_DATA) {
     cout << "ERROR: take_w_condition(qc1) shouldn't have returned data" << endl;
     return false;
@@ -262,7 +260,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   Message sample;
   for (CORBA::Long i = 0; i < 6; i++) {
     sample.key = i;
-    if (mdw->register_instance (sample) == HANDLE_NIL) {
+    if (mdw->register_instance(sample) == HANDLE_NIL) {
       cout << "ERROR: Registering instance failed" << endl;
       return false;
     }
@@ -271,7 +269,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   for (CORBA::Long i = 0; i < 6; i++) {
     for (CORBA::Long j = 0; j < 15; j++) {
       sample.key = i;
-      DDS::InstanceHandle_t const hnd = mdw->lookup_instance(sample);
+      const DDS::InstanceHandle_t hnd = mdw->lookup_instance(sample);
       if (hnd == HANDLE_NIL) {
         cout << "ERROR: Lookup instance failed" << endl;
         return false;
@@ -283,16 +281,16 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
 
   for (CORBA::Long i = 0; i < 6; i++) {
     sample.key = i;
-    DDS::InstanceHandle_t const hnd = mdw->lookup_instance(sample);
+    const DDS::InstanceHandle_t hnd = mdw->lookup_instance(sample);
     if (hnd == HANDLE_NIL) {
       cout << "ERROR: Lookup instance failed" << endl;
       return false;
     }
-    if (mdw->dispose (sample, hnd) != RETCODE_OK) {
+    if (mdw->dispose(sample, hnd) != RETCODE_OK) {
       cout << "ERROR: Dispose instance failed" << endl;
       return false;
     }
-    if (mdw->unregister_instance (sample, hnd) != RETCODE_OK) {
+    if (mdw->unregister_instance(sample, hnd) != RETCODE_OK) {
       cout << "ERROR: Unregistering instance failed" << endl;
       return false;
     }
@@ -338,7 +336,7 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "ORDER BY name, nest.value",
     empty_query_params);
-  if (CORBA::is_nil(dr_qc.in())) {
+  if (!dr_qc) {
     cout << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
@@ -421,7 +419,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   params_empty.length(0);
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_empty);
-  if (!CORBA::is_nil (dr_qc.in())) {
+  if (dr_qc) {
     cout << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed " << endl;
     return false;
   }
@@ -432,7 +430,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   params_two[1] = "2";
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_two);
-  if (!CORBA::is_nil (dr_qc.in())) {
+  if (dr_qc) {
     cout << "ERROR: Creating QueryCondition with 1 token and 2 parameters should have failed " << endl;
     return false;
   }
@@ -442,7 +440,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   params[0] = "2";
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params);
-  if (CORBA::is_nil(dr_qc.in())) {
+  if (!dr_qc) {
     cout << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
