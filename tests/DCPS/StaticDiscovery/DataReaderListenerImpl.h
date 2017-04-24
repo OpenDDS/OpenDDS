@@ -19,11 +19,12 @@ typedef void (*callback_t)(bool);
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const std::string& id, int expected_samples, callback_t done_callback, bool check_bits)
+  DataReaderListenerImpl(const std::string& id, int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
     : id_(id)
     , expected_samples_(expected_samples)
     , received_samples_(0)
     , done_callback_(done_callback)
+    , subscriber_(subscriber)
     , check_bits_(check_bits)
     , builtin_read_error_(false)
   {
@@ -72,9 +73,9 @@ private:
   const int expected_samples_;
   int received_samples_;
   callback_t done_callback_;
+  DDS::Subscriber_ptr subscriber_;
   bool check_bits_;
   bool builtin_read_error_;
-
 #ifndef DDS_HAS_MINIMUM_BIT
   DDS::DataReader_var     builtin_;
 #endif /* DDS_HAS_MINIMUM_BIT */
