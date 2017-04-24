@@ -43,6 +43,7 @@ FilterEvaluator::DeserializedForEval::~DeserializedForEval()
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : extended_grammar_(false)
   , filter_root_(0)
+  , number_parameters_(0)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
@@ -243,7 +244,9 @@ namespace {
       return Value(data.params_[param_], true);
     }
 
-    int param_;
+    size_t param() { return param_; }
+
+    size_t param_;
   };
 
   class Comparison : public FilterEvaluator::EvalNode {
@@ -489,7 +492,12 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
   } else if (node->TypeMatches<StrVal>()) {
     return new LiteralString(node);
   } else if (node->TypeMatches<ParamVal>()) {
-    return new Parameter(node);
+    Parameter* retval = new Parameter(node);
+    // Keep track of the highest parameter number
+    if (retval->param() + 1 > number_parameters_) {
+      number_parameters_ = retval->param() + 1;
+    }
+    return retval;
   } else if (node->TypeMatches<CallDef>()) {
     if (arity(node) == 1) {
       return walkOperand(child(node, 0));

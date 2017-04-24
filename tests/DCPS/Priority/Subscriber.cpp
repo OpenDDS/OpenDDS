@@ -178,7 +178,6 @@ Subscriber::Subscriber( const Options& options)
       ACE_TEXT("failed to create reader.\n")
     ));
     throw BadReaderException();
-
   }
 
   ACE_DEBUG((LM_DEBUG,

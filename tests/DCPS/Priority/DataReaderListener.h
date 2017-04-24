@@ -19,7 +19,7 @@ namespace Test {
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
   {
   public:
-    DataReaderListener( const bool verbose = false);
+    DataReaderListener(bool verbose = false);
 
     virtual void on_requested_deadline_missed (
         DDS::DataReader_ptr reader,

@@ -734,8 +734,12 @@ DomainParticipantImpl::create_contentfilteredtopic(
 
   DDS::ContentFilteredTopic_var cft;
   try {
-    cft = new ContentFilteredTopicImpl(name,
-      related_topic, filter_expression, expression_parameters, this);
+    // Create the cft in two steps so that we only have one place to
+    // check the expression parameters
+    cft = new ContentFilteredTopicImpl(name, related_topic, filter_expression, this);
+    if (cft->set_expression_parameters(expression_parameters) != DDS::RETCODE_OK) {
+      return 0;
+    }
   } catch (const std::exception& e) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
