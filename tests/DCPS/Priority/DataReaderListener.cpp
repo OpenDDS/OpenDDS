@@ -4,7 +4,7 @@
 #include "TestTypeSupportImpl.h"
 #include "ace/OS_NS_unistd.h"
 
-Test::DataReaderListener::DataReaderListener( const bool verbose)
+Test::DataReaderListener::DataReaderListener(bool verbose)
  : verbose_( verbose),
    count_( 0),
    received_samples_invalid_( false),
