@@ -2,7 +2,7 @@ branches:
   only:
     - master
 
-os: Visual Studio 2015
+os: Visual Studio 2017
 
 clone_depth: 15
 
@@ -12,9 +12,9 @@ install:
   - git clone -q -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
   - cd ..
   - set MPC_ROOT=%CD%\ext\MPC
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
   - call configure --no-tests --ace=ext\ACE_TAO\ACE
-  - ext\ACE_TAO\ACE\bin\mwc.pl -type vc14 tests\DCPS\Messenger
+  - perl ext\ACE_TAO\ACE\bin\mwc.pl -type vs2017 tests\DCPS\Messenger
 
 platform:
   - x64

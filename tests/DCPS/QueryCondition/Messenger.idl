@@ -13,6 +13,7 @@ module Messenger {
 
   struct Message {
     long key;
+    long iteration;
     string name;
     Nested nest;
   };

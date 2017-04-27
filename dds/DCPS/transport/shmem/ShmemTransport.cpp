@@ -107,7 +107,6 @@ ShmemTransport::stop_accepting_or_connecting(const TransportClient_rch&, const R
 bool
 ShmemTransport::configure_i(TransportInst* config)
 {
-  ShmemInst* conf = dynamic_cast<ShmemInst*>(config);
 #if (!defined ACE_WIN32 && defined ACE_LACKS_SYSV_SHMEM) || defined ACE_HAS_WINCE
   ACE_UNUSED_ARG(config);
   ACE_ERROR_RETURN((LM_ERROR,
@@ -116,6 +115,7 @@ ShmemTransport::configure_i(TransportInst* config)
                     ACE_TEXT("no platform support for shared memory!\n")),
                    false);
 #else
+  ShmemInst* conf = dynamic_cast<ShmemInst*>(config);
   if (!conf) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

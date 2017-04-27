@@ -76,6 +76,7 @@ Writer::svc ()
 
     Messenger::Message message;
     message.subject_id = 99;
+    message.wch = L'\0';
     ::DDS::InstanceHandle_t handle = message_dw->register_instance (message);
 
     ACE_DEBUG((LM_DEBUG,

@@ -73,6 +73,7 @@ resend_data_expired(DataSampleElement const & element,
 WriteDataContainer::WriteDataContainer(
   DataWriterImpl* writer,
   CORBA::Long max_samples_per_instance,
+  CORBA::Long history_depth,
   CORBA::Long max_durable_per_instance,
   DDS::Duration_t max_blocking_time,
   size_t         n_chunks,
@@ -89,6 +90,7 @@ WriteDataContainer::WriteDataContainer(
     publication_id_(GUID_UNKNOWN),
     writer_(writer),
     max_samples_per_instance_(max_samples_per_instance),
+    history_depth_(history_depth),
     max_durable_per_instance_(max_durable_per_instance),
     max_num_instances_(max_instances),
     max_num_samples_(max_total_samples),
@@ -1057,6 +1059,19 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
          ((CORBA::Long) this->num_all_samples () >= this->max_num_samples_))) {
 
     if (this->writer_->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+      if (instance_list.size() >= history_depth_) {
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
+                     ACE_TEXT(" instance %d attempting to remove")
+                     ACE_TEXT(" its oldest sample (reliable)\n"),
+                     handle));
+        }
+        bool oldest_released = false;
+        ret = remove_oldest_sample(instance_list, oldest_released);
+        if (oldest_released) {
+          break;
+        }
+      }
       // Reliable writers can wait
       if (need_to_set_abs_timeout) {
         abs_timeout = duration_to_absolute_time_value (max_blocking_time_);

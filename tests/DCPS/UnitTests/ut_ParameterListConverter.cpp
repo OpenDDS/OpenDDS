@@ -1281,8 +1281,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_DURABILITY_SERVICE));
     Parameter param = get(param_list, PID_DURABILITY_SERVICE);
     DurabilityServiceQosPolicy dsqp = param.durability_service();
-    TEST_ASSERT(dsqp.service_cleanup_delay.sec = 4);
-    TEST_ASSERT(dsqp.service_cleanup_delay.nanosec = 2000);
+    TEST_ASSERT(dsqp.service_cleanup_delay.sec == 4);
+    TEST_ASSERT(dsqp.service_cleanup_delay.nanosec == 2000);
 
     TEST_ASSERT(dsqp.history_kind == KEEP_LAST_HISTORY_QOS);
     TEST_ASSERT(dsqp.history_depth == 172);

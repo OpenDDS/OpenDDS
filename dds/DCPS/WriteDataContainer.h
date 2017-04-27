@@ -127,6 +127,7 @@ public:
     DataWriterImpl*  writer,
     /// Max samples kept within each instance
     CORBA::Long      max_samples_per_instance,
+    CORBA::Long history_depth,
     /// Max durable samples sent for each instance
     CORBA::Long      max_durable_per_instance,
     /// The timeout for write.
@@ -444,6 +445,8 @@ private:
   /// The maximum size a container should allow for
   /// an instance sample list
   CORBA::Long                     max_samples_per_instance_;
+
+  CORBA::Long history_depth_;
 
   /// The maximum number of samples from each instance that
   /// can be added to the resend_data_ for durability.
