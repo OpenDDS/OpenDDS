@@ -15,6 +15,7 @@
 #include "ace/Configuration.h"
 
 #include <cstring>
+#include <algorithm>
 
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
