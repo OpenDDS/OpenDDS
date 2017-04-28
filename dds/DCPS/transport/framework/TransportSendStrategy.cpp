@@ -1878,6 +1878,13 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
   this->delayed_delivered_notification_queue_.push_back(std::make_pair(element, this->mode_));
 }
 
+void
+OpenDDS::DCPS::TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
+{
+  GuardType guard(this->lock_);
+  element->data_delivered();
+}
+
 size_t
 TransportSendStrategy::space_available() const
 {

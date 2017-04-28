@@ -141,6 +141,7 @@ public:
   // this method and return the peer handle.
   virtual ACE_HANDLE get_handle();
 
+  void deliver_ack_request(TransportQueueElement* element);
 protected:
 
   TransportSendStrategy(std::size_t id,
