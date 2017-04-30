@@ -21,7 +21,7 @@ terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
 For the development of Java applications see java/README and java/jms/README for details.
 
-The [OpenDDS Developer's Guide](http://download.objectcomputing.com/OpenDDS) is freely downloadable.
+The [OpenDDS Developer's Guide](http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf) is freely downloadable.
 
 The [TAO Developer's Guide](http://www.theaceorb.com/purchase/index.html) may also be purchased as
 additional documentation.
