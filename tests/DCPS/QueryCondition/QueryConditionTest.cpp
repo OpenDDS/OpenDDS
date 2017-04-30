@@ -58,7 +58,7 @@ private:
   DDS::ReadCondition_var rc_;
 };
 
-void test_setup(const DomainParticipant_var& dp,
+bool test_setup(const DomainParticipant_var& dp,
   const MessageTypeSupport_var& ts, const Publisher_var& pub,
   const Subscriber_var& sub, const char* topicName, DataWriter_var& dw,
   DataReader_var& dr)
@@ -84,11 +84,14 @@ void test_setup(const DomainParticipant_var& dp,
   ws->attach_condition(dw_sc);
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  ws->wait(active, infinite);
+  if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+    return false;
+  }
   ws->detach_condition(dw_sc);
+  return true;
 }
 
-void complex_test_setup(const DomainParticipant_var& dp,
+bool complex_test_setup(const DomainParticipant_var& dp,
   const MessageTypeSupport_var& ts, const Publisher_var& pub,
   const Subscriber_var& sub, const char* topicName, DataWriter_var& dw,
   DataReader_var& dr1, DataReader_var& dr2)
@@ -119,8 +122,11 @@ void complex_test_setup(const DomainParticipant_var& dp,
   ws->attach_condition(dw_sc);
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  ws->wait(active, infinite);
+  if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+    return false;
+  }
   ws->detach_condition(dw_sc);
+  return true;
 }
 
 bool waitForSample(const DataReader_var& dr)
@@ -147,7 +153,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 {
   DataWriter_var dw;
   DataReader_var dr;
-  test_setup(dp, ts, pub, sub, "MyTopic2", dw, dr);
+  if (!test_setup(dp, ts, pub, sub, "MyTopic2", dw, dr)) return false;
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
@@ -218,7 +224,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   DataWriter_var dw;
   DataReader_var dr1;
   DataReader_var dr2;
-  complex_test_setup(dp, ts, pub, sub, "MyTopicComplex", dw, dr1, dr2);
+  if (!complex_test_setup(dp, ts, pub, sub, "MyTopicComplex", dw, dr1, dr2)) return false;
 
   DDS::StringSeq params(2);
   params.length (2);

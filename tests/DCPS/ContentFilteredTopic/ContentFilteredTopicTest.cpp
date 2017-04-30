@@ -143,7 +143,9 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
          && status.current_count < N_MATCHES) {
     ConditionSeq active;
-    ws->wait(active, infinite);
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
 
@@ -298,7 +300,9 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
   while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
          && status.current_count < 1) {
     ConditionSeq active;
-    ws->wait(active, infinite);
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
 
