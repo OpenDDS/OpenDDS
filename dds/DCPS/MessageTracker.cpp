@@ -78,7 +78,7 @@ MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
                 ACE_TEXT("from source=%C will wait until %#T.\n"),
-                msg_src_.c_str(), pending_timeout));
+                msg_src_.c_str(), &pending_timeout));
     } else {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
