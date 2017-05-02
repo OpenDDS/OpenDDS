@@ -1522,7 +1522,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     if (filtered) break; // sample filtered from instance
 
-    accept_sample_processing(instance, header, is_new_instance);
+    if (instance) accept_sample_processing(instance, header, is_new_instance);
   }
   break;
 
@@ -1647,7 +1647,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-      if( instance ) {
+      if (instance) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         if (! this->is_exclusive_ownership_
             || (this->is_exclusive_ownership_
@@ -1686,7 +1686,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                       && (instance)
                       && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-        this->watchdog_->cancel_timer(instance);
+        if (instance) {
+          this->watchdog_->cancel_timer(instance);
+        }
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
@@ -3397,7 +3399,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 #endif
 
-  if (watchdog_.in()) {
+  if (instance && watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
 
