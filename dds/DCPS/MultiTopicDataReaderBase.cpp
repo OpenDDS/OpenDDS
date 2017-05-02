@@ -114,6 +114,8 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   // mapped: set of topicNames that have this key in common
   std::map<OPENDDS_STRING, set<OPENDDS_STRING> > joinKeys;
 
+  listener_.reset(new Listener(this));
+
   const vector<OPENDDS_STRING>& selection = multitopic->get_selection();
   for (size_t i = 0; i < selection.size(); ++i) {
 
@@ -123,7 +125,6 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
       throw runtime_error("Topic: " + selection[i] + " not found.");
     }
 
-    listener_.reset(new Listener(this));
 
     DDS::DataReader_var incoming =
       parent->create_datareader(t, dr_qos, listener_.get(), ALL_STATUS_MASK);
