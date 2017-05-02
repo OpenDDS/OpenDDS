@@ -24,6 +24,63 @@ namespace {
       return sfs.incoming_name_ == look_for_;
     }
   };
+
+  class Listener
+    : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
+  public:
+    explicit Listener(OpenDDS::DCPS::MultiTopicDataReaderBase* outer)
+      : outer_(outer)
+    {}
+
+    void on_requested_deadline_missed(DDS::DataReader_ptr reader,
+      const DDS::RequestedDeadlineMissedStatus& status){}
+
+    void on_requested_incompatible_qos(DDS::DataReader_ptr reader,
+      const DDS::RequestedIncompatibleQosStatus& status){}
+
+    void on_sample_rejected(DDS::DataReader_ptr reader,
+      const DDS::SampleRejectedStatus& status){}
+
+    void on_liveliness_changed(DDS::DataReader_ptr reader,
+      const DDS::LivelinessChangedStatus& status){}
+
+    void on_data_available(DDS::DataReader_ptr reader){
+      try {
+        outer_->data_available(reader);
+      } catch (std::exception& e) {
+        if (OpenDDS::DCPS::DCPS_debug_level) {
+          ACE_DEBUG((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::Listener::"
+                     "on_data_available(): %C", e.what()));
+        }
+      }
+    }
+
+    void on_subscription_matched(DDS::DataReader_ptr reader,
+      const DDS::SubscriptionMatchedStatus& status){}
+
+    void on_sample_lost(DDS::DataReader_ptr reader,
+      const DDS::SampleLostStatus& status){}
+
+    /// Increment the reference count.
+    virtual void _add_ref (void){
+      outer_->_add_ref();
+    }
+
+
+    /// Decrement the reference count.
+    virtual void _remove_ref (void){
+      outer_->_remove_ref();
+    }
+
+
+    /// Get the refcount
+    virtual CORBA::ULong _refcount_value (void) const{
+      return outer_->_refcount_value();
+    }
+
+  private:
+    OpenDDS::DCPS::MultiTopicDataReaderBase* outer_;
+  };
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -66,8 +123,10 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
       throw runtime_error("Topic: " + selection[i] + " not found.");
     }
 
+    listener_.reset(new Listener(this));
+
     DDS::DataReader_var incoming =
-      parent->create_datareader(t, dr_qos, &listener_, ALL_STATUS_MASK);
+      parent->create_datareader(t, dr_qos, listener_.get(), ALL_STATUS_MASK);
     if (!incoming.in()) {
       throw runtime_error("Could not create incoming DataReader "
         + selection[i]);
@@ -194,64 +253,6 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
       }
     }
   }
-}
-
-void MultiTopicDataReaderBase::Listener::on_requested_deadline_missed(
-  DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&)
-{
-}
-
-void MultiTopicDataReaderBase::Listener::on_requested_incompatible_qos(
-  DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)
-{
-}
-
-void MultiTopicDataReaderBase::Listener::on_sample_rejected(
-  DDS::DataReader_ptr, const DDS::SampleRejectedStatus&)
-{
-}
-
-void MultiTopicDataReaderBase::Listener::on_liveliness_changed(
-  DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&)
-{
-}
-
-void MultiTopicDataReaderBase::Listener::on_data_available(
-  DDS::DataReader_ptr reader)
-{
-  try {
-    outer_->data_available(reader);
-  } catch (std::exception& e) {
-    if (DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::Listener::"
-                 "on_data_available(): %C", e.what()));
-    }
-  }
-}
-
-void MultiTopicDataReaderBase::Listener::on_subscription_matched(
-  DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus&)
-{
-}
-
-void MultiTopicDataReaderBase::Listener::on_sample_lost(DDS::DataReader_ptr,
-  const DDS::SampleLostStatus&)
-{
-}
-
-void MultiTopicDataReaderBase::Listener::_add_ref (void)
-{
-  outer_->_add_ref();
-}
-
-void MultiTopicDataReaderBase::Listener::_remove_ref (void)
-{
-  outer_->_remove_ref();
-}
-
-CORBA::ULong MultiTopicDataReaderBase::Listener::_refcount_value (void) const
-{
-  return outer_->_refcount_value();
 }
 
 void MultiTopicDataReaderBase::set_status_changed_flag(DDS::StatusKind status,

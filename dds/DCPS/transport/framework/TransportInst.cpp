@@ -15,6 +15,7 @@
 #include "ace/Configuration.h"
 
 #include <cstring>
+#include <algorithm>
 
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
@@ -130,7 +131,13 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
   const int BUFSIZE=1024;
   char result[BUFSIZE];
 
+#ifdef __SUNPRO_CC
+  int count = 0;
+  std::count(addr_str.begin(), addr_str.end(), ':', count);
+  if (count < 2) {
+#else
   if (std::count(addr_str.begin(), addr_str.end(), ':') < 2) {
+#endif
     OPENDDS_STRING::size_type pos = addr_str.find_last_of(":");
     ACE_OS::snprintf(result, BUFSIZE, "%.*s:%hu", static_cast<int>(pos), addr_str.c_str(), port_number);
   }
