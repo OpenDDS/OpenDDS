@@ -232,7 +232,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
   catch (std::runtime_error& err)
   {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
       err.what()), -1);
   }
 
