@@ -287,7 +287,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
       }
-      ACE_OS::fclose(readers_completed);
+      else
+      {
+        ACE_OS::fclose(readers_completed);
+      }
     }
 
     if (topics & TOPIC_T2)
@@ -300,7 +303,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
       }
-      ACE_OS::fclose(readers_completed);
+      else
+      {
+        ACE_OS::fclose(readers_completed);
+      }
     }
 
     if (topics & TOPIC_T3)
@@ -313,7 +319,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
       }
-      ACE_OS::fclose(readers_completed);
+      else
+      {
+        ACE_OS::fclose(readers_completed);
+      }
     }
 
     // Wait for the publisher(s) to finish
