@@ -554,7 +554,16 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = run_test(argc, argv);
+  int ret = 1;
+    
+  try
+  {
+    ret = run_test(argc, argv);
+  }
+  catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in QueryConditionTest.cpp:");
+    return 1;
+  }
 
   // cleanup
   TheServiceParticipant->shutdown ();

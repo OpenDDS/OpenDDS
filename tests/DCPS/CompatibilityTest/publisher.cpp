@@ -230,6 +230,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
+  catch (std::runtime_error& err)
+  {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+      err.what()), -1);
+  }
 
   return status;
 }
