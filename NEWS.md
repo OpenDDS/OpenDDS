@@ -1,6 +1,7 @@
 Version X.Y of OpenDDS
 
 ##### Additions:
+- Add support for Visual Studio 2017
 - TODO: Add your features here
 
 ##### Fixes:
