@@ -11,6 +11,8 @@
 
 #include "../common/TestSupport.h"
 
+#include <stdexcept>
+
 using namespace OpenDDS::DCPS;
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
