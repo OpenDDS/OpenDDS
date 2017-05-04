@@ -12,6 +12,7 @@
 #include "common.h"
 #include "Options.h"
 #include "Factory.h"
+#include <stdexcept>
 
 #include "Puller.h"
 #include "DataReaderListener.h"
