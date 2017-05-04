@@ -388,7 +388,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
             ACE_ERROR_RETURN((LM_ERROR,
                 ACE_TEXT("(%P|%t) ")
                 ACE_TEXT("PublisherImpl::set_qos: ")
-                ACE_TEXT("insert id %d to DwIdToQosMap ")
+                ACE_TEXT("insert id %C to DwIdToQosMap ")
                 ACE_TEXT("failed.\n"),
                 OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
           }

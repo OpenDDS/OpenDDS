@@ -375,7 +375,7 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::RepoId id)
 
       if (participant_->is_alive() && this->participant_->isOwner()) {
         try {
-          CORBA::Boolean dont_notify_lost = 0;
+          CORBA::Boolean dont_notify_lost = false;
           reader_->remove_associations(idSeq, dont_notify_lost);
 
         } catch (const CORBA::Exception& ex) {
@@ -486,10 +486,9 @@ CORBA::Boolean DCPS_IR_Subscription::is_publication_ignored(OpenDDS::DCPS::RepoI
                                                             OpenDDS::DCPS::RepoId topicId,
                                                             OpenDDS::DCPS::RepoId pubId)
 {
-  CORBA::Boolean ignored;
-  ignored = (participant_->is_participant_ignored(partId) ||
-             participant_->is_topic_ignored(topicId) ||
-             participant_->is_publication_ignored(pubId));
+  CORBA::Boolean ignored = (participant_->is_participant_ignored(partId) ||
+                            participant_->is_topic_ignored(topicId) ||
+                            participant_->is_publication_ignored(pubId));
 
   return ignored;
 }

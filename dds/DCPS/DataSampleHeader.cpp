@@ -184,21 +184,24 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 
   // Only byte-sized reads until we get the byte_order_ flag.
 
-  reader >> this->message_id_;
+  if (!(reader >> this->message_id_)) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->message_id_);
 
-  reader >> this->submessage_id_;
+  if (!(reader >> this->submessage_id_)) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->submessage_id_);
 
   // Extract the flag values.
   ACE_CDR::Octet byte;
-  reader >> ACE_InputCDR::to_octet(byte);
+  if (!(reader >> ACE_InputCDR::to_octet(byte))) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(byte);
 
   this->byte_order_         = byte & mask_flag(BYTE_ORDER_FLAG);
@@ -214,63 +217,73 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   // the publisher is in different byte order.
   reader.swap_bytes(this->byte_order_ != ACE_CDR_BYTE_ORDER);
 
-  reader >> ACE_InputCDR::to_octet(byte);
+  if (!(reader >> ACE_InputCDR::to_octet(byte))) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(byte);
 
   this->cdr_encapsulation_ = byte & mask_flag(CDR_ENCAP_FLAG);
   this->key_fields_only_   = byte & mask_flag(KEY_ONLY_FLAG);
 
-  reader >> this->message_length_;
+  if (!(reader >> this->message_length_)) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->message_length_);
 
-  reader >> this->sequence_;
+  if (!(reader >> this->sequence_)) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   size_t padding = 0;
   gen_find_size(this->sequence_, this->marshaled_size_, padding);
 
-  reader >> this->source_timestamp_sec_;
+  if (!(reader >> this->source_timestamp_sec_)) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->source_timestamp_sec_);
 
-  reader >> this->source_timestamp_nanosec_;
+  if (!(reader >> this->source_timestamp_nanosec_)) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   this->marshaled_size_ += sizeof(this->source_timestamp_nanosec_);
 
   if (this->lifespan_duration_) {
-    reader >> this->lifespan_duration_sec_;
+    if (!(reader >> this->lifespan_duration_sec_)) {
+      return;
+    }
 
-    if (!reader.good_bit()) return;
     this->marshaled_size_ += sizeof(this->lifespan_duration_sec_);
 
-    reader >> this->lifespan_duration_nanosec_;
+    if (!(reader >> this->lifespan_duration_nanosec_)) {
+      return;
+    }
 
-    if (!reader.good_bit()) return;
     this->marshaled_size_ += sizeof(this->lifespan_duration_nanosec_);
   }
 
-  reader >> this->publication_id_;
+  if (!(reader >> this->publication_id_)) {
+    return;
+  }
 
-  if (!reader.good_bit()) return;
   gen_find_size(this->publication_id_, this->marshaled_size_, padding);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (this->group_coherent_) {
-    reader >> this->publisher_id_;
-    if (!reader.good_bit()) return;
+    if (!(reader >> this->publisher_id_)) {
+      return;
+    }
     gen_find_size(this->publisher_id_, this->marshaled_size_, padding);
   }
 #endif
 
   if (this->content_filter_) {
-    reader >> this->content_filter_entries_;
-    if (!reader.good_bit()) return;
+    if (!(reader >> this->content_filter_entries_)) {
+      return;
+    }
     gen_find_size(this->content_filter_entries_, this->marshaled_size_, padding);
   }
 }

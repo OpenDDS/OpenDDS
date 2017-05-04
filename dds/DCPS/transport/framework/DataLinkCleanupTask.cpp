@@ -34,7 +34,7 @@ OpenDDS::DCPS::DataLinkCleanupTask::execute(DataLink_rch& dl)
 
   // Yan: It should be safe to remove now as we made the changes to take a
   // snapshot of associations in datalink when reconnect fails and removes
-  // associations based on the image. It won't remove the new assiciations
+  // associations based on the image. It won't remove the new associations
   // added to the datalink.
   dl->clear_associations();
 }
