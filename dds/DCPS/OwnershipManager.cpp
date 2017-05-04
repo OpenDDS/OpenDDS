@@ -265,7 +265,7 @@ OwnershipManager::remove_candidate(OwnershipWriterInfos& infos,
     WriterInfos::iterator const the_end = infos.candidates_.end();
 
     WriterInfos::iterator found_candidate = the_end;
-    // Supplied writer is not an owner, check if it exists in candicate list.
+    // Supplied writer is not an owner, check if it exists in candidate list.
     // If not, add it to the candidate list and sort the list.
     for (WriterInfos::iterator iter = infos.candidates_.begin();
          iter != the_end; ++iter) {
@@ -319,7 +319,7 @@ OwnershipManager::select_owner(const DDS::InstanceHandle_t& instance_handle,
     } else { // not current owner, reevaluate the owner
       bool replace_owner = false;
       // Add current owner to candidate list for owner reevaluation
-      // if provided pub has strength greater than currrent owner.
+      // if provided pub has strength greater than current owner.
       if (ownership_strength > infos.owner_.ownership_strength_) {
         infos.candidates_.push_back(infos.owner_);
         replace_owner = true;
@@ -328,7 +328,7 @@ OwnershipManager::select_owner(const DDS::InstanceHandle_t& instance_handle,
       bool found = false;
       bool sort = true;
 
-      // check if it already existed in candicate list. If not,
+      // check if it already existed in candidate list. If not,
       // add it to the candidate list, otherwise update strength
       // if strength was changed.
       const WriterInfos::iterator the_end = infos.candidates_.end();

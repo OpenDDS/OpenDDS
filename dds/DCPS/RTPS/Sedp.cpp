@@ -1663,7 +1663,7 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
     data[0].guid(guid);
     data[0]._d(PID_ENDPOINT_GUID);
   } else {
-    return (ser >> data);
+    return ser >> data;
   }
   return true;
 }

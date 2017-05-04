@@ -128,7 +128,7 @@ private:
   virtual void incoming_sample(void* sample, const DDS::SampleInfo& info,
                                const char* topic, const MetaStruct& meta) = 0;
 
-  scoped_ptr<LocalObject<DDS::DataReaderListener> > listener_;
+  scoped_ptr<OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> > listener_;
   DataReaderEx_var resulting_reader_;
 
 protected:

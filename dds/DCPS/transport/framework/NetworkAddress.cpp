@@ -20,10 +20,14 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 ACE_CDR::Boolean
 operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
 {
-  outCdr << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER);
+  if ((outCdr << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER)) == 0)
+    return 0;
 
-  outCdr << ACE_OutputCDR::from_octet(value.reserved_);
-  outCdr << value.addr_.c_str();
+  if ((outCdr << ACE_OutputCDR::from_octet(value.reserved_)) == 0)
+    return 0;
+
+  if ((outCdr << value.addr_.c_str()) == 0)
+    return 0;
 
   return outCdr.good_bit();
 }

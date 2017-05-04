@@ -66,8 +66,8 @@ namespace {
       "    }" << (skip ? "" : "\n");
     if (skip) {
       be_global->impl_ << " else {\n"
-        "      if (!(gen_skip_over(" << firstArg << ", static_cast<" << fieldType
-        << "*>(0)))) {\n"
+        "      if (!gen_skip_over(" << firstArg << ", static_cast<" << fieldType
+        << "*>(0))) {\n"
         "        throw std::runtime_error(\"Field '" << fieldName <<
         "' could not be skipped\");\n"
         "      }\n"
@@ -189,9 +189,9 @@ namespace {
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      if (!(ser.skip(len))) {\n"
+          "      if (!ser.skip(len)) {\n"
           "        throw std::runtime_error(\"String '" << fieldName <<
-          "' length could not be skipped\");\n"
+          "' contents could not be skipped\");\n"
           "      }\n";
       } else if (cls & CL_WIDE) {
         be_global->impl_ <<
@@ -200,13 +200,13 @@ namespace {
           "        throw std::runtime_error(\"WChar '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      if (!(ser.skip(len))) {\n"
+          "      if (!ser.skip(len)) {\n"
           "        throw std::runtime_error(\"WChar '" << fieldName <<
-          "' length could not be skipped\");\n"
+          "' contents could not be skipped\");\n"
           "      }\n";
       } else {
         be_global->impl_ <<
-          "      if (!(ser.skip(1, " << size << "))) {\n"
+          "      if (!ser.skip(1, " << size << ")) {\n"
           "        throw std::runtime_error(\"Field '" << fieldName <<
           "' could not be skipped\");\n"
           "      }\n";
@@ -217,8 +217,8 @@ namespace {
       delegateToNested(fieldName, field, "ser", true);
     } else { // array, sequence, union:
       be_global->impl_ <<
-        "    if (!(gen_skip_over(ser, static_cast<" << cxx_type
-        << ((cls & CL_ARRAY) ? "_forany" : "") << "*>(0)))) {\n"
+        "    if (!gen_skip_over(ser, static_cast<" << cxx_type
+        << ((cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) {\n"
         "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
         " could not be skipped\");\n"
         "    }\n";
@@ -517,16 +517,16 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
       be_global->impl_ <<
         "    ACE_CDR::Octet o;\n"
         "    if (!(ser >> ACE_InputCDR::to_octet(o))) return false;\n"
-        "    if (!(ser.skip(o))) return false;\n";
+        "    if (!ser.skip(o)) return false;\n";
     } else if (elem_cls & CL_STRING) {
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
         "    if (!(ser >> strlength)) return false;\n"
-        "    if (!(ser.skip(strlength))) return false;\n";
+        "    if (!ser.skip(strlength)) return false;\n";
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
       be_global->impl_ <<
-        "    if (!(gen_skip_over(ser, static_cast<" << cxx_elem
-        << ((elem_cls & CL_ARRAY) ? "_forany" : "") << "*>(0)))) return false;\n";
+        "    if (!gen_skip_over(ser, static_cast<" << cxx_elem <<
+        ((elem_cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) return false;\n";
     }
     be_global->impl_ <<
       "  }\n";
@@ -549,21 +549,21 @@ static std::string func(const std::string&,
     ss <<
       "      ACE_CDR::ULong len;\n"
       "      if (!(ser >> len)) return false;\n"
-      "      if (!(ser.skip(len))) return false;\n";
+      "      if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_WIDE) {
     ss <<
       "      ACE_CDR::Octet len;\n"
       "      if (!(ser >> ACE_InputCDR::to_octet(len))) return false;\n"
-      "      if (!(ser.skip(len))) return false;\n";
+      "      if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     int sz = 1;
     to_cxx_type(br_type, sz);
     ss <<
-      "      if (!(ser.skip(1, " << sz << "))) return false;\n";
+      "      if (!ser.skip(1, " << sz << ")) return false;\n";
   } else {
     ss <<
-      "      if (!(gen_skip_over(ser, static_cast<" << scoped(br_type->name())
-                                            << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0)))) return false;\n";
+      "      if (!gen_skip_over(ser, static_cast<" << scoped(br_type->name()) <<
+      ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) return false;\n";
   }
 
   return ss.str();

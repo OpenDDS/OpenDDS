@@ -106,8 +106,6 @@ DomainParticipantImpl::create_publisher(
   DDS::PublisherListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  ACE_UNUSED_ARG(mask);
-
   DDS::PublisherQos pub_qos = qos;
 
   if (! this->validate_publisher_qos(pub_qos))

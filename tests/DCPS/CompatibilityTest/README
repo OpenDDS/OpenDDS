@@ -6,4 +6,4 @@ run_test.pl
 This test is to verify RT#12054.
 This test starts multiple pairs of one publisher and one subscriber.  Various qos parameters are varied to verify that
 the DCPSInfoRepo pairs up compatible publishers and subscribers and doesn't pair uncompatible ones.
-Further granularity for varifying Liveliness Duration compatibility is handled by "UnitTest/run_test.pl LivelinessCompatibility".
+Further granularity for verifying Liveliness Duration compatibility is handled by "UnitTest/run_test.pl LivelinessCompatibility".

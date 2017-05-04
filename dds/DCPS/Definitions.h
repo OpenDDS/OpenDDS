@@ -212,10 +212,12 @@ inline ACE_CDR::Boolean
 operator>>(Serializer& s, SequenceNumber& x) {
   ACE_INT32 high;
   ACE_UINT32 low;
-  s >> high;
-  if (!s.good_bit()) return false;
-  s >> low;
-  if (!s.good_bit()) return false;
+  if (!(s >> high)) {
+    return false;
+  }
+  if (!(s >> low)) {
+    return false;
+  }
   x = SequenceNumber(high, low);
   return true;
 }
