@@ -49,7 +49,7 @@ namespace {
     DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators,
                                                 ignore_requires_inline_qos);
     if (result == DDS::RETCODE_OK) {
-      CORBA::ULong locators_len = locators.length();
+      const CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
         OpenDDS::DCPS::Locator_t& rtps_locator = locators[i];
         ACE_INET_Addr address;
