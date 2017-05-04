@@ -555,7 +555,6 @@ int run_test(int argc, ACE_TCHAR *argv[])
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int ret = 1;
-    
   try
   {
     ret = run_test(argc, argv);
