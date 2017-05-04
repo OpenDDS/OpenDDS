@@ -4,6 +4,7 @@ Version X.Y of OpenDDS
 - TODO: Add your features here
 
 ##### Fixes:
+- Fixed possible runtime crashes at the moment samples are lost
 - TODO: Add your fixes here
 
 ##### Notes:
