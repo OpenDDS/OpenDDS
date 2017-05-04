@@ -121,9 +121,9 @@ Linux family:
 * Red Hat EL and CentOS 6.6 and 6.8, x86_64
 * Red Hat EL and CentOS 7.2 and 7.3, x86_64
 * Fedora Core 6, x86
-* Fedora 24, x86_64
+* Fedora 24, and 25, x86_64
 * Ubuntu 16.04 LTS, x86_64
-* openSUSE 42.1, x86_64
+* openSUSE 42.1, and 42.2 , x86_64
 
 Windows family:
 * Windows 7 (32-bit, 64-bit)

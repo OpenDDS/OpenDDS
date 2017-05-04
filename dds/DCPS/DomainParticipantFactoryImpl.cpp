@@ -194,7 +194,7 @@ DomainParticipantFactoryImpl::delete_participant(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                      ACE_TEXT("%p domain_id=%d dp_id=%s.\n"),
+                      ACE_TEXT("%p domain_id=%d dp_id=%C.\n"),
                       ACE_TEXT("find"),
                       domain_id,
                       OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);

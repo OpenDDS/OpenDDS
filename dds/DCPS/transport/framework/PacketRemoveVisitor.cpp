@@ -90,7 +90,7 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
 
     // There is a chance that the head_ block (and thus the current_block_)
     // is actually a duplicate of the packet header_block_.  If so, we
-    // need to adust the current_block_ and previous_block_ appropriately.
+    // need to adjust the current_block_ and previous_block_ appropriately.
     if (this->header_block_->base() == this->current_block_->base()) {
       // Yup.  Just what we thought may be the case.
       this->previous_block_ = this->current_block_;

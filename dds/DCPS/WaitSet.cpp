@@ -17,8 +17,8 @@ namespace {
 void copyInto(DDS::ConditionSeq& target,
               const DDS::WaitSet::ConditionSet& source)
 {
-  size_t size = source.size();
-  target.length(static_cast<CORBA::ULong>(size));
+  CORBA::ULong size = source.size();
+  target.length(size);
   CORBA::ULong index = 0;
 
   for (DDS::WaitSet::ConditionSet::const_iterator iter = source.begin(),
