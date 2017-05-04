@@ -708,11 +708,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     if (submessageLength && buff_.length()) {
       const size_t read = start - buff_.length();
       if (read < static_cast<size_t>(submessageLength + SMHDR_SZ)) {
-        if (!(ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ - read)))) {
-          ACE_ERROR((
-                LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                ACE_TEXT("failed to skip sub message length\n")));
+        if (!ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ
+                                                 - read))) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+            ACE_TEXT("failed to skip sub message length\n")));
           return 0;
         }
       }
@@ -725,7 +725,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 }
 
 int
-Spdp::SpdpTransport::handle_exception(ACE_HANDLE )
+Spdp::SpdpTransport::handle_exception(ACE_HANDLE)
 {
   outer_->wait_for_acks().ack();
   return 0;
