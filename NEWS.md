@@ -5,6 +5,8 @@ Version X.Y of OpenDDS
 
 ##### Fixes:
 - Fixed possible runtime crashes at the moment samples are lost
+- The number of expression_parameters should match the number of tokens
+- Some fixes for versioned namespace support
 - TODO: Add your fixes here
 
 ##### Notes:
