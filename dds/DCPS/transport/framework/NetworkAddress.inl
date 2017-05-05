@@ -56,7 +56,7 @@ void OpenDDS::DCPS::NetworkAddress::to_addr(ACE_INET_Addr& addr) const
 ACE_INLINE
 void OpenDDS::DCPS::NetworkAddress::dump()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress addr: %s reserved: %d\n", addr_.c_str(), reserved_));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress addr: %C reserved: %d\n", addr_.c_str(), reserved_));
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

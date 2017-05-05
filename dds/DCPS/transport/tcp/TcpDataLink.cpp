@@ -349,7 +349,7 @@ OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* eleme
 {
   if (Transport_debug_level >= 1) {
     const GuidConverter converter(element->publication_id());
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::handle_send_request_ack(%@) sequence number %q, publication_id=%s\n"),
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::handle_send_request_ack(%@) sequence number %q, publication_id=%C\n"),
       element, element->sequence().getValue(), OPENDDS_STRING(converter).c_str()));
   }
 
@@ -366,7 +366,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 
   if (Transport_debug_level >= 1) {
     const GuidConverter converter(sample.header_.publication_id_);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received sequence number %q, publiction_id=%s\n"),
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received sequence number %q, publiction_id=%C\n"),
       sequence.getValue(), OPENDDS_STRING(converter).c_str()));
   }
 

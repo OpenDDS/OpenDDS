@@ -93,7 +93,7 @@ MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO,
                    ACE_TEXT("(%P|%t) %T MessageTracker::")
-                   ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p (caller: %s)\n"),
+                   ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p (caller: %C)\n"),
                    ACE_TEXT("Timed out waiting for messages to be transported"),
                    caller_message.c_str()));
       }

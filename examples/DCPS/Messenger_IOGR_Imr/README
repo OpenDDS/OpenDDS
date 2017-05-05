@@ -5,5 +5,5 @@ Status: Still under development.
 
 This test incarnates multiple instances of ImRified InfoRepo's and
 ties them all together into a single IOGR. This can be used as
-a FT startgy for clients to autamtically swicth over to a backup
+a FT strategy for clients to automatically switch over to a backup
 InfoRepo in case of an InfoRepo instance crash.

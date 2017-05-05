@@ -666,8 +666,7 @@ namespace OpenDDS {
     return DDS::RETCODE_ERROR;
   }
 
-  virtual DDS::InstanceHandle_t lookup_instance (
-                                                   const MessageType & instance_data)
+  virtual DDS::InstanceHandle_t lookup_instance (const MessageType & instance_data)
   {
     typename InstanceMap::const_iterator const it = instance_map_.find(instance_data);
 
@@ -954,19 +953,31 @@ namespace OpenDDS {
 
     if (cdr) {
       ACE_CDR::ULong header;
-      ser >> header;
+      if (!(ser >> header)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                  ACE_TEXT("deserialization header failed.\n"),
+                  TraitsType::type_name()));
+        return;
+      }
+
+      if (Serializer::use_rti_serialization()) {
+        // Start counting byte-offset AFTER header
+        ser.reset_alignment();
+      }
     }
 
-    if (cdr && Serializer::use_rti_serialization()) {
-      // Start counting byte-offset AFTER header
-      ser.reset_alignment();
-    }
     if (sample.header_.key_fields_only_) {
       ser >> OpenDDS::DCPS::KeyOnly< MessageType>(data);
     } else {
       ser >> data;
     }
 
+    if (!ser.good_bit()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                 ACE_TEXT("deserialization failed.\n"),
+                 TraitsType::type_name()));
+      return;
+    }
 
     DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
     typename InstanceMap::const_iterator const it = instance_map_.find(data);
@@ -1040,13 +1051,19 @@ protected:
 
     if (cdr) {
       ACE_CDR::ULong header;
-      ser >> header;
+      if (!(ser >> header)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::dds_demarshal ")
+                  ACE_TEXT("deserialization header failed, dropping sample.\n"),
+                  TraitsType::type_name()));
+        return;
+      }
+
+      if (Serializer::use_rti_serialization()) {
+        // Start counting byte-offset AFTER header
+        ser.reset_alignment();
+      }
     }
 
-    if (cdr && Serializer::use_rti_serialization()) {
-      // Start counting byte-offset AFTER header
-      ser.reset_alignment();
-    }
     if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
       ser >> OpenDDS::DCPS::KeyOnly< MessageType>(*data);
     } else {
@@ -1629,7 +1646,6 @@ void store_instance_data(
     if ((this->qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
       ((::CORBA::Long) instances_size >= this->qos_.resource_limits.max_instances))
     {
-
       DDS::DataReaderListener_var listener
         = listener_for (DDS::SAMPLE_REJECTED_STATUS);
 

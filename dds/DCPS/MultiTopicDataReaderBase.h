@@ -14,6 +14,7 @@
 #include "dds/DCPS/ZeroCopySeq_T.h"
 #include "dds/DCPS/MultiTopicImpl.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/scoped_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -29,7 +30,7 @@ class SubscriberImpl;
 class OpenDDS_Dcps_Export MultiTopicDataReaderBase
   : public virtual LocalObject<DataReaderEx> {
 public:
-  MultiTopicDataReaderBase(): listener_(this) {}
+  MultiTopicDataReaderBase() {}
 
   void init(const DDS::DataReaderQos& dr_qos,
     DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask,
@@ -127,47 +128,7 @@ private:
   virtual void incoming_sample(void* sample, const DDS::SampleInfo& info,
                                const char* topic, const MetaStruct& meta) = 0;
 
-  class Listener
-    : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
-  public:
-    explicit Listener(MultiTopicDataReaderBase* outer)
-      : outer_(outer)
-    {}
-
-    void on_requested_deadline_missed(DDS::DataReader_ptr reader,
-      const DDS::RequestedDeadlineMissedStatus& status);
-
-    void on_requested_incompatible_qos(DDS::DataReader_ptr reader,
-      const DDS::RequestedIncompatibleQosStatus& status);
-
-    void on_sample_rejected(DDS::DataReader_ptr reader,
-      const DDS::SampleRejectedStatus& status);
-
-    void on_liveliness_changed(DDS::DataReader_ptr reader,
-      const DDS::LivelinessChangedStatus& status);
-
-    void on_data_available(DDS::DataReader_ptr reader);
-
-    void on_subscription_matched(DDS::DataReader_ptr reader,
-      const DDS::SubscriptionMatchedStatus& status);
-
-    void on_sample_lost(DDS::DataReader_ptr reader,
-      const DDS::SampleLostStatus& status);
-
-    /// Increment the reference count.
-    virtual void _add_ref (void);
-
-    /// Decrement the reference count.
-    virtual void _remove_ref (void);
-
-    /// Get the refcount
-    virtual CORBA::ULong _refcount_value (void) const;
-
-  private:
-    MultiTopicDataReaderBase* outer_;
-  };
-
-  Listener listener_;
+  scoped_ptr<OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> > listener_;
   DataReaderEx_var resulting_reader_;
 
 protected:
