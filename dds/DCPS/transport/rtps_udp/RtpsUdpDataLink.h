@@ -506,7 +506,6 @@ private:
     HeldData held_data_;
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
-  friend class HeldDataDeliveryHandler;
 };
 
 } // namespace DCPS
