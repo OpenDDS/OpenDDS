@@ -32,7 +32,6 @@ void RIH::WriterListener::on_publication_matched(DDS::DataWriter_ptr writer,
     DDS::InstanceHandle_t bitHandle = status.last_subscription_handle;
     DDS::SubscriptionBuiltinTopicData bitData;
     if (writer->get_matched_subscription_data(bitData, bitHandle) == DDS::RETCODE_OK) {
-      DDS::BuiltinTopicKey_t key =  bitData.key;
       DDS::BuiltinTopicKey_t participant_key =  bitData.participant_key;
       std::cout << "publisher: found remote participant key[0] " << participant_key.value[0] << std::endl;
       std::cout << "publisher: found remote participant key[1] " << participant_key.value[1] << std::endl;
