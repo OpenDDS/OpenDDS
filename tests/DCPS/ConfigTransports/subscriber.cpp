@@ -12,6 +12,7 @@
 #include "common.h"
 #include "Options.h"
 #include "Factory.h"
+#include <stdexcept>
 
 #include "Puller.h"
 #include "DataReaderListener.h"
@@ -184,6 +185,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR,
                     ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
     }
+  catch (std::runtime_error& err)
+  {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
+      err.what()), -1);
+  }
 
   ACE_ERROR_RETURN((LM_INFO,
                     ACE_TEXT("(%P|%t) done.\n")), 0);

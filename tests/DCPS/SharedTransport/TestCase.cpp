@@ -234,5 +234,15 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   TestCase test;
-  return test.run(argc, argv);
+  int ret = 1;
+  try
+  {
+    ret = test.run(argc, argv);
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in TestCase.cpp:");
+    return 1;
+  }
+  return ret;
 }

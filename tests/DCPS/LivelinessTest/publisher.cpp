@@ -250,8 +250,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           readers_ready = ACE_OS::fopen ((temp_file_prefix + sub_ready_filename).c_str (), ACE_TEXT("r"));
         } while (0 == readers_ready);
 
-      ACE_OS::fclose(writers_ready);
-      ACE_OS::fclose(readers_ready);
+      if (writers_ready) ACE_OS::fclose(writers_ready);
+      if (readers_ready) ACE_OS::fclose(readers_ready);
 
       ReactorCtrl rc ;
 
@@ -308,8 +308,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           readers_completed = ACE_OS::fopen ((temp_file_prefix + sub_finished_filename).c_str (), ACE_TEXT("r"));
         } while (0 == readers_completed);
 
-      ACE_OS::fclose(writers_completed);
-      ACE_OS::fclose(readers_completed);
+      if (writers_completed) ACE_OS::fclose(writers_completed);
+      if (readers_completed) ACE_OS::fclose(readers_completed);
 
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T Readers are finished\n") ));
 

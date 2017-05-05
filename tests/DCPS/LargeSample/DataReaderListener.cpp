@@ -104,7 +104,7 @@ throw(CORBA::SystemException)
           }
 
           const unsigned int data_size = Writer::calc_sample_length(
-            message.writer_id, message.sample_id
+            message.sample_id, message.writer_id
           );
           if (message.data.length() != data_size) {
             std::cout << "ERROR: Expected message.data to have a size of " << data_size

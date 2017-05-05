@@ -85,108 +85,116 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   Fragments before_fragmentation;
   const size_t N = 3000;
-  // Create pre-fragmented headers
+
+  try
   {
-    const InfoTimestampSubmessage ts = {
-      {INFO_TS, 1, 8}, {1315413839, 822079774}
-    };
-    DataSubmessage ds = {
-      {DATA, 7, 0}, 0, DATA_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
-      {{5, 6, 7}, 8}, {0, 9}, ParameterList()
-    };
-    ds.inlineQos.length(2);
-    ds.inlineQos[0].string_data("my_topic_name");
-    ds.inlineQos[0]._d(PID_TOPIC_NAME);
-    ds.inlineQos[1].string_data("my_type_name");
-    ds.inlineQos[1]._d(PID_TYPE_NAME);
-    size_t size = 0, padding = 0;
-    gen_find_size(ts, size, padding);
-    gen_find_size(ds, size, padding);
-    before_fragmentation.head_ = new ACE_Message_Block(size + padding);
-    Serializer ser(before_fragmentation.head_, SWAP, Serializer::ALIGN_CDR);
-    TEST_CHECK((ser << ts) && (ser << ds));
+    // Create pre-fragmented headers
+    {
+      const InfoTimestampSubmessage ts = {
+        {INFO_TS, 1, 8}, {1315413839, 822079774}
+      };
+      DataSubmessage ds = {
+        {DATA, 7, 0}, 0, DATA_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
+        {{5, 6, 7}, 8}, {0, 9}, ParameterList()
+      };
+      ds.inlineQos.length(2);
+      ds.inlineQos[0].string_data("my_topic_name");
+      ds.inlineQos[0]._d(PID_TOPIC_NAME);
+      ds.inlineQos[1].string_data("my_type_name");
+      ds.inlineQos[1]._d(PID_TYPE_NAME);
+      size_t size = 0, padding = 0;
+      gen_find_size(ts, size, padding);
+      gen_find_size(ds, size, padding);
+      before_fragmentation.head_ = new ACE_Message_Block(size + padding);
+      Serializer ser(before_fragmentation.head_, SWAP, Serializer::ALIGN_CDR);
+      TEST_CHECK((ser << ts) && (ser << ds));
+    }
+    ACE_Message_Block& header_mb = *before_fragmentation.head_;
+    {
+      // Fragment
+      ACE_Message_Block data(N);
+      data.wr_ptr(N);
+      header_mb.cont(&data);
+      Fragments f;
+      const SequenceRange sr =
+        RtpsSampleHeader::split(header_mb, N / 2, f.head_, f.tail_);
+      header_mb.cont(0);
+
+      // Check results
+      TEST_CHECK(sr.first == 1 && sr.second == 3);
+      RtpsSampleHeader header1(*f.head_);
+      TEST_CHECK(header1.valid());
+      TEST_CHECK(header1.submessage_._d() == INFO_TS);
+      header1 = *f.head_;
+      TEST_CHECK(header1.valid());
+      TEST_CHECK(header1.submessage_._d() == DATA_FRAG);
+      {
+        ParameterList plist(2);
+        plist.length(2);
+        plist[0].string_data("my_topic_name");
+        plist[0]._d(PID_TOPIC_NAME);
+        plist[1].string_data("my_type_name");
+        plist[1]._d(PID_TYPE_NAME);
+        const DataFragSubmessage expected = {
+          {DATA_FRAG, 3, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
+          {{5, 6, 7}, 8}, {0, 9}, {1}, 1, 1024, N, plist };
+        matches(header1.submessage_.data_frag_sm(), expected);
+        TEST_CHECK(f.head_->cont() && f.head_->cont()->length() == 1024);
+      }
+      before_fragmentation.tail_ = f.tail_->duplicate();
+      RtpsSampleHeader header2(*f.tail_);
+      TEST_CHECK(header2.valid());
+      TEST_CHECK(header2.submessage_._d() == INFO_TS);
+      header2 = *f.tail_;
+      TEST_CHECK(header2.valid());
+      TEST_CHECK(header2.submessage_._d() == DATA_FRAG);
+      {
+        const DataFragSubmessage expected = {
+          {DATA_FRAG, 1, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
+          {{5, 6, 7}, 8}, {0, 9}, {2}, 2, 1024, N, ParameterList() };
+        matches(header2.submessage_.data_frag_sm(), expected);
+        TEST_CHECK(f.tail_->cont() && f.tail_->cont()->length() == N - 1024);
+      }
+
+      // Fragment the resulting "tail"
+      Fragments f2;
+      const SequenceRange sr2 =
+        RtpsSampleHeader::split(*before_fragmentation.tail_,
+          N / 2, f2.head_, f2.tail_);
+
+      // Check results
+      TEST_CHECK(sr2.first == 2 && sr2.second == 3);
+      RtpsSampleHeader header3(*f2.head_);
+      TEST_CHECK(header3.valid());
+      TEST_CHECK(header3.submessage_._d() == INFO_TS);
+      header3 = *f2.head_;
+      TEST_CHECK(header3.valid());
+      TEST_CHECK(header3.submessage_._d() == DATA_FRAG);
+      {
+        const DataFragSubmessage expected = {
+          {DATA_FRAG, 1, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
+          {{5, 6, 7}, 8}, {0, 9}, {2}, 1, 1024, N, ParameterList() };
+        matches(header3.submessage_.data_frag_sm(), expected);
+        TEST_CHECK(f2.head_->cont() && f2.head_->cont()->length() == 1024);
+      }
+      RtpsSampleHeader header4(*f2.tail_);
+      TEST_CHECK(header4.valid());
+      TEST_CHECK(header4.submessage_._d() == INFO_TS);
+      header4 = *f2.tail_;
+      TEST_CHECK(header4.valid());
+      TEST_CHECK(header4.submessage_._d() == DATA_FRAG);
+      {
+        const DataFragSubmessage expected = {
+          {DATA_FRAG, 1, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
+          {{5, 6, 7}, 8}, {0, 9}, {3}, 1, 1024, N, ParameterList() };
+        matches(header4.submessage_.data_frag_sm(), expected);
+        TEST_CHECK(f2.tail_->cont() && f2.tail_->cont()->length() == N - 2 * 1024);
+      }
+    }
   }
-  ACE_Message_Block& header_mb = *before_fragmentation.head_;
-  {
-    // Fragment
-    ACE_Message_Block data(N);
-    data.wr_ptr(N);
-    header_mb.cont(&data);
-    Fragments f;
-    const SequenceRange sr =
-      RtpsSampleHeader::split(header_mb, N / 2, f.head_, f.tail_);
-    header_mb.cont(0);
-
-    // Check results
-    TEST_CHECK(sr.first == 1 && sr.second == 3);
-    RtpsSampleHeader header1(*f.head_);
-    TEST_CHECK(header1.valid());
-    TEST_CHECK(header1.submessage_._d() == INFO_TS);
-    header1 = *f.head_;
-    TEST_CHECK(header1.valid());
-    TEST_CHECK(header1.submessage_._d() == DATA_FRAG);
-    {
-      ParameterList plist(2);
-      plist.length(2);
-      plist[0].string_data("my_topic_name");
-      plist[0]._d(PID_TOPIC_NAME);
-      plist[1].string_data("my_type_name");
-      plist[1]._d(PID_TYPE_NAME);
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 3, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
-        {{5, 6, 7}, 8}, {0, 9}, {1}, 1, 1024, N, plist};
-      matches(header1.submessage_.data_frag_sm(), expected);
-      TEST_CHECK(f.head_->cont() && f.head_->cont()->length() == 1024);
-    }
-    before_fragmentation.tail_ = f.tail_->duplicate();
-    RtpsSampleHeader header2(*f.tail_);
-    TEST_CHECK(header2.valid());
-    TEST_CHECK(header2.submessage_._d() == INFO_TS);
-    header2 = *f.tail_;
-    TEST_CHECK(header2.valid());
-    TEST_CHECK(header2.submessage_._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
-        {{5, 6, 7}, 8}, {0, 9}, {2}, 2, 1024, N, ParameterList()};
-      matches(header2.submessage_.data_frag_sm(), expected);
-      TEST_CHECK(f.tail_->cont() && f.tail_->cont()->length() == N - 1024);
-    }
-
-    // Fragment the resulting "tail"
-    Fragments f2;
-    const SequenceRange sr2 =
-      RtpsSampleHeader::split(*before_fragmentation.tail_,
-                              N / 2, f2.head_, f2.tail_);
-
-    // Check results
-    TEST_CHECK(sr2.first == 2 && sr2.second == 3);
-    RtpsSampleHeader header3(*f2.head_);
-    TEST_CHECK(header3.valid());
-    TEST_CHECK(header3.submessage_._d() == INFO_TS);
-    header3 = *f2.head_;
-    TEST_CHECK(header3.valid());
-    TEST_CHECK(header3.submessage_._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
-        {{5, 6, 7}, 8}, {0, 9}, {2}, 1, 1024, N, ParameterList()};
-      matches(header3.submessage_.data_frag_sm(), expected);
-      TEST_CHECK(f2.head_->cont() && f2.head_->cont()->length() == 1024);
-    }
-    RtpsSampleHeader header4(*f2.tail_);
-    TEST_CHECK(header4.valid());
-    TEST_CHECK(header4.submessage_._d() == INFO_TS);
-    header4 = *f2.tail_;
-    TEST_CHECK(header4.valid());
-    TEST_CHECK(header4.submessage_._d() == DATA_FRAG);
-    {
-      const DataFragSubmessage expected = {
-        {DATA_FRAG, 1, 0}, 0, DATA_FRAG_OCTETS_TO_IQOS, {{1, 2, 3}, 4},
-        {{5, 6, 7}, 8}, {0, 9}, {3}, 1, 1024, N, ParameterList()};
-      matches(header4.submessage_.data_frag_sm(), expected);
-      TEST_CHECK(f2.tail_->cont() && f2.tail_->cont()->length() == N - 2 * 1024);
-    }
+  catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in RtpsFragmentation.cpp:");
+    return 1;
   }
   return 0;
 }

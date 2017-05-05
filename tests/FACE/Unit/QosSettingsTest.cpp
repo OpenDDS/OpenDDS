@@ -1092,108 +1092,116 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  // Publisher QOS
-  test_set_publisher_single_partition();
-  test_set_publisher_multiple_partitions();
-  test_set_publisher_presentation_access_scope_instance();
-  test_set_publisher_presentation_access_scope_topic();
-  test_set_publisher_presentation_access_scope_group();
-  test_set_publisher_presentation_coherent_access_true();
-  test_set_publisher_presentation_coherent_access_false();
-  test_set_publisher_presentation_ordered_access_true();
-  test_set_publisher_presentation_ordered_access_false();
+  try
+  {
+    // Publisher QOS
+    test_set_publisher_single_partition();
+    test_set_publisher_multiple_partitions();
+    test_set_publisher_presentation_access_scope_instance();
+    test_set_publisher_presentation_access_scope_topic();
+    test_set_publisher_presentation_access_scope_group();
+    test_set_publisher_presentation_coherent_access_true();
+    test_set_publisher_presentation_coherent_access_false();
+    test_set_publisher_presentation_ordered_access_true();
+    test_set_publisher_presentation_ordered_access_false();
 
-  // Subscriber QOS
-  test_set_subscriber_single_partition();
-  test_set_subscriber_multiple_partitions();
-  test_set_subscriber_presentation_access_scope_instance();
-  test_set_subscriber_presentation_access_scope_topic();
-  test_set_subscriber_presentation_access_scope_group();
-  test_set_subscriber_presentation_coherent_access_true();
-  test_set_subscriber_presentation_coherent_access_false();
-  test_set_subscriber_presentation_ordered_access_true();
-  test_set_subscriber_presentation_ordered_access_false();
+    // Subscriber QOS
+    test_set_subscriber_single_partition();
+    test_set_subscriber_multiple_partitions();
+    test_set_subscriber_presentation_access_scope_instance();
+    test_set_subscriber_presentation_access_scope_topic();
+    test_set_subscriber_presentation_access_scope_group();
+    test_set_subscriber_presentation_coherent_access_true();
+    test_set_subscriber_presentation_coherent_access_false();
+    test_set_subscriber_presentation_ordered_access_true();
+    test_set_subscriber_presentation_ordered_access_false();
 
-  // DataWriter QOS
-  test_set_datawriter_durability_volatile();
-  test_set_datawriter_durability_transient_local();
+    // DataWriter QOS
+    test_set_datawriter_durability_volatile();
+    test_set_datawriter_durability_transient_local();
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-  test_set_datawriter_durability_transient();
-  test_set_datawriter_durability_persistent();
+    test_set_datawriter_durability_transient();
+    test_set_datawriter_durability_persistent();
 #endif // OPENDDS_NO_PERSISTENCE_PROFILE
-  test_set_datawriter_deadline_sec();
-  test_set_datawriter_deadline_nanosec();
-  test_set_datawriter_deadline_both();
-  test_set_datawriter_latency_budget_sec();
-  test_set_datawriter_latency_budget_nanosec();
-  test_set_datawriter_latency_budget_both();
-  test_set_datawriter_liveliness_kind_automatic();
-  test_set_datawriter_liveliness_kind_manual_by_topic();
-  test_set_datawriter_liveliness_kind_manual_by_participant();
-  test_set_datawriter_liveliness_lease_duration_sec();
-  test_set_datawriter_liveliness_lease_duration_nanosec();
-  test_set_datawriter_liveliness_lease_duration_both();
-  test_set_datawriter_reliability_kind_best_effort();
-  test_set_datawriter_reliability_kind_reliable();
-  test_set_datawriter_reliability_max_blocking_time_sec();
-  test_set_datawriter_reliability_max_blocking_time_nanosec();
-  test_set_datawriter_reliability_max_blocking_time_both();
-  test_set_datawriter_destination_order_kind_by_source_timestamp();
-  test_set_datawriter_destination_order_kind_by_reception_timestamp();
-  test_set_datawriter_history_kind_keep_all();
-  test_set_datawriter_history_kind_keep_last();
-  test_set_datawriter_history_depth();
-  test_set_datawriter_resource_limits_max_samples();
-  test_set_datawriter_resource_limits_max_instances();
-  test_set_datawriter_resource_limits_max_samples_per_instance();
-  test_set_datawriter_transport_priority_value();
-  test_set_datawriter_lifespan_duration_sec();
-  test_set_datawriter_lifespan_duration_nanosec();
-  test_set_datawriter_lifespan_duration_both();
-  test_set_datawriter_ownership_kind_shared();
-  test_set_datawriter_ownership_kind_exclusive();
-  test_set_datawriter_ownership_strength_value();
+    test_set_datawriter_deadline_sec();
+    test_set_datawriter_deadline_nanosec();
+    test_set_datawriter_deadline_both();
+    test_set_datawriter_latency_budget_sec();
+    test_set_datawriter_latency_budget_nanosec();
+    test_set_datawriter_latency_budget_both();
+    test_set_datawriter_liveliness_kind_automatic();
+    test_set_datawriter_liveliness_kind_manual_by_topic();
+    test_set_datawriter_liveliness_kind_manual_by_participant();
+    test_set_datawriter_liveliness_lease_duration_sec();
+    test_set_datawriter_liveliness_lease_duration_nanosec();
+    test_set_datawriter_liveliness_lease_duration_both();
+    test_set_datawriter_reliability_kind_best_effort();
+    test_set_datawriter_reliability_kind_reliable();
+    test_set_datawriter_reliability_max_blocking_time_sec();
+    test_set_datawriter_reliability_max_blocking_time_nanosec();
+    test_set_datawriter_reliability_max_blocking_time_both();
+    test_set_datawriter_destination_order_kind_by_source_timestamp();
+    test_set_datawriter_destination_order_kind_by_reception_timestamp();
+    test_set_datawriter_history_kind_keep_all();
+    test_set_datawriter_history_kind_keep_last();
+    test_set_datawriter_history_depth();
+    test_set_datawriter_resource_limits_max_samples();
+    test_set_datawriter_resource_limits_max_instances();
+    test_set_datawriter_resource_limits_max_samples_per_instance();
+    test_set_datawriter_transport_priority_value();
+    test_set_datawriter_lifespan_duration_sec();
+    test_set_datawriter_lifespan_duration_nanosec();
+    test_set_datawriter_lifespan_duration_both();
+    test_set_datawriter_ownership_kind_shared();
+    test_set_datawriter_ownership_kind_exclusive();
+    test_set_datawriter_ownership_strength_value();
 
-  // DataReader QOS
-  test_set_datareader_durability_volatile();
-  test_set_datareader_durability_transient_local();
+    // DataReader QOS
+    test_set_datareader_durability_volatile();
+    test_set_datareader_durability_transient_local();
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-  test_set_datareader_durability_transient();
-  test_set_datareader_durability_persistent();
+    test_set_datareader_durability_transient();
+    test_set_datareader_durability_persistent();
 #endif // OPENDDS_NO_PERSISTENCE_PROFILE
-  test_set_datareader_deadline_sec();
-  test_set_datareader_deadline_nanosec();
-  test_set_datareader_deadline_both();
-  test_set_datareader_liveliness_kind_automatic();
-  test_set_datareader_liveliness_kind_manual_by_topic();
-  test_set_datareader_liveliness_kind_manual_by_participant();
-  test_set_datareader_liveliness_lease_duration_sec();
-  test_set_datareader_liveliness_lease_duration_nanosec();
-  test_set_datareader_liveliness_lease_duration_both();
-  test_set_datareader_reliability_kind_best_effort();
-  test_set_datareader_reliability_kind_reliable();
-  test_set_datareader_reliability_max_blocking_time_sec();
-  test_set_datareader_reliability_max_blocking_time_nanosec();
-  test_set_datareader_reliability_max_blocking_time_both();
-  test_set_datareader_destination_order_kind_by_source_timestamp();
-  test_set_datareader_destination_order_kind_by_reception_timestamp();
-  test_set_datareader_history_kind_keep_all();
-  test_set_datareader_history_kind_keep_last();
-  test_set_datareader_history_depth();
-  test_set_datareader_resource_limits_max_samples();
-  test_set_datareader_resource_limits_max_instances();
-  test_set_datareader_resource_limits_max_samples_per_instance();
-  test_set_datareader_ownership_kind_shared();
-  test_set_datareader_ownership_kind_exclusive();
-  test_set_datareader_time_based_filter_minimum_separation_sec();
-  test_set_datareader_time_based_filter_minimum_separation_nanosec();
-  test_set_datareader_time_based_filter_minimum_separation_both();
-  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec();
-  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec();
-  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both();
-  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec();
-  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
-  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
+    test_set_datareader_deadline_sec();
+    test_set_datareader_deadline_nanosec();
+    test_set_datareader_deadline_both();
+    test_set_datareader_liveliness_kind_automatic();
+    test_set_datareader_liveliness_kind_manual_by_topic();
+    test_set_datareader_liveliness_kind_manual_by_participant();
+    test_set_datareader_liveliness_lease_duration_sec();
+    test_set_datareader_liveliness_lease_duration_nanosec();
+    test_set_datareader_liveliness_lease_duration_both();
+    test_set_datareader_reliability_kind_best_effort();
+    test_set_datareader_reliability_kind_reliable();
+    test_set_datareader_reliability_max_blocking_time_sec();
+    test_set_datareader_reliability_max_blocking_time_nanosec();
+    test_set_datareader_reliability_max_blocking_time_both();
+    test_set_datareader_destination_order_kind_by_source_timestamp();
+    test_set_datareader_destination_order_kind_by_reception_timestamp();
+    test_set_datareader_history_kind_keep_all();
+    test_set_datareader_history_kind_keep_last();
+    test_set_datareader_history_depth();
+    test_set_datareader_resource_limits_max_samples();
+    test_set_datareader_resource_limits_max_instances();
+    test_set_datareader_resource_limits_max_samples_per_instance();
+    test_set_datareader_ownership_kind_shared();
+    test_set_datareader_ownership_kind_exclusive();
+    test_set_datareader_time_based_filter_minimum_separation_sec();
+    test_set_datareader_time_based_filter_minimum_separation_nanosec();
+    test_set_datareader_time_based_filter_minimum_separation_both();
+    test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec();
+    test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec();
+    test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both();
+    test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec();
+    test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
+    test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in QosSettings.cpp:");
+    return 1;
+  }
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
   return failed;
