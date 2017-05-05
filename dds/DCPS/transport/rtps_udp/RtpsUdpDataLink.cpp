@@ -72,7 +72,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config->heartbeat_response_delay_),
   heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
-  heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats))
+  heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
+  held_data_delivery_handler_(this)
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
@@ -1028,20 +1029,7 @@ RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, WriterInfo& info,
                                    bool durable)
 {
   if (durable && (info.recvd_.empty() || info.recvd_.low() > 1)) return;
-  const SequenceNumber ca = info.recvd_.cumulative_ack();
-  typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
-  const iter end = info.held_.upper_bound(ca);
-  for (iter it = info.held_.begin(); it != end; /*increment in loop body*/) {
-    if (Transport_debug_level > 5) {
-      GuidConverter reader(readerId);
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::deliver_held_data -")
-                           ACE_TEXT(" deliver sequence: %q to %C\n"),
-                           it->second.header_.sequence_.getValue(),
-                           OPENDDS_STRING(reader).c_str()));
-    }
-    data_received(it->second, readerId);
-    info.held_.erase(it++);
-  }
+  held_data_delivery_handler_.notify_delivery(readerId, info);
 }
 
 void
@@ -2590,6 +2578,55 @@ RtpsUdpDataLink::send_final_acks (const RepoId& readerid)
   if (rr != readers_.end ()) {
     send_ack_nacks (rr, true);
   }
+}
+
+
+int
+RtpsUdpDataLink::HeldDataDeliveryHandler::handle_exception(ACE_HANDLE /* fd */)
+{
+  ACE_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
+
+  HeldData::iterator itr;
+  for (itr = held_data_.begin(); itr != held_data_.end(); ++itr) {
+    link_->data_received(itr->first, itr->second);
+  }
+  held_data_.clear();
+  return 0;
+}
+
+void RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery(const RepoId& readerId, WriterInfo& info)
+{
+  ACE_ASSERT(link_->reactor_task_->get_reactor_owner() == ACE_Thread::self());
+
+  const SequenceNumber ca = info.recvd_.cumulative_ack();
+  typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
+  const iter end = info.held_.upper_bound(ca);
+
+  for (iter it = info.held_.begin(); it != end; /*increment in loop body*/) {
+    if (Transport_debug_level > 5) {
+      GuidConverter reader(readerId);
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::HeldDataDeliveryHandler::notify_delivery -")
+                           ACE_TEXT(" deliver sequence: %q to %C\n"),
+                           it->second.header_.sequence_.getValue(),
+                           OPENDDS_STRING(reader).c_str()));
+    }
+    // The head_data_ is not protected by a mutex because it is always accessed from the reactor task thread.
+    held_data_.push_back(HeldDataEntry(it->second, readerId));
+    info.held_.erase(it++);
+  }
+  link_->reactor_task_->get_reactor()->notify(this);
+}
+
+ACE_Event_Handler::Reference_Count
+RtpsUdpDataLink::HeldDataDeliveryHandler::add_reference()
+{
+  return link_->add_reference();
+}
+
+ACE_Event_Handler::Reference_Count
+RtpsUdpDataLink::HeldDataDeliveryHandler::remove_reference()
+{
+  return link_->remove_reference();
 }
 
 } // namespace DCPS
