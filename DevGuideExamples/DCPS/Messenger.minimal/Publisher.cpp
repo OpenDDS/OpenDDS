@@ -80,10 +80,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     e._tao_print_exception("Exception caught in main():");
     return -1;
   } catch (std::runtime_error& err) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
                       err.what()), -1);
   } catch (std::string& msg) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
                       msg.c_str()), -1);
   }
 

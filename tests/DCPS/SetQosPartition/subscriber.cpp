@@ -147,8 +147,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       DataReaderListenerImpl* listener_servant1 =
         dynamic_cast<DataReaderListenerImpl*>(listener1.in());
+
+      if (!listener_servant1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant1 is nil (dynamic_cast failed)!\n")), -1);
+      }
+
       DataReaderListenerImpl* listener_servant2 =
         dynamic_cast<DataReaderListenerImpl*>(listener2.in());
+
+      if (!listener_servant2) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant2 is nil (dynamic_cast failed)!\n")), -1);
+      }
 
       int expected = 10;
       cout << "subscriber waiting for partition A completion" << endl;

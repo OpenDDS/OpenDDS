@@ -46,44 +46,53 @@ namespace {
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  { // First sequence should be 1
-    RepoId repoId;
-    memset(&repoId, 0, sizeof(repoId));
-    RepoIdSequence seq(repoId);
-    TEST_ASSERT(entityKey(seq.next()) == 1);
-    // Subsequent sequences should increase
-    TEST_ASSERT(entityKey(seq.next()) == 2);
-    TEST_ASSERT(entityKey(seq.next()) == 3);
-    TEST_ASSERT(entityKey(seq.next()) == 4);
-  }
-  { // Should preserve RepoId structure
-    RepoId repoId = Factory::not_default_repo_id();
-    RepoIdSequence seq(repoId);
+  try
+  {
+    { // First sequence should be 1
+      RepoId repoId;
+      memset(&repoId, 0, sizeof(repoId));
+      RepoIdSequence seq(repoId);
+      TEST_ASSERT(entityKey(seq.next()) == 1);
+      // Subsequent sequences should increase
+      TEST_ASSERT(entityKey(seq.next()) == 2);
+      TEST_ASSERT(entityKey(seq.next()) == 3);
+      TEST_ASSERT(entityKey(seq.next()) == 4);
+    }
+    { // Should preserve RepoId structure
+      RepoId repoId = Factory::not_default_repo_id();
+      RepoIdSequence seq(repoId);
 
-    {
-      RepoId result = seq.next();
-      TEST_ASSERT(!memcmp(repoId.guidPrefix,
-                          result.guidPrefix,
-                          sizeof repoId.guidPrefix));
-      TEST_ASSERT(entityKey(result) == 1);
-      TEST_ASSERT(repoId.entityId.entityKind == result.entityId.entityKind);
-    }
-    {
-      RepoId result = seq.next();
-      TEST_ASSERT(!memcmp(repoId.guidPrefix,
-                          result.guidPrefix,
-                          sizeof repoId.guidPrefix));
-      TEST_ASSERT(entityKey(result) == 2);
-      TEST_ASSERT(repoId.entityId.entityKind == result.entityId.entityKind);
-    }
-    {
-      RepoId result = seq.next();
-      TEST_ASSERT(!memcmp(repoId.guidPrefix,
-                          result.guidPrefix,
-                          sizeof repoId.guidPrefix));
-      TEST_ASSERT(entityKey(result) == 3);
-      TEST_ASSERT(repoId.entityId.entityKind == result.entityId.entityKind);
+      {
+        RepoId result = seq.next();
+        TEST_ASSERT(!memcmp(repoId.guidPrefix,
+          result.guidPrefix,
+          sizeof repoId.guidPrefix));
+        TEST_ASSERT(entityKey(result) == 1);
+        TEST_ASSERT(repoId.entityId.entityKind == result.entityId.entityKind);
+      }
+      {
+        RepoId result = seq.next();
+        TEST_ASSERT(!memcmp(repoId.guidPrefix,
+          result.guidPrefix,
+          sizeof repoId.guidPrefix));
+        TEST_ASSERT(entityKey(result) == 2);
+        TEST_ASSERT(repoId.entityId.entityKind == result.entityId.entityKind);
+      }
+      {
+        RepoId result = seq.next();
+        TEST_ASSERT(!memcmp(repoId.guidPrefix,
+          result.guidPrefix,
+          sizeof repoId.guidPrefix));
+        TEST_ASSERT(entityKey(result) == 3);
+        TEST_ASSERT(repoId.entityId.entityKind == result.entityId.entityKind);
+      }
     }
   }
+  catch (char const *ex)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) Assertion failed.\n"), ex), -1);
+  }
+
   return 0;
 }

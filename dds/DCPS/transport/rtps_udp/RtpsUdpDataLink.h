@@ -485,6 +485,27 @@ private:
   InterestingAckNackSetType interesting_ack_nacks_;
 
   void send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag = false);
+
+  class HeldDataDeliveryHandler : public RcEventHandler {
+  public:
+    HeldDataDeliveryHandler(RtpsUdpDataLink* link)
+      : link_(link) {
+      }
+
+      //Reactor invokes this after being notified in schedule_stop or cancel_release
+    int handle_exception(ACE_HANDLE /* fd */);
+
+    void notify_delivery(const RepoId& readerId, WriterInfo& info);
+
+    virtual ACE_Event_Handler::Reference_Count add_reference();
+    virtual ACE_Event_Handler::Reference_Count remove_reference();
+  private:
+    RtpsUdpDataLink* link_;
+    typedef std::pair<ReceivedDataSample, RepoId> HeldDataEntry;
+    typedef std::vector<HeldDataEntry> HeldData;
+    HeldData held_data_;
+  };
+  HeldDataDeliveryHandler held_data_delivery_handler_;
 };
 
 } // namespace DCPS

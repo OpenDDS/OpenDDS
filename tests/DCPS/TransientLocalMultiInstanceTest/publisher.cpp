@@ -75,6 +75,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) listener is nil.\n")));;
       exit(1);
     }
+    if (!listener_servant1) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("%N:%l main()")
+        ACE_TEXT(" ERROR: listener_servant1 is nil (dynamic_cast failed)!\n")), -1);
+    }
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
@@ -238,6 +243,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (CORBA::is_nil(listener2)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) listener is nil.\n")));
       exit(1);
+    }
+    if (!listener_servant2) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("%N:%l main()")
+        ACE_TEXT(" ERROR: listener_servant2 is nil (dynamic_cast failed)!\n")), -1);
     }
 
     // Create the Datareaders

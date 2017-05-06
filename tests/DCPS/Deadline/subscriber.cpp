@@ -136,7 +136,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ws->attach_condition(cond);
         DDS::Duration_t four_sec = {4, 0};
         DDS::ConditionSeq active;
-        ws->wait(active, four_sec);
+        if (ws->wait(active, four_sec) != DDS::RETCODE_OK) {
+          cerr << "ERROR: Wait on waitset failed" << endl;
+          exit (1);
+        }
 
         // Check if the incompatible deadline was correctly flagged.
         if ((active.length() == 0) || (active[0] != cond)) {
@@ -186,6 +189,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       {
         cerr << "ERROR: listener is nil." << endl;
         exit(1);
+      }
+      if (!listener_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
       }
 
       DDS::DataReaderQos dr_qos; // Good QoS.

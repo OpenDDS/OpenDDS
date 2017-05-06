@@ -155,6 +155,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       DataReaderListenerImpl* drl_servant =
         dynamic_cast<DataReaderListenerImpl*>(drl.in());
 
+      if (!drl_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: drl_servant is nil (dynamic_cast failed)!\n")), -1);
+      }
+
       ::DDS::DataReader_var dr ;
 
       dr = sub->create_datareader(description.in (),

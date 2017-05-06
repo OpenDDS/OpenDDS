@@ -30,7 +30,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
   }
 
-  TheServiceParticipant->get_domain_participant_factory();
+  try
+  {
+    TheServiceParticipant->get_domain_participant_factory();
+  }
+  catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in sub_main.cpp:");
+    return 1;
+  }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create the SubDriver object.\n"));

@@ -6,6 +6,8 @@
 #include "dds/DCPS/SubscriberImpl.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
@@ -143,7 +145,9 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
          && status.current_count < N_MATCHES) {
     ConditionSeq active;
-    ws->wait(active, infinite);
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
 
@@ -298,7 +302,9 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
   while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
          && status.current_count < 1) {
     ConditionSeq active;
-    ws->wait(active, infinite);
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
 
@@ -376,7 +382,20 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = run_test(argc, argv);
+  int ret = EXIT_FAILURE;
+  try
+  {
+    ret = run_test(argc, argv);
+  }
+  catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in ContentFilteredTopicTest.cpp:");
+    return 1;
+  }
+  catch (const OpenDDS::DCPS::Transport::MiscProblem&)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
+  }
 
   // cleanup
   TheServiceParticipant->shutdown();

@@ -21,6 +21,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_unistd.h"
@@ -500,6 +501,11 @@ int run_test(int argc, ACE_TCHAR *argv[])
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
+    }
+  catch (const OpenDDS::DCPS::Transport::MiscProblem&)
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
     }
   catch (const CORBA::Exception& ex)
     {

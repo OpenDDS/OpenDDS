@@ -965,7 +965,16 @@ bool run_test()
 
 int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  TheServiceParticipant->get_domain_participant_factory();
+  try
+  {
+    TheServiceParticipant->get_domain_participant_factory();
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in rtps_reliability.cpp:");
+    return 1;
+  }
+
   bool ok = false;
   try {
     ok = run_test();

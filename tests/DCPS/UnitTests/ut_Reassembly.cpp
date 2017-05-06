@@ -275,15 +275,23 @@ void test_fill_ltor()
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  test_empty();
-/*
-  test_insert_has_frag();
-  test_first_insert_has_no_gaps();
-  test_insert_gaps();
-  test_insert_one_then_gap();
-  test_insert_one_then_split_gap();
-  test_fill_rtol();
-  test_fill_ltor();
-*/
+  try
+  {
+    test_empty();
+    /*
+      test_insert_has_frag();
+      test_first_insert_has_no_gaps();
+      test_insert_gaps();
+      test_insert_one_then_gap();
+      test_insert_one_then_split_gap();
+      test_fill_rtol();
+      test_fill_ltor();
+    */
+  }
+  catch (char const *ex)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) Assertion failed.\n"), ex), -1);
+  }
   return 0;
 }

@@ -471,7 +471,15 @@ bool test_messages()
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   bool ok = true;
-  ok &= test_key_hash();
-  ok &= test_messages();
+  try
+  {
+    ok &= test_key_hash();
+    ok &= test_messages();
+  }
+  catch (const CORBA::BAD_PARAM& ex)\
+  {
+    ex._tao_print_exception("Exception caught in RtpsMessagesTest.cpp:");
+    return 1;
+  }
   return ok ? 0 : 1;
 }
