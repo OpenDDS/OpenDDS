@@ -85,7 +85,7 @@ public:
   /// Factory function to create a transport monitor object
   virtual Monitor* create_transport_monitor(TransportImpl* transport);
 
-  ///Initialize the monitor (required to report data)
+  /// Initialize the monitor (required to report data)
   virtual void initialize();
 
   static int service_initialize();

@@ -19,9 +19,13 @@ int const INVALID_ENUM_VALUE = 999;
 DDS::DomainParticipantQos
 Marked_Default_Qos::marked_default_DomainParticipantQos()
 {
-  DDS::DomainParticipantQos qos;
-  DDS::DomainParticipantFactory_var factory = TheParticipantFactory;
-  factory->get_default_participant_qos(qos);
+  DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
+  qos.user_data.value.length(5);
+  qos.user_data.value[0] = 'M';
+  qos.user_data.value[1] = 'A';
+  qos.user_data.value[2] = 'G';
+  qos.user_data.value[3] = 'I';
+  qos.user_data.value[4] = 'C';
   return qos;
 }
 

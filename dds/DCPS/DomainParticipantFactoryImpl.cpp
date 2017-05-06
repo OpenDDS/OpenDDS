@@ -42,6 +42,10 @@ DomainParticipantFactoryImpl::create_participant(
   DDS::DomainParticipantListener_ptr a_listener,
   DDS::StatusMask mask)
 {
+  if (qos == PARTICIPANT_QOS_DEFAULT) {
+    this->get_default_participant_qos(qos);
+  }
+
   if (!Qos_Helper::valid(qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
