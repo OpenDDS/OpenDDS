@@ -111,6 +111,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         cerr << "listener is nil." << endl;
         exit(1);
       }
+      if (!listener_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
+      }
 
       // Create the Datareaders
       DDS::DataReaderQos dr_qos;

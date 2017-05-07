@@ -391,10 +391,10 @@ gen_find_size(const Fixed_T<Digits, Scale>&, size_t& size, size_t&)
 }
 
 template <unsigned int Digits, unsigned int Scale>
-inline void
+inline bool
 gen_skip_over(DCPS::Serializer& ser, Fixed_T<Digits, Scale>*)
 {
-  ser.skip((Digits + 2) / 2);
+  return ser.skip((Digits + 2) / 2);
 }
 
 }

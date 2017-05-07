@@ -52,16 +52,6 @@ namespace DCPS {
     void wait_messages_pending(OPENDDS_STRING& caller_message);
 
     /**
-     * Provide a timestamp for the passed in time.
-     * @deprecated Remove and replace with ACE::timestamp
-     * once TAO 1.6a is no longer supported
-     */
-    static ACE_TCHAR*
-    timestamp (const ACE_Time_Value& time_value,
-               ACE_TCHAR date_and_time[],
-               size_t date_and_timelen);
-
-    /**
      * For testing.
      */
     int dropped_count();

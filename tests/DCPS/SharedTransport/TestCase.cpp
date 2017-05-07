@@ -99,7 +99,7 @@ TestCase::test()
   // wait for delivery
   for (TestSubscriberVector::iterator sub = subscribers_.begin();
        sub != subscribers_.end(); ++sub) {
-    int read = 0;
+    size_t read = 0;
     DDS::WaitSet_var ws = new DDS::WaitSet;
     DDS::ReadCondition_var rc =
         (*sub)->create_readcondition(DDS::NOT_READ_SAMPLE_STATE,
@@ -107,7 +107,7 @@ TestCase::test()
                                      DDS::ALIVE_INSTANCE_STATE);
     ws->attach_condition(rc);
     DDS::Duration_t finite = {30, 0};
-    CORBA::Long num_expected = num_messages * publishers_.size();
+    const size_t num_expected = num_messages * publishers_.size();
 
     do {
       TestMessageSeq data_values;
@@ -234,5 +234,15 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   TestCase test;
-  return test.run(argc, argv);
+  int ret = 1;
+  try
+  {
+    ret = test.run(argc, argv);
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in TestCase.cpp:");
+    return 1;
+  }
+  return ret;
 }

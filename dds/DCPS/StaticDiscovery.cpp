@@ -184,13 +184,13 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
   rid.entityId.entityKind = ENTITYKIND_USER_WRITER_WITH_KEY;
 
   if (DCPS_debug_level > 8) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) looking up writer ID %s\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) looking up writer ID %C\n",
                LogGuid(rid).c_str()));
   }
 
   EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(rid);
   if (pos == registry_.writer_map.end()) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: unknown writer: %s\n"), LogGuid(rid).c_str()));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: unknown writer: %C\n"), LogGuid(rid).c_str()));
     return;
   }
 
@@ -221,7 +221,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
 
   EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(rid);
   if (pos == registry_.reader_map.end()) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: unknown reader: %s\n"), LogGuid(rid).c_str()));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: unknown reader: %C\n"), LogGuid(rid).c_str()));
     return;
   }
 

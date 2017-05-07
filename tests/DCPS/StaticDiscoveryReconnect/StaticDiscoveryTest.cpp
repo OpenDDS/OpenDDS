@@ -331,7 +331,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    int return_code;
+    int return_code = 1;
     switch (mode) {
     case READER:
       return_code = do_reader(participant, topic, toggle);

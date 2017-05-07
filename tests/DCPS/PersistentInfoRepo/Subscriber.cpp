@@ -170,11 +170,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     e._tao_print_exception("Exception caught in main():");
     status = -1;
   } catch (const std::exception& ex) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
                ex.what()));
     status = -1;
   } catch (const std::string& msg) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
                msg.c_str()));
     status = -1;
   }

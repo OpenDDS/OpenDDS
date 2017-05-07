@@ -67,7 +67,7 @@ typedef std::map< ::CORBA::Long, Foos> SampleMap;
 
 class DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(unsigned int expected_num_samples)
+  explicit DataReaderListenerImpl(size_t expected_num_samples)
   : valid_(true)
   , condition_(lock_)
   , num_samples_(0)
@@ -202,8 +202,8 @@ private:
 
   ACE_SYNCH_MUTEX lock_;
   ACE_Condition<ACE_SYNCH_MUTEX> condition_;
-  unsigned int num_samples_;
-  const unsigned int expected_num_samples_;
+  size_t num_samples_;
+  const size_t expected_num_samples_;
 };
 
 void validate(const float expected_x, const float actual_x,

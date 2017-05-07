@@ -1395,16 +1395,15 @@ WriteDataContainer::wait_pending()
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
-    ACE_TCHAR date_time[50];
-    ACE_TCHAR* const time =
-      MessageTracker::timestamp(pending_timeout,
-                                date_time,
-                                50);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending timeout ")
-               ACE_TEXT("at %s\n"),
-               (pending_timeout == ACE_Time_Value::zero ?
-                  ACE_TEXT("(no timeout)") : time)));
+    if (pending_timeout == ACE_Time_Value::zero) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending no timeout\n")));
+    } else {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending timeout ")
+                 ACE_TEXT("at %#T\n"),
+                 &pending_timeout));
+    }
   }
   while (true) {
 

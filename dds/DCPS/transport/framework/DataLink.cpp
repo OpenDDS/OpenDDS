@@ -582,7 +582,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     const GuidConverter reader(readerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
-               ACE_TEXT("from publication %C received sample: %C to readerId %C (%s).\n"),
+               ACE_TEXT("from publication %C received sample: %C to readerId %C (%C).\n"),
                OPENDDS_STRING(converter).c_str(),
                to_string(sample.header_).c_str(),
                OPENDDS_STRING(reader).c_str(),
@@ -652,7 +652,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
         first = false;
         ++iter;
       }
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::data_received_i - normal data received to each subscription in listener_set %s ids:%C\n",
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::data_received_i - normal data received to each subscription in listener_set %C ids:%C\n",
                  constrain == ReceiveListenerSet::SET_EXCLUDED ? "exclude" : "include", included_ids.c_str()));
     }
     listener_set->data_received(sample, incl_excl, constrain);

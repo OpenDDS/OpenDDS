@@ -18,6 +18,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "DataWriterListenerImpl.h"
+#include <stdexcept>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -230,6 +231,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
+  catch (std::runtime_error& err)
+  {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
+      err.what()), -1);
+  }
 
   return status;
 }

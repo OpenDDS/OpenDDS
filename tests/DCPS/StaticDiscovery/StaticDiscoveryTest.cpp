@@ -343,6 +343,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
         dynamic_cast<DataReaderListenerImpl*>(listener.in());
+
+      if (!listener_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
+      }
+
       DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
       DDS::DataReader_var bitdr =
         builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);

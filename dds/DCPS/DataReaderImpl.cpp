@@ -1522,7 +1522,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     if (filtered) break; // sample filtered from instance
 
-    accept_sample_processing(instance, header, is_new_instance);
+    if (instance) accept_sample_processing(instance, header, is_new_instance);
   }
   break;
 
@@ -1534,7 +1534,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     Serializer serializer(
         sample.sample_, sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
-    serializer >> control;
+    if (!(serializer >> control)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
+          ACE_TEXT("deserialization coherent change control failed.\n")));
+      return;
+    }
 
     if (DCPS_debug_level > 0) {
       std::stringstream buffer;
@@ -1643,7 +1647,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-      if( instance ) {
+      if (instance) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         if (! this->is_exclusive_ownership_
             || (this->is_exclusive_ownership_
@@ -1682,7 +1686,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                       && (instance)
                       && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-        this->watchdog_->cancel_timer(instance);
+        if (instance) {
+          this->watchdog_->cancel_timer(instance);
+        }
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
@@ -1697,7 +1703,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     if (sample.header_.message_length_ >= sizeof(RepoId)) {
       Serializer ser(sample.sample_);
       RepoId readerId = GUID_UNKNOWN;
-      ser >> readerId;
+      if (!(ser >> readerId)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
+            ACE_TEXT("deserialization reader failed.\n")));
+        return;
+      }
       if (readerId != GUID_UNKNOWN && readerId != get_repo_id()) {
         break; // not our message
       }
@@ -3389,7 +3399,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 #endif
 
-  if (watchdog_.in()) {
+  if (instance && watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
 

@@ -2,9 +2,9 @@
 This test builds upon the DevGuide Messenger example.
 
 This test showcases how the DCPSInforepo can be used in combination
- with the TAO ImplmentationReposity service (ImR). The test starts
+ with the TAO ImplementationRepository service (ImR). The test starts
  up the ImR and the Activator Service (AtS). It then starts up the
- InfoRepo with the -ORBuseimr option turned on. Th InfoRepo in this
+ InfoRepo with the -ORBuseimr option turned on. The InfoRepo in this
  mode will register with the ImR and writes out an ImRified IOR. The
  test driver then kills the ImplRepo.
 

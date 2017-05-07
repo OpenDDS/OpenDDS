@@ -196,7 +196,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (stub_ready == 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to create stub ready file\n")));
   }
-  ACE_OS::fclose(stub_ready);
+  else
+  {
+    ACE_OS::fclose(stub_ready);
+  }
 
   Shutdown_Event_Handler shutdown_eh;
   ACE_Sig_Handler shutdown_handler;

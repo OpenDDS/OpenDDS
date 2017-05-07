@@ -241,7 +241,7 @@ namespace {
 
     Value eval(FilterEvaluator::DataForEval& data)
     {
-      return Value(data.params_[param_], true);
+      return Value(data.params_[static_cast<CORBA::ULong>(param_)], true);
     }
 
     size_t param() { return param_; }

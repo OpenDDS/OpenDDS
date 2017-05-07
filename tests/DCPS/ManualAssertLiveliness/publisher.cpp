@@ -16,6 +16,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -99,13 +100,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         return 1;
       }
 
-      OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->get_config("part1");
-      if (!cfg.is_nil()) {
-        TheTransportRegistry->bind_config(cfg, participant);
+      try
+      {
+        OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->get_config("part1");
+        if (!cfg.is_nil()) {
+          TheTransportRegistry->bind_config(cfg, participant);
+        }
+        cfg = TheTransportRegistry->get_config("part2");
+        if (!cfg.is_nil()) {
+          TheTransportRegistry->bind_config(cfg, participant2);
+        }
       }
-      cfg = TheTransportRegistry->get_config("part2");
-      if (!cfg.is_nil()) {
-        TheTransportRegistry->bind_config(cfg, participant2);
+      catch (const OpenDDS::DCPS::Transport::NotFound&)
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) Transport::NotFound caught.\n")), -1);
       }
 
       if (parse_args (argc, argv) == -1) {
@@ -275,6 +284,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
          << e << endl;
       exit(1);
     }
+  catch (const OpenDDS::DCPS::Transport::MiscProblem&)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
+  }
 
   return status;
 }

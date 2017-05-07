@@ -72,7 +72,7 @@ Writer::extend_sample(Messenger::Message& message)
   // Message ID is 0 to 9
   // Lengths will vary from 15k to 165k
   // Over 65K will require multiple fragments for udp/mcast
-  message.data.length(calc_sample_length(message.writer_id, message.sample_id));
+  message.data.length(calc_sample_length(message.sample_id, message.writer_id));
 }
 
 void
