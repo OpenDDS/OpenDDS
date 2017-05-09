@@ -46,7 +46,7 @@ DomainParticipantFactoryImpl::create_participant(
   DDS::DomainParticipantQos par_qos = qos;
 
   if (par_qos == PARTICIPANT_QOS_DEFAULT) {
-    this->get_default_participant_qos(par_qos);
+    get_default_participant_qos(par_qos);
   }
 
   if (!Qos_Helper::valid(par_qos)) {

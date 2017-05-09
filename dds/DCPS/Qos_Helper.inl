@@ -8,6 +8,8 @@
 #include "ace/OS_NS_string.h"
 #include "ace/Truncate.h"
 
+#include <cstring>
+
 namespace {
 
 const ACE_UINT32 NSECS_IN_SEC = 1000000000;
@@ -313,8 +315,10 @@ ACE_INLINE
 bool operator==(const DDS::EntityFactoryQosPolicy& qos1,
                 const DDS::EntityFactoryQosPolicy& qos2)
 {
-  return
-    qos1.autoenable_created_entities == qos2.autoenable_created_entities;
+  // Marked_Default_Qos for DomainParticipant uses a value that's not 0 or 1
+  return std::memcmp(&qos1.autoenable_created_entities,
+                     &qos2.autoenable_created_entities,
+                     sizeof qos2.autoenable_created_entities) == 0;
 }
 
 ACE_INLINE
@@ -1041,9 +1045,11 @@ Qos_Helper::valid(const DDS::DurabilityServiceQosPolicy& qos)
 #endif
 
 ACE_INLINE
-bool Qos_Helper::valid(const DDS::EntityFactoryQosPolicy& /*qos*/)
+bool Qos_Helper::valid(const DDS::EntityFactoryQosPolicy& qos)
 {
-  return true;
+  // see Marked_Default_Qos::marked_default_DomainParticipantQos()
+  const void* const mem = &qos.autoenable_created_entities;
+  return *static_cast<const char*>(mem) != 3;
 }
 
 ACE_INLINE
