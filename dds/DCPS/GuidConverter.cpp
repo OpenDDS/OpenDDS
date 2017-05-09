@@ -94,12 +94,10 @@ GuidConverter::entityKind() const
 
 GuidConverter::operator OPENDDS_STRING() const
 {
-
   OPENDDS_STRING ret(to_string(guid_));
   ret += "(";
   ret += to_dds_string((unsigned long) checksum(), true);
   ret += ")";
-
   return ret;
 }
 
@@ -107,9 +105,8 @@ GuidConverter::operator OPENDDS_STRING() const
 GuidConverter::operator std::wstring() const
 {
   std::wostringstream os;
-
-  os << guid_ << "(" << std::hex << checksum() << ")";
-
+  const OPENDDS_STRING guid_str(to_string(guid_));
+  os << guid_str.c_str() << "(" << std::hex << checksum() << ")";
   return os.str();
 }
 #endif
