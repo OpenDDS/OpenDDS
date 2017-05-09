@@ -451,7 +451,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   if (!this->associate(data, active)) {
     //FUTURE: inform inforepo and try again as passive peer
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ReplayerImpl::add_association: ")
                  ACE_TEXT("ERROR: transport layer failed to associate.\n")));
     }

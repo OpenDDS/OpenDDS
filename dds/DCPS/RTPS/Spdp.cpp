@@ -379,7 +379,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   if (0 != multicast_socket_.join(default_multicast, 1,
                                   net_if.empty() ? 0 :
                                   ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::SpdpTransport() - ")
         ACE_TEXT("failed to join multicast group %C:%hd %p\n"),
         mc_addr.c_str(), mc_port, ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
@@ -787,7 +787,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   }
 
   if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, outer_->disco_->ttl())) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
                ACE_TEXT("for port:%hd %p\n"),

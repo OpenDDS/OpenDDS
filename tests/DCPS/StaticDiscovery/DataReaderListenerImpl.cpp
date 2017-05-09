@@ -105,7 +105,7 @@ DataReaderListenerImpl::on_subscription_matched(
       rdr->read(data, infos, DDS::LENGTH_UNLIMITED,
                 DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
     if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
-      ACE_DEBUG((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
+      ACE_ERROR((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
       builtin_read_error_ = true;
       return;
     }

@@ -49,7 +49,7 @@ namespace {
         outer_->data_available(reader);
       } catch (std::exception& e) {
         if (OpenDDS::DCPS::DCPS_debug_level) {
-          ACE_DEBUG((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::Listener::"
+          ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::Listener::"
                      "on_data_available(): %C", e.what()));
         }
       }

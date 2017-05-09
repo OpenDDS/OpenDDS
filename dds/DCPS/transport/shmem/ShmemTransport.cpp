@@ -50,7 +50,7 @@ ShmemTransport::make_datalink(const std::string& remote_address)
 
   // Open logical connection:
   if (!link->open(remote_address)) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ShmemTransport::make_datalink: ")
                       ACE_TEXT("failed to open DataLink!\n")));

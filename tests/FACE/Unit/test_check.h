@@ -2,7 +2,7 @@
   ++assertions; \
   if (!( COND )) {\
     ++failed; \
-    ACE_DEBUG((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
+    ACE_ERROR((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
         #COND )); \
     return; \
   }
@@ -11,7 +11,7 @@
   ++assertions; \
   if (!( COND )) {\
     ++failed; \
-    ACE_DEBUG((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
+    ACE_ERROR((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
         #COND )); \
     return val; \
   }

@@ -50,7 +50,7 @@ public:
       pub_id_ = publication.remote_id_;
       return associate(publication, false /* active */);
     } catch (const CORBA::BAD_PARAM& ) {
-        ACE_DEBUG((LM_ERROR, "ERROR: caught CORBA::BAD_PARAM exception\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: caught CORBA::BAD_PARAM exception\n"));
         return false;
     }
   }
@@ -71,7 +71,7 @@ public:
       ok &= (ser >> data);
 
       if (!ok) {
-        ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize data\n"));
         return;
       }
 
@@ -104,7 +104,7 @@ public:
           || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
           || sample.header_.message_length_ != 533
           || pub.checksum() != GuidConverter(pub_id_).checksum()) {
-        ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
       }
 
       if (seq_ == 2) {
@@ -112,7 +112,7 @@ public:
       }
 
       if (data.key != 0x09230923 || std::strlen(data.value.in()) != 520) {
-        ACE_DEBUG((LM_ERROR, "ERROR: DataSample contents malformed\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: DataSample contents malformed\n"));
       }
       break;
     }
@@ -130,14 +130,14 @@ public:
       ok &= (ser >> OpenDDS::DCPS::KeyOnly<TestMsg>(data));
 
       if (!ok) {
-        ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize key data\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize key data\n"));
         return;
       }
       if (data.key == 0x04030201) {
         // Good control message
         control_msg_count_++;
       } else {
-        ACE_DEBUG((LM_ERROR, "ERROR: key contents malformed\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: key contents malformed\n"));
       }
 
       std::ostringstream oss;
@@ -283,7 +283,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     if (sdr.control_msg_count_ != 4) {
-      ACE_DEBUG((LM_ERROR, "ERROR: Expected 4 control messages, received %d\n",
+      ACE_ERROR((LM_ERROR, "ERROR: Expected 4 control messages, received %d\n",
                  sdr.control_msg_count_));
     }
 
@@ -294,7 +294,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     return 0;
   } catch (const OpenDDS::DCPS::Transport::NotConfigured& ) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                "ERROR: caught OpenDDS::DCPS::Transport::NotConfigured exception.\n"));
     return 1;
   } catch (const CORBA::BAD_PARAM& ex) {

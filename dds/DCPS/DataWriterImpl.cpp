@@ -269,7 +269,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   if (!associate(data, active)) {
     //FUTURE: inform inforepo and try again as passive peer
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) DataWriterImpl::add_association: ")
                  ACE_TEXT("ERROR: transport layer failed to associate.\n")));
     }
@@ -284,7 +284,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
       const GuidConverter conv(remote_id);
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
                  OPENDDS_STRING(conv).c_str()));
@@ -344,7 +344,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     // code will not be applicable.
     if (DCPS_debug_level) {
       const GuidConverter conv(publication_id_);
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("ERROR: DataWriter (%C) should always be active in current implementation\n"),
                  OPENDDS_STRING(conv).c_str()));

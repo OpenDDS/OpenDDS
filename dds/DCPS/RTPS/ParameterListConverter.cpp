@@ -65,7 +65,7 @@ namespace {
         }
       }
     } else {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: add_param_rtps_locator - ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: add_param_rtps_locator - ")
                            ACE_TEXT("Unable to convert dcps_rtps ")
                            ACE_TEXT("TransportLocator blob to LocatorSeq\n")));
     }

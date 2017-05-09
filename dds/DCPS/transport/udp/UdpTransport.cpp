@@ -55,7 +55,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
     return link;
   }
 
-  ACE_DEBUG((LM_ERROR,
+  ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: ")
               ACE_TEXT("UdpTransport::make_datalink: ")
               ACE_TEXT("failed to open DataLink!\n")));
