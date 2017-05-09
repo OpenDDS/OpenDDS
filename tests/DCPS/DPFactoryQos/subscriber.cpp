@@ -77,7 +77,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // The QoS of the dp shouldn't match the marked value which has a magic value
       if (dpqos == PARTICIPANT_QOS_DEFAULT)
       {
-        cerr << "DomainParticipant QoS matches marked PARTICIPANT_QOS_DEFAULT." << endl;
+        cerr << "ERROR: DomainParticipant QoS matches marked PARTICIPANT_QOS_DEFAULT." << endl;
         return 1;
       }
 
