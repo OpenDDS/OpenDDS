@@ -365,7 +365,8 @@ namespace {
       if (OpenDDS::DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - created new participant for domainId: %d\n", domainId));
       }
-      DDS::DomainParticipantQos qos(PARTICIPANT_QOS_DEFAULT);
+      DDS::DomainParticipantQos qos;
+      dpf->get_default_participant_qos(qos);
       qos.user_data.value.length(6);
       qos.user_data.value[0] = (participantId >> 0) & 0xFF;
       qos.user_data.value[1] = (participantId >> 8) & 0xFF;
