@@ -502,7 +502,7 @@ private:
   private:
     RtpsUdpDataLink* link_;
     typedef std::pair<ReceivedDataSample, RepoId> HeldDataEntry;
-    typedef std::vector<HeldDataEntry> HeldData;
+    typedef OPENDDS_VECTOR(HeldDataEntry) HeldData;
     HeldData held_data_;
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
