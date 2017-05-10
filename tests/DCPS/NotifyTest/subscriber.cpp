@@ -138,7 +138,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       int expected = num_expected_data + num_expected_dispose + num_expected_unregister;
-cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/" << num_expected_unregister <<endl;
+      cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/" << num_expected_unregister <<endl;
 
       while ( listener_servant.num_reads() < expected ) {
         cerr << " recv " << listener_servant.num_reads() << endl;

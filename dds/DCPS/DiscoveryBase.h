@@ -308,7 +308,7 @@ namespace OpenDDS {
                 top_it->second.endpoints_.erase(publicationId);
               }
             } else {
-            ACE_DEBUG((LM_ERROR,
+            ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: EndpointManager::remove_publication - ")
                        ACE_TEXT("Failed to publish dispose msg\n")));
           }
@@ -377,7 +377,7 @@ namespace OpenDDS {
               top_it->second.endpoints_.erase(subscriptionId);
             }
           } else {
-            ACE_DEBUG((LM_ERROR,
+            ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: EndpointManager::remove_subscription - ")
                        ACE_TEXT("Failed to publish dispose msg\n")));
           }
@@ -472,7 +472,7 @@ namespace OpenDDS {
         assign(guid.entityId.entityKey, topic_counter_++);
 
         if (topic_counter_ == 0x1000000) {
-          ACE_DEBUG((LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: EndpointManager::make_topic_guid: ")
                      ACE_TEXT("Exceeded Maximum number of topic entity keys!")
                      ACE_TEXT("Next key will be a duplicate!\n")));
@@ -968,7 +968,7 @@ namespace OpenDDS {
       {
         if (std::strlen(topicName) > 256 || std::strlen(dataTypeName) > 256) {
           if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR LocalParticipant::assert_topic() - ")
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR LocalParticipant::assert_topic() - ")
                        ACE_TEXT("topic or type name length limit (256) exceeded\n")));
           }
           return DCPS::PRECONDITION_NOT_MET;

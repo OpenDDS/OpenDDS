@@ -389,7 +389,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
 
     if (!this->associate(data, active)) {
       if (DCPS_debug_level) {
-        ACE_DEBUG((LM_ERROR,
+        ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
                    ACE_TEXT("ERROR: transport layer failed to associate.\n")));
       }

@@ -86,7 +86,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
     ACE_TCHAR str[64];
     conf->group_address_.addr_to_string(str,
                                         sizeof(str)/sizeof(str[0]));
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: ")
                     ACE_TEXT("MulticastTransport::make_datalink: ")
                     ACE_TEXT("failed to join multicast group: %s!\n"),

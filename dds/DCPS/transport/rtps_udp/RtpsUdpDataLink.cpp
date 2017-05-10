@@ -258,7 +258,7 @@ RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
   const iter_t iter = locators_.find(remote_id);
   if (iter == locators_.end()) {
     const GuidConverter conv(remote_id);
-    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locator_i() - "
+    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locator_i() - "
       "no locator found for peer %C\n", OPENDDS_STRING(conv).c_str()));
     return ACE_INET_Addr();
   }
@@ -783,7 +783,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     }
   } else if (durable && (Transport_debug_level)) {
     const GuidConverter conv(pub_id);
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
       "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
       "WARNING: no RtpsWriter to store durable data for local %C\n",
       OPENDDS_STRING(conv).c_str()));
@@ -1381,7 +1381,7 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag)
       if (!locators_.count(wi->first)) {
         if (Transport_debug_level) {
           const GuidConverter conv(wi->first);
-          ACE_DEBUG((LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      "(%P|%t) RtpsUdpDataLink::send_heartbeat_replies() - "
                      "no locator for remote %C\n", OPENDDS_STRING(conv).c_str()));
         }
@@ -2346,7 +2346,7 @@ RtpsUdpDataLink::send_heartbeats()
       bool send_ok = true;
       for (size_t i = 0; i < subm.size(); ++i) {
         if (!(ser << subm[i])) {
-          ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_heartbeats() - "
+          ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_heartbeats() - "
             "failed to serialize HEARTBEAT submessage %B\n", i));
           send_ok = false;
           break;
@@ -2464,7 +2464,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
     send_strategy_->send_rtps_control(mb, recipients);
   }
   else {
-    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_heartbeats_manual() - "
+    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_heartbeats_manual() - "
                "failed to serialize HEARTBEAT submessage\n"));
   }
 }
@@ -2527,7 +2527,7 @@ RtpsUdpDataLink::TimedDelay::schedule()
     const long timer = outer_->get_reactor()->schedule_timer(this, 0, timeout_);
 
     if (timer == -1) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::TimedDelay::schedule "
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::TimedDelay::schedule "
         "failed to schedule timer %p\n", ACE_TEXT("")));
     } else {
       scheduled_ = true;
@@ -2553,7 +2553,7 @@ RtpsUdpDataLink::HeartBeat::enable()
       outer_->get_reactor()->schedule_timer(this, 0, ACE_Time_Value::zero, per);
 
     if (timer == -1) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::HeartBeat::enable"
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::HeartBeat::enable"
         " failed to schedule timer %p\n", ACE_TEXT("")));
     } else {
       enabled_ = true;

@@ -23,7 +23,7 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
   , condition_(mutex_)
 {
   if (reactor == 0) {
-    ACE_DEBUG((LM_ERROR, "(%P|%t) ERROR: ReactorInterceptor initialized with null reactor\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorInterceptor initialized with null reactor\n"));
   }
   this->reactor(reactor);
 }

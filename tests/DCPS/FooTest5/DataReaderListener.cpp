@@ -40,7 +40,7 @@ int read (::DDS::DataReader_ptr reader)
 
         if (results.add (foo) == -1)
         {
-          ACE_DEBUG((LM_ERROR,
+          ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR add of sample resulted in -1\n")));
           return -1;
         }

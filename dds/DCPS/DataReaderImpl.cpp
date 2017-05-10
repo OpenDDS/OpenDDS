@@ -400,7 +400,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
 
   if (!associate(data, active)) {
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
           ACE_TEXT("ERROR: transport layer failed to associate.\n")));
     }
@@ -413,7 +413,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
       const GuidConverter conv(remote_id);
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
           ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
           OPENDDS_STRING(conv).c_str()));
@@ -906,7 +906,7 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
     return qc._retn();
   } catch (const std::exception& e) {
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ")
           ACE_TEXT("DataReaderImpl::create_querycondition - %C\n"),
           e.what()));
     }

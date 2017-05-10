@@ -23,7 +23,7 @@ namespace {
   {
     const char* dds_root = ACE_OS::getenv("DDS_ROOT");
     if (!dds_root) {
-      ACE_DEBUG((LM_ERROR, "The environment variable DDS_ROOT must be set.\n"));
+      ACE_ERROR((LM_ERROR, "The environment variable DDS_ROOT must be set.\n"));
       BE_abort();
     }
     std::string path = dds_root;

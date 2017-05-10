@@ -129,7 +129,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   if (ret == -1 && errno != EWOULDBLOCK) {
 
     VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
-    ACE_DEBUG((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"));
     //If the connection fails and, in the interim between releasing
     //lock and re-acquiring to remove the failed link, another association may have found
     //the datalink in links_ (always using find_datalink_i) so must allow the other
