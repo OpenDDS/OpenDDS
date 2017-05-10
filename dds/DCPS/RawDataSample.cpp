@@ -58,7 +58,7 @@ RawDataSample&
 RawDataSample::operator=(const RawDataSample& other)
 {
   RawDataSample tmp(other);
-  std::swap(*this, tmp);
+  swap(*this, tmp);
   return *this;
 }
 
