@@ -452,10 +452,7 @@ private:
   InterestingRemoteMapType interesting_readers_;
   InterestingRemoteMapType interesting_writers_;
 
-  mutable ACE_Thread_Mutex writer_no_longer_exists_lock_;
-
   typedef std::pair<RepoId, InterestingRemote> CallbackType;
-  OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks_;
 
 
   typedef OPENDDS_MAP_CMP(RepoId, CORBA::Long, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
