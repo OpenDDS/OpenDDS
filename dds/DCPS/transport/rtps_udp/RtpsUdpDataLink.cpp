@@ -2202,6 +2202,7 @@ RtpsUdpDataLink::send_heartbeats()
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
 
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
     if (writers_.empty() && interesting_readers_.empty()) {
       heartbeat_->disable();
