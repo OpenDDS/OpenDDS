@@ -1,13 +1,23 @@
-Version X.Y of OpenDDS
+Version 3.11 of OpenDDS
 
 ##### Additions:
-- TODO: Add your features here
+- Support for Visual Studio 2017
+- Content-filter expressions can now use 64-bit integer literals
+- tcp transport has a new wait_for_acknowledgements implementation
+- DataWriter's HISTORY QoS processing now allows replacing old samples with new ones without blocking
 
 ##### Fixes:
-- TODO: Add your fixes here
+- Improved robustness of DEADLINE QoS processing
+- Uses of content-filter expressions are now checked for the correct number of parameters
+- Fixed versioned namespace support
+- Improved support for IPv6
+- Improved robustness of rtps_udp transport, especially when used with static discovery
+- Use of the constant PARTICIPANT_QOS_DEFAULT no longer initializes the domain participant factory
+- Bug fixes in the OpenDDS Wireshark dissector (for sample dissection)
 
 ##### Notes:
-- TODO: Add your notes here
+- The QoS XML Handler library is now decoupled from DDS4CCM, it requires xerces
+
 _______________________________________________________________________________
 Version 3.10 of OpenDDS
 
