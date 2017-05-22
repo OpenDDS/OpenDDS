@@ -55,6 +55,12 @@ TransportRegistry::instance()
   return ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>::instance();
 }
 
+void
+TransportRegistry::close()
+{
+  ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>::close();
+}
+
 const char TransportRegistry::DEFAULT_CONFIG_NAME[] = "_OPENDDS_DEFAULT_CONFIG";
 const char TransportRegistry::DEFAULT_INST_PREFIX[] = "_OPENDDS_";
 
