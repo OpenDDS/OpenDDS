@@ -253,7 +253,7 @@ Service_Participant::reactor_owner() const
 void
 Service_Participant::shutdown()
 {
-  // When we are already shutdown just let the shutdown be a noo[
+  // When we are already shutdown just let the shutdown be a noop
   if (shut_down_) {
     return;
   }
