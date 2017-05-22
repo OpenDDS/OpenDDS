@@ -253,6 +253,11 @@ Service_Participant::reactor_owner() const
 void
 Service_Participant::shutdown()
 {
+  // When we are already shutdown just let the shutdown be a noo[
+  if (shut_down_) {
+    return;
+  }
+
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
