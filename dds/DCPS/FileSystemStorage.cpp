@@ -54,6 +54,10 @@ bool increment(ACE_TString& logical)
       ++logical[i];
       return true;
     }
+    else
+    {
+        logical[i] = 0x00;
+    }
   }
 
   return false;

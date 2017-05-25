@@ -744,6 +744,32 @@ Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
   sedp_.signal_liveliness(kind);
 }
 
+
+namespace{
+    bool check_address_local(ACE_INET_Addr* local){
+        ACE_INET_Addr* addr_array;
+        size_t count = 0;
+        if (ACE::get_ip_interfaces(count, addr_array) != 0)
+            return false;
+
+        bool blocal = false;
+        ACE_INET_Addr* p_interface = addr_array;
+        while (count--)
+        {
+            if (local->is_ip_equal(*p_interface))
+            {
+                blocal = true;
+                break;
+            }
+            p_interface++;
+        }
+
+        delete[] addr_array;
+        addr_array = 0;
+        return blocal;
+    }
+}
+
 bool
 Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                          u_short participant_id)
@@ -765,6 +791,20 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
           ACE_TEXT("failed setting unicast local_addr to port %d %p\n"),
           uni_port, ACE_TEXT("ACE_INET_Addr::set")));
     throw std::runtime_error("failed to set unicast local address");
+  }
+
+  if (!outer_->disco_->spdp_local_address().empty()){
+      if (!check_address_local(&local_addr))
+      {
+          if (DCPS::DCPS_debug_level > 3){
+              ACE_DEBUG((
+                  LM_ERROR,
+                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
+                  ACE_TEXT("Spdp local address not bind specific local network interface.\n")
+                  ));
+          }
+          throw std::runtime_error("failed to set unicast local address");
+      }
   }
 
   if (!OpenDDS::DCPS::open_appropriate_socket_type(unicast_socket_, local_addr)) {
