@@ -1706,16 +1706,17 @@ DomainParticipantImpl::is_clean() const
 }
 
 void
-DomainParticipantImpl::set_object_reference(const DDS::DomainParticipant_ptr& dp)
+DomainParticipantImpl::set_object_reference(DDS::DomainParticipant_ptr dp)
 {
   if (!CORBA::is_nil(participant_objref_.in())) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::set_object_reference, ")
                ACE_TEXT("This participant is already activated. \n")));
-    return;
   }
-
-  participant_objref_ = DDS::DomainParticipant::_duplicate(dp);
+  else
+  {
+    participant_objref_ = DDS::DomainParticipant::_duplicate(dp);
+  }
 }
 
 DDS::DomainParticipantListener_ptr

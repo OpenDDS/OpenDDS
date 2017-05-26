@@ -306,7 +306,7 @@ private:
    *  Associate the servant with the object reference.
    *  This is required to pass to the topic servant.
    */
-  void set_object_reference(const DDS::DomainParticipant_ptr& dp);
+  void set_object_reference(DDS::DomainParticipant_ptr dp);
 
   /**
    *  Check if the topic is used by any datareader or datawriter.
