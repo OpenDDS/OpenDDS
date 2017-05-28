@@ -303,12 +303,6 @@ private:
   RepoId get_repoid(const DDS::InstanceHandle_t& id);
 
   /**
-   *  Associate the servant with the object reference.
-   *  This is required to pass to the topic servant.
-   */
-  void set_object_reference(DDS::DomainParticipant_ptr dp);
-
-  /**
    *  Check if the topic is used by any datareader or datawriter.
    */
   int is_clean() const;
@@ -466,9 +460,6 @@ private:
   ACE_Condition<ACE_Thread_Mutex> shutdown_condition_;
   DDS::ReturnCode_t shutdown_result_;
   bool shutdown_complete_;
-
-  /// The object reference activated from this servant.
-  DDS::DomainParticipant_var participant_objref_;
 
   /// The built in topic subscriber.
   DDS::Subscriber_var bit_subscriber_;
