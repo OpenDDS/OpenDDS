@@ -399,6 +399,9 @@ DDS::ReturnCode_t
 InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant,
                             DDS::Subscriber_ptr bit_subscriber)
 {
+  if (CORBA::is_nil (bit_subscriber)) {
+    return DDS::RETCODE_OK;
+  }
 
   DDS::DataReader_var dr =
     bit_subscriber->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);

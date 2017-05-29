@@ -903,6 +903,10 @@ DomainParticipantImpl::delete_contained_entities()
   // BIT is no longer available
   Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
   disc->fini_bit(this, bit_subscriber_.in ());
+  if (!CORBA::is_nil (bit_subscriber_.in ())) {
+    this->delete_subscriber (bit_subscriber_.in ());
+    bit_subscriber_ = DDS::Subscriber::_nil();
+  }
 
   if (ACE_OS::thr_equal(TheServiceParticipant->reactor_owner(),
                         ACE_Thread::self())) {
@@ -918,8 +922,6 @@ DomainParticipantImpl::delete_contained_entities()
     shutdown_complete_ = false;
     shutdown_mutex_.release();
   }
-
-  bit_subscriber_ = DDS::Subscriber::_nil();
 
   OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
 

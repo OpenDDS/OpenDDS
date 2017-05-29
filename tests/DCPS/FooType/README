@@ -1,4 +1,4 @@
 
 This directory contains a hand-written DDS data type support implementation
 in support of ../SimpleFooTest.
-It just allows write & read by using memory - other functionallity is not implemented.
+It just allows write & read by using memory - other functionality is not implemented.
