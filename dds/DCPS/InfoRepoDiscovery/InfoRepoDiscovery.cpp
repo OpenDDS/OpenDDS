@@ -403,10 +403,13 @@ InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant,
     return DDS::RETCODE_OK;
   }
 
+  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
   DDS::DataReader_var dr =
     bit_subscriber->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
 
-  DDS::ReturnCode_t ret = bit_subscriber->delete_datareader (dr);
+  ret = bit_subscriber->delete_datareader (dr);
 
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -455,6 +458,7 @@ InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant,
                       ret),
                      ret);
   }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   ret = delete_bit_topics(participant);
 
