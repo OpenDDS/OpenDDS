@@ -5,6 +5,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "DataReaderListener.h"
+#include "DataReaderQCListener.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/Utils/ExceptionStreams.h"
 
@@ -29,7 +30,8 @@ SubDriver::SubDriver()
     add_new_subscription_ (0),
     shutdown_delay_secs_ (10),
     sub_ready_filename_(ACE_TEXT("sub_ready.txt")),
-    listener_(0)
+    listener_(0),
+    qc_usage_ (false)
 {
 }
 
@@ -86,7 +88,12 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
         {
-          num_disposed_ = ACE_OS::atoi (current_arg);;
+          num_disposed_ = ACE_OS::atoi (current_arg);
+          arg_shifter.consume_arg ();
+        }
+      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-q"))) != 0)
+        {
+          qc_usage_ = ACE_OS::atoi (current_arg);
           arg_shifter.consume_arg ();
         }
       else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
@@ -169,8 +176,17 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
 
   // Create datareader to test copy_from_topic_qos.
-  listener_ = new DataReaderListenerImpl;
-  ::DDS::DataReaderListener_var drl (listener_);
+  ::DDS::DataReaderListener_var drl;
+  if (qc_usage_)
+  {
+    qc_listener_ = new DataReaderQCListenerImpl;
+    drl = qc_listener_;
+  }
+  else
+  {
+    listener_ = new DataReaderListenerImpl;
+    drl = listener_;
+  }
 
   datareader_
     = subscriber_->create_datareader(topic_.in (),
@@ -178,6 +194,23 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                      drl.in(),
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datareader_.in ()));
+
+  if (qc_usage_)
+  {
+    DDS::StringSeq params(1);
+    params.length (1);
+    params[0] = "101010";
+
+    DDS::QueryCondition_var qc =
+      datareader_->create_querycondition (DDS::NOT_READ_SAMPLE_STATE,
+                                          DDS::NEW_VIEW_STATE | DDS::NOT_NEW_VIEW_STATE,
+                                          DDS::ANY_INSTANCE_STATE,
+                                          "a_long_value = %0",
+                                          params);
+    TEST_CHECK (! CORBA::is_nil (qc.in ()));
+
+    qc_listener_->set_qc (qc.in ());
+  }
 
   // Indicate that the subscriber is ready to accept connection
   FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("w"));
@@ -200,8 +233,17 @@ SubDriver::run()
               ACE_TEXT("(%P|%t) SubDriver::run, ")
               ACE_TEXT(" Wait for publisher. \n")));
 
-  while (this->listener_->samples_read() != num_writes_) {
-    ACE_OS::sleep(1);
+  if (qc_usage_)
+  {
+    while (this->qc_listener_->samples_read() != num_writes_) {
+      ACE_OS::sleep(1);
+    }
+  }
+  else
+  {
+    while (this->listener_->samples_read() != num_writes_) {
+      ACE_OS::sleep(1);
+    }
   }
 
   if (!participant_->contains_entity(datareader_->get_instance_handle()))
@@ -210,7 +252,14 @@ SubDriver::run()
       ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains datareader_\n")));
   }
 
-  TEST_CHECK (this->listener_->samples_disposed() == num_disposed_);
+  if (qc_usage_)
+  {
+    TEST_CHECK (this->qc_listener_->samples_disposed() == num_disposed_);
+  }
+  else
+  {
+    TEST_CHECK (this->listener_->samples_disposed() == num_disposed_);
+  }
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   participant_->delete_contained_entities();

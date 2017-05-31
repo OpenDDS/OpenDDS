@@ -12,6 +12,7 @@
 #include <vector>
 
 class DataReaderListenerImpl;
+class DataReaderQCListenerImpl;
 
 class SubDriver
 {
@@ -47,7 +48,9 @@ class SubDriver
     ::Xyz::FooDataReader_var     foo_datareader_;
 
     DataReaderListenerImpl*      listener_;
-
+    DataReaderQCListenerImpl*    qc_listener_;
+    // Are we going to use the QueryCondition version of the listener
+    bool                         qc_usage_;
 };
 
 #endif
