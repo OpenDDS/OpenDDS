@@ -1674,7 +1674,7 @@ void store_instance_data(
       return;
     }
 
-    // first find the instance mapin the participant instance map.
+    // first find the instance map in the participant instance map.
     // if the instance map for the type is not registered, then
     // create the instance map.
     // if the instance map for the type exists, then find the
