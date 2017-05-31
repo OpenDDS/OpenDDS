@@ -1774,12 +1774,6 @@ RepoId DataReaderImpl::get_subscription_id() const
   return subscription_id_;
 }
 
-char *
-DataReaderImpl::get_topic_name() const
-{
-  return topic_servant_->get_name();
-}
-
 bool DataReaderImpl::have_sample_states(
     DDS::SampleStateMask sample_states) const
 {
@@ -2513,7 +2507,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 {
   if (is_bit()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
-    CORBA::String_var topic = get_topic_name();
+    CORBA::String_var topic = topic_servant_->get_name();
     RepoId id = disc->bit_key_to_repo_id(participant_servant_, topic, key);
     return participant_servant_->id_to_handle(id);
 
