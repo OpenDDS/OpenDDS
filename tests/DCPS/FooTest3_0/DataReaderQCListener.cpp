@@ -18,8 +18,7 @@
 #include <iostream>
 
 DataReaderQCListenerImpl::DataReaderQCListenerImpl()
-  : samples_read_(0),
-    samples_disposed_(0)
+  : DataReaderListenerImpl()
 {
 }
 
@@ -28,7 +27,6 @@ DataReaderQCListenerImpl::~DataReaderQCListenerImpl()
 }
 
 void DataReaderQCListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-throw(CORBA::SystemException)
 {
   try {
     Xyz::FooDataReader_var foo_dr =
@@ -50,6 +48,7 @@ throw(CORBA::SystemException)
       for (CORBA::ULong index = 0; index < si.length(); index++)
         {
           ++samples_read_;
+          std::cout << "SampleInfo.valid_data = " << si[index].valid_data << std::endl;
           std::cout << "SampleInfo.sample_rank = " << si[index].sample_rank << std::endl;
           std::cout << "SampleInfo.instance_state = " << si[index].instance_state << std::endl;
 
@@ -80,54 +79,6 @@ throw(CORBA::SystemException)
     e._tao_print_exception("Exception caught in on_data_available():");
     ACE_OS::exit(-1);
   }
-}
-
-void DataReaderQCListenerImpl::on_requested_deadline_missed(
-  DDS::DataReader_ptr,
-  const DDS::RequestedDeadlineMissedStatus &)
-throw(CORBA::SystemException)
-{
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_deadline_missed()\n")));
-}
-
-void DataReaderQCListenerImpl::on_requested_incompatible_qos(
-  DDS::DataReader_ptr,
-  const DDS::RequestedIncompatibleQosStatus &)
-throw(CORBA::SystemException)
-{
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
-}
-
-void DataReaderQCListenerImpl::on_liveliness_changed(
-  DDS::DataReader_ptr,
-  const DDS::LivelinessChangedStatus &)
-throw(CORBA::SystemException)
-{
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed()\n")));
-}
-
-void DataReaderQCListenerImpl::on_subscription_matched(
-  DDS::DataReader_ptr,
-  const DDS::SubscriptionMatchedStatus &)
-throw(CORBA::SystemException)
-{
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
-}
-
-void DataReaderQCListenerImpl::on_sample_rejected(
-  DDS::DataReader_ptr,
-  const DDS::SampleRejectedStatus&)
-throw(CORBA::SystemException)
-{
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
-}
-
-void DataReaderQCListenerImpl::on_sample_lost(
-  DDS::DataReader_ptr,
-  const DDS::SampleLostStatus&)
-throw(CORBA::SystemException)
-{
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
 
 void DataReaderQCListenerImpl::set_qc (

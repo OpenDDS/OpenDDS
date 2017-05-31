@@ -176,17 +176,17 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
 
   // Create datareader to test copy_from_topic_qos.
-  ::DDS::DataReaderListener_var drl;
+  DataReaderQCListenerImpl* qc_listener = 0;
   if (qc_usage_)
   {
-    qc_listener_ = new DataReaderQCListenerImpl;
-    drl = qc_listener_;
+    qc_listener = new DataReaderQCListenerImpl;
+    listener_ = qc_listener;
   }
   else
   {
     listener_ = new DataReaderListenerImpl;
-    drl = listener_;
   }
+  ::DDS::DataReaderListener_var drl = listener_;
 
   datareader_
     = subscriber_->create_datareader(topic_.in (),
@@ -209,7 +209,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                           params);
     TEST_CHECK (! CORBA::is_nil (qc.in ()));
 
-    qc_listener_->set_qc (qc.in ());
+    qc_listener->set_qc (qc.in ());
   }
 
   // Indicate that the subscriber is ready to accept connection
@@ -233,33 +233,13 @@ SubDriver::run()
               ACE_TEXT("(%P|%t) SubDriver::run, ")
               ACE_TEXT(" Wait for publisher. \n")));
 
-  if (qc_usage_)
-  {
-    while (this->qc_listener_->samples_read() != num_writes_) {
-      ACE_OS::sleep(1);
-    }
-  }
-  else
-  {
-    while (this->listener_->samples_read() != num_writes_) {
-      ACE_OS::sleep(1);
-    }
+  while (this->listener_->samples_read() != num_writes_) {
+    ACE_OS::sleep(1);
   }
 
-  if (!participant_->contains_entity(datareader_->get_instance_handle()))
-  {
-    ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains datareader_\n")));
-  }
+  TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
 
-  if (qc_usage_)
-  {
-    TEST_CHECK (this->qc_listener_->samples_disposed() == num_disposed_);
-  }
-  else
-  {
-    TEST_CHECK (this->listener_->samples_disposed() == num_disposed_);
-  }
+  TEST_CHECK (this->listener_->samples_disposed() == num_disposed_);
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   participant_->delete_contained_entities();
