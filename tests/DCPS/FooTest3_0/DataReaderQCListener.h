@@ -14,6 +14,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
+
 class DataReaderQCListenerImpl
   : public virtual DataReaderListenerImpl {
 public:
@@ -29,5 +31,7 @@ public:
 private:
   DDS::QueryCondition_var qc_;
 };
+
+#endif
 
 #endif /* DATAREADER_QCLISTENER_IMPL  */

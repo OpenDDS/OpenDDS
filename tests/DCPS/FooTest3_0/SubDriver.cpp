@@ -176,6 +176,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
 
   // Create datareader to test copy_from_topic_qos.
+#ifndef OPENDDS_NO_QUERY_CONDITION
   DataReaderQCListenerImpl* qc_listener = 0;
   if (qc_usage_)
   {
@@ -183,6 +184,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
     listener_ = qc_listener;
   }
   else
+#endif
   {
     listener_ = new DataReaderListenerImpl;
   }
@@ -195,6 +197,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datareader_.in ()));
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
   if (qc_usage_)
   {
     DDS::StringSeq params(1);
@@ -211,6 +214,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
 
     qc_listener->set_qc (qc.in ());
   }
+#endif
 
   // Indicate that the subscriber is ready to accept connection
   FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("w"));
