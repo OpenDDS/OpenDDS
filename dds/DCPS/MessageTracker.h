@@ -42,6 +42,11 @@ namespace DCPS {
     void message_dropped();
 
     /**
+     * Answer if there are any messages that have not been accounted for.
+     */
+    bool pending_messages();
+
+    /**
      * Block until all messages have been account for.
      */
     void wait_messages_pending(OPENDDS_STRING& caller_message);
@@ -52,11 +57,6 @@ namespace DCPS {
     int dropped_count();
 
   private:
-    /**
-     * Answer if there are any messages that have not been accounted for.
-     */
-    bool pending_messages();
-
     const OPENDDS_STRING msg_src_;         // Source of tracked messages
     int                  dropped_count_;
     int                  delivered_count_; // Messages transmitted by transport layer
