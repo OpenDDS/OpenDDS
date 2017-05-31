@@ -2628,12 +2628,6 @@ DataWriterImpl::reschedule_deadline()
   }
 }
 
-bool
-DataWriterImpl::pending_control()
-{
-  return controlTracker.pending_messages();
-}
-
 void
 DataWriterImpl::wait_control_pending()
 {

@@ -544,11 +544,6 @@ protected:
                                          ACE_Message_Block* msg/*,
                                          void* extra = 0*/);
 
-  /**
-   * Answer if transport of all control messages is pending.
-   */
-  bool pending_control();
-
 private:
 
   void track_sequence_number(GUIDSeq* filter_out);
