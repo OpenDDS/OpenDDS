@@ -155,7 +155,7 @@ DataWriterImpl::cleanup()
 void
 DataWriterImpl::init(
   DDS::Topic_ptr                       topic,
-  TopicImpl *                            topic_servant,
+  TopicImpl *                          topic_servant,
   const DDS::DataWriterQos &           qos,
   DDS::DataWriterListener_ptr          a_listener,
   const DDS::StatusMask &              mask,

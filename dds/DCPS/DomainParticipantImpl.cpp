@@ -502,7 +502,7 @@ DomainParticipantImpl::delete_topic_i(
       dynamic_cast<DomainParticipantImpl*>(dp.in());
 
     if (the_dp_servant != this ||
-        (!remove_objref && the_topic_servant->entity_refs())) {
+        (!remove_objref && the_topic_servant->has_entity_refs())) {
       // If entity_refs is true (nonzero), then some reader or writer is using
       // this topic and the spec requires delete_topic() to fail with the error:
       return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -765,17 +765,17 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+        ACE_TEXT("can't delete contentfiltered topic \"%C\" ")
         ACE_TEXT("because it is not in the set.\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_reader()) {
+  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_entity_refs()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
-        ACE_TEXT("because it still is used by a reader.\n"), name.in ()));
+        ACE_TEXT("can't delete contentfiltered topic \"%C\" ")
+        ACE_TEXT("because it still is used.\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -838,12 +838,24 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
   DDS::MultiTopic_var mt = DDS::MultiTopic::_duplicate(a_multitopic);
-  CORBA::String_var mt_name = mt->get_name();
-  TopicDescriptionMap::iterator iter = topic_descrs_.find(mt_name.in());
+  CORBA::String_var name = mt->get_name();
+  TopicDescriptionMap::iterator iter = topic_descrs_.find(name.in());
   if (iter == topic_descrs_.end()) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+        ACE_TEXT("can't delete multitopic \"%C\" ")
+        ACE_TEXT("because it is not in the set.\n"), name.in ()));
+    }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_reader()) {
+  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_entity_refs()) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+        ACE_TEXT("can't delete contentfiltered topic \"%C\" ")
+        ACE_TEXT("because it still is used.\n"), name.in ()));
+    }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
   topic_descrs_.erase(iter);
@@ -1015,7 +1027,7 @@ DomainParticipantImpl::set_qos(
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) DomainParticipantImpl::set_qos, ")
-                          ACE_TEXT("failed on compatiblity check. \n")),
+                          ACE_TEXT("failed on compatibility check. \n")),
                          DDS::RETCODE_ERROR);
       }
     }

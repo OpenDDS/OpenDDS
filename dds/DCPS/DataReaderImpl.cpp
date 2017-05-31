@@ -202,7 +202,7 @@ DataReaderImpl::cleanup()
     ContentFilteredTopicImpl* cft =
         dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
     cft->remove_reader(*this);
-    cft->update_reader_count(false);
+    cft->remove_entity_ref();
     content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
   }
 #endif
@@ -3216,7 +3216,7 @@ DataReaderImpl::set_subscriber_qos(
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
-  cft->update_reader_count(true);
+  cft->add_entity_ref();
   cft->add_reader(*this);
   content_filtered_topic_ = DDS::ContentFilteredTopic::_duplicate(cft);
 }
