@@ -17,6 +17,8 @@
 
 #include <iostream>
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
+
 DataReaderQCListenerImpl::DataReaderQCListenerImpl()
   : DataReaderListenerImpl()
 {
@@ -86,3 +88,5 @@ void DataReaderQCListenerImpl::set_qc (
 {
   qc_ = DDS::QueryCondition::_duplicate (qc);
 }
+
+#endif
