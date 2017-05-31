@@ -463,7 +463,7 @@ RemoveResult
 RtpsUdpDataLink::remove_sample(const DataSampleElement* sample)
 {
   // see comment in RtpsUdpDataLink::send_i() for lock order
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RemoveResult::REMOVE_ERROR);
   return DataLink::remove_sample(sample);
 }
 
