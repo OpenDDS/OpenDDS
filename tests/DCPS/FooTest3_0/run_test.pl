@@ -26,6 +26,7 @@ my $shutdown_pub = 1;
 my $add_new_subscription = 0;
 my $shutdown_delay_secs=10;
 my $sub_ready_file = "sub_ready.txt";
+my $use_qc = 0;
 
 if ($ARGV[0] eq 'unregister') {
     $test_to_run = 1;
@@ -34,6 +35,12 @@ if ($ARGV[0] eq 'unregister') {
 elsif ($ARGV[0] eq 'dispose') {
     $test_to_run = 2;
     $num_disposed = 1;
+    $num_writes = 11;  # 1 dispose and 10 writes.
+}
+elsif ($ARGV[0] eq 'dispose_qc') {
+    $test_to_run = 2;
+    $num_disposed = 1;
+    $use_qc = 1;
     $num_writes = 11;  # 1 dispose and 10 writes.
 }
 elsif ($ARGV[0] eq 'resume') {
@@ -86,7 +93,7 @@ my $subscriber = PerlDDS::create_process ("FooTest3_subscriber",
                                           " -DCPSInfoRepo file://$dcpsrepo_ior "
                                           . "$app_bit_conf -n $num_writes "
                                           . "-x $shutdown_pub "
-                                          . "-a $add_new_subscription -d $shutdown_delay_secs -i $num_disposed"
+                                          . "-a $add_new_subscription -d $shutdown_delay_secs -i $num_disposed -q $use_qc"
                                           . "-f $sub_ready_file");
 
 print $subscriber->CommandLine(), "\n";
