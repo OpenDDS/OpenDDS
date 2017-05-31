@@ -509,7 +509,6 @@ DomainParticipantImpl::delete_topic_i(
     }
 
     {
-
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                        tao_mon,
                        this->topics_protector_,

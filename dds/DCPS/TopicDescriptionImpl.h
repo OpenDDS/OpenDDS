@@ -81,10 +81,8 @@ protected:
   /// The type_support for this topic.
   OpenDDS::DCPS::TypeSupport_var type_support_;
 
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
   /// The number of entities using this topic
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> entity_refs_;
-#endif
 };
 
 } // namespace DCPS
