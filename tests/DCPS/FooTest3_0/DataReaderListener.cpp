@@ -43,7 +43,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Xyz::Foo foo;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
+    const DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
 
     if (status == DDS::RETCODE_OK) {
       ++samples_read_;

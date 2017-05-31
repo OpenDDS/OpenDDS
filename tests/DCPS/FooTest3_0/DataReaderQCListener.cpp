@@ -42,7 +42,7 @@ void DataReaderQCListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Xyz::FooSeq foo;
     DDS::SampleInfoSeq si;
 
-    DDS::ReturnCode_t status = foo_dr->take_w_condition(foo, si, 1, qc_.in ()) ;
+    const DDS::ReturnCode_t status = foo_dr->take_w_condition(foo, si, 1, qc_.in ()) ;
 
     if (status == DDS::RETCODE_OK) {
       for (CORBA::ULong index = 0; index < si.length(); index++)
