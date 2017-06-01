@@ -54,7 +54,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance %d is disposed\n"), foo.a_long_value));
         ++samples_disposed_;
-	    } else if (si.valid_data) {
+      } else if (si.valid_data) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: Foo sample %d processed\n"), foo.sample_sequence));
       } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
