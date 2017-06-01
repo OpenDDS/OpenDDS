@@ -111,13 +111,13 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
     OPENDDS_SET(SequenceNumber) sns_to_release;
     while (it != iter->second.elems_not_acked_.end()) {
       if (criteria.matches(*it->second)) {
-	sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
-	sns_to_release.insert(it->first);
-	iter_t last = it;
-	++it;
-	iter->second.elems_not_acked_.erase(last);
+        sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
+        sns_to_release.insert(it->first);
+        iter_t last = it;
+        ++it;
+        iter->second.elems_not_acked_.erase(last);
       } else {
-	++it;
+        ++it;
       }
     }
     OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
