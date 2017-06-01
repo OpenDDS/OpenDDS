@@ -894,7 +894,7 @@ namespace OpenDDS {
       DataSampleHeader header;
       header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       bool just_registered;
-      MessageType* data;
+      MessageType* data = 0;
       ACE_NEW_MALLOC_NORETURN(data,
                               static_cast< MessageType*>(data_allocator_->malloc(sizeof(MessageType))),
                               MessageType(sample));
@@ -1983,7 +1983,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
     return;
   }
 
-  OpenDDS::DCPS::ReceivedDataElement *ptr;
+  OpenDDS::DCPS::ReceivedDataElement *ptr = 0;
   ACE_NEW_MALLOC (ptr,
                   static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
                                                                       rd_allocator_->malloc (
