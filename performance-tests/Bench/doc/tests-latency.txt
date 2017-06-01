@@ -1,5 +1,3 @@
-
-
 This file explains the execution of the latency tests located in the
 tests/latency subdirectory.  The file 'test-commands' in that directory
 contains a summary of how to execute the entire suite of latency tests
@@ -101,7 +99,7 @@ Once a test has completed, the latency results will be in the current
 directory where the originating process (on the first host) was started
 with a name including the message size of the test.  This includes
 both per hop and full path information.  The summary data is for all
-received samples while the latency for the last 5,000 samples recieved
+received samples while the latency for the last 5,000 samples received
 is also stored.  If the two hosts are not synchronized closely, the per
 hop information will be of limited value.
 

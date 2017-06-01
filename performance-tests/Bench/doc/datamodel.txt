@@ -1,5 +1,3 @@
-
-
 Overall test configuration requires that each process be identified.
 Each process can then be configured using the configuration file format
 below.  The overall test topology is then completely determined by the
