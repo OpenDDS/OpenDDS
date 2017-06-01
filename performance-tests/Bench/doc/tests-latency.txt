@@ -93,7 +93,7 @@ host, execute:
 
 The test will not start until the associations have been made, so the
 processes can be started in any order.  However it is best to have the
-orginating publisher end the test, so starting it first is preferred.
+originating publisher end the test, so starting it first is preferred.
 
 Once a test has completed, the latency results will be in the current
 directory where the originating process (on the first host) was started
