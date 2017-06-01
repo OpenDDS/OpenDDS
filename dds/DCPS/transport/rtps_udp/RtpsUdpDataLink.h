@@ -126,6 +126,7 @@ public:
 private:
   virtual void stop_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
+  RemoveResult remove_sample(const DataSampleElement* sample);
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);

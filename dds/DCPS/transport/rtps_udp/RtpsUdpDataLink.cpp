@@ -103,33 +103,33 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
   RtpsWriter::SnToTqeMap to_deliver;
   typedef RtpsWriter::SnToTqeMap::iterator iter_t;
 
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
-    RtpsWriterMap::iterator iter = writers_.find(pub_id);
-    if (iter != writers_.end() && !iter->second.elems_not_acked_.empty()) {
-      to_deliver.insert(iter->second.to_deliver_.begin(), iter->second.to_deliver_.end());
-      iter->second.to_deliver_.clear();
-      iter_t it = iter->second.elems_not_acked_.begin();
-      OPENDDS_SET(SequenceNumber) sns_to_release;
-      while (it != iter->second.elems_not_acked_.end()) {
-        if (criteria.matches(*it->second)) {
-          sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
-          sns_to_release.insert(it->first);
-          iter_t last = it;
-          ++it;
-          iter->second.elems_not_acked_.erase(last);
-        } else {
-          ++it;
-        }
-      }
-      OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
-      while (sns_it != sns_to_release.end()) {
-        iter->second.send_buff_->release_acked(*sns_it);
-        ++sns_it;
+  RtpsWriterMap::iterator iter = writers_.find(pub_id);
+  if (iter != writers_.end() && !iter->second.elems_not_acked_.empty()) {
+    to_deliver.insert(iter->second.to_deliver_.begin(), iter->second.to_deliver_.end());
+    iter->second.to_deliver_.clear();
+    iter_t it = iter->second.elems_not_acked_.begin();
+    OPENDDS_SET(SequenceNumber) sns_to_release;
+    while (it != iter->second.elems_not_acked_.end()) {
+      if (criteria.matches(*it->second)) {
+        sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
+        sns_to_release.insert(it->first);
+        iter_t last = it;
+        ++it;
+        iter->second.elems_not_acked_.erase(last);
+      } else {
+        ++it;
       }
     }
+    OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
+    while (sns_it != sns_to_release.end()) {
+      iter->second.send_buff_->release_acked(*sns_it);
+      ++sns_it;
+    }
   }
+
+  ACE_Reverse_Lock<ACE_Thread_Mutex> reverse(lock_);
+  ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, guard, reverse);
+
   iter_t deliver_iter = to_deliver.begin();
   while (deliver_iter != to_deliver.end()) {
     deliver_iter->second->data_delivered();
@@ -457,6 +457,14 @@ RtpsUdpDataLink::send_i(TransportQueueElement* element, bool relink)
   // which is required for resending due to nacks
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   DataLink::send_i(element, relink);
+}
+
+RemoveResult
+RtpsUdpDataLink::remove_sample(const DataSampleElement* sample)
+{
+  // see comment in RtpsUdpDataLink::send_i() for lock order
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, REMOVE_ERROR);
+  return DataLink::remove_sample(sample);
 }
 
 void
