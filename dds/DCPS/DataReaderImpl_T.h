@@ -1954,7 +1954,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
     }
   }
 
-  // Only when it is an unregister free the instance data, in case we 
+  // Only when it is an unregister free the instance data, in case we
   // have a dispose the instance data contains the key fields which we need
   // in order to apply a possible filter
   if (is_unregister_msg)
