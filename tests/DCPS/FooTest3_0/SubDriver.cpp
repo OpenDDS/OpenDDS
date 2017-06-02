@@ -24,6 +24,7 @@ using namespace ::OpenDDS::DCPS;
 
 SubDriver::SubDriver()
   : num_writes_ (0),
+    num_disposed_ (0),
     shutdown_pub_ (1),
     add_new_subscription_ (0),
     shutdown_delay_secs_ (10),
@@ -81,6 +82,11 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
         {
           sub_ready_filename_ = current_arg;
+          arg_shifter.consume_arg ();
+        }
+      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
+        {
+          num_disposed_ = ACE_OS::atoi (current_arg);;
           arg_shifter.consume_arg ();
         }
       else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
@@ -203,6 +209,8 @@ SubDriver::run()
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains datareader_\n")));
   }
+
+  TEST_CHECK (this->listener_->samples_disposed() == num_disposed_);
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   participant_->delete_contained_entities();

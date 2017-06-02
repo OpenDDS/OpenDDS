@@ -59,9 +59,14 @@ public:
     return samples_read_;
   }
 
+  long samples_disposed() const {
+    return samples_disposed_;
+  }
+
 private:
   DDS::DataReader_var  reader_;
   long                 samples_read_;
+  long                 samples_disposed_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

@@ -18,7 +18,8 @@
 #include <iostream>
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : samples_read_(0)
+  : samples_read_(0),
+    samples_disposed_(0)
 {
 }
 
@@ -46,7 +47,7 @@ throw(CORBA::SystemException)
     DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      samples_read_++;
+      ++samples_read_;
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
       std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
@@ -54,6 +55,7 @@ throw(CORBA::SystemException)
         std::cout << "Foo sample processed" << std::endl;
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+        ++samples_disposed_;
 
       } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
