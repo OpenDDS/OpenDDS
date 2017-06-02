@@ -923,8 +923,6 @@ DomainParticipantImpl::delete_contained_entities()
 
   OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
 
-  participant_objref_ = DDS::DomainParticipant::_nil();
-
   // the participant can now start creating new contained entities
   set_deleted(false);
   return shutdown_result_;
@@ -1703,19 +1701,6 @@ DomainParticipantImpl::is_clean() const
   return (publishers_.empty()
           && sub_is_clean == 1
           && topics_is_clean == 1);
-}
-
-void
-DomainParticipantImpl::set_object_reference(const DDS::DomainParticipant_ptr& dp)
-{
-  if (!CORBA::is_nil(participant_objref_.in())) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::set_object_reference, ")
-               ACE_TEXT("This participant is already activated. \n")));
-    return;
-  }
-
-  participant_objref_ = DDS::DomainParticipant::_duplicate(dp);
 }
 
 DDS::DomainParticipantListener_ptr
