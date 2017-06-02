@@ -339,11 +339,6 @@ public:
 #endif
 
   /**
-   * Accessor of the associated topic name.
-   */
-  const char* get_topic_name();
-
-  /**
    * Get associated topic type name.
    */
   char const* get_type_name() const;

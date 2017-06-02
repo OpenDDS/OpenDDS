@@ -1336,7 +1336,7 @@ DataWriterImpl::enable()
                                            qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,
-                                           get_topic_name(),
+                                           topic_name_.in(),
                                            get_type_name(),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
                                            durability_cache,
@@ -1463,7 +1463,7 @@ DataWriterImpl::enable()
   if (durability_cache != 0) {
 
     if (!durability_cache->get_data(this->domain_id_,
-                                    get_topic_name(),
+                                    this->topic_name_.in(),
                                     get_type_name(),
                                     this,
                                     this->mb_allocator_,
@@ -1957,12 +1957,6 @@ RepoId
 DataWriterImpl::get_dp_id()
 {
   return participant_servant_->get_id();
-}
-
-const char*
-DataWriterImpl::get_topic_name()
-{
-  return topic_name_.in();
 }
 
 char const *
