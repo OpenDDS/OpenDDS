@@ -70,14 +70,15 @@ public:
 
   PublicationId pub_;
 
-  /// Data sample received
+  /// Data sample received, could only be the keyed fields
+  /// in case we received a dispose message
   void *registered_data_;  // ugly, but works....
 
   /// Sample state for this data sample:
   /// DDS::NOT_READ_SAMPLE_STATE/DDS::READ_SAMPLE_STATE
   DDS::SampleStateKind sample_state_ ;
 
-  ///Source time stamp for this data sample
+  /// Source time stamp for this data sample
   DDS::Time_t source_timestamp_;
 
   /// Reception time stamp for this data sample
