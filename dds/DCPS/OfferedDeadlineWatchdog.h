@@ -46,7 +46,6 @@ public:
     lock_type & lock,
     DDS::DeadlineQosPolicy qos,
     OpenDDS::DCPS::DataWriterImpl * writer_impl,
-    DDS::DataWriter_ptr writer,
     DDS::OfferedDeadlineMissedStatus & status,
     CORBA::Long & last_total_count);
 

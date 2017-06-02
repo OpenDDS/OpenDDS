@@ -800,7 +800,7 @@ RecorderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   requested_incompatible_qos_status_.policies = status.policies;
 
   // if (!CORBA::is_nil(listener.in())) {
-  //   listener->on_requested_incompatible_qos(dr_local_objref_.in(),
+  //   listener->on_requested_incompatible_qos(this,
   //                                           requested_incompatible_qos_status_);
   //
   //   // TBD - why does the spec say to change total_count_change but not

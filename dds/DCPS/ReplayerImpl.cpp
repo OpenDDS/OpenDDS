@@ -251,7 +251,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
       //                          this->lock_,
       //                          qos.deadline,
       //                          this,
-      //                          this->dw_local_objref_.in(),
+      //                          this,
       //                          this->offered_deadline_missed_status_,
       //                          this->last_deadline_missed_total_count_));
       //
