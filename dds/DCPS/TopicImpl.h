@@ -72,18 +72,8 @@ public:
   */
   RepoId get_id() const;
 
-  CORBA::Long entity_refs() const {
-    return entity_refs_;
-  }
-
-  void add_entity_ref() {
-    entity_refs_++;
-  }
-
-  void remove_entity_ref() {
-    entity_refs_--;
-  }
-
+  // OpenDDS extension which doesn't duplicate the string to prevent
+  // the runtime costs of making a copy
   const char* type_name() const;
 
   virtual void transport_config(const TransportConfig_rch& cfg);
@@ -103,11 +93,8 @@ private:
   /// The id given by discovery.
   RepoId                       id_;
 
-  /// The number of DataReaders and DataWriters using this Topic.
-  CORBA::Long                  entity_refs_;
-
-  /// count of discovered (readers/writers using) topics with the same
-  ///  topic name but different characteristics (typename)
+  /// Count of discovered (readers/writers using) topics with the same
+  /// topic name but different characteristics (typename)
   DDS::InconsistentTopicStatus inconsistent_topic_status_;
 
   /// Pointer to the monitor object for this entity
