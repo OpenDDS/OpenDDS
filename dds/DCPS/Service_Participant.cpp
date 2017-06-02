@@ -253,9 +253,15 @@ Service_Participant::reactor_owner() const
 void
 Service_Participant::shutdown()
 {
+  // When we are already shutdown just let the shutdown be a noop
+  if (shut_down_) {
+    return;
+  }
+
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
+    TransportRegistry::instance()->close();
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
     domainRepoMap_.clear();

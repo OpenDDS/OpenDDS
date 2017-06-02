@@ -46,6 +46,9 @@ public:
   /// Return a singleton instance of this class.
   static TransportRegistry* instance();
 
+  /// Close the singleton instance of this class.
+  static void close();
+
   /// This will shutdown all TransportImpl objects.
   ///
   /// Client Application calls this method to tear down the transport
