@@ -173,15 +173,16 @@ DataReaderImpl::cleanup()
   liveliness_timer_->wait();
 
   // Cancel any watchdog timers
-  { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-      iter != instances_.end();
-      ++iter) {
-    SubscriptionInstance_rch ptr = iter->second;
-    if (this->watchdog_.in() && ptr->deadline_timer_id_ != -1) {
-      this->watchdog_->cancel_timer(ptr);
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+        iter != instances_.end();
+        ++iter) {
+      SubscriptionInstance_rch ptr = iter->second;
+      if (this->watchdog_.in() && ptr->deadline_timer_id_ != -1) {
+        this->watchdog_->cancel_timer(ptr);
+      }
     }
-  }
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -221,6 +222,8 @@ DataReaderImpl::cleanup()
 
   end_historic_sweeper_->wait();
   remove_association_sweeper_->wait();
+
+  disable_transport();
 }
 
 void DataReaderImpl::init(
@@ -1320,7 +1323,6 @@ DataReaderImpl::enable()
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
           ACE_TEXT("Transport Exception.\n")));
       return DDS::RETCODE_ERROR;
-
     }
 
     const TransportLocatorSeq& trans_conf_info = this->connection_info();

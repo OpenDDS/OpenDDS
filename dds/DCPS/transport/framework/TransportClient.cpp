@@ -91,11 +91,7 @@ TransportClient::~TransportClient()
 
   pending_assoc_timer_->wait();
 
-  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
-       it != impls_.end(); ++it) {
-
-    (*it)->detach_client(rchandle_from(this));
-  }
+  disable_transport();
 }
 
 void
@@ -184,6 +180,17 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
                ACE_TEXT("No TransportImpl could be created.\n")));
     throw Transport::NotConfigured();
   }
+}
+
+void
+TransportClient::disable_transport()
+{
+  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
+       it != impls_.end(); ++it) {
+
+    (*it)->detach_client(rchandle_from(this));
+  }
+  impls_.clear();
 }
 
 void

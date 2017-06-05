@@ -150,6 +150,8 @@ DataWriterImpl::cleanup()
   topic_servant_ = 0;
 
   dw_local_objref_ = DDS::DataWriter::_nil();
+
+  disable_transport();
 }
 
 void
