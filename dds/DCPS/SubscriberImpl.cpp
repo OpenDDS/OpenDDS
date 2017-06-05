@@ -356,20 +356,37 @@ SubscriberImpl::delete_contained_entities()
 
   ACE_Vector<DDS::DataReader_ptr> drs;
 
+#ifndef OPENDDS_NO_MULTI_TOPIC
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
-
-#ifndef OPENDDS_NO_MULTI_TOPIC
     for (OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var)::iterator mt_iter =
            multitopic_reader_map_.begin();
          mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
       drs.push_back(mt_iter->second);
     }
+  }
+
+  for (size_t i = 0; i < drs.size(); ++i) {
+    const DDS::ReturnCode_t ret = delete_datareader(drs[i]);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("SubscriberImpl::delete_contained_entities, ")
+                        ACE_TEXT("failed to delete datareader\n")),
+                       ret);
+    }
+  }
+  drs.clear();
 #endif
 
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     this->si_lock_,
+                     DDS::RETCODE_ERROR);
     DataReaderMap::iterator it;
     DataReaderMap::iterator itEnd = datareader_map_.end();
 
@@ -379,7 +396,8 @@ SubscriberImpl::delete_contained_entities()
   }
 
   for (size_t i = 0; i < drs.size(); ++i) {
-    const DDS::ReturnCode_t ret = delete_datareader(drs[i]);
+    DDS::ReturnCode_t ret = delete_datareader(drs[i]);
+
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
