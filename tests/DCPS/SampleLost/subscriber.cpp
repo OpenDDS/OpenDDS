@@ -123,7 +123,9 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       cerr << "Got " << listener_servant->num_samples_lost() << " sample lost callbacks" << endl;
       cerr << "Got " << listener_servant->num_samples_rejected() << " sample rejected callbacks" << endl;
-      cerr << "Got " << listener_servant->num_budget_exceeded() << " budget exceeded callbacks" << endl;
+      if (listener_servant->num_budget_exceeded() > 0) {
+        cerr << "ERROR: Got " << listener_servant->num_budget_exceeded() << " budget exceeded callbacks" << endl;
+      }
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
