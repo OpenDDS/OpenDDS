@@ -643,7 +643,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (failed)
     ACE_ERROR((LM_ERROR, "%s FAILED!\n", argv[0]));
   else
-    ACE_DEBUG((LM_ERROR, "%s PASSED\n", argv[0]));
+    ACE_ERROR((LM_ERROR, "%s PASSED\n", argv[0]));
 
   return failed; // let the test framework know it failed
 }

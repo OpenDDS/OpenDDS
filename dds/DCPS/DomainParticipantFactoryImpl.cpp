@@ -8,6 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DomainParticipantFactoryImpl.h"
 #include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "GuidConverter.h"
 #include "Service_Participant.h"
@@ -42,7 +43,13 @@ DomainParticipantFactoryImpl::create_participant(
   DDS::DomainParticipantListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  if (!Qos_Helper::valid(qos)) {
+  DDS::DomainParticipantQos par_qos = qos;
+
+  if (par_qos == PARTICIPANT_QOS_DEFAULT) {
+    get_default_participant_qos(par_qos);
+  }
+
+  if (!Qos_Helper::valid(par_qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
@@ -50,7 +57,7 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  if (!Qos_Helper::consistent(qos)) {
+  if (!Qos_Helper::consistent(par_qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
@@ -69,7 +76,7 @@ DomainParticipantFactoryImpl::create_participant(
   }
 
   const AddDomainStatus value =
-    disco->add_domain_participant(domainId, qos);
+    disco->add_domain_participant(domainId, par_qos);
 
   if (value.id == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
@@ -82,7 +89,7 @@ DomainParticipantFactoryImpl::create_participant(
   DomainParticipantImpl* dp = 0;
 
   ACE_NEW_RETURN(dp,
-                 DomainParticipantImpl(this, domainId, value.id, qos, a_listener,
+                 DomainParticipantImpl(this, domainId, value.id, par_qos, a_listener,
                                        mask, value.federated),
                  DDS::DomainParticipant::_nil());
 
@@ -184,7 +191,7 @@ DomainParticipantFactoryImpl::delete_participant(
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::DomainId_t domain_id = the_servant->get_domain_id();
+  const DDS::DomainId_t domain_id = the_servant->get_domain_id();
   RepoId dp_id = the_servant->get_id();
 
   DPSet* entry = 0;

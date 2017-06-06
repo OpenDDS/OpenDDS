@@ -232,7 +232,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 
     OPENDDS_STRING mc_addr = disco.default_multicast_group();
     if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
                  ACE_TEXT("failed setting multicast local_addr to port %hd\n"),
                           mc_port));
@@ -1553,7 +1553,7 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
                             new ACE_Message_Block(size));
 
   if (!payload) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::Writer::write_unregister_dispose")
                ACE_TEXT(" - Failed to allocate message block message\n")));
     return DDS::RETCODE_ERROR;
@@ -1573,7 +1573,7 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
     return DDS::RETCODE_OK;
   } else {
     // Error
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Sedp::Writer::write_unregister_dispose")
                ACE_TEXT(" - Failed to serialize RTPS control message\n")));
     return DDS::RETCODE_ERROR;
@@ -1697,14 +1697,14 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encap, data)) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
 
       ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata(new OpenDDS::DCPS::DiscoveredWriterData);
       if (ParameterListConverter::from_param_list(data, *wdata) < 0) {
-        ACE_DEBUG((LM_ERROR,
+        ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredWriterData\n")));
@@ -1715,14 +1715,14 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encap, data)) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
 
       ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata(new OpenDDS::DCPS::DiscoveredReaderData);
       if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
-        ACE_DEBUG((LM_ERROR,
+        ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to convert from ParameterList ")
                    ACE_TEXT("to DiscoveredReaderData\n")));
@@ -1737,7 +1737,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                && !sample.header_.key_fields_only_) {
       ACE_Auto_Ptr<ParticipantMessageData> data(new ParticipantMessageData);
       if (!(ser >> *data)) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
@@ -1878,7 +1878,7 @@ Sedp::write_publication_data(
 
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
                  ACE_TEXT(" to ParameterList\n")));
@@ -1909,7 +1909,7 @@ Sedp::write_subscription_data(
 
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));

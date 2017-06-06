@@ -104,7 +104,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
           handles.push_back(itr->second);
         }
       } else {
-        ACE_DEBUG((LM_ERROR, "(%P|%t) ERROR: ReceiveListenerSet::data_received - NOTHING\n"));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReceiveListenerSet::data_received - NOTHING\n"));
       }
     }
   }

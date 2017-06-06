@@ -112,7 +112,8 @@ TestCase::test()
     do {
       TestMessageSeq data_values;
       DDS::SampleInfoSeq sample_infos;
-      (*sub)->read_w_condition(data_values, sample_infos, num_expected, rc);
+      const CORBA::Long expected = static_cast<CORBA::Long>(num_expected);
+      (*sub)->read_w_condition(data_values, sample_infos, expected, rc);
       read += data_values.length();
       if (read != num_expected) {
         DDS::ConditionSeq active;

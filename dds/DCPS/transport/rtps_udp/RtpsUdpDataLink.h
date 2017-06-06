@@ -126,6 +126,7 @@ public:
 private:
   virtual void stop_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
+  RemoveResult remove_sample(const DataSampleElement* sample);
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
@@ -452,10 +453,7 @@ private:
   InterestingRemoteMapType interesting_readers_;
   InterestingRemoteMapType interesting_writers_;
 
-  mutable ACE_Thread_Mutex writer_no_longer_exists_lock_;
-
   typedef std::pair<RepoId, InterestingRemote> CallbackType;
-  OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks_;
 
 
   typedef OPENDDS_MAP_CMP(RepoId, CORBA::Long, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
@@ -502,7 +500,7 @@ private:
   private:
     RtpsUdpDataLink* link_;
     typedef std::pair<ReceivedDataSample, RepoId> HeldDataEntry;
-    typedef std::vector<HeldDataEntry> HeldData;
+    typedef OPENDDS_VECTOR(HeldDataEntry) HeldData;
     HeldData held_data_;
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;

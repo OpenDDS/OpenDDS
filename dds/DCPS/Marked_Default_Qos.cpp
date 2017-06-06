@@ -19,9 +19,10 @@ int const INVALID_ENUM_VALUE = 999;
 DDS::DomainParticipantQos
 Marked_Default_Qos::marked_default_DomainParticipantQos()
 {
-  DDS::DomainParticipantQos qos;
-  DDS::DomainParticipantFactory_var factory = TheParticipantFactory;
-  factory->get_default_participant_qos(qos);
+  DDS::DomainParticipantQos qos =
+    TheServiceParticipant->initial_DomainParticipantQos();
+  void* const mem = &qos.entity_factory.autoenable_created_entities;
+  *static_cast<char*>(mem) = 3;
   return qos;
 }
 

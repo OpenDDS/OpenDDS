@@ -49,7 +49,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task());
 
   if (!link->open(unicast_socket_)) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::make_datalink: ")
                       ACE_TEXT("failed to open DataLink for socket %d\n"),

@@ -350,6 +350,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   try
     {
+    DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
     TestParticipantImpl* tpi = new TestParticipantImpl();
     DDS_TEST* test = new DDS_TEST();
     ::DDS::DataWriterQos dw_qos;

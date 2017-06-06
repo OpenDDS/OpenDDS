@@ -81,10 +81,10 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
     if (sample.header_.sequence_ == 6) { // reassembled from DATA_FRAG
       if (sample.header_.message_length_ != 3 * 1024
           || sample.sample_->total_length() != 3 * 1024) {
-        ACE_DEBUG((LM_ERROR, "ERROR: unexpected reassembled sample length\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: unexpected reassembled sample length\n"));
       }
       if (have_frag_) {
-        ACE_DEBUG((LM_ERROR, "ERROR: duplicate delivery from DATA_FRAG\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: duplicate delivery from DATA_FRAG\n"));
       }
       have_frag_ = true;
     }
@@ -184,7 +184,7 @@ struct TestParticipant: ACE_Event_Handler {
     }
     if (ACE_Reactor::instance()->register_handler(sock_.get_handle(),
                                                   this, READ_MASK) == -1) {
-      ACE_DEBUG((LM_ERROR, "ERROR in TestParticipant ctor, %p\n",
+      ACE_ERROR((LM_ERROR, "ERROR in TestParticipant ctor, %p\n",
                  ACE_TEXT("register_handler")));
       throw std::exception();
     }
@@ -195,7 +195,7 @@ struct TestParticipant: ACE_Event_Handler {
     if (ACE_Reactor::instance()->remove_handler(sock_.get_handle(),
                                                 ALL_EVENTS_MASK | DONT_CALL)
                                                 == -1) {
-      ACE_DEBUG((LM_ERROR, "ERROR in TestParticipant dtor, %p\n",
+      ACE_ERROR((LM_ERROR, "ERROR in TestParticipant dtor, %p\n",
                  ACE_TEXT("remove_handler")));
     }
   }
@@ -449,7 +449,7 @@ struct TestParticipant: ACE_Event_Handler {
     recv_mb_.wr_ptr(ret);
     Serializer ser(&recv_mb_, host_is_bigendian, Serializer::ALIGN_CDR);
     if (!(ser >> recv_hdr_)) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         "ERROR: in handle_input() failed to deserialize RTPS Header\n"));
       return -1;
     }
@@ -477,12 +477,12 @@ struct TestParticipant: ACE_Event_Handler {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
                      smkinds[static_cast<unsigned char>(subm)]));
         } else {
-          ACE_DEBUG((LM_ERROR, "ERROR: Received unknown submessage type: %d\n",
+          ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %d\n",
                      int(subm)));
         }
         SubmessageHeader smh;
         if (!(ser >> smh)) {
-          ACE_DEBUG((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
+          ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
                                "SubmessageHeader\n"));
           return -1;
         }
@@ -499,7 +499,7 @@ struct TestParticipant: ACE_Event_Handler {
   {
     AckNackSubmessage an;
     if (!(ser >> an)) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         "ERROR: recv_an() failed to deserialize AckNackSubmessage\n"));
       return false;
     }
@@ -532,12 +532,12 @@ struct TestParticipant: ACE_Event_Handler {
   {
     NackFragSubmessage nf;
     if (!(ser >> nf)) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         "ERROR: recv_nackfrag() failed to deserialize NackFragSubmessage\n"));
       return false;
     }
     if (nf.writerSN.low != 6 && nf.writerSN.low != 7) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  "ERROR: recv_nackfrag() unexpected NACK_FRAG seq %d\n",
                  nf.writerSN.low));
       return true;
@@ -547,7 +547,7 @@ struct TestParticipant: ACE_Event_Handler {
         FragmentNumber_t frag = nf.fragmentNumberState.bitmapBase;
         frag.value += i;
         if (nf.writerSN.low == 6 && frag.value != 2) {
-          ACE_DEBUG((LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      "ERROR: recv_nackfrag() unexpected NACK_FRAG frag %d\n",
                      frag.value));
           return true;
@@ -568,7 +568,7 @@ struct TestParticipant: ACE_Event_Handler {
   {
     GapSubmessage gap;
     if (!(ser >> gap)) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         "ERROR: recv_gap() failed to deserialize GapSubmessage\n"));
       return false;
     }
@@ -583,7 +583,7 @@ struct TestParticipant: ACE_Event_Handler {
   {
     DataSubmessage data;
     if (!(ser >> data)) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         "ERROR: recv_data() failed to deserialize DataSubmessage\n"));
       return false;
     }
@@ -604,7 +604,7 @@ struct TestParticipant: ACE_Event_Handler {
   {
     HeartBeatSubmessage hb;
     if (!(ser >> hb)) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         "ERROR: recv_hb() failed to deserialize HeartBeatSubmessage\n"));
       return false;
     }
@@ -924,7 +924,7 @@ bool run_test()
   sn.setValue(seq.high, seq.low);
   if (sdr2.recvd_.disjoint() || sdr2.recvd_.empty()
       || sdr2.recvd_.high() != sn || sdr2.recvd_.low() != SequenceNumber()) {
-    ACE_DEBUG((LM_ERROR, "ERROR: reader2 did not receive expected data\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: reader2 did not receive expected data\n"));
   }
 
 
@@ -954,7 +954,7 @@ bool run_test()
   if (part1.recvd_.disjoint() || part1.recvd_.empty()
       || part1.recvd_.high() != seq_dw2.previous()
       || part1.recvd_.low() != SequenceNumber()) {
-    ACE_DEBUG((LM_ERROR, "ERROR: reader1 did not receive expected data\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: reader1 did not receive expected data\n"));
   }
 
   // cleanup
@@ -979,16 +979,16 @@ int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
   try {
     ok = run_test();
     if (!ok) {
-      ACE_DEBUG((LM_ERROR, "ERROR: test failed\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: test failed\n"));
     }
   } catch (const OpenDDS::DCPS::Transport::Exception& e) {
-    ACE_DEBUG((LM_ERROR, "EXCEPTION: %C\n", typeid(e).name()));
+    ACE_ERROR((LM_ERROR, "EXCEPTION: %C\n", typeid(e).name()));
   } catch (const CORBA::Exception& e) {
-    ACE_DEBUG((LM_ERROR, "EXCEPTION: %C\n", e._info().c_str()));
+    ACE_ERROR((LM_ERROR, "EXCEPTION: %C\n", e._info().c_str()));
   } catch (const std::exception& e) {
-    ACE_DEBUG((LM_ERROR, "EXCEPTION: %C\n", e.what()));
+    ACE_ERROR((LM_ERROR, "EXCEPTION: %C\n", e.what()));
   } catch (...) {
-    ACE_DEBUG((LM_ERROR, "Unknown EXCEPTION\n"));
+    ACE_ERROR((LM_ERROR, "Unknown EXCEPTION\n"));
   }
   TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();

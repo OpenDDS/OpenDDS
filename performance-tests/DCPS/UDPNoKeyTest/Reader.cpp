@@ -299,7 +299,7 @@ Reader::svc ()
       break;
 
     default:
-      ACE_DEBUG((LM_ERROR,"ERROR: bad data size %d\n", data_size_));
+      ACE_ERROR((LM_ERROR,"ERROR: bad data size %d\n", data_size_));
       return 1;
       break;
     };
