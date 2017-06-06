@@ -2830,7 +2830,7 @@ DataReaderImpl::has_zero_copies()
 
     for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
-      if (item->zero_copy_cnt_.value() > 0) {
+      if (item->zero_copy_cnt_ > 0) {
         return true;
       }
     }
