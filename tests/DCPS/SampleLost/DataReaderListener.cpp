@@ -92,20 +92,30 @@ DataReaderListenerImpl::on_subscription_matched (
 void
 DataReaderListenerImpl::on_sample_rejected (
     DDS::DataReader_ptr,
-    const DDS::SampleRejectedStatus&)
+    const DDS::SampleRejectedStatus& status)
 {
   ++this->num_samples_rejected_;
 
-  cerr << "DataReaderListenerImpl::on_sample_rejected" << endl;
+  cerr << "DataReaderListenerImpl::on_sample_rejected, "
+       << " total_count <" << status.total_count
+       << "> total_count_change <" << status.total_count_change
+       << "> last_reason <" << status.last_reason
+       << "> last_instance_handle <" << status.last_instance_handle
+       << ">"
+       << endl;
 }
 
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
-  const DDS::SampleLostStatus&)
+  const DDS::SampleLostStatus& status)
 {
   ++this->num_samples_lost_;
 
-  cerr << "DataReaderListenerImpl::on_sample_lost" << endl;
+  cerr << "DataReaderListenerImpl::on_sample_lost, "
+       << " total_count <" << status.total_count
+       << "> total_count_change <" << status.total_count_change
+       << ">"
+       << endl;
 }
 
 void DataReaderListenerImpl::on_subscription_disconnected (
