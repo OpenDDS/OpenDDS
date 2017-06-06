@@ -251,9 +251,9 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
-    int loans = dr_servant->num_zero_copies();
+    const bool has_zero_copies = dr_servant->has_zero_copies();
 
-    if (0 != loans) {
+    if (has_zero_copies) {
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
