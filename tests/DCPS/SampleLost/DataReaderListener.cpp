@@ -11,7 +11,9 @@ using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
-    num_samples_lost_ (0)
+    num_samples_lost_ (0),
+    num_samples_rejected_ (0),
+    num_budget_exceeded_ (0)
 {
 }
 
@@ -92,6 +94,8 @@ DataReaderListenerImpl::on_sample_rejected (
     DDS::DataReader_ptr,
     const DDS::SampleRejectedStatus&)
 {
+  ++this->num_samples_rejected_;
+
   cerr << "DataReaderListenerImpl::on_sample_rejected" << endl;
 }
 
@@ -129,6 +133,8 @@ void DataReaderListenerImpl::on_budget_exceeded (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::BudgetExceededStatus&)
 {
+  ++this->num_budget_exceeded_;
+
   cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
 }
 
