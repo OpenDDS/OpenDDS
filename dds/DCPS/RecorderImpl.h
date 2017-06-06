@@ -145,7 +145,7 @@ private:
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 
   /// Lookup the instance handles by the publication repo ids
-  bool lookup_instance_handles(const WriterIdSeq&      ids,
+  void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
   void _add_ref() { EntityImpl::_add_ref(); }

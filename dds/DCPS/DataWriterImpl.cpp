@@ -683,14 +683,8 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
     }
 
     if (fully_associated_len > 0 && !is_bit_) {
-      // The reader should be in the id_to_handle map at this time so
-      // log with error.
-      if (this->lookup_instance_handles(fully_associated_readers, handles) == false) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
-                   "lookup_instance_handles failed, notify %d \n", notify_lost));
-
-        return;
-      }
+      // The reader should be in the id_to_handle map at this time
+      this->lookup_instance_handles(fully_associated_readers, handles);
 
       for (CORBA::ULong i = 0; i < fully_associated_len; ++i) {
         id_to_handle_map_.erase(fully_associated_readers[i]);
@@ -2500,14 +2494,7 @@ DataWriterImpl::notify_publication_reconnected(const ReaderIdSeq& subids)
       PublicationDisconnectedStatus status;
 
       // If it's reconnected then the reader should be in id_to_handle
-      // map otherwise log with an error.
-      if (this->lookup_instance_handles(subids,
-                                        status.subscription_handles) == false) {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: DataWriterImpl::"
-                   "notify_publication_reconnected: "
-                   "lookup_instance_handles failed\n"));
-      }
+      this->lookup_instance_handles(subids, status.subscription_handles);
 
       the_listener->on_publication_reconnected(this->dw_local_objref_.in(),
                                                status);
@@ -2582,16 +2569,17 @@ DataWriterImpl::notify_connection_deleted(const RepoId& peerId)
     the_listener->on_connection_deleted(this->dw_local_objref_.in());
 }
 
-bool
+void
 DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
                                         DDS::InstanceHandleSeq & hdls)
 {
+  CORBA::ULong const num_rds = ids.length();
+
   if (DCPS_debug_level > 9) {
-    CORBA::ULong const size = ids.length();
     OPENDDS_STRING separator;
     OPENDDS_STRING buffer;
 
-    for (unsigned long i = 0; i < size; ++i) {
+    for (CORBA::ULong i = 0; i < num_rds; ++i) {
       buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
@@ -2602,14 +2590,11 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
                buffer.c_str()));
   }
 
-  CORBA::ULong const num_rds = ids.length();
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
     hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
-
-  return true;
 }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE

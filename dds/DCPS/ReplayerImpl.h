@@ -184,7 +184,7 @@ private:
   bool need_sequence_repair() const;
 
   /// Lookup the instance handles by the subscription repo ids
-  bool lookup_instance_handles(const ReaderIdSeq&      ids,
+  void lookup_instance_handles(const ReaderIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
   /// The number of chunks for the cached allocator.
   size_t n_chunks_;

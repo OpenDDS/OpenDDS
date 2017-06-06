@@ -574,7 +574,7 @@ private:
   bool send_liveliness(const ACE_Time_Value& now);
 
   /// Lookup the instance handles by the subscription repo ids
-  bool lookup_instance_handles(const ReaderIdSeq& ids,
+  void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
   const RepoId& get_repo_id() const {
