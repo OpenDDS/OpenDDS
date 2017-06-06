@@ -300,7 +300,7 @@ private:
 
   TransportLocatorSeq conn_info_;
 
-  //Seems to protect accesses to impls_, pending_, links_, data_link_index_
+  /// Seems to protect accesses to impls_, pending_, links_, data_link_index_
   ACE_Thread_Mutex lock_;
 
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
