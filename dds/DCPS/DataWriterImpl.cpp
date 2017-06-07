@@ -2403,6 +2403,7 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
     if (!CORBA::is_nil(listener.in())) {
       listener->on_liveliness_lost(this->dw_local_objref_.in(),
                                    this->liveliness_lost_status_);
+      this->liveliness_lost_status_.total_count_change = 0;
     }
   }
 
