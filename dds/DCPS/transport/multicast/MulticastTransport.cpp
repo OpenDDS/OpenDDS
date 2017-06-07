@@ -145,7 +145,7 @@ get_remote_reliability(const TransportImpl::RemoteTransport& remote)
   NetworkAddress network_address;
   ACE_CDR::Boolean reliable;
 
-  size_t len = remote.blob_.length();
+  const size_t len = remote.blob_.length();
   const char* buffer = reinterpret_cast<const char*>(remote.blob_.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);
