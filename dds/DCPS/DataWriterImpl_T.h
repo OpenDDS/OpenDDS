@@ -46,6 +46,20 @@ namespace OpenDDS {
       , mb_allocator_ (0)
       , db_allocator_ (0)
     {
+      MessageType data;
+      if (MarshalTraitsType::gen_is_bounded_size()) {
+        marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(data, true);
+        // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
+      } else {
+        marshaled_size_ = 0; // should use gen_find_size when marshaling
+      }
+      if (MarshalTraitsType::gen_is_bounded_key_size()) {
+        OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
+        key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
+        // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
+      } else {
+        key_marshaled_size_ = 0; // should use gen_find_size when marshaling
+      }
     }
 
     virtual ~DataWriterImpl_T (void)
@@ -290,44 +304,6 @@ namespace OpenDDS {
         }
     }
 
-
-  /**
-   * Initialize the DataWriter object.
-   * Called as part of create_datawriter.
-   */
-    virtual void init (DDS::Topic_ptr                       topic,
-                       OpenDDS::DCPS::TopicImpl*              topic_servant,
-                       const DDS::DataWriterQos &           qos,
-                       DDS::DataWriterListener_ptr          a_listener,
-                       const DDS::StatusMask &              mask,
-                       OpenDDS::DCPS::DomainParticipantImpl*  participant_servant,
-                       OpenDDS::DCPS::PublisherImpl*          publisher_servant,
-                       DDS::DataWriter_ptr                  dw_objref)
-    {
-      OpenDDS::DCPS::DataWriterImpl::init (topic,
-                                           topic_servant,
-                                           qos,
-                                           a_listener,
-                                           mask,
-                                           participant_servant,
-                                           publisher_servant,
-                                           dw_objref);
-
-      MessageType data;
-      if (MarshalTraitsType::gen_is_bounded_size()) {
-        marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(data, true);
-        // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
-      } else {
-        marshaled_size_ = 0; // should use gen_find_size when marshaling
-      }
-      if (MarshalTraitsType::gen_is_bounded_key_size()) {
-        OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
-        key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
-        // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
-      } else {
-        key_marshaled_size_ = 0; // should use gen_find_size when marshaling
-      }
-    }
 
   /**
    * Do parts of enable specific to the datatype.

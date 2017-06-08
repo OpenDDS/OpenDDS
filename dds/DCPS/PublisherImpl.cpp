@@ -122,14 +122,21 @@ PublisherImpl::create_datawriter(
   DataWriterImpl* dw_servant =
       dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
+  if (dw_servant == 0) {
+    ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("servant is nil.\n")));
+    return DDS::DataWriter::_nil();
+  }
+
   dw_servant->init(a_topic,
       topic_servant,
       dw_qos,
       a_listener,
       mask,
       participant_,
-      this,
-      dw_obj.in());
+      this);
 
   if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
     const DDS::ReturnCode_t ret = dw_servant->enable();

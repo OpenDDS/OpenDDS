@@ -202,15 +202,14 @@ public:
   /**
    * Initialize the data members.
    */
-  virtual void init(
+  void init(
     DDS::Topic_ptr                        topic,
     TopicImpl*                            topic_servant,
     const DDS::DataWriterQos &            qos,
     DDS::DataWriterListener_ptr           a_listener,
     const DDS::StatusMask &               mask,
     OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
-    OpenDDS::DCPS::PublisherImpl*         publisher_servant,
-    DDS::DataWriter_ptr                   dw_local);
+    OpenDDS::DCPS::PublisherImpl*         publisher_servant);
 
   void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
 
@@ -610,8 +609,6 @@ private:
   DDS::DomainId_t                 domain_id_;
   /// The publisher servant which creates this datawriter.
   PublisherImpl*                  publisher_servant_;
-  /// the object reference of the local datawriter
-  DDS::DataWriter_var             dw_local_objref_;
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.

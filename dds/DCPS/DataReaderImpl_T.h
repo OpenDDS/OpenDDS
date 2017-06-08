@@ -1657,13 +1657,11 @@ void store_instance_data(
       ++sample_rejected_status_.total_count_change;
       sample_rejected_status_.last_instance_handle = handle;
 
-      DDS::DataReader_var dr = get_dr_obj_ref();
       if (!CORBA::is_nil(listener.in()))
       {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-        listener->on_sample_rejected(dr.in (),
-                                     sample_rejected_status_);
+        listener->on_sample_rejected(this, sample_rejected_status_);
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
@@ -1863,13 +1861,11 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
       ++sample_rejected_status_.total_count_change;
       sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
 
-      DDS::DataReader_var dr = get_dr_obj_ref();
       if (!CORBA::is_nil(listener.in()))
       {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-        listener->on_sample_rejected(dr.in(),
-          sample_rejected_status_);
+        listener->on_sample_rejected(this, sample_rejected_status_);
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
@@ -1927,13 +1923,11 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         ++sample_rejected_status_.total_count;
         ++sample_rejected_status_.total_count_change;
         sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
-        DDS::DataReader_var dr = get_dr_obj_ref();
         if (!CORBA::is_nil(listener.in()))
         {
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          listener->on_sample_rejected(dr.in(),
-            sample_rejected_status_);
+          listener->on_sample_rejected(this, sample_rejected_status_);
         }  // do we want to do something if listener is nil???
         notify_status_condition_no_sample_lock();
 
@@ -2018,12 +2012,11 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
 
           set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, true);
 
-          DDS::DataReader_var dr = get_dr_obj_ref();
           if (!CORBA::is_nil(listener.in()))
             {
               ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-              listener->on_sample_lost(dr.in (), sample_lost_status_);
+              listener->on_sample_lost(this, sample_lost_status_);
             }
 
           notify_status_condition_no_sample_lock();
@@ -2056,12 +2049,11 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         DDS::DataReaderListener_var listener =
             listener_for (DDS::DATA_AVAILABLE_STATUS);
 
-        DDS::DataReader_var dr = get_dr_obj_ref();
         if (!CORBA::is_nil(listener.in()))
           {
             ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-            listener->on_data_available(dr.in ());
+            listener->on_data_available(this);
             set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
             sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
           }

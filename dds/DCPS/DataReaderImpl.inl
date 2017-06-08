@@ -8,15 +8,6 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_INLINE
-DDS::DataReader_ptr
-OpenDDS::DCPS::DataReaderImpl::get_dr_obj_ref()
-{
-  return DDS::DataReader::_duplicate(dr_local_objref_.in()) ;
-}
-
-
-
-ACE_INLINE
 const OpenDDS::DCPS::DataReaderImpl::StatsMapType&
 OpenDDS::DCPS::DataReaderImpl::raw_latency_statistics() const
 {
