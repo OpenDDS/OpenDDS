@@ -589,7 +589,7 @@ Error: #f88
 
     //typedef sequence&lt;GUID_t&gt; GUIDSeq;
 
-    enum ValueEnumType { INTEGER_TYPE, DOUBLE_TYPE, STRING_TYPE, 
+    enum ValueEnumType { INTEGER_TYPE, DOUBLE_TYPE, STRING_TYPE,
                          STATISTICS_TYPE, STRING_LIST_TYPE };
     union ValueUnion switch (ValueEnumType) {
       case INTEGER_TYPE:     long       integer_value;
@@ -597,11 +597,11 @@ Error: #f88
       case STRING_TYPE:      string     string_value;
       case STATISTICS_TYPE:  Statistics stat_value;
       case STRING_LIST_TYPE: StringSeq  string_seq_value;
-    }; 
-    struct NameValuePair { 
+    };
+    struct NameValuePair {
       string     name;
       ValueUnion value;
-    }; 
+    };
     typedef sequence&lt;NameValuePair&gt; NVPSeq;
 
     enum ReportType {
@@ -907,7 +907,7 @@ config.shadowTiddlers.PublishIndexTemplate = '&lt;div class=\'viewer\' id=\'cont
 config.macros.doPublish.handler = function(place)
  {
  if (!readOnly)
- createTiddlyButton(place, this.label, this.prompt, 
+ createTiddlyButton(place, this.label, this.prompt,
  function() {
   doPublish();
   return false;
@@ -920,7 +920,7 @@ config.macros.publishTiddler = {
  prompt : 'Publish this tiddler as an HTML file.',
  handler : function(place,macroName,params,wikifier,paramString,tiddler)
  {
-  var btn = createTiddlyButton(place, this.label, this.prompt, 
+  var btn = createTiddlyButton(place, this.label, this.prompt,
   function(e) {
    if(!e) var e = window.event;
    publishTiddler(this.getAttribute('tiddler'))
@@ -932,25 +932,25 @@ config.macros.publishTiddler = {
 config.commands.publishTiddler = {handler : function(event,src,title) {publishTiddler(title);},text: &quot;publish&quot;, tooltip: &quot;Publish this tiddler as HTML&quot;};
 function publishTiddler(title) {
  //debugger
- 
+
  var PublishFolder = getWikiPath('publish');
  var place = document.getElementById(story.container)
  var HTMLTemplateHead = store.getTiddlerText(&quot;PublishTemplateHead&quot;);
  var HTMLTemplateBody = store.getTiddlerText(&quot;PublishTemplateBodySingle&quot;) || store.getTiddlerText(&quot;PublishTemplateBody&quot;);
  HTMLTemplateBody = renderTemplate(HTMLTemplateBody)
  HTMLTemplateBody = wiki2Web(HTMLTemplateBody);
- 
+
  var tiddler = store.getTiddler(title);
  var tiddlerText = store.getValue(tiddler, 'text');
  var tiddlerHTML = wikifyStatic(tiddlerText);
  var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
  HTML = HTML.format([
-  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
-  tiddler.title.htmlEncode(), 
-  wiki2Web(tiddlerHTML), 
-  tiddler.tags.join(&quot;, &quot;), 
-  tiddler.modifier, 
-  tiddler.modified.toLocaleString(), 
+  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(),
+  tiddler.title.htmlEncode(),
+  wiki2Web(tiddlerHTML),
+  tiddler.tags.join(&quot;, &quot;),
+  tiddler.modifier,
+  tiddler.modified.toLocaleString(),
   tiddler.created.toLocaleString(),
   tiddlerText
  ]);
@@ -987,12 +987,12 @@ function doPublish() {
    var tiddlerHTML = wikifyStatic(tiddlerText);
    var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
    HTML = HTML.format([
-   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
-   tiddler.title.htmlEncode(), 
-   wiki2Web(tiddlerHTML), 
-   tiddler.tags.join(&quot;, &quot;), 
-   tiddler.modifier, 
-   tiddler.modified.toLocaleString(), 
+   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(),
+   tiddler.title.htmlEncode(),
+   wiki2Web(tiddlerHTML),
+   tiddler.tags.join(&quot;, &quot;),
+   tiddler.modifier,
+   tiddler.modified.toLocaleString(),
    tiddler.created.toLocaleString(),
   tiddlerText
    ]);
@@ -1034,11 +1034,11 @@ function wiki2Web(wikiHTML) {
  if (result) {
   for (i = 0; i &lt; result.length; i++) {
    var className = result[i].match(/ class=&quot;(.*?)&quot;/i) ? result[i].match(/ class=&quot;(.*?)&quot;/i)[1] : &quot;&quot;;
-   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1]; 
-   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;; 
-   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1]; 
-   if (!className.match(/tiddlyLinkNonExisting/i)) 
-   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;); 
+   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1];
+   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;;
+   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1];
+   if (!className.match(/tiddlyLinkNonExisting/i))
+   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;);
    else
    wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; title=\&quot;Page does not exist\&quot; href=\&quot;#\&quot;&gt;&quot; + tiddlerName + &quot;&lt;/a&gt;&quot;);
 
@@ -3634,8 +3634,8 @@ config.macros.tags.handler = function(place,macroName,params,wikifier,paramStrin
 	var prompt = tiddler.tags.length == 0 ? lingo.labelNoTags : lingo.labelTags;
 	createTiddlyElement(ul,"li",null,"listTitle",prompt.format([tiddler.title]));
 	for(var t=0; t<tiddler.tags.length; t++) {
-		var tag = store.getTiddler(tiddler.tags[t]); 
-		if(!tag || !tag.tags.contains("excludeLists")) { 
+		var tag = store.getTiddler(tiddler.tags[t]);
+		if(!tag || !tag.tags.contains("excludeLists")) {
 			createTagButton(createTiddlyElement(ul,"li"),tiddler.tags[t],tiddler.title);
 			if(t<tiddler.tags.length-1)
 				createTiddlyText(ul,sep);
