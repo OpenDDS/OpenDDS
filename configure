@@ -21,7 +21,9 @@ use strict;
 use warnings;
 
 ## Version of OCI's TAO to download
-my $tao_version = '2.2a';
+my $oci_tao_version = '2.2a';
+## Version of DOC Group ACE/TAO to download, uses the ACE version number
+my $doc_tao_version = '6.4.3';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -140,6 +142,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
+    'doc_group!', 'Use the DOC Group release of TAO',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -528,11 +531,19 @@ if ($opts{'safety-profile'}) {
 ## Download ACE+TAO
 my $tao_maj = 1;
 if (!$ace_src || !$tao_src) {
-  my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';
-  my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches_NO_makefiles.'
-    . ($slash eq '/' ? 'tar.gz' : 'zip');
+  my $urlbase;
+  my $file;
+  if ($opts{'doc_group'}) {
+    $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
+    $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
+      . ($slash eq '/' ? 'tar.gz' : 'zip');
+  } else {
+    $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
+    $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
+      . ($slash eq '/' ? 'tar.gz' : 'zip');
+  }
   $tao_maj = 2 if $opts{'dry-run'};
-  my $download_message = "Downloading ACE+TAO $tao_version with latest patches";
+  my $download_message = "Downloading ACE+TAO $file";
   if (-r $file) {
     print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
   }
