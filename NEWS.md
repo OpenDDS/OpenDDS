@@ -1,9 +1,13 @@
 Version 3.12(?) of OpenDDS
 
 ##### Additions:
+- Add support for Visual Studio 2017
 - TODO: Add your features here
 
 ##### Fixes:
+- Fixed possible runtime crashes at the moment samples are lost
+- The number of expression_parameters should match the number of tokens
+- Some fixes for versioned namespace support
 - TODO: Add your fixes here
 
 ##### Notes:
