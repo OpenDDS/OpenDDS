@@ -1345,7 +1345,7 @@ DataWriterImpl::enable()
                                            qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,
-                                           topic_name_.in(),
+                                           topic_name_,
                                            get_type_name(),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
                                            durability_cache,
@@ -1473,7 +1473,7 @@ DataWriterImpl::enable()
   if (durability_cache != 0) {
 
     if (!durability_cache->get_data(this->domain_id_,
-                                    this->topic_name_.in(),
+                                    this->topic_name_,
                                     get_type_name(),
                                     this,
                                     this->mb_allocator_,
