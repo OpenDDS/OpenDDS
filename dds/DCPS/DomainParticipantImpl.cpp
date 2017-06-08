@@ -851,7 +851,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_entity_refs()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
         ACE_TEXT("can't delete a multitopic topic \"%C\" ")
         ACE_TEXT("because it still is used.\n"), mt_name.in ()));
     }
