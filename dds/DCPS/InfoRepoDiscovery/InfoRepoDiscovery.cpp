@@ -395,10 +395,78 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 #endif
 }
 
-void
-InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* /* participant */)
+DDS::ReturnCode_t
+InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant,
+                            DDS::Subscriber_ptr bit_subscriber)
 {
-  // nothing to do for DCPSInfoRepo
+  if (CORBA::is_nil (bit_subscriber)) {
+    return DDS::RETCODE_OK;
+  }
+
+  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+  DDS::DataReader_var dr =
+    bit_subscriber->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
+
+  ret = bit_subscriber->delete_datareader (dr);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("InfoRepoDiscovery::fini_bit, ")
+                      ACE_TEXT("delete BUILT_IN_TOPIC_TOPIC datareader returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  dr = bit_subscriber->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
+
+  ret = bit_subscriber->delete_datareader (dr);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("InfoRepoDiscovery::fini_bit, ")
+                      ACE_TEXT("delete BUILT_IN_PUBLICATION_TOPIC datareader returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  dr = bit_subscriber->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
+
+  ret = bit_subscriber->delete_datareader (dr);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("InfoRepoDiscovery::fini_bit, ")
+                      ACE_TEXT("delete BUILT_IN_SUBSCRIPTION_TOPIC datareader returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  dr = bit_subscriber->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+
+  ret = bit_subscriber->delete_datareader (dr);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("InfoRepoDiscovery::fini_bit, ")
+                      ACE_TEXT("delete BUILT_IN_PARTICIPANT_TOPIC datareader returned %d.\n"),
+                      ret),
+                     ret);
+  }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+  ret = delete_bit_topics(participant);
+
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 RepoId

@@ -63,7 +63,8 @@ public:
 
   virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) = 0;
 
-  virtual void fini_bit(DCPS::DomainParticipantImpl* participant) = 0;
+  virtual DDS::ReturnCode_t fini_bit(DCPS::DomainParticipantImpl* participant,
+                                     DDS::Subscriber_ptr bit_subscriber) = 0;
 
   virtual RepoId bit_key_to_repo_id(DomainParticipantImpl* participant,
                                     const char* bit_topic_name,
@@ -232,6 +233,7 @@ public:
 
 protected:
   DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);
+  DDS::ReturnCode_t delete_bit_topics(DomainParticipantImpl* participant);
 
 private:
   RepoKey        key_;

@@ -1190,9 +1190,11 @@ namespace OpenDDS {
         return bit_subscriber._retn();
       }
 
-      virtual void fini_bit(DCPS::DomainParticipantImpl* participant)
+      virtual DDS::ReturnCode_t fini_bit(DCPS::DomainParticipantImpl* participant,
+                                         DDS::Subscriber_ptr /*bit_subscriber*/)
       {
         get_part(participant->get_domain_id(), participant->get_id())->fini_bit();
+        return DDS::RETCODE_OK;
       }
 
       virtual OpenDDS::DCPS::RepoId bit_key_to_repo_id(DCPS::DomainParticipantImpl* participant,

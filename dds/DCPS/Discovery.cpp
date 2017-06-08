@@ -184,6 +184,195 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
   return DDS::RETCODE_OK;
 }
 
+DDS::ReturnCode_t
+Discovery::delete_bit_topics(DomainParticipantImpl* participant)
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  const DDS::Duration_t no_wait = {0, 0};
+  DDS::Topic_var topic =
+    participant->find_topic(BUILT_IN_PARTICIPANT_TOPIC, no_wait);
+
+  if (CORBA::is_nil(topic.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C topic\n"),
+                      BUILT_IN_PARTICIPANT_TOPIC),
+                     DDS::RETCODE_ERROR);
+  }
+
+  DDS::ReturnCode_t ret = participant->delete_topic (topic.in ());
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("delete topic BUILT_IN_PARTICIPANT_TOPIC returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  topic = participant->find_topic(BUILT_IN_TOPIC_TOPIC, no_wait);
+
+  if (CORBA::is_nil(topic.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C topic\n"),
+                      BUILT_IN_TOPIC_TOPIC),
+                     DDS::RETCODE_ERROR);
+  }
+
+  ret = participant->delete_topic (topic.in ());
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("delete topic BUILT_IN_TOPIC_TOPIC returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  topic = participant->find_topic(BUILT_IN_SUBSCRIPTION_TOPIC, no_wait);
+
+  if (CORBA::is_nil(topic.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C topic\n"),
+                      BUILT_IN_SUBSCRIPTION_TOPIC),
+                     DDS::RETCODE_ERROR);
+  }
+
+  ret = participant->delete_topic (topic.in ());
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("delete topic BUILT_IN_SUBSCRIPTION_TOPIC returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  topic = participant->find_topic(BUILT_IN_PUBLICATION_TOPIC, no_wait);
+
+  if (CORBA::is_nil(topic.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C topic\n"),
+                      BUILT_IN_PUBLICATION_TOPIC),
+                     DDS::RETCODE_ERROR);
+  }
+
+  ret = participant->delete_topic (topic.in ());
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("delete topic BUILT_IN_PUBLICATION_TOPIC returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  TypeSupport_var ts = Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_TOPIC_TYPE);
+
+  if (CORBA::is_nil(ts.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C type support\n"),
+                      BUILT_IN_PARTICIPANT_TOPIC_TYPE),
+                     DDS::RETCODE_ERROR);
+  }
+
+  ret = ts->unregister_type(participant, BUILT_IN_PARTICIPANT_TOPIC_TYPE);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("unregister BUILT_IN_PARTICIPANT_TOPIC_TYPE returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  ts = Registered_Data_Types->lookup(participant, BUILT_IN_TOPIC_TOPIC_TYPE);
+
+  if (CORBA::is_nil(ts.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C type support\n"),
+                      BUILT_IN_TOPIC_TOPIC_TYPE),
+                     DDS::RETCODE_ERROR);
+  }
+
+  ret = ts->unregister_type(participant, BUILT_IN_TOPIC_TOPIC_TYPE);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("unregister BUILT_IN_TOPIC_TOPIC_TYPE returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  ts = Registered_Data_Types->lookup(participant, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
+
+  if (CORBA::is_nil(ts.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C type support\n"),
+                      BUILT_IN_SUBSCRIPTION_TOPIC_TYPE),
+                     DDS::RETCODE_ERROR);
+  }
+
+  ret = ts->unregister_type(participant, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("unregister BUILT_IN_SUBSCRIPTION_TOPIC_TYPE returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+  ts = Registered_Data_Types->lookup(participant, BUILT_IN_PUBLICATION_TOPIC_TYPE);
+
+  if (CORBA::is_nil(ts.in ())) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("Nil %C type support\n"),
+                      BUILT_IN_PUBLICATION_TOPIC_TYPE),
+                     DDS::RETCODE_ERROR);
+  }
+
+  ret = ts->unregister_type(participant, BUILT_IN_PUBLICATION_TOPIC_TYPE);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("Discovery::delete_bit_topics, ")
+                      ACE_TEXT("unregister BUILT_IN_PUBLICATION_TOPIC_TYPE returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
+#else
+  ACE_UNUSED_ARG(participant);
+#endif /* DDS_HAS_MINIMUM_BIT */
+
+  return DDS::RETCODE_OK;
+}
+
 Discovery::Config::~Config()
 {
 }
