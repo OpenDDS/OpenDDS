@@ -20,16 +20,9 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 ACE_CDR::Boolean
 operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
 {
-  if ((outCdr << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER)) == 0)
-    return 0;
-
-  if ((outCdr << ACE_OutputCDR::from_octet(value.reserved_)) == 0)
-    return 0;
-
-  if ((outCdr << value.addr_.c_str()) == 0)
-    return 0;
-
-  return outCdr.good_bit();
+  return (outCdr << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER)) &&
+         (outCdr << ACE_OutputCDR::from_octet(value.reserved_)) &&
+         (outCdr << value.addr_.c_str());
 }
 
 ACE_CDR::Boolean
@@ -37,18 +30,18 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
 {
   CORBA::Boolean byte_order;
 
-  if ((inCdr >> ACE_InputCDR::to_boolean(byte_order)) == 0)
-    return 0;
+  if (!(inCdr >> ACE_InputCDR::to_boolean(byte_order)))
+    return false;
 
   inCdr.reset_byte_order(byte_order);
 
-  if ((inCdr >> ACE_InputCDR::to_octet(value.reserved_)) == 0)
-    return 0;
+  if (!(inCdr >> ACE_InputCDR::to_octet(value.reserved_)))
+    return false;
 
   char* buf = 0;
 
-  if ((inCdr >> buf) == 0)
-    return 0;
+  if (!(inCdr >> buf))
+    return false;
 
   value.addr_ = buf;
 
@@ -73,7 +66,7 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
   if (fullname.length() == 0) {
     size_t addr_count;
-    ACE_INET_Addr *addr_array;
+    ACE_INET_Addr *addr_array = 0;
     OpenDDS::DCPS::HostnameInfoVector nonFQDN;
 
     int result = ACE::get_ip_interfaces(addr_count, addr_array);
