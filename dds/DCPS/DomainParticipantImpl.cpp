@@ -843,7 +843,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
-        ACE_TEXT("can't delete multitopic \"%C\" ")
+        ACE_TEXT("can't delete a multitopic \"%C\" ")
         ACE_TEXT("because it is not in the set.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
