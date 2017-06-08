@@ -69,10 +69,10 @@ TopicImpl::set_qos(const DDS::TopicQos & qos)
       qos_ = qos;
 
       Discovery_rch disco =
-        TheServiceParticipant->get_discovery(this->participant_->get_domain_id());
+        TheServiceParticipant->get_discovery(participant_->get_domain_id());
       const bool status =
-        disco->update_topic_qos(this->id_, this->participant_->get_domain_id(),
-                               this->participant_->get_id(), qos_);
+        disco->update_topic_qos(this->id_, participant_->get_domain_id(),
+                               participant_->get_id(), qos_);
 
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
