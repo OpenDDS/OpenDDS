@@ -480,6 +480,9 @@ PubDriver::register_test ()
   TEST_CHECK(key_holder.sample_sequence == foo1.sample_sequence);
   TEST_CHECK(key_holder.writer_id == foo1.writer_id);
 
+  ret = foo_datawriter_->get_key_value(key_holder, ::DDS::HANDLE_NIL);
+  TEST_CHECK(ret == ::DDS::RETCODE_BAD_PARAMETER);
+
   for (CORBA::Long i = 1; i <= 2; i ++)
   {
     foo2.a_long_value = 101010;
