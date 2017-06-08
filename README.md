@@ -100,7 +100,7 @@ Linux family:
 * Fedora Core 6, x86
 * Fedora 24 and 25, x86_64
 * Ubuntu 16.04 LTS, x86_64
-* openSUSE 42.1, and 42.2 , x86_64
+* openSUSE 42.1, and 42.2, x86_64
 
 Windows family:
 * Windows 7 (32-bit, 64-bit)
