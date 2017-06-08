@@ -10,7 +10,8 @@
 using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0)
+  : num_reads_(0),
+    num_samples_lost_ (0)
 {
 }
 
@@ -98,6 +99,8 @@ void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
 {
+  ++this->num_samples_lost_;
+
   cerr << "DataReaderListenerImpl::on_sample_lost" << endl;
 }
 

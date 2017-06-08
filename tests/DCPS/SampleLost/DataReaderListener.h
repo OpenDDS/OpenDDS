@@ -68,10 +68,15 @@ public:
     return num_reads_;
   }
 
+  long num_samples_lost () const {
+    return num_samples_lost_;
+  }
+
 private:
 
   DDS::DataReader_var reader_;
-  long                  num_reads_;
+  long num_reads_;
+  long num_samples_lost_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

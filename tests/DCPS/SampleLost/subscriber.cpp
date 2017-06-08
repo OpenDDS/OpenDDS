@@ -121,6 +121,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
+      if (listener_servant->num_samples_lost () == 0)
+      {
+        cerr << "ERROR: Did not got sample lost callbacks" << endl;
+      }
+
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
       }
