@@ -68,10 +68,22 @@ public:
     return num_reads_;
   }
 
+  long num_samples_lost () const {
+    return num_samples_lost_;
+  }
+  long num_samples_rejected () const {
+    return num_samples_rejected_;
+  }
+  long num_budget_exceeded () const {
+    return num_budget_exceeded_;
+  }
 private:
 
   DDS::DataReader_var reader_;
-  long                  num_reads_;
+  long num_reads_;
+  long num_samples_lost_;
+  long num_samples_rejected_;
+  long num_budget_exceeded_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
