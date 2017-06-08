@@ -261,7 +261,7 @@ Service_Participant::shutdown()
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
-    TransportRegistry::instance()->close();
+    TransportRegistry::close();
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
     domainRepoMap_.clear();
