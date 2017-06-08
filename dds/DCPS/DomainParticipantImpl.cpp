@@ -764,7 +764,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete a contentfiltered topic \"%C\" ")
+        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
         ACE_TEXT("because it is not in the set.\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -773,7 +773,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete contentfiltered topic \"%C\" ")
+        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
         ACE_TEXT("because it still is used.\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -843,7 +843,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
-        ACE_TEXT("can't delete multitopic \"%C\" ")
+        ACE_TEXT("can't delete a multitopic \"%C\" ")
         ACE_TEXT("because it is not in the set.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -851,8 +851,8 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_entity_refs()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete contentfiltered topic \"%C\" ")
+        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+        ACE_TEXT("can't delete a multitopic topic \"%C\" ")
         ACE_TEXT("because it still is used.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
