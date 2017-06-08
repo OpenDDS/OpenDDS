@@ -23,19 +23,13 @@ TopicDescriptionImpl::TopicDescriptionImpl(const char*            topic_name,
   : topic_name_(topic_name),
     type_name_(type_name),
     participant_(participant),
-    type_support_(type_support)
+    type_support_(OpenDDS::DCPS::TypeSupport::_duplicate(type_support)),
+    entity_refs_(0)
 {
-  // make sure the type_support doesn't get deleted while
-  // were still using it.
-  if (type_support_)
-    type_support_->_add_ref();
 }
 
 TopicDescriptionImpl::~TopicDescriptionImpl()
 {
-  // were finished with the type_support
-  if (type_support_)
-    type_support_->_remove_ref();
 }
 
 char *
