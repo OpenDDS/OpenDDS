@@ -291,8 +291,12 @@ InfoRepoDiscovery::bit_config()
     TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
 
     tcp_inst->datalink_release_delay_ = 0;
-    tcp_inst->local_address(bit_transport_port_,
-                            bit_transport_ip_.c_str());
+    if (bit_transport_ip_ != "") {
+      tcp_inst->local_address(bit_transport_port_,
+                              bit_transport_ip_.c_str());
+    } else {
+      tcp_inst->local_address_set_port(bit_transport_port_);
+    }
   }
   return bit_config_;
 #else
