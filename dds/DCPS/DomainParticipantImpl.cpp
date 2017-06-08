@@ -764,7 +764,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
-        ACE_TEXT("can't delete contentfiltered topic \"%C\" ")
+        ACE_TEXT("can't delete a contentfiltered topic \"%C\" ")
         ACE_TEXT("because it is not in the set.\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -837,14 +837,14 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
   DDS::MultiTopic_var mt = DDS::MultiTopic::_duplicate(a_multitopic);
-  CORBA::String_var name = mt->get_name();
-  TopicDescriptionMap::iterator iter = topic_descrs_.find(name.in());
+  CORBA::String_var mt_name = mt->get_name();
+  TopicDescriptionMap::iterator iter = topic_descrs_.find(mt_name.in());
   if (iter == topic_descrs_.end()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
         ACE_TEXT("can't delete multitopic \"%C\" ")
-        ACE_TEXT("because it is not in the set.\n"), name.in ()));
+        ACE_TEXT("because it is not in the set.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -853,7 +853,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
         ACE_TEXT("can't delete contentfiltered topic \"%C\" ")
-        ACE_TEXT("because it still is used.\n"), name.in ()));
+        ACE_TEXT("because it still is used.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
