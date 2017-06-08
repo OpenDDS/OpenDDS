@@ -12,7 +12,6 @@
 #include <vector>
 
 class DataReaderListenerImpl;
-class DataReaderQCListenerImpl;
 
 class SubDriver
 {
