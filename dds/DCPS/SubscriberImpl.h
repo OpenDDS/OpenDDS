@@ -190,7 +190,6 @@ private:
 #endif
 
   DomainParticipantImpl*       participant_;
-  DDS::DomainParticipant_var   participant_objref_;
 
   DDS::DomainId_t              domain_id_;
 
