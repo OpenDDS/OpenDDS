@@ -1253,7 +1253,7 @@ This script is intended to be called with the following parameters:
 $0: datafilename
 $1: statsfilename
 $2: outputfilename
-$3: multiplot title 
+$3: multiplot title
 }}}
 
 The output of this script will be a single output file in PNG format named by the //'$2'// parameter that contains a quad plot of the data read from the input file named by the //'$0'// parameter.  The statistics information located in the file named by the //'$1'// parameter is used as a labels on the charts.  The //'$3'// parameter is used as a label for the whole multiplot chart.
@@ -2022,7 +2022,7 @@ config.shadowTiddlers.PublishIndexTemplate = '&lt;div class=\'viewer\' id=\'cont
 config.macros.doPublish.handler = function(place)
  {
  if (!readOnly)
- createTiddlyButton(place, this.label, this.prompt, 
+ createTiddlyButton(place, this.label, this.prompt,
  function() {
   doPublish();
   return false;
@@ -2035,7 +2035,7 @@ config.macros.publishTiddler = {
  prompt : 'Publish this tiddler as an HTML file.',
  handler : function(place,macroName,params,wikifier,paramString,tiddler)
  {
-  var btn = createTiddlyButton(place, this.label, this.prompt, 
+  var btn = createTiddlyButton(place, this.label, this.prompt,
   function(e) {
    if(!e) var e = window.event;
    publishTiddler(this.getAttribute('tiddler'))
@@ -2047,25 +2047,25 @@ config.macros.publishTiddler = {
 config.commands.publishTiddler = {handler : function(event,src,title) {publishTiddler(title);},text: &quot;publish&quot;, tooltip: &quot;Publish this tiddler as HTML&quot;};
 function publishTiddler(title) {
  //debugger
- 
+
  var PublishFolder = getWikiPath('publish');
  var place = document.getElementById(story.container)
  var HTMLTemplateHead = store.getTiddlerText(&quot;PublishTemplateHead&quot;);
  var HTMLTemplateBody = store.getTiddlerText(&quot;PublishTemplateBodySingle&quot;) || store.getTiddlerText(&quot;PublishTemplateBody&quot;);
  HTMLTemplateBody = renderTemplate(HTMLTemplateBody)
  HTMLTemplateBody = wiki2Web(HTMLTemplateBody);
- 
+
  var tiddler = store.getTiddler(title);
  var tiddlerText = store.getValue(tiddler, 'text');
  var tiddlerHTML = wikifyStatic(tiddlerText);
  var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
  HTML = HTML.format([
-  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
-  tiddler.title.htmlEncode(), 
-  wiki2Web(tiddlerHTML), 
-  tiddler.tags.join(&quot;, &quot;), 
-  tiddler.modifier, 
-  tiddler.modified.toLocaleString(), 
+  wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(),
+  tiddler.title.htmlEncode(),
+  wiki2Web(tiddlerHTML),
+  tiddler.tags.join(&quot;, &quot;),
+  tiddler.modifier,
+  tiddler.modified.toLocaleString(),
   tiddler.created.toLocaleString(),
   tiddlerText
  ]);
@@ -2102,12 +2102,12 @@ function doPublish() {
    var tiddlerHTML = wikifyStatic(tiddlerText);
    var HTML = '&lt;html&gt;\n\&lt;head&gt;\n' + HTMLTemplateHead + '\n&lt;/head&gt;\n&lt;body&gt;\n' + HTMLTemplateBody + '\n&lt;/body&gt;\n&lt;/html&gt;';
    HTML = HTML.format([
-   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(), 
-   tiddler.title.htmlEncode(), 
-   wiki2Web(tiddlerHTML), 
-   tiddler.tags.join(&quot;, &quot;), 
-   tiddler.modifier, 
-   tiddler.modified.toLocaleString(), 
+   wikifyPlain(&quot;SiteTitle&quot;).htmlEncode(),
+   tiddler.title.htmlEncode(),
+   wiki2Web(tiddlerHTML),
+   tiddler.tags.join(&quot;, &quot;),
+   tiddler.modifier,
+   tiddler.modified.toLocaleString(),
    tiddler.created.toLocaleString(),
   tiddlerText
    ]);
@@ -2149,11 +2149,11 @@ function wiki2Web(wikiHTML) {
  if (result) {
   for (i = 0; i &lt; result.length; i++) {
    var className = result[i].match(/ class=&quot;(.*?)&quot;/i) ? result[i].match(/ class=&quot;(.*?)&quot;/i)[1] : &quot;&quot;;
-   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1]; 
-   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;; 
-   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1]; 
-   if (!className.match(/tiddlyLinkNonExisting/i)) 
-   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;); 
+   var tiddlerName = result[i].match(/ tiddlylink=&quot;(.*?)&quot;/i)[1];
+   var url = tiddlerName.htmlDecode().filenameEncode() + &quot;.html&quot;;
+   var tiddlerLabel = result[i].match(/&quot;&gt;(.*?)&lt;\/a&gt;/i)[1];
+   if (!className.match(/tiddlyLinkNonExisting/i))
+   wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; href=\&quot;&quot; + url + &quot;\&quot;&gt;&quot; + tiddlerLabel + &quot;&lt;/a&gt;&quot;);
    else
    wikiHTML = wikiHTML.myReplace(result[i], &quot;&lt;a class=\&quot;&quot; + className + &quot;\&quot; title=\&quot;Page does not exist\&quot; href=\&quot;#\&quot;&gt;&quot; + tiddlerName + &quot;&lt;/a&gt;&quot;);
 
@@ -2263,7 +2263,7 @@ The following steps need to be performed on each host for each test.  The ''&lt;
 &lt;&lt;&lt;
  shell&gt; mkdir -p &lt;testdir&gt;
  shell&gt; cd &lt;testdir&gt;
- shell&gt; $BASEDIR/bin/run_test -P -h &lt;host&gt;:&lt;port&gt; -i &lt;transportconfig&gt; -s &lt;testconfig&gt; 
+ shell&gt; $BASEDIR/bin/run_test -P -h &lt;host&gt;:&lt;port&gt; -i &lt;transportconfig&gt; -s &lt;testconfig&gt;
 &lt;&lt;&lt;
 Note that it is important to start the tests within 60 seconds of each other.  This is due to the script timeout value, which is set to 60 seconds after the specified duration.  The test execution does not start until the entire test is connected, so if any host is not started within the 60 seconds interval processes that were started first will time out before the test is complete.
 }}}</pre>
@@ -5491,8 +5491,8 @@ config.macros.tags.handler = function(place,macroName,params,wikifier,paramStrin
 	var prompt = tiddler.tags.length == 0 ? lingo.labelNoTags : lingo.labelTags;
 	createTiddlyElement(ul,"li",null,"listTitle",prompt.format([tiddler.title]));
 	for(var t=0; t<tiddler.tags.length; t++) {
-		var tag = store.getTiddler(tiddler.tags[t]); 
-		if(!tag || !tag.tags.contains("excludeLists")) { 
+		var tag = store.getTiddler(tiddler.tags[t]);
+		if(!tag || !tag.tags.contains("excludeLists")) {
 			createTagButton(createTiddlyElement(ul,"li"),tiddler.tags[t],tiddler.title);
 			if(t<tiddler.tags.length-1)
 				createTiddlyText(ul,sep);
