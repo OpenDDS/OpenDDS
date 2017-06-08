@@ -32,6 +32,7 @@ class SubDriver
     void run();
 
     int               num_writes_;
+    int               num_disposed_;
 
     int               shutdown_pub_;
     int               add_new_subscription_;

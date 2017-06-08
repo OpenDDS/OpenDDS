@@ -20,6 +20,7 @@ my $status = 0;
 # Configuration for default test - register test.
 my $test_to_run = 0;
 my $num_writes = 2;
+my $num_disposed = 0;
 my $n_chunks = 20; # Number of pre-allocated chunks for Dynamic_Cached_Allocator
 my $shutdown_pub = 1;
 my $add_new_subscription = 0;
@@ -32,6 +33,7 @@ if ($ARGV[0] eq 'unregister') {
 }
 elsif ($ARGV[0] eq 'dispose') {
     $test_to_run = 2;
+    $num_disposed = 1;
     $num_writes = 11;  # 1 dispose and 10 writes.
 }
 elsif ($ARGV[0] eq 'resume') {
@@ -84,7 +86,7 @@ my $subscriber = PerlDDS::create_process ("FooTest3_subscriber",
                                           " -DCPSInfoRepo file://$dcpsrepo_ior "
                                           . "$app_bit_conf -n $num_writes "
                                           . "-x $shutdown_pub "
-                                          . "-a $add_new_subscription -d $shutdown_delay_secs "
+                                          . "-a $add_new_subscription -d $shutdown_delay_secs -i $num_disposed"
                                           . "-f $sub_ready_file");
 
 print $subscriber->CommandLine(), "\n";
