@@ -222,12 +222,12 @@ DataReaderImpl::cleanup()
 }
 
 void DataReaderImpl::init(
-    TopicDescriptionImpl*       a_topic_desc,
-    const DDS::DataReaderQos &  qos,
+    TopicDescriptionImpl* a_topic_desc,
+    const DDS::DataReaderQos &qos,
     DDS::DataReaderListener_ptr a_listener,
-    const DDS::StatusMask &     mask,
-    DomainParticipantImpl*      participant,
-    SubscriberImpl*             subscriber)
+    const DDS::StatusMask & mask,
+    DomainParticipantImpl* participant,
+    SubscriberImpl* subscriber)
 {
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
