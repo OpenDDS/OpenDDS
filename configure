@@ -535,7 +535,7 @@ if (!$ace_src || !$tao_src) {
   my $file;
   if ($opts{'doc_group'}) {
     $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
-    $file = 'ACE+TAO-' . $doc_tao_version . '.'
+    $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
       . ($slash eq '/' ? 'tar.gz' : 'zip');
   } else {
     $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
