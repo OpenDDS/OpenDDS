@@ -412,11 +412,13 @@ public:
 
   bool is_bit() const;
 
-  /** This method is used for a precondition check of delete_datareader.
+  /**
+   * This method is used for a precondition check of delete_datareader.
    *
-   * @returns the number of outstanding zero-copy samples loaned out.
+   * @retval true We have zero-copy samples loaned out
+   * @retval false We have no zero-copy samples loaned out
    */
-  virtual int num_zero_copies();
+  virtual bool has_zero_copies();
 
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
