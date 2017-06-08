@@ -666,15 +666,8 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   if (!is_bit_) {
-    // The writer should be in the id_to_handle map at this time.  Note
-    // it if it not there.
-    if (this->lookup_instance_handles(updated_writers, handles) == false) {
-      if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
-            ACE_TEXT("lookup_instance_handles failed.\n")));
-      }
-    }
+    // The writer should be in the id_to_handle map at this time.
+    this->lookup_instance_handles(updated_writers, handles);
 
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
       id_to_handle_map_.erase(updated_writers[i]);
@@ -2538,12 +2531,8 @@ DataReaderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
 
-      // If it's reconnected then the reader should be in id_to_handle map otherwise
-      // log with an error.
-      if (this->lookup_instance_handles(pubids, status.publication_handles) == false) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) DataReaderImpl::notify_subscription_reconnected: "
-            "lookup_instance_handles failed.\n"));
-      }
+      // If it's reconnected then the reader should be in id_to_handle
+      this->lookup_instance_handles(pubids, status.publication_handles);
 
       the_listener->on_subscription_reconnected(this,  status);
     }
@@ -2610,16 +2599,17 @@ DataReaderImpl::notify_connection_deleted(const RepoId& peerId)
   }
 }
 
-bool
+void
 DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
     DDS::InstanceHandleSeq & hdls)
 {
+  CORBA::ULong const num_wrts = ids.length();
+
   if (DCPS_debug_level > 9) {
-    CORBA::ULong const size = ids.length();
     const char* separator = "";
     OPENDDS_STRING guids;
 
-    for (unsigned long i = 0; i < size; ++i) {
+    for (CORBA::ULong i = 0; i < num_wrts; ++i) {
       guids += separator;
       guids += OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
@@ -2631,14 +2621,11 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
         guids.c_str()));
   }
 
-  CORBA::ULong const num_wrts = ids.length();
   hdls.length(num_wrts);
 
   for (CORBA::ULong i = 0; i < num_wrts; ++i) {
     hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
-
-  return true;
 }
 
 bool
