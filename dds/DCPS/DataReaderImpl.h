@@ -366,8 +366,6 @@ public:
 
   RepoId get_subscription_id() const;
 
-  char *get_topic_name() const;
-
   bool have_sample_states(DDS::SampleStateMask sample_states) const;
   bool have_view_states(DDS::ViewStateMask view_states) const;
   bool have_instance_states(DDS::InstanceStateMask instance_states) const;
