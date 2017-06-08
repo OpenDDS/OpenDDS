@@ -774,7 +774,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
         ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
-        ACE_TEXT("because it still is used.\n"), name.in ()));
+        ACE_TEXT("because it is used by a datareader\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -853,7 +853,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
         ACE_TEXT("can't delete a multitopic topic \"%C\" ")
-        ACE_TEXT("because it still is used.\n"), mt_name.in ()));
+        ACE_TEXT("because it is used by a datareader.\n"), mt_name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
