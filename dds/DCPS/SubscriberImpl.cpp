@@ -64,14 +64,14 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
 
 SubscriberImpl::~SubscriberImpl()
 {
-  //
   // The datareaders should be deleted already before calling delete
   // subscriber.
   if (!is_clean()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("SubscriberImpl::~SubscriberImpl, ")
-               ACE_TEXT("some datareaders still exist.\n")));
+               ACE_TEXT("%B datareaders still exist.\n"),
+               datareader_map_.size ()));
   }
 }
 
@@ -794,7 +794,7 @@ SubscriberImpl::enable()
 bool
 SubscriberImpl::is_clean() const
 {
-  bool sub_is_clean = datareader_map_.empty();
+  const bool sub_is_clean = datareader_map_.empty();
 
   if (!sub_is_clean && !TheTransientKludge->is_enabled()) {
     // Four BIT datareaders.

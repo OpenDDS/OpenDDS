@@ -392,6 +392,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
               ACE_DEBUG((LM_DEBUG, "Got expected offered_incompatible_qos"
                 " with TRANSPORTTYPE_QOS_POLICY_ID"
                 " existing with success.\n"));
+              dp->delete_contained_entities ();
+              dpf->delete_participant(dp.in ());
               return 0;
             }
         }
@@ -475,20 +477,17 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test_failed = 1;
       }
 
-
-
       //======== clean up ============
 
-      // Clean up publisher objects
-//      pub->delete_contained_entities() ;
+      ACE_DEBUG ((LM_DEBUG,
+        ACE_TEXT("(%P|%t) Test ready, cleaning up.\n")));
 
+      // Clean up publisher objects
       pub->delete_datawriter(dw.in ());
       dp->delete_publisher(pub.in ());
 
 
       //clean up subscriber objects
-//      sub->delete_contained_entities() ;
-
       sub->delete_datareader(dr.in ());
       dp->delete_subscriber(sub.in ());
 
