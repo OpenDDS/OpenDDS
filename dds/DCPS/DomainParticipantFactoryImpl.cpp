@@ -103,10 +103,6 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  // Set the participant object reference before enable since it's
-  // needed for the built in topics during enable.
-  dp->set_object_reference(dp_obj);  //xxx no change
-
   if (qos_.entity_factory.autoenable_created_entities) {
     dp->enable();
   }

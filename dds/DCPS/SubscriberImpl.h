@@ -148,7 +148,6 @@ public:
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void coherent_change_received(RepoId& publisher_id,
-                                DataReaderImpl* reader,
                                 Coherent_State& group_state);
 #endif
 
@@ -190,7 +189,6 @@ private:
 #endif
 
   DomainParticipantImpl*       participant_;
-  DDS::DomainParticipant_var   participant_objref_;
 
   DDS::DomainId_t              domain_id_;
 

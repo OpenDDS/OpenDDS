@@ -35,7 +35,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-throw(CORBA::SystemException)
 {
 
   try {
@@ -101,7 +100,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
   const DDS::RequestedDeadlineMissedStatus & status)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_requested_deadline_missed(): ")
           ACE_TEXT(" handle %d total_count_change %d \n"),
@@ -111,7 +109,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_requested_incompatible_qos(
   DDS::DataReader_ptr,
   const DDS::RequestedIncompatibleQosStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
 }
@@ -119,7 +116,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus & status)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_liveliness_changed(): ")
           ACE_TEXT(" last pub handle %d alive_count %d change %d; not_alive_count %d change %d \n"),
@@ -131,7 +127,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
 }
@@ -139,7 +134,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_sample_rejected(
   DDS::DataReader_ptr,
   const DDS::SampleRejectedStatus&)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
 }
@@ -147,7 +141,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }

@@ -81,19 +81,16 @@ SubscriberListenerImpl::on_data_on_readers(::DDS::Subscriber_ptr sub)
 void
 SubscriberListenerImpl::on_liveliness_changed(::DDS::DataReader_ptr,
                                               const ::DDS::LivelinessChangedStatus&)
-  throw(CORBA::SystemException)
 {
 }
 
 void
 SubscriberListenerImpl::on_subscription_matched(::DDS::DataReader_ptr ,
                                                 const ::DDS::SubscriptionMatchedStatus& )
-  throw(CORBA::SystemException)
 {
 }
 
 void SubscriberListenerImpl::on_data_available(::DDS::DataReader_ptr )
-  throw(CORBA::SystemException)
 {
 }
 
@@ -101,7 +98,6 @@ void
 SubscriberListenerImpl::on_requested_deadline_missed (::DDS::DataReader_ptr /*reader*/,
                                                       const ::DDS::RequestedDeadlineMissedStatus& /*status*/
                                                       )
-  throw(CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) Subscriber deadline missed\n")));
@@ -112,7 +108,6 @@ SubscriberListenerImpl::on_requested_deadline_missed (::DDS::DataReader_ptr /*re
 void
 SubscriberListenerImpl::on_requested_incompatible_qos(::DDS::DataReader_ptr ,
                                                       const ::DDS::RequestedIncompatibleQosStatus&)
-  throw(CORBA::SystemException)
 {
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) Subscriber incompatible QoS\n")));
@@ -121,13 +116,11 @@ SubscriberListenerImpl::on_requested_incompatible_qos(::DDS::DataReader_ptr ,
 void
 SubscriberListenerImpl::on_sample_rejected(::DDS::DataReader_ptr,
                                            const ::DDS::SampleRejectedStatus&)
-  throw(CORBA::SystemException)
 {
 }
 
 void
 SubscriberListenerImpl::on_sample_lost(::DDS::DataReader_ptr,
                                        const ::DDS::SampleLostStatus&)
-  throw(CORBA::SystemException)
 {
 }

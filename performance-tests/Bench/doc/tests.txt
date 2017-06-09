@@ -43,7 +43,7 @@ include:
    scenario or service configuration files into the package directories.
 
    Once all files for the test have been copied into the package
-   directory, the directory can be transfered to each host participating
+   directory, the directory can be transferred to each host participating
    in the test.  This can be done by recursively copying the directories
    or archiving the directories and transferring the archive.  When the
    directories are visible from each host participating in the test via

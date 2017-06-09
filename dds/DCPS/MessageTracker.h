@@ -57,7 +57,6 @@ namespace DCPS {
     int dropped_count();
 
   private:
-
     const OPENDDS_STRING msg_src_;         // Source of tracked messages
     int                  dropped_count_;
     int                  delivered_count_; // Messages transmitted by transport layer

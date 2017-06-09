@@ -24,36 +24,28 @@ class SubscriberListenerImpl
   virtual void on_data_on_readers(::DDS::Subscriber_ptr sub);
 
   virtual void on_liveliness_changed(::DDS::DataReader_ptr,
-                                     const ::DDS::LivelinessChangedStatus&)
-    throw(CORBA::SystemException);
+                                     const ::DDS::LivelinessChangedStatus&);
 
   virtual void on_subscription_matched(::DDS::DataReader_ptr ,
-                                       const ::DDS::SubscriptionMatchedStatus& )
-    throw(CORBA::SystemException);
+                                       const ::DDS::SubscriptionMatchedStatus& );
 
-  virtual void on_data_available(::DDS::DataReader_ptr )
-    throw(CORBA::SystemException);
+  virtual void on_data_available(::DDS::DataReader_ptr );
 
   virtual void
     on_requested_deadline_missed (::DDS::DataReader_ptr reader,
-                                  const ::DDS::RequestedDeadlineMissedStatus& status
-                                  )
-    throw(CORBA::SystemException);
+                                  const ::DDS::RequestedDeadlineMissedStatus& status);
 
   virtual void
     on_requested_incompatible_qos(::DDS::DataReader_ptr ,
-                                  const ::DDS::RequestedIncompatibleQosStatus&)
-    throw(CORBA::SystemException);
+                                  const ::DDS::RequestedIncompatibleQosStatus&);
 
   virtual void
     on_sample_rejected(::DDS::DataReader_ptr,
-                       const ::DDS::SampleRejectedStatus&)
-    throw(CORBA::SystemException);
+                       const ::DDS::SampleRejectedStatus&);
 
   virtual void
     on_sample_lost(::DDS::DataReader_ptr,
-                   const ::DDS::SampleLostStatus&)
-    throw(CORBA::SystemException);
+                   const ::DDS::SampleLostStatus&);
 
  private:
   std::size_t& received_samples_;
