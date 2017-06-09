@@ -927,6 +927,10 @@ void
 SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
                                           Coherent_State& group_state)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard,
+            this->si_lock_);
+
   // Verify if all readers complete the coherent changes. The result
   // is either COMPLETED or REJECTED.
   group_state = COMPLETED;
