@@ -70,7 +70,7 @@ SubscriberImpl::~SubscriberImpl()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("SubscriberImpl::~SubscriberImpl, ")
-               ACE_TEXT("%d datareaders still exist.\n"),
+               ACE_TEXT("%B datareaders still exist.\n"),
                datareader_map_.size ()));
   }
 }
