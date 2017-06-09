@@ -941,7 +941,7 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
     Coherent_State state = COMPLETED;
     (*iter)->coherent_change_received (publisher_id, state);
     if (state == NOT_COMPLETED_YET) {
-      group_state = state;
+      group_state = NOT_COMPLETED_YET;
       return;
     }
     else if (state == REJECTED) {
