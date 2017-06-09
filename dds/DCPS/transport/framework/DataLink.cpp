@@ -521,12 +521,11 @@ DataLink::create_control(char submessage_id,
                                           this->mb_allocator_),
                         0);
 
-  if (!(*message << header))
-  {
+  if (!(*message << header)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) DataLink::create_control: ")
                ACE_TEXT("cannot put header in message\n")));
-    ACE_DES_FREE (message, this->mb_allocator_->free, ACE_Message_Block);
+    ACE_DES_FREE(message, this->mb_allocator_->free, ACE_Message_Block);
     message = 0;
   }
 

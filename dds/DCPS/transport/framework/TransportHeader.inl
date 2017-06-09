@@ -93,7 +93,7 @@ TransportHeader::init(ACE_Message_Block* buffer)
 
   Serializer reader(buffer);
 
-  if (!(reader.read_octet_array(this->protocol_, sizeof(this->protocol_))))
+  if (!reader.read_octet_array(this->protocol_, sizeof(this->protocol_)))
     return false;
 
   ACE_CDR::Octet flags;
@@ -111,7 +111,7 @@ TransportHeader::init(ACE_Message_Block* buffer)
 
   return (reader >> this->length_) &&
          (reader >> this->sequence_) &&
-         ( reader >> this->source_);
+         (reader >> this->source_);
 }
 
 }

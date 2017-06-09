@@ -1693,7 +1693,7 @@ TransportSendStrategy::prepare_packet()
 bool
 TransportSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  return (*mb << this->header_);
+  return *mb << this->header_;
 }
 
 void
