@@ -149,8 +149,12 @@ public:
 
 private:
 
-  /** In some versions of ACE, ACE_Vector doesn't have a working swap()
+  /**
+   * In some versions of ACE, ACE_Vector doesn't have a working swap()
     * function, so we have to provide our own.
+    *
+    * This version also provides public access to the allocator_ member,
+    * something the ACE_Vector doesn't do
     */
   class ZeroCopyVector
         : public ACE_Vector<OpenDDS::DCPS::ReceivedDataElement*, DEF_MAX> {
