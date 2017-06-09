@@ -533,17 +533,19 @@ my $tao_maj = 1;
 if (!$ace_src || !$tao_src) {
   my $urlbase;
   my $file;
+  my $download_message;
   if ($opts{'doc_group'}) {
     $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
     $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
       . ($slash eq '/' ? 'tar.gz' : 'zip');
+    $download_message = "Downloading $file";
   } else {
     $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
     $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
       . ($slash eq '/' ? 'tar.gz' : 'zip');
+    $download_message = "Downloading ACE+TAO $oci_tao_version with latest patches";
   }
   $tao_maj = 2 if $opts{'dry-run'};
-  my $download_message = "Downloading ACE+TAO $file";
   if (-r $file) {
     print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
   }
