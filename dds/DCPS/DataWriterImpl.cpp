@@ -148,20 +148,17 @@ DataWriterImpl::cleanup()
   topic_servant_->remove_entity_ref();
   topic_servant_->_remove_ref();
   topic_servant_ = 0;
-
-  dw_local_objref_ = DDS::DataWriter::_nil();
 }
 
 void
 DataWriterImpl::init(
   DDS::Topic_ptr                       topic,
-  TopicImpl *                            topic_servant,
+  TopicImpl *                          topic_servant,
   const DDS::DataWriterQos &           qos,
   DDS::DataWriterListener_ptr          a_listener,
   const DDS::StatusMask &              mask,
   OpenDDS::DCPS::DomainParticipantImpl * participant_servant,
-  OpenDDS::DCPS::PublisherImpl *         publisher_servant,
-  DDS::DataWriter_ptr                  dw_local)
+  OpenDDS::DCPS::PublisherImpl *         publisher_servant)
 {
   DBG_ENTRY_LVL("DataWriterImpl","init",6);
   topic_objref_ = DDS::Topic::_duplicate(topic);
@@ -193,7 +190,6 @@ DataWriterImpl::init(
   // Only store the publisher pointer, since it is our parent, we will
   // exist as long as it does.
   publisher_servant_ = publisher_servant;
-  dw_local_objref_   = DDS::DataWriter::_duplicate(dw_local);
 
   this->reactor_ = TheServiceParticipant->timer();
 
@@ -525,8 +521,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
     if (!CORBA::is_nil(listener.in())) {
 
-      listener->on_publication_matched(dw_local_objref_.in(),
-                                       publication_match_status_);
+      listener->on_publication_matched(this, publication_match_status_);
 
       // TBD - why does the spec say to change this but not
       // change the ChangeFlagStatus after a listener call?
@@ -683,14 +678,8 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
     }
 
     if (fully_associated_len > 0 && !is_bit_) {
-      // The reader should be in the id_to_handle map at this time so
-      // log with error.
-      if (this->lookup_instance_handles(fully_associated_readers, handles) == false) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
-                   "lookup_instance_handles failed, notify %d \n", notify_lost));
-
-        return;
-      }
+      // The reader should be in the id_to_handle map at this time
+      this->lookup_instance_handles(fully_associated_readers, handles);
 
       for (CORBA::ULong i = 0; i < fully_associated_len; ++i) {
         id_to_handle_map_.erase(fully_associated_readers[i]);
@@ -723,9 +712,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
           this->listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
         if (!CORBA::is_nil(listener.in())) {
-          listener->on_publication_matched(
-            this->dw_local_objref_.in(),
-            this->publication_match_status_);
+          listener->on_publication_matched(this, this->publication_match_status_);
 
           // Listener consumes the change.
           this->publication_match_status_.total_count_change = 0;
@@ -845,8 +832,7 @@ DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   offered_incompatible_qos_status_.policies = status.policies;
 
   if (!CORBA::is_nil(listener.in())) {
-    listener->on_offered_incompatible_qos(dw_local_objref_.in(),
-                                          offered_incompatible_qos_status_);
+    listener->on_offered_incompatible_qos(this, offered_incompatible_qos_status_);
 
     // TBD - Why does the spec say to change this but not change the
     //       ChangeFlagStatus after a listener call?
@@ -935,7 +921,6 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
                                ref(this->lock_),
                                qos.deadline,
                                this,
-                               this->dw_local_objref_.in(),
                                ref(this->offered_deadline_missed_status_),
                                ref(this->last_deadline_missed_total_count_));
 
@@ -1345,7 +1330,7 @@ DataWriterImpl::enable()
                                            qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,
-                                           get_topic_name(),
+                                           topic_name_,
                                            get_type_name(),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
                                            durability_cache,
@@ -1414,7 +1399,6 @@ DataWriterImpl::enable()
                            ref(this->lock_),
                            this->qos_.deadline,
                            this,
-                           this->dw_local_objref_.in(),
                            ref(this->offered_deadline_missed_status_),
                            ref(this->last_deadline_missed_total_count_));
   }
@@ -1473,7 +1457,7 @@ DataWriterImpl::enable()
   if (durability_cache != 0) {
 
     if (!durability_cache->get_data(this->domain_id_,
-                                    get_topic_name(),
+                                    this->topic_name_,
                                     get_type_name(),
                                     this,
                                     this->mb_allocator_,
@@ -1969,12 +1953,6 @@ DataWriterImpl::get_dp_id()
   return participant_servant_->get_id();
 }
 
-const char*
-DataWriterImpl::get_topic_name()
-{
-  return topic_name_.in();
-}
-
 char const *
 DataWriterImpl::get_type_name() const
 {
@@ -2401,8 +2379,7 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
       listener_for(DDS::LIVELINESS_LOST_STATUS);
 
     if (!CORBA::is_nil(listener.in())) {
-      listener->on_liveliness_lost(this->dw_local_objref_.in(),
-                                   this->liveliness_lost_status_);
+      listener->on_liveliness_lost(this, this->liveliness_lost_status_);
       this->liveliness_lost_status_.total_count_change = 0;
     }
   }
@@ -2479,8 +2456,7 @@ DataWriterImpl::notify_publication_disconnected(const ReaderIdSeq& subids)
       // error.
       this->lookup_instance_handles(subids,
                                     status.subscription_handles);
-      the_listener->on_publication_disconnected(this->dw_local_objref_.in(),
-                                                status);
+      the_listener->on_publication_disconnected(this, status);
     }
   }
 }
@@ -2501,17 +2477,9 @@ DataWriterImpl::notify_publication_reconnected(const ReaderIdSeq& subids)
       PublicationDisconnectedStatus status;
 
       // If it's reconnected then the reader should be in id_to_handle
-      // map otherwise log with an error.
-      if (this->lookup_instance_handles(subids,
-                                        status.subscription_handles) == false) {
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: DataWriterImpl::"
-                   "notify_publication_reconnected: "
-                   "lookup_instance_handles failed\n"));
-      }
+      this->lookup_instance_handles(subids, status.subscription_handles);
 
-      the_listener->on_publication_reconnected(this->dw_local_objref_.in(),
-                                               status);
+      the_listener->on_publication_reconnected(this, status);
     }
   }
 }
@@ -2535,8 +2503,7 @@ DataWriterImpl::notify_publication_lost(const ReaderIdSeq& subids)
       // the reader from id_to_handle map, we can ignore this error.
       this->lookup_instance_handles(subids,
                                     status.subscription_handles);
-      the_listener->on_publication_lost(this->dw_local_objref_.in(),
-                                        status);
+      the_listener->on_publication_lost(this, status);
     }
   }
 }
@@ -2563,8 +2530,7 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
         status.subscription_handles[i] = handles[i];
       }
 
-      the_listener->on_publication_lost(this->dw_local_objref_.in(),
-                                        status);
+      the_listener->on_publication_lost(this, status);
     }
   }
 }
@@ -2579,20 +2545,22 @@ DataWriterImpl::notify_connection_deleted(const RepoId& peerId)
   DataWriterListener_var the_listener =
     DataWriterListener::_narrow(this->listener_.in());
 
-  if (!CORBA::is_nil(the_listener.in()))
-    the_listener->on_connection_deleted(this->dw_local_objref_.in());
+  if (!CORBA::is_nil(the_listener.in())) {
+    the_listener->on_connection_deleted(this);
+  }
 }
 
-bool
+void
 DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
                                         DDS::InstanceHandleSeq & hdls)
 {
+  CORBA::ULong const num_rds = ids.length();
+
   if (DCPS_debug_level > 9) {
-    CORBA::ULong const size = ids.length();
     OPENDDS_STRING separator;
     OPENDDS_STRING buffer;
 
-    for (unsigned long i = 0; i < size; ++i) {
+    for (CORBA::ULong i = 0; i < num_rds; ++i) {
       buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
@@ -2603,14 +2571,11 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
                buffer.c_str()));
   }
 
-  CORBA::ULong const num_rds = ids.length();
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
     hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
-
-  return true;
 }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
@@ -2627,12 +2592,6 @@ DataWriterImpl::reschedule_deadline()
   if (this->watchdog_.in()) {
     this->data_container_->reschedule_deadline();
   }
-}
-
-bool
-DataWriterImpl::pending_control()
-{
-  return controlTracker.pending_messages();
 }
 
 void

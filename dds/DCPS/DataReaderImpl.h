@@ -261,8 +261,7 @@ public:
     DDS::DataReaderListener_ptr a_listener,
     const DDS::StatusMask &     mask,
     DomainParticipantImpl*        participant,
-    SubscriberImpl*               subscriber,
-    DDS::DataReader_ptr         dr_objref);
+    SubscriberImpl*               subscriber);
 
   virtual DDS::ReadCondition_ptr create_readcondition(
     DDS::SampleStateMask sample_states,
@@ -366,10 +365,6 @@ public:
   virtual bool check_transport_qos(const TransportInst& inst);
 
   RepoId get_subscription_id() const;
-
-  DDS::DataReader_ptr get_dr_obj_ref();
-
-  char *get_topic_name() const;
 
   bool have_sample_states(DDS::SampleStateMask sample_states) const;
   bool have_view_states(DDS::ViewStateMask view_states) const;
@@ -510,7 +505,7 @@ public:
                         RepoId& publisher_id);
   void coherent_change_received (RepoId publisher_id, Coherent_State& result);
 
-  void coherent_changes_completed (DataReaderImpl* reader);
+  void coherent_changes_completed ();
 
   void reset_coherent_info (const PublicationId& writer_id,
                             const RepoId& publisher_id);
@@ -645,7 +640,7 @@ private:
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 
   /// Lookup the instance handles by the publication repo ids
-  bool lookup_instance_handles(const WriterIdSeq& ids,
+  void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
   void instances_liveliness_update(WriterInfo& info,
@@ -684,7 +679,6 @@ private:
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
-  DDS::DataReader_var          dr_local_objref_;
   RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
   RcHandle<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 

@@ -199,7 +199,7 @@ sub usage {
 Welcome to OpenDDS version $ver
 
 Options for this script are listed below, with the default behavior described
-in parens after the option description.
+in parenthesis after the option description.
 Boolean options can take the form "--opt" or "--no-opt", the more commonly
 needed one (the one that changes the default behavior) is shown below.
 Options that require arguments are shown as "--opt=VAL"  Options with optional
@@ -399,7 +399,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
         $platforminfo{'win32'}->{'cl_versions'}->{$ver};
       if ($ver >= 19) {
         push(@{$opts{'features'}}, 'no_cxx11=0');
-        print "VC++ has C++11 support\n" if $opts{'verbose'};
+        print "Visual C++ has C++11 support\n" if $opts{'verbose'};
       }
       last;
     }
@@ -410,7 +410,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
       "the Visual Studio Command Prompt.\nStopped";
   }
   $ENV{'PATH'} = $savepath;
-  print "detected Visual C++ version: $opts{'compiler_version'}\n"
+  print "Detected Visual C++ version: $opts{'compiler_version'}\n"
     if $opts{'verbose'};
 }
 elsif ($opts{'compiler'} =~ /g\+\+/) {
@@ -573,7 +573,7 @@ if (!$ace_src || !$tao_src) {
         }
       }
       else {
-        die "Can't download ACE+TAO using LWP, wget, or curl.\nDownload it ".
+        die "Can't download ACE+TAO using LWP, wget, or curl.\nDownload ACE+TAO ".
           "from $urlbase$file, place the file here\n, and re-run the script.\n";
       }
     }

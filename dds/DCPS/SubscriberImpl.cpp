@@ -194,6 +194,14 @@ SubscriberImpl::create_datareader(
   DataReaderImpl* dr_servant =
     dynamic_cast<DataReaderImpl*>(dr_obj.in());
 
+  if (dr_servant == 0) {
+    ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("SubscriberImpl::create_datareader, ")
+        ACE_TEXT("servant is nil.\n")));
+    return DDS::DataReader::_nil();
+  }
+
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (cft) {
     dr_servant->enable_filtering(cft);
@@ -211,8 +219,7 @@ SubscriberImpl::create_datareader(
                    a_listener,
                    mask,
                    participant_,
-                   this,
-                   dr_obj.in());
+                   this);
 
   if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
     const DDS::ReturnCode_t ret = dr_servant->enable();
@@ -395,9 +402,7 @@ SubscriberImpl::delete_contained_entities()
     }
   }
 
-  size_t num_rds = drs.size();
-
-  for (size_t i = 0; i < num_rds; ++i) {
+  for (size_t i = 0; i < drs.size(); ++i) {
     DDS::ReturnCode_t ret = delete_datareader(drs[i]);
 
     if (ret != DDS::RETCODE_OK) {
@@ -498,7 +503,7 @@ SubscriberImpl::get_datareaders(
     if ((*pos)->have_sample_states(sample_states) &&
         (*pos)->have_view_states(view_states) &&
         (*pos)->have_instance_states(instance_states)) {
-      push_back(readers, (*pos)->get_dr_obj_ref());
+      push_back(readers, DDS::DataReader::_duplicate(*pos));
     }
   }
 
@@ -918,7 +923,6 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
 SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
-                                          DataReaderImpl* reader,
                                           Coherent_State& group_state)
 {
   // Verify if all readers complete the coherent changes. The result
@@ -953,7 +957,7 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
   if (group_state == COMPLETED) {
     for (DataReaderSet::const_iterator iter = datareader_set_.begin();
          iter != endIter; ++iter) {
-      (*iter)->coherent_changes_completed (reader);
+      (*iter)->coherent_changes_completed ();
       (*iter)->reset_coherent_info (writerId, publisher_id);
     }
   }
