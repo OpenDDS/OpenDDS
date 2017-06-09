@@ -61,7 +61,8 @@ PublisherImpl::~PublisherImpl()
     ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::~PublisherImpl, ")
-        ACE_TEXT("some datawriters still exist.\n")));
+        ACE_TEXT("%d datawriters and %d publications still exist.\n"),
+        datawriter_map_.size(), publication_map_.size()));
   }
 }
 
