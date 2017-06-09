@@ -102,6 +102,7 @@ namespace {
     switch (size) {
     case AST_Type::SIZE_UNKNOWN:
       be_global->lang_header_ << "/* Unknown size */\n";
+      break;
     case AST_Type::FIXED:
       be_global->lang_header_ <<
         "typedef " << helpers_[HLP_FIX_VAR] << '<' << nm << "> " << nm << "_var;\n" <<

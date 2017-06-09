@@ -402,9 +402,7 @@ SubscriberImpl::delete_contained_entities()
     }
   }
 
-  size_t num_rds = drs.size();
-
-  for (size_t i = 0; i < num_rds; ++i) {
+  for (size_t i = 0; i < drs.size(); ++i) {
     DDS::ReturnCode_t ret = delete_datareader(drs[i]);
 
     if (ret != DDS::RETCODE_OK) {

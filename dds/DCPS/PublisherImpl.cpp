@@ -320,7 +320,7 @@ PublisherImpl::delete_contained_entities()
 
   while (true) {
     PublicationId pub_id = GUID_UNKNOWN;
-    DataWriterImpl* a_datawriter;
+    DataWriterImpl* a_datawriter = 0;
 
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -336,7 +336,7 @@ PublisherImpl::delete_contained_entities()
       }
     }
 
-    DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
+    const DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
 
     if (ret != DDS::RETCODE_OK) {
       GuidConverter converter(pub_id);

@@ -19,7 +19,7 @@ workspace {
   $(TAO_ROOT)/tao/Messaging/Messaging.mpc
   $(TAO_ROOT)/tao/PI/PI.mpc
   $(TAO_ROOT)/tao/PortableServer/PortableServer.mpc
-  $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc        // used for dds4ccm
+  $(TAO_ROOT)/tao/Valuetype/Valuetype.mpc
   $(TAO_ROOT)/orbsvcs/orbsvcs/Svc_Utils.mpc
   dds
   tools

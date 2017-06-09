@@ -117,8 +117,14 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       int const expected = 10;
       while (listener_servant->num_reads() < expected)
       {
-        cerr << "Got " << listener_servant->num_reads() << endl;
+        cerr << "Got " << listener_servant->num_reads() << " number of reads" << endl;
         ACE_OS::sleep (1);
+      }
+
+      cerr << "Got " << listener_servant->num_samples_lost() << " sample lost callbacks" << endl;
+      cerr << "Got " << listener_servant->num_samples_rejected() << " sample rejected callbacks" << endl;
+      if (listener_servant->num_budget_exceeded() > 0) {
+        cerr << "ERROR: Got " << listener_servant->num_budget_exceeded() << " budget exceeded callbacks" << endl;
       }
 
       if (!CORBA::is_nil (participant.in ())) {

@@ -10,7 +10,10 @@
 using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0)
+  : num_reads_(0),
+    num_samples_lost_ (0),
+    num_samples_rejected_ (0),
+    num_budget_exceeded_ (0)
 {
 }
 
@@ -89,16 +92,30 @@ DataReaderListenerImpl::on_subscription_matched (
 void
 DataReaderListenerImpl::on_sample_rejected (
     DDS::DataReader_ptr,
-    const DDS::SampleRejectedStatus&)
+    const DDS::SampleRejectedStatus& status)
 {
-  cerr << "DataReaderListenerImpl::on_sample_rejected" << endl;
+  ++this->num_samples_rejected_;
+
+  cerr << "DataReaderListenerImpl::on_sample_rejected, "
+       << " total_count <" << status.total_count
+       << "> total_count_change <" << status.total_count_change
+       << "> last_reason <" << status.last_reason
+       << "> last_instance_handle <" << status.last_instance_handle
+       << ">"
+       << endl;
 }
 
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
-  const DDS::SampleLostStatus&)
+  const DDS::SampleLostStatus& status)
 {
-  cerr << "DataReaderListenerImpl::on_sample_lost" << endl;
+  ++this->num_samples_lost_;
+
+  cerr << "DataReaderListenerImpl::on_sample_lost, "
+       << " total_count <" << status.total_count
+       << "> total_count_change <" << status.total_count_change
+       << ">"
+       << endl;
 }
 
 void DataReaderListenerImpl::on_subscription_disconnected (
@@ -126,6 +143,8 @@ void DataReaderListenerImpl::on_budget_exceeded (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::BudgetExceededStatus&)
 {
+  ++this->num_budget_exceeded_;
+
   cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
 }
 

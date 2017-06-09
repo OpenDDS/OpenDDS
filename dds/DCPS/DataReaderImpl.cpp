@@ -666,15 +666,8 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   if (!is_bit_) {
-    // The writer should be in the id_to_handle map at this time.  Note
-    // it if it not there.
-    if (this->lookup_instance_handles(updated_writers, handles) == false) {
-      if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
-            ACE_TEXT("lookup_instance_handles failed.\n")));
-      }
-    }
+    // The writer should be in the id_to_handle map at this time.
+    this->lookup_instance_handles(updated_writers, handles);
 
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
       id_to_handle_map_.erase(updated_writers[i]);
@@ -2344,36 +2337,43 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
   = this->statistics_.find(sample.header_.publication_id_);
 
   if (location != this->statistics_.end()) {
-    // This starts as the current time.
-    ACE_Time_Value  latency = ACE_OS::gettimeofday();
+    const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
 
-    // The time interval starts at the send end.
-    DDS::Duration_t then = {
-        sample.header_.source_timestamp_sec_,
-        sample.header_.source_timestamp_nanosec_
-    };
+    // Only when the user has specified a latency budget or statistics
+    // are enabled we need to calculate our latency
+    if ((this->statistics_enabled()) ||
+        (this->qos_.latency_budget.duration > zero)) {
+      // This starts as the current time.
+      ACE_Time_Value latency = ACE_OS::gettimeofday();
 
-    // latency delay in ACE_Time_Value format.
-    latency -= duration_to_time_value(then);
+      // The time interval starts at the send end.
+      DDS::Duration_t then = {
+          sample.header_.source_timestamp_sec_,
+          sample.header_.source_timestamp_nanosec_
+      };
 
-    if (this->statistics_enabled()) {
-      location->second.add_stat(latency);
+      // latency delay in ACE_Time_Value format.
+      latency -= duration_to_time_value(then);
+
+      if (this->statistics_enabled()) {
+        location->second.add_stat(latency);
+      }
+
+      if (DCPS_debug_level > 9) {
+        ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
+            ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
+            latency.sec(),
+            latency.msec()));
+      }
+
+      if (this->qos_.latency_budget.duration > zero) {
+        // Check latency against the budget.
+        if (time_value_to_duration(latency) > this->qos_.latency_budget.duration) {
+          this->notify_latency(sample.header_.publication_id_);
+        }
+      }
     }
-
-    if (DCPS_debug_level > 9) {
-      ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-          ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
-          latency.sec(),
-          latency.msec()));
-    }
-
-    // Check latency against the budget.
-    if (time_value_to_duration(latency)
-        > this->qos_.latency_budget.duration) {
-      this->notify_latency(sample.header_.publication_id_);
-    }
-
   } else if (DCPS_debug_level > 0) {
     /// NB: This message is generated contemporaneously with a similar
     ///     message from writer_activity().  That message is not marked
@@ -2538,12 +2538,8 @@ DataReaderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
 
-      // If it's reconnected then the reader should be in id_to_handle map otherwise
-      // log with an error.
-      if (this->lookup_instance_handles(pubids, status.publication_handles) == false) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) DataReaderImpl::notify_subscription_reconnected: "
-            "lookup_instance_handles failed.\n"));
-      }
+      // If it's reconnected then the reader should be in id_to_handle
+      this->lookup_instance_handles(pubids, status.publication_handles);
 
       the_listener->on_subscription_reconnected(this,  status);
     }
@@ -2610,16 +2606,17 @@ DataReaderImpl::notify_connection_deleted(const RepoId& peerId)
   }
 }
 
-bool
+void
 DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
     DDS::InstanceHandleSeq & hdls)
 {
+  CORBA::ULong const num_wrts = ids.length();
+
   if (DCPS_debug_level > 9) {
-    CORBA::ULong const size = ids.length();
     const char* separator = "";
     OPENDDS_STRING guids;
 
-    for (unsigned long i = 0; i < size; ++i) {
+    for (CORBA::ULong i = 0; i < num_wrts; ++i) {
       guids += separator;
       guids += OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
@@ -2631,14 +2628,11 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
         guids.c_str()));
   }
 
-  CORBA::ULong const num_wrts = ids.length();
   hdls.length(num_wrts);
 
   for (CORBA::ULong i = 0; i < num_wrts; ++i) {
     hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
-
-  return true;
 }
 
 bool

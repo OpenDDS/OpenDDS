@@ -663,7 +663,7 @@ namespace OpenDDS {
           }
       }
 
-    return DDS::RETCODE_ERROR;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
   virtual DDS::InstanceHandle_t lookup_instance (const MessageType & instance_data)
