@@ -77,7 +77,7 @@ public:
   /// Instance state for this instance
   InstanceState instance_state_ ;
 
-  /// sequence number of the move recect data sample received
+  /// Sequence number of the move recent data sample received
   SequenceNumber last_sequence_ ;
 
   /// Data sample(s) in this instance

@@ -2787,15 +2787,14 @@ bool DataReaderImpl::is_bit() const
   return this->is_bit_;
 }
 
-int
-DataReaderImpl::num_zero_copies()
+bool
+DataReaderImpl::has_zero_copies()
 {
-  int loans = 0;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
       this->sample_lock_,
-      1 /* assume we have loans */);
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,1);
+      true /* assume we have loans */);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, true);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
@@ -2804,11 +2803,13 @@ DataReaderImpl::num_zero_copies()
 
     for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
-      loans += item->zero_copy_cnt_.value();
+      if (item->zero_copy_cnt_ > 0) {
+        return true;
+      }
     }
   }
 
-  return loans;
+  return false;
 }
 
 void DataReaderImpl::notify_liveliness_change()
