@@ -423,7 +423,7 @@ public:
    * @retval true We have zero-copy samples loaned out
    * @retval false We have no zero-copy samples loaned out
    */
-  virtual bool has_zero_copies();
+  bool has_zero_copies();
 
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
