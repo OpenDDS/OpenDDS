@@ -43,11 +43,10 @@ GroupRakeData::get_datareaders(DDS::DataReaderSeq & readers)
   ACE_UNUSED_ARG(readers);
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   readers.length(static_cast<CORBA::ULong>(this->sorted_.size()));
-  int i = 0;
+  CORBA::ULong i = 0;
   SortedSet::iterator itEnd = this->sorted_.end();
   for (SortedSet::iterator it = this->sorted_.begin(); it != itEnd; ++it) {
-    readers[i++] =
-      DDS::DataReader::_duplicate(it->si_->instance_state_.data_reader());
+    readers[i++] = DDS::DataReader::_duplicate(it->si_->instance_state_.data_reader());
   }
 #endif
 }
