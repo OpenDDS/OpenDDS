@@ -190,6 +190,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
 
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" matches 1: current %d total %d")
+                 ACE_TEXT(" matches 2: current %d total %d\n"),
+                 matches1.current_count, matches1.total_count,
+                 matches2.current_count, matches2.total_count));
+
       if ((matches1.current_count == 0 && matches1.total_count > 0) ||
           (matches2.current_count == 0 && matches2.total_count > 0)) {
         break;
