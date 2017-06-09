@@ -61,7 +61,7 @@ protected:
     const TransportQueueElement::MatchCriteria& criteria);
 
 private:
-  void marshal_transport_header(ACE_Message_Block* mb);
+  bool marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
                        const OPENDDS_SET(ACE_INET_Addr)& addrs);
   ssize_t send_single_i(const iovec iov[], int n,

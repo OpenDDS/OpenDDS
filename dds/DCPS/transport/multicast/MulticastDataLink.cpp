@@ -374,6 +374,14 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
   ACE_Message_Block* control =
       create_control(MULTICAST_SYNACK, header, synack_data);
 
+  if (control == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("MulticastDataLink::syn_received_no_session: ")
+               ACE_TEXT("create_control failed!\n")));
+    return;
+  }
+
   const int error = send_control(header, control);
   if (error != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) MulticastDataLink::syn_received_no_session: "
