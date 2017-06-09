@@ -2189,7 +2189,8 @@ public:
   void detatch()
   {
     cancel();
-    data_reader_var_ = DDS::DataReader_var();
+    data_reader_impl_ = 0;
+    data_reader_var_ = DDS::DataReader::_nil();
   }
 
   void cancel()
@@ -2205,7 +2206,7 @@ public:
                     const ACE_Time_Value& filter_time_expired)
   {
     // sample_lock_ should already be held
-    if (!data_reader_var_.in()) {
+    if (!data_reader_impl_) {
       return;
     }
 
@@ -2277,7 +2278,7 @@ private:
 
     DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
 
-    if (!data_reader_var_.in())
+    if (!data_reader_impl_)
       return -1;
 
     SubscriptionInstance_rch instance = data_reader_impl_->get_handle_instance(handle);
@@ -2330,35 +2331,31 @@ private:
 
   virtual void reschedule_deadline()
   {
-    if (!data_reader_var_.in()) {
-      return;
-    }
+    if (data_reader_impl_) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
 
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
-
-    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
-      reset_timer_interval(sample->second.timer_id);
+      for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
+        reset_timer_interval(sample->second.timer_id);
+      }
     }
   }
 
   void cleanup()
   {
-    if (!data_reader_var_.in()) {
-      return;
-    }
+    if (data_reader_impl_) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
+      // insure instance_ptrs get freed
+      for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
+        clear_message(sample->second.message);
+      }
 
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
-    // insure instance_ptrs get freed
-    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
-      clear_message(sample->second.message);
+      map_.clear();
     }
-
-    map_.clear();
   }
 
   void clear_message(MessageType*& message)
   {
-    if (data_reader_var_.in()) {
+    if (data_reader_impl_) {
       ACE_DES_FREE(message,
         data_reader_impl_->data_allocator_->free,
         MessageType);
