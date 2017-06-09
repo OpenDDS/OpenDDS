@@ -1197,7 +1197,7 @@ DataReaderImpl::get_matched_publication_data(
 
   DDS::PublicationBuiltinTopicDataSeq data;
 
-  DDS::ReturnCode_t ret
+  const DDS::ReturnCode_t ret
   = hh.instance_handle_to_bit_data(participant_servant_,
       BUILT_IN_PUBLICATION_TOPIC,
       publication_handle,
