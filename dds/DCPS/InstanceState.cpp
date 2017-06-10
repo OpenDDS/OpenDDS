@@ -65,7 +65,8 @@ void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
   si.source_timestamp = de->source_timestamp_;
   si.instance_handle = handle_;
   si.publication_handle = this->reader_->participant_servant_->id_to_handle(de->pub_);
-  si.valid_data = de->registered_data_ != 0;
+  // Only when we have an alive instance state we could have valid data
+  si.valid_data = de->registered_data_ != 0 && si.instance_state == DDS::ALIVE_INSTANCE_STATE;
   /*
    * These are actually calculated later...
    */
