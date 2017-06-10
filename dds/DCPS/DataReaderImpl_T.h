@@ -995,7 +995,7 @@ namespace OpenDDS {
   virtual void cleanup()
   {
     if (filter_delayed_handler_.in()) {
-      filter_delayed_handler_->detatch();
+      filter_delayed_handler_->detach();
       filter_delayed_handler_.reset();
     }
     DataReaderImpl::cleanup();
@@ -1651,8 +1651,7 @@ void store_instance_data(
 
       set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
 
-      sample_rejected_status_.last_reason =
-        DDS::REJECTED_BY_INSTANCES_LIMIT;
+      sample_rejected_status_.last_reason = DDS::REJECTED_BY_INSTANCES_LIMIT;
       ++sample_rejected_status_.total_count;
       ++sample_rejected_status_.total_count_change;
       sample_rejected_status_.last_instance_handle = handle;
@@ -1662,6 +1661,7 @@ void store_instance_data(
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
         listener->on_sample_rejected(this, sample_rejected_status_);
+        sample_rejected_status_.total_count_change = 0;
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
@@ -1860,6 +1860,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
         listener->on_sample_rejected(this, sample_rejected_status_);
+        sample_rejected_status_.total_count_change = 0;
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
@@ -1922,6 +1923,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
           listener->on_sample_rejected(this, sample_rejected_status_);
+          sample_rejected_status_.total_count_change = 0;
         }  // do we want to do something if listener is nil???
         notify_status_condition_no_sample_lock();
 
@@ -2011,6 +2013,8 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
               ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
               listener->on_sample_lost(this, sample_lost_status_);
+
+              sample_lost_status_.total_count_change = 0;
             }
 
           notify_status_condition_no_sample_lock();
@@ -2186,7 +2190,7 @@ public:
   {
   }
 
-  void detatch()
+  void detach()
   {
     cancel();
     data_reader_impl_ = 0;
