@@ -1506,8 +1506,7 @@ namespace OpenDDS {
         DDS::DataReader_var dr = type_support->create_datareader();
         OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
 
-        dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/,
-                  participant_i, sub, dr);
+        dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/, participant_i, sub);
         dri->disable_transport();
         dri->enable();
       }

@@ -202,15 +202,14 @@ public:
   /**
    * Initialize the data members.
    */
-  virtual void init(
+  void init(
     DDS::Topic_ptr                        topic,
     TopicImpl*                            topic_servant,
     const DDS::DataWriterQos &            qos,
     DDS::DataWriterListener_ptr           a_listener,
     const DDS::StatusMask &               mask,
     OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
-    OpenDDS::DCPS::PublisherImpl*         publisher_servant,
-    DDS::DataWriter_ptr                   dw_local);
+    OpenDDS::DCPS::PublisherImpl*         publisher_servant);
 
   void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
 
@@ -338,11 +337,6 @@ public:
   void end_coherent_changes(const GroupCoherentSamples& group_samples);
 
 #endif
-
-  /**
-   * Accessor of the associated topic name.
-   */
-  const char* get_topic_name();
 
   /**
    * Get associated topic type name.
@@ -544,11 +538,6 @@ protected:
                                          ACE_Message_Block* msg/*,
                                          void* extra = 0*/);
 
-  /**
-   * Answer if transport of all control messages is pending.
-   */
-  bool pending_control();
-
 private:
 
   void track_sequence_number(GUIDSeq* filter_out);
@@ -574,7 +563,7 @@ private:
   bool send_liveliness(const ACE_Time_Value& now);
 
   /// Lookup the instance handles by the subscription repo ids
-  bool lookup_instance_handles(const ReaderIdSeq& ids,
+  void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
   const RepoId& get_repo_id() const {
@@ -610,8 +599,6 @@ private:
   DDS::DomainId_t                 domain_id_;
   /// The publisher servant which creates this datawriter.
   PublisherImpl*                  publisher_servant_;
-  /// the object reference of the local datawriter
-  DDS::DataWriter_var             dw_local_objref_;
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.

@@ -3,12 +3,9 @@ in the main thread.
 This simplifies the coordination of writes and reads.
 
 
-
-
 Each test case needs to launch DCPSInfoRepo:
 
   ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
-
 
 Command line option:
 
@@ -24,6 +21,3 @@ Command line option:
     //  -m multiple_instances?1:0   defaults to 0
 
 Single datareader with single instance test:     - run_test.pl
-
-
-

@@ -663,7 +663,7 @@ namespace OpenDDS {
           }
       }
 
-    return DDS::RETCODE_ERROR;
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
   virtual DDS::InstanceHandle_t lookup_instance (const MessageType & instance_data)
@@ -995,7 +995,7 @@ namespace OpenDDS {
   virtual void cleanup()
   {
     if (filter_delayed_handler_.in()) {
-      filter_delayed_handler_->detatch();
+      filter_delayed_handler_->detach();
       filter_delayed_handler_.reset();
     }
     DataReaderImpl::cleanup();
@@ -1651,19 +1651,17 @@ void store_instance_data(
 
       set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
 
-      sample_rejected_status_.last_reason =
-        DDS::REJECTED_BY_INSTANCES_LIMIT;
+      sample_rejected_status_.last_reason = DDS::REJECTED_BY_INSTANCES_LIMIT;
       ++sample_rejected_status_.total_count;
       ++sample_rejected_status_.total_count_change;
       sample_rejected_status_.last_instance_handle = handle;
 
-      DDS::DataReader_var dr = get_dr_obj_ref();
       if (!CORBA::is_nil(listener.in()))
       {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-        listener->on_sample_rejected(dr.in (),
-                                     sample_rejected_status_);
+        listener->on_sample_rejected(this, sample_rejected_status_);
+        sample_rejected_status_.total_count_change = 0;
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
@@ -1674,12 +1672,6 @@ void store_instance_data(
       return;
     }
 
-    // first find the instance mapin the participant instance map.
-    // if the instance map for the type is not registered, then
-    // create the instance map.
-    // if the instance map for the type exists, then find the
-    // handle of the instance. If the instance is not registered
-    //
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     InstanceMap* inst = 0;
     bool new_handle = true;
@@ -1863,13 +1855,12 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
       ++sample_rejected_status_.total_count_change;
       sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
 
-      DDS::DataReader_var dr = get_dr_obj_ref();
       if (!CORBA::is_nil(listener.in()))
       {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-        listener->on_sample_rejected(dr.in(),
-          sample_rejected_status_);
+        listener->on_sample_rejected(this, sample_rejected_status_);
+        sample_rejected_status_.total_count_change = 0;
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
@@ -1927,13 +1918,12 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         ++sample_rejected_status_.total_count;
         ++sample_rejected_status_.total_count_change;
         sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
-        DDS::DataReader_var dr = get_dr_obj_ref();
         if (!CORBA::is_nil(listener.in()))
         {
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-          listener->on_sample_rejected(dr.in(),
-            sample_rejected_status_);
+          listener->on_sample_rejected(this, sample_rejected_status_);
+          sample_rejected_status_.total_count_change = 0;
         }  // do we want to do something if listener is nil???
         notify_status_condition_no_sample_lock();
 
@@ -2021,12 +2011,13 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
 
           set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, true);
 
-          DDS::DataReader_var dr = get_dr_obj_ref();
           if (!CORBA::is_nil(listener.in()))
             {
               ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-              listener->on_sample_lost(dr.in (), sample_lost_status_);
+              listener->on_sample_lost(this, sample_lost_status_);
+
+              sample_lost_status_.total_count_change = 0;
             }
 
           notify_status_condition_no_sample_lock();
@@ -2059,12 +2050,11 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         DDS::DataReaderListener_var listener =
             listener_for (DDS::DATA_AVAILABLE_STATUS);
 
-        DDS::DataReader_var dr = get_dr_obj_ref();
         if (!CORBA::is_nil(listener.in()))
           {
             ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-            listener->on_data_available(dr.in ());
+            listener->on_data_available(this);
             set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
             sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
           }
@@ -2203,10 +2193,11 @@ public:
   {
   }
 
-  void detatch()
+  void detach()
   {
     cancel();
-    data_reader_var_ = DDS::DataReader_var();
+    data_reader_impl_ = 0;
+    data_reader_var_ = DDS::DataReader::_nil();
   }
 
   void cancel()
@@ -2222,7 +2213,7 @@ public:
                     const ACE_Time_Value& filter_time_expired)
   {
     // sample_lock_ should already be held
-    if (!data_reader_var_.in()) {
+    if (!data_reader_impl_) {
       return;
     }
 
@@ -2294,7 +2285,7 @@ private:
 
     DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
 
-    if (!data_reader_var_.in())
+    if (!data_reader_impl_)
       return -1;
 
     SubscriptionInstance_rch instance = data_reader_impl_->get_handle_instance(handle);
@@ -2347,35 +2338,31 @@ private:
 
   virtual void reschedule_deadline()
   {
-    if (!data_reader_var_.in()) {
-      return;
-    }
+    if (data_reader_impl_) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
 
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
-
-    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
-      reset_timer_interval(sample->second.timer_id);
+      for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
+        reset_timer_interval(sample->second.timer_id);
+      }
     }
   }
 
   void cleanup()
   {
-    if (!data_reader_var_.in()) {
-      return;
-    }
+    if (data_reader_impl_) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
+      // insure instance_ptrs get freed
+      for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
+        clear_message(sample->second.message);
+      }
 
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
-    // insure instance_ptrs get freed
-    for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
-      clear_message(sample->second.message);
+      map_.clear();
     }
-
-    map_.clear();
   }
 
   void clear_message(MessageType*& message)
   {
-    if (data_reader_var_.in()) {
+    if (data_reader_impl_) {
       ACE_DES_FREE(message,
         data_reader_impl_->data_allocator_->free,
         MessageType);

@@ -112,11 +112,11 @@ RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
   outer_->override_dest_ = 0;
 }
 
-void
+bool
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
   Serializer writer(mb); // byte order doesn't matter for the RTPS Header
-  writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
+  return writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
     RTPS::RTPSHDR_SZ);
 }
 

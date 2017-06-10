@@ -65,6 +65,12 @@ SubscriberListenerImpl::on_data_on_readers(
   CORBA::ULong len = readers->length ();
 
   if (qos.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
+
+    ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers() ")
+                ACE_TEXT("GROUP_PRESENTATION_QOS get_datareaders returned %d readers!\n"),
+                  len));
+
     // redirect datareader listener to receive DISPOSE and UNREGISTER notifications.
     if (len == 0) {
       if (subs->notify_datareaders () != ::DDS::RETCODE_OK) {
@@ -115,6 +121,11 @@ SubscriberListenerImpl::on_data_on_readers(
     }
   }
   else if (qos.presentation.access_scope == ::DDS::TOPIC_PRESENTATION_QOS) {
+    ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers() ")
+                ACE_TEXT("TOPIC_PRESENTATION_QOS get_datareaders returned %d readers!\n"),
+                  len));
+
     // redirect datareader listener to receive DISPOSE and UNREGISTER notifications.
     if (len != 2) {
       if (subs->notify_datareaders () != ::DDS::RETCODE_OK) {
@@ -126,7 +137,6 @@ SubscriberListenerImpl::on_data_on_readers(
 
       return;
     }
-
 
     for (CORBA::ULong i = 0; i < len; ++i) {
       Messenger::MessageDataReader_var message_dr =

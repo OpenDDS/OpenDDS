@@ -57,18 +57,17 @@ public:
   */
   OpenDDS::DCPS::TypeSupport_ptr get_type_support();
 
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
-
-  bool has_reader() const {
-    return reader_count_ > 0;
+  bool has_entity_refs() const {
+    return entity_refs_ > 0;
   }
 
-  void update_reader_count(bool increment) {
-    if (increment) ++reader_count_;
-    else --reader_count_;
+  void add_entity_ref() {
+    ++entity_refs_;
   }
 
-#endif
+  void remove_entity_ref() {
+    --entity_refs_;
+  }
 
 protected:
   /// The name of the topic.
@@ -80,11 +79,10 @@ protected:
   DomainParticipantImpl*         participant_;
 
   /// The type_support for this topic.
-  OpenDDS::DCPS::TypeSupport_ptr type_support_;
+  OpenDDS::DCPS::TypeSupport_var type_support_;
 
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
-  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> reader_count_;
-#endif
+  /// The number of entities using this topic
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> entity_refs_;
 };
 
 } // namespace DCPS

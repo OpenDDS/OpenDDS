@@ -75,7 +75,7 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
 
   //
   // Update the view state here, since only sample data received affects
-  // this state value.  Then manage the data sample only transistions
+  // this state value.  Then manage the data sample only transitions
   // here.  Let the lively() method manage the other transitions.
   //
   writers_.insert(writer_id);

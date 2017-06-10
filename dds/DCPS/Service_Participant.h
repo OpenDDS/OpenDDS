@@ -593,7 +593,7 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
-  //used to track state of service participant
+  /// Used to track state of service participant
   bool shut_down_;
 
   /// Guard access to the internal maps.

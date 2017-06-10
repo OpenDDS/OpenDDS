@@ -42,8 +42,8 @@ public:
   DDS::Time_t source_timestamp_;
   /// Id of the datawriter that sent the sample
   PublicationId publication_id_;
-  /// 0 -  Message encoded using big-endian byte order. (see ace/CDR_Base.h)
-  /// 1 -  Message encoded using little-endian byte order.
+  /// false -  Message encoded using big-endian byte order. (see ace/CDR_Base.h)
+  /// true -  Message encoded using little-endian byte order.
   bool sample_byte_order_;
   /// The data in unspecified format
   ACE_Message_Block*       sample_;
