@@ -2961,7 +2961,7 @@ bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
   if (this->subqos_.presentation.access_scope == ::DDS::INSTANCE_PRESENTATION_QOS
       || ! this->subqos_.presentation.coherent_access) {
     this->accept_coherent (writer->writer_id_, writer->publisher_id_);
-    this->coherent_changes_completed ();
+    this->coherent_changes_completed (this);
     return true;
   }
 
@@ -2971,7 +2971,7 @@ bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
     if (state != NOT_COMPLETED_YET) {
       // verify if all readers received complete coherent changes in a group.
       this->subscriber_servant_->coherent_change_received (
-          writer->publisher_id_, state);
+          writer->publisher_id_, this, state);
     }
   }
   else {  // TOPIC coherent
@@ -3073,9 +3073,9 @@ DataReaderImpl::coherent_change_received (RepoId publisher_id, Coherent_State& r
       ++iter) {
 
     if (iter->second->publisher_id_ == publisher_id) {
-      Coherent_State state = iter->second->coherent_change_received();
+      const Coherent_State state = iter->second->coherent_change_received();
       if (state == NOT_COMPLETED_YET) {
-        result = state;
+        result = NOT_COMPLETED_YET;
         break;
       }
       else if (state == REJECTED) {
@@ -3087,7 +3087,7 @@ DataReaderImpl::coherent_change_received (RepoId publisher_id, Coherent_State& r
 
 
 void
-DataReaderImpl::coherent_changes_completed ()
+DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
 {
   this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
   this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
@@ -3096,7 +3096,7 @@ DataReaderImpl::coherent_changes_completed ()
       this->subscriber_servant_->listener_for(::DDS::DATA_ON_READERS_STATUS);
   if (!CORBA::is_nil(sub_listener.in()))
   {
-    {
+    if (reader == this) {
       // Release the sample_lock before listener callback.
       ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
       sub_listener->on_data_on_readers(this->subscriber_servant_);
@@ -3114,9 +3114,11 @@ DataReaderImpl::coherent_changes_completed ()
 
     if (!CORBA::is_nil(listener.in()))
     {
-      {
+      if (reader == this) {
         // Release the sample_lock before listener callback.
         ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+        listener->on_data_available(this);
+      } else {
         listener->on_data_available(this);
       }
 
