@@ -1636,7 +1636,6 @@ void store_instance_data(
     return;
   }
 
-
   if (it == instance_map_.end())
   {
     std::size_t instances_size = 0;
@@ -1942,13 +1941,6 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         dec_ref_data_element(item);
       }
     }
-  }
-
-  if (is_dispose_msg || is_unregister_msg) {
-    ACE_DES_FREE(instance_data,
-      data_allocator_->free,
-      MessageType);
-    instance_data = 0;
   }
 
   bool event_notify = false;
