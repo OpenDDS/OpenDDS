@@ -921,6 +921,7 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
 SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
+                                          DataReaderImpl* reader,
                                           Coherent_State& group_state)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
@@ -959,7 +960,7 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
   if (group_state == COMPLETED) {
     for (DataReaderSet::const_iterator iter = datareader_set_.begin();
          iter != endIter; ++iter) {
-      (*iter)->coherent_changes_completed ();
+      (*iter)->coherent_changes_completed (reader);
       (*iter)->reset_coherent_info (writerId, publisher_id);
     }
   }
