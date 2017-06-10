@@ -536,13 +536,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             test_failed = 1;
           }
 
-          if (info4[2].view_state != ::DDS::NOT_NEW_VIEW_STATE)
-          {
-            ACE_ERROR ((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: expected NOT NEW view state.\n") ));
-            test_failed = 1;
-          }
-
           if (data4[0].count != foo1.count || data4[1].count != foo2.count
             || data4[3].count != foo3.count)
           {
