@@ -54,11 +54,22 @@ void DataReaderQCListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           std::cout << "SampleInfo.sample_rank = " << si[index].sample_rank << std::endl;
           std::cout << "SampleInfo.instance_state = " << si[index].instance_state << std::endl;
 
-          if (si[index].instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance %d is disposed\n"), foo[index].a_long_value));
-            ++samples_disposed_;
-          } else if (si[index].valid_data) {
+          if (si[index].valid_data) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: Foo sample %d processed\n"), foo[index].sample_sequence));
+            Xyz::Foo keys;
+            if (foo_dr->get_key_value (keys, si[index].instance_handle) != DDS::RETCODE_OK) {
+              ACE_ERROR((LM_ERROR,
+                      ACE_TEXT("%N:%l: on_data_available()")
+                      ACE_TEXT(" ERROR: get_key_value failed\n")));
+            }
+          } else if (si[index].instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+            Xyz::Foo keys;
+            if (foo_dr->get_key_value (keys, si[index].instance_handle) == DDS::RETCODE_OK) {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance %d is disposed\n"), keys.a_long_value));
+            } else {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed but we don't know which one, only handle %x\n"), si[index].instance_handle));
+            }
+            ++samples_disposed_;
           } else if (si[index].instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
           } else {
@@ -68,6 +79,10 @@ void DataReaderQCListenerImpl::on_data_available(DDS::DataReader_ptr reader)
                       si[index].instance_state));
           }
         }
+    } else if (status == DDS::RETCODE_NO_DATA) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("%N:%l: on_data_available()")
+                 ACE_TEXT(" Didn't got any data\n")));
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")

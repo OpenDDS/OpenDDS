@@ -1944,11 +1944,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
     }
   }
 
-  // Only when it is an unregister free the instance data, in case we
-  // have a dispose the instance data contains the key fields which we need
-  // in order to apply a possible filter
-  if (is_unregister_msg)
-  {
+  if (is_dispose_msg || is_unregister_msg) {
     ACE_DES_FREE(instance_data,
       data_allocator_->free,
       MessageType);
