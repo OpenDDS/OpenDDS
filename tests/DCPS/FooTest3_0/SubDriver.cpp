@@ -206,7 +206,7 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
 
     DDS::QueryCondition_var qc =
       datareader_->create_querycondition (DDS::NOT_READ_SAMPLE_STATE,
-                                          DDS::NEW_VIEW_STATE | DDS::NOT_NEW_VIEW_STATE,
+                                          DDS::ANY_VIEW_STATE,
                                           DDS::ANY_INSTANCE_STATE,
                                           "a_long_value = %0",
                                           params);
