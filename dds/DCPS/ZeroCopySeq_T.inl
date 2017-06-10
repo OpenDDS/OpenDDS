@@ -31,8 +31,8 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::ZeroCopyVector::swap(ZeroCopyVector& rhs)
 {
-  //Later versions of ACE do have a working ACE_Vector<T,MAX>::swap so we must
-  //delegate up to ACE_Array<T> to get consistent swap behavior.
+  // Later versions of ACE do have a working ACE_Vector<T,MAX>::swap so we must
+  // delegate up to ACE_Array<T> to get consistent swap behavior.
   ACE_Array<OpenDDS::DCPS::ReceivedDataElement*>::swap(rhs);
   std::swap(this->length_, rhs.length_);
   std::swap(this->curr_max_size_, rhs.curr_max_size_);

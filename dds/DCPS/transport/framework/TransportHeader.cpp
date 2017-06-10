@@ -31,21 +31,19 @@ bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 {
   Serializer writer(&buffer);
 
-  writer.write_octet_array(value.protocol_, sizeof(value.protocol_));
+  if (!writer.write_octet_array(value.protocol_, sizeof(value.protocol_)))
+    return false;
 
   const ACE_CDR::Octet flags =
     (value.byte_order_ << TransportHeader::BYTE_ORDER_FLAG) |
     (value.first_fragment_ << TransportHeader::FIRST_FRAGMENT_FLAG) |
     (value.last_fragment_ << TransportHeader::LAST_FRAGMENT_FLAG);
-  writer << ACE_OutputCDR::from_octet(flags);
 
-  writer << ACE_OutputCDR::from_octet(value.reserved_);
-
-  writer << value.length_;
-  writer << value.sequence_;
-  writer << value.source_;
-
-  return writer.good_bit();
+  return (writer << ACE_OutputCDR::from_octet(flags)) &&
+         (writer << ACE_OutputCDR::from_octet(value.reserved_)) &&
+         (writer << value.length_) &&
+         (writer << value.sequence_) &&
+         (writer << value.source_);
 }
 
 /*static*/

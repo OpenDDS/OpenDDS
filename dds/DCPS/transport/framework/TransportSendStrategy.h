@@ -293,7 +293,7 @@ protected:
 
 private:
 
-  virtual void marshal_transport_header(ACE_Message_Block* mb);
+  virtual bool marshal_transport_header(ACE_Message_Block* mb);
 
   /// Helper function to debugging.
   static const char* mode_as_str(SendMode mode);

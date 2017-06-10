@@ -187,6 +187,11 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
         strcmp(data[0].misc, ui.misc)) {
       return false;
     }
+    // Check return get_key_value
+    Resulting resulting_value;
+    ret = res_dr->get_key_value(resulting_value, DDS::HANDLE_NIL);
+    if (ret != RETCODE_BAD_PARAMETER) return false;
+
     data.length(0);
     info.length(0);
     ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);
