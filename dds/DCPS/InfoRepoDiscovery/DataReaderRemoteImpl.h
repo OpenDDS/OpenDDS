@@ -10,9 +10,8 @@
 
 #include "InfoRepoDiscovery_Export.h"
 #include "DataReaderRemoteS.h"
+#include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/Definitions.h"
-
-#include "ace/Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -54,8 +53,7 @@ public:
   void detach_parent();
 
 private:
-  DataReaderCallbacks* parent_;
-  ACE_Thread_Mutex mutex_;
+  RcHandle<DataReaderCallbacks> parent_;
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

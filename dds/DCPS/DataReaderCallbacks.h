@@ -57,6 +57,9 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/) { }
+
+  virtual void _add_ref() = 0;
+  virtual void _remove_ref() = 0;
 };
 
 } // namespace DCPS
