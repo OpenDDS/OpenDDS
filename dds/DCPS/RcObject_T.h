@@ -35,7 +35,7 @@ public:
   }
 
   virtual void _remove_ref() {
-    long new_count = --this->ref_count_;
+    const long new_count = --this->ref_count_;
 
     if (new_count == 0) {
       // No need to protect the allocator with a lock since this

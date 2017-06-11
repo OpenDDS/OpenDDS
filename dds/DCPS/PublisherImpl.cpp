@@ -61,7 +61,8 @@ PublisherImpl::~PublisherImpl()
     ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::~PublisherImpl, ")
-        ACE_TEXT("some datawriters still exist.\n")));
+        ACE_TEXT("%B datawriters and %B publications still exist.\n"),
+        datawriter_map_.size(), publication_map_.size()));
   }
 }
 
@@ -122,14 +123,21 @@ PublisherImpl::create_datawriter(
   DataWriterImpl* dw_servant =
       dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
+  if (dw_servant == 0) {
+    ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("servant is nil.\n")));
+    return DDS::DataWriter::_nil();
+  }
+
   dw_servant->init(a_topic,
       topic_servant,
       dw_qos,
       a_listener,
       mask,
       participant_,
-      this,
-      dw_obj.in());
+      this);
 
   if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
     const DDS::ReturnCode_t ret = dw_servant->enable();
@@ -198,7 +206,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   dw_servant->wait_pending();
   dw_servant->wait_control_pending();
 
-  CORBA::String_var topic_name = dw_servant->get_topic_name();
   RepoId publication_id  = GUID_UNKNOWN;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -314,7 +321,7 @@ PublisherImpl::delete_contained_entities()
 
   while (true) {
     PublicationId pub_id = GUID_UNKNOWN;
-    DataWriterImpl* a_datawriter;
+    DataWriterImpl* a_datawriter = 0;
 
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -330,7 +337,7 @@ PublisherImpl::delete_contained_entities()
       }
     }
 
-    DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
+    const DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
 
     if (ret != DDS::RETCODE_OK) {
       GuidConverter converter(pub_id);

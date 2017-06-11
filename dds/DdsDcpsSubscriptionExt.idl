@@ -44,38 +44,38 @@ module OpenDDS
 
     local interface DataReaderListener : ::DDS::DataReaderListener {
 
-      // Called when a connection failure has been detected
-      // and there are still associations using the connection
-      // after the configurable graceful_disconnected_period.
-      // When connection is gracefully disconnected, this callback
-      // is also triggered.
+      /// Called when a connection failure has been detected
+      /// and there are still associations using the connection
+      /// after the configurable graceful_disconnected_period.
+      /// When connection is gracefully disconnected, this callback
+      /// is also triggered.
       void on_subscription_disconnected(
         in ::DDS::DataReader reader,
         in SubscriptionDisconnectedStatus status);
 
-      // Called when a disconnected connection
-      // has been reconnected.
+      /// Called when a disconnected connection
+      /// has been reconnected.
       void on_subscription_reconnected(
         in ::DDS::DataReader reader,
         in SubscriptionReconnectedStatus status);
 
-      // called when a connection is lost and hence one
-      // or more associations from this subscription to
-      // some publishers have been lost.
-      // A connection is "lost" when the retry attempts
-      // have been exhausted.
+      /// Called when a connection is lost and hence one
+      /// or more associations from this subscription to
+      /// some publishers have been lost.
+      /// A connection is "lost" when the retry attempts
+      /// have been exhausted.
       void on_subscription_lost(
         in ::DDS::DataReader reader,
         in SubscriptionLostStatus status);
 
-      // called when the connection object is cleaned up and
-      // the reconnect thread exits.
-      // This hook is added for testing the reconnect thread
-      // leaking problem when the subscriber crashes.
+      /// Called when the connection object is cleaned up and
+      /// the reconnect thread exits.
+      /// This hook is added for testing the reconnect thread
+      /// leaking problem when the subscriber crashes.
       void on_connection_deleted(
         in ::DDS::DataReader reader);
 
-      // Called when the latency budget has been exceeded.
+      /// Called when the latency budget has been exceeded.
       void on_budget_exceeded(
         in ::DDS::DataReader reader,
         in BudgetExceededStatus status);

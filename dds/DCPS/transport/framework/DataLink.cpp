@@ -504,7 +504,7 @@ DataLink::create_control(char submessage_id,
   header.submessage_id_ = submessage_id;
   header.message_length_ = static_cast<ACE_UINT32>(data->total_length());
 
-  ACE_Message_Block* message;
+  ACE_Message_Block* message = 0;
   ACE_NEW_MALLOC_RETURN(message,
                         static_cast<ACE_Message_Block*>(
                           this->mb_allocator_->malloc(sizeof(ACE_Message_Block))),
@@ -521,7 +521,13 @@ DataLink::create_control(char submessage_id,
                                           this->mb_allocator_),
                         0);
 
-  *message << header;
+  if (!(*message << header)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) DataLink::create_control: ")
+               ACE_TEXT("cannot put header in message\n")));
+    ACE_DES_FREE(message, this->mb_allocator_->free, ACE_Message_Block);
+    message = 0;
+  }
 
   return message;
 }

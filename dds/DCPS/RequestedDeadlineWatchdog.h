@@ -46,16 +46,15 @@ public:
     lock_type & lock,
     DDS::DeadlineQosPolicy qos,
     OpenDDS::DCPS::DataReaderImpl * reader_impl,
-    DDS::DataReader_ptr reader,
     DDS::RequestedDeadlineMissedStatus & status,
     CORBA::Long & last_total_count);
 
   virtual ~RequestedDeadlineWatchdog();
 
-  // Schedule timer for the supplied instance.
+  /// Schedule timer for the supplied instance.
   void schedule_timer(OpenDDS::DCPS::SubscriptionInstance_rch instance);
 
-  // Cancel timer for the supplied instance.
+  /// Cancel timer for the supplied instance.
   void cancel_timer(OpenDDS::DCPS::SubscriptionInstance_rch instance);
 
   virtual int handle_timeout(const ACE_Time_Value&, const void* act);

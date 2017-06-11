@@ -4,6 +4,7 @@
 #include "Reader.h"
 #include "../common/SampleInfo.h"
 #include "../common/TestException.h"
+#include "../common/TestSupport.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Serializer.h"
@@ -177,7 +178,8 @@ Reader::start1 ()
 
       PrintSampleInfo(si[0]);
 
-      foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+      status = foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+      TEST_CHECK(status == ::DDS::RETCODE_OK);
 
       PrintSampleInfo(si[0]) ;
 
@@ -212,7 +214,11 @@ Reader::start1 ()
 
               PrintSampleInfo(si[0]);
 
-              foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+              status = foo_dr->get_key_value(key_holder, ::DDS::HANDLE_NIL) ;
+              TEST_CHECK(status == ::DDS::RETCODE_BAD_PARAMETER);
+
+              status = foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+              TEST_CHECK(status == ::DDS::RETCODE_OK);
               ACE_OS::printf (
                   "get_key_value: handle = %d foo.x = %f foo.y = %f, foo.key = %d\n",
                   si[0].instance_handle,
@@ -255,7 +261,11 @@ Reader::start1 ()
 
       PrintSampleInfo(si[0]);
 
-      foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+      status = foo_dr->get_key_value(key_holder, ::DDS::HANDLE_NIL) ;
+      TEST_CHECK(status == ::DDS::RETCODE_BAD_PARAMETER);
+
+      status = foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+      TEST_CHECK(status == ::DDS::RETCODE_OK);
 
       ACE_OS::printf (
           "get_key_value: handle = %d foo.x = %f foo.y = %f, foo.key = %d\n",
@@ -291,7 +301,11 @@ Reader::start1 ()
 
               PrintSampleInfo(si[0]);
 
-              foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+              status = foo_dr->get_key_value(key_holder, ::DDS::HANDLE_NIL) ;
+              TEST_CHECK(status == ::DDS::RETCODE_BAD_PARAMETER);
+
+              status = foo_dr->get_key_value(key_holder, si[0].instance_handle) ;
+              TEST_CHECK(status == ::DDS::RETCODE_OK);
               ACE_OS::printf (
                   "get_key_value: handle = %d foo.x = %f foo.y = %f, foo.key = %d\n",
                   si[0].instance_handle,

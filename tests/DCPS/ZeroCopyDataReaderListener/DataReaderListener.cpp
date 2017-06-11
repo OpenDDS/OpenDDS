@@ -27,7 +27,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-throw(CORBA::SystemException)
 {
   ++num_reads_;
 
@@ -92,7 +91,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
   const DDS::RequestedDeadlineMissedStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_deadline_missed()\n")));
 }
@@ -100,7 +98,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_requested_incompatible_qos(
   DDS::DataReader_ptr,
   const DDS::RequestedIncompatibleQosStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
 }
@@ -108,7 +105,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed()\n")));
 }
@@ -116,7 +112,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
 }
@@ -124,7 +119,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_sample_rejected(
   DDS::DataReader_ptr,
   const DDS::SampleRejectedStatus&)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
 }
@@ -132,7 +126,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }

@@ -1690,10 +1690,10 @@ TransportSendStrategy::prepare_packet()
   this->header_complete_ = false;
 }
 
-void
+bool
 TransportSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  *mb << this->header_;
+  return *mb << this->header_;
 }
 
 void
