@@ -9,7 +9,7 @@
 #include "ace/Arg_Shifter.h"
 
 // const data declarations
-const long  TEST_DOMAIN_NUMBER   = 411;
+const long  TEST_DOMAIN_NUMBER   = 111;
 
 
 int

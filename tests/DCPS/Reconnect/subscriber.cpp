@@ -102,7 +102,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "(%P|%t) subscriber.cpp main()\n"));
 
     participant =
-      dpf->create_participant(411,
+      dpf->create_participant(111,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);

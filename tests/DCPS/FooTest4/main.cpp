@@ -25,7 +25,7 @@
 #include "ace/Arg_Shifter.h"
 #include "ace/SString.h"
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = (const char*) "foo";
 const char* MY_TYPE     = (const char*) "foo";
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
