@@ -14,11 +14,6 @@ use strict;
 my $test = new PerlDDS::TestFramework();
 my $DCPScfg = "";
 
-if ($ARGV[0] eq "rtps_disc") {
-  $DCPScfg = "-DCPSConfigFile " . $ARGV[0] . ".ini ";
-  shift;
-}
-
 $test->process('sub', 'subscriber');
 $test->process('pub', 'publisher');
 
