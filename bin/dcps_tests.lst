@@ -261,6 +261,7 @@ tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN !LYNXOS
 # tests/DCPS/Thrasher/run_test.pl high rtps: !DCPS_MIN !LYNXOS
 # tests/DCPS/Thrasher/run_test.pl aggressive rtps: !DCPS_MIN !LYNXOS
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
+tests/DCPS/DPFactoryQos/run_test.pl rtps_disc: !DCPS_MIN RTPS
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtps: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
