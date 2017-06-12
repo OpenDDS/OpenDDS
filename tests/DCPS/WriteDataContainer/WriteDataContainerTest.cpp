@@ -353,7 +353,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     TestParticipantImpl* tpi = new TestParticipantImpl();
-    DDS_TEST* test = new DDS_TEST();
+    DDS::DomainParticipant_var participant = tpi;
+    scoped_ptr<DDS_TEST> test(new DDS_TEST);
     ::DDS::DataWriterQos dw_qos;
     test->get_default_datawriter_qos(dw_qos);
 
@@ -862,9 +863,6 @@ int run_test(int argc, ACE_TCHAR *argv[])
           ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
         return 1;
       }
-      //======== clean up ============
-      delete test;
-      delete tpi;
     } //xxx dp::Entity::Object::muxtex_refcount_ = 1
   catch (const TestException&)
     {

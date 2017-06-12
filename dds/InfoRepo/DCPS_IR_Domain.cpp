@@ -1018,6 +1018,7 @@ DCPS_IR_Domain::last_participant_key(long key)
   this->participantIdGenerator_.last(key);
 }
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 namespace {
   void get_BuiltinTopicKey(DDS::BuiltinTopicKey_t& key,
                            const OpenDDS::DCPS::RepoId& id)
@@ -1028,6 +1029,7 @@ namespace {
     key.value[2] = c.entityId();
   }
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 {
