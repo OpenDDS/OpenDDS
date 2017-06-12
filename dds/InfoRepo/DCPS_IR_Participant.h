@@ -157,7 +157,7 @@ public:
   /// Participant retains ownership
   const DDS::DomainParticipantQos* get_qos();
 
-  /// Update qos and also propogate the qos change to related BITs
+  /// Update qos and also propagate the qos change to related BITs
   /// that has the qos copy.
   /// Return false if the provided QoS makes the DataWriter and DataReader
   /// QoS incompatible. Currently supported changeable QoS in DomainParticipantQos
