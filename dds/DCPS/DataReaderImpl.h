@@ -507,7 +507,7 @@ public:
                         RepoId& publisher_id);
   void coherent_change_received (RepoId publisher_id, Coherent_State& result);
 
-  void coherent_changes_completed ();
+  void coherent_changes_completed (DataReaderImpl* reader);
 
   void reset_coherent_info (const PublicationId& writer_id,
                             const RepoId& publisher_id);
