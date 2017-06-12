@@ -84,6 +84,7 @@ TransportClient::cleanup_transport()
     }
     iter->second->remove_listener(repo_id_);
   }
+  links_.map().clear();
 
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
@@ -101,7 +102,6 @@ TransportClient::cleanup_transport()
     (*it)->detach_client(rchandle_from(this));
   }
   impls_.clear();
-
 }
 
 void
