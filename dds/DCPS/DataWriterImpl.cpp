@@ -149,7 +149,7 @@ DataWriterImpl::cleanup()
   topic_servant_->_remove_ref();
   topic_servant_ = 0;
 
-  disable_transport();
+  cleanup_transport();
 }
 
 void

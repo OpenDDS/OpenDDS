@@ -71,7 +71,8 @@ protected:
   void enable_transport(bool reliable, bool durable);
   void enable_transport_using_config(bool reliable, bool durable,
                                      const TransportConfig_rch& tc);
-  void disable_transport();
+  // Cleanup this transport client completely
+  void cleanup_transport();
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }

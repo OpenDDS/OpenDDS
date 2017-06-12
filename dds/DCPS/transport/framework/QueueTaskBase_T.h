@@ -58,7 +58,7 @@ public:
     if (this->shutdown_initiated_)
       return -1;
 
-    int result = this->queue_.enqueue_tail(req);
+    const int result = this->queue_.enqueue_tail(req);
 
     if (result == 0) {
       this->work_available_.signal();

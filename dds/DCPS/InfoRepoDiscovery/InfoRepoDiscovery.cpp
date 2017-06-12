@@ -693,9 +693,12 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                               dr_remote_obj, qos, transInfo, subscriberQos,
                                               filterClassName, filterExpr, params);
 
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
-    // take ownership of the client allocated above
-    dataReaderMap_[subId] = dr_remote_obj;
+    {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+
+      // take ownership of the client allocated above
+      dataReaderMap_[subId] = dr_remote_obj;
+    }
 
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_subscription: ");

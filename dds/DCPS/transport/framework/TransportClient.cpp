@@ -52,7 +52,11 @@ TransportClient::~TransportClient()
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
                OPENDDS_STRING(converter).c_str()));
   }
+}
 
+void
+TransportClient::cleanup_transport()
+{
   stop_associating();
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
@@ -62,7 +66,7 @@ TransportClient::~TransportClient()
     if (Transport_debug_level > 5) {
       GuidConverter converter(repo_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C from link waiting for callback\n"),
+                 ACE_TEXT("(%P|%t) TransportClient[%@]::cleanup_transport: about to remove_listener %C from link waiting for callback\n"),
                  this,
                  OPENDDS_STRING(converter).c_str()));
     }
@@ -74,7 +78,7 @@ TransportClient::~TransportClient()
     if (Transport_debug_level > 5) {
       GuidConverter converter(repo_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C\n"),
+                 ACE_TEXT("(%P|%t) TransportClient[%@]::cleanup_transport: about to remove_listener %C\n"),
                  this,
                  OPENDDS_STRING(converter).c_str()));
     }
@@ -91,7 +95,13 @@ TransportClient::~TransportClient()
 
   pending_assoc_timer_->wait();
 
-  disable_transport();
+  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
+       it != impls_.end(); ++it) {
+
+    (*it)->detach_client(rchandle_from(this));
+  }
+  impls_.clear();
+
 }
 
 void
@@ -183,22 +193,10 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 }
 
 void
-TransportClient::disable_transport()
-{
-  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
-       it != impls_.end(); ++it) {
-
-    (*it)->detach_client(rchandle_from(this));
-  }
-  impls_.clear();
-}
-
-void
 TransportClient::transport_detached(TransportImpl* which)
 {
   TransportSendListener_rch this_tsl = get_send_listener();
   TransportReceiveListener_rch this_trl = get_receive_listener();
-
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 

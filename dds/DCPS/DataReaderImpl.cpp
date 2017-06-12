@@ -221,7 +221,7 @@ DataReaderImpl::cleanup()
   end_historic_sweeper_->wait();
   remove_association_sweeper_->wait();
 
-  disable_transport();
+  cleanup_transport();
 }
 
 void DataReaderImpl::init(
