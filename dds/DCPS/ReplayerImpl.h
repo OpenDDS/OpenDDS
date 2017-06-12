@@ -316,9 +316,6 @@ private:
   /// datawriter.
   bool is_bit_;
 
-  /// Flag indicates that the init() is called.
-  // bool                       initialized_;
-
   typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan)
   RepoIdToSequenceMap;
 

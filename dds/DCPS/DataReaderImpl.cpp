@@ -77,7 +77,6 @@ DataReaderImpl::DataReaderImpl()
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
-    initialized_(false),
     always_get_history_(false),
     statistics_enabled_(false),
     raw_latency_buffer_size_(0),
@@ -153,9 +152,7 @@ DataReaderImpl::~DataReaderImpl()
   liveliness_timer_->cancel_timer();
   liveliness_timer_->wait();
 
-  if (initialized_) {
-    delete rd_allocator_;
-  }
+  delete rd_allocator_;
 }
 
 // this method is called when delete_datareader is called.
@@ -276,8 +273,6 @@ void DataReaderImpl::init(
         ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::init() - ")
         ACE_TEXT("failed to get SubscriberQos\n")));
   }
-
-  initialized_ = true;
 }
 
 DDS::InstanceHandle_t
