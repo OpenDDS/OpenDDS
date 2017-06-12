@@ -802,8 +802,6 @@ private:
   /// datareader.
   bool is_bit_;
 
-  /// Flag indicates that the init() is called.
-  bool initialized_;
   bool always_get_history_;
 
   /// Flag indicating status of statistics gathering.

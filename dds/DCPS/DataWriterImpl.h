@@ -671,9 +671,6 @@ private:
   /// datawriter.
   bool                       is_bit_;
 
-  /// Flag indicates that the init() is called.
-  bool                       initialized_;
-
   RepoIdSet pending_readers_, assoc_complete_readers_;
 
   /// The cached available data while suspending and associated transaction ids.
