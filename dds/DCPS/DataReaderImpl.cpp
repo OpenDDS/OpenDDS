@@ -574,16 +574,17 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 void
 DataReaderImpl::remove_publication(const PublicationId& pub_id)
 {
-  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-  WriterMapType::iterator where = writers_.find(pub_id);
-  if (writers_.end() != where) {
-    WriterInfo& info = *where->second;
-    WriterIdSeq writers;
-    push_back(writers, pub_id);
-    bool notify = info.notify_lost_;
-    write_guard.release();
-    remove_associations_i(writers, notify);
+  WriterIdSeq writers;
+  bool notify = false;
+  {
+    ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+    WriterMapType::iterator where = writers_.find(pub_id);
+    if (writers_.end() != where) {
+      notify = where->second->notify_lost_;
+      push_back(writers, pub_id);
+    }
   }
+  remove_associations_i(writers, notify);
 }
 
 void
