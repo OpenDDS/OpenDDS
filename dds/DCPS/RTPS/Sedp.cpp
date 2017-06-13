@@ -1584,15 +1584,20 @@ void
 Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
 {
   const void* pReader = static_cast<const void*>(&reader);
-  ACE_Message_Block mb(DCPS::DataSampleHeader::max_marshaled_size(),
-                       ACE_Message_Block::MB_DATA,
-                       new ACE_Message_Block(static_cast<const char*>(pReader),
-                                             sizeof(reader)));
-  mb.set_flags(ACE_Message_Block::DONT_DELETE);
-  mb.cont()->wr_ptr(sizeof(reader));
-  // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
-  write_control_msg(mb, sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
-                    DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+  ACE_Message_Block* mb = new ACE_Message_Block (DCPS::DataSampleHeader::max_marshaled_size(),
+                                                 ACE_Message_Block::MB_DATA,
+                                                 new ACE_Message_Block(static_cast<const char*>(pReader),
+                                                  sizeof(reader)));
+  if (mb) {
+    mb->cont()->wr_ptr(sizeof(reader));
+    // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
+    write_control_msg(*mb, sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
+                      DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Sedp::Writer::end_historic_samples")
+               ACE_TEXT(" - Failed to allocate message block message\n")));
+  }
 }
 
 void
