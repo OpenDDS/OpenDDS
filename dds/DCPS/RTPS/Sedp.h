@@ -99,6 +99,8 @@ public:
 
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
+  void cleanup_transport();
+
   static const bool host_is_bigendian_;
 private:
   Spdp& spdp_;
@@ -147,6 +149,7 @@ private:
       { return 0; }
 
     using DCPS::TransportClient::enable_transport_using_config;
+    using DCPS::TransportClient::cleanup_transport;
     using DCPS::TransportClient::disassociate;
 
   protected:

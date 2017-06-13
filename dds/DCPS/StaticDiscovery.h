@@ -230,6 +230,10 @@ public:
     bit_subscriber_ = 0;
   }
 
+  void cleanup_transport()
+  {
+  }
+
 private:
   virtual StaticEndpointManager& endpoint_manager() { return endpoint_manager_; }
 

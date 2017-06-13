@@ -118,6 +118,12 @@ Spdp::~Spdp()
 }
 
 void
+Spdp::cleanup_transport()
+{
+  sedp_.cleanup_transport();
+}
+
+void
 Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 {
   if (shutdown_flag_.value()) { return; }

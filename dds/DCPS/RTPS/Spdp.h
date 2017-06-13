@@ -67,6 +67,8 @@ public:
 
   WaitForAcks& wait_for_acks();
 
+  void cleanup_transport();
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 
