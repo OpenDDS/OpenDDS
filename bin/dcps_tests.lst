@@ -209,6 +209,7 @@ tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Deadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Lifespan/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS
 tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
 tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
 tests/DCPS/SampleLost/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
