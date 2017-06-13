@@ -251,8 +251,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
           process_joins(partialResults, join_result, withJoin, other_qp);
         }
 
-      }
-      else if (!found->first.count(this_topic) /*avoid looping back*/) {
+      } else if (!found->first.count(this_topic) /*avoid looping back*/) {
         // we have partialResults for this topic, use them instead of recursing
 
         combine(starting, found->second, keys, found->first);
@@ -265,8 +264,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
         partialResults[newKey] = starting;
 
       }
-    }
-    catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
       ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReader_T::process_joins: "
         "%C", e.what()));
     }
@@ -297,11 +295,9 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
     partialResults[withJoin].swap(partialResults[seen]);
     partialResults.erase(seen);
     process_joins(partialResults, partialResults[withJoin], withJoin, qp);
-  }
-  catch (const std::runtime_error& e) {
+  } catch (const std::runtime_error& e) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReader_T::cross_join: "
-        "%C", e.what()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReader_T::cross_join: %C", e.what()));
     }
   }
 }

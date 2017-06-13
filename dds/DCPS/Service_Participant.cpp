@@ -1389,8 +1389,7 @@ Service_Participant::load_configuration(
         status),
         -1);
     }
-  }
-  catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM& ex) {
     ex._tao_print_exception("Exception caught in Service_Participant::load_configuration: "
       "trying to load_discovery_configuration()");
     return -1;

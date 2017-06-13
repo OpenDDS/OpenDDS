@@ -157,15 +157,13 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
           set<OPENDDS_STRING>& topics = joinKeys[*names];
           topics.insert(fieldToTopic[*names]);
           topics.insert(selection[i]);
-        }
-        else {
+        } else {
           fieldToTopic[*names] = selection[i];
         }
       }
-    }
-    catch (const std::runtime_error& e) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::init: "
-          "%C", e.what()));
+    } catch (const std::runtime_error& e) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) MultiTopicDataReaderBase::init: %C", e.what()));
         throw std::runtime_error("Failed to obtain metastruct for incoming.");
     }
   }
@@ -271,8 +269,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
     for (CORBA::ULong i = 0; i < gen.samples_.size(); ++i) {
       if (gen.info_[i].valid_data) {
         incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
-      }
-      else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
+      } else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
         DataReaderImpl* resulting_impl =
           dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
 
@@ -286,15 +283,13 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
             resulting_impl->set_instance_state(iter->second,
               gen.info_[i].instance_state);
           }
-        }
-        else {
+        } else {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available:"
             " failed to obtain DataReaderImpl.")));
         }
       }
     }
-  }
-  catch (const std::runtime_error& e) {
+  } catch (const std::runtime_error& e) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::data_available: "
         "%C", e.what()));
@@ -317,8 +312,7 @@ bool MultiTopicDataReaderBase::have_sample_states(
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
   if (dri) {
     return dri->have_sample_states(sample_states);
-  }
-  else {
+  } else {
     return false;
   }
 }
