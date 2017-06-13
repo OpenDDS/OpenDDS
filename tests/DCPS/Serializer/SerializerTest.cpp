@@ -467,8 +467,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     expectedArray.ushortValue[i] = ACE_CDR::UShort(0xffff|i);
     expectedArray.ulongValue[i] = ACE_CDR::ULong(0xf0f0f0f0|i);
     expectedArray.ulonglongValue[i] = ACE_UINT64_LITERAL(0xcdef0123456789ab);
-    expectedArray.floatValue[i] = (float) 1.0 / (float) i;
-    expectedArray.doubleValue[i] = (double) 3.0 / (double) i;
+    if (i == 0) {
+      expectedArray.floatValue[i] = (float) 0.0;
+      expectedArray.doubleValue[i] = (double) 0.0;
+    } else {
+      expectedArray.floatValue[i] = (float) 1.0 / (float)i;
+      expectedArray.doubleValue[i] = (double) 3.0 / (double)i;
+    }
 #if ACE_SIZEOF_LONG_DOUBLE == 16
     expectedArray.longdoubleValue[i] = 0x89abcdef01234567LL;
 #else
