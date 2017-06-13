@@ -1689,12 +1689,16 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     DCPS::Serializer ser(sample.sample_,
                          sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                          DCPS::Serializer::ALIGN_CDR);
-    bool ok = true;
     ACE_CDR::Octet encap, dummy;
     ACE_CDR::UShort options;
-    ok &= (ser >> ACE_InputCDR::to_octet(dummy))
-      && (ser >> ACE_InputCDR::to_octet(encap))
-      && (ser >> options);
+    const bool ok = (ser >> ACE_InputCDR::to_octet(dummy))
+              && (ser >> ACE_InputCDR::to_octet(encap))
+              && (ser >> options);
+    if (!ok) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                 ACE_TEXT("failed to deserialize encap and options\n")));
+      return;
+    }
 
     // Ignore the 'encap' byte order since we use sample.header_.byte_order_
     // to determine whether or not to swap bytes.
