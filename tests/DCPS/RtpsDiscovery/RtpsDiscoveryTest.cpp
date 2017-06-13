@@ -129,6 +129,10 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
 
+  if (!dp_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: could not obtain DomainParticipantImpl\n"), false);
+  }
+
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
                                                   ANY_VIEW_STATE,
