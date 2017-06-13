@@ -12,7 +12,6 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-my $DCPScfg = "";
 
 $test->process('sub', 'subscriber');
 $test->process('pub', 'publisher');
@@ -22,4 +21,4 @@ $test->start_process('pub');
 $test->start_process('sub');
 
 $test->ignore_error('Entity is not enabled.');
-exit $test->finish(300);
+exit $test->finish(60);
