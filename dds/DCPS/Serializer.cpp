@@ -62,36 +62,52 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
   switch (n) {               // 2   4   8   16
   case 16:
     to[ 15] = from[ n - 16]; // x   x   x    0
+    // fallthrough
   case 15:
     to[ 14] = from[ n - 15]; // x   x   x    1
+    // fallthrough
   case 14:
     to[ 13] = from[ n - 14]; // x   x   x    2
+    // fallthrough
   case 13:
     to[ 12] = from[ n - 13]; // x   x   x    3
+    // fallthrough
   case 12:
     to[ 11] = from[ n - 12]; // x   x   x    4
+    // fallthrough
   case 11:
     to[ 10] = from[ n - 11]; // x   x   x    5
+    // fallthrough
   case 10:
     to[  9] = from[ n - 10]; // x   x   x    6
+    // fallthrough
   case  9:
     to[  8] = from[ n -  9]; // x   x   x    7
+    // fallthrough
   case  8:
     to[  7] = from[ n -  8]; // x   x   0    8
+    // fallthrough
   case  7:
     to[  6] = from[ n -  7]; // x   x   1    9
+    // fallthrough
   case  6:
     to[  5] = from[ n -  6]; // x   x   2   10
+    // fallthrough
   case  5:
     to[  4] = from[ n -  5]; // x   x   3   11
+    // fallthrough
   case  4:
     to[  3] = from[ n -  4]; // x   0   4   12
+    // fallthrough
   case  3:
     to[  2] = from[ n -  3]; // x   1   5   13
+    // fallthrough
   case  2:
     to[  1] = from[ n -  2]; // 0   2   6   14
+    // fallthrough
   case  1:
     to[  0] = from[ n -  1]; // 1   3   7   15
+    // fallthrough
   case  0:
     return;
   default:
