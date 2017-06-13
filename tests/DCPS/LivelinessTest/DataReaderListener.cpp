@@ -15,6 +15,23 @@ DataReaderListenerImpl::DataReaderListenerImpl (void) :
     last_status_.not_alive_count = 0;
     last_status_.alive_count_change = 0;
     last_status_.not_alive_count_change = 0;
+    last_status_.last_publication_handle = DDS::HANDLE_NIL;
+
+    //Initialize last_si_
+    last_si_.sample_state = ::DDS::NOT_READ_SAMPLE_STATE;
+    last_si_.view_state = ::DDS::NEW_VIEW_STATE;
+    last_si_.instance_state = ::DDS::ALIVE_INSTANCE_STATE;
+    last_si_.source_timestamp.sec = ::DDS::TIME_INVALID_SEC;
+    last_si_.source_timestamp.nanosec = ::DDS::TIME_INVALID_NSEC;
+    last_si_.instance_handle = ::DDS::HANDLE_NIL;
+    last_si_.publication_handle = ::DDS::HANDLE_NIL;
+    last_si_.disposed_generation_count = 0;
+    last_si_.no_writers_generation_count = 0;
+    last_si_.sample_rank = 0;
+    last_si_.generation_rank = 0;
+    last_si_.absolute_generation_rank = 0;
+    last_si_.valid_data = false;
+    last_si_.opendds_reserved_publication_seq = 0;
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
