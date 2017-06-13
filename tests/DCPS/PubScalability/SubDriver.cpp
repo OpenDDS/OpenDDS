@@ -119,7 +119,9 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (subscriber_.in ()));
 
+  ios::fmtflags existing_flags(std::cout.flags());
   std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  std::cout.flags(existing_flags);
 
   // Create datareader to test copy_from_topic_qos.
   listener_ = new DataReaderListenerImpl;
