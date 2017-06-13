@@ -98,8 +98,12 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
 {
   info->scheduled_for_removal_ = true;
   info->notify_lost_ = callback;
-  ACE_Time_Value ten_seconds(10);
-  info->removal_deadline_ = ACE_OS::gettimeofday() + ten_seconds;
+  ACE_Time_Value time_to_deadline(info->activity_wait_period());
+
+  if (time_to_deadline > ACE_Time_Value(10))
+    time_to_deadline = ACE_Time_Value(10);
+
+  info->removal_deadline_ = ACE_OS::gettimeofday() + time_to_deadline;
   ScheduleCommand c(this, info);
   execute_or_enqueue(c);
 }

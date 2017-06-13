@@ -558,7 +558,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
-            it->second->active(TheServiceParticipant->pending_timeout())) {
+            it->second->active()) {
           remove_association_sweeper_->schedule_timer(it->second, notify_lost);
         } else {
           push_back(non_active_writers, writer_id);
