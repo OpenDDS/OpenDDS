@@ -83,7 +83,6 @@ DataWriterImpl::DataWriterImpl()
     watchdog_(),
     cancel_timer_(false),
     is_bit_(false),
-    initialized_(false),
     min_suspended_transaction_id_(0),
     max_suspended_transaction_id_(0),
     monitor_(0),
@@ -123,12 +122,10 @@ DataWriterImpl::~DataWriterImpl()
 {
   DBG_ENTRY_LVL("DataWriterImpl","~DataWriterImpl",6);
 
-  if (initialized_) {
-    delete data_container_;
-    delete mb_allocator_;
-    delete db_allocator_;
-    delete header_allocator_;
-  }
+  delete data_container_;
+  delete mb_allocator_;
+  delete db_allocator_;
+  delete header_allocator_;
   delete db_lock_pool_;
 }
 
@@ -194,8 +191,6 @@ DataWriterImpl::init(
   publisher_servant_ = publisher_servant;
 
   this->reactor_ = TheServiceParticipant->timer();
-
-  initialized_ = true;
 }
 
 DDS::InstanceHandle_t
