@@ -902,9 +902,9 @@ void
 Sedp::shutdown()
 {
   task_.shutdown();
-  publications_reader_->shutting_down_ = 1;
-  subscriptions_reader_->shutting_down_ = 1;
-  participant_message_reader_->shutting_down_ = 1;
+  publications_reader_->shutting_down_ = true;
+  subscriptions_reader_->shutting_down_ = true;
+  participant_message_reader_->shutting_down_ = true;
 }
 
 void
