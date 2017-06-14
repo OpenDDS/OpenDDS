@@ -657,6 +657,12 @@ bool check_discovered_participants(DomainParticipant_var& dp,
       OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
           dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
 
+      if (!dp_impl) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P check_discovered_participants: ")
+          ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+          false);
+      }
+
       OpenDDS::DCPS::RepoId repo_id = disc->bit_key_to_repo_id(
           dp_impl,
           OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
