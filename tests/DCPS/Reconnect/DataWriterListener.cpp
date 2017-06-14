@@ -20,8 +20,7 @@ DataWriterListenerImpl::~DataWriterListenerImpl ()
 
 void DataWriterListenerImpl::on_offered_deadline_missed (
   ::DDS::DataWriter_ptr,
-  const ::DDS::OfferedDeadlineMissedStatus &
-  )
+  const ::DDS::OfferedDeadlineMissedStatus &)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataWrierListenerImpl::on_offered_deadline_missed\n"));
@@ -30,8 +29,7 @@ void DataWriterListenerImpl::on_offered_deadline_missed (
 
 void DataWriterListenerImpl::on_offered_incompatible_qos (
   ::DDS::DataWriter_ptr,
-  const ::DDS::OfferedIncompatibleQosStatus &
-  )
+  const ::DDS::OfferedIncompatibleQosStatus &)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos\n"));
@@ -40,8 +38,7 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
 
 void DataWriterListenerImpl::on_liveliness_lost (
   ::DDS::DataWriter_ptr,
-  const ::DDS::LivelinessLostStatus &
-  )
+  const ::DDS::LivelinessLostStatus &)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataWriterListenerImpl::on_liveliness_lost\n"));
@@ -50,8 +47,7 @@ void DataWriterListenerImpl::on_liveliness_lost (
 
 void DataWriterListenerImpl::on_publication_matched (
   ::DDS::DataWriter_ptr,
-  const ::DDS::PublicationMatchedStatus &
-  )
+  const ::DDS::PublicationMatchedStatus &)
 {
   ACE_DEBUG ((LM_DEBUG ,
     "(%P|%t) DataWriterListenerImpl::on_publication_matched\n"));
@@ -60,8 +56,7 @@ void DataWriterListenerImpl::on_publication_matched (
 
 void DataWriterListenerImpl::on_publication_disconnected (
   ::DDS::DataWriter_ptr,
-  const ::OpenDDS::DCPS::PublicationDisconnectedStatus & status
-  )
+  const ::OpenDDS::DCPS::PublicationDisconnectedStatus & status)
 {
   CORBA::ULong len = status.subscription_handles.length ();
   for (CORBA::ULong i = 0; i < len; ++i)
@@ -75,8 +70,7 @@ void DataWriterListenerImpl::on_publication_disconnected (
 
 void DataWriterListenerImpl::on_publication_reconnected (
   ::DDS::DataWriter_ptr,
-  const ::OpenDDS::DCPS::PublicationReconnectedStatus & status
-  )
+  const ::OpenDDS::DCPS::PublicationReconnectedStatus & status)
 {
   CORBA::ULong len = status.subscription_handles.length ();
   for (CORBA::ULong i = 0; i < len; ++i)
@@ -90,8 +84,7 @@ void DataWriterListenerImpl::on_publication_reconnected (
 
 void DataWriterListenerImpl::on_publication_lost (
   ::DDS::DataWriter_ptr,
-  const ::OpenDDS::DCPS::PublicationLostStatus & status
-  )
+  const ::OpenDDS::DCPS::PublicationLostStatus & status)
 {
   ++ actual_lost_pub_notification;
 
@@ -106,8 +99,7 @@ void DataWriterListenerImpl::on_publication_lost (
 
 
 void DataWriterListenerImpl::on_connection_deleted (
-  ::DDS::DataWriter_ptr
-  )
+  ::DDS::DataWriter_ptr)
 {
   ++ num_deleted_connections;
 
