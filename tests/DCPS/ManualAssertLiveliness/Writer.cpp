@@ -105,6 +105,7 @@ Writer_Base::svc()
 
 Write_Samples::Write_Samples(DDS::DataWriter_ptr writer, const char* name)
   : Writer_Base(writer, name)
+  , handle_(DDS::HANDLE_NIL)
 {
 }
 
