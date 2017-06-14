@@ -959,6 +959,7 @@ InfoRepoDiscovery::OrbRunner::shutdown()
 {
   orb_->shutdown();
   wait();
+  orb_->destroy();
 }
 
 InfoRepoDiscovery::OrbRunner* InfoRepoDiscovery::orb_runner_;
