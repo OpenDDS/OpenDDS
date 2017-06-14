@@ -180,8 +180,12 @@ private:
     TransportImpl::ConnectionAttribs attribs_;
 
     PendingAssoc()
-      : active_(false), removed_(false), blob_index_(0)
-    {}
+      : active_(false)
+      , removed_(false)
+      , blob_index_(0)
+    {
+      attribs_ = {GUID_UNKNOWN, 0, false, false };
+    }
 
     bool initiate_connect(TransportClient* tc, Guard& guard);
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
