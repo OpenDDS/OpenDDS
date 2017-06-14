@@ -184,7 +184,10 @@ private:
       , removed_(false)
       , blob_index_(0)
     {
-      attribs_ = {GUID_UNKNOWN, 0, false, false };
+      attribs_.local_id_ = GUID_UNKNOWN;
+      attribs_.priority_ = 0;
+      attribs_.local_reliable_ = false;
+      attribs_.local_durable_ = false;
     }
 
     bool initiate_connect(TransportClient* tc, Guard& guard);
