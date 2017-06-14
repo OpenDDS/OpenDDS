@@ -363,9 +363,6 @@ WriteDataContainer::unregister(
     registered_sample = instance->registered_sample_->duplicate();
   }
 
-  // Unregister the instance with typed DataWriter.
-  this->writer_->unregistered(instance_handle);
-
   if (this->writer_->watchdog_.in())
     this->writer_->watchdog_->cancel_timer(instance);
 
