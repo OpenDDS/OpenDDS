@@ -291,7 +291,16 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
         multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
         DDS::DataReader_ptr ptr = mt_iter->second;
-        dynamic_cast<MultiTopicDataReaderBase*>(ptr)->cleanup();
+        MultiTopicDataReaderBase* mtdrb = dynamic_cast<MultiTopicDataReaderBase*>(ptr);
+        if (!mtdrb) {
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("SubscriberImpl::delete_datareader: ")
+            ACE_TEXT("datareader(topic_name=%C)")
+            ACE_TEXT("failed to obtain MultiTopicDataReaderBase.\n"),
+            topic_name.in()), ::DDS::RETCODE_ERROR);
+        }
+        mtdrb->cleanup();
         multitopic_reader_map_.erase(mt_iter);
         return DDS::RETCODE_OK;
       }
@@ -535,6 +544,14 @@ SubscriberImpl::notify_datareaders()
        ++it) {
     MultiTopicDataReaderBase* dri =
       dynamic_cast<MultiTopicDataReaderBase*>(it->second.in());
+
+    if (!dri) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::notify_datareaders: ")
+        ACE_TEXT("failed to obtain MultiTopicDataReaderBase.\n")),
+        ::DDS::RETCODE_ERROR);
+    }
+
     if (dri->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = dri->get_listener();
       if (!CORBA::is_nil(listener)) {
