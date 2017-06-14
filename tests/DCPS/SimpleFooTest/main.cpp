@@ -26,7 +26,7 @@
       ACE_ERROR((LM_ERROR,"(%N:%l) FAILED on TEST_CHECK(%C)%a\n",\
         #COND , -1));
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 

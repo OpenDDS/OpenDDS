@@ -148,7 +148,7 @@ Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (Publisher::InitError)
 bool
 Publisher::run (void)
 {
-  ::DDS::DomainId_t domain_id = 411;
+  ::DDS::DomainId_t domain_id = 111;
 
   try
     {
