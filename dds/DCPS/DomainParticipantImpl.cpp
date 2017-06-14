@@ -163,6 +163,17 @@ DomainParticipantImpl::delete_publisher(
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  const DDS::ReturnCode_t ret
+  = the_servant->delete_contained_entities();
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
+               ACE_TEXT("Failed to delete contained entities.\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,
                    this->publishers_protector_,
@@ -244,7 +255,7 @@ DomainParticipantImpl::delete_subscriber(
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::ReturnCode_t ret
+  const DDS::ReturnCode_t ret
   = the_servant->delete_contained_entities();
 
   if (ret != DDS::RETCODE_OK) {
