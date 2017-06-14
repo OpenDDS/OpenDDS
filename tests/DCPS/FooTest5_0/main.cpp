@@ -416,9 +416,15 @@ int run_test(int argc, ACE_TCHAR *argv[])
       const DDS::Duration_t infinite = { DDS::DURATION_INFINITE_SEC,
                                          DDS::DURATION_INFINITE_NSEC };
       DDS::SubscriptionMatchedStatus matched;
+      DDS::ReturnCode_t ret = DDS::RETCODE_OK;
       while (foo_dr->get_subscription_matched_status(matched) ==
              DDS::RETCODE_OK && matched.total_count == 0) {
-        ws->wait(active, infinite);
+        ret = ws->wait(active, infinite);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: waiting for subscription matched failed.\n")),
+            ret);
+        }
       }
       ws->detach_condition(sc);
 
