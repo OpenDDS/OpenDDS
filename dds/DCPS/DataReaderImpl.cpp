@@ -1741,9 +1741,17 @@ void DataReaderImpl::notify_read_conditions()
   ReadConditionSet local_read_conditions = read_conditions_;
   ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
+  ConditionImpl* ci;
   for (ReadConditionSet::iterator it = local_read_conditions.begin(),
       end = local_read_conditions.end(); it != end; ++it) {
-    dynamic_cast<ConditionImpl*>(it->in())->signal_all();
+    ci = dynamic_cast<ConditionImpl*>(it->in());
+    if (ci) {
+      ci->signal_all();
+    } else {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::notify_read_conditions: ")
+        ACE_TEXT("Failed to obtain ConditionImpl - can't notify.\n")));
+    }
   }
 }
 
