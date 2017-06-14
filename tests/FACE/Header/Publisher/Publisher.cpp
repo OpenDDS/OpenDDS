@@ -38,6 +38,10 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     DataWriter::_narrow(writers[connId].dw);
   OpenDDS::DCPS::DomainParticipantImpl* dpi =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writers[connId].dw->get_publisher()->get_participant());
+  if (!dpi) {
+    std::cout << "ERROR: Failed to obtain DomainParticipantImpl." << std::endl;
+    return static_cast<int>(FACE::INVALID_PARAM);
+  }
   const OpenDDS::DCPS::RepoId pub = dpi->get_repoid(typedWriter->get_instance_handle());
 
   for (; i < 10; ++i) {
