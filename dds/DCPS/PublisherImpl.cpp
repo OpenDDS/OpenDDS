@@ -104,7 +104,7 @@ PublisherImpl::create_datawriter(
   }
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
-  
+
   if (!topic_servant) {
     CORBA::String_var name = a_topic->get_name();
     ACE_ERROR((LM_ERROR,
