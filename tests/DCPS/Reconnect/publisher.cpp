@@ -187,12 +187,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     // Indicate that the publisher is done
     FILE* writers_completed = ACE_OS::fopen (pub_finished_filename, ACE_TEXT ("w"));
     if (writers_completed == 0) {
-      cerr << "ERROR Unable to i publisher completed file" << endl;
+      cerr << "ERROR Unable to open publisher completed file" << endl;
     } else {
       ACE_OS::fprintf (writers_completed, "%d\n",
                        writer->get_timeout_writes());
+      ACE_OS::fclose(writers_completed);
     }
-    ACE_OS::fclose (writers_completed);
 
     // Wait for the subscriber to finish.
     FILE* readers_completed = 0;
