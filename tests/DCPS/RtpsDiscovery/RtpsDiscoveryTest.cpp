@@ -273,9 +273,15 @@ void wait_match(const DataReader_var& dr, int n)
   ConditionSeq conditions;
   SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
   const Duration_t timeout = {1, 0};
+  ReturnCode_t result;
   while (dr->get_subscription_matched_status(ms) == RETCODE_OK
          && ms.current_count != n) {
-    ws->wait(conditions, timeout);
+    result = ws->wait(conditions, timeout);
+    if (result != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+        "ERROR: %P wait_match could not wait for condition: %d\n", result));
+      break;
+    }
   }
   ws->detach_condition(condition);
 }
