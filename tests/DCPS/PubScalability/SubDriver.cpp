@@ -120,8 +120,10 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (subscriber_.in ()));
 
-  OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
-  std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  {
+    OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
+    std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  }
 
   // Create datareader to test copy_from_topic_qos.
   listener_ = new DataReaderListenerImpl;

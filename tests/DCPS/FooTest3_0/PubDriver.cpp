@@ -174,8 +174,10 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
-  OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
-  std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
+  {
+    OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
+    std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
+  }
 
   TEST_CHECK (participant_->contains_entity(publisher_->get_instance_handle()));
 
