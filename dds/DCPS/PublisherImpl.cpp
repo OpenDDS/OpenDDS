@@ -112,7 +112,7 @@ PublisherImpl::create_datawriter(
       ACE_TEXT("PublisherImpl::create_datawriter, ")
       ACE_TEXT("topic_servant(topic_name=%C) is nil.\n"),
       name.in()));
-    return DDS::DataWriter::_nil();
+    return 0;
   }
 
   OpenDDS::DCPS::TypeSupport_ptr typesupport =
