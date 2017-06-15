@@ -277,7 +277,7 @@ void wait_match(const DataReader_var& dr, int n)
   while (dr->get_subscription_matched_status(ms) == RETCODE_OK
          && ms.current_count != n) {
     result = ws->wait(conditions, timeout);
-    if (result != RETCODE_OK) {
+    if (result != RETCODE_OK && result != RETCODE_TIMEOUT) {
       ACE_ERROR((LM_ERROR,
         "ERROR: %P wait_match could not wait for condition: %d\n", result));
       break;

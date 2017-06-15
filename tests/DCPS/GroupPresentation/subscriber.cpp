@@ -201,7 +201,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           (matches2.current_count == 0 && matches2.total_count > 0)) {
         break;
       }
-      if (DDS::RETCODE_OK != ws->wait(conditions, timeout)) {
+      DDS::ReturnCode_t ret = ws->wait(conditions, timeout);
+      if (DDS::RETCODE_OK != ret && DDS::RETCODE_TIMEOUT != ret) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: waiting for subscription matched to go away failed.\n")));
         break;
