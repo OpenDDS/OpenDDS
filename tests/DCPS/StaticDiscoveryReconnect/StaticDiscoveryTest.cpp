@@ -75,8 +75,7 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
     ACE_OS::sleep(SLEEP_SHORT);
     return 0;
   } else {
-    class Listener : public DDS::DataReaderListener {
-    public:
+    struct Listener : public DDS::DataReaderListener {
       size_t found, lost;
 
       Listener() : found(0), lost(0) { }
@@ -125,7 +124,7 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic,
                                     qos,
-                                    listener.in (),
+                                    listener,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (!reader) {
@@ -196,8 +195,7 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
     ACE_OS::sleep(SLEEP_SHORT);
     return 0;
   } else {
-    class Listener : public DDS::DataWriterListener {
-    public:
+    struct Listener : public DDS::DataWriterListener {
       size_t found, lost;
 
       Listener() : found(0), lost(0) { }
@@ -235,7 +233,7 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic,
                                    qos,
-                                   listener.in (),
+                                   listener,
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (!writer) {
