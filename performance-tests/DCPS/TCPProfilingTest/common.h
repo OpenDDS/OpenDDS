@@ -9,7 +9,7 @@
 // ============================================================================
 
 
-const long  TEST_DOMAIN   = 411;
+const long  TEST_DOMAIN   = 111;
 const char* TEST_TOPIC    = "PerfTest";
 const char* TEST_TYPE     = "PerfTestType";
 

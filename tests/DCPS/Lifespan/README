@@ -1,4 +1,3 @@
-
 This test confirms that LIFESPAN support in OpenDDS functions
 according to the OMG DDS specification.  It does so by configuring a
 finite lifespan QoS policy value, and purposely writing data with a

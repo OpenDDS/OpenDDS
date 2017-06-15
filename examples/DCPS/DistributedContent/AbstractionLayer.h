@@ -20,7 +20,7 @@ class ApplicationLevel;
 
 /// Id of the DDS domain that all the transactions will take place in.
 /// This id needs to be in the domain_ids file that is given to the DCPSInfoRepo application
-const int DOMAINID = 411;
+const int DOMAINID = 111;
 
 
 

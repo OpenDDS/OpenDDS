@@ -565,7 +565,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
-            it->second->active(TheServiceParticipant->pending_timeout())) {
+            it->second->active()) {
           remove_association_sweeper_->schedule_timer(it->second, notify_lost);
         } else {
           push_back(non_active_writers, writer_id);
@@ -579,7 +579,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
 }
 
 void
-RecorderImpl::remove_or_reschedule(const PublicationId& pub_id)
+RecorderImpl::remove_publication(const PublicationId& pub_id)
 {
   ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
   WriterMapType::iterator where = writers_.find(pub_id);
@@ -588,13 +588,8 @@ RecorderImpl::remove_or_reschedule(const PublicationId& pub_id)
     WriterIdSeq writers;
     push_back(writers, pub_id);
     bool notify = info.notify_lost_;
-    if (info.removal_deadline_ < ACE_OS::gettimeofday()) {
-      write_guard.release();
-      remove_associations_i(writers, notify);
-    } else {
-      write_guard.release();
-      remove_associations(writers, notify);
-    }
+    write_guard.release();
+    remove_associations_i(writers, notify);
   }
 }
 
