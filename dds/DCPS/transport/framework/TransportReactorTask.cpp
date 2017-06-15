@@ -24,6 +24,7 @@ OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
   : barrier_(2)
   , state_(STATE_NOT_RUNNING)
   , condition_(this->lock_)
+  , reactor_owner_(ACE_OS::NULL_thread)
 {
   DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",6);
 
@@ -43,7 +44,6 @@ OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
 
   this->reactor_ = new ACE_Reactor(new ACE_Select_Reactor, 1);
   this->proactor_ = 0;
-  this->reactor_owner_ = ACE_OS::NULL_thread;
 }
 
 OpenDDS::DCPS::TransportReactorTask::~TransportReactorTask()
