@@ -11,7 +11,7 @@
 #include <ace/Arg_Shifter.h>
 #include <sstream>
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 

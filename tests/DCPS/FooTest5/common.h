@@ -9,7 +9,7 @@
 #include  "ace/Atomic_Op.h"
 #include  <string>
 
-const long  MY_DOMAIN = 411;
+const long  MY_DOMAIN = 111;
 extern const char* MY_TOPIC;
 extern const char* MY_TOPIC_FOR_UDP;
 extern const char* MY_TOPIC_FOR_MULTICAST;

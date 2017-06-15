@@ -17,7 +17,7 @@
 #include <map>
 
 
-static const long  MY_DOMAIN   = 411;
+static const long  MY_DOMAIN   = 111;
 
 #define MY_TOPIC "foo"
 #define MY_TYPE  "foo"
