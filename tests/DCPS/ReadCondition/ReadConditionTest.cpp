@@ -48,8 +48,7 @@ int run_test_instance(DDS::DomainParticipant_ptr dp)
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
 
-  ReturnCode_t ret = RETCODE_OK;
-  ret = ws->wait(active, infinite);
+  ReturnCode_t ret = ws->wait(active, infinite);
   if (ret != RETCODE_OK) return ret;
 
   ret = ws->detach_condition(dw_sc);
@@ -156,8 +155,7 @@ int run_test_next_instance(DDS::DomainParticipant_ptr dp)
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
 
-  ReturnCode_t ret = RETCODE_OK;
-  ret = ws->wait(active, infinite);
+  ReturnCode_t ret = ws->wait(active, infinite);
   if (ret != RETCODE_OK) return ret;
 
   ret = ws->detach_condition(dw_sc);
