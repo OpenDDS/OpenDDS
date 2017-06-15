@@ -160,7 +160,7 @@ DomainParticipantImpl::delete_publisher(
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
       ACE_TEXT("Failed to obtain PublisherImpl.\n")));
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    return DDS::RETCODE_ERROR;
   }
 
   if (the_servant->is_clean() == 0) {
@@ -249,7 +249,7 @@ DomainParticipantImpl::delete_subscriber(
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
       ACE_TEXT("Failed to obtain SubscriberImpl.\n")));
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    return DDS::RETCODE_ERROR;
   }
 
   if (the_servant->is_clean() == 0) {
@@ -515,7 +515,7 @@ DomainParticipantImpl::delete_topic_i(
         ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
         ACE_TEXT("%p\n"),
         ACE_TEXT("failed to obtain TopicImpl.")),
-        DDS::RETCODE_PRECONDITION_NOT_MET);
+        DDS::RETCODE_ERROR);
     }
 
     CORBA::String_var topic_name = the_topic_servant->get_name();
@@ -803,7 +803,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
         ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
         ACE_TEXT("failed to obtain TopicDescriptionImpl\n"), name.in()));
     }
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    return DDS::RETCODE_ERROR;
   }
 
   if (tdi->has_entity_refs()) {
@@ -896,7 +896,7 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
         ACE_TEXT("failed to obtain TopicDescriptionImpl.\n"),
         mt_name.in()));
     }
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    return DDS::RETCODE_ERROR;
   }
 
   if (tdi->has_entity_refs()) {

@@ -179,7 +179,7 @@ DomainParticipantFactoryImpl::delete_participant(
       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
       ACE_TEXT("failed to obtain the DomainParticipantImpl.\n")));
 
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+    return DDS::RETCODE_ERROR;
   }
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
