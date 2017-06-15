@@ -16,7 +16,7 @@
 
 #include "ace/SString.h"
 
-#define MY_DOMAIN 411
+#define MY_DOMAIN 111
 #define MY_TOPIC  "foo"
 #define MY_TYPE "foo"
 

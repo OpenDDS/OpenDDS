@@ -22,7 +22,7 @@ using namespace std;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = "topic_foo";
 const char* MY_TYPE     = "type_foo";
 

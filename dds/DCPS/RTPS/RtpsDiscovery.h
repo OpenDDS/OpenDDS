@@ -12,7 +12,6 @@
 #include "dds/DCPS/DiscoveryBase.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include "dds/DCPS/RTPS/Spdp.h"
-#include "dds/DCPS/Service_Participant.h"
 #include "rtps_export.h"
 
 #include "ace/Configuration.h"
