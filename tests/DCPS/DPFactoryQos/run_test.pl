@@ -12,19 +12,11 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-my $is_rtps_disc = 0;
-my $DCPScfg = "";
-
-if ($ARGV[0] eq "rtps_disc") {
-  $DCPScfg = "-DCPSConfigFile " . $ARGV[0] . ".ini ";
-  $is_rtps_disc = 1;
-  shift;
-}
 
 $test->process('sub', 'subscriber');
 $test->process('pub', 'publisher');
 
-$test->setup_discovery() unless $is_rtps_disc;
+$test->setup_discovery();
 $test->start_process('pub');
 $test->start_process('sub');
 
