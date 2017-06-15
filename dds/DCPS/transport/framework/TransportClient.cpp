@@ -52,6 +52,8 @@ TransportClient::~TransportClient()
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
                OPENDDS_STRING(converter).c_str()));
   }
+
+  cleanup_transport ();
 }
 
 void
@@ -86,15 +88,19 @@ TransportClient::cleanup_transport()
   }
   links_.map().clear();
 
-  for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
-    for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(rchandle_from(this), it->second->data_.remote_id_);
+  if (pending_assoc_timer_) {
+    for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+      for (size_t i = 0; i < impls_.size(); ++i) {
+        impls_[i]->stop_accepting_or_connecting(rchandle_from(this), it->second->data_.remote_id_);
+      }
+
+      pending_assoc_timer_->cancel_timer(this, it->second);
     }
+    pending_.clear();
 
-    pending_assoc_timer_->cancel_timer(this, it->second);
+    pending_assoc_timer_->wait();
+    pending_assoc_timer_.reset();
   }
-
-  pending_assoc_timer_->wait();
 
   for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
