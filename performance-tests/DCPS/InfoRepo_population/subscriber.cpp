@@ -144,7 +144,7 @@ Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (Subscriber::InitErro
 bool
 Subscriber::run (void)
 {
-  ::DDS::DomainId_t domain_id = 411;
+  ::DDS::DomainId_t domain_id = 111;
 
   try
     {

@@ -6,7 +6,7 @@
 #include "ace/SString.h"
 #include "ace/Atomic_Op.h"
 
-const long domain_id = 411;
+const long domain_id = 111;
 extern const char* type_name;
 extern int num_datawriters;
 extern int num_instances_per_writer;
