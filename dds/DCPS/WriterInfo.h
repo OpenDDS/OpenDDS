@@ -107,10 +107,13 @@ public:
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
 
+
+  ACE_Time_Value activity_wait_period() const;
+
   /// Checks to see if writer has registered activity in either
   /// liveliness_lease_duration or DCPSPendingTimeout duration
   /// to allow it to finish before reader removes it
-  bool active(ACE_Time_Value default_participant_timeout) const;
+  bool active() const;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();

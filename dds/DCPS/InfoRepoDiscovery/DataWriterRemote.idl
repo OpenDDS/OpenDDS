@@ -23,8 +23,7 @@ module OpenDDS {
       oneway void add_association(
         in RepoId yourId,
         in ReaderAssociation reader,
-        in boolean active
-        );
+        in boolean active);
 
       // Called by the InfoRepo to the active peer when the passive peer
       // has indicated that the connection is made.
@@ -38,22 +37,19 @@ module OpenDDS {
       // the DataWriterListener on_subscription_lost.
       oneway void remove_associations(
         in ReaderIdSeq readers,
-        in boolean notify_lost
-        );
+        in boolean notify_lost);
 
       // supporting DataWriterListener::on_offered_incompatible_qos()
       // May get called even if add_associations() is not called.
       oneway void update_incompatible_qos(
-        in IncompatibleQosStatus status
-        );
+        in IncompatibleQosStatus status);
 
       // This call is two-way because the InfoRepo will block the reader
       // in CFT::set_expression_parameters() until each associated writer
       // is notified synchronously by this call.
       void update_subscription_params(
         in RepoId readerId,
-        in ::DDS::StringSeq exprParams
-        );
+        in ::DDS::StringSeq exprParams);
     };
   }; // module DDS
 }; // module OpenDDS

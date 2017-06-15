@@ -98,8 +98,12 @@ void RemoveAssociationSweeper<T>::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS
 {
   info->scheduled_for_removal_ = true;
   info->notify_lost_ = callback;
-  ACE_Time_Value ten_seconds(10);
-  info->removal_deadline_ = ACE_OS::gettimeofday() + ten_seconds;
+  ACE_Time_Value time_to_deadline(info->activity_wait_period());
+
+  if (time_to_deadline > ACE_Time_Value(10))
+    time_to_deadline = ACE_Time_Value(10);
+
+  info->removal_deadline_ = ACE_OS::gettimeofday() + time_to_deadline;
   ScheduleCommand c(this, info);
   execute_or_enqueue(c);
 }
@@ -133,22 +137,20 @@ int RemoveAssociationSweeper<T>::handle_timeout(
                OPENDDS_STRING(pub_repo).c_str()));
   }
 
-  reader_->remove_or_reschedule(pub_id);
+  reader_->remove_publication(pub_id);
   return 0;
 }
 
 template <typename T>
 void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 {
-  static const ACE_Time_Value two_seconds(2);
-
   //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
   const void* arg = reinterpret_cast<const void*>(this->info_.in());
   this->info_->_add_ref();
 
   this->info_->remove_association_timer_ = this->sweeper_->reactor()->schedule_timer(this->sweeper_,
                                                                        arg,
-                                                                       two_seconds);
+                                                                       this->info_->removal_deadline_ - ACE_OS::gettimeofday());
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", this->info_->remove_association_timer_));
   }

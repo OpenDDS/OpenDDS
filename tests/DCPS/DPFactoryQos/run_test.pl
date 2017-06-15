@@ -21,4 +21,4 @@ $test->start_process('pub');
 $test->start_process('sub');
 
 $test->ignore_error('Entity is not enabled.');
-exit $test->finish(300);
+exit $test->finish(60);
