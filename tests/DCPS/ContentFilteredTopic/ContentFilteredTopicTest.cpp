@@ -315,8 +315,6 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
     if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
   }
 
-  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
-
   if (!waitForSample(dr)) return false;
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
   size_t count(0);
