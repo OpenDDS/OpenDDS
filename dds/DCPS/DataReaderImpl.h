@@ -535,7 +535,7 @@ public:
 
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
-  void remove_or_reschedule(const PublicationId& pub_id);
+  void remove_publication(const PublicationId& pub_id);
 
   void prepare_to_delete();
 

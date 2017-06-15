@@ -13,7 +13,7 @@
 #include <vector>
 #include <string>
 
-#define MY_DOMAIN 411
+#define MY_DOMAIN 111
 #define MY_SAME_TOPIC  "foo"
 #define MY_OTHER_TOPIC  "bar"
 
