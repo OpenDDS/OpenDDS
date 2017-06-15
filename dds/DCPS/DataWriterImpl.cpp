@@ -1704,7 +1704,6 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
       this->data_container_->instances_.begin();
 
     while (it != this->data_container_->instances_.end()) {
-      // Only unregister instance that haven't been unregistered yet
       if (!it->second->unregistered_) {
         const DDS::InstanceHandle_t handle = it->first;
         ++it; // avoid mangling the iterator
