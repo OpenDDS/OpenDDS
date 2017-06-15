@@ -150,7 +150,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       // clean up the objects
-      retcode = pub->delete_datawriter(dw.in ());
+      ::DDS::ReturnCode_t retcode = pub->delete_datawriter(dw.in ());
       TEST_CHECK(::DDS::RETCODE_OK == retcode);
       retcode = dp->delete_publisher(pub.in ());
       TEST_CHECK(::DDS::RETCODE_OK == retcode);
