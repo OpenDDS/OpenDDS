@@ -326,10 +326,10 @@ void MultiTopicDataReaderBase::cleanup()
   }
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
   SubscriberImpl* si = dynamic_cast<SubscriberImpl*>(sub.in());
-  if (si && dri) {
-    si->remove_from_datareader_set(dri);
-  }
   if (dri) {
+    if (si) {
+      si->remove_from_datareader_set(dri);
+    }
     dri->cleanup();
   }
 }
