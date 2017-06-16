@@ -15,6 +15,7 @@
 template<typename Writer>
 TestPublisher<Writer>::TestPublisher(TestBase& test)
 : test_(test)
+, writer_i_()
 {
 }
 
@@ -237,6 +238,7 @@ TestPublisher<Writer>::create_datawriter()
 template<typename Reader>
 TestSubscriber<Reader>::TestSubscriber(TestBase& test)
 : test_(test)
+, reader_i_()
 {
 }
 

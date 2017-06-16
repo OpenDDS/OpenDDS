@@ -802,7 +802,14 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
 
   DDS::Subscriber_var temp_sub = readers[connection_id]->dr->get_subscriber();
   DDS::DomainParticipant_var temp_dp = temp_sub->get_participant();
-  const OpenDDS::DCPS::RepoId pub = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(temp_dp.in())->get_repoid(sinfo.publication_handle);
+  OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(temp_dp.in());
+  if (!dpi) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) populate_header_received: ")
+      ACE_TEXT("failed to get DomainParticipantImpl.\n")));
+    return_code = FACE::NOT_AVAILABLE;
+    return;
+  }
+  const OpenDDS::DCPS::RepoId pub = dpi->get_repoid(sinfo.publication_handle);
   header.message_instance_guid = create_message_instance_guid(pub, sinfo.opendds_reserved_publication_seq);
 
   header.message_timestamp = convertTime(sinfo.source_timestamp);

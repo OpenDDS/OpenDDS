@@ -47,10 +47,13 @@ int run_test_instance(DDS::DomainParticipant_ptr dp)
   ws->attach_condition(dw_sc);
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  ws->wait(active, infinite);
-  ws->detach_condition(dw_sc);
 
-  ReturnCode_t ret = RETCODE_OK;
+  ReturnCode_t ret = ws->wait(active, infinite);
+  if (ret != RETCODE_OK) return ret;
+
+  ret = ws->detach_condition(dw_sc);
+  if (ret != RETCODE_OK) return ret;
+
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message msg = {0};
   for (int i(0); i < 12; ++i) {
@@ -151,10 +154,13 @@ int run_test_next_instance(DDS::DomainParticipant_ptr dp)
   ws->attach_condition(dw_sc);
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  ws->wait(active, infinite);
-  ws->detach_condition(dw_sc);
 
-  ReturnCode_t ret = RETCODE_OK;
+  ReturnCode_t ret = ws->wait(active, infinite);
+  if (ret != RETCODE_OK) return ret;
+
+  ret = ws->detach_condition(dw_sc);
+  if (ret != RETCODE_OK) return ret;
+
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message msg = {0};
   for (int i(0); i < 12; ++i) {

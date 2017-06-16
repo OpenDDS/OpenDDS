@@ -29,7 +29,6 @@ protected:
 
   int num_thread_to_write_;
   int num_writes_per_thread_;
-  int multiple_instances_;
   bool finished_sending_;
   int max_wait_ ;
 };

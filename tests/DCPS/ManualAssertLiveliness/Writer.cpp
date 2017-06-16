@@ -26,7 +26,17 @@ void
 Writer_Base::start()
 {
   DDS::DomainParticipant_var part = DDS::Publisher_var(writer_->get_publisher())->get_participant();
-  id_ = OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part.in())->get_repoid(writer_->get_instance_handle())));
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part.in());
+
+  if (!dpi) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Writer_Base::start() %C ")
+      ACE_TEXT("failed to get DomainParticipantImpl\n"), get_id()));
+    exit(1);
+  }
+
+  id_ = OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(dpi->get_repoid(
+    writer_->get_instance_handle())));
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::start %C\n"), get_id()));
   if (activate(THR_NEW_LWP | THR_JOINABLE, 1) == -1) {
@@ -95,6 +105,7 @@ Writer_Base::svc()
 
 Write_Samples::Write_Samples(DDS::DataWriter_ptr writer, const char* name)
   : Writer_Base(writer, name)
+  , handle_(DDS::HANDLE_NIL)
 {
 }
 

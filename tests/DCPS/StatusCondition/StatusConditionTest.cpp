@@ -16,6 +16,7 @@ class Waiter : public ACE_Task_Base
 public:
   explicit Waiter(DDS::WaitSet_ptr ws)
     : ws_(DDS::WaitSet::_duplicate(ws))
+    , result_(::DDS::RETCODE_ERROR)
   {}
 
   int svc()

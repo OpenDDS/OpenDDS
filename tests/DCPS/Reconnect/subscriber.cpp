@@ -220,10 +220,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
 
           //writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-          fscanf (writers_completed, "%d\n", &timeout_writes);
-          num_expected_reads -= timeout_writes;
-          cout << "timed out writes " << timeout_writes << ", we expect "
-               << num_expected_reads << endl;
+          if (std::fscanf(writers_completed, "%d\n", &timeout_writes) != 1) {
+            //if fscanf return 0 or EOF(-1), failed to read a matching line format to populate in timeout_writes
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Warning: subscriber could not read timeout_writes\n")));
+          } else if (timeout_writes) {
+            num_expected_reads -= timeout_writes;
+            cout << "timed out writes " << timeout_writes << ", we expect "
+              << num_expected_reads << endl;
+          }
         }
       }
       ACE_OS::sleep (1);

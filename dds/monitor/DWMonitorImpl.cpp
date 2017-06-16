@@ -36,7 +36,13 @@ DWMonitorImpl::report() {
     report.pub_handle = pub->get_instance_handle();
     report.dw_id   = this->dw_->get_publication_id();
     DDS::Topic_var topic = this->dw_->get_topic();
-    report.topic_id = dynamic_cast<TopicImpl*>(topic.in())->get_id();
+    OpenDDS::DCPS::TopicImpl* ti = dynamic_cast<TopicImpl*>(topic.in());
+    if (!ti) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DWMonitorImpl::report():")
+        ACE_TEXT(" failed to obtain TopicImpl.\n")));
+      return;
+    }
+    report.topic_id = ti->get_id();
     DataWriterImpl::InstanceHandleVec instances;
     this->dw_->get_instance_handles(instances);
     CORBA::ULong length = 0;

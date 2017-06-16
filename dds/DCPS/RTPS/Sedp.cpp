@@ -1422,23 +1422,13 @@ Sedp::Writer::data_dropped(const DCPS::DataSampleElement* dsle, bool)
 void
 Sedp::Writer::control_delivered(ACE_Message_Block* mb)
 {
-  if (mb->flags() == ACE_Message_Block::DONT_DELETE) {
-    // We allocated mb on stack, its continuation block on heap
-    delete mb->cont();
-  } else {
-    mb->release();
-  }
+  mb->release();
 }
 
 void
 Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
 {
-  if (mb->flags() == ACE_Message_Block::DONT_DELETE) {
-    // We allocated mb on stack, its continuation block on heap
-    delete mb->cont();
-  } else {
-    mb->release();
-  }
+  mb->release();
 }
 
 DDS::ReturnCode_t

@@ -155,6 +155,14 @@ DomainParticipantImpl::delete_publisher(
   // set.
   PublisherImpl* the_servant = dynamic_cast<PublisherImpl*>(p);
 
+  if (!the_servant) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
+      ACE_TEXT("Failed to obtain PublisherImpl.\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
   if (the_servant->is_clean() == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -235,6 +243,14 @@ DomainParticipantImpl::delete_subscriber(
   // one referenced by poa, one referenced by the subscriber
   // set.
   SubscriberImpl* the_servant = dynamic_cast<SubscriberImpl*>(s);
+
+  if (!the_servant) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
+      ACE_TEXT("Failed to obtain SubscriberImpl.\n")));
+    return DDS::RETCODE_ERROR;
+  }
 
   if (the_servant->is_clean() == 0) {
     ACE_ERROR((LM_ERROR,
@@ -493,6 +509,14 @@ DomainParticipantImpl::delete_topic_i(
     // one referenced by poa, one referenced by the topic map and
     // others referenced by the datareader/datawriter.
     TopicImpl* the_topic_servant = dynamic_cast<TopicImpl*>(a_topic);
+
+    if (!the_topic_servant) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
+        ACE_TEXT("%p\n"),
+        ACE_TEXT("failed to obtain TopicImpl.")),
+        DDS::RETCODE_ERROR);
+    }
 
     CORBA::String_var topic_name = the_topic_servant->get_name();
 
@@ -769,7 +793,20 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_entity_refs()) {
+
+  TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(iter->second.in());
+
+  if (!tdi) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+        ACE_TEXT("failed to obtain TopicDescriptionImpl\n"), name.in()));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (tdi->has_entity_refs()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
@@ -848,7 +885,21 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_entity_refs()) {
+
+  TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(iter->second.in());
+
+  if (!tdi) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+        ACE_TEXT("can't delete a multitopic topic \"%C\" ")
+        ACE_TEXT("failed to obtain TopicDescriptionImpl.\n"),
+        mt_name.in()));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (tdi->has_entity_refs()) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")

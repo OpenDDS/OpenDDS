@@ -41,6 +41,7 @@ namespace {
   public:
     Gaps()
     : result_bits(0)
+    , base()
     {
       memset(&bitmap, 0, sizeof(bitmap));
     }
@@ -91,7 +92,8 @@ void test_insert_has_frag()
   SequenceNumber frag_seq(1);
   RepoId pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
-  tr.reassemble(frag_seq, true, data.sample);
+  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
+  TEST_ASSERT(true == reassembled);
   TEST_ASSERT(tr.has_frags(msg_seq, pub_id));
 }
 
@@ -123,7 +125,9 @@ void test_insert_gaps()
   RepoId pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
-  tr.reassemble(frag_seq, true, data.sample);
+  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
+  TEST_ASSERT(true == reassembled);
+
   CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
 
   TEST_ASSERT(1 == base);             // Gap from 1-3
@@ -144,8 +148,12 @@ void test_insert_one_then_gap()
   RepoId pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
-  tr.reassemble(frag_seq1, true, data.sample);
-  tr.reassemble(frag_seq2, true, data.sample);
+  bool reassembled = tr.reassemble(frag_seq1, true, data.sample);
+  TEST_ASSERT(true == reassembled);
+
+  reassembled = tr.reassemble(frag_seq2, true, data.sample);
+  TEST_ASSERT(true == reassembled);
+
   CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
 
   TEST_ASSERT(2 == base);             // Gap from 2-5

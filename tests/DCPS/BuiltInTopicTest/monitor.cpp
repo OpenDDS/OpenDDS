@@ -160,6 +160,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::DomainParticipantImpl* part_svt
         = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
 
+      if (!part_svt) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) monitor: ")
+          ACE_TEXT("failed to obtain DomainParticipantImpl.\n")));
+        return 1;
+      }
+
       const bool ignoredEntitiesAreInBIT =
         !dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
       const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;

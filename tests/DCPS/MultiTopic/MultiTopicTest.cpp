@@ -40,7 +40,11 @@ void waitForMatch(const DataWriter_var& dw, int count = 1)
   PublicationMatchedStatus pubmatched;
   while (dw->get_publication_matched_status(pubmatched) == RETCODE_OK
          && pubmatched.current_count != count) {
-    ws->wait(active, infinite);
+    if (RETCODE_OK != ws->wait(active, infinite)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: waitForMatch failed.\n")));
+      break;
+    }
   }
   ws->detach_condition(sc);
 }

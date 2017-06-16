@@ -1706,10 +1706,13 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
       this->data_container_->instances_.begin();
 
     while (it != this->data_container_->instances_.end()) {
-      DDS::InstanceHandle_t handle = it->first;
-      ++it; // avoid mangling the iterator
-
-      this->unregister_instance_i(handle, source_timestamp);
+      if (!it->second->unregistered_) {
+        const DDS::InstanceHandle_t handle = it->first;
+        ++it; // avoid mangling the iterator
+        this->unregister_instance_i(handle, source_timestamp);
+      } else {
+        ++it;
+      }
     }
   }
 }

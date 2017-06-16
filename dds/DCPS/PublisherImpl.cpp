@@ -105,6 +105,16 @@ PublisherImpl::create_datawriter(
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
+  if (!topic_servant) {
+    CORBA::String_var name = a_topic->get_name();
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("PublisherImpl::create_datawriter, ")
+      ACE_TEXT("topic_servant(topic_name=%C) is nil.\n"),
+      name.in()));
+    return 0;
+  }
+
   OpenDDS::DCPS::TypeSupport_ptr typesupport =
       topic_servant->get_type_support();
 
