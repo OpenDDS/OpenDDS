@@ -163,7 +163,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
       }
     } catch (const std::runtime_error& e) {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) MultiTopicDataReaderBase::init: %C", e.what()));
+          ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::init: %C"), e.what()));
         throw std::runtime_error("Failed to obtain metastruct for incoming.");
     }
   }
@@ -284,14 +284,14 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
               gen.info_[i].instance_state);
           }
         } else {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available:"
-            " failed to obtain DataReaderImpl.")));
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available:")
+            ACE_TEXT(" failed to obtain DataReaderImpl.")));
         }
       }
     }
   } catch (const std::runtime_error& e) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReaderBase::data_available: "
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available: ")
         "%C", e.what()));
     }
   }
