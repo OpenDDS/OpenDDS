@@ -147,9 +147,11 @@ DataWriterImpl::cleanup()
 
   // release our Topic_var
   topic_objref_ = DDS::Topic::_nil();
-  topic_servant_->remove_entity_ref();
-  topic_servant_->_remove_ref();
-  topic_servant_ = 0;
+  if (topic_servant_) {
+    topic_servant_->remove_entity_ref();
+    topic_servant_->_remove_ref();
+    topic_servant_ = 0;
+  }
 }
 
 void
