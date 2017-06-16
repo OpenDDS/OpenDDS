@@ -361,19 +361,6 @@ namespace OpenDDS {
     }
 
   /**
-   * The framework has completed its part of unregistering the
-   * given instance.
-   */
-  virtual void unregistered(DDS::InstanceHandle_t instance_handle)
-  {
-    ACE_UNUSED_ARG(instance_handle);
-    // Previously this method removed the instance from the instance_map_.
-    // The instance handle will not be removed from the
-    // map so the instance for re-registration after unregistered
-    // will use the old handle.
-  }
-
-  /**
    * Accessor to the marshalled data sample allocator.
    */
   ACE_INLINE
