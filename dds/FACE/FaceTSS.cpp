@@ -77,8 +77,7 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
         ACE_TEXT("Parser::parse () returned %d\n"),
         status));
       return_code = INVALID_PARAM;
-    }
-    else {
+    } else {
       return_code = RC_NO_ERROR;
 #if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
       TheServiceParticipant->configure_pool();
@@ -120,12 +119,10 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
         if (parser.find_qos(connection, qos)) {
           return_code = INVALID_CONFIG;
         }
-      }
-      else {
+      } else {
         return_code = INVALID_CONFIG;
       }
-    }
-    else {
+    } else {
       return_code = INVALID_CONFIG;
     }
 
@@ -194,12 +191,10 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
         OPENDDS_STRING conn_name = entities.connections_[connection_id].connection_name;
         if (std::strcmp(connection_name, conn_name.c_str()) == 0) {
           return_code = RC_NO_ERROR;
-        }
-        else {
+        } else {
           return_code = INVALID_PARAM;
         }
-      }
-      else {
+      } else {
         // connection_name not provided
         // so populate from connection_id lookup
         // and set return code so status will be populated
@@ -209,21 +204,18 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
         return_code = RC_NO_ERROR;
       }
 
-    }
-    else if (connection_name[0] && connection_id == 0) {
+    } else if (connection_name[0] && connection_id == 0) {
       // connection_id was not specified, but name was provided.
       // lookup connection_id and if found set return code to populate status
       ConnectionSettings settings;
       if (0 == parser.find_connection(connection_name, settings)) {
         connection_id = settings.connection_id_;
         return_code = RC_NO_ERROR;
-      }
-      else {
+      } else {
         // could not find connection for connection_name
         return_code = INVALID_PARAM;
       }
-    }
-    else {
+    } else {
       //Neither connection_id or connection_name provided
       // a valid connection
       return_code = INVALID_PARAM;
@@ -242,23 +234,20 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
         if (receiver.total_msgs_recvd != 0) {
           cur_status.REFRESH_PERIOD = receiver.sum_recvd_msgs_latency / receiver.total_msgs_recvd;
           cur_status.LAST_MSG_VALIDITY = receiver.last_msg_header.message_validity;
-        }
-        else {
+        } else {
           cur_status.REFRESH_PERIOD = 0;
         }
         WAITING_RANGE_TYPE num_waiting;
         if (receiver.messages_waiting(num_waiting) == FACE::RC_NO_ERROR) {
           cur_status.WAITING_PROCESSES_OR_MESSAGES = num_waiting;
-        }
-        else {
+        } else {
           if (OpenDDS::DCPS::DCPS_debug_level > 3) {
             ACE_DEBUG((LM_DEBUG, "Get_Connection_Parameters: returning NOT_AVAILABLE due to messages_waiting\n"));
           }
           return_code = NOT_AVAILABLE;
           return;
         }
-      }
-      else {
+      } else {
         //DDS Only supports Destination/Source therefore
         // CONNECTION_DIRECTION == FACE::SOURCE
         Entities::FaceSender& sender = entities.senders_[connection_id];
@@ -317,8 +306,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
       dp = pub->get_participant();
       try_cleanup_participant = cleanup_opendds_publisher(pub);
 
-    }
-    else if (readers.count(connection_id)) {
+    } else if (readers.count(connection_id)) {
       const DDS::DataReader_var datareader = readers[connection_id]->dr;
       const DDS::Subscriber_var sub = datareader->get_subscriber();
       delete readers[connection_id];
@@ -384,8 +372,7 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
     if (transaction_id == readers[connection_id]->last_msg_tid) {
       message_header = readers[connection_id]->last_msg_header;
       return_code = OpenDDS::FaceTSS::update_status(connection_id, DDS::RETCODE_OK);
-    }
-    else {
+    } else {
       return_code = OpenDDS::FaceTSS::update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     }
   } catch (const CORBA::BAD_PARAM& ex) {
