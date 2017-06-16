@@ -72,13 +72,17 @@ ReturnCode_t WaitSet::detach_conditions(const ConditionSeq& conds)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    RETCODE_OUT_OF_RESOURCES);
+  try {
+    for (CORBA::ULong i = 0; i < conds.length(); ++i) {
 
-  for (CORBA::ULong i = 0; i < conds.length(); ++i) {
-    ReturnCode_t ret = detach_i(conds[ i]);
+      ReturnCode_t ret = detach_i(conds[i]);
 
-    if (ret != RETCODE_OK) {
-      return ret;
+      if (ret != RETCODE_OK) {
+        return ret;
+      }
     }
+  } catch (const CORBA::BAD_PARAM& ex) {
+    return RETCODE_BAD_PARAMETER;
   }
 
   return RETCODE_OK;
