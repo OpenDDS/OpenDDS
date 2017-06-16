@@ -133,6 +133,11 @@ DataWriterImpl::~DataWriterImpl()
 void
 DataWriterImpl::cleanup()
 {
+  // As first step set our listener to nill which will prevent us from calling
+  // back onto the listener at the moment the related DDS entity has been
+  // deleted
+  set_listener(0, NO_STATUS_MASK);
+
   if (cancel_timer_) {
     // The cancel_timer will call handle_close to
     // remove_ref.
