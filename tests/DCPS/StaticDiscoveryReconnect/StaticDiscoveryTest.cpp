@@ -115,13 +115,16 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
       virtual void
       on_sample_lost (::DDS::DataReader_ptr,
                       const ::DDS::SampleLostStatus &) { }
-    } listener;
+    };
+
+    Listener* listener_servant = new Listener;
+    DDS::DataReaderListener_var listener = listener_servant;
 
     // Create DataReader
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic,
                                     qos,
-                                    &listener,
+                                    listener,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (!reader) {
@@ -133,7 +136,7 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
     ACE_OS::sleep(SLEEP_LONG);
 
-    if (listener.found == 2 && listener.lost == 1) {
+    if (listener_servant->found == 2 && listener_servant->lost == 1) {
       reader->set_listener(0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       return 0;
     }
@@ -221,14 +224,16 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
           ++lost;
         }
       }
+    };
 
-    } listener;
+    Listener* listener_servant = new Listener;
+    DDS::DataWriterListener_var listener = listener_servant;
 
     // Create DataWriter
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic,
                                    qos,
-                                   &listener,
+                                   listener,
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (!writer) {
@@ -240,7 +245,7 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
     ACE_OS::sleep(SLEEP_LONG);
 
-    if (listener.found == 2 && listener.lost == 1) {
+    if (listener_servant->found == 2 && listener_servant->lost == 1) {
       writer->set_listener(0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       return 0;
     }
