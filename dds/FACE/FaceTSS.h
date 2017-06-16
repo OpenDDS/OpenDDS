@@ -375,7 +375,13 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
   DDS::DataReaderListener_ptr existing_listener = readers[connection_id]->dr->get_listener();
   if (existing_listener) {
     Listener<Msg>* typedListener = dynamic_cast<Listener<Msg>*>(existing_listener);
-    typedListener->add_callback(callback);
+    if (typedListener) {
+      typedListener->add_callback(callback);
+    } else {
+      ACE_ERROR((LM_ERROR, "ERROR: register_callback - failed to obtain typed listener\n"));
+      return_code = FACE::INVALID_PARAM;
+      return;
+    }
   } else {
     DDS::DataReaderListener_var listener = new Listener<Msg>(callback, connection_id);
     readers[connection_id]->dr->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);

@@ -2,6 +2,7 @@
 #include "TestException.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/RestoreOutputStreamState.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "DataReaderListener.h"
 #include "tests/Utils/ExceptionStreams.h"
@@ -119,7 +120,10 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (subscriber_.in ()));
 
-  std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  {
+    OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
+    std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  }
 
   // Create datareader to test copy_from_topic_qos.
   listener_ = new DataReaderListenerImpl;

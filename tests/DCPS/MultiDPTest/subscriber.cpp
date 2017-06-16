@@ -265,20 +265,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           // Get the number of the timed out writes from publisher so we
           // can re-calculate the number of expected messages. Otherwise,
           // the blocking timeout test will never exit from this loop.
-          if (writers_completed == 0)
-            {
-              writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
-              if (writers_completed != 0)
-                {
-                  //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
-                  std::fscanf (writers_completed, "%d\n", &timeout_writes);
-                  expected -= timeout_writes;
-                  ACE_DEBUG((LM_DEBUG,
-                             ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d\n"),
-                             timeout_writes, expected));
-                }
-
+        if (writers_completed == 0) {
+          writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
+          if (writers_completed != 0) {
+            //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
+            if (std::fscanf(writers_completed, "%d\n", &timeout_writes) != 1) {
+              //if fscanf return 0 or EOF(-1), failed to read a matching line format to populate in timeout_writes
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) Warning: subscriber could not read timeout_writes\n")));
+            } else if (timeout_writes) {
+              expected -= timeout_writes;
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) timed out writes %d, we expect %d\n"),
+                timeout_writes, expected));
             }
+          }
+        }
           ACE_OS::sleep (1);
         }
 

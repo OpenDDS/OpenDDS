@@ -220,6 +220,11 @@ SubDriver::run()
 
   // Write a file so that test script knows we're ready
   FILE * file = ACE_OS::fopen ("subready.txt", ACE_TEXT("w"));
+  if (!file) {
+    ACE_ERROR((LM_ERROR,
+      "(%P|%t) SubDriver::run - Failed to open subready.txt to write.\n"));
+    throw TestException();
+  }
   ACE_OS::fprintf (file, "Ready\n");
   ACE_OS::fclose (file);
 

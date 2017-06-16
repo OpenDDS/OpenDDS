@@ -47,6 +47,10 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
                           + std::string("0410_MCAST_UNRELIABLE"),
                           MULTICAST_NAME);
   MulticastInst* mi = dynamic_cast<MulticastInst*>(default_unrel.in());
+  if (!mi) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) MulticastLoader::init:")
+      ACE_TEXT(" failed to obtain MulticastInst.\n")), -1);
+  }
   mi->reliable_ = false;
   cfg->sorted_insert(default_unrel);
 

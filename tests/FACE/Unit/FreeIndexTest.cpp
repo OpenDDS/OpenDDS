@@ -18,6 +18,8 @@ class FreeIndexTest {
 public:
 
 FreeIndexTest()
+  : next_alloc_()
+  , largest_free_()
 {
 
 }

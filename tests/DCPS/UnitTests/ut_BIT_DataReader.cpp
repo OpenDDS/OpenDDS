@@ -47,6 +47,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
     OpenDDS::DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit_dr =
       dynamic_cast<OpenDDS::DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(dr.in());
+    TEST_ASSERT(bit_dr);
     ReturnCode_t result;
 
     { // Should be able to read synthetic data

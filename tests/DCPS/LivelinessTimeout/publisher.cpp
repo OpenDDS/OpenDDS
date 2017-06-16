@@ -172,8 +172,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       {
         DataWriterListenerImpl* dwl_servant =
           dynamic_cast<DataWriterListenerImpl*>(dwl.in());
-        if(!dwl_servant->valid())
-        {
+
+        if (!dwl_servant) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. test_duration=%d\n"),
+            test_duration));
+          return 1;
+        }
+
+        if(!dwl_servant->valid()) {
           ACE_ERROR ((LM_ERROR,
                      ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. test_duration=%d\n"),
                      test_duration));
