@@ -291,8 +291,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
     }
   } catch (const std::runtime_error& e) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available: ")
-        "%C", e.what()));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available: %C"), e.what()));
     }
   }
 }
