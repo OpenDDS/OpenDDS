@@ -385,6 +385,12 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
   OpenDDS::DCPS::DomainParticipantImpl* subscriber_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(subscriber.in());
 
+  if (!subscriber_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P read_publication_bit: ")
+      ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+      false);
+  }
+
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
   if (!ignored_publication) {
     ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -509,6 +515,12 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     TheServiceParticipant->get_discovery(publisher->get_domain_id());
   OpenDDS::DCPS::DomainParticipantImpl* publisher_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(publisher.in());
+
+  if (!publisher_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P read_subscription_bit: ")
+      ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+      false);
+  }
 
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
   if (!ignored_subscription) {
@@ -696,6 +708,13 @@ bool run_test(DomainParticipant_var& dp_sub,
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
       dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_sub.in());
+
+    if (!dp_impl) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P run_test: ")
+        ACE_TEXT("Failed to obtain DomainParticipantImpl for sub\n")),
+        false);
+    }
+
     sub_repo_id = dp_impl->get_id ();
     OpenDDS::DCPS::GuidConverter converter(sub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
@@ -707,6 +726,13 @@ bool run_test(DomainParticipant_var& dp_sub,
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
       dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_pub.in());
+
+    if (!dp_impl) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P run_test: ")
+        ACE_TEXT("Failed to obtain DomainParticipantImpl for pub\n")),
+        false);
+    }
+
     pub_repo_id = dp_impl->get_id ();
     OpenDDS::DCPS::GuidConverter converter(pub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
