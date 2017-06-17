@@ -53,7 +53,7 @@ PortableServer::POA_ptr get_POA(CORBA::ORB_ptr orb)
 
   if (TheServiceParticipant->use_bidir_giop()) {
     while (true) {
-#ifdef CORBA_E_COMPACT
+#ifndef CORBA_E_MICRO
       try {
         return root_poa->find_POA(BIDIR_POA, false /*activate*/);
       } catch (const PortableServer::POA::AdapterNonExistent&) {
