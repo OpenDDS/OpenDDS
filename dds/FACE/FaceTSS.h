@@ -213,11 +213,11 @@ void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
       return;
     }
     return_code = update_status(connection_id, DDS::RETCODE_NO_DATA);
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: receive_message - INVALID_PARAM\n"));
     }
-    return_code = INVALID_PARAM;
+    return_code = FACE::INVALID_PARAM;
   }
 }
 
