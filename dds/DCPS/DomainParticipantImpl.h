@@ -305,7 +305,7 @@ private:
   /**
    *  Check if the topic is used by any datareader or datawriter.
    */
-  int is_clean() const;
+  bool is_clean() const;
 
   /**
    * This is used to retrieve the listener for a certain status change.

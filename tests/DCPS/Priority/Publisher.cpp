@@ -25,7 +25,11 @@ Publisher::~Publisher()
 {
   DDS::ConditionSeq conditions;
   this->waiter_->get_conditions( conditions);
-  this->waiter_->detach_conditions( conditions);
+  if (DDS::RETCODE_OK !=
+    this->waiter_->detach_conditions(conditions)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Publisher::~Publisher ")
+      ACE_TEXT("failed to detach conditions from waiter_.\n")));
+  }
 
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities();
