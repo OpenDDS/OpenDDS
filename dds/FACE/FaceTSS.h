@@ -147,71 +147,78 @@ void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
                      /*in*/    FACE::MESSAGE_SIZE_TYPE message_size,
                      /*out*/   FACE::RETURN_CODE_TYPE& return_code)
 {
-  Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
-  if (!readers.count(connection_id)) {
-    return_code = FACE::INVALID_PARAM;
-    return;
-  }
-  if(!Entities::instance()->connections_.count(connection_id)) {
-    return_code = FACE::INVALID_PARAM;
-    return;
-  }
-  FACE::TRANSPORT_CONNECTION_STATUS_TYPE status =
-    Entities::instance()->connections_[connection_id].connection_status;
-  if (message_size < status.MAX_MESSAGE_SIZE) {
-    return_code = FACE::INVALID_PARAM;
-    return;
-  }
-  typedef typename DCPS::DDSTraits<Msg>::DataReaderType DataReader;
-  const typename DataReader::_var_type typedReader =
-    DataReader::_narrow(readers[connection_id]->dr);
-  if (!typedReader) {
-    return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
-    return;
-  }
-  if (readers[connection_id]->status_valid != FACE::VALID) {
-    Entities::FaceReceiver* tmp = readers[connection_id];
-    readers[connection_id] = new Entities::DDSTypedAdapter<Msg>(*readers[connection_id]);
-    delete tmp;
-  }
-  readers[connection_id]->status_valid = FACE::VALID;
+  try {
+    Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
+    if (!readers.count(connection_id)) {
+      return_code = FACE::INVALID_PARAM;
+      return;
+    }
+    if (!Entities::instance()->connections_.count(connection_id)) {
+      return_code = FACE::INVALID_PARAM;
+      return;
+    }
+    FACE::TRANSPORT_CONNECTION_STATUS_TYPE status =
+      Entities::instance()->connections_[connection_id].connection_status;
+    if (message_size < status.MAX_MESSAGE_SIZE) {
+      return_code = FACE::INVALID_PARAM;
+      return;
+    }
+    typedef typename DCPS::DDSTraits<Msg>::DataReaderType DataReader;
+    const typename DataReader::_var_type typedReader =
+      DataReader::_narrow(readers[connection_id]->dr);
+    if (!typedReader) {
+      return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
+      return;
+    }
+    if (readers[connection_id]->status_valid != FACE::VALID) {
+      Entities::FaceReceiver* tmp = readers[connection_id];
+      readers[connection_id] = new Entities::DDSTypedAdapter<Msg>(*readers[connection_id]);
+      delete tmp;
+    }
+    readers[connection_id]->status_valid = FACE::VALID;
 
-  const DDS::ReadCondition_var rc =
-    typedReader->create_readcondition(DDS::ANY_SAMPLE_STATE,
-                                      DDS::ANY_VIEW_STATE,
-                                      DDS::ALIVE_INSTANCE_STATE);
-  const DDS::WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(rc);
+    const DDS::ReadCondition_var rc =
+      typedReader->create_readcondition(DDS::ANY_SAMPLE_STATE,
+        DDS::ANY_VIEW_STATE,
+        DDS::ALIVE_INSTANCE_STATE);
+    const DDS::WaitSet_var ws = new DDS::WaitSet;
+    ws->attach_condition(rc);
 
-  DDS::ConditionSeq active;
-  const DDS::Duration_t ddsTimeout = convertTimeout(timeout);
-  DDS::ReturnCode_t ret = ws->wait(active, ddsTimeout);
-  ws->detach_condition(rc);
+    DDS::ConditionSeq active;
+    const DDS::Duration_t ddsTimeout = convertTimeout(timeout);
+    DDS::ReturnCode_t ret = ws->wait(active, ddsTimeout);
+    ws->detach_condition(rc);
 
-  if (ret == DDS::RETCODE_TIMEOUT) {
-    return_code = update_status(connection_id, ret);
-    return;
-  }
-
-  typename DCPS::DDSTraits<Msg>::MessageSequenceType seq;
-  DDS::SampleInfoSeq sinfo;
-  ret = typedReader->take_w_condition(seq, sinfo, 1 /*max*/, rc);
-  if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
-    DDS::DomainParticipant_var participant = typedReader->get_subscriber()->get_participant();
-    FACE::RETURN_CODE_TYPE ret_code;
-    populate_header_received(connection_id, participant, sinfo[0], ret_code);
-    if (ret_code != FACE::RC_NO_ERROR) {
-      return_code = update_status(connection_id, ret_code);
+    if (ret == DDS::RETCODE_TIMEOUT) {
+      return_code = update_status(connection_id, ret);
       return;
     }
 
-    transaction_id = ++readers[connection_id]->last_msg_tid;
+    typename DCPS::DDSTraits<Msg>::MessageSequenceType seq;
+    DDS::SampleInfoSeq sinfo;
+    ret = typedReader->take_w_condition(seq, sinfo, 1 /*max*/, rc);
+    if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
+      DDS::DomainParticipant_var participant = typedReader->get_subscriber()->get_participant();
+      FACE::RETURN_CODE_TYPE ret_code;
+      populate_header_received(connection_id, participant, sinfo[0], ret_code);
+      if (ret_code != FACE::RC_NO_ERROR) {
+        return_code = update_status(connection_id, ret_code);
+        return;
+      }
 
-    message = seq[0];
-    return_code = update_status(connection_id, ret);
-    return;
+      transaction_id = ++readers[connection_id]->last_msg_tid;
+
+      message = seq[0];
+      return_code = update_status(connection_id, ret);
+      return;
+    }
+    return_code = update_status(connection_id, DDS::RETCODE_NO_DATA);
+  } catch (const CORBA::BAD_PARAM&) {
+    if (OpenDDS::DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: receive_message - INVALID_PARAM\n"));
+    }
+    return_code = FACE::INVALID_PARAM;
   }
-  return_code = update_status(connection_id, DDS::RETCODE_NO_DATA);
 }
 
 template <typename Msg>
