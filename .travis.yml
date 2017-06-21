@@ -42,6 +42,7 @@ matrix:
             - libxerces-c-dev
             - clang++-3.9
       env: COMPILER=clang++-3.9
+    - os: osx
 
 addons:
   apt:
