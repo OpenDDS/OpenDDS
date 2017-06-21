@@ -43,6 +43,7 @@ matrix:
             - clang++-3.9
       env: COMPILER=clang++-3.9
     - os: osx
+      env: COMPILER=clang++-3.9
 
 addons:
   apt:
