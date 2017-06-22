@@ -162,8 +162,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "public:\n"
       "  typedef OpenDDS::DCPS::DDSTraits<" << short_name << "> TraitsType;\n"
       "  typedef " << short_name << "TypeSupport TypeSupportType;\n"
-      "  typedef " << short_name << "TypeSupport::_var_type _var_type;\n"
-      "  typedef " << short_name << "TypeSupport::_ptr_type _ptr_type;\n"
       "\n"
       "  " << short_name << "TypeSupportImpl() {}\n"
       "  virtual ~" << short_name << "TypeSupportImpl() {}\n"
@@ -178,7 +176,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n"
       "  virtual bool has_dcps_key();\n"
       "  const char* default_type_name() const;\n"
-      "  static " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
   }
   be_global->header_ << be_global->versioning_end() << "\n";
@@ -227,10 +224,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
       "const char* " << short_name << "TypeSupportImpl::default_type_name() const\n"
       "{\n"
       "  return TraitsType::type_name();\n"
-      "}\n"
-      << short_name << "TypeSupport::_ptr_type " << short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
-      "{\n"
-      "  return TypeSupportType::_narrow(obj);\n"
       "}\n";
   }
   be_global->impl_ << be_global->versioning_end() << "\n";
