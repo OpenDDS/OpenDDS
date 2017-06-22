@@ -33,12 +33,12 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
   // buffer has been entirely read.
   //
   const size_t len = this->current_->length();
-  register size_t remainder = (size - offset > len) ? size - offset - len : 0;
+  const size_t remainder = (size - offset > len) ? size - offset - len : 0;
 
   //
   // Derive how much data we need to read from the current buffer.
   //
-  register size_t initial = size - offset - remainder;
+  const size_t initial = size - offset - remainder;
 
   //
   // Copy or swap the source data from the current buffer into the
@@ -93,7 +93,7 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
 ACE_INLINE void
 Serializer::buffer_read(char* dest, size_t size, bool swap)
 {
-  register size_t offset = 0;
+  size_t offset = 0;
 
   while (size > offset) {
     offset = this->doread(dest, size, swap, offset);
@@ -119,12 +119,12 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
   // buffer has been entirely filled.
   //
   const size_t spc = this->current_->space();
-  register size_t remainder = (size - offset > spc) ? size - offset - spc : 0;
+  const size_t remainder = (size - offset > spc) ? size - offset - spc : 0;
 
   //
   // Derive how much data we need to write to the current buffer.
   //
-  register size_t initial = size - offset - remainder;
+  const size_t initial = size - offset - remainder;
 
   //
   // Copy or swap the source data into the current buffer.
@@ -179,7 +179,7 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
 ACE_INLINE void
 Serializer::buffer_write(const char* src, size_t size, bool swap)
 {
-  register size_t offset = 0;
+  size_t offset = 0;
 
   while (size > offset) {
     offset = this->dowrite(src, size, swap, offset);
