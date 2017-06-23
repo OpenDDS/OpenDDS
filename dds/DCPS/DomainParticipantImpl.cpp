@@ -410,7 +410,7 @@ DomainParticipantImpl::create_topic_i(
                            tao_mon,
                            this->topics_protector_,
                            DDS::Topic::_nil());
-          entry->client_refs_ ++;
+          ++entry->client_refs_;
         }
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
 
@@ -548,7 +548,7 @@ DomainParticipantImpl::delete_topic_i(
                          DDS::RETCODE_ERROR);
       }
 
-      entry->client_refs_ --;
+      --entry->client_refs_;
 
       if (remove_objref == true ||
           0 == entry->client_refs_) {
@@ -617,7 +617,7 @@ DomainParticipantImpl::find_topic(
                        DDS::Topic::_nil());
 
       if (Util::find(topics_, topic_name, entry) == 0) {
-        entry->client_refs_ ++;
+        ++entry->client_refs_;
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
       }
     }
@@ -1702,7 +1702,7 @@ DomainParticipantImpl::create_new_topic(
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, topic_name, entry) == 0) {
-    entry->client_refs_ ++;
+    ++entry->client_refs_;
     return DDS::Topic::_duplicate(entry->pair_.obj_.in());
   }
   */
