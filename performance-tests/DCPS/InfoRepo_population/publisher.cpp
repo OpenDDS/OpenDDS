@@ -31,7 +31,7 @@ class Publisher
 public:
   typedef std::string InitError;
 
-  Publisher (int argc, ACE_TCHAR *argv[]) throw (InitError);
+  Publisher (int argc, ACE_TCHAR *argv[]);
 
   bool run ();
 
@@ -101,7 +101,7 @@ Publisher::parse_args (int argc, ACE_TCHAR *argv[])
   return true;
 }
 
-Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (Publisher::InitError)
+Publisher::Publisher (int argc, ACE_TCHAR *argv[])
   : topic_count_ (1), participant_count_ (1), writer_count_ (1)
   , control_file_ ("barrier_file"), subscriber_count_(1)
 {
