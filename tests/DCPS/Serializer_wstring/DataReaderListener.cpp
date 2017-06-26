@@ -88,6 +88,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       false);
         }
       }
+      break;
     case 8:
       {
         if (ACE_OS::strcmp (message.bounded_char_seq.get_buffer (), charseq))
@@ -98,6 +99,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       false);
         }
       }
+      break;
     case 7:
       {
         if (message.wstring_seq.length () != 5)
@@ -124,6 +126,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       false);
         }
       }
+      break;
     case 6:
       {
         if (message.string_seq.length () != 5)
@@ -147,6 +150,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       false);
         }
       }
+      break;
     case 5:
       {
         if (ACE_OS::strcmp (message.wchar_seq.get_buffer (), wcharseq))
@@ -157,6 +161,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       false);
         }
       }
+      break;
     case 4:
       {
         if (ACE_OS::strcmp (message.char_seq.get_buffer (), charseq))
@@ -165,6 +170,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       message.char_seq.get_buffer ()),
                       false);
       }
+      break;
     case 3:
       {
         if (!message.wstr.in()) {
@@ -177,6 +183,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       "(%P|%t) ERROR: wstring(%d) - unexpected wstring %W\n", message.count, message.wstr.in ()),
                       false);
       }
+      break;
     case 2:
       {
         if (ACE_OS::strcmp (message.str.in (), str))
@@ -184,6 +191,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       "(%P|%t) ERROR: string(%d) - unexpected string %C\n", message.count, message.str.in ()),
                       false);
       }
+      break;
     case 1:
       {
         if (message.wch != L'B')
@@ -191,6 +199,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       "(%P|%t) ERROR: wchar(%d) - unexpected wchar \n", message.count),
                       false);
       }
+      break;
     case 0:
       {
         if (message.ch != 'A')
