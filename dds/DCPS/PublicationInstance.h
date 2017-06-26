@@ -24,6 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+typedef ACE_UINT16 CoherencyGroup;
 
 /**
   * @class PublicationInstance

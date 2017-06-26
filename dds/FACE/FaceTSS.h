@@ -7,6 +7,7 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/RepoIdTypes.h"
 #include "ace/Singleton.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

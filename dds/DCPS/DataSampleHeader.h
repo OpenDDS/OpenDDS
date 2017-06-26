@@ -12,6 +12,7 @@
 #include "GuidUtils.h"
 #include "PoolAllocationBase.h"
 #include "SequenceNumber.h"
+#include "RepoIdTypes.h"
 
 #include <iosfwd>
 

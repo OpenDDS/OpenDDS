@@ -8,11 +8,10 @@
 #ifndef OPENDDS_DCPS_DEFINITION_H
 #define OPENDDS_DCPS_DEFINITION_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsInfrastructureC.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "ace/Message_Block.h"
 #include "ace/Global_Macros.h"
+#include "ace/Null_Mutex.h"
 
 #include <functional>
 #include <utility>
@@ -67,17 +66,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-typedef ACE_UINT16 CoherencyGroup;
-typedef RepoId PublicationId;
-typedef RepoId SubscriptionId;
-
-typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex>
-MessageBlockAllocator;
-typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Thread_Mutex>
-DataBlockAllocator;
+typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex> MessageBlockAllocator;
+typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Thread_Mutex> DataBlockAllocator;
 struct DataSampleHeader;
-typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex>
-DataSampleHeaderAllocator;
+typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex> DataSampleHeaderAllocator;
 
 #define DUP true
 #define NO_DUP false
