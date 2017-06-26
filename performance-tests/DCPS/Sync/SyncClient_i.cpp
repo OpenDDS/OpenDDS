@@ -7,7 +7,6 @@
 
 SyncClient_i::SyncClient_i (const std::string& sync_server
                             , CORBA::ORB_ptr orb, Role role)
-  throw (SyncClient_i::InitError)
   : shutdown_ (false), notification_ (false)
 {
   try
