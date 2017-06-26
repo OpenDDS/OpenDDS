@@ -795,6 +795,10 @@ sub write_platform_macros {
       print $PMG ($f =~ /=/ ? $f : "$f=1"), "\n";
     }
     if ($buildEnv{'build'} eq 'host') {
+      if ($opts{'std'}) {
+        print $PMG 'CCFLAGS += -std=' . $opts{'std'} . "\n";
+        print "Added -std=$opts{std} to host\n" if $opts{'verbose'};
+      }
       print $PMG "static_libs_only = 1\n";
       print $PMG "java = 1\n" if $opts{'java'};
     }
