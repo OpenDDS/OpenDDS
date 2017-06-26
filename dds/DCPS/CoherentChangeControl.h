@@ -13,6 +13,7 @@
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "Serializer.h"
+#include "SequenceNumber.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 #include "PoolAllocator.h"

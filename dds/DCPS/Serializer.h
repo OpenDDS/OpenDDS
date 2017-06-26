@@ -19,6 +19,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "dds/DCPS/Definitions.h"
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
@@ -182,6 +184,13 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
 
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, const std::string& x);
+#ifdef DDS_HAS_WCHAR
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, const std::wstring& x);
+#endif /* DDS_HAS_WCHAR */
+
   // Extraction operators.
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Char& x);
@@ -221,6 +230,13 @@ public:
   bool operator>>(Serializer& s, ACE_InputCDR::to_string x);
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
+
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, std::string& x);
+#ifdef DDS_HAS_WCHAR
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, std::wstring& x);
+#endif /* DDS_HAS_WCHAR */
 
   /// Read from the chain into a destination buffer.
   // This method doesn't respect alignment, so use with care.
