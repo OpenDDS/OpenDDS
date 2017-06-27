@@ -10,12 +10,6 @@
 
 #include <cstring>
 
-namespace {
-
-const ACE_UINT32 NSECS_IN_SEC = 1000000000;
-
-} // namespace
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -138,7 +132,7 @@ operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
 
   if (t2.nanosec > t1.nanosec)
     {
-      t.nanosec = (t1.nanosec + NSECS_IN_SEC) - t2.nanosec;
+      t.nanosec = (t1.nanosec + ACE_ONE_SECOND_IN_NSECS) - t2.nanosec;
       t.sec = (t1.sec - 1) - t2.sec;
     }
 

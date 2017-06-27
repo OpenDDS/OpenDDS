@@ -206,7 +206,8 @@ void postprocess(const char* fn, ostringstream& content,
     }
     if (which == BE_GlobalData::STREAM_H) {
       out << "#include \"dds/DCPS/Definitions.h\"\n";
-      out << "#include \"dds/DdsDcpsC.h\"\n";
+      out << "#include \"dds/DdsDcpsInfoUtilsC.h\"\n";
+      out << "#include \"dds/DdsDcpsInfrastructureC.h\"\n";
     }
   }
   break;
