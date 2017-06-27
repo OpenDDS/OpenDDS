@@ -12,6 +12,7 @@ env:
     - STATIC=1 NO_DEBUG=1
     - SAFETY_PROFILE=1
     - USES_WCHAR=1
+    - MULTITOPIC=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
     - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
@@ -73,6 +74,7 @@ before_script:
   - if [ "$STATIC" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
   - if [ "$NO_DEBUG" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-debug"; fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --safety-profile"; fi
+  - if [ "$MULTITOPIC" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-multi-topic"; fi
   - if [ "$USE_JAVA" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --java"; fi
   - if [ "$NO_TESTS" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-tests"; fi
   - if [ "$USES_WCHAR" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=uses_wchar=1"; else DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --xerces3"; fi
