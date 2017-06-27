@@ -744,14 +744,14 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
 ACE_INLINE bool
 operator<<(Serializer& s, const std::string& x)
 {
-  return s << x.c_str ();
+  return s << x.c_str();
 }
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
 operator<<(Serializer& s, const std::wstring& x)
 {
-  return s << x.c_str ();
+  return s << x.c_str();
 }
 #endif /* DDS_HAS_WCHAR */
 
@@ -949,9 +949,9 @@ operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
 ACE_INLINE bool
 operator>>(Serializer& s, std::string& x)
 {
-  char *buf = 0;
+  char* buf = 0;
   const size_t length = s.read_string(buf);
-  x.assign (buf, length);
+  x.assign(buf, length);
   return s.good_bit();
 }
 
@@ -959,9 +959,9 @@ operator>>(Serializer& s, std::string& x)
 ACE_INLINE bool
 operator>>(Serializer& s, std::wstring& x)
 {
-  ACE_CDR::WChar *buf = 0;
+  ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
-  x.assign (buf, length);
+  x.assign(buf, length);
   return s.good_bit();
 }
 #endif /* DDS_HAS_WCHAR */
