@@ -353,10 +353,14 @@ TransportClient::associate(const AssociationData& data, bool active)
             return true;
           }
 
-          if (res.success_ && !res.link_.is_nil()) {
-
-            use_datalink_i(data.remote_id_, res.link_, guard);
-
+          if (res.success_) {
+            if (res.link_.is_nil()) {
+                // In this case, it may be waiting for the TCP connection to be established.  Just wait without trying other transports.
+                pending_assoc_timer_->schedule_timer(this, iter->second);
+            }
+            else {
+                use_datalink_i(data.remote_id_, res.link_, guard);
+            }
             return true;
           }
         }
