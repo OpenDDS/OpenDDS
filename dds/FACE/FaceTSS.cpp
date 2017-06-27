@@ -83,7 +83,7 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
       TheServiceParticipant->configure_pool();
 #endif
     }
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM& ) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Initialize - INVALID_PARAM\n"));
     }
@@ -163,7 +163,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     conn_info.connection_name = connection_name;
     conn_info.connection_status = status;
     conn_info.platform_view_guid = topic.platform_view_guid_;
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Create_Connection - INVALID_PARAM\n"));
     }
@@ -260,7 +260,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
       }
       status = cur_status;
     }
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Get_Connection_Parameters - INVALID_PARAM\n"));
     }
@@ -279,7 +279,7 @@ void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
       return_code = RC_NO_ERROR;
       return;
     }
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Unregister_Callback - INVALID_PARAM\n"));
     }
@@ -327,7 +327,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
 
     entities.connections_.erase(connection_id);
     return_code = RC_NO_ERROR;
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Destroy_Connection - INVALID_PARAM\n"));
     }
@@ -375,7 +375,7 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
     } else {
       return_code = OpenDDS::FaceTSS::update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     }
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: receive_header - INVALID_PARAM\n"));
     }
@@ -395,7 +395,7 @@ void Receive_Message(
     receive_header(connection_id, timeout,
       transaction_id, message_header,
       message_size, return_code);
-  } catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM&) {
     if (OpenDDS::DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Receive_Message - INVALID_PARAM\n"));
     }
@@ -428,7 +428,7 @@ namespace {
       return;
     }
     if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d \n", domainId));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found existing participant for domainId: %d \n", domainId));
     }
     dp = temp_dp;
   }
@@ -450,7 +450,7 @@ namespace {
       if (dp->get_domain_id() == temp_dp->get_domain_id() &&
           temp_qos == qos) {
         if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_pub - found exiting publisher in senders\n"));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_pub - found existing publisher in senders\n"));
         }
         pub = temp_pub;
         return;
@@ -482,7 +482,7 @@ namespace {
       if (dp->get_domain_id() == temp_dp->get_domain_id() &&
           temp_qos == qos) {
         if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_sub - found exiting subscriber in receivers\n"));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_sub - found existing subscriber in receivers\n"));
         }
         sub = temp_sub;
         return;
