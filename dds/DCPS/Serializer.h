@@ -87,12 +87,12 @@ public:
   bool good_bit() const;
 
   /// Read a narrow string.
-  void read_string(ACE_CDR::Char*& dest,
+  size_t read_string(ACE_CDR::Char*& dest,
     ACE_CDR::Char* str_alloc(ACE_CDR::ULong) = CORBA::string_alloc,
     void str_free(ACE_CDR::Char*) = CORBA::string_free);
 
   /// Read a wide string.
-  void read_string(ACE_CDR::WChar*& dest,
+  size_t read_string(ACE_CDR::WChar*& dest,
     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong) = CORBA::wstring_alloc,
     void str_free(ACE_CDR::WChar*) = CORBA::wstring_free);
 

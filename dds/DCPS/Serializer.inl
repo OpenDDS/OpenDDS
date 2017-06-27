@@ -933,25 +933,25 @@ operator>>(Serializer& s, ACE_InputCDR::to_octet x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_string x)
 {
-  s.read_string(const_cast<char*&>(x.val_));
+  const size_t length = s.read_string(const_cast<char*&>(x.val_));
   return s.good_bit()
-         && ((x.bound_ == 0) || (ACE_OS::strlen(x.val_) <= x.bound_));
+         && ((x.bound_ == 0) || (length <= x.bound_));
 }
 
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
 {
-  s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
+  const size_t length = s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
   return s.good_bit()
-         && ((x.bound_ == 0) || (ACE_OS::strlen(x.val_) <= x.bound_));
+         && ((x.bound_ == 0) || (length <= x.bound_));
 }
 
 ACE_INLINE bool
 operator>>(Serializer& s, std::string& x)
 {
   char *buf = 0;
-  s.read_string(buf);
-  x.assign (buf);
+  const size_t length = s.read_string(buf);
+  x.assign (buf, length);
   return s.good_bit();
 }
 
@@ -960,8 +960,8 @@ ACE_INLINE bool
 operator>>(Serializer& s, std::wstring& x)
 {
   ACE_CDR::WChar *buf = 0;
-  s.read_string(buf);
-  x.assign (buf);
+  const size_t length = s.read_string(buf);
+  x.assign (buf, length);
   return s.good_bit();
 }
 #endif /* DDS_HAS_WCHAR */

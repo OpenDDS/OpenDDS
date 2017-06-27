@@ -115,7 +115,7 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
   }
 }
 
-void
+size_t
 Serializer::read_string(ACE_CDR::Char*& dest,
     ACE_CDR::Char* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::Char*))
@@ -134,7 +134,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   this->buffer_read(reinterpret_cast<char*>(&length), sizeof(ACE_CDR::ULong), this->swap_bytes());
 
   if (!this->good_bit_) {
-    return;
+    return 0;
   }
 
   //
@@ -164,9 +164,11 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   } else {
     good_bit_ = false;
   }
+
+  return length - 1;
 }
 
-void
+size_t
 Serializer::read_string(ACE_CDR::WChar*& dest,
     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong),
     void str_free(ACE_CDR::WChar*))
@@ -186,7 +188,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
                     sizeof(ACE_CDR::ULong), this->swap_bytes());
 
   if (!this->good_bit_) {
-    return;
+    return 0;
   }
 
   //
@@ -194,15 +196,14 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //       done here before the allocation even though it will be
   //       checked during the actual read as well.
   //
+  ACE_CDR::ULong length = 0;
   if (bytecount <= this->current_->total_length()) {
-
-    const ACE_CDR::ULong length = bytecount / WCHAR_SIZE;
-
+    length = bytecount / WCHAR_SIZE;
     dest = str_alloc(length);
 
     if (dest == 0) {
       this->good_bit_ = false;
-      return;
+      return 0;
     }
 
 #if ACE_SIZEOF_WCHAR == 2
@@ -222,15 +223,17 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
       // Null terminate the string.
       //
       dest[length] = L'\0';
-
     } else {
       str_free(dest);
       dest = 0;
+      length = 0;
     }
 
   } else {
     good_bit_ = false;
   }
+
+  return length;
 }
 
 void
