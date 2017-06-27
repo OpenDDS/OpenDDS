@@ -240,13 +240,12 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
   }
 
   const GUIDSeq_var peers = peer_ids(local_id);
-  if (!peers.ptr()) {
-    return;
-  }
-  for (CORBA::ULong i = 0; i < peers->length(); ++i) {
-    const ACE_INET_Addr addr = get_locator(peers[i]);
-    if (addr != ACE_INET_Addr()) {
-      addrs.insert(addr);
+  if (peers.ptr()) {
+    for (CORBA::ULong i = 0; i < peers->length(); ++i) {
+      const ACE_INET_Addr addr = get_locator(peers[i]);
+      if (addr != ACE_INET_Addr()) {
+        addrs.insert(addr);
+      }
     }
   }
 }
@@ -270,37 +269,34 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable)
 {
-  if (!local_reliable) {
-    return;
-  }
+  if (local_reliable) {
+    bool enable_heartbeat = false;
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      const GuidConverter conv(local_id);
+      const EntityKind kind = conv.entityKind();
+      if (kind == KIND_WRITER && remote_reliable) {
+        // Insert count if not already there.
+        heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
+        RtpsWriter& w = writers_[local_id];
+        w.remote_readers_[remote_id].durable_ = remote_durable;
+        w.durable_ = local_durable;
+        enable_heartbeat = true;
 
-  bool enable_heartbeat = false;
-
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  const GuidConverter conv(local_id);
-  const EntityKind kind = conv.entityKind();
-  if (kind == KIND_WRITER && remote_reliable) {
-    // Insert count if not already there.
-    heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
-    RtpsWriter& w = writers_[local_id];
-    w.remote_readers_[remote_id].durable_ = remote_durable;
-    w.durable_ = local_durable;
-    enable_heartbeat = true;
-
-  } else if (kind == KIND_READER) {
-    RtpsReaderMap::iterator rr = readers_.find(local_id);
-    if (rr == readers_.end()) {
-      rr = readers_.insert(RtpsReaderMap::value_type(local_id, RtpsReader()))
-        .first;
-      rr->second.durable_ = local_durable;
+      } else if (kind == KIND_READER) {
+        RtpsReaderMap::iterator rr = readers_.find(local_id);
+        if (rr == readers_.end()) {
+          rr = readers_.insert(RtpsReaderMap::value_type(local_id, RtpsReader()))
+            .first;
+          rr->second.durable_ = local_durable;
+        }
+        rr->second.remote_writers_[remote_id];
+        reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
+      }
     }
-    rr->second.remote_writers_[remote_id];
-    reader_index_.insert(RtpsReaderIndex::value_type(remote_id, rr));
-  }
-
-  g.release();
-  if (enable_heartbeat) {
-    heartbeat_->schedule_enable();
+    if (enable_heartbeat) {
+      heartbeat_->schedule_enable();
+    }
   }
 }
 
@@ -333,11 +329,13 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
                                      const ACE_INET_Addr& address,
                                      OpenDDS::DCPS::DiscoveryListener* listener)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  bool enableheartbeat = interesting_readers_.empty();
-  interesting_readers_.insert(InterestingRemoteMapType::value_type(readerid, InterestingRemote(writerid, address, listener)));
-  heartbeat_counts_[writerid] = 0;
-  g.release();
+  bool enableheartbeat = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    enableheartbeat = interesting_readers_.empty();
+    interesting_readers_.insert(InterestingRemoteMapType::value_type(readerid, InterestingRemote(writerid, address, listener)));
+    heartbeat_counts_[writerid] = 0;
+  }
   if (enableheartbeat) {
     heartbeat_->schedule_enable();
   }
@@ -366,10 +364,12 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
                                      const ACE_INET_Addr& address,
                                      OpenDDS::DCPS::DiscoveryListener* listener)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  bool enableheartbeatchecker = interesting_writers_.empty();
-  interesting_writers_.insert(InterestingRemoteMapType::value_type(writerid, InterestingRemote(readerid, address, listener)));
-  g.release();
+  bool enableheartbeatchecker = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    enableheartbeatchecker = interesting_writers_.empty();
+    interesting_writers_.insert(InterestingRemoteMapType::value_type(writerid, InterestingRemote(readerid, address, listener)));
+  }
   if (enableheartbeatchecker) {
     heartbeatchecker_->schedule_enable();
   }
