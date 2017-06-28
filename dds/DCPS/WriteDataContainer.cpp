@@ -17,7 +17,7 @@
 #endif
 #include "PublicationInstance.h"
 #include "Util.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "GuidConverter.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
