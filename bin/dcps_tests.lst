@@ -238,7 +238,7 @@ tests/DCPS/ContentFilteredTopic/run_test.pl rtps_disc nopub: !DCPS_MIN !NO_MCAST
 tests/DCPS/TopicExpression/run_test.pl: !DCPS_MIN !DDS_NO_MULTI_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/MultiTopic/run_test.pl: !DCPS_MIN !DDS_NO_MULTI_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION !OPENDDS_SAFETY_PROFILE
 tests/DCPS/MultiTopic/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_MULTI_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION RTPS !STATIC
-tests/DCPS/MetaStruct/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
+tests/DCPS/MetaStruct/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION !DDS_NO_MULTI_TOPIC
 
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE

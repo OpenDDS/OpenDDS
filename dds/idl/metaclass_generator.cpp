@@ -373,9 +373,11 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "template<>\n"
     "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
     "  typedef " << clazz << " T;\n\n"
+    "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
     "  void* allocate() const { return new T; }\n\n"
-    "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
-    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n\n"
+    "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n"
+    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n"
+    "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz
@@ -407,6 +409,7 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->impl_ <<
     exception <<
     "  }\n\n"
+    "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
     "  const char** getFieldNames() const\n"
     "  {\n"
     "    static const char* names[] = {";
@@ -432,7 +435,8 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   std::for_each(fields.begin(), fields.end(), assign_field);
   be_global->impl_ <<
     exception <<
-    "  }\n\n"
+    "  }\n"
+    "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
     "  bool compare(const void* lhs, const void* rhs, const char* field) "
     "const\n"
     "  {\n"
