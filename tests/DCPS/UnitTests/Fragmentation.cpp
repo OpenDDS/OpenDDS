@@ -8,7 +8,7 @@
 #include "ace/OS_main.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsDomainC.h"
 
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"

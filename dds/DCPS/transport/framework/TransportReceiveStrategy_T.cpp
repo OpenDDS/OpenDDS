@@ -7,6 +7,7 @@
 
 #include "TransportReceiveStrategy_T.h"
 #include "ace/INET_Addr.h"
+#include "ace/Min_Max.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportReceiveStrategy_T.inl"
