@@ -742,6 +742,20 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
 }
 
 ACE_INLINE bool
+operator<<(Serializer& s, const std::string& x)
+{
+  return s << x.c_str();
+}
+
+#ifdef DDS_HAS_WCHAR
+ACE_INLINE bool
+operator<<(Serializer& s, const std::wstring& x)
+{
+  return s << x.c_str();
+}
+#endif /* DDS_HAS_WCHAR */
+
+ACE_INLINE bool
 operator<<(Serializer& s, ACE_OutputCDR::from_octet x)
 {
   s.buffer_write(reinterpret_cast<char*>(&x.val_), sizeof(ACE_CDR::Octet), false);
@@ -919,18 +933,38 @@ operator>>(Serializer& s, ACE_InputCDR::to_octet x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_string x)
 {
-  s.read_string(const_cast<char*&>(x.val_));
+  const size_t length = s.read_string(const_cast<char*&>(x.val_));
   return s.good_bit()
-         && ((x.bound_ == 0) || (ACE_OS::strlen(x.val_) <= x.bound_));
+         && ((x.bound_ == 0) || (length <= x.bound_));
 }
 
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
 {
-  s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
+  const size_t length = s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
   return s.good_bit()
-         && ((x.bound_ == 0) || (ACE_OS::strlen(x.val_) <= x.bound_));
+         && ((x.bound_ == 0) || (length <= x.bound_));
 }
+
+ACE_INLINE bool
+operator>>(Serializer& s, std::string& x)
+{
+  char* buf = 0;
+  const size_t length = s.read_string(buf);
+  x.assign(buf, length);
+  return s.good_bit();
+}
+
+#ifdef DDS_HAS_WCHAR
+ACE_INLINE bool
+operator>>(Serializer& s, std::wstring& x)
+{
+  ACE_CDR::WChar* buf = 0;
+  const size_t length = s.read_string(buf);
+  x.assign(buf, length);
+  return s.good_bit();
+}
+#endif /* DDS_HAS_WCHAR */
 
 //----------------------------------------------------------------------------
 // predefined type gen_max_marshaled_size methods
