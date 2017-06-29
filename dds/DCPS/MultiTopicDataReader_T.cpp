@@ -84,6 +84,15 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
 {
   using namespace DDS;
   DataReaderImpl* other_dri = dynamic_cast<DataReaderImpl*>(other_dr);
+
+  if (!other_dri) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("MultiTopicDataReader_T::join, ")
+      ACE_TEXT("Failed to get DataReaderImpl.\n")));
+    return;
+  }
+
   TopicDescription_var other_td = other_dri->get_topicdescription();
   CORBA::String_var other_topic = other_td->get_name();
   const QueryPlan& other_qp = query_plans_[other_topic.in()];
@@ -208,50 +217,56 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
     iter_t range_end = qp.adjacent_joins_.upper_bound(other_topic);
     const QueryPlan& other_qp = query_plans_[other_topic];
     DDS::DataReader_ptr other_dr = other_qp.data_reader_;
-    const MetaStruct& other_meta = metaStructFor(other_dr);
 
-    vector<OPENDDS_STRING> keys;
-    for (; iter != range_end; ++iter) { // for each key in common w/ this topic
-      keys.push_back(iter->second);
-    }
+    try {
+      const MetaStruct& other_meta = metaStructFor(other_dr);
 
-    typename std::map<TopicSet, SampleVec>::iterator found =
-      find_if(partialResults.begin(), partialResults.end(),
-        Contains(other_topic));
+      vector<OPENDDS_STRING> keys;
+      for (; iter != range_end; ++iter) { // for each key in common w/ this topic
+        keys.push_back(iter->second);
+      }
 
-    if (found == partialResults.end()) { // haven't seen this topic yet
+      typename std::map<TopicSet, SampleVec>::iterator found =
+        find_if(partialResults.begin(), partialResults.end(),
+          Contains(other_topic));
 
-      partialResults.erase(seen);
-      TopicSet withJoin(seen);
-      withJoin.insert(other_topic);
-      SampleVec& join_result = partialResults[withJoin];
-      for (size_t i = 0; i < starting.size(); ++i) {
-        GenericData other_key(other_meta);
-        for (size_t j = 0; j < keys.size(); ++j) {
-          other_meta.assign(other_key.ptr_, keys[j].c_str(),
-                            &starting[i], keys[j].c_str(), resulting_meta);
+      if (found == partialResults.end()) { // haven't seen this topic yet
+
+        partialResults.erase(seen);
+        TopicSet withJoin(seen);
+        withJoin.insert(other_topic);
+        SampleVec& join_result = partialResults[withJoin];
+        for (size_t i = 0; i < starting.size(); ++i) {
+          GenericData other_key(other_meta);
+          for (size_t j = 0; j < keys.size(); ++j) {
+            other_meta.assign(other_key.ptr_, keys[j].c_str(),
+              &starting[i], keys[j].c_str(), resulting_meta);
+          }
+          join(join_result, starting[i], keys,
+            other_key.ptr_, other_dr, other_meta);
         }
-        join(join_result, starting[i], keys,
-             other_key.ptr_, other_dr, other_meta);
+
+        if (!join_result.empty() && !seen.count(other_topic)) {
+          // recurse
+          process_joins(partialResults, join_result, withJoin, other_qp);
+        }
+
+      } else if (!found->first.count(this_topic) /*avoid looping back*/) {
+        // we have partialResults for this topic, use them instead of recursing
+
+        combine(starting, found->second, keys, found->first);
+        TopicSet newKey(found->first);
+        for (set<OPENDDS_STRING>::const_iterator i3 = found->first.begin();
+          i3 != found->first.end(); ++i3) {
+          newKey.insert(*i3);
+        }
+        partialResults.erase(found);
+        partialResults[newKey] = starting;
+
       }
-
-      if (!join_result.empty() && !seen.count(other_topic)) {
-        // recurse
-        process_joins(partialResults, join_result, withJoin, other_qp);
-      }
-
-    } else if (!found->first.count(this_topic) /*avoid looping back*/) {
-      // we have partialResults for this topic, use them instead of recursing
-
-      combine(starting, found->second, keys, found->first);
-      TopicSet newKey(found->first);
-      for (set<OPENDDS_STRING>::const_iterator i3 = found->first.begin();
-           i3 != found->first.end(); ++i3) {
-        newKey.insert(*i3);
-      }
-      partialResults.erase(found);
-      partialResults[newKey] = starting;
-
+    } catch (const std::runtime_error& e) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReader_T::process_joins: "
+        "%C", e.what()));
     }
   }
 }
@@ -263,22 +278,28 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
   const QueryPlan& qp)
 {
   using namespace std;
-  const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
-  vector<OPENDDS_STRING> no_keys;
-  for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
-       partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
-    SampleVec resulting;
-    for (typename SampleVec::iterator i = iterPR->second.begin();
-         i != iterPR->second.end(); ++i) {
-      join(resulting, *i, no_keys, NULL, qp.data_reader_, other_meta);
+  try {
+    const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
+    vector<OPENDDS_STRING> no_keys;
+    for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
+      partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
+      SampleVec resulting;
+      for (typename SampleVec::iterator i = iterPR->second.begin();
+        i != iterPR->second.end(); ++i) {
+        join(resulting, *i, no_keys, NULL, qp.data_reader_, other_meta);
+      }
+      resulting.swap(iterPR->second);
     }
-    resulting.swap(iterPR->second);
+    TopicSet withJoin(seen);
+    withJoin.insert(topicNameFor(qp.data_reader_));
+    partialResults[withJoin].swap(partialResults[seen]);
+    partialResults.erase(seen);
+    process_joins(partialResults, partialResults[withJoin], withJoin, qp);
+  } catch (const std::runtime_error& e) {
+    if (OpenDDS::DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) MultiTopicDataReader_T::cross_join: %C", e.what()));
+    }
   }
-  TopicSet withJoin(seen);
-  withJoin.insert(topicNameFor(qp.data_reader_));
-  partialResults[withJoin].swap(partialResults[seen]);
-  partialResults.erase(seen);
-  process_joins(partialResults, partialResults[withJoin], withJoin, qp);
 }
 
 template<typename Sample, typename TypedDataReader>
@@ -311,6 +332,15 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   }
 
   TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
+
+  if (!tdr) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("MultiTopicDataReader_T::incoming_sample, ")
+      ACE_TEXT("Failed to get TypedDataReader.\n")));
+    return;
+  }
+
   for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
        partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     for (typename SampleVec::iterator i = iterPR->second.begin();

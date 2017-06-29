@@ -36,7 +36,13 @@ assert_subscription_matched(const Options& opts, const DDS::DataReaderListener_v
 
   DataReaderListenerImpl* drl_servant =
           dynamic_cast<DataReaderListenerImpl*> (drl.in());
-
+  if (!drl_servant)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) assert_subscription_matched ")
+      ACE_TEXT("failed to obtain DataReaderListenerImpl.\n")),
+      false);
+  }
   // there is an error if we matched when not compatible (or vice-versa)
   if (opts.compatible != drl_servant->subscription_matched() && opts.reliability_kind == DDS::RELIABLE_RELIABILITY_QOS)
     {
@@ -65,7 +71,13 @@ assert_publication_matched(const Options& opts, const DDS::DataWriterListener_va
   // Assert if pub/sub made a match ...
   DataWriterListenerImpl* dwl_servant =
           dynamic_cast<DataWriterListenerImpl*> (dwl.in());
-
+  if (!dwl_servant)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) assert_publication_matched ")
+      ACE_TEXT("failed to obtain DataWriterListenerImpl.\n")),
+      false);
+  }
   // check to see if the publisher worked
   if (opts.compatible != dwl_servant->publication_matched() && opts.reliability_kind == DDS::RELIABLE_RELIABILITY_QOS)
     {

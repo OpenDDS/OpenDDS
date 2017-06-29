@@ -57,7 +57,11 @@ Writer::svc ()
           cerr << "ERROR: Trying to call enable on null writer_" << endl;
           exit(1);
         }
-        writer_->enable ();
+        if (::DDS::RETCODE_OK != writer_->enable()) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: failed to enable writer.\n")));
+          exit(1);
+        }
         continue;
       }
 

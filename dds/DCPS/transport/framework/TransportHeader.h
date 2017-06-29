@@ -12,6 +12,7 @@
 #include "ace/CDR_Base.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/SequenceNumber.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

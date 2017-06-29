@@ -136,7 +136,8 @@ public:
 
   ACE_Recursive_Thread_Mutex& lock_wdc(WriteDataContainer* wdc) { return wdc->lock_; }
 
-  WriteDataContainer* get_test_data_container(::DDS::DataWriterQos dw_qos, Test::SimpleDataWriterImpl* fast_dw)
+  WriteDataContainer* get_test_data_container(::DDS::DataWriterQos const & dw_qos,
+    Test::SimpleDataWriterImpl* fast_dw)
   {
     const bool reliable = dw_qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 

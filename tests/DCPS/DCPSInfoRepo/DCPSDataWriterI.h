@@ -5,7 +5,7 @@
 #define DCPSDATAWRITERI_H_
 
 #include "dds/DCPS/DataWriterCallbacks.h"
-#include "dds/DCPS/Definitions.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #include <vector>
 

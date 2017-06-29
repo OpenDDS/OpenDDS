@@ -204,6 +204,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       {
         DataWriterListenerImpl* dwl_servant =
           dynamic_cast<DataWriterListenerImpl*>(dwl.ptr());
+
+        if (!dwl_servant) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Failed to obtain DataWriterListenerImpl.\n")));
+          return 1;
+        }
+
         // check to see if the publisher worked
         if(dwl_servant->publication_matched() != compatible)
         {

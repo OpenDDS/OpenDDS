@@ -13,6 +13,7 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

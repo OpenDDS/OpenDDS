@@ -27,6 +27,8 @@
 #include <vector>
 #include <cstring>
 
+#include "../DCPS/RestoreOutputStreamState.h"
+
 class dds_generator {
 public:
   virtual ~dds_generator() = 0;
@@ -393,21 +395,11 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
   return e.replace(colon + 2, std::string::npos, label);
 }
 
-struct RestoreOutputStreamState {
-  explicit RestoreOutputStreamState(std::ostream& o)
-    : os_(o), state_(o.flags()) {}
-  ~RestoreOutputStreamState() {
-    os_.flags(state_);
-  }
-  std::ostream& os_;
-  std::ios_base::fmtflags state_;
-};
-
 inline
 std::ostream& operator<<(std::ostream& o,
                          const AST_Expression::AST_ExprValue& ev)
 {
-  RestoreOutputStreamState ross(o);
+  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return o << static_cast<int>(ev.u.oval);

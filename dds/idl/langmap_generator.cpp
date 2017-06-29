@@ -158,7 +158,12 @@ public:
   {
     std::stringstream first_label;
     AST_Union::DefaultValue dv;
-    the_union->default_value(dv);
+    if (the_union->default_value(dv) == -1) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: generateDefaultValue::")
+        ACE_TEXT(" computing default value failed\n")));;
+      return first_label.str();
+    }
 
     switch (the_union->udisc_type ())
       {

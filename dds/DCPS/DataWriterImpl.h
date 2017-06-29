@@ -20,7 +20,7 @@
 #include "Definitions.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "RcEventHandler.h"
@@ -369,15 +369,6 @@ public:
   }
 
   /**
-   * This method is called when an instance is unregistered from
-   * the WriteDataContainer.
-   *
-   * The subclass must provide the implementation to unregister
-   * the instance from its own map.
-   */
-  virtual void unregistered(DDS::InstanceHandle_t instance_handle) = 0;
-
-  /**
    * This is used to retrieve the listener for a certain status
    * change.
    *
@@ -535,8 +526,7 @@ protected:
   };
 
   virtual SendControlStatus send_control(const DataSampleHeader& header,
-                                         ACE_Message_Block* msg/*,
-                                         void* extra = 0*/);
+                                         ACE_Message_Block* msg);
 
 private:
 

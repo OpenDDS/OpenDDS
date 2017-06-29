@@ -124,7 +124,16 @@ void DataReaderListenerImpl::on_budget_exceeded (
   num_late_++;
   cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
   ::OpenDDS::DCPS::LatencyStatisticsSeq stats;
-  dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader)->get_latency_stats (stats);
+  OpenDDS::DCPS::DataReaderImpl* dri =
+    dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader);
+
+  if (!dri) {
+    cerr << "ERROR: DataReaderListenerImpl::on_budget_exceeded - " <<
+      "failed to obtain DataReaderImpl." << endl;
+    return;
+  }
+
+  dri->get_latency_stats(stats);
   for (unsigned long i = 0; i < stats.length(); ++i)
   {
     cout << "stats[" << i << "]:" << endl;

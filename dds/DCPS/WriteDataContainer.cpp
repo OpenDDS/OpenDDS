@@ -17,7 +17,7 @@
 #endif
 #include "PublicationInstance.h"
 #include "Util.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "GuidConverter.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -362,9 +362,6 @@ WriteDataContainer::unregister(
     // The registered_sample is shallow copied.
     registered_sample = instance->registered_sample_->duplicate();
   }
-
-  // Unregister the instance with typed DataWriter.
-  this->writer_->unregistered(instance_handle);
 
   if (this->writer_->watchdog_.in())
     this->writer_->watchdog_->cancel_timer(instance);

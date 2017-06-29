@@ -162,8 +162,8 @@ private:
   /// both send() and recv() fail.
   LockType  reconnect_lock_;
 
-  /// Flag indicates if connected or disconneted. It's set to true
-  /// when actively connecting or passively acepting succeeds and set
+  /// Flag indicates if connected or disconnected. It's set to true
+  /// when actively connecting or passively accepting succeeds and set
   /// to false whenever the peer stream is closed.
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool>  connected_;
 

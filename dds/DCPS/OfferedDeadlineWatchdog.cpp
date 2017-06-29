@@ -9,7 +9,7 @@
 
 #include "OfferedDeadlineWatchdog.h"
 #include "DataWriterImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "ace/Recursive_Thread_Mutex.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
