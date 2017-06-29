@@ -20,7 +20,7 @@
 #include "Definitions.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "RcEventHandler.h"

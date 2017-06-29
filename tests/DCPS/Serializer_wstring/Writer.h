@@ -25,7 +25,7 @@ public:
 
   int get_timeout_writes () const;
 
-  void set_message (Messenger::Message& message, const int& count);
+  void set_message (Messenger::Message& message, int count);
 
 
 private:

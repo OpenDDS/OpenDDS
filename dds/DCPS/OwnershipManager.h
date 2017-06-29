@@ -14,6 +14,7 @@
 #include "GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "PoolAllocator.h"
+#include "RepoIdTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

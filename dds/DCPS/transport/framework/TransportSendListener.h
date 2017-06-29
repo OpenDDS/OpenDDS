@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcHandle_T.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "TransportDefs.h"
 
 #include "dds/DCPS/PoolAllocator.h"

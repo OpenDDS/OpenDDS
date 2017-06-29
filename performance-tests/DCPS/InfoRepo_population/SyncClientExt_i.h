@@ -8,8 +8,7 @@ class SyncClientExt_i : public SyncClient_i
 {
  public:
   SyncClientExt_i (const std::string& sync_server, CORBA::ORB_ptr orb
-                   , Role role)
-    throw (SyncClient_i::InitError);
+                   , Role role);
   virtual ~SyncClientExt_i (void);
 
   void publish (SyncExt::Role role, int instances
