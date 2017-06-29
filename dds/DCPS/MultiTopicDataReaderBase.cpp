@@ -98,12 +98,27 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   DataReaderImpl* resulting_impl =
     dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
 
+  if (!resulting_impl) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("MultiTopicDataReaderBase::init, ")
+      ACE_TEXT("Failed to get DataReaderImpl.\n")));
+    return;
+  }
+
   resulting_impl->raw_latency_buffer_size() = parent->raw_latency_buffer_size();
   resulting_impl->raw_latency_buffer_type() = parent->raw_latency_buffer_type();
 
   DDS::DomainParticipant_var participant = parent->get_participant();
-  resulting_impl->init(multitopic, dr_qos, a_listener, mask,
-    dynamic_cast<DomainParticipantImpl*>(participant.in()), parent);
+  DomainParticipantImpl* dpi = dynamic_cast<DomainParticipantImpl*>(participant.in());
+  if (!dpi) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("MultiTopicDataReaderBase::init, ")
+      ACE_TEXT("Failed to get DomainParticipantImpl.\n")));
+    return;
+  }
+  resulting_impl->init(multitopic, dr_qos, a_listener, mask, dpi, parent);
 
   init_typed(resulting_reader_);
 
@@ -134,16 +149,22 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 
     QueryPlan& qp = query_plans_[selection[i]];
     qp.data_reader_ = incoming;
-    const MetaStruct& meta = metaStructFor(incoming);
+    try {
+      const MetaStruct& meta = metaStructFor(incoming);
 
-    for (const char** names = meta.getFieldNames(); *names; ++names) {
-      if (fieldToTopic.count(*names)) { // already seen this field name
-        set<OPENDDS_STRING>& topics = joinKeys[*names];
-        topics.insert(fieldToTopic[*names]);
-        topics.insert(selection[i]);
-      } else {
-        fieldToTopic[*names] = selection[i];
+      for (const char** names = meta.getFieldNames(); *names; ++names) {
+        if (fieldToTopic.count(*names)) { // already seen this field name
+          set<OPENDDS_STRING>& topics = joinKeys[*names];
+          topics.insert(fieldToTopic[*names]);
+          topics.insert(selection[i]);
+        } else {
+          fieldToTopic[*names] = selection[i];
+        }
       }
+    } catch (const std::runtime_error& e) {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::init: %C"), e.what()));
+        throw std::runtime_error("Failed to obtain metastruct for incoming.");
     }
   }
 
@@ -213,8 +234,13 @@ MultiTopicDataReaderBase::metaStructFor(DDS::DataReader_ptr reader)
 {
   DDS::TopicDescription_var td = reader->get_topicdescription();
   TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(td.in());
-  TypeSupportImpl* ts = dynamic_cast<TypeSupportImpl*>(tdi->get_type_support());
-  return ts->getMetaStructForType();
+  if (tdi) {
+    TypeSupportImpl* ts = dynamic_cast<TypeSupportImpl*>(tdi->get_type_support());
+    if (ts) {
+      return ts->getMetaStructForType();
+    }
+  }
+  throw std::runtime_error("Failed to obtain type support for incoming DataReader");
 }
 
 void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
@@ -224,6 +250,10 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 
   const OPENDDS_STRING topic = topicNameFor(reader);
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
+  if (!dri) {
+    throw runtime_error("Incoming DataReader for " + topic +
+      " could not be cast to DataReaderImpl.");
+  }
   DataReaderImpl::GenericBundle gen;
   ReturnCode_t rc = dri->read_generic(gen, NOT_READ_SAMPLE_STATE,
                                       ANY_VIEW_STATE, ANY_INSTANCE_STATE,false);
@@ -233,24 +263,35 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
     throw runtime_error("Incoming DataReader for " + topic +
       " could not be read, error #" + to_dds_string(rc));
   }
+  try {
+    const MetaStruct& meta = metaStructFor(reader);
+    const QueryPlan& qp = query_plans_[topic];
+    for (CORBA::ULong i = 0; i < gen.samples_.size(); ++i) {
+      if (gen.info_[i].valid_data) {
+        incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
+      } else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
+        DataReaderImpl* resulting_impl =
+          dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
 
-  const MetaStruct& meta = metaStructFor(reader);
-  const QueryPlan& qp = query_plans_[topic];
-  for (CORBA::ULong i = 0; i < gen.samples_.size(); ++i) {
-    if (gen.info_[i].valid_data) {
-      incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
-    } else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
-      DataReaderImpl* resulting_impl =
-        dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
-      set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator
-        iter = qp.instances_.begin();
-      while (iter != qp.instances_.end() &&
-             iter->first != gen.info_[i].instance_handle) ++iter;
-      for (; iter != qp.instances_.end() &&
-           iter->first == gen.info_[i].instance_handle; ++iter) {
-        resulting_impl->set_instance_state(iter->second,
-                                           gen.info_[i].instance_state);
+        if (resulting_impl) {
+          set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator
+            iter = qp.instances_.begin();
+          while (iter != qp.instances_.end() &&
+            iter->first != gen.info_[i].instance_handle) ++iter;
+          for (; iter != qp.instances_.end() &&
+            iter->first == gen.info_[i].instance_handle; ++iter) {
+            resulting_impl->set_instance_state(iter->second,
+              gen.info_[i].instance_state);
+          }
+        } else {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available:")
+            ACE_TEXT(" failed to obtain DataReaderImpl.")));
+        }
       }
+    }
+  } catch (const std::runtime_error& e) {
+    if (OpenDDS::DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MultiTopicDataReaderBase::data_available: %C"), e.what()));
     }
   }
 }
@@ -258,15 +299,21 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
 void MultiTopicDataReaderBase::set_status_changed_flag(DDS::StatusKind status,
   bool flag)
 {
-  dynamic_cast<DataReaderImpl*>(resulting_reader_.in())
-    ->set_status_changed_flag(status, flag);
+  DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
+  if (dri) {
+    dri->set_status_changed_flag(status, flag);
+  }
 }
 
 bool MultiTopicDataReaderBase::have_sample_states(
   DDS::SampleStateMask sample_states) const
 {
-  return dynamic_cast<DataReaderImpl*>(resulting_reader_.in())
-    ->have_sample_states(sample_states);
+  DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
+  if (dri) {
+    return dri->have_sample_states(sample_states);
+  } else {
+    return false;
+  }
 }
 
 void MultiTopicDataReaderBase::cleanup()
@@ -278,8 +325,12 @@ void MultiTopicDataReaderBase::cleanup()
   }
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
   SubscriberImpl* si = dynamic_cast<SubscriberImpl*>(sub.in());
-  si->remove_from_datareader_set(dri);
-  dri->cleanup();
+  if (dri) {
+    if (si) {
+      si->remove_from_datareader_set(dri);
+    }
+    dri->cleanup();
+  }
 }
 
 DDS::InstanceHandle_t MultiTopicDataReaderBase::get_instance_handle()

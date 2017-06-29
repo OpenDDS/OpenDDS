@@ -31,7 +31,7 @@ class Subscriber
 public:
   typedef std::string InitError;
 
-  Subscriber (int argc, ACE_TCHAR *argv[]) throw (InitError);
+  Subscriber (int argc, ACE_TCHAR *argv[]);
 
   bool run ();
 
@@ -102,7 +102,7 @@ Subscriber::parse_args (int argc, ACE_TCHAR *argv[])
   return true;
 }
 
-Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (Subscriber::InitError)
+Subscriber::Subscriber (int argc, ACE_TCHAR *argv[])
   : topic_count_ (1), participant_count_ (1), reader_count_(1)
   , control_file_ ("barrier_file"), publisher_count_ (1)
 {

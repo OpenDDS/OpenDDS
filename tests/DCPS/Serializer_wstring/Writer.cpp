@@ -115,7 +115,7 @@ Writer::svc ()
 }
 
 
-void Writer::set_message (Messenger::Message& message, const int& count)
+void Writer::set_message (Messenger::Message& message, int count)
 {
   message.count = count;
   switch (count)
@@ -125,43 +125,52 @@ void Writer::set_message (Messenger::Message& message, const int& count)
         CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(wcharseq));
         message.bounded_wchar_seq = BoundedWCharSeq (len + 1, wcharseq);
       }
+      break;
     case 8:
       {
         CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(charseq));
         message.bounded_char_seq = BoundedCharSeq (len + 1, charseq);
       }
+      break;
     case 7:
       {
         message.wstring_seq.length (5);
         message.wstring_seq[4] = CORBA::wstring_dup (wstrseq);
       }
+      break;
     case 6:
       {
         message.string_seq.length (5);
         message.string_seq[4] = CORBA::string_dup (strseq);
       }
+      break;
     case 5:
       {
         CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(wcharseq));
         message.wchar_seq.replace (len + 1, len + 1, wcharseq);
       }
+      break;
     case 4:
       {
         CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(charseq));
         message.char_seq.replace (len + 1, len + 1, charseq);
       }
+      break;
     case 3:
       {
         message.wstr = CORBA::wstring_dup (wstr);
       }
+      break;
     case 2:
       {
         message.str = CORBA::string_dup (str);
       }
+      break;
     case 1:
       {
         message.wch = L'B';
       }
+      break;
     case 0:
       {
         message.ch = 'A';

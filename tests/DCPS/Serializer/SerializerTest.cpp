@@ -29,7 +29,11 @@ struct Values {
   ACE_CDR::Char       charValue;
   ACE_CDR::WChar      wcharValue;
   ACE_CDR::Char*      stringValue;
+  std::string         stdstringValue;
+#ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar*     wstringValue;
+  std::wstring        stdwstringValue;
+#endif
 };
 
 struct ArrayValues {
@@ -66,8 +70,10 @@ insertions(ACE_Message_Block* chain, const Values& values,
   serializer << values.charValue;
   serializer << ACE_OutputCDR::from_wchar(values.wcharValue);
   serializer << ACE_OutputCDR::from_string(values.stringValue, 0);
+  serializer << values.stdstringValue;
 #ifdef DDS_HAS_WCHAR
   serializer << ACE_OutputCDR::from_wstring(values.wstringValue, 0);
+  serializer << values.stdwstringValue;
 #endif
 }
 
@@ -110,8 +116,10 @@ extractions(ACE_Message_Block* chain, Values& values,
   serializer >> values.charValue;
   serializer >> ACE_InputCDR::to_wchar(values.wcharValue);
   serializer >> ACE_InputCDR::to_string(values.stringValue, 0);
+  serializer >> values.stdstringValue;
 #ifdef DDS_HAS_WCHAR
   serializer >> ACE_InputCDR::to_wstring(values.wstringValue, 0);
+  serializer >> values.stdwstringValue;
 #endif
 }
 
@@ -248,6 +256,15 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << ")." << std::endl;
     failed = true;
   }
+  if(expected.stdstringValue != observed.stdstringValue) {
+    ACE::format_hexdump(expected.stdstringValue.c_str(), expected.stdstringValue.length(), ebuffer, sizeof(ebuffer));
+    ACE::format_hexdump(observed.stdstringValue.c_str(), observed.stdstringValue.length(), obuffer, sizeof(obuffer));
+    std::cout << "string values not correct after insertion and extraction." << std::endl;
+    std::cout << "(expected: " << expected.stdstringValue << "/" << ebuffer;
+    std::cout << ", observed: " << observed.stdstringValue << "/" << obuffer;
+    std::cout << ")." << std::endl;
+    failed = true;
+  }
 #ifdef DDS_HAS_WCHAR
   if((expected.wstringValue != 0) && (0 != ACE_OS::strcmp(expected.wstringValue, observed.wstringValue))) {
     ACE::format_hexdump(reinterpret_cast<char*>(expected.wstringValue), ACE_OS::strlen(expected.wstringValue), ebuffer, sizeof(ebuffer));
@@ -256,6 +273,12 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << "(expected: " << expected.wstringValue << "/" << ebuffer;
     std::cout << ", observed: " << observed.wstringValue << "/" << obuffer;
     std::cout << ")." << std::endl;
+    failed = true;
+  }
+  if(expected.stdwstringValue != observed.stdwstringValue) {
+    ACE::format_hexdump(reinterpret_cast<const char*>(expected.stdwstringValue.c_str()), expected.stdwstringValue.length(), ebuffer, sizeof(ebuffer));
+    ACE::format_hexdump(reinterpret_cast<const char*>(observed.stdwstringValue.c_str()), observed.stdwstringValue.length(), obuffer, sizeof(obuffer));
+    std::cout << "wstring values not correct after insertion and extraction." << std::endl;
     failed = true;
   }
 #endif
@@ -395,7 +418,11 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
   displayChain(testchain);
   std::cout << "EXTRACTING SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   Values observed = {0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0, 0};
+                     ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0, ""
+#ifdef DDS_HAS_WCHAR
+                     , 0, L""
+#endif
+                    };
   extractions(testchain, observed, swap, align);
   if (testchain->total_length()) {
     std::cout << "ERROR: BYTES READ != BYTES WRITTEN" << std::endl;
@@ -431,6 +458,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 #ifdef DDS_HAS_WCHAR
   const ACE_CDR::WChar wstring[] = L"This is a test of the wstring serialization.";
 #endif
+  std::string stdstring = "This is a test of the std string serialization.";
+#ifdef DDS_HAS_WCHAR
+  std::wstring stdwstring = L"This is a test of the std wstring serialization.";
+#endif
 
   Values expected = { 0x01,
                       0x2345,
@@ -449,10 +480,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                       0x1a,
                       0xb2,
                       const_cast<ACE_CDR::Char*>(string),
+                      stdstring,
 #ifdef DDS_HAS_WCHAR
-                      const_cast<ACE_CDR::WChar*>(wstring)
-#else
-                      0
+                      const_cast<ACE_CDR::WChar*>(wstring),
+                      stdwstring
 #endif
   };
 
@@ -467,8 +498,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     expectedArray.ushortValue[i] = ACE_CDR::UShort(0xffff|i);
     expectedArray.ulongValue[i] = ACE_CDR::ULong(0xf0f0f0f0|i);
     expectedArray.ulonglongValue[i] = ACE_UINT64_LITERAL(0xcdef0123456789ab);
-    expectedArray.floatValue[i] = (float) 1.0 / (float) i;
-    expectedArray.doubleValue[i] = (double) 3.0 / (double) i;
+    if (i == 0) {
+      expectedArray.floatValue[i] = (float) 0.0;
+      expectedArray.doubleValue[i] = (double) 0.0;
+    } else {
+      expectedArray.floatValue[i] = (float) 1.0 / (float)i;
+      expectedArray.doubleValue[i] = (double) 3.0 / (double)i;
+    }
 #if ACE_SIZEOF_LONG_DOUBLE == 16
     expectedArray.longdoubleValue[i] = 0x89abcdef01234567LL;
 #else

@@ -1215,7 +1215,7 @@ DataReaderImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (this->subscriber_servant_->is_enabled() == false) {
+  if (!this->subscriber_servant_->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -1734,7 +1734,14 @@ void DataReaderImpl::notify_read_conditions()
 
   for (ReadConditionSet::iterator it = local_read_conditions.begin(),
       end = local_read_conditions.end(); it != end; ++it) {
-    dynamic_cast<ConditionImpl*>(it->in())->signal_all();
+    ConditionImpl* ci = dynamic_cast<ConditionImpl*>(it->in());
+    if (ci) {
+      ci->signal_all();
+    } else {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::notify_read_conditions: ")
+        ACE_TEXT("Failed to obtain ConditionImpl - can't notify.\n")));
+    }
   }
 }
 

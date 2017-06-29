@@ -97,9 +97,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample = {0, 0};
-  mdw->write(sample, HANDLE_NIL); // durable, filtered
+  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false; // durable, filtered
   sample.key = 99;
-  mdw->write(sample, HANDLE_NIL); // durable, not filtered
+  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false; // durable, not filtered
+
   DataWriter_var dw2 =
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
 
@@ -310,8 +311,9 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample = {0, INT64_LITERAL_SUFFIX(1485441228338)};
-  for (; sample.key < 3; ++sample.key, ++sample.ull)
-    mdw->write(sample, HANDLE_NIL);
+  for (; sample.key < 3; ++sample.key, ++sample.ull) {
+    if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+  }
 
   if (!waitForSample(dr)) return false;
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);

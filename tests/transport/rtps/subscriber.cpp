@@ -39,6 +39,8 @@ public:
   explicit SimpleDataReader(const RepoId& sub_id)
     : done_(false)
     , sub_id_(sub_id)
+    , pub_id_(GUID_UNKNOWN)
+    , seq_()
     , control_msg_count_(0)
   {}
 

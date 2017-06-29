@@ -70,7 +70,7 @@ usage_and_exit(int value = 0)
             << "              will then failover to another repository within the" << std::endl
             << "              federation." << std::endl
             << std::endl
-            << "   Any unrecongnized commands or no command will result in the same" << std::endl
+            << "   Any unrecognized commands or no command will result in the same" << std::endl
             << "   action as the '-h' option." << std::endl
             << std::endl;
 

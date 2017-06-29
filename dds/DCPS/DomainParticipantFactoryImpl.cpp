@@ -174,8 +174,16 @@ DomainParticipantFactoryImpl::delete_participant(
   DomainParticipantImpl* the_servant
   = dynamic_cast<DomainParticipantImpl*>(a_participant);
 
+  if (!the_servant) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+      ACE_TEXT("failed to obtain the DomainParticipantImpl.\n")));
+
+    return DDS::RETCODE_ERROR;
+  }
+
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
-  if (the_servant->is_clean() == 0) {
+  if (!the_servant->is_clean()) {
     RepoId id = the_servant->get_id();
     GuidConverter converter(id);
     ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose

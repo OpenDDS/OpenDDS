@@ -11,6 +11,7 @@
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/Transient_Kludge.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/RestoreOutputStreamState.h"
 #include "DomainParticipantListener.h"
 #include "DataWriterListener.h"
 #include "PublisherListener.h"
@@ -173,7 +174,10 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
-  std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
+  {
+    OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
+    std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
+  }
 
   TEST_CHECK (participant_->contains_entity(publisher_->get_instance_handle()));
 

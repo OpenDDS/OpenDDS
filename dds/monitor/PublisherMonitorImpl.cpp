@@ -35,7 +35,13 @@ PublisherMonitorImpl::report() {
     PublisherReport report;
     report.handle = pub_->get_instance_handle();
     DDS::DomainParticipant_var dp = pub_->get_participant();
-    report.dp_id   = dynamic_cast<DomainParticipantImpl*>(dp.in())->get_id();
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<DomainParticipantImpl*>(dp.in());
+    if (!dpi) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PublisherMonitorImpl::report():")
+        ACE_TEXT(" failed to obtain DomainParticipantImpl.\n")));
+      return;
+    }
+    report.dp_id   = dpi->get_id();
     TransportImpl_rch ti; //TODO: transport    = pub_->get_transport_impl();
     // TODO: remove/replace
     report.transport_id = 0;

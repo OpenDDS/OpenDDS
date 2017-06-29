@@ -2,8 +2,9 @@
 #define dds_DCPS_SafetyProfileSequence_h
 
 #include "dds/DCPS/SafetyProfilePool.h"
-#include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Serializer.h"
 
 #include <tao/Array_VarOut_T.h> // Array_Traits
 #include <tao/String_Manager_T.h>

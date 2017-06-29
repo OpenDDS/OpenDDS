@@ -16,7 +16,7 @@
 #include "DataSampleElement.h"
 #include "WriteDataContainer.h"
 #include "DataWriterImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "debug.h"
 #include "SafetyProfileStreams.h"
 #include "Service_Participant.h"

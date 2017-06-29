@@ -129,6 +129,10 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
 
+  if (!dp_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: could not obtain DomainParticipantImpl\n"), false);
+  }
+
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
                                                   ANY_VIEW_STATE,
@@ -269,9 +273,15 @@ void wait_match(const DataReader_var& dr, int n)
   ConditionSeq conditions;
   SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
   const Duration_t timeout = {1, 0};
+  ReturnCode_t result;
   while (dr->get_subscription_matched_status(ms) == RETCODE_OK
          && ms.current_count != n) {
-    ws->wait(conditions, timeout);
+    result = ws->wait(conditions, timeout);
+    if (result != RETCODE_OK && result != RETCODE_TIMEOUT) {
+      ACE_ERROR((LM_ERROR,
+        "ERROR: %P wait_match could not wait for condition: %d\n", result));
+      break;
+    }
   }
   ws->detach_condition(condition);
 }
@@ -374,6 +384,12 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     TheServiceParticipant->get_discovery(subscriber->get_domain_id());
   OpenDDS::DCPS::DomainParticipantImpl* subscriber_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(subscriber.in());
+
+  if (!subscriber_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P read_publication_bit: ")
+      ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+      false);
+  }
 
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
   if (!ignored_publication) {
@@ -499,6 +515,12 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     TheServiceParticipant->get_discovery(publisher->get_domain_id());
   OpenDDS::DCPS::DomainParticipantImpl* publisher_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(publisher.in());
+
+  if (!publisher_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P read_subscription_bit: ")
+      ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+      false);
+  }
 
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
   if (!ignored_subscription) {
@@ -647,6 +669,12 @@ bool check_discovered_participants(DomainParticipant_var& dp,
       OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
           dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
 
+      if (!dp_impl) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P check_discovered_participants: ")
+          ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+          false);
+      }
+
       OpenDDS::DCPS::RepoId repo_id = disc->bit_key_to_repo_id(
           dp_impl,
           OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
@@ -680,6 +708,13 @@ bool run_test(DomainParticipant_var& dp_sub,
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
       dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_sub.in());
+
+    if (!dp_impl) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P run_test: ")
+        ACE_TEXT("Failed to obtain DomainParticipantImpl for sub\n")),
+        false);
+    }
+
     sub_repo_id = dp_impl->get_id ();
     OpenDDS::DCPS::GuidConverter converter(sub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
@@ -691,6 +726,13 @@ bool run_test(DomainParticipant_var& dp_sub,
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
       dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_pub.in());
+
+    if (!dp_impl) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P run_test: ")
+        ACE_TEXT("Failed to obtain DomainParticipantImpl for pub\n")),
+        false);
+    }
+
     pub_repo_id = dp_impl->get_id ();
     OpenDDS::DCPS::GuidConverter converter(pub_repo_id);
     ACE_DEBUG ((LM_DEBUG,

@@ -180,7 +180,9 @@ private:
     TransportImpl::ConnectionAttribs attribs_;
 
     PendingAssoc()
-      : active_(false), removed_(false), blob_index_(0)
+      : active_(false)
+      , removed_(false)
+      , blob_index_(0)
     {}
 
     bool initiate_connect(TransportClient* tc, Guard& guard);

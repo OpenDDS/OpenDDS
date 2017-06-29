@@ -40,6 +40,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
+    if (msg_count < 0 || msg_count > 5000) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("ERROR: %N:%l: main() -")
+        ACE_TEXT(" specified msg_count outside range!\n")), -1);
+    }
+
     if (argc > 2) {
       if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
         keep_last_one = true;

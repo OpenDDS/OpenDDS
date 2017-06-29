@@ -388,6 +388,12 @@ TestSystem::run()
 {
   ForwardingListenerImpl* forwarder
     = dynamic_cast< ForwardingListenerImpl*>(this->listener_.in ());
-  forwarder->waitForCompletion();
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: processing complete.\n")));
+  if (forwarder) {
+    forwarder->waitForCompletion();
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: processing complete.\n")));
+  } else {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) %T ERROR: Failed to obtain ForwardingListenerImpl")
+      ACE_TEXT(" cannot wait for completion.\n")));
+  }
 }

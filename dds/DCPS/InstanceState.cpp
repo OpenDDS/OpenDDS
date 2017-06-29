@@ -12,7 +12,7 @@
 #include "DataReaderImpl.h"
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "DomainParticipantImpl.h"
 
 #if !defined (__ACE_INLINE__)

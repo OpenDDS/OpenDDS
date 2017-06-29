@@ -8,6 +8,7 @@
 #include "ace/OS_main.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/SequenceNumber.h"
 
 #include "../common/TestSupport.h"
 

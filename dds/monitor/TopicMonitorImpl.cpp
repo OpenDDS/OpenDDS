@@ -36,11 +36,16 @@ TopicMonitorImpl::report() {
     DDS::DomainParticipant_var dp = this->topic_->get_participant();
     DomainParticipantImpl* dp_impl =
       dynamic_cast<DomainParticipantImpl*>(dp.in());
-    report.dp_id      = dp_impl->get_id();
-    report.topic_id   = this->topic_->get_id();
-    report.topic_name = this->topic_->get_name();
-    report.type_name  = this->topic_->get_type_name();
-    this->topic_writer_->write(report, DDS::HANDLE_NIL);
+    if (dp_impl) {
+      report.dp_id = dp_impl->get_id();
+      report.topic_id = this->topic_->get_id();
+      report.topic_name = this->topic_->get_name();
+      report.type_name = this->topic_->get_type_name();
+      this->topic_writer_->write(report, DDS::HANDLE_NIL);
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TopicMonitorImpl::report(): ")
+        ACE_TEXT("failed to obtain DomainParticipantImpl.\n")));
+    }
   }
 }
 

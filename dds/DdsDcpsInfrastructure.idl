@@ -48,15 +48,6 @@ module DDS {
 
     const long LENGTH_UNLIMITED = -1;
 
-    const long            DURATION_INFINITE_SEC   = 0x7fffffff;
-    const unsigned long   DURATION_INFINITE_NSEC  = 0x7fffffff;
-
-    const long DURATION_ZERO_SEC = 0;
-    const unsigned long DURATION_ZERO_NSEC = 0;
-
-    const long            TIME_INVALID_SEC        = -1;
-    const unsigned long   TIME_INVALID_NSEC       = 0xffffffff;
-
     // ----------------------------------------------------------------------
     // Return codes
     // ----------------------------------------------------------------------
