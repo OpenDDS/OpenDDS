@@ -83,6 +83,11 @@ elsif ($test->flag('rtps_disc_tcp')) {
     $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $is_rtps_disc = 1;
 }
+elsif ($test->flag('rtps_disc_tcp_udp')) {
+    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
+    $is_rtps_disc = 1;
+}
 elsif ($test->flag('rtps_unicast')) {
     $test->{nobits} = 1;
     $pub_opts .= " -DCPSConfigFile rtps_uni.ini";

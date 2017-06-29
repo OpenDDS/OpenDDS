@@ -163,7 +163,7 @@ DomainParticipantImpl::delete_publisher(
     return DDS::RETCODE_ERROR;
   }
 
-  if (the_servant->is_clean() == 0) {
+  if (!the_servant->is_clean()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
@@ -252,7 +252,7 @@ DomainParticipantImpl::delete_subscriber(
     return DDS::RETCODE_ERROR;
   }
 
-  if (the_servant->is_clean() == 0) {
+  if (!the_servant->is_clean()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
@@ -410,7 +410,7 @@ DomainParticipantImpl::create_topic_i(
                            tao_mon,
                            this->topics_protector_,
                            DDS::Topic::_nil());
-          entry->client_refs_ ++;
+          ++entry->client_refs_;
         }
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
 
@@ -548,7 +548,7 @@ DomainParticipantImpl::delete_topic_i(
                          DDS::RETCODE_ERROR);
       }
 
-      entry->client_refs_ --;
+      --entry->client_refs_;
 
       if (remove_objref == true ||
           0 == entry->client_refs_) {
@@ -617,7 +617,7 @@ DomainParticipantImpl::find_topic(
                        DDS::Topic::_nil());
 
       if (Util::find(topics_, topic_name, entry) == 0) {
-        entry->client_refs_ ++;
+        ++entry->client_refs_;
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
       }
     }
@@ -1702,7 +1702,7 @@ DomainParticipantImpl::create_new_topic(
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, topic_name, entry) == 0) {
-    entry->client_refs_ ++;
+    ++entry->client_refs_;
     return DDS::Topic::_duplicate(entry->pair_.obj_.in());
   }
   */
@@ -1747,22 +1747,22 @@ DomainParticipantImpl::create_new_topic(
   return DDS::Topic::_duplicate(refCounted_topic.pair_.obj_.in());
 }
 
-int
+bool
 DomainParticipantImpl::is_clean() const
 {
-  int sub_is_clean = subscribers_.empty();
-  int topics_is_clean = topics_.size() == 0;
+  bool sub_is_clean = subscribers_.empty();
+  bool topics_is_clean = topics_.size() == 0;
 
   if (!TheTransientKludge->is_enabled()) {
     // There are four topics and builtin topic subscribers
     // left.
 
-    sub_is_clean = sub_is_clean == 0 ? subscribers_.size() == 1 : 1;
-    topics_is_clean = topics_is_clean == 0 ? topics_.size() == 4 : 1;
+    sub_is_clean = !sub_is_clean ? subscribers_.size() == 1 : true;
+    topics_is_clean = !topics_is_clean ? topics_.size() == 4 : true;
   }
   return (publishers_.empty()
-          && sub_is_clean == 1
-          && topics_is_clean == 1);
+          && sub_is_clean
+          && topics_is_clean);
 }
 
 DDS::DomainParticipantListener_ptr

@@ -7,11 +7,12 @@ compiler:
 env:
   matrix:
     - FUZZ=1
-    - NO_INLINE=1
-    - NO_BIT=1
-    - STATIC=1 NO_DEBUG=1
-    - SAFETY_PROFILE=1
-    - USES_WCHAR=1
+    - NO_INLINE=1 XERCES3=1
+    - NO_BIT=1 XERCES3=1
+    - STATIC=1 NO_DEBUG=1 XERCES3=1
+    - SAFETY_PROFILE=1 XERCES3=1
+    - USES_WCHAR=1 XERCES3=0
+    - NO_MULTITOPIC=1 XERCES3=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
     - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
@@ -41,7 +42,9 @@ matrix:
           packages:
             - libxerces-c-dev
             - clang++-3.9
-      env: COMPILER=clang++-3.9
+      env: COMPILER=clang++
+    - os: osx
+      env: COMPILER=clang++ XERCES3=0 NO_INLINE=1
 
 addons:
   apt:
@@ -73,9 +76,11 @@ before_script:
   - if [ "$STATIC" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
   - if [ "$NO_DEBUG" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-debug"; fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --safety-profile"; fi
+  - if [ "$NO_MULTITOPIC" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-multi-topic"; fi
   - if [ "$USE_JAVA" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --java"; fi
   - if [ "$NO_TESTS" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-tests"; fi
-  - if [ "$USES_WCHAR" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=uses_wchar=1"; else DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --xerces3"; fi
+  - if [ "$USES_WCHAR" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=uses_wchar=1"; fi
+  - if [ "$XERCES3" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --xerces3"; fi
   - if [ "$CXX" == "g++" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --macros=c++11=1"; fi
   - ./configure --mpcopts="-workers 2" --compiler=$COMPILER $DDS_CONFIGURE_PARAMS
   - if [ "$SAFETY_PROFILE" == "1" ]; then

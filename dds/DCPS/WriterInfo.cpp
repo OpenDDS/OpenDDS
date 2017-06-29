@@ -9,7 +9,7 @@
 
 #include "GuidConverter.h"
 #include "WriterInfo.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "Service_Participant.h"
 
 #include "ace/OS_NS_sys_time.h"

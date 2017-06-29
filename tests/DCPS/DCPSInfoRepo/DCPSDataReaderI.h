@@ -5,7 +5,7 @@
 #define DCPSDATAREADERI_H_
 
 #include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/Definitions.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #include "DiscReceivedCalls.h"
 

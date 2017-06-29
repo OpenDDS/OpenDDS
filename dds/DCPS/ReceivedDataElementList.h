@@ -15,7 +15,7 @@
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "DataSampleHeader.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 

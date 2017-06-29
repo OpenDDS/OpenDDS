@@ -1218,7 +1218,7 @@ DataReaderImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (this->subscriber_servant_->is_enabled() == false) {
+  if (!this->subscriber_servant_->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 

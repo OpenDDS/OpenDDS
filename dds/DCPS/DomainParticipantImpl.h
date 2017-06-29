@@ -116,7 +116,7 @@ private:
     /// The topic object reference.
     Topic_Pair pair_;
     /// The reference count on the obj_.
-    CORBA::Long client_refs_;
+    CORBA::ULong client_refs_;
   };
 
   typedef OPENDDS_MAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
@@ -305,7 +305,7 @@ private:
   /**
    *  Check if the topic is used by any datareader or datawriter.
    */
-  int is_clean() const;
+  bool is_clean() const;
 
   /**
    * This is used to retrieve the listener for a certain status change.

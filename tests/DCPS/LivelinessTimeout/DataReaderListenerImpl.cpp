@@ -9,7 +9,8 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
-  deadline_missed_(0)
+  deadline_missed_(0),
+  last_si_()
 {
 }
 

@@ -12,7 +12,7 @@ class SyncServer
 public:
   typedef std::string InitError;
 
-  SyncServer (int argc, ACE_TCHAR *argv[]) throw (InitError);
+  SyncServer (int argc, ACE_TCHAR *argv[]);
 
   bool run ();
 
@@ -57,7 +57,6 @@ SyncServer::parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 SyncServer::SyncServer (int argc, ACE_TCHAR* argv[])
-  throw (SyncServer::InitError)
   : pub_count_ (1), sub_count_ (1)
 {
   try

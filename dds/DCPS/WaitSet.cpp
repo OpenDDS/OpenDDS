@@ -8,7 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "WaitSet.h"
 #include "ConditionImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 
 #include "ace/OS_NS_sys_time.h"
 

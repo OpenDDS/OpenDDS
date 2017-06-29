@@ -6,7 +6,6 @@
 
 SyncClientExt_i::SyncClientExt_i (const std::string& sync_server
                                   , CORBA::ORB_ptr orb, Role role)
-  throw (SyncClient_i::InitError)
   : SyncClient_i (sync_server, orb, role)
 { }
 
