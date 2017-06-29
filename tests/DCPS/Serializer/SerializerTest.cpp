@@ -8,6 +8,7 @@
 #include "ace/OS_NS_string.h"
 
 #include <iostream>
+#include <string>
 
 using OpenDDS::DCPS::Serializer;
 
