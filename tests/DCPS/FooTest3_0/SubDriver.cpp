@@ -87,7 +87,7 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
         {
-          num_disposed_ = ACE_OS::atoi (current_arg);;
+          num_disposed_ = ACE_OS::atoi (current_arg);
           arg_shifter.consume_arg ();
         }
       else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
