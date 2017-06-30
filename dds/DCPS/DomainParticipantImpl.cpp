@@ -2221,13 +2221,13 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       DDS::ReturnCode_t result = subPtr->delete_contained_entities();
 
       if (result != DDS::RETCODE_OK) {
-        ret = result;;
+        ret = result;
       }
 
       result = delete_subscriber(subPtr);
 
       if (result != DDS::RETCODE_OK) {
-        ret = result;;
+        ret = result;
       }
 
       --subsize;

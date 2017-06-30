@@ -443,7 +443,7 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache()
          ++s) {
       sample_list_type * const list = (*s).int_id_;
 
-      size_t const len = list->size();;
+      size_t const len = list->size();
 
       for (size_t l = 0; l != len; ++l) {
         ACE_DES_FREE((*list)[l],
