@@ -51,7 +51,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         DDS::TopicListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(topic)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_topic failed.\n")));;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_topic failed.\n")));
       exit(1);
     }
 
@@ -62,7 +62,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         DDS::SubscriberListener::_nil(),
         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(sub1)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Failed to create_subscriber.\n")));;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Failed to create_subscriber.\n")));
       exit(1);
     }
 
@@ -72,7 +72,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       dynamic_cast<DataReaderListenerImpl*>(listener1.in());
 
     if (CORBA::is_nil(listener1)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) listener is nil.\n")));;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) listener is nil.\n")));
       exit(1);
     }
     if (!listener_servant1) {
@@ -91,11 +91,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       listener1,
       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(dr1)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datareader dr1 durable failed.\n")));;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_datareader dr1 durable failed.\n")));
       exit(1);
     }
     else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader dr1 durable success.\n")));;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader dr1 durable success.\n")));
     }
 
     //Now create the publisher
@@ -103,7 +103,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
         DDS::PublisherListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(pub)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_publisher failed.\n")));;
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_publisher failed.\n")));
       exit(1);
     }
 
