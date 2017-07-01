@@ -434,9 +434,15 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
   displayChain(testchain);
   std::cout << "EXTRACTING SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   Values observed = {0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0, ""
+                     ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0
+#ifndef OPENDDS_SAFETY_PROFILE
+                     , ""
+#endif
 #ifdef DDS_HAS_WCHAR
-                     , 0, L""
+                     , 0
+#ifndef OPENDDS_SAFETY_PROFILE
+                     , L""
+#endif
 #endif
                     };
   extractions(testchain, observed, swap, align);
@@ -497,14 +503,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 #endif
                       0x1a,
                       0xb2,
-                      const_cast<ACE_CDR::Char*>(string),
+                      const_cast<ACE_CDR::Char*>(string)
 #ifndef OPENDDS_SAFETY_PROFILE
-                      stdstring,
+                      , stdstring
 #endif
 #ifdef DDS_HAS_WCHAR
-                      const_cast<ACE_CDR::WChar*>(wstring),
+                      , const_cast<ACE_CDR::WChar*>(wstring)
 #ifndef OPENDDS_SAFETY_PROFILE
-                      stdwstring
+                      , stdwstring
 #endif
 #endif
   };
