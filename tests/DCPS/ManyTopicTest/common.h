@@ -8,6 +8,12 @@
  */
 // ============================================================================
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#ifndef COMMON_H_3FEAE041
+#define COMMON_H_3FEAE041
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -41,3 +47,5 @@ static ACE_TString synch_dir;
 static ACE_TString pub_finished_filename = ACE_TEXT("_publisher_finished.txt");
 //static ACE_TString sub_ready_filename = ACE_TEXT("subscriber_ready.txt");
 static ACE_TString sub_finished_filename = ACE_TEXT("_subscriber_finished.txt");
+
+#endif /* end of include guard: COMMON_H_3FEAE041 */

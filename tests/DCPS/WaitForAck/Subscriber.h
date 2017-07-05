@@ -1,4 +1,7 @@
 // -*- C++ -*-
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"

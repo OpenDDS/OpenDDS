@@ -8,6 +8,12 @@
  */
 // ============================================================================
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#ifndef COMMON_H_BB55E14B
+#define COMMON_H_BB55E14B
 
 #include "ace/SString.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -58,3 +64,6 @@ extern ACE_TString liveliness_kind_str;
 ::DDS::LivelinessQosPolicyKind get_liveliness_kind(const ACE_TString& argument);
 ::DDS::ReliabilityQosPolicyKind get_reliability_kind(const ACE_TString& argument);
 DDS::Duration_t get_lease_duration(const ACE_TString& argument);
+
+#endif /* end of include guard: COMMON_H_BB55E14B */
+
