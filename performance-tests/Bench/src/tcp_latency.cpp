@@ -117,7 +117,7 @@ recevier(ACE_SOCK_Stream& cli_stream)
             << " --- full path statistical data --\n";
 
 
-  std::copy(latencies.begin(), latencies.end(), std::ostream_iterator<double>(cout, "\n"));
+  std::copy(latencies.begin(), latencies.end(), std::ostream_iterator<double>(std::cout, "\n"));
 
   return;
 }
