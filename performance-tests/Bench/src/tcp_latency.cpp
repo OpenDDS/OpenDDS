@@ -2,7 +2,9 @@
 #include "ace/OS_NS_sys_wait.h"
 #include "ace/Thread.h"
 #include "ace/Thread_Manager.h"
-#include "ace/SOCK_Dgram.h"
+#include "ace/SOCK_Stream.h"
+#include "ace/SOCK_Connector.h"
+#include "ace/SOCK_Acceptor.h"
 #include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_unistd.h"
@@ -18,7 +20,7 @@ const int max_buffer_size = 32000;
 
 ACE_INET_Addr server_addr;
 int frequency = 100; // messages per second
-int message_size = 100;
+int message_size = 0;
 int test_duration = 120; // seconds
 int server_port = 0;
 
@@ -31,7 +33,7 @@ struct DataSample {
 static void *
 sender (void *arg)
 {
-  ACE_SOCK_Dgram& cli_dgram = *reinterpret_cast<ACE_SOCK_Dgram*>(arg);
+  ACE_SOCK_Stream& cli_stream = *reinterpret_cast<ACE_SOCK_Stream*>(arg);
 
   ACE_Time_Value sleep_time (0, 1000000/frequency);
   int counter = frequency * test_duration;
@@ -39,17 +41,17 @@ sender (void *arg)
 
   while (counter--) {
     data.sending_time_ = ACE_OS::gethrtime();
-    if (cli_dgram.send (&data, message_size, server_addr) == -1)
+    if (cli_stream.send_n (&data, message_size) == -1)
     {
 
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) %p\n"), ACE_TEXT("cli_dgram.send")));
+                 ACE_TEXT("(%P|%t) %p\n"), ACE_TEXT("cli_stream.send_n")));
       return 0;
     }
     ACE_OS::sleep(sleep_time);
   }
 
-  cli_dgram.send (&data, 0, server_addr);
+  cli_stream.close_writer();
 
   return 0;
 }
@@ -79,31 +81,26 @@ Statistics get_stat(const std::vector<double>& data)
   return result;
 }
 
-
 static void
-recevier(ACE_SOCK_Dgram& cli_dgram)
+recevier(ACE_SOCK_Stream& cli_stream)
 {
   ACE_INET_Addr peer_addr;
   DataSample data;
-  ACE_Time_Value timeout(2,0);
   ssize_t rcv_cnt = 1;
 
   std::vector<double> latencies;
   latencies.reserve(frequency * test_duration);
 
   while (rcv_cnt) {
-    rcv_cnt = cli_dgram.recv (&data,
-                              sizeof (data),
-                              peer_addr,
-                              0,
-                              &timeout);
+    rcv_cnt = cli_stream.recv_n (&data,
+                                 message_size);
     if (rcv_cnt > 0) {
-      latencies.push_back(1E-9* (ACE_OS::gethrtime()-data.sending_time_));
+      latencies.push_back( 1E-9 *(ACE_OS::gethrtime()-data.sending_time_) );
     }
     else if (rcv_cnt < 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) %p\n"),
-                 ACE_TEXT("cli_dgram.recv")));
+                 ACE_TEXT("cli_stream.recv_n")));
       return;
     }
   }
@@ -121,6 +118,7 @@ recevier(ACE_SOCK_Dgram& cli_dgram)
 
 
   std::copy(latencies.begin(), latencies.end(), std::ostream_iterator<double>(cout, "\n"));
+
   return;
 }
 
@@ -128,44 +126,53 @@ recevier(ACE_SOCK_Dgram& cli_dgram)
 int echo_server(int port)
 {
 
-  ACE_INET_Addr server_addr;
-  server_addr.set (port);
-  ACE_SOCK_Dgram server_dgram;
+  // Acceptor
+  ACE_SOCK_Acceptor peer_acceptor;
 
-  if (server_dgram.open (server_addr) == -1)
+  ACE_INET_Addr server_addr, cli_addr;
+  server_addr.set (port);
+  ACE_SOCK_Stream server_stream;
+
+  if (peer_acceptor.open (server_addr) == -1)
   {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) %p\n"),
-               ACE_TEXT("server_dgram.open")));
+               ACE_TEXT("peer_acceptor.open")));
     return 1;
   }
 
-  ACE_INET_Addr peer_addr;
+  if (peer_acceptor.accept (server_stream, &cli_addr) == -1)
+  {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) %p\n"),
+               ACE_TEXT("peer_acceptor.accept")));
+    return 1;
+  }
+
   DataSample data;
   ACE_Time_Value timeout(120,0);
   ssize_t rcv_cnt = 1;
 
   while (rcv_cnt) {
-    rcv_cnt = server_dgram.recv (&data,
-                              sizeof (data),
-                              peer_addr,
-                              0,
-                              &timeout);
-    if (rcv_cnt >= 0) {
-      if (server_dgram.send(&data,
-                            rcv_cnt,
-                            peer_addr) < 0){
+    rcv_cnt = server_stream.recv_n (&data,
+                                    message_size);
+    if (rcv_cnt > 0) {
+      if (server_stream.send_n(&data,
+                               message_size) < 0){
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) %p\n"),
-                   ACE_TEXT("server_dgram.send")));
+                   ACE_TEXT("server_stream.send_n")));
         return 1;
       }
     }
     else if (rcv_cnt < 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) %p\n"),
-                 ACE_TEXT("server_dgram.recv")));
+                 ACE_TEXT("server_stream.recv_n")));
       return 1;
+    }
+    else {
+      server_stream.close_writer();
     }
   }
   return 0;
@@ -207,7 +214,7 @@ int parse_args(int argc, ACE_TCHAR ** argv)
 
   if (!ok) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("usage: %s [-c server_address [-d test_duration_in_sec] [-f frequency] [-m message_size] | -s server_port] \n"),
+      ACE_TEXT("usage: %s [-c server_address [-d test_duration_in_sec] [-f frequency] | -s server_port] [-m message_size] \n"),
       argv[0]));
     return 1;
   }
@@ -226,27 +233,28 @@ int ACE_MAIN (int argc, ACE_TCHAR ** argv)
     }
     else {
 
-      ACE_SOCK_Dgram cli_dgram;
+      ACE_SOCK_Stream cli_stream;
+      ACE_SOCK_Connector con;
 
-      if (cli_dgram.open (ACE_Addr::sap_any, server_addr.get_type ()) == -1)
+      if (con.connect (cli_stream, server_addr, 0) == -1)
         {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) %p\n"),
-                     ACE_TEXT("cli_dgram.open")));
+                     ACE_TEXT("con.connect")));
         }
 
 
         if (ACE_Thread_Manager::instance ()->spawn
             (ACE_THR_FUNC (sender),
-             (void *) &cli_dgram,
+             (void *) &cli_stream,
              THR_NEW_LWP | THR_DETACHED) == -1)
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) %p\n"),
                              ACE_TEXT("thread create failed")),
                              1);
 
-      recevier(cli_dgram);
-      cli_dgram.close();
+      recevier(cli_stream);
+      cli_stream.close();
     }
     return 0;
   }
