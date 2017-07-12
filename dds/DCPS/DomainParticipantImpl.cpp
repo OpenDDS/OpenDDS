@@ -1121,7 +1121,7 @@ DomainParticipantImpl::ignore_participant(
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_participant, ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
+                      ACE_TEXT("Entity is not enabled. \n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -1150,7 +1150,7 @@ DomainParticipantImpl::ignore_participant(
                                         ignoreId)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_participant, ")
-                      ACE_TEXT(" Could not ignore domain participant.\n")),
+                      ACE_TEXT("Could not ignore domain participant.\n")),
                      DDS::RETCODE_NOT_ENABLED);
     return DDS::RETCODE_ERROR;
   }
