@@ -15,7 +15,7 @@ TEST_DURATION=120
 
 REMOTE_HOST=dds-perf-test2
 
-CONFIGS="rtps udp tcp" # multi-be multi-rel
+CONFIGS="rtps udp tcp multi-be multi-rel"
 SIZES="50 100 250 500 1000 2500 5000 8000 16000 32000"
 
 $DDS_ROOT/bin/DCPSInfoRepo -ORBListenEndpoints iiop://$REPOHOST:$REPOPORT & export PREO_PID=$!
@@ -45,3 +45,16 @@ for conf in $CONFIGS; do
 done
 
 kill -9 $PREO_PID
+
+SERVERPORT=3001
+
+for conf in tcp udp; do
+  mkdir -p raw-$conf
+  cd raw-$conf
+  for sz in $SIZES; do
+    echo ============ Runing raw-$conf $sz
+    ssh $REMOTE_HOST "$PROJECTBASE/bin/$conf_latency -m $sz -s $SERVERPORT" &
+    $PROJECTBASE/bin/$conf_latency -d $TEST_DURATION -m $sz -c $REMOTE_HOST:$SERVERPORT 2>&1 >  p1-$sz.log
+  done
+  cd ..
+done

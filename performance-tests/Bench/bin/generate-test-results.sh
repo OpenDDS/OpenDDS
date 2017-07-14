@@ -64,7 +64,7 @@ process_latency_test ()
 
   for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
   do
-    for protocol in tcp udp multi-be multi-rel rtps
+    for protocol in tcp udp multi-be multi-rel rtps raw-tcp raw-udp
     do
       if [ -d "$TESTDIR/$protocol" ]; then
         $SCRIPT_DIR/reduce-latency-data.pl "$TESTDIR/$protocol/latency-$sz.data" > "$DATADIR/latency-$protocol-$sz.gpd"

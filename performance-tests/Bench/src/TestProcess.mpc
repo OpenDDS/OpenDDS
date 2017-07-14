@@ -34,11 +34,20 @@ project(BenchProcess) : dcpsexe, dcps_transports_for_test, svc_utils {
   }
 }
 
-project(BenchUdpLatency) : acexe {
+project(BenchUdpLatency) : aceexe {
   exename = udp_latency
   exeout  = ../bin
 
   Source_Files {
     udp_latency.cpp
+  }
+}
+
+project(BenchTcpLatency) : aceexe {
+  exename = tcp_latency
+  exeout  = ../bin
+
+  Source_Files {
+    tcp_latency.cpp
   }
 }
