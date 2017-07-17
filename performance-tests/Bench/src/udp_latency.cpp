@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <vector>
 
 const int max_buffer_size = 32000;
 
@@ -65,14 +66,13 @@ Statistics get_stat(const std::vector<double>& data)
 {
   Statistics result = {0.0, 0.0, 0, data[0]};
 
-  for (int i =0; i < data.size(); ++i) {
+  for (std::size_t  i =0; i < data.size(); ++i) {
     result.mean = (data[i])/(i+1) + ( result.mean / (i+1) * i);
     result.max = std::max(result.max, data[i]);
     result.min = std::min(result.min, data[i]);
   }
 
-  double variance = 0;
-  for (int i= 0; i < data.size(); ++i) {
+  for (std::size_t i= 0; i < data.size(); ++i) {
     double delta = result.mean - data[i];
     result.variance = (delta*delta) /(i+1) + result.variance/(i+1) *i;
   }
