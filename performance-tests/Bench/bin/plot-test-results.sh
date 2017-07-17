@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #
 #
 
@@ -62,6 +62,10 @@ parse_input ()
 # Generate the graphs for the latency tests.
 #
 ###############################################################################
+
+declare -a protocols=("tcp" "udp" "multi-be" "multi-re" "rtps" "raw-tcp" "raw-udp")
+declare -a protocol_descs=('TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP')
+
 plot_latency_results ()
 {
   local DATADIR="$BASEDIR/tests/latency/data"
@@ -74,33 +78,31 @@ plot_latency_results ()
       exit
 EOF
 
-    for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
+    for (( i=0; i<${#protocols[@]}; i++ ));
     do
-      gnuplot <<EOF
-        # Plotting TCP charts
-        call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-tcp-$sz.gpd" "$DATADIR/latency-tcp-$sz.stats" "$OUTDIR/latency-tcp-$sz.png" "TCP / Message Size $sz bytes"
-        # Plotting UDP charts
-        call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-udp-$sz.gpd" "$DATADIR/latency-udp-$sz.stats" "$OUTDIR/latency-udp-$sz.png" "UDP / Message Size $sz bytes"
-        # # Plotting Multicast / best effort charts
-        # call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-mbe-$sz.gpd" "$DATADIR/latency-mbe-$sz.stats" "$OUTDIR/latency-mbe-$sz.png" "Multicast - Best Effort / Message Size $sz bytes"
-        # # Plotting Multicast / reliable charts
-        # call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-mrel-$sz.gpd" "$DATADIR/latency-mrel-$sz.stats" "$OUTDIR/latency-mrel-$sz.png" "Multicast - Reliable / Message Size $sz bytes"
-        # Plotting RTPS charts
-        call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-rtps-$sz.gpd" "$DATADIR/latency-rtps-$sz.stats" "$OUTDIR/latency-rtps-$sz.png" "RTPS / Message Size $sz bytes"
-       exit
+      protocol=${protocols[$i]}
+      desc=${protocol_descs[$i]}
+      for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
+      do
+        if [ -f "$DATADIR/latency-$protocol-$sz.gpd" ]; then
+          gnuplot <<EOF
+            call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-$protocol-$sz.gpd" "$DATADIR/latency-$protocol-$sz.stats" "$OUTDIR/latency-$protocol-$sz.png" "$desc / Message Size $sz bytes"
+           exit
 EOF
+        fi
+      done
     done
-
-
-    # Plotting Quantile Distributions
-    gnuplot <<EOF
-      call "$SCRIPT_DIR/plot-quantiles.gpi" "$DATADIR"  "$OUTDIR"
-      exit
-EOF
 
     # Plotting Kernel Density Estimates
     # gnuplot 4.4 functionality in the plot-density.gpi fails on earlier systems.
-    if [ "$GNUPLOT_MAJORVERSION" -gt 3 -a "$GNUPLOT_MAJORVERSION" -gt 2 ]; then
+    if [ "$GNUPLOT_MAJORVERSION" -gt 4 -a "$GNUPLOT_MAJORVERSION" -gt 0 ]; then
+    # Plotting Quantile Distributions
+      gnuplot <<EOF
+        call "$SCRIPT_DIR/plot-quantiles.gpi" "$DATADIR"  "$OUTDIR"
+        exit
+EOF
+
+
       gnuplot <<EOF
         call "$SCRIPT_DIR/plot-density.gpi" "$DATADIR"  "$OUTDIR"
         exit
@@ -154,5 +156,5 @@ parse_input $@
 
 plot_latency_results
 
-# plot_throughput_results
+plot_throughput_results
 

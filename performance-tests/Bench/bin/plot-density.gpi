@@ -28,30 +28,18 @@ set format y "%.0f%%"
 set xtics out nomirror rotate by 15 offset -5,-1
 
 list = "50 100 250 500 1000 2500 5000 8000 16000 32000"
+protocols = "tcp udp multi-be multi-re rtps raw-tcp raw-udp"
+protocol_descs = "'TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP'"
 
-set output ARG2 . '/tcp-density.png'
-set title "TCP - Latency Density Plot per Message Size"
-plot for [i in list] ARG1 . "/latency-tcp-" . i . ".gpd" index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t i
-
-set output ARG2 . '/udp-density.png'
-set title "UDP - Latency Density Plot per Message Size"
-plot for [i in list] ARG1 . "/latency-udp-" . i . ".gpd" index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t i
-
-if (file_exists(ARG1 . "/latency-multi-be-50.gpd")) {
-  set output ARG2 . '/mbe-density.png'
-  set title "Best Effort Multicast - Latency Density Plot per Message Size"
-  plot for [i in list] ARG1 . "/latency-multi-be-" . i . ".gpd" index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t i
+do for [j=1:words(protocols)] {
+  protocol = word(protocols, j)
+  if (file_exists(ARG1 . "/latency-" . protocol . "-50.gpd")) {
+    set output ARG2 . '/' . protocol . '-density.png'
+    set title  word(protocol_descs, j) . " - Latency Density Plot per Message Size"
+    plot for [i in list] ARG1 . "/latency-" . protocol . "-" . i . ".gpd" index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t i
+  }
 }
 
-if (file_exists(ARG1 . "/latency-multi-re-50.gpd")) {
-  set output ARG2 . '/mrel-density.png'
-  set title "Reliable Multicast - Latency Density Plot per Message Size"
-  plot for [i in list] ARG1 . "/latency-multi-re-" . i . ".gpd" index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t i
-}
-
-set output ARG2 . '/rtps-density.png'
-set title "RTPS - Latency Density Plot per Message Size"
-plot for [i in list] ARG1 . "/latency-rtps-" . i . ".gpd" index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t i
 
 set output
 set terminal pop
