@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #
 #
 
@@ -92,17 +92,26 @@ store_result_files ()
 {
   pushd "$BASEDIR"
 
-  tar --ignore-failed-read -czf "$OUTDIR/perf_tests_logs_$DATE.tar.gz" \
-    tests/latency/tcp \
-    tests/latency/udp \
-    tests/latency/multi-rel \
-    tests/latency/multi-be \
-    tests/latency/rtps \
-    tests/thru/tcp \
-    tests/thru/udp \
-    tests/thru/multi-rel \
-    tests/thru/multi-be \
-    tests/thru/rtps
+  result_dirs=
+  for dir in tests/latency/tcp \
+             tests/latency/udp \
+             tests/latency/multi-rel \
+             tests/latency/multi-be \
+             tests/latency/rtps \
+             tests/latency/raw-tcp \
+             tests/latency/raw-udp \
+             tests/thru/tcp \
+             tests/thru/udp \
+             tests/thru/multi-rel \
+             tests/thru/multi-be \
+             tests/thru/rtps
+  do
+    if [ -d $dir ]; then
+      result_dirs="$result_dirs $dir"
+    fi
+  done
+
+  tar -czf "$OUTDIR/perf_tests_logs_$DATE.tar.gz" $result_dirs
 
   popd
 }
@@ -117,7 +126,7 @@ store_result_files ()
 ###############################################################################
 process_latency_test ()
 {
-  $DDS_ROOT/performance-tests/Bench/bin/gen-latency-tables.pl "$BASEDIR/tests/latency/data/latency.csv"
+  $SCRIPT_DIR/gen-latency-tables.pl "$BASEDIR/tests/latency/data/latency.csv"
 }
 
 
@@ -130,7 +139,9 @@ process_latency_test ()
 ###############################################################################
 process_throughput_test ()
 {
-  $DDS_ROOT/performance-tests/Bench/bin/gen-throughput-tables.pl "$BASEDIR/tests/thru/data/throughput.csv"
+  if [ -f $BASEDIR/tests/thru/data/throughput.csv ]; then
+    $SCRIPT_DIR/gen-throughput-tables.pl "$BASEDIR/tests/thru/data/throughput.csv"
+  fi
 }
 
 
@@ -148,7 +159,8 @@ process_images ()
   for imgfile in `ls *.png`
   do
     if [ -s "$imgfile" ]; then
-      convert "$imgfile" -scale 200x "$OUTDIR/images/thumbnails/$imgfile"
+      echo convert "$imgfile" -scale 200x "thumbnails/$imgfile"
+      convert "$imgfile" -scale 200x "thumbnails/$imgfile"
     else
       # remove empty files - they usually are a result of a plotting failure
       echo "Removing zero length file:  $imgfile"
@@ -159,6 +171,9 @@ process_images ()
   popd
 }
 
+
+declare -a protocols=("tcp" "udp" "multi-be" "multi-re" "rtps" "raw-tcp" "raw-udp")
+declare -a protocol_descs=('TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP')
 
 ###############################################################################
 #
@@ -223,25 +238,39 @@ generate_latency_html ()
   echo '<table class="graph_thumbnails">'
   echo '<colgroup span="4" width="25%"/>'
   echo '<tr class="graph_thumbnails">'
-  echo '  <td class="graph_thumbnails"><a href="images/tcp-quantiles.png"><img src="images/thumbnails/tcp-quantiles.png" alt="TCP Latency Quantiles - all sizes"><br>TCP Latency Quantiles - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/udp-quantiles.png"><img src="images/thumbnails/udp-quantiles.png" alt="UDP Latency Quantiles - all sizes"><br>UDP Latency Quantiles - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/mbe-quantiles.png"><img src="images/thumbnails/mbe-quantiles.png" alt="Best Effort Multicast Latency Quantiles - all sizes"><br>Best Effort Multicast Latency Quantiles - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/mrel-quantiles.png"><img src="images/thumbnails/mrel-quantiles.png" alt="Reliable Multicast Latency Quantiles - all sizes"><br>Reliable Multicast Latency Quantiles - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/rtps-quantiles.png"><img src="images/thumbnails/rtps-quantiles.png" alt="Real-Time Publish-Subscribe Latency Quantiles - all sizes"><br>Real-Time Publish-Subscribe Latency Quantiles - all sizes</a></tr>'
+
+  for (( i=0; i<${#protocols[@]}; i++ ));
+  do
+    protocol=${protocols[$i]}
+    desc=${protocol_descs[$i]}
+    if [ -f $OUTDIR/images/thumbnails/$protocol-quantiles.png ]; then
+      echo '  <td class="graph_thumbnails"><a href="images/'$protocol'-quantiles.png"><img src="images/thumbnails/'$protocol'-quantiles.png" alt="$desc Latency Quantiles - all sizes"><br>'$desc' Latency Quantiles - all sizes</a>'
+    fi
+  done
+
   echo '<tr class="graph_thumbnails">'
-  echo '  <td class="graph_thumbnails"><a href="images/tcp-density.png"><img src="images/thumbnails/tcp-density.png" alt="TCP Latency Density - all sizes"><br>TCP Latency Density - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/udp-density.png"><img src="images/thumbnails/udp-density.png" alt="UDP Latency Density - all sizes"><br>UDP Latency Density - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/mbe-density.png"><img src="images/thumbnails/mbe-density.png" alt="Best Effort Multicast Latency Density - all sizes"><br>Best Effort Multicast Latency Density - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/mrel-density.png"><img src="images/thumbnails/mrel-density.png" alt="Reliable Multicast Latency Density - all sizes"><br>Reliable Multicast Latency Density - all sizes</a>'
-  echo '  <td class="graph_thumbnails"><a href="images/rtps-density.png"><img src="images/thumbnails/rtps-density.png" alt="Real-Time Publish-Subscribe Latency Density - all sizes"><br>Real-Time Publish-Subscribe Latency Density - all sizes</a></tr>'
+
+  for (( i=0; i<${#protocols[@]}; i++ ));
+  do
+    protocol=${protocols[$i]}
+    desc=${protocol_descs[$i]}
+    if [ -f $OUTDIR/images/thumbnails/$protocol-density.png ]; then
+      echo '  <td class="graph_thumbnails"><a href="images/'$protocol'-density.png"><img src="images/thumbnails/'$protocol'-density.png" alt="'$desc' Latency Density - all sizes"><br>'$desc' Latency Density - all sizes</a>'
+    fi
+  done
+
   for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
   do
     echo '<tr class="graph_thumbnails">'
-    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-tcp-$sz.png\"><img src=\"images/thumbnails/latency-tcp-$sz.png\" alt=\"TCP Latency - $sz bytes\"><br>TCP Latency - $sz bytes</a>"
-    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-udp-$sz.png\"><img src=\"images/thumbnails/latency-udp-$sz.png\" alt=\"UDP Latency - $sz bytes\"><br>UDP Latency - $sz bytes</a>"
-    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-mbe-$sz.png\"><img src=\"images/thumbnails/latency-mbe-$sz.png\" alt=\"Best Effort Multicast Latency - $sz bytes\"><br>Best Effort Multicast Latency - $sz bytes</a>"
-    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-mrel-$sz.png\"><img src=\"images/thumbnails/latency-mrel-$sz.png\" alt=\"Reliable Multicast Latency - $sz bytes\"><br>Reliable Multicast Latency - $sz bytes</a>"
-    echo "  <td class=\"graph_thumbnails\"><a href=\"images/latency-rtps-$sz.png\"><img src=\"images/thumbnails/latency-rtps-$sz.png\" alt=\"Real-Time Publish-Subscribe Latency - $sz bytes\"><br>Real-Time Publish-Subscribe Latency - $sz bytes</a></tr>"
+
+    for (( i=0; i<${#protocols[@]}; i++ ));
+    do
+      protocol=${protocols[$i]}
+      desc=${protocol_descs[$i]}
+      if [ -f $OUTDIR/images/thumbnails/latency-$protocol-$sz.png ]; then
+        echo '  <td class="graph_thumbnails"><a href="images/latency-'$protocol-$sz'.png"><img src="images/thumbnails/latency-'$protocol-$sz'.png" alt="'$desc' Latency - '$sz' bytes"><br>'$desc' Latency - '$sz' bytes</a>'
+      fi
+    done
   done
   echo '</table>'
   echo '<div>'
@@ -428,13 +457,13 @@ generate_main_html ()
 }
 
 
-
+SCRIPT_DIR=$( cd "$( dirname ${BASH_SOURCE[0]} )" && pwd )
 
 OUTDIR="."
 BASEDIR="."
 DATE=$(date +%Y%m%d)
-export PATH=$DDS_ROOT/performance-tests/Bench/bin:$PATH
-RUNINFO_HTML=`bash $DDS_ROOT/performance-tests/Bench/bin/gen-run-info-table.pl $DATE`
+export PATH=$SCRIPT_DIR:$PATH
+RUNINFO_HTML=`bash $SCRIPT_DIR/gen-run-info-table.pl $DATE`
 
 parse_input $@
 
@@ -442,18 +471,20 @@ create_output_directory
 
 store_result_files
 
-$DDS_ROOT/performance-tests/Bench/bin/generate-test-results.sh "$BASEDIR"
+$SCRIPT_DIR/generate-test-results.sh "$BASEDIR"
 
 process_latency_test
 
 process_throughput_test
 
-$DDS_ROOT/performance-tests/Bench/bin/plot-test-results.sh "$BASEDIR" "$OUTDIR/images"
+$SCRIPT_DIR/plot-test-results.sh "$BASEDIR" "$OUTDIR/images"
 
 process_images
 
 generate_latency_html > "$OUTDIR/latency.html"
 
-generate_throughput_html > "$OUTDIR/throughput.html"
+if [ -f $BASEDIR/tests/thru/data/throughput.csv ]; then
+  generate_throughput_html > "$OUTDIR/throughput.html"
+fi
 
 generate_main_html > "$OUTDIR/index.html"
