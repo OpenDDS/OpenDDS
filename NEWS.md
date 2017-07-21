@@ -1,13 +1,8 @@
-Version 3.12(?) of OpenDDS
-
-##### Additions:
-- TODO: Add your features here
+Version 3.11.1 of OpenDDS
 
 ##### Fixes:
-- TODO: Add your fixes here
+- Updated locking for RtpsUdpDataLink::remove_sample which could result in a deadlock before this fix
 
-##### Notes:
-- TODO: Add your notes here
 _______________________________________________________________________________
 Version 3.11 of OpenDDS
 
