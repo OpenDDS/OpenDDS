@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+  <head>
+    <title>
+      OpenDDS - Latency Details
+    </title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <meta name="keywords" content="results, publish">
+  </head>
+  <body>
+    <div class="viewer" id="contentWrapper">
+      <small><a href="../../performance.html">Performance</a> &gt; Latency Details</small>
+      <h1 class="publishLogo">
+        OpenDDS - Performance Testing Results
+      </h1>
+      <div id="publishContentWrapper">
+        <h2>
+          Latency Details
+        </h2>The results of executing the latency tests are included in the table below. The table is organized with rows of transport types and columns of message size for each test executed.<br>
+        <br>
+        Each transport and message size combination in the table below contains information about the latency and jitter for that test. The 'plot' links are to quad-plots of the individual test run results. These include a timeline plot for both latency and jitter as well as histograms of the latency and jitter measurements.<br>
+        <span class="imgcenter"><img src="../../images/perf/table-legend.png"></span><br>
+        <br>
+        The plots for each individual test include two timelines and two historgrams - one each for latency data and one each for jitter data. The timeline plots show that actualy measured values from the test execution. The histograms show the data collected and segregated into 25 bins with frequency per bin plotted versus the center value of the bin.<br>
+        <br>
+        For latency plots the average value indicates the most likely latency to be encountered for the test conditions. The standard deviation gives a measure of the variability or "spread" of the data for those test conditions. Note that the histogram of latency delay values is clearly not Gaussian, so the standard deviation has little value other than for comparative purposes. The actual distribution appears closer to a Rayleigh distribution, which is not unexpected.<br>
+        <br>
+        For jitter plots the average indicates the most likely jitter value to be encountered for the test conditions. We expect this to be zero for all cases, but since we have a finite number of values, the actual average is sometimes not exactly zero. The actual average values can be seen to be very close to zero increasing confidence that the actual average is 0. The distribution of the jitter values appears to be Gaussian and the standard deviation measure can be used to evaluate performance in the different conditions.<br>
+        <br>
+        Both the latency and jitter plots show that there is some additional activity on the host at indeterminate times. This is the result of executing on a time shared host without a real-time operating system. Execution on a host with a real-time operating system and scheduler would allow the system designer the ability to determine when, if at all, these additional tasks would affect the distribution processing.<br>
+        <br>
+        <table class="twtable">
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="latency.csv.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+      var size_set = new Set();
+      var transport_set = [
+        "tcp", "udp", "rtps", "multi-be", "raw-tcp", "raw-udp"
+      ];
+
+      var transport_discs = [
+        "TCP<br>(reliable)",
+        "UDP<br>(best effort)",
+        "RTPS<br>(reliable)",
+        "Mulitcast<br>(best effort)",
+        "Raw TCP",
+        "Raw UDP"
+      ];
+
+      function toDict(entry) {
+        return entry.reduce(function(result, field, index) {
+          result[columns[index]] = field;
+          return result;
+        }, {} );
+      };
+
+      function toSized(transport_item) {
+        var transport_name = "";
+        var r2 = d3.csv.parseRows(transport_item).reduce(function (r1, entry) {
+          var r = toDict(entry);
+          r1.push(r);
+          size_set.add(r['size']);
+          transport_name = r['transport'];
+          return r1;
+        }, []);
+        // transport_set.push(transport_name);
+        return [transport_name, r2];
+      };
+
+      var parsed_data = latency_data.reduce(function(result, transport_item){
+        var r = toSized(transport_item);
+        result[r[0]] = r[1];
+        return result;
+      }, {});
+
+      let size_array = Array.from(size_set);
+
+      var tbody_container = d3.select("body").select('div').select('div')
+        .select("table").select("tbody");
+
+
+      //size caption
+      var rows = [
+        [{ text: 'Transport', rowspan:2 },{ text:'Message Size (Bytes)', colspan: 20}],
+        size_array.map(function(sz) {
+          return { text: sz, colspan: 2};
+        })
+    ];
+
+      for (var i = 0; i < transport_set.length; i++) {
+
+        var transport = transport_set[i];
+        var transport_disc = transport_discs[i];
+
+        var transport_data = parsed_data[transport];
+        rows.push(
+          // latency means
+          transport_data.reduce(function(r, x) {
+            r.push( {text:'Latency', rowspan: 2},
+                    {text:'Mean<br>' + x['latency mean']});
+            return r;
+          }, [{text:transport_disc, rowspan: 5}]),
+          // latency std. dev
+          transport_data.reduce(function(r, x) {
+                    r.push({text:'Dev<br>'+ x['latency std. dev']});
+                    return r;
+          }, []),
+          // jiter means
+          transport_data.reduce(function(r, x) {
+            r.push({text:'Jitter', rowspan:2},
+                   {text:'Mean<br>' + x['jitter mean']});
+            return r;
+          }, []),
+          // jitter std. dev
+          transport_data.reduce(function(r, x) {
+                    r.push({text:'Dev<br>'+ x['jitter dev']});
+                    return r;
+          }, []),
+          // plot
+          size_array.map(function(sz) {
+            return {text: '<a class="externalLink null" href="latency_chart.html?protocol=' + transport + '&size=' + sz +'">plot</a>', colspan: 2};
+          })
+        );
+
+        d3.select("body").select('div').select('div')
+          .select("table").select("tbody")
+          .selectAll('tr')
+          .data(rows).enter()
+          .append('tr')
+          .selectAll("td")
+          .data(function(d) { return d; }).enter()
+          .append(function(d) {
+            var element = document.createElement("td");
+            var x= "";
+            if ('rowspan' in d) {
+              element.setAttribute('rowspan', d.rowspan);
+            }
+            if ('colspan' in d) {
+              element.setAttribute('colspan', d.colspan);
+            }
+            element.align = 'center';
+            element.innerHTML = d.text;
+            return element;
+          });
+
+
+      }
+
+
+    </script>
+  </body>
+</html>
