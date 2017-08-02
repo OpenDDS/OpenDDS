@@ -5,7 +5,7 @@ a:hover {
 .publishLogo {
     position: relative;
     background-color:#fff;
-    background-image: url(/opendds/images/perf/opendds.png);
+    background-image: url(/images/perf/opendds.png);
     background-position: left;
     background-repeat: no-repeat;
     color:#666;
@@ -16,7 +16,7 @@ a:hover {
 .headerForeground {
     position: relative;
     background-color:#fff;
-    background-image: url(/opendds/images/perf/opendds.png);
+    background-image: url(/images/perf/opendds.png);
     background-position: left;
     background-repeat: no-repeat;
     color:#666;

@@ -3,6 +3,7 @@
 <title>OpenDDS - Latency Results</title>
 <link rel="stylesheet" type="text/css" href="../style.css"/>
 <meta name="keywords" content="results, publish"/>
+<link rel="icon" type="image/png" href="/images/opendds_favicon.png"/>
 </head>
 <body>
 <div class="viewer" id="contentWrapper">
@@ -18,8 +19,13 @@ Executing on hosts with real-time operating systems and schedulers would
 allow the system designers to choose how the processing for data
 distribution and applications would interact and reduce the jitter to the
 levels required by the system.</span><br><br>Latency for the TCP, UDP,
-best effort Multicast, and reliable Multicast transports are shown in the
-diagram below.  Latency was measured by taking a timestamp in the
+best effort Multicast (multi-be), and RTPS transports are shown in the
+diagram below.
+<br><br>The data sets labeled raw-tcp and raw-udp show the results of
+running similar latency tests using just operating system sockets APIs
+instead of using OpenDDS.  These can be used as baselines for latency
+expected when using the TCP/IP network stack on these hosts.<br><br>
+Latency was measured by taking a timestamp in the
 originating process, inserting that timestamp into the data sample and
 sending it.  When the data sample is received in the terminating process,
 another timestamp is generated and the latency is defined as the
