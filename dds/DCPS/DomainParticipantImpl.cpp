@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+this is extra text to cause the build to fail
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DomainParticipantImpl.h"
 #include "dds/DdsDcpsGuidC.h"
