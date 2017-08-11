@@ -159,6 +159,11 @@ DataReaderImpl::~DataReaderImpl()
 void
 DataReaderImpl::cleanup()
 {
+  // As first step set our listener to nill which will prevent us from calling
+  // back onto the listener at the moment the related DDS entity has been
+  // deleted
+  set_listener(0, NO_STATUS_MASK);
+
   {
     // Is this lock necessary?
     ACE_GUARD(ACE_Recursive_Thread_Mutex,

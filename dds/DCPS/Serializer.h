@@ -183,12 +183,14 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
 
+#ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, const std::string& x);
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, const std::wstring& x);
 #endif /* DDS_HAS_WCHAR */
+#endif /* !OPENDDS_SAFETYP_PROFILE */
 
   // Extraction operators.
   friend OpenDDS_Dcps_Export
@@ -230,12 +232,14 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
 
+#ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, std::string& x);
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, std::wstring& x);
 #endif /* DDS_HAS_WCHAR */
+#endif /* !OPENDDS_SAFETY_PROFILE */
 
   /// Read from the chain into a destination buffer.
   // This method doesn't respect alignment, so use with care.
