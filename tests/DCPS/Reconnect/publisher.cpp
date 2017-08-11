@@ -204,13 +204,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     ACE_OS::fclose(readers_completed);
 
     writer->end ();
-    delete writer;
 
-    // Sleep a while before shutdown to avoid the problem of repository
-    // crashes when it handles both remove_association from subscriber
-    // and publisher at the same time.
-    // Cleanup
-    //ACE_OS::sleep (2);
+
+    // Sleep a while before deleting writer so that DataWriterListenerImpl::on_connection_deleted()
+    // can be called.
+    ACE_OS::sleep (10);
+    delete writer;
 
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in ());
