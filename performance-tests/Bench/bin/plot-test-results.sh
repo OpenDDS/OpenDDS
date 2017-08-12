@@ -1,7 +1,8 @@
-#! /bin/sh
+#! /bin/bash
 #
 #
 
+SCRIPT_DIR=$( cd "$( dirname ${BASH_SOURCE[0]} )" && pwd )
 
 
 ###############################################################################
@@ -61,6 +62,10 @@ parse_input ()
 # Generate the graphs for the latency tests.
 #
 ###############################################################################
+
+declare -a protocols=("tcp" "udp" "multi-be" "multi-re" "rtps" "raw-tcp" "raw-udp")
+declare -a protocol_descs=('TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP')
+
 plot_latency_results ()
 {
   local DATADIR="$BASEDIR/tests/latency/data"
@@ -68,40 +73,38 @@ plot_latency_results ()
   if [ -e "$DATADIR/latency.csv" ]; then
     # Plotting summary charts
     gnuplot <<EOF
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-transports.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-latency"
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-jitter.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-jitter"
+      call "$SCRIPT_DIR/plot-transports.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-latency"
+      call "$SCRIPT_DIR/plot-jitter.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-jitter"
       exit
 EOF
 
-    for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
+    for (( i=0; i<${#protocols[@]}; i++ ));
     do
-      gnuplot <<EOF
-        # Plotting TCP charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-tcp-$sz.gpd" "$DATADIR/latency-tcp-$sz.stats" "$OUTDIR/latency-tcp-$sz.png" "TCP / Message Size $sz bytes"
-        # Plotting UDP charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-udp-$sz.gpd" "$DATADIR/latency-udp-$sz.stats" "$OUTDIR/latency-udp-$sz.png" "UDP / Message Size $sz bytes"
-        # Plotting Multicast / best effort charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-mbe-$sz.gpd" "$DATADIR/latency-mbe-$sz.stats" "$OUTDIR/latency-mbe-$sz.png" "Multicast - Best Effort / Message Size $sz bytes"
-        # Plotting Multicast / reliable charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-mrel-$sz.gpd" "$DATADIR/latency-mrel-$sz.stats" "$OUTDIR/latency-mrel-$sz.png" "Multicast - Reliable / Message Size $sz bytes"
-        # Plotting RTPS charts
-        call "$DDS_ROOT/performance-tests/Bench/bin/lj-plots.gpi" "$DATADIR/latency-rtps-$sz.gpd" "$DATADIR/latency-rtps-$sz.stats" "$OUTDIR/latency-rtps-$sz.png" "RTPS / Message Size $sz bytes"
-       exit
+      protocol=${protocols[$i]}
+      desc=${protocol_descs[$i]}
+      for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
+      do
+        if [ -f "$DATADIR/latency-$protocol-$sz.gpd" ]; then
+          gnuplot <<EOF
+            call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-$protocol-$sz.gpd" "$DATADIR/latency-$protocol-$sz.stats" "$OUTDIR/latency-$protocol-$sz.png" "$desc / Message Size $sz bytes"
+           exit
 EOF
+        fi
+      done
     done
-
-
-    # Plotting Quantile Distributions
-    gnuplot <<EOF
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-quantiles.gpi" "$DATADIR"  "$OUTDIR"
-      exit
-EOF
 
     # Plotting Kernel Density Estimates
     # gnuplot 4.4 functionality in the plot-density.gpi fails on earlier systems.
-    if [ "$GNUPLOT_MAJORVERSION" -gt 3 -a "$GNUPLOT_MAJORVERSION" -gt 2 ]; then
+    if [ "$GNUPLOT_MAJORVERSION" -gt 4 -a "$GNUPLOT_MAJORVERSION" -gt 0 ]; then
+    # Plotting Quantile Distributions
       gnuplot <<EOF
-        call "$DDS_ROOT/performance-tests/Bench/bin/plot-density.gpi" "$DATADIR"  "$OUTDIR"
+        call "$SCRIPT_DIR/plot-quantiles.gpi" "$DATADIR"  "$OUTDIR"
+        exit
+EOF
+
+
+      gnuplot <<EOF
+        call "$SCRIPT_DIR/plot-density.gpi" "$DATADIR"  "$OUTDIR"
         exit
 EOF
     fi
@@ -130,10 +133,10 @@ plot_throughput_results ()
   if [ -e "$DATADIR/throughput.csv" ]; then
     gnuplot <<EOF
       # Plotting test format charts
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-testformats.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call "$SCRIPT_DIR/plot-throughput-testformats.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
       # Plotting transport charts
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
-      call "$DDS_ROOT/performance-tests/Bench/bin/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
+      call "$SCRIPT_DIR/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call "$SCRIPT_DIR/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
       exit
 EOF
   else
@@ -146,8 +149,8 @@ EOF
 
 OUTDIR="."
 BASEDIR="."
-GNUPLOT_MAJORVERSION=`gnuplot --version | sed -n -e "s/gnuplot \([0-9]*\).[0-9]* patchlevel.*/\1/gpi"`
-GNUPLOT_MINORVERSION=`gnuplot --version | sed -n -e "s/gnuplot [0-9]*.\([0-9]*\) patchlevel.*/\1/gpi"`
+GNUPLOT_MAJORVERSION=`gnuplot --version | sed -n -e "s/gnuplot \([0-9]*\).[0-9]* patchlevel.*/\1/gp"`
+GNUPLOT_MINORVERSION=`gnuplot --version | sed -n -e "s/gnuplot [0-9]*.\([0-9]*\) patchlevel.*/\1/gp"`
 
 parse_input $@
 
