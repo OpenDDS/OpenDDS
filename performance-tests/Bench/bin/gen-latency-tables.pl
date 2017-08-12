@@ -38,12 +38,14 @@ sub transportName {
   return "UNKNOWN TRANSPORT TYPE"  if not $type;
   return "TCP"      if $type eq "tcp";
   return "TCP"      if $type eq "SimpleTcp";
-  return "Multicast Best Effort"  if $type eq "mbe";
+  return "Multicast Best Effort"  if $type eq "multi-be";
   return "Multicast Best Effort"  if $type eq "best effort multicast";
-  return "Multicast Reliable" if ($type eq "mre" || $type eq "mrel");
+  return "Multicast Reliable" if ($type eq "multi-re" || $type eq "mrel");
   return "Multicast Reliable" if $type eq "reliable multicast";
   return "UDP" if $type eq "udp";
   return "RTPS" if $type eq "rtps";
+  return "Raw-TCP" if $type eq "raw-tcp";
+  return "Raw-UDP" if $type eq "raw-udp";
   return "UNKNOWN TRANSPORT TYPE";
 }
 

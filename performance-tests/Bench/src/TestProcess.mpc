@@ -34,3 +34,22 @@ project(BenchProcess) : dcpsexe, dcps_transports_for_test, svc_utils {
   }
 }
 
+project(BenchUdpLatency) : aceexe {
+  exename = udp_latency
+  exeout  = ../bin
+  macros  += NOMINMAX         //don't #define min and max in Win32 headers
+
+  Source_Files {
+    udp_latency.cpp
+  }
+}
+
+project(BenchTcpLatency) : aceexe {
+  exename = tcp_latency
+  exeout  = ../bin
+  macros  += NOMINMAX         //don't #define min and max in Win32 headers
+
+  Source_Files {
+    tcp_latency.cpp
+  }
+}
