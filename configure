@@ -861,7 +861,9 @@ sub default_java_home {
   }
   else {
     $result = which('javac');
-
+    if (!$result) {
+      die "ERROR: No javac in PATH.\n";
+    }
     while (-l $result) {
       $result = readlink($result);
     }
