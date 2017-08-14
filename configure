@@ -992,6 +992,9 @@ elsif (exists $opts{'qt'} && !$ENV{'QT4_INCDIR'} && !$targetEnv{'QT4_INCDIR'}) {
   setEnv('QT4_INCDIR', $targetEnv{'QTDIR'} . "/include/qt4")
     if -r "$targetEnv{'QTDIR'}/include/qt4/QtCore/qglobal.h";
 }
+elsif (exists $opts{'qt'} && $ENV{'QT4_INCDIR'} && !$targetEnv{'QT4_INCDIR'}) {
+  setEnv('QT4_INCDIR', $ENV{'QT4_INCDIR'});
+}
 
 if (exists $opts{'qt'} && !-r ($targetEnv{'QT4_INCDIR'} ?
                                $targetEnv{'QT4_INCDIR'} :
