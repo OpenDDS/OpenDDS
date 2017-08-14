@@ -164,7 +164,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open active.\n"), 2);
     // Take over the refcount from TcpTransport::connect_datalink().
-    const TcpConnection_rch self(this, keep_count());
+
     const TcpTransport_rch transport = link_->get_transport_impl();
 
     const bool is_loop(local_address_ == remote_address_);
@@ -173,7 +173,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     int active_open_ = active_open();
 
-    int connect_tcp_datalink_ = transport->connect_tcp_datalink(link_, self);
+    int connect_tcp_datalink_ = transport->connect_tcp_datalink(link_, rchandle_from(this));
 
     if (active_open_ == -1 || connect_tcp_datalink_ == -1) {
       // if (active_open() == -1 ||
@@ -200,6 +200,8 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
                       ACE_TEXT("TcpAcceptor* type.\n")),
                      -1);
   }
+
+  TcpConnection_rch self(this, keep_count());
 
   // Now we need to ask the TcpAcceptor object to provide us with
   // a pointer to the TcpTransport object that "owns" the acceptor.
