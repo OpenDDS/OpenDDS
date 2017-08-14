@@ -1137,12 +1137,10 @@ EOT
   # Append to default.features
   if ($buildEnv->{'build'} eq 'target') {
     push(@features, 'cross_compile') if $cross_compile;
-    if (@features) {
+    if ($buildtao and @features) {
       my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
         "/default.features";
-      my $DF = $wrote_df
-        ? ($opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file"))
-        : backup_and_open($df_file);
+      my $DF = $opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file");
       for my $f (@features) {
         print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
       }
@@ -1184,6 +1182,12 @@ EOT
 
   my $mwcargs = "-type $mpctype $buildEnv->{'DDS_ROOT'}$slash$ws $static";
   $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
+  if (!$buildtao and @features) {
+    for my $feature (@features) {
+      $mwcargs .= " -features " . ($feature =~ /=/ ? $feature : "$feature=1");
+    }
+  }
+
   print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
