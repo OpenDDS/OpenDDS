@@ -1640,7 +1640,8 @@ void store_instance_data(
   if (it == instance_map_.end())
   {
     std::size_t instances_size = 0;
-    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       instances_size = instances_.size();
     }
     if ((this->qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
@@ -1709,7 +1710,8 @@ void store_instance_data(
 
     instance->instance_handle_ = handle;
 
-    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
 
       if (ret != 0)
