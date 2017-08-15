@@ -1749,6 +1749,7 @@ DataWriterImpl::write(DataSample* data,
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
 
   if (ret == DDS::RETCODE_TIMEOUT) {
+    data->release();
     return ret; // silent for timeout
 
   } else if (ret != DDS::RETCODE_OK) {
