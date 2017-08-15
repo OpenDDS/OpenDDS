@@ -219,7 +219,8 @@ Monitor::MonitorTask::setRepoIor( const std::string& ior)
     ));
   }
 
-  { ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, DEFAULT_REPO);
+  {
+    ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, lock_, DEFAULT_REPO);
 
     IorKeyMap::iterator location = this->iorKeyMap_.find( ior);
     if( location != this->iorKeyMap_.end()) {

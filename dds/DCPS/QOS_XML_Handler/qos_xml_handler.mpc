@@ -48,7 +48,7 @@ project(OpenDDS_QOS_XML_XSC_Handler): install, ace_xml_utils, dcpslib {
     QOS_Common.h
     DataWriterQos_Handler.h
     DataReaderQos_Handler.h
-    TopicQos_Handler.cpp
+    TopicQos_Handler.h
     PublisherQos_Handler.h
     SubscriberQos_Handler.h
     ParticipantQos_Handler.h
