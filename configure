@@ -837,6 +837,13 @@ my %optdep =
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
   );
 
+my @ace_features = ('xerces3');
+my @ace_macros = ('debug',
+                  'optimize',
+                  'inline',
+                  'static',
+                  'ipv6');
+
 if (exists $opts{'java'}) {
   if ($opts{'static'}) {
     die "ERROR: --static can't be used with --java\n";
@@ -1137,9 +1144,8 @@ EOT
   # Append to default.features
   if ($buildEnv->{'build'} eq 'target') {
     push(@features, 'cross_compile') if $cross_compile;
-    if ($buildtao and @features) {
-      my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
-        "/default.features";
+    if ($buildtao && @features) {
+      my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
       my $DF = $opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file");
       for my $f (@features) {
         print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
@@ -1150,6 +1156,84 @@ EOT
           " $buildEnv->{'ACE_ROOT'}/.../default.features\n";
       }
       dump_and_unlink($DF) if $opts{'dry-run'};
+    }
+
+    if (!$buildtao) {
+      # Read the existing features.
+      my $file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
+      open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
+      my %existing_features;
+      while (my $row = <$fh>) {
+        chomp $row;
+        my ($key, $value) = split(/=/, $row);
+        $existing_features{$key} = $value;
+      }
+      # Convert the requested features.
+      my %requested_features;
+      for my $f (@features) {
+        my ($key, $value) = split(/=/, $f);
+        $value = "1" unless defined $value;
+        $requested_features{$key} = $value;
+      }
+      # Make sure everything agrees.
+      for my $f (@ace_features) {
+        if(defined $requested_features{$f}) {
+          if(!defined $existing_features{$f}) {
+            # Requested a feature not defined in ACE.
+            die "ERROR: Requested feature $f not defined for ACE/TAO";
+          }
+          elsif ($requested_features{$f} != $existing_features{$f}) {
+            # Requested feature does not agree.
+            die "ERROR: Feature $f set to $requested_features{$f} but has value $existing_features{$f} in ACE/TAO";
+          }
+        }
+      }
+    }
+
+    if (!$buildtao) {
+      # Read the existing features.
+      my $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
+      if (-e $file) {
+        open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
+        my %existing_macros;
+        while (my $row = <$fh>) {
+          chomp $row;
+          unless ($row =~ /^include/) {
+            my ($key, $value) = split(/=/, $row);
+            $existing_macros{$key} = $value;
+          }
+        }
+        # Convert the requested macros.
+        my %requested_macros;
+        for my $f (@platformmacros) {
+          my ($key, $value) = split(/=/, $f);
+          $value = "1" unless defined $value;
+          $requested_macros{$key} = $value;
+        }
+        for my $f (@{$opts{'macros'}}) {
+          my ($key, $value) = split(/=/, $f);
+          $value = "1" unless defined $value;
+          $requested_macros{$key} = $value;
+        }
+        for my $key ('debug', 'optimize', 'inline', 'static', 'ipv6') {
+          if (exists $opts{$key}) {
+            my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
+            $requested_macros{$macro} = $opts{$key};
+          }
+        }
+        # Make sure everything agrees.
+        for my $f (@ace_macros) {
+          if (defined $requested_macros{$f}) {
+            if (!defined $existing_macros{$f}) {
+              # Requested a macro not defined in ACE.
+              die "ERROR: Requested macro $f not defined for ACE/TAO";
+            } elsif ($requested_macros{$f} != $existing_macros{$f}) {
+              # Requested macro does not agree.
+              die "ERROR: Macro $f set to $requested_macros{$f} but has value $existing_macros{$f} in ACE/TAO";
+            }
+          }
+        }
+      }
     }
   }
 
@@ -1182,7 +1266,7 @@ EOT
 
   my $mwcargs = "-type $mpctype $buildEnv->{'DDS_ROOT'}$slash$ws $static";
   $mwcargs .= ' ' . join(' ', @{$opts{'mpcopts'}}) if defined $opts{'mpcopts'};
-  if (!$buildtao and @features) {
+  if (!$buildtao && @features) {
     for my $feature (@features) {
       $mwcargs .= " -features " . ($feature =~ /=/ ? $feature : "$feature=1");
     }
