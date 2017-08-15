@@ -1161,12 +1161,14 @@ EOT
     if (!$buildtao) {
       # Read the existing features.
       my $file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
-      open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
       my %existing_features;
-      while (my $row = <$fh>) {
-        chomp $row;
-        my ($key, $value) = split(/=/, $row);
-        $existing_features{$key} = $value;
+      if (-e $file) {
+        open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
+        while (my $row = <$fh>) {
+          chomp $row;
+          my ($key, $value) = split(/=/, $row);
+          $existing_features{$key} = $value;
+        }
       }
       # Convert the requested features.
       my %requested_features;
@@ -1193,9 +1195,9 @@ EOT
     if (!$buildtao) {
       # Read the existing features.
       my $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
+      my %existing_macros;
       if (-e $file) {
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
-        my %existing_macros;
         while (my $row = <$fh>) {
           chomp $row;
           unless ($row =~ /^include/) {
@@ -1203,34 +1205,34 @@ EOT
             $existing_macros{$key} = $value;
           }
         }
+      }
         # Convert the requested macros.
-        my %requested_macros;
-        for my $f (@platformmacros) {
-          my ($key, $value) = split(/=/, $f);
-          $value = "1" unless defined $value;
-          $requested_macros{$key} = $value;
+      my %requested_macros;
+      for my $f (@platformmacros) {
+        my ($key, $value) = split(/=/, $f);
+        $value = "1" unless defined $value;
+        $requested_macros{$key} = $value;
+      }
+      for my $f (@{$opts{'macros'}}) {
+        my ($key, $value) = split(/=/, $f);
+        $value = "1" unless defined $value;
+        $requested_macros{$key} = $value;
+      }
+      for my $key ('debug', 'optimize', 'inline', 'static', 'ipv6') {
+        if (exists $opts{$key}) {
+          my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
+          $requested_macros{$macro} = $opts{$key};
         }
-        for my $f (@{$opts{'macros'}}) {
-          my ($key, $value) = split(/=/, $f);
-          $value = "1" unless defined $value;
-          $requested_macros{$key} = $value;
-        }
-        for my $key ('debug', 'optimize', 'inline', 'static', 'ipv6') {
-          if (exists $opts{$key}) {
-            my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
-            $requested_macros{$macro} = $opts{$key};
-          }
-        }
-        # Make sure everything agrees.
-        for my $f (@ace_macros) {
-          if (defined $requested_macros{$f}) {
-            if (!defined $existing_macros{$f}) {
-              # Requested a macro not defined in ACE.
-              die "ERROR: Requested macro $f not defined for ACE/TAO";
-            } elsif ($requested_macros{$f} != $existing_macros{$f}) {
-              # Requested macro does not agree.
-              die "ERROR: Macro $f set to $requested_macros{$f} but has value $existing_macros{$f} in ACE/TAO";
-            }
+      }
+      # Make sure everything agrees.
+      for my $f (@ace_macros) {
+        if (defined $requested_macros{$f}) {
+          if (!defined $existing_macros{$f}) {
+            # Requested a macro not defined in ACE.
+            die "ERROR: Requested macro $f not defined for ACE/TAO";
+          } elsif ($requested_macros{$f} != $existing_macros{$f}) {
+            # Requested macro does not agree.
+            die "ERROR: Macro $f set to $requested_macros{$f} but has value $existing_macros{$f} in ACE/TAO";
           }
         }
       }
