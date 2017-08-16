@@ -52,6 +52,7 @@ struct SimpleTC: TransportClient {
   explicit SimpleTC(const RepoId& local) : local_id_(local) {}
 
   using TransportClient::enable_transport;
+  using TransportClient::cleanup_transport;
   using TransportClient::associate;
   using TransportClient::disassociate;
   using TransportClient::send;
@@ -798,7 +799,6 @@ bool run_test()
   SimpleDataReader sdr2(reader2);
   sdr2.enable_transport(true /*reliable*/, true /*durable*/);
 
-
   // "local" setup is now done, start making associations
   ACE_Message_Block mb_locator;
   make_blob(part1_addr, mb_locator);
@@ -938,7 +938,6 @@ bool run_test()
     ACE_ERROR((LM_ERROR, "ERROR: reader2 did not receive expected data\n"));
   }
 
-
   // Use the real DDS DataWriter (sdw2) against the test reader
   ACE_DEBUG((LM_INFO, ">>> Starting test of DataWriter\n"));
   AssociationData part1_reader = part1_writer;
@@ -971,6 +970,10 @@ bool run_test()
   // cleanup
   sdw2.disassociate(reader1);
   sdr2.disassociate(writer1);
+
+  sdw2.cleanup_transport();
+  sdr2.cleanup_transport();
+
   return true;
 }
 

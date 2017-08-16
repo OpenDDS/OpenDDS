@@ -56,7 +56,7 @@ Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
   : OpenDDS::DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco), domain_(domain), guid_(guid)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), shutdown_flag_(0), sedp_(guid_, *this, lock_)
+  , shutdown_cond_(lock_), shutdown_flag_(false), sedp_(guid_, *this, lock_)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   guid = guid_; // may have changed in SpdpTransport constructor
@@ -79,7 +79,7 @@ Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
 
 Spdp::~Spdp()
 {
-  shutdown_flag_ = 1;
+  shutdown_flag_ = true;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     if (DCPS::DCPS_debug_level > 3) {
@@ -115,6 +115,12 @@ Spdp::~Spdp()
       shutdown_cond_.wait();
     }
   }
+}
+
+void
+Spdp::cleanup_transport()
+{
+  sedp_.cleanup_transport();
 }
 
 void

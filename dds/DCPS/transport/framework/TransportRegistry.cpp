@@ -494,9 +494,9 @@ TransportRegistry::release()
   for (InstMap::iterator iter = inst_map_.begin(); iter != inst_map_.end(); ++iter) {
     iter->second->shutdown();
   }
+  inst_map_.clear();
 
   type_map_.clear();
-  inst_map_.clear();
   config_map_.clear();
   domain_default_config_map_.clear();
   global_config_.reset();

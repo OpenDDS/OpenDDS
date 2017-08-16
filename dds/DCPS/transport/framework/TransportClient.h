@@ -71,6 +71,8 @@ protected:
   void enable_transport(bool reliable, bool durable);
   void enable_transport_using_config(bool reliable, bool durable,
                                      const TransportConfig_rch& tc);
+  // Cleanup this transport client completely
+  void cleanup_transport();
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
@@ -301,7 +303,7 @@ private:
 
   TransportLocatorSeq conn_info_;
 
-  //Seems to protect accesses to impls_, pending_, links_, data_link_index_
+  /// Seems to protect accesses to impls_, pending_, links_, data_link_index_
   ACE_Thread_Mutex lock_;
 
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;

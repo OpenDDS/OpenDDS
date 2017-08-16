@@ -152,6 +152,8 @@ DataWriterImpl::cleanup()
     topic_servant_->_remove_ref();
     topic_servant_ = 0;
   }
+
+  cleanup_transport();
 }
 
 void

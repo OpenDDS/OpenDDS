@@ -222,6 +222,8 @@ DataReaderImpl::cleanup()
 
   end_historic_sweeper_->wait();
   remove_association_sweeper_->wait();
+
+  cleanup_transport();
 }
 
 void DataReaderImpl::init(
@@ -1300,7 +1302,6 @@ DataReaderImpl::enable()
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
           ACE_TEXT("Transport Exception.\n")));
       return DDS::RETCODE_ERROR;
-
     }
 
     const TransportLocatorSeq& trans_conf_info = this->connection_info();

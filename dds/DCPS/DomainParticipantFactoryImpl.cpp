@@ -249,8 +249,7 @@ DomainParticipantFactoryImpl::delete_participant(
   }//xxx now obj rc = 3
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
-  if (!disco->remove_domain_participant(domain_id,
-                                        dp_id)) {
+  if (!disco->remove_domain_participant(domain_id, dp_id)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("could not remove domain participant.\n")),

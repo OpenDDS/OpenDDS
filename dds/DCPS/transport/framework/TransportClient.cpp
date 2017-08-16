@@ -53,6 +53,12 @@ TransportClient::~TransportClient()
                OPENDDS_STRING(converter).c_str()));
   }
 
+  cleanup_transport ();
+}
+
+void
+TransportClient::cleanup_transport()
+{
   stop_associating();
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
@@ -62,7 +68,7 @@ TransportClient::~TransportClient()
     if (Transport_debug_level > 5) {
       GuidConverter converter(repo_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C from link waiting for callback\n"),
+                 ACE_TEXT("(%P|%t) TransportClient[%@]::cleanup_transport: about to remove_listener %C from link waiting for callback\n"),
                  this,
                  OPENDDS_STRING(converter).c_str()));
     }
@@ -74,28 +80,34 @@ TransportClient::~TransportClient()
     if (Transport_debug_level > 5) {
       GuidConverter converter(repo_id_);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C\n"),
+                 ACE_TEXT("(%P|%t) TransportClient[%@]::cleanup_transport: about to remove_listener %C\n"),
                  this,
                  OPENDDS_STRING(converter).c_str()));
     }
     iter->second->remove_listener(repo_id_);
   }
+  links_.map().clear();
 
-  for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
-    for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(rchandle_from(this), it->second->data_.remote_id_);
+  if (pending_assoc_timer_) {
+    for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+      for (size_t i = 0; i < impls_.size(); ++i) {
+        impls_[i]->stop_accepting_or_connecting(rchandle_from(this), it->second->data_.remote_id_);
+      }
+
+      pending_assoc_timer_->cancel_timer(this, it->second);
     }
+    pending_.clear();
 
-    pending_assoc_timer_->cancel_timer(this, it->second);
+    pending_assoc_timer_->wait();
+    pending_assoc_timer_.reset();
   }
-
-  pending_assoc_timer_->wait();
 
   for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
 
     (*it)->detach_client(rchandle_from(this));
   }
+  impls_.clear();
 }
 
 void
@@ -191,7 +203,6 @@ TransportClient::transport_detached(TransportImpl* which)
 {
   TransportSendListener_rch this_tsl = get_send_listener();
   TransportReceiveListener_rch this_trl = get_receive_listener();
-
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 

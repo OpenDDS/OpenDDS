@@ -194,6 +194,17 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
 }
 
+void
+Sedp::cleanup_transport()
+{
+  publications_writer_.cleanup_transport();
+  publications_reader_->cleanup_transport();
+  subscriptions_writer_.cleanup_transport();
+  subscriptions_reader_->cleanup_transport();
+  participant_message_writer_.cleanup_transport();
+  participant_message_reader_->cleanup_transport();
+}
+
 RepoId
 Sedp::make_id(const RepoId& participant_id, const EntityId_t& entity)
 {
@@ -891,9 +902,9 @@ void
 Sedp::shutdown()
 {
   task_.shutdown();
-  publications_reader_->shutting_down_ = 1;
-  subscriptions_reader_->shutting_down_ = 1;
-  participant_message_reader_->shutting_down_ = 1;
+  publications_reader_->shutting_down_ = true;
+  subscriptions_reader_->shutting_down_ = true;
+  participant_message_reader_->shutting_down_ = true;
 }
 
 void

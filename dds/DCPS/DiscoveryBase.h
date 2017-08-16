@@ -1212,9 +1212,6 @@ namespace OpenDDS {
       virtual bool remove_domain_participant(DDS::DomainId_t domain_id,
                                              const OpenDDS::DCPS::RepoId& participantId)
       {
-        // Use reference counting to ensure participant
-        // does not get deleted until lock as been released.
-        ParticipantHandle participant;
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
         typename DomainParticipantMap::iterator domain = participants_.find(domain_id);
         if (domain == participants_.end()) {
@@ -1224,7 +1221,8 @@ namespace OpenDDS {
         if (part == domain->second.end()) {
           return false;
         }
-        participant = part->second;
+        ParticipantHandle participant = part->second;
+        part->second->cleanup_transport();
         domain->second.erase(part);
         if (domain->second.empty()) {
           participants_.erase(domain);

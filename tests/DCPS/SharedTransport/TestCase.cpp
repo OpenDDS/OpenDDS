@@ -234,10 +234,10 @@ TestCase::set_writers(int count)
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  TestCase test;
   int ret = 1;
   try
   {
+    TestCase test;
     ret = test.run(argc, argv);
   }
   catch (const CORBA::BAD_PARAM& ex)

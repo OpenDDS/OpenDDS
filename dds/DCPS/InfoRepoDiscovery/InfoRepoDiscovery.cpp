@@ -672,10 +672,10 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                    DataReaderRemoteImpl(subscription),
                    DCPS::GUID_UNKNOWN);
 
-    //this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
+    // this is taking ownership of the DataReaderRemoteImpl (server side) allocated above
     PortableServer::ServantBase_var reader_remote(reader_remote_impl);
 
-    //this is the client reference to the DataReaderRemoteImpl
+    // this is the client reference to the DataReaderRemoteImpl
     OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_);
 
@@ -684,9 +684,9 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                               filterClassName, filterExpr, params);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
+
     // take ownership of the client allocated above
     dataReaderMap_[subId] = dr_remote_obj;
-
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_subscription: ");
     subId = DCPS::GUID_UNKNOWN;
