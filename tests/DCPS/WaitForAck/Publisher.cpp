@@ -79,7 +79,7 @@ Publisher::Publisher( const Options& options)
   }
 
   // Create and register the type support.
-  DataTypeSupportImpl* testData = new DataTypeSupportImpl();
+  DataTypeSupportImpl::_var_type testData = new DataTypeSupportImpl();
   CORBA::String_var type_name = testData->get_type_name();
   if( ::DDS::RETCODE_OK
    != testData->register_type( this->participant_.in(), 0)) {

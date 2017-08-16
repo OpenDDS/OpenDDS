@@ -60,7 +60,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "model/Utilities.h"
 
-namespace OpenDDS { namespace Model { 
+namespace OpenDDS { namespace Model {
 </xsl:text>
   <xsl:apply-templates/>
 <xsl:text>
@@ -211,13 +211,13 @@ Elements::Data::loadTopics()
     <xsl:choose>
       <xsl:when test="$cf-topics[@xmi:id = current()/@xmi:id]">
         <xsl:text>  this->cfTopics_[</xsl:text>
-        <xsl:value-of select="concat('Topics::', $enum, 
+        <xsl:value-of select="concat('Topics::', $enum,
                                      '] = ContentFilteredTopics::', $enum,
                                      ';', $newline)"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:text>  this->cfTopics_[</xsl:text>
-        <xsl:value-of select="concat('Topics::', $enum, 
+        <xsl:value-of select="concat('Topics::', $enum,
                                      '] = ContentFilteredTopics::LAST_INDEX;',
                                      $newline)"/>
       </xsl:otherwise>
@@ -225,13 +225,13 @@ Elements::Data::loadTopics()
     <xsl:choose>
       <xsl:when test="$multitopics[@xmi:id = current()/@xmi:id]">
         <xsl:text>  this->multiTopics_[</xsl:text>
-        <xsl:value-of select="concat('Topics::', $enum, 
+        <xsl:value-of select="concat('Topics::', $enum,
                                      '] = MultiTopics::', $enum,
                                      ';', $newline)"/>
       </xsl:when>
       <xsl:otherwise>
         <xsl:text>  this->multiTopics_[</xsl:text>
-        <xsl:value-of select="concat('Topics::', $enum, 
+        <xsl:value-of select="concat('Topics::', $enum,
                                      '] = MultiTopics::LAST_INDEX;',
                                      $newline)"/>
       </xsl:otherwise>
@@ -353,43 +353,43 @@ Elements::Data::loadTransportConfigNames()
 {
 </xsl:text>
   <xsl:for-each select="$lib-participants[@transportConfig]">
-    <xsl:variable name="enum"> 
+    <xsl:variable name="enum">
       <xsl:call-template name="normalize-identifier"/>
     </xsl:variable>
     <xsl:value-of select="concat('  participantTxCfgNames_[Participants::',
-                                 $enum, '] = &quot;', @transportConfig, 
+                                 $enum, '] = &quot;', @transportConfig,
                                  '&quot;;', $newline)"/>
   </xsl:for-each>
   <xsl:for-each select="$lib-publishers[@transportConfig]">
-    <xsl:variable name="enum"> 
+    <xsl:variable name="enum">
       <xsl:call-template name="normalize-identifier"/>
     </xsl:variable>
     <xsl:value-of select="concat('  publisherTxCfgNames_[Publishers::',
-                                 $enum, '] = &quot;', @transportConfig, 
+                                 $enum, '] = &quot;', @transportConfig,
                                  '&quot;;', $newline)"/>
   </xsl:for-each>
   <xsl:for-each select="$lib-subscribers[@transportConfig]">
-    <xsl:variable name="enum"> 
+    <xsl:variable name="enum">
       <xsl:call-template name="normalize-identifier"/>
     </xsl:variable>
     <xsl:value-of select="concat('  subscriberTxCfgNames_[Subscribers::',
-                                 $enum, '] = &quot;', @transportConfig, 
+                                 $enum, '] = &quot;', @transportConfig,
                                  '&quot;;', $newline)"/>
   </xsl:for-each>
   <xsl:for-each select="$lib-writers[@transportConfig]">
-    <xsl:variable name="enum"> 
+    <xsl:variable name="enum">
       <xsl:call-template name="normalize-identifier"/>
     </xsl:variable>
     <xsl:value-of select="concat('  writerTxCfgNames_[DataWriters::',
-                                 $enum, '] = &quot;', @transportConfig, 
+                                 $enum, '] = &quot;', @transportConfig,
                                  '&quot;;', $newline)"/>
   </xsl:for-each>
   <xsl:for-each select="$lib-readers[@transportConfig]">
-    <xsl:variable name="enum"> 
+    <xsl:variable name="enum">
       <xsl:call-template name="normalize-identifier"/>
     </xsl:variable>
     <xsl:value-of select="concat('  readerTxCfgNames_[DataReaders::',
-                                 $enum, '] = &quot;', @transportConfig, 
+                                 $enum, '] = &quot;', @transportConfig,
                                  '&quot;;', $newline)"/>
   </xsl:for-each>
 <xsl:text>}
@@ -527,7 +527,7 @@ Elements::Data::buildParticipantsQos()
     <xsl:call-template name="process-policies">
       <xsl:with-param name="base"   select="'participantQos.'"/>
     </xsl:call-template>
-    
+
     <xsl:text>  this->participantsQos_[ participant] = participantQos;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:for-each>
@@ -549,7 +549,7 @@ Elements::Data::buildTopicsQos()
     <xsl:call-template name="topic-enum"/>
     <xsl:text>;
   topicQos = TheServiceParticipant->initial_TopicQos();
-    
+
 </xsl:text>
     <!-- '  topicQos.(policyfield) = (value);\n' -->
     <xsl:call-template name="process-policies">
@@ -839,16 +839,16 @@ Elements::Data::copySubscriptionQos(
   <xsl:for-each select="@*">
     <xsl:choose>
       <!-- ignore the 'name', 'type' and 'id' attributes of the policy. -->
-      <xsl:when test="name() = 'name' or 
+      <xsl:when test="name() = 'name' or
                       name() = 'model' or
-                      name() = 'xsi:type' or 
+                      name() = 'xsi:type' or
                       name() = 'xmi:id'"/>
 
       <xsl:when test="../@xsi:type = 'opendds:udQosPolicy'
                    or ../@xsi:type = 'opendds:tdQosPolicy'
                    or ../@xsi:type = 'opendds:gdQosPolicy'">
         <xsl:variable name="value" select="concat($base, $field, '.value')"/>
-        <xsl:value-of select="concat('  ', $value, '.replace(', $newline, 
+        <xsl:value-of select="concat('  ', $value, '.replace(', $newline,
                                 '      ', string-length(.) + 1, ',', $newline,
                                 '      ', string-length(.) + 1, ',', $newline,
                                 '      reinterpret_cast&lt;CORBA::Octet*&gt;(const_cast&lt;char *&gt;(&quot;', ., '&quot;)));', $newline)"/>
@@ -861,7 +861,7 @@ Elements::Data::copySubscriptionQos(
             <xsl:value-of select="key('lut-qos-field', $policy-type)/@*[name() = $suffix-attr-name]"/>
           </xsl:for-each>
         </xsl:variable>
-        
+
         <xsl:value-of select="concat('  ', $base, $field, '.', name(), ' = ')"/>
 
         <!-- quote the value if specified in the lookup table. -->
@@ -885,7 +885,7 @@ Elements::Data::copySubscriptionQos(
       <xsl:value-of select="concat('  ', $base, $field, '.name.length(',
                                    count(names), ');', $newline)"/>
       <xsl:for-each select="names">
-        <xsl:value-of select="concat('  ', $base, $field, '.name[', 
+        <xsl:value-of select="concat('  ', $base, $field, '.name[',
                                      position() - 1, '] = &quot;',
                                      ., '&quot;;', $newline)"/>
       </xsl:for-each>
@@ -908,9 +908,9 @@ Elements::Data::copySubscriptionQos(
             <xsl:otherwise>0</xsl:otherwise>
           </xsl:choose>
         </xsl:variable>
-        <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
+        <xsl:value-of select="concat('  ', $base, $field, '.', name(),
                                      '.sec = ', $sec, ';', $newline)"/>
-        <xsl:value-of select="concat('  ', $base, $field, '.', name(), 
+        <xsl:value-of select="concat('  ', $base, $field, '.', name(),
                                      '.nanosec = ', $nanosec, ';', $newline)"/>
       </xsl:for-each>
     </xsl:when>
@@ -921,7 +921,7 @@ Elements::Data::copySubscriptionQos(
 <xsl:template name="include-referenced-data-models">
   <xsl:param name="models"/>
   <xsl:param name="completed-models" select="' '"/>
-  
+
   <xsl:if test="$models">
     <xsl:variable name="model" select="$models[1]"/>
 
@@ -950,12 +950,12 @@ Elements::Data::copySubscriptionQos(
 
   <xsl:text>    case Types::</xsl:text>
   <xsl:call-template name="type-enum"/>
-  <xsl:value-of select="concat(':', $newline, '      {', $newline, 
+  <xsl:value-of select="concat(':', $newline, '      {', $newline,
                                '        typedef ')"/>
   <xsl:value-of select="concat('::', $scopename, $type/@name)"/>
   <xsl:text>TypeSupportImpl TypeSupport;
 
-        TypeSupport* typeSupport = new TypeSupport();
+        TypeSupport::_var_type typeSupport = new TypeSupport();
         if( RETCODE_OK != typeSupport->register_type( participant, 0)) {
           throw BadRegisterException();
         }

@@ -34,7 +34,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         return 1;
       }
 
-      Test::DataTypeSupportImpl* servant = new Test::DataTypeSupportImpl();
+      Test::DataTypeSupportImpl::_var_type servant = new Test::DataTypeSupportImpl();
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
