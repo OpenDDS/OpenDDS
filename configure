@@ -1158,7 +1158,7 @@ EOT
       dump_and_unlink($DF) if $opts{'dry-run'};
     }
 
-    if (!$buildtao) {
+    if (!$buildtao && !defined $opts{'safety-profile'}) {
       # Read the existing features.
       my $file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
       my %existing_features;
@@ -1190,11 +1190,9 @@ EOT
           }
         }
       }
-    }
 
-    if (!$buildtao) {
-      # Read the existing features.
-      my $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
+      # Read the existing macros.
+      $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
       my %existing_macros;
       if (-e $file) {
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
