@@ -176,13 +176,13 @@ DataReaderImpl::cleanup()
 
   // Cancel any watchdog timers
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
     for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
         iter != instances_.end();
         ++iter) {
       SubscriptionInstance_rch ptr = iter->second;
-      if (this->watchdog_.in() && ptr->deadline_timer_id_ != -1) {
-        this->watchdog_->cancel_timer(ptr);
+      if (watchdog_ && ptr->deadline_timer_id_ != -1) {
+        watchdog_->cancel_timer(ptr);
       }
     }
   }
@@ -1575,14 +1575,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     // tell all instances they got a liveliness message
-    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-        iter != instances_.end();
-        ++iter) {
-      SubscriptionInstance_rch ptr = iter->second;
-
-      ptr->instance_state_.lively(sample.header_.publication_id_);
-    }
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+      for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+          iter != instances_.end();
+          ++iter) {
+        iter->second->instance_state_.lively(sample.header_.publication_id_);
+      }
     }
 
   }
@@ -2056,9 +2055,11 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 
   this->purge_data(instance);
 
-  { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  this->instances_.erase(handle);
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    instances_.erase(handle);
   }
+
   this->release_instance_i(handle);
   if (this->monitor_) {
     this->monitor_->report();
