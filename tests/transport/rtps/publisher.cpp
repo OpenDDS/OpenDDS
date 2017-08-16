@@ -356,21 +356,24 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     gen_find_size(ko_instance_data, size, padding);
     dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
 
-    ACE_Message_Block* ir_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-                                                     ACE_Message_Block::MB_DATA,
-                                                     new ACE_Message_Block(dsh.message_length_));
-    *ir_mb << dsh;
+    {
+      ACE_Message_Block* ir_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                                                       ACE_Message_Block::MB_DATA,
+                                                       new ACE_Message_Block(dsh.message_length_));
+      *ir_mb << dsh;
 
-    OpenDDS::DCPS::Serializer serializer(ir_mb->cont(),
-                                         host_is_bigendian,
-                                         Serializer::ALIGN_CDR);
-    ok = (serializer << encap) && (serializer << ko_instance_data);
-    if (!ok) {
-      std::cerr << "ERROR: failed to serialize data for instance registration\n";
-      return 1;
+      OpenDDS::DCPS::Serializer serializer(ir_mb->cont(),
+                                           host_is_bigendian,
+                                           Serializer::ALIGN_CDR);
+      ok = (serializer << encap) && (serializer << ko_instance_data);
+      if (!ok) {
+        std::cerr << "ERROR: failed to serialize data for instance registration\n";
+        return 1;
+      }
+      ::DDS_TEST::force_inline_qos(false);  // No inline QoS
+      sdw.send_control(dsh, ir_mb);
+      ACE_Message_Block::release(ir_mb);
     }
-    ::DDS_TEST::force_inline_qos(false);  // No inline QoS
-    sdw.send_control(dsh, ir_mb);
 
     // Send a dispose instance
     {
@@ -390,6 +393,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::PARTIAL_MOD_QOS;
       sdw.send_control(dsh, di_mb);
+      ACE_Message_Block::release(di_mb);
     }
 
     // Send an unregister instance
@@ -410,6 +414,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
       sdw.send_control(dsh, ui_mb);
+      ACE_Message_Block::release(ui_mb);
     }
 
     // Send a dispose & unregister instance
@@ -430,6 +435,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
       sdw.send_control(dsh, ui_mb);
+      ACE_Message_Block::release(ui_mb);
     }
   }
 
@@ -544,7 +550,8 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
-    TheParticipantFactoryWithArgs(argc, argv);
+    ::DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
     ACE_TString host;
     u_short port = 0;
