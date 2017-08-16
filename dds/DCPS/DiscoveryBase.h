@@ -1221,8 +1221,6 @@ namespace OpenDDS {
         if (part == domain->second.end()) {
           return false;
         }
-        // Use reference counting to ensure participant
-        // does not get deleted until lock as been released.
         ParticipantHandle participant = part->second;
         part->second->cleanup_transport();
         domain->second.erase(part);
