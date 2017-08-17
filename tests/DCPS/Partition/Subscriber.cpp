@@ -47,7 +47,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         return 1 ;
       }
 
-      Test::DataTypeSupportImpl * const dts_servant =
+      Test::DataTypeSupportImpl::_var_type dts_servant =
         new Test::DataTypeSupportImpl;
 
       if (DDS::RETCODE_OK != dts_servant->register_type(participant.in (),

@@ -289,12 +289,13 @@ PersistenceUpdater::init(int argc, ACE_TCHAR *argv[])
 
   // Create the allocator with the appropriate options.  The name used
   // for  the lock is the same as one used for the file.
-  ACE_NEW_RETURN(allocator_,
+  ALLOCATOR* allocator;
+  ACE_NEW_RETURN(allocator,
                  ALLOCATOR(persistence_file_.c_str(),
                            persistence_file_.c_str(),
                            &options),
                  -1);
-
+  allocator_.reset(allocator);
   std::string topic_tag("TopicIndex");
   std::string participant_tag("ParticipantIndex");
   std::string actor_tag("ActorIndex");
@@ -341,15 +342,15 @@ PersistenceUpdater::init(int argc, ACE_TCHAR *argv[])
     }
 
   } else {
-    topic_index_ = new(topic_index) TopicIndex(allocator_);
-    participant_index_ = new(participant_index) ParticipantIndex(allocator_);
-    actor_index_ = new(actor_index) ActorIndex(allocator_);
+    topic_index_ = new(topic_index) TopicIndex(allocator_.get());
+    participant_index_ = new(participant_index) ParticipantIndex(allocator_.get());
+    actor_index_ = new(actor_index) ActorIndex(allocator_.get());
   }
 
   if (reset_) {
-    index_cleanup(topic_index_, allocator_);
-    index_cleanup(participant_index_, allocator_);
-    index_cleanup(actor_index_, allocator_);
+    index_cleanup(topic_index_, allocator_.get());
+    index_cleanup(participant_index_, allocator_.get());
+    index_cleanup(actor_index_, allocator_.get());
   }
 
   // lastly register the callback
@@ -577,12 +578,12 @@ PersistenceUpdater::create(const UTopic& topic)
 
   // Initialize TopicData
   PersistenceUpdater::Topic* persistent_data
-  = new(buffer) PersistenceUpdater::Topic(topic_data, allocator_);
+  = new(buffer) PersistenceUpdater::Topic(topic_data, allocator_.get());
 
   IdType_ExtId ext(topic_data.topicId);
 
   // bind TopicData with the topicId
-  if (topic_index_->bind(ext, persistent_data, allocator_) != 0) {
+  if (topic_index_->bind(ext, persistent_data, allocator_.get()) != 0) {
     allocator_->free((void *) buffer);
     return;
   }
@@ -624,12 +625,12 @@ PersistenceUpdater::create(const UParticipant& participant)
   // Initialize ParticipantData
   PersistenceUpdater::Participant* persistent_data
   = new(buffer) PersistenceUpdater::Participant(participant_data
-                                                , allocator_);
+                                                , allocator_.get());
 
   IdType_ExtId ext(participant_data.participantId);
 
   // bind ParticipantData with the participantId
-  if (participant_index_->bind(ext, persistent_data, allocator_) != 0) {
+  if (participant_index_->bind(ext, persistent_data, allocator_.get()) != 0) {
     allocator_->free((void *) buffer);
     return;
   }
@@ -727,12 +728,12 @@ PersistenceUpdater::create(const URActor& actor)
   // Initialize ActorData
   PersistenceUpdater::RWActor* persistent_data =
     new(buffer) PersistenceUpdater::RWActor(actor_data
-                                            , allocator_);
+                                            , allocator_.get());
 
   IdType_ExtId ext(actor.actorId);
 
   // bind ActorData with the actorId
-  if (actor_index_->bind(ext, persistent_data, allocator_) != 0) {
+  if (actor_index_->bind(ext, persistent_data, allocator_.get()) != 0) {
     allocator_->free((void *) buffer);
     return;
   }
@@ -812,12 +813,12 @@ PersistenceUpdater::create(const UWActor& actor)
   // Initialize ActorData
   PersistenceUpdater::RWActor* persistent_data =
     new(buffer) PersistenceUpdater::RWActor(actor_data
-                                            , allocator_);
+                                            , allocator_.get());
 
   IdType_ExtId ext(actor.actorId);
 
   // bind ActorData with the actorId
-  if (actor_index_->bind(ext, persistent_data, allocator_) != 0) {
+  if (actor_index_->bind(ext, persistent_data, allocator_.get()) != 0) {
     allocator_->free((void *) buffer);
     return;
   }
@@ -835,7 +836,7 @@ PersistenceUpdater::update(const IdPath& id, const DDS::DomainParticipantQos& qo
   IdType_ExtId ext(id.id);
   PersistenceUpdater::Participant* part_data = 0;
 
-  if (this->participant_index_->find(ext, part_data, this->allocator_) ==  0) {
+  if (this->participant_index_->find(ext, part_data, this->allocator_.get()) ==  0) {
     TAO_OutputCDR outCdr;
     outCdr << qos;
     ACE_Message_Block dst;
@@ -858,7 +859,7 @@ PersistenceUpdater::update(const IdPath& id, const DDS::TopicQos& qos)
   IdType_ExtId ext(id.id);
   PersistenceUpdater::Topic* topic_data = 0;
 
-  if (this->topic_index_->find(ext, topic_data, this->allocator_) ==  0) {
+  if (this->topic_index_->find(ext, topic_data, this->allocator_.get()) ==  0) {
     TAO_OutputCDR outCdr;
     outCdr << qos;
     ACE_Message_Block dst;
@@ -881,7 +882,7 @@ PersistenceUpdater::update(const IdPath& id, const DDS::DataWriterQos& qos)
   IdType_ExtId ext(id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
 
-  if (this->actor_index_->find(ext, actor_data, this->allocator_) ==  0) {
+  if (this->actor_index_->find(ext, actor_data, this->allocator_.get()) ==  0) {
     TAO_OutputCDR outCdr;
     outCdr << qos;
     ACE_Message_Block dst;
@@ -904,7 +905,7 @@ PersistenceUpdater::update(const IdPath& id, const DDS::PublisherQos& qos)
   IdType_ExtId ext(id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
 
-  if (this->actor_index_->find(ext, actor_data, this->allocator_) ==  0) {
+  if (this->actor_index_->find(ext, actor_data, this->allocator_.get()) ==  0) {
     TAO_OutputCDR outCdr;
     outCdr << qos;
     ACE_Message_Block dst;
@@ -927,7 +928,7 @@ PersistenceUpdater::update(const IdPath& id, const DDS::DataReaderQos& qos)
   IdType_ExtId ext(id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
 
-  if (this->actor_index_->find(ext, actor_data, this->allocator_) ==  0) {
+  if (this->actor_index_->find(ext, actor_data, this->allocator_.get()) ==  0) {
     TAO_OutputCDR outCdr;
     outCdr << qos;
     ACE_Message_Block dst;
@@ -950,7 +951,7 @@ PersistenceUpdater::update(const IdPath& id, const DDS::SubscriberQos& qos)
   IdType_ExtId ext(id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
 
-  if (this->actor_index_->find(ext, actor_data, this->allocator_) ==  0) {
+  if (this->actor_index_->find(ext, actor_data, this->allocator_.get()) ==  0) {
     TAO_OutputCDR outCdr;
     outCdr << qos;
     ACE_Message_Block dst;
@@ -973,7 +974,7 @@ PersistenceUpdater::update(const IdPath& id, const DDS::StringSeq& exprParams)
   IdType_ExtId ext(id.id);
   PersistenceUpdater::RWActor* actor_data = 0;
 
-  if (actor_index_->find(ext, actor_data, allocator_) ==  0) {
+  if (actor_index_->find(ext, actor_data, allocator_.get()) ==  0) {
     TAO_OutputCDR outCdr;
     outCdr << exprParams;
     ACE_Message_Block dst;
@@ -1001,24 +1002,24 @@ PersistenceUpdater::destroy(const IdPath& id, ItemType type, ActorType)
   switch (type) {
   case Update::Topic:
 
-    if (topic_index_->unbind(ext, topic, allocator_) == 0) {
-      topic->cleanup(allocator_);
+    if (topic_index_->unbind(ext, topic, allocator_.get()) == 0) {
+      topic->cleanup(allocator_.get());
       allocator_->free((void *) topic);
     }
 
     break;
   case Update::Participant:
 
-    if (participant_index_->unbind(ext, participant, allocator_) == 0) {
-      participant->cleanup(allocator_);
+    if (participant_index_->unbind(ext, participant, allocator_.get()) == 0) {
+      participant->cleanup(allocator_.get());
       allocator_->free((void *) participant);
     }
 
     break;
   case Update::Actor:
 
-    if (actor_index_->unbind(ext, actor, allocator_) == 0) {
-      actor->cleanup(allocator_);
+    if (actor_index_->unbind(ext, actor, allocator_.get()) == 0) {
+      actor->cleanup(allocator_.get());
       allocator_->free((void *) actor);
     }
 

@@ -40,7 +40,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       return 1 ;
     }
 
-    MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl;
+    MessageTypeSupportImpl::_var_type mts_servant = new MessageTypeSupportImpl;
 
     if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                       "")) {
