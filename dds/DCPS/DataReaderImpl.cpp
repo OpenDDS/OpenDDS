@@ -222,6 +222,9 @@ DataReaderImpl::cleanup()
 
   end_historic_sweeper_->wait();
   remove_association_sweeper_->wait();
+
+  // reset the watchdog to deal with the circular references
+  watchdog_.reset();
 }
 
 void DataReaderImpl::init(

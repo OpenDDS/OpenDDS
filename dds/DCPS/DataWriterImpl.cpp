@@ -138,6 +138,9 @@ DataWriterImpl::cleanup()
   // deleted
   set_listener(0, NO_STATUS_MASK);
 
+  // reset the watchdog to deal with the circular references
+  this->watchdog_.reset();
+
   if (cancel_timer_) {
     // The cancel_timer will call handle_close to
     // remove_ref.
