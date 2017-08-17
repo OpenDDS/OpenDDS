@@ -1099,7 +1099,7 @@ sub generate_workspace {
   my $mpctype = ($slash eq '/' ||
                   ($cross_compile && $buildEnv->{'build'} eq 'target'))
                 ? 'gnuace' : $opts{'compiler_version'};
- 
+
   if ($mpctype eq 'gnuace') {
     if ($buildEnv->{'build'} eq 'target') {
       print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
