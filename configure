@@ -307,8 +307,8 @@ sub locate_mpc {
     setEnv('MPC_ROOT', $ace_src . $slash . 'MPC');
   }
   elsif (!$ENV{'MPC_ROOT'}) {
-    die "ERROR: Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in\n".
-      "the 'MPC' directory under ACE_ROOT ($ace_src), stopped";
+    die "ERROR: Can't find MPC.  Please set MPC_ROOT or make sure MPC exists".
+      "\n in the 'MPC' directory under ACE_ROOT ($ace_src), stopped";
   }
   else {
     $targetEnv{'MPC_ROOT'} = $ENV{'MPC_ROOT'};
@@ -396,7 +396,8 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
       my $ver = ($2 == 0) ? $1 : "$1.$2";
       $ver =~ s/0+$// unless $2 == 0;
       if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
-        die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\nStopped";
+        die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
+          . "Stopped";
       }
       $opts{'compiler_version'} =
         $platforminfo{'win32'}->{'cl_versions'}->{$ver};
@@ -409,8 +410,8 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   close CL;
   if (!$opts{'compiler_version'}) {
-    die "ERROR: Could not detect Visual C++ version, try running this script from\n" .
-      "the Visual Studio Command Prompt.\nStopped";
+    die "ERROR: Could not detect Visual C++ version, try running this script ".
+      "from the Visual Studio Command Prompt.\nStopped";
   }
   $ENV{'PATH'} = $savepath;
   print "Detected Visual C++ version: $opts{'compiler_version'}\n"
@@ -542,7 +543,8 @@ if (!$ace_src || !$tao_src) {
     $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
     $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
       . ($slash eq '/' ? 'tar.gz' : 'zip');
-    $download_message = "Downloading ACE+TAO $oci_tao_version with latest patches";
+    $download_message =
+      "Downloading ACE+TAO $oci_tao_version with latest patches";
   }
   if (-r $file) {
     print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
@@ -584,8 +586,9 @@ if (!$ace_src || !$tao_src) {
         }
       }
       else {
-        die "ERROR: Can't download ACE+TAO using LWP, wget, or curl.\nDownload ACE+TAO ".
-          "from $urlbase$file, place the file here\n, and re-run the script.\n";
+        die "ERROR: Can't download ACE+TAO using LWP, wget, or curl.\n" .
+          "Download ACE+TAO from $urlbase$file, place the file here\n, " .
+          "and re-run the script.\n";
       }
     }
   }
@@ -1136,8 +1139,10 @@ EOT
   if ($buildEnv->{'build'} eq 'target') {
     push(@features, 'cross_compile') if $cross_compile;
     if ($buildtao && @features) {
-      my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
-      my $DF = $opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file");
+      my $df_file = $buildEnv->{'ACE_ROOT'} .
+        '/bin/MakeProjectCreator/config/default.features';
+      my $DF = $opts{'dry-run'} ? File::Temp->new()
+        : new FileHandle(">>$df_file");
       for my $f (@features) {
         print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
       }
@@ -1150,8 +1155,10 @@ EOT
     }
 
     if (!$buildtao && !defined $opts{'safety-profile'}) {
-      # Check for compatibility between the requested features/macros and the build ACE/TAO.
-      my $file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
+      # Check for compatibility between the requested features/macros
+      # and the pre-built ACE/TAO.
+      my $file = $buildEnv->{'ACE_ROOT'} .
+        '/bin/MakeProjectCreator/config/default.features';
       my %existing_features;
       if (-e $file) {
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
@@ -1173,7 +1180,8 @@ EOT
             die "ERROR: Requested feature $f not defined for ACE/TAO";
           }
           elsif ($requested_features{$f} != $existing_features{$f}) {
-            die "ERROR: Feature $f set to $requested_features{$f} but has value $existing_features{$f} in ACE/TAO";
+            die "ERROR: Feature $f set to $requested_features{$f} but has " .
+              "value $existing_features{$f} in ACE/TAO";
           }
         }
       }
@@ -1207,7 +1215,8 @@ EOT
           if (!defined $existing_macros{$f}) {
             die "ERROR: Requested macro $f not defined for ACE/TAO";
           } elsif ($requested_macros{$f} != $existing_macros{$f}) {
-            die "ERROR: Macro $f set to $requested_macros{$f} but has value $existing_macros{$f} in ACE/TAO";
+            die "ERROR: Macro $f set to $requested_macros{$f} but has " .
+              "value $existing_macros{$f} in ACE/TAO";
           }
         }
       }
