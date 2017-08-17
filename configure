@@ -43,7 +43,7 @@ my %platforminfo =
   ('win32' => {
                'compilers' => ['cl'],
                'libpath' => 'PATH',
-               'cl_versions' => {13 => 'vc71', 14 => 'vc8', 15 => 'vc9',
+               'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017'},
               },
@@ -529,7 +529,6 @@ if ($opts{'safety-profile'}) {
 }
 
 ## Download ACE+TAO
-my $tao_maj = 1;
 if (!$ace_src || !$tao_src) {
   my $urlbase;
   my $file;
@@ -545,7 +544,6 @@ if (!$ace_src || !$tao_src) {
       . ($slash eq '/' ? 'tar.gz' : 'zip');
     $download_message = "Downloading ACE+TAO $oci_tao_version with latest patches";
   }
-  $tao_maj = 2 if $opts{'dry-run'};
   if (-r $file) {
     print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
   }
@@ -638,17 +636,6 @@ if (!$ace_src || !$tao_src) {
 
 print "Using ace_src: $ace_src\n" if $opts{'verbose'};
 print "Using tao_src: $tao_src\n" if $opts{'verbose'};
-
-unless ($opts{'dry-run'} && $would_download) {
-  open TAOVER, $tao_src . '/VERSION' or die "ERROR: can't open TAO VERSION\n";
-  while (<TAOVER>) {
-    if (/^This is TAO version (\d)/) {
-      $tao_maj = $1;
-      last;
-    }
-  }
-  close TAOVER;
-}
 
 sub clone_host_and_target {
   my $source_dir = shift;
@@ -765,7 +752,8 @@ my @ace_macros = ('debug',
 my @platformmacros;
 sub write_platform_macros {
   my %buildEnv = %{shift()};
-  if ($slash eq '/') {
+  if ($slash eq '/' ||
+      ($cross_compile && $buildEnv{'build'} eq 'target')) {
     my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
@@ -1139,7 +1127,9 @@ EOT
     $buildtao = 1 if !-x "$buildEnv->{'ACE_ROOT'}/bin/tao_idl$exeext";
   }
 
-  my $mpctype = ($slash eq '/') ? 'gnuace' : $opts{'compiler_version'};
+  my $mpctype = ($slash eq '/' ||
+                  ($cross_compile && $buildEnv->{'build'} eq 'target'))
+                ? 'gnuace' : $opts{'compiler_version'};
   locate_mpc($ace_src);
 
   # Append to default.features
@@ -1238,7 +1228,9 @@ EOT
     $ws = 'DDS_TAOv2_all.mwc';
   }
 
-  my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
+  my $static = (($opts{'static'} && $slash ne '/') ||
+    ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'))
+    ? '-static' : '';
 
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
   # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
@@ -1267,6 +1259,7 @@ EOT
       die "ERROR: Error from MPC, stopped";
     }
   }
+  $buildEnv->{'mpctype'} = $mpctype;
 
   # If this is a target safety profile build
   if (defined $opts{'no-opendds-safety-profile'}) {
@@ -1289,11 +1282,17 @@ EOT
   $opts{'solution_file'} = $ws;
 }
 
+sub convert_environment {
+  my $val = shift;
+  $$val =~ s/\\/\//g;
+  $$val =~ s/%(\w+)%/\$\{$1\}/g;
+}
+
 sub write_environment {
   my %buildEnv = %{shift()};
   my $dir = shift;
   my $MK = undef;
-  if ($slash eq '/') {
+  if ($buildEnv{'mpctype'} eq 'gnuace') {
     if (!$opts{'dry-run'}) {
       move($dir . '/GNUmakefile', $dir . '/GNUmakefile.dist');
     }
@@ -1307,9 +1306,13 @@ sub write_environment {
   print $MK "$specific{'comment'} OpenDDS configure script: $0 $args_\n" if $MK;
 
   for my $key (keys %buildEnv) {
-    if ($key ne 'build') {
+    if ($key ne 'build' && $key ne 'mpctype') {
       print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
-      print $MK "export $key := $buildEnv{$key}\n" if $MK;
+      if ($MK) {
+        my $value = $buildEnv{$key};
+        convert_environment(\$value) if $slash ne '/';
+        print $MK "export $key := $value\n" if $MK;
+      }
     }
   }
 
@@ -1438,12 +1441,12 @@ if ($cross_compile) {
   push_path(\%targetEnv, $hostEnv{'ACE_ROOT'} . $slash . 'bin');
   push_path(\%targetEnv, $hostEnv{'DDS_ROOT'} . $slash . 'bin');
 
-  print "Cross-compile configuring host\n" if $opts{'verbose'};
+  print "Cross-compile configuring host\n";
 
   write_host_workspace(\%hostEnv); # host_tools.mwc
   configure_build(\%hostEnv);
 
-  print "Cross-compile configuring target\n" if $opts{'verbose'};
+  print "Cross-compile configuring target\n";
 
   if ($opts{'safety-profile'}) {
     $opts{'no-opendds-safety-profile'} = 0; # only set for target
@@ -1480,6 +1483,13 @@ else { # not cross-compiling:
 print "Completed configuring OpenDDS, next ";
 if ($slash eq '/') {
   print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
+}
+elsif ($cross_compile) {
+  print "compile build\\host\\host_tools.sln\n",
+    "using the environment in build\\host\\setenv.cmd.\n",
+    "Then build OpenDDS for $opts{'target'} by running make in ",
+    "build\\target.\n";
+  exit 0;
 }
 else {
   print "build '", $opts{'solution_file'}, "' using the '",
