@@ -395,6 +395,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if (/version (\d+)\.(\d+)/i) { # match i18n version strings
       my $ver = ($2 == 0) ? $1 : "$1.$2";
       $ver =~ s/0+$// unless $2 == 0;
+      $ver =~ s/\.(\d)\d*/.$1/; # only keep one digit after .
       if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
         die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
           . "Stopped";
