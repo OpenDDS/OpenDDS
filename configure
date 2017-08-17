@@ -1096,7 +1096,11 @@ sub generate_workspace {
     }
   }
 
-  if ($slash eq '/') {
+  my $mpctype = ($slash eq '/' ||
+                  ($cross_compile && $buildEnv->{'build'} eq 'target'))
+                ? 'gnuace' : $opts{'compiler_version'};
+ 
+  if ($mpctype eq 'gnuace') {
     if ($buildEnv->{'build'} eq 'target') {
       print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
         if $opts{'verbose'};
@@ -1110,9 +1114,9 @@ sub generate_workspace {
       if ($cross_compile) {
         print $UM <<'EOT';
 OPENDDS_IDL = $(HOST_DDS)/bin/opendds_idl
-OPENDDS_IDL_DEP = $(OPENDDS_IDL)
+OPENDDS_IDL_DEP = $(OPENDDS_IDL)$(HOST_EXE_EXT)
 IDL2JNI = $(HOST_DDS)/bin/idl2jni
-IDL2JNI_DEP = $(IDL2JNI)
+IDL2JNI_DEP = $(IDL2JNI)$(HOST_EXE_EXT)
 CROSS-COMPILE = 1
 EOT
       }
@@ -1131,9 +1135,6 @@ EOT
     $buildtao = 1 if !-x "$buildEnv->{'ACE_ROOT'}/bin/tao_idl$exeext";
   }
 
-  my $mpctype = ($slash eq '/' ||
-                  ($cross_compile && $buildEnv->{'build'} eq 'target'))
-                ? 'gnuace' : $opts{'compiler_version'};
   locate_mpc($ace_src);
 
   # Append to default.features
