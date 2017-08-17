@@ -756,6 +756,12 @@ sub write_default_features {
   }
 }
 
+my @ace_macros = ('debug',
+                  'optimize',
+                  'inline',
+                  'static',
+                  'ipv6');
+
 my @platformmacros;
 sub write_platform_macros {
   my %buildEnv = %{shift()};
@@ -767,7 +773,7 @@ sub write_platform_macros {
       for my $line (@{$opts{'macros'}}) {
         print $PMG "$line\n";
       }
-      for my $key ('debug', 'optimize', 'inline', 'static', 'ipv6') {
+      for my $key (@ace_macros) {
         if (exists $opts{$key}) {
           my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
           print $PMG "$macro = $opts{$key}\n";
@@ -838,11 +844,6 @@ my %optdep =
   );
 
 my @ace_features = ('xerces3');
-my @ace_macros = ('debug',
-                  'optimize',
-                  'inline',
-                  'static',
-                  'ipv6');
 
 if (exists $opts{'java'}) {
   if ($opts{'static'}) {
@@ -1159,7 +1160,7 @@ EOT
     }
 
     if (!$buildtao && !defined $opts{'safety-profile'}) {
-      # Read the existing features.
+      # Check for compatibility between the requested features/macros and the build ACE/TAO.
       my $file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
       my %existing_features;
       if (-e $file) {
@@ -1170,28 +1171,23 @@ EOT
           $existing_features{$key} = $value;
         }
       }
-      # Convert the requested features.
       my %requested_features;
       for my $f (@features) {
         my ($key, $value) = split(/=/, $f);
         $value = "1" unless defined $value;
         $requested_features{$key} = $value;
       }
-      # Make sure everything agrees.
       for my $f (@ace_features) {
         if(defined $requested_features{$f}) {
           if(!defined $existing_features{$f}) {
-            # Requested a feature not defined in ACE.
             die "ERROR: Requested feature $f not defined for ACE/TAO";
           }
           elsif ($requested_features{$f} != $existing_features{$f}) {
-            # Requested feature does not agree.
             die "ERROR: Feature $f set to $requested_features{$f} but has value $existing_features{$f} in ACE/TAO";
           }
         }
       }
 
-      # Read the existing macros.
       $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
       my %existing_macros;
       if (-e $file) {
@@ -1204,32 +1200,23 @@ EOT
           }
         }
       }
-        # Convert the requested macros.
       my %requested_macros;
-      for my $f (@platformmacros) {
+      for my $f (@platformmacros, @{$opts{'macros'}}) {
         my ($key, $value) = split(/=/, $f);
         $value = "1" unless defined $value;
         $requested_macros{$key} = $value;
       }
-      for my $f (@{$opts{'macros'}}) {
-        my ($key, $value) = split(/=/, $f);
-        $value = "1" unless defined $value;
-        $requested_macros{$key} = $value;
-      }
-      for my $key ('debug', 'optimize', 'inline', 'static', 'ipv6') {
+      for my $key (@ace_macros) {
         if (exists $opts{$key}) {
           my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
           $requested_macros{$macro} = $opts{$key};
         }
       }
-      # Make sure everything agrees.
       for my $f (@ace_macros) {
         if (defined $requested_macros{$f}) {
           if (!defined $existing_macros{$f}) {
-            # Requested a macro not defined in ACE.
             die "ERROR: Requested macro $f not defined for ACE/TAO";
           } elsif ($requested_macros{$f} != $existing_macros{$f}) {
-            # Requested macro does not agree.
             die "ERROR: Macro $f set to $requested_macros{$f} but has value $existing_macros{$f} in ACE/TAO";
           }
         }
