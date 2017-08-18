@@ -8,6 +8,8 @@
 #include "scoped_ptr.h"
 #include "ace/Message_Block.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -22,5 +24,7 @@ typedef scoped_ptr<ACE_Message_Block,Message_Block_Deleter> Message_Block_Ptr;
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // MESSAGE_BLOCK_PTR_H_18C6F30C
