@@ -161,7 +161,7 @@ public:
     if (the_union->default_value(dv) == -1) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: generateDefaultValue::")
-        ACE_TEXT(" computing default value failed\n")));;
+        ACE_TEXT(" computing default value failed\n")));
       return first_label.str();
     }
 

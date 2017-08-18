@@ -571,7 +571,7 @@ Monitor::MonitorDataStorage::manageTransportLink(
   if( row == -1) {
     // New entry, add a reference to the actual transport node.
     QList<QVariant> list;
-    list << label << QString( QObject::tr("<error>"));;
+    list << label << QString( QObject::tr("<error>"));
     TreeNode* idNode = new TreeNode( list, node);
     idNode->setColor( 1, QColor("#bfbfff"));
     node->append( idNode);
