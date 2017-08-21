@@ -79,6 +79,8 @@ public:
   /// Expose the participants for reading.
   const DPMap& participants() const;
 
+  void cleanup();
+
 private:
 
   DDS::DomainParticipantFactoryQos qos_;

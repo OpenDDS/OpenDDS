@@ -346,6 +346,18 @@ DomainParticipantFactoryImpl::participants() const
   return this->participants_;
 }
 
+void DomainParticipantFactoryImpl::cleanup()
+{
+  DPMap::iterator itr;
+  for (itr = participants_.begin(); itr != participants_.end(); ++itr) {
+    DPSet& dp_set = itr->second;
+    DPSet::iterator dp_set_itr;
+    for (dp_set_itr = dp_set.begin(); dp_set_itr != dp_set.end(); ++dp_set_itr) {
+      dp_set_itr->svt_->delete_contained_entities();
+    }
+  }
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
