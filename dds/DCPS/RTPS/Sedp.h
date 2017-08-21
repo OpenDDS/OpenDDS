@@ -254,10 +254,10 @@ private:
     }
     ~Task();
 
-    void enqueue(const SPDPdiscoveredParticipantData* pdata);
-    void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
-    void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
-    void enqueue(DCPS::MessageId id, const ParticipantMessageData* data);
+    void enqueue(DCPS::scoped_ptr<SPDPdiscoveredParticipantData>& pdata);
+    void enqueue(DCPS::MessageId id, DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredWriterData>& wdata);
+    void enqueue(DCPS::MessageId id, DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredReaderData>& rdata);
+    void enqueue(DCPS::MessageId id, DCPS::scoped_ptr<ParticipantMessageData>& data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
     void acknowledge();

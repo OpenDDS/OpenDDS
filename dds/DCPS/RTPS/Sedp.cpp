@@ -429,15 +429,15 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     participant_message_reader_->assoc(peer);
   }
 
-  SPDPdiscoveredParticipantData* dpd =
-    new SPDPdiscoveredParticipantData(pdata);
+  DCPS::scoped_ptr<SPDPdiscoveredParticipantData> dpd(
+    new SPDPdiscoveredParticipantData(pdata));
   task_.enqueue(dpd);
 }
 
 void
 Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
 {
-  ACE_Auto_Basic_Ptr<const SPDPdiscoveredParticipantData> delete_the_data(ppdata);
+  DCPS::scoped_ptr<const SPDPdiscoveredParticipantData> delete_the_data(ppdata);
   const SPDPdiscoveredParticipantData& pdata = *ppdata;
   // First create a 'prototypical' instance of AssociationData.  It will
   // be copied and modified for each of the (up to) four SEDP Endpoints.
@@ -917,7 +917,7 @@ void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const OpenDDS::DCPS::DiscoveredWriterData* pwdata)
 {
-  ACE_Auto_Basic_Ptr<const OpenDDS::DCPS::DiscoveredWriterData> delete_the_data(pwdata);
+  DCPS::scoped_ptr<const OpenDDS::DCPS::DiscoveredWriterData> delete_the_data(pwdata);
   sedp_->data_received(message_id, *pwdata);
 }
 
@@ -1077,7 +1077,7 @@ void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const OpenDDS::DCPS::DiscoveredReaderData* prdata)
 {
-  ACE_Auto_Basic_Ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
+  DCPS::scoped_ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
   sedp_->data_received(message_id, *prdata);
 }
 
@@ -1276,7 +1276,7 @@ void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const ParticipantMessageData* data)
 {
-  ACE_Auto_Basic_Ptr<const ParticipantMessageData> delete_the_data(data);
+  DCPS::scoped_ptr<const ParticipantMessageData> delete_the_data(data);
   sedp_->data_received(message_id, *data);
 }
 
@@ -1701,7 +1701,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata(new OpenDDS::DCPS::DiscoveredWriterData);
+      DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata(new OpenDDS::DCPS::DiscoveredWriterData);
       if (ParameterListConverter::from_param_list(data, *wdata) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
@@ -1709,7 +1709,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to DiscoveredWriterData\n")));
         return;
       }
-      sedp_.task_.enqueue(id, wdata.release());
+      sedp_.task_.enqueue(id, wdata);
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
       ParameterList data;
@@ -1719,7 +1719,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata(new OpenDDS::DCPS::DiscoveredReaderData);
+      DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata(new OpenDDS::DCPS::DiscoveredReaderData);
       if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
@@ -1730,18 +1730,18 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       if (rdata->readerProxy.expectsInlineQos) {
         set_inline_qos(rdata->readerProxy.allLocators);
       }
-      sedp_.task_.enqueue(id, rdata.release());
+      sedp_.task_.enqueue(id, rdata);
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
                && !sample.header_.key_fields_only_) {
-      ACE_Auto_Ptr<ParticipantMessageData> data(new ParticipantMessageData);
+      DCPS::scoped_ptr<ParticipantMessageData> data(new ParticipantMessageData);
       if (!(ser >> *data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
 
-      sedp_.task_.enqueue(id, data.release());
+      sedp_.task_.enqueue(id, data);
 
     }
   }
@@ -1963,31 +1963,31 @@ Sedp::acknowledge()
 }
 
 void
-Sedp::Task::enqueue(const SPDPdiscoveredParticipantData* pdata)
+Sedp::Task::enqueue(DCPS::scoped_ptr<SPDPdiscoveredParticipantData>& pdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata));
+  putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredWriterData>& wdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_WRITER, id, wdata));
+  putq(new Msg(Msg::MSG_WRITER, id, wdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredReaderData>& rdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_READER, id, rdata));
+  putq(new Msg(Msg::MSG_READER, id, rdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const ParticipantMessageData* data)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::scoped_ptr<ParticipantMessageData>& data)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data));
+  putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data.release()));
 }
 
 void
@@ -2010,7 +2010,7 @@ Sedp::Task::svc()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
         "got message from queue type %d\n", msg->type_));
     }
-    ACE_Auto_Basic_Ptr<Msg> delete_the_msg(msg);
+    DCPS::scoped_ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
     case Msg::MSG_PARTICIPANT:
       svc_i(msg->dpdata_);
