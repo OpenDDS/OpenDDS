@@ -175,7 +175,6 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   // Create datareader to test copy_from_topic_qos.
   listener_ = new DataReaderListenerImpl;
   ::DDS::DataReaderListener_var drl (listener_);
-  ::DDS::DataReaderListener_var drl = listener_;
 
   datareader_
     = subscriber_->create_datareader(topic_.in (),
