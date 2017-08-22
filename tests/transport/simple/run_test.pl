@@ -90,7 +90,10 @@ if ($quiet) {
 #
 # Create the test objects.
 #
+
+print("$subscriberCmd $subscriberArgs\n");
 my $subscriber = PerlDDS::create_process($subscriberCmd, $subscriberArgs);
+print("$publisherCmd $publisherArgs\n");
 my $publisher  = PerlDDS::create_process($publisherCmd, $publisherArgs);
 
 

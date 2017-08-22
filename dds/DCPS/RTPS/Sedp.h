@@ -217,7 +217,7 @@ private:
   public:
     Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
       : Endpoint(sub_id, sedp)
-      , shutting_down_(0)
+      , shutting_down_(false)
     {}
 
     virtual ~Reader();
@@ -237,7 +237,7 @@ private:
     virtual void _add_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref(); }
     virtual void _remove_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref(); }
 
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> shutting_down_;
+    ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> shutting_down_;
   };
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
@@ -262,7 +262,6 @@ private:
 
     void acknowledge();
     void shutdown();
-
 
   private:
     int svc();

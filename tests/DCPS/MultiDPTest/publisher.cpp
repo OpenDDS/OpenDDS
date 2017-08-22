@@ -98,7 +98,7 @@ void init ()
       throw TestException ();
     }
 
-  ::Xyz::FooTypeSupportImpl* fts_servant
+  ::Xyz::FooTypeSupportImpl::_var_type fts_servant
     = new ::Xyz::FooTypeSupportImpl();
 
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), type_name))

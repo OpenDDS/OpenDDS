@@ -134,9 +134,19 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     ser << data;
   }
 
+  ~SimpleDataWriter()
+  {
+    for (size_t i = 0; i< old_samples_.size(); ++i)
+      old_samples_[i]->release();
+  }
+
   void send_data(const SequenceNumber& seq)
   {
     dsle_.get_header().sequence_ = seq;
+
+    if (dsle_.get_sample())
+      old_samples_.push_back(dsle_.get_sample());
+
     dsle_.set_sample(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
     *dsle_.get_sample() << dsle_.get_header();
     dsle_.get_sample()->cont(payload_.duplicate());
@@ -161,6 +171,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   SendStateDataSampleList list_;
   DataSampleElement dsle_;
   ACE_Message_Block payload_;
+  std::vector<ACE_Message_Block*> old_samples_;
 };
 
 
@@ -967,7 +978,8 @@ int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
   try
   {
-    TheServiceParticipant->get_domain_participant_factory();
+    ::DDS::DomainParticipantFactory_var dpf =
+      TheServiceParticipant->get_domain_participant_factory();
   }
   catch (const CORBA::BAD_PARAM& ex)
   {

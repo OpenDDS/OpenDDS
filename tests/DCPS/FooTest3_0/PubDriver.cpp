@@ -689,15 +689,17 @@ PubDriver::listener_test ()
   TEST_CHECK (CORBA::is_nil (dwl_got.in ()));
 
   // Since datawriter has nil listener with
-  TEST_CHECK (datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS) == dpl.in ());
+  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
+  TEST_CHECK (dwl_got.in() == dpl.in ());
 
   foo_datawriter_->set_listener (dwl.in (), ::OpenDDS::DCPS::ALL_STATUS_MASK);
+  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
+  TEST_CHECK (dwl_got.in() == dwl.in ());
 
-  TEST_CHECK (datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS) == dwl.in ());
 
   foo_datawriter_->set_listener (dwl.in (), ::OpenDDS::DCPS::NO_STATUS_MASK);
-
-  TEST_CHECK (datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS) == dpl.in ());
+  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
+  TEST_CHECK (dwl_got.in() == dpl.in ());
 
   dwl_got = foo_datawriter_->get_listener ();
 

@@ -117,7 +117,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   connection->set_datalink(link);
 
   TcpConnection* pConn = connection.in();
-  TcpConnection_rch reactor_refcount(connection); // increment for reactor callback
 
   ACE_TCHAR str[64];
   key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]));
@@ -149,10 +148,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
     return AcceptConnectResult();
   }
-
-  // Don't decrement count when reactor_refcount goes out of scope, see
-  // TcpConnection::open()
-  (void) reactor_refcount._retn();
 
   if (ret == 0) {
     // connect() completed synchronously and called TcpConnection::active_open().

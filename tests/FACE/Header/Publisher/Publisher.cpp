@@ -36,8 +36,10 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   typedef OpenDDS::DCPS::DDSTraits<HeaderTest::Message>::DataWriterType DataWriter;
   const DataWriter::_var_type typedWriter =
     DataWriter::_narrow(writers[connId].dw);
+  DDS::Publisher_var publisher = writers[connId].dw->get_publisher();
+  DDS::DomainParticipant_var participant = publisher->get_participant();
   OpenDDS::DCPS::DomainParticipantImpl* dpi =
-    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writers[connId].dw->get_publisher()->get_participant());
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
   if (!dpi) {
     std::cout << "ERROR: Failed to obtain DomainParticipantImpl." << std::endl;
     return static_cast<int>(FACE::INVALID_PARAM);

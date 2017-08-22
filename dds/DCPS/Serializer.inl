@@ -955,6 +955,7 @@ operator>>(Serializer& s, std::string& x)
   char* buf = 0;
   const size_t length = s.read_string(buf);
   x.assign(buf, length);
+  CORBA::string_free(buf);
   return s.good_bit();
 }
 
@@ -965,6 +966,7 @@ operator>>(Serializer& s, std::wstring& x)
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
   x.assign(buf, length);
+  CORBA::wstring_free(buf);
   return s.good_bit();
 }
 #endif /* DDS_HAS_WCHAR */

@@ -50,7 +50,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         return 1;
       }
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
+      MessageTypeSupportImpl::_var_type servant (new MessageTypeSupportImpl);
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         ACE_DEBUG((LM_DEBUG, "register_type failed.\n"));

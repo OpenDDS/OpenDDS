@@ -461,7 +461,7 @@ TestSubscriber<Reader>::take_instance(
 {
   return reader_i_->take_instance(
     messages, si, max_samples, handle,
-    sample_states, view_states, instance_states);;
+    sample_states, view_states, instance_states);
 }
 
 template<typename Reader>
