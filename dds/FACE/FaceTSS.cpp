@@ -568,7 +568,8 @@ namespace {
     Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
     Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
     while (rdrIter != readers.end()) {
-      temp_dp = rdrIter->second->dr->get_subscriber()->get_participant();
+      DDS::Subscriber_var sub = rdrIter->second->dr->get_subscriber();
+      temp_dp = sub->get_participant();
       if (dp->get_domain_id() == temp_dp->get_domain_id()) {
         if (OpenDDS::DCPS::DCPS_debug_level > 3) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_participant - participant still in use by reader\n"));
@@ -583,7 +584,8 @@ namespace {
     Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
 
     while (wtrIter != writers.end()) {
-      temp_dp = wtrIter->second.dw->get_publisher()->get_participant();
+      DDS::Publisher_var publisher = wtrIter->second.dw->get_publisher();
+      temp_dp = publisher->get_participant();
       if (dp->get_domain_id() == temp_dp->get_domain_id()) {
         if (OpenDDS::DCPS::DCPS_debug_level > 3) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_participant - participant still in use by writer\n"));
@@ -624,7 +626,7 @@ namespace {
     if (!dp) return INVALID_PARAM;
 
     using OpenDDS::DCPS::Data_Types_Register;
-    OpenDDS::DCPS::TypeSupport* ts =
+    OpenDDS::DCPS::TypeSupport_var ts =
       Registered_Data_Types->lookup(dp, type);
     if (!ts) {
       ts = Registered_Data_Types->lookup(0, type);

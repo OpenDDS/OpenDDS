@@ -14,7 +14,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-template<class T>
+template <typename T>
+struct default_deleter
+{
+  void operator()(T* ptr) const {
+    delete ptr;
+  }
+};
+
+template<typename T, typename Deleter = default_deleter<T> >
 class scoped_ptr {
    public:
      typedef T element_type;
@@ -25,12 +33,12 @@ class scoped_ptr {
 
      ~scoped_ptr() // never throws
      {
-       delete ptr_;
+       Deleter()(ptr_);
      }
 
      void reset(T * p = 0) // never throws
      {
-       delete ptr_;
+       Deleter()(ptr_);
        ptr_ = p;
      }
 
@@ -66,14 +74,14 @@ class scoped_ptr {
        std::swap(ptr_, b.ptr_);
      }
    private:
-     scoped_ptr(const scoped_ptr<T>&);
-     scoped_ptr<T>& operator = (const scoped_ptr<T>&);
+     scoped_ptr(const scoped_ptr&);
+     scoped_ptr& operator = (const scoped_ptr&);
 
      T* ptr_;
   };
 
-  template<class T>
-  void swap(scoped_ptr<T> & a, scoped_ptr<T> & b) // never throws
+  template<typename T, typename Deleter>
+  void swap(scoped_ptr<T, Deleter> & a, scoped_ptr<T, Deleter> & b) // never throws
   {
     return a.swap(b);
   }

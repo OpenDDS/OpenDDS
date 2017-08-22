@@ -164,6 +164,7 @@ Options::Options(int argc, ACE_TCHAR** argv)
       switch (*++arg) {
       case 'h':
         usage_and_exit(-8);
+        break;
 
       case 'v':
         this->verbose_ = true;

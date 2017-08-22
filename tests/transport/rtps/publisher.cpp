@@ -21,6 +21,7 @@
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 
 #include <tao/CORBA_String.h>
 
@@ -153,6 +154,7 @@ public:
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       qos_data.dw_qos.ownership.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
+      /* Falls through. */
     case PARTIAL_MOD_QOS:
       qos_data.pub_qos.partition.name.length(1);
       qos_data.pub_qos.partition.name[0] = "Hello";
@@ -356,28 +358,30 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     gen_find_size(ko_instance_data, size, padding);
     dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
 
-    ACE_Message_Block* ir_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-                                                     ACE_Message_Block::MB_DATA,
-                                                     new ACE_Message_Block(dsh.message_length_));
-    *ir_mb << dsh;
+    {
+      OpenDDS::DCPS::Message_Block_Ptr ir_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                                                       ACE_Message_Block::MB_DATA,
+                                                       new ACE_Message_Block(dsh.message_length_)));
+      *ir_mb << dsh;
 
-    OpenDDS::DCPS::Serializer serializer(ir_mb->cont(),
-                                         host_is_bigendian,
-                                         Serializer::ALIGN_CDR);
-    ok = (serializer << encap) && (serializer << ko_instance_data);
-    if (!ok) {
-      std::cerr << "ERROR: failed to serialize data for instance registration\n";
-      return 1;
+      OpenDDS::DCPS::Serializer serializer(ir_mb->cont(),
+                                           host_is_bigendian,
+                                           Serializer::ALIGN_CDR);
+      ok = (serializer << encap) && (serializer << ko_instance_data);
+      if (!ok) {
+        std::cerr << "ERROR: failed to serialize data for instance registration\n";
+        return 1;
+      }
+      ::DDS_TEST::force_inline_qos(false);  // No inline QoS
+      sdw.send_control(dsh, ir_mb.get());
     }
-    ::DDS_TEST::force_inline_qos(false);  // No inline QoS
-    sdw.send_control(dsh, ir_mb);
 
     // Send a dispose instance
     {
       dsh.message_id_ = DISPOSE_INSTANCE;
-      ACE_Message_Block* di_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+      OpenDDS::DCPS::Message_Block_Ptr di_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
                                                        ACE_Message_Block::MB_DATA,
-                                                       new ACE_Message_Block(dsh.message_length_));
+                                                       new ACE_Message_Block(dsh.message_length_)));
       *di_mb << dsh;
       OpenDDS::DCPS::Serializer serializer(di_mb->cont(),
                                            host_is_bigendian,
@@ -389,15 +393,15 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       }
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::PARTIAL_MOD_QOS;
-      sdw.send_control(dsh, di_mb);
+      sdw.send_control(dsh, di_mb.get());
     }
 
     // Send an unregister instance
     {
       dsh.message_id_ = UNREGISTER_INSTANCE;
-      ACE_Message_Block* ui_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+      OpenDDS::DCPS::Message_Block_Ptr ui_mb  (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
                                                        ACE_Message_Block::MB_DATA,
-                                                       new ACE_Message_Block(dsh.message_length_));
+                                                       new ACE_Message_Block(dsh.message_length_)));
       *ui_mb << dsh;
       OpenDDS::DCPS::Serializer serializer(ui_mb->cont(),
                                            host_is_bigendian,
@@ -409,15 +413,15 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       }
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
-      sdw.send_control(dsh, ui_mb);
+      sdw.send_control(dsh, ui_mb.get());
     }
 
     // Send a dispose & unregister instance
     {
       dsh.message_id_ = DISPOSE_UNREGISTER_INSTANCE;
-      ACE_Message_Block* ui_mb = new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+      OpenDDS::DCPS::Message_Block_Ptr ui_mb (new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
                                                        ACE_Message_Block::MB_DATA,
-                                                       new ACE_Message_Block(dsh.message_length_));
+                                                       new ACE_Message_Block(dsh.message_length_)));
       *ui_mb << dsh;
       OpenDDS::DCPS::Serializer serializer(ui_mb->cont(),
                                            host_is_bigendian,
@@ -429,7 +433,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       }
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
-      sdw.send_control(dsh, ui_mb);
+      sdw.send_control(dsh, ui_mb.get());
     }
   }
 
@@ -544,7 +548,8 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
-    TheParticipantFactoryWithArgs(argc, argv);
+    ::DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
     ACE_TString host;
     u_short port = 0;

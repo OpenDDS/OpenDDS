@@ -63,7 +63,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
 
-      Messenger::MessageTypeSupportImpl* mts_servant =
+      Messenger::MessageTypeSupportImpl::_var_type mts_servant =
         new Messenger::MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != mts_servant->register_type (participant.in (),

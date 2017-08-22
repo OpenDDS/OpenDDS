@@ -112,10 +112,10 @@ void init_dcps_objects (int i)
       throw TestException ();
     }
 
-  ::Xyz::FooTypeSupportImpl* fts_servant
+  ::Xyz::FooTypeSupportImpl::_var_type fts_servant
     = new ::Xyz::FooTypeSupportImpl();
 
-  ::Xyz::FooTypeSupportImpl* another_fts_servant
+  ::Xyz::FooTypeSupportImpl::_var_type another_fts_servant
     = new ::Xyz::FooTypeSupportImpl();
 
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant[i].in (), type_name))

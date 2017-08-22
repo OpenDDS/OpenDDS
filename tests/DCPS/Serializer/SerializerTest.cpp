@@ -452,6 +452,12 @@ runTest(const Values& expected, const ArrayValues& expectedArray,
     failed = true;
   }
   checkValues(expected, observed);
+#ifdef DDS_HAS_WCHAR
+  CORBA::wstring_free(observed.wstringValue);
+#ifndef OPENDDS_SAFETY_PROFILE
+  CORBA::string_free(observed.stringValue);
+#endif
+#endif
   testchain->release();
 
   testchain = getchain(sizeof(chaindefs)/sizeof(chaindefs[0]), chaindefs);

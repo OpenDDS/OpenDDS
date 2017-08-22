@@ -199,7 +199,8 @@ void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
     DDS::SampleInfoSeq sinfo;
     ret = typedReader->take_w_condition(seq, sinfo, 1 /*max*/, rc);
     if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
-      DDS::DomainParticipant_var participant = typedReader->get_subscriber()->get_participant();
+      DDS::Subscriber_var subscriber = typedReader->get_subscriber();
+      DDS::DomainParticipant_var participant = subscriber->get_participant();
       FACE::RETURN_CODE_TYPE ret_code;
       populate_header_received(connection_id, participant, sinfo[0], ret_code);
       if (ret_code != FACE::RC_NO_ERROR) {
@@ -321,7 +322,8 @@ private:
     DDS::SampleInfo sinfo;
     while (typedReader->take_next_sample(sample, sinfo) == DDS::RETCODE_OK) {
       if (sinfo.valid_data) {
-        DDS::DomainParticipant_var participant = typedReader->get_subscriber()->get_participant();
+        DDS::Subscriber_var subscriber = typedReader->get_subscriber();
+        DDS::DomainParticipant_var participant = subscriber->get_participant();
         FACE::RETURN_CODE_TYPE ret_code;
         populate_header_received(connection_id_, participant, sinfo, ret_code);
         if (ret_code != FACE::RC_NO_ERROR) {
@@ -380,9 +382,9 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
     return_code = FACE::INVALID_PARAM;
     return;
   }
-  DDS::DataReaderListener_ptr existing_listener = readers[connection_id]->dr->get_listener();
-  if (existing_listener) {
-    Listener<Msg>* typedListener = dynamic_cast<Listener<Msg>*>(existing_listener);
+  DDS::DataReaderListener_var existing_listener = readers[connection_id]->dr->get_listener();
+  if (existing_listener.in()) {
+    Listener<Msg>* typedListener = dynamic_cast<Listener<Msg>*>(existing_listener.in());
     if (typedListener) {
       typedListener->add_callback(callback);
     } else {

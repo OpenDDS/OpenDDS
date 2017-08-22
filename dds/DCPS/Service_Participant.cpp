@@ -265,13 +265,13 @@ Service_Participant::shutdown()
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
     domainRepoMap_.clear();
-    discoveryMap_.clear();
 
     if (0 != reactor_) {
       reactor_->end_reactor_event_loop();
       reactor_task_.wait();
     }
 
+    discoveryMap_.clear();
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE

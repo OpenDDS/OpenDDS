@@ -198,7 +198,8 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
-    TheParticipantFactoryWithArgs(argc, argv);
+    ::DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
     std::cerr << "STARTING MAIN IN SUBSCRIBER\n";
     ACE_TString host;

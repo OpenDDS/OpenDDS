@@ -32,7 +32,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
   try
   {
-    TheServiceParticipant->get_domain_participant_factory();
+    DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
   }
   catch (const CORBA::BAD_PARAM& ex) {
     ex._tao_print_exception("Exception caught in pub_main.cpp:");
