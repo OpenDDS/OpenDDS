@@ -53,15 +53,9 @@ class unique_ptr {
 
      unique_ptr& operator = (rv<unique_ptr>& other)
      {
-       ptr_.reset(other.release());
+       reset(other.release());
        return *this;
      }
-
-     operator rv<unique_ptr>&()
-     {  return *static_cast< rv<unique_ptr>* >(this);  }
-
-     operator const rv<unique_ptr>&() const
-     {  return *static_cast<const rv<unique_ptr>* >(this);  }
 
      void reset(T * p = 0) // never throws
      {
@@ -109,10 +103,10 @@ class unique_ptr {
   };
 
 
-  template<typename T, typename Deleter>
-  rv<unique_ptr<T, Deleter> >& move(unique_ptr<T, Deleter>& p)
+  template<typename T>
+  rv<T>& move(T& p)
   {
-    return p;
+    return static_cast< rv<T>& >(p);
   }
 
 } // namespace DCPS
