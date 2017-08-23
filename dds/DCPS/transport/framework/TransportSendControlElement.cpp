@@ -108,6 +108,9 @@ TransportSendControlElement::release_element(bool dropped_by_transport)
   if (allocator_) {
     OPENDDS_DES_FREE_THIS(allocator_->free, TransportSendControlElement);
   }
+  else {
+    delete this;
+  }
 
   // reporting the message w/o using "this" pointer
   if (dcps_elem) {

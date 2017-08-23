@@ -30,16 +30,8 @@ public:
   /**
    * msg_block - chain of ACE_Message_Blocks containing the control
    *             sample held by this queue element, if any.
-   * pub_id    - publication Id value of the originating publication, if
-   *             any.
-   * owner     - indicates that this element has been obtained from the
-   *             heap and can be discarded to it.  If an object of this
-   *             type is created on the stack, this *must* be set to
-   *             false.
    */
-  TransportControlElement(Message_Block_Ptr msg_block,
-                          const RepoId& pub_id = GUID_UNKNOWN,
-                          bool owner = true);
+  TransportControlElement(Message_Block_Ptr msg_block);
 
   virtual ~TransportControlElement();
 
@@ -63,9 +55,6 @@ private:
 
   /// The control message.
   Message_Block_Ptr msg_;
-
-  /// Ownership flag.
-  bool owner_;
 };
 
 } // namespace DCPS

@@ -14,12 +14,9 @@
 #endif /* __ACE_INLINE__ */
 
 OpenDDS::DCPS::TransportControlElement::TransportControlElement(
-  Message_Block_Ptr msg_block,
-  const RepoId& /*pub_id*/,
-  bool owner
+  Message_Block_Ptr msg_block
 ) : TransportQueueElement(1),
-    msg_( msg_block.release()),
-    owner_( owner)
+    msg_( msg_block.release())
 {
   DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",6);
 }
@@ -34,7 +31,5 @@ OpenDDS::DCPS::TransportControlElement::release_element(
   bool /* dropped_by_transport */
 )
 {
-  if (this->owner_) {
-    delete this;
-  }
+  delete this;
 }
