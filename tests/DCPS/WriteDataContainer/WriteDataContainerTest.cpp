@@ -374,9 +374,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
           dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
           dw_qos.resource_limits.max_samples = MAX_SAMPLES;
 
-          Test::SimpleDataWriterImpl* fast_dw = new Test::SimpleDataWriterImpl();
-          test->substitute_dw_particpant(fast_dw, tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw);
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          test->substitute_dw_particpant(fast_dw.get(), tpi);
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);
@@ -386,7 +386,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          Message_Block_Ptr mb(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
@@ -432,7 +432,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
           }
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           DataSampleElement* element_1 = 0;
           ret = test_data_container->obtain_buffer(element_1, handle1);
@@ -466,10 +466,11 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
 
+          test_data_container->release_buffer(element_0);
+          test_data_container->release_buffer(element_1);
           test_data_container->unregister_all();
           guard.release();
           delete test_data_container;
-          delete fast_dw;
         } //End Test Case 1 scope
 
         { //Test Case 2 scope
@@ -486,9 +487,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           dw_qos.resource_limits.max_samples = 2;
 
-          Test::SimpleDataWriterImpl* fast_dw = new Test::SimpleDataWriterImpl();
-          test->substitute_dw_particpant(fast_dw, tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw);
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          test->substitute_dw_particpant(fast_dw.get(), tpi);
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);
@@ -498,7 +499,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
@@ -549,7 +550,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo2.key  = 2;
           foo2.count = 1;
 
-          Message_Block_Ptr mb2(test->dds_marshal(fast_dw, foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
 
@@ -586,7 +587,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo3.key  = 3;
           foo3.count = 1;
 
-          Message_Block_Ptr mb3(test->dds_marshal(fast_dw, foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
 
@@ -600,11 +601,11 @@ int run_test(int argc, ACE_TCHAR *argv[])
           TEST_ASSERT(errno == ETIME);
 
           test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
-
+          test_data_container->release_buffer(element_1);
+          test_data_container->release_buffer(element_2);
           test_data_container->unregister_all();
           guard.release();
           delete test_data_container;
-          delete fast_dw;
         } //End Test Case 2 scope
 
         { //Test Case 3 scope
@@ -622,9 +623,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
           dw_qos.reliability.max_blocking_time.sec = 2;
           dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
 
-          Test::SimpleDataWriterImpl* fast_dw = new Test::SimpleDataWriterImpl();
-          test->substitute_dw_particpant(fast_dw, tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw);
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          test->substitute_dw_particpant(fast_dw.get(), tpi);
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);
@@ -634,7 +635,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
@@ -685,7 +686,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo2.key  = 2;
           foo2.count = 1;
 
-          Message_Block_Ptr mb2(test->dds_marshal(fast_dw, foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
 
@@ -722,7 +723,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo3.key  = 3;
           foo3.count = 1;
 
-          Message_Block_Ptr mb3(test->dds_marshal(fast_dw, foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
 
@@ -738,11 +739,12 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           test->log_send_state_lists("After TEST_ASSERT 3rd obtain_buffer TIMED OUT", test_data_container);
 
+          test_data_container->release_buffer(element_1);
+          test_data_container->release_buffer(element_2);
           test_data_container->unregister_all();
 
           guard.release();
           delete test_data_container;
-          delete fast_dw;
         } //End Test Case 3 scope
 
         { //Test Case 4 scope
@@ -759,9 +761,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
           dw_qos.resource_limits.max_samples = MAX_SAMPLES;
           dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
 
-          Test::SimpleDataWriterImpl* fast_dw = new Test::SimpleDataWriterImpl();
-          test->substitute_dw_particpant(fast_dw, tpi);
-          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw);
+          OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
+          test->substitute_dw_particpant(fast_dw.get(), tpi);
+          WriteDataContainer* test_data_container  = test->get_test_data_container(dw_qos, fast_dw.get());
 
           test->log_dw_qos_limits(dw_qos);
           test->log_perceived_qos_limits(test_data_container);
@@ -771,7 +773,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          Message_Block_Ptr mb(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;//fast_dw->register_instance(foo1);
 
@@ -825,7 +827,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
-          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           element_1->set_sample(move(mb1));
 
@@ -850,11 +852,11 @@ int run_test(int argc, ACE_TCHAR *argv[])
           TEST_ASSERT(errno == ETIME);
 
           test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
-
+          test_data_container->release_buffer(element_0);
+          test_data_container->release_buffer(element_1);
           test_data_container->unregister_all();
           guard.release();
           delete test_data_container;
-          delete fast_dw;
         } //End Test Case 4 scope
 
 
