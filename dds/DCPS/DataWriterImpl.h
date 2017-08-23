@@ -24,6 +24,8 @@
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "RcEventHandler.h"
+#include "unique_ptr.h"
+#include "Message_Block_Ptr.h"
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"
@@ -221,7 +223,7 @@ public:
   DDS::ReturnCode_t
   register_instance_i(
     DDS::InstanceHandle_t& handle,
-    DataSample* data,
+    Message_Block_Ptr data,
     const DDS::Time_t& source_timestamp);
 
   /**
@@ -231,7 +233,7 @@ public:
   DDS::ReturnCode_t
   register_instance_from_durable_data(
     DDS::InstanceHandle_t& handle,
-    DataSample* data,
+    Message_Block_Ptr data,
     const DDS::Time_t & source_timestamp);
 
   /**
@@ -257,7 +259,7 @@ public:
    *        associated reader RepoIds that should NOT get the
    *        data sample due to content filtering.
    */
-  DDS::ReturnCode_t write(DataSample* sample,
+  DDS::ReturnCode_t write(Message_Block_Ptr& sample,
                           DDS::InstanceHandle_t handle,
                           const DDS::Time_t& source_timestamp,
                           GUIDSeq* filter_out);
@@ -313,7 +315,7 @@ public:
    * This is called by transport to notify that the control
    * message is delivered.
    */
-  void control_delivered(ACE_Message_Block* sample);
+  void control_delivered(const Message_Block_Ptr& sample);
 
   /// Does this writer have samples to be acknowledged?
   bool should_ack() const;
@@ -355,7 +357,7 @@ public:
    * This is called by transport to notify that the control
    * message is dropped.
    */
-  void control_dropped(ACE_Message_Block* sample,
+  void control_dropped(const Message_Block_Ptr& sample,
                        bool dropped_by_transport);
 
   /**
@@ -422,10 +424,10 @@ public:
    * data block and header.
    */
   DDS::ReturnCode_t
-  create_sample_data_message(DataSample* data,
+  create_sample_data_message(Message_Block_Ptr& data,
                              DDS::InstanceHandle_t instance_handle,
                              DataSampleHeader& header_data,
-                             ACE_Message_Block*& message,
+                             Message_Block_Ptr& message,
                              const DDS::Time_t& source_timestamp,
                              bool content_filter);
 
@@ -526,7 +528,7 @@ protected:
   };
 
   virtual SendControlStatus send_control(const DataSampleHeader& header,
-                                         ACE_Message_Block* msg);
+                                         Message_Block_Ptr msg);
 
 private:
 
@@ -546,7 +548,7 @@ private:
   ACE_Message_Block*
   create_control_message(MessageId message_id,
                          DataSampleHeader& header,
-                         ACE_Message_Block* data,
+                         Message_Block_Ptr data,
                          const DDS::Time_t& source_timestamp);
 
   /// Send the liveliness message.

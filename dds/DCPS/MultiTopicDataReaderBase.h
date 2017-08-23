@@ -14,7 +14,7 @@
 #include "dds/DCPS/ZeroCopySeq_T.h"
 #include "dds/DCPS/MultiTopicImpl.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -128,7 +128,7 @@ private:
   virtual void incoming_sample(void* sample, const DDS::SampleInfo& info,
                                const char* topic, const MetaStruct& meta) = 0;
 
-  scoped_ptr<OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> > listener_;
+  unique_ptr<OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> > listener_;
   DataReaderEx_var resulting_reader_;
 
 protected:

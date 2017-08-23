@@ -109,20 +109,20 @@ protected:
 
   bool send_response(const RepoId& peer,
                      const DataSampleHeader& header,
-                     ACE_Message_Block* payload); // [DR]
+                     Message_Block_Ptr payload); // [DR]
 
   void send(SendStateDataSampleList send_list, ACE_UINT64 transaction_id = 0);
 
   SendControlStatus send_w_control(SendStateDataSampleList send_list,
                                    const DataSampleHeader& header,
-                                   ACE_Message_Block* msg,
+                                   Message_Block_Ptr msg,
                                    const RepoId& destination);
 
   SendControlStatus send_control(const DataSampleHeader& header,
-                                 ACE_Message_Block* msg);
+                                 Message_Block_Ptr msg);
 
   SendControlStatus send_control_to(const DataSampleHeader& header,
-                                    ACE_Message_Block* msg,
+                                    Message_Block_Ptr msg,
                                     const RepoId& destination);
 
   bool remove_sample(const DataSampleElement* sample);

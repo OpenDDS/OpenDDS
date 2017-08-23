@@ -946,7 +946,7 @@ namespace OpenDDS {
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
-      sample.sample_,
+      sample.sample_.get(),
       sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
       cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR
           : OpenDDS::DCPS::Serializer::ALIGN_NONE);
@@ -1045,7 +1045,7 @@ protected:
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
-                                  sample.sample_,
+                                  sample.sample_.get(),
                                   sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                                   cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
 

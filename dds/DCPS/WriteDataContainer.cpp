@@ -277,7 +277,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 DDS::ReturnCode_t
 WriteDataContainer::register_instance(
   DDS::InstanceHandle_t&      instance_handle,
-  DataSample*&                registered_sample)
+  Message_Block_Ptr&          registered_sample)
 {
   PublicationInstance_rch instance;
 
@@ -288,7 +288,7 @@ WriteDataContainer::register_instance(
     }
 
     // registered the instance for the first time.
-    instance = make_rch<PublicationInstance>(registered_sample);
+    instance = make_rch<PublicationInstance>(ref(move(registered_sample)));
 
     instance_handle = this->writer_->get_next_handle();
 
@@ -320,14 +320,11 @@ WriteDataContainer::register_instance(
       return DDS::RETCODE_ERROR;
     } // if (0 != find_attempt)
 
-    // don't need this - the PublicationInstances already has a sample.
-    registered_sample->release();
-
     instance->unregistered_ = false;
   }
 
   // The registered_sample is shallow copied.
-  registered_sample = instance->registered_sample_->duplicate();
+  registered_sample.reset(instance->registered_sample_->duplicate());
 
   if (this->writer_->watchdog_.in()) {
     this->writer_->watchdog_->schedule_timer(instance);
@@ -338,8 +335,8 @@ WriteDataContainer::register_instance(
 
 DDS::ReturnCode_t
 WriteDataContainer::unregister(
-  DDS::InstanceHandle_t instance_handle,
-  DataSample*&            registered_sample,
+  DDS::InstanceHandle_t   instance_handle,
+  Message_Block_Ptr& registered_sample,
   bool                    dup_registered_sample)
 {
   PublicationInstance_rch instance;
@@ -360,7 +357,7 @@ WriteDataContainer::unregister(
 
   if (dup_registered_sample) {
     // The registered_sample is shallow copied.
-    registered_sample = instance->registered_sample_->duplicate();
+    registered_sample.reset(instance->registered_sample_->duplicate());
   }
 
   if (this->writer_->watchdog_.in())
@@ -371,8 +368,8 @@ WriteDataContainer::unregister(
 
 DDS::ReturnCode_t
 WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
-                            DataSample*&            registered_sample,
-                            bool                    dup_registered_sample)
+                            Message_Block_Ptr&    registered_sample,
+                            bool                  dup_registered_sample)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -395,7 +392,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
 
   if (dup_registered_sample) {
     // The registered_sample is shallow copied.
-    registered_sample = instance->registered_sample_->duplicate();
+    registered_sample.reset(instance->registered_sample_->duplicate());
   }
 
   // Note: The DDS specification is unclear as to if samples in the process
@@ -1220,7 +1217,7 @@ WriteDataContainer::unregister_all()
     }
   }
   DDS::ReturnCode_t ret;
-  DataSample* registered_sample;
+  Message_Block_Ptr registered_sample;
   PublicationInstanceMapType::iterator it = instances_.begin();
 
   while (it != instances_.end()) {

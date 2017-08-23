@@ -16,7 +16,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <ace/streams.h>
 #include "ace/High_Res_Timer.h"
@@ -53,7 +53,7 @@ private:
   std::vector<DDS::Publisher_var> pub_;
   std::vector<DDS::DataWriter_var> dw_;
 
-  OpenDDS::DCPS::scoped_ptr<SyncClientExt_i> sync_client_;
+  OpenDDS::DCPS::unique_ptr<SyncClientExt_i> sync_client_;
 };
 
 bool

@@ -23,20 +23,20 @@ RtpsCustomizedElement::~RtpsCustomizedElement()
 ElementPair
 RtpsCustomizedElement::fragment(size_t size)
 {
-  ACE_Message_Block* head;
-  ACE_Message_Block* tail;
+  Message_Block_Ptr head;
+  Message_Block_Ptr tail;
   const SequenceRange fragNumbers =
     RtpsSampleHeader::split(*msg(), size, head, tail);
 
   RtpsCustomizedElement* frag =
-    RtpsCustomizedElement::alloc(0, head, allocator());
+    RtpsCustomizedElement::alloc(0, move(head), allocator());
   frag->set_publication_id(publication_id());
   frag->seq_ = sequence();
   frag->set_fragment();
   frag->last_frag_ = fragNumbers.first;
 
   RtpsCustomizedElement* rest =
-    RtpsCustomizedElement::alloc(this, tail, allocator());
+    RtpsCustomizedElement::alloc(this, move(tail), allocator());
   rest->set_fragment();
   rest->last_frag_ = fragNumbers.second;
 

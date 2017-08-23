@@ -583,20 +583,20 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       size_t size = 0, padding = 0;
       gen_find_size(remote_id, size, padding);
-      ACE_Message_Block* const data =
+      Message_Block_Ptr data(
         new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
-                              get_db_lock());
-      Serializer ser(data);
+                              get_db_lock()));
+      Serializer ser(data.get());
       ser << remote_id;
 
       const DDS::Time_t timestamp = time_value_to_time(ACE_OS::gettimeofday());
       DataSampleHeader header;
-      ACE_Message_Block* const end_historic_samples =
-        create_control_message(END_HISTORIC_SAMPLES, header, data, timestamp);
+      Message_Block_Ptr end_historic_samples(
+        create_control_message(END_HISTORIC_SAMPLES, header, move(data), timestamp));
 
       this->controlTracker.message_sent();
       guard.release();
-      SendControlStatus ret = send_w_control(list, header, end_historic_samples, remote_id);
+      SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
@@ -1020,11 +1020,13 @@ DataWriterImpl::send_request_ack()
                      ret);
   }
 
+  Message_Block_Ptr blk;
   // Add header with the registration sample data.
-  element->set_sample(create_control_message(REQUEST_ACK,
+  Message_Block_Ptr sample(create_control_message(REQUEST_ACK,
                                              element->get_header(),
-                                             0,
+                                             move(blk),
                                              time_value_to_time( ACE_OS::gettimeofday() )));
+  element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1495,7 +1497,7 @@ DataWriterImpl::send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>&
 
 DDS::ReturnCode_t
 DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
-                                    DataSample* data,
+                                    Message_Block_Ptr data,
                                     const DDS::Time_t& source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
@@ -1535,10 +1537,12 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   }
 
   // Add header with the registration sample data.
-  element->set_sample(create_control_message(INSTANCE_REGISTRATION,
+  Message_Block_Ptr sample(create_control_message(INSTANCE_REGISTRATION,
                                              element->get_header(),
-                                             data,
+                                             move(data),
                                              source_timestamp));
+
+  element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1555,7 +1559,7 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
 
 DDS::ReturnCode_t
 DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handle,
-                                    DataSample* data,
+                                    Message_Block_Ptr data,
                                     const DDS::Time_t & source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_from_durable_data",6);
@@ -1565,7 +1569,7 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
                    get_lock(),
                    DDS::RETCODE_ERROR);
 
-  DDS::ReturnCode_t ret = register_instance_i(handle, data, source_timestamp);
+  DDS::ReturnCode_t ret = register_instance_i(handle, move(data), source_timestamp);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
@@ -1599,7 +1603,7 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
 
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
-  DataSample* unregistered_sample_data = 0;
+  Message_Block_Ptr unregistered_sample_data;
   ret = this->data_container_->unregister(handle, unregistered_sample_data);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1622,10 +1626,11 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                      ret);
   }
 
-  element->set_sample(create_control_message(UNREGISTER_INSTANCE,
-                                             element->get_header(),
-                                             unregistered_sample_data,
-                                             source_timestamp));
+  Message_Block_Ptr sample(create_control_message(UNREGISTER_INSTANCE,
+                                                  element->get_header(),
+                                                  move(unregistered_sample_data),
+                                                  source_timestamp));
+  element->set_sample(move(sample));
   ret = this->data_container_->enqueue_control(element);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1649,7 +1654,7 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
 
-  DataSample* data_sample = 0;
+  Message_Block_Ptr data_sample;
   ret = this->data_container_->dispose(handle, data_sample);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1682,11 +1687,11 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
                      ret);
   }
 
-  element->set_sample(create_control_message(DISPOSE_UNREGISTER_INSTANCE,
-                                             element->get_header(),
-                                             data_sample,
-                                             source_timestamp));
-
+  Message_Block_Ptr sample(create_control_message(DISPOSE_UNREGISTER_INSTANCE,
+                                                  element->get_header(),
+                                                  move(data_sample),
+                                                  source_timestamp));
+  element->set_sample(move(sample));
   ret = this->data_container_->enqueue_control(element);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1723,7 +1728,7 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 }
 
 DDS::ReturnCode_t
-DataWriterImpl::write(DataSample* data,
+DataWriterImpl::write(Message_Block_Ptr& data,
                       DDS::InstanceHandle_t handle,
                       const DDS::Time_t& source_timestamp,
                       GUIDSeq* filter_out)
@@ -1749,7 +1754,6 @@ DataWriterImpl::write(DataSample* data,
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
 
   if (ret == DDS::RETCODE_TIMEOUT) {
-    data->release();
     return ret; // silent for timeout
 
   } else if (ret != DDS::RETCODE_OK) {
@@ -1761,14 +1765,14 @@ DataWriterImpl::write(DataSample* data,
                      ret);
   }
 
-  DataSample* temp;
+  Message_Block_Ptr temp;
   ret = create_sample_data_message(data,
                                    handle,
                                    element->get_header(),
                                    temp,
                                    source_timestamp,
                                    (filter_out != 0));
-  element->set_sample(temp);
+  element->set_sample(move(temp));
 
   if (ret != DDS::RETCODE_OK) {
     return ret;
@@ -1886,7 +1890,7 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
 
-  DataSample* registered_sample_data = 0;
+  Message_Block_Ptr registered_sample_data;
   ret = this->data_container_->dispose(handle, registered_sample_data);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1909,10 +1913,11 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
                      ret);
   }
 
-  element->set_sample(create_control_message(DISPOSE_INSTANCE,
-                                             element->get_header(),
-                                             registered_sample_data,
-                                             source_timestamp));
+  Message_Block_Ptr sample(create_control_message(DISPOSE_INSTANCE,
+                                                  element->get_header(),
+                                                  move(registered_sample_data),
+                                                  source_timestamp));
+  element->set_sample(move(sample));
   ret = this->data_container_->enqueue_control(element);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1968,7 +1973,7 @@ DataWriterImpl::get_type_name() const
 ACE_Message_Block*
 DataWriterImpl::create_control_message(MessageId message_id,
                                        DataSampleHeader& header_data,
-                                       ACE_Message_Block* data,
+                                       Message_Block_Ptr data,
                                        const DDS::Time_t& source_timestamp)
 {
   header_data.message_id_ = message_id;
@@ -1978,10 +1983,6 @@ DataWriterImpl::create_control_message(MessageId message_id,
 
   if (data) {
     header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
-
-    if (header_data.message_length_ == 0) {
-      data->release();
-    }
   }
 
   header_data.sequence_ = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
@@ -2019,7 +2020,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                         ACE_Message_Block(
                           DataSampleHeader::max_marshaled_size(),
                           ACE_Message_Block::MB_DATA,
-                          header_data.message_length_ ? data : 0, //cont
+                          header_data.message_length_ ? data.release() : 0, //cont
                           0, //data
                           0, //allocator_strategy
                           get_db_lock(), //locking_strategy
@@ -2054,10 +2055,10 @@ DataWriterImpl::create_control_message(MessageId message_id,
 }
 
 DDS::ReturnCode_t
-DataWriterImpl::create_sample_data_message(DataSample* data,
+DataWriterImpl::create_sample_data_message(Message_Block_Ptr& data,
                                            DDS::InstanceHandle_t instance_handle,
                                            DataSampleHeader& header_data,
-                                           ACE_Message_Block*& message,
+                                           Message_Block_Ptr& message,
                                            const DDS::Time_t& source_timestamp,
                                            bool content_filter)
 {
@@ -2108,12 +2109,13 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
   size_t max_marshaled_size = header_data.max_marshaled_size();
 
-  ACE_NEW_MALLOC_RETURN(message,
+  ACE_Message_Block* tmp_message;
+  ACE_NEW_MALLOC_RETURN(tmp_message,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
                         ACE_Message_Block(max_marshaled_size,
                                           ACE_Message_Block::MB_DATA,
-                                          data, //cont
+                                          data.release(), //cont
                                           0, //data
                                           header_allocator_, //alloc_strategy
                                           get_db_lock(), //locking_strategy
@@ -2123,7 +2125,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                                           db_allocator_,
                                           mb_allocator_),
                         DDS::RETCODE_ERROR);
-
+  message.reset(tmp_message);
   *message << header_data;
   if (DCPS_debug_level >= 4) {
     const GuidConverter converter(publication_id_);
@@ -2159,10 +2161,9 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
 }
 
 void
-DataWriterImpl::control_delivered(ACE_Message_Block* sample)
+DataWriterImpl::control_delivered(const Message_Block_Ptr& sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","control_delivered",6);
-  sample->release();
   controlTracker.message_delivered();
 }
 
@@ -2250,10 +2251,9 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
     end_msg.group_coherent_samples_ = group_samples;
   }
 
-  ACE_Message_Block* data = 0;
   size_t max_marshaled_size = end_msg.max_marshaled_size();
 
-  ACE_NEW(data, ACE_Message_Block(max_marshaled_size,
+  Message_Block_Ptr data( new ACE_Message_Block(max_marshaled_size,
                                   ACE_Message_Block::MB_DATA,
                                   0, //cont
                                   0, //data
@@ -2261,7 +2261,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
                                   get_db_lock()));
 
   Serializer serializer(
-    data,
+    data.get(),
     this->swap_bytes());
 
   serializer << end_msg;
@@ -2270,15 +2270,15 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
     time_value_to_time(ACE_OS::gettimeofday());
 
   DataSampleHeader header;
-  ACE_Message_Block* control =
-    create_control_message(END_COHERENT_CHANGES, header, data, source_timestamp);
+  Message_Block_Ptr control(
+    create_control_message(END_COHERENT_CHANGES, header, move(data), source_timestamp));
 
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
 
   guard.release();
-  if (this->send_control(header, control) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, move(control)) == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
                ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
@@ -2300,11 +2300,10 @@ DataWriterImpl::data_dropped(const DataSampleElement* element,
 }
 
 void
-DataWriterImpl::control_dropped(ACE_Message_Block* sample,
+DataWriterImpl::control_dropped(const Message_Block_Ptr& sample,
                                 bool /* dropped_by_transport */)
 {
   DBG_ENTRY_LVL("DataWriterImpl","control_dropped",6);
-  sample->release();
   controlTracker.message_dropped();
 }
 
@@ -2407,10 +2406,11 @@ DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
       !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()) {
     DDS::Time_t t = time_value_to_time(now);
     DataSampleHeader header;
-    ACE_Message_Block* liveliness_msg =
-      this->create_control_message(DATAWRITER_LIVELINESS, header, 0, t);
+    Message_Block_Ptr empty;
+    Message_Block_Ptr liveliness_msg(
+      this->create_control_message(DATAWRITER_LIVELINESS, header, move(empty), t));
 
-    if (this->send_control(header, liveliness_msg) == SEND_CONTROL_ERROR) {
+    if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
                         ACE_TEXT(" send_control failed. \n")),
@@ -2656,11 +2656,11 @@ DataWriterImpl::need_sequence_repair_i() const
 
 SendControlStatus
 DataWriterImpl::send_control(const DataSampleHeader& header,
-                             ACE_Message_Block* msg)
+                             Message_Block_Ptr msg)
 {
   controlTracker.message_sent();
 
-  SendControlStatus status = TransportClient::send_control(header, msg);
+  SendControlStatus status = TransportClient::send_control(header, move(msg));
 
   if (status != SEND_CONTROL_OK) {
     controlTracker.message_dropped();

@@ -16,6 +16,7 @@
 #include "DisjointSequence.h"
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
+#include "Message_Block_Ptr.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
@@ -192,7 +193,7 @@ public:
    */
   DDS::ReturnCode_t
   register_instance(DDS::InstanceHandle_t&  instance_handle,
-                    DataSample*&            registered_sample);
+                    Message_Block_Ptr&      registered_sample);
 
   /**
    * Remove the provided instance from the instances_ list.
@@ -205,7 +206,7 @@ public:
    */
   DDS::ReturnCode_t unregister(
     DDS::InstanceHandle_t handle,
-    DataSample*& registered_sample,
+    Message_Block_Ptr&    registered_sample,
     bool dup_registered_sample = true);
 
   /**
@@ -218,7 +219,7 @@ public:
    */
   DDS::ReturnCode_t dispose(
     DDS::InstanceHandle_t handle,
-    DataSample*& registered_sample,
+    Message_Block_Ptr& registered_sample,
     bool dup_registered_sample = true);
 
   /**

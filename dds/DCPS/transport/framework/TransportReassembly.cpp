@@ -67,18 +67,13 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         return false;
       }
       fr.rec_ds_.header_ = joined;
-      if (fr.rec_ds_.sample_ && !data.sample_) {
-        ACE_Message_Block::release(fr.rec_ds_.sample_);
-        fr.rec_ds_.sample_ = 0;
-      } else if (!fr.rec_ds_.sample_) {
-        ACE_Message_Block::release(data.sample_);
-      } else {
+      if (fr.rec_ds_.sample_ && data.sample_) {
         ACE_Message_Block* last;
-        for (last = data.sample_; last->cont(); last = last->cont()) ;
-        last->cont(fr.rec_ds_.sample_);
-        fr.rec_ds_.sample_ = data.sample_;
+        for (last = data.sample_.get(); last->cont(); last = last->cont()) ;
+        last->cont(fr.rec_ds_.sample_.release());
+        fr.rec_ds_.sample_.reset(data.sample_.release());
       }
-      data.sample_ = 0;
+      data.sample_.reset();
       fr.transport_seq_.first = seqRange.first;
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "combined on left\n"));
@@ -95,17 +90,16 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         return false;
       }
       fr.rec_ds_.header_ = joined;
-      if (fr.rec_ds_.sample_ && !data.sample_) {
-        ACE_Message_Block::release(fr.rec_ds_.sample_);
-        fr.rec_ds_.sample_ = 0;
-      } else if (!fr.rec_ds_.sample_) {
-        ACE_Message_Block::release(data.sample_);
-      } else {
+      if (fr.rec_ds_.sample_ && data.sample_) {
         ACE_Message_Block* last;
-        for (last = fr.rec_ds_.sample_; last->cont(); last = last->cont()) ;
-        last->cont(data.sample_);
+        for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
+        last->cont(data.sample_.release());
       }
-      data.sample_ = 0;
+      else {
+        fr.rec_ds_.sample_.reset();
+        data.sample_.reset();
+      }
+
       fr.transport_seq_.second = seqRange.second;
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "combined on right\n"));
@@ -123,8 +117,7 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
           }
           fr.rec_ds_.header_ = joined;
           if (!it->rec_ds_.sample_) {
-            ACE_Message_Block::release(fr.rec_ds_.sample_);
-            fr.rec_ds_.sample_ = 0;
+            fr.rec_ds_.sample_.reset();
           } else {
             if (!fr.rec_ds_.sample_) {
               ACE_ERROR((LM_ERROR,
@@ -134,9 +127,8 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
               return false;
             }
             ACE_Message_Block* last;
-            for (last = fr.rec_ds_.sample_; last->cont(); last = last->cont()) ;
-            last->cont(it->rec_ds_.sample_);
-            it->rec_ds_.sample_ = 0;
+            for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
+            last->cont(it->rec_ds_.sample_.release());
           }
           fr.transport_seq_.second = it->transport_seq_.second;
           flist.erase(it);

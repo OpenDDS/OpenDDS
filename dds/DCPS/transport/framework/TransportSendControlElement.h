@@ -38,22 +38,22 @@ public:
                               const RepoId& publisher_id,
                               TransportSendListener* listener,
                               const DataSampleHeader& header,
-                              ACE_Message_Block* msg_block,
+                              Message_Block_Ptr msg_block,
                               TransportSendControlElementAllocator* allocator = 0);
 
   TransportSendControlElement(int initial_count,
-                              const DataSampleElement* dcps_elem,
+                              DataSampleElement* dcps_elem,
                               TransportSendControlElementAllocator* allocator);
 
   static TransportSendControlElement* alloc(int initial_count,
                                             const RepoId& publisher_id,
                                             TransportSendListener* listener,
                                             const DataSampleHeader& header,
-                                            ACE_Message_Block* message,
+                                            Message_Block_Ptr message,
                                             TransportSendControlElementAllocator* allocator);
 
   static TransportSendControlElement* alloc(int initial_count,
-                                            const DataSampleElement* dcps_elem,
+                                            DataSampleElement* dcps_elem,
                                             TransportSendControlElementAllocator* allocator);
 
   virtual ~TransportSendControlElement();
@@ -100,7 +100,7 @@ private:
   DataSampleHeader header_;
 
   /// The control message.
-  ACE_Message_Block* msg_;
+  Message_Block_Ptr msg_;
 
   /// If constructed from a DataSampleElement, keep it around for release
   const DataSampleElement* const dcps_elem_;

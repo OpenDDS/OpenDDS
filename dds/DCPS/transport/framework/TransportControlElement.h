@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 #include "TransportDefs.h"
 #include "TransportQueueElement.h"
 
@@ -36,7 +37,7 @@ public:
    *             type is created on the stack, this *must* be set to
    *             false.
    */
-  TransportControlElement(const ACE_Message_Block* msg_block,
+  TransportControlElement(Message_Block_Ptr msg_block,
                           const RepoId& pub_id = GUID_UNKNOWN,
                           bool owner = true);
 
@@ -61,7 +62,7 @@ protected:
 private:
 
   /// The control message.
-  ACE_Message_Block* msg_;
+  Message_Block_Ptr msg_;
 
   /// Ownership flag.
   bool owner_;

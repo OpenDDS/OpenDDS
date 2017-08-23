@@ -166,9 +166,9 @@ private:
 
     void data_dropped(const DCPS::DataSampleElement*, bool by_transport);
 
-    void control_delivered(ACE_Message_Block* sample);
+    void control_delivered(const DCPS::Message_Block_Ptr& sample);
 
-    void control_dropped(ACE_Message_Block* sample,
+    void control_dropped(const DCPS::Message_Block_Ptr& sample,
                          bool dropped_by_transport);
 
     void notify_publication_disconnected(const DCPS::ReaderIdSeq&) {}
@@ -193,7 +193,7 @@ private:
     Header header_;
     DCPS::SequenceNumber seq_;
 
-    void write_control_msg(ACE_Message_Block& payload,
+    void write_control_msg(DCPS::Message_Block_Ptr payload,
                            size_t size,
                            DCPS::MessageId id,
                            DCPS::SequenceNumber seq = DCPS::SequenceNumber());
@@ -254,10 +254,10 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::scoped_ptr<SPDPdiscoveredParticipantData>& pdata);
-    void enqueue(DCPS::MessageId id, DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredWriterData>& wdata);
-    void enqueue(DCPS::MessageId id, DCPS::scoped_ptr<OpenDDS::DCPS::DiscoveredReaderData>& rdata);
-    void enqueue(DCPS::MessageId id, DCPS::scoped_ptr<ParticipantMessageData>& data);
+    void enqueue(DCPS::unique_ptr<SPDPdiscoveredParticipantData>& pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData>& wdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData>& rdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData>& data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
     void acknowledge();

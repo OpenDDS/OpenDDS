@@ -240,7 +240,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
           && (rtps.smHeader.flags & FLAG_Q) && !rds.sample_) {
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
           if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
-            rds.sample_ = new ACE_Message_Block(20);
+            rds.sample_.reset(new ACE_Message_Block(20));
             // CDR_BE encapsuation scheme (endianness is not used for key hash)
             rds.sample_->copy("\x00\x00\x00\x00", 4);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
@@ -597,7 +597,7 @@ namespace {
 
 SequenceRange
 RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
-                        ACE_Message_Block*& head, ACE_Message_Block*& tail)
+                        Message_Block_Ptr& head, Message_Block_Ptr& tail)
 {
   using namespace RTPS;
   static const SequenceRange unknown_range(SequenceNumber::SEQUENCENUMBER_UNKNOWN(),
@@ -666,7 +666,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
       new_flags |= FLAG_K_IN_FRAG;
     }
   }
-  head = DataSampleHeader::alloc_msgblock(orig, sz, false);
+  head.reset(DataSampleHeader::alloc_msgblock(orig, sz, false));
 
   head->copy(rd, data_offset);
 
@@ -677,24 +677,24 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   std::memset(head->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
   head->wr_ptr(4);
 
-  write(head, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+  write(head.get(), DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
 
   head->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
 
-  write(head, starting_frag, swap_bytes);
+  write(head.get(), starting_frag, swap_bytes);
   const size_t max_data = size - sz, orig_payload = orig.cont()->total_length();
   const ACE_CDR::UShort frags =
     static_cast<ACE_CDR::UShort>(std::min(max_data, orig_payload) / FRAG_SIZE);
-  write(head, frags, swap_bytes);
-  write(head, FRAG_SIZE, swap_bytes);
-  write(head, sample_size, swap_bytes);
+  write(head.get(), frags, swap_bytes);
+  write(head.get(), FRAG_SIZE, swap_bytes);
+  write(head.get(), sample_size, swap_bytes);
 
   if (flags & FLAG_Q) {
     head->copy(rd + iqos_offset, orig.length() - iqos_offset);
   }
 
   // Create the "tail" message block containing DATA_FRAG with Q=0
-  tail = DataSampleHeader::alloc_msgblock(orig, data_offset + 36, false);
+  tail.reset(DataSampleHeader::alloc_msgblock(orig, data_offset + 36, false));
 
   tail->copy(rd, data_offset);
 
@@ -705,23 +705,23 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   std::memset(tail->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
   tail->wr_ptr(4);
 
-  write(tail, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+  write(tail.get(), DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
   tail->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
 
-  write(tail, starting_frag + frags, swap_bytes);
+  write(tail.get(), starting_frag + frags, swap_bytes);
   const size_t tail_data = orig_payload - frags * FRAG_SIZE;
   const ACE_CDR::UShort tail_frags =
     static_cast<ACE_CDR::UShort>((tail_data + FRAG_SIZE - 1) / FRAG_SIZE);
-  write(tail, tail_frags, swap_bytes);
-  write(tail, FRAG_SIZE, swap_bytes);
-  write(tail, sample_size, swap_bytes);
+  write(tail.get(), tail_frags, swap_bytes);
+  write(tail.get(), FRAG_SIZE, swap_bytes);
+  write(tail.get(), sample_size, swap_bytes);
 
-  ACE_Message_Block* payload_head = 0;
-  ACE_Message_Block* payload_tail;
+  Message_Block_Ptr payload_head;
+  Message_Block_Ptr payload_tail;
   DataSampleHeader::split_payload(*orig.cont(), frags * FRAG_SIZE,
                                   payload_head, payload_tail);
-  head->cont(payload_head);
-  tail->cont(payload_tail);
+  head->cont(payload_head.release());
+  tail->cont(payload_tail.release());
 
   return SequenceRange(starting_frag + frags - 1,
                        starting_frag + frags + tail_frags - 1);

@@ -23,7 +23,7 @@ ReceivedDataSample::ReceivedDataSample(ACE_Message_Block* payload)
 ACE_INLINE
 ReceivedDataSample::ReceivedDataSample(const ReceivedDataSample& other)
   : header_(other.header_)
-  , sample_(ACE_Message_Block::duplicate(other.sample_))
+  , sample_(ACE_Message_Block::duplicate(other.sample_.get()))
 {
   DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample(copy)", 6);
 }
@@ -41,11 +41,6 @@ ACE_INLINE
 ReceivedDataSample::~ReceivedDataSample()
 {
   DBG_ENTRY_LVL("ReceivedDataSample", "~ReceivedDataSample", 6);
-
-  // Release the sample_ (ACE_Message_Block chain) back to its allocator.
-  if (this->sample_ != 0) {
-    this->sample_->release();
-  }
 }
 
 ACE_INLINE void

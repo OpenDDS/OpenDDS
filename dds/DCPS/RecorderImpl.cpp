@@ -242,7 +242,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                           sample.header_.source_timestamp_nanosec_,
                           sample.header_.publication_id_,
                           sample.header_.byte_order_,
-                          sample.sample_);
+                          sample.sample_.get());
 
   if (listener_.in()) {
     listener_->on_sample_data_received(this, rawSample);

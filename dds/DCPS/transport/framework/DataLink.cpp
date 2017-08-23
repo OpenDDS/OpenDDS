@@ -495,7 +495,7 @@ DataLink::stop_i()
 ACE_Message_Block*
 DataLink::create_control(char submessage_id,
                          DataSampleHeader& header,
-                         ACE_Message_Block* data)
+                         Message_Block_Ptr data)
 {
   DBG_ENTRY_LVL("DataLink", "create_control", 6);
 
@@ -510,7 +510,7 @@ DataLink::create_control(char submessage_id,
                           this->mb_allocator_->malloc(sizeof(ACE_Message_Block))),
                         ACE_Message_Block(header.max_marshaled_size(),
                                           ACE_Message_Block::MB_DATA,
-                                          data,
+                                          data.release(),
                                           0,  // data
                                           0,  // allocator_strategy
                                           0,  // locking_strategy
@@ -533,14 +533,14 @@ DataLink::create_control(char submessage_id,
 }
 
 SendControlStatus
-DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* message)
+DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message)
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
   TransportSendControlElement* const elem =
     TransportSendControlElement::alloc(1, // initial_count
                                        GUID_UNKNOWN, &send_response_listener_,
-                                       header, message, send_control_allocator_);
+                                       header, move(message), send_control_allocator_);
   if (!elem) return SEND_CONTROL_ERROR;
 
   send_response_listener_.track_message();

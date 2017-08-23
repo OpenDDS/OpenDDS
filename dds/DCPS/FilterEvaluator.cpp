@@ -106,14 +106,6 @@ FilterEvaluator::DeserializedForEval::lookup(const char* field) const
   return meta_.getValue(deserialized_, field);
 }
 
-namespace {
-  struct AMB_Releaser {
-    explicit AMB_Releaser(ACE_Message_Block* mb) : mb_(mb) {}
-    ~AMB_Releaser() { mb_->release(); }
-    ACE_Message_Block* mb_;
-  };
-}
-
 Value
 FilterEvaluator::SerializedForEval::lookup(const char* field) const
 {
@@ -121,9 +113,8 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
   if (iter != cache_.end()) {
     return iter->second;
   }
-  ACE_Message_Block* const mb = serialized_->duplicate();
-  AMB_Releaser release(mb);
-  Serializer ser(mb, swap_,
+  Message_Block_Ptr mb (serialized_->duplicate());
+  Serializer ser(mb.get(), swap_,
                  cdr_ ? Serializer::ALIGN_CDR : Serializer::ALIGN_NONE);
   if (cdr_) {
     ser.skip(4); // CDR encapsulation header

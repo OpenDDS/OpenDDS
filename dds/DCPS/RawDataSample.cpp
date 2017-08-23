@@ -40,8 +40,6 @@ RawDataSample::RawDataSample(MessageId          mid,
 
 RawDataSample::~RawDataSample()
 {
-  if (sample_)
-    sample_->release();
 }
 
 RawDataSample::RawDataSample(const RawDataSample& other)

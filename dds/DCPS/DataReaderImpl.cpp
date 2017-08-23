@@ -1513,7 +1513,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     Serializer serializer(
-        sample.sample_, sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
+        sample.sample_.get(), sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
     if (!(serializer >> control)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
           ACE_TEXT("deserialization coherent change control failed.\n")));
@@ -1680,7 +1680,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case END_HISTORIC_SAMPLES: {
     if (sample.header_.message_length_ >= sizeof(RepoId)) {
-      Serializer ser(sample.sample_);
+      Serializer ser(sample.sample_.get());
       RepoId readerId = GUID_UNKNOWN;
       if (!(ser >> readerId)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")

@@ -9,6 +9,7 @@
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DataWriterImpl_T.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 
 #include "../common/TestSupport.h"
 
@@ -355,7 +356,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
       TheParticipantFactoryWithArgs(argc, argv);
     TestParticipantImpl* tpi = new TestParticipantImpl();
     DDS::DomainParticipant_var participant = tpi;
-    scoped_ptr<DDS_TEST> test(new DDS_TEST);
+    OpenDDS::DCPS::unique_ptr<DDS_TEST> test(new DDS_TEST);
     ::DDS::DataWriterQos dw_qos;
     test->get_default_datawriter_qos(dw_qos);
 
@@ -385,7 +386,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          ACE_Message_Block* mb = test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
@@ -414,7 +415,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
           }
 
-          element_0->set_sample(mb);
+          element_0->set_sample(move(mb));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
@@ -431,7 +432,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
           }
-          ACE_Message_Block* mb1 = test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           DataSampleElement* element_1 = 0;
           ret = test_data_container->obtain_buffer(element_1, handle1);
@@ -441,7 +442,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
 
-          element_1->set_sample(mb1);
+          element_1->set_sample(move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;
@@ -497,7 +498,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          ACE_Message_Block* mb1 = test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
@@ -527,7 +528,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
 
-          element_1->set_sample(mb1);
+          element_1->set_sample(move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
@@ -548,7 +549,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo2.key  = 2;
           foo2.count = 1;
 
-          ACE_Message_Block* mb2 = test->dds_marshal(fast_dw, foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb2(test->dds_marshal(fast_dw, foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
 
@@ -565,7 +566,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
           }
 
-          element_2->set_sample(mb2);
+          element_2->set_sample(move(mb2));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;
@@ -585,7 +586,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo3.key  = 3;
           foo3.count = 1;
 
-          ACE_Message_Block* mb3 = test->dds_marshal(fast_dw, foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb3(test->dds_marshal(fast_dw, foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
 
@@ -633,7 +634,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          ACE_Message_Block* mb1 = test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
 
@@ -663,7 +664,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
 
-          element_1->set_sample(mb1);
+          element_1->set_sample(move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
@@ -684,7 +685,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo2.key  = 2;
           foo2.count = 1;
 
-          ACE_Message_Block* mb2 = test->dds_marshal(fast_dw, foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb2(test->dds_marshal(fast_dw, foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
 
@@ -701,7 +702,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
           }
 
-          element_2->set_sample(mb2);
+          element_2->set_sample(move(mb2));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;
@@ -721,7 +722,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo3.key  = 3;
           foo3.count = 1;
 
-          ACE_Message_Block* mb3 = test->dds_marshal(fast_dw, foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb3(test->dds_marshal(fast_dw, foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
 
@@ -770,7 +771,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           foo1.key  = 1;
           foo1.count = 1;
 
-          ACE_Message_Block* mb = test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
           ::DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;//fast_dw->register_instance(foo1);
 
@@ -800,7 +801,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
           }
 
-          element_0->set_sample(mb);
+          element_0->set_sample(move(mb));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
@@ -824,9 +825,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
-          ACE_Message_Block* mb1 = test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
+          Message_Block_Ptr mb1(test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          element_1->set_sample(mb1);
+          element_1->set_sample(move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;

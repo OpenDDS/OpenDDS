@@ -707,14 +707,14 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   TransportSendControlElement* tsce =
     dynamic_cast<TransportSendControlElement*>(element);
 
-  ACE_Message_Block* data = 0;
+  Message_Block_Ptr data;
   bool durable = false;
 
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
   if (tsce) {        // Control message
     if (RtpsSampleHeader::control_message_supported(tsce->header().message_id_)) {
-      data = msg->cont()->duplicate();
+      data.reset(msg->cont()->duplicate());
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
       RtpsSampleHeader::populate_data_control_submessages(
                 subm, *tsce, requires_inline_qos(pub_id));
@@ -733,7 +733,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 
   } else if (tse) {  // Basic data message
     // {DataSampleHeader} -> {Data Payload}
-    data = msg->cont()->duplicate();
+    data.reset(msg->cont()->duplicate());
     const DataSampleElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
@@ -742,7 +742,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 
   } else if (tce) {  // Customized data message
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
-    data = msg->cont()->cont()->duplicate();
+    data.reset(msg->cont()->cont()->duplicate());
     const DataSampleElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
@@ -753,10 +753,10 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
-  ACE_Message_Block* hdr = submsgs_to_msgblock(subm);
-  hdr->cont(data);
+  Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
+  hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
-    RtpsCustomizedElement::alloc(element, hdr,
+    RtpsCustomizedElement::alloc(element, move(hdr),
       &rtps_customized_element_allocator_);
 
   // Handle durability resends
