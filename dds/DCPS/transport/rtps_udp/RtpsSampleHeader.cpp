@@ -551,7 +551,7 @@ RtpsSampleHeader::populate_inline_qos(
 
 // simple marshaling helpers for RtpsSampleHeader::split()
 namespace {
-  void write(ACE_Message_Block* mb, ACE_CDR::UShort s, bool swap_bytes)
+  void write(const Message_Block_Ptr& mb, ACE_CDR::UShort s, bool swap_bytes)
   {
     const char* ps = reinterpret_cast<const char*>(&s);
     if (swap_bytes) {
@@ -562,7 +562,7 @@ namespace {
     }
   }
 
-  void write(ACE_Message_Block* mb, ACE_CDR::ULong i, bool swap_bytes)
+  void write(const Message_Block_Ptr& mb, ACE_CDR::ULong i, bool swap_bytes)
   {
     const char* pi = reinterpret_cast<const char*>(&i);
     if (swap_bytes) {
@@ -677,17 +677,17 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   std::memset(head->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
   head->wr_ptr(4);
 
-  write(head.get(), DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+  write(head, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
 
   head->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
 
-  write(head.get(), starting_frag, swap_bytes);
+  write(head, starting_frag, swap_bytes);
   const size_t max_data = size - sz, orig_payload = orig.cont()->total_length();
   const ACE_CDR::UShort frags =
     static_cast<ACE_CDR::UShort>(std::min(max_data, orig_payload) / FRAG_SIZE);
-  write(head.get(), frags, swap_bytes);
-  write(head.get(), FRAG_SIZE, swap_bytes);
-  write(head.get(), sample_size, swap_bytes);
+  write(head, frags, swap_bytes);
+  write(head, FRAG_SIZE, swap_bytes);
+  write(head, sample_size, swap_bytes);
 
   if (flags & FLAG_Q) {
     head->copy(rd + iqos_offset, orig.length() - iqos_offset);
@@ -705,16 +705,16 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   std::memset(tail->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
   tail->wr_ptr(4);
 
-  write(tail.get(), DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
+  write(tail, DATA_FRAG_OCTETS_TO_IQOS, swap_bytes);
   tail->copy(rd + data_offset + 8, 16); // readerId, writerId, sequenceNum
 
-  write(tail.get(), starting_frag + frags, swap_bytes);
+  write(tail, starting_frag + frags, swap_bytes);
   const size_t tail_data = orig_payload - frags * FRAG_SIZE;
   const ACE_CDR::UShort tail_frags =
     static_cast<ACE_CDR::UShort>((tail_data + FRAG_SIZE - 1) / FRAG_SIZE);
-  write(tail.get(), tail_frags, swap_bytes);
-  write(tail.get(), FRAG_SIZE, swap_bytes);
-  write(tail.get(), sample_size, swap_bytes);
+  write(tail, tail_frags, swap_bytes);
+  write(tail, FRAG_SIZE, swap_bytes);
+  write(tail, sample_size, swap_bytes);
 
   Message_Block_Ptr payload_head;
   Message_Block_Ptr payload_tail;
