@@ -66,7 +66,7 @@ TransportSendControlElement::requires_exclusive_packet() const
 namespace
 {
   void handle_message(const bool dropped,
-                      Message_Block_Ptr& msg,
+                      const Message_Block_Ptr& msg,
                       TransportSendListener* const listener,
                       const bool dropped_by_transport)
   {

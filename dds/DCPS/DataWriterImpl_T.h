@@ -221,7 +221,7 @@ namespace OpenDDS {
       Message_Block_Ptr marshalled(
         dds_marshal (instance_data, OpenDDS::DCPS::FULL_MARSHALING));
 
-      return OpenDDS::DCPS::DataWriterImpl::write(marshalled, handle,
+      return OpenDDS::DCPS::DataWriterImpl::write(move(marshalled), handle,
                                                   source_timestamp,
                                                   filter_out._retn());
     }

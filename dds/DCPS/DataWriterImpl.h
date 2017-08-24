@@ -259,7 +259,7 @@ public:
    *        associated reader RepoIds that should NOT get the
    *        data sample due to content filtering.
    */
-  DDS::ReturnCode_t write(Message_Block_Ptr& sample,
+  DDS::ReturnCode_t write(Message_Block_Ptr sample,
                           DDS::InstanceHandle_t handle,
                           const DDS::Time_t& source_timestamp,
                           GUIDSeq* filter_out);
@@ -424,7 +424,7 @@ public:
    * data block and header.
    */
   DDS::ReturnCode_t
-  create_sample_data_message(Message_Block_Ptr& data,
+  create_sample_data_message(Message_Block_Ptr data,
                              DDS::InstanceHandle_t instance_handle,
                              DataSampleHeader& header_data,
                              Message_Block_Ptr& message,

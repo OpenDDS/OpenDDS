@@ -1731,7 +1731,7 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 }
 
 DDS::ReturnCode_t
-DataWriterImpl::write(Message_Block_Ptr& data,
+DataWriterImpl::write(Message_Block_Ptr data,
                       DDS::InstanceHandle_t handle,
                       const DDS::Time_t& source_timestamp,
                       GUIDSeq* filter_out)
@@ -1769,7 +1769,7 @@ DataWriterImpl::write(Message_Block_Ptr& data,
   }
 
   Message_Block_Ptr temp;
-  ret = create_sample_data_message(data,
+  ret = create_sample_data_message(move(data),
                                    handle,
                                    element->get_header(),
                                    temp,
@@ -2058,7 +2058,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
 }
 
 DDS::ReturnCode_t
-DataWriterImpl::create_sample_data_message(Message_Block_Ptr& data,
+DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
                                            DDS::InstanceHandle_t instance_handle,
                                            DataSampleHeader& header_data,
                                            Message_Block_Ptr& message,

@@ -431,7 +431,7 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
 
   DCPS::unique_ptr<SPDPdiscoveredParticipantData> dpd(
     new SPDPdiscoveredParticipantData(pdata));
-  task_.enqueue(dpd);
+  task_.enqueue(move(dpd));
 }
 
 void
@@ -1709,7 +1709,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to DiscoveredWriterData\n")));
         return;
       }
-      sedp_.task_.enqueue(id, wdata);
+      sedp_.task_.enqueue(id, move(wdata));
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
       ParameterList data;
@@ -1730,7 +1730,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       if (rdata->readerProxy.expectsInlineQos) {
         set_inline_qos(rdata->readerProxy.allLocators);
       }
-      sedp_.task_.enqueue(id, rdata);
+      sedp_.task_.enqueue(id, move(rdata));
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
                && !sample.header_.key_fields_only_) {
@@ -1741,7 +1741,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      sedp_.task_.enqueue(id, data);
+      sedp_.task_.enqueue(id, move(data));
 
     }
   }
@@ -1963,28 +1963,28 @@ Sedp::acknowledge()
 }
 
 void
-Sedp::Task::enqueue(DCPS::unique_ptr<SPDPdiscoveredParticipantData>& pdata)
+Sedp::Task::enqueue(DCPS::unique_ptr<SPDPdiscoveredParticipantData> pdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData>& wdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_WRITER, id, wdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData>& rdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_READER, id, rdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData>& data)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data.release()));
