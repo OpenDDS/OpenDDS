@@ -1409,12 +1409,12 @@ Sedp::Writer::data_dropped(const DCPS::DataSampleElement* dsle, bool)
 }
 
 void
-Sedp::Writer::control_delivered(const DCPS::Message_Block_Ptr& mb)
+Sedp::Writer::control_delivered(const DCPS::Message_Block_Ptr& /* sample */)
 {
 }
 
 void
-Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& mb, bool)
+Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& /* sample */, bool)
 {
 }
 

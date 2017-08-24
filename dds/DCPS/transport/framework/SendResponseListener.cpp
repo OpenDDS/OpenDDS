@@ -41,14 +41,14 @@ SendResponseListener::data_dropped(
 }
 
 void
-SendResponseListener::control_delivered(const Message_Block_Ptr& sample)
+SendResponseListener::control_delivered(const Message_Block_Ptr& /* sample */)
 {
   tracker_.message_delivered();
 }
 
 void
 SendResponseListener::control_dropped(
-  const Message_Block_Ptr& sample,
+  const Message_Block_Ptr& /* sample */,
   bool /* dropped_by_transport */)
 {
   tracker_.message_dropped();
