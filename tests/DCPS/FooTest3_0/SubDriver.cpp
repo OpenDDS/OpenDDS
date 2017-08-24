@@ -208,11 +208,7 @@ SubDriver::run()
     ACE_OS::sleep(1);
   }
 
-  if (!participant_->contains_entity(datareader_->get_instance_handle()))
-  {
-    ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains datareader_\n")));
-  }
+  TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
 
   TEST_CHECK (this->listener_->samples_disposed() == num_disposed_);
 

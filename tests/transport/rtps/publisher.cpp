@@ -154,6 +154,7 @@ public:
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       qos_data.dw_qos.ownership.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
+      /* Falls through. */
     case PARTIAL_MOD_QOS:
       qos_data.pub_qos.partition.name.length(1);
       qos_data.pub_qos.partition.name[0] = "Hello";
