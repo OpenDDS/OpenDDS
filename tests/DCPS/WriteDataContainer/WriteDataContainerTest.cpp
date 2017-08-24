@@ -415,7 +415,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
           }
 
-          element_0->set_sample(move(mb));
+          element_0->set_sample(OpenDDS::DCPS::move(mb));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
@@ -442,7 +442,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
 
-          element_1->set_sample(move(mb1));
+          element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;
@@ -529,7 +529,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
 
-          element_1->set_sample(move(mb1));
+          element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
@@ -567,7 +567,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
           }
 
-          element_2->set_sample(move(mb2));
+          element_2->set_sample(OpenDDS::DCPS::move(mb2));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;
@@ -665,7 +665,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
           }
 
-          element_1->set_sample(move(mb1));
+          element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 1\n"));
@@ -703,7 +703,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 2\n"));
           }
 
-          element_2->set_sample(move(mb2));
+          element_2->set_sample(OpenDDS::DCPS::move(mb2));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;
@@ -803,7 +803,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "obtain buffer failed for element 0\n"));
           }
 
-          element_0->set_sample(move(mb));
+          element_0->set_sample(OpenDDS::DCPS::move(mb));
 
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to write element 0\n"));
@@ -829,7 +829,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           }
           Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
 
-          element_1->set_sample(move(mb1));
+          element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
           if (ret != DDS::RETCODE_OK) {
             return ret;

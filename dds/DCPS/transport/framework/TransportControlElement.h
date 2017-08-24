@@ -31,7 +31,7 @@ public:
    * msg_block - chain of ACE_Message_Blocks containing the control
    *             sample held by this queue element, if any.
    */
-  TransportControlElement(Message_Block_Ptr msg_block);
+  explicit TransportControlElement(Message_Block_Ptr msg_block);
 
   virtual ~TransportControlElement();
 
@@ -52,7 +52,7 @@ protected:
   virtual void data_delivered();
 
 private:
-
+  TransportControlElement(const TransportControlElement&);
   /// The control message.
   Message_Block_Ptr msg_;
 };
