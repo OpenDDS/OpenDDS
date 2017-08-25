@@ -237,13 +237,12 @@ Manager::pushImage(const DImage& image)
       dr_qos_seq.push_back(reader_qos);
       read_cdr >> *reader_qos;
 
-      ContentSubscriptionInfo* csi = 0;
-      ACE_NEW_NORETURN(csi, ContentSubscriptionInfo);
-      csi->filterClassName = actor.contentSubscriptionProfile.filterClassName.c_str();
-      csi->filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
+      ContentSubscriptionInfo csi;
+      csi.filterClassName = actor.contentSubscriptionProfile.filterClassName.c_str();
+      csi.filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
       TAO_InputCDR csp_cdr(actor.contentSubscriptionProfile.exprParams.second,
                            actor.contentSubscriptionProfile.exprParams.first);
-      csp_cdr >> csi->exprParams;
+      csp_cdr >> csi.exprParams;
 
       URActor* reader;
       ACE_NEW_NORETURN(reader
@@ -251,7 +250,7 @@ Manager::pushImage(const DImage& image)
                                  , actor.topicId, actor.participantId
                                  , actor.type, actor.callback.c_str()
                                  , *sub_qos, *reader_qos
-                                 , *trans, *csi));
+                                 , *trans, csi));
       readers.push_back(reader);
       u_image.actors.push_back(reader);
 
