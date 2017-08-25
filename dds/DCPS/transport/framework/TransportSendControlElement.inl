@@ -34,7 +34,7 @@ TransportSendControlElement::alloc(int initial_count,
 ACE_INLINE /*static*/
 TransportSendControlElement*
 TransportSendControlElement::alloc(int initial_count,
-                                   DataSampleElement* dcps_elem,
+                                   const DataSampleElement* dcps_elem,
                                    TransportSendControlElementAllocator* allocator)
 {
   TransportSendControlElement* ret;

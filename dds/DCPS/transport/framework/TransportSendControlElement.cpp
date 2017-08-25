@@ -39,7 +39,7 @@ TransportSendControlElement::TransportSendControlElement(int initial_count,
 
 
 TransportSendControlElement::TransportSendControlElement(int initial_count,
-                                                         DataSampleElement* dcps_elem,
+                                                         const DataSampleElement* dcps_elem,
                                                          TransportSendControlElementAllocator* allocator)
   : TransportQueueElement(initial_count)
   , publisher_id_(dcps_elem->get_pub_id())

@@ -42,7 +42,7 @@ public:
                               TransportSendControlElementAllocator* allocator = 0);
 
   TransportSendControlElement(int initial_count,
-                              DataSampleElement* dcps_elem,
+                              const DataSampleElement* dcps_elem,
                               TransportSendControlElementAllocator* allocator);
 
   static TransportSendControlElement* alloc(int initial_count,
@@ -53,7 +53,7 @@ public:
                                             TransportSendControlElementAllocator* allocator);
 
   static TransportSendControlElement* alloc(int initial_count,
-                                            DataSampleElement* dcps_elem,
+                                            const DataSampleElement* dcps_elem,
                                             TransportSendControlElementAllocator* allocator);
 
   virtual ~TransportSendControlElement();
