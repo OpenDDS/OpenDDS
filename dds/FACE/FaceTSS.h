@@ -36,7 +36,8 @@ public:
 
   struct FaceReceiver : public DDSAdapter {
     FaceReceiver ()
-      : last_msg_tid(0),
+      : last_msg_header(),
+        last_msg_tid(0),
         sum_recvd_msgs_latency(0),
         total_msgs_recvd(0)
     {}
