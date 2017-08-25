@@ -759,7 +759,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
 
   // Don't use the cached allocator for the registered sample message
   // block.
-  scoped_ptr<DataSample> registration_sample(
+  Message_Block_Ptr registration_sample(
     new ACE_Message_Block(marshaled_sample_length,
                           ACE_Message_Block::MB_DATA,
                           0, //cont
@@ -782,13 +782,11 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
    */
   DDS::ReturnCode_t ret =
     data_writer->register_instance_from_durable_data(handle,
-                                     registration_sample.get(),
+                                     move(registration_sample),
                                      registration_timestamp);
 
   if (ret != DDS::RETCODE_OK)
     return false;
-
-  registration_sample.release();
 
   typedef DurabilityQueue<sample_data_type> data_queue_type;
   size_t const len = sample_list.size();
@@ -810,8 +808,8 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
 
       data->get_sample(sample, sample_length, source_timestamp);
 
-      ACE_Message_Block * mb = 0;
-      ACE_NEW_MALLOC_RETURN(mb,
+      ACE_Message_Block * tmp_mb = 0;
+      ACE_NEW_MALLOC_RETURN(tmp_mb,
                             static_cast<ACE_Message_Block*>(
                               mb_allocator->malloc(
                                 sizeof(ACE_Message_Block))),
@@ -828,19 +826,17 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
                               db_allocator,
                               mb_allocator),
                             false);
+      Message_Block_Ptr mb(tmp_mb);
 
       ACE_OS::memcpy(mb->wr_ptr(),
                      sample,
                      sample_length);
       mb->wr_ptr(sample_length);
 
-      const DDS::ReturnCode_t ret = data_writer->write(mb, handle,
+      const DDS::ReturnCode_t ret = data_writer->write(move(mb), handle,
         source_timestamp, 0 /* no content filtering */);
 
       if (ret != DDS::RETCODE_OK) {
-        ACE_DES_FREE(mb,
-                     mb_allocator->free,
-                     ACE_Message_Block);
         return false;
       }
     }

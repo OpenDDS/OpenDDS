@@ -25,13 +25,14 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
             sample), 5);
   GuardType guard(this->lock_);
-  TransportSendElement* send_element =
-    TransportSendElement::alloc(static_cast<int>(map_.size()), sample);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const bool customHeader =
     DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->get_sample());
 #endif
+
+  TransportSendElement* send_element =
+    TransportSendElement::alloc(static_cast<int>(map_.size()), sample);
 
   for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
 
@@ -48,14 +49,14 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
         "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
         itr->second.in(), guids ? guids->length() : 0), 5);
 
-      ACE_Message_Block* mb = sample->get_sample()->duplicate();
+      Message_Block_Ptr mb (send_element->msg()->duplicate());
 
-      DataSampleHeader::add_cfentries(guids, mb);
+      DataSampleHeader::add_cfentries(guids, mb.get());
 
       TransportCustomizedElement* tce =
         TransportCustomizedElement::alloc(send_element, false,
           sample->get_transport_customized_element_allocator());
-      tce->set_msg(mb); // tce now owns ACE_Message_Block chain
+      tce->set_msg(move(mb)); // tce now owns ACE_Message_Block chain
 
       itr->second->send(tce);
 
@@ -94,7 +95,7 @@ ACE_INLINE OpenDDS::DCPS::SendControlStatus
 OpenDDS::DCPS::DataLinkSet::send_control(RepoId                           pub_id,
                                          const TransportSendListener_rch& listener,
                                          const DataSampleHeader&          header,
-                                         ACE_Message_Block*               msg,
+                                         Message_Block_Ptr                msg,
                                          TransportSendControlElementAllocator* allocator)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_control",6);
@@ -122,7 +123,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                           pub_id
 
   TransportSendControlElement* const send_element =
     TransportSendControlElement::alloc(static_cast<int>(dup_map.size()), pub_id,
-                                       listener.in(), header, msg, &use_alloc);
+                                       listener.in(), header, move(msg), &use_alloc);
   if (!send_element) return SEND_CONTROL_ERROR;
 
   for (MapType::iterator itr = dup_map.begin();
@@ -140,7 +141,7 @@ ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_response(
   RepoId pub_id,
   const DataSampleHeader& header,
-  ACE_Message_Block* response)
+  Message_Block_Ptr response)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
   GuardType guard(this->lock_);
@@ -148,7 +149,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   TransportSendControlElement* const send_element =
     TransportSendControlElement::alloc(static_cast<int>(map_.size()), pub_id,
                                        &send_response_listener_, header,
-                                       response, &send_control_element_allocator_);
+                                       move(response), &send_control_element_allocator_);
   if (!send_element) return;
   send_response_listener_.track_message();
 

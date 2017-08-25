@@ -345,10 +345,10 @@ MulticastDataLink::release_remote_i(const RepoId& remote)
 
 void
 MulticastDataLink::syn_received_no_session(MulticastPeer source,
-    ACE_Message_Block* data,
+    const Message_Block_Ptr& data,
     bool swap_bytes)
 {
-  Serializer serializer_read(data, swap_bytes);
+  Serializer serializer_read(data.get(), swap_bytes);
 
   MulticastPeer local_peer;
   serializer_read >> local_peer;
@@ -365,14 +365,14 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
       (unsigned int) (source >> 32),
       (unsigned int) source), 2);
 
-  ACE_Message_Block* synack_data = new ACE_Message_Block(sizeof(MulticastPeer));
+  Message_Block_Ptr synack_data(new ACE_Message_Block(sizeof(MulticastPeer)));
 
-  Serializer serializer_write(synack_data);
+  Serializer serializer_write(synack_data.get());
   serializer_write << source;
 
   DataSampleHeader header;
-  ACE_Message_Block* control =
-      create_control(MULTICAST_SYNACK, header, synack_data);
+  Message_Block_Ptr control(
+      create_control(MULTICAST_SYNACK, header, move(synack_data)));
 
   if (control == 0) {
     ACE_ERROR((LM_ERROR,
@@ -382,7 +382,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     return;
   }
 
-  const int error = send_control(header, control);
+  const int error = send_control(header, move(control));
   if (error != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) MulticastDataLink::syn_received_no_session: "
         "ERROR: send_control failed: %d!\n", error));

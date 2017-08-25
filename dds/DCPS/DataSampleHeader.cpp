@@ -19,11 +19,6 @@
 #endif /* __ACE_INLINE__ */
 
 namespace {
-  struct AMB_Releaser {
-    explicit AMB_Releaser(ACE_Message_Block* p) : p_(p) {}
-    ~AMB_Releaser() { p_->release(); }
-    ACE_Message_Block* p_;
-  };
 
   bool mb_copy(char& dest, const ACE_Message_Block& mb, size_t offset, bool)
   {
@@ -44,16 +39,15 @@ namespace {
       return true;
     }
 
-    ACE_Message_Block* temp = mb.duplicate();
+    OpenDDS::DCPS::Message_Block_Ptr temp(mb.duplicate());
     if (!temp) { // couldn't allocate
       return false;
     }
-    AMB_Releaser r(temp);
     temp->rd_ptr(offset);
     if (temp->total_length() < sizeof(T)) {
       return false;
     }
-    OpenDDS::DCPS::Serializer ser(temp, swap);
+    OpenDDS::DCPS::Serializer ser(temp.get(), swap);
     ser.buffer_read(reinterpret_cast<char*>(&dest), sizeof(T), swap);
     return true;
   }
@@ -366,23 +360,23 @@ DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 
 void
 DataSampleHeader::split_payload(const ACE_Message_Block& orig, size_t size,
-                                ACE_Message_Block*& head,
-                                ACE_Message_Block*& tail)
+                                Message_Block_Ptr& head,
+                                Message_Block_Ptr& tail)
 {
   if (!head) {
-    head = orig.duplicate();
+    head.reset(orig.duplicate());
   }
 
-  ACE_Message_Block* frag = head;
+  ACE_Message_Block* frag = head.get();
   size_t frag_remain = size;
   for (; frag_remain > frag->length(); frag = frag->cont()) {
     frag_remain -= frag->length();
   }
 
   if (frag_remain == frag->length()) { // split at ACE_Message_Block boundary
-    tail = frag->cont();
+    tail.reset(frag->cont());
   } else {
-    tail = frag->duplicate();
+    tail.reset(frag->duplicate());
     frag->wr_ptr(frag->wr_ptr() - frag->length() + frag_remain);
     ACE_Message_Block::release(frag->cont());
     tail->rd_ptr(frag_remain);
@@ -392,24 +386,25 @@ DataSampleHeader::split_payload(const ACE_Message_Block& orig, size_t size,
 
 void
 DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
-                        ACE_Message_Block*& head, ACE_Message_Block*& tail)
+                        Message_Block_Ptr& head, Message_Block_Ptr& tail)
 {
-  ACE_Message_Block* dup = orig.duplicate();
-  AMB_Releaser rel(dup);
+  Message_Block_Ptr dup (orig.duplicate());
 
   const size_t length = dup->total_length();
   DataSampleHeader hdr(*dup); // deserialize entire header (with cfentries)
   const size_t hdr_len = length - dup->total_length();
 
-  ACE_Message_Block* payload = dup;
+  ACE_Message_Block* payload = dup.get();
+  //skip zero length message blocks
   ACE_Message_Block* prev = 0;
   for (; payload->length() == 0; payload = payload->cont()) {
     prev = payload;
   }
   prev->cont(0);
+  Message_Block_Ptr payload_head(payload);
 
   if (size < hdr_len) { // need to fragment the content_filter_entries_
-    head = alloc_msgblock(*dup, max_marshaled_size(), true);
+    head.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
     hdr.more_fragments_ = true;
     hdr.message_length_ = 0; // no room for payload data
     *head << hdr;
@@ -424,40 +419,40 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
       entries[i] = hdr.content_filter_entries_[--x];
       hdr.content_filter_entries_.length(x);
     }
-    add_cfentries(&entries, head);
+    add_cfentries(&entries, head.get());
 
-    tail = alloc_msgblock(*dup, max_marshaled_size(), true);
+    tail.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
     hdr.more_fragments_ = false;
     hdr.content_filter_ = (hdr.content_filter_entries_.length() > 0);
     hdr.message_length_ = static_cast<ACE_UINT32>(payload->total_length());
     *tail << hdr;
     tail->cont(payload);
     if (hdr.content_filter_) {
-      add_cfentries(&hdr.content_filter_entries_, tail);
+      add_cfentries(&hdr.content_filter_entries_, tail.get());
     }
     return;
   }
 
-  ACE_Message_Block* payload_tail;
-  split_payload(*payload, size - hdr_len, payload, payload_tail);
+  Message_Block_Ptr payload_tail;
+  split_payload(*payload, size - hdr_len, payload_head, payload_tail);
 
   hdr.more_fragments_ = true;
-  hdr.message_length_ = static_cast<ACE_UINT32>(payload->total_length());
+  hdr.message_length_ = static_cast<ACE_UINT32>(payload_head->total_length());
 
-  head = alloc_msgblock(*dup, max_marshaled_size(), true);
+  head.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
   *head << hdr;
-  head->cont(payload);
+  head->cont(payload_head.release());
   if (hdr.content_filter_) {
-    add_cfentries(&hdr.content_filter_entries_, head);
+    add_cfentries(&hdr.content_filter_entries_, head.get());
   }
 
   hdr.more_fragments_ = false;
   hdr.content_filter_ = false;
   hdr.message_length_ = static_cast<ACE_UINT32>(payload_tail->total_length());
 
-  tail = alloc_msgblock(*dup, max_marshaled_size(), true);
+  tail.reset(alloc_msgblock(*dup, max_marshaled_size(), true));
   *tail << hdr;
-  tail->cont(payload_tail);
+  tail->cont(payload_tail.release());
 }
 
 bool

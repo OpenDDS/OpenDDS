@@ -26,9 +26,9 @@ OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
   // Obtain the publisher id.
   this->publisher_id_ = orig_elem->publication_id();
 
-  this->msg_ = TransportQueueElement::clone_mb(orig_elem->msg(),
+  this->msg_.reset(TransportQueueElement::clone_mb(orig_elem->msg(),
                                                this->mb_allocator_,
-                                               this->db_allocator_);
+                                               this->db_allocator_));
 }
 
 ACE_INLINE
@@ -44,7 +44,7 @@ const ACE_Message_Block*
 OpenDDS::DCPS::TransportReplacedElement::msg() const
 {
   DBG_ENTRY_LVL("TransportReplacedElement","msg",6);
-  return this->msg_;
+  return this->msg_.get();
 }
 
 ACE_INLINE

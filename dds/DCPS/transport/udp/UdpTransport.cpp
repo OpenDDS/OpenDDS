@@ -259,12 +259,12 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
 
 void
 UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
-                                 ACE_Message_Block* data)
+                                 const Message_Block_Ptr& data)
 {
   CORBA::ULong octet_size =
     static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
   Priority priority;
-  Serializer serializer(data);
+  Serializer serializer(data.get());
   serializer >> priority;
   TransportBLOB blob(octet_size);
   blob.length(octet_size);

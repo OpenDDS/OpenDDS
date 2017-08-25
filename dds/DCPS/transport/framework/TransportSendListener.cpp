@@ -44,7 +44,7 @@ TransportSendListener::data_dropped(const DataSampleElement* sample,
 }
 
 void
-TransportSendListener::control_delivered(ACE_Message_Block* sample)
+TransportSendListener::control_delivered(const Message_Block_Ptr& sample)
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,
@@ -52,8 +52,8 @@ TransportSendListener::control_delivered(ACE_Message_Block* sample)
 }
 
 void
-TransportSendListener::control_dropped(ACE_Message_Block* sample,
-                                                      bool dropped_by_transport)
+TransportSendListener::control_dropped(const Message_Block_Ptr& sample,
+                                       bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(dropped_by_transport);

@@ -13,6 +13,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 
 class DDS_TEST;
 
@@ -77,7 +78,7 @@ public:
   DataSample* get_sample() const;
   DataSample* get_sample();
 
-  void set_sample(DataSample* sample);
+  void set_sample(Message_Block_Ptr sample);
 
   PublicationId get_pub_id() const;
 
@@ -117,7 +118,7 @@ private:
 
   /// Message being sent which includes the DataSampleHeader message block
   /// and DataSample message block.
-  DataSample*            sample_;
+  Message_Block_Ptr      sample_;
 
   /// Publication Id used downstream.
   PublicationId          publication_id_;
