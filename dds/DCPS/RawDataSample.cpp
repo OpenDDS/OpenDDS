@@ -62,10 +62,11 @@ RawDataSample::operator=(const RawDataSample& other)
 
 void swap(RawDataSample& lhs, RawDataSample& rhs)
 {
-  std::swap(lhs.message_id_, rhs.message_id_);
-  std::swap(lhs.publication_id_, rhs.publication_id_);
-  std::swap(lhs.sample_byte_order_, rhs.sample_byte_order_);
-  std::swap(lhs.sample_, rhs.sample_);
+  using std::swap;
+  swap(lhs.message_id_, rhs.message_id_);
+  swap(lhs.publication_id_, rhs.publication_id_);
+  swap(lhs.sample_byte_order_, rhs.sample_byte_order_);
+  swap(lhs.sample_, rhs.sample_);
 }
 
 } // namespace DCPS

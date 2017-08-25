@@ -46,8 +46,9 @@ ReceivedDataSample::~ReceivedDataSample()
 ACE_INLINE void
 swap(ReceivedDataSample& a, ReceivedDataSample& b)
 {
-  std::swap(a.header_, b.header_);
-  std::swap(a.sample_, b.sample_);
+  using std::swap;
+  swap(a.header_, b.header_);
+  swap(a.sample_, b.sample_);
 }
 
 }

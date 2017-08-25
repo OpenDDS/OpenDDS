@@ -109,17 +109,15 @@ class unique_ptr {
     return static_cast< rv<T>& >(p);
   }
 
+
+  template<typename T, typename Deleter>
+  inline void swap(unique_ptr<T, Deleter>& a, DCPS::unique_ptr<T, Deleter>& b) // never throws
+  {
+    return a.swap(b);
+  }
+
 } // namespace DCPS
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-namespace std {
-  template<typename T, typename Deleter>
-  inline void swap(OpenDDS::DCPS::unique_ptr<T, Deleter> & a, OpenDDS::DCPS::unique_ptr<T, Deleter> & b) // never throws
-  {
-    return a.swap(b);
-  }
-}
-
 #endif /* end of include guard: UNIQUE_PTR_H_18C6F30C */
