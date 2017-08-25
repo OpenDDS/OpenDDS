@@ -97,7 +97,7 @@ public:
   }
 
   void swap(unique_ptr& b) // never throws
-  {       
+  {
     std::swap(ptr_, b.ptr_);
   }
 
