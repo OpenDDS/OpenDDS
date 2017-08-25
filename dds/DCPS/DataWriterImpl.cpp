@@ -2164,7 +2164,7 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
 }
 
 void
-DataWriterImpl::control_delivered(const Message_Block_Ptr& sample)
+DataWriterImpl::control_delivered(const Message_Block_Ptr&)
 {
   DBG_ENTRY_LVL("DataWriterImpl","control_delivered",6);
   controlTracker.message_delivered();
@@ -2303,7 +2303,7 @@ DataWriterImpl::data_dropped(const DataSampleElement* element,
 }
 
 void
-DataWriterImpl::control_dropped(const Message_Block_Ptr& sample,
+DataWriterImpl::control_dropped(const Message_Block_Ptr&,
                                 bool /* dropped_by_transport */)
 {
   DBG_ENTRY_LVL("DataWriterImpl","control_dropped",6);
