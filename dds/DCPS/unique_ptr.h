@@ -19,8 +19,8 @@ template <typename T>
 class rv : public T {
     rv();
     ~rv();
-    rv(rv const&);
-    void operator=(rv const&);
+    rv(const rv &);
+    void operator=(const rv&);
 };
 
 template <typename T>
@@ -111,7 +111,7 @@ class unique_ptr {
 
 
   template<typename T, typename Deleter>
-  inline void swap(unique_ptr<T, Deleter>& a, DCPS::unique_ptr<T, Deleter>& b) // never throws
+  inline void swap(unique_ptr<T, Deleter>& a, unique_ptr<T, Deleter>& b) // never throws
   {
     return a.swap(b);
   }
