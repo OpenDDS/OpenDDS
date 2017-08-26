@@ -97,7 +97,7 @@ Subscriber::Subscriber( int argc, ACE_TCHAR** argv, char** envp)
       this->config_.domain()
     ));
   }
-  ::Xyz::FooNoKeyTypeSupportImpl* subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
+  ::Xyz::FooNoKeyTypeSupportImpl::_var_type subscriber_data = new ::Xyz::FooNoKeyTypeSupportImpl();
   if(::DDS::RETCODE_OK != subscriber_data->register_type(
                             this->participant_.in(),
                             this->config_.typeName().c_str()
