@@ -7,8 +7,14 @@
 
 
 #include "dds/Versioned_Namespace.h"
-#include <utility>
 
+#include "ace/config-lite.h"
+
+#ifdef ACE_HAS_CPP11
+#include <utility>
+#else
+#include <algorithm>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -17,104 +23,104 @@ namespace DCPS {
 
 template <typename T>
 class rv : public T {
-    rv();
-    ~rv();
-    rv(const rv &);
-    void operator=(const rv&);
+  rv();
+  ~rv();
+  rv(const rv &);
+  void operator=(const rv&);
 };
 
 template <typename T>
 struct default_deleter
 {
-  void operator()(T* ptr) const {
+  void operator()(T* ptr) const
+  {
     delete ptr;
   }
 };
 
-template<typename T, typename Deleter = default_deleter<T> >
+template <typename T, typename Deleter = default_deleter<T> >
 class unique_ptr {
-   public:
-     typedef T element_type;
-     typedef Deleter deleter_type;
+public:
+  typedef T element_type;
+  typedef Deleter deleter_type;
 
-     explicit unique_ptr(T * p = 0) // never throws
-       : ptr_(p)
-     {}
+  explicit unique_ptr(T* p = 0) // never throws
+    : ptr_(p)
+  {}
 
-     unique_ptr(rv<unique_ptr>& other)
-       : ptr_(other.release())
-     {
-     }
+  unique_ptr(rv<unique_ptr>& other)
+    : ptr_(other.release())
+  {}
 
-     ~unique_ptr() // never throws
-     {
-       Deleter()(ptr_);
-     }
-
-     unique_ptr& operator = (rv<unique_ptr>& other)
-     {
-       reset(other.release());
-       return *this;
-     }
-
-     void reset(T * p = 0) // never throws
-     {
-       Deleter()(ptr_);
-       ptr_ = p;
-     }
-
-     T * release()
-     {
-       T* p = ptr_;
-       ptr_ = 0;
-       return p;
-     }
-
-     T & operator*() const // never throws
-     {
-       return *get();
-     }
-
-     T * operator->() const // never throws
-     {
-       return get();
-     }
-
-     T * get() const // never throws
-     {
-       return ptr_;
-     }
-
-     operator bool() const // never throws
-     {
-       return get() != 0;
-     }
-
-     void swap(unique_ptr & b) // never throws
-     {
-       std::swap(ptr_, b.ptr_);
-     }
-
-   private:
-     unique_ptr(const unique_ptr&);
-     unique_ptr& operator = (const unique_ptr&);
-
-     T* ptr_;
-  };
-
-
-  template<typename T>
-  rv<T>& move(T& p)
+  ~unique_ptr() // never throws
   {
-    return static_cast< rv<T>& >(p);
+    Deleter()(ptr_);
   }
 
-
-  template<typename T, typename Deleter>
-  inline void swap(unique_ptr<T, Deleter>& a, unique_ptr<T, Deleter>& b) // never throws
+  unique_ptr& operator=(rv<unique_ptr>& other)
   {
-    return a.swap(b);
+    reset(other.release());
+    return *this;
   }
+
+  void reset(T* p = 0) // never throws
+  {
+    Deleter()(ptr_);
+    ptr_ = p;
+  }
+
+  T* release()
+  {
+    T* p = ptr_;
+    ptr_ = 0;
+    return p;
+  }
+
+  T& operator*() const // never throws
+  {
+    return *get();
+  }
+
+  T* operator->() const // never throws
+  {
+    return get();
+  }
+
+  T* get() const // never throws
+  {
+    return ptr_;
+  }
+
+  operator bool() const // never throws
+  {
+    return get() != 0;
+  }
+
+  void swap(unique_ptr& b) // never throws
+  {
+    std::swap(ptr_, b.ptr_);
+  }
+
+private:
+  unique_ptr(const unique_ptr&);
+  unique_ptr& operator=(const unique_ptr&);
+
+  T* ptr_;
+};
+
+
+template <typename T>
+rv<T>& move(T& p)
+{
+  return static_cast<rv<T>&>(p);
+}
+
+
+template <typename T, typename Deleter>
+void swap(unique_ptr<T, Deleter>& a, unique_ptr<T, Deleter>& b) // never throws
+{
+  return a.swap(b);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS
