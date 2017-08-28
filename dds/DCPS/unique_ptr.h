@@ -48,9 +48,15 @@ public:
     : ptr_(p)
   {}
 
+#ifndef __SUNPRO_CC
   unique_ptr(rv<unique_ptr>& other)
     : ptr_(other.release())
   {}
+#else
+  unique_ptr(unique_ptr& other)
+    : ptr_(other.release())
+  {}
+#endif
 
   ~unique_ptr() // never throws
   {
@@ -108,13 +114,19 @@ private:
   T* ptr_;
 };
 
-
+#ifndef __SUNPRO_CC
 template <typename T>
 rv<T>& move(T& p)
 {
   return static_cast<rv<T>&>(p);
 }
-
+#else
+template <typename T, typename Deleter>
+unique_ptr<T, Deleter>& move(unique_ptr<T, Deleter>& p)
+{
+  return p;
+}
+#endif
 
 template <typename T, typename Deleter>
 void swap(unique_ptr<T, Deleter>& a, unique_ptr<T, Deleter>& b) // never throws
