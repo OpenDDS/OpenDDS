@@ -1,0 +1,12 @@
+version: '2'
+services:
+  subscriber:
+    image: opendds
+    command: ["subscriber", "-DCPSConfigFile",  "rtps.ini" ]
+    volumes:
+      - $PWD:/opt/workspace
+  publisher:
+    image: opendds
+    command: ["publisher", "-DCPSConfigFile",  "rtps.ini" ]
+    volumes:
+      - $PWD:/opt/workspace
