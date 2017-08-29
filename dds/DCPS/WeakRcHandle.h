@@ -89,13 +89,13 @@ namespace DCPS {
 
     WeakRcHandle& operator = (const WeakRcHandle& other) {
        WeakRcHandle tmp(other);
-       std::swap(weak_object_, tmp.weak_objct_);
+       std::swap(weak_object_, tmp.weak_object_);
        return *this;
     }
 
     WeakRcHandle& operator = (const RcHandle<T>& other) {
        WeakRcHandle tmp(other);
-       std::swap(weak_object_, tmp.weak_objct_);
+       std::swap(weak_object_, tmp.weak_object_);
        return *this;
     }
 
