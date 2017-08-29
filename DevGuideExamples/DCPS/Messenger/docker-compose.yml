@@ -1,12 +1,12 @@
 version: '2'
 services:
   subscriber:
-    image: opendds
+    image: wilsonj/opendds
     command: ["subscriber", "-DCPSConfigFile",  "rtps.ini" ]
     volumes:
       - $PWD:/opt/workspace
   publisher:
-    image: opendds
+    image: wilsonj/opendds
     command: ["publisher", "-DCPSConfigFile",  "rtps.ini" ]
     volumes:
       - $PWD:/opt/workspace
