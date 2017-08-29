@@ -143,7 +143,7 @@ struct ActorStrt {
     PSQ          pub,
     RWQ          drdw,
     T            trans,
-    CSP          csProf)
+    const CSP&   csProf)
     : domainId(dom),
       actorId(act),
       topicId(top),
