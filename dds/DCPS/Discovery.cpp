@@ -177,6 +177,11 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                       BUILT_IN_PUBLICATION_TOPIC),
                      DDS::RETCODE_ERROR);
   }
+
+  bit_part_topic->enable();
+  bit_topic_topic->enable();
+  bit_sub_topic->enable();
+  bit_pub_topic->enable();
 #else
   ACE_UNUSED_ARG(participant);
 #endif /* DDS_HAS_MINIMUM_BIT */
