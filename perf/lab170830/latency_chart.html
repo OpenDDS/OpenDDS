@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      OpenDDS - Latency Charts
+    </title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <meta name="keywords" content="plots, mrel, publish">
+    <link rel="icon" type="image/png" href="/images/opendds_favicon.png"/>
+  </head>
+  <body onload="show_chart()">
+    <script type="text/javascript">
+
+    function show_chart(){
+      var qs = (function(a) {
+            if (a == "") return {};
+            var b = {};
+            for (var i = 0; i < a.length; ++i)
+            {
+                var p=a[i].split('=', 2);
+                if (p.length == 1)
+                    b[p[0]] = "";
+                else
+                    b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+            }
+            return b;
+          })(window.location.search.substr(1).split('&'));
+
+      const all_protocols = ["tcp", "udp", "rtps", "multi-be", "raw-tcp", "raw-udp"];
+      const all_protocol_descs = ["TCP", "UDP", "RTPS", "Best Effort Multicast", "Raw TCP", "Raw UDP"];
+      const all_sizes = ['50', '100', '250', '500', '1000', '2500', '5000', '8000', '16000', '32000'];
+      const my_protocol = qs["protocol"];
+      const my_size = qs["size"];
+      const date="170830";
+
+      var content= "";
+
+      var my_id=my_protocol +'-'+ my_size;
+
+
+
+      var content = '<div class="viewer" id="contentWrapper"><small><a href="../../performance.html">Performance</a> &gt; '+ my_id +'</small>';
+      content += '<h1 class="publishLogo">  OpenDDS - Performance Testing Results</h1><div id="publishContentWrapper">';
+      content += '<h2>' + my_id + '</h2><span class="rightside">';
+
+      for (i=0; i< all_protocols.length; i++) {
+        if (i != 0) {
+          content += "<span>/</span>";
+        }
+        if (all_protocols[i] == my_protocol) {
+          content += all_protocol_descs[i];
+        }
+        else {
+          content += '<a class="externalLink null" href="latency_chart.html?protocol=' + all_protocols[i] + "&size=" + my_size + '">' +  all_protocol_descs[i] + '</a>';
+        }
+      }
+      content += '</span><br><span class="rightside">';
+
+
+
+
+      for (i=0; i < all_sizes.length; i++) {
+        if (i != 0) {
+          content += "/";
+        }
+
+        var label = my_size + " bytes";
+        if (all_sizes[i] == my_size) {
+          content += label
+        }
+        else {
+          content += '<a class="externalLink null" href="latency_chart.html?protocol=' + my_protocol + '&size=' + all_sizes[i] + '">' + all_sizes[i] + ' bytes</a>'
+        }
+      }
+
+      content += '</span><br>';
+      content += '<img src="../../images/perf/lab' + date + '/latency-' + my_id + '.png"><hr></div></div>';
+      document.getElementsByTagName('body')[0].innerHTML = content;
+    }
+    </script>
+  </body>
+</html>
