@@ -172,7 +172,7 @@ A Docker image containing a pre-built OpenDDS is available.
         cp -R /opt/OpenDDS/DevGuideExamples/DCPS/Messenger Messenger
         cd Messenger
 
-4. Configure and build the Message
+4. Configure and build the Messenger example
 
         mwc.pl -type gnuace
         make
