@@ -29,6 +29,9 @@
       {% assign counter = counter | plus: 1 %}
           <ul class="sub-menu">
             <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">Index</a></li>
+        {% if p.title == 'Documentation' %}
+            <li><a class="page-link" href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
+        {% endif %}
     {% else %}
         <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a></li>
     {% endif %}
