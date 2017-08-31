@@ -1,0 +1,85 @@
+---
+layout: page
+title: Docker
+categories: [opendds]
+tags: []
+order: 13
+---
+<p>
+  This guide will take you through the process of compiling and runnning an OpenDDS application with Docker.
+</p>
+
+<div class="bodytext" align="justify">
+  <a name="Prerequisites"><span class="headertext">Prerequisites</span></a>
+  <p>Check that <code>docker</code> and <code>docker-compose</code> are installed.</p>
+  <pre>
+docker --version
+docker-compose --version
+</pre>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Compile the Messenger Example"><span class="headertext">Compile the Messenger Example</span></a>
+  <ol>
+    <li>
+      <p>Enter a container</p>
+      <pre>docker run --rm -ti -v "$PWD:/opt/workspace" objectcomputing/opendds</pre>
+    </li>
+    <li>
+      <p>Copy the <i>Messenger</i> directory which contains an example from the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide</a></p>
+      <pre>cp -R /opt/OpenDDS/DevGuideExamples/DCPS/Messenger Messenger
+cd Messenger</pre>
+    </li>
+    <li>
+      <p>Configure and build the Messenger example</p>
+      <pre>mwc.pl -type gnuace
+make</pre>
+    </li>
+    <li>
+      <p>Exit the container</p>
+      <pre>exit</pre>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Run the Messenger Example with RTPS"><span class="headertext">Run the Messenger Example with RTPS</span></a>
+  <ol>
+    <li>
+      <p>Enter the <i>Messenger</i> directory</p>
+      <pre>cd Messenger</pre>
+    </li>
+    <li>
+      <p>Create an <i>rtps.ini</i> file to control discovery with the following content</p>
+      <pre>
+[common]
+DCPSGlobalTransportConfig=$file
+DCPSDefaultDiscovery=DEFAULT_RTPS
+
+[transport/the_rtps_transport]
+transport_type=rtps_udp</pre>
+    </li>
+    <li>
+      <p>Run the Messenger example with RTPS</p>
+      <pre>docker-compose up</pre>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Run the Messenger Example with InfoRepo"><span class="headertext">Run the Messenger Example with InfoRepo</span></a>
+  <ol>
+    <li>
+      <p>Run the Messenger example with InfoRepo</p>
+      <pre>docker-compose -f docker-compose-inforepo.yml up</pre>
+    </li>
+    <li>
+      <p>Use Control-C to kill the InfoRepo process</p>
+    </li>
+  </ol>
+</div>
+
+<div class="bodytext" align="justify">
+  <a name="Next Steps"><span class="headertext">Next Steps</span></a>
+  <p>See Chapter 2 of the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide</a> for a detailed explanation of the Messenger C++ Example or Chapter 11 for the Java Example.</p>
+</div>
