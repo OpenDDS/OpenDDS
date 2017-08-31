@@ -1593,18 +1593,6 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  DDS::DomainParticipantFactoryQos qos;
-
-  if (this->factory_->get_qos(qos) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)DomainParticipantImpl::enable failed to")
-               ACE_TEXT(" get factory qos\n")));
-    return DDS::RETCODE_ERROR;
-  }
-
-  if (!qos.entity_factory.autoenable_created_entities) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
-  }
-
   DDS::ReturnCode_t ret = this->set_enabled();
 
   if (monitor_) {
@@ -1617,6 +1605,21 @@ DomainParticipantImpl::enable()
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
     this->bit_subscriber_ = disc->init_bit(this);
+  }
+
+  if (qos_.entity_factory.autoenable_created_entities) {
+
+    for (TopicMap::iterator it = topics_.begin(); it != topics_.end(); ++it) {
+      it->second.pair_.svt_->enable();
+    }
+
+    for (PublisherSet::iterator it = publishers_.begin(); it != publishers_.end(); ++it) {
+      it->svt_->enable();
+    }
+
+    for (SubscriberSet::iterator it = subscribers_.begin(); it != subscribers_.end(); ++it) {
+      it->svt_->enable();
+    }
   }
 
   return ret;
