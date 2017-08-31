@@ -23,8 +23,7 @@ docker-compose --version
   <ol>
     <li>
       <p>Enter a container</p>
-      <pre>docker run --rm -ti -u `id -u`:`id -g` -v "$PWD:/opt/workspace" objectcomputing/opendds /bin/bash</pre>
-      <p>Messages like <code>groups: cannot find name for group ID XXXX</code> and <code>I have no name!</code> may safely be ignored.</p>
+      <pre>docker run --rm -ti -v "$PWD:/opt/workspace" objectcomputing/opendds</pre>
     </li>
     <li>
       <p>Copy the <i>Messenger</i> directory which contains an example from the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide</a></p>
