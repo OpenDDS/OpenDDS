@@ -98,7 +98,7 @@ Linux family:
 * Red Hat EL and CentOS 6.6 and 6.8, x86_64
 * Red Hat EL and CentOS 7.2 and 7.3, x86_64
 * Fedora Core 6, x86
-* Fedora 24 and 25, x86_64
+* Fedora 24 and 26, x86_64
 * Ubuntu 16.04 LTS, x86_64
 * openSUSE 42.1, and 42.2, x86_64
 
@@ -135,14 +135,14 @@ This release of OpenDDS has been tested using the following compilers:
 * Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
 * Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
 * Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-* Microsoft Visual C++ 14.1 (Visual Studio 2017)
+* Microsoft Visual C++ 14.1 (Visual Studio 2017) - Update 3
 * gcc 4.1.x
 * gcc 4.4.x
 * gcc 4.8.x
 * gcc 4.9.x
 * gcc 5.4
 * gcc 6.2
-* gcc 6.3
+* gcc 7.2
 * Clang 4.0 (llvm.org) and 7.3 (Apple)
 * Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 

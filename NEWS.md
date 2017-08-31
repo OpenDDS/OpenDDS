@@ -1,13 +1,24 @@
-Version 3.12(?) of OpenDDS
-
-##### Additions:
-- TODO: Add your features here
+Version 3.12 of OpenDDS
 
 ##### Fixes:
-- TODO: Add your fixes here
+- RtpsUdpDataLink::remove_sample locking
+- track latency only when needed for LatencyBudget QoS or statistics
+- corrected counters for sample rejected/lost liveliness lost total_count_change
+- get_key_value() corrected return value for errors
+- setting DCPSBitTransportPort without DCPSBitTransportIPAddress had no effect
+- writer side association wasn't removed after the the reader had unsubscribed
+- memory leaks
+- issue with unregistered instances when deleting DataWriter
+- problem with multiple transport instances in a single transport config
+- EntityFactory QoS didn't enable child objects when the factory was enabled
 
 ##### Notes:
-- TODO: Add your notes here
+- configure supports ACE+TAO from DOCGroup repository as an option
+- configure improvements for using external ACE+TAO, cross-compiling on Windows
+- coverity fixes
+- improved Bench performance test
+- Docker Hub now has an OpenDDS docker image
+
 _______________________________________________________________________________
 Version 3.11 of OpenDDS
 
