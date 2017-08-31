@@ -163,9 +163,7 @@ A Docker image containing a pre-built OpenDDS is available.
 
 2. Enter a container
 
-        docker run --rm -ti -u `id -u`:`id -g` -v "$PWD:/opt/workspace" objectcomputing/opendds /bin/bash
-
-    Messages like `groups: cannot find name for group ID XXXX` and `I have no name!` may safely be ignored.
+        docker run --rm -ti -v "$PWD:/opt/workspace" objectcomputing/opendds
 
 3. Copy the `Messenger` directory which contains an example from the [Developer's Guide](http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf)
 
