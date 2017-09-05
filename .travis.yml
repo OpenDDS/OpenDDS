@@ -18,7 +18,7 @@ env:
     - DDS_ROOT=$TRAVIS_BUILD_DIR
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
-    - COMPILER=g++-6
+    - COMPILER=g++-7
 
 matrix:
   include:
@@ -29,7 +29,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - libxerces-c-dev
-            - g++-6
+            - g++-7
             - openjdk-7-jdk
       env: USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
     - compiler: clang
@@ -49,7 +49,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libxerces-c-dev
-      - g++-6
+      - g++-7
 
 before_install:
   - mkdir ext
