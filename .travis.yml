@@ -29,7 +29,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - libxerces-c-dev
-            - g++-7
+            - g++-6
             - openjdk-7-jdk
       env: USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
     - compiler: clang
