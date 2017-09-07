@@ -23,7 +23,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.4.4';
+my $doc_tao_version = '6.4.5';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
