@@ -705,7 +705,8 @@ DataLink::transport_shutdown()
   ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
   reactor->cancel_timer(this);
   this->stop();
-
+  this->send_listeners_.clear();
+  this->recv_listeners_.clear();
   // Drop our reference to the TransportImpl object
   this->impl_.reset();
 }
