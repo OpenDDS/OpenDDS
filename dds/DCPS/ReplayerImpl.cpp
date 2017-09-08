@@ -1110,7 +1110,7 @@ ReplayerImpl::lookup_instance_handles(const ReaderIdSeq&       ids,
     }
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::lookup_instance_handles: ")
+               ACE_TEXT("(%P|%t) ReplayerImpl::lookup_instance_handles: ")
                ACE_TEXT("searching for handles for reader Ids: %C.\n"),
                buffer.c_str()));
   }

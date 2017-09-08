@@ -189,10 +189,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 void
 TransportClient::transport_detached(TransportImpl* which)
 {
-  TransportSendListener_rch this_tsl = get_send_listener();
-  TransportReceiveListener_rch this_trl = get_receive_listener();
-
-
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   // Remove any DataLinks created by the 'which' TransportImpl from our local
