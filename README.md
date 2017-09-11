@@ -154,7 +154,7 @@ see the INSTALL file in this directory.
 
 # Quick Start with Docker
 
-A Docker image containing a pre-built OpenDDS is available.
+Docker images containing a pre-built OpenDDS are available on [DockerHub](https://hub.docker.com/r/objectcomputing/opendds/).  An image corresponding to a particular release has a tag of the form `release-DDS-X.xx`, e.g., `release-DDS-3.12`.
 
 1. Check for prerequisites
 
