@@ -6,7 +6,6 @@
  */
 
 #include "dds/DCPS/ReceivedDataElementList.h"
-#include "dds/DCPS/Loaner.h"
 #include "ace/Truncate.h"
 
 #include <utility>

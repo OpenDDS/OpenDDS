@@ -60,13 +60,13 @@ public:
 
   virtual ~ReceivedDataElement(){}
 
-  long dec_ref() {
+  void dec_ref() {
      if (0 == --this->ref_count_)
        delete this;
   }
 
-  long inc_ref() {
-    return ++this->ref_count_;
+  void inc_ref() {
+    ++this->ref_count_;
   }
 
   long ref_count() {
