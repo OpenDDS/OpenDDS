@@ -99,6 +99,13 @@ public:
     return eval_i(data);
   }
 
+  template<typename T>
+  bool eval(const T& sample, const DDS::StringSeq& params, const MetaStruct& meta) const
+  {
+    DeserializedForEval data(&sample, meta, params);
+    return eval_i(data);
+  }
+
   bool eval(ACE_Message_Block* serializedSample, bool swap_bytes,
             bool cdr_encap, const MetaStruct& meta,
             const DDS::StringSeq& params) const

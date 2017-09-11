@@ -16,6 +16,7 @@
 #include "GuidUtils.h"
 #include "DataSampleHeader.h"
 #include "Time_Helper.h"
+#include "unique_ptr.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
@@ -32,7 +33,7 @@ class InstanceState;
 
 class OpenDDS_Dcps_Export ReceivedDataElement {
 public:
-  ReceivedDataElement(const DataSampleHeader& header, void *received_data)
+  ReceivedDataElement(const DataSampleHeader& header, void *received_data, ACE_Recursive_Thread_Mutex* mx)
     : pub_(header.publication_id_),
       registered_data_(received_data),
       sample_state_(DDS::NOT_READ_SAMPLE_STATE),
@@ -47,7 +48,8 @@ public:
       sequence_(header.sequence_),
       previous_data_sample_(0),
       next_data_sample_(0),
-      ref_count_(1)
+      ref_count_(1),
+      mx_(mx)
   {
 
     this->destination_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
@@ -56,8 +58,11 @@ public:
     this->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
   }
 
+  virtual ~ReceivedDataElement(){}
+
   long dec_ref() {
-    return --this->ref_count_;
+     if (0 == --this->ref_count_)
+       delete this;
   }
 
   long inc_ref() {
@@ -71,7 +76,7 @@ public:
   PublicationId pub_;
 
   /// Data sample received
-  void *registered_data_;  // ugly, but works....
+  void * const registered_data_;  // ugly, but works....
 
   /// Sample state for this data sample:
   /// DDS::NOT_READ_SAMPLE_STATE/DDS::READ_SAMPLE_STATE
@@ -115,10 +120,38 @@ public:
   /// the next data sample in the ReceivedDataElementList
   ReceivedDataElement *next_data_sample_ ;
 
+  void* operator new(size_t size, ACE_New_Allocator& pool);
+  void operator delete(void* memory);
+
 private:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
-
+protected:
+  ACE_Recursive_Thread_Mutex* mx_;
 }; // class ReceivedDataElement
+
+struct ReceivedDataElementMemoryBlock
+{
+  ACE_New_Allocator* allocator_;
+  ReceivedDataElement element_;
+};
+
+
+template <typename DataTypeWithAllocator>
+class ReceivedDataElementWithType : public ReceivedDataElement
+{
+public:
+  ReceivedDataElementWithType(const DataSampleHeader& header, DataTypeWithAllocator* received_data, ACE_Recursive_Thread_Mutex* mx)
+    : ReceivedDataElement(header, received_data, mx)
+  {
+  }
+
+  ~ReceivedDataElementWithType() {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+              guard,
+              *this->mx_)
+    delete static_cast<DataTypeWithAllocator*> (registered_data_);
+  }
+};
 
 class OpenDDS_Dcps_Export ReceivedDataFilter {
 public:

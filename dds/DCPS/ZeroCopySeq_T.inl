@@ -112,7 +112,10 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::swap(ZeroCopyDataSeq& frm)
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::~ZeroCopyDataSeq()
 {
-  if (loaner_) loaner_->auto_return_loan(this);
+  if (!this->release())
+  {
+    this->length(0);
+  }
 
   if (sc_release_ && sc_buffer_) freebuf(sc_buffer_);
 }
@@ -262,7 +265,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::internal_set_length(CORBA::ULong len)
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 void
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::set_loaner(
-  OpenDDS::DCPS::Loaner* loaner)
+  OpenDDS::DCPS::DataReaderImpl* loaner)
 {
   loaner_ = loaner;
 }
@@ -274,6 +277,9 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
   OpenDDS::DCPS::ReceivedDataElement* item)
 {
   ACE_ASSERT(is_zero_copy());
+  if (ptrs_[ii])
+    ptrs_[ii]->dec_ref();
+
   item->inc_ref();
   ++item->zero_copy_cnt_;
   ptrs_[ii] = item;

@@ -39,7 +39,31 @@ namespace OpenDDS {
 
     typedef OPENDDS_MAP_CMP(MessageType, DDS::InstanceHandle_t,
                             typename TraitsType::LessThanType) InstanceMap;
-    typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageType, ACE_Null_Mutex>  DataAllocator;
+
+
+    class MessageTypeWithAllocator : public MessageType
+    {
+    public:
+      void* operator new(size_t size, ACE_New_Allocator& pool);
+      void operator delete(void* memory);
+
+      static const MetaStruct& getMetaStruct() {
+        return OpenDDS::DCPS::getMetaStruct<MessageType>();
+      }
+
+      MessageTypeWithAllocator(){}
+      MessageTypeWithAllocator(const MessageType& other)
+        : MessageType(other)
+      {
+      }
+    };
+
+    struct MessageTypeMemoryBlock {
+      ACE_New_Allocator* allocator_;
+      MessageTypeWithAllocator element_;
+    };
+
+    typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageTypeMemoryBlock, ACE_Null_Mutex>  DataAllocator;
 
     typedef typename TraitsType::DataReaderType Interface;
 
@@ -329,7 +353,7 @@ namespace OpenDDS {
                         next = item->next_data_sample_;
 
                         ptr->rcvd_samples_.remove(item);
-                        dec_ref_data_element(item);
+                        item->dec_ref();
 
                         item = next;
                       }
@@ -356,7 +380,7 @@ namespace OpenDDS {
                 this->sample_info(sample_info, tail);
 
                 ptr->rcvd_samples_.remove(tail);
-                dec_ref_data_element(tail);
+                tail->dec_ref();
               }
             else
               {
@@ -698,30 +722,6 @@ namespace OpenDDS {
     received_data.length(0);
   }
 
-  void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement* item)
-  {
-    using OpenDDS::DCPS::ReceivedDataElement;
-
-    if (0 == item->dec_ref())
-      {
-        if (item->registered_data_ != 0)
-          {
-            ACE_GUARD(ACE_Recursive_Thread_Mutex,
-                      guard,
-                      this->sample_lock_);
-
-            MessageType* const ptr
-                  = static_cast< MessageType* >(item->registered_data_);
-            ACE_DES_FREE (ptr,
-                          data_allocator_->free,
-                          MessageType );
-          }
-
-        ACE_DES_FREE (item,
-                      rd_allocator_->free,
-                      ReceivedDataElement);
-      }
-  }
 
   virtual void delete_instance_map (void* map)
   {
@@ -894,10 +894,7 @@ namespace OpenDDS {
       DataSampleHeader header;
       header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       bool just_registered;
-      MessageType* data;
-      ACE_NEW_MALLOC_NORETURN(data,
-                              static_cast< MessageType*>(data_allocator_->malloc(sizeof(MessageType))),
-                              MessageType(sample));
+      MessageTypeWithAllocator* data = new (*data_allocator_) MessageTypeWithAllocator(sample);
       store_instance_data(data, header, instance, just_registered, filtered);
       if (instance) inst = instance->instance_handle_;
     }
@@ -923,10 +920,7 @@ namespace OpenDDS {
       header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
         ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
       bool just_registered, filtered;
-      MessageType* data;
-      ACE_NEW_MALLOC_NORETURN(data,
-                              static_cast< MessageType*>(data_allocator_->malloc(sizeof(MessageType))),
-                              MessageType);
+      MessageTypeWithAllocator* data =  new (*data_allocator_) MessageTypeWithAllocator;
       get_key_value(*data, instance);
       store_instance_data(data, header, si, just_registered, filtered);
       if (!filtered)
@@ -1035,13 +1029,7 @@ protected:
                              bool & filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    MessageType* data = 0;
-
-    ACE_NEW_MALLOC_NORETURN(data,
-                            static_cast< MessageType *>(
-                                                         data_allocator_->malloc(sizeof(MessageType))),
-                            MessageType);
-
+    MessageTypeWithAllocator* data = new (*data_allocator_) MessageTypeWithAllocator;
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
@@ -1083,7 +1071,7 @@ protected:
       if (ContentFilteredTopicImpl* cft =
           dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in())) {
         if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
-            && !cft->filter(*data)) {
+            && !cft->filter(static_cast<MessageType&>(*data))) {
           filtered = true;
           return;
         }
@@ -1124,7 +1112,7 @@ protected:
       {
         OpenDDS::DCPS::ReceivedDataElement* head =
           instance->rcvd_samples_.remove_head();
-        dec_ref_data_element(head);
+        head->dec_ref();
       }
   }
 
@@ -1604,7 +1592,7 @@ return DDS::RETCODE_NO_DATA;
 }
 
 void store_instance_data(
-                         MessageType *instance_data,
+                         MessageTypeWithAllocator *instance_data,
                          const OpenDDS::DCPS::DataSampleHeader& header,
                          OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr,
                          bool & just_registered,
@@ -1629,10 +1617,7 @@ void store_instance_data(
 
   if ((is_dispose_msg || is_unregister_msg) && it == instance_map_.end())
   {
-    ACE_DES_FREE (instance_data,
-                  data_allocator_->free,
-                  MessageType );
-    instance_data = 0;
+    delete instance_data;
     return;
   }
 
@@ -1666,10 +1651,7 @@ void store_instance_data(
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
-      ACE_DES_FREE (instance_data,
-                    data_allocator_->free,
-                    MessageType );
-
+      delete instance_data;
       return;
     }
 
@@ -1699,7 +1681,7 @@ void store_instance_data(
 #endif
 
     just_registered = true;
-    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(instance_data);
+    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data));
     handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
     OpenDDS::DCPS::SubscriptionInstance_rch instance =
       OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
@@ -1806,9 +1788,7 @@ void store_instance_data(
 
       if (filtered)
       {
-        ACE_DES_FREE (instance_data,
-                      data_allocator_->free,
-                      MessageType );
+        delete instance_data;
         return;
       }
     }
@@ -1819,13 +1799,11 @@ void store_instance_data(
   {
     instance_ptr = this->get_handle_instance(handle);
     instance_ptr->instance_state_.lively(header.publication_id_);
-    ACE_DES_FREE(instance_data,
-                 data_allocator_->free,
-                 MessageType);
+    delete instance_data;
   }
 }
 
-void finish_store_instance_data(MessageType* instance_data, const DataSampleHeader& header,
+void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const DataSampleHeader& header,
   SubscriptionInstance_rch instance_ptr, bool is_dispose_msg, bool is_unregister_msg )
 {
   if ((this->qos_.resource_limits.max_samples_per_instance !=
@@ -1865,11 +1843,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         sample_rejected_status_.total_count_change = 0;
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
-
-      ACE_DES_FREE(instance_data,
-        data_allocator_->free,
-        MessageType);
-
+      delete instance_data;
       return;
     }
     else if (!is_dispose_msg && !is_unregister_msg)
@@ -1878,7 +1852,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
       OpenDDS::DCPS::ReceivedDataElement *item =
         instance_ptr->rcvd_samples_.head_;
       instance_ptr->rcvd_samples_.remove(item);
-      dec_ref_data_element(item);
+      item->dec_ref();
     }
   }
   else if (this->qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
@@ -1929,10 +1903,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         }  // do we want to do something if listener is nil???
         notify_status_condition_no_sample_lock();
 
-        ACE_DES_FREE(instance_data,
-          data_allocator_->free,
-          MessageType);
-
+        delete instance_data;
         return;
       }
       else if (!is_dispose_msg && !is_unregister_msg)
@@ -1941,16 +1912,14 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
         OpenDDS::DCPS::ReceivedDataElement *item =
           instance_ptr->rcvd_samples_.head_;
         instance_ptr->rcvd_samples_.remove(item);
-        dec_ref_data_element(item);
+        item->dec_ref();
       }
     }
   }
 
   if (is_dispose_msg || is_unregister_msg)
   {
-    ACE_DES_FREE(instance_data,
-      data_allocator_->free,
-      MessageType);
+    delete instance_data;
     instance_data = 0;
   }
 
@@ -1975,13 +1944,8 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
     return;
   }
 
-  OpenDDS::DCPS::ReceivedDataElement *ptr;
-  ACE_NEW_MALLOC (ptr,
-                  static_cast<OpenDDS::DCPS::ReceivedDataElement *> (
-                                                                      rd_allocator_->malloc (
-                                                                                            sizeof (OpenDDS::DCPS::ReceivedDataElement))),
-                  OpenDDS::DCPS::ReceivedDataElement(header,
-                                                      instance_data));
+  OpenDDS::DCPS::ReceivedDataElement *ptr =
+    new (*rd_allocator_) OpenDDS::DCPS::ReceivedDataElementWithType<MessageTypeWithAllocator>(header,instance_data, &this->sample_lock_);
 
   ptr->disposed_generation_count_ =
     instance_ptr->instance_state_.disposed_generation_count();
@@ -2022,7 +1986,7 @@ void finish_store_instance_data(MessageType* instance_data, const DataSampleHead
           notify_status_condition_no_sample_lock();
         }
 
-      dec_ref_data_element(head_ptr);
+      head_ptr->dec_ref();
     }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -2206,7 +2170,7 @@ public:
   }
 
   void delay_sample(DDS::InstanceHandle_t handle,
-                    MessageType* instance_data,
+                    MessageTypeWithAllocator* instance_data,
                     const OpenDDS::DCPS::DataSampleHeader& header,
                     const bool just_registered,
                     const ACE_Time_Value& filter_time_expired)
@@ -2306,7 +2270,7 @@ private:
         const bool NOT_DISPOSE_MSG = false;
         const bool NOT_UNREGISTER_MSG = false;
         // clear the message, since ownership is being transfered to finish_store_instance_data.
-        MessageType* const instance_data = data->second.message;
+        MessageTypeWithAllocator* const instance_data = static_cast<MessageTypeWithAllocator*>(data->second.message);
         data->second.message = 0;
         instance->last_accepted_ = ACE_OS::gettimeofday();
         const DataSampleHeader_ptr header = data->second.header;
@@ -2359,12 +2323,10 @@ private:
     }
   }
 
-  void clear_message(MessageType*& message)
+  void clear_message(MessageTypeWithAllocator*& message)
   {
     if (data_reader_impl_) {
-      ACE_DES_FREE(message,
-        data_reader_impl_->data_allocator_->free,
-        MessageType);
+      delete message;
       message = 0;
     }
   }
@@ -2375,14 +2337,14 @@ private:
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
 
   struct FilterDelayedSample {
-    FilterDelayedSample(MessageType* msg, DataSampleHeader_ptr hdr, bool new_inst)
+    FilterDelayedSample(MessageTypeWithAllocator* msg, DataSampleHeader_ptr hdr, bool new_inst)
     : message(msg)
     , header(hdr)
     , new_instance(new_inst)
     , timer_id(-1) {
     }
 
-    MessageType* message;
+    MessageTypeWithAllocator* message;
     DataSampleHeader_ptr header;
     bool new_instance;
     long timer_id;
@@ -2393,11 +2355,31 @@ private:
   FilterDelayedSampleMap map_;
 };
 
+
+
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap  instance_map_;
 DataAllocator* data_allocator_;
 };
+
+template <typename MessageType>
+void* DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator new(size_t size, ACE_New_Allocator& pool)
+{
+  DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock* block =
+    static_cast<DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock*>(pool.malloc(sizeof(DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock)));
+  block->allocator_ = &pool;
+  return &block->element_;
+}
+
+template <typename MessageType>
+void DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator delete(void* memory)
+{
+  if (memory) {
+    ACE_New_Allocator** ptr_alloactor = static_cast<ACE_New_Allocator**>(memory)-1;
+    (*ptr_alloactor)->free(ptr_alloactor);
+  }
+}
 
 }
 }

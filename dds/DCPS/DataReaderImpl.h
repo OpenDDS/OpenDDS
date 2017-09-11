@@ -39,7 +39,6 @@
 #include "PoolAllocator.h"
 #include "RemoveAssociationSweeper.h"
 #include "RcEventHandler.h"
-#include "Loaner.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -70,7 +69,7 @@ class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
-typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
+typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElementMemoryBlock, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
 enum MarshalingType {
@@ -191,7 +190,6 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportReceiveListener,
-    public virtual Loaner,
     private WriterInfoListener {
 public:
   friend class RequestedDeadlineWatchdog;
