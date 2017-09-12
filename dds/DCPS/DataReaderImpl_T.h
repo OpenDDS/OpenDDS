@@ -47,9 +47,6 @@ namespace OpenDDS {
       void* operator new(size_t size, ACE_New_Allocator& pool);
       void operator delete(void* memory);
 
-      static const MetaStruct& getMetaStruct() {
-        return OpenDDS::DCPS::getMetaStruct<MessageType>();
-      }
 
       MessageTypeWithAllocator(){}
       MessageTypeWithAllocator(const MessageType& other)
