@@ -2363,8 +2363,9 @@ DataAllocator* data_allocator_;
 template <typename MessageType>
 void* DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator new(size_t size, ACE_New_Allocator& pool)
 {
-  DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock* block =
-    static_cast<DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock*>(pool.malloc(sizeof(DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock)));
+  typedef typename DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock MessageTypeMemoryBlock;
+  MessageTypeMemoryBlock* block =
+    static_cast<MessageTypeMemoryBlock*>(pool.malloc(sizeof(MessageTypeMemoryBlock)));
   block->allocator_ = &pool;
   return &block->element_;
 }
