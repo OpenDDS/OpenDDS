@@ -32,6 +32,22 @@ private:
 
 } // namespace
 
+
+void* OpenDDS::DCPS::ReceivedDataElement::operator new(size_t size, ACE_New_Allocator& pool)
+{
+  OpenDDS::DCPS::ReceivedDataElementMemoryBlock* block =  static_cast<OpenDDS::DCPS::ReceivedDataElementMemoryBlock*>(pool.malloc(sizeof(OpenDDS::DCPS::ReceivedDataElementMemoryBlock)));
+  block->allocator_ = &pool;
+  return &block->element_;
+}
+
+void OpenDDS::DCPS::ReceivedDataElement::operator delete(void* memory)
+{
+  ACE_New_Allocator** allocator_ptr = static_cast<ACE_New_Allocator**>(memory) -1;
+  (*allocator_ptr)->free(allocator_ptr);
+}
+
+
+
 OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
   : head_(0), tail_(0), size_(0), instance_state_(instance_state)
 {
@@ -116,3 +132,4 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
   IdentityFilter match(data_sample);
   return remove(match, false); // short-circuit evaluation
 }
+
