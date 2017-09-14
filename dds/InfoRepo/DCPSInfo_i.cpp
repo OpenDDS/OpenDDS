@@ -57,6 +57,10 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
 
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 {
+  DCPS_IR_Domain_Map::iterator where;
+  for (where = this->domains_.begin(); where != this->domains_.end(); ++where) {
+    delete where->second;
+  }
 }
 
 int

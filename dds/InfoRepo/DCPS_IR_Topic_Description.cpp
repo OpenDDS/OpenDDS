@@ -33,54 +33,6 @@ DCPS_IR_Topic_Description::DCPS_IR_Topic_Description(DCPS_IR_Domain* domain,
 
 DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description()
 {
-  // check for any subscriptions still referencing this description.
-  if (0 != subscriptionRefs_.size()) {
-    DCPS_IR_Subscription* subscription = 0;
-    DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
-    DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
-
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description: ")
-               ACE_TEXT("topic description name %C data type name %C has retained subscriptions.\n"),
-               name_.c_str(),
-               dataTypeName_.c_str()));
-
-    while (iter != end) {
-      subscription = *iter;
-      ++iter;
-
-      OpenDDS::DCPS::RepoIdConverter converter(subscription->get_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description: ")
-                 ACE_TEXT("topic description %C retains subscription %C.\n"),
-                 this->name_.c_str(),
-                 std::string(converter).c_str()));
-    }
-  }
-
-  if (0 != topics_.size()) {
-    DCPS_IR_Topic* topic = 0;
-    DCPS_IR_Topic_Set::ITERATOR iter = topics_.begin();
-    DCPS_IR_Topic_Set::ITERATOR end = topics_.end();
-
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description: ")
-               ACE_TEXT("topic description name %C data type name %C has retained topics.\n"),
-               name_.c_str(),
-               dataTypeName_.c_str()));
-
-    while (iter != end) {
-      topic = *iter;
-      ++iter;
-
-      OpenDDS::DCPS::RepoIdConverter converter(topic->get_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic_Description::~DCPS_IR_Topic_Description: ")
-                 ACE_TEXT("topic description %C retains topic %C.\n"),
-                 this->name_.c_str(),
-                 std::string(converter).c_str()));
-    }
-  }
 }
 
 int DCPS_IR_Topic_Description::add_subscription_reference(DCPS_IR_Subscription* subscription
