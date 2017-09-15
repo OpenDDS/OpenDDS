@@ -186,7 +186,7 @@ public:
   using TransportClient::send;
   using TransportClient::send_control;
 
-  const RepoId& pub_id_;
+  const RepoId pub_id_;
   RepoId sub_id_;
   ssize_t callbacks_expected_;
   InlineQosMode inline_qos_mode_;
