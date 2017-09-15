@@ -2171,6 +2171,8 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 {
+  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+
   // delete publishers
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -2190,16 +2192,16 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       = pubPtr->delete_contained_entities();
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
       result = delete_publisher(pubPtr);
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
-      pubsize--;
+      --pubsize;
     }
 
   }
@@ -2222,20 +2224,19 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       DDS::ReturnCode_t result = subPtr->delete_contained_entities();
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
       result = delete_subscriber(subPtr);
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
-      subsize--;
+      --subsize;
     }
   }
 
-  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   // delete topics
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -2252,12 +2253,12 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       ++topicIter;
 
       // Delete the topic the reference count.
-      DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
-      topicsize--;
+      --topicsize;
     }
   }
 
