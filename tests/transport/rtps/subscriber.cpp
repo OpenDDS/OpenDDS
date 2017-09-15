@@ -187,7 +187,7 @@ public:
   using TransportClient::disassociate;
 
   bool done_;
-  const RepoId& sub_id_;
+  const RepoId sub_id_;
   RepoId pub_id_;
   SequenceNumber seq_;
   int control_msg_count_;

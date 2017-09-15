@@ -208,6 +208,8 @@ Manager::pushImage(const DImage& image)
   SeqGuard<UWActor> writer_guard;
   SeqGuard<UWActor>::Seq& writers = writer_guard.seq();
 
+  ContentSubscriptionInfo csi;
+
   for (DImage::ReaderSeq::const_iterator iter = image.actors.begin();
        iter != image.actors.end(); iter++) {
     const DActor& actor = *iter;
@@ -237,7 +239,6 @@ Manager::pushImage(const DImage& image)
       dr_qos_seq.push_back(reader_qos);
       read_cdr >> *reader_qos;
 
-      ContentSubscriptionInfo csi;
       csi.filterClassName = actor.contentSubscriptionProfile.filterClassName.c_str();
       csi.filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
       TAO_InputCDR csp_cdr(actor.contentSubscriptionProfile.exprParams.second,
@@ -266,8 +267,6 @@ Manager::pushImage(const DImage& image)
       ACE_NEW_NORETURN(writer_qos, DDS::DataWriterQos);
       dw_qos_seq.push_back(writer_qos);
       write_cdr >> *writer_qos;
-
-      ContentSubscriptionInfo csi; //writers have no info
 
       UWActor* writer;
       ACE_NEW_NORETURN(writer
