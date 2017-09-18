@@ -917,7 +917,7 @@ namespace OpenDDS {
     };
 
     template <typename EndpointManagerType>
-    class LocalParticipant : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
+    class LocalParticipant : public DCPS::RcObject {
     public:
       typedef typename EndpointManagerType::DiscoveredParticipantData DiscoveredParticipantData;
       typedef typename EndpointManagerType::TopicDetails TopicDetails;

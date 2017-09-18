@@ -14,7 +14,7 @@
 #endif
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "TransportInst.h"
 #include "TransportInst_rch.h"
@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportConfig : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export TransportConfig : public RcObject {
 public:
 
   static const unsigned long DEFAULT_PASSIVE_CONNECT_DURATION = 60000;

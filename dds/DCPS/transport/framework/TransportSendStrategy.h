@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"

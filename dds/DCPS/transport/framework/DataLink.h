@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/RcEventHandler.h"
 #include "ReceiveListenerSetMap.h"
@@ -62,8 +62,7 @@ typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetM
  *    is enabled.
  */
 class OpenDDS_Dcps_Export DataLink
-  : public RcEventHandler,
-    public PoolAllocationBase {
+: public RcEventHandler {
 
   friend class DataLinkCleanupTask;
 

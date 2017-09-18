@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_RECEIVELISTENERSET_H
 #define OPENDDS_DCPS_RECEIVELISTENERSET_H
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -25,7 +25,7 @@ class ReceivedDataSample;
 typedef RcHandle<TransportReceiveListener> TransportReceiveListener_rch;
 
 class OpenDDS_Dcps_Export ReceiveListenerSet :
-      public RcObject<ACE_SYNCH_MUTEX> {
+      public RcObject {
 public:
 
   enum ConstrainReceiveSet {

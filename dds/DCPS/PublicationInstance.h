@@ -13,7 +13,7 @@
 #include "DataSampleElement.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "ace/Synch_Traits.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/unique_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -36,7 +36,7 @@ typedef ACE_UINT16 CoherencyGroup;
   *        from typed datawriter. The data will be duplicated for the register,
   *        unregister and dispose control message.
   */
-struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject<ACE_SYNCH_MUTEX> {
+struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject {
 
   PublicationInstance(Message_Block_Ptr registered_sample)
     : sequence_(),

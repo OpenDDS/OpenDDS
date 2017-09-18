@@ -2672,32 +2672,6 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
   return status;
 }
 
-void
-DataWriterImpl::_add_ref()
-{
-  CORBA::Object::_add_ref();
-}
-
-void
-DataWriterImpl::_remove_ref()
-{
-  CORBA::Object::_remove_ref();
-}
-
-ACE_Event_Handler::Reference_Count
-DataWriterImpl::add_reference()
-{
-  CORBA::Object::_add_ref();
-  return 1;
-}
-
-ACE_Event_Handler::Reference_Count
-DataWriterImpl::remove_reference()
-{
-  CORBA::Object::_remove_ref();
-  return 1;
-}
-
 
 } // namespace DCPS
 } // namespace OpenDDS

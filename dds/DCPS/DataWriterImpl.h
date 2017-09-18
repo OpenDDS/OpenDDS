@@ -77,12 +77,12 @@ struct AssociationData;
 *        up ownership to this WriteDataContainer.
 */
 class OpenDDS_Dcps_Export DataWriterImpl
-  : public virtual DDS::DataWriter,
+  : public virtual LocalObject<DDS::DataWriter>,
     public virtual DataWriterCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportSendListener,
-    private RcEventHandler {
+    public virtual RcEventHandler {
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
@@ -187,13 +187,6 @@ public:
                                           const DDS::StringSeq& params);
 
   virtual void inconsistent_topic();
-
-
-  virtual void _add_ref();
-  virtual void _remove_ref();
-
-  virtual ACE_Event_Handler::Reference_Count add_reference();
-  virtual ACE_Event_Handler::Reference_Count remove_reference();
 
 
   /**

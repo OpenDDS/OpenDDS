@@ -9,7 +9,7 @@
 #define OPENDDS_DDS_DCPS_DISCOVERY_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "RcObject_T.h"
+#include "RcObject.h"
 #include "RcHandle_T.h"
 
 #include "dds/DCPS/DataReaderCallbacks.h"
@@ -45,7 +45,7 @@ class DataReaderImpl;
  * InfoRepo-based discovery and RTPS Discovery.
  *
  */
-class OpenDDS_Dcps_Export Discovery : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export Discovery : public RcObject {
 public:
   /// Key type for storing discovery objects.
   /// Probably should just be Discovery::Key

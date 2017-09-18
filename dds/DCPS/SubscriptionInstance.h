@@ -17,7 +17,7 @@
 #include "ReceivedDataStrategy.h"
 #include "InstanceState.h"
 #include "PoolAllocationBase.h"
-#include "RcObject_T.h"
+#include "RcObject.h"
 #include "ace/Synch_Traits.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -37,7 +37,7 @@ class DataReaderImpl;
   * @brief Struct that has information about an instance and the instance
   *        sample list.
   */
-class SubscriptionInstance : public RcObject<ACE_SYNCH_MUTEX> {
+class SubscriptionInstance : public RcObject {
 public:
   SubscriptionInstance(DataReaderImpl *reader,
                        const DDS::DataReaderQos& qos,

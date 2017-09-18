@@ -32,7 +32,7 @@
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "RcHandle_T.h"
-#include "RcObject_T.h"
+#include "RcObject.h"
 #include "WriterInfo.h"
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
@@ -247,9 +247,6 @@ public:
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
   void writer_removed(WriterInfo& info);
-
-  virtual void _add_ref();
-  virtual void _remove_ref();
 
   virtual void cleanup();
 

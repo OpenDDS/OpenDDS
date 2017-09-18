@@ -21,7 +21,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler, public PoolAllocationBase {
+class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler {
 public:
 
   class Command : public PoolAllocationBase {

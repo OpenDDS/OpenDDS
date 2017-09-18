@@ -14,7 +14,7 @@
 #endif
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
@@ -47,7 +47,7 @@ namespace DCPS {
  * The TransportInst object is supplied to the
  * TransportImpl::configure() method.
  */
-class OpenDDS_Dcps_Export TransportInst : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export TransportInst : public RcObject {
 public:
 
   OPENDDS_STRING name() const { return name_; }

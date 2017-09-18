@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_THREADSYNCHWORKER_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "ace/Synch_Traits.h"
 #include <cstddef>
@@ -20,7 +20,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export ThreadSynchWorker
-  : public RcObject<ACE_SYNCH_MUTEX> {
+  : public RcObject {
 public:
 
   virtual ~ThreadSynchWorker();

@@ -12,7 +12,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "RcObject_T.h"
+#include "RcObject.h"
 #include "Definitions.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
@@ -70,7 +70,7 @@ enum Coherent_State {
 
 
 /// Keeps track of a DataWriter's liveliness for a DataReader.
-class OpenDDS_Dcps_Export WriterInfo : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export WriterInfo : public RcObject {
   friend class WriteInfoListner;
 
 public:

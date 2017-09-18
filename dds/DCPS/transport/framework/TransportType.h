@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_TRANSPORT_TYPE_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/PoolAllocator.h"
 
@@ -32,7 +32,7 @@ namespace DCPS {
  * to provide the new concrete transport object.
  *
  */
-class OpenDDS_Dcps_Export TransportType : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export TransportType : public RcObject {
 public:
 
   virtual const char* name() = 0;

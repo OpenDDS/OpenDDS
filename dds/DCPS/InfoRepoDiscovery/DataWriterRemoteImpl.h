@@ -11,7 +11,7 @@
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteS.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcHandle_T.h"
-
+#include "dds/DCPS/DataWriterCallbacks.h"
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -21,7 +21,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class DataWriterCallbacks;
 
 /**
 * @class DataWriterRemoteImpl
@@ -32,7 +31,7 @@ class DataWriterCallbacks;
 class DataWriterRemoteImpl
   : public virtual POA_OpenDDS::DCPS::DataWriterRemote {
 public:
-  explicit DataWriterRemoteImpl(DataWriterCallbacks* parent);
+  explicit DataWriterRemoteImpl(DataWriterCallbacks& parent);
 
   virtual ~DataWriterRemoteImpl();
 
@@ -53,7 +52,7 @@ public:
   void detach_parent();
 
 private:
-  RcHandle<DataWriterCallbacks> parent_;
+  WeakRcHandle<DataWriterCallbacks> parent_;
 };
 
 } // namespace DCPS

@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_RECORDER_H
 #define OPENDDS_DCPS_RECORDER_H
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -28,7 +28,7 @@ class Recorder;
  *
  * This class is for handling callbacks from the Recorder object.
  */
-class OpenDDS_Dcps_Export RecorderListener : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export RecorderListener : public RcObject {
 
 public:
   virtual ~RecorderListener();
@@ -54,7 +54,8 @@ typedef RcHandle<RecorderListener> RecorderListener_rch;
 typedef Recorder* Recorder_ptr;
 typedef TAO_Objref_Var_T<Recorder> Recorder_var;
 
-class OpenDDS_Dcps_Export Recorder {
+class OpenDDS_Dcps_Export Recorder
+  : public virtual RcObject {
 public:
   typedef Recorder_ptr _ptr_type;
   typedef Recorder_var _var_type;
@@ -62,9 +63,6 @@ public:
   virtual ~Recorder();
 
   static Recorder_ptr _duplicate(Recorder_ptr obj);
-
-  virtual void _add_ref() = 0;
-  virtual void _remove_ref() = 0;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   /**

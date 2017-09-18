@@ -19,7 +19,7 @@
 #include "TcpReconnectTask.h"
 #include "TcpTransport_rch.h"
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/SOCK_Stream.h"
@@ -34,7 +34,7 @@ namespace DCPS {
 
 class TcpConnection
   : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
-  , public RcObject<ACE_SYNCH_MUTEX> {
+  , public RcObject {
 public:
 
   /// States are used during reconnecting.

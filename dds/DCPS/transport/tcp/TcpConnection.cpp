@@ -996,14 +996,14 @@ OpenDDS::DCPS::TcpConnection::shutdown()
 ACE_Event_Handler::Reference_Count
 OpenDDS::DCPS::TcpConnection::add_reference()
 {
-  RcObject<ACE_SYNCH_MUTEX>::_add_ref();
+  RcObject::_add_ref();
   return 1;
 }
 
 ACE_Event_Handler::Reference_Count
 OpenDDS::DCPS::TcpConnection::remove_reference()
 {
-  RcObject<ACE_SYNCH_MUTEX>::_remove_ref();
+  RcObject::_remove_ref();
   return 1;
 }
 

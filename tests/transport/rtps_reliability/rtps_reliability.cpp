@@ -68,7 +68,13 @@ struct SimpleTC: TransportClient {
 
 struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   explicit SimpleDataReader(const RepoId& sub_id)
-    : SimpleTC(sub_id), have_frag_(false) {}
+    : SimpleTC(sub_id), have_frag_(false) {
+
+      // The reference count is explicited incremented to avoid been explcitly deleted
+      // via the RcHandle<TransportClient> because the object is always been created
+      // on the stack.
+      RcObject::_add_ref();
+    }
 
   void data_received(const ReceivedDataSample& sample)
   {
@@ -95,9 +101,6 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   void notify_subscription_lost(const WriterIdSeq&) {}
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const WriterIdSeq&, bool) {}
-
-  void _add_ref() {}
-  void _remove_ref() {}
 
   DisjointSequence recvd_;
   bool have_frag_;
@@ -132,6 +135,11 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     Serializer ser(&payload_, host_is_bigendian, Serializer::ALIGN_CDR);
     ser << encap;
     ser << data;
+
+    // The reference count is explicited incremented to avoid been explcitly deleted
+    // via the RcHandle<TransportClient> because the object is always been created
+    // on the stack.
+    RcObject::_add_ref();
   }
 
   ~SimpleDataWriter()
@@ -159,8 +167,6 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const ReaderIdSeq&, bool) {}
-  void _add_ref() {}
-  void _remove_ref() {}
 
   TransportSendElementAllocator alloc_;
   SendStateDataSampleList list_;

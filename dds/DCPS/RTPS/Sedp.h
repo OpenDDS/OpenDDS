@@ -204,15 +204,11 @@ private:
                            DCPS::SequenceNumber& sequence,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
-    void _add_ref() {}
-    void _remove_ref() {}
-
   } publications_writer_, subscriptions_writer_, participant_message_writer_;
 
   class Reader
     : public DCPS::TransportReceiveListener
     , public Endpoint
-    , public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
   public:
     Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
@@ -233,9 +229,6 @@ private:
     void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
     void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
-
-    virtual void _add_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref(); }
-    virtual void _remove_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref(); }
 
     ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> shutting_down_;
   };

@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_DATALINKSET_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "DataLink_rch.h"
 #include "SendResponseListener.h"
@@ -27,7 +27,7 @@ class DataSampleElement;
 class DataLinkSet;
 typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
-class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export DataLinkSet : public RcObject {
 public:
 
   DataLinkSet();

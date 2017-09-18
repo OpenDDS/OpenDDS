@@ -50,6 +50,7 @@ class SendStateDataSampleListIterator;
  * currently active communication channels to peers.
  */
 class OpenDDS_Dcps_Export TransportClient
+  : public virtual RcObject
 {
 public:
   // Used by TransportImpl to complete associate() processing:
@@ -57,10 +58,6 @@ public:
 
   // values for flags parameter of transport_assoc_done():
   enum { ASSOC_OK = 1, ASSOC_ACTIVE = 2 };
-
-  virtual void _add_ref() {}
-  virtual void _remove_ref() {}
-
 protected:
   TransportClient();
   virtual ~TransportClient();
@@ -172,7 +169,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
 
-  struct PendingAssoc : RcEventHandler, PoolAllocationBase {
+  struct PendingAssoc : RcEventHandler {
     bool active_, removed_;
     ImplsType impls_;
     CORBA::ULong blob_index_;

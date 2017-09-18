@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_TRANSPORTIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsPublicationC.h"
@@ -53,7 +53,7 @@ typedef RcHandle<TransportClient> TransportClient_rch;
 *     but has a references via smart pointer then the reference should be freed;
 *     if this object has ownership of task objects then the tasks should be closed.
 */
-class OpenDDS_Dcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export TransportImpl : public RcObject {
 public:
 
   virtual ~TransportImpl();

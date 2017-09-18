@@ -10,7 +10,7 @@
 #define OPENDDS_DCPS_REPLAYER_H
 
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -29,7 +29,7 @@ class Replayer;
  *
  * This class is for handling callbacks from the Replayer object.
  */
-class OpenDDS_Dcps_Export ReplayerListener : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export ReplayerListener : public RcObject {
 public:
   ~ReplayerListener();
   /**
@@ -55,7 +55,8 @@ typedef TAO_Objref_Var_T<Replayer> Replayer_var;
  * This class is for sending raw sample data.  Combined with data saved from
  * a recorder, this allows the data to be replayed to DataReaders.
  */
-class OpenDDS_Dcps_Export Replayer {
+class OpenDDS_Dcps_Export Replayer
+  : public virtual RcObject {
 public:
   typedef Replayer_ptr _ptr_type;
   typedef Replayer_var _var_type;
@@ -63,9 +64,6 @@ public:
   virtual ~Replayer();
 
   static Replayer_ptr _duplicate(Replayer_ptr obj);
-
-  virtual void _add_ref() = 0;
-  virtual void _remove_ref() = 0;
 
   /**
    * Send the sample to all associated DataReaders.

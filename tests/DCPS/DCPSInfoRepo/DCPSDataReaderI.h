@@ -19,7 +19,6 @@
 
 class TAO_DDS_DCPSDataReader_i
   : public OpenDDS::DCPS::DataReaderCallbacks
-  , public OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>
 {
 public:
   enum Called { ENABLE_SPECIFIC, ADD_ASSOC, ASSOC_COMPLETE, REM_ASSOC, UPDATE_INCOMP_QOS };
@@ -58,8 +57,6 @@ public:
   DDS::DomainId_t domainId_;
   ::OpenDDS::DCPS::RepoId participantId_;
 
-  void _add_ref();
-  void _remove_ref();
 private:
   DiscReceivedCalls received_;
 };

@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_RECORDERIMPL_H
 #define OPENDDS_DCPS_RECORDERIMPL_H
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/WriterInfo.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
@@ -147,9 +147,6 @@ private:
   /// Lookup the instance handles by the publication repo ids
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
-
-  void _add_ref() { EntityImpl::_add_ref(); }
-  void _remove_ref() { EntityImpl::_remove_ref(); }
 
   DDS::DataReaderQos qos_;
 
