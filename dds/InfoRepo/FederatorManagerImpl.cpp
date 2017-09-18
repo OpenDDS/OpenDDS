@@ -111,7 +111,7 @@ ManagerImpl::initialize()
   // Add type support for update topics
   //
 
-  OwnerUpdateTypeSupportImpl* ownerUpdate = new OwnerUpdateTypeSupportImpl();
+  OwnerUpdateTypeSupportImpl::_var_type ownerUpdate = new OwnerUpdateTypeSupportImpl();
 
   if (DDS::RETCODE_OK != ownerUpdate->register_type(
         this->federationParticipant_.in(),
@@ -123,7 +123,7 @@ ManagerImpl::initialize()
     throw Incomplete();
   }
 
-  ParticipantUpdateTypeSupportImpl* participantUpdate = new ParticipantUpdateTypeSupportImpl();
+  ParticipantUpdateTypeSupportImpl::_var_type participantUpdate = new ParticipantUpdateTypeSupportImpl();
 
   if (DDS::RETCODE_OK != participantUpdate->register_type(
         this->federationParticipant_.in(),
@@ -135,7 +135,7 @@ ManagerImpl::initialize()
     throw Incomplete();
   }
 
-  TopicUpdateTypeSupportImpl* topicUpdate = new TopicUpdateTypeSupportImpl();
+  TopicUpdateTypeSupportImpl::_var_type topicUpdate = new TopicUpdateTypeSupportImpl();
 
   if (DDS::RETCODE_OK != topicUpdate->register_type(
         this->federationParticipant_.in(),
@@ -147,7 +147,7 @@ ManagerImpl::initialize()
     throw Incomplete();
   }
 
-  PublicationUpdateTypeSupportImpl* publicationUpdate = new PublicationUpdateTypeSupportImpl();
+  PublicationUpdateTypeSupportImpl::_var_type publicationUpdate = new PublicationUpdateTypeSupportImpl();
 
   if (DDS::RETCODE_OK != publicationUpdate->register_type(
         this->federationParticipant_.in(),
@@ -159,7 +159,7 @@ ManagerImpl::initialize()
     throw Incomplete();
   }
 
-  SubscriptionUpdateTypeSupportImpl* subscriptionUpdate = new SubscriptionUpdateTypeSupportImpl();
+  SubscriptionUpdateTypeSupportImpl::_var_type subscriptionUpdate = new SubscriptionUpdateTypeSupportImpl();
 
   if (DDS::RETCODE_OK != subscriptionUpdate->register_type(
         this->federationParticipant_.in(),
@@ -1023,8 +1023,9 @@ ManagerImpl::join_federation(
 
   // Symmetrical joining behavior.
   try {
+    Manager_var self = this->_this();
     Manager_var remoteManager
-    = peer->join_federation(this->_this(), this->config_.federationDomain());
+    = peer->join_federation(self, this->config_.federationDomain());
 
     if (this->joinRepo_ == remote) {
       this->peers_[ this->joinRepo_]

@@ -70,8 +70,9 @@ UpdateListener<DataType, ReaderType>::on_data_available(
 
     // Process all available data.
     while (true) {
-      DataType*           sample = new DataType();
-      DDS::SampleInfo*  info   = new DDS::SampleInfo();
+      using namespace OpenDDS::DCPS;
+      unique_ptr<DataType> sample(new DataType);
+      unique_ptr<DDS::SampleInfo>  info(new DDS::SampleInfo);
       DDS::ReturnCode_t status = dataReader->read_next_sample(*sample, *info);
 
       if (status == DDS::RETCODE_OK) {
@@ -80,7 +81,7 @@ UpdateListener<DataType, ReaderType>::on_data_available(
             this->federationId_.id() != sample->sender) {
 
           // Delegate processing to the federation manager.
-          this->receiver_.add(sample, info);
+          this->receiver_.add(move(sample), move(info));
         }
 
       } else if (status == DDS::RETCODE_NO_DATA) {
