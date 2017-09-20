@@ -9,7 +9,7 @@
 #define OPENDDS_TCPDATALINK_H
 
 #include "TcpConnection_rch.h"
-#include "TcpTransport_rch.h"
+#include "TcpTransport.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
 
@@ -25,7 +25,7 @@ class TcpDataLink : public DataLink {
 public:
 
   TcpDataLink(const ACE_INET_Addr& remote_address,
-              const TcpTransport_rch&  transport_impl,
+                    TcpTransport&  transport_impl,
                     Priority           priority,
                     bool               is_loopback,
                     bool               is_active);
@@ -45,7 +45,6 @@ public:
   int reconnect(const TcpConnection_rch& connection);
 
   TcpConnection_rch get_connection();
-  TcpTransport_rch get_transport_impl();
 
   virtual bool issues_on_deleted_callback() const;
 
@@ -73,7 +72,6 @@ private:
 
   ACE_INET_Addr           remote_address_;
   TcpConnection_rch connection_;
-  TcpTransport_rch  transport_;
   bool graceful_disconnect_sent_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
   typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;

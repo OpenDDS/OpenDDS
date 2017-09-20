@@ -57,33 +57,9 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  for (DataLinkIndex::iterator iter = links_waiting_for_on_deleted_callback_.begin();
-       iter != links_waiting_for_on_deleted_callback_.end(); ++iter) {
-    if (Transport_debug_level > 5) {
-      GuidConverter converter(repo_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C from link waiting for callback\n"),
-                 this,
-                 OPENDDS_STRING(converter).c_str()));
-    }
-    iter->second->remove_listener(repo_id_);
-  }
-
-  for (DataLinkSet::MapType::iterator iter = links_.map().begin();
-       iter != links_.map().end(); ++iter) {
-    if (Transport_debug_level > 5) {
-      GuidConverter converter(repo_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C\n"),
-                 this,
-                 OPENDDS_STRING(converter).c_str()));
-    }
-    iter->second->remove_listener(repo_id_);
-  }
-
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(rchandle_from(this), it->second->data_.remote_id_);
+      impls_[i]->stop_accepting_or_connecting(*this, it->second->data_.remote_id_);
     }
 
     pending_assoc_timer_->cancel_timer(this, it->second);
@@ -91,11 +67,6 @@ TransportClient::~TransportClient()
 
   pending_assoc_timer_->wait();
 
-  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
-       it != impls_.end(); ++it) {
-
-    (*it)->detach_client(rchandle_from(this));
-  }
 }
 
 void
@@ -162,14 +133,13 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   const size_t n = tc->instances_.size();
 
   for (size_t i = 0; i < n; ++i) {
-    TransportInst_rch inst = tc->instances_[i];
+    TransportInst* inst = tc->instances_[i];
 
-    if (check_transport_qos(*inst.in())) {
+    if (check_transport_qos(*inst)) {
       TransportImpl_rch impl = inst->impl();
 
       if (!impl.is_nil()) {
-        impl->attach_client(rchandle_from(this));
-        impls_.push_back(impl);
+        impls_.push_back(impl.in());
         const CORBA::ULong len = conn_info_.length();
         conn_info_.length(len + 1);
         impl->connection_info(conn_info_[len]);
@@ -186,57 +156,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   }
 }
 
-void
-TransportClient::transport_detached(TransportImpl* which)
-{
-  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-
-  // Remove any DataLinks created by the 'which' TransportImpl from our local
-  // data structures (both links_ and data_link_index_).
-  for (DataLinkSet::MapType::iterator iter = links_.map().begin();
-       iter != links_.map().end();) {
-    TransportImpl_rch impl = iter->second->impl();
-
-    if (impl.in() == which) {
-      for (DataLinkIndex::iterator it2 = data_link_index_.begin();
-           it2 != data_link_index_.end();) {
-        if (it2->second.in() == iter->second.in()) {
-          data_link_index_.erase(it2++);
-
-        } else {
-          ++it2;
-        }
-      }
-      if (DCPS_debug_level > 4) {
-        GuidConverter converter(repo_id_);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) TransportClient::transport_detached: calling remove_listener %C on link[%@]\n"),
-                   OPENDDS_STRING(converter).c_str(),
-                   iter->second.in()));
-      }
-      iter->second->remove_listener(repo_id_);
-      links_.map().erase(iter++);
-
-    } else {
-      ++iter;
-    }
-  }
-
-  // Remove the 'which' TransportImpl from the impls_ list
-  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
-       it != impls_.end(); ++it) {
-    if (it->in() == which) {
-      impls_.erase(it);
-
-      for (PendingMap::iterator it2 = pending_.begin();
-           it2 != pending_.end(); ++it2) {
-        which->stop_accepting_or_connecting(rchandle_from(this), it2->first);
-      }
-
-      break;
-    }
-  }
-}
 
 bool
 TransportClient::associate(const AssociationData& data, bool active)
@@ -384,7 +303,7 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
 
 bool
 TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
-                                    const TransportImpl_rch impl,
+                                    TransportImpl* impl,
                                     const TransportImpl::RemoteTransport& remote,
                                     const TransportImpl::ConnectionAttribs& attribs_,
                                     Guard& guard)
@@ -445,7 +364,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                       OPENDDS_STRING(remote).c_str()), 0);
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
-    const TransportImpl_rch& impl = impls_.back();
+    TransportImpl* impl = impls_.back();
     const OPENDDS_STRING type = impl->transport_type();
 
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
@@ -583,7 +502,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   if (!pend->active_) {
 
     for (size_t i = 0; i < pend->impls_.size(); ++i) {
-      pend->impls_[i]->stop_accepting_or_connecting(rchandle_from(this), pend->data_.remote_id_);
+      pend->impls_[i]->stop_accepting_or_connecting(*this, pend->data_.remote_id_);
     }
   }
 

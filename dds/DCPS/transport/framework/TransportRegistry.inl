@@ -61,14 +61,6 @@ TransportRegistry::domain_default_config(DDS::DomainId_t domain) const
 
 ACE_INLINE
 void
-TransportRegistry::remove_inst(const TransportInst_rch& inst)
-{
-  GuardType guard(this->lock_);
-  this->inst_map_.erase(inst->name());
-}
-
-ACE_INLINE
-void
 TransportRegistry::remove_config(const TransportConfig_rch& cfg)
 {
   GuardType guard(this->lock_);

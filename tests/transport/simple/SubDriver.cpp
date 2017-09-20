@@ -175,7 +175,7 @@ SubDriver::init()
 {
   DBG_ENTRY("SubDriver","init");
 
-  OpenDDS::DCPS::TransportInst_rch inst;
+  OpenDDS::DCPS::TransportInst* inst;
 
   if (shmem_) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   Create a new ShmemInst object.\n"));
@@ -188,8 +188,8 @@ SubDriver::init()
 
     inst = TheTransportRegistry->create_inst("tcp1", "tcp");
 
-    OpenDDS::DCPS::TcpInst_rch tcp_inst =
-      OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
+    OpenDDS::DCPS::TcpInst* tcp_inst =
+      dynamic_cast<OpenDDS::DCPS::TcpInst*>(inst);
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                "Set the tcp_inst->local_address_ to our (local) sub_addr_.\n"));

@@ -139,10 +139,6 @@ private:
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
 
-  // transport_detached() is called from TransportImpl when it shuts down
-  friend class TransportImpl;
-  void transport_detached(TransportImpl* which);
-
   // helpers
   typedef ACE_Guard<ACE_Thread_Mutex> Guard;
   void use_datalink_i(const RepoId& remote_id,
@@ -155,7 +151,7 @@ private:
   //allows PendingAssoc to temporarily release lock_ to allow
   //TransportImpl to access Reactor if needed
   bool initiate_connect_i(TransportImpl::AcceptConnectResult& result,
-                          const TransportImpl_rch impl,
+                          TransportImpl* impl,
                           const TransportImpl::RemoteTransport& remote,
                           const TransportImpl::ConnectionAttribs& attribs_,
                           Guard& guard);
@@ -167,7 +163,7 @@ private:
   friend class ::DDS_TEST;
 
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
-  typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
+  typedef OPENDDS_VECTOR(TransportImpl*) ImplsType;
 
   struct PendingAssoc : RcEventHandler {
     bool active_, removed_;

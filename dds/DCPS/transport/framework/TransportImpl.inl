@@ -15,7 +15,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_INLINE OpenDDS::DCPS::TransportInst_rch
+ACE_INLINE OpenDDS::DCPS::TransportInst&
 OpenDDS::DCPS::TransportImpl::config() const
 {
   return this->config_;

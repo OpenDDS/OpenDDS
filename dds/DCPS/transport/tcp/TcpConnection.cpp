@@ -57,23 +57,16 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-
-  if (this->reconnect_task_.open()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Reconnect task failed to open : %p\n"),
-               ACE_TEXT("open")));
-  }
-
 }
 
 OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
                                             Priority priority,
-                                            const TcpInst_rch& config)
+                                            const TcpInst& config)
   : connected_(false)
   , is_connector_(true)
   , remote_address_(remote_address)
-  , local_address_(config->local_address())
-  , tcp_config_(config)
+  , local_address_(config.local_address())
+  , tcp_config_(&config)
   , passive_reconnect_timer_id_(-1)
   , reconnect_task_(this)
   , reconnect_state_(INIT_STATE)
@@ -85,13 +78,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-
-  // Open the reconnect task
-  if (this->reconnect_task_.open()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Reconnect task failed to open : %p\n"),
-               ACE_TEXT("open")));
-  }
 
 }
 OpenDDS::DCPS::TcpConnection::~TcpConnection()
@@ -165,7 +151,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open active.\n"), 2);
     // Take over the refcount from TcpTransport::connect_datalink().
 
-    const TcpTransport_rch transport = link_->get_transport_impl();
+    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
 
     const bool is_loop(local_address_ == remote_address_);
     const PriorityKey key(transport_priority_, remote_address_,
@@ -173,13 +159,13 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
     int active_open_ = active_open();
 
-    int connect_tcp_datalink_ = transport->connect_tcp_datalink(link_, rchandle_from(this));
+    int connect_tcp_datalink_ = transport.connect_tcp_datalink(*link_, rchandle_from(this));
 
     if (active_open_ == -1 || connect_tcp_datalink_ == -1) {
       // if (active_open() == -1 ||
       //       transport->connect_tcp_datalink(link_, self) == -1) {
 
-      transport->async_connect_failed(key);
+      transport.async_connect_failed(key);
 
       return -1;
     }
@@ -205,9 +191,9 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   // Now we need to ask the TcpAcceptor object to provide us with
   // a pointer to the TcpTransport object that "owns" the acceptor.
-  TcpTransport_rch transport(acceptor->transport());
+  TcpTransport* transport = acceptor->transport();
 
-  if (transport.is_nil()) {
+  if (!transport) {
     // The acceptor gave us a nil transport (smart) pointer.
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: TcpConnection::open() - ")
@@ -217,10 +203,10 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
   // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
-  tcp_config_ =  acceptor->get_configuration();
+  tcp_config_ =  &acceptor->get_configuration();
   local_address_ = tcp_config_->local_address();
 
-  set_sock_options(tcp_config_.in());
+  set_sock_options(tcp_config_);
 
   // We expect that the active side of the connection (the remote side
   // in this case) will supply its listening ACE_INET_Addr as the first
@@ -302,7 +288,6 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
       }
 
       transport_during_setup_->passive_connection(remote_address_, rchandle_from(this));
-      transport_during_setup_.reset();
       connected_ = true;
 
       return 0;
@@ -373,6 +358,12 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
   return 0;
 }
 
+const std::string&
+OpenDDS::DCPS::TcpConnection::config_name() const
+{
+  return this->link_->impl().config().name();
+}
+
 int
 OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
@@ -380,7 +371,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_close() called on transport: %C to %C:%d.\n",
-               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->config_name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
   }
@@ -408,7 +399,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 }
 
 void
-OpenDDS::DCPS::TcpConnection::set_sock_options(TcpInst* tcp_config)
+OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst* tcp_config)
 {
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -495,7 +486,7 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
   DirectPriorityMapper mapper(this->transport_priority_);
   this->link_->set_dscp_codepoint(mapper.codepoint(), this->peer());
 
-  set_sock_options(tcp_config_.in());
+  set_sock_options(tcp_config_);
 
   // In order to complete the connection establishment from the active
   // side, we need to tell the remote side about our public address.
@@ -553,7 +544,7 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
   DBG_ENTRY_LVL("TcpConnection","reconnect",6);
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect initiated on transport: %C to %C:%d.\n",
-               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->config_name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
   }
@@ -746,13 +737,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     if (ret == -1) {
       if (this->tcp_config_->conn_retry_attempts_ > 0) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C:%d.\n",
-                   this->link_->get_transport_impl()->config()->name().c_str(),
+                   this->config_name().c_str(),
                    this->remote_address_.get_host_addr(),
                    this->remote_address_.get_port_number()));
 
       } else {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) we did not try to re-establish connection on transport: %C to %C:%d.\n",
-                   this->link_->get_transport_impl()->config()->name().c_str(),
+                   this->config_name().c_str(),
                    this->remote_address_.get_host_addr(),
                    this->remote_address_.get_port_number()));
       }
@@ -763,7 +754,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
     } else {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
-                 this->link_->get_transport_impl()->config()->name().c_str(),
+                 this->config_name().c_str(),
                  this->remote_address_.get_host_addr(),
                  this->remote_address_.get_port_number()));
       if (this->receive_strategy_->get_reactor()->register_handler(this, ACE_Event_Handler::READ_MASK) == -1) {
@@ -796,7 +787,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
   switch (this->reconnect_state_) {
   case PASSIVE_WAITING_STATE: {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, we tried and failed to re-establish connection on transport: %C to %C:%d.\n",
-               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->config_name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
 
@@ -820,7 +811,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
   case RECONNECTED_STATE:
     // reconnected successfully.
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, re-established connection on transport: %C to %C:%d.\n",
-               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->config_name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
     break;

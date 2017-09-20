@@ -29,10 +29,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportImpl::TransportImpl()
-  : monitor_(0),
-    last_link_(0),
-    is_shut_down_(false)
+TransportImpl::TransportImpl(TransportInst& config)
+  : config_(config)
+  , monitor_(0)
+  , last_link_(0)
+  , is_shut_down_(false)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
@@ -67,20 +68,6 @@ TransportImpl::shutdown()
 
   this->pre_shutdown_i();
 
-  OPENDDS_SET(TransportClient_rch) local_clients;
-
-  {
-    GuardType guard(this->lock_);
-
-    local_clients.swap(this->clients_);
-    // We can release our lock_ now.
-  }
-
-  for (OPENDDS_SET(TransportClient_rch)::iterator it = local_clients.begin();
-       it != local_clients.end(); ++it) {
-    (*it)->transport_detached(this);
-  }
-
   // Tell our subclass about the "shutdown event".
   this->shutdown_i();
 
@@ -90,44 +77,10 @@ TransportImpl::shutdown()
   }
 }
 
+
 bool
-TransportImpl::configure(const TransportInst_rch& config)
+TransportImpl::open()
 {
-  DBG_ENTRY_LVL("TransportImpl","configure",6);
-
-  GuardType guard(this->lock_);
-
-  if (!config) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: invalid configuration.\n"),
-                     false);
-  }
-
-  if (this->config_) {
-    // We are rejecting this configuration attempt since this
-    // TransportImpl object has already been configured.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl already configured.\n"),
-                     false);
-  }
-
-  this->config_ = config;
-
-  // Let our subclass take a shot at the configuration object.
-  if (this->configure_i(config.in()) == false) {
-    if (Transport_debug_level > 0) {
-      dump();
-    }
-
-    guard.release();
-    shutdown();
-
-    // The subclass rejected the configuration attempt.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TransportImpl configuration failed.\n"),
-                     false);
-  }
-
   // Open the DL Cleanup task
   // We depend upon the existing config logic to ensure the
   // DL Cleanup task is opened only once
@@ -145,7 +98,7 @@ TransportImpl::configure(const TransportInst_rch& config)
   if (Transport_debug_level > 0) {
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TransportImpl::configure()\n%C"),
+               ACE_TEXT("(%P|%t) TransportImpl::open()\n%C"),
                dump_to_str().c_str()));
   }
 
@@ -172,24 +125,6 @@ TransportImpl::create_reactor_task(bool useAsyncSend)
   }
 }
 
-void
-TransportImpl::attach_client(const TransportClient_rch& client)
-{
-  DBG_ENTRY_LVL("TransportImpl", "attach_client", 6);
-
-  GuardType guard(this->lock_);
-  clients_.insert(client);
-}
-
-void
-TransportImpl::detach_client(const TransportClient_rch& client)
-{
-  DBG_ENTRY_LVL("TransportImpl", "detach_client", 6);
-
-  pre_detach(client);
-  GuardType guard(this->lock_);
-  clients_.erase(client);
-}
 
 void
 TransportImpl::unbind_link(DataLink*)
@@ -228,11 +163,7 @@ TransportImpl::dump()
 OPENDDS_STRING
 TransportImpl::dump_to_str()
 {
-  if (this->config_.is_nil()) {
-    return OPENDDS_STRING(" (not configured)\n");
-  } else {
-    return this->config_->dump_to_str();
-  }
+  return config_.dump_to_str();
 }
 
 }

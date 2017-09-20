@@ -57,19 +57,19 @@ namespace {
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy(
   std::size_t id,
-  const TransportInst_rch& transport_inst,
+  TransportImpl& transport,
   ThreadSynchResource* synch_resource,
   Priority priority,
   const ThreadSynchStrategy_rch& thread_sync_strategy)
   : ThreadSynchWorker(id),
-    max_samples_(transport_inst->max_samples_per_packet_),
-    optimum_size_(transport_inst->optimum_packet_size_),
-    max_size_(transport_inst->max_packet_size_),
-    queue_(new QueueType(transport_inst->queue_messages_per_pool_,
-                         transport_inst->queue_initial_pools_)),
+    max_samples_(transport.config().max_samples_per_packet_),
+    optimum_size_(transport.config().optimum_packet_size_),
+    max_size_(transport.config().max_packet_size_),
+    queue_(new QueueType(transport.config().queue_messages_per_pool_,
+                         transport.config().queue_initial_pools_)),
     max_header_size_(0),
     header_block_(0),
-    elems_(new QueueType(1, transport_inst->max_samples_per_packet_)),
+    elems_(new QueueType(1, transport.config().max_samples_per_packet_)),
     pkt_chain_(0),
     header_complete_(false),
     start_counter_(0),
@@ -83,11 +83,10 @@ TransportSendStrategy::TransportSendStrategy(
     replaced_element_mb_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
     replaced_element_db_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
     retained_element_allocator_(0),
-    transport_inst_(transport_inst),
+    transport_(transport),
     graceful_disconnecting_(false),
     link_released_(true),
-    send_buffer_(0),
-    transport_shutdown_(false)
+    send_buffer_(0)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
 
@@ -711,14 +710,16 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
   if (!found_element)
     return false;
 
+  bool transport_shutdown = this->transport_.is_shut_down();
+
   if (num_delayed_notifications == 1) {
     // optimization for the common case
     if (mode == MODE_TERMINATED) {
-      if (!transport_shutdown_ || sample->owned_by_transport()) {
+      if (!transport_shutdown || sample->owned_by_transport()) {
         sample->data_dropped(true);
       }
     } else {
-      if (!transport_shutdown_ || sample->owned_by_transport()) {
+      if (!transport_shutdown || sample->owned_by_transport()) {
         sample->data_delivered();
       }
     }
@@ -726,11 +727,11 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
   } else {
     for (size_t i = 0; i < samples.size(); ++i) {
       if (samples[i].second == MODE_TERMINATED) {
-        if (!transport_shutdown_ || samples[i].first->owned_by_transport()) {
+        if (!transport_shutdown || samples[i].first->owned_by_transport()) {
           samples[i].first->data_dropped(true);
         }
       } else {
-        if (!transport_shutdown_ || samples[i].first->owned_by_transport()) {
+        if (!transport_shutdown || samples[i].first->owned_by_transport()) {
           samples[i].first->data_delivered();
         }
       }
@@ -799,10 +800,12 @@ TransportSendStrategy::clear(SendMode mode)
     }
 
     elems = this->elems_;
-    this->elems_ = new QueueType(1, this->transport_inst_->max_samples_per_packet_);
     queue = this->queue_;
-    this->queue_ = new QueueType(this->transport_inst_->queue_messages_per_pool_,
-                                 this->transport_inst_->queue_initial_pools_);
+    TransportInst& inst = transport_.config();
+
+    this->elems_ = new QueueType(1, inst.max_samples_per_packet_);
+    this->queue_ = new QueueType(inst.queue_messages_per_pool_,
+                                 inst.queue_initial_pools_);
 
     this->header_.length_ = 0;
     this->pkt_chain_ = 0;
@@ -1485,7 +1488,7 @@ TransportSendStrategy::direct_send(bool relink)
                    ACE_TEXT("send_bytes")));
 
         if (Transport_debug_level > 0) {
-          this->transport_inst_->dump();
+          this->transport_.config().dump();
         }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "

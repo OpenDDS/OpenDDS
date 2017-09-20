@@ -30,18 +30,18 @@ SynWatchdog::SynWatchdog(ACE_Reactor* reactor,
 bool
 SynWatchdog::reactor_is_shut_down() const
 {
-  return session_->link()->transport()->is_shut_down();
+  return session_->link()->transport().is_shut_down();
 }
 
 ACE_Time_Value
 SynWatchdog::next_interval()
 {
-  MulticastInst* config = this->session_->link()->config();
-  ACE_Time_Value interval(config->syn_interval_);
+  MulticastInst& config = this->session_->link()->config();
+  ACE_Time_Value interval(config.syn_interval_);
 
   // Apply exponential backoff based on number of retries:
   if (this->retries_ > 0) {
-    interval *= std::pow(config->syn_backoff_, double(this->retries_));
+    interval *= std::pow(config.syn_backoff_, double(this->retries_));
   }
   ++this->retries_;
 
@@ -59,8 +59,7 @@ SynWatchdog::on_interval(const void* /*arg*/)
 ACE_Time_Value
 SynWatchdog::next_timeout()
 {
-  MulticastInst* config = this->session_->link()->config();
-  return config->syn_timeout_;
+  return this->session_->link()->config().syn_timeout_;
 }
 
 void
@@ -72,7 +71,7 @@ SynWatchdog::on_timeout(const void* /*arg*/)
              ACE_TEXT("(%P|%t) WARNING: ")
              ACE_TEXT("SynWatchdog[transport=%C]::on_timeout: ")
              ACE_TEXT("timed out waiting on remote peer: %#08x%08x local: %#08x%08x\n"),
-             this->session_->link()->config()->name().c_str(),
+             this->session_->link()->config().name().c_str(),
              (unsigned int)(this->session_->remote_peer() >> 32),
              (unsigned int) this->session_->remote_peer(),
              (unsigned int)(this->session_->link()->local_peer() >> 32),
@@ -185,7 +184,7 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::syn_received "
                     "local %#08x%08x remote %#08x%08x\n",
-                    this->link()->config()->name().c_str(),
+                    this->link()->config().name().c_str(),
                     (unsigned int)(this->link()->local_peer() >> 32),
                     (unsigned int) this->link()->local_peer(),
                     (unsigned int)(this->remote_peer_ >> 32),
@@ -204,7 +203,7 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
   // acknowledged by a matching remote peer:
   send_synack();
 
-  this->link_->transport()->passive_connection(this->link_->local_peer(), this->remote_peer_);
+  this->link_->transport().passive_connection(this->link_->local_peer(), this->remote_peer_);
 
 }
 
@@ -221,7 +220,7 @@ MulticastSession::send_syn()
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_syn "
                       "local %#08x%08x remote %#08x%08x\n",
-                      this->link()->config()->name().c_str(),
+                      this->link()->config().name().c_str(),
                       (unsigned int)(this->link()->local_peer() >> 32),
                       (unsigned int) this->link()->local_peer(),
                       (unsigned int)(this->remote_peer_ >> 32),
@@ -255,7 +254,7 @@ MulticastSession::synack_received(const Message_Block_Ptr& control)
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::synack_received "
                       "local %#08x%08x remote %#08x%08x\n",
-                      this->link()->config()->name().c_str(),
+                      this->link()->config().name().c_str(),
                       (unsigned int)(this->link()->local_peer() >> 32),
                       (unsigned int) this->link()->local_peer(),
                       (unsigned int)(this->remote_peer_ >> 32),
@@ -284,7 +283,7 @@ MulticastSession::send_synack()
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_synack "
                       "local %#08x%08x remote %#08x%08x active %d\n",
-                      this->link()->config()->name().c_str(),
+                      this->link()->config().name().c_str(),
                       (unsigned int)(this->link()->local_peer() >> 32),
                       (unsigned int) this->link()->local_peer(),
                       (unsigned int)(this->remote_peer_ >> 32),

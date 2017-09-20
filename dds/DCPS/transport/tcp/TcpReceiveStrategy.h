@@ -23,7 +23,7 @@ class TcpConnection;
 class TcpReceiveStrategy : public TransportReceiveStrategy<> {
 public:
 
-  TcpReceiveStrategy(const TcpDataLink_rch& link,
+  TcpReceiveStrategy(TcpDataLink& link,
                      const TcpConnection_rch& connection,
                      const TransportReactorTask_rch& task);
 
@@ -54,7 +54,7 @@ protected:
 
 private:
 
-  TcpDataLink_rch    link_;
+  WeakRcHandle<TcpDataLink> link_;
   TcpConnection_rch  connection_;
   TransportReactorTask_rch reactor_task_;
 };

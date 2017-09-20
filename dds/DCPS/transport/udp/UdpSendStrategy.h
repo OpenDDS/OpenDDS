@@ -18,12 +18,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 class UdpDataLink;
+class UdpInst;
 typedef RcHandle<UdpDataLink> UdpDataLink_rch;
 
 class OpenDDS_Udp_Export UdpSendStrategy
   : public TransportSendStrategy {
 public:
-  UdpSendStrategy(UdpDataLink* link, const TransportInst_rch& inst);
+  UdpSendStrategy(UdpDataLink* link);
 
   virtual void stop_i();
 

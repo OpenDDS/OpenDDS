@@ -14,6 +14,7 @@
 #include "UdpSendStrategy_rch.h"
 #include "UdpReceiveStrategy.h"
 #include "UdpReceiveStrategy_rch.h"
+#include "UdpInst_rch.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram.h"
@@ -26,7 +27,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class UdpInst;
 class UdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<UdpTransport> UdpTransport_rch;
@@ -34,17 +34,14 @@ typedef RcHandle<UdpTransport> UdpTransport_rch;
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
 public:
-  UdpDataLink(const UdpTransport_rch& transport,
+  UdpDataLink(UdpTransport& transport,
               Priority   priority,
+              UdpInst& config,
+              TransportReactorTask* reactor_task,
               bool          active);
-
-  void configure(UdpInst* config,
-                 TransportReactorTask* reactor_task);
-
 
   bool active() const;
 
-  UdpInst* config();
   TransportReactorTask* reactor_task();
 
   ACE_Reactor* get_reactor();
@@ -61,7 +58,6 @@ public:
 protected:
   bool active_;
 
-  UdpInst* config_;
   TransportReactorTask* reactor_task_;
 
   UdpSendStrategy_rch send_strategy_;

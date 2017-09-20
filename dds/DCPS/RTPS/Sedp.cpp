@@ -217,8 +217,8 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
                        OPENDDS_STRING("_SEDPTransportInst_") + key.c_str() + domainStr,
                        "rtps_udp");
   // Use a static cast to avoid dependency on the RtpsUdp library
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+      static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   // The SEDP endpoints may need to wait at least one resend period before
   // the handshake completes (allows time for our SPDP multicast to be
   // received by the other side).  Arbitrary constant of 5 to account for
@@ -282,8 +282,8 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 void
 Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+    static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   using namespace OpenDDS::RTPS;
 
   CORBA::ULong idx = 0;
@@ -330,16 +330,16 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
 const ACE_INET_Addr&
 Sedp::local_address() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+      static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   return rtps_inst->local_address_;
 }
 
 const ACE_INET_Addr&
 Sedp::multicast_group() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+      static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   return rtps_inst->multicast_group_address_;
 }
 bool

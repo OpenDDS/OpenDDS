@@ -10,17 +10,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE void
-ShmemDataLink::configure(ShmemInst* config)
-{
-  this->config_ = config;
-}
-
-ACE_INLINE ShmemInst*
-ShmemDataLink::config()
-{
-  return this->config_;
-}
 
 ACE_INLINE std::string
 ShmemDataLink::peer_address()

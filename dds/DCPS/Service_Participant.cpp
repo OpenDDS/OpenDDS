@@ -263,29 +263,34 @@ Service_Participant::shutdown()
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
+    {
+      ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
+
+      if (dp_factory_servant_)
+        dp_factory_servant_->cleanup();
+
+      domainRepoMap_.clear();
+
+      if (0 != reactor_) {
+        reactor_->end_reactor_event_loop();
+        reactor_task_.wait();
+      }
+
+      discoveryMap_.clear();
+      dp_factory_ = DDS::DomainParticipantFactory::_nil();
+
+  #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+      transient_data_cache_.reset();
+      persistent_data_cache_.reset();
+  #endif
+
+      typedef OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter;
+      for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
+        delete i->second;
+      }
+      discovery_types_.clear();
+    }
     TransportRegistry::close();
-    ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-
-    domainRepoMap_.clear();
-
-    if (0 != reactor_) {
-      reactor_->end_reactor_event_loop();
-      reactor_task_.wait();
-    }
-
-    discoveryMap_.clear();
-    dp_factory_ = DDS::DomainParticipantFactory::_nil();
-
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    transient_data_cache_.reset();
-    persistent_data_cache_.reset();
-#endif
-
-    typedef OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter;
-    for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
-      delete i->second;
-    }
-    discovery_types_.clear();
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }

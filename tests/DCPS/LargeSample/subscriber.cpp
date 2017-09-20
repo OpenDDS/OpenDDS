@@ -18,7 +18,6 @@
 #include <dds/DCPS/WaitSet.h>
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
 #if defined (sun)
 #include "dds/DCPS/transport/udp/UdpInst.h"
 #include "dds/DCPS/transport/udp/UdpInst_rch.h"

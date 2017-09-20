@@ -57,11 +57,11 @@ namespace DCPS {
       weak_object_->_remove_ref();
     }
 
-    virtual void _add_ref() {
+    virtual void _add_ref() const {
       ++this->ref_count_;
     }
 
-    virtual void _remove_ref() {
+    virtual void _remove_ref() const {
       const long new_count = --this->ref_count_;
       if (new_count == 0 && weak_object_->set_expire()) {
         delete this;
@@ -89,7 +89,7 @@ namespace DCPS {
 
   private:
 
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
+    mutable ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
     WeakObject*  weak_object_;
 
     RcObject(const RcObject&);
@@ -158,6 +158,12 @@ namespace DCPS {
        return *this;
     }
 
+    WeakRcHandle& operator = (const T& obj) {
+      WeakRcHandle tmp(obj);
+      std::swap(weak_object_, tmp.weak_object_);
+      return *this;
+    }
+
     RcHandle<T> lock() const {
       if (weak_object_){
         return RcHandle<T>(dynamic_cast<T*>(weak_object_->lock()), keep_count());
@@ -178,6 +184,17 @@ namespace DCPS {
     bool operator < (const WeakRcHandle& rhs) const
     {
       return weak_object_ < rhs.weak_object_;
+    }
+
+    operator bool() const {
+      return weak_object_;
+    }
+
+    void reset() {
+      if (weak_object_) {
+        weak_object_->_remove_ref();
+        weak_object_ = 0;
+      }
     }
 
   private:

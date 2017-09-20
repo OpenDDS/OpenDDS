@@ -225,7 +225,7 @@ RtpsUdpReceiveStrategy::start_i()
                      -1);
   }
 
-  if (link_->config()->use_multicast_) {
+  if (link_->config().use_multicast_) {
     if (reactor->register_handler(link_->multicast_socket().get_handle(), this,
                                   ACE_Event_Handler::READ_MASK) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -254,7 +254,7 @@ RtpsUdpReceiveStrategy::stop_i()
   reactor->remove_handler(link_->unicast_socket().get_handle(),
                           ACE_Event_Handler::READ_MASK);
 
-  if (link_->config()->use_multicast_) {
+  if (link_->config().use_multicast_) {
     reactor->remove_handler(link_->multicast_socket().get_handle(),
                             ACE_Event_Handler::READ_MASK);
   }

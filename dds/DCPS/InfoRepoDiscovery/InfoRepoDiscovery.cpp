@@ -268,7 +268,7 @@ InfoRepoDiscovery::bit_config()
 
     const std::string inst_name = TransportRegistry::DEFAULT_INST_PREFIX +
                                   std::string("_BITTCPTransportInst_") + key();
-    TransportInst_rch inst =
+    TransportInst* inst =
       TransportRegistry::instance()->create_inst(inst_name, "tcp");
     bit_config_->instances_.push_back(inst);
 
@@ -278,7 +278,7 @@ InfoRepoDiscovery::bit_config()
     }
 
     // Use a static cast to avoid dependency on the Tcp library
-    TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
+    TcpInst* tcp_inst = static_cast<TcpInst*>(inst);
 
     tcp_inst->datalink_release_delay_ = 0;
     if (!bit_transport_ip_.empty()) {

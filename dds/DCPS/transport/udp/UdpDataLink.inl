@@ -10,25 +10,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE void
-UdpDataLink::configure(UdpInst* config,
-                       TransportReactorTask* reactor_task)
-{
-  this->config_ = config;
-  this->reactor_task_ = reactor_task;
-}
-
 ACE_INLINE bool
 UdpDataLink::active() const
 {
   return this->active_;
 }
 
-ACE_INLINE UdpInst*
-UdpDataLink::config()
-{
-  return this->config_;
-}
 
 ACE_INLINE TransportReactorTask*
 UdpDataLink::reactor_task()

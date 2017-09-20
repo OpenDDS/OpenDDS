@@ -29,7 +29,6 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
@@ -271,7 +270,7 @@ private:
   } task_;
 
   // Transport
-  DCPS::TransportInst_rch transport_inst_;
+  DCPS::TransportInst* transport_inst_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
   OpenDDS::DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();

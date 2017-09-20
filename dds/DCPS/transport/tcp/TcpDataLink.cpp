@@ -24,13 +24,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
   const ACE_INET_Addr& remote_address,
-  const OpenDDS::DCPS::TcpTransport_rch&  transport_impl,
+  OpenDDS::DCPS::TcpTransport&  transport_impl,
   Priority priority,
   bool        is_loopback,
   bool        is_active)
   : DataLink(transport_impl, priority, is_loopback, is_active),
     remote_address_(remote_address),
-    transport_(transport_impl),
     graceful_disconnect_sent_(false),
     release_is_pending_(false)
 {
@@ -228,7 +227,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
   }
 
   if (released) {
-    return this->transport_->connect_tcp_datalink(rchandle_from(this), connection);
+    return static_cast<TcpTransport&>(impl()).connect_tcp_datalink(*this, connection);
   }
 
   this->connection_ = connection;

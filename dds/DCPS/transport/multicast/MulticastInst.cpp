@@ -144,13 +144,13 @@ MulticastInst::default_group_address(ACE_INET_Addr& group_address)
 }
 
 TransportImpl_rch
-MulticastInst::new_impl(const TransportInst_rch& inst)
+MulticastInst::new_impl()
 {
-  return make_rch<MulticastTransport>(inst);
+  return make_rch<MulticastTransport>(ref(*this));
 }
 
 OPENDDS_STRING
-MulticastInst::dump_to_str()
+MulticastInst::dump_to_str() const
 {
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;

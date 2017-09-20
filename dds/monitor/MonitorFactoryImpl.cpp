@@ -166,7 +166,7 @@ MonitorFactoryImpl::initialize()
 
     std::string inst_name = TransportRegistry::DEFAULT_INST_PREFIX
       + std::string("FederationBITTCPTransportInst");
-    TransportInst_rch inst =
+    TransportInst* inst =
       TransportRegistry::instance()->create_inst(inst_name, "tcp");
     config->instances_.push_back(inst);
   }

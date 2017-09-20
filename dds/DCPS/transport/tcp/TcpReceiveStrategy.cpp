@@ -21,7 +21,7 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
-  const TcpDataLink_rch& link,
+  TcpDataLink& link,
   const TcpConnection_rch& connection,
   const TransportReactorTask_rch& task)
   : link_(link)
@@ -61,20 +61,26 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
   (ReceivedDataSample& sample, const ACE_INET_Addr&)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","deliver_sample",6);
+
+  TcpDataLink_rch link = this->link_.lock();
+  if (!link) {
+    return;
+  }
+
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
     this->gracefully_disconnected_ = true;
   }
   else if (sample.header_.message_id_ == REQUEST_ACK) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received REQUEST_ACK \n"));
-    this->link_->request_ack_received(sample);
+    link->request_ack_received(sample);
   }
   else if (sample.header_.message_id_ == SAMPLE_ACK) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received SAMPLE_ACK \n"));
-    this->link_->ack_received(sample);
+    link->ack_received(sample);
   }
   else {
-    this->link_->data_received(sample);
+    link->data_received(sample);
   }
 }
 
@@ -96,7 +102,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
 
   if (DCPS_debug_level > 9) {
     std::stringstream buffer;
-    buffer << *this->link_.in();
+    TcpDataLink_rch link = link_.lock();
+    if (link)
+      buffer << *link;
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpReceiveStrategy::start_i() - ")
                ACE_TEXT("link:\n%C connected to %C:%d ")
@@ -149,7 +157,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::reset(const TcpConnection_rch& connection)
    ACE_Event_Handler::READ_MASK |
    ACE_Event_Handler::DONT_CALL);
 
-  this->link_->drop_pending_request_acks();
+  TcpDataLink_rch link = link_.lock();
+  if (link)
+     link->drop_pending_request_acks();
   // This will cause the connection_ object to drop its reference to this
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();
@@ -188,7 +198,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::stop_i()
    ACE_Event_Handler::READ_MASK |
    ACE_Event_Handler::DONT_CALL);
 
-  this->link_->drop_pending_request_acks();
+  TcpDataLink_rch link = link_.lock();
+  if (link)
+    link->drop_pending_request_acks();
   // This will cause the connection_ object to drop its reference to this
   // TransportReceiveStrategy object.
   this->connection_->remove_receive_strategy();

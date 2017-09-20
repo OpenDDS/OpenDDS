@@ -26,8 +26,7 @@ class TcpSendStrategy : public TransportSendStrategy {
 public:
 
   TcpSendStrategy(std::size_t id,
-                  const TcpDataLink_rch& link,
-                  const TcpInst_rch& config,
+                  TcpDataLink& link,
                   const TcpConnection_rch& connection,
                   TcpSynchResource* synch_resource,
                   const TransportReactorTask_rch& task,
@@ -57,7 +56,7 @@ protected:
   virtual void add_delayed_notification(TransportQueueElement* element);
 private:
   TcpConnection_rch connection_;
-  TcpDataLink_rch   link_;
+  WeakRcHandle<TcpDataLink> link_;
   TransportReactorTask_rch reactor_task_;
 };
 

@@ -36,8 +36,7 @@ NakWatchdog::NakWatchdog(ACE_Reactor* reactor,
 ACE_Time_Value
 NakWatchdog::next_interval()
 {
-  MulticastInst* config = this->session_->link()->config();
-  ACE_Time_Value interval(config->nak_interval_);
+  ACE_Time_Value interval(this->session_->link()->config().nak_interval_);
 
   // Apply random backoff to minimize potential collisions:
   interval *= static_cast<double>(std::rand()) /
@@ -77,7 +76,7 @@ ReliableSession::~ReliableSession()
 bool
 NakWatchdog::reactor_is_shut_down() const
 {
-  return session_->link()->transport()->is_shut_down();
+  return session_->link()->transport().is_shut_down();
 }
 
 bool
@@ -261,7 +260,7 @@ ReliableSession::expire_naks()
   if (this->nak_requests_.empty()) return; // nothing to expire
 
   ACE_Time_Value deadline(ACE_OS::gettimeofday());
-  deadline -= this->link_->config()->nak_timeout_;
+  deadline -= this->link_->config().nak_timeout_;
 
   NakRequestMap::iterator first(this->nak_requests_.begin());
   NakRequestMap::iterator last(this->nak_requests_.upper_bound(deadline));
@@ -374,8 +373,8 @@ ReliableSession::send_naks()
     // The sequences between rbegin - 1 and rbegin will not be ignored for naking.
     ++itr;
 
-    size_t nak_delay_intervals = this->link()->config()->nak_delay_intervals_;
-    size_t nak_max = this->link()->config()->nak_max_;
+    size_t nak_delay_intervals = this->link()->config().nak_delay_intervals_;
+    size_t nak_max = this->link()->config().nak_max_;
     size_t sz = this->nak_requests_.size();
 
     // Image i is the index of element in nak_requests_ in reverse order.

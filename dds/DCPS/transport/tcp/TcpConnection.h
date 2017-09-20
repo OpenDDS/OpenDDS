@@ -52,7 +52,7 @@ public:
   /// Active side constructor (connector)
   TcpConnection(const ACE_INET_Addr& remote_address,
                 Priority priority,
-                const TcpInst_rch& config);
+                const TcpInst& config);
 
   virtual ~TcpConnection();
 
@@ -92,7 +92,7 @@ public:
   virtual int close(u_long);
   virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
-  void set_sock_options(TcpInst* tcp_config);
+  void set_sock_options(const TcpInst* tcp_config);
 
   int reconnect(bool on_new_association = false);
 
@@ -155,6 +155,8 @@ private:
   /// redirecting handle_input() events here (there is no recv strategy yet).
   int handle_setup_input(ACE_HANDLE h);
 
+  const std::string& config_name() const;
+
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
@@ -183,7 +185,7 @@ private:
   ACE_INET_Addr local_address_;
 
   /// The configuration used by this connection.
-  TcpInst_rch tcp_config_;
+  const TcpInst* tcp_config_;
 
   /// Datalink object which is needed for connection lost callback.
   TcpDataLink_rch link_;
@@ -214,7 +216,7 @@ private:
 
   bool passive_setup_;
   ACE_Message_Block passive_setup_buffer_;
-  TcpTransport_rch transport_during_setup_;
+  TcpTransport* transport_during_setup_;
 
   /// Small unique identifying value.
   std::size_t id_;

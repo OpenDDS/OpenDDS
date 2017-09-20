@@ -22,7 +22,7 @@ namespace DCPS {
 
 class TransportReceiveListener;
 class ReceivedDataSample;
-typedef RcHandle<TransportReceiveListener> TransportReceiveListener_rch;
+typedef WeakRcHandle<TransportReceiveListener> TransportReceiveListener_wrch;
 
 class OpenDDS_Dcps_Export ReceiveListenerSet :
       public RcObject {
@@ -33,7 +33,7 @@ public:
     SET_INCLUDED
   };
 
-  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener_rch, GUID_tKeyLessThan) MapType;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener_wrch, GUID_tKeyLessThan) MapType;
 
   ReceiveListenerSet();
   ReceiveListenerSet(const ReceiveListenerSet&);
@@ -41,7 +41,7 @@ public:
   virtual ~ReceiveListenerSet();
 
   int insert(RepoId                              subscriber_id,
-             const TransportReceiveListener_rch& listener);
+             const TransportReceiveListener_wrch& listener);
   int remove(RepoId subscriber_id);
   void remove_all(const GUIDSeq& to_remove);
 

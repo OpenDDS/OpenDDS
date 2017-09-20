@@ -21,13 +21,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   std::size_t id,
-  const TcpDataLink_rch& link,
-  const TcpInst_rch& config,
+  TcpDataLink& link,
   const TcpConnection_rch& connection,
   TcpSynchResource* synch_resource,
   const TransportReactorTask_rch& task,
   Priority priority)
-  : TransportSendStrategy(id, static_rchandle_cast<TransportInst>(config),
+  : TransportSendStrategy(id, link.impl(),
                           synch_resource, priority,
                           make_rch<ReactorSynchStrategy>(this,task->get_reactor()))
   , connection_(connection)

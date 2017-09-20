@@ -18,6 +18,11 @@ OpenDDS::DCPS::TcpReconnectTask::TcpReconnectTask(
   : connection_(connection)
 {
   DBG_ENTRY_LVL("TcpReconnectTask","TcpReconnectTask",6);
+  if (open()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Reconnect task failed to open : %p\n"),
+               ACE_TEXT("open")));
+  }
 }
 
 OpenDDS::DCPS::TcpReconnectTask::~TcpReconnectTask()

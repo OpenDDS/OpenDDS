@@ -22,19 +22,18 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MulticastInst;
-typedef RcHandle<MulticastInst> MulticastInst_rch;
 
 class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
-  explicit MulticastTransport(const TransportInst_rch& inst);
+  explicit MulticastTransport(MulticastInst& inst);
   ~MulticastTransport();
 
   void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);
 
-  MulticastInst_rch config() const;
+  MulticastInst& config() const;
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -45,10 +44,10 @@ protected:
                                               const ConnectionAttribs& attribs,
                                               const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
+  virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id);
 
-  virtual bool configure_i(TransportInst* config);
+  bool configure_i(MulticastInst& config);
 
   virtual void shutdown_i();
 

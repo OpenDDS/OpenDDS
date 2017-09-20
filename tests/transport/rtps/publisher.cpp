@@ -216,10 +216,10 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     remote_addr = ACE_INET_Addr(port, host.c_str(), AF_INET);
   }
 
-  TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
-                                                             "rtps_udp");
+  TransportInst* inst = TheTransportRegistry->create_inst("my_rtps",
+                                                          "rtps_udp");
 
-  RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+  RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst);
   if (!rtps_inst) {
     std::cerr << "ERROR: Failed to cast to RtpsUdpInst\n";
     return 1;

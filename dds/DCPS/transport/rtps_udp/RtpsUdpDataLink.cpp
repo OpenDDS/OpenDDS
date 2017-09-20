@@ -52,25 +52,24 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
+RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
-                                 const RtpsUdpInst_rch& config,
+                                 const RtpsUdpInst& config,
                                  const TransportReactorTask_rch& reactor_task)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
              false),    // is_active
-    config_(config),
     reactor_task_(reactor_task),
-    send_strategy_(make_rch<RtpsUdpSendStrategy>(this, config, local_prefix)),
+    send_strategy_(make_rch<RtpsUdpSendStrategy>(this, local_prefix)),
     recv_strategy_(make_rch<RtpsUdpReceiveStrategy>(this, local_prefix)),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
-    multi_buff_(this, config->nak_depth_),
+    multi_buff_(this, config.nak_depth_),
     best_effort_heartbeat_count_(0),
     nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
-                config->nak_response_delay_),
+                config.nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
-                     config->heartbeat_response_delay_),
+                     config.heartbeat_response_delay_),
   heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
   heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
   held_data_delivery_handler_(this)
@@ -78,10 +77,10 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
 
-RtpsUdpInst_rch
+RtpsUdpInst&
 RtpsUdpDataLink::config() const
 {
-  return config_;
+  return static_cast<RtpsUdpTransport&>(impl()).config();
 }
 
 bool
@@ -149,13 +148,15 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {
   unicast_socket_ = unicast_socket;
 
-  if (config_->use_multicast_) {
-    const OPENDDS_STRING& net_if = config_->multicast_interface_;
+  RtpsUdpInst& config = this->config();
+
+  if (config.use_multicast_) {
+    const OPENDDS_STRING& net_if = config.multicast_interface_;
 #ifdef ACE_HAS_MAC_OSX
     multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
                            ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
 #endif
-    if (multicast_socket_.join(config_->multicast_group_address_, 1,
+    if (multicast_socket_.join(config.multicast_group_address_, 1,
                                net_if.empty() ? 0 :
                                ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -166,17 +167,17 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, config_->ttl_)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, config.ttl_)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
                       ACE_TEXT("failed to set TTL: %d\n"),
-                      config_->ttl_),
+                      config.ttl_),
                      false);
   }
 
-  if (this->config_->send_buffer_size_ > 0) {
-    int snd_size = this->config_->send_buffer_size_;
+  if (config.send_buffer_size_ > 0) {
+    int snd_size = config.send_buffer_size_;
     if (this->unicast_socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 (void *) &snd_size,
@@ -190,8 +191,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (this->config_->rcv_buffer_size_ > 0) {
-    int rcv_size = this->config_->rcv_buffer_size_;
+  if (config.rcv_buffer_size_ > 0) {
+    int rcv_size = config.rcv_buffer_size_;
     if (this->unicast_socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 (void *) &rcv_size,
@@ -2225,8 +2226,10 @@ RtpsUdpDataLink::send_heartbeats()
 
     RepoIdSet writers_to_advertise;
 
-    const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config_->heartbeat_period_;
-    const ACE_Time_Value tv3 = ACE_OS::gettimeofday() - 3 * config_->heartbeat_period_;
+    RtpsUdpInst& config = this->config();
+
+    const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config.heartbeat_period_;
+    const ACE_Time_Value tv3 = ACE_OS::gettimeofday() - 3 * config.heartbeat_period_;
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
            limit = interesting_readers_.end();
          pos != limit;
@@ -2262,7 +2265,7 @@ RtpsUdpDataLink::send_heartbeats()
         }
         if (!ri->second.durable_data_.empty()) {
           const ACE_Time_Value expiration =
-            ri->second.durable_timestamp_ + config_->durable_data_timeout_;
+            ri->second.durable_timestamp_ + config.durable_data_timeout_;
           if (now > expiration) {
             typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator
               dd_iter;
@@ -2372,8 +2375,9 @@ void
 RtpsUdpDataLink::check_heartbeats()
 {
   OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks;
+
   // Have any interesting writers timed out?
-  const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config_->heartbeat_period_;
+  const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * this->config().heartbeat_period_;
   {
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -2424,7 +2428,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
          ri != end;
          ++ri) {
       if (!ri->second.durable_data_.empty()) {
-        const ACE_Time_Value expiration = ri->second.durable_timestamp_ + config_->durable_data_timeout_;
+        const ACE_Time_Value expiration = ri->second.durable_timestamp_ + config().durable_data_timeout_;
         if (now <= expiration &&
             ri->second.durable_data_.rbegin()->first > durable_max) {
           durable_max = ri->second.durable_data_.rbegin()->first;
@@ -2543,7 +2547,7 @@ void
 RtpsUdpDataLink::HeartBeat::enable()
 {
   if (!enabled_) {
-    const ACE_Time_Value& per = outer_->config_->heartbeat_period_;
+    const ACE_Time_Value& per = outer_->config().heartbeat_period_;
     const long timer =
       outer_->get_reactor()->schedule_timer(this, 0, ACE_Time_Value::zero, per);
 

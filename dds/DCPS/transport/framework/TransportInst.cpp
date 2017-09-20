@@ -58,7 +58,7 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
 }
 
 void
-OpenDDS::DCPS::TransportInst::dump()
+OpenDDS::DCPS::TransportInst::dump() const
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
@@ -85,7 +85,7 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 }
 
 OPENDDS_STRING
-OpenDDS::DCPS::TransportInst::dump_to_str()
+OpenDDS::DCPS::TransportInst::dump_to_str() const
 {
   OPENDDS_STRING ret;
   ret += formatNameForDump("transport_type")          + this->transport_type_ + '\n';
@@ -107,22 +107,21 @@ OpenDDS::DCPS::TransportInst::shutdown()
   ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
   if (!this->impl_.is_nil()) {
     this->impl_->shutdown();
-    this->impl_.reset();
   }
 }
 
-OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportImpl*
 OpenDDS::DCPS::TransportInst::impl()
 {
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, TransportImpl_rch());
-  if (this->impl_.is_nil()) {
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, this->lock_, 0);
+  if (!this->impl_) {
     try {
-      this->impl_ = this->new_impl(rchandle_from(this));
+      this->impl_ = this->new_impl();
     } catch (const OpenDDS::DCPS::Transport::UnableToCreate& ) {
-      return TransportImpl_rch();
+      return 0;
     }
   }
-  return this->impl_;
+  return this->impl_.in();
 }
 
 void

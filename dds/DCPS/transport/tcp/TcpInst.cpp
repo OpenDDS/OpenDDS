@@ -27,9 +27,9 @@ OpenDDS::DCPS::TcpInst::~TcpInst()
 }
 
 OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::DCPS::TcpInst::new_impl(const TransportInst_rch& inst)
+OpenDDS::DCPS::TcpInst::new_impl()
 {
-  return make_rch<TcpTransport>(inst);
+  return make_rch<TcpTransport>(ref(*this));
 }
 
 int
@@ -69,7 +69,7 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
 }
 
 OPENDDS_STRING
-OpenDDS::DCPS::TcpInst::dump_to_str()
+OpenDDS::DCPS::TcpInst::dump_to_str() const
 {
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;

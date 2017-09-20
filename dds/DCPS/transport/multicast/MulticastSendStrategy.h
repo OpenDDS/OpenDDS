@@ -28,7 +28,7 @@ class OpenDDS_Multicast_Export MulticastSendStrategy
   {
 #endif
 public:
-  MulticastSendStrategy(MulticastDataLink* link, const TransportInst_rch& inst);
+  MulticastSendStrategy(MulticastDataLink* link);
 
   virtual void stop_i();
 

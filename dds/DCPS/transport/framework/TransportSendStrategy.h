@@ -142,13 +142,15 @@ public:
   virtual ACE_HANDLE get_handle();
 
   void deliver_ack_request(TransportQueueElement* element);
+
 protected:
 
   TransportSendStrategy(std::size_t id,
-                        const TransportInst_rch& transport_inst,
+                        const TransportInst& transport_inst,
                         ThreadSynchResource* synch_resource,
                         Priority priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
+
 
   // Only our subclass knows how to do this.
   // Third arg is the "back-pressure" flag.  If send_bytes() returns
@@ -313,6 +315,7 @@ private:
   /// completely unsent.
   /// Also used as a bucket for packets which still have to become
   /// part of a packet.
+  // TODO: should use unique_ptr
   QueueType* queue_;
 
   /// Maximum marshalled size of the transport packet header.
@@ -326,6 +329,7 @@ private:
 
   /// Current elements that have contributed blocks to the current
   /// transport packet.
+  // TODO: should use unique_ptr
   QueueType* elems_;
 
   /// Current (head of chain) block containing unsent bytes for the
@@ -382,7 +386,7 @@ private:
   /// is created in start if the transport needs it.
   TransportRetainedElementAllocator* retained_element_allocator_;
 
-  TransportInst_rch transport_inst_;
+  const TransportInst& transport_inst_;
 
   bool graceful_disconnecting_;
 

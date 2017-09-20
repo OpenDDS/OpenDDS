@@ -50,9 +50,9 @@ typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink {
 public:
 
-  RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
+  RtpsUdpDataLink(RtpsUdpTransport& transport,
                   const GuidPrefix_t& local_prefix,
-                  const RtpsUdpInst_rch& config,
+                  const RtpsUdpInst& config,
                   const TransportReactorTask_rch& reactor_task);
 
   bool add_delayed_notification(TransportQueueElement* element);
@@ -61,7 +61,7 @@ public:
                         const TransportQueueElement::MatchCriteria& criteria,
                         ACE_Guard<ACE_Thread_Mutex>& guard);
 
-  RtpsUdpInst_rch config() const;
+  RtpsUdpInst& config() const;
 
   ACE_Reactor* get_reactor();
   bool reactor_is_shut_down();
@@ -149,7 +149,6 @@ private:
                       const TransportQueueElement& tqe,
                       const DestToEntityMap& dtem);
 
-  RtpsUdpInst_rch config_;
   TransportReactorTask_rch reactor_task_;
 
   RtpsUdpSendStrategy_rch send_strategy_;

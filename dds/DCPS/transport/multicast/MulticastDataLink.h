@@ -42,18 +42,17 @@ typedef RcHandle<MulticastTransport> MulticastTransport_rch;
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
-  MulticastDataLink(const MulticastTransport_rch& transport,
+  MulticastDataLink(MulticastTransport& transport,
                     const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
+                    MulticastInst& config,
+                    TransportReactorTask* reactor_task,
                     bool is_active);
   virtual ~MulticastDataLink();
 
-  MulticastTransport* transport();
+  MulticastTransport& transport();
 
   MulticastPeer local_peer() const;
-
-  void configure(MulticastInst* config,
-                 TransportReactorTask* reactor_task);
 
   MulticastSendStrategy* send_strategy();
 
@@ -61,7 +60,7 @@ public:
 
   SingleSendBuffer* send_buffer();
 
-  MulticastInst* config();
+  MulticastInst& config();
 
   TransportReactorTask* reactor_task();
   ACE_Reactor* get_reactor();
@@ -85,8 +84,6 @@ private:
   MulticastSessionFactory_rch session_factory_;
 
   MulticastPeer local_peer_;
-
-  MulticastInst* config_;
 
   TransportReactorTask* reactor_task_;
 
