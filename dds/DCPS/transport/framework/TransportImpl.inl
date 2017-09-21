@@ -54,10 +54,5 @@ OpenDDS::DCPS::TransportImpl::connection_info
   return this->connection_info_i(local_info);
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportImpl::pre_shutdown_i()
-{
-  //noop
-}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -133,12 +133,6 @@ OpenDDS::DCPS::TransportSendStrategy::get_handle()
 }
 
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportSendStrategy::transport_shutdown ()
-{
-  this->transport_shutdown_ = true;
-}
-
 ACE_INLINE size_t
 OpenDDS::DCPS::TransportSendStrategy::max_message_size() const
 {

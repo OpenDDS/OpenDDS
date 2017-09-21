@@ -72,7 +72,6 @@ private:
   virtual bool configure_i(TcpInst& config);
 
   virtual void shutdown_i();
-  virtual void pre_shutdown_i();
 
   virtual bool connection_info_i(TransportLocator& local_info) const;
 

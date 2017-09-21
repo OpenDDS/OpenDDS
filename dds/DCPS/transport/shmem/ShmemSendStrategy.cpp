@@ -18,14 +18,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link, const ShmemInst& inst)
-  : TransportSendStrategy(0, inst,
+ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link)
+  : TransportSendStrategy(0, link->impl(),
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>())
   , link_(link)
   , current_data_(0)
-  , datalink_control_size_(inst.datalink_control_size_)
+  , datalink_control_size_(link->impl().config().datalink_control_size_)
 {
 #ifdef ACE_HAS_POSIX_SEM
   memset(&peer_semaphore_, 0, sizeof(peer_semaphore_));

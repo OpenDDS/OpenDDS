@@ -189,10 +189,6 @@ protected:
   /// the shutdown "event" occurs.
   virtual void shutdown_i() = 0;
 
-  /// Called before transport is shutdown to let the
-  /// concrete transport to do anything necessary.
-  virtual void pre_shutdown_i();
-
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
   /// returned.
@@ -201,6 +197,7 @@ protected:
   typedef OPENDDS_MULTIMAP(TransportClient_wrch, DataLink_rch) PendConnMap;
   PendConnMap pending_connections_;
   void add_pending_connection(const TransportClient_rch& client, DataLink_rch link);
+  void shutdown();
 
 private:
   /// We have a few friends in the transport framework so that they
@@ -212,7 +209,6 @@ private:
   /// Called by the TransportRegistry when this TransportImpl object
   /// is released while the TransportRegistry is handling a release()
   /// "event".
-  void shutdown();
 
   /// The DataLink itself calls this method when it thinks it is
   /// no longer used for any associations.  This occurs during

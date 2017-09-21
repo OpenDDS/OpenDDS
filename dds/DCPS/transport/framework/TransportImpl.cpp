@@ -66,8 +66,6 @@ TransportImpl::shutdown()
     this->reactor_task_->stop();
   }
 
-  this->pre_shutdown_i();
-
   // Tell our subclass about the "shutdown event".
   this->shutdown_i();
 

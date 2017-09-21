@@ -689,10 +689,6 @@ DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink", "transport_shutdown", 6);
 
-  if (!this->send_strategy_.is_nil()) {
-    this->send_strategy_->transport_shutdown();
-  }
-
   //this->cancel_release();
   this->set_scheduling_release(false);
   this->scheduled_to_stop_at_ = ACE_Time_Value::zero;

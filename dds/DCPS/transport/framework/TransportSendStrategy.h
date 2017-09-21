@@ -18,7 +18,6 @@
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
-#include "TransportInst_rch.h"
 #include "ThreadSynchStrategy_rch.h"
 #include "ace/Synch_Traits.h"
 
@@ -35,6 +34,7 @@ class TransportSendBuffer;
 class DataSampleElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
+class TransportImpl;
 
 /**
  * This class provides methods to fill packets with samples for sending
@@ -126,10 +126,6 @@ public:
 
   bool isDirectMode();
 
-  /// Informed transport shutdown so no more notifications to
-  /// listener.
-  void transport_shutdown();
-
   typedef BasicQueue<TransportQueueElement> QueueType;
 
   /// Convert ACE_Message_Block chain into iovec[] entries for send(),
@@ -146,7 +142,7 @@ public:
 protected:
 
   TransportSendStrategy(std::size_t id,
-                        const TransportInst& transport_inst,
+                        TransportImpl& transport,
                         ThreadSynchResource* synch_resource,
                         Priority priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
@@ -386,7 +382,7 @@ private:
   /// is created in start if the transport needs it.
   TransportRetainedElementAllocator* retained_element_allocator_;
 
-  const TransportInst& transport_inst_;
+  TransportImpl& transport_;
 
   bool graceful_disconnecting_;
 
@@ -398,8 +394,6 @@ private:
   // refactored into the TransportSendStrategy eventually; a good
   // amount of private state is shared between both classes.
   friend class TransportSendBuffer;
-
-  bool transport_shutdown_;
 
 protected:
   ThreadSynch* synch() const;

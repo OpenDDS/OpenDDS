@@ -40,6 +40,7 @@ TcpTransport::TcpTransport(TcpInst& inst)
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
 
   if (!(configure_i(inst) && open())) {
+    this->shutdown();
     throw Transport::UnableToCreate();
   }
 
@@ -402,26 +403,23 @@ TcpTransport::configure_i(TcpInst& config)
   return true;
 }
 
-void
-TcpTransport::pre_shutdown_i()
-{
-  DBG_ENTRY_LVL("TcpTransport","pre_shutdown_i",6);
-
-  GuardType guard(this->links_lock_);
-
-  AddrLinkMap::ENTRY* entry;
-
-  for (AddrLinkMap::ITERATOR itr(this->links_);
-       itr.next(entry);
-       itr.advance()) {
-    entry->int_id_->pre_stop_i();
-  }
-}
 
 void
 TcpTransport::shutdown_i()
 {
   DBG_ENTRY_LVL("TcpTransport","shutdown_i",6);
+
+  {
+    GuardType guard(this->links_lock_);
+
+    AddrLinkMap::ENTRY* entry;
+
+    for (AddrLinkMap::ITERATOR itr(this->links_);
+         itr.next(entry);
+         itr.advance()) {
+      entry->int_id_->pre_stop_i();
+    }
+  }
 
   // Don't accept any more connections.
   this->acceptor_->close();
@@ -678,7 +676,7 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
   connection->id() = last_link_;
 
   TransportSendStrategy_rch send_strategy (
-    make_rch<TcpSendStrategy>(last_link_, ref(link), config(), connection,
+    make_rch<TcpSendStrategy>(last_link_, ref(link), connection,
                              new TcpSynchResource(connection,
                                                   this->config().max_output_pause_period_),
                              this->reactor_task(), link.transport_priority()));
