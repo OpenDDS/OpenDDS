@@ -366,7 +366,7 @@ private:
   TransportDataBlockAllocator* header_db_allocator_;
 
   /// The thread synch object.
-  ThreadSynch* synch_;
+  unique_ptr<ThreadSynch> synch_;
 
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.

@@ -24,7 +24,7 @@ OpenDDS::DCPS::TransportSendStrategy::synch() const
 {
   DBG_ENTRY_LVL("TransportSendStrategy","synch",6);
 
-  return synch_;
+  return synch_.get();
 }
 
 ACE_INLINE void

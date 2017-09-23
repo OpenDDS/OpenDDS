@@ -15,7 +15,6 @@
 OpenDDS::DCPS::ThreadSynch::~ThreadSynch()
 {
   DBG_ENTRY_LVL("ThreadSynch","~ThreadSynch",6);
-  delete this->resource_;
 }
 
 int

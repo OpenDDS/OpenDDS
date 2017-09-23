@@ -92,14 +92,14 @@ TransportSendStrategy::TransportSendStrategy(
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper(priority);
-  this->synch_ = thread_sync_strategy->create_synch_object(
+  this->synch_.reset(thread_sync_strategy->create_synch_object(
                    synch_resource,
 #ifdef ACE_WIN32
                    ACE_DEFAULT_THREAD_PRIORITY,
 #else
                    mapper.thread_priority(),
 #endif
-                   TheServiceParticipant->scheduler());
+                   TheServiceParticipant->scheduler()));
 
   // We cache this value in data member since it doesn't change, and we
   // don't want to keep asking for it over and over.
@@ -117,7 +117,6 @@ TransportSendStrategy::~TransportSendStrategy()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
 
-  delete this->synch_;
 
   this->delayed_delivered_notification_queue_.clear();
 
@@ -867,7 +866,7 @@ TransportSendStrategy::start()
   // We will do the reverse when we unregister ourselves (as a worker) from
   // the synch_ object.
 
-  if (this->synch_->register_worker(rchandle_from(this)) == -1) {
+  if (this->synch_->register_worker(*this) == -1) {
 
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportSendStrategy failed to register "
