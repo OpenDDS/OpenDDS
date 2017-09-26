@@ -71,7 +71,7 @@ private:
   void send_graceful_disconnect_message();
 
   ACE_INET_Addr           remote_address_;
-  TcpConnection_rch connection_;
+  WeakRcHandle<TcpConnection> connection_;
   bool graceful_disconnect_sent_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
   typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;

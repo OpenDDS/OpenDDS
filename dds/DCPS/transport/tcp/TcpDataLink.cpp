@@ -52,12 +52,10 @@ OpenDDS::DCPS::TcpDataLink::stop_i()
 {
   DBG_ENTRY_LVL("TcpDataLink","stop_i",6);
 
-  if (!this->connection_.is_nil()) {
+  TcpConnection_rch connection(this->connection_.lock());
+  if (connection) {
     // Tell the connection object to disconnect.
-    this->connection_->disconnect();
-
-    // Drop our reference to the connection object.
-    this->connection_.reset();
+    connection->disconnect();
   }
 }
 
@@ -71,21 +69,23 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
   TcpReceiveStrategy * rs
     = dynamic_cast <TcpReceiveStrategy*>(this->receive_strategy_.in());
 
+  TcpConnection_rch connection(this->connection_.lock());
+
   if (rs != NULL) {
     // If we received the GRACEFUL_DISCONNECT message from peer before we
     // initiate the disconnecting of the datalink, then we will not send
     // the GRACEFUL_DISCONNECT message to the peer.
     bool disconnected = rs->gracefully_disconnected();
 
-    if (!this->connection_.is_nil() && !this->graceful_disconnect_sent_
+    if (connection && !this->graceful_disconnect_sent_
         && !disconnected) {
       this->send_graceful_disconnect_message();
       this->graceful_disconnect_sent_ = true;
     }
   }
 
-  if (!this->connection_.is_nil()) {
-    this->connection_->shutdown();
+  if (connection) {
+    connection->shutdown();
   }
 }
 
@@ -101,7 +101,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
   DBG_ENTRY_LVL("TcpDataLink","connect",6);
 
   // Sanity check - cannot connect() if we are already connected.
-  if (!this->connection_.is_nil()) {
+  if (this->connection_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpDataLink already connected.\n"),
                      -1);
@@ -109,14 +109,14 @@ OpenDDS::DCPS::TcpDataLink::connect(
 
   this->connection_ = connection;
 
-  if (this->connection_->peer().enable(ACE_NONBLOCK) == -1) {
+  if (connection->peer().enable(ACE_NONBLOCK) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpDataLink::connect failed to set "
                       "ACE_NONBLOCK %p\n", ACE_TEXT("enable")), -1);
   }
 
   // Let connection know the datalink for callbacks upon reconnect failure.
-  this->connection_->set_datalink(rchandle_from(this));
+  connection->set_datalink(rchandle_from(this));
 
   // And lastly, inform our base class (DataLink) that we are now "connected",
   // and it should start the strategy objects.
@@ -152,10 +152,13 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
   //has previously gone through connection phase so this is a reuse of the connection
   //proceed to determine if we can reuse/reset existing mechanisms or need to start from
   //scratch.
-  if (!this->connection_.is_nil()) {
+
+  TcpConnection_rch old_connection(this->connection_.lock());
+
+  if (old_connection) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpDataLink::reuse_existing_connection - "
                            "trying to reuse existing connection\n"), 0);
-    this->connection_->transfer(connection.in());
+    old_connection->transfer(connection.in());
 
     //Connection already exists.
     TransportStrategy_rch brs;
@@ -176,11 +179,11 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
 
       // Associate the new connection object with the receiving strategy and disassociate
       // the old connection object with the receiving strategy.
-      int rs_result = rs->reset(this->connection_);
+      int rs_result = rs->reset(connection);
 
       // Associate the new connection object with the sending strategy and disassociate
       // the old connection object with the sending strategy.
-      int ss_result = ss->reset(this->connection_, true);
+      int ss_result = ss->reset(connection, true);
 
       if (rs_result == 0 && ss_result == 0) {
         return 0;
@@ -199,15 +202,16 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpDataLink","reconnect",6);
 
+  TcpConnection_rch existing_connection(this->connection_.lock());
   // Sanity check - the connection should exist already since we are reconnecting.
-  if (this->connection_.is_nil()) {
+  if (!existing_connection) {
     VDBG_LVL((LM_ERROR,
               "(%P|%t) ERROR: TcpDataLink::reconnect old connection is nil.\n")
              , 1);
     return -1;
   }
 
-  this->connection_->transfer(connection.in());
+  existing_connection->transfer(connection.in());
 
   bool released = false;
   TransportStrategy_rch brs;
@@ -238,11 +242,11 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
-  int rs_result = rs->reset(this->connection_);
+  int rs_result = rs->reset(connection);
 
   // Associate the new connection object with the sending strategy and disassociate
   // the old connection object with the sending strategy.
-  int ss_result = ss->reset(this->connection_);
+  int ss_result = ss->reset(connection);
 
   if (rs_result == 0 && ss_result == 0) {
     return 0;

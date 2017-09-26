@@ -21,7 +21,7 @@ OpenDDS::DCPS::TcpDataLink::remote_address() const
 ACE_INLINE OpenDDS::DCPS::TcpConnection_rch
 OpenDDS::DCPS::TcpDataLink::get_connection()
 {
-  return this->connection_;
+  return this->connection_.lock();
 }
 
 ACE_INLINE
