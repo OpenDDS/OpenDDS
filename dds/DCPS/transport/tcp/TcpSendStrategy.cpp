@@ -35,7 +35,6 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
 {
   DBG_ENTRY_LVL("TcpSendStrategy","TcpSendStrategy",6);
 
-  connection->set_send_strategy(rchandle_from(this));
 }
 
 OpenDDS::DCPS::TcpSendStrategy::~TcpSendStrategy()
@@ -87,17 +86,8 @@ OpenDDS::DCPS::TcpSendStrategy::reset(const TcpConnection_rch& connection, bool 
                      -1);
   }
 
-  // This will cause the connection_ object to drop its reference to this
-  // TransportSendStrategy object.
-  this->connection_->remove_send_strategy();
 
   this->connection_ = connection;
-
-  // Tell the TcpConnection that we are the object that it should
-  // call when it receives a handle_input() "event", and we will carry
-  // it out.  The TcpConnection object will make a "copy" of the
-  // reference (to this object) that we pass-in here.
-  this->connection_->set_send_strategy(rchandle_from(this));
 
   //For the case of a send_strategy being reused for a new connection (not reconnect)
   //need to reset the state
@@ -160,7 +150,6 @@ OpenDDS::DCPS::TcpSendStrategy::stop_i()
 
   // This will cause the connection_ object to drop its reference to this
   // TransportSendStrategy object.
-  this->connection_->remove_send_strategy();
   this->connection_.reset();
 }
 

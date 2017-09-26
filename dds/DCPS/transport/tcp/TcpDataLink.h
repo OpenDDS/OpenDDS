@@ -18,8 +18,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class TransportSendStrategy;
-class TransportStrategy;
+class TcpSendStrategy;
+class TcpReceiveStrategy;
 
 class TcpDataLink : public DataLink {
 public:
@@ -38,8 +38,8 @@ public:
   /// for this TcpDataLink.  Called by the TcpTransport's
   /// connect_datalink() method.
   int connect(const TcpConnection_rch& connection,
-              const TransportSendStrategy_rch& send_strategy,
-              const TransportStrategy_rch& receive_strategy);
+              const RcHandle<TcpSendStrategy>& send_strategy,
+              const RcHandle<TcpReceiveStrategy>& receive_strategy);
 
   int reuse_existing_connection(const TcpConnection_rch& connection);
   int reconnect(const TcpConnection_rch& connection);
@@ -58,6 +58,9 @@ public:
   void ack_received(const ReceivedDataSample& sample);
   void request_ack_received(const ReceivedDataSample& sample);
   void drop_pending_request_acks();
+
+  TcpSendStrategy* send_strategy();
+  TcpReceiveStrategy* receive_strategy();
 
 protected:
 

@@ -100,14 +100,26 @@ OpenDDS::DCPS::TcpConnection::~TcpConnection()
 
 }
 
+OpenDDS::DCPS::TcpSendStrategy*
+OpenDDS::DCPS::TcpConnection::send_strategy()
+{
+  return this->link_->send_strategy();
+}
+
+OpenDDS::DCPS::TcpReceiveStrategy*
+OpenDDS::DCPS::TcpConnection::receive_strategy()
+{
+  return this->link_->receive_strategy();
+}
+
 void
 OpenDDS::DCPS::TcpConnection::disconnect()
 {
   DBG_ENTRY_LVL("TcpConnection","disconnect",6);
   this->connected_ = false;
 
-  if (!this->receive_strategy_.is_nil()) {
-    this->receive_strategy_->get_reactor()->remove_handler(this,
+  if (this->receive_strategy()) {
+    this->receive_strategy()->get_reactor()->remove_handler(this,
                                                            ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
   }
 
@@ -117,28 +129,6 @@ OpenDDS::DCPS::TcpConnection::disconnect()
 
   this->peer().close();
 
-}
-
-// This can not be inlined due to circular dependencies disallowing
-// visibility into the receive strategy to call add_ref().  Oh well.
-void
-OpenDDS::DCPS::TcpConnection::set_receive_strategy
-(const TcpReceiveStrategy_rch& receive_strategy)
-{
-  DBG_ENTRY_LVL("TcpConnection","set_receive_strategy",6);
-
-  // Make a "copy" for ourselves
-  this->receive_strategy_ = receive_strategy;
-}
-
-void
-OpenDDS::DCPS::TcpConnection::set_send_strategy
-(const TcpSendStrategy_rch& send_strategy)
-{
-  DBG_ENTRY_LVL("TcpConnection","set_send_strategy",6);
-
-  // Make a "copy" for ourselves
-  this->send_strategy_ = send_strategy;
 }
 
 int
@@ -308,19 +298,19 @@ OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE fd)
     return handle_setup_input(fd);
   }
 
-  if (receive_strategy_.is_nil()) {
+  if (!receive_strategy()) {
     return 0;
   }
 
-  return receive_strategy_->handle_dds_input(fd);
+  return receive_strategy()->handle_dds_input(fd);
 }
 
 int
 OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_output",6);
-
-  if (!this->send_strategy_.is_nil()) {
+  OpenDDS::DCPS::TcpSendStrategy* send_strategy = this->send_strategy();
+  if (send_strategy) {
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TcpConnection::handle_output() [%d] - ")
@@ -330,12 +320,12 @@ OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
 
     // Process data to be sent from the queue.
     if (ThreadSynchWorker::WORK_OUTCOME_MORE_TO_DO
-        != send_strategy_->perform_work()) {
+        != send_strategy->perform_work()) {
 
       // Stop handling output ready events when there is nothing to output.
       // N.B. This calls back into the reactor.  Is the reactor lock
       //      recursive?
-      send_strategy_->schedule_output();
+      send_strategy->schedule_output();
     }
   }
 
@@ -350,8 +340,8 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
   // TBD SOON - Find out exactly when close() is called.
   //            I have no clue when and who might call this.
 
-  if (!this->send_strategy_.is_nil())
-    this->send_strategy_->terminate_send();
+  if (this->send_strategy())
+    this->send_strategy()->terminate_send();
 
   this->disconnect();
 
@@ -376,13 +366,13 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
                this->remote_address_.get_port_number()));
   }
 
-  bool graceful = !this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected();
+  bool graceful = this->receive_strategy() && this->receive_strategy()->gracefully_disconnected();
 
-  if (!this->send_strategy_.is_nil()) {
+  if (this->send_strategy()) {
     if (graceful) {
-      this->send_strategy_->terminate_send();
+      this->send_strategy()->terminate_send();
     } else {
-      this->send_strategy_->suspend_send();
+      this->send_strategy()->suspend_send();
     }
   }
 
@@ -611,7 +601,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_on_new_association()
 
   else if (this->active_establishment() == 0) {
     this->reconnect_state_ = INIT_STATE;
-    this->send_strategy_->resume_send();
+    this->send_strategy()->resume_send();
     return 0;
   }
 
@@ -642,12 +632,10 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
 
     // It is possible that the passive reconnect is called after the new connection
     // is accepted and the receive_strategy of this old connection is reset to nil.
-    if (!this->receive_strategy_.is_nil()) {
-      TcpReceiveStrategy* rs
-        = dynamic_cast <TcpReceiveStrategy*>(this->receive_strategy_.in());
+    if (this->receive_strategy()) {
 
       // Give a copy to reactor.
-      this->passive_reconnect_timer_id_ = rs->get_reactor()->schedule_timer(this, 0, timeout);
+      this->passive_reconnect_timer_id_ = this->receive_strategy()->get_reactor()->schedule_timer(this, 0, timeout);
 
       if (this->passive_reconnect_timer_id_ == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -702,7 +690,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
   if (this->reconnect_state_ == INIT_STATE) {
     // Suspend send once.
-    this->send_strategy_->suspend_send();
+    this->send_strategy()->suspend_send();
 
     this->disconnect();
 
@@ -750,14 +738,14 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
       this->reconnect_state_ = LOST_STATE;
       this->link_->notify(DataLink::LOST);
-      this->send_strategy_->terminate_send();
+      this->send_strategy()->terminate_send();
 
     } else {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
                  this->config_name().c_str(),
                  this->remote_address_.get_host_addr(),
                  this->remote_address_.get_port_number()));
-      if (this->receive_strategy_->get_reactor()->register_handler(this, ACE_Event_Handler::READ_MASK) == -1) {
+      if (this->receive_strategy()->get_reactor()->register_handler(this, ACE_Event_Handler::READ_MASK) == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "(%P|%t) ERROR: OpenDDS::DCPS::TcpConnection::active_reconnect_i() can't register "
                           "with reactor %X %p\n", this, ACE_TEXT("register_handler")),
@@ -765,7 +753,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
       }
       this->reconnect_state_ = RECONNECTED_STATE;
       this->link_->notify(DataLink::RECONNECTED);
-      this->send_strategy_->resume_send();
+      this->send_strategy()->resume_send();
     }
 
     this->last_reconnect_attempted_ = ACE_OS::gettimeofday();
@@ -798,8 +786,8 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
 
     // The handle_timeout may be called after the connection is re-established
     // and the send strategy of this old connection is reset to nil.
-    if (!this->send_strategy_.is_nil())
-      this->send_strategy_->terminate_send();
+    if (this->send_strategy())
+      this->send_strategy()->terminate_send();
 
     this->reconnect_state_ = LOST_STATE;
 
@@ -860,11 +848,8 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
     break;
 
   case PASSIVE_WAITING_STATE: {
-    TcpReceiveStrategy* rs
-      = dynamic_cast <TcpReceiveStrategy*>(this->receive_strategy_.in());
-
     // Cancel the timer since we got new connection.
-    if (rs->get_reactor()->cancel_timer(this) == -1) {
+    if (this->receive_strategy()->get_reactor()->cancel_timer(this) == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TcpConnection::transfer, ")
                  ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
@@ -891,8 +876,8 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
   }
 
   this->reconnect_task_.close(1);
-  connection->receive_strategy_ = this->receive_strategy_;
-  connection->send_strategy_ = this->send_strategy_;
+  // connection->receive_strategy_ = this->receive_strategy_;
+  // connection->send_strategy_ = this->send_strategy_;
   connection->remote_address_ = this->remote_address_;
   connection->local_address_ = this->local_address_;
   connection->tcp_config_ = this->tcp_config_;
@@ -934,7 +919,7 @@ OpenDDS::DCPS::TcpConnection::notify_lost_on_backpressure_timeout()
 
   if (notify_lost) {
     this->link_->notify(DataLink::LOST);
-    this->send_strategy_->terminate_send();
+    this->send_strategy()->terminate_send();
   }
 
 }
@@ -948,8 +933,8 @@ OpenDDS::DCPS::TcpConnection::relink_from_send(bool do_suspend)
 {
   DBG_ENTRY_LVL("TcpConnection","relink_from_send",6);
 
-  if (do_suspend && !this->send_strategy_.is_nil())
-    this->send_strategy_->suspend_send();
+  if (do_suspend && this->send_strategy())
+    this->send_strategy()->suspend_send();
 
   ReconnectOpType op = DO_RECONNECT;
   this->reconnect_task_.add(op);
@@ -963,8 +948,8 @@ OpenDDS::DCPS::TcpConnection::relink_from_recv(bool do_suspend)
 {
   DBG_ENTRY_LVL("TcpConnection","relink_from_recv",6);
 
-  if (do_suspend && !this->send_strategy_.is_nil())
-    this->send_strategy_->suspend_send();
+  if (do_suspend && this->send_strategy())
+    this->send_strategy()->suspend_send();
 }
 
 bool

@@ -89,12 +89,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","start_i",6);
 
-  // Tell the TcpConnection that we are the object that it should
-  // call when it receives a handle_input() "event", and we will carry
-  // it out.  The TcpConnection object will make a "copy" of the
-  // reference (to this object) that we pass-in here.
-  this->connection_->set_receive_strategy(rchandle_from(this));
-
   if (connection_->is_connector()) {
     // Give the reactor its own reference to the connection object.
     // If ACE_Acceptor was used, the reactor already has this reference
@@ -160,18 +154,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::reset(const TcpConnection_rch& connection)
   TcpDataLink_rch link = link_.lock();
   if (link)
      link->drop_pending_request_acks();
-  // This will cause the connection_ object to drop its reference to this
-  // TransportReceiveStrategy object.
-  this->connection_->remove_receive_strategy();
 
   // Replace with a new connection.
   this->connection_ = connection;
-
-  // Tell the TcpConnection that we are the object that it should
-  // call when it receives a handle_input() "event", and we will carry
-  // it out.  The TcpConnection object will make a "copy" of the
-  // reference (to this object) that we pass-in here.
-  this->connection_->set_receive_strategy(rchandle_from(this));
 
   // Give the reactor its own "copy" of the reference to the connection object.
 
@@ -201,9 +186,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::stop_i()
   TcpDataLink_rch link = link_.lock();
   if (link)
     link->drop_pending_request_acks();
-  // This will cause the connection_ object to drop its reference to this
-  // TransportReceiveStrategy object.
-  this->connection_->remove_receive_strategy();
   this->connection_.reset();
 }
 

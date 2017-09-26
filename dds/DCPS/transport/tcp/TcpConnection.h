@@ -73,15 +73,8 @@ public:
   // itself in as a void*.
   virtual int open(void* arg);
 
-  void set_receive_strategy(const TcpReceiveStrategy_rch& receive_strategy);
-
-  void remove_receive_strategy();
-
-  /// Give a "copy" of the TcpSendStrategy object to this
-  /// connection object.
-  void set_send_strategy(const TcpSendStrategy_rch& send_strategy);
-
-  void remove_send_strategy();
+  TcpSendStrategy* send_strategy();
+  TcpReceiveStrategy* receive_strategy();
 
   /// We pass this "event" along to the receive_strategy.
   virtual int handle_input(ACE_HANDLE);
@@ -171,12 +164,6 @@ private:
 
   /// Flag indicate this connection object is the connector or acceptor.
   bool is_connector_;
-
-  /// Reference to the receiving strategy.
-  TcpReceiveStrategy_rch receive_strategy_;
-
-  /// Reference to the send strategy.
-  TcpSendStrategy_rch send_strategy_;
 
   /// Remote address.
   ACE_INET_Addr remote_address_;

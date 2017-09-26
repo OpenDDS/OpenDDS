@@ -95,8 +95,8 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 int
 OpenDDS::DCPS::TcpDataLink::connect(
   const TcpConnection_rch& connection,
-  const TransportSendStrategy_rch& send_strategy,
-  const TransportStrategy_rch& receive_strategy)
+  const RcHandle<TcpSendStrategy>& send_strategy,
+  const RcHandle<TcpReceiveStrategy>& receive_strategy)
 {
   DBG_ENTRY_LVL("TcpDataLink","connect",6);
 
@@ -445,5 +445,18 @@ OpenDDS::DCPS::TcpDataLink::drop_pending_request_acks()
   }
   pending_request_acks_.clear();
 }
+
+OpenDDS::DCPS::TcpSendStrategy*
+OpenDDS::DCPS::TcpDataLink::send_strategy()
+{
+  return static_cast<OpenDDS::DCPS::TcpSendStrategy*>(send_strategy_.in());
+}
+
+OpenDDS::DCPS::TcpReceiveStrategy*
+OpenDDS::DCPS::TcpDataLink::receive_strategy()
+{
+  return static_cast<OpenDDS::DCPS::TcpReceiveStrategy*>(receive_strategy_.in());
+}
+
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

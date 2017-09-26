@@ -675,13 +675,13 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
 
   connection->id() = last_link_;
 
-  TransportSendStrategy_rch send_strategy (
+  TcpSendStrategy_rch send_strategy (
     make_rch<TcpSendStrategy>(last_link_, ref(link), connection,
                              new TcpSynchResource(connection,
                                                   this->config().max_output_pause_period_),
                              this->reactor_task(), link.transport_priority()));
 
-  TransportStrategy_rch receive_strategy(
+  TcpReceiveStrategy_rch receive_strategy(
     make_rch<TcpReceiveStrategy>(ref(link), connection, this->reactor_task()));
 
   if (link.connect(connection, send_strategy, receive_strategy) != 0) {
