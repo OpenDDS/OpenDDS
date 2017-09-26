@@ -64,7 +64,7 @@ namespace OpenDDS {
     typedef typename TraitsType::DataReaderType Interface;
 
     DataReaderImpl_T (void)
-    : filter_delayed_handler_(make_rch<FilterDelayedHandler>(this))
+    : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this)))
     , data_allocator_ (0)
     {
     }
@@ -1941,7 +1941,7 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
   }
 
   OpenDDS::DCPS::ReceivedDataElement *ptr =
-    new (*rd_allocator_) OpenDDS::DCPS::ReceivedDataElementWithType<MessageTypeWithAllocator>(header,instance_data, &this->sample_lock_);
+    new (*rd_allocator_.get()) OpenDDS::DCPS::ReceivedDataElementWithType<MessageTypeWithAllocator>(header,instance_data, &this->sample_lock_);
 
   ptr->disposed_generation_count_ =
     instance_ptr->instance_state_.disposed_generation_count();
@@ -2140,11 +2140,10 @@ DDS::ReturnCode_t check_inputs (
 
 class FilterDelayedHandler : public Watchdog {
 public:
-  FilterDelayedHandler(DataReaderImpl_T<MessageType>* data_reader_impl)
+  FilterDelayedHandler(DataReaderImpl_T<MessageType>& data_reader_impl)
   // Watchdog's interval_ only used for resetting current intervals
   : Watchdog(ACE_Time_Value(0))
   , data_reader_impl_(data_reader_impl)
-  , data_reader_var_(DDS::DataReader::_duplicate(data_reader_impl))
   {
   }
 
@@ -2155,8 +2154,6 @@ public:
   void detach()
   {
     cancel();
-    data_reader_impl_ = 0;
-    data_reader_var_ = DDS::DataReader::_nil();
   }
 
   void cancel()
@@ -2172,7 +2169,9 @@ public:
                     const ACE_Time_Value& filter_time_expired)
   {
     // sample_lock_ should already be held
-    if (!data_reader_impl_) {
+    RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
+
+    if (!data_reader_impl) {
       return;
     }
 
@@ -2181,14 +2180,14 @@ public:
       map_.insert(std::make_pair(handle, FilterDelayedSample(instance_data, hdr, just_registered)));
     FilterDelayedSample& sample = result.first->second;
     if (result.second) {
-      const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation);
+      const ACE_Time_Value interval = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation);
 
-      const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation) - filter_time_expired;
+      const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation) - filter_time_expired;
 
       long timer_id = -1;
 
       {
-        ACE_GUARD(Reverse_Lock_t, unlock_guard, data_reader_impl_->reverse_sample_lock_);
+        ACE_GUARD(Reverse_Lock_t, unlock_guard, data_reader_impl->reverse_sample_lock_);
         timer_id = schedule_timer(reinterpret_cast<const void*>(intptr_t(handle)),
           filter_time_remaining, interval);
       }
@@ -2228,8 +2227,11 @@ public:
       clear_message(sample->second.message);
 
       {
-        ACE_GUARD(Reverse_Lock_t, unlock_guard, data_reader_impl_->reverse_sample_lock_);
-        cancel_timer(sample->second.timer_id);
+        RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
+        if (data_reader_impl) {
+          ACE_GUARD(Reverse_Lock_t, unlock_guard, data_reader_impl->reverse_sample_lock_);
+          cancel_timer(sample->second.timer_id);
+        }
       }
 
       // use the handle to erase, since the sample lock was released
@@ -2244,10 +2246,11 @@ private:
 
     DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
 
-    if (!data_reader_impl_)
+    RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
+    if (!data_reader_impl)
       return -1;
 
-    SubscriptionInstance_rch instance = data_reader_impl_->get_handle_instance(handle);
+    SubscriptionInstance_rch instance = data_reader_impl->get_handle_instance(handle);
 
     if (!instance)
       return 0;
@@ -2255,7 +2258,7 @@ private:
     long cancel_timer_id = -1;
 
     {
-      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_, -1);
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, data_reader_impl->sample_lock_, -1);
 
       typename FilterDelayedSampleMap::iterator data = map_.find(handle);
       if (data == map_.end()) {
@@ -2273,13 +2276,13 @@ private:
         const bool new_instance = data->second.new_instance;
 
         // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-        data_reader_impl_->finish_store_instance_data(instance_data, *header, instance, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
+        data_reader_impl->finish_store_instance_data(instance_data, *header, instance, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
 
-        data_reader_impl_->accept_sample_processing(instance, *header, new_instance);
+        data_reader_impl->accept_sample_processing(instance, *header, new_instance);
       } else {
         // this check is performed to handle the corner case where store_instance_data received and delivered a sample, while this
         // method was waiting for the lock
-        const ACE_Time_Value interval = duration_to_time_value(data_reader_impl_->qos_.time_based_filter.minimum_separation);
+        const ACE_Time_Value interval = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation);
         if (ACE_OS::gettimeofday() - instance->last_sample_tv_ >= interval) {
           // nothing to process, so unregister this handle for timeout
           cancel_timer_id = data->second.timer_id;
@@ -2297,8 +2300,10 @@ private:
 
   virtual void reschedule_deadline()
   {
-    if (data_reader_impl_) {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
+    RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
+
+    if (data_reader_impl) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl->sample_lock_);
 
       for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
         reset_timer_interval(sample->second.timer_id);
@@ -2308,8 +2313,9 @@ private:
 
   void cleanup()
   {
-    if (data_reader_impl_) {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl_->sample_lock_);
+    RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
+    if (data_reader_impl) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl->sample_lock_);
       // insure instance_ptrs get freed
       for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
         clear_message(sample->second.message);
@@ -2321,14 +2327,14 @@ private:
 
   void clear_message(MessageTypeWithAllocator*& message)
   {
-    if (data_reader_impl_) {
+    RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
+    if (data_reader_impl) {
       delete message;
       message = 0;
     }
   }
 
-  DataReaderImpl_T<MessageType>* data_reader_impl_;
-  DDS::DataReader_var data_reader_var_;
+  WeakRcHandle<DataReaderImpl_T<MessageType> > data_reader_impl_;
 
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
 

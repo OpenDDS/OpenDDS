@@ -152,7 +152,6 @@ DataReaderImpl::~DataReaderImpl()
   liveliness_timer_->cancel_timer();
   liveliness_timer_->wait();
 
-  delete rd_allocator_;
 }
 
 // this method is called when delete_datareader is called.
@@ -1258,12 +1257,12 @@ DataReaderImpl::enable()
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  rd_allocator_ = new ReceivedDataAllocator(n_chunks_);
+  rd_allocator_.reset(new ReceivedDataAllocator(n_chunks_));
 
   if (DCPS_debug_level >= 2)
     ACE_DEBUG((LM_DEBUG,"(%P|%t) DataReaderImpl::enable"
         " Cached_Allocator_With_Overflow %x with %d chunks\n",
-        rd_allocator_, n_chunks_));
+        rd_allocator_.get(), n_chunks_));
 
   if ((qos_.liveliness.lease_duration.sec !=
       DDS::DURATION_INFINITE_SEC) &&

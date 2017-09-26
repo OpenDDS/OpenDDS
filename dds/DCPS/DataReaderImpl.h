@@ -594,7 +594,7 @@ protected:
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
 
-  ReceivedDataAllocator        *rd_allocator_;
+  unique_ptr<ReceivedDataAllocator>  rd_allocator_;
   DDS::DataReaderQos           qos_;
 
   // Status conditions accessible by subclasses.
