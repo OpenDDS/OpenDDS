@@ -151,8 +151,8 @@ private:
 
   TransportReactorTask_rch reactor_task_;
 
-  RtpsUdpSendStrategy_rch send_strategy_;
-  RtpsUdpReceiveStrategy_rch recv_strategy_;
+  RtpsUdpSendStrategy* send_strategy();
+  RtpsUdpReceiveStrategy* receive_strategy();
 
   GuidPrefix_t local_prefix_;
 
