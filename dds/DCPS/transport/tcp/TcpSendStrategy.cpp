@@ -30,7 +30,6 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
                           synch_resource, priority,
                           make_rch<ReactorSynchStrategy>(this,task->get_reactor()))
   , connection_(connection)
-  , link_(link)
   , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","TcpSendStrategy",6);

@@ -66,8 +66,7 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 
   DataLink::pre_stop_i();
 
-  TcpReceiveStrategy * rs
-    = dynamic_cast <TcpReceiveStrategy*>(this->receive_strategy_.in());
+  TcpReceiveStrategy * rs = this->receive_strategy();
 
   TcpConnection_rch connection(this->connection_.lock());
 
@@ -179,7 +178,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
 
       // Associate the new connection object with the receiving strategy and disassociate
       // the old connection object with the receiving strategy.
-      int rs_result = rs->reset(connection);
+      int rs_result = rs->reset(0, connection.in());
 
       // Associate the new connection object with the sending strategy and disassociate
       // the old connection object with the sending strategy.
@@ -242,7 +241,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
-  int rs_result = rs->reset(connection);
+  int rs_result = rs->reset(existing_connection.in(), connection.in());
 
   // Associate the new connection object with the sending strategy and disassociate
   // the old connection object with the sending strategy.

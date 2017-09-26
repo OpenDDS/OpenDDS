@@ -24,12 +24,11 @@ class TcpReceiveStrategy : public TransportReceiveStrategy<> {
 public:
 
   TcpReceiveStrategy(TcpDataLink& link,
-                     const TcpConnection_rch& connection,
                      const TransportReactorTask_rch& task);
 
   virtual ~TcpReceiveStrategy();
 
-  int reset(const TcpConnection_rch& connection);
+  int reset(TcpConnection* old_connection, TcpConnection* new_connection);
 
   ACE_Reactor* get_reactor();
 
@@ -54,8 +53,7 @@ protected:
 
 private:
 
-  WeakRcHandle<TcpDataLink> link_;
-  TcpConnection_rch  connection_;
+  TcpDataLink& link_;
   TransportReactorTask_rch reactor_task_;
 };
 

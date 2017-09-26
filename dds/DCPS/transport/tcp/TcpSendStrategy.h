@@ -56,7 +56,6 @@ protected:
   virtual void add_delayed_notification(TransportQueueElement* element);
 private:
   TcpConnection_rch connection_;
-  WeakRcHandle<TcpDataLink> link_;
   TransportReactorTask_rch reactor_task_;
 };
 

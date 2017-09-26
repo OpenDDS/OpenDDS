@@ -22,10 +22,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
   TcpDataLink& link,
-  const TcpConnection_rch& connection,
   const TransportReactorTask_rch& task)
   : link_(link)
-  , connection_(connection)
   , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","TcpReceiveStrategy",6);
@@ -46,10 +44,8 @@ OpenDDS::DCPS::TcpReceiveStrategy::receive_bytes(
   DBG_ENTRY_LVL("TcpReceiveStrategy", "receive_bytes", 6);
 
   // We don't do anything to the remote_address for the Tcp case.
-
-  TcpConnection_rch connection = this->connection_;
-
-  if (connection.is_nil()) {
+  TcpConnection_rch connection = link_.get_connection();
+  if (!connection) {
     return 0;
   }
 
@@ -62,25 +58,20 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","deliver_sample",6);
 
-  TcpDataLink_rch link = this->link_.lock();
-  if (!link) {
-    return;
-  }
-
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
     this->gracefully_disconnected_ = true;
   }
   else if (sample.header_.message_id_ == REQUEST_ACK) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received REQUEST_ACK \n"));
-    link->request_ack_received(sample);
+    link_.request_ack_received(sample);
   }
   else if (sample.header_.message_id_ == SAMPLE_ACK) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received SAMPLE_ACK \n"));
-    link->ack_received(sample);
+    link_.ack_received(sample);
   }
   else {
-    link->data_received(sample);
+    link_.data_received(sample);
   }
 }
 
@@ -89,32 +80,27 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","start_i",6);
 
-  if (connection_->is_connector()) {
-    // Give the reactor its own reference to the connection object.
-    // If ACE_Acceptor was used, the reactor already has this reference
-  }
+  TcpConnection_rch connection = link_.get_connection();
 
   if (DCPS_debug_level > 9) {
     std::stringstream buffer;
-    TcpDataLink_rch link = link_.lock();
-    if (link)
-      buffer << *link;
+    buffer << link_;
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpReceiveStrategy::start_i() - ")
                ACE_TEXT("link:\n%C connected to %C:%d ")
                ACE_TEXT("registering with reactor to receive.\n"),
                buffer.str().c_str(),
-               this->connection_->get_remote_address().get_host_name(),
-               this->connection_->get_remote_address().get_port_number()));
+               connection->get_remote_address().get_host_name(),
+               connection->get_remote_address().get_port_number()));
   }
 
   if (this->reactor_task_->get_reactor()->register_handler
-      (this->connection_.in(),
+      (connection.in(),
        ACE_Event_Handler::READ_MASK) == -1) {
     // Take back the "copy" we made.
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpReceiveStrategy::start_i TcpConnection can't register with "
-                      "reactor %@ %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
+                      "reactor %@ %p\n", connection.in(), ACE_TEXT("register_handler")),
                      -1);
   }
 
@@ -125,43 +111,23 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
 // The "old" connection object is unregistered with the reactor and the "new" connection
 // object is registered for receiving.
 int
-OpenDDS::DCPS::TcpReceiveStrategy::reset(const TcpConnection_rch& connection)
+OpenDDS::DCPS::TcpReceiveStrategy::reset(TcpConnection* old_connection, TcpConnection* new_connection)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","reset",6);
-
-  // Sanity check - this connection is passed in from the constructor and
-  // it should not be nil.
-  if (this->connection_.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpReceiveStrategy::reset  previous connection "
-                      "should not be nil.\n"),
-                     -1);
-  }
-
-  if (this->connection_ == connection) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpReceiveStrategy::reset should not be called"
-                      " to replace the same connection.\n"),
-                     -1);
-  }
-
   // Unregister the old handle
-  this->reactor_task_->get_reactor()->remove_handler
-  (this->connection_.in(),
-   ACE_Event_Handler::READ_MASK |
-   ACE_Event_Handler::DONT_CALL);
+  if (old_connection) {
+    this->reactor_task_->get_reactor()->remove_handler
+    (old_connection,
+     ACE_Event_Handler::READ_MASK |
+     ACE_Event_Handler::DONT_CALL);
+   }
 
-  TcpDataLink_rch link = link_.lock();
-  if (link)
-     link->drop_pending_request_acks();
-
-  // Replace with a new connection.
-  this->connection_ = connection;
+   link_.drop_pending_request_acks();
 
   // Give the reactor its own "copy" of the reference to the connection object.
 
   if (this->reactor_task_->get_reactor()->register_handler
-      (this->connection_.in(),
+      (new_connection,
        ACE_Event_Handler::READ_MASK) == -1) {
     // Take back the "copy" we made.
     ACE_ERROR_RETURN((LM_ERROR,
@@ -178,24 +144,16 @@ OpenDDS::DCPS::TcpReceiveStrategy::stop_i()
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","stop_i",6);
 
-  this->reactor_task_->get_reactor()->remove_handler
-  (this->connection_.in(),
-   ACE_Event_Handler::READ_MASK |
-   ACE_Event_Handler::DONT_CALL);
-
-  TcpDataLink_rch link = link_.lock();
-  if (link)
-    link->drop_pending_request_acks();
-  this->connection_.reset();
+  link_.drop_pending_request_acks();
 }
 
 void
 OpenDDS::DCPS::TcpReceiveStrategy::relink(bool do_suspend)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","relink",6);
-
-  if (!this->connection_.is_nil())
-    this->connection_->relink_from_recv(do_suspend);
+  TcpConnection_rch connection = link_.get_connection();
+  if (connection)
+    connection->relink_from_recv(do_suspend);
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

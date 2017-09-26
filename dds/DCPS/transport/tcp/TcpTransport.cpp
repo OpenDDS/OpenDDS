@@ -682,7 +682,7 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
                              this->reactor_task(), link.transport_priority()));
 
   TcpReceiveStrategy_rch receive_strategy(
-    make_rch<TcpReceiveStrategy>(ref(link), connection, this->reactor_task()));
+    make_rch<TcpReceiveStrategy>(ref(link), this->reactor_task()));
 
   if (link.connect(connection, send_strategy, receive_strategy) != 0) {
     return -1;
