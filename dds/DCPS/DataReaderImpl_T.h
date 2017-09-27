@@ -2361,7 +2361,7 @@ DataAllocator* data_allocator_;
 };
 
 template <typename MessageType>
-void* DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator new(size_t size, ACE_New_Allocator& pool)
+void* DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator new(size_t , ACE_New_Allocator& pool)
 {
   typedef typename DataReaderImpl_T<MessageType>::MessageTypeMemoryBlock MessageTypeMemoryBlock;
   MessageTypeMemoryBlock* block =

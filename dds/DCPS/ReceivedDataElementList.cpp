@@ -33,7 +33,7 @@ private:
 } // namespace
 
 
-void* OpenDDS::DCPS::ReceivedDataElement::operator new(size_t size, ACE_New_Allocator& pool)
+void* OpenDDS::DCPS::ReceivedDataElement::operator new(size_t , ACE_New_Allocator& pool)
 {
   OpenDDS::DCPS::ReceivedDataElementMemoryBlock* block =  static_cast<OpenDDS::DCPS::ReceivedDataElementMemoryBlock*>(pool.malloc(sizeof(OpenDDS::DCPS::ReceivedDataElementMemoryBlock)));
   block->allocator_ = &pool;
