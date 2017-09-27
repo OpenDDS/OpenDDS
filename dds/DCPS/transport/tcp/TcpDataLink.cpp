@@ -99,13 +99,6 @@ OpenDDS::DCPS::TcpDataLink::connect(
 {
   DBG_ENTRY_LVL("TcpDataLink","connect",6);
 
-  // Sanity check - cannot connect() if we are already connected.
-  if (this->connection_) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpDataLink already connected.\n"),
-                     -1);
-  }
-
   this->connection_ = connection;
 
   if (connection->peer().enable(ACE_NONBLOCK) == -1) {
@@ -182,7 +175,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
 
       // Associate the new connection object with the sending strategy and disassociate
       // the old connection object with the sending strategy.
-      int ss_result = ss->reset(connection, true);
+      int ss_result = ss->reset(true);
 
       if (rs_result == 0 && ss_result == 0) {
         return 0;
@@ -245,7 +238,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 
   // Associate the new connection object with the sending strategy and disassociate
   // the old connection object with the sending strategy.
-  int ss_result = ss->reset(connection);
+  int ss_result = ss->reset();
 
   if (rs_result == 0 && ss_result == 0) {
     return 0;

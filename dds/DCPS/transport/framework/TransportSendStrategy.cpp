@@ -852,13 +852,8 @@ TransportSendStrategy::start()
     header_chunks += 1;
   }
 
-  ACE_NEW_RETURN(this->header_db_allocator_,
-                 TransportDataBlockAllocator(header_chunks),
-                 -1);
-
-  ACE_NEW_RETURN(this->header_mb_allocator_,
-                 TransportMessageBlockAllocator(header_chunks),
-                 -1);
+  this->header_db_allocator_.reset( new TransportDataBlockAllocator(header_chunks));
+  this->header_mb_allocator_.reset( new TransportMessageBlockAllocator(header_chunks));
 
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
@@ -904,9 +899,6 @@ TransportSendStrategy::stop()
       }
     }
   }
-
-  delete this->header_mb_allocator_;
-  delete this->header_db_allocator_;
 
   {
     GuardType guard(this->lock_);
@@ -1654,8 +1646,8 @@ TransportSendStrategy::prepare_packet()
                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                       ACE_Time_Value::zero,
                       ACE_Time_Value::max_time,
-                      this->header_db_allocator_,
-                      this->header_mb_allocator_));
+                      this->header_db_allocator_.get(),
+                      this->header_mb_allocator_.get()));
 
   marshal_transport_header(this->header_block_);
 

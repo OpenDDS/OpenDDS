@@ -27,7 +27,6 @@ public:
 
   TcpSendStrategy(std::size_t id,
                   TcpDataLink& link,
-                  const TcpConnection_rch& connection,
                   TcpSynchResource* synch_resource,
                   const TransportReactorTask_rch& task,
                   Priority priority);
@@ -37,7 +36,7 @@ public:
   /// The "old" connection object is unregistered with the reactor and the "new" connection
   /// object is registered for sending. The implementation of this method is borrowed from
   /// the ReceiveStrategy.
-  int reset(const TcpConnection_rch& connection, bool reset_mode = false);
+  int reset(bool reset_mode = false);
 
   /// Enable or disable output processing by the reactor according to mode.
   virtual void schedule_output();
@@ -55,7 +54,7 @@ protected:
   virtual void stop_i();
   virtual void add_delayed_notification(TransportQueueElement* element);
 private:
-  TcpConnection_rch connection_;
+  TcpDataLink& link_;
   TransportReactorTask_rch reactor_task_;
 };
 

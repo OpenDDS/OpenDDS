@@ -22,14 +22,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   std::size_t id,
   TcpDataLink& link,
-  const TcpConnection_rch& connection,
   TcpSynchResource* synch_resource,
   const TransportReactorTask_rch& task,
   Priority priority)
   : TransportSendStrategy(id, link.impl(),
                           synch_resource, priority,
                           make_rch<ReactorSynchStrategy>(this,task->get_reactor()))
-  , connection_(connection)
+  , link_(link)
   , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","TcpSendStrategy",6);
@@ -65,29 +64,9 @@ OpenDDS::DCPS::TcpSendStrategy::schedule_output()
 }
 
 int
-OpenDDS::DCPS::TcpSendStrategy::reset(const TcpConnection_rch& connection, bool reset_mode)
+OpenDDS::DCPS::TcpSendStrategy::reset(bool reset_mode)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","reset",6);
-
-  // Sanity check - this connection is passed in from the constructor and
-  // it should not be nil.
-  if (this->connection_.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpSendStrategy::reset  previous connection "
-                      "should not be nil.\n"),
-                     -1);
-  }
-
-  if (this->connection_ == connection) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpSendStrategy::reset should not be called"
-                      " to replace the same connection.\n"),
-                     -1);
-  }
-
-
-  this->connection_ = connection;
-
   //For the case of a send_strategy being reused for a new connection (not reconnect)
   //need to reset the state
   if (reset_mode) {
@@ -110,9 +89,9 @@ OpenDDS::DCPS::TcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 ACE_HANDLE
 OpenDDS::DCPS::TcpSendStrategy::get_handle()
 {
-  TcpConnection_rch connection = this->connection_;
+  TcpConnection_rch connection = link_.get_connection();
 
-  if (connection.is_nil())
+  if (!connection)
     return ACE_INVALID_HANDLE;
 
   return connection->peer().get_handle();
@@ -121,9 +100,9 @@ OpenDDS::DCPS::TcpSendStrategy::get_handle()
 ssize_t
 OpenDDS::DCPS::TcpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
-  TcpConnection_rch connection = this->connection_;
+  TcpConnection_rch connection = link_.get_connection();
 
-  if (connection.is_nil())
+  if (!connection)
     return -1;
   ssize_t result = connection->peer().sendv(iov, n);
   if (DCPS_debug_level > 4)
@@ -136,9 +115,10 @@ void
 OpenDDS::DCPS::TcpSendStrategy::relink(bool do_suspend)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","relink",6);
+  TcpConnection_rch connection = link_.get_connection();
 
-  if (!this->connection_.is_nil()) {
-    this->connection_->relink_from_send(do_suspend);
+  if (connection) {
+    connection->relink_from_send(do_suspend);
   }
 }
 
@@ -146,10 +126,6 @@ void
 OpenDDS::DCPS::TcpSendStrategy::stop_i()
 {
   DBG_ENTRY_LVL("TcpSendStrategy","stop_i",6);
-
-  // This will cause the connection_ object to drop its reference to this
-  // TransportSendStrategy object.
-  this->connection_.reset();
 }
 
 void

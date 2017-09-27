@@ -676,7 +676,7 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
   connection->id() = last_link_;
 
   TcpSendStrategy_rch send_strategy (
-    make_rch<TcpSendStrategy>(last_link_, ref(link), connection,
+    make_rch<TcpSendStrategy>(last_link_, ref(link),
                              new TcpSynchResource(connection,
                                                   this->config().max_output_pause_period_),
                              this->reactor_task(), link.transport_priority()));

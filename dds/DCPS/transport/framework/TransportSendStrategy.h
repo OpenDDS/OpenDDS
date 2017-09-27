@@ -360,10 +360,10 @@ private:
   OPENDDS_VECTOR(TQESendModePair) delayed_delivered_notification_queue_;
 
   /// Allocator for header data block.
-  TransportMessageBlockAllocator* header_mb_allocator_;
+  unique_ptr<TransportMessageBlockAllocator> header_mb_allocator_;
 
   /// Allocator for header message block.
-  TransportDataBlockAllocator* header_db_allocator_;
+  unique_ptr<TransportDataBlockAllocator> header_db_allocator_;
 
   /// The thread synch object.
   unique_ptr<ThreadSynch> synch_;
