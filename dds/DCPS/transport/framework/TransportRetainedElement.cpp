@@ -26,13 +26,11 @@ OpenDDS::DCPS::TransportRetainedElement::release_element(
 {
   DBG_ENTRY_LVL("TransportRetainedElement","release_element",6);
 
-  if (this->msg_ != 0) {
-    this->msg_->release();
-    this->msg_ = 0;
-  }
-
   if (this->allocator_) {
-    this->allocator_->free(this);
+    OPENDDS_DES_FREE_THIS(this->allocator_->free, TransportRetainedElement);
+  }
+  else {
+    delete this;
   }
 }
 
@@ -47,7 +45,7 @@ const ACE_Message_Block*
 OpenDDS::DCPS::TransportRetainedElement::msg() const
 {
   DBG_ENTRY_LVL("TransportRetainedElement","msg",6);
-  return this->msg_;
+  return this->msg_.get();
 }
 
 const ACE_Message_Block*

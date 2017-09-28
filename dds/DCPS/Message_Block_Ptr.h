@@ -5,7 +5,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "scoped_ptr.h"
+#include "unique_ptr.h"
 #include "ace/Message_Block.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -16,11 +16,11 @@ namespace DCPS {
 struct Message_Block_Deleter
 {
   void operator()(ACE_Message_Block* ptr) const {
-    ptr->release();
+    ACE_Message_Block::release(ptr);
   }
 };
 
-typedef scoped_ptr<ACE_Message_Block,Message_Block_Deleter> Message_Block_Ptr;
+typedef unique_ptr<ACE_Message_Block,Message_Block_Deleter> Message_Block_Ptr;
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -27,7 +27,7 @@ namespace {
       sample.header_.publication_id_ = pub_id;
       sample.header_.sequence_ = msg_seq;
       sample.header_.more_fragments_ = more_fragments;
-      sample.sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size());
+      sample.sample_.reset(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
     }
     ACE_Message_Block* mb;     // Released (deleted) by sample
     ReceivedDataSample sample;

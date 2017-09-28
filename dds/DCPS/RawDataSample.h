@@ -46,7 +46,7 @@ public:
   /// true -  Message encoded using little-endian byte order.
   bool sample_byte_order_;
   /// The data in unspecified format
-  ACE_Message_Block*       sample_;
+  Message_Block_Ptr       sample_;
 };
 
 void swap(RawDataSample& lhs, RawDataSample& rhs);

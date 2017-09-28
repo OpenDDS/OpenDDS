@@ -60,6 +60,19 @@ DCPS_IR_Domain::DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerato
 
 DCPS_IR_Domain::~DCPS_IR_Domain()
 {
+
+
+  for (DCPS_IR_Topic_Description_Set::iterator itr = topicDescriptions_.begin(); itr != topicDescriptions_.end(); ++ itr) {
+    delete *itr;
+  }
+
+  for (DCPS_IR_Participant_Map::iterator where = this->participants_.begin(); where != this->participants_.end(); ++where) {
+    delete where->second;
+  }
+
+  for (IdToTopicMap::iterator itr = idToTopicMap_.begin(); itr != idToTopicMap_.end(); ++ itr) {
+    delete itr->second;
+  }
 }
 
 const DCPS_IR_Participant_Map&

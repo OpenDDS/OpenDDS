@@ -119,10 +119,10 @@ namespace OpenDDS { namespace Model {
       std::vector<DDS::DomainParticipant*>       participants_;
       std::vector<std::vector<bool> >            types_;  // [part][type]
       std::vector<std::vector<DDS::TopicDescription_var> > topics_; // [part][topic]
-      std::vector<DDS::Publisher*>               publishers_;
-      std::vector<DDS::Subscriber*>              subscribers_;
-      std::vector<DDS::DataWriter*>              writers_;
-      std::vector<DDS::DataReader*>              readers_;
+      std::vector<DDS::Publisher_var>               publishers_;
+      std::vector<DDS::Subscriber_var>              subscribers_;
+      std::vector<DDS::DataWriter_var>              writers_;
+      std::vector<DDS::DataReader_var>              readers_;
       ///}
   };
 

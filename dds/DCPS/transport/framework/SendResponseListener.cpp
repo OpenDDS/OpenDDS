@@ -41,18 +41,16 @@ SendResponseListener::data_dropped(
 }
 
 void
-SendResponseListener::control_delivered(ACE_Message_Block* sample)
+SendResponseListener::control_delivered(const Message_Block_Ptr& /* sample */)
 {
-  if (sample != 0) sample->release();
   tracker_.message_delivered();
 }
 
 void
 SendResponseListener::control_dropped(
-  ACE_Message_Block* sample,
+  const Message_Block_Ptr& /* sample */,
   bool /* dropped_by_transport */)
 {
-  if (sample != 0) sample->release();
   tracker_.message_dropped();
 }
 

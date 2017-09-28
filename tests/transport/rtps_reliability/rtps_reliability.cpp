@@ -136,18 +136,13 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
 
   ~SimpleDataWriter()
   {
-    for (size_t i = 0; i< old_samples_.size(); ++i)
-      old_samples_[i]->release();
   }
 
   void send_data(const SequenceNumber& seq)
   {
     dsle_.get_header().sequence_ = seq;
-
-    if (dsle_.get_sample())
-      old_samples_.push_back(dsle_.get_sample());
-
-    dsle_.set_sample(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
+    Message_Block_Ptr sample(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
+    dsle_.set_sample(move(sample));
     *dsle_.get_sample() << dsle_.get_header();
     dsle_.get_sample()->cont(payload_.duplicate());
     ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));

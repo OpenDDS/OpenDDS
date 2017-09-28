@@ -49,12 +49,12 @@ public:
   SendControlStatus send_control(RepoId                           pub_id,
                                  const TransportSendListener_rch& listener,
                                  const DataSampleHeader&          header,
-                                 ACE_Message_Block*               msg,
+                                 Message_Block_Ptr                msg,
                                  TransportSendControlElementAllocator* allocator = 0);
 
   void send_response(RepoId sub_id,
                      const DataSampleHeader& header,
-                     ACE_Message_Block* response);
+                     Message_Block_Ptr response);
 
   bool remove_sample(const DataSampleElement* sample);
 

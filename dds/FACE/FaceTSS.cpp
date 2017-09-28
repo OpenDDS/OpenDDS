@@ -13,6 +13,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include <cstring>
 
@@ -649,7 +650,13 @@ namespace {
       if (transport && transport[0]) {
         OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->get_config(transport);
         if (config.is_nil()) return INVALID_PARAM;
-        TheTransportRegistry->bind_config(config, pub);
+        try {
+          TheTransportRegistry->bind_config(config, pub);
+        } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
+          return INVALID_PARAM;
+        } catch (const OpenDDS::DCPS::Transport::NotFound&) {
+          return INVALID_PARAM;
+        }
       }
 
       DDS::DataWriterQos datawriter_qos;
@@ -678,7 +685,11 @@ namespace {
       if (transport && transport[0]) {
         OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->get_config(transport);
         if (config.is_nil()) return INVALID_PARAM;
-        TheTransportRegistry->bind_config(config, sub);
+        try {
+          TheTransportRegistry->bind_config(config, sub);
+        } catch (const OpenDDS::DCPS::Transport::MiscProblem& mp) {
+          return INVALID_PARAM;
+        }
       }
 
       DDS::DataReaderQos datareader_qos;

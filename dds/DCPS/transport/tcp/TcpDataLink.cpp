@@ -286,46 +286,40 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
 
   // To work arround this problem, I have to add bogus data to chain with the
   // DataSampleHeader to make the receiving work.
-  ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size();
-  ACE_Message_Block* data = 0;
-  ACE_NEW(data,
-          ACE_Message_Block(20,
-                            ACE_Message_Block::MB_DATA,
-                            0, //cont
-                            0, //data
-                            0, //allocator_strategy
-                            0, //locking_strategy
-                            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                            ACE_Time_Value::zero,
-                            ACE_Time_Value::max_time,
-                            0,
-                            0));
+
+  Message_Block_Ptr data(
+    new ACE_Message_Block(20,
+                          ACE_Message_Block::MB_DATA,
+                          0, //cont
+                          0, //data
+                          0, //allocator_strategy
+                          0, //locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          0,
+                          0));
   data->wr_ptr(20);
 
   header_data.message_length_ = static_cast<ACE_UINT32>(data->length());
 
-  ACE_NEW(message,
-          ACE_Message_Block(max_marshaled_size,
-                            ACE_Message_Block::MB_DATA,
-                            data, //cont
-                            0, //data
-                            0, //allocator_strategy
-                            0, //locking_strategy
-                            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                            ACE_Time_Value::zero,
-                            ACE_Time_Value::max_time,
-                            0,
-                            0));
+  Message_Block_Ptr message(
+    new ACE_Message_Block(max_marshaled_size,
+                          ACE_Message_Block::MB_DATA,
+                          data.release(), //cont
+                          0, //data
+                          0, //allocator_strategy
+                          0, //locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          0,
+                          0));
 
   *message << header_data;
 
-  TransportControlElement* send_element = 0;
-
-  ACE_NEW(send_element, TransportControlElement(message));
-
-  // give the message block ownership to TransportControlElement
-  message->release();
+  TransportControlElement* send_element = new TransportControlElement(move(message));
 
   // I don't want to rebuild a connection in order to send
   // a graceful disconnect message.
@@ -413,30 +407,25 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
   header_data.publication_id_ = sample.header_.publication_id_;
   header_data.publisher_id_ = sample.header_.publisher_id_;
 
-  ACE_Message_Block* message;
   size_t max_marshaled_size = header_data.max_marshaled_size();
 
-  ACE_NEW(message,
-          ACE_Message_Block(max_marshaled_size,
-                            ACE_Message_Block::MB_DATA,
-                            0, //cont
-                            0, //data
-                            0, //allocator_strategy
-                            0, //locking_strategy
-                            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                            ACE_Time_Value::zero,
-                            ACE_Time_Value::max_time,
-                            0,
-                            0));
+  Message_Block_Ptr message(
+    new ACE_Message_Block(max_marshaled_size,
+                          ACE_Message_Block::MB_DATA,
+                          0, //cont
+                          0, //data
+                          0, //allocator_strategy
+                          0, //locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          0,
+                          0));
 
   *message << header_data;
 
-  TransportControlElement* send_element = 0;
+  TransportControlElement* send_element =  new TransportControlElement(move(message));
 
-  ACE_NEW(send_element, TransportControlElement(message));
-
-  // give the message block ownership to TransportControlElement
-  message->release();
 
   // I don't want to rebuild a connection in order to send
   // a sample ack message

@@ -40,54 +40,6 @@ DCPS_IR_Topic::DCPS_IR_Topic(const OpenDDS::DCPS::RepoId& id,
 
 DCPS_IR_Topic::~DCPS_IR_Topic()
 {
-  // check for remaining publication references
-  if (0 != publicationRefs_.size()) {
-    DCPS_IR_Publication* pub = 0;
-    DCPS_IR_Publication_Set::ITERATOR iter = publicationRefs_.begin();
-    DCPS_IR_Publication_Set::ITERATOR end = publicationRefs_.end();
-
-    OpenDDS::DCPS::RepoIdConverter topic_converter(id_);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::~DCPS_IR_Topic: ")
-               ACE_TEXT("id %C has retained publications.\n"),
-               std::string(topic_converter).c_str()));
-
-    while (iter != end) {
-      pub = *iter;
-      ++iter;
-
-      OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::~DCPS_IR_Topic: ")
-                 ACE_TEXT("topic %C retains publication id %C.\n"),
-                 std::string(topic_converter).c_str(),
-                 std::string(pub_converter).c_str()));
-    }
-  }
-
-  if (0 != subscriptionRefs_.size()) {
-    DCPS_IR_Subscription* sub = 0;
-    DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
-    DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
-
-    OpenDDS::DCPS::RepoIdConverter topic_converter(id_);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::~DCPS_IR_Topic: ")
-               ACE_TEXT("id %C has retained subscriptions.\n"),
-               std::string(topic_converter).c_str()));
-
-    while (iter != end) {
-      sub = *iter;
-      ++iter;
-
-      OpenDDS::DCPS::RepoIdConverter sub_converter(sub->get_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Topic::~DCPS_IR_Topic: ")
-                 ACE_TEXT("topic %C retains subscription id %C.\n"),
-                 std::string(topic_converter).c_str(),
-                 std::string(sub_converter).c_str()));
-    }
-  }
 }
 
 void DCPS_IR_Topic::release(bool removing)

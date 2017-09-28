@@ -113,12 +113,12 @@ public:
     --callbacks_expected_;
   }
 
-  void control_delivered(ACE_Message_Block* /*sample*/)
+  void control_delivered(const Message_Block_Ptr& /*sample*/)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_delivered()\n"));
   }
 
-  void control_dropped(ACE_Message_Block* /*sample*/,
+  void control_dropped(const Message_Block_Ptr& /*sample*/,
                        bool /*dropped_by_transport*/)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::control_dropped()\n"));
@@ -186,7 +186,7 @@ public:
   using TransportClient::send;
   using TransportClient::send_control;
 
-  const RepoId& pub_id_;
+  const RepoId pub_id_;
   RepoId sub_id_;
   ssize_t callbacks_expected_;
   InlineQosMode inline_qos_mode_;
@@ -373,7 +373,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
         return 1;
       }
       ::DDS_TEST::force_inline_qos(false);  // No inline QoS
-      sdw.send_control(dsh, ir_mb.get());
+      sdw.send_control(dsh, OpenDDS::DCPS::move(ir_mb));
     }
 
     // Send a dispose instance
@@ -393,7 +393,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       }
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::PARTIAL_MOD_QOS;
-      sdw.send_control(dsh, di_mb.get());
+      sdw.send_control(dsh, OpenDDS::DCPS::move(di_mb));
     }
 
     // Send an unregister instance
@@ -413,7 +413,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       }
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
-      sdw.send_control(dsh, ui_mb.get());
+      sdw.send_control(dsh, OpenDDS::DCPS::move(ui_mb));
     }
 
     // Send a dispose & unregister instance
@@ -433,7 +433,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
       }
       ::DDS_TEST::force_inline_qos(true);  // Inline QoS
       sdw.inline_qos_mode_ = SimpleDataWriter::FULL_MOD_QOS;
-      sdw.send_control(dsh, ui_mb.get());
+      sdw.send_control(dsh, OpenDDS::DCPS::move(ui_mb));
     }
   }
 
@@ -471,9 +471,9 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   gen_find_size(data, size, padding);
   dsh.message_length_ = static_cast<ACE_UINT32>(size + padding);
 
-  elements[index].sample_ =
+  elements[index].sample_.reset(
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_));
+      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh.message_length_)));
 
   *elements[index].sample_ << dsh;
 
@@ -507,9 +507,9 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   gen_find_size(data, size, padding);
   dsh2.message_length_ = static_cast<ACE_UINT32>(size + padding);
 
-  elements[index].sample_ =
+  elements[index].sample_.reset(
     new ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
-      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh2.message_length_));
+      ACE_Message_Block::MB_DATA, new ACE_Message_Block(dsh2.message_length_)));
 
   *elements[index].sample_ << dsh2;
 

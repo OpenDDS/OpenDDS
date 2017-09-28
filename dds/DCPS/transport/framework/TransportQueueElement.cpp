@@ -42,17 +42,17 @@ TransportQueueElement::is_control(RepoId /*pub_id*/) const
 ElementPair
 TransportQueueElement::fragment(size_t size)
 {
-  ACE_Message_Block* head;
-  ACE_Message_Block* tail;
+  Message_Block_Ptr head;
+  Message_Block_Ptr tail;
   DataSampleHeader::split(*msg(), size, head, tail);
 
   TransportCustomizedElement* frag = TransportCustomizedElement::alloc(0, true);
   frag->set_publication_id(publication_id());
-  frag->set_msg(head);
+  frag->set_msg(move(head));
 
   TransportCustomizedElement* rest =
     TransportCustomizedElement::alloc(this, true);
-  rest->set_msg(tail);
+  rest->set_msg(move(tail));
 
   return ElementPair(frag, rest);
 }

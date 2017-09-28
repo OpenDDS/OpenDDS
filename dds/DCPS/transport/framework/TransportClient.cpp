@@ -189,10 +189,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 void
 TransportClient::transport_detached(TransportImpl* which)
 {
-  TransportSendListener_rch this_tsl = get_send_listener();
-  TransportReceiveListener_rch this_trl = get_receive_listener();
-
-
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   // Remove any DataLinks created by the 'which' TransportImpl from our local
@@ -815,13 +811,11 @@ TransportClient::unregister_for_writer(const RepoId& participant,
 bool
 TransportClient::send_response(const RepoId& peer,
                                const DataSampleHeader& header,
-                               ACE_Message_Block* payload)
+                               Message_Block_Ptr payload)
 {
   DataLinkIndex::iterator found = data_link_index_.find(peer);
 
   if (found == data_link_index_.end()) {
-    payload->release();
-
     if (DCPS_debug_level > 4) {
       GuidConverter converter(peer);
       ACE_DEBUG((LM_DEBUG,
@@ -836,7 +830,7 @@ TransportClient::send_response(const RepoId& peer,
 
   DataLinkSet singular;
   singular.insert_link(found->second);
-  singular.send_response(peer, header, payload);
+  singular.send_response(peer, header, move(payload));
   return true;
 }
 
@@ -853,7 +847,7 @@ TransportClient::send(SendStateDataSampleList send_list, ACE_UINT64 transaction_
 SendControlStatus
 TransportClient::send_w_control(SendStateDataSampleList send_list,
                                 const DataSampleHeader& header,
-                                ACE_Message_Block* msg,
+                                Message_Block_Ptr msg,
                                 const RepoId& destination)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, send_transaction_guard,
@@ -861,7 +855,7 @@ TransportClient::send_w_control(SendStateDataSampleList send_list,
   if (send_list.head()) {
     send_i(send_list, 0);
   }
-  return send_control_to(header, msg, destination);
+  return send_control_to(header, move(msg), destination);
 }
 
 void
@@ -1033,14 +1027,14 @@ TransportClient::get_receive_listener()
 
 SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
-                              ACE_Message_Block* msg)
+                              Message_Block_Ptr msg)
 {
-  return links_.send_control(repo_id_, get_send_listener(), header, msg);
+  return links_.send_control(repo_id_, get_send_listener(), header, move(msg));
 }
 
 SendControlStatus
 TransportClient::send_control_to(const DataSampleHeader& header,
-                                 ACE_Message_Block* msg,
+                                 Message_Block_Ptr msg,
                                  const RepoId& destination)
 {
   DataLinkSet singular;
@@ -1049,13 +1043,12 @@ TransportClient::send_control_to(const DataSampleHeader& header,
     DataLinkIndex::iterator found = data_link_index_.find(destination);
 
     if (found == data_link_index_.end()) {
-      msg->release();
       return SEND_CONTROL_ERROR;
     }
 
     singular.insert_link(found->second);
   }
-  return singular.send_control(repo_id_, get_send_listener(), header, msg,
+  return singular.send_control(repo_id_, get_send_listener(), header, move(msg),
                                &links_.tsce_allocator());
 }
 

@@ -36,6 +36,9 @@ OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
   if (allocator_) {
     OPENDDS_DES_FREE_THIS(allocator_->free, TransportSendElement);
   }
+  else {
+    delete this;
+  }
 }
 
 OpenDDS::DCPS::RepoId

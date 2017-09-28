@@ -380,6 +380,15 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                                            DDS::DataReaderListener::_nil(),
                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+    const DDS::ReturnCode_t ret = bit_subscriber->enable();
+    if (ret != DDS::RETCODE_OK) {
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::init_bit")
+                   ACE_TEXT(" - Error %d enabling subscriber\n"), ret));
+      }
+      return 0;
+    }
+
   } catch (const CORBA::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during DataReader initialization\n"));

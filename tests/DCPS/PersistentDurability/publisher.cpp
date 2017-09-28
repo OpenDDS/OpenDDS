@@ -15,7 +15,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/FileSystemStorage.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <ace/Atomic_Op_T.h>
 #include <ace/streams.h>
@@ -163,7 +163,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (do_write)
         {
           // Write samples.
-          OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
+          OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
           if (!writer->start () || !writer->end ())
           {
@@ -250,7 +250,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         // Write samples using multiple threads.
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dummy_dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dummy_dw.in ()));
 
         // Explicitly destroy the DataWriter.
         if (pub->delete_datawriter (dummy_dw.in ())

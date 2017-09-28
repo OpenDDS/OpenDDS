@@ -1,0 +1,17 @@
+version: '2'
+services:
+  inforepo:
+    image: objectcomputing/opendds
+    command: DCPSInfoRepo -ORBListenEndpoints iiop://:3897
+    volumes:
+      - $PWD:/opt/workspace
+  subscriber:
+    image: objectcomputing/opendds
+    command: ["./wait-for-it.sh", "inforepo:3897", "--", "subscriber", "-DCPSInfoRepo",  "inforepo:3897" ]
+    volumes:
+      - $PWD:/opt/workspace
+  publisher:
+    image: objectcomputing/opendds
+    command: ["./wait-for-it.sh", "inforepo:3897", "--", "publisher", "-DCPSInfoRepo",  "inforepo:3897" ]
+    volumes:
+      - $PWD:/opt/workspace

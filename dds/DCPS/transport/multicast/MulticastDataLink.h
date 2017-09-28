@@ -104,7 +104,7 @@ private:
 
   virtual void stop_i();
 
-  void syn_received_no_session(MulticastPeer source, ACE_Message_Block* data,
+  void syn_received_no_session(MulticastPeer source, const Message_Block_Ptr& data,
                                bool swap_bytes);
 
   void release_remote_i(const RepoId& remote);

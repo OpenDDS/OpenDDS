@@ -16,7 +16,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <tools/modeling/codegen/model/Sync.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -54,7 +54,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         return 1;
       }
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
+      MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -108,7 +108,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // cache handle for first reader.
       ::DDS::InstanceHandle_t handle = -1;
       {
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on A partition." << std::endl;
         if (OpenDDS::Model::WriterSync::wait_match(dw)) {
@@ -160,7 +160,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // Now DataWriter is in PARTITION B, the second DataReader in PARTITION B
       // should receive the messages.
       {
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         cout << "Pub waiting for match on B partition." << std::endl;
         if (OpenDDS::Model::WriterSync::wait_match(dw)) {
@@ -194,7 +194,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // Wait for first reader to switch from PARTITION A to B so
       // both two readers will receive the messages.
       {
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         attempts = 1;
         while (attempts != max_attempts)

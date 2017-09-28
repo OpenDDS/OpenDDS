@@ -75,9 +75,6 @@ DataSampleElement::DataSampleElement(const DataSampleElement& elem)
 
 DataSampleElement::~DataSampleElement()
 {
-  if (sample_) {
-    sample_->release();
-  }
 }
 
 DataSampleElement&
@@ -85,7 +82,7 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
 {
   transaction_id_ = rhs.transaction_id_;
   header_ = rhs.header_;
-  sample_ = rhs.sample_->duplicate();
+  sample_.reset(rhs.sample_->duplicate());
   publication_id_ = rhs.publication_id_;
   num_subs_ = rhs.num_subs_;
 

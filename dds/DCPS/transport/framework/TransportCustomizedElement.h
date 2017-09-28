@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportQueueElement.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -30,7 +31,7 @@ public:
   void set_publication_id(const RepoId& id);
 
   virtual const ACE_Message_Block* msg() const;
-  void set_msg(ACE_Message_Block* m);
+  void set_msg(Message_Block_Ptr m);
 
   virtual const ACE_Message_Block* msg_payload() const;
 
@@ -61,7 +62,7 @@ private:
   RepoId subscription_id() const;
 
   TransportQueueElement* orig_;
-  ACE_Message_Block* msg_;
+  Message_Block_Ptr msg_;
   ACE_Allocator* allocator_;
   RepoId publication_id_;
   bool fragment_, exclusive_;
