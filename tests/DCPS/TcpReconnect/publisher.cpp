@@ -92,6 +92,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (options.command_line(command_line.c_str()) != 0)
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT("set options")) ,-1);
 
+      if (stub_ready_filename.empty())
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%p\n"), ACE_TEXT("-stub_ready_file required.")), -1);
+
 #ifdef ACE_WIN32
       options.creation_flags(CREATE_NEW_PROCESS_GROUP);
 #endif

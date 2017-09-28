@@ -216,7 +216,7 @@ ReliableSession::release_remote(const RepoId& remote)
 
 bool
 ReliableSession::control_received(char submessage_id,
-                                  ACE_Message_Block* control)
+                                  const Message_Block_Ptr& control)
 {
   if (MulticastSession::control_received(submessage_id, control)) {
     return true; // base class handled message
@@ -473,10 +473,9 @@ ReliableSession::send_naks()
                + sizeof(size)
                + size * 2 * sizeof(SequenceNumber);
 
-    ACE_Message_Block* data;
-    ACE_NEW(data, ACE_Message_Block(len));
+    Message_Block_Ptr data(new ACE_Message_Block(len));
 
-    Serializer serializer(data);
+    Serializer serializer(data.get());
 
     serializer << this->remote_peer_;
     serializer << size;
@@ -495,7 +494,7 @@ ReliableSession::send_naks()
       }
     }
     // Send control sample to remote peer:
-    send_control(MULTICAST_NAK, data);
+    send_control(MULTICAST_NAK, move(data));
   }
   if (received.disjoint()) {
     sending_naks = true;
@@ -516,14 +515,14 @@ ReliableSession::send_naks()
 }
 
 void
-ReliableSession::nak_received(ACE_Message_Block* control)
+ReliableSession::nak_received(const Message_Block_Ptr& control)
 {
   if (!this->active_) return; // sub send naks, then doesn't receive them.
 
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  Serializer serializer(control, header.swap_bytes());
+  Serializer serializer(control.get(), header.swap_bytes());
 
   MulticastPeer local_peer;
   CORBA::ULong size = 0;
@@ -588,10 +587,9 @@ ReliableSession::send_naks(DisjointSequence& received)
              + sizeof(size)
              + size * 2 * sizeof(SequenceNumber);
 
-  ACE_Message_Block* data;
-  ACE_NEW(data, ACE_Message_Block(len));
+  Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data);
+  Serializer serializer(data.get());
 
   serializer << this->remote_peer_;
   serializer << size;
@@ -610,12 +608,12 @@ ReliableSession::send_naks(DisjointSequence& received)
     }
   }
   // Send control sample to remote peer:
-  send_control(MULTICAST_NAK, data);
+  send_control(MULTICAST_NAK, move(data));
 }
 
 
 void
-ReliableSession::nakack_received(ACE_Message_Block* control)
+ReliableSession::nakack_received(const Message_Block_Ptr& control)
 {
   if (this->active_) return; // pub send nakack, doesn't receive them.
 
@@ -625,7 +623,7 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control, header.swap_bytes());
+  Serializer serializer(control.get(), header.swap_bytes());
 
   SequenceNumber low;
   serializer >> low;
@@ -667,14 +665,13 @@ ReliableSession::send_nakack(SequenceNumber low)
 {
   size_t len = sizeof(low.getValue());
 
-  ACE_Message_Block* data;
-  ACE_NEW(data, ACE_Message_Block(len));
+  Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data);
+  Serializer serializer(data.get());
 
   serializer << low;
   // Broadcast control sample to all peers:
-  send_control(MULTICAST_NAKACK, data);
+  send_control(MULTICAST_NAKACK, move(data));
 }
 
 bool

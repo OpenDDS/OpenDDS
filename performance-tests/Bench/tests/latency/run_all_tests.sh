@@ -20,7 +20,7 @@ SIZES="50 100 250 500 1000 2500 5000 8000 16000 32000"
 
 $DDS_ROOT/bin/DCPSInfoRepo -ORBListenEndpoints iiop://$REPOHOST:$REPOPORT & export PREO_PID=$!
 
-ssh $REMOTE_HOST 'sed "s/RELIABLE/BEST_EFFORT/" $TESTBASE/p2.ini > $TESTBASE/p2-be.ini'
+ssh $REMOTE_HOST "sed 's/RELIABLE/BEST_EFFORT/' $TESTBASE/p2.ini > $TESTBASE/p2-be.ini"
 
 for sz in $SIZES; do
   sed "s/RELIABLE/BEST_EFFORT/" $TESTBASE/p1-$sz.ini > $TESTBASE/p1-$sz-be.ini

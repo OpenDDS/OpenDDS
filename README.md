@@ -98,7 +98,7 @@ Linux family:
 * Red Hat EL and CentOS 6.6 and 6.8, x86_64
 * Red Hat EL and CentOS 7.2 and 7.3, x86_64
 * Fedora Core 6, x86
-* Fedora 24 and 25, x86_64
+* Fedora 24 and 26, x86_64
 * Ubuntu 16.04 LTS, x86_64
 * openSUSE 42.1, and 42.2, x86_64
 
@@ -135,14 +135,14 @@ This release of OpenDDS has been tested using the following compilers:
 * Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
 * Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
 * Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-* Microsoft Visual C++ 14.1 (Visual Studio 2017)
+* Microsoft Visual C++ 14.1 (Visual Studio 2017) - Update 3
 * gcc 4.1.x
 * gcc 4.4.x
 * gcc 4.8.x
 * gcc 4.9.x
 * gcc 5.4
 * gcc 6.2
-* gcc 6.3
+* gcc 7.2
 * Clang 4.0 (llvm.org) and 7.3 (Apple)
 * Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 
@@ -152,6 +152,54 @@ This release of OpenDDS has been tested using the following compilers:
 For building and installation instructions
 see the INSTALL file in this directory.
 
+# Quick Start with Docker
+
+Docker images containing a pre-built OpenDDS are available on [DockerHub](https://hub.docker.com/r/objectcomputing/opendds/).  An image corresponding to a particular release has a tag of the form `release-DDS-X.xx`, e.g., `release-DDS-3.12`.
+
+1. Check for prerequisites
+
+        docker --version
+        docker-compose --version
+
+2. Enter a container
+
+        docker run --rm -ti -v "$PWD:/opt/workspace" objectcomputing/opendds
+
+3. Copy the `Messenger` directory which contains an example from the [Developer's Guide](http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf)
+
+        cp -R /opt/OpenDDS/DevGuideExamples/DCPS/Messenger Messenger
+        cd Messenger
+
+4. Configure and build the Messenger example
+
+        mwc.pl -type gnuace
+        make
+
+5. Exit the container
+
+        exit
+
+6. Enter the `Messenger` directory
+
+        cd Messenger
+
+7. Create an `rtps.ini` file to control discovery with the following content
+
+        [common]
+        DCPSGlobalTransportConfig=$file
+        DCPSDefaultDiscovery=DEFAULT_RTPS
+
+        [transport/the_rtps_transport]
+        transport_type=rtps_udp
+
+8. Run the Messenger example with RTPS
+
+        docker-compose up
+
+9. Run the Messenger example with InfoRepo
+
+        docker-compose -f docker-compose-inforepo.yml up
+        # Use Control-C to kill the InfoRepo process
 
 # OpenDDS Compliance with the DDS Specification
 

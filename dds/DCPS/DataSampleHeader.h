@@ -13,7 +13,7 @@
 #include "PoolAllocationBase.h"
 #include "SequenceNumber.h"
 #include "RepoIdTypes.h"
-
+#include "Message_Block_Ptr.h"
 #include <iosfwd>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -204,7 +204,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   /// Create two new serialized headers (owned by caller), the "head" having at
   /// most "size" bytes (header + data) and the "tail" having the rest.
   static void split(const ACE_Message_Block& orig, size_t size,
-                    ACE_Message_Block*& head, ACE_Message_Block*& tail);
+                    Message_Block_Ptr& head, Message_Block_Ptr& tail);
 
   /// If "first" and "second" are two fragments of the same original message
   /// (as created by split()), return true and set up the "result" header to
@@ -242,7 +242,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
                                            size_t size, bool use_data_alloc);
 
   static void split_payload(const ACE_Message_Block& orig, size_t size,
-                            ACE_Message_Block*& head, ACE_Message_Block*& tail);
+                            Message_Block_Ptr& head, Message_Block_Ptr& tail);
 
 private:
   /// Keep track of the amount of data read from a buffer.

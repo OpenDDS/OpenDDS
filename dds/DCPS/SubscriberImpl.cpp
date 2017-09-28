@@ -231,6 +231,9 @@ SubscriberImpl::create_datareader(
                  ACE_TEXT("enable failed.\n")));
       return DDS::DataReader::_nil();
     }
+  } else {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, 0);
+    readers_not_enabled_.insert(DDS::DataReader::_duplicate(dr_servant));
   }
 
   // add created data reader to this' data reader container -
@@ -805,6 +808,16 @@ SubscriberImpl::enable()
   }
 
   this->set_enabled();
+
+  if (qos_.entity_factory.autoenable_created_entities) {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
+    DataReaderVarSet readers;
+    readers_not_enabled_.swap(readers);
+    for (DataReaderVarSet::iterator it = readers.begin(); it != readers.end(); ++it) {
+      (*it)->enable();
+    }
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -840,6 +853,10 @@ SubscriberImpl::reader_enabled(const char*     topic_name,
                ACE_TEXT("datareader(topic_name=%C) enabled\n"),
                topic_name));
   }
+
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
+  DDS::DataReader_var reader_var = DDS::DataReader::_duplicate(reader);
+  readers_not_enabled_.erase(reader_var);
 
   this->datareader_map_.insert(DataReaderMap::value_type(topic_name, reader));
 

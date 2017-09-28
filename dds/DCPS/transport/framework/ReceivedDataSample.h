@@ -44,7 +44,7 @@ public:
   DataSampleHeader header_;
 
   /// The "data" part (ie, no "header" part) of the sample.
-  ACE_Message_Block* sample_;
+  Message_Block_Ptr sample_;
 };
 
 void swap(ReceivedDataSample&, ReceivedDataSample&);

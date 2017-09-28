@@ -159,6 +159,9 @@ PublisherImpl::create_datawriter(
           ACE_TEXT("enable failed.\n")));
       return DDS::DataWriter::_nil();
     }
+  } else {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, 0);
+    writers_not_enabled_.insert(DDS::DataWriter::_duplicate(dw_servant));
   }
 
   return DDS::DataWriter::_duplicate(dw_obj.in());
@@ -769,6 +772,16 @@ PublisherImpl::enable()
   }
 
   this->set_enabled();
+
+  if (qos_.entity_factory.autoenable_created_entities) {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, DDS::RETCODE_ERROR);
+    DataWriterVarSet writers;
+    writers_not_enabled_.swap(writers);
+    for (DataWriterVarSet::iterator it = writers.begin(); it != writers.end(); ++it) {
+      (*it)->enable();
+    }
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -790,6 +803,9 @@ PublisherImpl::writer_enabled(const char*     topic_name,
       guard,
       this->pi_lock_,
       DDS::RETCODE_ERROR);
+
+  DDS::DataWriter_var writer_var = DDS::DataWriter::_duplicate(writer);
+  writers_not_enabled_.erase(writer_var);
 
   datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 

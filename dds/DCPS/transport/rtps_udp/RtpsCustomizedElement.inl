@@ -12,30 +12,30 @@ namespace DCPS {
 
 ACE_INLINE
 RtpsCustomizedElement::RtpsCustomizedElement(TransportQueueElement* orig,
-                                             ACE_Message_Block* msg,
+                                             Message_Block_Ptr msg,
                                              ACE_Allocator* allocator)
   : TransportCustomizedElement(orig, false, allocator)
   , seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
   set_requires_exclusive();
-  set_msg(msg);
+  set_msg(move(msg));
 }
 
 ACE_INLINE /*static*/
 RtpsCustomizedElement*
 RtpsCustomizedElement::alloc(TransportQueueElement* orig,
-                             ACE_Message_Block* msg,
+                             Message_Block_Ptr msg,
                              ACE_Allocator* allocator /* = 0 */)
 {
   if (allocator) {
     RtpsCustomizedElement* ret;
     ACE_NEW_MALLOC_RETURN(ret,
       static_cast<RtpsCustomizedElement*>(allocator->malloc(0)),
-      RtpsCustomizedElement(orig, msg, allocator),
+      RtpsCustomizedElement(orig, move(msg), allocator),
       0);
     return ret;
   } else {
-    return new RtpsCustomizedElement(orig, msg, 0);
+    return new RtpsCustomizedElement(orig, move(msg), 0);
   }
 }
 

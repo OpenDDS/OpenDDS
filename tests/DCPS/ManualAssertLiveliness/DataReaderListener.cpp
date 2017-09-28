@@ -90,9 +90,11 @@ void DataReaderListenerImpl::on_liveliness_changed (
     const DDS::LivelinessChangedStatus & status)
 {
   ++ num_liveliness_change_callbacks_;
+  DDS::Subscriber_var subscriber = reader->get_subscriber();
+  DDS::DomainParticipant_var participant = subscriber->get_participant();
   OpenDDS::DCPS::DomainParticipantImpl* dpi =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(
-      reader->get_subscriber()->get_participant());
+      participant.in());
 
   if (!dpi) {
     ACE_ERROR((LM_ERROR,

@@ -11,6 +11,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 #include "TransportDefs.h"
 
 #include "dds/DCPS/PoolAllocator.h"
@@ -42,8 +43,8 @@ public:
   virtual void data_dropped(const DataSampleElement* sample,
                             bool dropped_by_transport);
 
-  virtual void control_delivered(ACE_Message_Block* sample);
-  virtual void control_dropped(ACE_Message_Block* sample,
+  virtual void control_delivered(const Message_Block_Ptr& sample);
+  virtual void control_dropped(const Message_Block_Ptr& sample,
                                bool dropped_by_transport);
 
   virtual void notify_publication_disconnected(const ReaderIdSeq& subids) = 0;

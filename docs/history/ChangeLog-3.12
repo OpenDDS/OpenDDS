@@ -1,0 +1,4515 @@
+Thu Aug 31 20:17:33 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit b53174158f756a0d44dfbf5d6dc073590cbfc30c
+
+          Merge pull request #733 from jrw972/master
+
+          Tidy up Dockerfile and simplify entry command
+
+Thu Aug 31 20:17:24 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 8a0ecf0ccc93b75b0028264037a6d85bdab609c6
+
+          Merge pull request #732 from jwillemsen/jwi-zapid
+
+          Zap some left over Ids
+
+Thu Aug 31 20:17:14 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit de1e33d396f5bec6643f2280bba9ae02f49507f8
+
+          Merge pull request #730 from huangminghuang/master
+
+          Fix script quote problem
+
+Thu Aug 31 20:16:52 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit cf4e61f75e4a4ba01357d9de877179b3f4b22e5f
+
+        * NEWS.md:
+        * README.md:
+
+          Documentation updates for upcoming release
+
+Thu Aug 31 14:52:35 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 5f5d8a4e0e45012946ce6b9ecf56a80740198f1b
+
+        * Dockerfile:
+        * README.md:
+
+          Tidy up Dockerfile and simplify entry command
+
+Thu Aug 31 12:59:37 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit eca3b6c4b9b63fa320b636d0c5e4549f782788fc
+
+        * tests/DCPS/LivelinessKeepAliveTest/LivelinessKeepAliveTest_export.h:
+        * tests/DCPS/StringKey/pub_multicast.ini:
+        * tests/DCPS/StringKey/sub_multicast.ini:
+
+          Zap some left over Ids
+
+          *
+          tests/DCPS/LivelinessKeepAliveTest/LivelinessKeepAliveTest_export.h:
+          * tests/DCPS/StringKey/pub_multicast.ini:
+          * tests/DCPS/StringKey/sub_multicast.ini:
+
+Thu Aug 31 03:39:13 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 098e20c0f8a619a6a8c153b67305d737b16f5930
+
+          Merge pull request #731 from mitza-oci/master
+
+          When factories are enabled, if they have autoenable turned on
+          then they should enable child objects
+
+Thu Aug 31 00:29:15 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 246dea6b765a246c7c5b97ae77afb79a7b0369ab
+
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+
+          DPFactoryQos: updated this test to reflect what DDS spec says
+          should happen with autoenable_created_entities
+
+Wed Aug 30 21:26:42 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1f4b44645a4cbce33f6fdbc6ccffc38bd5d22822
+
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+
+          When factories are enabled, if they have autoenable turned on
+          then they should enable child objects
+
+          Allow BIT setup to work correctly when the DomainParticipant has
+          autoenable disabled
+
+Wed Aug 30 19:27:17 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 2cd41e1f7f3c0194139a311ccad6d014a7490a4e
+
+        * performance-tests/Bench/tests/latency/run_all_tests.sh:
+
+          Fix script quote problem
+
+Wed Aug 30 18:56:22 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit bbac6eec0caacd85b7bba8eede219d0c587fa41a
+
+        * README.md:
+
+          Fix typo in README
+
+Tue Aug 29 17:58:59 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 8dee14d0abba1bff2f5215ae995a8d9effaf6932
+
+        * README.md:
+
+          Add message describing non-errors when entering a container
+
+          The user should not be concerned about messages concerning an
+          inability to map user, group, and host names.
+
+Wed Aug 30 14:52:18 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit a52704c8ab7d0fd1e642e4a6399143e425890aab
+
+          Merge pull request #727 from huangminghuang/memory-leak-fixes
+
+          Revert UpdateDataTypes.h
+
+Wed Aug 30 13:19:28 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 2e512145ba8ea108d45361cad457ed560155c7e9
+
+        * dds/InfoRepo/UpdateDataTypes.h:
+
+          Revert UpdateDataTypes.h
+
+Tue Aug 29 21:56:22 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit de84a9a4e5d319373e08790d1d2fee008f6b3aad
+
+          Merge pull request #726 from huangminghuang/memory-leak-fixes
+
+          Fourth batch of memory leak fixes
+
+Tue Aug 29 21:03:22 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit c552e8e504d7e84bccd9b6c1c53aee127998fd09
+
+          Merge pull request #725 from jrw972/master
+
+          Docker image
+
+Tue Aug 29 20:33:43 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit ec746e61291d1ff1c215c3d4e73bbf4034568677
+
+        * DevGuideExamples/DCPS/Messenger/docker-compose-inforepo.yml:
+        * DevGuideExamples/DCPS/Messenger/docker-compose.yml:
+        * README.md:
+
+          Updated to refer to new docker image
+
+Tue Aug 29 19:20:16 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 6ba65c708d73ffbc080a8483dda939927bb920b1
+
+        * dds/DCPS/WeakRcHandle.h:
+
+          Fix typo
+
+Tue Aug 29 16:25:22 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 2b15aeebaa6b7dc780ff502ee29a556d6291c58b
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Another memory leak fix in Service_T.cpp
+
+Fri Aug 25 15:24:43 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit e38ec6869f282226f9b9de62fad4989eaab38cfd
+
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/ConditionImpl.h:
+        * dds/DCPS/WaitSet.h:
+        * dds/DCPS/WeakRcHandle.h:
+
+          Added WeakRcHandle to break reference cycles
+
+Tue Aug 29 15:11:44 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 215000528ec2c9d419ed0842f0e698684d2b9121
+
+        * tools/modeling/codegen/model/Service_T.h:
+
+          Fix memory leak in modeling
+
+Tue Aug 29 15:26:49 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 8df556a00dcc5afa63ec7f39a29187ec4fe2f02a
+
+        * DevGuideExamples/DCPS/Messenger/docker-compose-inforepo.yml:
+        * DevGuideExamples/DCPS/Messenger/docker-compose.yml:
+
+          Update compose files to use the correct image
+
+Mon Aug 28 21:33:55 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 6de3db443af7ed23dc23e2e9b4c9e5a5f625fb0a
+
+          Merge pull request #724 from huangminghuang/suncc_workaround
+
+          unique_ptr workaround for suncc
+
+Mon Aug 28 21:33:48 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 50397ba56c1c41b65351fd1fd793cff5465582a9
+
+          Merge pull request #723 from oschwaldp-oci/coverity_issues_fixes
+
+          Coverity Scan updates
+
+Mon Aug 28 18:37:26 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2c049717195635d0edc0739de9ba21e183893def
+
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+
+          Coverity Scan Defect: Address 1380592
+
+          Check stub_ready_filename to make sure it has been set before
+          passing it to fopen.
+
+Mon Aug 28 14:21:38 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 2d759ff8a7488284a337202c2dd58dca492255de
+
+        * .dockerignore:
+        * DevGuideExamples/DCPS/Messenger/docker-compose-inforepo.yml:
+        * DevGuideExamples/DCPS/Messenger/docker-compose.yml:
+        * DevGuideExamples/DCPS/Messenger/wait-for-it.sh:
+        * Dockerfile:
+        * README.md:
+
+          Add OpenDDS Docker image
+
+Sat Aug 26 12:58:39 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 4222eabba268d8f072a083407858ef164dba8803
+
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+
+          Fix some memory leaks in tests/DCPS/Federation
+
+Mon Aug 28 15:42:56 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit c5d06d7da5fce2c46feccc83e7a13631689a8f36
+
+        * dds/DCPS/unique_ptr.h:
+
+          unqiue_ptr workaround for suncc
+
+Mon Aug 28 15:29:10 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 5c181fc8fbe9ab4682499bffbca8bbf8a7e9ac43
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Coverity Scan updates: Address 1454919 and 1454912 having to do
+          with further exceptions not being caught from the bind_config
+          call.
+
+Fri Aug 25 20:42:34 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 5c27a12731200769d26ee90129dfd8a1698f9780
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+
+          Fix memory leak for tests/DCPS/ManualAssertLiveliness
+
+Fri Aug 25 19:24:30 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 12e72a9b474db8a65885154aababbbc95da467b4
+
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+
+          Fix memory leak in TestFramework
+
+Fri Aug 25 16:21:15 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 65e0b36fa154df72d035dfff50de0151eafd121e
+
+        * dds/InfoRepo/UpdateDataTypes.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+          fix memory leak in InfoRepo/UpdateManager
+
+Sun Aug 27 15:49:10 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 7a3079c98c9a1d725e080f3b2ef069cdcea4b1db
+
+          Merge pull request #722 from mitza-oci/master
+
+          unique_ptr: pre-C++11 needs <algorithm> header
+
+Fri Aug 25 22:44:20 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit cb79f07e6fcdc455e483c29a4a9bd22a1e8d820b
+
+        * dds/DCPS/unique_ptr.h:
+
+          fixed whitespace
+
+Fri Aug 25 22:17:38 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 42f13902aa7d27b8f702ec4ad27fcd90fbb5a13c
+
+        * dds/DCPS/unique_ptr.h:
+
+          unique_ptr: pre-C++11 needs <algorithm> header
+
+          formatting
+
+Fri Aug 25 19:09:55 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 246710d1240ca5073fadb8c2bf6827c031fddbb1
+
+          Merge pull request #720 from oschwaldp-oci/coverity_issues_fixes
+
+          Coverity Issues.
+
+Fri Aug 25 19:09:28 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 67b261fbc0ac7d604b6cb685a8f7a501cf0b59a4
+
+          Merge pull request #719 from huangminghuang/master
+
+          Third batch of memory leak fixes
+
+Fri Aug 25 19:05:38 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit aac49d33d3f82e39e368fb6e8f9644a0604e166e
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          fixed warnings
+
+Fri Aug 25 15:37:49 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 37ab6949f0a5b40d32bbc3bd0ac8b90c40407f9b
+
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+
+          Restore constness
+
+Fri Aug 25 15:37:09 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit d02b4696a46a640e74c83ed7aacdf737d7fe8010
+
+        * dds/DCPS/unique_ptr.h:
+
+          syntax cleanup
+
+Fri Aug 25 15:14:05 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 6e04c6d48cc9c86dc7311f6ab929591e78758952
+
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+        * dds/DCPS/unique_ptr.h:
+
+          Use swap() in class's namespace, not std
+
+Thu Aug 24 22:01:24 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ee065392b57cbafc14f825b3b093693820609bd7
+
+        * dds/FACE/FaceTSS.h:
+
+          Initialize last_msg_header to default.
+
+          Addressing coverity defect 1380662
+
+Thu Aug 24 20:37:24 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ed19a382fcbbc6aab51b35786ab257dcba6102f7
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Catch exception thrown in bind_config.
+
+          Addresses Coverity Defects: 1446126 & 1446125.
+
+Thu Aug 24 16:28:42 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit e83305b312c8444a4eddb1f3deb113f1451c2bdd
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Change some function declarations using unique_ptr
+
+Thu Aug 24 16:31:03 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 6dad858b9d9b3d270602169e23f534b37fad7101
+
+          Merge remote-tracking branch 'upstream/master'
+
+Thu Aug 24 16:28:42 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 5f985b22f33572f999213c11712a163669599d50
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl_T.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+
+          Change some function declarations using unique_ptr
+
+Thu Aug 24 13:08:26 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit e283cdf635fad112f5a1f8ac715f89d1f760f474
+
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Fix ambiguous call for clang
+
+Thu Aug 24 13:05:06 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit afb697410174531df1875c1e2c52648075fdfb1c
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+
+          Fix warning messages
+
+Thu Aug 24 02:04:51 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 46e2f45e1813a09e66f2d2a263d59d5ec484d1f0
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Fix tests/DCPS/DCPSInfoRepo memory leak
+
+Wed Aug 23 21:47:05 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 9f2fb60b37ff1987695db7687a99f5a8aa00ad7f
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Fix WriteDataConainerTest memory leak
+
+Wed Aug 23 20:52:03 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 37cf0537358032e83a1e9e5625b2693aa3ff6729
+
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Fix tests/DCPS/Deadline memory leak
+
+Wed Aug 23 20:50:45 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 673631c2013b15d9683da3fe8aeae8c708129e78
+
+        * dds/DCPS/unique_ptr.h:
+
+          Fix unique_ptr errors
+
+Wed Aug 23 15:04:19 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit e394300cff2b0a78f635939bb7a7c8c080f10c46
+
+        * tests/FACE/Compiler/idl_test1_main/main.cpp:
+
+          Fix FACE/Compiler/idl_test1_main memory leak
+
+Wed Aug 23 14:55:14 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 6c5d2c33b3e47d62aa5078d92fbaca6763b1ff17
+
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+
+          Fix leaks in TransportQueuedElement derived classes
+
+Thu Aug 17 17:59:42 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 7b5a1108bd5334e2153765591493d11c63bd3ad1
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+
+          Fix circular reference problem when deadline is enabled
+
+Mon Aug 21 14:38:22 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 707c19a5137e1e023e041f92001043cbc398b0f9
+
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+
+          Fix memory leak in tests/DCPS/SetQosPartition
+
+Wed Aug 23 12:37:49 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 1a9e6d490def1ae2c857a4468961886d2527b30a
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataSampleElement.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl_T.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/Message_Block_Ptr.h:
+        * dds/DCPS/MultiTopicDataReaderBase.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/scoped_ptr.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/rtps_udp/RtpsCustomizedElement.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsCustomizedElement.h:
+        * dds/DCPS/transport/rtps_udp/RtpsCustomizedElement.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/unique_ptr.h:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/SampleLost/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+        * tests/DCPS/UnitTests/RtpsFragmentation.cpp:
+        * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Rename scope_ptr to unique_ptr
+
+Mon Aug 21 16:37:45 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 215f57fc521ee2f8f47d059e99abb7d183610fd1
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Fix memory leaks in Sedp
+
+Mon Aug 21 22:25:56 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 3850a29e0932bf9984895c6aad357eb71ed99f7b
+
+          Merge pull request #718 from mitza-oci/master
+
+          Attempting to fix GCC7 warnings
+
+Mon Aug 21 20:13:34 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit b5aa62d3122290c2561b9844829432ce6b4a24d4
+
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tools/repoctl/repoctl.cpp:
+
+          Attempting to fix GCC7 warnings
+
+Wed May 31 16:38:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0b8bb8a6b9d7d34e5af3bf344b4ea6b67c10d778
+
+        * tests/DCPS/FooTest3_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_0/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+
+          Simplify test code
+
+          * tests/DCPS/FooTest3_0/DataReaderListener.cpp:
+          * tests/DCPS/FooTest3_0/DataReaderQCListener.cpp:
+          * tests/DCPS/FooTest3_0/DataReaderQCListener.h:
+          * tests/DCPS/FooTest3_0/SubDriver.cpp:
+          * tests/DCPS/FooTest3_0/SubDriver.h:
+
+          (cherry picked from commit
+          f420fe33331328c650c5fa4a1d0062dd45ba6158)
+
+          # Conflicts:
+          #  tests/DCPS/FooTest3_0/DataReaderQCListener.cpp
+          #  tests/DCPS/FooTest3_0/DataReaderQCListener.h
+          #  tests/DCPS/FooTest3_0/SubDriver.cpp
+          #  tests/DCPS/FooTest3_0/SubDriver.h
+
+Fri Aug 18 17:45:45 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 09f600bdb3112617895bdaeeac3490f80690f8e6
+
+          Merge pull request #717 from huangminghuang/master
+
+          Added Versioned namespace support for Message_Block_Ptr.h
+
+Fri Aug 18 17:45:39 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit f50270466810475cbdbd134cd08f3e437f5338be
+
+          Merge pull request #716 from jwillemsen/jwi-doublesemicolon
+
+          Removed double semi colon
+
+Fri Aug 18 14:29:29 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit d0ad4f36f6e86dff4769b4d0c6e41e9ba60c40d4
+
+        * dds/DCPS/Message_Block_Ptr.h:
+
+          Added Versioned namespace support for Message_Block_Ptr.h
+
+Fri Aug 18 13:30:40 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit c134ad6b74c190beceef44327075bf5ef48f0701
+
+          Merge pull request #715 from mitza-oci/master
+
+          configure: support Windows-hosted cross compiles.
+
+Fri Jun 30 19:49:06 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 21020dcbb8b5809c2cb9709af82176a3964d935b
+
+        * dds/idl/langmap_generator.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+        * tests/DCPS/TransientLocalMultiInstanceTest/publisher.cpp:
+        * tools/monitor/MonitorDataStorage.cpp:
+
+          Removed double semi colon
+
+          * dds/idl/langmap_generator.cpp:
+          * tests/DCPS/FooTest3_0/SubDriver.cpp:
+          * tests/DCPS/Partition/Publisher.cpp:
+          * tests/DCPS/TestFramework/TestFramework_T.cpp:
+          * tests/DCPS/TransientLocalMultiInstanceTest/publisher.cpp:
+          * tools/monitor/MonitorDataStorage.cpp:
+
+Thu Aug 17 21:51:51 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit e8c6433d0a119cf1433ea19b656fd9e34f08dd90
+
+        * configure:
+
+          configure: fixed whitespace
+
+Thu Aug 17 19:47:06 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 9cabbe8217ef7b3779fcaaa67f9b08837cf99f17
+
+        * configure:
+
+          configure: fixed issues with Windows-hosted cross compile
+
+Thu Aug 17 19:46:35 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit a81cb555b40103a58c235dac9d6d5ed5273897a1
+
+        * configure:
+
+          configure: support Visual Studio 2017 version 15.3 (cl 19.11)
+
+Thu Aug 17 19:42:50 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 0c5f09b9b5ffa8f2d165e91eb424628386d4b351
+
+        * configure:
+
+          configure: wrap long lines
+
+Thu Aug 17 19:05:08 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 96fec045da0ae78b453991947a163a791895980a
+
+        * configure:
+
+          configure: support Windows-hosted cross compiles.
+
+Thu Aug 17 18:24:32 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit d9c9fcb5d133c62e7054db57aa1e8d778a83f5b2
+
+        * .travis.yml:
+
+          Travis: test with --optimize in one configuration
+
+Thu Aug 17 15:49:27 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 15af2e5460c2697afe6c7ee89749494b937e995a
+
+          Merge pull request #714 from mitza-oci/master
+
+          Updated order of steps for Service_Participant::shutdown()
+
+Thu Aug 17 15:49:19 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 862946c30ace7c2a27d250bb31048fc4ec41c249
+
+          Merge pull request #713 from huangminghuang/master
+
+          Second batch of memory leak fixes
+
+Thu Aug 17 15:49:11 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1368fa63ff279fce14f3805d76abdb7fb0ce11c4
+
+          Merge pull request #712 from jwillemsen/jwi-docuboolchanges
+
+          Minor code improvements, cherry-picked from 641
+
+Thu Aug 17 15:48:59 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 83b89eb68f39ed0435a4747795a38673715f53d4
+
+          Merge pull request #708 from jrw972/configure_improvements
+
+          Configure improvements
+
+Thu Aug 17 14:06:44 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 3839ecf547c0db32ea9807fc7419186b4276de7c
+
+        * configure:
+
+          Cleanup code
+
+Thu Aug 17 13:28:11 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 0d985dc6abfafd85fd30d2f3c2d954aff0a98b2a
+
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/FaceTSS.h:
+        * tests/FACE/Header/Publisher/Publisher.cpp:
+
+          Fix memory leaks in FACE
+
+Wed Aug 16 21:32:20 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 77ba074846506c4402af3ba301bbe070eda65563
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Updated order of steps for Service_Participant::shutdown()
+
+          Now reactor_task_ is stopped before discoveryMap_.clear() to
+          avoid an issue
+          where TAO_ORB_Core's TSS for that reactor thread is still
+          allocated at when
+          the process ends.
+
+Wed Aug 16 20:33:19 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit a3bb4c23ab4f167e968755bdf797ddd1f18f9421
+
+        * dds/FACE/FaceTSS.cpp:
+
+          FaceTSS memory leak fix
+
+Wed Aug 16 20:32:46 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit a2e6282ad8601cfa7b0d6ae59b66810e8ab9d932
+
+        * tests/FACE/Compiler/idl_test1_main/main.cpp:
+
+          Fix another ACE_Message_Block leak in test
+
+Wed Aug 16 20:18:48 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 930916e9ce16b8a387d387c605914220c6c38da0
+
+        * dds/DCPS/Message_Block_Ptr.h:
+
+          Fix fuzz error
+
+Wed Aug 16 19:45:31 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit ad142e0322201a9f72dafa1dd93420cff98f5f9b
+
+        * configure:
+
+          Handle safety-profile
+
+Wed Aug 16 18:12:22 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit a16c85b07df59acf57a8459590697d7633a7f1e0
+
+        * dds/DCPS/Serializer.inl:
+
+          Fix Serializer memory leak
+
+Wed Aug 16 18:11:04 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 55bcc514d63b1a4f1f42c1021e2fd137f4330c29
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * dds/InfoRepo/PersistenceUpdater.h:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+
+          Fix memory leaks in tests
+
+Wed Aug 16 18:01:54 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 1e0d1096767318af300ab3c60973c3575db71fb9
+
+        * dds/DCPS/Message_Block_Ptr.h:
+        * dds/DCPS/scoped_ptr.h:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+
+          Added Message_Block_Ptr
+
+Tue Jun 13 14:04:03 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 71c48865c028f3d5ebb2cde4208d9b1d8862a4ad
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Put the TestCase construction within the try/catch
+
+          * tests/DCPS/SharedTransport/TestCase.cpp:
+
+Tue Jun 13 14:03:27 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit dd409694e99f0a4f0746085f5effb33c23538cf6
+
+        * MPC/config/dcps_test.mpb:
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+
+          Removed empty comment lines
+
+          * MPC/config/dcps_test.mpb:
+          * tests/DCPS/SharedTransport/SharedTransport.mpc:
+
+Tue Jun 13 07:45:02 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d058a724730ce5718634cb8195f13adb58b0a691
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+
+          Make shutdown_flag_ a bool
+
+          * dds/DCPS/RTPS/Spdp.cpp:
+          * dds/DCPS/RTPS/Spdp.h:
+
+Tue Jun 13 07:41:52 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7e66fa949fd2765581f41d49b953efd09c2df0d1
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Make shutting_down_ a bool
+
+          * dds/DCPS/RTPS/Sedp.cpp:
+          * dds/DCPS/RTPS/Sedp.h:
+
+Tue Jun 06 06:07:27 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9f9dd0945ec8ab1b2346e5b32df72df8adcdf26f
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Documentation change
+
+          * dds/DCPS/transport/framework/TransportClient.h:
+
+Wed Aug 16 15:41:55 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 4e6f56f7f418be8addaa4cb40694cfc84e5a9f6a
+
+          Merge pull request #710 from huangminghuang/master
+
+          Several memory leak fixes
+
+Tue Aug 15 22:22:03 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 2747a110210a9ef7727b01379f385508676f0290
+
+        * .travis.yml:
+
+          Remove xerces3 from safety profile build
+
+Tue Aug 15 22:21:49 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 496fe5f388dec61fb2e465205f10c4bd0fb85c38
+
+        * configure:
+
+          Handle missing files
+
+Tue Aug 15 22:16:09 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit f8875453ab9f09f7be7a2c94167d010222ef9da9
+
+          Merge pull request #711 from mitza-oci/master
+
+          Fixed formatting where ACE_GUARD was on the same line as {
+
+Tue Aug 15 22:16:01 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 522c537b8b3e50287eb8f0fd8206a33ecd2c44a6
+
+          Merge pull request #707 from jwillemsen/jwi-acetao-644
+
+          Use new ACE 6.4.4 and TAO 2.4.4 for DOC group release
+
+Tue Aug 15 20:53:43 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 16ef5c5097b62725f227f075f4196cc5ef0e6848
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * tools/monitor/MonitorTask.cpp:
+
+          Fixed formatting where ACE_GUARD was on the same line as {
+
+Tue Aug 15 20:52:52 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1c68a0370702bac44e5bd505e21613531d072513
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+
+          Fixed file in wrong section of .mpc
+
+Tue Aug 15 17:28:02 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9c45b1182e9e43be2c1d60b1c136d28e1ccb04c5
+
+        * README.md:
+
+          Updated TAO DOC group version to use
+
+          * README.md:
+
+Tue Aug 15 17:00:07 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 06e9c051fea148ce024d6fb7570124790aa82b92
+
+        * configure:
+
+          Check for compatible features and macros
+
+Tue Aug 15 16:18:54 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit f316d32e9873aab66bb6be9e098dc1b1708103da
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fix memory leak when timeout occurs
+
+Tue Aug 15 16:18:16 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit d57455c6141a9a7b8b68648f19188d2f920c4846
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Fix memory leaks in tests/transport/
+
+Mon Aug 14 20:55:21 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 3ade63f2a1d93ea73fced9af4cadc33aff141d5f
+
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple/sub_main.cpp:
+
+          Fix memory leak for tests/transport/simple
+
+Mon Aug 14 17:52:51 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 9c1a71e50b0a271bff849768fc342aefa8562fed
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fix memory leak for TcpConnection
+
+Wed Aug 09 14:51:20 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 70f19d130ebfa6f2dba8f69141869c1b7c8791e6
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Allow test debug level to be set by environment variables
+
+Mon Aug 14 20:08:06 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 4f8d654d93c7e10f8f91d26ba9537384a216882c
+
+        * configure:
+
+          Do not manipulate default.features when using prebuilt ACE/TAO
+
+Mon Aug 14 20:07:35 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit a3c397216d501e4e854db938c72421db86b2073e
+
+        * configure:
+
+          Translate QT config into target
+
+Mon Aug 14 20:06:42 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 81a7cfd9bd1bd3d952182dfa3ad55124e83fa885
+
+        * configure:
+
+          Die if java is requested but no javac is found
+
+Mon Aug 14 20:04:51 UTC 2017  Justin R. Wilson  <jrw972@gmail.com>
+        commit 56ff87d334d1f94983662afdc0d15a8cd2658377
+
+        * configure:
+
+          Prefix die statements with ERROR
+
+Mon Aug 14 07:41:03 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0a08499bad1970d1b7910e63df0ff59fe3354324
+
+        * configure:
+
+          Use new ACE 6.4.4 and TAO 2.4.4 for DOC group release
+
+          * configure:
+
+Fri Aug 11 19:10:39 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit dc3aba2d20951c0974626d82dc59caf3eb95d4ed
+
+          Merge pull request #706 from
+          huangminghuang/jwillemsen-jwi-listenercleanup-641
+
+          Fix PR #656 tests/DCPS/Reconnect/run_test.pl bp_timeout
+
+Thu Aug 10 21:11:21 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 27e5ed5dfa3b997dbcb7e92214001d4d4e8ebc16
+
+        * tests/DCPS/Reconnect/publisher.cpp:
+
+          Fix Reconnect bp_timeout test
+
+Thu Aug 10 18:47:06 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 19879cbcda74e952935ea87b1b841c829c2147e0
+
+          Merge branch 'jwi-listenercleanup-641' of
+          https://github.com/jwillemsen/OpenDDS into
+          jwillemsen-jwi-listenercleanup-641
+
+Mon Aug 07 23:06:11 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 140d974e0bbcd318d69a800f87928695a6a305a2
+
+          Merge pull request #704 from huangminghuang/master
+
+          Avoid running Inconsistent_Qos Test for static build
+
+Mon Aug 07 16:33:18 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 62c8edb01d818083c0bf1df2b51d76fc8c806c23
+
+        * bin/dcps_tests.lst:
+
+          Change DDS4CCM_OPENDDS to XERCES3
+
+Thu Aug 03 21:16:26 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit d7e143dc0b468ded7b2e32e0d327c29f32709701
+
+        * bin/dcps_tests.lst:
+
+          Avoid running Inconsistenct_Qos Test for static build
+
+Mon Jul 31 22:25:49 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit ed4e5941d61d4794113714c40a28fe884fd8e046
+
+          Merge pull request #702 from huangminghuang/master
+
+          Make the config file content reflect its filename
+
+Fri Jul 28 19:07:43 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 6adf3d851c0002b3b9defb456cf4da43b9df7dbf
+
+        * tests/DCPS/Messenger/rtps_disc_tcp_udp.ini:
+
+          Make the config file content reflects its filename
+
+Fri Jul 21 22:31:13 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 6770623a61390a669a23796817930f4eb4c75195
+
+          Merge pull request #700 from huangminghuang/master
+
+          Fix compile problem for MSVC
+
+Fri Jul 21 20:50:57 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit f0ef59bce4973ad76a7504e1817c266ab6f83415
+
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/src/tcp_latency.cpp:
+        * performance-tests/Bench/src/udp_latency.cpp:
+
+          Fix compile problem for MSVC
+
+Thu Jul 20 21:30:25 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 91f25e5ba5e26eef37eaca44190e522e96094fa6
+
+          Merge pull request #699 from huangminghuang/Bench
+
+          Update performance-test/Bench
+
+Mon Jul 17 18:11:40 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 5f67564ed0f0b555868ff48dc39514d0a17e85d2
+
+        * performance-tests/Bench/src/tcp_latency.cpp:
+        * performance-tests/Bench/src/udp_latency.cpp:
+
+          Added missing includes
+
+Mon Jul 17 17:21:43 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 694f07367c19299cac791b05bc83f7506fc41030
+
+        * performance-tests/Bench/bin/gen-latency-tables.pl:
+        * performance-tests/Bench/bin/generate-perf-html.sh:
+        * performance-tests/Bench/bin/plot-density.gpi:
+        * performance-tests/Bench/bin/plot-quantiles.gpi:
+        * performance-tests/Bench/bin/plot-test-results.sh:
+
+          Update performance/Bench scripts
+
+Fri Jul 14 15:29:11 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 90f5c9a793a9d446bf6df06b49babbb65f585366
+
+        * performance-tests/Bench/bin/generate-test-results.sh:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/tests/latency/run_all_tests.sh:
+
+          Some more fixes for performance test scripts
+
+Sun Jul 09 13:16:00 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 309860826dd04a32d87197a692b248cea72af318
+
+        * performance-tests/Bench/src/tcp_latency.cpp:
+        * performance-tests/Bench/src/udp_latency.cpp:
+
+          Fix std::cout problem
+
+Sun Jul 09 12:46:17 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit ec52ee60329177fc932a551bc421d93416be4dfd
+
+        * performance-tests/Bench/src/tcp_latency.cpp:
+        * performance-tests/Bench/src/udp_latency.cpp:
+
+          Added tcp_latency
+
+          # Conflicts:
+          #  performance-tests/Bench/src/CMakeLists.txt
+
+Thu Jul 06 15:13:10 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit cc143b6b364e72180e9bb616fa6bd1f54041f208
+
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/src/udp_latency.cpp:
+
+          Added udp_latency program
+
+Thu Jun 22 01:55:38 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 4a0bee6a8ff024d6af39b141ab7c3da4daf5b3cc
+
+        * performance-tests/Bench/bin/extract-latency.pl:
+        * performance-tests/Bench/bin/generate-test-results.sh:
+        * performance-tests/Bench/bin/lj-plots.gpi:
+        * performance-tests/Bench/bin/plot-density.gpi:
+        * performance-tests/Bench/bin/plot-jitter.gpi:
+        * performance-tests/Bench/bin/plot-quantiles.gpi:
+        * performance-tests/Bench/bin/plot-test-results.sh:
+        * performance-tests/Bench/bin/plot-transports.gpi:
+        * performance-tests/Bench/tests/latency/run_all_tests.sh:
+
+          Fix bench scripts
+
+Fri Jul 14 22:00:28 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit d2f3b86b15d8fb0931620a4699f2cd80bbb50430
+
+          Merge pull request #698 from huangminghuang/master
+
+          Fix dcps_tests.lst errors
+
+Fri Jul 14 22:00:22 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 064e689dffd2920586d7ec06057085952509c9cd
+
+          Merge pull request #697 from jwillemsen/jwi-loggingfix
+
+          Only need a single space in the logging message
+
+Fri Jul 14 14:29:01 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 8e3c65535d1289b53063501887b7f0a8396b053d
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Reliability/rtps.ini:
+
+          Fix dcps_tests.lst errors
+
+Wed Jul 12 15:17:23 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 2349683589bc34e81da4ae6523c5107c1a1c9640
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Only need a single space in the logging message
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+
+Thu Jul 06 14:04:25 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 23c3c5f5b05846d85cf9853de4946200f8a64b5e
+
+          Merge pull request #693 from jwillemsen/jwi-stdstring-safety
+
+          Disable std::(w)string insertion/extraction when using safety
+          profile
+
+Sat Jul 01 07:18:49 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1057e93968212c6f69996c6c3fa9f98b05cecb32
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Some more fixes for safety
+
+          * tests/DCPS/Serializer/SerializerTest.cpp:
+
+Fri Jun 30 19:44:44 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a0849a3edbdb220880e5decee24e9956cb5b3621
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Added safety profile checks for std::(w)string usage
+
+          * tests/DCPS/Serializer/SerializerTest.cpp:
+
+Fri Jun 30 14:39:54 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 25f0dd36b98f0530d2ee6680f001508359051f59
+
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+
+          Disable std::(w)string insertion/extraction when using safety
+          profile
+
+          * dds/DCPS/Serializer.h:
+          * dds/DCPS/Serializer.inl:
+
+Thu Jun 29 14:50:46 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit a91321734486c14c3b2ea7aa27b18be37eb0f5ef
+
+          Merge pull request #691 from jwillemsen/jwi-serializertest
+
+          Add include of string
+
+Thu Jun 29 10:59:36 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fbadec8f5fcd438caab2968eae73befe6e15292f
+
+          Merge branch 'master' into jwi-listenercleanup-641
+
+Thu Jun 29 06:34:27 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b0ac1b9a9071d28bf9b085c9c2209e6043e7f487
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Add include of string
+
+          * tests/DCPS/Serializer/SerializerTest.cpp:
+
+Wed Jun 28 22:00:18 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 58c1a2afecc9c823ee544dbab7e26faff5cd8ee1
+
+          Merge pull request #688 from jwillemsen/jwi-multitopic
+
+          Guard several generated methods with OPENDDS_NO_MULTI_TOPIC, they
+          are…
+
+Wed Jun 28 22:00:10 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 5f1c69e899cd7749b4f471ac4ab75a0fbff1ef9c
+
+          Merge pull request #681 from
+          jwillemsen/jwi-serializer-stdstring-672
+
+          Implemented std::(w)string insertion and extraction for the
+          Serialize…
+
+Wed Jun 28 14:00:17 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1a484b222b29f828bacd620d89baf94c28ddb787
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Add missing includes for safety-profile
+
+          * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+          * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+Wed Jun 28 11:54:02 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit c080e239c60c1bebede5b01b854a743594492695
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Add include so that we get the CORBA exceptions
+
+          * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+Wed Jun 28 07:28:48 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9b657d118260aa595ba951c9b54e0ca5bce7cb75
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+
+          Add missing includes
+
+          * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+          * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+
+Wed Jun 28 06:41:38 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fa9c781230ea78054a05bf437488fec0bdc0e4bf
+
+          Merge
+
+Wed Jun 28 06:40:54 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a292f65ef5f36465384e70181a38659a0acf49be
+
+          Merge master
+
+Wed Jun 28 06:38:41 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fc3a646cfce47e1cb2be0ac80cfce7ab91892ecf
+
+          Merge branch 'master' into jwi-serializer-stdstring-672
+
+Tue Jun 27 22:10:09 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 8e88355eea093e220fe0b6143c4b5b4355498ecb
+
+          Merge pull request #678 from huangminghuang/master
+
+          fix problem with multiple transports in configuration file
+
+Tue Jun 27 22:09:59 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit bf343cc761aa4eaeea108b3cbf10ef1112917c14
+
+          Merge pull request #668 from jwillemsen/jwi-timehelper2
+
+          Introduce a new Time_Helper.{h,cpp,inl} which only provides the
+          helpe…
+
+Tue Jun 27 22:09:50 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit d7adcc7dcc2f6c678429a585d967f45e2e921c6b
+
+          Merge pull request #666 from jwillemsen/jwi-travis-osx
+
+          Add osx to travis-ci
+
+Tue Jun 27 21:20:25 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit f3cc1f5e93f2cf40ce07e059976ad0bf22beec15
+
+        * .travis.yml:
+
+          Use NO_
+
+Tue Jun 27 18:09:09 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 751df12aee9bfd396955e847aa28257d76253094
+
+        * dds/DCPS/Serializer.inl:
+
+          Layout issues
+
+          * dds/DCPS/Serializer.inl:
+
+Tue Jun 27 17:57:14 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 80f4438605c5b3dd6060978d6d281ecb674cd76e
+
+        * .travis.yml:
+
+          Make use of existing NO_INLINE
+
+          * .travis.yml:
+
+Tue Jun 27 17:08:19 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 42f61585d617880e3de4ddf2d41a13e419a06aea
+
+        * .travis.yml:
+
+          Disable inlining with OSX, should also reduce the log size
+
+          * .travis.yml:
+
+Tue Jun 27 14:09:51 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fdba2ebf129b764ecdeee2e11f59d1c312f0467c
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/MetaStruct/MetaStructTest.mpc:
+
+          MetaStructTest does use several operations that require multi
+          topic support
+
+          * bin/dcps_tests.lst:
+          * tests/DCPS/MetaStruct/MetaStructTest.mpc:
+
+Tue Jun 27 13:00:41 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5e81e7a146dd5b77bfaa7fc423855bc66c10cfd5
+
+        * .travis.yml:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          Guard several generated methods with OPENDDS_NO_MULTI_TOPIC, they
+          are not necessary when the user has disabled multitopics. Extend
+          travis-ci build with a configuration to also build with multi
+          topic disabled
+
+          * .travis.yml:
+          * dds/DCPS/FilterEvaluator.h:
+          * dds/idl/metaclass_generator.cpp:
+
+Tue Jun 27 10:58:30 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0b7e9eda013fcf3eb8afcda5ceaba16329ac44cc
+
+        * dds/idl/be_produce.cpp:
+
+          We need DdsDcpsC.h else we don't provide all IDL defined DDS
+          types to the end user
+
+          * dds/idl/be_produce.cpp:
+
+Tue Jun 27 08:32:43 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0c839a7ff07fe22e88f2be4a193ee5cdf161fe7f
+
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+
+          Return the string length with read_string and use this in the
+          calling methods
+
+          * dds/DCPS/Serializer.cpp:
+          * dds/DCPS/Serializer.h:
+          * dds/DCPS/Serializer.inl:
+
+Tue Jun 27 06:30:25 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fa8fc16b2ee7af5637608c3649cef2f02b6ab34c
+
+          Merge branch 'master' into jwi-serializer-stdstring-672
+
+Tue Jun 27 06:27:04 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a1a59ef9a29ff20fbaade2c013d201232212b60c
+
+        * dds/DCPS/Time_Helper.inl:
+        * dds/idl/be_produce.cpp:
+
+          Addressed review comments, use an ACE define and include more
+          specific stub headers
+
+          * dds/DCPS/Time_Helper.inl:
+          * dds/idl/be_produce.cpp:
+
+Tue Jun 27 06:17:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9bdda330e06f905587777cec7aa3a9a8e2109451
+
+          Merge branch 'master' into jwi-timehelper2
+
+Mon Jun 26 22:37:58 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 0a27c2bc063103c53340764c4960906629f475cd
+
+          Merge pull request #685 from
+          jwillemsen/jwi-missingbreakserializerwstringtest
+
+          Add missing breaks
+
+Mon Jun 26 22:37:50 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1b20151458bc6677101372787b621809a13f0ea5
+
+          Merge pull request #684 from
+          jwillemsen/jwi-cpp17-exceptionspecification
+
+          Removed throw exception specification, results in a compile error
+          whe…
+
+Mon Jun 26 22:37:40 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 801a729ded823c189043b0d7a1c537f0fe364252
+
+          Merge pull request #679 from jwillemsen/jwi-face-warnings
+
+          Fixed some warnings with msvc and fixed some typos in some debug
+          mess…
+
+Mon Jun 26 22:37:32 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 05db416908b7901a7418831e86f6d6eae3267010
+
+          Merge pull request #677 from jwillemsen/jwi-client_refs
+
+          Make client_refs_ an unsigned long and use prefix
+          increment/decrement
+
+Mon Jun 26 22:37:19 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit df8d3376aba4558e047932d5d7fbd8ea7c673b7d
+
+          Merge pull request #670 from jwillemsen/jwi-repoctl-type
+
+          Fixed typo in repoctl console output
+
+Mon Jun 26 22:37:11 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit f16b27376b337d7507861536d1348f58e18b84b7
+
+          Merge pull request #669 from jwillemsen/jwi-zap-register
+
+          Removed usage of register keyword, triggers warnings with newer
+          compi…
+
+Mon Jun 26 18:02:40 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 88f3e8ac9209f44847cfc45d8f88f60c5149bbad
+
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+
+          Added missing breaks
+
+          * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+
+Mon Jun 26 17:33:07 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6880a3949d52a86c9abc18919f09eb2e5cd830ae
+
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+        * tests/DCPS/Serializer_wstring/Writer.h:
+
+          Add missing breaks
+
+          * tests/DCPS/Serializer_wstring/Writer.cpp:
+          * tests/DCPS/Serializer_wstring/Writer.h:
+
+Mon Jun 26 15:00:31 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 2f576f0ecc482df5e4db2c1c8927a5ffb2e140c3
+
+        * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.cpp:
+        * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.h:
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/Sync/SyncClient_i.h:
+        * performance-tests/DCPS/Sync/SyncServer.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+
+          Removed throw exception specification, results in a compile error
+          when C++17 is enabled
+
+          * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.cpp:
+          * performance-tests/DCPS/InfoRepo_population/SyncClientExt_i.h:
+          * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+          * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+          * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+          * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+          * performance-tests/DCPS/Sync/SyncClient_i.h:
+          * performance-tests/DCPS/Sync/SyncServer.cpp:
+          * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+          * performance-tests/DCPS/Sync/SyncServer_i.h:
+
+Mon Jun 26 12:26:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 774dd0020aa4138cf1e0c06eee72ec47dc6f4b0a
+
+        * dds/DCPS/OwnershipManager.h:
+
+          Add missing include
+
+          * dds/DCPS/OwnershipManager.h:
+
+Mon Jun 26 12:23:45 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d5253326a752a1aa583dba09d0c85cd505e5af20
+
+        * dds/DCPS/CoherentChangeControl.h:
+
+          Added missing include
+
+          * dds/DCPS/CoherentChangeControl.h:
+
+Mon Jun 26 12:21:44 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7c147b1abab2783cee6cd9652ecd3efd127ad373
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DiscoveryListener.h:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/RepoIdTypes.h:
+        * dds/DCPS/SafetyProfileSequence.h:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/FACE/FaceTSS.h:
+
+          Moved RepoIdTypes to its own header to break another cyclic
+          include which now happens in the case of safety profile
+
+          * dds/DCPS/RepoIdTypes.h:
+          Added.
+
+          * dds/DCPS/DataSampleHeader.h:
+          * dds/DCPS/Definitions.h:
+          * dds/DCPS/DiscoveryListener.h:
+          * dds/DCPS/InstanceState.h:
+          * dds/DCPS/PublicationInstance.h:
+          * dds/DCPS/Recorder.h:
+          * dds/DCPS/Replayer.h:
+          * dds/DCPS/SafetyProfileSequence.h:
+          * dds/DCPS/Serializer.h:
+          * dds/DCPS/transport/framework/TransportSendListener.h:
+          * dds/FACE/FaceTSS.h:
+
+Mon Jun 26 11:06:53 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit f6f8d5e8a32b5a3fd08defbe1abeed07efb3adfe
+
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+
+          Add include of SequenceNumber.h
+
+          * tests/DCPS/UnitTests/SequenceNumber.cpp:
+
+Mon Jun 26 10:24:03 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e46454702620302651ec81f9abd2a625d2b7916a
+
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/SequenceNumber.h:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Implemented std::(w)string insertion and extraction for the
+          Serializer. Serializer.h has to include Definitions.h to get the
+          correct setting of DDS_HAS_WCHAR but this lead to a cyclic
+          include, moved SequenceNumber out of Definitions.h to break this.
+          Updated some other files to include the new SequenceNumber.h.
+          This implements issue #672
+
+          * dds/DCPS/SequenceNumber.h:
+          Added.
+
+          * dds/DCPS/CoherentChangeControl.h:
+          * dds/DCPS/DataSampleHeader.h:
+          * dds/DCPS/Definitions.h:
+          * dds/DCPS/DisjointSequence.h:
+          * dds/DCPS/Serializer.h:
+          * dds/DCPS/Serializer.inl:
+          * dds/DCPS/transport/framework/TransportHeader.h:
+          * dds/DCPS/transport/framework/TransportQueueElement.h:
+          * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+          * tests/DCPS/Serializer/SerializerTest.cpp:
+
+Fri Jun 23 20:06:36 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit dfcf7693f09577e34b4524c89db41f7f880ae384
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Fixed some warnings with msvc and fixed some typos in some debug
+          messages
+
+          * dds/FACE/FaceTSS.cpp:
+
+Fri Jun 23 14:11:14 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 50ddd410fdb8bf5d445dd0ea11af63c16f3542d3
+
+        * bin/dcps_tests.lst:
+
+          Added new test
+
+Thu Jun 22 21:12:26 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 55e9866190f422f20ceda9e2f7951521c789dde1
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/Messenger/rtps_disc_tcp_udp.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          fix problem with multiple transports in configuration file
+
+Fri Jun 23 11:47:46 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit f3b57a00f5aa41db98c80e347dd261dde9bb5ed4
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Make client_refs_ an unsigned long and use prefix
+          increment/decrement
+          * dds/DCPS/DomainParticipantImpl.cpp:
+          * dds/DCPS/DomainParticipantImpl.h:
+
+Thu Jun 22 13:07:55 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 145c77f327cf6c0a65c94ff9aec954ec7ec5e232
+
+        * .travis.yml:
+
+          Add XERCES3 as separate variable which we can use to
+          enable/disable xerces3 support, for osx we now disable it
+
+          * .travis.yml:
+
+Thu Jun 22 12:37:21 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8b8df150bf0b4b5a33a7a0dd79ac47c3831baa86
+
+        * tools/repoctl/repoctl.cpp:
+
+          Fixed typo in message
+
+          * tools/repoctl/repoctl.cpp:
+
+Thu Jun 22 12:34:29 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a20a722eb73bf3a191c2f4031e7bf71a1d34943c
+
+        * dds/idl/be_produce.cpp:
+
+          dds/DdsDcpsC.h is a better one
+
+          * dds/idl/be_produce.cpp:
+
+Thu Jun 22 12:33:28 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 904b81d0395ca6c228b3faa857d2f1778190e777
+
+        * dds/idl/be_produce.cpp:
+
+          Generate an include of dds/DdsDcpsDomainC.h, we now don't include
+          this implicitly anymore through the Qos_Helper
+
+          * dds/idl/be_produce.cpp:
+
+Thu Jun 22 12:09:07 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a1ee2a48fa50eb0f4ca81e483fda52b825f8de98
+
+        * .travis.yml:
+
+          Change COMPILE env for clang
+
+          * .travis.yml:
+
+Thu Jun 22 09:52:18 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 459c7858bec30dd1f4e1945f87faf0e2b12c866f
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Time_Helper.cpp:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DCPS/WaitSet.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DdsDcpsCore.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Introduce a new Time_Helper.{h,cpp,inl} which only provides the
+          helper for time. This way the QoS_Helper.h has only to be
+          included in some implementation files and is not visible anymore
+          from the generated TypeSupportImpl
+
+          * dds/DCPS/Time_Helper.cpp:
+          * dds/DCPS/Time_Helper.h:
+          * dds/DCPS/Time_Helper.inl:
+          Added.
+
+          * dds/DCPS/DataDurabilityCache.cpp:
+          * dds/DCPS/DataWriterImpl.h:
+          * dds/DCPS/InstanceState.cpp:
+          * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+          * dds/DCPS/Qos_Helper.h:
+          * dds/DCPS/Qos_Helper.inl:
+          * dds/DCPS/ReceivedDataElementList.h:
+          * dds/DCPS/ReceivedDataStrategy.cpp:
+          * dds/DCPS/ReplayerImpl.h:
+          * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+          * dds/DCPS/WaitSet.cpp:
+          * dds/DCPS/WriteDataContainer.cpp:
+          * dds/DCPS/WriterInfo.cpp:
+          * dds/DdsDcpsCore.idl:
+          * dds/DdsDcpsInfrastructure.idl:
+
+Thu Jun 22 09:56:50 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit c901020bdbb2f686a41e2fa226e4d684f19ae69e
+
+        * dds/DCPS/Serializer.inl:
+
+          Removed usage of register keyword, triggers warnings with newer
+          compilers
+
+          * dds/DCPS/Serializer.inl:
+
+Wed Jun 21 13:08:00 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 185ca7fd4f2be6f06f3f875d520bd0a746e1fd4e
+
+        * .travis.yml:
+
+          Compiler is clang
+
+Wed Jun 21 12:22:20 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 492cb95bea41b01ef05ce4fcc73d6de8f8457353
+
+        * .travis.yml:
+
+          Add osx
+
+          * .travis.yml:
+
+Tue Jun 20 06:45:18 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5ac97eeab712c54b37f986f92f143886f68a5c79
+
+          Merge branch 'master' into jwi-listenercleanup-641
+
+Mon Jun 19 22:41:50 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 6f4f301e41c077a505eac442d1b0d1d7b6414b55
+
+          Merge pull request #663 from oschwaldp-oci/coverity_issues_fixes
+
+          Coverity Scan Defect Report issues.
+
+Mon Jun 19 22:41:40 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 5685a17e6dcb6708bce73850e10aa81371fd17f5
+
+          Merge pull request #661 from jwillemsen/jwi-corbae-findpoacheck
+
+          Corrected check for when to use find_POA
+
+Mon Jun 19 19:13:14 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 09e819c09472696162a64f8458808973709032f0
+
+        * dds/FACE/FaceTSS.h:
+
+          Fix namespace of INVALID_PARAM. Fix warning of unused variable
+          'ex'.
+
+Mon Jun 19 17:52:25 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 6f9538105d103091bb2c8f379c98de213f53b4b8
+
+        * dds/FACE/FaceTSS.h:
+
+          Add try/catch for CORBA::BAD_PARAM exceptions at the FaceTSS API
+          boundary.
+
+Mon Jun 19 13:50:40 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 3679e30ed62ffc8d5bffd3aa7a30136486c92c3b
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Always use find_POA, it is supported with CORBA/e compact
+
+          * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+Mon Jun 19 13:50:06 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit aca7e4c688a8edf79afa5f6282e79ba0ba71afa9
+
+          Merge branch 'master' into jwi-corbae-findpoacheck
+
+Sun Jun 18 13:45:46 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 7a5296b3c38105d0c737b91d3533ce9b80214292
+
+          Merge pull request #660 from oschwaldp-oci/coverity_issues_fixes
+
+          Coverity issues fixes
+
+Sun Jun 18 13:45:35 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 0500f943795615b46cb53e089f26d55fa586b5ee
+
+          Merge pull request #659 from mitza-oci/master
+
+          Attempt to fix a problem in versioned namespace build
+
+Sun Jun 18 13:45:25 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 76820fc7eba9b3a3a20e876d64e014fe992e19ee
+
+          Merge pull request #658 from jwillemsen/jwi-dp-isclean-571
+
+          Change dp::is_clean to return a bool instead of int
+
+Sun Jun 18 13:45:13 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 88030200462e8879f4c1b0ea67d3b573e5ed7e82
+
+          Merge pull request #657 from
+          jwillemsen/jwi-entityimpl-deleted-655
+
+          Make set_deleted/get_deleted/set_enabled of EntityImpl protected
+          instead of public
+
+Sat Jun 17 18:15:05 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8074abc8c3722998dbb02f5f6e573c663888782a
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Corrected check for when to use find_POA
+
+          * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+Fri Jun 16 21:33:07 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 3968c871ea79751024e29f69f9b9220c92d4102d
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Fix unintentional style changes.
+
+Fri Jun 16 21:27:59 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit e8eae599624bb6d3454040fa0434b3afc23b392c
+
+        * dds/DCPS/WaitSet.cpp:
+
+          Revert changes to WaitSet.cpp from commit "Handle thrown
+          exception BAD_PARAM."
+
+          This reverts partial commit
+          366f81655ecbd994e36176d67a0766e7549cdbba.
+
+Fri Jun 16 21:12:21 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1cc7f439bccf8973f4cd7ff5e806aee192cc527e
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Another fix for wchar.
+
+Fri Jun 16 21:10:55 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d721d877e74d2470f25d484d9ed31bd42d0f7def
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Add try/catch for CORBA::BAD_PARAM exceptions at the FaceTSS API
+          boundary.
+
+Fri Jun 16 19:54:24 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 366f81655ecbd994e36176d67a0766e7549cdbba
+
+        * dds/DCPS/WaitSet.cpp:
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+
+          Handle thrown exception BAD_PARAM.
+
+Fri Jun 16 19:24:30 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d65428b3f2dddab30dd2c44073541e67a83bb1e4
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Missed a couple null pointer checks after dynamic casts.
+
+Fri Jun 16 19:13:43 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 46a071f4cf4b0d8ff4be40cb69b42056ecf73ca1
+
+        * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
+
+          Initialize result_
+
+Fri Jun 16 19:13:30 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit ad77d8521278277d5054d5bf285c304b402969b5
+
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+
+          Try initializing member variable last_si_ as default instead of
+          calling out each.
+
+Fri Jun 16 17:31:57 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b87fd37ba8d2925781780daa832a3d1c3a5ca0e8
+
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+
+          missed an unchecked null pointer from dynamic_cast.
+
+Fri Jun 16 17:24:34 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 7e0b74c0fe1bfdd036a4fa164065335bca3581ad
+
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+
+          restore outputstream format
+
+Fri Jun 16 17:23:04 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 02ea7bae6dbb727f817537e8181d62f402e98a89
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          fix wchar build
+
+Fri Jun 16 14:48:22 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 546ff02e9c5cbc2433c521b8ef18b217dbabb017
+
+        * dds/Versioned_Namespace.h:
+
+          Attempt to fix a problem in versioned namespace build
+
+Fri Jun 16 07:30:54 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 4b6feddb5c0400242475b84215110c1fdb2d6220
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Check whether the topic_server_ point is not nil before invoking
+          an operation on it
+
+          * dds/DCPS/DataWriterImpl.cpp:
+
+Fri Jun 16 06:57:15 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 19463386d7e96b34ab4dc7437734a99641116a36
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Change dp::is_clean to return a bool instead of int
+
+          * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+          * dds/DCPS/DomainParticipantImpl.cpp:
+          * dds/DCPS/DomainParticipantImpl.h:
+
+Fri Jun 16 06:47:48 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1c81494cd94652e34d873ce3f0e441023f5fc46e
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Use ! instead of == false
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/TopicImpl.cpp:
+
+Fri Jun 16 06:47:33 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9c2b5d6b8bf130baad2c566e8b40d69853dcab7c
+
+        * dds/DCPS/EntityImpl.h:
+
+          Make several helper methods non virtual and protected, they
+          shouldn't be public
+
+          * dds/DCPS/EntityImpl.h:
+
+Fri Jun 16 06:30:01 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 62ae595e142bd8d44fa313486d95bbb9c62da09b
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          At the moment the users calls delete_datawriter/delete_datareader
+          it can happen the DDS entity is deleted for the user but the
+          underlying object still exists due to reference counting. As
+          first step in the cleanup now set the listener to nil so that we
+          don't callback onto the listener after the user has called delete
+          on the DR/DW, see issue #654
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataWriterImpl.cpp:
+
+Fri Jun 16 04:47:12 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit e36a6aecf4abdee2693186883b3e8e5df2c7082b
+
+          Merge pull request #653 from jwillemsen/jwi-fixdocutypo
+
+          Fixed some typos
+
+Fri Jun 16 04:47:02 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 2e99092cb909fc44234bc3387342cd28f5e57d03
+
+          Merge pull request #652 from jwillemsen/jwi-rtpschangesstatic
+
+          Added missing includes for static builds
+
+Fri Jun 16 04:46:41 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit d5ec2205ada81ccd4dda8c46c3a3338d54006887
+
+          Merge pull request #650 from jwillemsen/jwi-datawriterunregister
+
+          No need to unregister instances which have been unregistered
+          already,…
+
+Fri Jun 16 04:46:16 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 9ee0fcaf7c29f23795c25bb67eaaff2b9e820e3e
+
+          Merge pull request #649 from
+          jwillemsen/jwi-datawriterunregistered
+
+          Removed DataWriter unregistered method, doesn't do anything
+
+Fri Jun 16 04:45:55 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 7badbbfee09e7a0f167343c63dde0128f2ce75c0
+
+          Merge pull request #643 from jwillemsen/jwi-statisdiscoverytest
+
+          Don't put the listeners on the stack, they are reference counted
+
+Fri Jun 16 04:45:31 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit e02c530db7764cf56b874bc9abb1adda7537a719
+
+          Merge pull request #642 from jwillemsen/jwi-endhistorysampleleak
+
+          Fixed valgrind reported leakage of end_historic_sample at
+          shutdown
+
+Fri Jun 16 04:44:50 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 8d13d0744841978205444ccc22340a70afa15d09
+
+          Merge pull request #639 from oschwaldp-oci/coverity_issues_fixes
+
+          Addressing Coverity Scan Reported Defects.
+
+Thu Jun 15 19:28:32 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 50f4bd55f80ad31289f6445a2157e6274c3af71f
+
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Allow wait's to return timeout and loop back through.
+
+Thu Jun 15 18:14:50 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 084689ed81c64f39098f0f6d3bffafa5b9b80e30
+
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+
+          Fixed some typos
+
+          * dds/DCPS/transport/tcp/TcpConnection.h:
+
+Thu Jun 15 17:37:51 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7d58f34cff5042c43b67b4bd2e7988fc31e373b8
+
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Added missing includes for static builds
+
+          * tests/DCPS/DPFactoryQos/publisher.cpp:
+          * tests/DCPS/DPFactoryQos/subscriber.cpp:
+          * tests/DCPS/Lifespan/publisher.cpp:
+          * tests/DCPS/Lifespan/subscriber.cpp:
+          * tests/DCPS/LivelinessTimeout/publisher.cpp:
+          * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+Thu Jun 15 17:16:35 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit f17195800ba8b7a92a63cecdfe2e33f9b172315a
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Removed special handling of DONT_DELETE
+
+          * dds/DCPS/RTPS/Sedp.cpp:
+
+Thu Jun 15 17:14:59 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0c9fe188e3c2a19580cd2a652519b95b84450a17
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed comment
+
+          * dds/DCPS/DataWriterImpl.cpp:
+
+Thu Jun 15 16:50:48 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d477ea4892499490241d6f2fd1fd12f25fc6991c
+
+        * tests/DCPS/SimpleFooTest/main.cpp:
+
+          Fix build issue
+
+Thu Jun 15 16:01:32 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 8549e453b97f94205526f5c1325375dc20ca360a
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Fix accidental increase in writes in the test from previous
+          change.
+
+Thu Jun 15 15:58:26 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 91c1a05d9c31dd100835d4e7ac2766e75342a338
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Pass by const&.
+
+Thu Jun 15 15:52:53 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 93acafb4c1151a213ca562428b9a1563aa21f88f
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+
+          Fix braces for style.
+
+Thu Jun 15 15:48:39 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1c8c5d3131ad7f49eb535b96fd74d3e8075c9eff
+
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          moved to the initializer list so that in the case of useAsyncSend
+          it is also initialized
+
+Thu Jun 15 15:34:29 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit c00850701e2b1d08af9767923a26546f12a95724
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Use
+          here instead of the _nil() that we are trying to get away from.
+
+Thu Jun 15 15:33:07 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 8a3bb95efc37ed707df263714c6c1787fd9ed111
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+
+          Use RETCODE_ERROR instead of RETCODE_PRECONDITION_NOT_MET.
+
+Thu Jun 15 14:37:48 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 4141f7e76286e844c691afc59dca570f302a522a
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          assign to ret on one line.
+
+Thu Jun 15 14:10:21 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d1eb2a41c04a82e73486abf6a8f835c7ce0af667
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          nest the if's.
+
+Thu Jun 15 14:02:13 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1ec5312c03ba51765815d939afeef4ad3c351a56
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Give ConnectionAttribs a default constructor and make use of it.
+
+Thu Jun 15 13:45:02 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 636fc73a7cadb3cd72bf391fd52e3d2ee5020627
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          move variable declaration inside loop.
+
+Thu Jun 15 13:42:16 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 0ebece8ca85051ee99460fac2af48c011a63f592
+
+        * tests/DCPS/SimpleFooTest/main.cpp:
+
+          assign to retcode in one line.
+
+Thu Jun 15 13:38:23 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 57fa809eaf060253d2507f9b22d2ad3bb9ff4fc3
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/PubScalability/SubDriver.cpp:
+
+          Use nested scope to reset ostream flags directly following write.
+
+Thu Jun 15 11:43:47 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 4fb25d05ee453b6a705abae0776c3e9e3c753562
+
+          Merge branch 'master' into jwi-datawriterunregistered
+
+Thu Jun 15 06:54:16 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 2d1c333188b11e073b1f86322b65cefe492dd4cf
+
+          Merge branch 'master' into jwi-endhistorysampleleak
+
+Thu Jun 15 06:52:09 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 61fce5aca302aa96bc5cd879f14faae0efbbf827
+
+        * tests/DCPS/StaticDiscoveryReconnect/StaticDiscoveryTest.cpp:
+
+          Revert some changes
+
+          * tests/DCPS/StaticDiscoveryReconnect/StaticDiscoveryTest.cpp:
+
+Thu Jun 15 06:50:21 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 3b918b0fa3a24d8e4db0e2ffb264481a5441b5cc
+
+          Merge branch 'master' into jwi-statisdiscoverytest
+
+Thu Jun 15 06:49:42 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit dc8296713f477dee7767f910cb05882bcbf2aa5a
+
+          Merge branch 'master' into jwi-datawriterunregister
+
+Wed Jun 14 22:45:26 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit b2d7d27b97d9a993d8b67effe6a1888edee5f88f
+
+          Merge pull request #648 from jwillemsen/jwi-serializer-gcc71
+
+          Fix gcc7.1 warnings
+
+Wed Jun 14 22:45:14 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit e41cfb2a054214867b1898896f6eaa9bcd52d1fd
+
+          Merge pull request #647 from jwillemsen/jwi-includertps
+
+          Remove not needed include
+
+Wed Jun 14 22:45:05 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 93c4a29213034895c12151fa670c84bfbbbba4ab
+
+          Merge pull request #646 from jwillemsen/jwi-inforepoorbdestroy
+
+          InfoRepoDiscovery ORB destroy change
+
+Wed Jun 14 22:44:57 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1da120baa094a82f4a5c1a6cd70ff9525f22721f
+
+          Merge pull request #644 from jwillemsen/jwi-reconnecttest
+
+          Layout changes in Reconnect test
+
+Wed Jun 14 22:44:45 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 976f077a8d279a01268386c90aacc24fd15f736c
+
+          Merge pull request #637 from huangminghuang/master
+
+          Fix RemoveAssociationSweeper failed to remove association problem
+
+Wed Jun 14 22:44:33 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit dd0e7f24b2e4e2afe9bb60e78b0f072b0937eea4
+
+          Merge pull request #632 from jwillemsen/jwi-dpfactoryqos_rtps
+
+          Added support to run DPFactoryQos and Lifespan using rtps
+          discovery
+
+Wed Jun 14 22:38:40 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b9191be638f0197d3a9eb32fa1f9b531fa2d037e
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Initialize separately.
+
+Wed Jun 14 21:36:47 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 5c6970d1b4f9b45c719db122edd6748182e03939
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Pass by reference.
+
+Wed Jun 14 21:24:04 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit f38f0cf269d5f3693726548e179e686d14e19cf2
+
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+
+          Initialize member variable.
+
+Wed Jun 14 21:16:50 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1d8c8bcea02998d9ed21f3c8fbc62e13c322a575
+
+        * tests/DCPS/DestinationOrder/TestCase.h:
+
+          Add constructor to initialize member variable pointers.
+
+Wed Jun 14 20:55:45 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit b3ea98ce2f137ba70d3580ae03af93bc1ccad60f
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Initialize member variable in constructor.
+
+Wed Jun 14 20:32:01 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 04b929c02cf334ed787dd952642bef2073061530
+
+        * tests/DCPS/ManyTopicTest/Writer.h:
+
+          Remove unused member variable.
+
+Wed Jun 14 20:21:57 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 98df4697392165bca0e8e052f864c8e0984fac24
+
+        * dds/DCPS/ZeroCopyAllocator_T.inl:
+
+          Initialize member variable pointer.
+
+Wed Jun 14 20:15:00 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit a84c64dd8f7436f54953d3bf35292e693c4f8ed3
+
+        * dds/idl/langmap_generator.cpp:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+
+          Check return values.
+
+Wed Jun 14 19:23:48 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit af59f5df9c98b002e729aa47a5d5fb83f75eaa44
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/RakeResults_T.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Wed Jun 14 17:07:36 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 882cba83067e9f88a02bb903245b2f96bea201aa
+
+        * tests/DCPS/Reconnect/publisher.cpp:
+
+          Don't call close on a file that failed to open.
+
+Wed Jun 14 17:03:35 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit c5933cc0b15faacdc49069bb1f2df14b23e0beae
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Wed Jun 14 17:00:51 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1d2a4ea8f5734786f61ecf38c56335dd60d4a3a6
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Check return value.
+
+Wed Jun 14 16:56:08 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit a2b0c9f94b51a7b70c654bc0e6e3d3ad55a13777
+
+        * tests/DCPS/SimpleFooTest/main.cpp:
+
+          Check return value.
+
+Wed Jun 14 16:52:22 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit c605fa4a27a00822e05f0d1b2d953447756ed74a
+
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Wed Jun 14 16:41:39 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 65e7ee191073522234bc5b7e5976cb4ad5b02038
+
+        * tests/FACE/Header/Publisher/Publisher.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Wed Jun 14 16:35:38 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 3c856d1dce6c535523735e00434ea84df9a36991
+
+        * tests/FACE/Unit/FreeIndexTest.cpp:
+
+          Initialize member variables in constructor.
+
+Wed Jun 14 16:32:43 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit e8ed0f32da040dded6cd2146de86a0109c81bb70
+
+        * tests/transport/rtps/subscriber.cpp:
+
+          Initialize member variables in constructor.
+
+Wed Jun 14 16:23:34 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2d5e2ffec4016d5e06cdd51f59961951da8a2e55
+
+        * tests/transport/simple/SubDriver.cpp:
+
+          Fix dereference of possible null return value.
+
+Wed Jun 14 16:12:53 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit db3f5e2ade4502998d25d4f5f311a85405d5805d
+
+        * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+
+          Addressing Coverity Scan Defect Reported issues. Initialize
+          member variable. Check return values.
+
+Wed Jun 14 15:33:34 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 2967df779f458f71e7570559032acb2067e40f90
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Wed Jun 14 15:27:19 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 063d6647c8cebe5a3f424d3a49de4eb7f319f3d2
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Wed Jun 14 15:19:14 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit d7a15e0122c32d29d1d9172848770e4fe6af0510
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Wed Jun 14 14:54:40 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 18541c894b0598223e017405b52db95b11bff6bd
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RestoreOutputStreamState.h:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+
+          Fuzz fixes.
+
+Wed Jun 14 08:15:46 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6d310e4154f9b3071bd027cc518f829b9b869e84
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          No need to unregister instances which have been unregistered
+          already, this could happen when the user has already unregistered
+          his instances explicitly and after that deletes the datawriter
+
+          * dds/DCPS/DataWriterImpl.cpp:
+
+Wed Jun 14 08:05:00 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit c851e6a7b534c9a92488b9153c81df05ce8bc984
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl_T.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removed DataWriter unregistered method, doesn't do anything
+
+          * dds/DCPS/DataWriterImpl.h:
+          * dds/DCPS/DataWriterImpl_T.h:
+          * dds/DCPS/WriteDataContainer.cpp:
+
+Tue Jun 13 21:39:42 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 261445bbc207041247f4f54bdc800731a74d800b
+
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+
+          Initialize members.
+
+Tue Jun 13 21:18:34 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit dfc1df7eaf1f65a5b3722f0272acd0de70ddfeba
+
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Initialize reactor_owner to NULL_thread, it is set to the actual
+          thread in svc()
+
+Tue Jun 13 21:03:17 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 7665bf80861209b0c80f5657de2114a7f51712ee
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          Missed one.  Check return value.
+
+Tue Jun 13 21:01:00 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 9c7bbf77c01907deea9edae42e02c5cf1493eb3b
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          Check return value.
+
+Tue Jun 13 20:49:37 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 2da076defb6b54a2746121705247c8ab1aeee9fb
+
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+
+          Check return value of fscanf.
+
+Tue Jun 13 20:34:23 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 6324885555b2508d9eab04f044385e0295970e29
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Check return value from attempt to write.
+
+Tue Jun 13 20:31:40 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 95b5583ee18de845eb2d3e79e50a48abf7b0c756
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/RemoveAssociationSweeper.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/WriterInfo.h:
+
+          Use liveliness_lease_duration for remove_association timeout
+          value when necessary
+
+Tue Jun 13 20:13:15 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit a3ad077e1183a5ce872bed09d2f4badf706fc3aa
+
+        * tests/FACE/GetConnectionParameters/Subscriber/Subscriber.cpp:
+
+          Addressing Coverity Scan Report Defect. Initialize max_msg_size
+          to 0, it should get set from the topic when create connection is
+          called.
+
+Tue Jun 13 19:58:37 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit e35b940ed5f8146ad3a8ad34895d30ea8f2c6d3a
+
+        * DevGuideExamples/DCPS/Messenger.minimal/Publisher.cpp:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+
+          Addressing Coverity Scan Report Defects: Untrusted loop bound due
+          to tainted data.
+
+Tue Jun 13 19:12:10 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit d8c082875af043a41ace17e21a66df09f816f94c
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/PubScalability/SubDriver.cpp:
+
+          Use RestoreOutputStreamState helper class to address Coverity
+          Scan reported defects of not restoring ostream format.
+
+Tue Jun 13 19:04:57 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 183c342289e2e23e42b2e43e13be8719c19db4c7
+
+        * dds/DCPS/RestoreOutputStreamState.h:
+        * dds/idl/dds_generator.h:
+
+          Move RestoreOutputStreamState helper to its own header to be used
+          other places.
+
+Tue Jun 13 18:42:06 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5c320818c4a2c700beac37c7fe46ca0850bcc8af
+
+        * dds/DCPS/Serializer.cpp:
+
+          Fix gcc7.1 warnings
+
+          * dds/DCPS/Serializer.cpp:
+
+Tue Jun 13 18:27:35 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 552d7064da9b361d2197b8471a9f4aa25c9ea6ca
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+
+          Remove not needed include
+
+          * dds/DCPS/RTPS/RtpsDiscovery.h:
+
+Tue Jun 13 18:06:39 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 5b5c17dbb637d4134e45c80db322f08f29a4f3e3
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Tue Jun 13 18:02:55 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 13eff78a4a507647de56cc7db3611469f7d07616
+
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Tue Jun 13 17:58:12 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 393ff430a5ec7c4344c8517ad8a9c856bfda68b3
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Addressing Coverity Scan reported defect of division by zero.
+
+Tue Jun 13 17:44:46 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 96b3e54dd7d0a4496ddcc0b361c5cf37cd7d6967
+
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+
+          Addressing Coverity Scan reported defect of uninitialized
+          members.
+
+Tue Jun 13 17:14:51 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 59f0f264c7cb2cc1e1fd89a5623e134551e61894
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Tue Jun 13 17:09:29 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 61b346d79b68667bb042f019f30ceafbc274a7ae
+
+        * tests/DCPS/PubScalability/SubDriver.cpp:
+
+          Addressing Coverity Scan reported defect of not restoring ostream
+          format.
+
+Tue Jun 13 17:00:17 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit b5043fe71f9e8a991a0469888a51c1270243eb33
+
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+
+          Addressing Coverity Scan reported defect of uninitialized
+          members.
+
+Tue Jun 13 16:25:13 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 0898d7b89f457aa819924ac984ccc3ed20cd34b5
+
+        * tests/FACE/MultiDomainMessenger/Publisher/Publisher.cpp:
+
+          Addressing Coverity Scan reported defect of uncaught exception of
+          DATA_CONVERSION.
+
+Tue Jun 13 16:12:47 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit f1cbde8795510d377c13ec41278c0d6ea2f221d7
+
+        * dds/FACE/FaceTSS.h:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Tue Jun 13 15:54:35 UTC 2017  Peter Oschwald  <oschwaldp@objectcomputing.com>
+        commit 566e0dd7044dc049038c4abc7aba987e8d773059
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Updating style per guidelines.
+
+Tue Jun 13 15:11:46 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 182f0db1caa3be62933c9cc5c3b7eca1c20cdec7
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          destroy the ORB after we have given the shutdown and we know the
+          runner is ready
+
+          * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+Tue Jun 13 15:11:25 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 10f6f8824630b89b830c3a2997f4964ba7b3e9cb
+
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl:
+
+          Layout changes
+
+          * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+          * dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl:
+
+Tue Jun 13 14:12:16 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 411a8ef9075a49583cb4967892719d9b9425ae2d
+
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+
+          Layout changes
+
+          * tests/DCPS/Reconnect/DataWriterListener.cpp:
+          * tests/DCPS/Reconnect/DataWriterListener.h:
+
+Tue Jun 13 13:30:00 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6ffe59e268a5718293180fdd679ce0e4bcb80ffd
+
+        * tests/DCPS/StaticDiscoveryReconnect/StaticDiscoveryTest.cpp:
+
+          Don't put the listeners on the stack, they are reference counted
+
+          * tests/DCPS/StaticDiscoveryReconnect/StaticDiscoveryTest.cpp:
+
+Tue Jun 13 09:26:02 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 4274b83eee28e8a9ecfdce80ae06e1e80e16f6b1
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LivelinessTimeout/rtps_disc.ini:
+
+          Run also livelinesstimeout using rtps
+
+          * tests/DCPS/LivelinessTimeout/rtps_disc.ini:
+          Added.
+
+          * bin/dcps_tests.lst:
+
+Tue Jun 13 09:15:25 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit bb18396ba6dd9a4936dc5ab111429bc5941f044e
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Lifespan/README:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/rtps_disc.ini:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+
+          Fixed memory leak in Lifespan test and made it running with
+          rtps_disc
+
+          * tests/DCPS/Lifespan/rtps_disc.ini:
+          Added.
+
+          * bin/dcps_tests.lst:
+          * tests/DCPS/Lifespan/README:
+          * tests/DCPS/Lifespan/publisher.cpp:
+          * tests/DCPS/Lifespan/subscriber.cpp:
+
+Tue Jun 13 08:42:03 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 835abf23503af8138b15da10ffe5872e7ea10fed
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          When in data_received deserialize of encap and options fails log
+          an error and return at that point
+
+          * dds/DCPS/RTPS/Sedp.cpp:
+
+Tue Jun 13 08:39:33 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fd6b551909fe4e881fb149c458dc3c14c6a80742
+
+        * dds/DCPS/DataWriterImpl.h:
+
+          Removed commented our arg
+
+          * dds/DCPS/DataWriterImpl.h:
+
+Tue Jun 13 08:13:38 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b8ef0fa738c009581897bf463b8aefae831851ef
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed leakage of message block in end_historic_samples
+
+          * dds/DCPS/RTPS/Sedp.cpp:
+
+Tue Jun 13 06:01:20 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 47f501cdf737b90104d02bce0d935f586c507819
+
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+
+          Removed not needed variable and shorten max runtime
+
+          * tests/DCPS/DPFactoryQos/run_test.pl:
+
+Mon Jun 12 21:00:44 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 9b5f580dc788ce0e65689e36d9c4044aceb552e1
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          refactor to remove explicit guard.release()
+
+Mon Jun 12 20:26:13 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 21552398cb5cfa58069c3a2d372b2f0e0a8b5c03
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Handling uncaught BAD_PARAM exception per Coverity Scan defect
+          report.
+
+Mon Jun 12 20:00:54 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
+        commit 1fed088307d7effe92f8b0fda0bc8b4e23c26e57
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Adding checks after dynamic_cast to address coverity defect
+          reports.
+
+Mon Jun 12 19:06:14 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
+        commit 6c50334d351f055d5b40dde3eb69e16ac17f9f96
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RemoveAssociationSweeper.h:
+
+          Fix RemoveAssociationSweeper failed to remove association problem
+
+Mon Jun 12 18:09:59 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 30c65ff484d0861336af6c5b07dc5a46730275fe
+
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+
+          Simplify script
+
+          * tests/DCPS/DPFactoryQos/run_test.pl:
+
+Mon Jun 12 16:58:29 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8fe84278f5d50f3d14fc919067cc3d25588421bc
+
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+
+          Remove addition of $is_rtps_disc
+
+          * tests/DCPS/DPFactoryQos/run_test.pl:
+
+Mon Jun 12 16:55:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 79e40e206f1d51a132c617320fe818b8246a5d62
+
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/common.h:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/rtps_disc.ini:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/common.h:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/GroupPresentation/publisher.cpp:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/rtps.ini:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTimeout/common.h:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/rtps_disc.ini:
+        * tests/DCPS/ManyToMany/rtps_disc_tcp.ini:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/common.h:
+        * tests/DCPS/MultiRepoTest/monitor.ini:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/system1.ini:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/rtps.ini:
+        * tests/DCPS/Ownership/subscriber.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/PubScalability/PubDriver.cpp:
+        * tests/DCPS/PubScalability/SubDriver.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/SampleLost/publisher.cpp:
+        * tests/DCPS/SampleLost/subscriber.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Replaced all occurances of domain id 411 with 111 in order to
+          have a valid domain id when we are testing with rtps
+
+          * examples/DCPS/DistributedContent/AbstractionLayer.h:
+          * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+          * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+          * examples/DCPS/Messenger_Imr/publisher.cpp:
+          * examples/DCPS/Messenger_Imr/subscriber.cpp:
+          * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+          * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+          * performance-tests/DCPS/MulticastListenerTest/common.h:
+          * performance-tests/DCPS/SimpleE2ETest/common.h:
+          * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+          * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+          * performance-tests/DCPS/TCPListenerTest/common.h:
+          * performance-tests/DCPS/TCPProfilingTest/common.h:
+          * performance-tests/DCPS/UDPListenerTest/common.h:
+          * performance-tests/DCPS/UDPNoKeyTest/common.h:
+          * tests/DCPS/BidirMessenger/pubsub.cpp:
+          * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+          * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+          * tests/DCPS/BuiltInTopicTest/rtps_disc.ini:
+          * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+          * tests/DCPS/ConfigTransports/common.h:
+          * tests/DCPS/CorbaSeq/publisher.cpp:
+          * tests/DCPS/CorbaSeq/subscriber.cpp:
+          * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+          * tests/DCPS/FooTest3_0/PubDriver.cpp:
+          * tests/DCPS/FooTest3_0/SubDriver.cpp:
+          * tests/DCPS/FooTest3_2/PubDriver.cpp:
+          * tests/DCPS/FooTest3_2/SubDriver.cpp:
+          * tests/DCPS/FooTest4/main.cpp:
+          * tests/DCPS/FooTest4_0/common.h:
+          * tests/DCPS/FooTest5/common.h:
+          * tests/DCPS/FooTest5_0/main.cpp:
+          * tests/DCPS/GroupPresentation/publisher.cpp:
+          * tests/DCPS/GroupPresentation/subscriber.cpp:
+          * tests/DCPS/LargeSample/publisher.cpp:
+          * tests/DCPS/LargeSample/rtps.ini:
+          * tests/DCPS/LargeSample/subscriber.cpp:
+          * tests/DCPS/LatencyBudget/publisher.cpp:
+          * tests/DCPS/LatencyBudget/subscriber.cpp:
+          * tests/DCPS/Lifespan/publisher.cpp:
+          * tests/DCPS/Lifespan/subscriber.cpp:
+          * tests/DCPS/LivelinessTest/common.h:
+          * tests/DCPS/LivelinessTimeout/common.h:
+          * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+          * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+          * tests/DCPS/ManyToMany/publisher.cpp:
+          * tests/DCPS/ManyToMany/rtps_disc.ini:
+          * tests/DCPS/ManyToMany/rtps_disc_tcp.ini:
+          * tests/DCPS/ManyToMany/subscriber.cpp:
+          * tests/DCPS/Monitor/publisher.cpp:
+          * tests/DCPS/Monitor/subscriber.cpp:
+          * tests/DCPS/MultiDPTest/common.h:
+          * tests/DCPS/MultiRepoTest/monitor.ini:
+          * tests/DCPS/MultiRepoTest/run_test.pl:
+          * tests/DCPS/MultiRepoTest/system1.ini:
+          * tests/DCPS/NotifyTest/publisher.cpp:
+          * tests/DCPS/NotifyTest/subscriber.cpp:
+          * tests/DCPS/Ownership/publisher.cpp:
+          * tests/DCPS/Ownership/rtps.ini:
+          * tests/DCPS/Ownership/subscriber.cpp:
+          * tests/DCPS/Partition/Publisher.cpp:
+          * tests/DCPS/Partition/Subscriber.cpp:
+          * tests/DCPS/PersistentDurability/publisher.cpp:
+          * tests/DCPS/PersistentDurability/subscriber.cpp:
+          * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+          * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+          * tests/DCPS/PubScalability/PubDriver.cpp:
+          * tests/DCPS/PubScalability/SubDriver.cpp:
+          * tests/DCPS/Reconnect/publisher.cpp:
+          * tests/DCPS/Reconnect/subscriber.cpp:
+          * tests/DCPS/SampleLost/publisher.cpp:
+          * tests/DCPS/SampleLost/subscriber.cpp:
+          * tests/DCPS/Serializer_wstring/publisher.cpp:
+          * tests/DCPS/Serializer_wstring/subscriber.cpp:
+          * tests/DCPS/SimpleFooTest/main.cpp:
+          * tests/DCPS/StringKey/publisher.cpp:
+          * tests/DCPS/StringKey/subscriber.cpp:
+          * tests/DCPS/TransientDurability/publisher.cpp:
+          * tests/DCPS/TransientDurability/subscriber.cpp:
+          * tests/DCPS/ViewState/main.cpp:
+          * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+          * tests/DCPS/ZeroCopyRead/main.cpp:
+          * tests/DCPS/sub_init_loop/publisher.cpp:
+          * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+Mon Jun 12 15:50:09 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d60e2e9d05553a6d4e2e128c814c22549595f252
+
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/rtps_disc.ini:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+
+          Lower domain id
+
+          * tests/DCPS/DPFactoryQos/publisher.cpp:
+          * tests/DCPS/DPFactoryQos/rtps_disc.ini:
+          * tests/DCPS/DPFactoryQos/subscriber.cpp:
+
+Mon Jun 12 15:49:09 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 652a317bdc3a29fde490de739403c8036a1bf781
+
+          Merge pull request #634 from jwillemsen/jwi-initialized
+
+          Removed initialized_ flag, was only used to check if some points
+          need…
+
+Mon Jun 12 15:48:59 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 3ea28a8078a1e3856925fd111bdd3cdd5497bda6
+
+          Merge pull request #631 from jwillemsen/jwi-mininumbit
+
+          get_BuiltinTopicKey is not needed with DDS_HAS_MINIMUM_BIT set,
+          solve…
+
+Mon Jun 12 15:48:51 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit d320ced310dae18c325ecdd87b3dda3604b62b1e
+
+          Merge pull request #630 from jwillemsen/jwi-DataReaderRemoteImpl
+
+          Updated DataReaderRemoteImpl to match DataWriterRemoteImpl,
+          triggered…
+
+Mon Jun 12 15:48:41 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 58d009910425c66f44b54d186006eb5f1cb38262
+
+          Merge pull request #629 from jwillemsen/jwi-propogatefix
+
+          Fix propogate to propagate
+
+Mon Jun 12 15:47:59 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 568e73cf8f8323788dafd71891976895e4784db1
+
+          Merge pull request #628 from jwillemsen/jwi-grouppresentation
+
+          Fix GroupPresentation test failures by reverting a small part of
+          the change of PR #575
+
+Mon Jun 12 12:17:10 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9472512b6956ac00b123234d027eaa71ba3c4058
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/ReplayerImpl.h:
+
+          Removed initialized_ flag, was only used to check if some points
+          need to be deleted, but at the moment we haven't allocated them
+          they are zero which is not a problem when calling delete on them
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataReaderImpl.h:
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/DataWriterImpl.h:
+          * dds/DCPS/ReplayerImpl.h:
+
+Mon Jun 12 08:45:31 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 924b19b7417ca3dab3dd1b84fc351521994ef413
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DPFactoryQos/rtps_disc.ini:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+
+          Added support to run DPFactoryQos using rtps discovery
+
+          * tests/DCPS/DPFactoryQos/rtps_disc.ini:
+          Added.
+
+          * bin/dcps_tests.lst:
+          * tests/DCPS/DPFactoryQos/run_test.pl:
+
+Sun Jun 11 18:19:29 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0a63075119eecbeff059460788f764b11961510b
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Documentation change
+
+          * dds/DCPS/transport/framework/TransportClient.cpp:
+
+Sun Jun 11 16:40:03 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 83e96515cfae9c43ce66edf864ba205ba50efa0e
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          get_BuiltinTopicKey is not needed with DDS_HAS_MINIMUM_BIT set,
+          solves a compiler warning with gcc7
+
+          * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+Sun Jun 11 13:25:30 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 58ddc61b7677162de1dd8f36ba8dbe5aba357413
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+
+          Fixed compile errors and made some layout/indent changes
+
+          * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+          * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+          * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+
+Sun Jun 11 08:08:09 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fad53af0f984f8444a341174fec5b8f4b4a6d0d3
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h:
+
+          Updated DataReaderRemoteImpl to match DataWriterRemoteImpl,
+          triggered by issue #624
+
+          * dds/DCPS/DataReaderCallbacks.h:
+          * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+          * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+          * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h:
+
+Sat Jun 10 19:38:26 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 8e58e0175fd7fb7cfa48c843172786aabd57512f
+
+          Merge pull request #625 from mitza-oci/tests-coverity-bugs
+
+          Fixed Coverity-reported issues in tests
+
+Sat Jun 10 19:06:53 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 632b7eca918988b103b3e1b5ec397352d7935652
+
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+
+          Fix propogate to propagate
+
+          * dds/InfoRepo/DCPS_IR_Participant.h:
+          * dds/InfoRepo/DCPS_IR_Topic.h:
+          * tests/DCPS/ZeroCopyRead/main.cpp:
+
+Sat Jun 10 17:43:22 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 14b5a7bc11e914a59b54ccf515163e38bdb91ad8
+
+          Merge branch 'master' into jwi-grouppresentation
+
+Sat Jun 10 08:07:04 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 995cbb57067be60c1910af8aaf0623fb95757b6b
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+
+          Revert part of PR #575, testing whether this solves the hang on
+          windows
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataReaderImpl.h:
+          * dds/DCPS/SubscriberImpl.cpp:
+          * dds/DCPS/SubscriberImpl.h:
+
+Fri Jun 09 21:51:11 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 255d8b1b0fd1b7fe01bc99282397ecfbc804e680
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          WriteDataContainer test: use smart pointers to avoid resource
+          leaks when returning due to error
+
+Fri Jun 09 21:50:02 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit a30b7da6086e1d05ee95c389de515619a6da1257
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          FooTest3_0: removed calls to accessors for values that are not
+          used
+
+Fri Jun 09 20:48:02 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 36c7e159d6aa722992643e2d4bc8d9ce08bac35a
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Small cleanup after PR #622 merge
+
+Fri Jun 09 20:43:55 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 168a9770ebe863dcbb25b07236298e8b16c01c9b
+
+          Merge remote-tracking branch 'upstream/pr622' into
+          merge_pull_requests
+
+Fri Jun 09 20:43:21 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit a1d288b5b320477b753ea9424943d8d87185c730
+
+          Merge remote-tracking branch 'upstream/pr621' into
+          merge_pull_requests
+
+Fri Jun 09 20:42:31 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 2a2dc0bf2231064843dcd5cff5c1ea1c2f73062d
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Small cleanup after PR #617 merge
+
+Fri Jun 09 20:41:35 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 458c5121fd1a92d242f0605ccd0028e28e7a66da
+
+          Merge remote-tracking branch 'upstream/pr617' into
+          merge_pull_requests
+
+Fri Jun 09 20:41:16 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 44373687ca64fc9d7b42eae40abd7de2ace8b903
+
+          Merge remote-tracking branch 'upstream/pr616' into
+          merge_pull_requests
+
+Fri Jun 09 20:40:52 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 32f21c5fa3cbbfa7640b071aa61671594e528c11
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Small cleanup after PR #601 merge
+
+Fri Jun 09 20:39:32 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit adbe90f6ea739fe7da7feec6fbd8f21a3cd123da
+
+          Merge remote-tracking branch 'upstream/pr601' into
+          merge_pull_requests
+
+Fri Jun 09 20:37:28 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1f270d6fa11893a8cc8dfa622c365039fd39cd90
+
+          Merge branch 'master' into merge_pull_requests
+
+          # Conflicts:
+          #  dds/DCPS/DataReaderImpl_T.h
+          #  dds/DCPS/DataWriterImpl.cpp
+
+Fri Jun 09 19:36:04 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8a7dcbb8a047ba9b5bca06c9ebee260c9599a4cf
+
+        * dds/DCPS/GroupRakeData.cpp:
+
+          Revert layout change
+
+          * dds/DCPS/GroupRakeData.cpp:
+
+Fri Jun 09 19:34:37 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit af427b7ff34a25fa51470b211ef86e2f2bfb6c36
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Const change
+
+          * dds/DCPS/DataReaderImpl.cpp:
+
+Fri Jun 09 19:21:39 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit aec6c0ba40a89f6b387fab0182221eed888fd8b0
+
+          Merge branch 'master' into jwi-grouppresentation
+
+Fri Jun 09 17:03:40 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1c12b0c6c6029bbdcc5dffa28ffdff7f2490e5e7
+
+          Merge pull request #620 from jwillemsen/jwi-gcc7
+
+          Fix gcc7 warning
+
+Fri Jun 09 17:03:29 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit ecbec58c4d05f837f9ddc52f711c49d073417fb3
+
+          Merge pull request #614 from
+          jwillemsen/jwi-transportframeworkimprovements
+
+          Const improvements, check return values in some places
+
+Fri Jun 09 17:03:18 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit cf5b213be03d677089a212af1d8d06892d68bf55
+
+          Merge pull request #613 from jwillemsen/jwi-keyvalue
+
+          According to the DDS specification get_key_value should return
+          RETCOD…
+
+Fri Jun 09 17:03:10 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 757b6652b6dc72ed17881edfaec19ff42e159edc
+
+          Merge pull request #611 from jwillemsen/jwi-zapoldid
+
+          Removed left over cvs ids
+
+Fri Jun 09 17:02:52 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit bb5d03fa2f559ca6aaa60c017ce285a46631f6f8
+
+          Merge pull request #608 from
+          jwillemsen/jwi-samplelosttestextension
+
+          Sample lost test extension
+
+Fri Jun 09 17:02:42 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit d426f0aea71ecf49d1c5d75e41d148e5a12aebf2
+
+          Merge pull request #607 from jwillemsen/jwi-latencybudgetzero
+
+          It is only necessary to calculate the latency budget when the
+          user ha…
+
+Fri Jun 09 17:02:32 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 3c99b819209983088d8f422af0a870ffcb7eab71
+
+          Merge pull request #605 from jwillemsen/jwi-rtpsdiscoverywarnings
+
+          Initialise local variables to resolve gcc warnings
+
+Fri Jun 09 17:02:22 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit fdb31600007434acdfa168bc7bffdcc830e78beb
+
+          Merge pull request #604 from
+          jwillemsen/jwi-lookup_instance_handles
+
+          lookup_instance_handles only returns true so made this a void
+          functio…
+
+Fri Jun 09 17:02:13 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit d3f7247e9abf56a576ca4e05f99949d45f8ee961
+
+          Merge pull request #603 from jwillemsen/jwi-novaluetype
+
+          Documentation changes in DDS_TAOv2.mwc and README.md
+
+Fri Jun 09 17:02:00 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit c2b7c21f09864dc68aaad4ee11eefcea5c69b25b
+
+          Merge pull request #602 from jwillemsen/jwi-zerocopyvector
+
+          Documentation improvements, wanted to remove ZeroCopyVector but
+          that …
+
+Fri Jun 09 17:01:42 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 27ad855d2f9c0bfb51f33853633e8e551896b158
+
+          Merge pull request #596 from jwillemsen/jwi-datareadercleanup
+
+          Simplify DataReaders cleanup
+
+Fri Jun 09 17:01:29 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit b10a74b4213dd78e5a33f1c7261ae8e617e2128d
+
+          Merge pull request #588 from jwillemsen/jwi-remotefootype2-576
+
+          Removed these files, are not compile at all and not used, issue
+          #576
+
+Fri Jun 09 16:32:30 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit edd42fa094a243f1d0d2179465c7a0fa68a2ae9a
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fixed log format specifier for size_t
+
+          * dds/DCPS/PublisherImpl.cpp:
+          * dds/DCPS/SubscriberImpl.cpp:
+
+Fri Jun 09 16:27:08 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6d68c194b28169141567eeb4fa6d942c59170d0f
+
+        * dds/DCPS/GroupRakeData.cpp:
+
+          Use CORBA::ULong for a corba sequence index
+
+          * dds/DCPS/GroupRakeData.cpp:
+
+Fri Jun 09 16:19:57 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6d159c3b285abd6e45038305b1e11b744b707a7a
+
+        * configure:
+
+          Use different download message for OCI and DOC Group version
+          * configure:
+
+Fri Jun 09 16:12:54 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit ff24a706782d703c882ef817d6a11462ed03d3b2
+
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+
+          Add logging
+
+          * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+
+Fri Jun 09 16:12:46 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 53305ca2ec53764cd1e35be1b125110330a97b82
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          More clear code
+
+          * dds/DCPS/SubscriberImpl.cpp:
+
+Fri Jun 09 15:51:22 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 78aabd7af101ca209d7ace0375008d5620160530
+
+        * dds/DCPS/DataReaderImpl_T.h:
+
+          Check for data_reader_impl_
+
+          * dds/DCPS/DataReaderImpl_T.h:
+
+Fri Jun 09 15:08:57 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 73d22cc15f17b925a6b935b2757f52432f9d377a
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Removed virtual from has_zero_copies()
+
+          * dds/DCPS/DataReaderImpl.h:
+
+Fri Jun 09 14:54:23 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5666cb2176ef4c6028ea338728b4b3aaf8e11fc4
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Added missing guard
+
+          * dds/DCPS/SubscriberImpl.cpp:
+
+Fri Jun 09 14:29:47 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9d2151a1c2bfba9a92f0c8ee2ee37adf37846bcf
+
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+
+          Extended logging
+
+          * tests/DCPS/GroupPresentation/subscriber.cpp:
+
+Fri Jun 09 07:09:50 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1233386f71cb519fc5cdd2d529984ff8a15af22f
+
+        * tests/DCPS/FooTest5_0/main.cpp:
+
+          At the moment we test for an incompatible QoS and get it we need
+          to cleanup our DDS entities beforing shutting down
+
+          * tests/DCPS/FooTest5_0/main.cpp:
+
+Fri Jun 09 07:00:35 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8a5e584b51db00e46495b5d6f19752fec3c219a8
+
+        * tests/DCPS/FooTest5_0/README:
+
+          Removed empty lines
+
+          * tests/DCPS/FooTest5_0/README:
+
+Fri Jun 09 06:38:44 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e5ca81fda150ff4a52e56e62f62284c8bd211784
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Log how many entities still exist at shutdown
+
+          * dds/DCPS/PublisherImpl.cpp:
+          * dds/DCPS/SubscriberImpl.cpp:
+
+Fri Jun 09 06:28:01 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7910f9b05716d6df58914d915da6da3712f76022
+
+          Merge branch 'master' into jwi-gcc7
+
+Fri Jun 09 06:27:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit c93607cff9195d983bee466a7e571cead04bd9d2
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fix gcc7 warnings
+
+          * dds/InfoRepo/DCPSInfo_i.cpp:
+
+Thu Jun 08 20:55:35 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 16f30e97bf7d34a340d14cbf5d53ec1e3e442bb2
+
+          Merge pull request #587 from
+          jwillemsen/jwi-zapexceptionspecification
+
+          Removed deprecated throw exception specification in tests
+
+Thu Jun 08 20:55:22 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit b6b9c705bc0763cbda0a070390d0f35497f646c0
+
+          Merge pull request #584 from jwillemsen/jwi-disposechecks
+
+          FooTest3_0: check count of disposed instances
+
+Thu Jun 08 20:55:08 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit dcd5d7bc58115bc969fc7354bc6360bc1e6aeaee
+
+          Merge pull request #583 from jwillemsen/jwi-docutypos
+
+          Fixed some typos in comments
+
+Thu Jun 08 20:54:41 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit e2c8360b58320a169cac59fde61934429f65d242
+
+          Merge remote-tracking branch 'upstream/pr580'
+
+          # Conflicts:
+          #  dds/DCPS/DataReaderImpl.h
+
+Thu Jun 08 20:50:46 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 580b4336fc08d20ab15bda351e22171055af3fd3
+
+          Merge pull request #579 from jwillemsen/jwi-pendingcontrol
+
+          Remove datawriter pending_control operation, not used
+
+Thu Jun 08 20:50:35 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 12d462d397aa09ca04e8d9b6f551c9a7f15e1ced
+
+          Merge pull request #578 from jwillemsen/jwi-topicimprovements
+
+          Simplify topic implementation, store the number of entities used
+          in t…
+
+Thu Jun 08 20:50:23 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 4e608ec7ffc95cfac0c444fc63962229485fbc6c
+
+          Merge pull request #575 from jwillemsen/jwi-getdrobjref-574
+
+          DataReader and DataWriter are local objects so we can just pass
+          this …
+
+Thu Jun 08 20:50:11 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 1e36d5baad6d6ca13ecc79d83db28b8a5912e64c
+
+          Merge pull request #569 from jwillemsen/jwi-dp-improvements
+
+          DomainParticipant improvements
+
+Thu Jun 08 20:49:25 UTC 2017  Adam Mitz  <mitza@ociweb.com>
+        commit 82ba84c5360e2810fc0e46af7884f65d0956707c
+
+          Merge pull request #566 from jwillemsen/jwi-shutdown-565
+
+          Fixed memory leaks/valgrind issues when having a double shutdown,
+          issue #565
+
+Thu Jun 08 20:46:49 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 06589143c8923537358aae2bceb6981be4f0ac8a
+
+        * performance-tests/Bench/doc/scenarios.txt:
+        * performance-tests/Bench/doc/tests-latency.txt:
+        * performance-tests/Bench/doc/tests.txt:
+        * performance-tests/Bench/doc/userguide.html:
+
+          Typo fixes from PR #591
+
+Thu Jun 08 20:41:40 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a83bb89aab1e125a228f3343293f787b1c0b5f46
+
+        * tools/excelRTD/doc/userguide.html:
+        * tools/monitor/doc/userguide.html:
+
+          Typo fixes from PR #564
+
+Thu Jun 08 20:19:13 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b88f5a6bcfff7000eec816f293feee5451b72006
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed logging
+
+Thu Jun 08 19:43:18 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a0869f4ca6debc4ad1f13b507d6f3f142c1e4bd5
+
+        * dds/idl/langmap_generator.cpp:
+
+          Fix gcc7 warning
+
+          * dds/idl/langmap_generator.cpp:
+
+Thu Jun 08 18:45:37 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 16b0f629ad8c7db492b3a682d399326a12fef086
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed logging
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+
+Thu Jun 08 18:45:12 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d09fe666d9dbf133256d5e2f7284b1af3d897531
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed logging
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+
+Thu Jun 08 18:45:01 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a6ef50ee4c4c764e1b9411fff3552690270869e1
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed logging
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+
+Thu Jun 08 18:43:52 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 843a78ccb01e9a09641792dee9e596d56c12ca90
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Updated logging lines
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+
+Thu Jun 08 18:12:16 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d7c2eeec086ecd9e65d31f8a019f73432e335b75
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed .in()
+
+          * dds/DCPS/DataWriterImpl.cpp:
+
+Thu Jun 08 17:14:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e706a2560d38eba96cda1707a1f302c804c17a02
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed close invocation
+
+          * dds/DCPS/Service_Participant.cpp:
+
+Thu Jun 08 17:08:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 0292cd804c8a58fd7f6be37a817fbab104018ed5
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed extra spaces
+
+          * dds/DCPS/DataReaderImpl.cpp:
+
+Thu Jun 08 17:06:50 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1e84a863932c3c15534fe98a2da843ac45f6bd26
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Address review comments
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+
+Thu Jun 08 17:02:13 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit ca6b820849e649796fc286dd3958643e8d4541e1
+
+        * dds/DCPS/TopicImpl.cpp:
+
+          Don't use this->
+
+          * dds/DCPS/TopicImpl.cpp:
+
+Thu Jun 08 16:57:44 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit be36bda1130014be8d3c86c8a62b99e574970b9b
+
+        * dds/DCPS/DataReaderImpl_T.h:
+
+          Removed comment block
+
+          * dds/DCPS/DataReaderImpl_T.h:
+
+Thu Jun 08 14:59:40 UTC 2017  Paul Calabrese  <calabrep@objectcomputing.com>
+        commit e0dd5ce95a23395c78634e5df0e6dc36b4ba8b11
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Fix issue where setting DCPSBitTransportPort without
+          DCPSBitTransportIPAddress has no effect
+
+Thu Jun 08 07:09:22 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit db1d127bd137db1db7b8a70daa4a190ab817d82b
+
+        * configure:
+
+          Get the source package of the DOC group ACE+TAO release
+
+          * configure:
+
+Thu Jun 08 07:04:41 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 1e8a38665e26d79a3b278ea57b184c6ce6b9c2c1
+
+        * configure:
+
+          Fixed errors
+
+          * configure:
+
+Thu Jun 08 06:56:26 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d9376aa456a436bb0da0d8f383c5afdd03b63c49
+
+        * configure:
+
+          Add docgroup commandline option to easily configure that we want
+          to download the doc group release of TAO
+
+          * configure:
+
+Wed Jun 07 16:44:35 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 48c34acacc3d81743d73f8201050fca0053779f2
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Const improvements, check return values in some places
+
+          * dds/DCPS/transport/framework/DataLink.cpp:
+          * dds/DCPS/transport/framework/NetworkAddress.cpp:
+          * dds/DCPS/transport/framework/TransportHeader.cpp:
+          * dds/DCPS/transport/framework/TransportHeader.h:
+          * dds/DCPS/transport/framework/TransportHeader.inl:
+          * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+          * dds/DCPS/transport/framework/TransportSendStrategy.h:
+          * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+          * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+          * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+          * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+          * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+Wed Jun 07 11:45:17 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a4769aeb8be6b71cd1982935a67ae67049241f1f
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl_T.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+
+          According to the DDS specification get_key_value should return
+          RETCODE_BAD_PARAMETER at the moment an unknown handle is passed.
+          This fixes issue #592
+
+          * dds/DCPS/DataReaderImpl_T.h:
+          * dds/DCPS/DataWriterImpl_T.h:
+          * tests/DCPS/FooTest3_0/PubDriver.cpp:
+          * tests/DCPS/FooTest4/Reader.cpp:
+          * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+
+Wed Jun 07 11:17:26 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 66eea9e2dce0e85a5585b330d23571c0114545f0
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Reset total_count_change to zero after we called a listener,
+          fixed typo in method name
+
+          * dds/DCPS/DataReaderImpl_T.h:
+          * dds/DCPS/DataWriterImpl.cpp:
+
+Wed Jun 07 11:07:47 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 669c602b5a8561c6ea6dcd07204c7de0445cff53
+
+        * tests/DCPS/SampleLost/DataReaderListener.cpp:
+
+          Extended test with functionality to check the on_sample_rejected
+          total count change, see issue #610
+
+          * tests/DCPS/SampleLost/DataReaderListener.cpp:
+
+Tue Jun 06 19:05:50 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit ad1a0279f363557376d7e002be9dfe9d86b88002
+
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+          Removed left over cvs ids
+
+          * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+          * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+Tue Jun 06 14:47:49 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 2c7f75e7ffce7dd306a0d779916e5f748f00342a
+
+        * tests/DCPS/SampleLost/DataReaderListener.cpp:
+
+          Log the full sample rejected and lost status
+
+          * tests/DCPS/SampleLost/DataReaderListener.cpp:
+
+Tue Jun 06 12:01:40 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e1157a652b300ebd81eb585edbf065f66aaee349
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          No need to call value()
+
+          * dds/DCPS/DataReaderImpl.cpp:
+
+Tue Jun 06 11:38:58 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a5e42f6117ce01a55464754a9d0379786d8287e7
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+
+          Use doxygen style of documentation
+
+          * dds/DdsDcpsSubscriptionExt.idl:
+
+Tue Jun 06 11:38:39 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 13d44a5cb1d83cdb987fb4a43fd5632e5ca3d2f6
+
+        * tests/DCPS/SampleLost/subscriber.cpp:
+
+          Log an error when we got any on_budget_exceeded callbacks, we
+          haven't specified this QoS so shouldn't get these. The fix for
+          this is PR #607
+
+          * tests/DCPS/SampleLost/subscriber.cpp:
+
+Tue Jun 06 11:14:20 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit c20ddb10413bed6f66ce291945126f2356961e19
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          It is only necessary to calculate the latency budget when the
+          user has enabled statistics or has specified a latency budget. In
+          case the qos latency budget is zero we shouldn't call back to the
+          on_budget_exceeded callback on the listener
+
+          * dds/DCPS/DataReaderImpl.cpp:
+
+Tue Jun 06 10:50:55 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit dbd236903a6caee628e8f712bf3c393948fee7a3
+
+        * tests/DCPS/SampleLost/DataReaderListener.cpp:
+        * tests/DCPS/SampleLost/DataReaderListener.h:
+        * tests/DCPS/SampleLost/subscriber.cpp:
+
+          Log the number of sampe lost, sample rejected, and budget
+          exceeded callbacks received
+
+          * tests/DCPS/SampleLost/DataReaderListener.cpp:
+          * tests/DCPS/SampleLost/DataReaderListener.h:
+          * tests/DCPS/SampleLost/subscriber.cpp:
+
+Tue Jun 06 10:17:02 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e4fd7685042d48ee7d43173795e7d776191c6a9b
+
+        * DDS_TAOv2.mwc:
+
+          Valuetype is needed for messaging, so removed the comment about
+          dds4ccm
+
+          * DDS_TAOv2.mwc:
+
+Tue Jun 06 08:58:17 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit c984707d46c240b42ef8ac5432938aa1bfd62090
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Initialise local variables to resolve gcc warnings
+
+          * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+Tue Jun 06 08:33:46 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9245f2307bb7fef9bfe016ebeb2161dc907c32f0
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+
+          lookup_instance_handles only returns true so made this a void
+          function and make some minor improvements
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataReaderImpl.h:
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/DataWriterImpl.h:
+          * dds/DCPS/RecorderImpl.cpp:
+          * dds/DCPS/RecorderImpl.h:
+          * dds/DCPS/ReplayerImpl.cpp:
+          * dds/DCPS/ReplayerImpl.h:
+
+Tue Jun 06 08:03:11 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 124c05549dc88605407af22716dfad13ce521e9e
+
+          Merge branch 'master' into jwi-samplelosttestextension
+
+Tue Jun 06 08:03:01 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9974db7cd4f77ab750fcf2e1086c0e1f8ce02c58
+
+        * README.md:
+
+          Small docu change
+
+          * README.md:
+
+Tue Jun 06 07:58:32 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9982de6931ae043053b9ef752b1aa1867db9985e
+
+        * DDS_TAOv2.mwc:
+
+          Removed valuetype library, dds4ccm uses opendds and when it
+          requires valuetype it should build it itself
+
+          * DDS_TAOv2.mwc:
+
+Tue Jun 06 06:58:07 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 59bdb1b612c20f2e90db0e0a541ae4fd05454275
+
+        * configure:
+
+          Documentation changes
+
+Tue Jun 06 06:51:02 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 08a37fc682a7500f720a13e2c276b9dad1df68e9
+
+        * dds/DCPS/RcObject_T.h:
+
+          Const change
+
+          * dds/DCPS/RcObject_T.h:
+
+Tue Jun 06 06:50:47 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit afdd4b4e3f2b8ac79b218bf566d463d1163a9a52
+
+        * dds/DCPS/RawDataSample.h:
+
+          Documentation update
+
+          * dds/DCPS/RawDataSample.h:
+
+Tue Jun 06 06:44:34 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5fc6372b4bae4c0474c78a524e3d1964130759e3
+
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Documentation improvements, wanted to remove ZeroCopyVector but
+          that provides public access to the allocator member
+
+          * dds/DCPS/RequestedDeadlineWatchdog.h:
+          * dds/DCPS/ZeroCopySeq_T.h:
+          * dds/DCPS/ZeroCopySeq_T.inl:
+
+Tue Jun 06 06:27:17 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit edcc371b52ef513cba211d2afab50acc08ef39d9
+
+        * dds/DCPS/SubscriptionInstance.h:
+
+          Documentation change
+
+          * dds/DCPS/SubscriptionInstance.h:
+
+Tue Jun 06 06:25:24 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 558159f5b202855353d8b55f99f83e497ff1641f
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Changed num_zero_copies to has_zero_copies, we are only
+          interested whether there are zero copies, no need to calculate
+          how many exactly
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataReaderImpl.h:
+          * dds/DCPS/SubscriberImpl.cpp:
+
+Mon Jun 05 16:59:16 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 3ce906fe232230a7d3e497da0048dc26110bd5b9
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Revert part of change, need to revisit
+
+          * dds/DCPS/SubscriberImpl.cpp:
+
+Sun Jun 04 18:42:10 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit a54d18ae92e641da464b2a9945828c3d304ce84b
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Const change and initialise pointer with 0
+
+          * dds/DCPS/PublisherImpl.cpp:
+
+Sun Jun 04 18:38:08 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit daf6327ec439bc53ec63902a63a48ddadc790a8c
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Gather all datareaders during one lock of the mutex
+
+          * dds/DCPS/SubscriberImpl.cpp:
+
+Wed May 31 17:43:26 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 208b80b552ce7983aa75c791f19a6332504d40bd
+
+        * tests/DCPS/FooType2/FooDataReaderImpl.cpp:
+        * tests/DCPS/FooType2/FooDataReaderImpl.h:
+        * tests/DCPS/FooType2/FooDataWriterImpl.cpp:
+        * tests/DCPS/FooType2/FooDataWriterImpl.h:
+        * tests/DCPS/FooType2/FooType.idl:
+        * tests/DCPS/FooType2/FooType2.obsolete_mpc:
+        * tests/DCPS/FooType2/FooTypeSupportImpl.cpp:
+        * tests/DCPS/FooType2/FooTypeSupportImpl.h:
+        * tests/DCPS/FooType2/footype_export.h:
+
+          Removed these files, are not compile at all and not used, issue
+          #576
+
+          * tests/DCPS/FooType2/FooDataReaderImpl.cpp:
+          * tests/DCPS/FooType2/FooDataReaderImpl.h:
+          * tests/DCPS/FooType2/FooDataWriterImpl.cpp:
+          * tests/DCPS/FooType2/FooDataWriterImpl.h:
+          * tests/DCPS/FooType2/FooType.idl:
+          * tests/DCPS/FooType2/FooType2.obsolete_mpc:
+          * tests/DCPS/FooType2/FooTypeSupportImpl.cpp:
+          * tests/DCPS/FooType2/FooTypeSupportImpl.h:
+          * tests/DCPS/FooType2/footype_export.h:
+          Deleted.
+
+Wed May 31 17:01:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 94219119378aa31b06b5f904fe5861efe27802ec
+
+        * tests/DCPS/FooTest3_2/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_2/DataReaderListener.h:
+        * tests/DCPS/Footprint/DataReaderListener.cpp:
+        * tests/DCPS/Footprint/DataReaderListener.h:
+        * tests/DCPS/GroupPresentation/DataReaderListener.cpp:
+        * tests/DCPS/GroupPresentation/DataReaderListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DPMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DataReaderListener.cpp:
+        * tests/DCPS/Monitor/DataReaderListener.h:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.h:
+        * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/SPMDataReaderListener.h:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.h:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.h:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.h:
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+        * tests/DCPS/Ownership/DataReaderListener.h:
+        * tests/DCPS/PubScalability/DataReaderListener.cpp:
+        * tests/DCPS/PubScalability/DataReaderListener.h:
+        * tests/DCPS/RtiSerialization/DataReaderListener.cpp:
+        * tests/DCPS/RtiSerialization/DataReaderListener.h:
+        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.cpp:
+        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.cpp:
+        * tests/DCPS/TcpReconnect/DataReaderListener.h:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.h:
+
+          Removed deprecated throw expeption specification. Skipped one
+          test, that is changed on another branch already
+
+          * tests/DCPS/FooTest3_2/DataReaderListener.cpp:
+          * tests/DCPS/FooTest3_2/DataReaderListener.h:
+          * tests/DCPS/Footprint/DataReaderListener.cpp:
+          * tests/DCPS/Footprint/DataReaderListener.h:
+          * tests/DCPS/GroupPresentation/DataReaderListener.cpp:
+          * tests/DCPS/GroupPresentation/DataReaderListener.h:
+          * tests/DCPS/LargeSample/DataReaderListener.cpp:
+          * tests/DCPS/LargeSample/DataReaderListener.h:
+          * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+          * tests/DCPS/ManyToMany/DataReaderListener.h:
+          * tests/DCPS/Messenger/DataReaderListener.cpp:
+          * tests/DCPS/Messenger/DataReaderListener.h:
+          * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/DPMDataReaderListener.h:
+          * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/DRMDataReaderListener.h:
+          * tests/DCPS/Monitor/DRPerMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/DRPerMDataReaderListener.h:
+          * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/DWMDataReaderListener.h:
+          * tests/DCPS/Monitor/DWPerMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/DWPerMDataReaderListener.h:
+          * tests/DCPS/Monitor/DataReaderListener.cpp:
+          * tests/DCPS/Monitor/DataReaderListener.h:
+          * tests/DCPS/Monitor/PublisherMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/PublisherMDataReaderListener.h:
+          * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/SPMDataReaderListener.h:
+          * tests/DCPS/Monitor/SubscriberMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/SubscriberMDataReaderListener.h:
+          * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/TopicMDataReaderListener.h:
+          * tests/DCPS/Monitor/TransportMDataReaderListener.cpp:
+          * tests/DCPS/Monitor/TransportMDataReaderListener.h:
+          * tests/DCPS/Ownership/DataReaderListener.cpp:
+          * tests/DCPS/Ownership/DataReaderListener.h:
+          * tests/DCPS/PubScalability/DataReaderListener.cpp:
+          * tests/DCPS/PubScalability/DataReaderListener.h:
+          * tests/DCPS/RtiSerialization/DataReaderListener.cpp:
+          * tests/DCPS/RtiSerialization/DataReaderListener.h:
+          * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.cpp:
+          * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.h:
+          * tests/DCPS/TcpReconnect/DataReaderListener.cpp:
+          * tests/DCPS/TcpReconnect/DataReaderListener.h:
+          * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+          * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.h:
+
+Wed May 31 14:04:19 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit fda13e94ffabe3b4bd5cbd93518c8fb2849ada03
+
+        * tests/DCPS/FooTest3_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_0/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Extended this test with the functionality to check whether we get
+          the correct number of disposed instance states in the listener
+
+          * tests/DCPS/FooTest3_0/DataReaderListener.cpp:
+          * tests/DCPS/FooTest3_0/DataReaderListener.h:
+          * tests/DCPS/FooTest3_0/SubDriver.cpp:
+          * tests/DCPS/FooTest3_0/SubDriver.h:
+          * tests/DCPS/FooTest3_0/run_test.pl:
+
+Wed May 31 13:23:17 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7af88e779e84c53278d6570151c4f48a94449c6a
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/InstanceState.inl:
+
+          Fixed some typos in comments
+
+          * dds/DCPS/DataReaderImpl_T.h:
+          * dds/DCPS/InstanceState.inl:
+
+Wed May 31 10:58:22 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6773fdce5771af8d8bfba69d84c9afc71f99b165
+
+        * dds/DCPS/MessageTracker.h:
+
+          Make pending_messages public again, used by some of the unit
+          tests
+
+          * dds/DCPS/MessageTracker.h:
+
+Wed May 31 10:56:24 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 28601da1b7e3b347c847d6b220dbaac25d1d0921
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+
+          Removed ifdefs, for regular topics we also now keep the refcount
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+          * dds/DCPS/TopicDescriptionImpl.h:
+
+Wed May 31 10:51:32 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 320a95ce3f16f959f230e1df3394ec7af9f21da3
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Removed dr/dw get_topic_name, just use the member directly
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataReaderImpl.h:
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/DataWriterImpl.h:
+          * dds/DCPS/PublisherImpl.cpp:
+
+Wed May 31 10:20:11 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 05cb841bc806092f3d70e3c375fee816c0a43271
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/MessageTracker.h:
+
+          Remove datawriter pending_control operation, not used
+
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/DataWriterImpl.h:
+          * dds/DCPS/MessageTracker.h:
+
+Wed May 31 09:59:23 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit e72b10e5baa7982caebf63ff1d4dc038553b715b
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+
+          Simplify topic implementation, store the number of entities used
+          in the topic description, removed not necessary dynamic casts,
+          use _var
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/DomainParticipantImpl.cpp:
+          * dds/DCPS/TopicDescriptionImpl.cpp:
+          * dds/DCPS/TopicDescriptionImpl.h:
+          * dds/DCPS/TopicImpl.cpp:
+          * dds/DCPS/TopicImpl.h:
+
+Mon May 29 11:29:40 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 14142e85e2fdba5178b3c720188d41132d6fdd93
+
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+
+          First check the return value of take_next_sample before checking
+          whether we have valid data
+
+          * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+
+Mon May 29 09:08:50 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 33c7a8ed5a491933a01860b72e99a05c62b0b32d
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl_T.h:
+        * dds/DCPS/DiscoveryBase.h:
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+
+          DataReader and DataWriter are local objects so we can just pass
+          this when we need a reference to a reader/writer, no need to
+          store a seperate _var/_ptr for the reader/writer
+
+          * dds/DCPS/DataReaderImpl.cpp:
+          * dds/DCPS/DataReaderImpl.h:
+          * dds/DCPS/DataReaderImpl.inl:
+          * dds/DCPS/DataReaderImpl_T.h:
+          * dds/DCPS/DataWriterImpl.cpp:
+          * dds/DCPS/DataWriterImpl.h:
+          * dds/DCPS/DataWriterImpl_T.h:
+          * dds/DCPS/DiscoveryBase.h:
+          * dds/DCPS/MultiTopicDataReaderBase.cpp:
+          * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+          * dds/DCPS/OfferedDeadlineWatchdog.h:
+          * dds/DCPS/PublisherImpl.cpp:
+          * dds/DCPS/RecorderImpl.cpp:
+          * dds/DCPS/ReplayerImpl.cpp:
+          * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+          * dds/DCPS/RequestedDeadlineWatchdog.h:
+          * dds/DCPS/SubscriberImpl.cpp:
+          * dds/DCPS/SubscriberImpl.h:
+
+Sun May 28 18:57:43 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8923d4372040fad79bfd321f6dfd3a4b9f18144e
+
+        * dds/DCPS/SubscriberImpl.h:
+
+          Removed participant_objref_, not used
+
+          * dds/DCPS/SubscriberImpl.h:
+
+Sun May 28 18:57:27 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7bcd2f0f17082806ebf5ee958e954f8e64848873
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Removed set_object_reference, not used at all
+
+          * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+          * dds/DCPS/DomainParticipantImpl.cpp:
+          * dds/DCPS/DomainParticipantImpl.h:
+
+Fri May 26 17:49:54 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 74546ed6f9e30c6281bbf8711c350c1b6c41d657
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Pass a point by value and prevent usage of return in the middle
+          of a function
+
+          * dds/DCPS/DomainParticipantImpl.cpp:
+          * dds/DCPS/DomainParticipantImpl.h:
+
+Fri May 26 17:49:22 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 8239e13be971e0b0d92090e07842ed121249fcbe
+
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+
+          Removed not needed include
+
+          * dds/DCPS/DomainParticipantFactoryImpl.h:
+
+Wed May 24 17:54:31 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b505b0af95f3529c13a1eabff5ed62c6ba268a34
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Use an ACE_Unmanaged_Singleton because not the service
+          participant is explictly closing the transport registry, no need
+          to redo this at process shutdown again
+
+          * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+Mon May 22 12:57:51 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 41cca00a49a735c46cdd1af4ac70543240fdf24c
+
+          Merge branch 'jwi-shutdown-565' of
+          https://github.com/jwillemsen/OpenDDS into jwi-shutdown-565
+
+Mon May 22 12:57:00 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 882ef1867fe3e1c01b3a978dedad8d4aa1c9c308
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+
+          Explicitly close the transport registry singleton so that we
+          cleanup any instance, even when it has been created by the
+          shutdown, like in the tests/DCPS/KeyTest test
+
+          * dds/DCPS/Service_Participant.cpp:
+          * dds/DCPS/transport/framework/TransportRegistry.cpp:
+          * dds/DCPS/transport/framework/TransportRegistry.h:
+
+Mon May 22 12:57:00 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 5e8c8f3f8f35163341fe2c0d72a2824b16a43165
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+
+          Explicitly close the transport registry singleton so that we
+          cleanup any instance, even when it has been created by the
+          shutdown
+
+          * dds/DCPS/Service_Participant.cpp:
+          * dds/DCPS/transport/framework/TransportRegistry.cpp:
+          * dds/DCPS/transport/framework/TransportRegistry.h:
+
+Mon May 22 12:29:35 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 325ea615d9f02d7ec8a9f865de7216745369ce07
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed typo
+
+          * dds/DCPS/Service_Participant.cpp:
+
+Mon May 22 12:29:22 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d5eaa6b7a846ccb16c3b2b0fe6df06dca7d73881
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          At the moment we have had a shutdown just ignore the second one
+          * dds/DCPS/Service_Participant.cpp:
+          * dds/DCPS/Service_Participant.h:
+
+Tue May 09 11:28:07 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/SampleLost/DataReaderListener.cpp:
+        * tests/DCPS/SampleLost/DataReaderListener.h:
+        * tests/DCPS/SampleLost/subscriber.cpp:
+
+          Check whether we get any on_sample_lost calls, looks we don't get
+          them which feels like a bug
+
+          * tests/DCPS/SampleLost/DataReaderListener.cpp:
+          * tests/DCPS/SampleLost/DataReaderListener.h:
+          * tests/DCPS/SampleLost/subscriber.cpp:
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

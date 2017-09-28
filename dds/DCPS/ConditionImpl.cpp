@@ -38,25 +38,25 @@ void ConditionImpl::signal_all()
 
   for (WaitSetSet::iterator it = local_ws.begin(), end = local_ws.end();
        it != end; ++it) {
-    (*it)->signal(this);
+    RcHandle<DDS::WaitSet> ws ((*it).lock());
+    if (ws)
+      ws->signal(this);
   }
 }
 
 DDS::ReturnCode_t ConditionImpl::attach_to_ws(DDS::WaitSet_ptr ws)
 {
-  DDS::WaitSet_var wsv(DDS::WaitSet::_duplicate(ws));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
-  return waitsets_.insert(wsv).second
+  return waitsets_.insert(ws->weak_rchandle_from_this()).second
          ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
 }
 
 DDS::ReturnCode_t ConditionImpl::detach_from_ws(DDS::WaitSet_ptr ws)
 {
-  DDS::WaitSet_var wsv(DDS::WaitSet::_duplicate(ws));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
-  return waitsets_.erase(wsv)
+  return waitsets_.erase(ws->weak_rchandle_from_this())
          ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
 }
 

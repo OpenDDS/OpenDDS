@@ -18,16 +18,8 @@
 using namespace OpenDDS::DCPS;
 
 struct Fragments {
-  ACE_Message_Block* head_;
-  ACE_Message_Block* tail_;
-
-  Fragments() : head_(0), tail_(0) {}
-
-  ~Fragments()
-  {
-    ACE_Message_Block::release(head_);
-    ACE_Message_Block::release(tail_);
-  }
+  Message_Block_Ptr head_;
+  Message_Block_Ptr tail_;
 };
 
 void release_cfentries(ACE_Message_Block& mb_hdr)

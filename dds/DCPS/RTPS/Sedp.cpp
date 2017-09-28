@@ -429,15 +429,15 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     participant_message_reader_->assoc(peer);
   }
 
-  SPDPdiscoveredParticipantData* dpd =
-    new SPDPdiscoveredParticipantData(pdata);
-  task_.enqueue(dpd);
+  DCPS::unique_ptr<SPDPdiscoveredParticipantData> dpd(
+    new SPDPdiscoveredParticipantData(pdata));
+  task_.enqueue(move(dpd));
 }
 
 void
 Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
 {
-  ACE_Auto_Basic_Ptr<const SPDPdiscoveredParticipantData> delete_the_data(ppdata);
+  DCPS::unique_ptr<const SPDPdiscoveredParticipantData> delete_the_data(ppdata);
   const SPDPdiscoveredParticipantData& pdata = *ppdata;
   // First create a 'prototypical' instance of AssociationData.  It will
   // be copied and modified for each of the (up to) four SEDP Endpoints.
@@ -917,7 +917,7 @@ void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const OpenDDS::DCPS::DiscoveredWriterData* pwdata)
 {
-  ACE_Auto_Basic_Ptr<const OpenDDS::DCPS::DiscoveredWriterData> delete_the_data(pwdata);
+  DCPS::unique_ptr<const OpenDDS::DCPS::DiscoveredWriterData> delete_the_data(pwdata);
   sedp_->data_received(message_id, *pwdata);
 }
 
@@ -1077,7 +1077,7 @@ void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const OpenDDS::DCPS::DiscoveredReaderData* prdata)
 {
-  ACE_Auto_Basic_Ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
+  DCPS::unique_ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
   sedp_->data_received(message_id, *prdata);
 }
 
@@ -1276,7 +1276,7 @@ void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const ParticipantMessageData* data)
 {
-  ACE_Auto_Basic_Ptr<const ParticipantMessageData> delete_the_data(data);
+  DCPS::unique_ptr<const ParticipantMessageData> delete_the_data(data);
   sedp_->data_received(message_id, *data);
 }
 
@@ -1409,15 +1409,13 @@ Sedp::Writer::data_dropped(const DCPS::DataSampleElement* dsle, bool)
 }
 
 void
-Sedp::Writer::control_delivered(ACE_Message_Block* mb)
+Sedp::Writer::control_delivered(const DCPS::Message_Block_Ptr& /* sample */)
 {
-  mb->release();
 }
 
 void
-Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
+Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& /* sample */, bool)
 {
-  mb->release();
 }
 
 DDS::ReturnCode_t
@@ -1453,7 +1451,8 @@ Sedp::Writer::write_sample(const ParameterList& plist,
       new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
-    list_el->set_sample(new ACE_Message_Block(size));
+    DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
+    list_el->set_sample(DCPS::move(sample));
     *list_el->get_sample() << list_el->get_header();
     list_el->get_sample()->cont(payload.duplicate());
 
@@ -1504,7 +1503,8 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
       new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
-    list_el->set_sample(new ACE_Message_Block(size));
+    DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
+    list_el->set_sample(DCPS::move(sample));
     *list_el->get_sample() << list_el->get_header();
     list_el->get_sample()->cont(payload.duplicate());
 
@@ -1538,9 +1538,9 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
   DCPS::find_size_ulong(size, padding);
   DCPS::gen_find_size(plist, size, padding);
 
-  ACE_Message_Block* payload = new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
+  DCPS::Message_Block_Ptr payload(new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
                             ACE_Message_Block::MB_DATA,
-                            new ACE_Message_Block(size));
+                            new ACE_Message_Block(size)));
 
   if (!payload) {
     ACE_ERROR((LM_ERROR,
@@ -1559,7 +1559,7 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 
   if (ok) {
     // Send
-    write_control_msg(*payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+    write_control_msg(move(payload), size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
     return DDS::RETCODE_OK;
   } else {
     // Error
@@ -1574,14 +1574,14 @@ void
 Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
 {
   const void* pReader = static_cast<const void*>(&reader);
-  ACE_Message_Block* mb = new ACE_Message_Block (DCPS::DataSampleHeader::max_marshaled_size(),
+  DCPS::Message_Block_Ptr mb(new ACE_Message_Block (DCPS::DataSampleHeader::max_marshaled_size(),
                                                  ACE_Message_Block::MB_DATA,
                                                  new ACE_Message_Block(static_cast<const char*>(pReader),
-                                                  sizeof(reader)));
-  if (mb) {
+                                                  sizeof(reader))));
+  if (mb.get()) {
     mb->cont()->wr_ptr(sizeof(reader));
     // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
-    write_control_msg(*mb, sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
+    write_control_msg(move(mb), sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
                       DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
   } else {
     ACE_ERROR((LM_ERROR,
@@ -1591,7 +1591,7 @@ Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
 }
 
 void
-Sedp::Writer::write_control_msg(ACE_Message_Block& payload,
+Sedp::Writer::write_control_msg(DCPS::Message_Block_Ptr payload,
                                 size_t size,
                                 DCPS::MessageId id,
                                 DCPS::SequenceNumber seq)
@@ -1599,7 +1599,7 @@ Sedp::Writer::write_control_msg(ACE_Message_Block& payload,
   DCPS::DataSampleHeader header;
   set_header_fields(header, size, GUID_UNKNOWN, seq, id);
   // no need to serialize header since rtps_udp transport ignores it
-  send_control(header, &payload);
+  send_control(header, DCPS::move(payload));
 }
 
 void
@@ -1676,7 +1676,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     const DCPS::MessageId id =
       static_cast<DCPS::MessageId>(sample.header_.message_id_);
 
-    DCPS::Serializer ser(sample.sample_,
+    DCPS::Serializer ser(sample.sample_.get(),
                          sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                          DCPS::Serializer::ALIGN_CDR);
     ACE_CDR::Octet encap, dummy;
@@ -1701,7 +1701,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata(new OpenDDS::DCPS::DiscoveredWriterData);
+      DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata(new OpenDDS::DCPS::DiscoveredWriterData);
       if (ParameterListConverter::from_param_list(data, *wdata) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
@@ -1709,7 +1709,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to DiscoveredWriterData\n")));
         return;
       }
-      sedp_.task_.enqueue(id, wdata.release());
+      sedp_.task_.enqueue(id, move(wdata));
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
       ParameterList data;
@@ -1719,7 +1719,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata(new OpenDDS::DCPS::DiscoveredReaderData);
+      DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata(new OpenDDS::DCPS::DiscoveredReaderData);
       if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
@@ -1730,18 +1730,18 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       if (rdata->readerProxy.expectsInlineQos) {
         set_inline_qos(rdata->readerProxy.allLocators);
       }
-      sedp_.task_.enqueue(id, rdata.release());
+      sedp_.task_.enqueue(id, move(rdata));
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
                && !sample.header_.key_fields_only_) {
-      ACE_Auto_Ptr<ParticipantMessageData> data(new ParticipantMessageData);
+      DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
       if (!(ser >> *data)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
 
-      sedp_.task_.enqueue(id, data.release());
+      sedp_.task_.enqueue(id, move(data));
 
     }
   }
@@ -1963,31 +1963,31 @@ Sedp::acknowledge()
 }
 
 void
-Sedp::Task::enqueue(const SPDPdiscoveredParticipantData* pdata)
+Sedp::Task::enqueue(DCPS::unique_ptr<SPDPdiscoveredParticipantData> pdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata));
+  putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_WRITER, id, wdata));
+  putq(new Msg(Msg::MSG_WRITER, id, wdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_READER, id, rdata));
+  putq(new Msg(Msg::MSG_READER, id, rdata.release()));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const ParticipantMessageData* data)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data));
+  putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data.release()));
 }
 
 void
@@ -2010,7 +2010,7 @@ Sedp::Task::svc()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
         "got message from queue type %d\n", msg->type_));
     }
-    ACE_Auto_Basic_Ptr<Msg> delete_the_msg(msg);
+    DCPS::unique_ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
     case Msg::MSG_PARTICIPANT:
       svc_i(msg->dpdata_);

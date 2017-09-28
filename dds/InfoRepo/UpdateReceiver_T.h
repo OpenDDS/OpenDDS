@@ -13,6 +13,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ace/Task.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <list>
 
@@ -53,7 +54,7 @@ public:
    * NOTE: We take ownership of this data and delete it when we are
    *       done processing it.
    */
-  void add(DataType* sample, DDS::SampleInfo* info);
+  void add(OpenDDS::DCPS::unique_ptr<DataType> sample, OpenDDS::DCPS::unique_ptr<DDS::SampleInfo> info);
 
   /// Synchronous termination.
   void stop();

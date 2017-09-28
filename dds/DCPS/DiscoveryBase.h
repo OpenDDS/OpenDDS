@@ -1183,6 +1183,15 @@ namespace OpenDDS {
           participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
         create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                       sub, dr_qos);
+
+        const DDS::ReturnCode_t ret = bit_subscriber->enable();
+        if (ret != DDS::RETCODE_OK) {
+          if (DCPS_debug_level) {
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
+                       ACE_TEXT(" - Error %d enabling subscriber\n"), ret));
+          }
+          return 0;
+        }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);

@@ -467,7 +467,7 @@ InfoRepo::init()
     }
 
     // Actually join.
-    peer->join_federation(federator,
+    peer = peer->join_federation(federator,
                           this->federatorConfig_.federationDomain());
   }
 }

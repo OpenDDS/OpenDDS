@@ -24,13 +24,13 @@ TransportSendControlElement::TransportSendControlElement(int initial_count,
                                                          const RepoId& publisher_id,
                                                          TransportSendListener* listener,
                                                          const DataSampleHeader& header,
-                                                         ACE_Message_Block* msg_block,
+                                                         Message_Block_Ptr msg_block,
                                                          TransportSendControlElementAllocator* allocator)
   : TransportQueueElement(initial_count),
     publisher_id_(publisher_id),
     listener_(listener),
     header_(header),
-    msg_(msg_block),
+    msg_(msg_block.release()),
     dcps_elem_(0),
     allocator_(allocator)
 {
@@ -45,7 +45,6 @@ TransportSendControlElement::TransportSendControlElement(int initial_count,
   , publisher_id_(dcps_elem->get_pub_id())
   , listener_(dcps_elem->get_send_listener())
   , header_(dcps_elem->get_header())
-  , msg_(dcps_elem->get_sample())
   , dcps_elem_(dcps_elem)
   , allocator_(allocator)
 {
@@ -67,7 +66,7 @@ TransportSendControlElement::requires_exclusive_packet() const
 namespace
 {
   void handle_message(const bool dropped,
-                      ACE_Message_Block* const msg,
+                      const Message_Block_Ptr& msg,
                       TransportSendListener* const listener,
                       const bool dropped_by_transport)
   {
@@ -79,7 +78,7 @@ namespace
   }
 
   void handle_message(const bool dropped,
-                      const DataSampleElement* const elem,
+                      const DataSampleElement* elem,
                       const bool dropped_by_transport)
   {
     TransportSendListener* const listener = elem->get_send_listener();
@@ -100,12 +99,17 @@ TransportSendControlElement::release_element(bool dropped_by_transport)
 
   // store off local copies to use after "this" pointer deleted
   const bool dropped = this->was_dropped();
-  ACE_Message_Block* const msg = this->msg_;
+
+  Message_Block_Ptr msg(this->msg_.release());
+
   TransportSendListener* const listener = this->listener_;
-  const DataSampleElement* const dcps_elem = dcps_elem_;
+  const DataSampleElement* dcps_elem = dcps_elem_;
 
   if (allocator_) {
     OPENDDS_DES_FREE_THIS(allocator_->free, TransportSendControlElement);
+  }
+  else {
+    delete this;
   }
 
   // reporting the message w/o using "this" pointer
@@ -127,14 +131,16 @@ const ACE_Message_Block*
 TransportSendControlElement::msg() const
 {
   DBG_ENTRY_LVL("TransportSendControlElement","msg",6);
-  return this->msg_;
+  if (dcps_elem_)
+    return dcps_elem_->get_sample();
+  return this->msg_.get();
 }
 
 const ACE_Message_Block*
 TransportSendControlElement::msg_payload() const
 {
   DBG_ENTRY_LVL("TransportSendControlElement", "msg_payload", 6);
-  return this->msg_->cont();
+  return this->msg()->cont();
 }
 
 bool

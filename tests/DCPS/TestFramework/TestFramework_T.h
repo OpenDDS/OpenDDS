@@ -52,7 +52,7 @@ protected:
   DDS::Publisher_var publisher_;
 
   DDS::DataWriter_var writer_;
-  Writer_ptr writer_i_;
+  Writer_var writer_i_;
 
   DDS::Publisher_var create_publisher();
   DDS::DataWriter_var create_datawriter();
@@ -128,7 +128,7 @@ protected:
   DDS::Subscriber_var subscriber_;
 
   DDS::DataReader_var reader_;
-  Reader_ptr reader_i_;
+  Reader_var reader_i_;
 
   DDS::Subscriber_var create_subscriber();
   DDS::DataReader_var create_datareader();

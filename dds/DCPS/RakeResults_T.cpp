@@ -186,7 +186,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
         // Prevent access of the SampleInfo, below
         released_instances.insert(&inst);
       }
-      this->reader_->dec_ref_data_element(rde);
+      rde->dec_ref();
     }
   }
 

@@ -20,7 +20,7 @@
 #include "Time_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
-#include "scoped_ptr.h"
+#include "unique_ptr.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #include "FilterEvaluator.h"
@@ -113,8 +113,8 @@ public:
   virtual void data_dropped(const DataSampleElement* sample,
                             bool                         dropped_by_transport);
 
-  virtual void control_delivered(ACE_Message_Block* sample);
-  virtual void control_dropped(ACE_Message_Block* sample,
+  virtual void control_delivered(const Message_Block_Ptr& sample);
+  virtual void control_dropped(const Message_Block_Ptr& sample,
                                bool               dropped_by_transport);
 
   virtual void notify_publication_disconnected(const ReaderIdSeq& subids);
@@ -176,9 +176,9 @@ private:
   DDS::ReturnCode_t write (const RawDataSample* sample_array, int array_size, DDS::InstanceHandle_t* reader);
 
   DDS::ReturnCode_t
-  create_sample_data_message(DataSample*         data,
+  create_sample_data_message(Message_Block_Ptr   data,
                              DataSampleHeader&   header_data,
-                             ACE_Message_Block*& message,
+                             Message_Block_Ptr&  message,
                              const DDS::Time_t&  source_timestamp,
                              bool                content_filter);
   bool need_sequence_repair() const;
@@ -277,23 +277,23 @@ private:
   // PublicationReconnectingStatus       publication_reconnecting_status_;
 
   // The message block allocator.
-  scoped_ptr<MessageBlockAllocator>     mb_allocator_;
+  unique_ptr<MessageBlockAllocator>     mb_allocator_;
   // The data block allocator.
-  scoped_ptr<DataBlockAllocator>        db_allocator_;
+  unique_ptr<DataBlockAllocator>        db_allocator_;
   // The header data allocator.
-  scoped_ptr<DataSampleHeaderAllocator> header_allocator_;
+  unique_ptr<DataSampleHeaderAllocator> header_allocator_;
 
   /// The cached allocator to allocate DataSampleElement
   /// objects.
-  scoped_ptr<DataSampleElementAllocator> sample_list_element_allocator_;
+  unique_ptr<DataSampleElementAllocator> sample_list_element_allocator_;
 
   /// The allocator for TransportSendElement.
   /// The TransportSendElement allocator is put here because it
   /// needs the number of chunks information that WriteDataContainer
   /// has.
-  scoped_ptr<TransportSendElementAllocator>  transport_send_element_allocator_;
+  unique_ptr<TransportSendElementAllocator>  transport_send_element_allocator_;
 
-  scoped_ptr<TransportCustomizedElementAllocator> transport_customized_element_allocator_;
+  unique_ptr<TransportCustomizedElementAllocator> transport_customized_element_allocator_;
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
@@ -307,7 +307,7 @@ private:
   // CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  // scoped_ptr<OfferedDeadlineWatchdog> watchdog_;
+  // unique_ptr<OfferedDeadlineWatchdog> watchdog_;
   /// The flag indicates whether the liveliness timer is scheduled and
   /// needs be cancelled.
   // bool                       cancel_timer_;

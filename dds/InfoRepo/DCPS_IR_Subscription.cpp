@@ -52,10 +52,6 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
 
 DCPS_IR_Subscription::~DCPS_IR_Subscription()
 {
-  if (0 != associations_.size()) {
-    CORBA::Boolean dont_notify_lost = 0;
-    remove_associations(dont_notify_lost);
-  }
 }
 
 int DCPS_IR_Subscription::add_associated_publication(DCPS_IR_Publication* pub,

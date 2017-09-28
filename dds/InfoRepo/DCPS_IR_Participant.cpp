@@ -58,43 +58,15 @@ DCPS_IR_Participant::~DCPS_IR_Participant()
   for (DCPS_IR_Subscription_Map::const_iterator current = this->subscriptions_.begin();
        current != this->subscriptions_.end();
        ++current) {
-    OpenDDS::DCPS::RepoIdConverter part_converter(id_);
-    OpenDDS::DCPS::RepoIdConverter sub_converter(current->first);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-               ACE_TEXT("domain %d participant %C removing subscription %C.\n"),
-               this->domain_->get_id(),
-               std::string(part_converter).c_str(),
-               std::string(sub_converter).c_str()));
-    remove_subscription(current->first);
+    delete current->second;
   }
 
   for (DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
        current != this->publications_.end();
        ++current) {
-    OpenDDS::DCPS::RepoIdConverter part_converter(id_);
-    OpenDDS::DCPS::RepoIdConverter pub_converter(current->first);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-               ACE_TEXT("domain %d participant %C removing publication %C.\n"),
-               this->domain_->get_id(),
-               std::string(part_converter).c_str(),
-               std::string(pub_converter).c_str()));
-    remove_publication(current->first);
+    delete current->second;
   }
 
-  for (DCPS_IR_Topic_Map::const_iterator current = this->topicRefs_.begin();
-       current != this->topicRefs_.end();
-       ++current) {
-    OpenDDS::DCPS::RepoIdConverter part_converter(id_);
-    OpenDDS::DCPS::RepoIdConverter topic_converter(current->first);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::~DCPS_IR_Participant: ")
-               ACE_TEXT("domain %d participant %C retained topic %C.\n"),
-               this->domain_->get_id(),
-               std::string(part_converter).c_str(),
-               std::string(topic_converter).c_str()));
-  }
 }
 
 const DCPS_IR_Publication_Map&

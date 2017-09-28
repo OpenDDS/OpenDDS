@@ -26,16 +26,8 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
 struct Fragments {
-  ACE_Message_Block* head_;
-  ACE_Message_Block* tail_;
-
-  Fragments() : head_(0), tail_(0) {}
-
-  ~Fragments()
-  {
-    ACE_Message_Block::release(head_);
-    ACE_Message_Block::release(tail_);
-  }
+  Message_Block_Ptr head_;
+  Message_Block_Ptr tail_;
 };
 
 const bool SWAP =
@@ -105,8 +97,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       size_t size = 0, padding = 0;
       gen_find_size(ts, size, padding);
       gen_find_size(ds, size, padding);
-      before_fragmentation.head_ = new ACE_Message_Block(size + padding);
-      Serializer ser(before_fragmentation.head_, SWAP, Serializer::ALIGN_CDR);
+      before_fragmentation.head_ .reset(new ACE_Message_Block(size + padding));
+      Serializer ser(before_fragmentation.head_.get(), SWAP, Serializer::ALIGN_CDR);
       TEST_CHECK((ser << ts) && (ser << ds));
     }
     ACE_Message_Block& header_mb = *before_fragmentation.head_;
@@ -141,7 +133,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         matches(header1.submessage_.data_frag_sm(), expected);
         TEST_CHECK(f.head_->cont() && f.head_->cont()->length() == 1024);
       }
-      before_fragmentation.tail_ = f.tail_->duplicate();
+      before_fragmentation.tail_.reset(f.tail_->duplicate());
       RtpsSampleHeader header2(*f.tail_);
       TEST_CHECK(header2.valid());
       TEST_CHECK(header2.submessage_._d() == INFO_TS);

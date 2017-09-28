@@ -19,14 +19,14 @@ TransportSendControlElement::alloc(int initial_count,
                                    const RepoId& publisher_id,
                                    TransportSendListener* listener,
                                    const DataSampleHeader& header,
-                                   ACE_Message_Block* message,
+                                   Message_Block_Ptr message,
                                    TransportSendControlElementAllocator* allocator)
 {
   TransportSendControlElement* ret;
   ACE_NEW_MALLOC_RETURN(ret,
     static_cast<TransportSendControlElement*>(allocator->malloc()),
     TransportSendControlElement(initial_count, publisher_id, listener, header,
-                                message, allocator),
+                                move(message), allocator),
     0);
   return ret;
 }

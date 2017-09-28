@@ -74,7 +74,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (participant->get_qos (dpqos) != ::DDS::RETCODE_OK)
       {
         cerr << "DomainParticipant get_qos failed." << endl;
-        cerr << "DomainParticipant QoS matches marked PARTICIPANT_QOS_DEFAULT." << endl;
         return 1;
       }
 
@@ -82,12 +81,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (dpqos == PARTICIPANT_QOS_DEFAULT)
       {
         cerr << "ERROR: DomainParticipant QoS matches marked PARTICIPANT_QOS_DEFAULT." << endl;
-        return 1;
-      }
-
-      if (participant->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
-      {
-        cerr << "DomainParticipant can not be enabled because factory autoenable is off." << endl;
         return 1;
       }
 
@@ -118,8 +111,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Create the subscriber and attach to the corresponding
       // transport.
+      DDS::SubscriberQos sub_qos;
+      participant->get_default_subscriber_qos(sub_qos);
+      sub_qos.entity_factory.autoenable_created_entities = false;
       DDS::Subscriber_var sub =
-        participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+        participant->create_subscriber(sub_qos,
                                        DDS::SubscriberListener::_nil(),
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ())) {
@@ -129,7 +125,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (sub->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
-        cerr << "Publisher can not be enabled because DomainParticipant is not enabled." << endl;
+        cerr << "Subscriber can not be enabled because DomainParticipant is not enabled." << endl;
         return 1;
       }
 
@@ -156,14 +152,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (dr->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         cerr << "DataReader can not be enabled because Subscriber is not enabled." << endl;
-        return 1;
-      }
-
-      // Now enable DomainParticipantFactory autoenable
-      fqos.entity_factory.autoenable_created_entities = true;
-      if (dpf->set_qos (fqos) != ::DDS::RETCODE_OK)
-      {
-        cerr << "DomainParticipantFactory set_qos failed." << endl;
         return 1;
       }
 

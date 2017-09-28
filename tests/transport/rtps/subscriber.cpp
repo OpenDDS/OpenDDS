@@ -63,7 +63,7 @@ public:
   {
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
-      Serializer ser(sample.sample_,
+      Serializer ser(sample.sample_.get(),
                      sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                      Serializer::ALIGN_CDR);
       bool ok = true;
@@ -122,7 +122,7 @@ public:
     case DISPOSE_INSTANCE:
     case UNREGISTER_INSTANCE:
     case DISPOSE_UNREGISTER_INSTANCE: {
-      OpenDDS::DCPS::Serializer ser(sample.sample_,
+      OpenDDS::DCPS::Serializer ser(sample.sample_.get(),
                                     sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                                     OpenDDS::DCPS::Serializer::ALIGN_CDR);
       bool ok = true;
@@ -187,7 +187,7 @@ public:
   using TransportClient::disassociate;
 
   bool done_;
-  const RepoId& sub_id_;
+  const RepoId sub_id_;
   RepoId pub_id_;
   SequenceNumber seq_;
   int control_msg_count_;
