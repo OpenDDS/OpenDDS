@@ -15,7 +15,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::TcpSynchResource::TcpSynchResource(
   const TcpConnection_rch& connection,
   const int& max_output_pause_period_ms)
-  : ThreadSynchResource(connection->peer().get_handle())
+  : ThreadSynchResource()
   , connection_(connection)
 {
   DBG_ENTRY_LVL("TcpSynchResource","TcpSynchResource",6);

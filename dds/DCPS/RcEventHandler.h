@@ -10,6 +10,7 @@
 
 #include "ace/Event_Handler.h"
 #include "dds/Versioned_Namespace.h"
+#include "RcObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -11,6 +11,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "ThreadSynchWorker.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

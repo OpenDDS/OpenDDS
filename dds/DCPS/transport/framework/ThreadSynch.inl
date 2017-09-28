@@ -29,6 +29,8 @@ OpenDDS::DCPS::ThreadSynch::register_worker(ThreadSynchWorker& worker)
 {
   DBG_ENTRY_LVL("ThreadSynch","register_worker",6);
   this->worker_ = worker;
+  if (resource_)
+    resource_->set_handle(worker.get_handle());
   return this->register_worker_i();
 }
 

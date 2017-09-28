@@ -40,6 +40,8 @@ public:
   /// DataLink reference value for diagnostics.
   std::size_t id() const;
 
+  virtual ACE_HANDLE get_handle()=0;
+
 protected:
 
   ThreadSynchWorker( std::size_t id = 0);

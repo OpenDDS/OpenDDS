@@ -22,12 +22,13 @@ public:
   virtual ~ThreadSynchResource();
 
   virtual int wait_to_unclog();
+  void set_handle(ACE_HANDLE handle);
 
 protected:
 
   virtual void notify_lost_on_backpressure_timeout() = 0;
 
-  ThreadSynchResource(ACE_HANDLE handle);
+  ThreadSynchResource();
   ACE_HANDLE handle_;
   ACE_Time_Value* timeout_;
 };
