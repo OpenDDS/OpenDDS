@@ -41,7 +41,7 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 0, 0)
 # define WS_GET_PDU_LEN_EXTRA_PARAM , void*
 # define WS_DISSECTOR_EXTRA_ARG , 0
-# define ws_tvb_length tvb_reported_length
+# define ws_tvb_length tvb_reported_length // TODO: Diff btwn tvb_reported_length and tvb_captured_length?
 inline proto_item* ws_proto_tree_add_text(proto_tree* tree, tvbuff_t* tvb, gint start,
                                           gint length, const char* format, ...)
 {

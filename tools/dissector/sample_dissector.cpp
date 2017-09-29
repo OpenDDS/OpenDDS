@@ -313,7 +313,7 @@ namespace OpenDDS
           if (this->type_id_ != WString)
             {
               this->to_stream (outstream, params.data);
-              proto_tree_add_text (params.tree, params.tvb, params.offset,
+              ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                                    (gint)len, "%s", outstream.str().c_str());
             }
           else
@@ -325,7 +325,7 @@ namespace OpenDDS
               ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1];
               ACE_OS::memcpy (clone, params.data+4, width);
               clone[len] = 0;
-              proto_tree_add_text (params.tree, params.tvb, params.offset,
+              ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                                    width + 4, "%s %ls", outstream.str().c_str(), clone);
               delete [] clone;
             }
@@ -429,7 +429,7 @@ namespace OpenDDS
           outstream << subtree_label_;
           std::string buffer = outstream.str();
           proto_item *item =
-            proto_tree_add_text (params.tree, params.tvb, params.offset, len,
+            ws_proto_tree_add_text (params.tree, params.tvb, params.offset, len,
                                  "%s", buffer.c_str());
           subtree = proto_item_add_subtree (item, ett_payload_);
           use_index = false;
@@ -518,7 +518,7 @@ namespace OpenDDS
         outstream << "[" << params.index << "]";
       outstream << " (length = " << count << ")";
       proto_item *item =
-        proto_tree_add_text (params.tree, params.tvb, params.offset,
+        ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
@@ -574,7 +574,7 @@ namespace OpenDDS
         outstream << "[" << params.index << "]";
       outstream << " (length = " << count_ << ")";
       proto_item *item =
-        proto_tree_add_text (params.tree, params.tvb, params.offset,
+        ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              (gint)len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
@@ -643,7 +643,7 @@ namespace OpenDDS
       else
         outstream << ": " << sf->label_;
 
-      proto_tree_add_text (params.tree, params.tvb, params.offset,
+      ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                            (gint)len, "%s", outstream.str().c_str());
       return len;
     }
@@ -754,7 +754,7 @@ namespace OpenDDS
       outstream << " (on " << _d << ")";
 
       proto_item *item =
-        proto_tree_add_text (params.tree, params.tvb, params.offset,
+        ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              (gint)len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 

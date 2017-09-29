@@ -179,7 +179,7 @@ namespace OpenDDS
     {
       T t;
 
-      guint len = std::min(tvb_length(tvb) - offset,
+      guint len = std::min(ws_tvb_length(tvb) - offset,
                            static_cast<guint>(t.max_marshaled_size()));
       const guint8* data = tvb_get_ptr(tvb, offset, len);
 
@@ -437,7 +437,7 @@ namespace OpenDDS
                   size = 0;
                   gen_find_size(filter, size, padding);
                   len = static_cast<gint>(size);
-                  proto_tree_add_text (subtree, tvb_, offset, len, "%s",
+                  ws_proto_tree_add_text (subtree, tvb_, offset, len, "%s",
                                        strm.str().c_str());
                   offset += len;
                 }
