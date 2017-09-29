@@ -9,7 +9,8 @@
 
 #include "GuidConverter.h"
 #include "WriterInfo.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
+#include "Service_Participant.h"
 
 #include "ace/OS_NS_sys_time.h"
 
@@ -178,8 +179,22 @@ WriterInfo::ack_sequence() const
   return this->ack_sequence_.cumulative_ack();
 }
 
+ACE_Time_Value WriterInfo::activity_wait_period() const
+{
+  ACE_Time_Value activity_wait_period(TheServiceParticipant->pending_timeout());
+  if (reader_->liveliness_lease_duration_ != ACE_Time_Value::zero) {
+    activity_wait_period = reader_->liveliness_lease_duration_;
+  }
+  if (activity_wait_period == ACE_Time_Value::zero) {
+      activity_wait_period = duration_to_time_value(writer_qos_.reliability.max_blocking_time);
+  }
+
+  return activity_wait_period;
+}
+
+
 bool
-WriterInfo::active(ACE_Time_Value default_participant_timeout) const
+WriterInfo::active() const
 {
   // Need some period of time by which to decide if a writer the
   // DataReaderImpl knows about has gone 'inactive'.  Used to determine
@@ -193,13 +208,8 @@ WriterInfo::active(ACE_Time_Value default_participant_timeout) const
   //     3) Writer's max blocking time (could be infinite, in which case
   //        RemoveAssociationSweeper will remove after its max wait)
   //     4) Zero - don't wait, simply remove association
-  ACE_Time_Value activity_wait_period(default_participant_timeout);
-  if (reader_->liveliness_lease_duration_ != ACE_Time_Value::zero) {
-    activity_wait_period = reader_->liveliness_lease_duration_;
-  }
-  if (activity_wait_period == ACE_Time_Value::zero) {
-      activity_wait_period = duration_to_time_value(writer_qos_.reliability.max_blocking_time);
-  }
+  ACE_Time_Value activity_wait_period = this->activity_wait_period();
+
   if (activity_wait_period == ACE_Time_Value::zero) {
     return false;
   }

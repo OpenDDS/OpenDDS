@@ -106,8 +106,6 @@ DomainParticipantImpl::create_publisher(
   DDS::PublisherListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  ACE_UNUSED_ARG(mask);
-
   DDS::PublisherQos pub_qos = qos;
 
   if (! this->validate_publisher_qos(pub_qos))
@@ -157,7 +155,15 @@ DomainParticipantImpl::delete_publisher(
   // set.
   PublisherImpl* the_servant = dynamic_cast<PublisherImpl*>(p);
 
-  if (the_servant->is_clean() == 0) {
+  if (!the_servant) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
+      ACE_TEXT("Failed to obtain PublisherImpl.\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (!the_servant->is_clean()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
@@ -238,7 +244,15 @@ DomainParticipantImpl::delete_subscriber(
   // set.
   SubscriberImpl* the_servant = dynamic_cast<SubscriberImpl*>(s);
 
-  if (the_servant->is_clean() == 0) {
+  if (!the_servant) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
+      ACE_TEXT("Failed to obtain SubscriberImpl.\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (!the_servant->is_clean()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
@@ -396,7 +410,7 @@ DomainParticipantImpl::create_topic_i(
                            tao_mon,
                            this->topics_protector_,
                            DDS::Topic::_nil());
-          entry->client_refs_ ++;
+          ++entry->client_refs_;
         }
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
 
@@ -496,6 +510,14 @@ DomainParticipantImpl::delete_topic_i(
     // others referenced by the datareader/datawriter.
     TopicImpl* the_topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
+    if (!the_topic_servant) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
+        ACE_TEXT("%p\n"),
+        ACE_TEXT("failed to obtain TopicImpl.")),
+        DDS::RETCODE_ERROR);
+    }
+
     CORBA::String_var topic_name = the_topic_servant->get_name();
 
     DDS::DomainParticipant_var dp = the_topic_servant->get_participant();
@@ -504,14 +526,13 @@ DomainParticipantImpl::delete_topic_i(
       dynamic_cast<DomainParticipantImpl*>(dp.in());
 
     if (the_dp_servant != this ||
-        (!remove_objref && the_topic_servant->entity_refs())) {
+        (!remove_objref && the_topic_servant->has_entity_refs())) {
       // If entity_refs is true (nonzero), then some reader or writer is using
       // this topic and the spec requires delete_topic() to fail with the error:
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
     {
-
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                        tao_mon,
                        this->topics_protector_,
@@ -527,7 +548,7 @@ DomainParticipantImpl::delete_topic_i(
                          DDS::RETCODE_ERROR);
       }
 
-      entry->client_refs_ --;
+      --entry->client_refs_;
 
       if (remove_objref == true ||
           0 == entry->client_refs_) {
@@ -596,7 +617,7 @@ DomainParticipantImpl::find_topic(
                        DDS::Topic::_nil());
 
       if (Util::find(topics_, topic_name, entry) == 0) {
-        entry->client_refs_ ++;
+        ++entry->client_refs_;
         return DDS::Topic::_duplicate(entry->pair_.obj_.in());
       }
     }
@@ -734,8 +755,12 @@ DomainParticipantImpl::create_contentfilteredtopic(
 
   DDS::ContentFilteredTopic_var cft;
   try {
-    cft = new ContentFilteredTopicImpl(name,
-      related_topic, filter_expression, expression_parameters, this);
+    // Create the cft in two steps so that we only have one place to
+    // check the expression parameters
+    cft = new ContentFilteredTopicImpl(name, related_topic, filter_expression, this);
+    if (cft->set_expression_parameters(expression_parameters) != DDS::RETCODE_OK) {
+      return 0;
+    }
   } catch (const std::exception& e) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -768,12 +793,25 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_reader()) {
+
+  TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(iter->second.in());
+
+  if (!tdi) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
         ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
-        ACE_TEXT("because it still is used by a reader.\n"), name.in ()));
+        ACE_TEXT("failed to obtain TopicDescriptionImpl\n"), name.in()));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (tdi->has_entity_refs()) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_contentfilteredtopic, ")
+        ACE_TEXT("can't delete a content-filtered topic \"%C\" ")
+        ACE_TEXT("because it is used by a datareader\n"), name.in ()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -839,9 +877,35 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   CORBA::String_var mt_name = mt->get_name();
   TopicDescriptionMap::iterator iter = topic_descrs_.find(mt_name.in());
   if (iter == topic_descrs_.end()) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+        ACE_TEXT("can't delete a multitopic \"%C\" ")
+        ACE_TEXT("because it is not in the set.\n"), mt_name.in ()));
+    }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-  if (dynamic_cast<TopicDescriptionImpl*>(iter->second.in())->has_reader()) {
+
+  TopicDescriptionImpl* tdi = dynamic_cast<TopicDescriptionImpl*>(iter->second.in());
+
+  if (!tdi) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+        ACE_TEXT("can't delete a multitopic topic \"%C\" ")
+        ACE_TEXT("failed to obtain TopicDescriptionImpl.\n"),
+        mt_name.in()));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (tdi->has_entity_refs()) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+        ACE_TEXT("can't delete a multitopic topic \"%C\" ")
+        ACE_TEXT("because it is used by a datareader.\n"), mt_name.in ()));
+    }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
   topic_descrs_.erase(iter);
@@ -920,8 +984,6 @@ DomainParticipantImpl::delete_contained_entities()
   bit_subscriber_ = DDS::Subscriber::_nil();
 
   OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
-
-  participant_objref_ = DDS::DomainParticipant::_nil();
 
   // the participant can now start creating new contained entities
   set_deleted(false);
@@ -1013,7 +1075,7 @@ DomainParticipantImpl::set_qos(
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) DomainParticipantImpl::set_qos, ")
-                          ACE_TEXT("failed on compatiblity check. \n")),
+                          ACE_TEXT("failed on compatibility check. \n")),
                          DDS::RETCODE_ERROR);
       }
     }
@@ -1059,7 +1121,7 @@ DomainParticipantImpl::ignore_participant(
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_participant, ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
+                      ACE_TEXT("Entity is not enabled. \n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -1088,7 +1150,7 @@ DomainParticipantImpl::ignore_participant(
                                         ignoreId)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_participant, ")
-                      ACE_TEXT(" Could not ignore domain participant.\n")),
+                      ACE_TEXT("Could not ignore domain participant.\n")),
                      DDS::RETCODE_NOT_ENABLED);
     return DDS::RETCODE_ERROR;
   }
@@ -1531,18 +1593,6 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  DDS::DomainParticipantFactoryQos qos;
-
-  if (this->factory_->get_qos(qos) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t)DomainParticipantImpl::enable failed to")
-               ACE_TEXT(" get factory qos\n")));
-    return DDS::RETCODE_ERROR;
-  }
-
-  if (!qos.entity_factory.autoenable_created_entities) {
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
-  }
-
   DDS::ReturnCode_t ret = this->set_enabled();
 
   if (monitor_) {
@@ -1555,6 +1605,21 @@ DomainParticipantImpl::enable()
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
     this->bit_subscriber_ = disc->init_bit(this);
+  }
+
+  if (qos_.entity_factory.autoenable_created_entities) {
+
+    for (TopicMap::iterator it = topics_.begin(); it != topics_.end(); ++it) {
+      it->second.pair_.svt_->enable();
+    }
+
+    for (PublisherSet::iterator it = publishers_.begin(); it != publishers_.end(); ++it) {
+      it->svt_->enable();
+    }
+
+    for (SubscriberSet::iterator it = subscribers_.begin(); it != subscribers_.end(); ++it) {
+      it->svt_->enable();
+    }
   }
 
   return ret;
@@ -1640,7 +1705,7 @@ DomainParticipantImpl::create_new_topic(
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, topic_name, entry) == 0) {
-    entry->client_refs_ ++;
+    ++entry->client_refs_;
     return DDS::Topic::_duplicate(entry->pair_.obj_.in());
   }
   */
@@ -1685,35 +1750,22 @@ DomainParticipantImpl::create_new_topic(
   return DDS::Topic::_duplicate(refCounted_topic.pair_.obj_.in());
 }
 
-int
+bool
 DomainParticipantImpl::is_clean() const
 {
-  int sub_is_clean = subscribers_.empty();
-  int topics_is_clean = topics_.size() == 0;
+  bool sub_is_clean = subscribers_.empty();
+  bool topics_is_clean = topics_.size() == 0;
 
   if (!TheTransientKludge->is_enabled()) {
     // There are four topics and builtin topic subscribers
     // left.
 
-    sub_is_clean = sub_is_clean == 0 ? subscribers_.size() == 1 : 1;
-    topics_is_clean = topics_is_clean == 0 ? topics_.size() == 4 : 1;
+    sub_is_clean = !sub_is_clean ? subscribers_.size() == 1 : true;
+    topics_is_clean = !topics_is_clean ? topics_.size() == 4 : true;
   }
   return (publishers_.empty()
-          && sub_is_clean == 1
-          && topics_is_clean == 1);
-}
-
-void
-DomainParticipantImpl::set_object_reference(const DDS::DomainParticipant_ptr& dp)
-{
-  if (!CORBA::is_nil(participant_objref_.in())) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::set_object_reference, ")
-               ACE_TEXT("This participant is already activated. \n")));
-    return;
-  }
-
-  participant_objref_ = DDS::DomainParticipant::_duplicate(dp);
+          && sub_is_clean
+          && topics_is_clean);
 }
 
 DDS::DomainParticipantListener_ptr
@@ -2119,6 +2171,8 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 {
+  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+
   // delete publishers
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -2138,16 +2192,16 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       = pubPtr->delete_contained_entities();
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
       result = delete_publisher(pubPtr);
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
-      pubsize--;
+      --pubsize;
     }
 
   }
@@ -2170,20 +2224,19 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       DDS::ReturnCode_t result = subPtr->delete_contained_entities();
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
       result = delete_subscriber(subPtr);
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
 
-      subsize--;
+      --subsize;
     }
   }
 
-  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   // delete topics
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -2200,12 +2253,12 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
       ++topicIter;
 
       // Delete the topic the reference count.
-      DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
 
       if (result != DDS::RETCODE_OK) {
-        return result;
+        ret = result;
       }
-      topicsize--;
+      --topicsize;
     }
   }
 

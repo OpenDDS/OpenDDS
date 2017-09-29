@@ -25,7 +25,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs(argc, argv);
       DDS::DomainParticipant_var participant =
-        dpf->create_participant(411,
+        dpf->create_participant(111,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -34,7 +34,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         return 1;
       }
 
-      Test::DataTypeSupportImpl* servant = new Test::DataTypeSupportImpl();
+      Test::DataTypeSupportImpl::_var_type servant = new Test::DataTypeSupportImpl();
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -137,7 +137,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) %T PUB starting to write.\n")));
 
-        ::DDS::ReturnCode_t const ret = writer->write (the_data, handle);;
+        ::DDS::ReturnCode_t const ret = writer->write (the_data, handle);
         if (ret != ::DDS::RETCODE_OK)
         {
           ACE_ERROR ((LM_ERROR,

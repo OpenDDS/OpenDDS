@@ -15,7 +15,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
@@ -34,7 +34,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs(argc, argv);
       DDS::DomainParticipant_var participant =
-        dpf->create_participant(411,
+        dpf->create_participant(111,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -67,7 +67,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
+      MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -120,7 +120,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       {
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in (), offset));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in (), offset));
 
         writer->start ();
         while ( !writer->is_finished())

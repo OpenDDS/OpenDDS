@@ -8,140 +8,12 @@
 #include "ace/OS_NS_string.h"
 #include "ace/Truncate.h"
 
-namespace {
-
-const ACE_UINT32 NSECS_IN_SEC = 1000000000;
-
-} // namespace
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
-// These operators are used in some inline functions below.  Some
-// compilers require the inline definition to appear before its use.
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE
-bool operator==(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
-{
-  return t1.sec == t2.sec && t1.nanosec == t2.nanosec;
-}
-
-ACE_INLINE
-bool operator!=(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
-{
-  return !(t1 == t2);
-}
-#endif
-
-ACE_INLINE
-bool operator<(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
-{
-  // @note We wouldn't have to handle the case for INFINITY explicitly
-  //       if both the Duration_t sec and nanosec fields were the
-  //       maximum values for their corresponding types.
-  //       Unfortunately, the OMG DDS specification defines the
-  //       infinite nanosec value to be somewhere in the middle.
-  DDS::Duration_t const DDS_DURATION_INFINITY = {
-    DDS::DURATION_INFINITE_SEC,
-    DDS::DURATION_INFINITE_NSEC
-  };
-
-  // We assume that either both the DDS::Duration_t::sec and
-  // DDS::Duration_t::nanosec fields are INFINITY or neither of them
-  // are.  It doesn't make sense for only one of the fields to be
-  // INFINITY.
-  return
-    t1 != DDS_DURATION_INFINITY
-    && (t2 == DDS_DURATION_INFINITY
-        || t1.sec < t2.sec
-        || (t1.sec == t2.sec && t1.nanosec < t2.nanosec));
-}
-
-ACE_INLINE
-bool operator<=(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
-{
-  // If t2 is *not* less than t1, t1 must be less than
-  // or equal to t2.
-  // This is more concise than:
-  //   t1 < t2 || t1 == t2
-  return !(t2 < t1);
-}
-
-ACE_INLINE
-bool operator>(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
-{
-  return t2 < t1;
-}
-
-ACE_INLINE
-bool operator>=(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
-{
-  return t2 <= t1;
-}
-
-ACE_INLINE
-bool operator!(const DDS::Time_t& t)
-{
-  return t.sec == DDS::TIME_INVALID_SEC
-         || t.nanosec == DDS::TIME_INVALID_NSEC;
-}
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE bool
-operator==(const DDS::Time_t& t1, const DDS::Time_t& t2)
-{
-  return !(t1 < t2) && !(t2 < t1);
-}
-
-ACE_INLINE bool
-operator!=(const DDS::Time_t& t1, const DDS::Time_t& t2)
-{
-  return !(t1 == t2);
-}
-#endif
-
-ACE_INLINE bool
-operator<(const DDS::Time_t& t1, const DDS::Time_t& t2)
-{
-  if (!t1 || !t2) return false;
-
-  return t1.sec < t2.sec
-         || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
-}
-
-ACE_INLINE bool
-operator<=(const DDS::Time_t& t1, const DDS::Time_t& t2)
-{
-  return !(t2 < t1);
-}
-
-ACE_INLINE bool
-operator>(const DDS::Time_t& t1, const DDS::Time_t& t2)
-{
-  return t2 < t1;
-}
-
-ACE_INLINE bool
-operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
-{
-  return t2 <= t1;
-}
-
-ACE_INLINE DDS::Time_t
-operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
-{
-  DDS::Time_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
-
-  if (t2.nanosec > t1.nanosec)
-    {
-      t.nanosec = (t1.nanosec + NSECS_IN_SEC) - t2.nanosec;
-      t.sec = (t1.sec - 1) - t2.sec;
-    }
-
-  return t;
-}
 
 #ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
@@ -313,8 +185,10 @@ ACE_INLINE
 bool operator==(const DDS::EntityFactoryQosPolicy& qos1,
                 const DDS::EntityFactoryQosPolicy& qos2)
 {
-  return
-    qos1.autoenable_created_entities == qos2.autoenable_created_entities;
+  // Marked_Default_Qos for DomainParticipant uses a value that's not 0 or 1
+  return std::memcmp(&qos1.autoenable_created_entities,
+                     &qos2.autoenable_created_entities,
+                     sizeof qos2.autoenable_created_entities) == 0;
 }
 
 ACE_INLINE
@@ -641,104 +515,6 @@ bool operator!=(const DDS::DomainParticipantFactoryQos& qos1,
 }
 #endif
 
-// ------------------------------------------------------------------
-
-ACE_INLINE
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t)
-{
-  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
-  return tv;
-}
-
-ACE_INLINE
-DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
-{
-  DDS::Time_t t;
-  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
-  return t;
-}
-
-
-ACE_INLINE
-ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
-{
-  CORBA::LongLong sec = t.sec + t.nanosec/1000/ACE_ONE_SECOND_IN_USECS;
-  CORBA::ULong usec = t.nanosec/1000 % ACE_ONE_SECOND_IN_USECS;
-
-  if (sec > ACE_Time_Value::max_time.sec()) {
-    return ACE_Time_Value::max_time;
-  }
-  else {
-    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
-  }
-}
-
-
-ACE_INLINE
-ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
-                                               const ACE_Time_Value& now)
-{
-  CORBA::LongLong sec
-    = t.sec + now.sec() + (t.nanosec/1000 + now.usec())/ACE_ONE_SECOND_IN_USECS;
-  CORBA::ULong usec = (t.nanosec/1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS;
-
-  if (sec > ACE_Time_Value::max_time.sec()) {
-    return ACE_Time_Value::max_time;
-  }
-  else {
-    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
-  }
-}
-
-
-ACE_INLINE
-DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)
-{
-  DDS::Duration_t t;
-  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
-  return t;
-}
-
-ACE_INLINE
-DDS::Duration_t time_to_duration(const DDS::Time_t& t)
-{
-  DDS::Duration_t d = { t.sec, t.nanosec };
-  return d;
-}
-
-ACE_INLINE
-bool valid_duration(const DDS::Duration_t& t)
-{
-  DDS::Duration_t const DDS_DURATION_INFINITY = {
-    DDS::DURATION_INFINITE_SEC,
-    DDS::DURATION_INFINITE_NSEC
-  };
-
-  // Only accept infinite or positive finite durations.  (Zero
-  // excluded).
-  //
-  // Note that it doesn't make much sense for users to set
-  // durations less than 10 milliseconds since the underlying
-  // timer resolution is generally no better than that.
-  return
-    t == DDS_DURATION_INFINITY
-    || t.sec > 0
-    || (t.sec >= 0 && t.nanosec > 0);
-}
-
-ACE_INLINE
-bool non_negative_duration(const DDS::Duration_t& t)
-{
-  return
-    (t.sec == DDS::DURATION_ZERO_SEC  // Allow zero duration.
-     && t.nanosec == DDS::DURATION_ZERO_NSEC)
-    || valid_duration(t);
-}
-
-// ------------------------------------------------------------
-
 ACE_INLINE
 bool
 Qos_Helper::consistent(
@@ -1041,9 +817,11 @@ Qos_Helper::valid(const DDS::DurabilityServiceQosPolicy& qos)
 #endif
 
 ACE_INLINE
-bool Qos_Helper::valid(const DDS::EntityFactoryQosPolicy& /*qos*/)
+bool Qos_Helper::valid(const DDS::EntityFactoryQosPolicy& qos)
 {
-  return true;
+  // see Marked_Default_Qos::marked_default_DomainParticipantQos()
+  const void* const mem = &qos.autoenable_created_entities;
+  return *static_cast<const char*>(mem) != 3;
 }
 
 ACE_INLINE
@@ -1087,25 +865,93 @@ bool Qos_Helper::valid(const DDS::TopicQos& qos)
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
 {
-  return
-    valid(qos.durability)
+  if (!valid(qos.durability))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid durability qos.\n")), false);
+
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    && valid(qos.durability_service)
+  if (!valid(qos.durability_service))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid durability_service qos.\n")), false);
 #endif
-    && valid(qos.deadline)
-    && valid(qos.latency_budget)
-    && valid(qos.liveliness)
-    && valid(qos.destination_order)
-    && valid(qos.history)
-    && valid(qos.resource_limits)
-    && valid(qos.transport_priority)
-    && valid(qos.lifespan)
-    && valid(qos.user_data)
-    && valid(qos.ownership)
+  if (!valid(qos.deadline))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid deadline qos.\n")), false);
+
+  if (!valid(qos.latency_budget))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid latency_budget qos.\n")), false);
+
+  if (!valid(qos.liveliness))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid liveliness qos.\n")), false);
+
+  if (!valid(qos.destination_order))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid destination_order qos.\n")), false);
+
+  if (!valid(qos.history))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid history qos.\n")), false);
+
+  if (!valid(qos.resource_limits))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid resource_limits qos.\n")), false);
+
+  if (!valid(qos.transport_priority))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid transport_priority qos.\n")), false);
+
+  if (!valid(qos.lifespan))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid lifespan qos.\n")), false);
+
+  if (!valid(qos.user_data))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid user_data qos.\n")), false);
+
+  if (!valid(qos.ownership))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid ownership qos.\n")), false);
+
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    && valid(qos.ownership_strength)
+  if (!valid(qos.ownership_strength))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid ownership_strength qos.\n")), false);
 #endif
-    && valid(qos.writer_data_lifecycle);
+  if (!valid(qos.writer_data_lifecycle))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
+        ACE_TEXT("invalid writer_data_lifecycle qos.\n")), false);
+
+  return true;
 }
 
 ACE_INLINE

@@ -189,8 +189,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createContentFilteredTopic(
 {
   const char* topicName = this->modelData_.topicName(topic);
   typename Topics::Values target_topic = this->modelData_.relatedTopic(cfTopic);
-  DDS::Topic_var related_topic =
-        dynamic_cast<DDS::Topic*>(this->topic(participant, target_topic).ptr());
+  DDS::Topic_var related_topic = DDS::Topic::_narrow(this->topic(participant, target_topic));
   const char* filter_expression = this->modelData_.filterExpression(cfTopic);
   DDS::DomainParticipant_var domain_participant = this->participant(participant);
   // TODO: Should this be moved to Delegate?

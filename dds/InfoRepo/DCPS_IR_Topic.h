@@ -101,7 +101,7 @@ public:
   /// Topic retains ownership
   DDS::TopicQos * get_topic_qos();
 
-  /// Reset topic qos and also propogate the qos change to related BITs
+  /// Reset topic qos and also propagate the qos change to related BITs
   /// that has the qos copy.
   /// Return false if the provided QoS makes the DataWriter and DataReader
   /// QoS incompatible. Currently supported changeable QoS in TopicQos do

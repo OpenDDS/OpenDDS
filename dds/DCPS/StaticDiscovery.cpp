@@ -174,7 +174,7 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
                                                    const DDS::DataWriterQos& qos)
 {
   if (qos.user_data.value.length() != 3) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_publication_key: no user data to identify writer\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_publication_key: no user data to identify writer\n")));
     return;
   }
 
@@ -184,13 +184,13 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
   rid.entityId.entityKind = ENTITYKIND_USER_WRITER_WITH_KEY;
 
   if (DCPS_debug_level > 8) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) looking up writer ID %s\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) looking up writer ID %C\n",
                LogGuid(rid).c_str()));
   }
 
   EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(rid);
   if (pos == registry_.writer_map.end()) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: unknown writer: %s\n"), LogGuid(rid).c_str()));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: unknown writer: %C\n"), LogGuid(rid).c_str()));
     return;
   }
 
@@ -201,7 +201,7 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
   DDS::DataWriterQos qos3(pos->second.qos);
 
   if (qos2 != qos3) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
   }
 }
 
@@ -210,7 +210,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
                                                     const DDS::DataReaderQos& qos)
 {
   if (qos.user_data.value.length() != 3) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: no user data to identify reader\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: no user data to identify reader\n")));
     return;
   }
 
@@ -221,7 +221,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
 
   EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(rid);
   if (pos == registry_.reader_map.end()) {
-    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: unknown reader: %s\n"), LogGuid(rid).c_str()));
+    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: unknown reader: %C\n"), LogGuid(rid).c_str()));
     return;
   }
 
@@ -230,7 +230,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
   qos2.user_data = pos->second.qos.user_data;
 
   if (qos2 != pos->second.qos) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
   }
 }
 
@@ -239,7 +239,7 @@ StaticEndpointManager::update_topic_qos(const RepoId& /*topicId*/,
                                         const DDS::TopicQos& /*qos*/,
                                         OPENDDS_STRING& /*name*/)
 {
-  ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
              ACE_TEXT("Not allowed\n")));
   return false;
 }
@@ -249,7 +249,7 @@ StaticEndpointManager::update_publication_qos(const RepoId& /*publicationId*/,
                                               const DDS::DataWriterQos& /*qos*/,
                                               const DDS::PublisherQos& /*publisherQos*/)
 {
-  ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_publication_qos - ")
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_publication_qos - ")
              ACE_TEXT("Not allowed\n")));
   return false;
 }
@@ -259,7 +259,7 @@ StaticEndpointManager::update_subscription_qos(const RepoId& /*subscriptionId*/,
                                                const DDS::DataReaderQos& /*qos*/,
                                                const DDS::SubscriberQos& /*subscriberQos*/)
 {
-  ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
              ACE_TEXT("Not allowed\n")));
   return false;
 }
@@ -268,7 +268,7 @@ bool
 StaticEndpointManager::update_subscription_params(const RepoId& /*subId*/,
                                                   const DDS::StringSeq& /*params*/)
 {
-  ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
              ACE_TEXT("Not allowed\n")));
   return false;
 }
@@ -665,7 +665,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
   AddDomainStatus ads = {RepoId(), false /*federated*/};
 
   if (qos.user_data.value.length() != 6) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::add_domain_participant ")
                 ACE_TEXT("No userdata to identify participant\n")));
     return ads;
@@ -675,7 +675,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
                                          qos.user_data.value.get_buffer(),
                                          ENTITYID_PARTICIPANT);
   if (!get_part(domain, id).is_nil()) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::add_domain_participant ")
                 ACE_TEXT("Duplicate participant\n")));
     return ads;

@@ -24,7 +24,7 @@ class OpenDDS_Rtps_Udp_Export RtpsCustomizedElement
 
 public:
   static RtpsCustomizedElement* alloc(TransportQueueElement* orig,
-                                      ACE_Message_Block* msg,
+                                      Message_Block_Ptr msg,
                                       ACE_Allocator* allocator = 0);
 
   SequenceNumber sequence() const;
@@ -32,7 +32,7 @@ public:
 
 private:
   RtpsCustomizedElement(TransportQueueElement* orig,
-                        ACE_Message_Block* msg,
+                        Message_Block_Ptr msg,
                         ACE_Allocator* allocator);
   virtual ~RtpsCustomizedElement();
 

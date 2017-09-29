@@ -112,10 +112,10 @@ void init_dcps_objects (int i)
       throw TestException ();
     }
 
-  ::Xyz::FooTypeSupportImpl* fts_servant
+  ::Xyz::FooTypeSupportImpl::_var_type fts_servant
     = new ::Xyz::FooTypeSupportImpl();
 
-  ::Xyz::FooTypeSupportImpl* another_fts_servant
+  ::Xyz::FooTypeSupportImpl::_var_type another_fts_servant
     = new ::Xyz::FooTypeSupportImpl();
 
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant[i].in (), type_name))
@@ -251,8 +251,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == writers_ready);
 
-      ACE_OS::fclose(readers_ready);
-      ACE_OS::fclose(writers_ready);
+      if (readers_ready) ACE_OS::fclose(readers_ready);
+      if (writers_ready) ACE_OS::fclose(writers_ready);
 
       int expected
         = num_datawriters * num_instances_per_writer * num_samples_per_instance;
@@ -265,20 +265,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           // Get the number of the timed out writes from publisher so we
           // can re-calculate the number of expected messages. Otherwise,
           // the blocking timeout test will never exit from this loop.
-          if (writers_completed == 0)
-            {
-              writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
-              if (writers_completed != 0)
-                {
-                  //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
-                  std::fscanf (writers_completed, "%d\n", &timeout_writes);
-                  expected -= timeout_writes;
-                  ACE_DEBUG((LM_DEBUG,
-                             ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d\n"),
-                             timeout_writes, expected));
-                }
-
+        if (writers_completed == 0) {
+          writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
+          if (writers_completed != 0) {
+            //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
+            if (std::fscanf(writers_completed, "%d\n", &timeout_writes) != 1) {
+              //if fscanf return 0 or EOF(-1), failed to read a matching line format to populate in timeout_writes
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) Warning: subscriber could not read timeout_writes\n")));
+            } else if (timeout_writes) {
+              expected -= timeout_writes;
+              ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) timed out writes %d, we expect %d\n"),
+                timeout_writes, expected));
             }
+          }
+        }
           ACE_OS::sleep (1);
         }
 
@@ -298,8 +300,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
         }
 
-      ACE_OS::fclose(readers_completed);
-      ACE_OS::fclose(writers_completed);
+      if (readers_completed) ACE_OS::fclose(readers_completed);
+      if (writers_completed) ACE_OS::fclose(writers_completed);
     }
   catch (const TestException&)
     {

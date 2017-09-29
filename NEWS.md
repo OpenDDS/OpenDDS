@@ -1,4 +1,4 @@
-Version X.Y of OpenDDS
+Version 3.13(?) of OpenDDS
 
 ##### Additions:
 - TODO: Add your features here
@@ -8,6 +8,49 @@ Version X.Y of OpenDDS
 
 ##### Notes:
 - TODO: Add your notes here
+_______________________________________________________________________________
+Version 3.12 of OpenDDS
+
+##### Fixes:
+- RtpsUdpDataLink::remove_sample locking
+- track latency only when needed for LatencyBudget QoS or statistics
+- corrected counters for sample rejected/lost liveliness lost total_count_change
+- get_key_value() corrected return value for errors
+- setting DCPSBitTransportPort without DCPSBitTransportIPAddress had no effect
+- writer side association wasn't removed after the the reader had unsubscribed
+- memory leaks
+- issue with unregistered instances when deleting DataWriter
+- problem with multiple transport instances in a single transport config
+- EntityFactory QoS didn't enable child objects when the factory was enabled
+
+##### Notes:
+- configure supports ACE+TAO from DOCGroup repository as an option
+- configure improvements for using external ACE+TAO, cross-compiling on Windows
+- coverity fixes
+- improved Bench performance test
+- Docker Hub now has an OpenDDS docker image
+
+_______________________________________________________________________________
+Version 3.11 of OpenDDS
+
+##### Additions:
+- Support for Visual Studio 2017
+- Content-filter expressions can now use 64-bit integer literals
+- tcp transport has a new wait_for_acknowledgements implementation
+- DataWriter's HISTORY QoS processing now allows replacing old samples with new ones without blocking
+
+##### Fixes:
+- Improved robustness of DEADLINE QoS processing
+- Uses of content-filter expressions are now checked for the correct number of parameters
+- Fixed versioned namespace support
+- Improved support for IPv6
+- Improved robustness of rtps_udp transport, especially when used with static discovery
+- Use of the constant PARTICIPANT_QOS_DEFAULT no longer initializes the domain participant factory
+- Bug fixes in the OpenDDS Wireshark dissector (for sample dissection)
+
+##### Notes:
+- The QoS XML Handler library is now decoupled from DDS4CCM, it requires xerces
+
 _______________________________________________________________________________
 Version 3.10 of OpenDDS
 
@@ -229,11 +272,11 @@ _______________________________________________________________________________
 Version 3.5.1 of OpenDDS
 
 ##### Notes:
- 
+
   - Due to addition control messages in the 3.5.1 release, mixing 3.5.0
   and 3.5.1 releases should work properly, but the 3.5.0 data readers can emit
   the following error message when associating with a durable 3.5.1 data
-  writer: 
+  writer:
     ERROR: DataReaderImpl::data\_received unexpected message\_id = 11
     Upgrade all endpoints to 3.5.1 to remove this error message.
 
@@ -398,7 +441,7 @@ Version 3.3 of OpenDDS
 
 - Improved multicast transport's robustness during handshaking when many
   connections are set up at the same time, and also allow for multicast
-  to skip over recieved datagrams that don't have the expcted header values.
+  to skip over received datagrams that don't have the expected header values.
 
 - Multicast transport configuration can now specify a local network interface
   which will be used to join the multicast group.
@@ -450,16 +493,16 @@ Version 3.1 of OpenDDS
 
 - This release includes the initial implementation of DDS Interoperability
   in OpenDDS, using the DDS-RTPS spec v2.1 from the OMG (formal/2010-11-01).
-  
+
   RTPS support in OpenDDS consists of two main features:
-  
+
     - A pluggable transport implementation, known as "rtps\_udp" because it
       implements the UDP PSM of the DDS-RTPS spec.  This is a peer of the
       existing OpenDDS-native transports: "tcp", "udp", and "multicast".
-  
+
     - A new discovery mechanism for RTPS's distributed discovery.  This can
       replace the DCPSInfoRepo in existing OpenDDS deployments.
-  
+
   Neither of these features is enabled by default.  See the OpenDDS Developer's
   Guide chapter 7 for configuration details.  Also, note that not every OpenDDS
   feature (for example, certain QoS values) is supported with RTPS in the

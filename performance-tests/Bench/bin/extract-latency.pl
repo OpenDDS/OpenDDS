@@ -93,7 +93,12 @@ our ($current, $transport, $size, $section, $data);
 if( not defined $current or $ARGV ne "$current") {
   # Starting a new file.
   my $testtype;
-  ($testtype, $transport, $size) = split "-", basename( $ARGV, EXTENSION);
+  my $slot4;
+  ($testtype, $transport, $size , $slot4) = split "-", basename( $ARGV, EXTENSION);
+  if ($slot4) {
+      $transport .= "-$size";
+      $size = $slot4;
+  }
   $current = $ARGV;
   undef $section;
 }
@@ -119,8 +124,12 @@ $data->{ $transport}->{ $size}->{ $key } = $1 if $key;
 
 END {
   # Format output as CSV data.
+  my $block = 0;
   my $index = 0;
   foreach my $transport (sort keys %$data) {
+    if ($block++) {
+      print "\n\n";
+    }
     print "#\n";
     print "# Index " . $index++ . " data for $transport.\n";
     print "#\n";
@@ -130,6 +139,7 @@ END {
     print "#   jitter median, jitter median absolute deviation,\n";
     print "#   jitter max, jitter min\n";
     print "#\n";
+    print "$transport\n";
     foreach my $size (sort { $a <=> $b; } keys %{$data->{$transport}}) {
       print "$transport,";
       print "$size,";
@@ -147,7 +157,6 @@ END {
       print "$data->{$transport}->{$size}->{jittermin}";
       print "\n";
     }
-    print "\n\n";
   }
 }
 

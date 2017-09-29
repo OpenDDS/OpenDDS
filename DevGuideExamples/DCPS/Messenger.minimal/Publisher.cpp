@@ -55,6 +55,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         msg_count = ACE_OS::atoi(argv[1]);
       }
 
+      if (msg_count < 0 || msg_count > 100) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("ERROR: %N:%l: main() -")
+          ACE_TEXT(" specified msg_count outside range!\n")), -1);
+      }
+
       for (int i = 0; i < msg_count; ++i) {
         // Publish the message
         DDS::ReturnCode_t error = msg_writer->write(message,
@@ -80,10 +86,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     e._tao_print_exception("Exception caught in main():");
     return -1;
   } catch (std::runtime_error& err) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
                       err.what()), -1);
   } catch (std::string& msg) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
                       msg.c_str()), -1);
   }
 

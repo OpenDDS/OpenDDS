@@ -103,13 +103,13 @@ void cleanup(const DomainParticipantFactory_var& dpf,
 
   ReturnCode_t ret = dp->delete_contained_entities();
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P delete_contained_entities() returned %d\n",
+    ACE_ERROR((LM_ERROR, "ERROR: %P delete_contained_entities() returned %d\n",
                ret));
   }
 
   ret = dpf->delete_participant(dp);
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P delete_participant() returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: %P delete_participant() returned %d\n", ret));
   }
 }
 
@@ -128,6 +128,10 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
     TheServiceParticipant->get_discovery(dp->get_domain_id());
   OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
+
+  if (!dp_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: could not obtain DomainParticipantImpl\n"), false);
+  }
 
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -152,7 +156,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   ReturnCode_t ret =
     part_bit->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read participant BIT: %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not read participant BIT: %d\n", ret));
     return false;
   }
 
@@ -199,7 +203,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   }
 
   if (num_valid != 1) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P expected to discover 1 other participant, found %d\n", data.length ()));
+    ACE_ERROR((LM_ERROR, "ERROR: %P expected to discover 1 other participant, found %d\n", data.length ()));
   }
 
   part_bit->return_loan(data, infos);
@@ -216,7 +220,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
   TypeSupport_var ts = new TestMsgTypeSupportImpl;
 
   if (ts->register_type(dp2, "") != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to register type support\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to register type support\n"));
     return 0;
   }
 
@@ -231,7 +235,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                       DEFAULT_STATUS_MASK);
 
   if (!topic) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create topic\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to create topic\n"));
     return 0;
   }
 
@@ -240,7 +244,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                             DEFAULT_STATUS_MASK);
 
   if (!pub) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create publisher\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to create publisher\n"));
     return 0;
   }
 
@@ -254,7 +258,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                              DEFAULT_STATUS_MASK);
 
   if (!dw) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create data writer\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to create data writer\n"));
     return 0;
   }
   return dw;
@@ -269,9 +273,15 @@ void wait_match(const DataReader_var& dr, int n)
   ConditionSeq conditions;
   SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
   const Duration_t timeout = {1, 0};
+  ReturnCode_t result;
   while (dr->get_subscription_matched_status(ms) == RETCODE_OK
          && ms.current_count != n) {
-    ws->wait(conditions, timeout);
+    result = ws->wait(conditions, timeout);
+    if (result != RETCODE_OK && result != RETCODE_TIMEOUT) {
+      ACE_ERROR((LM_ERROR,
+        "ERROR: %P wait_match could not wait for condition: %d\n", result));
+      break;
+    }
   }
   ws->detach_condition(condition);
 }
@@ -300,13 +310,13 @@ void recreate_data_writer_and_topic(DataWriter_var& dw, const DataReader_var& dr
 
   topic = dp->create_topic(topic_name, type_name, topic_qos, 0, 0);
   if (!topic) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to re-create topic\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to re-create topic\n"));
     return;
   }
 
   dw = pub->create_datawriter(topic, dw_qos, 0, 0);
   if (!dw) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to re-create data writer\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to re-create data writer\n"));
   }
 }
 
@@ -315,7 +325,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
   TypeSupport_var ts = new TestMsgTypeSupportImpl;
 
   if (ts->register_type(dp, "") != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to register type support\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to register type support\n"));
     return 0;
   }
 
@@ -330,7 +340,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                      DEFAULT_STATUS_MASK);
 
   if (!topic) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create topic\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to create topic\n"));
     return 0;
   }
 
@@ -339,7 +349,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                              DEFAULT_STATUS_MASK);
 
   if (!sub) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create subscriber\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to create subscriber\n"));
     return 0;
   }
 
@@ -354,7 +364,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                              DEFAULT_STATUS_MASK);
 
   if (!dr) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create data reader\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P failed to create data reader\n"));
     return 0;
   }
   return dr;
@@ -375,6 +385,12 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
   OpenDDS::DCPS::DomainParticipantImpl* subscriber_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(subscriber.in());
 
+  if (!subscriber_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P read_publication_bit: ")
+      ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+      false);
+  }
+
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
   if (!ignored_publication) {
     ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -388,7 +404,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     ReturnCode_t result = waiter->wait(activeConditions, forever);
     waiter->detach_condition(rc);
     if (result != RETCODE_OK) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
                  "ERROR: %P (publication BIT) could not wait for condition: %d\n", result));
       return false;
     }
@@ -405,11 +421,11 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     pub_bit->read(data, infos, LENGTH_UNLIMITED,
                   ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
   if (ignored_publication && (ret != RETCODE_NO_DATA)) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read ignored publication BIT: %d\n",
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not read ignored publication BIT: %d\n",
                ret));
     return false;
   } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
     return false;
   }
 
@@ -500,6 +516,12 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
   OpenDDS::DCPS::DomainParticipantImpl* publisher_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(publisher.in());
 
+  if (!publisher_impl) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P read_subscription_bit: ")
+      ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+      false);
+  }
+
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
   if (!ignored_subscription) {
     ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -513,7 +535,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     ReturnCode_t result = waiter->wait(activeConditions, forever);
     waiter->detach_condition(rc);
     if (result != RETCODE_OK) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         "ERROR: %P (subscription BIT) could not wait for condition: %d\n", result));
       return false;
     }
@@ -529,11 +551,11 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     pub_bit->read(data, infos, LENGTH_UNLIMITED,
                   ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
   if (ignored_subscription && (ret != RETCODE_NO_DATA)) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read ignored subscription BIT: %d\n",
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not read ignored subscription BIT: %d\n",
                ret));
     return false;
   } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read subscription BIT: %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not read subscription BIT: %d\n", ret));
     return false;
   }
 
@@ -647,6 +669,12 @@ bool check_discovered_participants(DomainParticipant_var& dp,
       OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
           dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
 
+      if (!dp_impl) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P check_discovered_participants: ")
+          ACE_TEXT("Failed to obtain DomainParticipantImpl\n")),
+          false);
+      }
+
       OpenDDS::DCPS::RepoId repo_id = disc->bit_key_to_repo_id(
           dp_impl,
           OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
@@ -680,6 +708,13 @@ bool run_test(DomainParticipant_var& dp_sub,
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
       dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_sub.in());
+
+    if (!dp_impl) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P run_test: ")
+        ACE_TEXT("Failed to obtain DomainParticipantImpl for sub\n")),
+        false);
+    }
+
     sub_repo_id = dp_impl->get_id ();
     OpenDDS::DCPS::GuidConverter converter(sub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
@@ -691,6 +726,13 @@ bool run_test(DomainParticipant_var& dp_sub,
   {
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
       dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_pub.in());
+
+    if (!dp_impl) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P run_test: ")
+        ACE_TEXT("Failed to obtain DomainParticipantImpl for pub\n")),
+        false);
+    }
+
     pub_repo_id = dp_impl->get_id ();
     OpenDDS::DCPS::GuidConverter converter(pub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
@@ -728,7 +770,7 @@ bool run_test(DomainParticipant_var& dp_sub,
 
   DataWriter_var dw = create_data_writer(dp_pub);
   if (!dw) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Data Writer (participant 2)\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not create Data Writer (participant 2)\n"));
     return false;
   }
 
@@ -738,7 +780,7 @@ bool run_test(DomainParticipant_var& dp_sub,
 
   DataReader_var dr = create_data_reader(dp_sub);
   if (!dr) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Data Reader (participant 1)\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not create Data Reader (participant 1)\n"));
     return false;
   }
   if (!read_subscription_bit(dp_pub->get_builtin_subscriber(), dp_pub, sub_repo_id, sub_ih, TestConfig::DATA_READER_USER_DATA(), TestConfig::TOPIC_DATA())) {
@@ -779,7 +821,7 @@ bool run_test(DomainParticipant_var& dp_sub,
   ReturnCode_t result = waiter->wait(activeConditions, timeout);
   waiter->detach_condition(rc);
   if (result != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
       "ERROR: %P TestMsg reader could not wait for condition: %d\n", result));
     return false;
   }
@@ -790,7 +832,7 @@ bool run_test(DomainParticipant_var& dp_sub,
   SampleInfoSeq infos;
   ReturnCode_t ret = tmdr->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read TestMsg: %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: %P could not read TestMsg: %d\n", ret));
     return false;
   }
 
@@ -803,7 +845,7 @@ bool run_test(DomainParticipant_var& dp_sub,
   }
 
   if (!ok) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P no valid data from TestMsg data reader\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P no valid data from TestMsg data reader\n"));
   }
 
   // Change dp qos
@@ -900,7 +942,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     dp_sub = dpf->create_participant(9, PARTICIPANT_QOS_DEFAULT,
                                      0, DEFAULT_STATUS_MASK);
     if (!dp_sub) {
-      ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Sub Domain Participant\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: %P could not create Sub Domain Participant\n"));
 
     } else {
       {
@@ -922,28 +964,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       dp_pub = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
 
       if (!dp_pub) {
-        ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Domain Participant 2\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: %P could not create Domain Participant 2\n"));
 
       } else {
         ok = run_test(dp_sub, dp_pub);
 
         if (!ok) {
-          ACE_DEBUG((LM_ERROR, "ERROR: %P from run_test\n"));
+          ACE_ERROR((LM_ERROR, "ERROR: %P from run_test\n"));
           return -1;
         }
       }
     }
   } catch (const std::exception& e) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P Exception thrown: %C\n", e.what()));
+    ACE_ERROR((LM_ERROR, "ERROR: %P Exception thrown: %C\n", e.what()));
     return -2;
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("ERROR: %P Exception thrown:");
     return -2;
   } catch (const OpenDDS::DCPS::Transport::Exception&) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P Transport exception thrown\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P Transport exception thrown\n"));
     return -2;
   } catch (...) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P unknown exception thrown\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: %P unknown exception thrown\n"));
     return -2;
   }
 

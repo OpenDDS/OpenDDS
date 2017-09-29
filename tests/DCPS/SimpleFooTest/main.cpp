@@ -26,7 +26,7 @@
       ACE_ERROR((LM_ERROR,"(%N:%l) FAILED on TEST_CHECK(%C)%a\n",\
         #COND , -1));
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 
@@ -106,9 +106,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       foo_write_data.x = (float) 123.456;
       foo_write_data.y = (float) 987.654;
 
-      foo_dw->write(foo_write_data,
-                    0);
-
+      ::DDS::ReturnCode_t retcode = foo_dw->write(foo_write_data, 0);
+      TEST_CHECK(::DDS::RETCODE_OK == retcode);
 
       ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
@@ -149,7 +148,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       // clean up the objects
-      ::DDS::ReturnCode_t retcode;
       retcode = pub->delete_datawriter(dw.in ());
       TEST_CHECK(::DDS::RETCODE_OK == retcode);
       retcode = dp->delete_publisher(pub.in ());

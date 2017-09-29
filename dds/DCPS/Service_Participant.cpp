@@ -253,19 +253,25 @@ Service_Participant::reactor_owner() const
 void
 Service_Participant::shutdown()
 {
+  // When we are already shutdown just let the shutdown be a noop
+  if (shut_down_) {
+    return;
+  }
+
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
+    TransportRegistry::close();
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
     domainRepoMap_.clear();
-    discoveryMap_.clear();
 
     if (0 != reactor_) {
       reactor_->end_reactor_event_loop();
       reactor_task_.wait();
     }
 
+    discoveryMap_.clear();
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
@@ -1373,14 +1379,20 @@ Service_Participant::load_configuration(
   }
 
   // Needs to be loaded after transport configs and instances and domains.
-  status = StaticDiscovery::instance()->load_configuration(config);
+  try {
+    status = StaticDiscovery::instance()->load_configuration(config);
 
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
-                      status),
-                     -1);
+    if (status != 0) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+        ACE_TEXT("load_discovery_configuration() returned %d\n"),
+        status),
+        -1);
+    }
+  } catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in Service_Participant::load_configuration: "
+      "trying to load_discovery_configuration()");
+    return -1;
   }
 
   return 0;

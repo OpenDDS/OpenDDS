@@ -14,6 +14,10 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
@@ -51,7 +55,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
 
       DDS::DomainParticipant_var participant =
-        dpf->create_participant(411,
+        dpf->create_participant(111,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -59,13 +63,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         cerr << "create_participant failed." << endl;
         return 1;
       }
-
-      if (participant->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
-      {
-        cerr << "DomainParticipant can not be enabled because factory autoenable is off." << endl;
-        return 1;
-      }
-
       MessageTypeSupport_var mts = new MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != mts->register_type(participant.in (), "")) {
@@ -121,14 +118,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       if (dw->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         cerr << "DataWriter can not be enabled because Publisher is not enabled." << endl;
-        return 1;
-      }
-
-      // Now enable DomainParticipantFactory autoenable
-      fqos.entity_factory.autoenable_created_entities = true;
-      if (dpf->set_qos (fqos) != ::DDS::RETCODE_OK)
-      {
-        cerr << "DomainParticipantFactory set_qos failed." << endl;
         return 1;
       }
 

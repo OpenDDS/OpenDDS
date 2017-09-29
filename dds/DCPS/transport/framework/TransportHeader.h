@@ -12,6 +12,7 @@
 #include "ace/CDR_Base.h"
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/SequenceNumber.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -84,7 +85,7 @@ struct OpenDDS_Dcps_Export TransportHeader {
   static size_t max_marshaled_size();
 
   /// Demarshal transport packet from ACE_Message_Block.
-  void init(ACE_Message_Block* buffer);
+  bool init(ACE_Message_Block* buffer);
 
   bool first_fragment() { return this->first_fragment_; }
   bool last_fragment()  { return this->last_fragment_; }

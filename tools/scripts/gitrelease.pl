@@ -664,6 +664,8 @@ sub remedy_git_changes_pushed {
   my $result = system("git push $remote $settings->{branch}");
   print "pushing tags with git push $remote --tags\n";
   $result = $result || system("git push $remote --tags");
+  print "pushing latest-release branch"
+  $result = $result || system("git push $remote $settings->{branch}:latest-release");
   return !$result;
 }
 

@@ -11,6 +11,7 @@
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/Transient_Kludge.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/RestoreOutputStreamState.h"
 #include "DomainParticipantListener.h"
 #include "DataWriterListener.h"
 #include "PublisherListener.h"
@@ -24,7 +25,7 @@
 #include <string>
 #include <sstream>
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 
@@ -173,7 +174,10 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (publisher_.in ()));
 
-  std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
+  {
+    OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
+    std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
+  }
 
   TEST_CHECK (participant_->contains_entity(publisher_->get_instance_handle()));
 
@@ -480,6 +484,9 @@ PubDriver::register_test ()
   TEST_CHECK(key_holder.sample_sequence == foo1.sample_sequence);
   TEST_CHECK(key_holder.writer_id == foo1.writer_id);
 
+  ret = foo_datawriter_->get_key_value(key_holder, ::DDS::HANDLE_NIL);
+  TEST_CHECK(ret == ::DDS::RETCODE_BAD_PARAMETER);
+
   for (CORBA::Long i = 1; i <= 2; i ++)
   {
     foo2.a_long_value = 101010;
@@ -589,10 +596,6 @@ PubDriver::unregister_test ()
   // The subscriber will wait a while after telling the
   // publisher shutdown, so the unreigster message can still
   // be sent out.
-  MessageTracker & tracker = foo_datawriter_servant_->controlTracker;
-  tracker.dropped_count();
-  tracker.pending_messages();
-
   TEST_CHECK (foo_datawriter_servant_->controlTracker.dropped_count() == 0);
 }
 
@@ -686,15 +689,17 @@ PubDriver::listener_test ()
   TEST_CHECK (CORBA::is_nil (dwl_got.in ()));
 
   // Since datawriter has nil listener with
-  TEST_CHECK (datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS) == dpl.in ());
+  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
+  TEST_CHECK (dwl_got.in() == dpl.in ());
 
   foo_datawriter_->set_listener (dwl.in (), ::OpenDDS::DCPS::ALL_STATUS_MASK);
+  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
+  TEST_CHECK (dwl_got.in() == dwl.in ());
 
-  TEST_CHECK (datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS) == dwl.in ());
 
   foo_datawriter_->set_listener (dwl.in (), ::OpenDDS::DCPS::NO_STATUS_MASK);
-
-  TEST_CHECK (datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS) == dpl.in ());
+  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
+  TEST_CHECK (dwl_got.in() == dpl.in ());
 
   dwl_got = foo_datawriter_->get_listener ();
 

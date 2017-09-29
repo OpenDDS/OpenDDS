@@ -39,7 +39,6 @@ public:
 
   virtual ~EntityImpl();
 
-  virtual DDS::ReturnCode_t set_enabled();
   bool is_enabled() const;
 
   virtual DDS::StatusCondition_ptr get_statuscondition();
@@ -47,10 +46,6 @@ public:
   virtual DDS::StatusMask get_status_changes();
 
   virtual DDS::InstanceHandle_t get_instance_handle() = 0;
-
-  virtual void set_deleted(bool state);
-
-  virtual bool get_deleted();
 
   void set_status_changed_flag(DDS::StatusKind status,
                                bool status_changed_flag);
@@ -65,6 +60,12 @@ public:
   virtual EntityImpl* parent() const { return 0; }
 
 protected:
+  DDS::ReturnCode_t set_enabled();
+
+  void set_deleted(bool state);
+
+  bool get_deleted();
+
   /// The flag indicates the entity is enabled.
   ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>       enabled_;
 

@@ -41,25 +41,26 @@ DataSampleElement::get_header()
   return const_cast<DataSampleHeader&>(static_cast<const DataSampleElement &>(*this).get_header());
 }
 
+
 ACE_INLINE
 DataSample*
 DataSampleElement::get_sample() const
 {
-  return sample_;
+  return sample_.get();
 }
 
 ACE_INLINE
 DataSample*
 DataSampleElement::get_sample()
 {
-  return sample_;
+  return sample_.get();
 }
 
 ACE_INLINE
 void
-DataSampleElement::set_sample(DataSample* sample)
+DataSampleElement::set_sample(Message_Block_Ptr sample)
 {
-  this->sample_ = sample;
+  this->sample_.reset(sample.release());
 }
 
 ACE_INLINE

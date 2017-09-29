@@ -16,7 +16,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <ace/streams.h>
 #include "ace/High_Res_Timer.h"
@@ -31,7 +31,7 @@ class Publisher
 public:
   typedef std::string InitError;
 
-  Publisher (int argc, ACE_TCHAR *argv[]) throw (InitError);
+  Publisher (int argc, ACE_TCHAR *argv[]);
 
   bool run ();
 
@@ -53,7 +53,7 @@ private:
   std::vector<DDS::Publisher_var> pub_;
   std::vector<DDS::DataWriter_var> dw_;
 
-  OpenDDS::DCPS::scoped_ptr<SyncClientExt_i> sync_client_;
+  OpenDDS::DCPS::unique_ptr<SyncClientExt_i> sync_client_;
 };
 
 bool
@@ -101,7 +101,7 @@ Publisher::parse_args (int argc, ACE_TCHAR *argv[])
   return true;
 }
 
-Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (Publisher::InitError)
+Publisher::Publisher (int argc, ACE_TCHAR *argv[])
   : topic_count_ (1), participant_count_ (1), writer_count_ (1)
   , control_file_ ("barrier_file"), subscriber_count_(1)
 {
@@ -148,7 +148,7 @@ Publisher::Publisher (int argc, ACE_TCHAR *argv[]) throw (Publisher::InitError)
 bool
 Publisher::run (void)
 {
-  ::DDS::DomainId_t domain_id = 411;
+  ::DDS::DomainId_t domain_id = 111;
 
   try
     {

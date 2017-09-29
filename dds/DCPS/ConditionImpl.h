@@ -35,8 +35,10 @@ protected:
   ConditionImpl() {}
   virtual ~ConditionImpl() {}
 
-  typedef OPENDDS_SET_CMP(DDS::WaitSet_var, VarLess<DDS::WaitSet> ) WaitSetSet;
+  typedef OPENDDS_SET(OpenDDS::DCPS::WeakRcHandle<DDS::WaitSet>) WaitSetSet;
   WaitSetSet waitsets_;
+  /// Use a recursive mutex because we have derived classes that
+  /// need the recursive behavior
   ACE_Recursive_Thread_Mutex lock_;
 };
 

@@ -86,30 +86,32 @@ TransportHeader::valid() const
 }
 
 ACE_INLINE
-void
+bool
 TransportHeader::init(ACE_Message_Block* buffer)
 {
   DBG_ENTRY_LVL("TransportHeader","init",6);
 
   Serializer reader(buffer);
 
-  reader.read_octet_array(this->protocol_, sizeof(this->protocol_));
+  if (!reader.read_octet_array(this->protocol_, sizeof(this->protocol_)))
+    return false;
 
   ACE_CDR::Octet flags;
-  reader >> ACE_InputCDR::to_octet(flags);
+  if (!(reader >> ACE_InputCDR::to_octet(flags)))
+    return false;
+
   this->byte_order_= flags & (1 << BYTE_ORDER_FLAG);
   this->first_fragment_ = flags & (1 << FIRST_FRAGMENT_FLAG);
   this->last_fragment_ = flags & (1 << LAST_FRAGMENT_FLAG);
 
-  reader >> ACE_InputCDR::to_octet(this->reserved_);
+  if (!(reader >> ACE_InputCDR::to_octet(this->reserved_)))
+    return false;
 
   reader.swap_bytes(swap_bytes());
 
-  reader >> this->length_;
-
-  reader >> this->sequence_;
-
-  reader >> this->source_;
+  return (reader >> this->length_) &&
+         (reader >> this->sequence_) &&
+         (reader >> this->source_);
 }
 
 }

@@ -72,6 +72,12 @@ UpdateReceiver<DataType>::close(u_long /* flags */)
                ACE_TEXT("(%P|%t) UpdateReceiver::close()\n")));
   }
 
+  while (this->queue_.size()) {
+    delete this->queue_.front().first;
+    delete this->queue_.front().second;
+    this->queue_.pop_front();
+  }
+
   return 0;
 }
 
@@ -94,16 +100,19 @@ UpdateReceiver<DataType>::stop()
 
 template<class DataType>
 void
-UpdateReceiver<DataType>::add(DataType* sample, DDS::SampleInfo* info)
+UpdateReceiver<DataType>::add(OpenDDS::DCPS::unique_ptr<DataType> sample, OpenDDS::DCPS::unique_ptr<DDS::SampleInfo> info)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) UpdateReceiver::add()\n")));
   }
 
+  if (this->stop_)
+    return;
+
   { // Protect the queue.
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->lock_);
-    this->queue_.push_back(DataInfo(sample, info));
+    this->queue_.push_back(DataInfo(sample.release(), info.release()));
 
     if (OpenDDS::DCPS::DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,

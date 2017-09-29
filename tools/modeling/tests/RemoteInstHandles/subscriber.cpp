@@ -116,7 +116,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::DataReader_var reader = model.reader(Elements::DataReaders::reader);
     DDS::DataReaderListener_var bit_listener(new BitSubscriptionListener());
-    DDS::DomainParticipant_var reader_part = reader->get_subscriber()->get_participant();
+    DDS::Subscriber_var subscriber = reader->get_subscriber();
+    DDS::DomainParticipant_var reader_part = subscriber->get_participant();
 
     DDS::Subscriber_var bit_sub(reader_part->get_builtin_subscriber());
     DDS::DataReader_var bit_dr(bit_sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC));

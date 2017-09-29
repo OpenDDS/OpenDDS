@@ -10,7 +10,7 @@ Scenario 2 is a more complex test simulating the conditions of a
 simulation with state data, control data and status data all being
 transferred at the same time.
 
-Scenario 3 is a larger loopback test showing latencies when transfering
+Scenario 3 is a larger loopback test showing latencies when transferring
 data between 3 hosts.
 
 NOTATION:

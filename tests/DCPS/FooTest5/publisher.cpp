@@ -457,8 +457,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_ready);
 
-      ACE_OS::fclose(writers_ready);
-      ACE_OS::fclose(readers_ready);
+      if (writers_ready) ACE_OS::fclose(writers_ready);
+      if (readers_ready) ACE_OS::fclose(readers_ready);
 
       // If mixed transports, each writer will associate with only one reader
       int associations_per_writer = mixed_trans ? 1 : num_datareaders;

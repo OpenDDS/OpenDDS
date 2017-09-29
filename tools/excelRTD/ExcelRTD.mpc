@@ -5,7 +5,7 @@ project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monit
 
   macros += _USRDLL RTDServer_EXPORTS
 
-  specific (vc9, vc10, vc11, vc12, vc14, nmake) {
+  specific (vc9, vc10, vc11, vc12, vc14, vs2017, nmake) {
     compile_flags += /bigobj
   }
 

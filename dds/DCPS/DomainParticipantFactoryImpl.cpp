@@ -8,6 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DomainParticipantFactoryImpl.h"
 #include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "GuidConverter.h"
 #include "Service_Participant.h"
@@ -42,7 +43,13 @@ DomainParticipantFactoryImpl::create_participant(
   DDS::DomainParticipantListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  if (!Qos_Helper::valid(qos)) {
+  DDS::DomainParticipantQos par_qos = qos;
+
+  if (par_qos == PARTICIPANT_QOS_DEFAULT) {
+    get_default_participant_qos(par_qos);
+  }
+
+  if (!Qos_Helper::valid(par_qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
@@ -50,7 +57,7 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  if (!Qos_Helper::consistent(qos)) {
+  if (!Qos_Helper::consistent(par_qos)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
@@ -69,7 +76,7 @@ DomainParticipantFactoryImpl::create_participant(
   }
 
   const AddDomainStatus value =
-    disco->add_domain_participant(domainId, qos);
+    disco->add_domain_participant(domainId, par_qos);
 
   if (value.id == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
@@ -82,7 +89,7 @@ DomainParticipantFactoryImpl::create_participant(
   DomainParticipantImpl* dp = 0;
 
   ACE_NEW_RETURN(dp,
-                 DomainParticipantImpl(this, domainId, value.id, qos, a_listener,
+                 DomainParticipantImpl(this, domainId, value.id, par_qos, a_listener,
                                        mask, value.federated),
                  DDS::DomainParticipant::_nil());
 
@@ -95,10 +102,6 @@ DomainParticipantFactoryImpl::create_participant(
                ACE_TEXT("nil DomainParticipant.\n")));
     return DDS::DomainParticipant::_nil();
   }
-
-  // Set the participant object reference before enable since it's
-  // needed for the built in topics during enable.
-  dp->set_object_reference(dp_obj);  //xxx no change
 
   if (qos_.entity_factory.autoenable_created_entities) {
     dp->enable();
@@ -171,8 +174,16 @@ DomainParticipantFactoryImpl::delete_participant(
   DomainParticipantImpl* the_servant
   = dynamic_cast<DomainParticipantImpl*>(a_participant);
 
+  if (!the_servant) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
+      ACE_TEXT("failed to obtain the DomainParticipantImpl.\n")));
+
+    return DDS::RETCODE_ERROR;
+  }
+
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
-  if (the_servant->is_clean() == 0) {
+  if (!the_servant->is_clean()) {
     RepoId id = the_servant->get_id();
     GuidConverter converter(id);
     ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
@@ -184,7 +195,7 @@ DomainParticipantFactoryImpl::delete_participant(
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::DomainId_t domain_id = the_servant->get_domain_id();
+  const DDS::DomainId_t domain_id = the_servant->get_domain_id();
   RepoId dp_id = the_servant->get_id();
 
   DPSet* entry = 0;
@@ -194,7 +205,7 @@ DomainParticipantFactoryImpl::delete_participant(
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                      ACE_TEXT("%p domain_id=%d dp_id=%s.\n"),
+                      ACE_TEXT("%p domain_id=%d dp_id=%C.\n"),
                       ACE_TEXT("find"),
                       domain_id,
                       OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);

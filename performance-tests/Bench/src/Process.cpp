@@ -20,10 +20,18 @@ Process::~Process()
   // Clean up the wait conditions.
   DDS::ConditionSeq conditions;
   this->publicationWaiter_->get_conditions( conditions);
-  this->publicationWaiter_->detach_conditions( conditions);
+  if (DDS::RETCODE_OK !=
+    this->publicationWaiter_->detach_conditions(conditions)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Process::~Process ")
+      ACE_TEXT("failed to detach conditions from publicationWaiter.\n")));
+  }
 
   this->subscriptionWaiter_->get_conditions( conditions);
-  this->subscriptionWaiter_->detach_conditions( conditions);
+  if (DDS::RETCODE_OK !=
+    this->subscriptionWaiter_->detach_conditions(conditions)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Process::~Process ")
+      ACE_TEXT("failed to detach conditions from subscriptionWaiter_.\n")));
+  }
 
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   // Clean up the participants and their resources.

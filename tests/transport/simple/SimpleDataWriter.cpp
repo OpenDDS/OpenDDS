@@ -202,15 +202,15 @@ DDS_TEST::run(int num_messages, int msg_size)
     header.sequence_ = i;
 
     // The DataSampleHeader is what goes in the "Header Block".
-    ACE_Message_Block* header_block =
-      new ACE_Message_Block(header.max_marshaled_size());
+    OpenDDS::DCPS::Message_Block_Ptr header_block(
+      new ACE_Message_Block(header.max_marshaled_size()));
     *header_block << header;
 
-    ACE_Message_Block* data_block = new ACE_Message_Block(num_data_bytes);
+    OpenDDS::DCPS::Message_Block_Ptr data_block(new ACE_Message_Block(num_data_bytes));
     data_block->copy(data_str.c_str());
 
     // Chain the "Data Block" to the "Header Block"
-    header_block->cont(data_block);
+    header_block->cont(data_block.release());
 
     // Create the DataSampleElement now.
     OpenDDS::DCPS::DataSampleElement* element;
@@ -220,7 +220,7 @@ DDS_TEST::run(int num_messages, int msg_size)
       OpenDDS::DCPS::DataSampleElement(this->pub_id_, this, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0), 1);
 
     // The Sample Element will hold on to the chain of blocks (header + data).
-    element->sample_ = header_block;
+    element->sample_.reset(header_block.release());
     if (prev_element == 0) {
       samples.head_ = element;
     } else {

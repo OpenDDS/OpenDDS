@@ -166,9 +166,9 @@ private:
 
     void data_dropped(const DCPS::DataSampleElement*, bool by_transport);
 
-    void control_delivered(ACE_Message_Block* sample);
+    void control_delivered(const DCPS::Message_Block_Ptr& sample);
 
-    void control_dropped(ACE_Message_Block* sample,
+    void control_dropped(const DCPS::Message_Block_Ptr& sample,
                          bool dropped_by_transport);
 
     void notify_publication_disconnected(const DCPS::ReaderIdSeq&) {}
@@ -193,7 +193,7 @@ private:
     Header header_;
     DCPS::SequenceNumber seq_;
 
-    void write_control_msg(ACE_Message_Block& payload,
+    void write_control_msg(DCPS::Message_Block_Ptr payload,
                            size_t size,
                            DCPS::MessageId id,
                            DCPS::SequenceNumber seq = DCPS::SequenceNumber());
@@ -217,7 +217,7 @@ private:
   public:
     Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
       : Endpoint(sub_id, sedp)
-      , shutting_down_(0)
+      , shutting_down_(false)
     {}
 
     virtual ~Reader();
@@ -237,7 +237,7 @@ private:
     virtual void _add_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref(); }
     virtual void _remove_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref(); }
 
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> shutting_down_;
+    ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> shutting_down_;
   };
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
@@ -254,15 +254,14 @@ private:
     }
     ~Task();
 
-    void enqueue(const SPDPdiscoveredParticipantData* pdata);
-    void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
-    void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
-    void enqueue(DCPS::MessageId id, const ParticipantMessageData* data);
+    void enqueue(DCPS::unique_ptr<SPDPdiscoveredParticipantData> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
     void acknowledge();
     void shutdown();
-
 
   private:
     int svc();

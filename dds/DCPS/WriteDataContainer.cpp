@@ -17,7 +17,7 @@
 #endif
 #include "PublicationInstance.h"
 #include "Util.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "GuidConverter.h"
 #include "OfferedDeadlineWatchdog.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -73,6 +73,7 @@ resend_data_expired(DataSampleElement const & element,
 WriteDataContainer::WriteDataContainer(
   DataWriterImpl* writer,
   CORBA::Long max_samples_per_instance,
+  CORBA::Long history_depth,
   CORBA::Long max_durable_per_instance,
   DDS::Duration_t max_blocking_time,
   size_t         n_chunks,
@@ -89,6 +90,7 @@ WriteDataContainer::WriteDataContainer(
     publication_id_(GUID_UNKNOWN),
     writer_(writer),
     max_samples_per_instance_(max_samples_per_instance),
+    history_depth_(history_depth),
     max_durable_per_instance_(max_durable_per_instance),
     max_num_instances_(max_instances),
     max_num_samples_(max_total_samples),
@@ -275,7 +277,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 DDS::ReturnCode_t
 WriteDataContainer::register_instance(
   DDS::InstanceHandle_t&      instance_handle,
-  DataSample*&                registered_sample)
+  Message_Block_Ptr&          registered_sample)
 {
   PublicationInstance_rch instance;
 
@@ -286,7 +288,7 @@ WriteDataContainer::register_instance(
     }
 
     // registered the instance for the first time.
-    instance = make_rch<PublicationInstance>(registered_sample);
+    instance = make_rch<PublicationInstance>(ref(move(registered_sample)));
 
     instance_handle = this->writer_->get_next_handle();
 
@@ -318,14 +320,11 @@ WriteDataContainer::register_instance(
       return DDS::RETCODE_ERROR;
     } // if (0 != find_attempt)
 
-    // don't need this - the PublicationInstances already has a sample.
-    registered_sample->release();
-
     instance->unregistered_ = false;
   }
 
   // The registered_sample is shallow copied.
-  registered_sample = instance->registered_sample_->duplicate();
+  registered_sample.reset(instance->registered_sample_->duplicate());
 
   if (this->writer_->watchdog_.in()) {
     this->writer_->watchdog_->schedule_timer(instance);
@@ -336,8 +335,8 @@ WriteDataContainer::register_instance(
 
 DDS::ReturnCode_t
 WriteDataContainer::unregister(
-  DDS::InstanceHandle_t instance_handle,
-  DataSample*&            registered_sample,
+  DDS::InstanceHandle_t   instance_handle,
+  Message_Block_Ptr& registered_sample,
   bool                    dup_registered_sample)
 {
   PublicationInstance_rch instance;
@@ -358,11 +357,8 @@ WriteDataContainer::unregister(
 
   if (dup_registered_sample) {
     // The registered_sample is shallow copied.
-    registered_sample = instance->registered_sample_->duplicate();
+    registered_sample.reset(instance->registered_sample_->duplicate());
   }
-
-  // Unregister the instance with typed DataWriter.
-  this->writer_->unregistered(instance_handle);
 
   if (this->writer_->watchdog_.in())
     this->writer_->watchdog_->cancel_timer(instance);
@@ -372,8 +368,8 @@ WriteDataContainer::unregister(
 
 DDS::ReturnCode_t
 WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
-                            DataSample*&            registered_sample,
-                            bool                    dup_registered_sample)
+                            Message_Block_Ptr&    registered_sample,
+                            bool                  dup_registered_sample)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
@@ -396,7 +392,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
 
   if (dup_registered_sample) {
     // The registered_sample is shallow copied.
-    registered_sample = instance->registered_sample_->duplicate();
+    registered_sample.reset(instance->registered_sample_->duplicate());
   }
 
   // Note: The DDS specification is unclear as to if samples in the process
@@ -1057,6 +1053,19 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
          ((CORBA::Long) this->num_all_samples () >= this->max_num_samples_))) {
 
     if (this->writer_->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+      if (instance_list.size() >= history_depth_) {
+        if (DCPS_debug_level >= 2) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
+                     ACE_TEXT(" instance %d attempting to remove")
+                     ACE_TEXT(" its oldest sample (reliable)\n"),
+                     handle));
+        }
+        bool oldest_released = false;
+        ret = remove_oldest_sample(instance_list, oldest_released);
+        if (oldest_released) {
+          break;
+        }
+      }
       // Reliable writers can wait
       if (need_to_set_abs_timeout) {
         abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
@@ -1208,7 +1217,7 @@ WriteDataContainer::unregister_all()
     }
   }
   DDS::ReturnCode_t ret;
-  DataSample* registered_sample;
+  Message_Block_Ptr registered_sample;
   PublicationInstanceMapType::iterator it = instances_.begin();
 
   while (it != instances_.end()) {
@@ -1380,16 +1389,15 @@ WriteDataContainer::wait_pending()
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
-    ACE_TCHAR date_time[50];
-    ACE_TCHAR* const time =
-      MessageTracker::timestamp(pending_timeout,
-                                date_time,
-                                50);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending timeout ")
-               ACE_TEXT("at %s\n"),
-               (pending_timeout == ACE_Time_Value::zero ?
-                  ACE_TEXT("(no timeout)") : time)));
+    if (pending_timeout == ACE_Time_Value::zero) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending no timeout\n")));
+    } else {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending timeout ")
+                 ACE_TEXT("at %#T\n"),
+                 &pending_timeout));
+    }
   }
   while (true) {
 

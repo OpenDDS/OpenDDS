@@ -15,7 +15,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/FileSystemStorage.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <ace/Atomic_Op_T.h>
 #include <ace/streams.h>
@@ -69,7 +69,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs (argc, argv);
       DDS::DomainParticipant_var participant =
-        dpf->create_participant (411,
+        dpf->create_participant (111,
                                  PARTICIPANT_QOS_DEFAULT,
                                  DDS::DomainParticipantListener::_nil(),
                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -163,7 +163,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (do_write)
         {
           // Write samples.
-          OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
+          OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
           if (!writer->start () || !writer->end ())
           {
@@ -250,7 +250,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         // Write samples using multiple threads.
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dummy_dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dummy_dw.in ()));
 
         // Explicitly destroy the DataWriter.
         if (pub->delete_datawriter (dummy_dw.in ())
@@ -273,7 +273,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       exit (1);
     }
   catch (const std::runtime_error& err) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
                       err.what()), -1);
   }
 

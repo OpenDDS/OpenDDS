@@ -116,7 +116,7 @@ private:
     /// The topic object reference.
     Topic_Pair pair_;
     /// The reference count on the obj_.
-    CORBA::Long client_refs_;
+    CORBA::ULong client_refs_;
   };
 
   typedef OPENDDS_MAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
@@ -303,15 +303,9 @@ private:
   RepoId get_repoid(const DDS::InstanceHandle_t& id);
 
   /**
-   *  Associate the servant with the object reference.
-   *  This is required to pass to the topic servant.
-   */
-  void set_object_reference(const DDS::DomainParticipant_ptr& dp);
-
-  /**
    *  Check if the topic is used by any datareader or datawriter.
    */
-  int is_clean() const;
+  bool is_clean() const;
 
   /**
    * This is used to retrieve the listener for a certain status change.
@@ -466,9 +460,6 @@ private:
   ACE_Condition<ACE_Thread_Mutex> shutdown_condition_;
   DDS::ReturnCode_t shutdown_result_;
   bool shutdown_complete_;
-
-  /// The object reference activated from this servant.
-  DDS::DomainParticipant_var participant_objref_;
 
   /// The built in topic subscriber.
   DDS::Subscriber_var bit_subscriber_;

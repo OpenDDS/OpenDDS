@@ -56,7 +56,16 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   // Always destroy connection, but don't overwrite bad status
   FACE::RETURN_CODE_TYPE destroy_status = FACE::RC_NO_ERROR;
-  FACE::TS::Destroy_Connection(connId, destroy_status);
+  try
+  {
+    FACE::TS::Destroy_Connection(connId, destroy_status);
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in Subscriber.cpp:");
+    return 1;
+  }
+
   if ((destroy_status != FACE::RC_NO_ERROR) && (!status)) {
     status = destroy_status;
   }

@@ -419,19 +419,20 @@ namespace OpenDDS
             outstream << "[" << params.index << "]";
         }
       proto_tree *subtree = params.tree;
+      bool use_index = params.use_index;
       if (!this->subtree_label_.empty())
         {
           if (top_level)
             outstream << "Sample Payload: ";
           else
-            outstream << " : ";
+            outstream << ": ";
           outstream << subtree_label_;
           std::string buffer = outstream.str();
           proto_item *item =
             proto_tree_add_text (params.tree, params.tvb, params.offset, len,
                                  "%s", buffer.c_str());
           subtree = proto_item_add_subtree (item, ett_payload_);
-          params.use_index = false;
+          use_index = false;
         }
 
       if (field_ != 0)
@@ -441,7 +442,7 @@ namespace OpenDDS
           fp.info = params.info;
           fp.tree = subtree;
           fp.offset = params.offset;
-          fp.use_index = params.use_index;
+          fp.use_index = use_index;
           fp.index = params.index;
           fp.data = data;
           data_pos += field_->dissect_i (fp, label);
@@ -524,10 +525,10 @@ namespace OpenDDS
       size_t data_pos = 4;
       Wireshark_Bundle_i sp = params;
       sp.tree = subtree;
-      sp.use_index = true;
       for (guint32 ndx = 0; ndx < count; ndx++)
         {
           sp.index = ndx;
+          sp.use_index = true;
           sp.offset = params.offset + (gint)data_pos;
           data_pos += element_->dissect_i (sp, label);
         }
@@ -580,7 +581,6 @@ namespace OpenDDS
       size_t data_pos = 0;
       Wireshark_Bundle_i sp = params;
       sp.tree = subtree;
-      sp.use_index = true;
       for (guint32 ndx = 0; ndx < count_; ndx++)
         {
           sp.index = ndx;

@@ -21,6 +21,10 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include "ace/Arg_Shifter.h"
 
@@ -154,6 +158,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
       DataReaderListenerImpl* drl_servant =
         dynamic_cast<DataReaderListenerImpl*>(drl.in());
+
+      if (!drl_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: drl_servant is nil (dynamic_cast failed)!\n")), -1);
+      }
 
       ::DDS::DataReader_var dr ;
 

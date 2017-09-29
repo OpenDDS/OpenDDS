@@ -39,6 +39,8 @@ public:
   explicit SimpleDataReader(const RepoId& sub_id)
     : done_(false)
     , sub_id_(sub_id)
+    , pub_id_(GUID_UNKNOWN)
+    , seq_()
     , control_msg_count_(0)
   {}
 
@@ -50,7 +52,7 @@ public:
       pub_id_ = publication.remote_id_;
       return associate(publication, false /* active */);
     } catch (const CORBA::BAD_PARAM& ) {
-        ACE_DEBUG((LM_ERROR, "ERROR: caught CORBA::BAD_PARAM exception\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: caught CORBA::BAD_PARAM exception\n"));
         return false;
     }
   }
@@ -61,7 +63,7 @@ public:
   {
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
-      Serializer ser(sample.sample_,
+      Serializer ser(sample.sample_.get(),
                      sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                      Serializer::ALIGN_CDR);
       bool ok = true;
@@ -71,7 +73,7 @@ public:
       ok &= (ser >> data);
 
       if (!ok) {
-        ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize data\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize data\n"));
         return;
       }
 
@@ -104,7 +106,7 @@ public:
           || sample.header_.sequence_ != seq_++ || !sample.header_.byte_order_
           || sample.header_.message_length_ != 533
           || pub.checksum() != GuidConverter(pub_id_).checksum()) {
-        ACE_DEBUG((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
       }
 
       if (seq_ == 2) {
@@ -112,7 +114,7 @@ public:
       }
 
       if (data.key != 0x09230923 || std::strlen(data.value.in()) != 520) {
-        ACE_DEBUG((LM_ERROR, "ERROR: DataSample contents malformed\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: DataSample contents malformed\n"));
       }
       break;
     }
@@ -120,7 +122,7 @@ public:
     case DISPOSE_INSTANCE:
     case UNREGISTER_INSTANCE:
     case DISPOSE_UNREGISTER_INSTANCE: {
-      OpenDDS::DCPS::Serializer ser(sample.sample_,
+      OpenDDS::DCPS::Serializer ser(sample.sample_.get(),
                                     sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                                     OpenDDS::DCPS::Serializer::ALIGN_CDR);
       bool ok = true;
@@ -130,14 +132,14 @@ public:
       ok &= (ser >> OpenDDS::DCPS::KeyOnly<TestMsg>(data));
 
       if (!ok) {
-        ACE_DEBUG((LM_ERROR, "ERROR: failed to deserialize key data\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize key data\n"));
         return;
       }
       if (data.key == 0x04030201) {
         // Good control message
         control_msg_count_++;
       } else {
-        ACE_DEBUG((LM_ERROR, "ERROR: key contents malformed\n"));
+        ACE_ERROR((LM_ERROR, "ERROR: key contents malformed\n"));
       }
 
       std::ostringstream oss;
@@ -185,7 +187,7 @@ public:
   using TransportClient::disassociate;
 
   bool done_;
-  const RepoId& sub_id_;
+  const RepoId sub_id_;
   RepoId pub_id_;
   SequenceNumber seq_;
   int control_msg_count_;
@@ -196,7 +198,8 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
-    TheParticipantFactoryWithArgs(argc, argv);
+    ::DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
     std::cerr << "STARTING MAIN IN SUBSCRIBER\n";
     ACE_TString host;
@@ -283,7 +286,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     if (sdr.control_msg_count_ != 4) {
-      ACE_DEBUG((LM_ERROR, "ERROR: Expected 4 control messages, received %d\n",
+      ACE_ERROR((LM_ERROR, "ERROR: Expected 4 control messages, received %d\n",
                  sdr.control_msg_count_));
     }
 
@@ -294,7 +297,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     return 0;
   } catch (const OpenDDS::DCPS::Transport::NotConfigured& ) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                "ERROR: caught OpenDDS::DCPS::Transport::NotConfigured exception.\n"));
     return 1;
   } catch (const CORBA::BAD_PARAM& ex) {

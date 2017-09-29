@@ -61,7 +61,8 @@ PublisherImpl::~PublisherImpl()
     ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::~PublisherImpl, ")
-        ACE_TEXT("some datawriters still exist.\n")));
+        ACE_TEXT("%B datawriters and %B publications still exist.\n"),
+        datawriter_map_.size(), publication_map_.size()));
   }
 }
 
@@ -104,6 +105,16 @@ PublisherImpl::create_datawriter(
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
+  if (!topic_servant) {
+    CORBA::String_var name = a_topic->get_name();
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("PublisherImpl::create_datawriter, ")
+      ACE_TEXT("topic_servant(topic_name=%C) is nil.\n"),
+      name.in()));
+    return 0;
+  }
+
   OpenDDS::DCPS::TypeSupport_ptr typesupport =
       topic_servant->get_type_support();
 
@@ -122,14 +133,21 @@ PublisherImpl::create_datawriter(
   DataWriterImpl* dw_servant =
       dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
+  if (dw_servant == 0) {
+    ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("servant is nil.\n")));
+    return DDS::DataWriter::_nil();
+  }
+
   dw_servant->init(a_topic,
       topic_servant,
       dw_qos,
       a_listener,
       mask,
       participant_,
-      this,
-      dw_obj.in());
+      this);
 
   if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
     const DDS::ReturnCode_t ret = dw_servant->enable();
@@ -141,6 +159,9 @@ PublisherImpl::create_datawriter(
           ACE_TEXT("enable failed.\n")));
       return DDS::DataWriter::_nil();
     }
+  } else {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, 0);
+    writers_not_enabled_.insert(DDS::DataWriter::_duplicate(dw_servant));
   }
 
   return DDS::DataWriter::_duplicate(dw_obj.in());
@@ -198,7 +219,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   dw_servant->wait_pending();
   dw_servant->wait_control_pending();
 
-  CORBA::String_var topic_name = dw_servant->get_topic_name();
   RepoId publication_id  = GUID_UNKNOWN;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -314,7 +334,7 @@ PublisherImpl::delete_contained_entities()
 
   while (true) {
     PublicationId pub_id = GUID_UNKNOWN;
-    DataWriterImpl* a_datawriter;
+    DataWriterImpl* a_datawriter = 0;
 
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -330,7 +350,7 @@ PublisherImpl::delete_contained_entities()
       }
     }
 
-    DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
+    const DDS::ReturnCode_t ret = delete_datawriter(a_datawriter);
 
     if (ret != DDS::RETCODE_OK) {
       GuidConverter converter(pub_id);
@@ -388,7 +408,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
             ACE_ERROR_RETURN((LM_ERROR,
                 ACE_TEXT("(%P|%t) ")
                 ACE_TEXT("PublisherImpl::set_qos: ")
-                ACE_TEXT("insert id %d to DwIdToQosMap ")
+                ACE_TEXT("insert id %C to DwIdToQosMap ")
                 ACE_TEXT("failed.\n"),
                 OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
           }
@@ -752,6 +772,16 @@ PublisherImpl::enable()
   }
 
   this->set_enabled();
+
+  if (qos_.entity_factory.autoenable_created_entities) {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, DDS::RETCODE_ERROR);
+    DataWriterVarSet writers;
+    writers_not_enabled_.swap(writers);
+    for (DataWriterVarSet::iterator it = writers.begin(); it != writers.end(); ++it) {
+      (*it)->enable();
+    }
+  }
+
   return DDS::RETCODE_OK;
 }
 
@@ -773,6 +803,9 @@ PublisherImpl::writer_enabled(const char*     topic_name,
       guard,
       this->pi_lock_,
       DDS::RETCODE_ERROR);
+
+  DDS::DataWriter_var writer_var = DDS::DataWriter::_duplicate(writer);
+  writers_not_enabled_.erase(writer_var);
 
   datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 

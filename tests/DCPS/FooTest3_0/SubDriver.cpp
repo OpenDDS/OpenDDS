@@ -4,6 +4,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/RestoreOutputStreamState.h"
 #include "DataReaderListener.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/Utils/ExceptionStreams.h"
@@ -16,7 +17,7 @@
 #include <sstream>
 #include <iostream>
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 
@@ -24,6 +25,7 @@ using namespace ::OpenDDS::DCPS;
 
 SubDriver::SubDriver()
   : num_writes_ (0),
+    num_disposed_ (0),
     shutdown_pub_ (1),
     add_new_subscription_ (0),
     shutdown_delay_secs_ (10),
@@ -81,6 +83,11 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
         {
           sub_ready_filename_ = current_arg;
+          arg_shifter.consume_arg ();
+        }
+      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
+        {
+          num_disposed_ = ACE_OS::atoi (current_arg);
           arg_shifter.consume_arg ();
         }
       else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0)
@@ -160,7 +167,10 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
       ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains subscriber_\n")));
   }
 
-  std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  {
+    OpenDDS::DCPS::RestoreOutputStreamState ross(std::cout);
+    std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  }
 
   // Create datareader to test copy_from_topic_qos.
   listener_ = new DataReaderListenerImpl;
@@ -180,7 +190,10 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
     ACE_ERROR ((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ready file\n")));
   }
-  ACE_OS::fclose(readers_ready);
+  else
+  {
+    ACE_OS::fclose(readers_ready);
+  }
   // And we are done with the init().
 }
 
@@ -195,11 +208,9 @@ SubDriver::run()
     ACE_OS::sleep(1);
   }
 
-  if (!participant_->contains_entity(datareader_->get_instance_handle()))
-  {
-    ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: participant_ should indicated it contains datareader_\n")));
-  }
+  TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
+
+  TEST_CHECK (this->listener_->samples_disposed() == num_disposed_);
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   participant_->delete_contained_entities();

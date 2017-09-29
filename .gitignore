@@ -26,6 +26,7 @@ lib*.dylib
 *.res
 *.VC.db
 *.VC.opendb
+.vs/
 
 /setenv.sh
 /setenv.cmd
@@ -39,3 +40,4 @@ lib*.dylib
 /ACE_wrappers
 /ACE_TAO
 .idea/
+.vs/

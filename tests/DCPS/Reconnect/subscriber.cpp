@@ -102,7 +102,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     ACE_DEBUG((LM_DEBUG, "(%P|%t) subscriber.cpp main()\n"));
 
     participant =
-      dpf->create_participant(411,
+      dpf->create_participant(111,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -154,6 +154,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
     DataReaderListenerImpl* listener_servant =
       dynamic_cast<DataReaderListenerImpl*>(listener.in());
+
+    if (!listener_servant) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("%N:%l main()")
+        ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
+    }
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
@@ -214,10 +220,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
 
           //writers_completed = ACE_OS::fopen (pub_finished_filename, "r");
-          fscanf (writers_completed, "%d\n", &timeout_writes);
-          num_expected_reads -= timeout_writes;
-          cout << "timed out writes " << timeout_writes << ", we expect "
-               << num_expected_reads << endl;
+          if (std::fscanf(writers_completed, "%d\n", &timeout_writes) != 1) {
+            //if fscanf return 0 or EOF(-1), failed to read a matching line format to populate in timeout_writes
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Warning: subscriber could not read timeout_writes\n")));
+          } else if (timeout_writes) {
+            num_expected_reads -= timeout_writes;
+            cout << "timed out writes " << timeout_writes << ", we expect "
+              << num_expected_reads << endl;
+          }
         }
       }
       ACE_OS::sleep (1);

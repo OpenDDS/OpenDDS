@@ -29,9 +29,7 @@ EntityImpl::~EntityImpl()
 DDS::ReturnCode_t
 EntityImpl::set_enabled()
 {
-  if (enabled_ == false) {
-    enabled_ = true;
-  }
+  enabled_ = true;
 
   return DDS::RETCODE_OK;
 }
@@ -73,27 +71,27 @@ EntityImpl::set_status_changed_flag(
 void
 EntityImpl::set_deleted(bool state)
 {
-  if (entity_deleted_ != state) {
-    entity_deleted_ = state;
-  }
+  entity_deleted_ = state;
 }
 
 bool
 EntityImpl::get_deleted()
 {
-  bool deleted_state = true;
-
-  if (entity_deleted_ != true) {
-    deleted_state = false;
-  }
-
-  return deleted_state;
+  return this->entity_deleted_.value();
 }
 
 void
 EntityImpl::notify_status_condition()
 {
-  dynamic_cast<StatusConditionImpl*>(status_condition_.in())->signal_all();
+  StatusConditionImpl* sci =
+    dynamic_cast<StatusConditionImpl*>(status_condition_.in());
+  if (sci) {
+    sci->signal_all();
+  } else {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("EntityImpl::notify_status_condition: ")
+      ACE_TEXT("failed to obtain the StatusConditionImpl.\n")));
+  }
 }
 
 void

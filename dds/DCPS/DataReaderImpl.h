@@ -39,7 +39,6 @@
 #include "PoolAllocator.h"
 #include "RemoveAssociationSweeper.h"
 #include "RcEventHandler.h"
-#include "Loaner.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -70,7 +69,7 @@ class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
-typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElement, ACE_Null_Mutex>
+typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElementMemoryBlock, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
 enum MarshalingType {
@@ -191,7 +190,6 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportReceiveListener,
-    public virtual Loaner,
     private WriterInfoListener {
 public:
   friend class RequestedDeadlineWatchdog;
@@ -261,8 +259,7 @@ public:
     DDS::DataReaderListener_ptr a_listener,
     const DDS::StatusMask &     mask,
     DomainParticipantImpl*        participant,
-    SubscriberImpl*               subscriber,
-    DDS::DataReader_ptr         dr_objref);
+    SubscriberImpl*               subscriber);
 
   virtual DDS::ReadCondition_ptr create_readcondition(
     DDS::SampleStateMask sample_states,
@@ -367,10 +364,6 @@ public:
 
   RepoId get_subscription_id() const;
 
-  DDS::DataReader_ptr get_dr_obj_ref();
-
-  char *get_topic_name() const;
-
   bool have_sample_states(DDS::SampleStateMask sample_states) const;
   bool have_view_states(DDS::ViewStateMask view_states) const;
   bool have_instance_states(DDS::InstanceStateMask instance_states) const;
@@ -417,11 +410,13 @@ public:
 
   bool is_bit() const;
 
-  /** This method is used for a precondition check of delete_datareader.
+  /**
+   * This method is used for a precondition check of delete_datareader.
    *
-   * @returns the number of outstanding zero-copy samples loaned out.
+   * @retval true We have zero-copy samples loaned out
+   * @retval false We have no zero-copy samples loaned out
    */
-  virtual int num_zero_copies();
+  bool has_zero_copies();
 
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
@@ -538,7 +533,7 @@ public:
 
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
-  void remove_or_reschedule(const PublicationId& pub_id);
+  void remove_publication(const PublicationId& pub_id);
 
   void prepare_to_delete();
 
@@ -645,7 +640,7 @@ private:
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 
   /// Lookup the instance handles by the publication repo ids
-  bool lookup_instance_handles(const WriterIdSeq& ids,
+  void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
   void instances_liveliness_update(WriterInfo& info,
@@ -684,7 +679,6 @@ private:
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
-  DDS::DataReader_var          dr_local_objref_;
   RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
   RcHandle<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 
@@ -806,8 +800,6 @@ private:
   /// datareader.
   bool is_bit_;
 
-  /// Flag indicates that the init() is called.
-  bool initialized_;
   bool always_get_history_;
 
   /// Flag indicating status of statistics gathering.

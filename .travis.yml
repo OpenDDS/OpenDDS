@@ -7,18 +7,19 @@ compiler:
 env:
   matrix:
     - FUZZ=1
-    - NO_INLINE=1
-    - NO_BIT=1
-    - STATIC=1 NO_DEBUG=1
+    - NO_INLINE=1 XERCES3=1
+    - NO_BIT=1 XERCES3=1
+    - STATIC=1 NO_DEBUG=1 XERCES3=1
     - SAFETY_PROFILE=1
-    - USES_WCHAR=1
+    - USES_WCHAR=1 XERCES3=0
+    - NO_MULTITOPIC=1 XERCES3=1
   global:
     - ACE_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/ACE
     - TAO_ROOT=$TRAVIS_BUILD_DIR/ACE_TAO/TAO
     - DDS_ROOT=$TRAVIS_BUILD_DIR
     - MPC_ROOT=$TRAVIS_BUILD_DIR/ext/MPC
     - LD_LIBRARY_PATH=$ACE_ROOT/lib:$DDS_ROOT/lib:$LD_LIBRARY_PATH
-    - COMPILER=g++-6
+    - COMPILER=g++-7
 
 matrix:
   include:
@@ -31,7 +32,7 @@ matrix:
             - libxerces-c-dev
             - g++-6
             - openjdk-7-jdk
-      env: USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1
+      env: USE_JAVA=1 NO_DEBUG=1 NO_TESTS=1 COMPILER=g++-6
     - compiler: clang
       addons:
         apt:
@@ -41,7 +42,9 @@ matrix:
           packages:
             - libxerces-c-dev
             - clang++-3.9
-      env: COMPILER=clang++-3.9
+      env: COMPILER=clang++
+    - os: osx
+      env: COMPILER=clang++ XERCES3=0 NO_INLINE=1
 
 addons:
   apt:
@@ -49,7 +52,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libxerces-c-dev
-      - g++-6
+      - g++-7
 
 before_install:
   - mkdir ext
@@ -71,11 +74,13 @@ before_script:
   - if [ "$NO_INLINE" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-inline"; fi
   - if [ "$NO_BIT" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-built-in-topics"; fi
   - if [ "$STATIC" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --static"; fi
-  - if [ "$NO_DEBUG" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-debug"; fi
+  - if [ "$NO_DEBUG" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-debug --optimize"; fi
   - if [ "$SAFETY_PROFILE" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --safety-profile"; fi
+  - if [ "$NO_MULTITOPIC" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-multi-topic"; fi
   - if [ "$USE_JAVA" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --java"; fi
   - if [ "$NO_TESTS" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --no-tests"; fi
-  - if [ "$USES_WCHAR" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=uses_wchar=1"; else DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --xerces3"; fi
+  - if [ "$USES_WCHAR" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --features=uses_wchar=1"; fi
+  - if [ "$XERCES3" == "1" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --xerces3"; fi
   - if [ "$CXX" == "g++" ]; then DDS_CONFIGURE_PARAMS="$DDS_CONFIGURE_PARAMS --macros=c++11=1"; fi
   - ./configure --mpcopts="-workers 2" --compiler=$COMPILER $DDS_CONFIGURE_PARAMS
   - if [ "$SAFETY_PROFILE" == "1" ]; then
@@ -101,7 +106,7 @@ before_script:
     fi
 
 script:
-  - make -s -j 6
+  - travis_wait 45 make -s -j 6
   - if [ "$SAFETY_PROFILE" == "1" ]; then
         cd build/target/tests/DCPS/Messenger && ./run_test.pl rtps_disc;
         cd $DDS_ROOT/build/target/tests/FACE/Messenger;

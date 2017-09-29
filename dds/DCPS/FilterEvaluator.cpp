@@ -43,6 +43,7 @@ FilterEvaluator::DeserializedForEval::~DeserializedForEval()
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : extended_grammar_(false)
   , filter_root_(0)
+  , number_parameters_(0)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
@@ -105,14 +106,6 @@ FilterEvaluator::DeserializedForEval::lookup(const char* field) const
   return meta_.getValue(deserialized_, field);
 }
 
-namespace {
-  struct AMB_Releaser {
-    explicit AMB_Releaser(ACE_Message_Block* mb) : mb_(mb) {}
-    ~AMB_Releaser() { mb_->release(); }
-    ACE_Message_Block* mb_;
-  };
-}
-
 Value
 FilterEvaluator::SerializedForEval::lookup(const char* field) const
 {
@@ -120,9 +113,8 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
   if (iter != cache_.end()) {
     return iter->second;
   }
-  ACE_Message_Block* const mb = serialized_->duplicate();
-  AMB_Releaser release(mb);
-  Serializer ser(mb, swap_,
+  Message_Block_Ptr mb (serialized_->duplicate());
+  Serializer ser(mb.get(), swap_,
                  cdr_ ? Serializer::ALIGN_CDR : Serializer::ALIGN_NONE);
   if (cdr_) {
     ser.skip(4); // CDR encapsulation header
@@ -240,10 +232,12 @@ namespace {
 
     Value eval(FilterEvaluator::DataForEval& data)
     {
-      return Value(data.params_[param_], true);
+      return Value(data.params_[static_cast<CORBA::ULong>(param_)], true);
     }
 
-    int param_;
+    size_t param() { return param_; }
+
+    size_t param_;
   };
 
   class Comparison : public FilterEvaluator::EvalNode {
@@ -489,7 +483,12 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
   } else if (node->TypeMatches<StrVal>()) {
     return new LiteralString(node);
   } else if (node->TypeMatches<ParamVal>()) {
-    return new Parameter(node);
+    Parameter* retval = new Parameter(node);
+    // Keep track of the highest parameter number
+    if (retval->param() + 1 > number_parameters_) {
+      number_parameters_ = retval->param() + 1;
+    }
+    return retval;
   } else if (node->TypeMatches<CallDef>()) {
     if (arity(node) == 1) {
       return walkOperand(child(node, 0));

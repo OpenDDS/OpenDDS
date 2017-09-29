@@ -8,8 +8,8 @@
 #ifndef OPENDDS_DCPS_QOS_HELPER_H
 #define OPENDDS_DCPS_QOS_HELPER_H
 
-#include "dds/DdsDcpsC.h"
-#include "ace/OS_NS_sys_time.h"
+#include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DCPS/Time_Helper.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -21,35 +21,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class Service_Participant;
-
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t);
-
-ACE_INLINE OpenDDS_Dcps_Export
-DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);
-
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
-
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
-                                               const ACE_Time_Value& now = ACE_OS::gettimeofday());
-
-ACE_INLINE OpenDDS_Dcps_Export
-DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv);
-
-ACE_INLINE OpenDDS_Dcps_Export
-DDS::Duration_t time_to_duration(const DDS::Time_t& t);
-
-/// Validate DDS::Duration_t value (infinite or positive and
-/// non-zero).
-ACE_INLINE OpenDDS_Dcps_Export
-bool valid_duration(DDS::Duration_t const & t);
-
-/// Check if given duration is either infinite or greater than or
-/// equal to zero.
-ACE_INLINE OpenDDS_Dcps_Export
-bool non_negative_duration(const DDS::Duration_t& t);
 
 /**
  * @class Qos_Helper
@@ -271,52 +242,6 @@ public:
   static bool copy_from_topic_qos(DDS::DataWriterQos& a_datareader_qos,
                                   const DDS::TopicQos& a_topic_qos);
 };
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator==(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator!=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
-#endif
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator<(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator<=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator>(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator>=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator!(const DDS::Time_t& t);
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator==(const DDS::Time_t& t1, const DDS::Time_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator!=(const DDS::Time_t& t1, const DDS::Time_t& t2);
-#endif
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator<(const DDS::Time_t& t1, const DDS::Time_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator<=(const DDS::Time_t& t1, const DDS::Time_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator>(const DDS::Time_t& t1, const DDS::Time_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 #ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export

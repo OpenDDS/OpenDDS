@@ -27,7 +27,7 @@
 #if defined (OPENDDS_HAS_VERSIONED_NAMESPACE) && OPENDDS_HAS_VERSIONED_NAMESPACE == 1
 
 # ifndef OPENDDS_VERSIONED_NAMESPACE_NAME
-#  include "dds/Version.h"
+#  include "Version.h"
 
 // Preprocessor symbols will not be expanded if they are
 // concatenated.  Force the preprocessor to expand them during the

@@ -12,6 +12,12 @@
 
 class TestCase : public TestBase {
 public:
+  TestCase()
+    : TestBase()
+    , publisher_()
+    , subscriber_()
+  {}
+
   virtual DDS::ReturnCode_t init_datareader(
     DDS::DataReaderQos& qos,
     DDS::DataReaderListener_ptr& listener,

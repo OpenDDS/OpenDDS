@@ -36,7 +36,6 @@ TopicImpl::TopicImpl(const RepoId                   topic_id,
     listener_mask_(mask),
     listener_(DDS::TopicListener::_duplicate(a_listener)),
     id_(topic_id),
-    entity_refs_(0),
     monitor_(0)
 {
   inconsistent_topic_status_.total_count = 0;
@@ -68,19 +67,17 @@ TopicImpl::set_qos(const DDS::TopicQos & qos)
 
     } else {
       qos_ = qos;
-      DomainParticipantImpl* part =
-        dynamic_cast<DomainParticipantImpl*>(this->participant_);
 
       Discovery_rch disco =
-        TheServiceParticipant->get_discovery(part->get_domain_id());
+        TheServiceParticipant->get_discovery(participant_->get_domain_id());
       const bool status =
-        disco->update_topic_qos(this->id_, part->get_domain_id(),
-                               part->get_id(), qos_);
+        disco->update_topic_qos(this->id_, participant_->get_domain_id(),
+                               participant_->get_id(), qos_);
 
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
-                          ACE_TEXT("failed on compatiblity check. \n")),
+                          ACE_TEXT("failed on compatibility check. \n")),
                          DDS::RETCODE_ERROR);
       }
     }
@@ -136,10 +133,7 @@ TopicImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  DomainParticipantImpl* part =
-    dynamic_cast<DomainParticipantImpl*>(this->participant_);
-
-  if (part->is_enabled() == false) {
+  if (!this->participant_->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 

@@ -10,7 +10,7 @@
 #include "RequestedDeadlineWatchdog.h"
 #include "DataReaderImpl.h"
 #include "DomainParticipantImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
 
@@ -20,14 +20,13 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
   OpenDDS::DCPS::DataReaderImpl * reader_impl,
-  DDS::DataReader_ptr reader,
   DDS::RequestedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
   : Watchdog(duration_to_time_value(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
   , reader_impl_(reader_impl)
-  , reader_(DDS::DataReader::_duplicate(reader))
+  , reader_(DDS::DataReader::_duplicate(reader_impl))
   , status_(status)
   , last_total_count_(last_total_count)
 {

@@ -14,7 +14,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <ace/streams.h>
 #include "ace/OS_NS_unistd.h"
@@ -30,7 +30,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs (argc, argv);
       DDS::DomainParticipant_var participant =
-        dpf->create_participant (411,
+        dpf->create_participant (111,
                                  PARTICIPANT_QOS_DEFAULT,
                                  DDS::DomainParticipantListener::_nil(),
                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -104,7 +104,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         }
 
         // Write samples using multiple threads.
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw_tmp.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw_tmp.in ()));
         if (!writer->start () || !writer->end ())
         {
           // Error logging performed in above method call.
@@ -202,7 +202,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         }
 
         // Write samples using multiple threads.
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dummy_dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dummy_dw.in ()));
         if (!writer->start () || !writer->end ())
         {
           // Error logging performed in above method call.

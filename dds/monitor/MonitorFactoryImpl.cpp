@@ -121,7 +121,7 @@ MonitorFactoryImpl::create_data_writer(DDS::DomainParticipant_ptr participant,
                               DDS::TopicListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(topic)) {
-    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::create_data_writer(): Failed to create topic, name = %s\n", topic_name));
+    ACE_DEBUG((LM_DEBUG, "MonitorFactoryImpl::create_data_writer(): Failed to create topic, name = %C\n", topic_name));
   }
   DDS::DataWriter_var writer =
     publisher->create_datawriter(topic.in(),

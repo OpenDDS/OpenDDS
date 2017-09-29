@@ -35,7 +35,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
-throw(CORBA::SystemException)
 {
 
   try {
@@ -101,7 +100,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
   const DDS::RequestedDeadlineMissedStatus & status)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_requested_deadline_missed(): ")
           ACE_TEXT(" handle %d total_count_change %d \n"),
@@ -111,7 +109,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_requested_incompatible_qos(
   DDS::DataReader_ptr,
   const DDS::RequestedIncompatibleQosStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
 }
@@ -119,7 +116,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus & status)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_liveliness_changed(): ")
           ACE_TEXT(" last pub handle %d alive_count %d change %d; not_alive_count %d change %d \n"),
@@ -131,7 +127,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus &)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
 }
@@ -139,7 +134,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_sample_rejected(
   DDS::DataReader_ptr,
   const DDS::SampleRejectedStatus&)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
 }
@@ -147,7 +141,6 @@ throw(CORBA::SystemException)
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
-throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
@@ -156,7 +149,7 @@ bool
 DataReaderListenerImpl::verify (const Messenger::Message& msg)
 {
   if (msg.subject_id != msg.count % 2) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
         "(%P|%t) ERROR: subject id %d not count mod 2",
         msg.subject_id));
     return false;
@@ -171,7 +164,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
   {
     // strength should be not be less then before
     if (msg.strength < previous_strength) {
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
         "(%P|%t) ERROR: strength %d less than prev %d\n",
         msg.strength, previous_strength));
       // record the strength of writer that sample is from.
@@ -184,7 +177,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
   {
     ACE_Time_Value now = ACE_OS::gettimeofday();
     if (msg.count == 5 && msg.strength != 12) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: count is %d while strength is %d\n",
           msg.count, msg.strength));
       return false;
@@ -194,7 +187,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
     }
 
     if (msg.count == 6 && msg.strength != 12) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: count is %d while strength is %d\n",
           msg.count, msg.strength));
       return false;
@@ -204,7 +197,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
     }
 
     if (now < end_missing_ && now > start_missing_ && msg.strength != 10) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: now < end_missing, > start_missing with stength %d\n",
           msg.strength));
       return false;
@@ -219,7 +212,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
 
     // strength should not be less then before
     if ((! result_verify_complete_) && (msg.strength < previous_strength)) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: !result_verify_complete_ and strength %d less than prev %d\n",
           msg.strength, previous_strength));
       return false;
@@ -232,7 +225,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
       this->result_verify_complete_ = true;
 
       if (msg.strength != 15) {
-        ACE_DEBUG((LM_ERROR,
+        ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: owner complete while strength is %d\n",
           msg.strength));
         return false;

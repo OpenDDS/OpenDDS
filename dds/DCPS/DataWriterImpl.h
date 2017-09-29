@@ -20,10 +20,12 @@
 #include "Definitions.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "RcEventHandler.h"
+#include "unique_ptr.h"
+#include "Message_Block_Ptr.h"
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"
@@ -202,15 +204,14 @@ public:
   /**
    * Initialize the data members.
    */
-  virtual void init(
+  void init(
     DDS::Topic_ptr                        topic,
     TopicImpl*                            topic_servant,
     const DDS::DataWriterQos &            qos,
     DDS::DataWriterListener_ptr           a_listener,
     const DDS::StatusMask &               mask,
     OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
-    OpenDDS::DCPS::PublisherImpl*         publisher_servant,
-    DDS::DataWriter_ptr                   dw_local);
+    OpenDDS::DCPS::PublisherImpl*         publisher_servant);
 
   void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
 
@@ -222,7 +223,7 @@ public:
   DDS::ReturnCode_t
   register_instance_i(
     DDS::InstanceHandle_t& handle,
-    DataSample* data,
+    Message_Block_Ptr data,
     const DDS::Time_t& source_timestamp);
 
   /**
@@ -232,7 +233,7 @@ public:
   DDS::ReturnCode_t
   register_instance_from_durable_data(
     DDS::InstanceHandle_t& handle,
-    DataSample* data,
+    Message_Block_Ptr data,
     const DDS::Time_t & source_timestamp);
 
   /**
@@ -258,7 +259,7 @@ public:
    *        associated reader RepoIds that should NOT get the
    *        data sample due to content filtering.
    */
-  DDS::ReturnCode_t write(DataSample* sample,
+  DDS::ReturnCode_t write(Message_Block_Ptr sample,
                           DDS::InstanceHandle_t handle,
                           const DDS::Time_t& source_timestamp,
                           GUIDSeq* filter_out);
@@ -314,7 +315,7 @@ public:
    * This is called by transport to notify that the control
    * message is delivered.
    */
-  void control_delivered(ACE_Message_Block* sample);
+  void control_delivered(const Message_Block_Ptr& sample);
 
   /// Does this writer have samples to be acknowledged?
   bool should_ack() const;
@@ -340,11 +341,6 @@ public:
 #endif
 
   /**
-   * Accessor of the associated topic name.
-   */
-  const char* get_topic_name();
-
-  /**
    * Get associated topic type name.
    */
   char const* get_type_name() const;
@@ -361,7 +357,7 @@ public:
    * This is called by transport to notify that the control
    * message is dropped.
    */
-  void control_dropped(ACE_Message_Block* sample,
+  void control_dropped(const Message_Block_Ptr& sample,
                        bool dropped_by_transport);
 
   /**
@@ -373,15 +369,6 @@ public:
   ACE_Recursive_Thread_Mutex& get_lock() {
     return data_container_->lock_;
   }
-
-  /**
-   * This method is called when an instance is unregistered from
-   * the WriteDataContainer.
-   *
-   * The subclass must provide the implementation to unregister
-   * the instance from its own map.
-   */
-  virtual void unregistered(DDS::InstanceHandle_t instance_handle) = 0;
 
   /**
    * This is used to retrieve the listener for a certain status
@@ -437,10 +424,10 @@ public:
    * data block and header.
    */
   DDS::ReturnCode_t
-  create_sample_data_message(DataSample* data,
+  create_sample_data_message(Message_Block_Ptr data,
                              DDS::InstanceHandle_t instance_handle,
                              DataSampleHeader& header_data,
-                             ACE_Message_Block*& message,
+                             Message_Block_Ptr& message,
                              const DDS::Time_t& source_timestamp,
                              bool content_filter);
 
@@ -541,13 +528,7 @@ protected:
   };
 
   virtual SendControlStatus send_control(const DataSampleHeader& header,
-                                         ACE_Message_Block* msg/*,
-                                         void* extra = 0*/);
-
-  /**
-   * Answer if transport of all control messages is pending.
-   */
-  bool pending_control();
+                                         Message_Block_Ptr msg);
 
 private:
 
@@ -567,14 +548,14 @@ private:
   ACE_Message_Block*
   create_control_message(MessageId message_id,
                          DataSampleHeader& header,
-                         ACE_Message_Block* data,
+                         Message_Block_Ptr data,
                          const DDS::Time_t& source_timestamp);
 
   /// Send the liveliness message.
   bool send_liveliness(const ACE_Time_Value& now);
 
   /// Lookup the instance handles by the subscription repo ids
-  bool lookup_instance_handles(const ReaderIdSeq& ids,
+  void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
   const RepoId& get_repo_id() const {
@@ -610,8 +591,6 @@ private:
   DDS::DomainId_t                 domain_id_;
   /// The publisher servant which creates this datawriter.
   PublisherImpl*                  publisher_servant_;
-  /// the object reference of the local datawriter
-  DDS::DataWriter_var             dw_local_objref_;
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.
@@ -683,9 +662,6 @@ private:
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
   bool                       is_bit_;
-
-  /// Flag indicates that the init() is called.
-  bool                       initialized_;
 
   RepoIdSet pending_readers_, assoc_complete_readers_;
 

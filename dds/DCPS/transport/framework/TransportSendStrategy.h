@@ -141,6 +141,7 @@ public:
   // this method and return the peer handle.
   virtual ACE_HANDLE get_handle();
 
+  void deliver_ack_request(TransportQueueElement* element);
 protected:
 
   TransportSendStrategy(std::size_t id,
@@ -292,7 +293,7 @@ protected:
 
 private:
 
-  virtual void marshal_transport_header(ACE_Message_Block* mb);
+  virtual bool marshal_transport_header(ACE_Message_Block* mb);
 
   /// Helper function to debugging.
   static const char* mode_as_str(SendMode mode);

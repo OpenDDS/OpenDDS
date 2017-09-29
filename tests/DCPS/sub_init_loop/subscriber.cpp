@@ -72,7 +72,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
 
       participant =
-        dpf->create_participant(411,
+        dpf->create_participant(111,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -82,7 +82,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                           , -1);
       }
 
-      MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl;
+      MessageTypeSupportImpl::_var_type mts_servant = new MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                         "")) {

@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_TRANSPORTRETAINEDELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 #include "TransportQueueElement.h"
 #include "ace/Synch_Traits.h"
 
@@ -56,7 +57,7 @@ protected:
 
 private:
   /// Sample data, if any.
-  ACE_Message_Block* msg_;
+  Message_Block_Ptr msg_;
 
   /// Originating publication Id, if any.
   RepoId publication_id_;

@@ -10,7 +10,6 @@
 
 #include "ace/CDR_Base.h"
 #include "ace/CDR_Stream.h"
-
 #include "tao/String_Alloc.h"
 
 #include "dcps_export.h"
@@ -18,6 +17,8 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "dds/DCPS/Definitions.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -86,12 +87,12 @@ public:
   bool good_bit() const;
 
   /// Read a narrow string.
-  void read_string(ACE_CDR::Char*& dest,
+  size_t read_string(ACE_CDR::Char*& dest,
     ACE_CDR::Char* str_alloc(ACE_CDR::ULong) = CORBA::string_alloc,
     void str_free(ACE_CDR::Char*) = CORBA::string_free);
 
   /// Read a wide string.
-  void read_string(ACE_CDR::WChar*& dest,
+  size_t read_string(ACE_CDR::WChar*& dest,
     ACE_CDR::WChar* str_alloc(ACE_CDR::ULong) = CORBA::wstring_alloc,
     void str_free(ACE_CDR::WChar*) = CORBA::wstring_free);
 
@@ -182,6 +183,15 @@ public:
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
 
+#ifndef OPENDDS_SAFETY_PROFILE
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, const std::string& x);
+#ifdef DDS_HAS_WCHAR
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, const std::wstring& x);
+#endif /* DDS_HAS_WCHAR */
+#endif /* !OPENDDS_SAFETYP_PROFILE */
+
   // Extraction operators.
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_CDR::Char& x);
@@ -221,6 +231,15 @@ public:
   bool operator>>(Serializer& s, ACE_InputCDR::to_string x);
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, std::string& x);
+#ifdef DDS_HAS_WCHAR
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, std::wstring& x);
+#endif /* DDS_HAS_WCHAR */
+#endif /* !OPENDDS_SAFETY_PROFILE */
 
   /// Read from the chain into a destination buffer.
   // This method doesn't respect alignment, so use with care.

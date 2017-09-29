@@ -29,7 +29,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(411,
+      dpf->create_participant(111,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -38,7 +38,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1;
     }
 
-    MessageTypeSupportImpl* servant = new MessageTypeSupportImpl;
+    MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl;
 
     if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
       cerr << "register_type failed." << endl;

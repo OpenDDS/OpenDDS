@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "ReceivedDataElementList.h"
 #include "ReceivedDataStrategy.h"
 #include "GuidUtils.h"

@@ -132,9 +132,10 @@ public:
 
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
+    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
+    DDS::ConditionSeq conditions;
 
     while (true) {
-      DDS::PublicationMatchedStatus matches;
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
@@ -147,7 +148,6 @@ public:
         break;
       }
 
-      DDS::ConditionSeq conditions;
       DDS::Duration_t timeout = { 60, 0 };
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -157,7 +157,6 @@ public:
       }
     }
 
-    ws->detach_condition(condition);
 
     // Write samples
     TestMsg message;
@@ -173,12 +172,20 @@ public:
       }
     }
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is waiting for acknowledgements\n", writers_[thread_id].c_str()));
-    DDS::Duration_t timeout = { 30, 0 };
-    message_writer->wait_for_acknowledgments(timeout);
-    // With static discovery, it's not an error for wait_for_acks to fail
-    // since the peer process may have terminated before sending acks.
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is done\n", writers_[thread_id].c_str()));
+    while (true) {
+      ACE_OS::sleep(1);
+      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_publication_matched_status failed!\n")),
+                         -1);
+      }
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) matches.current_count = %d\n", matches.current_count));
+      if (matches.current_count == 0) {
+        break;
+      }
+    }
+    ws->detach_condition(condition);
 
     return 0;
   }
@@ -331,11 +338,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, n_msgs, reader_done_callback, check_bits));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, n_msgs, reader_done_callback, subscriber.in(), check_bits));
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
         dynamic_cast<DataReaderListenerImpl*>(listener.in());
+
+      if (!listener_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
+      }
+
       DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
       DDS::DataReader_var bitdr =
         builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
@@ -375,7 +389,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     WriterTask task(writers, participant, topic, reliable, total_readers);
     task.activate(DEFAULT_FLAGS, static_cast<int>(writers.size()));
-    task.wait();
 
     if (!reliable)
       ACE_OS::sleep(10);
@@ -384,6 +397,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       while (readers_done != static_cast<int>(readers.size()))
         readers_done_cond.wait();
     }
+
+    task.wait();
 
     if (built_in_read_errors) {
       ACE_ERROR_RETURN((LM_ERROR,

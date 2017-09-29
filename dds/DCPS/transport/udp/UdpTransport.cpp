@@ -55,7 +55,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
     return link;
   }
 
-  ACE_DEBUG((LM_ERROR,
+  ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: ")
               ACE_TEXT("UdpTransport::make_datalink: ")
               ACE_TEXT("failed to open DataLink!\n")));
@@ -212,9 +212,9 @@ UdpTransport::get_connection_addr(const TransportBLOB& data) const
   const char* buffer = reinterpret_cast<const char*>(data.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);
-  cdr >> network_address;
-
-  network_address.to_addr(local_address);
+  if (cdr >> network_address) {
+    network_address.to_addr(local_address);
+  }
 
   return local_address;
 }
@@ -244,7 +244,7 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
   NetworkAddress network_order_address;
   ACE_InputCDR cdr((const char*)remote.get_buffer(), remote.length());
 
-  if ((cdr >> network_order_address) == 0) {
+  if (!(cdr >> network_order_address)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: UdpTransport::blob_to_key")
                ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
@@ -259,12 +259,12 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
 
 void
 UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
-                                 ACE_Message_Block* data)
+                                 const Message_Block_Ptr& data)
 {
   CORBA::ULong octet_size =
     static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
   Priority priority;
-  Serializer serializer(data);
+  Serializer serializer(data.get());
   serializer >> priority;
   TransportBLOB blob(octet_size);
   blob.length(octet_size);

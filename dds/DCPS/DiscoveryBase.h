@@ -308,7 +308,7 @@ namespace OpenDDS {
                 top_it->second.endpoints_.erase(publicationId);
               }
             } else {
-            ACE_DEBUG((LM_ERROR,
+            ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: EndpointManager::remove_publication - ")
                        ACE_TEXT("Failed to publish dispose msg\n")));
           }
@@ -377,7 +377,7 @@ namespace OpenDDS {
               top_it->second.endpoints_.erase(subscriptionId);
             }
           } else {
-            ACE_DEBUG((LM_ERROR,
+            ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: EndpointManager::remove_subscription - ")
                        ACE_TEXT("Failed to publish dispose msg\n")));
           }
@@ -472,7 +472,7 @@ namespace OpenDDS {
         assign(guid.entityId.entityKey, topic_counter_++);
 
         if (topic_counter_ == 0x1000000) {
-          ACE_DEBUG((LM_ERROR,
+          ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: EndpointManager::make_topic_guid: ")
                      ACE_TEXT("Exceeded Maximum number of topic entity keys!")
                      ACE_TEXT("Next key will be a duplicate!\n")));
@@ -968,7 +968,7 @@ namespace OpenDDS {
       {
         if (std::strlen(topicName) > 256 || std::strlen(dataTypeName) > 256) {
           if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR LocalParticipant::assert_topic() - ")
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR LocalParticipant::assert_topic() - ")
                        ACE_TEXT("topic or type name length limit (256) exceeded\n")));
           }
           return DCPS::PRECONDITION_NOT_MET;
@@ -1183,6 +1183,15 @@ namespace OpenDDS {
           participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
         create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                       sub, dr_qos);
+
+        const DDS::ReturnCode_t ret = bit_subscriber->enable();
+        if (ret != DDS::RETCODE_OK) {
+          if (DCPS_debug_level) {
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
+                       ACE_TEXT(" - Error %d enabling subscriber\n"), ret));
+          }
+          return 0;
+        }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
@@ -1506,8 +1515,7 @@ namespace OpenDDS {
         DDS::DataReader_var dr = type_support->create_datareader();
         OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
 
-        dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/,
-                  participant_i, sub, dr);
+        dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/, participant_i, sub);
         dri->disable_transport();
         dri->enable();
       }

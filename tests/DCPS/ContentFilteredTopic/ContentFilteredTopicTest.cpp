@@ -6,6 +6,8 @@
 #include "dds/DCPS/SubscriberImpl.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
@@ -95,9 +97,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample = {0, 0};
-  mdw->write(sample, HANDLE_NIL); // durable, filtered
+  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false; // durable, filtered
   sample.key = 99;
-  mdw->write(sample, HANDLE_NIL); // durable, not filtered
+  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false; // durable, not filtered
+
   DataWriter_var dw2 =
     pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
 
@@ -109,6 +112,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   dr_qos_durable.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
     "MyTopic-Filtered", topic, "key > 1", StringSeq());
+  if (!cft) {
+    cout << "ERROR: creating cft failed" << endl;
+    return false;
+  }
   DataReader_var dr =
     sub->create_datareader(cft, dr_qos_durable, 0, DEFAULT_STATUS_MASK);
   TopicDescription_var td = dr->get_topicdescription();
@@ -122,8 +129,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   DataReader_var sub2_dr =
     sub2->create_datareader(cft, dr_qos, 0, DEFAULT_STATUS_MASK);
+  DDS::StringSeq mytopicfiltered2_params(1);
+  mytopicfiltered2_params.length(1);
   ContentFilteredTopic_var cft2 = dp->create_contentfilteredtopic(
-    "MyTopic-Filtered2", topic, "key > %0", StringSeq());
+    "MyTopic-Filtered2", topic, "key > %0", mytopicfiltered2_params);
   DataReader_var sub2_dr2 =
     sub2->create_datareader(cft2, dr_qos, 0, DEFAULT_STATUS_MASK);
   const int N_MATCHES = 4; // each writer matches 4 readers
@@ -137,7 +146,9 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
          && status.current_count < N_MATCHES) {
     ConditionSeq active;
-    ws->wait(active, infinite);
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
 
@@ -149,10 +160,45 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
+  // Create a cft where the parameter sequence doesn't match the size
+  DDS::StringSeq paramssize(2);
+  paramssize.length(2);
+  ContentFilteredTopic_var cft3 = dp->create_contentfilteredtopic(
+    "MyTopic-Filtered3", topic, "key > %0", paramssize);
+  if (cft3) {
+    cout << "ERROR: creating cft3 with invalid parameter size should fail"
+         << endl;
+    return false;
+  }
+
+  // Try to set expression parameters that have a parameter too much
+  // compared to the expression, this should fail
+  DDS::StringSeq params_large(2);
+  params_large.length(2);
+  params_large[0] = "2";
+  params_large[1] = "2";
+  if (cft2->set_expression_parameters(params_large) != RETCODE_ERROR) {
+    cout << "ERROR: setting too much parameters should return an error"
+         << endl;
+    return false;
+  }
+
+  DDS::StringSeq params_empty(0);
+  params_empty.length(0);
+  if (cft2->set_expression_parameters(params_empty) != RETCODE_ERROR) {
+    cout << "ERROR: setting empty parameters should return an error"
+         << endl;
+    return false;
+  }
+
   DDS::StringSeq params(1);
   params.length(1);
   params[0] = "2";
-  cft2->set_expression_parameters(params);
+  if (cft2->set_expression_parameters(params) != RETCODE_OK) {
+    cout << "ERROR: setting expression parameters failed"
+         << endl;
+    return false;
+  }
 
   for (sample.key = 1; sample.key < 4; ++sample.key) {
     if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
@@ -257,14 +303,17 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
   while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
          && status.current_count < 1) {
     ConditionSeq active;
-    ws->wait(active, infinite);
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample = {0, INT64_LITERAL_SUFFIX(1485441228338)};
-  for (; sample.key < 3; ++sample.key, ++sample.ull)
-    mdw->write(sample, HANDLE_NIL);
+  for (; sample.key < 3; ++sample.key, ++sample.ull) {
+    if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+  }
 
   if (!waitForSample(dr)) return false;
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
@@ -335,7 +384,20 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = run_test(argc, argv);
+  int ret = EXIT_FAILURE;
+  try
+  {
+    ret = run_test(argc, argv);
+  }
+  catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in ContentFilteredTopicTest.cpp:");
+    return 1;
+  }
+  catch (const OpenDDS::DCPS::Transport::MiscProblem&)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
+  }
 
   // cleanup
   TheServiceParticipant->shutdown();

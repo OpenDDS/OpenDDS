@@ -15,6 +15,7 @@
 template<typename Writer>
 TestPublisher<Writer>::TestPublisher(TestBase& test)
 : test_(test)
+, writer_i_()
 {
 }
 
@@ -149,9 +150,6 @@ TestPublisher<Writer>::init_i()
                ACE_TEXT(" _narrow failed!\n")));
     ACE_OS::exit(-1);
   }
-  // narrow added ref, but we already have a var for writer_
-  // so create a temporary var to remove the extra ref
-  DDS::DataWriter_var cleanup_narrow_ref = this->writer_i_;
 }
 
 template<typename Writer>
@@ -237,6 +235,7 @@ TestPublisher<Writer>::create_datawriter()
 template<typename Reader>
 TestSubscriber<Reader>::TestSubscriber(TestBase& test)
 : test_(test)
+, reader_i_()
 {
 }
 
@@ -459,7 +458,7 @@ TestSubscriber<Reader>::take_instance(
 {
   return reader_i_->take_instance(
     messages, si, max_samples, handle,
-    sample_states, view_states, instance_states);;
+    sample_states, view_states, instance_states);
 }
 
 template<typename Reader>

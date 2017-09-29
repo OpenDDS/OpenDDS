@@ -60,6 +60,19 @@ DCPS_IR_Domain::DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerato
 
 DCPS_IR_Domain::~DCPS_IR_Domain()
 {
+
+
+  for (DCPS_IR_Topic_Description_Set::iterator itr = topicDescriptions_.begin(); itr != topicDescriptions_.end(); ++ itr) {
+    delete *itr;
+  }
+
+  for (DCPS_IR_Participant_Map::iterator where = this->participants_.begin(); where != this->participants_.end(); ++where) {
+    delete where->second;
+  }
+
+  for (IdToTopicMap::iterator itr = idToTopicMap_.begin(); itr != idToTopicMap_.end(); ++ itr) {
+    delete itr->second;
+  }
 }
 
 const DCPS_IR_Participant_Map&
@@ -1018,6 +1031,7 @@ DCPS_IR_Domain::last_participant_key(long key)
   this->participantIdGenerator_.last(key);
 }
 
+#if !defined (DDS_HAS_MINIMUM_BIT)
 namespace {
   void get_BuiltinTopicKey(DDS::BuiltinTopicKey_t& key,
                            const OpenDDS::DCPS::RepoId& id)
@@ -1028,6 +1042,7 @@ namespace {
     key.value[2] = c.entityId();
   }
 }
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 {

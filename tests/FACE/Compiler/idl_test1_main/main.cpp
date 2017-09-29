@@ -4,6 +4,7 @@
 
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 
 #include <map>
 #include <cstring>
@@ -133,12 +134,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   fwddeclstructs.length(2);
   fwddeclstructs[0].v1 = -5;
   fwddeclstructs[1].v1 = 43;
-  ACE_Message_Block* b = new ACE_Message_Block( 100000) ;
-  OpenDDS::DCPS::Serializer serializer( b, false) ;
+  OpenDDS::DCPS::Message_Block_Ptr b (new ACE_Message_Block( 100000)) ;
+  OpenDDS::DCPS::Serializer serializer( b.get(), false) ;
 
   serializer << fwddeclstructs;
 
-  OpenDDS::DCPS::Serializer deserializer( b, false) ;
+  OpenDDS::DCPS::Serializer deserializer( b.get(), false) ;
   N1::FwdDeclSameNamespaceStructs fwddeclstructs2;
   deserializer >> fwddeclstructs2;
 
@@ -166,12 +167,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   fwddeclstructs.length(2);
   fwddeclstructs[0].v1 = -5;
   fwddeclstructs[1].v1 = 43;
-  ACE_Message_Block* b = new ACE_Message_Block( 100000) ;
-  OpenDDS::DCPS::Serializer serializer( b, false) ;
+  OpenDDS::DCPS::Message_Block_Ptr b (new ACE_Message_Block( 100000)) ;
+  OpenDDS::DCPS::Serializer serializer( b.get(), false) ;
 
   serializer << fwddeclstructs;
 
-  OpenDDS::DCPS::Serializer deserializer( b, false) ;
+  OpenDDS::DCPS::Serializer deserializer( b.get(), false) ;
   N2::FwdDeclDiffNamespaceStructs fwddeclstructs2;
   deserializer >> fwddeclstructs2;
 
@@ -477,7 +478,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (failed)
     ACE_ERROR((LM_ERROR, "%s FAILED!\n", argv[0]));
   else
-    ACE_DEBUG((LM_ERROR, "%s PASSED\n", argv[0]));
+    ACE_ERROR((LM_ERROR, "%s PASSED\n", argv[0]));
 
   return failed; // let the test framework know it failed
 }

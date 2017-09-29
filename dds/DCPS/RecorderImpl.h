@@ -138,14 +138,14 @@ public:
 
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
-  void remove_or_reschedule(const PublicationId& pub_id);
+  void remove_publication(const PublicationId& pub_id);
 
 private:
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 
   /// Lookup the instance handles by the publication repo ids
-  bool lookup_instance_handles(const WriterIdSeq&      ids,
+  void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
   void _add_ref() { EntityImpl::_add_ref(); }

@@ -242,7 +242,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                           sample.header_.source_timestamp_nanosec_,
                           sample.header_.publication_id_,
                           sample.header_.byte_order_,
-                          sample.sample_);
+                          sample.sample_.get());
 
   if (listener_.in()) {
     listener_->on_sample_data_received(this, rawSample);
@@ -389,7 +389,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
 
     if (!this->associate(data, active)) {
       if (DCPS_debug_level) {
-        ACE_DEBUG((LM_ERROR,
+        ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
                    ACE_TEXT("ERROR: transport layer failed to associate.\n")));
       }
@@ -565,7 +565,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
-            it->second->active(TheServiceParticipant->pending_timeout())) {
+            it->second->active()) {
           remove_association_sweeper_->schedule_timer(it->second, notify_lost);
         } else {
           push_back(non_active_writers, writer_id);
@@ -579,7 +579,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
 }
 
 void
-RecorderImpl::remove_or_reschedule(const PublicationId& pub_id)
+RecorderImpl::remove_publication(const PublicationId& pub_id)
 {
   ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
   WriterMapType::iterator where = writers_.find(pub_id);
@@ -588,13 +588,8 @@ RecorderImpl::remove_or_reschedule(const PublicationId& pub_id)
     WriterIdSeq writers;
     push_back(writers, pub_id);
     bool notify = info.notify_lost_;
-    if (info.removal_deadline_ < ACE_OS::gettimeofday()) {
-      write_guard.release();
-      remove_associations_i(writers, notify);
-    } else {
-      write_guard.release();
-      remove_associations(writers, notify);
-    }
+    write_guard.release();
+    remove_associations_i(writers, notify);
   }
 }
 
@@ -674,13 +669,8 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
   if (!is_bit_) {
     // The writer should be in the id_to_handle map at this time.  Note
     // it if it not there.
-    if (this->lookup_instance_handles(updated_writers, handles) == false) {
-      if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
-                   ACE_TEXT("lookup_instance_handles failed.\n")));
-      }
-    }
+    this->lookup_instance_handles(updated_writers, handles);
+
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
       id_to_handle_map_.erase(updated_writers[i]);
     }
@@ -800,7 +790,7 @@ RecorderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   requested_incompatible_qos_status_.policies = status.policies;
 
   // if (!CORBA::is_nil(listener.in())) {
-  //   listener->on_requested_incompatible_qos(dr_local_objref_.in(),
+  //   listener->on_requested_incompatible_qos(this,
   //                                           requested_incompatible_qos_status_);
   //
   //   // TBD - why does the spec say to change total_count_change but not
@@ -935,16 +925,17 @@ RecorderImpl::get_listener()
   return listener_;
 }
 
-bool
+void
 RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
                                       DDS::InstanceHandleSeq & hdls)
 {
+  CORBA::ULong const num_wrts = ids.length();
+
   if (DCPS_debug_level > 9) {
-    CORBA::ULong const size = ids.length();
     OPENDDS_STRING separator = "";
     OPENDDS_STRING buffer;
 
-    for (unsigned long i = 0; i < size; ++i) {
+    for (CORBA::ULong i = 0; i < num_wrts; ++i) {
       buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
@@ -955,14 +946,11 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
                buffer.c_str()));
   }
 
-  CORBA::ULong const num_wrts = ids.length();
   hdls.length(num_wrts);
 
   for (CORBA::ULong i = 0; i < num_wrts; ++i) {
     hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
-
-  return true;
 }
 
 DDS::ReturnCode_t

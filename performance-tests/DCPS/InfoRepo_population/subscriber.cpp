@@ -16,7 +16,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
@@ -31,7 +31,7 @@ class Subscriber
 public:
   typedef std::string InitError;
 
-  Subscriber (int argc, ACE_TCHAR *argv[]) throw (InitError);
+  Subscriber (int argc, ACE_TCHAR *argv[]);
 
   bool run ();
 
@@ -53,7 +53,7 @@ private:
   std::vector<DDS::Subscriber_var> subs_;
   std::vector<DDS::DataReader_var> dr_;
 
-  OpenDDS::DCPS::scoped_ptr<SyncClientExt_i> sync_client_;
+  OpenDDS::DCPS::unique_ptr<SyncClientExt_i> sync_client_;
 };
 
 
@@ -102,7 +102,7 @@ Subscriber::parse_args (int argc, ACE_TCHAR *argv[])
   return true;
 }
 
-Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (Subscriber::InitError)
+Subscriber::Subscriber (int argc, ACE_TCHAR *argv[])
   : topic_count_ (1), participant_count_ (1), reader_count_(1)
   , control_file_ ("barrier_file"), publisher_count_ (1)
 {
@@ -144,7 +144,7 @@ Subscriber::Subscriber (int argc, ACE_TCHAR *argv[]) throw (Subscriber::InitErro
 bool
 Subscriber::run (void)
 {
-  ::DDS::DomainId_t domain_id = 411;
+  ::DDS::DomainId_t domain_id = 111;
 
   try
     {

@@ -27,6 +27,8 @@
 #include <vector>
 #include <cstring>
 
+#include "../DCPS/RestoreOutputStreamState.h"
+
 class dds_generator {
 public:
   virtual ~dds_generator() = 0;
@@ -329,43 +331,8 @@ namespace AstTypeClassification {
 
 struct NestedForLoops {
   NestedForLoops(const char* type, const char* prefix, AST_Array* arr,
-                 std::string& indent, bool followTypedefs = false)
-    : n_(arr->n_dims()), indent_(indent)
-  {
-    std::ostringstream index_oss;
-    size_t i = 0, j = 0;
-    while (true) {
-      for (; i < n_; ++i) {
-        be_global->impl_ <<
-          indent << "for (" << type << ' ' << prefix << i << " = 0; " <<
-          prefix << i << " < " << arr->dims()[i - j]->ev()->u.ulval << "; ++" <<
-          prefix << i << ") {\n";
-        indent += "  ";
-        index_oss << "[" << prefix << i << "]";
-      }
-      if (!followTypedefs) {
-        break;
-      }
-      AST_Type* const base =
-        AstTypeClassification::resolveActualType(arr->base_type());
-      if (base->node_type() == AST_Decl::NT_array) {
-        arr = AST_Array::narrow_from_decl(base);
-        n_ += arr->n_dims();
-        j = i;
-      } else {
-        break;
-      }
-    }
-    index_ = index_oss.str();
-  }
-
-  ~NestedForLoops()
-  {
-    for (size_t i = 0; i < n_; ++i) {
-      indent_.resize(indent_.size() - 2);
-      be_global->impl_ << indent_ << "}\n";
-    }
-  }
+                 std::string& indent, bool followTypedefs = false);
+  ~NestedForLoops();
 
   size_t n_;
   std::string& indent_;
@@ -428,21 +395,11 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
   return e.replace(colon + 2, std::string::npos, label);
 }
 
-struct RestoreOutputStreamState {
-  explicit RestoreOutputStreamState(std::ostream& o)
-    : os_(o), state_(o.flags()) {}
-  ~RestoreOutputStreamState() {
-    os_.flags(state_);
-  }
-  std::ostream& os_;
-  std::ios_base::fmtflags state_;
-};
-
 inline
 std::ostream& operator<<(std::ostream& o,
                          const AST_Expression::AST_ExprValue& ev)
 {
-  RestoreOutputStreamState ross(o);
+  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return o << static_cast<int>(ev.u.oval);

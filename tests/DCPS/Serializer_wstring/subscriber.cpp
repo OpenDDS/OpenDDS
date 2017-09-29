@@ -33,7 +33,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     dpf = TheParticipantFactoryWithArgs(argc, argv);
     participant =
-      dpf->create_participant(411,
+      dpf->create_participant(111,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -42,7 +42,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1 ;
     }
 
-    MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl;
+    MessageTypeSupportImpl::_var_type mts_servant = new MessageTypeSupportImpl;
 
     if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
                                                       "")) {
@@ -84,6 +84,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     DataReaderListenerImpl* listener_servant =
       dynamic_cast<DataReaderListenerImpl*>(listener.in());
+
+    if (!listener_servant) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("%N:%l main()")
+        ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
+    }
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;

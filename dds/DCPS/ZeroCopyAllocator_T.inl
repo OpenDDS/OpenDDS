@@ -13,6 +13,7 @@ namespace DCPS {
 template<class T, std::size_t N> ACE_INLINE
 FirstTimeFastAllocator<T, N>::FirstTimeFastAllocator()
   : firstTime_(true)
+  , pool_()
 {
 }
 

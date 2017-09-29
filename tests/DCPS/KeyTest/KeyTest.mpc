@@ -5,7 +5,7 @@ project(DDS*idl): dcps_test_lib {
   dcps_ts_flags += -Wb,export_macro=KeyTest_Export
   dynamicflags  += KEYTEST_BUILD_DLL
 
-  specific (vc9, vc10, vc11, vc12, vc14, nmake) {
+  specific (vc9, vc10, vc11, vc12, vc14, vs2017, nmake) {
     compile_flags += /bigobj
   }
 

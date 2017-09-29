@@ -86,7 +86,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
     ACE_TCHAR str[64];
     conf->group_address_.addr_to_string(str,
                                         sizeof(str)/sizeof(str[0]));
-    ACE_DEBUG((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: ")
                     ACE_TEXT("MulticastTransport::make_datalink: ")
                     ACE_TEXT("failed to join multicast group: %s!\n"),
@@ -145,7 +145,7 @@ get_remote_reliability(const TransportImpl::RemoteTransport& remote)
   NetworkAddress network_address;
   ACE_CDR::Boolean reliable;
 
-  size_t len = remote.blob_.length();
+  const size_t len = remote.blob_.length();
   const char* buffer = reinterpret_cast<const char*>(remote.blob_.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);

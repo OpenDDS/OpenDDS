@@ -80,14 +80,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     int error;
     if ((error = parse_args(argc, argv)) != 0) {
-      ACE_DEBUG((LM_ERROR, "(%P|%t) Parsing error, returning %d\n", error));
+      ACE_ERROR((LM_ERROR, "(%P|%t) Parsing error, returning %d\n", error));
       return error;
     }
 
     {  // Scope of entities
       // Create DomainParticipant
       participant =
-        dpf->create_participant(411,
+        dpf->create_participant(111,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);

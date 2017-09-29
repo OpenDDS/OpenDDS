@@ -1,10 +1,6 @@
 //========================================================
 /**
- *
  *  @file sample_pub.cpp
- *
- *  @Id: sample_pub.cpp v1.1
- *
  */
 //========================================================
 
@@ -71,7 +67,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
        bool useTCP = true;
        bool useZeroCopyRead = false;
-       DomainId_t myDomain = 411;
+       DomainId_t myDomain = 111;
 
 #ifndef _WIN32_WCE
        std::setbuf (stdout, NULL);

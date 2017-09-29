@@ -14,6 +14,7 @@
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "ace/Synch_Traits.h"
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -24,6 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+typedef ACE_UINT16 CoherencyGroup;
 
 /**
   * @class PublicationInstance
@@ -36,10 +38,10 @@ namespace DCPS {
   */
 struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject<ACE_SYNCH_MUTEX> {
 
-  PublicationInstance(DataSample* registered_sample)
+  PublicationInstance(Message_Block_Ptr registered_sample)
     : sequence_(),
       group_id_(0),
-      registered_sample_(registered_sample),
+      registered_sample_(registered_sample.release()),
       unregistered_(false),
       instance_handle_(0),
       deadline_timer_id_(-1),
@@ -47,10 +49,6 @@ struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject<ACE_SYNCH_MUTE
   }
 
   ~PublicationInstance() {
-    // Release will decrement the reference count and
-    // the sample data is released when the reference
-    // count is 0.
-    registered_sample_->release();
   }
 
   /// The sequence number.
@@ -60,7 +58,7 @@ struct OpenDDS_Dcps_Export PublicationInstance  : public RcObject<ACE_SYNCH_MUTE
   CoherencyGroup   group_id_ ;
 
   /// The sample data for registration.
-  DataSample*      registered_sample_;
+  Message_Block_Ptr registered_sample_;
 
   /// History of the instance samples.
   InstanceDataSampleList   samples_;

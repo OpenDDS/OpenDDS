@@ -63,15 +63,15 @@ public:
   virtual void release_remote(const RepoId& remote);
 
   virtual bool control_received(char submessage_id,
-                                ACE_Message_Block* control);
+                                const Message_Block_Ptr& control);
 
   void expire_naks();
   void send_naks();
 
-  void nak_received(ACE_Message_Block* control);
+  void nak_received(const Message_Block_Ptr& control);
   void send_naks(DisjointSequence& found);
 
-  void nakack_received(ACE_Message_Block* control);
+  void nakack_received(const Message_Block_Ptr& control);
   virtual void send_nakack(SequenceNumber low);
 
   virtual bool start(bool active, bool acked);

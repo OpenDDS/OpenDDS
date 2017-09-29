@@ -16,6 +16,7 @@ class Waiter : public ACE_Task_Base
 public:
   explicit Waiter(DDS::WaitSet_ptr ws)
     : ws_(DDS::WaitSet::_duplicate(ws))
+    , result_(::DDS::RETCODE_ERROR)
   {}
 
   int svc()
@@ -79,7 +80,17 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = run_test(argc, argv);
-  TheServiceParticipant->shutdown();
+  int ret = 1;
+  try
+  {
+    ret = run_test(argc, argv);
+    TheServiceParticipant->shutdown();
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in StatusConditionTest.cpp:");
+    return 1;
+  }
+
   return ret;
 }

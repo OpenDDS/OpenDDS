@@ -77,7 +77,6 @@ DataReaderImpl::DataReaderImpl()
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
-    initialized_(false),
     always_get_history_(false),
     statistics_enabled_(false),
     raw_latency_buffer_size_(0),
@@ -153,15 +152,18 @@ DataReaderImpl::~DataReaderImpl()
   liveliness_timer_->cancel_timer();
   liveliness_timer_->wait();
 
-  if (initialized_) {
-    delete rd_allocator_;
-  }
+  delete rd_allocator_;
 }
 
 // this method is called when delete_datareader is called.
 void
 DataReaderImpl::cleanup()
 {
+  // As first step set our listener to nill which will prevent us from calling
+  // back onto the listener at the moment the related DDS entity has been
+  // deleted
+  set_listener(0, NO_STATUS_MASK);
+
   {
     // Is this lock necessary?
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
@@ -173,15 +175,16 @@ DataReaderImpl::cleanup()
   liveliness_timer_->wait();
 
   // Cancel any watchdog timers
-  { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-      iter != instances_.end();
-      ++iter) {
-    SubscriptionInstance_rch ptr = iter->second;
-    if (this->watchdog_.in() && ptr->deadline_timer_id_ != -1) {
-      this->watchdog_->cancel_timer(ptr);
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+        iter != instances_.end();
+        ++iter) {
+      SubscriptionInstance_rch ptr = iter->second;
+      if (watchdog_ && ptr->deadline_timer_id_ != -1) {
+        watchdog_->cancel_timer(ptr);
+      }
     }
-  }
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -195,14 +198,12 @@ DataReaderImpl::cleanup()
     topic_servant_->_remove_ref();
   }
 
-  dr_local_objref_ = DDS::DataReader::_nil();
-
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (!CORBA::is_nil(content_filtered_topic_.in())) {
     ContentFilteredTopicImpl* cft =
         dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
     cft->remove_reader(*this);
-    cft->update_reader_count(false);
+    cft->remove_entity_ref();
     content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
   }
 #endif
@@ -221,16 +222,18 @@ DataReaderImpl::cleanup()
 
   end_historic_sweeper_->wait();
   remove_association_sweeper_->wait();
+
+  // reset the watchdog to deal with the circular references
+  watchdog_.reset();
 }
 
 void DataReaderImpl::init(
     TopicDescriptionImpl* a_topic_desc,
-    const DDS::DataReaderQos &  qos,
+    const DDS::DataReaderQos &qos,
     DDS::DataReaderListener_ptr a_listener,
-    const DDS::StatusMask &     mask,
-    DomainParticipantImpl*        participant,
-    SubscriberImpl*               subscriber,
-    DDS::DataReader_ptr         dr_objref)
+    const DDS::StatusMask & mask,
+    DomainParticipantImpl* participant,
+    SubscriberImpl* subscriber)
 {
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
@@ -273,15 +276,12 @@ void DataReaderImpl::init(
   // Only store the subscriber pointer, since it is our parent, we
   // will exist as long as it does.
   subscriber_servant_ = subscriber;
-  dr_local_objref_    = DDS::DataReader::_duplicate(dr_objref);
 
   if (this->subscriber_servant_->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::init() - ")
         ACE_TEXT("failed to get SubscriberQos\n")));
   }
-
-  initialized_ = true;
 }
 
 DDS::InstanceHandle_t
@@ -400,7 +400,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
 
   if (!associate(data, active)) {
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
           ACE_TEXT("ERROR: transport layer failed to associate.\n")));
     }
@@ -413,7 +413,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
       const GuidConverter conv(remote_id);
-      ACE_DEBUG((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
           ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
           OPENDDS_STRING(conv).c_str()));
@@ -482,8 +482,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
           listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
       if (!CORBA::is_nil(listener)) {
-        listener->on_subscription_matched(dr_local_objref_,
-            subscription_match_status_);
+        listener->on_subscription_matched(this, subscription_match_status_);
 
         // TBD - why does the spec say to change this but not change
         //       the ChangeFlagStatus after a listener call?
@@ -563,7 +562,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
-            it->second->active(TheServiceParticipant->pending_timeout())) {
+            it->second->active()) {
           remove_association_sweeper_->schedule_timer(it->second, notify_lost);
         } else {
           push_back(non_active_writers, writer_id);
@@ -577,23 +576,19 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 }
 
 void
-DataReaderImpl::remove_or_reschedule(const PublicationId& pub_id)
+DataReaderImpl::remove_publication(const PublicationId& pub_id)
 {
-  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-  WriterMapType::iterator where = writers_.find(pub_id);
-  if (writers_.end() != where) {
-    WriterInfo& info = *where->second;
-    WriterIdSeq writers;
-    push_back(writers, pub_id);
-    bool notify = info.notify_lost_;
-    if (info.removal_deadline_ < ACE_OS::gettimeofday()) {
-      write_guard.release();
-      remove_associations_i(writers, notify);
-    } else {
-      write_guard.release();
-      remove_associations(writers, notify);
+  WriterIdSeq writers;
+  bool notify = false;
+  {
+    ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+    WriterMapType::iterator where = writers_.find(pub_id);
+    if (writers_.end() != where) {
+      notify = where->second->notify_lost_;
+      push_back(writers, pub_id);
     }
   }
+  remove_associations_i(writers, notify);
 }
 
 void
@@ -671,15 +666,8 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   if (!is_bit_) {
-    // The writer should be in the id_to_handle map at this time.  Note
-    // it if it not there.
-    if (this->lookup_instance_handles(updated_writers, handles) == false) {
-      if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
-            ACE_TEXT("lookup_instance_handles failed.\n")));
-      }
-    }
+    // The writer should be in the id_to_handle map at this time.
+    this->lookup_instance_handles(updated_writers, handles);
 
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
       id_to_handle_map_.erase(updated_writers[i]);
@@ -715,9 +703,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
       if (!CORBA::is_nil(listener.in())) {
-        listener->on_subscription_matched(
-            dr_local_objref_.in(),
-            this->subscription_match_status_);
+        listener->on_subscription_matched(this, this->subscription_match_status_);
 
         // Client will look at it so next time it looks the change should be 0
         this->subscription_match_status_.total_count_change = 0;
@@ -810,8 +796,7 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   requested_incompatible_qos_status_.policies = status.policies;
 
   if (!CORBA::is_nil(listener.in())) {
-    listener->on_requested_incompatible_qos(dr_local_objref_.in(),
-        requested_incompatible_qos_status_);
+    listener->on_requested_incompatible_qos(this, requested_incompatible_qos_status_);
 
     // TBD - why does the spec say to change total_count_change but not
     // change the ChangeFlagStatus after a listener call?
@@ -897,18 +882,21 @@ DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, 0);
   try {
     DDS::QueryCondition_var qc = new QueryConditionImpl(this, sample_states,
-        view_states, instance_states, query_expression, query_parameters);
+        view_states, instance_states, query_expression);
+    if (qc->set_query_parameters(query_parameters) != DDS::RETCODE_OK) {
+      return 0;
+    }
     DDS::ReadCondition_var rc = DDS::ReadCondition::_duplicate(qc);
     read_conditions_.insert(rc);
     return qc._retn();
   } catch (const std::exception& e) {
     if (DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ")
           ACE_TEXT("DataReaderImpl::create_querycondition - %C\n"),
           e.what()));
     }
-    return 0;
   }
+  return 0;
 }
 #endif
 
@@ -994,7 +982,6 @@ void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
                   ref(this->sample_lock_),
                   qos.deadline,
                   this,
-                  this->dr_local_objref_.in(),
                   ref(this->requested_deadline_missed_status_),
                   ref(this->last_deadline_missed_total_count_));
 
@@ -1210,7 +1197,7 @@ DataReaderImpl::get_matched_publication_data(
 
   DDS::PublicationBuiltinTopicDataSeq data;
 
-  DDS::ReturnCode_t ret
+  const DDS::ReturnCode_t ret
   = hh.instance_handle_to_bit_data(participant_servant_,
       BUILT_IN_PUBLICATION_TOPIC,
       publication_handle,
@@ -1237,7 +1224,7 @@ DataReaderImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (this->subscriber_servant_->is_enabled() == false) {
+  if (!this->subscriber_servant_->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -1297,7 +1284,6 @@ DataReaderImpl::enable()
             ref(this->sample_lock_),
             this->qos_.deadline,
             this,
-            this->dr_local_objref_.in(),
             ref(this->requested_deadline_missed_status_),
             ref(this->last_deadline_missed_total_count_));
   }
@@ -1519,7 +1505,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     if (filtered) break; // sample filtered from instance
 
-    accept_sample_processing(instance, header, is_new_instance);
+    if (instance) accept_sample_processing(instance, header, is_new_instance);
   }
   break;
 
@@ -1530,8 +1516,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     Serializer serializer(
-        sample.sample_, sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
-    serializer >> control;
+        sample.sample_.get(), sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
+    if (!(serializer >> control)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
+          ACE_TEXT("deserialization coherent change control failed.\n")));
+      return;
+    }
 
     if (DCPS_debug_level > 0) {
       std::stringstream buffer;
@@ -1587,14 +1577,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
 
     // tell all instances they got a liveliness message
-    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-        iter != instances_.end();
-        ++iter) {
-      SubscriptionInstance_rch ptr = iter->second;
-
-      ptr->instance_state_.lively(sample.header_.publication_id_);
-    }
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+      for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+          iter != instances_.end();
+          ++iter) {
+        iter->second->instance_state_.lively(sample.header_.publication_id_);
+      }
     }
 
   }
@@ -1640,7 +1629,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-      if( instance ) {
+      if (instance) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         if (! this->is_exclusive_ownership_
             || (this->is_exclusive_ownership_
@@ -1679,7 +1668,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                       && (instance)
                       && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-        this->watchdog_->cancel_timer(instance);
+        if (instance) {
+          this->watchdog_->cancel_timer(instance);
+        }
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
@@ -1692,9 +1683,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case END_HISTORIC_SAMPLES: {
     if (sample.header_.message_length_ >= sizeof(RepoId)) {
-      Serializer ser(sample.sample_);
+      Serializer ser(sample.sample_.get());
       RepoId readerId = GUID_UNKNOWN;
-      ser >> readerId;
+      if (!(ser >> readerId)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
+            ACE_TEXT("deserialization reader failed.\n")));
+        return;
+      }
       if (readerId != GUID_UNKNOWN && readerId != get_repo_id()) {
         break; // not our message
       }
@@ -1747,7 +1742,14 @@ void DataReaderImpl::notify_read_conditions()
 
   for (ReadConditionSet::iterator it = local_read_conditions.begin(),
       end = local_read_conditions.end(); it != end; ++it) {
-    dynamic_cast<ConditionImpl*>(it->in())->signal_all();
+    ConditionImpl* ci = dynamic_cast<ConditionImpl*>(it->in());
+    if (ci) {
+      ci->signal_all();
+    } else {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::notify_read_conditions: ")
+        ACE_TEXT("Failed to obtain ConditionImpl - can't notify.\n")));
+    }
   }
 }
 
@@ -1759,12 +1761,6 @@ SubscriberImpl* DataReaderImpl::get_subscriber_servant()
 RepoId DataReaderImpl::get_subscription_id() const
 {
   return subscription_id_;
-}
-
-char *
-DataReaderImpl::get_topic_name() const
-{
-  return topic_servant_->get_name();
 }
 
 bool DataReaderImpl::have_sample_states(
@@ -2061,9 +2057,11 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 
   this->purge_data(instance);
 
-  { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  this->instances_.erase(handle);
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    instances_.erase(handle);
   }
+
   this->release_instance_i(handle);
   if (this->monitor_) {
     this->monitor_->report();
@@ -2347,36 +2345,43 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
   = this->statistics_.find(sample.header_.publication_id_);
 
   if (location != this->statistics_.end()) {
-    // This starts as the current time.
-    ACE_Time_Value  latency = ACE_OS::gettimeofday();
+    const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
 
-    // The time interval starts at the send end.
-    DDS::Duration_t then = {
-        sample.header_.source_timestamp_sec_,
-        sample.header_.source_timestamp_nanosec_
-    };
+    // Only when the user has specified a latency budget or statistics
+    // are enabled we need to calculate our latency
+    if ((this->statistics_enabled()) ||
+        (this->qos_.latency_budget.duration > zero)) {
+      // This starts as the current time.
+      ACE_Time_Value latency = ACE_OS::gettimeofday();
 
-    // latency delay in ACE_Time_Value format.
-    latency -= duration_to_time_value(then);
+      // The time interval starts at the send end.
+      DDS::Duration_t then = {
+          sample.header_.source_timestamp_sec_,
+          sample.header_.source_timestamp_nanosec_
+      };
 
-    if (this->statistics_enabled()) {
-      location->second.add_stat(latency);
+      // latency delay in ACE_Time_Value format.
+      latency -= duration_to_time_value(then);
+
+      if (this->statistics_enabled()) {
+        location->second.add_stat(latency);
+      }
+
+      if (DCPS_debug_level > 9) {
+        ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
+            ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
+            latency.sec(),
+            latency.msec()));
+      }
+
+      if (this->qos_.latency_budget.duration > zero) {
+        // Check latency against the budget.
+        if (time_value_to_duration(latency) > this->qos_.latency_budget.duration) {
+          this->notify_latency(sample.header_.publication_id_);
+        }
+      }
     }
-
-    if (DCPS_debug_level > 9) {
-      ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-          ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
-          latency.sec(),
-          latency.msec()));
-    }
-
-    // Check latency against the budget.
-    if (time_value_to_duration(latency)
-        > this->qos_.latency_budget.duration) {
-      this->notify_latency(sample.header_.publication_id_);
-    }
-
   } else if (DCPS_debug_level > 0) {
     /// NB: This message is generated contemporaneously with a similar
     ///     message from writer_activity().  That message is not marked
@@ -2421,9 +2426,7 @@ void DataReaderImpl::notify_latency(PublicationId writer)
     ++this->budget_exceeded_status_.total_count;
     ++this->budget_exceeded_status_.total_count_change;
 
-    listener->on_budget_exceeded(
-        this->dr_local_objref_.in(),
-        this->budget_exceeded_status_);
+    listener->on_budget_exceeded(this, this->budget_exceeded_status_);
 
     this->budget_exceeded_status_.total_count_change = 0;
   }
@@ -2500,7 +2503,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 {
   if (is_bit()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
-    CORBA::String_var topic = get_topic_name();
+    CORBA::String_var topic = topic_servant_->get_name();
     RepoId id = disc->bit_key_to_repo_id(participant_servant_, topic, key);
     return participant_servant_->id_to_handle(id);
 
@@ -2525,8 +2528,7 @@ DataReaderImpl::notify_subscription_disconnected(const WriterIdSeq& pubids)
     // Since this callback may come after remove_association which removes
     // the writer from id_to_handle map, we can ignore this error.
     this->lookup_instance_handles(pubids, status.publication_handles);
-    the_listener->on_subscription_disconnected(this->dr_local_objref_.in(),
-        status);
+    the_listener->on_subscription_disconnected(this, status);
   }
 }
 
@@ -2544,15 +2546,10 @@ DataReaderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
 
-      // If it's reconnected then the reader should be in id_to_handle map otherwise
-      // log with an error.
-      if (this->lookup_instance_handles(pubids, status.publication_handles) == false) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) DataReaderImpl::notify_subscription_reconnected: "
-            "lookup_instance_handles failed.\n"));
-      }
+      // If it's reconnected then the reader should be in id_to_handle
+      this->lookup_instance_handles(pubids, status.publication_handles);
 
-      the_listener->on_subscription_reconnected(this->dr_local_objref_.in(),
-          status);
+      the_listener->on_subscription_reconnected(this,  status);
     }
   }
 }
@@ -2578,8 +2575,7 @@ DataReaderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq& handles)
         status.publication_handles[i] = handles[i];
       }
 
-      the_listener->on_subscription_lost(this->dr_local_objref_.in(),
-          status);
+      the_listener->on_subscription_lost(this, status);
     }
   }
 }
@@ -2600,8 +2596,7 @@ DataReaderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
     // Since this callback may come after remove_association which removes
     // the writer from id_to_handle map, we can ignore this error.
     this->lookup_instance_handles(pubids, status.publication_handles);
-    the_listener->on_subscription_lost(this->dr_local_objref_.in(),
-        status);
+    the_listener->on_subscription_lost(this, status);
   }
 }
 
@@ -2614,20 +2609,22 @@ DataReaderImpl::notify_connection_deleted(const RepoId& peerId)
   // is given to this DataWriter then narrow() fails.
   DataReaderListener_var the_listener = DataReaderListener::_narrow(this->listener_.in());
 
-  if (!CORBA::is_nil(the_listener.in()))
-    the_listener->on_connection_deleted(this->dr_local_objref_.in());
+  if (!CORBA::is_nil(the_listener.in())) {
+    the_listener->on_connection_deleted(this);
+  }
 }
 
-bool
+void
 DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
     DDS::InstanceHandleSeq & hdls)
 {
+  CORBA::ULong const num_wrts = ids.length();
+
   if (DCPS_debug_level > 9) {
-    CORBA::ULong const size = ids.length();
     const char* separator = "";
     OPENDDS_STRING guids;
 
-    for (unsigned long i = 0; i < size; ++i) {
+    for (CORBA::ULong i = 0; i < num_wrts; ++i) {
       guids += separator;
       guids += OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
@@ -2639,14 +2636,11 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
         guids.c_str()));
   }
 
-  CORBA::ULong const num_wrts = ids.length();
   hdls.length(num_wrts);
 
   for (CORBA::ULong i = 0; i < num_wrts; ++i) {
     hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
-
-  return true;
 }
 
 bool
@@ -2801,15 +2795,14 @@ bool DataReaderImpl::is_bit() const
   return this->is_bit_;
 }
 
-int
-DataReaderImpl::num_zero_copies()
+bool
+DataReaderImpl::has_zero_copies()
 {
-  int loans = 0;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
       this->sample_lock_,
-      1 /* assume we have loans */);
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,1);
+      true /* assume we have loans */);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, true);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
@@ -2818,11 +2811,13 @@ DataReaderImpl::num_zero_copies()
 
     for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
-      loans += item->zero_copy_cnt_.value();
+      if (item->zero_copy_cnt_ > 0) {
+        return true;
+      }
     }
   }
 
-  return loans;
+  return false;
 }
 
 void DataReaderImpl::notify_liveliness_change()
@@ -2834,8 +2829,7 @@ void DataReaderImpl::notify_liveliness_change()
   = listener_for(DDS::LIVELINESS_CHANGED_STATUS);
 
   if (!CORBA::is_nil(listener.in())) {
-    listener->on_liveliness_changed(dr_local_objref_.in(),
-        liveliness_changed_status_);
+    listener->on_liveliness_changed(this, liveliness_changed_status_);
 
     liveliness_changed_status_.alive_count_change = 0;
     liveliness_changed_status_.not_alive_count_change = 0;
@@ -3088,9 +3082,9 @@ DataReaderImpl::coherent_change_received (RepoId publisher_id, Coherent_State& r
       ++iter) {
 
     if (iter->second->publisher_id_ == publisher_id) {
-      Coherent_State state = iter->second->coherent_change_received();
+      const Coherent_State state = iter->second->coherent_change_received();
       if (state == NOT_COMPLETED_YET) {
-        result = state;
+        result = NOT_COMPLETED_YET;
         break;
       }
       else if (state == REJECTED) {
@@ -3132,10 +3126,9 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
       if (reader == this) {
         // Release the sample_lock before listener callback.
         ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-        listener->on_data_available(dr_local_objref_.in ());
-      }
-      else {
-        listener->on_data_available(dr_local_objref_.in ());
+        listener->on_data_available(this);
+      } else {
+        listener->on_data_available(this);
       }
 
       set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
@@ -3203,7 +3196,7 @@ DataReaderImpl::set_subscriber_qos(
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
-  cft->update_reader_count(true);
+  cft->add_entity_ref();
   cft->add_reader(*this);
   content_filtered_topic_ = DDS::ContentFilteredTopic::_duplicate(cft);
 }
@@ -3386,7 +3379,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 #endif
 
-  if (watchdog_.in()) {
+  if (instance && watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
 

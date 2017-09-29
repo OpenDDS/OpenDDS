@@ -75,6 +75,8 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
       if (++received_samples_ == expected_samples_) {
+        subscriber_->delete_datareader(reader);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) datareader deleted\n"));
         done_callback_(builtin_read_error_);
       } else {
         ACE_DEBUG((LM_INFO, "(%P|%t) Got message %d\n", received_samples_));
@@ -103,7 +105,7 @@ DataReaderListenerImpl::on_subscription_matched(
       rdr->read(data, infos, DDS::LENGTH_UNLIMITED,
                 DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
     if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
-      ACE_DEBUG((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
+      ACE_ERROR((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
       builtin_read_error_ = true;
       return;
     }

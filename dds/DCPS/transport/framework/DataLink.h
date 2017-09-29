@@ -147,7 +147,7 @@ public:
   /// This method is essentially an "undo_send()" method.  It's goal
   /// is to remove all traces of the sample from this DataLink (if
   /// the sample is even known to the DataLink).
-  RemoveResult remove_sample(const DataSampleElement* sample);
+  virtual RemoveResult remove_sample(const DataSampleElement* sample);
 
   // ciju: Called by LinkSet with locks held
   void remove_all_msgs(RepoId pub_id);
@@ -229,13 +229,13 @@ public:
   /// sample to send via send_control.
   ACE_Message_Block* create_control(char submessage_id,
                                     DataSampleHeader& header,
-                                    ACE_Message_Block* data);
+                                    Message_Block_Ptr data);
 
   /// This allows a subclass to send transport control samples over
   /// this DataLink. This is useful for sending transport-specific
   /// control messages between one or more endpoints under this
   /// DataLink's control.
-  SendControlStatus send_control(const DataSampleHeader& header, ACE_Message_Block* data);
+  SendControlStatus send_control(const DataSampleHeader& header, Message_Block_Ptr data);
 
   /// For a given publication "pub_id", store the total number of corresponding
   /// subscriptions in "n_subs" and given a set of subscriptions

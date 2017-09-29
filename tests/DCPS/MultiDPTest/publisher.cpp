@@ -98,7 +98,7 @@ void init ()
       throw TestException ();
     }
 
-  ::Xyz::FooTypeSupportImpl* fts_servant
+  ::Xyz::FooTypeSupportImpl::_var_type fts_servant
     = new ::Xyz::FooTypeSupportImpl();
 
   if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), type_name))
@@ -225,8 +225,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_ready);
 
-      ACE_OS::fclose(writers_ready);
-      ACE_OS::fclose(readers_ready);
+      if (writers_ready) ACE_OS::fclose(writers_ready);
+      if (readers_ready) ACE_OS::fclose(readers_ready);
 
       // ensure the associations are fully established before writing.
       ACE_OS::sleep(3);
@@ -277,8 +277,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_completed);
 
-      ACE_OS::fclose(writers_completed);
-      ACE_OS::fclose(readers_completed);
+      if (writers_completed) ACE_OS::fclose(writers_completed);
+      if (readers_completed) ACE_OS::fclose(readers_completed);
 
       {  // Extra scope for VC6
         for (int i = 0; i < num_datawriters; i ++)

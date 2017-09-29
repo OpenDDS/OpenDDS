@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportQueueElement.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 #include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -60,7 +61,7 @@ private:
   RepoId publisher_id_;
 
   /// A deep-copy of the msg() from the original TransportQueueElement.
-  ACE_Message_Block* msg_;
+  Message_Block_Ptr msg_;
 };
 
 } // namespace DCPS

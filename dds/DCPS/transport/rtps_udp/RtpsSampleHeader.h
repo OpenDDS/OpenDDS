@@ -47,8 +47,8 @@ public:
   /// most "size" bytes (header + data) and the "tail" having the rest.
   /// Returns a pair containing the largest fragment number in each new header.
   static SequenceRange split(const ACE_Message_Block& orig, size_t size,
-                             ACE_Message_Block*& head,
-                             ACE_Message_Block*& tail);
+                             Message_Block_Ptr& head,
+                             Message_Block_Ptr& tail);
 
   RtpsSampleHeader();
   explicit RtpsSampleHeader(ACE_Message_Block& mb);

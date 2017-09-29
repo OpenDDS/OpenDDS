@@ -544,12 +544,20 @@ sub process {
     return;
   }
 
+  if (defined $ENV{DCPSDebugLevel}) {
+    $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
+  }
+
   if ($params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
     my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
     if ($params !~ /-ORBVerboseLogging /) {
       $debug .= " -ORBVerboseLogging 1";
     }
     $params .= $debug;
+  }
+
+  if (defined $ENV{DCPSTransportDebugLevel}) {
+    $self->{dcps_transport_debug_level} = $ENV{DCPSTransportDebugLevel};
   }
 
   if ($params !~ /-DCPSTransportDebugLevel / &&

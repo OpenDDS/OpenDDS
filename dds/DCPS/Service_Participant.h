@@ -17,7 +17,7 @@
 #include "dds/DCPS/Discovery.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DomainParticipantFactoryImpl.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 
 #include "ace/Task.h"
@@ -576,10 +576,10 @@ private:
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
   /// The @c TRANSIENT data durability cache.
-  scoped_ptr<DataDurabilityCache> transient_data_cache_;
+  unique_ptr<DataDurabilityCache> transient_data_cache_;
 
   /// The @c PERSISTENT data durability cache.
-  scoped_ptr<DataDurabilityCache> persistent_data_cache_;
+  unique_ptr<DataDurabilityCache> persistent_data_cache_;
 
   /// The @c PERSISTENT data durability directory.
   ACE_CString persistent_data_dir_;
@@ -593,7 +593,7 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
-  //used to track state of service participant
+  /// Used to track state of service participant
   bool shut_down_;
 
   /// Guard access to the internal maps.

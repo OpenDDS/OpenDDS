@@ -83,7 +83,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
 
       for (size_t i(length); i < ptrs_.size(); ++i) {
         --ptrs_[i]->zero_copy_cnt_;
-        loaner_->dec_ref_data_element(ptrs_[i]);
+        ptrs_[i]->dec_ref();
       }
 
       ptrs_.resize(length, 0);

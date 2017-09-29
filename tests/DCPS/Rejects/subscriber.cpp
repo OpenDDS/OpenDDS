@@ -59,7 +59,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1 ;
       }
 
-      Messenger::MessageTypeSupportImpl* mts_servant =
+      Messenger::MessageTypeSupportImpl::_var_type mts_servant =
         new Messenger::MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant.in (),
@@ -104,6 +104,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       {
         cerr << "ERROR: listener is nil." << endl;
         exit(1);
+      }
+      if (!listener_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
       }
 
       DDS::DataReaderQos dr_qos; // Good QoS.

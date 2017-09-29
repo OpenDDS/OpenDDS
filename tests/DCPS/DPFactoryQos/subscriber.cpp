@@ -14,7 +14,12 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
@@ -23,6 +28,7 @@
 
 using namespace Messenger;
 using namespace std;
+using namespace OpenDDS::DCPS;
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
@@ -55,7 +61,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
-      participant = dpf->create_participant(411,
+      participant = dpf->create_participant(111,
                                             PARTICIPANT_QOS_DEFAULT,
                                             DDS::DomainParticipantListener::_nil(),
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -64,9 +70,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1 ;
       }
 
-      if (participant->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
+      DDS::DomainParticipantQos dpqos;
+      if (participant->get_qos (dpqos) != ::DDS::RETCODE_OK)
       {
-        cerr << "DomainParticipant can not be enabled because factory autoenable is off." << endl;
+        cerr << "DomainParticipant get_qos failed." << endl;
+        return 1;
+      }
+
+      // The QoS of the dp shouldn't match the marked value which has a magic value
+      if (dpqos == PARTICIPANT_QOS_DEFAULT)
+      {
+        cerr << "ERROR: DomainParticipant QoS matches marked PARTICIPANT_QOS_DEFAULT." << endl;
         return 1;
       }
 
@@ -97,8 +111,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       // Create the subscriber and attach to the corresponding
       // transport.
+      DDS::SubscriberQos sub_qos;
+      participant->get_default_subscriber_qos(sub_qos);
+      sub_qos.entity_factory.autoenable_created_entities = false;
       DDS::Subscriber_var sub =
-        participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+        participant->create_subscriber(sub_qos,
                                        DDS::SubscriberListener::_nil(),
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ())) {
@@ -108,7 +125,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (sub->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
-        cerr << "Publisher can not be enabled because DomainParticipant is not enabled." << endl;
+        cerr << "Subscriber can not be enabled because DomainParticipant is not enabled." << endl;
         return 1;
       }
 
@@ -135,14 +152,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (dr->enable () != ::DDS::RETCODE_PRECONDITION_NOT_MET)
       {
         cerr << "DataReader can not be enabled because Subscriber is not enabled." << endl;
-        return 1;
-      }
-
-      // Now enable DomainParticipantFactory autoenable
-      fqos.entity_factory.autoenable_created_entities = true;
-      if (dpf->set_qos (fqos) != ::DDS::RETCODE_OK)
-      {
-        cerr << "DomainParticipantFactory set_qos failed." << endl;
         return 1;
       }
 

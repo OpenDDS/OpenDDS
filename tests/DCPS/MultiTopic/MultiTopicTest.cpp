@@ -40,7 +40,11 @@ void waitForMatch(const DataWriter_var& dw, int count = 1)
   PublicationMatchedStatus pubmatched;
   while (dw->get_publication_matched_status(pubmatched) == RETCODE_OK
          && pubmatched.current_count != count) {
-    ws->wait(active, infinite);
+    if (RETCODE_OK != ws->wait(active, infinite)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: waitForMatch failed.\n")));
+      break;
+    }
   }
   ws->detach_condition(sc);
 }
@@ -187,6 +191,11 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
         strcmp(data[0].misc, ui.misc)) {
       return false;
     }
+    // Check return get_key_value
+    Resulting resulting_value;
+    ret = res_dr->get_key_value(resulting_value, DDS::HANDLE_NIL);
+    if (ret != RETCODE_BAD_PARAMETER) return false;
+
     data.length(0);
     info.length(0);
     ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);

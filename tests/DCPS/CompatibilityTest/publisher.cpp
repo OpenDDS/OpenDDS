@@ -18,6 +18,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "DataWriterListenerImpl.h"
+#include <stdexcept>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -203,6 +204,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       {
         DataWriterListenerImpl* dwl_servant =
           dynamic_cast<DataWriterListenerImpl*>(dwl.ptr());
+
+        if (!dwl_servant) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Failed to obtain DataWriterListenerImpl.\n")));
+          return 1;
+        }
+
         // check to see if the publisher worked
         if(dwl_servant->publication_matched() != compatible)
         {
@@ -230,6 +237,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
+  catch (std::runtime_error& err)
+  {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
+      err.what()), -1);
+  }
 
   return status;
 }

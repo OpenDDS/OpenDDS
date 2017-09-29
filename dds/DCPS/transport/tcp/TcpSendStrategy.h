@@ -42,7 +42,6 @@ public:
 
   /// Enable or disable output processing by the reactor according to mode.
   virtual void schedule_output();
-  void add_delayed_notification_on_ack_received(TransportQueueElement* element);
 
 protected:
 

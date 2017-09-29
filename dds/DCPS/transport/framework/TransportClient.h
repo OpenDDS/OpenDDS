@@ -109,20 +109,20 @@ protected:
 
   bool send_response(const RepoId& peer,
                      const DataSampleHeader& header,
-                     ACE_Message_Block* payload); // [DR]
+                     Message_Block_Ptr payload); // [DR]
 
   void send(SendStateDataSampleList send_list, ACE_UINT64 transaction_id = 0);
 
   SendControlStatus send_w_control(SendStateDataSampleList send_list,
                                    const DataSampleHeader& header,
-                                   ACE_Message_Block* msg,
+                                   Message_Block_Ptr msg,
                                    const RepoId& destination);
 
   SendControlStatus send_control(const DataSampleHeader& header,
-                                 ACE_Message_Block* msg);
+                                 Message_Block_Ptr msg);
 
   SendControlStatus send_control_to(const DataSampleHeader& header,
-                                    ACE_Message_Block* msg,
+                                    Message_Block_Ptr msg,
                                     const RepoId& destination);
 
   bool remove_sample(const DataSampleElement* sample);
@@ -180,7 +180,9 @@ private:
     TransportImpl::ConnectionAttribs attribs_;
 
     PendingAssoc()
-      : active_(false), removed_(false), blob_index_(0)
+      : active_(false)
+      , removed_(false)
+      , blob_index_(0)
     {}
 
     bool initiate_connect(TransportClient* tc, Guard& guard);
@@ -299,7 +301,7 @@ private:
 
   TransportLocatorSeq conn_info_;
 
-  //Seems to protect accesses to impls_, pending_, links_, data_link_index_
+  /// Seems to protect accesses to impls_, pending_, links_, data_link_index_
   ACE_Thread_Mutex lock_;
 
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;

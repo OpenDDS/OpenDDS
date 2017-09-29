@@ -24,6 +24,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
     int part = atoi(argv[1]);
+    if (part < 0 || part > 10) {
+      std::cerr << "Publisher: partition count : " <<
+        part << " out of range."  << std::endl;
+      return static_cast<int>(FACE::INVALID_PARAM);
+    }
     FACE::CONNECTION_DIRECTION_TYPE dir;
     FACE::MESSAGE_SIZE_TYPE size;
     char connection_name[16];

@@ -68,10 +68,10 @@ public:
   void set_acked();
   virtual bool is_reliable() { return false;}
 
-  void syn_received(ACE_Message_Block* control);
+  void syn_received(const Message_Block_Ptr& control);
   void send_syn();
 
-  void synack_received(ACE_Message_Block* control);
+  void synack_received(const Message_Block_Ptr& control);
   void send_synack();
   virtual void send_naks() {}
 
@@ -82,7 +82,7 @@ public:
   virtual void release_remote(const RepoId& /*remote*/) {};
 
   virtual bool control_received(char submessage_id,
-                                ACE_Message_Block* control);
+                                const Message_Block_Ptr& control);
 
   virtual bool start(bool active, bool acked) = 0;
   virtual void stop();
@@ -100,7 +100,7 @@ protected:
                    MulticastPeer remote_peer);
 
   void send_control(char submessage_id,
-                    ACE_Message_Block* data);
+                    Message_Block_Ptr data);
 
   bool start_syn();
 

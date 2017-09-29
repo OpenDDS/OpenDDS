@@ -495,7 +495,7 @@ DataLink::stop_i()
 ACE_Message_Block*
 DataLink::create_control(char submessage_id,
                          DataSampleHeader& header,
-                         ACE_Message_Block* data)
+                         Message_Block_Ptr data)
 {
   DBG_ENTRY_LVL("DataLink", "create_control", 6);
 
@@ -504,13 +504,13 @@ DataLink::create_control(char submessage_id,
   header.submessage_id_ = submessage_id;
   header.message_length_ = static_cast<ACE_UINT32>(data->total_length());
 
-  ACE_Message_Block* message;
+  ACE_Message_Block* message = 0;
   ACE_NEW_MALLOC_RETURN(message,
                         static_cast<ACE_Message_Block*>(
                           this->mb_allocator_->malloc(sizeof(ACE_Message_Block))),
                         ACE_Message_Block(header.max_marshaled_size(),
                                           ACE_Message_Block::MB_DATA,
-                                          data,
+                                          data.release(),
                                           0,  // data
                                           0,  // allocator_strategy
                                           0,  // locking_strategy
@@ -521,20 +521,26 @@ DataLink::create_control(char submessage_id,
                                           this->mb_allocator_),
                         0);
 
-  *message << header;
+  if (!(*message << header)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) DataLink::create_control: ")
+               ACE_TEXT("cannot put header in message\n")));
+    ACE_DES_FREE(message, this->mb_allocator_->free, ACE_Message_Block);
+    message = 0;
+  }
 
   return message;
 }
 
 SendControlStatus
-DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* message)
+DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message)
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
   TransportSendControlElement* const elem =
     TransportSendControlElement::alloc(1, // initial_count
                                        GUID_UNKNOWN, &send_response_listener_,
-                                       header, message, send_control_allocator_);
+                                       header, move(message), send_control_allocator_);
   if (!elem) return SEND_CONTROL_ERROR;
 
   send_response_listener_.track_message();
@@ -582,7 +588,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     const GuidConverter reader(readerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
-               ACE_TEXT("from publication %C received sample: %C to readerId %C (%s).\n"),
+               ACE_TEXT("from publication %C received sample: %C to readerId %C (%C).\n"),
                OPENDDS_STRING(converter).c_str(),
                to_string(sample.header_).c_str(),
                OPENDDS_STRING(reader).c_str(),
@@ -652,7 +658,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
         first = false;
         ++iter;
       }
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::data_received_i - normal data received to each subscription in listener_set %s ids:%C\n",
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::data_received_i - normal data received to each subscription in listener_set %C ids:%C\n",
                  constrain == ReceiveListenerSet::SET_EXCLUDED ? "exclude" : "include", included_ids.c_str()));
     }
     listener_set->data_received(sample, incl_excl, constrain);
@@ -699,7 +705,8 @@ DataLink::transport_shutdown()
   ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
   reactor->cancel_timer(this);
   this->stop();
-
+  this->send_listeners_.clear();
+  this->recv_listeners_.clear();
   // Drop our reference to the TransportImpl object
   this->impl_.reset();
 }

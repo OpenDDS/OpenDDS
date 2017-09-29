@@ -73,7 +73,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
 
       DDS::DomainParticipant_var participant =
-        dpf->create_participant(411,
+        dpf->create_participant(111,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -82,7 +82,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
-      Messenger::MessageTypeSupportImpl* servant =
+      Messenger::MessageTypeSupportImpl::_var_type servant =
         new Messenger::MessageTypeSupportImpl;
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {

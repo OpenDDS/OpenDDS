@@ -74,7 +74,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::DomainParticipant_var participant;
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
-      participant = dpf->create_participant(411,
+      participant = dpf->create_participant(111,
                                             PARTICIPANT_QOS_DEFAULT,
                                             DDS::DomainParticipantListener::_nil(),
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -138,7 +138,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
 
       int expected = num_expected_data + num_expected_dispose + num_expected_unregister;
-cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/" << num_expected_unregister <<endl;
+      cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/" << num_expected_unregister <<endl;
 
       while ( listener_servant.num_reads() < expected ) {
         cerr << " recv " << listener_servant.num_reads() << endl;

@@ -9,7 +9,8 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 DataReaderListenerImpl::DataReaderListenerImpl (void) :
-  subscription_matched_(false)
+  subscription_matched_(false),
+  last_si_()
   {
   }
 

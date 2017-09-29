@@ -16,7 +16,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/WaitSet.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -50,7 +50,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         return 1;
       }
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
+      MessageTypeSupportImpl::_var_type servant (new MessageTypeSupportImpl);
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         ACE_DEBUG((LM_DEBUG, "register_type failed.\n"));
@@ -99,7 +99,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       int attempts = 1;
       {
         // Wait for both first DataReader connect and write messages.
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
 
         while (attempts != max_attempts)
         {
@@ -192,7 +192,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       {
         // Wait for both second DataReader connect which changed deadline period
         // from 3 seconds to 5 seconds.
-        OpenDDS::DCPS::scoped_ptr<Writer> writer (new Writer (dw.in ()));
+        OpenDDS::DCPS::unique_ptr<Writer> writer (new Writer (dw.in ()));
         attempts = 1;
         while (attempts != max_attempts)
         {

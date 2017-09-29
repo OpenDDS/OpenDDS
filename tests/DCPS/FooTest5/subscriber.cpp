@@ -488,8 +488,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == writers_ready);
 
-      ACE_OS::fclose(readers_ready);
-      ACE_OS::fclose(writers_ready);
+      if (readers_ready) ACE_OS::fclose(readers_ready);
+      if (writers_ready) ACE_OS::fclose(writers_ready);
 
       int num_associations = mixed_trans ? num_datawriters :
                                            num_datareaders * num_datawriters;
@@ -552,8 +552,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
         }
 
-      ACE_OS::fclose(readers_completed);
-      ACE_OS::fclose(writers_completed);
+      if (readers_completed) ACE_OS::fclose(readers_completed);
+      if (writers_completed) ACE_OS::fclose(writers_completed);
 
       if (results.test_passed (expected) == false)
         {

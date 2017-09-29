@@ -423,7 +423,7 @@ bool set_reader_data_lifecycle_autopurge_disposed_samples_delay(
 void
 log_parser_error(const char* section, const char* name, const char* value)
 {
-  ACE_DEBUG((LM_ERROR, "Could not set %s QOS setting %s to value %s\n",
+  ACE_ERROR((LM_ERROR, "Could not set %C QOS setting %C to value %C\n",
     section, name, value));
 }
 

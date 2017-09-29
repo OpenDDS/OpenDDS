@@ -33,7 +33,7 @@ ACE_INLINE
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportControlElement::msg() const
 {
-  return this->msg_;
+  return this->msg_.get();
 }
 
 ACE_INLINE

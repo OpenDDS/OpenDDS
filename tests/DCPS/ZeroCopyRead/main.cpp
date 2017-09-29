@@ -34,7 +34,7 @@ class TestException
 };
 
 
-const long  MY_DOMAIN   = 411;
+const long  MY_DOMAIN   = 111;
 const char* MY_TOPIC    = "foo";
 const char* MY_TYPE     = "foo";
 
@@ -866,7 +866,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         foo_dw->write(foo,
                         writer_instance_handle);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t3 ERROR: timeout waiting for data.\n")),
@@ -913,7 +913,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         foo_dw->write(foo,
                         writer_instance_handle);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t3 ERROR: timeout waiting for data.\n")),
@@ -1094,7 +1094,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // from the instance container.
         foo_dw->write(foo, writer_instance_handle);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t5 ERROR: timeout waiting for data.\n")),
@@ -1140,7 +1140,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // from the instance container.
         foo_dw->write(foo, writer_instance_handle);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t5 ERROR: timeout waiting for data.\n")),
@@ -1205,7 +1205,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // from the instance container.
         foo_dw->write(foo, writer_instance_handle);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t6 ERROR: timeout waiting for data.\n")),
@@ -1309,7 +1309,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // from the instance container.
         foo_dw->write(foo,  ::DDS::HANDLE_NIL /*don't use instance_handle_ because it is a different instance */);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t7 ERROR: timeout waiting for data.\n")),
@@ -1407,7 +1407,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // from the instance container.
         foo_dw->write(foo, writer_instance_handle);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t8 ERROR: timeout waiting for data.\n")),
@@ -1582,7 +1582,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // from the instance container.
         foo_dw->write(foo, writer_instance_handle);
 
-        // wait for write to propogate
+        // wait for write to propagate
         if (!wait_for_data(sub.in (), 5))
             ACE_ERROR_RETURN ((LM_ERROR,
                             ACE_TEXT("(%P|%t) t10 ERROR: timeout waiting for data.\n")),

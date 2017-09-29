@@ -117,6 +117,13 @@ public:
     RepoId local_id_;
     Priority priority_;
     bool local_reliable_, local_durable_;
+
+    ConnectionAttribs()
+      : local_id_(GUID_UNKNOWN)
+      , priority_(0)
+      , local_reliable_(false)
+      , local_durable_(false)
+    {}
   };
 
   struct RemoteTransport {

@@ -33,12 +33,12 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
   // buffer has been entirely read.
   //
   const size_t len = this->current_->length();
-  register size_t remainder = (size - offset > len) ? size - offset - len : 0;
+  const size_t remainder = (size - offset > len) ? size - offset - len : 0;
 
   //
   // Derive how much data we need to read from the current buffer.
   //
-  register size_t initial = size - offset - remainder;
+  const size_t initial = size - offset - remainder;
 
   //
   // Copy or swap the source data from the current buffer into the
@@ -93,7 +93,7 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
 ACE_INLINE void
 Serializer::buffer_read(char* dest, size_t size, bool swap)
 {
-  register size_t offset = 0;
+  size_t offset = 0;
 
   while (size > offset) {
     offset = this->doread(dest, size, swap, offset);
@@ -119,12 +119,12 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
   // buffer has been entirely filled.
   //
   const size_t spc = this->current_->space();
-  register size_t remainder = (size - offset > spc) ? size - offset - spc : 0;
+  const size_t remainder = (size - offset > spc) ? size - offset - spc : 0;
 
   //
   // Derive how much data we need to write to the current buffer.
   //
-  register size_t initial = size - offset - remainder;
+  const size_t initial = size - offset - remainder;
 
   //
   // Copy or swap the source data into the current buffer.
@@ -179,7 +179,7 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
 ACE_INLINE void
 Serializer::buffer_write(const char* src, size_t size, bool swap)
 {
-  register size_t offset = 0;
+  size_t offset = 0;
 
   while (size > offset) {
     offset = this->dowrite(src, size, swap, offset);
@@ -732,6 +732,7 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
 #else
   const ACE_UINT16 as_utf16 = static_cast<ACE_UINT16>(x.val_);
   if (as_utf16 != x.val_) { // not currently handling surrogates
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) operator<<(Serializer&, ACE_OutputCDR::from_wchar): failure to convert UTF-32 to UTF-16.\n")));
     s.good_bit_ = false;
   } else {
     s.buffer_write(reinterpret_cast<const char*>(&as_utf16), Serializer::WCHAR_SIZE, Serializer::SWAP_BE);
@@ -739,6 +740,22 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
 #endif
   return s.good_bit();
 }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+ACE_INLINE bool
+operator<<(Serializer& s, const std::string& x)
+{
+  return s << x.c_str();
+}
+
+#ifdef DDS_HAS_WCHAR
+ACE_INLINE bool
+operator<<(Serializer& s, const std::wstring& x)
+{
+  return s << x.c_str();
+}
+#endif /* DDS_HAS_WCHAR */
+#endif /* !OPENDDS_SAFETY_PROFILE */
 
 ACE_INLINE bool
 operator<<(Serializer& s, ACE_OutputCDR::from_octet x)
@@ -918,18 +935,42 @@ operator>>(Serializer& s, ACE_InputCDR::to_octet x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_string x)
 {
-  s.read_string(const_cast<char*&>(x.val_));
+  const size_t length = s.read_string(const_cast<char*&>(x.val_));
   return s.good_bit()
-         && ((x.bound_ == 0) || (ACE_OS::strlen(x.val_) <= x.bound_));
+         && ((x.bound_ == 0) || (length <= x.bound_));
 }
 
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
 {
-  s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
+  const size_t length = s.read_string(const_cast<ACE_CDR::WChar*&>(x.val_));
   return s.good_bit()
-         && ((x.bound_ == 0) || (ACE_OS::strlen(x.val_) <= x.bound_));
+         && ((x.bound_ == 0) || (length <= x.bound_));
 }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+ACE_INLINE bool
+operator>>(Serializer& s, std::string& x)
+{
+  char* buf = 0;
+  const size_t length = s.read_string(buf);
+  x.assign(buf, length);
+  CORBA::string_free(buf);
+  return s.good_bit();
+}
+
+#ifdef DDS_HAS_WCHAR
+ACE_INLINE bool
+operator>>(Serializer& s, std::wstring& x)
+{
+  ACE_CDR::WChar* buf = 0;
+  const size_t length = s.read_string(buf);
+  x.assign(buf, length);
+  CORBA::wstring_free(buf);
+  return s.good_bit();
+}
+#endif /* DDS_HAS_WCHAR */
+#endif /* !OPENDDS_SAFETY_PROFILE */
 
 //----------------------------------------------------------------------------
 // predefined type gen_max_marshaled_size methods

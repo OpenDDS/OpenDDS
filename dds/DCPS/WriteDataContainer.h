@@ -16,6 +16,7 @@
 #include "DisjointSequence.h"
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
+#include "Message_Block_Ptr.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/Condition_T.h"
@@ -127,6 +128,7 @@ public:
     DataWriterImpl*  writer,
     /// Max samples kept within each instance
     CORBA::Long      max_samples_per_instance,
+    CORBA::Long history_depth,
     /// Max durable samples sent for each instance
     CORBA::Long      max_durable_per_instance,
     /// The timeout for write.
@@ -191,7 +193,7 @@ public:
    */
   DDS::ReturnCode_t
   register_instance(DDS::InstanceHandle_t&  instance_handle,
-                    DataSample*&            registered_sample);
+                    Message_Block_Ptr&      registered_sample);
 
   /**
    * Remove the provided instance from the instances_ list.
@@ -204,7 +206,7 @@ public:
    */
   DDS::ReturnCode_t unregister(
     DDS::InstanceHandle_t handle,
-    DataSample*& registered_sample,
+    Message_Block_Ptr&    registered_sample,
     bool dup_registered_sample = true);
 
   /**
@@ -217,7 +219,7 @@ public:
    */
   DDS::ReturnCode_t dispose(
     DDS::InstanceHandle_t handle,
-    DataSample*& registered_sample,
+    Message_Block_Ptr& registered_sample,
     bool dup_registered_sample = true);
 
   /**
@@ -444,6 +446,8 @@ private:
   /// The maximum size a container should allow for
   /// an instance sample list
   CORBA::Long                     max_samples_per_instance_;
+
+  CORBA::Long history_depth_;
 
   /// The maximum number of samples from each instance that
   /// can be added to the resend_data_ for durability.

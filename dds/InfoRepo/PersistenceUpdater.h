@@ -12,6 +12,7 @@
 #include "Updater.h"
 
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include "ace/Task.h"
 #include "ace/Hash_Map_With_Allocator_T.h"
@@ -107,7 +108,7 @@ private:
 
   Manager *um_;
 
-  ALLOCATOR *allocator_;
+  OpenDDS::DCPS::unique_ptr<ALLOCATOR> allocator_;
 
   TopicIndex *topic_index_;
   ParticipantIndex *participant_index_;

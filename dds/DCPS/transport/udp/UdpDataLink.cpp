@@ -115,7 +115,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     }
   }
 
-  if (this->config_->send_buffer_size_ > 0) {
+  if (this->config_->rcv_buffer_size_ > 0) {
     int rcv_size = this->config_->rcv_buffer_size_;
     if (this->socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,

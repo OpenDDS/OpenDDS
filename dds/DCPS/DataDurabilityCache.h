@@ -20,7 +20,7 @@
 #include "dds/DCPS/DurabilityQueue.h"
 #include "dds/DCPS/FileSystemStorage.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 
 #include "ace/Hash_Map_With_Allocator_T.h"
@@ -40,14 +40,14 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace DDS {
 
 struct DurabilityServiceQosPolicy;
 struct LifespanQosPolicy;
 
 } // namespace DDS
-
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -224,7 +224,7 @@ private:
 private:
 
   /// Allocator used to allocate memory for sample map and lists.
-  scoped_ptr<ACE_Allocator> const allocator_;
+  unique_ptr<ACE_Allocator> const allocator_;
 
   DDS::DurabilityQosPolicyKind kind_;
 

@@ -182,6 +182,9 @@ private:
   DDS::StatusMask              listener_mask_;
   DDS::SubscriberListener_var  listener_;
 
+  typedef OPENDDS_SET_CMP(DDS::DataReader_var, VarLess<DDS::DataReader>) DataReaderVarSet;
+  DataReaderVarSet readers_not_enabled_;
+
   DataReaderMap                datareader_map_;
   DataReaderSet                datareader_set_;
 
@@ -190,7 +193,6 @@ private:
 #endif
 
   DomainParticipantImpl*       participant_;
-  DDS::DomainParticipant_var   participant_objref_;
 
   DDS::DomainId_t              domain_id_;
 

@@ -27,7 +27,7 @@ namespace {
       sample.header_.publication_id_ = pub_id;
       sample.header_.sequence_ = msg_seq;
       sample.header_.more_fragments_ = more_fragments;
-      sample.sample_ = new ACE_Message_Block(DataSampleHeader::max_marshaled_size());
+      sample.sample_.reset(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
     }
     ACE_Message_Block* mb;     // Released (deleted) by sample
     ReceivedDataSample sample;
@@ -41,6 +41,7 @@ namespace {
   public:
     Gaps()
     : result_bits(0)
+    , base()
     {
       memset(&bitmap, 0, sizeof(bitmap));
     }
@@ -91,7 +92,8 @@ void test_insert_has_frag()
   SequenceNumber frag_seq(1);
   RepoId pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
-  tr.reassemble(frag_seq, true, data.sample);
+  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
+  TEST_ASSERT(true == reassembled);
   TEST_ASSERT(tr.has_frags(msg_seq, pub_id));
 }
 
@@ -123,7 +125,9 @@ void test_insert_gaps()
   RepoId pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
-  tr.reassemble(frag_seq, true, data.sample);
+  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
+  TEST_ASSERT(true == reassembled);
+
   CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
 
   TEST_ASSERT(1 == base);             // Gap from 1-3
@@ -144,8 +148,12 @@ void test_insert_one_then_gap()
   RepoId pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
-  tr.reassemble(frag_seq1, true, data.sample);
-  tr.reassemble(frag_seq2, true, data.sample);
+  bool reassembled = tr.reassemble(frag_seq1, true, data.sample);
+  TEST_ASSERT(true == reassembled);
+
+  reassembled = tr.reassemble(frag_seq2, true, data.sample);
+  TEST_ASSERT(true == reassembled);
+
   CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
 
   TEST_ASSERT(2 == base);             // Gap from 2-5
@@ -275,15 +283,23 @@ void test_fill_ltor()
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  test_empty();
-/*
-  test_insert_has_frag();
-  test_first_insert_has_no_gaps();
-  test_insert_gaps();
-  test_insert_one_then_gap();
-  test_insert_one_then_split_gap();
-  test_fill_rtol();
-  test_fill_ltor();
-*/
+  try
+  {
+    test_empty();
+    /*
+      test_insert_has_frag();
+      test_first_insert_has_no_gaps();
+      test_insert_gaps();
+      test_insert_one_then_gap();
+      test_insert_one_then_split_gap();
+      test_fill_rtol();
+      test_fill_ltor();
+    */
+  }
+  catch (char const *ex)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) Assertion failed.\n"), ex), -1);
+  }
   return 0;
 }

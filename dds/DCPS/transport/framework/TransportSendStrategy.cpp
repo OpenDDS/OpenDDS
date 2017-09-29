@@ -1690,10 +1690,10 @@ TransportSendStrategy::prepare_packet()
   this->header_complete_ = false;
 }
 
-void
+bool
 TransportSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  *mb << this->header_;
+  return *mb << this->header_;
 }
 
 void
@@ -1876,6 +1876,13 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
   }
 
   this->delayed_delivered_notification_queue_.push_back(std::make_pair(element, this->mode_));
+}
+
+void
+OpenDDS::DCPS::TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
+{
+  GuardType guard(this->lock_);
+  element->data_delivered();
 }
 
 size_t

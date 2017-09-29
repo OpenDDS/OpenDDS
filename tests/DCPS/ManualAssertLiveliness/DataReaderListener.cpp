@@ -90,8 +90,21 @@ void DataReaderListenerImpl::on_liveliness_changed (
     const DDS::LivelinessChangedStatus & status)
 {
   ++ num_liveliness_change_callbacks_;
+  DDS::Subscriber_var subscriber = reader->get_subscriber();
+  DDS::DomainParticipant_var participant = subscriber->get_participant();
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(
+      participant.in());
 
-  const OpenDDS::DCPS::RepoId id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(reader->get_subscriber()->get_participant())->get_repoid(status.last_publication_handle);
+  if (!dpi) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_liveliness_changed:")
+      ACE_TEXT(" failed to obtain DomainParticipantImpl.\n")));
+    return;
+  }
+
+  const OpenDDS::DCPS::RepoId id =
+    dpi->get_repoid(status.last_publication_handle);
   OpenDDS::DCPS::GuidConverter converter(id);
 
   ACE_DEBUG((LM_INFO, "DataReaderListenerImpl::on_liveliness_changed #%d\n"

@@ -10,6 +10,7 @@
 
 #include "dcps_export.h"
 #include "Definitions.h"
+#include "SequenceNumber.h"
 
 #include "PoolAllocator.h"
 

@@ -99,7 +99,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Creating participant\n")));
 
       *part =
-        dpf->create_participant(411,
+        dpf->create_participant(111,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -229,7 +229,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     e._tao_print_exception("Exception caught in main():");
     return -1;
   } catch (const OpenDDS::DCPS::Transport::Exception&) {
-    ACE_DEBUG((LM_ERROR, "Transport exception caught in subscriber main\n"));
+    ACE_ERROR((LM_ERROR, "Transport exception caught in subscriber main\n"));
     return -1;
   }
 

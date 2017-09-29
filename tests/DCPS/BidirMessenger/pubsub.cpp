@@ -105,7 +105,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(411,
+      dpf->create_participant(111,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -266,6 +266,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       for (int i = 0; i < num_topics; ++i) {
         DataReaderListenerImpl* listener_impl =
           dynamic_cast<DataReaderListenerImpl*>(listener[i].in());
+
+        if (!listener_impl) {
+          ACE_ERROR_RETURN((LM_ERROR,
+            ACE_TEXT("%N:%l main()")
+            ACE_TEXT(" ERROR: listener_impl is nil (dynamic_cast failed)!\n")), -1);
+        }
 
         while (listener_impl->num_reads() != expected_num_reads) {
           ACE_Time_Value small_time(0, 1000000);

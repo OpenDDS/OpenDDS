@@ -15,7 +15,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/scoped_ptr.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -55,7 +55,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         return 1;
       }
 
-      MessageTypeSupportImpl* servant = new MessageTypeSupportImpl();
+      MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != servant->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
@@ -125,10 +125,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
 
       {
         // Two threads use same datawriter to write different instances.
-        OpenDDS::DCPS::scoped_ptr<Writer> writer1 (new Writer (dw.in (), 99, SLEEP_DURATION));
-        OpenDDS::DCPS::scoped_ptr<Writer> writer2 (new Writer (dw.in (), 100, SLEEP_DURATION));
-        OpenDDS::DCPS::scoped_ptr<Writer> writer3 (new Writer (dw.in (), 101, SLEEP_DURATION));
-        OpenDDS::DCPS::scoped_ptr<Writer> writer4 (new Writer (dw2.in (), 101, SLEEP_DURATION));
+        OpenDDS::DCPS::unique_ptr<Writer> writer1 (new Writer (dw.in (), 99, SLEEP_DURATION));
+        OpenDDS::DCPS::unique_ptr<Writer> writer2 (new Writer (dw.in (), 100, SLEEP_DURATION));
+        OpenDDS::DCPS::unique_ptr<Writer> writer3 (new Writer (dw.in (), 101, SLEEP_DURATION));
+        OpenDDS::DCPS::unique_ptr<Writer> writer4 (new Writer (dw2.in (), 101, SLEEP_DURATION));
 
         writer1->start ();
         writer2->start ();

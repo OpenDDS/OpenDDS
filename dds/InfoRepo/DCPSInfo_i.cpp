@@ -57,6 +57,10 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
 
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 {
+  DCPS_IR_Domain_Map::iterator where;
+  for (where = this->domains_.begin(); where != this->domains_.end(); ++where) {
+    delete where->second;
+  }
 }
 
 int
@@ -569,8 +573,9 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_publication: ")
                ACE_TEXT("failed to add publication to participant %C.\n"),
                std::string(converter).c_str()));
+    delete pubPtr;
+    return false;
   }
-  // Deliberate fall through to next case.
 
   case 1:
     delete pubPtr;
@@ -892,8 +897,9 @@ TAO_DDS_DCPSInfo_i::add_subscription(
                ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::add_subscription: ")
                ACE_TEXT("failed to add subscription to participant %C.\n"),
                std::string(converter).c_str()));
+    delete subPtr;
+    return false;
   }
-  // Deliberate fall through to next case.
 
   case 1:
     delete subPtr;

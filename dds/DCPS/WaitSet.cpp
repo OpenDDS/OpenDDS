@@ -8,7 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "WaitSet.h"
 #include "ConditionImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 
 #include "ace/OS_NS_sys_time.h"
 
@@ -17,8 +17,8 @@ namespace {
 void copyInto(DDS::ConditionSeq& target,
               const DDS::WaitSet::ConditionSet& source)
 {
-  size_t size = source.size();
-  target.length(static_cast<CORBA::ULong>(size));
+  const CORBA::ULong size = static_cast<CORBA::ULong>(source.size());
+  target.length(size);
   CORBA::ULong index = 0;
 
   for (DDS::WaitSet::ConditionSet::const_iterator iter = source.begin(),

@@ -9,7 +9,7 @@
 
 #include "OfferedDeadlineWatchdog.h"
 #include "DataWriterImpl.h"
-#include "Qos_Helper.h"
+#include "Time_Helper.h"
 #include "ace/Recursive_Thread_Mutex.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -18,14 +18,13 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::OfferedDeadlineWatchdog(
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
   OpenDDS::DCPS::DataWriterImpl * writer_impl,
-  DDS::DataWriter_ptr writer,
   DDS::OfferedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
   : Watchdog(duration_to_time_value(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
   , writer_impl_(writer_impl)
-  , writer_(DDS::DataWriter::_duplicate(writer))
+  , writer_(DDS::DataWriter::_duplicate(writer_impl))
   , status_(status)
   , last_total_count_(last_total_count)
 {

@@ -93,7 +93,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                        part_user_data_len,
                                        reinterpret_cast<CORBA::Octet*>(PART_USER_DATA));
 
-      participant = dpf->create_participant(411,
+      participant = dpf->create_participant(111,
                                             partQos,
                                             DDS::DomainParticipantListener::_nil(),
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -150,6 +150,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
       DataReaderListenerImpl* listener_servant =
         dynamic_cast<DataReaderListenerImpl*>(listener.in());
+      if (!listener_servant)
+      {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: failed to obtain DataReaderListenerImpl!\n")), -1);
+      }
 
       DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
       DDS::DataReader_var bitdr =
@@ -159,6 +165,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil (listener.in ())) {
         cerr << "subscriber: listener is nil." << endl;
         exit(1);
+      }
+      if (!listener_servant) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
       }
 
       // Create the Datareaders
