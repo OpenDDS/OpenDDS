@@ -24,7 +24,6 @@
 #include <sstream>
 #include <string>
 
-
 // value ABSOLUTE_TIME_LOCAL, 1.2.x does not.  This technique uses
 // the ABSOLUTE_TIME_LOCAL value if it is present (1.3.x),
 // and uses BASE_NONE if it is not (1.2.x).  This must be in
@@ -573,48 +572,24 @@ namespace OpenDDS
     bool
     DDS_Dissector::dissect_heur()
     {
+      // Check for Magic Number in Header
       gint len = sizeof(DCPS::TransportHeader::DCPS_PROTOCOL);
       guint8* data = ws_tvb_get_ephemeral_string(tvb_, 0, len);
+      if (std::memcmp(data, DCPS::TransportHeader::DCPS_PROTOCOL, len) != 0) {
+        return false;
+      }
 
-      if (std::memcmp(data, DCPS::TransportHeader::DCPS_PROTOCOL, len) != 0)
-        {
-          return false;
-        }
-
-      if ( pinfo_->ptype == PT_TCP )
-        {
-          // A converstion is used to keep track of a series of frames
-          // that carry data between a connected pair of TCP endpoints.
-
-          if (!pinfo_->fd->flags.visited)
-            {
-              // adapted this from the implementation of
-              // find_or_create_converation which was not available prior to
-              // 1.4.x wireshark.
-              conversation_t *conv =
-                ::find_conversation(pinfo_->fd->num,
-                                    &pinfo_->src, &pinfo_->dst,
-                                    pinfo_->ptype,
-                                    pinfo_->srcport,
-                                    pinfo_->destport, 0);
-              if (conv == 0)
-                {
-                  // this is a new conversation
-                  conv = ::conversation_new(pinfo_->fd->num,
-                                            &pinfo_->src, &pinfo_->dst,
-                                            pinfo_->ptype,
-                                            pinfo_->srcport,
-                                            pinfo_->destport, 0);
-                }
-              ::conversation_set_dissector(conv, dcps_tcp_handle);
-            }
-
-          dissect_dds (tvb_, pinfo_, tree_ WS_DISSECTOR_EXTRA_ARG);
-        }
-      else
-        {
-          this->dissect ();
-        }
+      // This was simplified from WS 1.x code,
+      // And modified to avoid adding
+      if (pinfo_->ptype == PT_TCP)
+      {
+        // Compatibility Note: According to 1.x dissector,
+        // find_or_create_conversation didn't exist before WS 1.4.
+        conversation_t* conversation = ::find_or_create_conversation(pinfo_);
+        ::conversation_set_dissector(conversation, dcps_tcp_handle);
+      } else {
+        this->dissect();
+      }
 
       return true;
     }
