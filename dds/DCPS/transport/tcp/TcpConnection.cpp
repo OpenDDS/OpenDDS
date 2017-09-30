@@ -45,7 +45,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   : connected_(false)
   , is_connector_(false)
   , passive_reconnect_timer_id_(-1)
-  , reconnect_task_(this)
   , reconnect_state_(INIT_STATE)
   , last_reconnect_attempted_(ACE_Time_Value::zero)
   , transport_priority_(0)  // TRANSPORT_PRIORITY.value default value - 0.
@@ -68,7 +67,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , local_address_(config.local_address())
   , tcp_config_(&config)
   , passive_reconnect_timer_id_(-1)
-  , reconnect_task_(this)
   , reconnect_state_(INIT_STATE)
   , last_reconnect_attempted_(ACE_Time_Value::zero)
   , transport_priority_(priority)
@@ -381,8 +379,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   if (graceful) {
     this->link_->notify(DataLink::DISCONNECTED);
   } else {
-    ReconnectOpType op = DO_RECONNECT;
-    this->reconnect_task_.add(op);
+    this->spawn_reconnect_thread();
   }
 
   return 0;
@@ -875,7 +872,6 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
                ACE_TEXT(" should NOT be called by the connector side \n")));
   }
 
-  this->reconnect_task_.close(1);
   // connection->receive_strategy_ = this->receive_strategy_;
   // connection->send_strategy_ = this->send_strategy_;
   connection->remote_address_ = this->remote_address_;
@@ -936,8 +932,7 @@ OpenDDS::DCPS::TcpConnection::relink_from_send(bool do_suspend)
   if (do_suspend && this->send_strategy())
     this->send_strategy()->suspend_send();
 
-  ReconnectOpType op = DO_RECONNECT;
-  this->reconnect_task_.add(op);
+  this->spawn_reconnect_thread();
 }
 
 /// This is called by TcpReceiveStrategy when a disconnect
@@ -965,8 +960,6 @@ OpenDDS::DCPS::TcpConnection::shutdown()
 {
   DBG_ENTRY_LVL("TcpConnection","shutdown",6);
   this->shutdown_ = true;
-
-  this->reconnect_task_.close(1);
 }
 
 ACE_Event_Handler::Reference_Count
@@ -981,6 +974,41 @@ OpenDDS::DCPS::TcpConnection::remove_reference()
 {
   RcObject::_remove_ref();
   return 1;
+}
+
+void
+OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
+{
+  DBG_ENTRY_LVL("TcpConnection","spawn_reconnect_thread",6);
+
+  if (!shutdown_) {
+    // add the reference count to be picked up from the new thread
+    this->_add_ref();
+    if (ACE_Thread_Manager::instance()->spawn(&reconnect_thread_fun, this) == -1){
+      // we nnned to decrement the reference count when thread creation fails.
+      this->_remove_ref();
+    }
+  }
+}
+
+ACE_THR_FUNC_RETURN
+OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
+{
+  DBG_ENTRY_LVL("TcpConnection","reconnect_thread_fun",6);
+
+  TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
+
+  // Ignore all signals to avoid
+  //     ERROR: <something descriptive> Interrupted system call
+  // The main thread will handle signals.
+  sigset_t set;
+  ACE_OS::sigfillset(&set);
+  ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
+
+  if (connection->reconnect() == -1) {
+    connection->tear_link();
+  }
+  return 0;
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

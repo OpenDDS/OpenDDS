@@ -157,7 +157,6 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
     TransportSendStrategy_rch bss;
 
     if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
-      this->connection_.reset();
       return -1;
     } else {
       brs = this->receive_strategy_;
@@ -214,7 +213,6 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 
     if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
       released = true;
-      this->connection_.reset();
 
     } else {
       brs = this->receive_strategy_;

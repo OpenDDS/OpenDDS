@@ -33,8 +33,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TcpConnection
-  : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
-  , public RcObject {
+  : public RcObject
+  , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> {
 public:
 
   /// States are used during reconnecting.
@@ -150,6 +150,10 @@ private:
 
   const std::string& config_name() const;
 
+  void spawn_reconnect_thread();
+  static ACE_THR_FUNC_RETURN reconnect_thread_fun(void* conn);
+
+
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
@@ -182,12 +186,6 @@ private:
   /// that the timer is just scheduled once when there are multiple threads detect
   /// the lost connection.
   int passive_reconnect_timer_id_;
-
-  /// The task to do the reconnecting.
-  /// @todo We might need reuse the PerConnectionSynch thread
-  /// to do the reconnecting or create the reconnect task when
-  /// we need reconnect.
-  TcpReconnectTask reconnect_task_;
 
   /// The state indicates each step of the reconnecting.
   ReconnectState reconnect_state_;
