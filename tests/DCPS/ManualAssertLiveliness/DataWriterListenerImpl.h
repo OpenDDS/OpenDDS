@@ -54,11 +54,6 @@ public:
       const ::OpenDDS::DCPS::PublicationLostStatus & status
     );
 
-
-  virtual void on_connection_deleted (
-      ::DDS::DataWriter_ptr writer
-    );
-
   unsigned long num_liveliness_lost_callbacks() const
   {
     return num_liveliness_lost_callbacks_.value();

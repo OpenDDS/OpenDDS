@@ -46,8 +46,6 @@ public:
 
   TcpConnection_rch get_connection();
 
-  virtual bool issues_on_deleted_callback() const;
-
   virtual void pre_stop_i();
 
   /// Set release pending flag.

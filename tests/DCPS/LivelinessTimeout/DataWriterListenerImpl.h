@@ -52,11 +52,6 @@ public:
       const ::OpenDDS::DCPS::PublicationLostStatus & status
     );
 
-
-  virtual void on_connection_deleted (
-      ::DDS::DataWriter_ptr writer
-    );
-
   bool valid() const
   {
     return (test_valid_ && !test_failed_);

@@ -24,11 +24,4 @@ OpenDDS::DCPS::TcpDataLink::get_connection()
   return this->connection_.lock();
 }
 
-ACE_INLINE
-bool
-OpenDDS::DCPS::TcpDataLink::issues_on_deleted_callback() const
-{
-  return true;
-}
-
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

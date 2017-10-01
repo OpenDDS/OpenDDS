@@ -71,8 +71,3 @@ DataWriterListenerImpl::on_publication_lost (
 {
 }
 
-void
-DataWriterListenerImpl::on_connection_deleted (
-    ::DDS::DataWriter_ptr /* writer */)
-{
-}

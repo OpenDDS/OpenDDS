@@ -153,9 +153,3 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(reader) ;
   }
 
-  void DataReaderListenerImpl::on_connection_deleted (
-    ::DDS::DataReader_ptr
-    )
-  {
-  }
-

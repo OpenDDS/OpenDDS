@@ -134,11 +134,6 @@ Test::DataReaderListener::on_budget_exceeded (
 }
 
 void
-Test::DataReaderListener::on_connection_deleted (DDS::DataReader_ptr)
-{
-}
-
-void
 Test::DataReaderListener::display_partitions (
   DDS::DataReader_ptr reader) const
 {

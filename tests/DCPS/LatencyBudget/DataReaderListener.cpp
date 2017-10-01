@@ -145,8 +145,3 @@ void DataReaderListenerImpl::on_budget_exceeded (
   }
 }
 
-void DataReaderListenerImpl::on_connection_deleted (
-  DDS::DataReader_ptr)
-{
-  cerr << "DataReaderListenerImpl::on_connection_deleted" << endl;
-}

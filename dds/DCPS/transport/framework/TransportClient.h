@@ -127,9 +127,6 @@ protected:
 
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
-  void on_notification_of_connection_deletion(const RepoId& peerId);
-
-
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
@@ -264,7 +261,6 @@ private:
   ImplsType impls_;
   PendingMap pending_;
   DataLinkSet links_;
-  DataLinkIndex links_waiting_for_on_deleted_callback_;
 
   /// These are the links being used during the call to send(). This is made a member of the
   /// class to minimize allocation/deallocations of the data link set.

@@ -2599,19 +2599,6 @@ DataReaderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
   }
 }
 
-void
-DataReaderImpl::notify_connection_deleted(const RepoId& peerId)
-{
-  DBG_ENTRY_LVL("DataReaderImpl","notify_connection_deleted",6);
-  on_notification_of_connection_deletion(peerId);
-  // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-  // is given to this DataWriter then narrow() fails.
-  DataReaderListener_var the_listener = DataReaderListener::_narrow(this->listener_.in());
-
-  if (!CORBA::is_nil(the_listener.in())) {
-    the_listener->on_connection_deleted(this);
-  }
-}
 
 void
 DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,

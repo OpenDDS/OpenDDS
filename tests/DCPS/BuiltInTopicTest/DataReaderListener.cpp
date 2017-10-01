@@ -178,12 +178,6 @@ void DataReaderListenerImpl::on_subscription_lost (
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
 }
 
-void DataReaderListenerImpl::on_connection_deleted (
-  DDS::DataReader_ptr)
-{
-  cerr << "DataReaderListenerImpl::on_connection_deleted" << endl;
-}
-
 void DataReaderListenerImpl::set_builtin_datareader (
   DDS::DataReader_ptr builtin)
 {

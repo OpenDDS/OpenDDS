@@ -945,10 +945,6 @@ ReplayerImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
   ACE_UNUSED_ARG(handles);
 }
 
-void
-ReplayerImpl::notify_connection_deleted(const RepoId&)
-{
-}
 
 void
 ReplayerImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos_data) const

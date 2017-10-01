@@ -289,13 +289,6 @@ void DataReaderListenerImpl::on_budget_exceeded (
   cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
 }
 
-void DataReaderListenerImpl::on_connection_deleted (
-  ::DDS::DataReader_ptr)
-{
-  cerr << "DataReaderListenerImpl::on_connection_deleted" << endl;
-}
-
-
 bool DataReaderListenerImpl::received_all ()
 {
   return this->num_reads_ == num_expected_messages;

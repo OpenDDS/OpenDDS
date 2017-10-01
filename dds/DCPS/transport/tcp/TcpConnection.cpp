@@ -81,21 +81,6 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
 OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
-
-  // The Reconnect task belongs to the Connection object.
-  // Cleanup before leaving the house.
-  this->reconnect_task_.close(1);
-  //this->reconnect_task_.wait ();
-
-  if (!this->link_.is_nil()) {
-    if (Transport_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TcpConnection::~TcpConnection: about to notify link[%@] connection deleted\n"),
-                 this->link_.in()));
-    }
-    this->link_->notify_connection_deleted();
-  }
-
 }
 
 OpenDDS::DCPS::TcpSendStrategy*

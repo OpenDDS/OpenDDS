@@ -163,9 +163,3 @@ void DataReaderListenerImpl::on_budget_exceeded (
     cerr << "ERROR: Incorrected total_count_change <" << status.total_count_change << "> reported for budget exceeded" << endl;
   }
 }
-
-void DataReaderListenerImpl::on_connection_deleted (
-  DDS::DataReader_ptr)
-{
-  cerr << "DataReaderListenerImpl::on_connection_deleted" << endl;
-}

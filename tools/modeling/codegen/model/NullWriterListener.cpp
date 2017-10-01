@@ -104,15 +104,4 @@ OpenDDS::Model::NullWriterListener::on_publication_lost(
   }
 }
 
-void
-OpenDDS::Model::NullWriterListener::on_connection_deleted(
-  DDS::DataWriter_ptr /* writer */
-)
-{
-  if( OpenDDS::DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) NullWriterListener::on_connection_deleted()\n")));
-  }
-}
-
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

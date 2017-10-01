@@ -62,8 +62,6 @@ namespace Test {
         DDS::DataReader_ptr reader,
         const ::OpenDDS::DCPS::BudgetExceededStatus& status);
 
-    virtual void on_connection_deleted (DDS::DataReader_ptr);
-
     /// Number of messages received by this listener over its lifetime.
     int total_messages() const;
 

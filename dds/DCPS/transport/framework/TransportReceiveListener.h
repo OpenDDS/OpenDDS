@@ -31,7 +31,6 @@ public:
   virtual void notify_subscription_disconnected(const WriterIdSeq& pubids) = 0;
   virtual void notify_subscription_reconnected(const WriterIdSeq& pubids) = 0;
   virtual void notify_subscription_lost(const WriterIdSeq& pubids) = 0;
-  virtual void notify_connection_deleted(const RepoId& peerId) = 0;
 
   virtual void remove_associations(const WriterIdSeq& pubids, bool notify) = 0;
 

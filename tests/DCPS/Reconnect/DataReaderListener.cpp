@@ -166,8 +166,3 @@ void DataReaderListenerImpl::on_budget_exceeded (
 }
 
 
-void DataReaderListenerImpl::on_connection_deleted (
-  ::DDS::DataReader_ptr)
-{
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
-}

@@ -17,13 +17,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-bool
-DataLink::issues_on_deleted_callback() const
-{
-  return false;
-}
-
-ACE_INLINE
 Priority&
 DataLink::transport_priority()
 {

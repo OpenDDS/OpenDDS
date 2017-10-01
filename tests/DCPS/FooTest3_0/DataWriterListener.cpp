@@ -81,13 +81,3 @@ void DataWriterListenerImpl::on_publication_lost (
     ACE_UNUSED_ARG(status);
     // Add your implementation here
   }
-
-void DataWriterListenerImpl::on_connection_deleted (
-    ::DDS::DataWriter_ptr writer
-  )
-  {
-    ACE_UNUSED_ARG(writer) ;
-
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_connection_deleted \n")));
-  }

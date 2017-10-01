@@ -401,8 +401,6 @@ public:
   void notify_publication_reconnected(const ReaderIdSeq& subids);
   void notify_publication_lost(const ReaderIdSeq& subids);
 
-  virtual void notify_connection_deleted(const RepoId& peerId);
-
   /// Statistics counter.
   int         data_dropped_count_;
   int         data_delivered_count_;

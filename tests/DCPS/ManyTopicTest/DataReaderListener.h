@@ -105,11 +105,6 @@ public:
     ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
   }
 
-  virtual void on_connection_deleted(::DDS::DataReader_ptr)
-  {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
-  }
-
   void read(::DDS::DataReader_ptr reader);
 
   int num_samples() const { return num_samples_ ; }

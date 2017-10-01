@@ -421,10 +421,6 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
     if (links.is_nil())
       links = make_rch<DataLinkSet>();
     links->insert_link(rchandle_from(this));
-    {
-      GuardType guard(this->released_assoc_by_local_lock_);
-      released_assoc_by_local_[local_id].insert(remote_id);
-    }
     assoc_by_local_.erase(local_id);
   } else {
     ris.erase(remote_id);
@@ -697,8 +693,8 @@ DataLink::transport_shutdown()
   reactor->cancel_timer(this);
 
   this->stop();
-  this->send_listeners_.clear();
-  this->recv_listeners_.clear();
+  // this->send_listeners_.clear();
+  // this->recv_listeners_.clear();
   // Drop our reference to the TransportImpl object
 }
 
@@ -846,61 +842,7 @@ DataLink::notify(ConnectionNotice notice)
   }
 }
 
-void DataLink::notify_connection_deleted()
-{
-  // Locking:
-  // - if released_assoc_by_local_lock_ and pub_sub_maps_lock_ are both held at
-  //   the same time, pub_sub_maps_lock_ must be locked first
-  // - pub_sub_maps_lock_ must not be held during the callbacks to
-  //   notify_connection_deleted() which may re-enter the DataLink
-  AssocByLocal released;
-  {
-    GuardType guard(released_assoc_by_local_lock_);
-    released = released_assoc_by_local_;
-  }
 
-  RepoIdSet found;
-  for (AssocByLocal::iterator iter = released.begin();
-       iter != released.end(); ++iter) {
-
-    TransportSendListener_rch tsl;
-    {
-      GuardType guard(pub_sub_maps_lock_);
-      tsl = send_listener_for(iter->first);
-    }
-
-    if (tsl) {
-      for (RepoIdSet::iterator ris_it = iter->second.begin();
-           ris_it != iter->second.end(); ++ris_it) {
-        tsl->notify_connection_deleted(*ris_it);
-      }
-      found.insert(iter->first);
-      continue;
-    }
-
-    TransportReceiveListener_rch trl;
-    {
-      GuardType guard(pub_sub_maps_lock_);
-      trl = recv_listener_for(iter->first);
-    }
-
-    if (trl) {
-      for (RepoIdSet::iterator ris_it = iter->second.begin();
-           ris_it != iter->second.end(); ++ris_it) {
-        trl->notify_connection_deleted(*ris_it);
-      }
-      found.insert(iter->first);
-    }
-  }
-
-  GuardType guard(released_assoc_by_local_lock_);
-  for (RepoIdSet::const_iterator it = found.begin(); it != found.end(); ++it) {
-    const AssocByLocal::iterator iter = released_assoc_by_local_.find(*it);
-    if (iter != released_assoc_by_local_.end()) {
-      iter->second.clear();
-    }
-  }
-}
 
 void
 DataLink::pre_stop_i()

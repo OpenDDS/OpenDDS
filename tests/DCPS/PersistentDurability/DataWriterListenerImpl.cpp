@@ -64,9 +64,3 @@ DataWriterListenerImpl::on_publication_lost (
     ::OpenDDS::DCPS::PublicationLostStatus const & /* status */)
 {
 }
-
-void
-DataWriterListenerImpl::on_connection_deleted (
-    ::DDS::DataWriter_ptr /* writer */)
-{
-}

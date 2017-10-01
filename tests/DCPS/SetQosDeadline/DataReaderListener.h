@@ -60,9 +60,6 @@ public:
     DDS::DataReader_ptr,
     const ::OpenDDS::DCPS::BudgetExceededStatus& status);
 
-  virtual void on_connection_deleted (
-    DDS::DataReader_ptr);
-
   long num_reads() const {
     return num_reads_;
   }

@@ -73,10 +73,6 @@ public:
       const ::OpenDDS::DCPS::BudgetExceededStatus& status
     );
 
-  virtual void on_connection_deleted (
-    ::DDS::DataReader_ptr reader
-  );
-
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
