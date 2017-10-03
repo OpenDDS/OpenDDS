@@ -8,10 +8,13 @@ additional information.
 
 By default, OpenDDS will not publish monitoring data.  To enable
 monitoring, each application process must link with the monitoring
-library (OpenDDS_monitor) and initialize the monitor factory
-immediately after initializing the Domain Participant Factory.
-Here is the code for this:
-    TheServiceParticipant->monitor_factory_->initialize();
+library (OpenDDS_monitor) and initialize the monitor factory.
+When using dynamic libraries, this can be done using the 
+DCPSMonitor option from the command line or configuration file.
+When using static libraries, you will also need to include the
+dds/monitor/MonitorFactoryImpl.h header to force the monitor
+library to be linked.
+
 See the code in $DDS_ROOT/tests/DCPS/Monitor for examples of
 publisher and subscriber processes that enable monitoring.
 
