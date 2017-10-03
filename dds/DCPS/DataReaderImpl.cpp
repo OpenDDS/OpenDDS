@@ -54,7 +54,6 @@ DataReaderImpl::DataReaderImpl()
 : rd_allocator_(0),
   qos_(TheServiceParticipant->initial_DataReaderQos()),
   reverse_sample_lock_(sample_lock_),
-  participant_servant_(0),
   topic_servant_(0),
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ (false),
@@ -67,7 +66,6 @@ DataReaderImpl::DataReaderImpl()
     topic_desc_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
-    subscriber_servant_(0),
     end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
@@ -262,21 +260,19 @@ void DataReaderImpl::init(
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
-  participant_servant_ = participant;
+  participant_servant_ = *participant;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (is_exclusive_ownership_) {
-    owner_manager_ = participant_servant_->ownership_manager ();
+    owner_manager_ = participant->ownership_manager ();
   }
 #endif
+  domain_id_ = participant->get_domain_id();
+  dp_id_ = participant->get_id();
 
-  domain_id_ = participant_servant_->get_domain_id();
+  subscriber_servant_ = *subscriber;
 
-  // Only store the subscriber pointer, since it is our parent, we
-  // will exist as long as it does.
-  subscriber_servant_ = subscriber;
-
-  if (this->subscriber_servant_->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
+  if (subscriber->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::init() - ")
         ACE_TEXT("failed to get SubscriberQos\n")));
@@ -286,7 +282,11 @@ void DataReaderImpl::init(
 DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
 {
-  return this->participant_servant_->id_to_handle(subscription_id_);
+  using namespace OpenDDS::DCPS;
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (participant)
+    return participant->id_to_handle(subscription_id_);
+  return 0;
 }
 
 void
@@ -442,7 +442,12 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
   if (!is_bit_) {
 
-    DDS::InstanceHandle_t handle = participant_servant_->id_to_handle(remote_id);
+    RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+
+    if (!participant)
+      return;
+
+    DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
 
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
@@ -508,7 +513,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   if (!active) {
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
 
-    disco->association_complete(domain_id_, participant_servant_->get_id(),
+    disco->association_complete(domain_id_, dp_id_,
         subscription_id_, remote_id);
   }
 
@@ -942,14 +947,19 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
     } else {
       Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
       DDS::SubscriberQos subscriberQos;
-      this->subscriber_servant_->get_qos(subscriberQos);
-      const bool status =
+
+      RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+      bool status = false;
+      if (subscriber) {
+        subscriber->get_qos(subscriberQos);
+        status =
           disco->update_subscription_qos(
-              this->participant_servant_->get_domain_id(),
-              this->participant_servant_->get_id(),
+              domain_id_,
+              dp_id_,
               this->subscription_id_,
               qos,
               subscriberQos);
+      }
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) DataReaderImpl::set_qos, ")
@@ -1031,7 +1041,7 @@ DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 
 DDS::Subscriber_ptr DataReaderImpl::get_subscriber()
 {
-  return DDS::Subscriber::_duplicate(subscriber_servant_);
+  return get_subscriber_servant()._retn();
 }
 
 DDS::ReturnCode_t
@@ -1196,8 +1206,13 @@ DataReaderImpl::get_matched_publication_data(
 
   DDS::PublicationBuiltinTopicDataSeq data;
 
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+
+  if (!participant)
+    return DDS::RETCODE_ERROR;
+
   const DDS::ReturnCode_t ret
-  = hh.instance_handle_to_bit_data(participant_servant_,
+  = hh.instance_handle_to_bit_data(participant.in(),
       BUILT_IN_PUBLICATION_TOPIC,
       publication_handle,
       data);
@@ -1223,7 +1238,12 @@ DataReaderImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (!this->subscriber_servant_->is_enabled()) {
+  RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+  if (!subscriber) {
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (!subscriber->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -1324,11 +1344,11 @@ DataReaderImpl::enable()
 #endif
 
     DDS::SubscriberQos sub_qos;
-    this->subscriber_servant_->get_qos(sub_qos);
+    subscriber->get_qos(sub_qos);
 
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
-            this->participant_servant_->get_id(),
+            this->dp_id_,
             this->topic_servant_->get_id(),
             this,
             this->qos_,
@@ -1349,7 +1369,7 @@ DataReaderImpl::enable()
   if (topic_servant_) {
     const CORBA::String_var name = topic_servant_->get_name();
     DDS::ReturnCode_t return_value =
-        this->subscriber_servant_->reader_enabled(name.in(), this);
+        subscriber->reader_enabled(name.in(), this);
 
     if (this->monitor_) {
       this->monitor_->report();
@@ -1469,7 +1489,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     if (this->filter_sample(header)) break;
 
     // This adds the reader to the set/list of readers with data.
-    this->subscriber_servant_->data_received(this);
+    RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+    if (subscriber)
+      subscriber->data_received(this);
 
     // Only gather statistics about real samples, not registration data, etc.
     if (header.message_id_ == SAMPLE_DATA) {
@@ -1718,10 +1740,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
 }
 
-EntityImpl*
+RcHandle<EntityImpl>
 DataReaderImpl::parent() const
 {
-  return this->subscriber_servant_;
+  return this->subscriber_servant_.lock();
 }
 
 bool
@@ -1752,9 +1774,10 @@ void DataReaderImpl::notify_read_conditions()
   }
 }
 
-SubscriberImpl* DataReaderImpl::get_subscriber_servant()
+RcHandle<SubscriberImpl>
+DataReaderImpl::get_subscriber_servant()
 {
-  return subscriber_servant_;
+  return subscriber_servant_.lock();
 }
 
 RepoId DataReaderImpl::get_subscription_id() const
@@ -1861,8 +1884,9 @@ DataReaderImpl::listener_for(DDS::StatusKind kind)
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
-  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    return subscriber_servant_->listener_for(kind);
+  RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+  if (subscriber && (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0)) {
+    return subscriber->listener_for(kind);
 
   } else {
     return DDS::DataReaderListener::_duplicate(listener_.in());
@@ -2500,14 +2524,19 @@ DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 DDS::InstanceHandle_t
 DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 {
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (!participant)
+    return 0;
+
   if (is_bit()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
     CORBA::String_var topic = topic_servant_->get_name();
-    RepoId id = disc->bit_key_to_repo_id(participant_servant_, topic, key);
-    return participant_servant_->id_to_handle(id);
+
+    RepoId id = disc->bit_key_to_repo_id(participant.in(), topic, key);
+    return participant->id_to_handle(id);
 
   } else {
-    return participant_servant_->id_to_handle(GUID_UNKNOWN);
+    return participant->id_to_handle(GUID_UNKNOWN);
   }
 }
 
@@ -2624,8 +2653,11 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
 
   hdls.length(num_wrts);
 
-  for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (participant) {
+    for (CORBA::ULong i = 0; i < num_wrts; ++i) {
+      hdls[i] = participant->id_to_handle(ids[i]);
+    }
   }
 }
 
@@ -2853,7 +2885,9 @@ void DataReaderImpl::notify_liveliness_change()
 void DataReaderImpl::post_read_or_take()
 {
   set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
-  get_subscriber_servant()->set_status_changed_flag(
+  RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+  if (subscriber)
+    subscriber->set_status_changed_flag(
       DDS::DATA_ON_READERS_STATUS, false);
 }
 
@@ -2889,7 +2923,7 @@ DataReaderImpl::get_topic_id()
 OpenDDS::DCPS::RepoId
 DataReaderImpl::get_dp_id()
 {
-  return this->participant_servant_->get_id();
+  return dp_id_;
 }
 
 void
@@ -2963,9 +2997,10 @@ bool DataReaderImpl::verify_coherent_changes_completion (WriterInfo* writer)
   // verify current coherent changes from single writer
   Coherent_State state = writer->coherent_change_received();
   if (writer->group_coherent_) { // GROUP coherent
-    if (state != NOT_COMPLETED_YET) {
+    RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+    if (subscriber && state != NOT_COMPLETED_YET) {
       // verify if all readers received complete coherent changes in a group.
-      this->subscriber_servant_->coherent_change_received (
+      subscriber->coherent_change_received (
           writer->publisher_id_, this, state);
     }
   }
@@ -3084,25 +3119,29 @@ DataReaderImpl::coherent_change_received (RepoId publisher_id, Coherent_State& r
 void
 DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
 {
-  this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
+  RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+  if (!subscriber)
+    return;
+
+  subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
   this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
 
   ::DDS::SubscriberListener_var sub_listener =
-      this->subscriber_servant_->listener_for(::DDS::DATA_ON_READERS_STATUS);
+      subscriber->listener_for(::DDS::DATA_ON_READERS_STATUS);
   if (!CORBA::is_nil(sub_listener.in()))
   {
     if (reader == this) {
       // Release the sample_lock before listener callback.
       ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-      sub_listener->on_data_on_readers(this->subscriber_servant_);
+      sub_listener->on_data_on_readers(subscriber.in());
     }
 
     this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-    this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+    subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
   }
   else
   {
-    this->subscriber_servant_->notify_status_condition();
+    subscriber->notify_status_condition();
 
     ::DDS::DataReaderListener_var listener =
         this->listener_for (::DDS::DATA_AVAILABLE_STATUS);
@@ -3118,7 +3157,7 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
       }
 
       set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-      this->subscriber_servant_->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
     }
     else
     {
@@ -3200,8 +3239,8 @@ void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
 {
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-  disco->update_subscription_params(participant_servant_->get_domain_id(),
-      participant_servant_->get_id(),
+  disco->update_subscription_params(domain_id_,
+      dp_id_,
       subscription_id_,
       params);
 }

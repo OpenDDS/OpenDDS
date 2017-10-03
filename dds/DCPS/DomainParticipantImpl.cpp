@@ -1838,7 +1838,7 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
 
 #endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
-DomainParticipantImpl::RepoIdSequence::RepoIdSequence(RepoId& base) :
+DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const RepoId& base) :
   base_(base),
   serial_(0),
   builder_(base_)

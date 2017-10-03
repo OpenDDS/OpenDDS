@@ -77,7 +77,7 @@ TransportClient::enable_transport(bool reliable, bool durable)
 
   // 1. If this object is an Entity, check if a TransportConfig has been
   //    bound either directly to this entity or to a parent entity.
-  for (const EntityImpl* ent = dynamic_cast<const EntityImpl*>(this);
+  for (RcHandle<EntityImpl> ent = rchandle_from(dynamic_cast<EntityImpl*>(this));
        ent && tc.is_nil(); ent = ent->parent()) {
     tc = ent->transport_config();
   }

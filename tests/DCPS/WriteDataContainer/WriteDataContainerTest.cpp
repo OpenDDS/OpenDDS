@@ -81,7 +81,7 @@ public:
 
   void substitute_dw_particpant(DataWriterImpl* dw, TestParticipantImpl* tp)
   {
-    dw->participant_servant_ = tp;
+    dw->participant_servant_ = *tp;
   }
 
   ACE_Message_Block* dds_marshal(Test::SimpleDataWriterImpl* dw,

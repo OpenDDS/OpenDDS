@@ -152,7 +152,7 @@ public:
                                 Coherent_State& group_state);
 #endif
 
-  virtual EntityImpl* parent() const;
+  virtual RcHandle<EntityImpl> parent() const;
 
   static bool validate_datareader_qos(const DDS::DataReaderQos & qos,
                                       const DDS::DataReaderQos & default_qos,
@@ -192,9 +192,10 @@ private:
   OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var) multitopic_reader_map_;
 #endif
 
-  DomainParticipantImpl*       participant_;
+  WeakRcHandle<DomainParticipantImpl> participant_;
 
   DDS::DomainId_t              domain_id_;
+  RepoId                       dp_id_;
 
   /// Bound (or initial reservation) of raw latency buffers.
   unsigned int raw_latency_buffer_size_;

@@ -42,7 +42,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   change_depth_(0),
 #endif
   domain_id_(participant->get_domain_id()),
-  participant_(participant),
+  participant_(*participant),
   suspend_depth_count_(0),
   sequence_number_(),
   aggregation_period_start_(ACE_Time_Value::zero),
@@ -284,10 +284,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
   // not just unregister but remove any pending writes/sends.
   dw_servant->unregister_all();
+
+  RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
+
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_publication(
       this->domain_id_,
-      this->participant_->get_id(),
+      participant->get_id(),
       publication_id)) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
@@ -298,7 +301,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   // Decrease ref count after the servant is removed from the maps.
   dw_servant->_remove_ref();
 
-  participant_->remove_adjust_liveliness_timers();
+  participant->remove_adjust_liveliness_timers();
 
   return DDS::RETCODE_OK;
 }
@@ -424,13 +427,16 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
 
       while (iter != idToQosMap.end()) {
         Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-        const bool status
-        = disco->update_publication_qos(
-            participant_->get_domain_id(),
-            participant_->get_id(),
-            iter->first,
-            iter->second,
-            this->qos_);
+        bool status = false;
+
+        RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
+        if (participant)
+          status = disco->update_publication_qos(
+              participant->get_domain_id(),
+              participant->get_id(),
+              iter->first,
+              iter->second,
+              this->qos_);
 
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -722,7 +728,7 @@ PublisherImpl::wait_for_acknowledgments(
 DDS::DomainParticipant_ptr
 PublisherImpl::get_participant()
 {
-  return DDS::DomainParticipant::_duplicate(participant_);
+  return participant_.lock()._retn();
 }
 
 DDS::ReturnCode_t
@@ -768,7 +774,8 @@ PublisherImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (this->participant_->is_enabled() == false) {
+  RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
+  if (!participant || participant->is_enabled() == false) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -848,8 +855,13 @@ PublisherImpl::listener_for(DDS::StatusKind kind)
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
+  RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
+
+  if (!participant)
+    return 0;
+
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    return participant_->listener_for(kind);
+    return participant->listener_for(kind);
 
   } else {
     return DDS::PublisherListener::_duplicate(listener_.in());
@@ -912,10 +924,10 @@ PublisherImpl::get_publication_ids(PublicationIdVec& pubs)
   }
 }
 
-EntityImpl*
+RcHandle<EntityImpl>
 PublisherImpl::parent() const
 {
-  return this->participant_;
+  return this->participant_.lock();
 }
 
 bool

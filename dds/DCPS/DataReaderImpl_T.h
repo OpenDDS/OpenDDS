@@ -890,8 +890,8 @@ namespace OpenDDS {
       DataSampleHeader header;
       header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       bool just_registered;
-      MessageTypeWithAllocator* data = new (*data_allocator_) MessageTypeWithAllocator(sample);
-      store_instance_data(data, header, instance, just_registered, filtered);
+      unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator_) MessageTypeWithAllocator(sample));
+      store_instance_data(move(data), header, instance, just_registered, filtered);
       if (instance) inst = instance->instance_handle_;
     }
 
@@ -916,9 +916,9 @@ namespace OpenDDS {
       header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
         ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
       bool just_registered, filtered;
-      MessageTypeWithAllocator* data =  new (*data_allocator_) MessageTypeWithAllocator;
+      unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator_) MessageTypeWithAllocator);
       get_key_value(*data, instance);
-      store_instance_data(data, header, si, just_registered, filtered);
+      store_instance_data(move(data), header, si, just_registered, filtered);
       if (!filtered)
       {
         notify_read_conditions();
@@ -1025,7 +1025,7 @@ protected:
                              bool & filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    MessageTypeWithAllocator* data = new (*data_allocator_) MessageTypeWithAllocator;
+    unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator_) MessageTypeWithAllocator);
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
@@ -1075,7 +1075,7 @@ protected:
     }
 #endif
 
-    store_instance_data(data, sample.header_, instance, just_registered, filtered);
+    store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
   }
 
   virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -1588,7 +1588,7 @@ return DDS::RETCODE_NO_DATA;
 }
 
 void store_instance_data(
-                         MessageTypeWithAllocator *instance_data,
+                         unique_ptr<MessageTypeWithAllocator> instance_data,
                          const OpenDDS::DCPS::DataSampleHeader& header,
                          OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr,
                          bool & just_registered,
@@ -1613,8 +1613,7 @@ void store_instance_data(
 
   if ((is_dispose_msg || is_unregister_msg) && it == instance_map_.end())
   {
-    delete instance_data;
-    return;
+     return;
   }
 
 
@@ -1647,7 +1646,6 @@ void store_instance_data(
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
 
-      delete instance_data;
       return;
     }
 
@@ -1677,7 +1675,7 @@ void store_instance_data(
 #endif
 
     just_registered = true;
-    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data));
+    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data.get()));
     handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
     OpenDDS::DCPS::SubscriptionInstance_rch instance =
       OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
@@ -1770,10 +1768,8 @@ void store_instance_data(
         filtered = true;
         if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
           if (filter_delayed_handler_.in()) {
-            filter_delayed_handler_->delay_sample(handle, instance_data, header, just_registered, filter_time_expired);
+            filter_delayed_handler_->delay_sample(handle, instance_data.release(), header, just_registered, filter_time_expired);
           }
-          // handed off to filter_delayed_handler_, so do not free
-          instance_data = 0;
         }
       } else {
         // nothing time based filtered now
@@ -1784,22 +1780,20 @@ void store_instance_data(
 
       if (filtered)
       {
-        delete instance_data;
         return;
       }
     }
 
-    finish_store_instance_data(instance_data, header, instance_ptr, is_dispose_msg, is_unregister_msg);
+    finish_store_instance_data(move(instance_data), header, instance_ptr, is_dispose_msg, is_unregister_msg);
   }
   else
   {
     instance_ptr = this->get_handle_instance(handle);
     instance_ptr->instance_state_.lively(header.publication_id_);
-    delete instance_data;
   }
 }
 
-void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const DataSampleHeader& header,
+void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data, const DataSampleHeader& header,
   SubscriptionInstance_rch instance_ptr, bool is_dispose_msg, bool is_unregister_msg )
 {
   if ((this->qos_.resource_limits.max_samples_per_instance !=
@@ -1839,7 +1833,6 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
         sample_rejected_status_.total_count_change = 0;
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
-      delete instance_data;
       return;
     }
     else if (!is_dispose_msg && !is_unregister_msg)
@@ -1899,7 +1892,6 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
         }  // do we want to do something if listener is nil???
         notify_status_condition_no_sample_lock();
 
-        delete instance_data;
         return;
       }
       else if (!is_dispose_msg && !is_unregister_msg)
@@ -1915,8 +1907,7 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
 
   if (is_dispose_msg || is_unregister_msg)
   {
-    delete instance_data;
-    instance_data = 0;
+    instance_data.reset();
   }
 
   bool event_notify = false;
@@ -1941,7 +1932,7 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
   }
 
   OpenDDS::DCPS::ReceivedDataElement *ptr =
-    new (*rd_allocator_.get()) OpenDDS::DCPS::ReceivedDataElementWithType<MessageTypeWithAllocator>(header,instance_data, &this->sample_lock_);
+    new (*rd_allocator_.get()) OpenDDS::DCPS::ReceivedDataElementWithType<MessageTypeWithAllocator>(header,instance_data.release(), &this->sample_lock_);
 
   ptr->disposed_generation_count_ =
     instance_ptr->instance_state_.disposed_generation_count();
@@ -1988,9 +1979,12 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (! ptr->coherent_change_) {
 #endif
-    OpenDDS::DCPS::SubscriberImpl* sub = get_subscriber_servant ();
+    RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
+    if (!sub)
+      return;
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
+
     set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, true);
 
     DDS::SubscriberListener_var sub_listener =
@@ -1999,7 +1993,7 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
       {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-        sub_listener->on_data_on_readers(sub);
+        sub_listener->on_data_on_readers(sub.in());
         sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
       }
     else
@@ -2269,14 +2263,14 @@ private:
         const bool NOT_DISPOSE_MSG = false;
         const bool NOT_UNREGISTER_MSG = false;
         // clear the message, since ownership is being transfered to finish_store_instance_data.
-        MessageTypeWithAllocator* const instance_data = static_cast<MessageTypeWithAllocator*>(data->second.message);
+        unique_ptr<MessageTypeWithAllocator> instance_data (static_cast<MessageTypeWithAllocator*>(data->second.message));
         data->second.message = 0;
         instance->last_accepted_ = ACE_OS::gettimeofday();
         const DataSampleHeader_ptr header = data->second.header;
         const bool new_instance = data->second.new_instance;
 
         // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-        data_reader_impl->finish_store_instance_data(instance_data, *header, instance, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
+        data_reader_impl->finish_store_instance_data(move(instance_data), *header, instance, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
 
         data_reader_impl->accept_sample_processing(instance, *header, new_instance);
       } else {

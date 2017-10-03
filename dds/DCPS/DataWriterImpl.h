@@ -203,7 +203,7 @@ public:
     const DDS::DataWriterQos &            qos,
     DDS::DataWriterListener_ptr           a_listener,
     const DDS::StatusMask &               mask,
-    OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
+    WeakRcHandle<OpenDDS::DCPS::DomainParticipantImpl> participant_servant,
     OpenDDS::DCPS::PublisherImpl*         publisher_servant);
 
   void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
@@ -439,7 +439,7 @@ public:
    */
   DDS::InstanceHandle_t get_next_handle();
 
-  virtual EntityImpl* parent() const;
+  virtual RcHandle<EntityImpl> parent() const;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   bool filter_out(const DataSampleElement& elt,
@@ -489,14 +489,14 @@ protected:
 
   /// The participant servant which creats the publisher that
   /// creates this datawriter.
-  DomainParticipantImpl*          participant_servant_;
+  WeakRcHandle<DomainParticipantImpl>          participant_servant_;
 
   //This lock should be used to protect access to reader_info_
   ACE_Thread_Mutex reader_info_lock_;
 
   struct ReaderInfo {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-    DomainParticipantImpl* participant_;
+    WeakRcHandle<DomainParticipantImpl> participant_;
     OPENDDS_STRING filter_class_name_;
     OPENDDS_STRING filter_;
     DDS::StringSeq expression_params_;
@@ -505,7 +505,7 @@ protected:
     SequenceNumber expected_sequence_;
     bool durable_;
     ReaderInfo(const char* filter_class_name, const char* filter, const DDS::StringSeq& params,
-               DomainParticipantImpl* participant, bool durable);
+               WeakRcHandle<DomainParticipantImpl> participant, bool durable);
     ~ReaderInfo();
   };
 
@@ -580,8 +580,9 @@ private:
   DDS::DataWriterListener_var     listener_;
   /// The domain id.
   DDS::DomainId_t                 domain_id_;
+  RepoId                          dp_id_;
   /// The publisher servant which creates this datawriter.
-  PublisherImpl*                  publisher_servant_;
+  WeakRcHandle<PublisherImpl>     publisher_servant_;
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.

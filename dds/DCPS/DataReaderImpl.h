@@ -513,7 +513,7 @@ public:
   // Set the instance related writers to reevaluate the owner.
   void reset_ownership (DDS::InstanceHandle_t instance);
 
-  virtual EntityImpl* parent() const;
+  virtual RcHandle<EntityImpl> parent() const;
 
   void disable_transport();
 
@@ -533,7 +533,7 @@ protected:
 
   void prepare_to_delete();
 
-  SubscriberImpl* get_subscriber_servant();
+  RcHandle<SubscriberImpl> get_subscriber_servant();
 
   void post_read_or_take();
 
@@ -606,7 +606,7 @@ protected:
   typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_sample_lock_;
 
-  DomainParticipantImpl*       participant_servant_;
+  WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicImpl*                   topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -674,7 +674,11 @@ private:
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
-  SubscriberImpl*              subscriber_servant_;
+  RepoId                       dp_id_;
+  // subscriber_servant_ has to be a weak pinter because it may be used from the
+  // transport reactor thread and that thread doesn't have the owenership of the
+  // the subscriber_servant_ object.
+  WeakRcHandle<SubscriberImpl>              subscriber_servant_;
   RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
   RcHandle<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 

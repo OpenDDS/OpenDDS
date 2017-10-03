@@ -144,7 +144,7 @@ public:
 
   bool is_suspended() const;
 
-  virtual EntityImpl* parent() const;
+  virtual RcHandle<EntityImpl> parent() const;
   static bool validate_datawriter_qos(const DDS::DataWriterQos& qos,
                                          const DDS::DataWriterQos& default_qos,
                                          DDS::Topic_ptr a_topic,
@@ -186,7 +186,7 @@ private:
   /// Domain in which we are contained.
   DDS::DomainId_t              domain_id_;
   /// The DomainParticipant servant that owns this Publisher.
-  DomainParticipantImpl*       participant_;
+  WeakRcHandle<DomainParticipantImpl>       participant_;
   /// The suspend depth count.
   CORBA::Short                 suspend_depth_count_;
   /// Unique sequence number used when the scope_access = GROUP.

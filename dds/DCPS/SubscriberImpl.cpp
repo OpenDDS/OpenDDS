@@ -49,8 +49,9 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
   qos_(qos),
   default_datareader_qos_(TheServiceParticipant->initial_DataReaderQos()),
   listener_mask_(mask),
-  participant_(participant),
+  participant_(*participant),
   domain_id_(participant->get_domain_id()),
+  dp_id_(participant->get_id()),
   raw_latency_buffer_size_(0),
   raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
   monitor_(0),
@@ -114,6 +115,9 @@ SubscriberImpl::create_datareader(
   }
 
   DDS::DataReaderQos dr_qos;
+  RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
+  if (!participant)
+    return DDS::DataReader::_nil();
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
@@ -214,11 +218,12 @@ SubscriberImpl::create_datareader(
   dr_servant->raw_latency_buffer_size() = this->raw_latency_buffer_size_;
   dr_servant->raw_latency_buffer_type() = this->raw_latency_buffer_type_;
 
+
   dr_servant->init(topic_servant,
                    dr_qos,
                    a_listener,
                    mask,
-                   participant_,
+                   participant.in(),
                    this);
 
   if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
@@ -346,7 +351,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   RepoId subscription_id = dr_servant->get_subscription_id();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
-                                  participant_->get_id(),
+                                  this->dp_id_,
                                   subscription_id)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -621,7 +626,7 @@ SubscriberImpl::set_qos(
         Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
         const bool status
           = disco->update_subscription_qos(this->domain_id_,
-                                           participant_->get_id(),
+                                           this->dp_id_,
                                            iter->first,
                                            iter->second,
                                            this->qos_);
@@ -749,7 +754,7 @@ SubscriberImpl::end_access()
 DDS::DomainParticipant_ptr
 SubscriberImpl::get_participant()
 {
-  return DDS::DomainParticipant::_duplicate(participant_);
+  return participant_.lock()._retn();
 }
 
 DDS::ReturnCode_t
@@ -799,7 +804,8 @@ SubscriberImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (this->participant_->is_enabled() == false) {
+  RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
+  if (!participant || participant->is_enabled() == false) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -895,8 +901,12 @@ SubscriberImpl::listener_for(::DDS::StatusKind kind)
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
+  RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
+  if (! participant)
+    return 0;
+
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    return participant_->listener_for(kind);
+    return participant->listener_for(kind);
 
   } else {
     return DDS::SubscriberListener::_duplicate(listener_.in());
@@ -1001,10 +1011,10 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
 }
 #endif
 
-EntityImpl*
+RcHandle<EntityImpl>
 SubscriberImpl::parent() const
 {
-  return this->participant_;
+  return this->participant_.lock();
 }
 
 bool
