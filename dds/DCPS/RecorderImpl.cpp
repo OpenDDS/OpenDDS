@@ -121,10 +121,6 @@ RecorderImpl::cleanup()
 
   this->remove_all_associations();
 
-  if (topic_servant_) {
-    topic_servant_->remove_entity_ref();
-    topic_servant_->_remove_ref();
-  }
   {
     ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
                    read_guard,
@@ -160,9 +156,6 @@ void RecorderImpl::init(
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
-    topic_servant_->_add_ref();
-
-    topic_servant_->add_entity_ref();
   }
 
   CORBA::String_var topic_name = a_topic_desc->get_name();

@@ -45,7 +45,7 @@ public:
   RequestedDeadlineWatchdog(
     lock_type & lock,
     DDS::DeadlineQosPolicy qos,
-    OpenDDS::DCPS::DataReaderImpl * reader_impl,
+    DataReaderImpl& reader_impl,
     DDS::RequestedDeadlineMissedStatus & status,
     CORBA::Long & last_total_count);
 
@@ -79,7 +79,7 @@ private:
 
   /// Pointer to the @c DataReaderImpl object from which the
   /// @c DataReaderListener is obtained.
-  OpenDDS::DCPS::DataReaderImpl* const reader_impl_;
+  WeakRcHandle<DataReaderImpl> reader_impl_;
 
   /// Reference to DataReader passed to listener when the deadline
   /// expires.

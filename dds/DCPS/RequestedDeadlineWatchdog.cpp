@@ -19,7 +19,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
-  OpenDDS::DCPS::DataReaderImpl * reader_impl,
+  OpenDDS::DCPS::DataReaderImpl & reader_impl,
   DDS::RequestedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
   : Watchdog(duration_to_time_value(qos.period))

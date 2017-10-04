@@ -74,12 +74,9 @@ namespace OpenDDS {
       for (typename InstanceMap::iterator it = instance_map_.begin();
            it != instance_map_.end(); ++it)
         {
-          OpenDDS::DCPS::SubscriptionInstance_rch ptr =
-            get_handle_instance(it->second);
+          OpenDDS::DCPS::SubscriptionInstance_rch ptr = get_handle_instance(it->second);
           this->purge_data(ptr);
         }
-
-      delete data_allocator_;
       //X SHH release the data samples in the instance_map_.
     }
 
@@ -89,7 +86,7 @@ namespace OpenDDS {
      */
     virtual DDS::ReturnCode_t enable_specific ()
     {
-      data_allocator_ = new DataAllocator(get_n_chunks ());
+      data_allocator_.reset(new DataAllocator(get_n_chunks ()));
       if (OpenDDS::DCPS::DCPS_debug_level >= 2)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) %CDataReaderImpl::")
@@ -97,7 +94,7 @@ namespace OpenDDS {
                    ACE_TEXT(" Cached_Allocator_With_Overflow ")
                    ACE_TEXT("%x with %d chunks\n"),
                    TraitsType::type_name(),
-                   data_allocator_,
+                   data_allocator_.get(),
                    this->get_n_chunks ()));
 
       return DDS::RETCODE_OK;
@@ -1064,10 +1061,9 @@ protected:
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     if (!sample.header_.content_filter_) { // if this is true, the writer has already filtered
       using OpenDDS::DCPS::ContentFilteredTopicImpl;
-      if (ContentFilteredTopicImpl* cft =
-          dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in())) {
+      if (content_filtered_topic_) {
         if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
-            && !cft->filter(static_cast<MessageType&>(*data))) {
+            && !content_filtered_topic_->filter(static_cast<MessageType&>(*data))) {
           filtered = true;
           return;
         }
@@ -2356,7 +2352,7 @@ private:
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap  instance_map_;
-DataAllocator* data_allocator_;
+unique_ptr<DataAllocator> data_allocator_;
 };
 
 template <typename MessageType>

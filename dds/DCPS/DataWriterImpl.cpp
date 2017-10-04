@@ -149,8 +149,6 @@ DataWriterImpl::cleanup()
   // release our Topic_var
   topic_objref_ = DDS::Topic::_nil();
   if (topic_servant_) {
-    topic_servant_->remove_entity_ref();
-    topic_servant_->_remove_ref();
     topic_servant_ = 0;
   }
 }
@@ -168,8 +166,6 @@ DataWriterImpl::init(
   DBG_ENTRY_LVL("DataWriterImpl","init",6);
   topic_objref_ = DDS::Topic::_duplicate(topic);
   topic_servant_ = topic_servant;
-  topic_servant_->_add_ref();
-  topic_servant_->add_entity_ref();
   topic_name_    = topic_servant_->get_name();
   topic_id_      = topic_servant_->get_id();
   type_name_     = topic_servant_->get_type_name();

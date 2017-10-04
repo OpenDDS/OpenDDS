@@ -39,6 +39,7 @@
 #include "PoolAllocator.h"
 #include "RemoveAssociationSweeper.h"
 #include "RcEventHandler.h"
+#include "TopicImpl.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -607,7 +608,7 @@ protected:
   Reverse_Lock_t reverse_sample_lock_;
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
-  TopicImpl*                   topic_servant_;
+  TopicDescriptionPtr<TopicImpl>                     topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
@@ -616,7 +617,7 @@ protected:
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  DDS::ContentFilteredTopic_var content_filtered_topic_;
+  TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif
 
 
@@ -835,6 +836,8 @@ private:
 
   bool transport_disabled_;
 };
+
+typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

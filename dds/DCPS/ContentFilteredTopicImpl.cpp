@@ -97,10 +97,19 @@ ContentFilteredTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
 
   expression_parameters_ = p;
 
-  for (std::vector<DataReaderImpl*>::iterator iter = readers_.begin(),
+  Readers readers_still_alive;
+
+  for (Readers::iterator iter = readers_.begin(),
        end = readers_.end(); iter != end; ++iter) {
-    (*iter)->update_subscription_params(p);
+    DataReaderImpl_rch reader = iter->lock();
+    if (reader) {
+      reader->update_subscription_params(p);
+      readers_still_alive.push_back(*iter);
+    }
   }
+
+  using namespace std;
+  swap(readers_, readers_still_alive);
 
   return DDS::RETCODE_OK;
 }
@@ -118,15 +127,15 @@ ContentFilteredTopicImpl::add_reader(DataReaderImpl& reader)
   // the readers reference this CFT and this CFT can't be removed
   // until all readers are gone (DomainParticipant::delete_contentfilteredtopic)
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-  readers_.push_back(&reader);
+  readers_.push_back(reader);
 }
 
 void
 ContentFilteredTopicImpl::remove_reader(DataReaderImpl& reader)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-  std::vector<DataReaderImpl*>::iterator end = readers_.end();
-  readers_.erase(std::remove(readers_.begin(), end, &reader), end);
+  Readers::iterator end = readers_.end();
+  readers_.erase(std::remove(readers_.begin(), end, reader), end);
 }
 
 } // namespace DCPS

@@ -220,7 +220,7 @@ private:
   /// The object reference of the associated topic.
   DDS::Topic_var topic_objref_;
   /// The topic servant.
-  TopicImpl*                      topic_servant_;
+  TopicDescriptionPtr<TopicImpl> topic_servant_;
 
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.

@@ -190,21 +190,6 @@ DataReaderImpl::cleanup()
   }
 #endif
 
-  if (topic_servant_) {
-    topic_servant_->remove_entity_ref();
-    topic_servant_->_remove_ref();
-  }
-
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  if (!CORBA::is_nil(content_filtered_topic_.in())) {
-    ContentFilteredTopicImpl* cft =
-        dynamic_cast<ContentFilteredTopicImpl*>(content_filtered_topic_.in());
-    cft->remove_reader(*this);
-    cft->remove_entity_ref();
-    content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
-  }
-#endif
-
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex,
                    read_guard,
@@ -235,9 +220,6 @@ void DataReaderImpl::init(
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
-    topic_servant_->_add_ref();
-
-    topic_servant_->add_entity_ref();
   }
 
   CORBA::String_var topic_name = a_topic_desc->get_name();
@@ -1031,9 +1013,8 @@ DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  DDS::ContentFilteredTopic_ptr cft = this->get_cf_topic();
-  if (cft) {
-    return cft; // get_cf_topic has already _duplicated()
+  if (content_filtered_topic_) {
+    return DDS::TopicDescription::_duplicate(content_filtered_topic_.get());
   }
 #endif
   return DDS::TopicDescription::_duplicate(topic_desc_.in());
@@ -1331,16 +1312,13 @@ DataReaderImpl::enable()
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-    DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
-    if (cft) {
-      OpenDDS::DCPS::ContentFilteredTopicImpl* impl =
-        dynamic_cast<OpenDDS::DCPS::ContentFilteredTopicImpl*>(cft.in());
-      if (impl) {
-        filterClassName = impl->get_filter_class_name();
-      }
-      filterExpression = cft->get_filter_expression();
-      cft->get_expression_parameters(exprParams);
+
+    if (content_filtered_topic_) {
+      filterClassName = content_filtered_topic_->get_filter_class_name();
+      filterExpression = content_filtered_topic_->get_filter_expression();
+      content_filtered_topic_->get_expression_parameters(exprParams);
     }
+
 #endif
 
     DDS::SubscriberQos sub_qos;
@@ -3221,15 +3199,14 @@ DataReaderImpl::set_subscriber_qos(
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
-  cft->add_entity_ref();
   cft->add_reader(*this);
-  content_filtered_topic_ = DDS::ContentFilteredTopic::_duplicate(cft);
+  content_filtered_topic_ = cft;
 }
 
 DDS::ContentFilteredTopic_ptr
 DataReaderImpl::get_cf_topic() const
 {
-  return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_);
+  return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_.get());
 }
 #endif
 

@@ -153,7 +153,7 @@ private:
   ACE_Recursive_Thread_Mutex sample_lock_;
 
   DomainParticipantImpl*       participant_servant_;
-  TopicImpl*                   topic_servant_;
+  TopicDescriptionPtr<TopicImpl>              topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
