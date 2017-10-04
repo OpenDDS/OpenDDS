@@ -127,8 +127,9 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
     }
   }
 
-  ACE_Reverse_Lock<ACE_Thread_Mutex> reverse(lock_);
-  ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, guard, reverse);
+  // see comment in RtpsUdpDataLink::send_i() for lock order
+  // reverse guard can't be used since that involves re-locking
+  lock_.release();
 
   iter_t deliver_iter = to_deliver.begin();
   while (deliver_iter != to_deliver.end()) {
