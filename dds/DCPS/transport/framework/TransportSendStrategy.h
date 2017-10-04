@@ -78,7 +78,7 @@ public:
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
-  RemoveResult remove_sample(const DataSampleElement* sample);
+  RemoveResult remove_sample(const DataSampleElement* sample, void* context);
 
   void remove_all_msgs(RepoId pub_id);
 
@@ -289,7 +289,8 @@ public:
 protected:
   /// Implement framework chain visitations to remove a sample.
   virtual RemoveResult do_remove_sample(const RepoId& pub_id,
-    const TransportQueueElement::MatchCriteria& criteria);
+    const TransportQueueElement::MatchCriteria& criteria,
+    void* context);
 
 private:
 

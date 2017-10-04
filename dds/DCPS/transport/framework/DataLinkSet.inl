@@ -170,7 +170,7 @@ OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
   const MapType::iterator end = this->map_.end();
   for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
 
-    if (itr->second->remove_sample(sample) == REMOVE_RELEASED) {
+    if (itr->second->remove_sample(sample, 0) == REMOVE_RELEASED) {
       return true;
     }
   }
