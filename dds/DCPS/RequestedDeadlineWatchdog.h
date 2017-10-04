@@ -81,10 +81,6 @@ private:
   /// @c DataReaderListener is obtained.
   WeakRcHandle<DataReaderImpl> reader_impl_;
 
-  /// Reference to DataReader passed to listener when the deadline
-  /// expires.
-  DDS::DataReader_var reader_;
-
   /// Reference to the missed requested deadline status
   /// structure.
   DDS::RequestedDeadlineMissedStatus& status_;

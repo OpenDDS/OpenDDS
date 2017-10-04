@@ -972,7 +972,7 @@ void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
           this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
                   ref(this->sample_lock_),
                   qos.deadline,
-                  this,
+                  ref(*this),
                   ref(this->requested_deadline_missed_status_),
                   ref(this->last_deadline_missed_total_count_));
 
@@ -1283,7 +1283,7 @@ DataReaderImpl::enable()
     this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
             ref(this->sample_lock_),
             this->qos_.deadline,
-            this,
+            ref(*this),
             ref(this->requested_deadline_missed_status_),
             ref(this->last_deadline_missed_total_count_));
   }
