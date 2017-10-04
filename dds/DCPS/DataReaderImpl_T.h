@@ -1649,7 +1649,9 @@ void store_instance_data(
     InstanceMap* inst = 0;
     bool new_handle = true;
     if (this->is_exclusive_ownership_) {
-      if (this->owner_manager_->instance_lock_acquire () != 0) {
+      OwnershipManagerPtr owner_manager = this->ownership_manager();
+
+      if (!owner_manager || owner_manager->instance_lock_acquire () != 0) {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) ")
                     ACE_TEXT("%CDataReaderImpl::")
@@ -1659,7 +1661,7 @@ void store_instance_data(
       }
 
       inst = (InstanceMap*)(
-        this->owner_manager_->get_instance_map(this->topic_servant_->type_name(), this));
+        owner_manager->get_instance_map(this->topic_servant_->type_name(), this));
       if (inst != 0) {
         typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
         if (iter != inst->end ()) {
@@ -1698,10 +1700,12 @@ void store_instance_data(
     }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    if (this->is_exclusive_ownership_) {
+    OwnershipManagerPtr owner_manager = this->ownership_manager();
+
+    if (owner_manager) {
       if (inst == 0) {
         inst = new InstanceMap ();
-        this->owner_manager_->set_instance_map(
+        owner_manager->set_instance_map(
           this->topic_servant_->type_name(), reinterpret_cast <void* > (inst), this);
       }
 
@@ -1720,7 +1724,7 @@ void store_instance_data(
         }
       }
 
-      if (this->owner_manager_->instance_lock_release () != 0) {
+      if (owner_manager->instance_lock_release () != 0) {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) ")
                     ACE_TEXT("%CDataReaderImpl::")

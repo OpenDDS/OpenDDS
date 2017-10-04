@@ -46,7 +46,7 @@ OpenDDS::DCPS::InstanceState::~InstanceState()
   cancel_release();
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (registered_) {
-    OwnershipManager* om = reader_->ownership_manager();
+    DataReaderImpl::OwnershipManagerPtr om = reader_->ownership_manager();
     if (om) om->remove_instance(this);
   }
 #endif
@@ -119,8 +119,9 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
   // resume if the writer sends message again.
   if (this->instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+    DataReaderImpl::OwnershipManagerPtr owner_manager = this->reader_->ownership_manager();
     if (! this->exclusive_
-      || this->reader_->owner_manager_->is_owner (this->handle_, writer_id)) {
+      || (owner_manager && owner_manager->is_owner (this->handle_, writer_id))) {
 #endif
       this->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
       schedule_release();
@@ -143,8 +144,9 @@ OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& write
   if (this->exclusive_) {
     // If unregistered by owner then the ownership should be transferred to another
     // writer.
-    (void) this->reader_->owner_manager_->remove_writer (
-             this->handle_, writer_id);
+    DataReaderImpl::OwnershipManagerPtr owner_manager = this->reader_->ownership_manager();
+    if (owner_manager)
+      owner_manager->remove_writer (this->handle_, writer_id);
   }
 #endif
 

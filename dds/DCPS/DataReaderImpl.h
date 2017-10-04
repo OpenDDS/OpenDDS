@@ -40,6 +40,7 @@
 #include "RemoveAssociationSweeper.h"
 #include "RcEventHandler.h"
 #include "TopicImpl.h"
+#include "DomainParticipantImpl.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -436,7 +437,28 @@ public:
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
-  OwnershipManager* ownership_manager() const { return owner_manager_; }
+
+  // Access to OwnershipManager is only valid when the domain participant is valid;
+  // therefore, we must lock the domain pariticipant when using  OwnershipManager.
+  class OwnershipManagerPtr
+  {
+  public:
+    OwnershipManagerPtr(DataReaderImpl* reader)
+      : participant_( reader->is_exclusive_ownership_ ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
+    {
+    }
+    operator bool() const { return participant_.in(); }
+    OwnershipManager* operator->() const
+    {
+      return participant_->ownership_manager();
+    }
+
+  private:
+    RcHandle<DomainParticipantImpl> participant_;
+  };
+  friend class OwnershipManagerPtr;
+
+  OwnershipManagerPtr ownership_manager() { return OwnershipManagerPtr(this); }
 #endif
 
   virtual void delete_instance_map (void* map) = 0;
@@ -608,12 +630,11 @@ protected:
   Reverse_Lock_t reverse_sample_lock_;
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
-  TopicDescriptionPtr<TopicImpl>                     topic_servant_;
+  TopicDescriptionPtr<TopicImpl>      topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
 
-  OwnershipManager* owner_manager_;
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
