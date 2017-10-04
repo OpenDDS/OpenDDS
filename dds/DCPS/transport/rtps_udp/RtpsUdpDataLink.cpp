@@ -97,7 +97,8 @@ RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
 }
 
 void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
-  const TransportQueueElement::MatchCriteria& criteria)
+  const TransportQueueElement::MatchCriteria& criteria,
+  ACE_Guard<ACE_Thread_Mutex>& guard)
 {
   RtpsWriter::SnToTqeMap sn_tqe_map;
   RtpsWriter::SnToTqeMap to_deliver;
@@ -129,7 +130,7 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
 
   // see comment in RtpsUdpDataLink::send_i() for lock order
   // reverse guard can't be used since that involves re-locking
-  lock_.release();
+  guard.release();
 
   iter_t deliver_iter = to_deliver.begin();
   while (deliver_iter != to_deliver.end()) {
@@ -461,11 +462,11 @@ RtpsUdpDataLink::send_i(TransportQueueElement* element, bool relink)
 }
 
 RemoveResult
-RtpsUdpDataLink::remove_sample(const DataSampleElement* sample)
+RtpsUdpDataLink::remove_sample(const DataSampleElement* sample, void*)
 {
   // see comment in RtpsUdpDataLink::send_i() for lock order
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, REMOVE_ERROR);
-  return DataLink::remove_sample(sample);
+  return DataLink::remove_sample(sample, &g);
 }
 
 void
