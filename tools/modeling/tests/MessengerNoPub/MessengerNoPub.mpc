@@ -1,4 +1,4 @@
-project(*xmlSubscriber) : dcpsexe, dds_model {
+project(*xmlSubscriber) : dcpsexe, all_dcps_transports, dds_model {
   exename   = subscriber
   after    += MessengerNoPub
   libs     += MessengerNoPub

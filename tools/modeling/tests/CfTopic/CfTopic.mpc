@@ -1,4 +1,4 @@
-project(*xmlPublisher) : dcpsexe, dds_model, CfTopic_paths, CfTopic {
+project(*xmlPublisher) : dcpsexe, all_dcps_transports, dds_model, CfTopic_paths, CfTopic {
   exename   = publisher
   libpaths += model
 
@@ -7,7 +7,7 @@ project(*xmlPublisher) : dcpsexe, dds_model, CfTopic_paths, CfTopic {
   }
 }
 
-project(*xmlSubscriber) : dcpsexe, dds_model, CfTopic_paths, CfTopic {
+project(*xmlSubscriber) : dcpsexe, all_dcps_transports, dds_model, CfTopic_paths, CfTopic {
   exename   = subscriber
   libpaths += model
 

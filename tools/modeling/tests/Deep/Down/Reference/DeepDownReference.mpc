@@ -1,4 +1,4 @@
-project(*xmlPublisher) : dcpsexe, dds_model, DeepDownReference_paths, DeepDownReference {
+project(*xmlPublisher) : dcpsexe, all_dcps_transports, dds_model, DeepDownReference_paths, DeepDownReference {
   exename   = publisher
   libpaths += model
 
@@ -7,7 +7,7 @@ project(*xmlPublisher) : dcpsexe, dds_model, DeepDownReference_paths, DeepDownRe
   }
 }
 
-project(*xmlSubscriber) : dcpsexe, dds_model, DeepDownReference_paths, DeepDownReference {
+project(*xmlSubscriber) : dcpsexe, all_dcps_transports, dds_model, DeepDownReference_paths, DeepDownReference {
   exename   = subscriber
   libpaths += model
 

@@ -1,4 +1,4 @@
-project(*xmlPublisher) : dcpsexe, dds_model {
+project(*xmlPublisher) : dcpsexe, all_dcps_transports, dds_model {
   exename   = publisher
   after    += DomainZero
   libs     += DomainZero
@@ -9,7 +9,7 @@ project(*xmlPublisher) : dcpsexe, dds_model {
   }
 }
 
-project(*xmlSubscriber) : dcpsexe, dds_model {
+project(*xmlSubscriber) : dcpsexe, all_dcps_transports, dds_model {
   exename   = subscriber
   after    += DomainZero
   libs     += DomainZero
