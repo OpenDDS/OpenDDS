@@ -79,14 +79,14 @@ DataWriterImpl::DataWriterImpl()
     last_liveliness_activity_time_(ACE_Time_Value::zero),
     last_deadline_missed_total_count_(0),
     watchdog_(),
-    cancel_timer_(false),
     is_bit_(false),
     min_suspended_transaction_id_(0),
     max_suspended_transaction_id_(0),
     monitor_(0),
     periodic_monitor_(0),
     db_lock_pool_(0),
-    liveliness_asserted_(false)
+    liveliness_asserted_(false),
+    liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -135,16 +135,6 @@ DataWriterImpl::cleanup()
   // back onto the listener at the moment the related DDS entity has been
   // deleted
   set_listener(0, NO_STATUS_MASK);
-
-  // reset the watchdog to deal with the circular references
-  this->watchdog_.reset();
-
-  if (cancel_timer_) {
-    // The cancel_timer will call handle_close to
-    // remove_ref.
-    (void) reactor_->cancel_timer(this, 0);
-    cancel_timer_ = false;
-  }
 
   // release our Topic_var
   topic_objref_ = DDS::Topic::_nil();
@@ -945,7 +935,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
           this->watchdog_= make_rch<OfferedDeadlineWatchdog>(
                                ref(this->lock_),
                                qos.deadline,
-                               this,
+                               ref(*this),
                                ref(this->offered_deadline_missed_status_),
                                ref(this->last_deadline_missed_total_count_));
 
@@ -1411,7 +1401,7 @@ DataWriterImpl::enable()
       liveliness_check_interval_ = ACE_Time_Value (0, 1);
     }
 
-    if (reactor_->schedule_timer(this,
+    if (reactor_->schedule_timer(liveness_timer_.in(),
                                  0,
                                  liveliness_check_interval_,
                                  liveliness_check_interval_) == -1) {
@@ -1419,8 +1409,6 @@ DataWriterImpl::enable()
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: %p.\n"),
                  ACE_TEXT("schedule_timer")));
 
-    } else {
-      cancel_timer_ = true;
     }
   }
 
@@ -1439,7 +1427,7 @@ DataWriterImpl::enable()
     this->watchdog_ = make_rch<OfferedDeadlineWatchdog>(
                            ref(this->lock_),
                            this->qos_.deadline,
-                           this,
+                           ref(*this),
                            ref(this->offered_deadline_missed_status_),
                            ref(this->last_deadline_missed_total_count_));
   }
@@ -1983,12 +1971,6 @@ DataWriterImpl::num_samples(DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_all()
 {
-  if (cancel_timer_) {
-    // The cancel_timer will call handle_close to remove_ref.
-    (void) reactor_->cancel_timer(this, 0);
-    cancel_timer_ = false;
-  }
-
   data_container_->unregister_all();
 }
 
@@ -2414,12 +2396,12 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
   }
   else {
     // Reschedule.
-    if (reactor_->cancel_timer(this) == -1) {
+    if (reactor_->cancel_timer(liveness_timer_.in()) == -1) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
         ACE_TEXT("cancel_timer")));
     }
-    if (reactor_->schedule_timer(this, 0, liveliness_check_interval_ - elapsed,
+    if (reactor_->schedule_timer(liveness_timer_.in(), 0, liveliness_check_interval_ - elapsed,
       liveliness_check_interval_) == -1)
     {
       ACE_ERROR((LM_ERROR,
@@ -2451,12 +2433,6 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
   }
 
   this->liveliness_lost_ = liveliness_lost;
-  return 0;
-}
-
-int
-DataWriterImpl::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
-{
   return 0;
 }
 
@@ -2721,6 +2697,19 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
   }
 
   return status;
+}
+
+int
+LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
+                             const void *arg)
+{
+  DataWriterImpl_rch writer = this->writer_.lock();
+  if (writer) {
+    writer->handle_timeout(tv, arg);
+  }
+  else {
+    this->reactor()->cancel_timer(this);
+  }
 }
 
 

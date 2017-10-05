@@ -54,6 +54,10 @@ class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
+class LivenessTimer;
+
+
+
 
 /**
 * @class DataWriterImpl
@@ -81,8 +85,7 @@ class OpenDDS_Dcps_Export DataWriterImpl
     public virtual DataWriterCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
-    public virtual TransportSendListener,
-    public virtual RcEventHandler {
+    public virtual TransportSendListener {
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
@@ -378,9 +381,6 @@ public:
   virtual int handle_timeout(const ACE_Time_Value &tv,
                              const void *arg);
 
-  virtual int handle_close(ACE_HANDLE,
-                           ACE_Reactor_Mask);
-
   /// Called by the PublisherImpl to indicate that the Publisher is now
   /// resumed and any data collected while it was suspended should now be sent.
   void send_suspended_data();
@@ -647,9 +647,6 @@ private:
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
   RcHandle<OfferedDeadlineWatchdog> watchdog_;
-  /// The flag indicates whether the liveliness timer is scheduled and
-  /// needs be cancelled.
-  bool                       cancel_timer_;
 
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
@@ -684,6 +681,26 @@ private:
   // Lock used to synchronize remove_associations calls from discovery
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
+  RcHandle<LivenessTimer> liveness_timer_;
+};
+
+typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
+
+
+class LivenessTimer : public RcEventHandler
+{
+public:
+  LivenessTimer(DataWriterImpl& writer)
+    : writer_(writer)
+  {
+  }
+
+  /// Handle the assert liveliness timeout.
+  virtual int handle_timeout(const ACE_Time_Value &tv,
+                             const void *arg);
+
+private:
+  WeakRcHandle<DataWriterImpl> writer_;
 };
 
 } // namespace DCPS

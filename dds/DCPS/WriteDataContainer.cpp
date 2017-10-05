@@ -197,7 +197,7 @@ WriteDataContainer::enqueue(
   if (this->writer_->watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
-    this->writer_->watchdog_->execute(instance, false);
+    this->writer_->watchdog_->execute(*this->writer_, instance, false);
   }
 
   //
