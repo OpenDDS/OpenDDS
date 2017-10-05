@@ -190,7 +190,7 @@ void  DataLink::set_scheduling_release(bool scheduling_release)
 }
 
 ACE_INLINE RemoveResult
-DataLink::remove_sample(const DataSampleElement* sample)
+DataLink::remove_sample(const DataSampleElement* sample, void* context)
 {
   DBG_ENTRY_LVL("DataLink", "remove_sample", 6);
 
@@ -211,7 +211,7 @@ DataLink::remove_sample(const DataSampleElement* sample)
   }
 
   if (!strategy.is_nil()) {
-    return strategy->remove_sample(sample);
+    return strategy->remove_sample(sample, context);
   }
 
   return REMOVE_NOT_FOUND;
