@@ -1,4 +1,4 @@
-project(*xmlPublisher) : dcpsexe, dds_model {
+project(*xmlPublisher) : dcpsexe, all_dcps_transports, dds_model {
   exename   = publisher
   after    += MessengerNoSub
   libs     += MessengerNoSub
