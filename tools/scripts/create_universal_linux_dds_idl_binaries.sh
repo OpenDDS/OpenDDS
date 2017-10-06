@@ -16,7 +16,7 @@ set -e
 cd `dirname "${BASH_SOURCE[0]}"`/../..
 
 ## get the tao_version from the configure script
-tao_version=`grep 'my $tao_version' ./configure | sed -r 's/my \\\$tao_version\s*=\s*//' | sed -r "s/'([^']+)'.+$/\1/"`
+tao_version=`grep 'my $oci_tao_version' ./configure | sed -r 's/my \\\$oci_tao_version\s*=\s*//' | sed -r "s/'([^']+)'.+$/\1/"`
 
 if [ ! -d ACE_wrappers ]; then
   curl http://download.ociweb.com/TAO-${tao_version}/ACE+TAO-${tao_version}_with_latest_patches_NO_makefiles.tar.gz | tar xz
