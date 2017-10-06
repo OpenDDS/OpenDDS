@@ -30,7 +30,7 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 # define WS_HEUR_DISSECTOR_EXTRA_ARGS2 , HEURISTIC_ENABLE
 # define WS_CONV_IDX conv_index
 #else
-# define WS_DISSECTOR_RETURN_TYPE
+# define WS_DISSECTOR_RETURN_TYPE void
 # define WS_DISSECTOR_RETURN_VALUE
 # define ws_dissector_add_handle dissector_add_handle
 # define WS_HEUR_DISSECTOR_EXTRA_ARGS1(A, B)
