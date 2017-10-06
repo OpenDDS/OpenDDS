@@ -283,14 +283,6 @@ private:
   /// objects.
   unique_ptr<DataSampleElementAllocator> sample_list_element_allocator_;
 
-  /// The allocator for TransportSendElement.
-  /// The TransportSendElement allocator is put here because it
-  /// needs the number of chunks information that WriteDataContainer
-  /// has.
-  unique_ptr<TransportSendElementAllocator>  transport_send_element_allocator_;
-
-  unique_ptr<TransportCustomizedElementAllocator> transport_customized_element_allocator_;
-
   /// The orb's reactor to be used to register the liveliness
   /// timer.
   // ACE_Reactor_Timer_Interface* reactor_;

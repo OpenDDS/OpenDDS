@@ -168,8 +168,6 @@ private:
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
 
-  RtpsCustomizedElementAllocator rtps_customized_element_allocator_;
-
   struct MultiSendBuffer : TransportSendBuffer {
 
     MultiSendBuffer(RtpsUdpDataLink* outer, size_t capacity)

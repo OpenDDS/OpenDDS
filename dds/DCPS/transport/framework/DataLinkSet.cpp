@@ -28,15 +28,9 @@
 #define NUM_SEND_CONTROL_ELEMENT_CHUNKS 20
 
 OpenDDS::DCPS::DataLinkSet::DataLinkSet()
-  : send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
-  , send_response_listener_("DataLinkSet")
+  : send_response_listener_("DataLinkSet")
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",6);
-
-  if (OpenDDS::DCPS::Transport_debug_level > 3) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLinkSet send_control_element_allocator %x with %d chunks\n",
-               &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
-  }
 }
 
 OpenDDS::DCPS::DataLinkSet::~DataLinkSet()

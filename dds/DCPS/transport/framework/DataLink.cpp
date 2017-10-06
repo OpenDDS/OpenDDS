@@ -47,7 +47,6 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
     thr_per_con_send_task_(0),
     transport_priority_(priority),
     scheduling_release_(false),
-    send_control_allocator_(0),
     mb_allocator_(0),
     db_allocator_(0),
     is_loopback_(is_loopback),
@@ -80,9 +79,6 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
   // Initialize transport control sample allocators:
   size_t control_chunks = impl.config().datalink_control_chunks_;
 
-  this->send_control_allocator_ =
-    new TransportSendControlElementAllocator(control_chunks);
-
   this->mb_allocator_ = new MessageBlockAllocator(control_chunks);
   this->db_allocator_ = new DataBlockAllocator(control_chunks);
 }
@@ -100,8 +96,6 @@ DataLink::~DataLink()
 
   delete this->db_allocator_;
   delete this->mb_allocator_;
-
-  delete this->send_control_allocator_;
 
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->close(1);
@@ -525,11 +519,9 @@ DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
-  TransportSendControlElement* const elem =
-    TransportSendControlElement::alloc(1, // initial_count
+  TransportSendControlElement* const elem = new TransportSendControlElement(1, // initial_count
                                        GUID_UNKNOWN, &send_response_listener_,
-                                       header, move(message), send_control_allocator_);
-  if (!elem) return SEND_CONTROL_ERROR;
+                                       header, move(message));
 
   send_response_listener_.track_message();
 

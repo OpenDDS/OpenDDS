@@ -121,20 +121,6 @@ DataSampleElement::get_send_listener()
 
 
 ACE_INLINE
-TransportSendElementAllocator*
-DataSampleElement::get_transport_send_element_allocator() const
-{
-  return transport_send_element_allocator_;
-}
-
-ACE_INLINE
-TransportCustomizedElementAllocator*
-DataSampleElement::get_transport_customized_element_allocator() const
-{
-  return transport_customized_element_allocator_;
-}
-
-ACE_INLINE
 DataSampleElement::DataLinkIdTypeGUIDMap&
 DataSampleElement::get_filter_per_link()
 {

@@ -121,8 +121,7 @@ public:
 struct SimpleDataWriter: SimpleTC, TransportSendListener {
   explicit SimpleDataWriter(const RepoId& pub_id)
     : SimpleTC(pub_id)
-    , alloc_(2, sizeof(TransportSendElementAllocator))
-    , dsle_(pub_id, this, OpenDDS::DCPS::PublicationInstance_rch(), &alloc_, 0)
+    , dsle_(pub_id, this, OpenDDS::DCPS::PublicationInstance_rch())
   {
     DDS_TEST::list_set(dsle_, list_);
     dsle_.get_header().message_id_ = SAMPLE_DATA;
@@ -166,7 +165,6 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void notify_publication_lost(const ReaderIdSeq&) {}
   void remove_associations(const ReaderIdSeq&, bool) {}
 
-  TransportSendElementAllocator alloc_;
   SendStateDataSampleList list_;
   DataSampleElement dsle_;
   ACE_Message_Block payload_;

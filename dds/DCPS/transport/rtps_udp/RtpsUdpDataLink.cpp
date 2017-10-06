@@ -61,8 +61,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
              false,     // is_loopback
              false),    // is_active
     reactor_task_(reactor_task),
-
-    rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config.nak_depth_),
     best_effort_heartbeat_count_(0),
     nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
@@ -760,8 +758,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
-    RtpsCustomizedElement::alloc(element, move(hdr),
-      &rtps_customized_element_allocator_);
+    new RtpsCustomizedElement(element, move(hdr));
 
   // Handle durability resends
   if (durable && rw != writers_.end()) {

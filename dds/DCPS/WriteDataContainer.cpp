@@ -101,10 +101,6 @@ WriteDataContainer::WriteDataContainer(
     wfa_condition_(this->wfa_lock_),
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
-    transport_send_element_allocator_(2 * n_chunks_,
-                                      sizeof(TransportSendElement)),
-    transport_customized_element_allocator_(2 * n_chunks_,
-                                            sizeof(TransportCustomizedElement)),
     shutdown_(false),
     domain_id_(domain_id),
     topic_name_(topic_name),
@@ -120,10 +116,6 @@ WriteDataContainer::WriteDataContainer(
                "(%P|%t) WriteDataContainer "
                "sample_list_element_allocator %x with %d chunks\n",
                &sample_list_element_allocator_, n_chunks_));
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) WriteDataContainer "
-               "transport_send_element_allocator %x with %d chunks\n",
-               &transport_send_element_allocator_, n_chunks_));
   }
 }
 
@@ -1005,9 +997,7 @@ WriteDataContainer::obtain_buffer_for_control(DataSampleElement*& element)
         sizeof(DataSampleElement))),
     DataSampleElement(publication_id_,
                       this->writer_,
-                      PublicationInstance_rch(),
-                      &transport_send_element_allocator_,
-                      &transport_customized_element_allocator_),
+                      PublicationInstance_rch()),
     DDS::RETCODE_ERROR);
 
   return DDS::RETCODE_OK;
@@ -1034,9 +1024,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         sizeof(DataSampleElement))),
     DataSampleElement(publication_id_,
                           this->writer_,
-                          instance,
-                          &transport_send_element_allocator_,
-                          &transport_customized_element_allocator_),
+                          instance),
     DDS::RETCODE_ERROR);
 
   // Extract the current instance queue.

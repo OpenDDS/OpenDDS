@@ -23,17 +23,15 @@ class OpenDDS_Rtps_Udp_Export RtpsCustomizedElement
   : public TransportCustomizedElement {
 
 public:
-  static RtpsCustomizedElement* alloc(TransportQueueElement* orig,
-                                      Message_Block_Ptr msg,
-                                      ACE_Allocator* allocator = 0);
+
+  RtpsCustomizedElement(TransportQueueElement* orig,
+                        Message_Block_Ptr msg);
 
   SequenceNumber sequence() const;
   SequenceNumber last_fragment() const;
 
 private:
-  RtpsCustomizedElement(TransportQueueElement* orig,
-                        Message_Block_Ptr msg,
-                        ACE_Allocator* allocator);
+
   virtual ~RtpsCustomizedElement();
 
   ElementPair fragment(size_t size);

@@ -23,7 +23,6 @@ PacketRemoveVisitor::PacketRemoveVisitor(
   const TransportQueueElement::MatchCriteria& match,
   ACE_Message_Block*& unsent_head_block,
   ACE_Message_Block* header_block,
-  TransportReplacedElementAllocator& allocator,
   MessageBlockAllocator& mb_allocator,
   DataBlockAllocator& db_allocator)
   : match_(match)
@@ -32,7 +31,6 @@ PacketRemoveVisitor::PacketRemoveVisitor(
   , status_(REMOVE_NOT_FOUND)
   , current_block_(0)
   , previous_block_(0)
-  , replaced_element_allocator_(allocator)
   , replaced_element_mb_allocator_(mb_allocator)
   , replaced_element_db_allocator_(db_allocator)
 {
@@ -357,17 +355,10 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
           orig_elem));
 
     // Create the replacement element for the original element.
-    ACE_NEW_MALLOC_NORETURN(
-      element,
-      (TransportQueueElement*)this->replaced_element_allocator_.malloc(),
-      TransportReplacedElement(orig_elem, &this->replaced_element_allocator_,
+    element = new
+      TransportReplacedElement(orig_elem,
                                &this->replaced_element_mb_allocator_,
-                               &this->replaced_element_db_allocator_));
-    if (element == 0) {
-      // Set fatal error and stop visitation.
-      this->status_ = REMOVE_ERROR;
-      return 0;
-    }
+                               &this->replaced_element_db_allocator_);
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The new TransportReplacedElement is [%0x]\n",

@@ -1363,8 +1363,7 @@ Sedp::Endpoint::~Endpoint()
 
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
-  : Endpoint(pub_id, sedp),
-    alloc_(2, sizeof(DCPS::TransportSendElementAllocator))
+  : Endpoint(pub_id, sedp)
 {
   header_.prefix[0] = 'R';
   header_.prefix[1] = 'T';
@@ -1453,7 +1452,7 @@ Sedp::Writer::write_sample(const ParameterList& plist,
   if (result == DDS::RETCODE_OK) {
     // Send sample
     DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
+      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch());
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
     DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
@@ -1505,7 +1504,7 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
   if (result == DDS::RETCODE_OK) {
     // Send sample
     DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
+      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch());
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
     DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));

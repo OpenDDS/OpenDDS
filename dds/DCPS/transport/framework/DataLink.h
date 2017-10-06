@@ -401,10 +401,6 @@ protected:
   /// should be released after all associations are removed.
   ACE_Time_Value datalink_release_delay_;
 
-  /// Allocator for TransportSendControlElements created when
-  /// send_control is called.
-  TransportSendControlElementAllocator* send_control_allocator_;
-
   /// Allocators for data and message blocks used by transport
   /// control samples when send_control is called.
   MessageBlockAllocator* mb_allocator_;

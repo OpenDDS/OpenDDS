@@ -20,12 +20,8 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportSendElement : public TransportQueueElement {
 public:
 
-  static TransportSendElement* alloc(int initial_count,
-                                     const DataSampleElement* sample);
-
   TransportSendElement(int initial_count,
-                       const DataSampleElement* sample,
-                       TransportSendElementAllocator* allocator = 0);
+                       const DataSampleElement* sample);
 
   virtual ~TransportSendElement();
 
@@ -55,9 +51,6 @@ private:
   /// This is the actual element that the transport framework was
   /// asked to send.
   const DataSampleElement* element_;
-
-  /// Reference to TransportSendElement allocator.
-  TransportSendElementAllocator* allocator_;
 };
 
 } // namespace DCPS

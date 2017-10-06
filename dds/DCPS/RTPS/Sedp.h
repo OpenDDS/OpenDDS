@@ -187,7 +187,6 @@ private:
     void end_historic_samples(const DCPS::RepoId& reader);
 
   private:
-    DCPS::TransportSendElementAllocator alloc_;
     Header header_;
     DCPS::SequenceNumber seq_;
 

@@ -324,10 +324,6 @@ ReplayerImpl::enable()
 
   sample_list_element_allocator_.reset(new DataSampleElementAllocator(2 * n_chunks_));
 
-  transport_send_element_allocator_.reset(new TransportSendElementAllocator(2 * n_chunks_,
-                                                       sizeof(TransportSendElement)));
-  transport_customized_element_allocator_.reset(new TransportCustomizedElementAllocator(2 * n_chunks_,
-                                                             sizeof(TransportCustomizedElement)));
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
@@ -980,9 +976,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
           sizeof(DataSampleElement))),
       DataSampleElement(publication_id_,
                             this,
-                            PublicationInstance_rch(),
-                            transport_send_element_allocator_.get(),
-                            transport_customized_element_allocator_.get()),
+                            PublicationInstance_rch()),
       DDS::RETCODE_ERROR);
 
     element->get_header().byte_order_ = samples[i].sample_byte_order_;

@@ -922,8 +922,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
 
     singular.insert_link(found->second);
   }
-  return singular.send_control(repo_id_, get_send_listener(), header, move(msg),
-                               &links_.tsce_allocator());
+  return singular.send_control(repo_id_, get_send_listener(), header, move(msg));
 }
 
 bool

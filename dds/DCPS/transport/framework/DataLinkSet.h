@@ -49,8 +49,7 @@ public:
   SendControlStatus send_control(RepoId                           pub_id,
                                  const TransportSendListener_rch& listener,
                                  const DataSampleHeader&          header,
-                                 Message_Block_Ptr                msg,
-                                 TransportSendControlElementAllocator* allocator = 0);
+                                 Message_Block_Ptr                msg);
 
   void send_response(RepoId sub_id,
                      const DataSampleHeader& header,
@@ -86,17 +85,10 @@ public:
   MapType& map() { return map_; }
   //@}
 
-  TransportSendControlElementAllocator& tsce_allocator() {
-    return send_control_element_allocator_;
-  }
-
 private:
 
   /// Hash map for DataLinks.
   MapType map_;
-
-  /// Allocator for TransportSendControlElement.
-  TransportSendControlElementAllocator send_control_element_allocator_;
 
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.

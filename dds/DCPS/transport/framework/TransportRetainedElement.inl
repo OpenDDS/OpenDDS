@@ -13,13 +13,11 @@ ACE_INLINE
 OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     const ACE_Message_Block*           message,
     const RepoId&                      pubId,
-    TransportRetainedElementAllocator* allocator,
     MessageBlockAllocator*             mb_allocator,
     DataBlockAllocator*                db_allocator
 ) : TransportQueueElement(1),
     msg_(0),
     publication_id_( pubId),
-    allocator_( allocator),
     mb_allocator_( mb_allocator),
     db_allocator_( db_allocator)
 {
@@ -36,7 +34,6 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
 ) : TransportQueueElement(1),
     msg_( ACE_Message_Block::duplicate( source.msg())),
     publication_id_( source.publication_id()),
-    allocator_( source.allocator_),
     mb_allocator_( source.mb_allocator_),
     db_allocator_( source.db_allocator_)
 {

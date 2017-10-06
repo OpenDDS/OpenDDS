@@ -79,10 +79,8 @@ TransportSendStrategy::TransportSendStrategy(
     header_db_allocator_(0),
     synch_(0),
     lock_(),
-    replaced_element_allocator_(NUM_REPLACED_ELEMENT_CHUNKS),
     replaced_element_mb_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
     replaced_element_db_allocator_(NUM_REPLACED_ELEMENT_CHUNKS * 2),
-    retained_element_allocator_(0),
     transport_(transport),
     graceful_disconnecting_(false),
     link_released_(true),
@@ -104,11 +102,6 @@ TransportSendStrategy::TransportSendStrategy(
   // We cache this value in data member since it doesn't change, and we
   // don't want to keep asking for it over and over.
   this->max_header_size_ = TransportHeader::max_marshaled_size();
-
-  if (Transport_debug_level >= 2) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy replaced_element_allocator %x with %d chunks\n",
-               &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
-  }
 
   delayed_delivered_notification_queue_.reserve(this->max_samples_);
 }
@@ -1411,7 +1404,6 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
   PacketRemoveVisitor pac_rem_vis(criteria,
                                   this->pkt_chain_,
                                   this->header_block_,
-                                  this->replaced_element_allocator_,
                                   this->replaced_element_mb_allocator_,
                                   this->replaced_element_db_allocator_);
 

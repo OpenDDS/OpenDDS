@@ -12,11 +12,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 ACE_INLINE
 OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
 (TransportQueueElement* orig_elem,
- TransportReplacedElementAllocator* allocator,
  MessageBlockAllocator* mb_allocator,
  DataBlockAllocator* db_allocator)
   : TransportQueueElement(1),
-    allocator_(allocator),
     mb_allocator_ (mb_allocator),
     db_allocator_ (db_allocator),
     msg_(0)

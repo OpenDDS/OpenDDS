@@ -178,7 +178,6 @@ DDS_TEST::run(int num_messages, int msg_size)
 
   OpenDDS::DCPS::DataSampleElementAllocator allocator(num_messages);
   Cleanup cleanup(allocator, samples);
-  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (OpenDDS::DCPS::TransportSendElement));
 
   std::string data = "Hello World!";
 
@@ -217,7 +216,7 @@ DDS_TEST::run(int num_messages, int msg_size)
 
     ACE_NEW_MALLOC_RETURN(element,
       static_cast<OpenDDS::DCPS::DataSampleElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleElement))),
-      OpenDDS::DCPS::DataSampleElement(this->pub_id_, this, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0), 1);
+      OpenDDS::DCPS::DataSampleElement(this->pub_id_, this, OpenDDS::DCPS::PublicationInstance_rch()), 1);
 
     // The Sample Element will hold on to the chain of blocks (header + data).
     element->sample_.reset(header_block.release());

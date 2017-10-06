@@ -25,13 +25,7 @@ OpenDDS::DCPS::TransportRetainedElement::release_element(
 )
 {
   DBG_ENTRY_LVL("TransportRetainedElement","release_element",6);
-
-  if (this->allocator_) {
-    OPENDDS_DES_FREE_THIS(this->allocator_->free, TransportRetainedElement);
-  }
-  else {
-    delete this;
-  }
+  delete this;
 }
 
 OpenDDS::DCPS::RepoId
