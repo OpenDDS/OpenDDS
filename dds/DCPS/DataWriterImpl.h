@@ -594,7 +594,7 @@ private:
   /// coherent change set.
   ACE_UINT32                      coherent_samples_;
   /// The sample data container.
-  WriteDataContainer*             data_container_;
+  unique_ptr<WriteDataContainer>  data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
   ACE_Recursive_Thread_Mutex      lock_;
@@ -628,11 +628,11 @@ private:
   // PublicationReconnectingStatus       publication_reconnecting_status_;
 
   /// The message block allocator.
-  MessageBlockAllocator*     mb_allocator_;
+  unique_ptr<MessageBlockAllocator>     mb_allocator_;
   /// The data block allocator.
-  DataBlockAllocator*        db_allocator_;
+  unique_ptr<DataBlockAllocator>        db_allocator_;
   /// The header data allocator.
-  DataSampleHeaderAllocator* header_allocator_;
+  unique_ptr<DataSampleHeaderAllocator> header_allocator_;
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
@@ -666,7 +666,7 @@ private:
   Monitor* periodic_monitor_;
 
   // Data block local pool for this data writer.
-  DataBlockLockPool*  db_lock_pool_;
+  unique_ptr<DataBlockLockPool>  db_lock_pool_;
 
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number

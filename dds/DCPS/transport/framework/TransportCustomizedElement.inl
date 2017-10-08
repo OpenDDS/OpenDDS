@@ -17,7 +17,6 @@ TransportCustomizedElement::TransportCustomizedElement(
   TransportQueueElement* orig, bool fragment)
   : TransportQueueElement(1),
     orig_(orig),
-    msg_(0),
     publication_id_(orig ? orig->publication_id() : GUID_UNKNOWN),
     fragment_(fragment),
     exclusive_(false)

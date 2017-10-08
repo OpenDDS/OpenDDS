@@ -26,8 +26,6 @@ namespace DCPS {
 
 ShmemTransport::ShmemTransport(ShmemInst& inst)
   : TransportImpl(inst)
-  , alloc_(0)
-  , read_task_(0)
 {
   if (! (configure_i(inst) && open()) ) {
     throw Transport::UnableToCreate();

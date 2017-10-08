@@ -16,7 +16,6 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     MessageBlockAllocator*             mb_allocator,
     DataBlockAllocator*                db_allocator
 ) : TransportQueueElement(1),
-    msg_(0),
     publication_id_( pubId),
     mb_allocator_( mb_allocator),
     db_allocator_( db_allocator)

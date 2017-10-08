@@ -56,8 +56,7 @@ namespace DCPS {
 #endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
 DataReaderImpl::DataReaderImpl()
-: rd_allocator_(0),
-  qos_(TheServiceParticipant->initial_DataReaderQos()),
+: qos_(TheServiceParticipant->initial_DataReaderQos()),
   reverse_sample_lock_(sample_lock_),
   topic_servant_(0),
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -75,7 +74,6 @@ DataReaderImpl::DataReaderImpl()
     reactor_(0),
     liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     last_deadline_missed_total_count_(0),
-    watchdog_(),
     is_bit_(false),
     always_get_history_(false),
     statistics_enabled_(false),

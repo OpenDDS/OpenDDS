@@ -185,8 +185,6 @@ Service_Participant::Service_Participant()
     priority_max_(0),
     publisher_content_filter_(true),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    transient_data_cache_(0),
-    persistent_data_cache_(0),
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
     pending_timeout_(ACE_Time_Value::zero),

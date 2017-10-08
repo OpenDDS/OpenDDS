@@ -69,11 +69,7 @@ DataWriterImpl::DataWriterImpl()
     sequence_number_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
     coherent_(false),
     coherent_samples_(0),
-    data_container_(0),
     liveliness_lost_(false),
-    mb_allocator_(0),
-    db_allocator_(0),
-    header_allocator_(0),
     reactor_(0),
     liveliness_check_interval_(ACE_Time_Value::max_time),
     last_liveliness_activity_time_(ACE_Time_Value::zero),
@@ -84,7 +80,7 @@ DataWriterImpl::DataWriterImpl()
     max_suspended_transaction_id_(0),
     monitor_(0),
     periodic_monitor_(0),
-    db_lock_pool_(0),
+    db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks())),
     liveliness_asserted_(false),
     liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
 {
@@ -110,8 +106,6 @@ DataWriterImpl::DataWriterImpl()
     TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this);
   periodic_monitor_ =
     TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
-
-  db_lock_pool_ = new DataBlockLockPool((unsigned long)n_chunks_);
 }
 
 // This method is called when there are no longer any reference to the
@@ -119,12 +113,6 @@ DataWriterImpl::DataWriterImpl()
 DataWriterImpl::~DataWriterImpl()
 {
   DBG_ENTRY_LVL("DataWriterImpl","~DataWriterImpl",6);
-
-  delete data_container_;
-  delete mb_allocator_;
-  delete db_allocator_;
-  delete header_allocator_;
-  delete db_lock_pool_;
 }
 
 // this method is called when delete_datawriter is called.
@@ -1350,7 +1338,7 @@ DataWriterImpl::enable()
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ = new WriteDataContainer(this,
+  data_container_ .reset(new WriteDataContainer(this,
                                            max_samples_per_instance,
                                            history_depth,
                                            max_durable_per_instance,
@@ -1364,31 +1352,31 @@ DataWriterImpl::enable()
                                            qos_.durability_service,
 #endif
                                            max_instances,
-                                           max_total_samples);
+                                           max_total_samples));
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
-  mb_allocator_ = new MessageBlockAllocator(n_chunks_ * association_chunk_multiplier_);
-  db_allocator_ = new DataBlockAllocator(n_chunks_+1);
-  header_allocator_ = new DataSampleHeaderAllocator(n_chunks_+1);
+  mb_allocator_.reset(new MessageBlockAllocator(n_chunks_ * association_chunk_multiplier_));
+  db_allocator_.reset(new DataBlockAllocator(n_chunks_+1));
+  header_allocator_.reset(new DataSampleHeaderAllocator(n_chunks_+1));
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-mb"
                " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               mb_allocator_,
+               mb_allocator_.get(),
                n_chunks_));
 
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-db"
                " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               db_allocator_,
+               db_allocator_.get(),
                n_chunks_));
 
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-header"
                " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               header_allocator_,
+               header_allocator_.get(),
                n_chunks_));
   }
 
@@ -1491,8 +1479,8 @@ DataWriterImpl::enable()
                                     this->topic_name_,
                                     get_type_name(),
                                     this,
-                                    this->mb_allocator_,
-                                    this->db_allocator_,
+                                    this->mb_allocator_.get(),
+                                    this->db_allocator_.get(),
                                     this->qos_.lifespan)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
@@ -2055,8 +2043,8 @@ DataWriterImpl::create_control_message(MessageId message_id,
                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                           ACE_Time_Value::zero,
                           ACE_Time_Value::max_time,
-                          db_allocator_,
-                          mb_allocator_),
+                          db_allocator_.get(),
+                          mb_allocator_.get()),
                         0);
 
   *message << header_data;
@@ -2151,13 +2139,13 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
                                           ACE_Message_Block::MB_DATA,
                                           data.release(), //cont
                                           0, //data
-                                          header_allocator_, //alloc_strategy
+                                          header_allocator_.get(), //alloc_strategy
                                           get_db_lock(), //locking_strategy
                                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                           ACE_Time_Value::zero,
                                           ACE_Time_Value::max_time,
-                                          db_allocator_,
-                                          mb_allocator_),
+                                          db_allocator_.get(),
+                                          mb_allocator_.get()),
                         DDS::RETCODE_ERROR);
   message.reset(tmp_message);
   *message << header_data;

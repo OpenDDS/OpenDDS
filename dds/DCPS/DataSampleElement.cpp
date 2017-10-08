@@ -24,7 +24,6 @@ DataSampleElement::DataSampleElement(
   TransportSendListener*  send_listener,
   PublicationInstance_rch handle)
   : transaction_id_(0),
-    sample_(0),
     publication_id_(publication_id),
     num_subs_(0),
     send_listener_(send_listener),

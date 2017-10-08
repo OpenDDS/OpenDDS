@@ -65,7 +65,6 @@ namespace OpenDDS {
 
     DataReaderImpl_T (void)
     : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this)))
-    , data_allocator_ (0)
     {
     }
 
