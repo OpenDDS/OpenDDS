@@ -191,6 +191,7 @@ Service_Participant::Service_Participant()
 #endif
     pending_timeout_(ACE_Time_Value::zero),
     bidir_giop_(true),
+    monitor_enabled_(false),
     shut_down_(false)
 {
   initialize();
@@ -419,26 +420,32 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       reactor_task_.wait_for_startup();
 
-#if !defined(ACE_AS_STATIC_LIBS)
       if (this->monitor_enabled_) {
+#if !defined(ACE_AS_STATIC_LIBS)
         ACE_TString directive = ACE_TEXT("dynamic OpenDDS_Monitor Service_Object * OpenDDS_monitor:_make_MonitorFactoryImpl()");
         ACE_Service_Config::process_directive(directive.c_str());
-      }
 #endif
-      this->monitor_factory_ =
-        ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
-      if (this->monitor_factory_ == 0) {
-        if (this->monitor_enabled_) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                     ACE_TEXT("Unable to enable monitor factory.\n")));
+        this->monitor_factory_ =
+          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
+
+        if (this->monitor_factory_ == 0) {
+          if (this->monitor_enabled_) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
+                       ACE_TEXT("Unable to enable monitor factory.\n")));
+          }
         }
+      }
+
+      if (this->monitor_factory_ == 0) {
         // Use the stubbed factory
         this->monitor_factory_ =
           ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
       }
+      if (this->monitor_enabled_) {
+        this->monitor_factory_->initialize();
+      }
       this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
-      this->monitor_factory_->initialize();
     }
   }
 

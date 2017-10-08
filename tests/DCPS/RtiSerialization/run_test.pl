@@ -53,8 +53,8 @@ else {
     $sub_opts .= ' -DCPSConfigFile tcp.ini';
 }
 
-$pub_opts .= " -DCPSRTISerialization";
-$sub_opts .= " -DCPSRTISerialization";
+$pub_opts .= " -DCPSRTISerialization 1";
+$sub_opts .= " -DCPSRTISerialization 1";
 
 $test->report_unused_flags(!$flag_found);
 

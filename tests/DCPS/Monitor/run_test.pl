@@ -22,7 +22,7 @@ my $status = 0;
 
 my $pub_opts = "-i $send_interval -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
 my $sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
-my $mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
+my $mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSConfigFile mon.ini -DCPSDebugLevel 10";
 
 my $dcpsrepo_ior = "repo.ior";
 
@@ -86,7 +86,7 @@ unlink $dcpsrepo_ior;
 
 my $mon_count = `grep -c Report mon.out`;
 print STDOUT "mon_count=$mon_count\n";
-if ($mon_count < 200) {
+if ($mon_count < 130) {
     print STDERR "ERROR: Insufficient number of monitor messages seen\n";
     $status = 1;
 }

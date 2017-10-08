@@ -177,6 +177,7 @@ MonitorFactoryImpl::initialize()
   DDS::DataWriterQos dw_qos;
   publisher->get_default_datawriter_qos(dw_qos);
   dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+  dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
   OpenDDS::DCPS::ServiceParticipantReportTypeSupport_var sp_ts =
     new OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl();
