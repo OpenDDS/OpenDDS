@@ -568,8 +568,6 @@ private:
   CORBA::String_var               topic_name_;
   /// The associated topic repository id.
   RepoId                          topic_id_;
-  /// The object reference of the associated topic.
-  DDS::Topic_var                  topic_objref_;
   /// The topic servant.
   TopicDescriptionPtr<TopicImpl>                 topic_servant_;
 

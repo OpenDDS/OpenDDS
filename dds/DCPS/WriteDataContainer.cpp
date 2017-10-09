@@ -280,7 +280,7 @@ WriteDataContainer::register_instance(
     }
 
     // registered the instance for the first time.
-    instance = make_rch<PublicationInstance>(ref(move(registered_sample)));
+    instance.reset(new PublicationInstance(move(registered_sample)), keep_count());
 
     instance_handle = this->writer_->get_next_handle();
 

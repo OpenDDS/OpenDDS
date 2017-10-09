@@ -123,12 +123,7 @@ DataWriterImpl::cleanup()
   // back onto the listener at the moment the related DDS entity has been
   // deleted
   set_listener(0, NO_STATUS_MASK);
-
-  // release our Topic_var
-  topic_objref_ = DDS::Topic::_nil();
-  if (topic_servant_) {
-    topic_servant_ = 0;
-  }
+  topic_servant_ = 0;
 }
 
 void
@@ -142,7 +137,6 @@ DataWriterImpl::init(
   OpenDDS::DCPS::PublisherImpl *         publisher_servant)
 {
   DBG_ENTRY_LVL("DataWriterImpl","init",6);
-  topic_objref_ = DDS::Topic::_duplicate(topic);
   topic_servant_ = topic_servant;
   topic_name_    = topic_servant_->get_name();
   topic_id_      = topic_servant_->get_id();
@@ -974,7 +968,7 @@ DataWriterImpl::get_listener()
 DDS::Topic_ptr
 DataWriterImpl::get_topic()
 {
-  return DDS::Topic::_duplicate(topic_objref_.in());
+  return DDS::Topic::_duplicate(topic_servant_.get());
 }
 
 bool

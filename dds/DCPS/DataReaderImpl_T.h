@@ -40,7 +40,9 @@ namespace OpenDDS {
                             typename TraitsType::LessThanType) InstanceMap;
 
 
-    class MessageTypeWithAllocator : public MessageType
+    class MessageTypeWithAllocator
+      : public MessageType
+      , public EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>
     {
     public:
       void* operator new(size_t size, ACE_New_Allocator& pool);
@@ -85,7 +87,7 @@ namespace OpenDDS {
      */
     virtual DDS::ReturnCode_t enable_specific ()
     {
-      data_allocator_.reset(new DataAllocator(get_n_chunks ()));
+      data_allocator().reset(new DataAllocator(get_n_chunks ()));
       if (OpenDDS::DCPS::DCPS_debug_level >= 2)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) %CDataReaderImpl::")
@@ -93,7 +95,7 @@ namespace OpenDDS {
                    ACE_TEXT(" Cached_Allocator_With_Overflow ")
                    ACE_TEXT("%x with %d chunks\n"),
                    TraitsType::type_name(),
-                   data_allocator_.get(),
+                   data_allocator().get(),
                    this->get_n_chunks ()));
 
       return DDS::RETCODE_OK;
@@ -886,7 +888,7 @@ namespace OpenDDS {
       DataSampleHeader header;
       header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
       bool just_registered;
-      unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator_) MessageTypeWithAllocator(sample));
+      unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
       store_instance_data(move(data), header, instance, just_registered, filtered);
       if (instance) inst = instance->instance_handle_;
     }
@@ -912,7 +914,7 @@ namespace OpenDDS {
       header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
         ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
       bool just_registered, filtered;
-      unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator_) MessageTypeWithAllocator);
+      unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
       get_key_value(*data, instance);
       store_instance_data(move(data), header, si, just_registered, filtered);
       if (!filtered)
@@ -978,15 +980,6 @@ namespace OpenDDS {
     }
   }
 
-  virtual void cleanup()
-  {
-    if (filter_delayed_handler_.in()) {
-      filter_delayed_handler_->detach();
-      filter_delayed_handler_.reset();
-    }
-    DataReaderImpl::cleanup();
-  }
-
   virtual void qos_change(const DDS::DataReaderQos& qos)
   {
     // reliability is not changeable, just time_based_filter
@@ -996,13 +989,9 @@ namespace OpenDDS {
         if (qos_.time_based_filter.minimum_separation != zero) {
           if (qos.time_based_filter.minimum_separation != zero) {
             const ACE_Time_Value new_interval = duration_to_time_value(qos.time_based_filter.minimum_separation);
-            if (filter_delayed_handler_.in()) {
-              filter_delayed_handler_->reset_interval(new_interval);
-            }
+            filter_delayed_handler_->reset_interval(new_interval);
           } else {
-            if (filter_delayed_handler_.in()) {
-              filter_delayed_handler_->cancel();
-            }
+            filter_delayed_handler_->cancel();
           }
         }
         // else no existing timers to change/cancel
@@ -1021,7 +1010,7 @@ protected:
                              bool & filtered,
                              OpenDDS::DCPS::MarshalingType marshaling_type)
   {
-    unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator_) MessageTypeWithAllocator);
+    unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     OpenDDS::DCPS::Serializer ser(
@@ -1093,9 +1082,8 @@ protected:
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch instance)
   {
-    if (filter_delayed_handler_.in()) {
-      filter_delayed_handler_->drop_sample(instance->instance_handle_);
-    }
+    filter_delayed_handler_->drop_sample(instance->instance_handle_);
+
 
     instance->instance_state_.cancel_release();
 
@@ -1766,15 +1754,13 @@ void store_instance_data(
           time_based_filter_instance(instance_ptr, filter_time_expired)) {
         filtered = true;
         if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
-          if (filter_delayed_handler_.in()) {
-            filter_delayed_handler_->delay_sample(handle, instance_data.release(), header, just_registered, filter_time_expired);
-          }
+          filter_delayed_handler_->delay_sample(handle, move(instance_data), header, just_registered, filter_time_expired);
+
         }
       } else {
         // nothing time based filtered now
-        if (filter_delayed_handler_.in()) {
-          filter_delayed_handler_->clear_sample(handle);
-        }
+        filter_delayed_handler_->clear_sample(handle);
+
       }
 
       if (filtered)
@@ -2144,11 +2130,6 @@ public:
   {
   }
 
-  void detach()
-  {
-    cancel();
-  }
-
   void cancel()
   {
     cancel_all();
@@ -2156,7 +2137,7 @@ public:
   }
 
   void delay_sample(DDS::InstanceHandle_t handle,
-                    MessageTypeWithAllocator* instance_data,
+                    unique_ptr<MessageTypeWithAllocator> data,
                     const OpenDDS::DCPS::DataSampleHeader& header,
                     const bool just_registered,
                     const ACE_Time_Value& filter_time_expired)
@@ -2168,9 +2149,18 @@ public:
       return;
     }
 
+    MessageTypeWithAllocator* instance_data = data.get();
+
     DataSampleHeader_ptr hdr(new OpenDDS::DCPS::DataSampleHeader(header));
     std::pair<typename FilterDelayedSampleMap::iterator, bool> result =
-      map_.insert(std::make_pair(handle, FilterDelayedSample(instance_data, hdr, just_registered)));
+#ifdef ACE_HAS_CPP11
+    map_.emplace(std::piecewise_construct,
+                 std::forward_as_tuple(handle),
+                 std::forward_as_tuple(move(data), hdr, just_registered));
+#else
+    map_.insert(std::make_pair(handle, FilterDelayedSample(move(data), hdr, just_registered)));
+#endif
+
     FilterDelayedSample& sample = result.first->second;
     if (result.second) {
       const ACE_Time_Value interval = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation);
@@ -2186,14 +2176,12 @@ public:
       }
 
       // ensure that another sample has not replaced this while the lock was released
-      if (instance_data == sample.message) {
+      if (instance_data == sample.message.get()) {
         sample.timer_id = timer_id;
       }
     } else {
       // we only care about the most recently filtered sample, so clean up the last one
-      clear_message(sample.message);
-
-      sample.message = instance_data;
+      sample.message = move(data);
       sample.header = hdr;
       sample.new_instance = just_registered;
       // already scheduled for timeout at the desired time
@@ -2207,7 +2195,7 @@ public:
     typename FilterDelayedSampleMap::iterator sample = map_.find(handle);
     if (sample != map_.end()) {
       // leave the entry in the container, so that the key remains valid if the reactor is waiting on this lock while this is occurring
-      clear_message(sample->second.message);
+      sample->second.message.reset();
     }
   }
 
@@ -2217,8 +2205,6 @@ public:
 
     typename FilterDelayedSampleMap::iterator sample = map_.find(handle);
     if (sample != map_.end()) {
-      clear_message(sample->second.message);
-
       {
         RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
         if (data_reader_impl) {
@@ -2233,6 +2219,8 @@ public:
   }
 
 private:
+
+
 
   int handle_timeout(const ACE_Time_Value&, const void* act)
   {
@@ -2262,14 +2250,18 @@ private:
         const bool NOT_DISPOSE_MSG = false;
         const bool NOT_UNREGISTER_MSG = false;
         // clear the message, since ownership is being transfered to finish_store_instance_data.
-        unique_ptr<MessageTypeWithAllocator> instance_data (static_cast<MessageTypeWithAllocator*>(data->second.message));
-        data->second.message = 0;
+
         instance->last_accepted_ = ACE_OS::gettimeofday();
         const DataSampleHeader_ptr header = data->second.header;
         const bool new_instance = data->second.new_instance;
 
         // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-        data_reader_impl->finish_store_instance_data(move(instance_data), *header, instance, NOT_DISPOSE_MSG, NOT_UNREGISTER_MSG);
+        data_reader_impl->finish_store_instance_data(
+          move(data->second.message),
+          *header,
+          instance,
+          NOT_DISPOSE_MSG,
+          NOT_UNREGISTER_MSG);
 
         data_reader_impl->accept_sample_processing(instance, *header, new_instance);
       } else {
@@ -2310,20 +2302,7 @@ private:
     if (data_reader_impl) {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, data_reader_impl->sample_lock_);
       // insure instance_ptrs get freed
-      for (typename FilterDelayedSampleMap::iterator sample = map_.begin(); sample != map_.end(); ++sample) {
-        clear_message(sample->second.message);
-      }
-
       map_.clear();
-    }
-  }
-
-  void clear_message(MessageTypeWithAllocator*& message)
-  {
-    RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
-    if (data_reader_impl) {
-      delete message;
-      message = 0;
     }
   }
 
@@ -2332,30 +2311,36 @@ private:
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
 
   struct FilterDelayedSample {
-    FilterDelayedSample(MessageTypeWithAllocator* msg, DataSampleHeader_ptr hdr, bool new_inst)
-    : message(msg)
+
+    FilterDelayedSample(unique_ptr<MessageTypeWithAllocator> msg, DataSampleHeader_ptr hdr, bool new_inst)
+    : message(move(msg))
     , header(hdr)
     , new_instance(new_inst)
     , timer_id(-1) {
     }
 
-    MessageTypeWithAllocator* message;
+    container_supported_unique_ptr<MessageTypeWithAllocator> message;
     DataSampleHeader_ptr header;
     bool new_instance;
     long timer_id;
   };
 
+
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, FilterDelayedSample) FilterDelayedSampleMap;
 
   FilterDelayedSampleMap map_;
+public:
+  typedef typename DataReaderImpl_T<MessageType>::DataAllocator DataAllocator;
+  //We put the data_allocator_ inside FilterDelayedHandler because the reactor thread in FilterDelayedHandler may be still alive
+  // after the containing DataReaderImpl is destroyed. This avoids access violation during cleanup.
+  unique_ptr<DataAllocator> data_allocator_;
 };
 
-
+unique_ptr<DataAllocator>& data_allocator() { return filter_delayed_handler_->data_allocator_; }
 
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap  instance_map_;
-unique_ptr<DataAllocator> data_allocator_;
 };
 
 template <typename MessageType>

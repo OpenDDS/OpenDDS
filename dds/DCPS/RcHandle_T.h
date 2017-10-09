@@ -8,6 +8,7 @@
 
 #include "dds/Versioned_Namespace.h"
 #include <cassert>
+#include "unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -29,6 +30,12 @@ public:
 
   RcHandle(T* p, keep_count)
     : ptr_(p)
+  {
+  }
+
+  template <typename U>
+  RcHandle(unique_ptr<U> p)
+    : ptr_(p.release())
   {
   }
 
@@ -85,6 +92,14 @@ public:
     return *this;
   }
 
+  template <typename U>
+  RcHandle& operator=(unique_ptr<U> b)
+  {
+    RcHandle<T> tmp(b.release(), keep_count());
+    swap(tmp);
+    return *this;
+  }
+
   void swap(RcHandle& rhs)
   {
     T* t = this->ptr_;
@@ -108,6 +123,11 @@ public:
   }
 
   T* in() const
+  {
+    return this->ptr_;
+  }
+
+  T* get() const
   {
     return this->ptr_;
   }
@@ -293,6 +313,7 @@ RcHandle<T> rchandle_from(T* pointer)
   assert(pointer == 0 || pointer->ref_count() > 0);
   return RcHandle<T>(pointer, inc_count());
 }
+
 
 } // namespace DCPS
 } // namespace OpenDDS
