@@ -30,7 +30,7 @@
 #include "DRPerMDataReaderListener.h"
 #include "TransportMDataReaderListener.h"
 #include <dds/monitor/monitorTypeSupportImpl.h>
-
+#include <fstream>
 
 DDS::DataReader_ptr
 create_data_reader(DDS::DomainParticipant_ptr participant,
@@ -97,7 +97,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
     dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-    dr_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     DDS::DataReader_var reader;
 
     // Register for OpenDDS::DCPS::ServiceParticipantReport
@@ -320,6 +319,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
+    std::ofstream ofs("mon_ready.txt");
+    ofs << "Ready" << std::endl;
+    ofs.close();
     while (1) {
       ACE_OS::sleep(1);
     }
