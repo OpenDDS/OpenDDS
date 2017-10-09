@@ -115,12 +115,14 @@ public:
   {
     TopicDescriptionPtr tmp(other);
     std::swap(this->topic_, tmp.topic_);
+    return *this;
   }
 
   TopicDescriptionPtr& operator = (const TopicDescriptionPtr& other)
   {
     TopicDescriptionPtr tmp(other);
     std::swap(this->topic_, tmp.topic_);
+    return *this;
   }
 
   Topic* operator->() const
