@@ -24,10 +24,6 @@
 
 int send_interval = 0;
 
-namespace {
-
-} // namespace
-
 int
 parse_args (int argc, ACE_TCHAR *argv[])
 {
@@ -65,8 +61,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (parse_args (argc, argv) != 0) {
       return 1;
     }
-
-    TheServiceParticipant->monitor_factory_->initialize();
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =

@@ -22,12 +22,14 @@ my $status = 0;
 
 my $pub_opts = "-i $send_interval -ORBDebugLevel 10 -ORBLogFile pub.log -DCPSConfigFile pub.ini -DCPSDebugLevel 10";
 my $sub_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile sub.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
-my $mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSConfigFile sub.ini -DCPSDebugLevel 10";
+my $mon_opts = "-DCPSTransportDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile mon.log -DCPSConfigFile mon.ini -DCPSDebugLevel 10";
 
 my $dcpsrepo_ior = "repo.ior";
+my $monready_file = "mon_ready.txt";
 
 unlink $dcpsrepo_ior;
-unlink qw/pub.log sub.log mon.log DCPSInfoRepo.log/;
+unlink $monready_file;
+unlink qw/pub.log sub.log mon.out mon.log DCPSInfoRepo.log/;
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                   "-DCPSDebugLevel 6 -ORBDebugLevel 10 -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior ");
@@ -45,7 +47,17 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 }
 
 print $Monitor->CommandLine() . "\n";
+# Redirect std out so we can check it for monitor messages
+open(SAVEOUT, ">&STDOUT");
+open(STDOUT, '>mon.out');
 $Monitor->Spawn ();
+open(STDOUT, ">&SAVEOUT");
+if (PerlACE::waitforfile_timed ($monready_file, 30) == -1) {
+    print STDERR "ERROR: waiting for monitor initialization\n";
+    $DCPSREPO->Kill ();
+    $Monitor->Kill ();
+    exit 1;
+}
 
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn ();
@@ -66,7 +78,7 @@ if ($SubscriberResult != 0) {
     $status = 1;
 }
 
-my $MonitorResult = $Monitor->TerminateWaitKill(5);
+my $MonitorResult = $Monitor->TerminateWaitKill(10);
 if ($MonitorResult != 0) {
     print STDERR "ERROR: Monitor returned $MonitorResult\n";
     $status = 1;
@@ -79,6 +91,16 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
+unlink $monready_file;
+
+open(MONOUT,"mon.out");
+my @monout=<MONOUT>;close MONOUT;
+my $mon_count = grep /Report/,@monout;
+print STDOUT "mon_count=$mon_count\n";
+if ($mon_count < 150) {
+    print STDERR "ERROR: Insufficient number of monitor messages seen\n";
+    $status = 1;
+}
 
 if ($status == 0) {
   print "test PASSED.\n";

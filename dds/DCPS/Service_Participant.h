@@ -593,6 +593,9 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
+  /// Enable Monitor functionality
+  bool monitor_enabled_;
+
   /// Used to track state of service participant
   bool shut_down_;
 

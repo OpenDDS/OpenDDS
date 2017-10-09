@@ -24,10 +24,6 @@
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 
-namespace {
-
-} // namespace
-
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -35,8 +31,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
-
-    TheServiceParticipant->monitor_factory_->initialize();
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
