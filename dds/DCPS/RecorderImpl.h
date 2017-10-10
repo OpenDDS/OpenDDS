@@ -41,7 +41,7 @@ class OpenDDS_Dcps_Export RecorderImpl
   : public TransportClient
   , public TransportReceiveListener
   , public DataReaderCallbacks
-  , public LocalObject<Recorder>
+  , public Recorder
   , public EntityImpl
   , private WriterInfoListener
 {

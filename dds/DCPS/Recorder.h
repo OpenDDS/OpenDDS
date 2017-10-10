@@ -55,7 +55,7 @@ typedef Recorder* Recorder_ptr;
 typedef TAO_Objref_Var_T<Recorder> Recorder_var;
 
 class OpenDDS_Dcps_Export Recorder
-  : public virtual RcObject {
+  : public virtual LocalObjectBase {
 public:
   typedef Recorder_ptr _ptr_type;
   typedef Recorder_var _var_type;
