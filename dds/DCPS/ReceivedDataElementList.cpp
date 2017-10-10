@@ -4,7 +4,6 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReceivedDataElementList.h"
 
@@ -37,16 +36,21 @@ void* OpenDDS::DCPS::ReceivedDataElement::operator new(size_t , ACE_New_Allocato
 {
   OpenDDS::DCPS::ReceivedDataElementMemoryBlock* block =  static_cast<OpenDDS::DCPS::ReceivedDataElementMemoryBlock*>(pool.malloc(sizeof(OpenDDS::DCPS::ReceivedDataElementMemoryBlock)));
   block->allocator_ = &pool;
-  return &block->element_;
+  return block;
 }
 
 void OpenDDS::DCPS::ReceivedDataElement::operator delete(void* memory)
 {
-  ACE_New_Allocator** allocator_ptr = static_cast<ACE_New_Allocator**>(memory) -1;
-  (*allocator_ptr)->free(allocator_ptr);
+  if (memory) {
+    OpenDDS::DCPS::ReceivedDataElementMemoryBlock* block = static_cast<OpenDDS::DCPS::ReceivedDataElementMemoryBlock*>(memory);
+    block->allocator_->free(block);
+  }
 }
 
-
+void OpenDDS::DCPS::ReceivedDataElement::operator delete(void* memory, ACE_New_Allocator&)
+{
+  operator delete(memory);
+}
 
 OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState *instance_state)
   : head_(0), tail_(0), size_(0), instance_state_(instance_state)

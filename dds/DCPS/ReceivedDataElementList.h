@@ -122,6 +122,7 @@ public:
 
   void* operator new(size_t size, ACE_New_Allocator& pool);
   void operator delete(void* memory);
+  void operator delete(void* memory, ACE_New_Allocator& pool);
 
 private:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> ref_count_;
@@ -131,8 +132,8 @@ protected:
 
 struct ReceivedDataElementMemoryBlock
 {
-  ACE_New_Allocator* allocator_;
   ReceivedDataElement element_;
+  ACE_New_Allocator* allocator_;
 };
 
 
