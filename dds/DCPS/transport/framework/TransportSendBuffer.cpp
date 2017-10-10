@@ -221,7 +221,7 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
 {
   // Copy sample's TransportQueueElements:
   TransportSendStrategy::QueueType*& elems = buffer.first;
-  ACE_NEW(elems, TransportSendStrategy::QueueType(queue->size(), 1));
+  ACE_NEW(elems, TransportSendStrategy::QueueType());
 
   CopyChainVisitor visitor(*elems,
                            &this->retained_mb_allocator_,

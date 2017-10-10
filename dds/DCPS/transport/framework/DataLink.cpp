@@ -44,11 +44,8 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
   : stopped_(false),
     scheduled_to_stop_at_(ACE_Time_Value::zero),
     impl_(impl),
-    thr_per_con_send_task_(0),
     transport_priority_(priority),
     scheduling_release_(false),
-    mb_allocator_(0),
-    db_allocator_(0),
     is_loopback_(is_loopback),
     is_active_(is_active),
     started_(false),
@@ -62,7 +59,7 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
   id_ = DataLink::get_next_datalink_id();
 
   if (impl.config().thread_per_connection_) {
-    this->thr_per_con_send_task_ = new ThreadPerConnectionSendTask(this);
+    this->thr_per_con_send_task_.reset(new ThreadPerConnectionSendTask(this));
 
     if (this->thr_per_con_send_task_->open() == -1) {
       ACE_ERROR((LM_ERROR,
@@ -79,8 +76,8 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
   // Initialize transport control sample allocators:
   size_t control_chunks = impl.config().datalink_control_chunks_;
 
-  this->mb_allocator_ = new MessageBlockAllocator(control_chunks);
-  this->db_allocator_ = new DataBlockAllocator(control_chunks);
+  this->mb_allocator_.reset(new MessageBlockAllocator(control_chunks));
+  this->db_allocator_.reset(new DataBlockAllocator(control_chunks));
 }
 
 DataLink::~DataLink()
@@ -94,12 +91,8 @@ DataLink::~DataLink()
                this, assoc_by_local_.size()));
   }
 
-  delete this->db_allocator_;
-  delete this->mb_allocator_;
-
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->close(1);
-    delete this->thr_per_con_send_task_;
   }
 }
 
@@ -499,8 +492,8 @@ DataLink::create_control(char submessage_id,
                                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                           ACE_Time_Value::zero,
                                           ACE_Time_Value::max_time,
-                                          this->db_allocator_,
-                                          this->mb_allocator_),
+                                          this->db_allocator_.get(),
+                                          this->mb_allocator_.get()),
                         0);
 
   if (!(*message << header)) {

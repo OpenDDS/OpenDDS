@@ -46,32 +46,24 @@ public:
     : instance_state_(reader, lock, handle),
       last_sequence_(),
       rcvd_samples_(&instance_state_),
-      rcvd_strategy_(0),
       instance_handle_(handle),
       deadline_timer_id_(-1)
   {
     switch (qos.destination_order.kind) {
     case DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS:
-      ACE_NEW_NORETURN(this->rcvd_strategy_,
-                       ReceptionDataStrategy(this->rcvd_samples_));
+      this->rcvd_strategy_.reset(new ReceptionDataStrategy(this->rcvd_samples_));
       break;
 
     case DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS:
-      ACE_NEW_NORETURN(this->rcvd_strategy_,
-                       SourceDataStrategy(this->rcvd_samples_));
+      this->rcvd_strategy_.reset(new SourceDataStrategy(this->rcvd_samples_));
       break;
     }
 
-    if (this->rcvd_strategy_ == 0) {
+    if (!this->rcvd_strategy_) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: SubscriptionInstance: ")
                  ACE_TEXT(" unable to allocate ReceiveDataStrategy!\n")));
     }
-  }
-
-  ~SubscriptionInstance()
-  {
-    delete this->rcvd_strategy_;
   }
 
   /// Instance state for this instance
@@ -84,7 +76,7 @@ public:
   ReceivedDataElementList rcvd_samples_ ;
 
   /// ReceivedDataElementList strategy
-  ReceivedDataStrategy* rcvd_strategy_;
+  unique_ptr<ReceivedDataStrategy> rcvd_strategy_;
 
   /// The instance handle for the registered object
   DDS::InstanceHandle_t instance_handle_;

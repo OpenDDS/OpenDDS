@@ -74,7 +74,7 @@ public:
 private:
   OPENDDS_STRING subscription_expression_;
   DDS::StringSeq expression_parameters_;
-  FilterEvaluator* filter_eval_;
+  unique_ptr<FilterEvaluator> filter_eval_;
 
   std::vector<SubjectFieldSpec> aggregation_;
   std::vector<OPENDDS_STRING> selection_;

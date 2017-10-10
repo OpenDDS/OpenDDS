@@ -87,7 +87,7 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
   } else if (this->mode_ == MODE_SUSPEND) {
     this->mode_ = this->mode_before_suspend_;
     this->mode_before_suspend_ = MODE_NOT_SET;
-    if (this->queue_->size() > 0) {
+    if (this->queue_.size() > 0) {
       this->mode_ = MODE_QUEUE;
       this->synch_->work_available();
     }
@@ -142,7 +142,7 @@ OpenDDS::DCPS::TransportSendStrategy::max_message_size() const
 ACE_INLINE OpenDDS::DCPS::TransportQueueElement*
 OpenDDS::DCPS::TransportSendStrategy::current_packet_first_element() const
 {
-  return this->elems_->peek();
+  return this->elems_.peek();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -45,7 +45,6 @@ MultiTopicImpl::MultiTopicImpl(const char* name,
       participant)
   , subscription_expression_(subscription_expression)
   , expression_parameters_(expression_parameters)
-  , filter_eval_(NULL)
 {
   const char* out = subscription_expression
     + std::strlen(subscription_expression);
@@ -63,14 +62,13 @@ MultiTopicImpl::MultiTopicImpl(const char* name,
     } else if (iter->TypeMatches<TopicExpressionGrammar::TopicName>()) {
       selection_.push_back(toString(iter));
     } else {
-      filter_eval_ = new FilterEvaluator(iter);
+      filter_eval_.reset(new FilterEvaluator(iter));
     }
   }
 }
 
 MultiTopicImpl::~MultiTopicImpl()
 {
-  delete filter_eval_;
 }
 
 char* MultiTopicImpl::get_subscription_expression()

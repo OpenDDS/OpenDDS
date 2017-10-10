@@ -377,7 +377,7 @@ private:
   /// The task used to do the sending. This ThreadPerConnectionSendTask
   /// object is created when the thread_per_connection configuration is
   /// true. It only dedicate to this datalink.
-  ThreadPerConnectionSendTask* thr_per_con_send_task_;
+  unique_ptr<ThreadPerConnectionSendTask> thr_per_con_send_task_;
 
   // snapshot of associations when the release_resources() is called.
   AssocByLocal assoc_releasing_;
@@ -403,8 +403,8 @@ protected:
 
   /// Allocators for data and message blocks used by transport
   /// control samples when send_control is called.
-  MessageBlockAllocator* mb_allocator_;
-  DataBlockAllocator* db_allocator_;
+  unique_ptr<MessageBlockAllocator> mb_allocator_;
+  unique_ptr<DataBlockAllocator> db_allocator_;
 
   /// Is remote attached to same transport ?
   bool is_loopback_;

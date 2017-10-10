@@ -311,8 +311,7 @@ private:
   /// completely unsent.
   /// Also used as a bucket for packets which still have to become
   /// part of a packet.
-  // TODO: should use unique_ptr
-  QueueType* queue_;
+  QueueType queue_;
 
   /// Maximum marshalled size of the transport packet header.
   size_t max_header_size_;
@@ -325,8 +324,7 @@ private:
 
   /// Current elements that have contributed blocks to the current
   /// transport packet.
-  // TODO: should use unique_ptr
-  QueueType* elems_;
+  QueueType elems_;
 
   /// Current (head of chain) block containing unsent bytes for the
   /// current transport packet.
