@@ -72,7 +72,7 @@ class OpenDDS_Shmem_Export ShmemDataLink
   : public DataLink {
 public:
 
-  ShmemDataLink(ShmemTransport& transport, const ShmemInst& config);
+  ShmemDataLink(ShmemTransport& transport);
 
   bool open(const std::string& peer_address);
 

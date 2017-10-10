@@ -29,7 +29,6 @@ namespace DCPS {
 
 UdpDataLink::UdpDataLink(UdpTransport& transport,
                          Priority   priority,
-                         UdpInst& config,
                          TransportReactorTask* reactor_task,
                          bool       active)
   : DataLink(transport,

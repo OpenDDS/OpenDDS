@@ -42,7 +42,7 @@ ShmemDataLink_rch
 ShmemTransport::make_datalink(const std::string& remote_address)
 {
 
-  ShmemDataLink_rch link = make_rch<ShmemDataLink>(ref(*this), ref(config()));
+  ShmemDataLink_rch link = make_rch<ShmemDataLink>(ref(*this));
 
   // Open logical connection:
   if (link->open(remote_address))
