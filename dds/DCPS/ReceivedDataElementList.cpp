@@ -4,7 +4,6 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#include <cstddef>
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReceivedDataElementList.h"
 
