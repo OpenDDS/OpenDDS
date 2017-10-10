@@ -39,6 +39,13 @@ namespace OpenDDS {
     typedef OPENDDS_MAP_CMP(MessageType, DDS::InstanceHandle_t,
                             typename TraitsType::LessThanType) InstanceMap;
 
+    class SharedInstanceMap
+      : public RcObject
+      , public InstanceMap
+    {
+    };
+
+    typedef RcHandle<SharedInstanceMap> SharedInstanceMap_rch;
 
     class MessageTypeWithAllocator
       : public MessageType
@@ -714,13 +721,6 @@ namespace OpenDDS {
   void release_loan (MessageSequenceType & received_data)
   {
     received_data.length(0);
-  }
-
-
-  virtual void delete_instance_map (void* map)
-  {
-    InstanceMap* instances = reinterpret_cast <InstanceMap* > (map);
-    delete instances;
   }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -1633,7 +1633,7 @@ void store_instance_data(
     }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    InstanceMap* inst = 0;
+    SharedInstanceMap_rch inst;
     bool new_handle = true;
     if (this->is_exclusive_ownership_) {
       OwnershipManagerPtr owner_manager = this->ownership_manager();
@@ -1647,7 +1647,7 @@ void store_instance_data(
         return;
       }
 
-      inst = (InstanceMap*)(
+      inst = dynamic_rchandle_cast<SharedInstanceMap>(
         owner_manager->get_instance_map(this->topic_servant_->type_name(), this));
       if (inst != 0) {
         typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
@@ -1690,10 +1690,12 @@ void store_instance_data(
     OwnershipManagerPtr owner_manager = this->ownership_manager();
 
     if (owner_manager) {
-      if (inst == 0) {
-        inst = new InstanceMap ();
+      if (!inst) {
+        inst = make_rch<SharedInstanceMap>();
         owner_manager->set_instance_map(
-          this->topic_servant_->type_name(), reinterpret_cast <void* > (inst), this);
+          this->topic_servant_->type_name(),
+          inst,
+          this);
       }
 
       if (new_handle) {

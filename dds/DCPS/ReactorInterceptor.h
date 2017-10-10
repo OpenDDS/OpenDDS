@@ -62,9 +62,6 @@ protected:
                      ACE_thread_t owner);
 
   virtual ~ReactorInterceptor();
-
-private:
-
   int handle_exception(ACE_HANDLE /*fd*/);
   int handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard);
   ACE_thread_t owner_;

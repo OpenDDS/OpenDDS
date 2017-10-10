@@ -1941,7 +1941,7 @@ DDS::ReturnCode_t
 Service_Participant::delete_recorder(Recorder_ptr recorder)
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
-  RecorderImpl* impl = static_cast<RecorderImpl*>(recorder);
+  RecorderImpl* impl = dynamic_cast<RecorderImpl*>(recorder);
   if (impl){
     ret = impl->cleanup();
     impl->participant()->delete_recorder(recorder);

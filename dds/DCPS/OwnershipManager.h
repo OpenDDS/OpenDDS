@@ -15,6 +15,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "PoolAllocator.h"
 #include "RepoIdTypes.h"
+#include "RcObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -34,14 +35,14 @@ public:
 
   // TypeInstanceMap is only used for EXCLUSIVE ownership.
   struct InstanceMap {
-    InstanceMap() : map_(0) {}
-    InstanceMap(void* map, DataReaderImpl* reader)
+    InstanceMap()  {}
+    InstanceMap(const RcHandle<RcObject>& map, DataReaderImpl* reader)
       : map_(map)
     {
       readers_.insert(reader);
     }
 
-    void* map_;
+    RcHandle<RcObject> map_;
     ReaderSet readers_;
   };
 
@@ -90,14 +91,14 @@ public:
   * when first sample with the type is received.
   */
   void set_instance_map(const char* type_name,
-                        void* instance_map,
+                        const RcHandle<RcObject>& instance_map,
                         DataReaderImpl* reader);
 
   /**
   * Accesor of the instance map for provided type. It is called once
   * for each new instance in a datareader.
   */
-  void* get_instance_map(const char* type_name, DataReaderImpl* reader);
+  RcHandle<RcObject> get_instance_map(const char* type_name, DataReaderImpl* reader);
 
   /**
   * The readers that access the instance map are keep tracked as ref

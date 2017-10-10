@@ -140,7 +140,8 @@ public:
 private:
   ~EndHistoricSamplesMissedSweeper();
 
-  DataReaderImpl* reader_;
+  WeakRcHandle<DataReaderImpl> reader_;
+  OPENDDS_SET(RcHandle<OpenDDS::DCPS::WriterInfo>) info_set_;
 
   class CommandBase : public Command {
   public:
@@ -461,7 +462,6 @@ public:
   OwnershipManagerPtr ownership_manager() { return OwnershipManagerPtr(this); }
 #endif
 
-  virtual void delete_instance_map (void* map) = 0;
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance_rch& instance) = 0;
 
@@ -745,7 +745,7 @@ private:
                     ACE_thread_t owner,
                     DataReaderImpl* data_reader)
       : ReactorInterceptor(reactor, owner)
-      , data_reader_(data_reader)
+      , data_reader_(*data_reader)
       , liveliness_timer_id_(-1)
     { }
 
@@ -769,7 +769,7 @@ private:
   private:
     ~LivelinessTimer() { }
 
-    DataReaderImpl* data_reader_;
+    WeakRcHandle<DataReaderImpl> data_reader_;
 
     /// liveliness timer id; -1 if no timer is set
     long liveliness_timer_id_;

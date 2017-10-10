@@ -2270,7 +2270,7 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 
     RecorderSet::iterator it = recorders_.begin();
     for (; it != recorders_.end(); ++it ){
-      RecorderImpl* impl = static_cast<RecorderImpl* >(it->in());
+      RecorderImpl* impl = dynamic_cast<RecorderImpl* >(it->in());
       DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
       if (impl) result = impl->cleanup();
       if (result != DDS::RETCODE_OK) ret = result;

@@ -75,6 +75,9 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, 
     if (instance)
       execute(instance, true);
   }
+  else {
+    this->reactor()->purge_pending_notifications(this);
+  }
   return 0;
 }
 

@@ -47,25 +47,26 @@ public:
 private:
   ~RemoveAssociationSweeper();
 
-  T* reader_;
+  WeakRcHandle<T> reader_;
+  OPENDDS_SET(RcHandle<WriterInfo>) info_set_;
 
   class CommandBase : public Command {
   public:
     CommandBase(RemoveAssociationSweeper<T>* sweeper,
-                OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                RcHandle<WriterInfo> info)
       : sweeper_ (sweeper)
       , info_(info)
     { }
 
   protected:
     RemoveAssociationSweeper<T>* sweeper_;
-    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+    RcHandle<OpenDDS::DCPS::WriterInfo> info_;
   };
 
   class ScheduleCommand : public CommandBase {
   public:
     ScheduleCommand(RemoveAssociationSweeper<T>* sweeper,
-                    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                    RcHandle<WriterInfo> info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
@@ -74,11 +75,13 @@ private:
   class CancelCommand : public CommandBase {
   public:
     CancelCommand(RemoveAssociationSweeper<T>* sweeper,
-                  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                  RcHandle<WriterInfo> info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
   };
+
+  friend class CancelCommand;
 };
 //Starting RemoveAssociationSweeper
 template <typename T>
@@ -86,7 +89,7 @@ RemoveAssociationSweeper<T>::RemoveAssociationSweeper(ACE_Reactor* reactor,
                                                    ACE_thread_t owner,
                                                    T* reader)
   : ReactorInterceptor (reactor, owner)
-  , reader_(reader)
+  , reader_(*reader)
 { }
 
 template <typename T>
@@ -127,17 +130,24 @@ int RemoveAssociationSweeper<T>::handle_timeout(
   info->remove_association_timer_ = WriterInfo::NO_TIMER;
   const PublicationId pub_id = info->writer_id_;
 
-  info->_remove_ref();
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(this->mutex_);
+    info_set_.erase(rchandle_from(info));
+  }
+
+  RcHandle<T> reader = reader_.lock();
+  if (!reader)
+    return 0;
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter sub_repo(reader_->get_repo_id());
+    GuidConverter sub_repo(reader->get_repo_id());
     GuidConverter pub_repo(pub_id);
     ACE_DEBUG((LM_INFO, "((%P|%t)) RemoveAssociationSweeper::handle_timeout reader: %C waiting on writer: %C\n",
                OPENDDS_STRING(sub_repo).c_str(),
                OPENDDS_STRING(pub_repo).c_str()));
   }
 
-  reader_->remove_publication(pub_id);
+  reader->remove_publication(pub_id);
   return 0;
 }
 
@@ -146,7 +156,7 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 {
   //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
   const void* arg = reinterpret_cast<const void*>(this->info_.in());
-  this->info_->_add_ref();
+  this->sweeper_->info_set_.insert(this->info_);
 
   this->info_->remove_association_timer_ = this->sweeper_->reactor()->schedule_timer(this->sweeper_,
                                                                        arg,
@@ -165,7 +175,7 @@ void RemoveAssociationSweeper<T>::CancelCommand::execute()
       ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", this->info_->remove_association_timer_));
     }
     this->info_->remove_association_timer_ = WriterInfo::NO_TIMER;
-    this->info_->_remove_ref();
+    this->sweeper_->info_set_.erase(this->info_);
   }
 }
 //End RemoveAssociationSweeper
