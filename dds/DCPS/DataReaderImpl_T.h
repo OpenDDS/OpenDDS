@@ -1,6 +1,6 @@
 #ifndef dds_DCPS_DataReaderImpl_T_h
 #define dds_DCPS_DataReaderImpl_T_h
-
+#include <cstddef>
 #include "dds/DCPS/MultiTopicImpl.h"
 #include "dds/DCPS/RakeResults_T.h"
 #include "dds/DCPS/SubscriberImpl.h"
@@ -45,8 +45,8 @@ namespace OpenDDS {
     {
     public:
       void* operator new(size_t size, ACE_New_Allocator& pool);
+      void operator delete(void* memory, ACE_New_Allocator& pool);
       void operator delete(void* memory);
-
 
       MessageTypeWithAllocator(){}
       MessageTypeWithAllocator(const MessageType& other)
@@ -56,8 +56,8 @@ namespace OpenDDS {
     };
 
     struct MessageTypeMemoryBlock {
-      ACE_New_Allocator* allocator_;
       MessageTypeWithAllocator element_;
+      ACE_New_Allocator* allocator_;
     };
 
     typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageTypeMemoryBlock, ACE_Null_Mutex>  DataAllocator;
@@ -2367,16 +2367,22 @@ void* DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator new(size
   MessageTypeMemoryBlock* block =
     static_cast<MessageTypeMemoryBlock*>(pool.malloc(sizeof(MessageTypeMemoryBlock)));
   block->allocator_ = &pool;
-  return &block->element_;
+  return block;
 }
 
 template <typename MessageType>
 void DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator delete(void* memory)
 {
   if (memory) {
-    ACE_New_Allocator** ptr_alloactor = static_cast<ACE_New_Allocator**>(memory)-1;
-    (*ptr_alloactor)->free(ptr_alloactor);
+    MessageTypeMemoryBlock* block = static_cast<MessageTypeMemoryBlock*>(memory);
+    block->allocator_->free(block);
   }
+}
+
+template <typename MessageType>
+void DataReaderImpl_T<MessageType>::MessageTypeWithAllocator::operator delete(void* memory, ACE_New_Allocator&)
+{
+  operator delete(memory);
 }
 
 }
