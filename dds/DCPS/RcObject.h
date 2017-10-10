@@ -57,11 +57,11 @@ namespace DCPS {
       weak_object_->_remove_ref();
     }
 
-    virtual void _add_ref() const {
+    virtual void _add_ref() {
       ++this->ref_count_;
     }
 
-    virtual void _remove_ref() const {
+    virtual void _remove_ref() {
       const long new_count = --this->ref_count_;
       if (new_count == 0 && weak_object_->set_expire()) {
         delete this;
@@ -89,7 +89,7 @@ namespace DCPS {
 
   private:
 
-    mutable ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
+    ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
     WeakObject*  weak_object_;
 
     RcObject(const RcObject&);
