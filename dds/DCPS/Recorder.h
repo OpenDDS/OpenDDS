@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_RECORDER_H
 #define OPENDDS_DCPS_RECORDER_H
 
-#include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
 #include "dds/DdsDcpsInfrastructureC.h"
