@@ -69,8 +69,8 @@ public:
   /// The visitor can stop visitation early by returning 0 from
   /// its visit_element(T* element) method.
   void accept_visitor(VisitorType& visitor) const {
-    for (const_iterator itr = elements_.cbegin();
-         itr != elements_.cend(); ++itr) {
+    for (const_iterator itr = elements_.begin();
+         itr != elements_.end(); ++itr) {
       visitor.visit_element(*itr);
     }
   }

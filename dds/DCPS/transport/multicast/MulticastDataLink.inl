@@ -37,7 +37,7 @@ MulticastDataLink::receive_strategy()
 ACE_INLINE SingleSendBuffer*
 MulticastDataLink::send_buffer()
 {
-  return this->send_buffer_;
+  return this->send_buffer_.get();
 }
 
 ACE_INLINE MulticastInst&

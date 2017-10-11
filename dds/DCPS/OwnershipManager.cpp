@@ -109,7 +109,7 @@ OwnershipManager::unregister_reader(const char* type_name,
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) OwnershipManager::unregister_reader ")
                  ACE_TEXT(" instance map %@ is deleted by reader %@\n"),
-                 instance->map_, reader));
+                 instance->map_.in(), reader));
     }
     unbind(type_instance_map_, type_name);
   }

@@ -1469,10 +1469,10 @@ namespace OpenDDS {
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, reactor_runner_.mtx_, 0);
         if (!reactor_runner_.reactor_) {
-          reactor_runner_.reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+          reactor_runner_.reactor_.reset(new ACE_Reactor(new ACE_Select_Reactor, true));
           reactor_runner_.activate();
         }
-        return reactor_runner_.reactor_;
+        return reactor_runner_.reactor_.get();
       }
 
     protected:
@@ -1524,11 +1524,7 @@ namespace OpenDDS {
 
       // Before participants_ so destroyed after.
       struct ReactorRunner : ACE_Task_Base {
-      ReactorRunner() : reactor_(0) {}
-        ~ReactorRunner()
-        {
-          delete reactor_;
-        }
+      ReactorRunner()  {}
 
         int svc()
         {
@@ -1546,7 +1542,7 @@ namespace OpenDDS {
           }
         }
 
-        ACE_Reactor* reactor_;
+        unique_ptr<ACE_Reactor> reactor_;
         ACE_Thread_Mutex mtx_;
       } reactor_runner_;
 

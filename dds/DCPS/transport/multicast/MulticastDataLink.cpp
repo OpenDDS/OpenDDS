@@ -45,15 +45,14 @@ MulticastDataLink::MulticastDataLink(MulticastTransport& transport,
   local_peer_(local_peer),
   reactor_task_(reactor_task),
   send_strategy_(make_rch<MulticastSendStrategy>(this)),
-  recv_strategy_(make_rch<MulticastReceiveStrategy>(this)),
-  send_buffer_(0)
+  recv_strategy_(make_rch<MulticastReceiveStrategy>(this))
 {
   // A send buffer may be bound to the send strategy to ensure a
   // configured number of most-recent datagrams are retained:
   if (this->session_factory_->requires_send_buffer()) {
-    this->send_buffer_ = new SingleSendBuffer(config.nak_depth_,
-                                              config.max_samples_per_packet_);
-    this->send_strategy_->send_buffer(this->send_buffer_);
+    this->send_buffer_.reset(new SingleSendBuffer(config.nak_depth_,
+                                              config.max_samples_per_packet_));
+    this->send_strategy_->send_buffer(this->send_buffer_.get());
   }
 }
 
@@ -61,7 +60,6 @@ MulticastDataLink::~MulticastDataLink()
 {
   if (this->send_buffer_) {
     this->send_strategy_->send_buffer(0);
-    delete this->send_buffer_;
   }
 }
 

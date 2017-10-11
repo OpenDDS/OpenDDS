@@ -568,8 +568,8 @@ private:
     size_t       marshaled_size_;
     size_t       key_marshaled_size_;
     unique_ptr<DataAllocator> data_allocator_;
-    unique_ptr<::OpenDDS::DCPS::MessageBlockAllocator> mb_allocator_;
-    unique_ptr<::OpenDDS::DCPS::DataBlockAllocator>    db_allocator_;
+    unique_ptr<MessageBlockAllocator> mb_allocator_;
+    unique_ptr<DataBlockAllocator>    db_allocator_;
 
     // A class, normally provided by an unit test, that needs access to
     // private methods/members.

@@ -2692,6 +2692,7 @@ LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
   else {
     this->reactor()->cancel_timer(this);
   }
+  return 0;
 }
 
 

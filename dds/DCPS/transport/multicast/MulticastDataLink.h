@@ -90,7 +90,7 @@ private:
   MulticastSendStrategy_rch send_strategy_;
   MulticastReceiveStrategy_rch recv_strategy_;
 
-  SingleSendBuffer* send_buffer_;
+  unique_ptr<SingleSendBuffer> send_buffer_;
 
   ACE_SOCK_Dgram_Mcast socket_;
 
