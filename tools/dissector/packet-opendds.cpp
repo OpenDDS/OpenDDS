@@ -90,6 +90,9 @@ int hf_sample_flags2            = -1;
 int hf_sample_flags2_cdr_encap  = -1;
 int hf_sample_flags2_key_only   = -1;
 
+// Sample Type, ex "Messenger::Message"
+int hf_sample_type = -1;
+
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
   &hf_sample_flags_byte_order,
@@ -485,15 +488,17 @@ namespace OpenDDS
 
       const char * data_name =
         InfoRepo_Dissector::instance().topic_for_pub(&header.publication_id_);
-      if (data_name == 0)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "no topic for %s\n",
-                      std::string(converter).c_str()));
-          offset += header.message_length_; // skip marshaled data
-          return;
-        }
+
+      if (data_name == 0) {
+        ACE_DEBUG ((LM_DEBUG,
+                    "DDS_Dissector::dissect_sample_payload: "
+                    "no topic for %s\n",
+                    std::string(converter).c_str()));
+        offset += header.message_length_; // skip marshaled data
+        return;
+      } else { // Set sample.type
+        proto_tree_add_string(ltree, hf_sample_type, tvb_, 0, 0, data_name);
+      }
 
       Sample_Dissector *data_dissector =
         Sample_Manager::instance().find (data_name);
@@ -538,6 +543,7 @@ namespace OpenDDS
 
         proto_tree* trans_tree =
           proto_item_add_subtree(item, ett_trans_header);
+
 
         this->dissect_transport_header (trans_tree, trans, offset);
 
@@ -807,6 +813,12 @@ namespace OpenDDS
             { "Content Filters",
                 "opendds.sample.content_filter_entries",
                 FT_UINT32, BASE_HEX, NULL_HFILL
+                }
+        },
+        { &hf_sample_type,
+            { "Sample Type",
+                "opendds.sample.type",
+                FT_STRING, BASE_NONE, NULL_HFILL
                 }
         }
       };
