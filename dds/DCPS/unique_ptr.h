@@ -165,7 +165,7 @@ public:
   }
 
   template <typename U>
-  explicit container_supported_unique_ptr(unique_ptr<U> p)
+  container_supported_unique_ptr(unique_ptr<U> p)
     : ptr_(p.release())
   {
   }
