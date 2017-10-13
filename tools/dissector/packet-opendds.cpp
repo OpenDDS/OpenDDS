@@ -688,7 +688,7 @@ namespace OpenDDS
                 FT_BOOLEAN, flags_bits, BF_HFILL(2) }
         },
         { &hf_length,
-            { "opendds.length", "Length",
+            { "Length", "opendds.length",
                 FT_UINT16, BASE_HEX, NULL_HFILL
                 }
         },
