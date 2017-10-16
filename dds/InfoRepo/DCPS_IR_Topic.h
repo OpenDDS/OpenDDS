@@ -13,7 +13,7 @@
 #include /**/ "dds/DdsDcpsTopicC.h"
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include /**/ "ace/Unbounded_Set.h"
-
+#include "dds/DCPS/unique_ptr.h"
 #include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -40,7 +40,9 @@ class DCPS_IR_Subscription;
  * @brief Representative of a Topic
  *
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic {
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic
+  : public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Topic>
+{
 public:
   DCPS_IR_Topic(const OpenDDS::DCPS::RepoId& id,
                 const DDS::TopicQos& qos,

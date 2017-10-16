@@ -12,6 +12,7 @@
 #include /**/ "ace/Unbounded_Set.h"
 #include /**/ "ace/SString.h"
 #include /**/ "tao/corbafwd.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #include <string>
 
@@ -39,7 +40,8 @@ typedef ACE_Unbounded_Set<DCPS_IR_Topic*> DCPS_IR_Topic_Set;
  * @brief Representative of a Topic Description
  *
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic_Description {
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic_Description
+  : public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Topic_Description> {
 public:
   DCPS_IR_Topic_Description(
     DCPS_IR_Domain* domain,

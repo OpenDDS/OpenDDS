@@ -15,6 +15,7 @@
 #include "ace/Condition_Thread_Mutex.h"
 #include "RcEventHandler.h"
 #include "dcps_export.h"
+#include "unique_ptr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,11 +25,14 @@ namespace DCPS {
 class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler {
 public:
 
-  class Command : public PoolAllocationBase {
+  class Command
+  : public PoolAllocationBase
+  , public EnableContainerSupportedUniquePtr<Command> {
   public:
     virtual ~Command() { }
     virtual void execute() = 0;
   };
+  typedef container_supported_unique_ptr<Command> CommandPtr;
 
   bool should_execute_immediately();
   void process_command_queue();
@@ -49,7 +53,7 @@ public:
   void enqueue(T& t)
   {
     ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-    command_queue_.push(new T(t));
+    command_queue_.push(CommandPtr(new T(t)));
     this->reactor()->notify(this);
   }
 
@@ -67,7 +71,7 @@ protected:
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
   ACE_Condition_Thread_Mutex condition_;
-  OPENDDS_QUEUE(Command*) command_queue_;
+  OPENDDS_QUEUE(CommandPtr) command_queue_;
 };
 
 } // namespace DCPS
