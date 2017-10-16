@@ -252,6 +252,8 @@ namespace OpenDDS
 
     //--------------------------------------------------------------------
 
+    const std::string Sample_Manager::payload_namespace = "opendds.sample.payload";
+
     Sample_Manager::~Sample_Manager()
     {
       if (hf_array_ != NULL) {

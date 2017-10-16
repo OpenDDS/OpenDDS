@@ -58,6 +58,9 @@ namespace OpenDDS
       void init ();
       Sample_Dissector *find (const char *repo_id);
 
+      /// Wireshark Namespace to set the payload in
+      static const std::string payload_namespace;
+
       /// Add sample field to register later.
       void add_protocol_field(
         int * hf_index,
@@ -71,6 +74,7 @@ namespace OpenDDS
       /// What is passed to wireshark
       hf_register_info * fields_array();
       size_t number_of_fields();
+
 
     private:
       static Sample_Manager instance_;

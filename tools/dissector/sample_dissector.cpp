@@ -52,11 +52,110 @@ namespace OpenDDS
         nested_ (n),
         next_(0)
     {
-        if (n->field_->type_id_ == Sample_Field::String) {
-            std::string full_name = std::string("opendds.sample.payload.") + label;
-            Sample_Manager::instance().add_protocol_field(
-                &hf_, full_name, label, FT_STRING
-            );
+        // Prepare to Register Field
+        //       (will be registered when DCPS is registered)
+        std::string full_name;
+        // TODO: remove duplicate full_name lines
+        switch (n->field_->type_id_) {
+
+        case Sample_Field::Boolean:
+          // TODO
+          break;
+
+        case Sample_Field::Char:
+          // TODO
+          break;
+
+        case Sample_Field::Octet:
+          // TODO
+          break;
+
+        case Sample_Field::WChar:
+          // TODO
+          break;
+
+        case Sample_Field::Short:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_INT16, BASE_DEC
+          );
+          break;
+
+        case Sample_Field::Long:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_INT32, BASE_DEC
+          );
+          break;
+
+        case Sample_Field::LongLong:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_INT64, BASE_DEC
+          );
+          break;
+
+        case Sample_Field::UShort:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_UINT16, BASE_DEC
+          );
+          break;
+
+        case Sample_Field::ULong:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_UINT32, BASE_DEC
+          );
+          break;
+
+        case Sample_Field::ULongLong:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_UINT64, BASE_DEC
+          );
+          break;
+
+        case Sample_Field::Float:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_FLOAT
+          );
+          break;
+
+        case Sample_Field::Double:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_DOUBLE
+          );
+          break;
+
+        case Sample_Field::LongDouble:
+          // TODO
+          break;
+
+        case Sample_Field::String:
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_STRING
+          );
+          break;
+
+        case Sample_Field::WString:
+          // TODO
+          break;
+
+        case Sample_Field::Enumeration:
+          // TODO
+          break;
+
+        case Sample_Field::Undefined:
+          // TODO
+          break;
+
+        default:
+          // TODO
+          break;
         }
     }
 
@@ -311,38 +410,121 @@ namespace OpenDDS
       size_t len = 0;
       if (this->nested_ == 0)
         {
-          std::stringstream outstream;
-          /* if (this->label_.empty()) */
-          /*   outstream << alt_label; */
-          /* else */
-          /*   outstream << this->label_; */
-          /* if (params.use_index) */
-          /*   outstream << "[" << params.index << "]"; */
-          /* outstream << ": "; */
           len = compute_field_length (params.data);
-          if (this->type_id_ != WString)
-            {
-              this->to_stream (outstream, params.data);
-              /* ws_proto_tree_add_text (params.tree, params.tvb, params.offset, */
-              /*                      (gint)len, "%s", outstream.str().c_str()); */
-              proto_tree_add_string(
-                params.tree, params.last_known_hf,
-                params.tvb, params.offset, (gint)len,
-                outstream.str().c_str());
-            }
-          else
-            {
-              guint32 len =
-                *(reinterpret_cast< guint32 * >(params.data));
-              guint32 width = len * Serializer::WCHAR_SIZE;
+          std::stringstream s;
+          switch (this->type_id_) {
 
-              ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1];
-              ACE_OS::memcpy (clone, params.data+4, width);
-              clone[len] = 0;
-              ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
-                                   width + 4, "%s %ls", outstream.str().c_str(), clone);
-              delete [] clone;
-            }
+          case Sample_Field::Boolean:
+            // TODO
+            break;
+
+          case Sample_Field::Char:
+            // TODO
+            break;
+
+          case Sample_Field::Octet:
+            // TODO
+            break;
+
+          case Sample_Field::WChar:
+            // TODO
+            break;
+
+          case Sample_Field::Short:
+            proto_tree_add_int(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::Short *>(params.data));
+            break;
+
+          case Sample_Field::Long:
+            proto_tree_add_int(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::Long *>(params.data));
+            break;
+
+          case Sample_Field::LongLong:
+            proto_tree_add_int64(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::LongLong *>(params.data));
+            break;
+
+          case Sample_Field::UShort:
+            proto_tree_add_uint(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::UShort *>(params.data));
+            break;
+
+          case Sample_Field::ULong:
+            proto_tree_add_uint(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::ULong *>(params.data));
+            break;
+
+          case Sample_Field::ULongLong:
+            proto_tree_add_uint64(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::ULongLong *>(params.data));
+            break;
+
+          case Sample_Field::Float:
+            proto_tree_add_float(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::Float *>(params.data));
+            break;
+
+          case Sample_Field::Double:
+            proto_tree_add_double(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::Double *>(params.data));
+            break;
+
+          case Sample_Field::LongDouble:
+            // TODO
+            break;
+
+          case Sample_Field::String:
+            this->to_stream(s, params.data);
+            proto_tree_add_string(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              s.str().c_str());
+            break;
+
+          case Sample_Field::WString:
+            /* // TODO: Change to add_string */
+            /* guint32 len = */
+            /*   *(reinterpret_cast< guint32 * >(params.data)); */
+            /* guint32 width = len * Serializer::WCHAR_SIZE; */
+
+            /* ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1]; */
+            /* ACE_OS::memcpy (clone, params.data+4, width); */
+            /* clone[len] = 0; */
+            /* ws_proto_tree_add_text (params.tree, params.tvb, params.offset, */
+            /*                      width + 4, "%s %ls", params.data, clone); */
+            /* delete [] clone; */
+            break;
+
+          case Sample_Field::Enumeration:
+            // TODO
+            break;
+
+          case Sample_Field::Undefined:
+            // TODO
+            break;
+
+          default:
+            // TODO
+            break;
+
+          }
         }
       else
         {
