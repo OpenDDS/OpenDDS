@@ -89,9 +89,8 @@ int hf_sample_flags_more_frags  = -1;
 int hf_sample_flags2            = -1;
 int hf_sample_flags2_cdr_encap  = -1;
 int hf_sample_flags2_key_only   = -1;
-
-// Sample Type, ex "Messenger::Message"
-int hf_sample_type = -1;
+// Payload IDL Type, ex "Messenger::Message"
+int hf_sample_payload = -1; 
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -119,6 +118,7 @@ gint ett_sample_header = -1;
 gint ett_sample_flags  = -1;
 gint ett_sample_flags2 = -1;
 gint ett_filters = -1;
+gint ett_sample_payload = -1;
 
 const value_string byte_order_vals[] = {
   { 0x0,  "Big Endian"    },
@@ -496,10 +496,15 @@ namespace OpenDDS
                     std::string(converter).c_str()));
         offset += header.message_length_; // skip marshaled data
         return;
-      } else { // Set sample.type
-        proto_tree_add_string(ltree, hf_sample_type, tvb_, 0, 0, data_name);
       }
+      
+      // Set Payload Field/Tree
+      proto_item * payload_item = proto_tree_add_string(
+        ltree, hf_sample_payload, tvb_, offset, (gint) header.message_length_, data_name);
+      proto_tree * contents_tree = proto_item_add_subtree(
+          payload_item, ett_sample_payload);
 
+      // Try to Dissect Payload
       Sample_Dissector *data_dissector =
         Sample_Manager::instance().find (data_name);
       if (data_dissector == 0)
@@ -513,7 +518,7 @@ namespace OpenDDS
         }
       else
         {
-          Wireshark_Bundle params = {tvb_, pinfo_, ltree, offset};
+          Wireshark_Bundle params = {tvb_, pinfo_, contents_tree, offset};
           offset = data_dissector->dissect (params);
         }
     }
@@ -660,8 +665,6 @@ namespace OpenDDS
       if (initialized_)
         return;
       initialized_ = true;
-
-      Sample_Manager::instance ().init();
 
       //#define HFILL 0, 0, HF_REF_TYPE_NONE, 0, NULL, NULL
 #define NULL_HFILL NULL, 0, NULL, HFILL
@@ -815,13 +818,19 @@ namespace OpenDDS
                 FT_UINT32, BASE_HEX, NULL_HFILL
                 }
         },
-        { &hf_sample_type,
-            { "Sample Type",
-                "opendds.sample.type",
+        { &hf_sample_payload,
+            { "Payload",
+                "opendds.sample.payload",
                 FT_STRING, BASE_NONE, NULL_HFILL
                 }
         }
       };
+
+      for (unsigned i = 0; i < array_length(hf); i++) {
+          Sample_Manager::instance().add_protocol_field(hf[i]);
+      }
+
+      Sample_Manager::instance().init();
 
       static gint *ett[] = {
         &ett_trans_header,
@@ -829,7 +838,8 @@ namespace OpenDDS
         &ett_sample_header,
         &ett_sample_flags,
         &ett_sample_flags2,
-        &ett_filters
+        &ett_filters,
+        &ett_sample_payload
       };
 
       proto_opendds =
@@ -838,7 +848,10 @@ namespace OpenDDS
          "OpenDDS",                // short_name
          "opendds");               // filter_name
 
-      proto_register_field_array(proto_opendds, hf, array_length(hf));
+      proto_register_field_array(proto_opendds,
+        Sample_Manager::instance().fields_array(),
+        Sample_Manager::instance().number_of_fields()
+      );
       proto_register_subtree_array(ett, array_length(ett));
     }
 

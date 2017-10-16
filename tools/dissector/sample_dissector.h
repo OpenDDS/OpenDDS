@@ -43,6 +43,8 @@ namespace OpenDDS
       packet_info *info;
       proto_tree *tree;
       gint offset;
+      // Used to pass Header Field Id from Parent to its childern
+      int last_known_hf; 
 
       guint8 *get_remainder ();
     };
@@ -139,6 +141,9 @@ namespace OpenDDS
       /// top-level field is deleted, it will iterate over this list deleting
       /// each subsequent field.
       Sample_Field *next_;
+
+      /// Associated Wireshark Header Field
+      int hf_ = -1;
     };
 
     /*
@@ -196,17 +201,15 @@ namespace OpenDDS
 
       virtual std::string stringify (guint8 *data);
 
+      /// The list of fields defining the sample.
+      Sample_Field *field_;
+
     protected:
       /// Values used by the wireshark framework for rendering a sub-tree.
       /// These get set in init(), a subtree is defined only if label_ is not
       /// empty.
       gint ett_payload_;
       std::string subtree_label_;
-
-    private:
-      /// The list of fields defining the sample.
-      Sample_Field *field_;
-
     };
 
     /*

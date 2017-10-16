@@ -52,6 +52,12 @@ namespace OpenDDS
         nested_ (n),
         next_(0)
     {
+        if (n->field_->type_id_ == Sample_Field::String) {
+            std::string full_name = std::string("opendds.sample.payload.") + label;
+            Sample_Manager::instance().add_protocol_field(
+                &hf_, full_name, label, FT_STRING
+            );
+        }
     }
 
     Sample_Field::~Sample_Field ()
@@ -298,23 +304,31 @@ namespace OpenDDS
                              const std::string &alt_label,
                              bool recur)
     {
+      // No matter what, pass this fields hf this Fields childern
+      if (this->hf_ != -1)
+        params.last_known_hf = this->hf_;
+
       size_t len = 0;
       if (this->nested_ == 0)
         {
           std::stringstream outstream;
-          if (this->label_.empty())
-            outstream << alt_label;
-          else
-            outstream << this->label_;
-          if (params.use_index)
-            outstream << "[" << params.index << "]";
-          outstream << ": ";
+          /* if (this->label_.empty()) */
+          /*   outstream << alt_label; */
+          /* else */
+          /*   outstream << this->label_; */
+          /* if (params.use_index) */
+          /*   outstream << "[" << params.index << "]"; */
+          /* outstream << ": "; */
           len = compute_field_length (params.data);
           if (this->type_id_ != WString)
             {
               this->to_stream (outstream, params.data);
-              ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
-                                   (gint)len, "%s", outstream.str().c_str());
+              /* ws_proto_tree_add_text (params.tree, params.tvb, params.offset, */
+              /*                      (gint)len, "%s", outstream.str().c_str()); */
+              proto_tree_add_string(
+                params.tree, params.last_known_hf,
+                params.tvb, params.offset, (gint)len,
+                outstream.str().c_str());
             }
           else
             {
@@ -445,6 +459,7 @@ namespace OpenDDS
           fp.use_index = use_index;
           fp.index = params.index;
           fp.data = data;
+          fp.last_known_hf = params.last_known_hf;
           data_pos += field_->dissect_i (fp, label);
         }
 

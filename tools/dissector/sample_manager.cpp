@@ -251,6 +251,14 @@ namespace OpenDDS
 #endif
 
     //--------------------------------------------------------------------
+
+    Sample_Manager::~Sample_Manager()
+    {
+      if (hf_array_ != NULL) {
+        delete hf_array_;
+      }
+    }
+
     Sample_Manager
     Sample_Manager::instance_;
 
@@ -346,6 +354,47 @@ namespace OpenDDS
       else {
         return 0;
       }
+    }
+
+    void
+    Sample_Manager::add_protocol_field(
+      int * hf_index,
+      const std::string & full_name, const std::string & short_name,
+      enum ftenum ft, field_display_e fd
+    ) {
+      // Get copies of the names
+      char * _full_name = strdup(full_name.c_str());
+      char * _short_name = strdup(short_name.c_str());
+
+      // Push hf_info struct to hf_vector
+      hf_vector_.push_back({
+        hf_index,
+        {
+          _short_name, _full_name,
+          ft, fd,
+          NULL, 0, NULL, HFILL
+        }
+      });
+    }
+
+    void
+    Sample_Manager::add_protocol_field(hf_register_info field)
+    {
+      hf_vector_.push_back(field);
+    }
+
+    size_t Sample_Manager::number_of_fields()
+    {
+      return hf_vector_.size();
+    }
+
+    hf_register_info * Sample_Manager::fields_array()
+    {
+      if (hf_array_ == NULL) {
+        hf_array_ = new hf_register_info[number_of_fields()];
+        std::copy(hf_vector_.begin(), hf_vector_.end(), &hf_array_[0]);
+      }
+      return hf_array_;
     }
   }
 }

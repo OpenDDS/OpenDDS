@@ -33,6 +33,7 @@ extern "C" {
 
 #include <string>
 #include <map>
+#include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -49,16 +50,36 @@ namespace OpenDDS
     class dissector_Export Sample_Manager
     {
     public:
-      static Sample_Manager &instance();
-      void init ();
+      /// Clean up Header Fields
+      ~Sample_Manager();
 
+      static Sample_Manager &instance();
+
+      void init ();
       Sample_Dissector *find (const char *repo_id);
 
-    private:
+      /// Add sample field to register later.
+      void add_protocol_field(
+        int * hf_index,
+        const std::string & full_name, const std::string & short_name,
+        enum ftenum ft, field_display_e fd = BASE_NONE
+      );
 
+      /// Add a premade hf_register_info struct to register later
+      void add_protocol_field(hf_register_info field);
+
+      /// What is passed to wireshark
+      hf_register_info * fields_array();
+      size_t number_of_fields();
+
+    private:
       static Sample_Manager instance_;
+
       typedef std::map<std::string, Sample_Dissector*> DissectorsType;
       DissectorsType dissectors_;
+      std::vector<hf_register_info> hf_vector_;
+      hf_register_info * hf_array_ = NULL;
+
       void init_from_file (const ACE_TCHAR *filename);
     };
   }
