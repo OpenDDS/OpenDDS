@@ -257,7 +257,14 @@ namespace OpenDDS
     Sample_Manager::~Sample_Manager()
     {
       if (hf_array_ != NULL) {
-        delete hf_array_;
+        delete [] hf_array_;
+      }
+      // Free Dynamically Generated Field Names
+      char * ptr;
+      while (!field_names_.empty()) {
+        ptr = field_names_.front();
+        free(ptr);
+        field_names_.pop_front();
       }
     }
 
@@ -368,7 +375,11 @@ namespace OpenDDS
       char * _full_name = strdup(full_name.c_str());
       char * _short_name = strdup(short_name.c_str());
 
-      // Push hf_info struct to hf_vector
+      // Delete strings later
+      field_names_.push_front(_full_name);
+      field_names_.push_front(_short_name);
+
+      // Push hf_info struct to hf_vector_
       hf_vector_.push_back({
         hf_index,
         {
