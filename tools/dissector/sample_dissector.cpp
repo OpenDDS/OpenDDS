@@ -59,19 +59,31 @@ namespace OpenDDS
         switch (n->field_->type_id_) {
 
         case Sample_Field::Boolean:
-          // TODO
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_BOOLEAN
+          );
           break;
 
         case Sample_Field::Char:
-          // TODO
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_CHAR
+          );
           break;
 
         case Sample_Field::Octet:
-          // TODO
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_UINT8, BASE_HEX
+          );
           break;
 
         case Sample_Field::WChar:
-          // TODO
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_STRING
+          );
           break;
 
         case Sample_Field::Short:
@@ -131,7 +143,12 @@ namespace OpenDDS
           break;
 
         case Sample_Field::LongDouble:
-          // TODO
+          // Long Doubles will be cast to doubles, resulting in possible 
+          // data loss if long doubles are larger than doubles.
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_DOUBLE
+          );
           break;
 
         case Sample_Field::String:
@@ -142,19 +159,21 @@ namespace OpenDDS
           break;
 
         case Sample_Field::WString:
-          // TODO
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_STRING
+          );
           break;
 
         case Sample_Field::Enumeration:
           // TODO
           break;
 
-        case Sample_Field::Undefined:
-          // TODO
-          break;
-
         default:
-          // TODO
+          full_name = Sample_Manager::payload_namespace + "." + label;
+          Sample_Manager::instance().add_protocol_field(
+              &hf_, full_name, label, FT_BYTES
+          );
           break;
         }
     }
@@ -411,23 +430,41 @@ namespace OpenDDS
       if (this->nested_ == 0)
         {
           len = compute_field_length (params.data);
+          // Following are Used by String and WString
           std::stringstream s;
+          guint32 l;
+          guint8 * last;
+          guint32 width;
+          ACE_CDR::WChar * clone;
           switch (this->type_id_) {
 
           case Sample_Field::Boolean:
-            // TODO
+            proto_tree_add_item(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::Boolean *>(params.data));
             break;
 
           case Sample_Field::Char:
-            // TODO
+            proto_tree_add_item(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::Char *>(params.data));
             break;
 
           case Sample_Field::Octet:
-            // TODO
+            proto_tree_add_uint(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              *reinterpret_cast<ACE_CDR::Octet *>(params.data));
             break;
 
           case Sample_Field::WChar:
             // TODO
+            /* proto_tree_add_string( */
+            /*   params.tree, params.last_known_hf, */
+            /*   params.tvb, params.offset, (gint)len, */
+            /*   reinterpret_cast<ACE_CDR::WChar *>(params.data)); */
             break;
 
           case Sample_Field::Short:
@@ -487,11 +524,20 @@ namespace OpenDDS
             break;
 
           case Sample_Field::LongDouble:
-            // TODO
+            // Casting to double
+            proto_tree_add_double(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              (double) (*reinterpret_cast<ACE_CDR::LongDouble *>(params.data)));
             break;
 
           case Sample_Field::String:
-            this->to_stream(s, params.data);
+            l = *(reinterpret_cast< guint32 * >(params.data));
+            params.data += 4;
+            last = params.data + l - 1; // len included the trailing null
+            while (params.data != last) {
+              s << *(params.data++);
+            }
             proto_tree_add_string(
               params.tree, params.last_known_hf,
               params.tvb, params.offset, (gint)len,
@@ -499,16 +545,18 @@ namespace OpenDDS
             break;
 
           case Sample_Field::WString:
-            /* // TODO: Change to add_string */
-            /* guint32 len = */
-            /*   *(reinterpret_cast< guint32 * >(params.data)); */
-            /* guint32 width = len * Serializer::WCHAR_SIZE; */
-
-            /* ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1]; */
-            /* ACE_OS::memcpy (clone, params.data+4, width); */
+            // TODO: Investigate this more and make sure it works
+            // as it should.
+            /* len = *(reinterpret_cast< guint32 * >(params.data)); */
+            /* width = len * Serializer::WCHAR_SIZE; */
+            /* clone = new ACE_CDR::WChar[len + 1]; */
+            /* ACE_OS::memcpy(clone, params.data+4, width); */
             /* clone[len] = 0; */
-            /* ws_proto_tree_add_text (params.tree, params.tvb, params.offset, */
-            /*                      width + 4, "%s %ls", params.data, clone); */
+            /* proto_tree_add_string_format( */
+            /*   params.tree, params.last_known_hf, */
+            /*   params.tvb, params.offset, width + 4, */
+            /*   (char *) params.data, */
+            /*   "%s %ls", params.data, clone); */
             /* delete [] clone; */
             break;
 
@@ -516,14 +564,12 @@ namespace OpenDDS
             // TODO
             break;
 
-          case Sample_Field::Undefined:
-            // TODO
-            break;
-
           default:
-            // TODO
+            proto_tree_add_bytes(
+              params.tree, params.last_known_hf,
+              params.tvb, params.offset, (gint)len,
+              params.data);
             break;
-
           }
         }
       else
