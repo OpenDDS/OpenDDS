@@ -163,13 +163,13 @@ private:
 
   /// Keep track of all the DataReaders attached to this
   /// Subscriber: key is the topic_name
-  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataReaderImpl*) DataReaderMap;
+  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataReaderImpl_rch) DataReaderMap;
 
   /// Keep track of DataReaders with data
   /// std::set for now, want to encapsulate
   /// this so we can switch between a set or
   /// list depending on Presentation QoS.
-  typedef OPENDDS_SET(DataReaderImpl*) DataReaderSet;
+  typedef OPENDDS_SET(DataReaderImpl_rch) DataReaderSet;
 
   /// DataReader id to qos map.
   typedef OPENDDS_MAP_CMP(RepoId, DDS::DataReaderQos, GUID_tKeyLessThan) DrIdToQosMap;
@@ -182,9 +182,7 @@ private:
   DDS::StatusMask              listener_mask_;
   DDS::SubscriberListener_var  listener_;
 
-  typedef OPENDDS_SET_CMP(DDS::DataReader_var, VarLess<DDS::DataReader>) DataReaderVarSet;
-  DataReaderVarSet readers_not_enabled_;
-
+  DataReaderSet                readers_not_enabled_;
   DataReaderMap                datareader_map_;
   DataReaderSet                datareader_set_;
 

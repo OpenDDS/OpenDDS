@@ -152,9 +152,7 @@ Service_Participant::Service_Participant()
 #ifndef OPENDDS_SAFETY_PROFILE
     ORB_argv_(false /*substitute_env_args*/),
 #endif
-    reactor_(0),
     reactor_owner_(ACE_OS::NULL_thread),
-    dp_factory_servant_(0),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
@@ -170,7 +168,6 @@ Service_Participant::Service_Participant()
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
     global_transport_config_(ACE_TEXT("")),
     monitor_factory_(0),
-    monitor_(0),
     federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
@@ -198,13 +195,6 @@ Service_Participant::Service_Participant()
 Service_Participant::~Service_Participant()
 {
   shutdown();
-  ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-  typedef OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter_t;
-  for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
-    delete it->second;
-  }
-  delete monitor_;
-  delete reactor_;
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -235,13 +225,13 @@ Service_Participant::ReactorTask::svc()
 ACE_Reactor_Timer_Interface*
 Service_Participant::timer() const
 {
-  return reactor_;
+  return reactor_.get();
 }
 
 ACE_Reactor*
 Service_Participant::reactor() const
 {
-  return reactor_;
+  return reactor_.get();
 }
 
 ACE_thread_t
@@ -269,23 +259,18 @@ Service_Participant::shutdown()
 
       domainRepoMap_.clear();
 
-      if (0 != reactor_) {
+      if (reactor_) {
         reactor_->end_reactor_event_loop();
         reactor_task_.wait();
       }
 
       discoveryMap_.clear();
-      dp_factory_ = DDS::DomainParticipantFactory::_nil();
 
   #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       transient_data_cache_.reset();
       persistent_data_cache_.reset();
   #endif
 
-      typedef OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter;
-      for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
-        delete i->second;
-      }
       discovery_types_.clear();
     }
     TransportRegistry::close();
@@ -309,13 +294,13 @@ DDS::DomainParticipantFactory_ptr
 Service_Participant::get_domain_participant_factory(int &argc,
                                                     ACE_TCHAR *argv[])
 {
-  if (CORBA::is_nil(dp_factory_.in())) {
+  if (!dp_factory_servant_) {
     ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
                      guard,
                      this->factory_lock_,
                      DDS::DomainParticipantFactory::_nil());
 
-    if (CORBA::is_nil(dp_factory_.in())) {
+    if (!dp_factory_servant_) {
       // This used to be a call to ORB_init().  Since the ORB is now managed
       // by InfoRepoDiscovery, just save the -ORB* args for later use.
       // The exceptions are -ORBLogFile and -ORBVerboseLogging, which
@@ -397,22 +382,10 @@ Service_Participant::get_domain_participant_factory(int &argc,
       ///        established.
       this->initializeScheduling();
 
-      ACE_NEW_RETURN(dp_factory_servant_,
-                     DomainParticipantFactoryImpl(),
-                     DDS::DomainParticipantFactory::_nil());
-
-      dp_factory_ = dp_factory_servant_;
-
-      if (CORBA::is_nil(dp_factory_.in())) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("Service_Participant::get_domain_participant_factory, ")
-                   ACE_TEXT("nil DomainParticipantFactory. \n")));
-        return DDS::DomainParticipantFactory::_nil();
-      }
+      dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
       if (!reactor_)
-        reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+        reactor_.reset(new ACE_Reactor(new ACE_Select_Reactor, true));
 
       if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
         ACE_ERROR((LM_ERROR,
@@ -448,11 +421,12 @@ Service_Participant::get_domain_participant_factory(int &argc,
       if (this->monitor_enabled_) {
         this->monitor_factory_->initialize();
       }
-      this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
+
+      this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
     }
   }
 
-  return DDS::DomainParticipantFactory::_duplicate(dp_factory_.in());
+  return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
 }
 
 int
@@ -951,7 +925,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
     //
 
     // No servant means no participant.  No worries.
-    if (0 != this->dp_factory_servant_) {
+    if (this->dp_factory_servant_) {
       // Map of domains to sets of participants.
       const DomainParticipantFactoryImpl::DPMap& participants
       = this->dp_factory_servant_->participants();
@@ -972,7 +946,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
             try {
               // Attach each DomainParticipant in this domain to this
               // repository.
-              RepoId id = current->svt_->get_id();
+              RepoId id = (*current)->get_id();
               repoList.push_back(std::make_pair(disc_iter->second, id));
 
               if (DCPS_debug_level > 0) {
@@ -1298,8 +1272,7 @@ void
 Service_Participant::register_discovery_type(const char* section_name,
                                              Discovery::Config* cfg)
 {
-  delete discovery_types_[section_name];
-  discovery_types_[section_name] = cfg;
+  discovery_types_[section_name].reset(cfg);
 }
 
 int
@@ -1811,7 +1784,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   if (cf.open_section(root, section_name, 0, sect) == 0) {
 
     const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
-    OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter =
+    DiscoveryTypes::iterator iter =
       this->discovery_types_.find(sect_name);
 
     if (iter == this->discovery_types_.end()) {

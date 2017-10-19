@@ -238,7 +238,7 @@ SubscriberImpl::create_datareader(
     }
   } else {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, 0);
-    readers_not_enabled_.insert(DDS::DataReader::_duplicate(dr_servant));
+    readers_not_enabled_.insert(rchandle_from(dr_servant));
   }
 
   // add created data reader to this' data reader container -
@@ -251,7 +251,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 {
   DBG_ENTRY_LVL("SubscriberImpl", "delete_datareader", 6);
 
-  DataReaderImpl* dr_servant = dynamic_cast<DataReaderImpl*>(a_datareader);
+  DataReaderImpl_rch dr_servant = rchandle_from(dynamic_cast<DataReaderImpl*>(a_datareader));
 
   if (dr_servant) { // for MultiTopic this will be false
     DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
@@ -364,9 +364,6 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   // otherwise some callbacks resulted from remove_association may be lost.
   dr_servant->remove_all_associations();
   dr_servant->cleanup();
-  // Decrease the ref count after the servant is removed
-  // from the datareader map.
-  dr_servant->_remove_ref();
   return DDS::RETCODE_OK;
 }
 
@@ -413,7 +410,7 @@ SubscriberImpl::delete_contained_entities()
     DataReaderMap::iterator itEnd = datareader_map_.end();
 
     for (it = datareader_map_.begin(); it != itEnd; ++it) {
-      drs.push_back(it->second);
+      drs.push_back(it->second.in());
     }
   }
 
@@ -468,7 +465,7 @@ SubscriberImpl::lookup_datareader(
     return DDS::DataReader::_nil();
 
   } else {
-    return DDS::DataReader::_duplicate(it->second);
+    return DDS::DataReader::_duplicate(it->second.in());
   }
 }
 
@@ -518,7 +515,7 @@ SubscriberImpl::get_datareaders(
     if ((*pos)->have_sample_states(sample_states) &&
         (*pos)->have_view_states(view_states) &&
         (*pos)->have_instance_states(instance_states)) {
-      push_back(readers, DDS::DataReader::_duplicate(*pos));
+      push_back(readers, DDS::DataReader::_duplicate(pos->in()));
     }
   }
 
@@ -539,7 +536,7 @@ SubscriberImpl::notify_datareaders()
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (!CORBA::is_nil (listener)) {
-        listener->on_data_available(it->second);
+        listener->on_data_available(it->second.in());
       }
 
       it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
@@ -602,7 +599,7 @@ SubscriberImpl::set_qos(
 
         for (DataReaderMap::iterator iter = datareader_map_.begin();
              iter != endIter; ++iter) {
-          DataReaderImpl* reader = iter->second;
+          DataReaderImpl_rch reader = iter->second;
           reader->set_subscriber_qos (qos);
           DDS::DataReaderQos qos;
           reader->get_qos(qos);
@@ -817,9 +814,9 @@ SubscriberImpl::enable()
 
   if (qos_.entity_factory.autoenable_created_entities) {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
-    DataReaderVarSet readers;
+    DataReaderSet readers;
     readers_not_enabled_.swap(readers);
-    for (DataReaderVarSet::iterator it = readers.begin(); it != readers.end(); ++it) {
+    for (DataReaderSet::iterator it = readers.begin(); it != readers.end(); ++it) {
       (*it)->enable();
     }
   }
@@ -846,12 +843,12 @@ SubscriberImpl::data_received(DataReaderImpl* reader)
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->si_lock_);
-  datareader_set_.insert(reader);
+  datareader_set_.insert(rchandle_from(reader));
 }
 
 DDS::ReturnCode_t
 SubscriberImpl::reader_enabled(const char*     topic_name,
-                               DataReaderImpl* reader)
+                               DataReaderImpl* reader_ptr)
 {
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -861,14 +858,10 @@ SubscriberImpl::reader_enabled(const char*     topic_name,
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
-  DDS::DataReader_var reader_var = DDS::DataReader::_duplicate(reader);
-  readers_not_enabled_.erase(reader_var);
+  DataReaderImpl_rch reader = rchandle_from(reader_ptr);
+  readers_not_enabled_.erase(reader);
 
   this->datareader_map_.insert(DataReaderMap::value_type(topic_name, reader));
-
-  // Increase the ref count when the servant is referenced
-  // by the datareader map.
-  reader->_add_ref();
 
   if (this->monitor_) {
     this->monitor_->report();
@@ -891,7 +884,7 @@ void
 SubscriberImpl::remove_from_datareader_set(DataReaderImpl* reader)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, si_lock_);
-  datareader_set_.erase(reader);
+  datareader_set_.erase(rchandle_from(reader));
 }
 #endif
 

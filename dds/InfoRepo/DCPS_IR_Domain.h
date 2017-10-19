@@ -61,7 +61,8 @@ class DCPS_IR_Publication;
  * representatives of the entities that are in the corresponding
  * system's domain.
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain {
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
+: public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Domain>{
 public:
   DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator);
 

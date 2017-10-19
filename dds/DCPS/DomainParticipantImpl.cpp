@@ -964,7 +964,8 @@ DomainParticipantImpl::delete_contained_entities()
   // rest of the entities, so need to report to discovery that
   // BIT is no longer available
   Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
-  disc->fini_bit(this);
+  if (disc)
+    disc->fini_bit(this);
 
   if (ACE_OS::thr_equal(TheServiceParticipant->reactor_owner(),
                         ACE_Thread::self())) {

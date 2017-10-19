@@ -86,22 +86,10 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  DomainParticipantImpl* dp = 0;
+  RcHandle<DomainParticipantImpl> dp = make_rch<DomainParticipantImpl>(
+    this, domainId, value.id, par_qos, a_listener, mask, value.federated
+  );
 
-  ACE_NEW_RETURN(dp,
-                 DomainParticipantImpl(this, domainId, value.id, par_qos, a_listener,
-                                       mask, value.federated),
-                 DDS::DomainParticipant::_nil());
-
-  DDS::DomainParticipant_ptr dp_obj(dp);
-
-  if (CORBA::is_nil(dp_obj)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-               ACE_TEXT("nil DomainParticipant.\n")));
-    return DDS::DomainParticipant::_nil();
-  }
 
   if (qos_.entity_factory.autoenable_created_entities) {
     dp->enable();
@@ -112,48 +100,9 @@ DomainParticipantFactoryImpl::create_participant(
                    this->participants_protector_,
                    DDS::DomainParticipant::_nil());
 
-  // the Pair will also act as a guard against leaking the
-  // new DomainParticipantImpl (NO_DUP, so this takes over mem)
-  Participant_Pair pair(dp, dp_obj, NO_DUP);
-
-  DPSet* entry = 0;
-
-  if (find(participants_, domainId, entry) == -1) {
-    DPSet set;
-
-    if (OpenDDS::DCPS::insert(set, pair) == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-                 ACE_TEXT(" %p.\n"),
-                 ACE_TEXT("insert")));
-      return DDS::DomainParticipant::_nil();
-    }
-
-    if (OpenDDS::DCPS::bind(participants_, domainId, set)  == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-                 ACE_TEXT(" %p.\n"),
-                 ACE_TEXT("bind")));
-      return DDS::DomainParticipant::_nil();
-    }
-
-  } else {
-    if (OpenDDS::DCPS::insert(*entry, pair) == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-                 ACE_TEXT(" %p.\n"),
-                 ACE_TEXT("insert")));
-      return DDS::DomainParticipant::_nil();
-    }
-  }
-
-//xxx still ref_count = 1
-
-  return DDS::DomainParticipant::_duplicate(dp_obj); //xxx still 2  (obj 3->4)
-} //xxx obj 4->3
+  participants_[domainId].insert(dp);
+  return dp._retn();
+}
 
 DDS::ReturnCode_t
 DomainParticipantFactoryImpl::delete_participant(
@@ -181,6 +130,8 @@ DomainParticipantFactoryImpl::delete_participant(
 
     return DDS::RETCODE_ERROR;
   }
+
+  RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (!the_servant->is_clean()) {
@@ -219,14 +170,11 @@ DomainParticipantFactoryImpl::delete_participant(
     DDS::ReturnCode_t result
     = the_servant->delete_contained_entities();
 
-//xxx still rc=4
     if (result != DDS::RETCODE_OK) {
       return result;
     }
 
-    Participant_Pair pair(the_servant, a_participant, DUP);
-
-    if (OpenDDS::DCPS::remove(*entry, pair) == -1) {
+    if (OpenDDS::DCPS::remove(*entry, servant_rch) == -1) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
@@ -235,7 +183,6 @@ DomainParticipantFactoryImpl::delete_participant(
                        DDS::RETCODE_ERROR);
     }
 
-//xxx now obj rc=5 and servant rc=4
     if (entry->empty()) {
       if (unbind(participants_, domain_id) == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -245,16 +192,18 @@ DomainParticipantFactoryImpl::delete_participant(
                           ACE_TEXT("unbind")),
                          DDS::RETCODE_ERROR);
       }
-    } //xxx now obj rc = 4
-  }//xxx now obj rc = 3
+    }
+  }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
-  if (!disco->remove_domain_participant(domain_id,
-                                        dp_id)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("could not remove domain participant.\n")),
-                     DDS::RETCODE_ERROR);
+  if (disco) {
+    if (!disco->remove_domain_participant(domain_id,
+                                          dp_id)) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("could not remove domain participant.\n")),
+                       DDS::RETCODE_ERROR);
+    }
   }
   return DDS::RETCODE_OK;
 }
@@ -285,7 +234,7 @@ DomainParticipantFactoryImpl::lookup_participant(
     // No specification about which participant will return. We just return the first
     // object.
     // Note: We are not duplicate the object ref, so a delete call is not needed.
-    return DDS::DomainParticipant::_duplicate((*(entry->begin())).obj_.in());
+    return DDS::DomainParticipant::_duplicate(entry->begin()->in());
   }
 }
 
@@ -353,7 +302,7 @@ void DomainParticipantFactoryImpl::cleanup()
     DPSet& dp_set = itr->second;
     DPSet::iterator dp_set_itr;
     for (dp_set_itr = dp_set.begin(); dp_set_itr != dp_set.end(); ++dp_set_itr) {
-      dp_set_itr->svt_->delete_contained_entities();
+      (*dp_set_itr)->delete_contained_entities();
     }
   }
 }

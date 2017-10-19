@@ -56,10 +56,6 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
 
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 {
-  DCPS_IR_Domain_Map::iterator where;
-  for (where = this->domains_.begin(); where != this->domains_.end(); ++where) {
-    delete where->second;
-  }
 }
 
 int
@@ -700,7 +696,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
     }
 
     // Grab the domain and participant.
-    domainPtr = where->second;
+    domainPtr = where->second.get();
     partPtr = domainPtr->participant(participantId);
 
     if (0 == partPtr) {
@@ -1464,7 +1460,6 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
   }
 
   if (where->second->participants().empty()) {
-    delete where->second;
     domains_.erase(where);
   }
 
@@ -2135,16 +2130,16 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
 
   if (where == this->domains_.end()) {
     // We will attempt to insert a new domain, go ahead and allocate it.
-    DCPS_IR_Domain* domainPtr;
-    ACE_NEW_RETURN(domainPtr,
-                   DCPS_IR_Domain(domain, this->participantIdGenerator_),
-                   0);
+    OpenDDS::DCPS::unique_ptr<DCPS_IR_Domain> domain_uptr( new
+                   DCPS_IR_Domain(domain, this->participantIdGenerator_));
+
+    DCPS_IR_Domain* domainPtr = domain_uptr.get();
 
     // We need to insert the domain into the map at this time since it
     // might be looked up during the init_built_in_topics() call.
     this->domains_.insert(
       where,
-      DCPS_IR_Domain_Map::value_type(domain, domainPtr));
+      DCPS_IR_Domain_Map::value_type(domain, OpenDDS::DCPS::move(domain_uptr)));
 
     int bit_status = 0;
 
@@ -2161,7 +2156,6 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
                  ACE_TEXT("when loading domain %d.\n"),
                  domain));
       this->domains_.erase(domain);
-      delete domainPtr;
       return 0;
     }
 
@@ -2175,7 +2169,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
     return domainPtr;
 
   } else {
-    return where->second;
+    return where->second.get();
   }
 }
 

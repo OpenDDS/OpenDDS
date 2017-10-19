@@ -11,6 +11,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "RcObject.h"
 #include "RcHandle_T.h"
+#include "unique_ptr.h"
 
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
@@ -71,7 +72,9 @@ public:
 
   RepoKey key() const { return this->key_; }
 
-  class OpenDDS_Dcps_Export Config : public PoolAllocationBase {
+  class OpenDDS_Dcps_Export Config
+    : public PoolAllocationBase
+    , public EnableContainerSupportedUniquePtr<Config> {
   public:
     virtual ~Config();
     virtual int discovery_config(ACE_Configuration_Heap& cf) = 0;

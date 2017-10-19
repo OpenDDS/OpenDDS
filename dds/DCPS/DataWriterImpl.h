@@ -564,6 +564,10 @@ private:
 
   friend class ::DDS_TEST; // allows tests to get at privates
 
+
+  // Data block local pool for this data writer.
+  unique_ptr<DataBlockLockPool>  db_lock_pool_;
+
   /// The name of associated topic.
   CORBA::String_var               topic_name_;
   /// The associated topic repository id.
@@ -663,8 +667,6 @@ private:
   /// Periodic Monitor object for this entity
   Monitor* periodic_monitor_;
 
-  // Data block local pool for this data writer.
-  unique_ptr<DataBlockLockPool>  db_lock_pool_;
 
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number
