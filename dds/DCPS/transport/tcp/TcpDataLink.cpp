@@ -77,7 +77,7 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
     bool disconnected = rs->gracefully_disconnected();
 
     if (connection && !this->graceful_disconnect_sent_
-        && !disconnected) {
+        && !disconnected && !this->impl().is_shut_down()) {
       this->send_graceful_disconnect_message();
       this->graceful_disconnect_sent_ = true;
     }
