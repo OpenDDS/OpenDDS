@@ -41,6 +41,7 @@ RtpsUdpDataLink::multicast_socket()
 ACE_INLINE void
 RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   locators_.erase(remote_id);
 }
 

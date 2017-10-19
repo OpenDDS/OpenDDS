@@ -133,7 +133,7 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
     strategy = this->send_strategy_;
   }
 
-  if (!strategy.is_nil()) {
+  if (strategy) {
     strategy->send(element, relink);
   }
 }
