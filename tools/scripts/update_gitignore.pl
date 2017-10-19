@@ -34,6 +34,6 @@ for my $dir (keys %dirs) {
   for my $file (sort {lc($a) cmp lc($b)} @files) {
     print GIOUT "$file\n";
   }
-  close SVN;
+  close GIOUT;
 }
 print "DONE\n";

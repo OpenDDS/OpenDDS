@@ -1102,9 +1102,12 @@ sub generate_workspace {
 
   if ($mpctype eq 'gnuace') {
     if ($buildEnv->{'build'} eq 'target') {
-      print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
-        if $opts{'verbose'};
-      my $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
+      my $UM;
+      if (@features || $cross_compile) {
+        print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
+          if $opts{'verbose'};
+        $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
+      }
       for my $feat (@features) {
         my $key = $feat;
         $key =~ s/=.*//;
@@ -1120,8 +1123,8 @@ IDL2JNI_DEP = $(IDL2JNI)$(HOST_EXE_EXT)
 CROSS-COMPILE = 1
 EOT
       }
-      $UM->close;
-      dump_and_unlink($UM) if $opts{'dry-run'};
+      $UM->close if $UM;
+      dump_and_unlink($UM) if $UM && $opts{'dry-run'};
     }
   }
 
