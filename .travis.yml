@@ -8,8 +8,8 @@ env:
   matrix:
     - FUZZ=1 NO_INLINE=1
     - NO_INLINE=1 NO_BIT=1 XERCES3=1
-    - STATIC=1 XERCES3=1
-    - NO_DEBUG=1 NO_INLINE=1
+    - STATIC=1 XERCES3=1 NO_TESTS=1
+    - NO_DEBUG=1 NO_TESTS=1
     - SAFETY_PROFILE=1
     - NO_INLINE=1 USES_WCHAR=1
     - NO_INLINE=1 NO_MULTITOPIC=1 XERCES3=1
@@ -38,11 +38,11 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.9
+            - llvm-toolchain-trusty-5.0
           packages:
             - libxerces-c-dev
-            - clang++-3.9
-      env: COMPILER=clang++
+            - clang++-5.0
+      env: COMPILER=clang++-5.0
     - os: osx
       os_image: xcode9.1
       compiler: clang
