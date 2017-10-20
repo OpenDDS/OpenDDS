@@ -247,6 +247,9 @@ private:
   DDS::Topic_var                                   bitPublicationTopic_;
   DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+  // MSVC 2017 has trouble to compile std::map<key, std::unique_ptr<Foo> > when it is enclosed
+  // by a DLL exported class whose copy constructor is not explicitly deleted
+  DCPS_IR_Domain(const DCPS_IR_Domain&);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
