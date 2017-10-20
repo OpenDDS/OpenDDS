@@ -64,6 +64,13 @@ public:
     new (static_cast<void*>(ptr)) T(value);
   }
 
+#ifdef ACE_HAS_CPP11
+  static void construct(T* ptr, T&& value)
+  {
+    new (static_cast<void*>(ptr)) T(std::move(value));
+  }
+#endif
+
   static void destroy(T* ptr)
   {
     ptr->~T();
