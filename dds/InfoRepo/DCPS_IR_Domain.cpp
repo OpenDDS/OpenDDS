@@ -875,7 +875,7 @@ int DCPS_IR_Domain::add_topic_description(OpenDDS::DCPS::unique_ptr<DCPS_IR_Topi
             desc->get_dataTypeName(),
             discard)) {
   case -1:
-    this->topicDescriptions_[desc->get_name()] = move(desc);
+    this->topicDescriptions_[desc_ptr->get_name()] = move(desc);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,

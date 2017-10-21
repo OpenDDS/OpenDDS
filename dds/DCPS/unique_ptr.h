@@ -155,6 +155,7 @@ template <typename T>
 class container_supported_unique_ptr
 {
 public:
+
   container_supported_unique_ptr()
     : ptr_(0)
   {}
@@ -333,8 +334,7 @@ template <typename T>
 typename unique_ptr<T>::rv_reference move(container_supported_unique_ptr<T>& ptr)
 {
   assert(ptr->ref_count()==1);
-  unique_ptr<T> tmp(ptr.release());
-  return move(tmp);
+  return reinterpret_cast<typename unique_ptr<T>::rv_reference>(ptr);
 }
 
 #endif

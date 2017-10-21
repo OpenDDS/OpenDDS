@@ -333,7 +333,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
       return -1;
 
     } else {
-      VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
+      VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) DBG: Unrecoverable problem ")
                 ACE_TEXT("with data link detected\n")), 1);
 
       // The relink() will handle the connection to the ReconnectTask to do
