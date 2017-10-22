@@ -52,6 +52,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , passive_setup_(false)
   , passive_setup_buffer_(sizeof(ACE_UINT32))
   , id_(0)
+  , reconnect_thread_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
@@ -73,6 +74,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , shutdown_(false)
   , passive_setup_(false)
   , id_(0)
+  , reconnect_thread_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
@@ -944,7 +946,16 @@ void
 OpenDDS::DCPS::TcpConnection::shutdown()
 {
   DBG_ENTRY_LVL("TcpConnection","shutdown",6);
+
   this->shutdown_ = true;
+
+  // Have to wait until the reconnect thread finishes because
+  // the thread would access the reactor which is owned by TcpTransport.
+  // Thus the thread has to be finished before the
+  //  TcpTransport object is destructed.
+  if (reconnect_thread_)
+    ACE_Thread_Manager::instance()->join(reconnect_thread_);
+
 }
 
 ACE_Event_Handler::Reference_Count
@@ -969,7 +980,10 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
   if (!shutdown_) {
     // add the reference count to be picked up from the new thread
     this->_add_ref();
-    if (ACE_Thread_Manager::instance()->spawn(&reconnect_thread_fun, this) == -1){
+    if (ACE_Thread_Manager::instance()->spawn(&reconnect_thread_fun,
+                                              this,
+                                              THR_NEW_LWP|THR_JOINABLE|THR_INHERIT_SCHED,
+                                              &reconnect_thread_) == -1){
       // we nnned to decrement the reference count when thread creation fails.
       this->_remove_ref();
     }

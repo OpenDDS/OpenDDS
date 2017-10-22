@@ -205,6 +205,7 @@ private:
 
   /// Small unique identifying value.
   std::size_t id_;
+  ACE_thread_t reconnect_thread_;
 };
 
 } // namespace DCPS
