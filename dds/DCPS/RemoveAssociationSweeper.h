@@ -44,11 +44,14 @@ public:
     return TheServiceParticipant->is_shut_down();
   }
 
+
+  int remove_info(WriterInfo* const info);
 private:
   ~RemoveAssociationSweeper();
 
+
   WeakRcHandle<T> reader_;
-  OPENDDS_SET(RcHandle<WriterInfo>) info_set_;
+  OPENDDS_VECTOR(RcHandle<WriterInfo>) info_set_;
 
   class CommandBase : public Command {
   public:
@@ -121,19 +124,43 @@ void RemoveAssociationSweeper<T>::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::
 }
 
 template <typename T>
+int RemoveAssociationSweeper<T>::remove_info(WriterInfo* const info)
+{
+  OPENDDS_VECTOR(RcHandle<WriterInfo>)::iterator itr, last = --info_set_.end();
+  // find the RcHandle holds the pointer info in this->info_set_
+  // and then swap the found element with the last element in the
+  // info_set_ vector so  we can delete it.
+  for (itr = info_set_.begin(); itr != info_set_.end(); ++itr){
+    if (itr->in() == info) {
+      if (itr != last) {
+        std::swap(*itr, info_set_.back());
+      }
+      info_set_.pop_back();
+      return 0;
+    }
+  }
+  return -1;
+}
+
+template <typename T>
 int RemoveAssociationSweeper<T>::handle_timeout(
     const ACE_Time_Value& ,
     const void* arg)
 {
   WriterInfo* const info =
     const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));
-  info->remove_association_timer_ = WriterInfo::NO_TIMER;
-  const PublicationId pub_id = info->writer_id_;
 
   {
+    // info may be destroyed at this moment, we can only access it
+    // if it is in the info_set_. This could happen when cancel_timer() handle it first.
+    bool valid = false;
     ACE_Guard<ACE_Thread_Mutex> guard(this->mutex_);
-    info_set_.erase(rchandle_from(info));
+    if (this->remove_info(info) == -1)
+      return 0;
   }
+
+  info->remove_association_timer_ = WriterInfo::NO_TIMER;
+  const PublicationId pub_id = info->writer_id_;
 
   RcHandle<T> reader = reader_.lock();
   if (!reader)
@@ -156,7 +183,7 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 {
   //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
   const void* arg = reinterpret_cast<const void*>(this->info_.in());
-  this->sweeper_->info_set_.insert(this->info_);
+  this->sweeper_->info_set_.push_back(this->info_);
 
   this->info_->remove_association_timer_ = this->sweeper_->reactor()->schedule_timer(this->sweeper_,
                                                                        arg,
@@ -175,7 +202,7 @@ void RemoveAssociationSweeper<T>::CancelCommand::execute()
       ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", this->info_->remove_association_timer_));
     }
     this->info_->remove_association_timer_ = WriterInfo::NO_TIMER;
-    this->sweeper_->info_set_.erase(this->info_);
+    this->sweeper_->remove_info(this->info_.in());
   }
 }
 //End RemoveAssociationSweeper
