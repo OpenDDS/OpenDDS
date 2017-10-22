@@ -795,10 +795,16 @@ InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
     return;
   }
 
-  DataReaderRemoteImpl* impl =
-    remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
-  impl->detach_parent();
-  deactivate_remote_object(drr->second.in(), orb_);
+  try {
+    DataReaderRemoteImpl* impl =
+      remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
+    impl->detach_parent();
+    deactivate_remote_object(drr->second.in(), orb_);
+  }
+  catch (::CORBA::BAD_INV_ORDER&){
+    // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
+    // Ignore it anyway.
+  }
 
   dataReaderMap_.erase(drr);
 }
@@ -814,10 +820,16 @@ InfoRepoDiscovery::removeDataWriterRemote(const RepoId& publicationId)
     return;
   }
 
-  DataWriterRemoteImpl* impl =
-    remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
-  impl->detach_parent();
-  deactivate_remote_object(dwr->second.in(), orb_);
+  try {
+    DataWriterRemoteImpl* impl =
+      remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
+    impl->detach_parent();
+    deactivate_remote_object(dwr->second.in(), orb_);
+  }
+  catch (::CORBA::BAD_INV_ORDER&){
+    // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
+    // Ignore it anyway.
+  }
 
   dataWriterMap_.erase(dwr);
 }
