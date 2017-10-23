@@ -443,10 +443,10 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
 
   if (initiate_connect && connector.connect(this->peer(), remote_address_) != 0) {
 
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Failed to connect. %p\n%C"),
-                      ACE_TEXT("connect"), this->tcp_config_->dump_to_str().c_str()),
-                     -1);
+    ACE_DEBUG((LM_DEBUG,
+                      ACE_TEXT("(%P|%t) DBG: Failed to connect. this->shutdown_=%d %p\n%C"),
+                      int(this->shutdown_), ACE_TEXT("connect"), this->tcp_config_->dump_to_str().c_str()));
+                      return -1;
 
   } else {
     this->connected_ = true;
