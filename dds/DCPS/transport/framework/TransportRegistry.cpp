@@ -66,6 +66,7 @@ const char TransportRegistry::DEFAULT_INST_PREFIX[] = "_OPENDDS_";
 
 TransportRegistry::TransportRegistry()
   : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
+  , released_(false)
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
@@ -490,6 +491,7 @@ TransportRegistry::release()
 {
   DBG_ENTRY_LVL("TransportRegistry", "release", 6);
   GuardType guard(lock_);
+  released_ = true;
 
   for (InstMap::iterator iter = inst_map_.begin(); iter != inst_map_.end(); ++iter) {
     iter->second->shutdown();
@@ -497,6 +499,12 @@ TransportRegistry::release()
 
 }
 
+bool
+TransportRegistry::released() const
+{
+  GuardType guard(lock_);
+  return released_;
+}
 
 }
 }

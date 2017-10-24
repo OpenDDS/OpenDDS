@@ -39,6 +39,7 @@
 #include "Util.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
@@ -2608,14 +2609,18 @@ DataWriterImpl::reschedule_deadline()
 void
 DataWriterImpl::wait_control_pending()
 {
-  OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
-  controlTracker.wait_messages_pending(caller_string);
+  if (!TransportRegistry::instance()->released()) {
+    OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
+    controlTracker.wait_messages_pending(caller_string);
+  }
 }
 
 void
 DataWriterImpl::wait_pending()
 {
-  this->data_container_->wait_pending();
+  if (!TransportRegistry::instance()->released()) {
+    data_container_->wait_pending();
+  }
 }
 
 void

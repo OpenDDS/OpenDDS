@@ -99,6 +99,8 @@ public:
   /// Dynamically load the library for the supplied transport type.
   void load_transport_lib(const OPENDDS_STRING& transport_type);
 
+  bool released() const;
+
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 
@@ -121,6 +123,7 @@ private:
   DomainConfigMap domain_default_config_map_;
 
   TransportConfig_rch global_config_;
+  bool released_;
 
   mutable LockType lock_;
 };
