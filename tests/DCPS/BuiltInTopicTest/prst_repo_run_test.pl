@@ -34,10 +34,9 @@ $repo_bit_opt .= " " . $debugOpts if $debug or $transportDebug;
 
 $info_prst_file = "info.pr";
 $num_messages = 60;
-$pub_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
-$pub2_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
+$pub_opts = "$opts -n $num_messages";
 $num_messages += 10;
-$sub_opts = "$opts -DCPSConfigFile sub.ini -n $num_messages";
+$sub_opts = "$opts -n $num_messages";
 $SRV_PORT = PerlACE::random_port();
 $synch_file = "monitor1_done";
 
@@ -54,14 +53,14 @@ $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     #. "-ORBDebugLevel 10 "
                                     . "-ORBSvcConf mySvc.conf "
                                     . "-orbendpoint iiop://:$SRV_PORT");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
-$Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 5");
-$Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
-$Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts");
+$Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
+$Publisher = PerlDDS::create_process("publisher", $pub_opts);
+$Monitor1 = PerlDDS::create_process("monitor", "$opts -l 5");
+$Monitor2 = PerlDDS::create_process("monitor", "$opts -u");
+$Publisher2 = PerlDDS::create_process("publisher", $pub_opts);
 
-$data_file = "test_run_prst.data";
-unlink $data_file;
+#$data_file = "test_run_prst.data";
+#unlink $data_file;
 
 open (OLDOUT, ">&STDOUT");
 open (STDOUT, ">$data_file") or die "can't redirect stdout: $!";
