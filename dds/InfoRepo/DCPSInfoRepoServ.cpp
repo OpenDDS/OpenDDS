@@ -94,10 +94,9 @@ InfoRepo::finalize()
     // which bypasses InfoRepo::handle_exception()
     this->info_servant_->finalize();
     this->federator_.finalize();
+    TheServiceParticipant->shutdown();
     this->servant_finalized_ = true;
   }
-
-  TheServiceParticipant->shutdown();
 
   if (!CORBA::is_nil(this->orb_)) {
     try {
@@ -117,6 +116,7 @@ InfoRepo::handle_exception(ACE_HANDLE /* fd */)
   // these should occur before ORB::shutdown() since they use the ORB/reactor
   this->info_servant_->finalize();
   this->federator_.finalize();
+  TheServiceParticipant->shutdown();
   this->servant_finalized_ = true;
 
   this->orb_->shutdown(true);
