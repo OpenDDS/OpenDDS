@@ -1242,22 +1242,18 @@ DataWriterImpl::get_matched_subscription_data(
                       ACE_TEXT("Entity is not enabled. \n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
-
-  BIT_Helper_1 < DDS::SubscriptionBuiltinTopicDataDataReader,
-               DDS::SubscriptionBuiltinTopicDataDataReader_var,
-               DDS::SubscriptionBuiltinTopicDataSeq > hh;
-
-  DDS::SubscriptionBuiltinTopicDataSeq data;
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
 
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
+  DDS::SubscriptionBuiltinTopicDataSeq data;
 
   if (participant) {
-    ret = hh.instance_handle_to_bit_data(participant.in(),
-                                   BUILT_IN_SUBSCRIPTION_TOPIC,
-                                   subscription_handle,
-                                   data);
-   }
+    ret = instance_handle_to_bit_data<DDS::SubscriptionBuiltinTopicDataDataReader_var>(
+            participant.in(),
+            BUILT_IN_SUBSCRIPTION_TOPIC,
+            subscription_handle,
+            data);
+  }
 
   if (ret == DDS::RETCODE_OK) {
     subscription_data = data[0];

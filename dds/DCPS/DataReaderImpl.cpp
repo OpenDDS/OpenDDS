@@ -1118,23 +1118,17 @@ DataReaderImpl::get_matched_publication_data(
       this->publication_handle_lock_,
       DDS::RETCODE_ERROR);
 
-
-  BIT_Helper_1 < DDS::PublicationBuiltinTopicDataDataReader,
-  DDS::PublicationBuiltinTopicDataDataReader_var,
-  DDS::PublicationBuiltinTopicDataSeq > hh;
-
-  DDS::PublicationBuiltinTopicDataSeq data;
-
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
 
   if (!participant)
     return DDS::RETCODE_ERROR;
 
-  const DDS::ReturnCode_t ret
-  = hh.instance_handle_to_bit_data(participant.in(),
-      BUILT_IN_PUBLICATION_TOPIC,
-      publication_handle,
-      data);
+  DDS::PublicationBuiltinTopicDataSeq data;
+  const DDS::ReturnCode_t ret = instance_handle_to_bit_data<DDS::PublicationBuiltinTopicDataDataReader_var>(
+                                  participant.in(),
+                                  BUILT_IN_PUBLICATION_TOPIC,
+                                  publication_handle,
+                                  data);
 
   if (ret == DDS::RETCODE_OK) {
     publication_data = data[0];

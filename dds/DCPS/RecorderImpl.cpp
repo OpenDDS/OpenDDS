@@ -1057,17 +1057,13 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
                    this->publication_handle_lock_,
                    DDS::RETCODE_ERROR);
 
-  BIT_Helper_1 < DDS::PublicationBuiltinTopicDataDataReader,
-                 DDS::PublicationBuiltinTopicDataDataReader_var,
-                 DDS::PublicationBuiltinTopicDataSeq > hh;
-
   DDS::PublicationBuiltinTopicDataSeq data;
 
-  DDS::ReturnCode_t ret
-    = hh.instance_handle_to_bit_data(participant_servant_,
-                                     BUILT_IN_PUBLICATION_TOPIC,
-                                     publication_handle,
-                                     data);
+  DDS::ReturnCode_t ret = instance_handle_to_bit_data<DDS::PublicationBuiltinTopicDataDataReader_var>(
+                            participant_servant_,
+                            BUILT_IN_PUBLICATION_TOPIC,
+                            publication_handle,
+                            data);
 
   if (ret == DDS::RETCODE_OK) {
     key = data[0].key;
