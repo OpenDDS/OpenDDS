@@ -480,16 +480,10 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       // protect publication_match_status_ and status changed flags.
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-      // update the publication_match_status_
-      ++publication_match_status_.total_count;
-      ++publication_match_status_.total_count_change;
-      ++publication_match_status_.current_count;
-      ++publication_match_status_.current_count_change;
-
       if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
         GuidConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
+                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
                    OPENDDS_STRING(converter).c_str(),
                    handle));
@@ -504,8 +498,11 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
                    handle));
       }
 
+      ++publication_match_status_.total_count;
+      ++publication_match_status_.total_count_change;
+      ++publication_match_status_.current_count;
+      ++publication_match_status_.current_count_change;
       publication_match_status_.last_subscription_handle = handle;
-
       set_status_changed_flag(DDS::PUBLICATION_MATCHED_STATUS, true);
     }
 
