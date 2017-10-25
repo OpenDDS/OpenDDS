@@ -42,6 +42,9 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    /// Wireshark Namespace to set the payload in
+    const std::string payload_namespace = "opendds.sample.payload";
+
     /*
      * The Sample_Manager is a singleton which contains a map
      * of Sample_Dissectors keyed to type identifiers. This singleton is
@@ -58,9 +61,6 @@ namespace OpenDDS
 
       void init ();
       Sample_Dissector *find (const char *repo_id);
-
-      /// Wireshark Namespace to set the payload in
-      static const std::string payload_namespace;
 
       /// Add sample field to register later.
       void add_protocol_field(

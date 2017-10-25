@@ -95,12 +95,12 @@ namespace OpenDDS
       };
 
       /// @ctor for fixed length fields, supply a type identifier and a label
-      Sample_Field (IDLTypeID type_id, const std::string &label);
+      Sample_Field (IDLTypeID type_id, const std::string &ns, const std::string &label);
 
       /// @ctor for complex fields, supply a nested Sample_Dissector to handle
       /// the dissection. The Sample_Field takes ownership of the nested
       /// sample base value.
-      Sample_Field (Sample_Dissector *n, const std::string &label);
+      Sample_Field (Sample_Dissector *n, const std::string &ns, const std::string &label);
 
       virtual ~Sample_Field ();
 
@@ -108,8 +108,8 @@ namespace OpenDDS
       /// returns the argument pointer to facilitate iterative construction
       /// of chains
       Sample_Field *chain (Sample_Field *n);
-      Sample_Field *chain (IDLTypeID ti, const std::string &l);
-      Sample_Field *chain (Sample_Dissector *n, const std::string &l);
+      Sample_Field *chain (IDLTypeID ti, const std::string &ns, const std::string &l);
+      Sample_Field *chain (Sample_Dissector *n, const std::string &ns, const std::string &l);
 
       /// Iterate over the list to return the n'th link returns null if n
       /// exceeds the number of links in the chain
@@ -129,6 +129,7 @@ namespace OpenDDS
       /// with a type identifier. Fields that are members of an array or
       /// sequence will have an index value adjusted as the owning dissector
       /// iterates over the members.
+      std::string ns_;
       std::string label_;
       IDLTypeID   type_id_;
 
@@ -184,8 +185,8 @@ namespace OpenDDS
       /// Sample_Field::chain(), it returns the supplied field pointer
       /// to facilitate simple chain construction.
       Sample_Field *add_field (Sample_Field *field);
-      Sample_Field *add_field (Sample_Field::IDLTypeID, const std::string &l);
-      Sample_Field *add_field (Sample_Dissector *n, const std::string &l);
+      Sample_Field *add_field (Sample_Field::IDLTypeID, const std::string &ns, const std::string &l);
+      Sample_Field *add_field (Sample_Dissector *n, const std::string &ns, const std::string &l);
 
       /// The actual dissector metheod. Since a sample can be composed of
       /// complex fields which need to do their own dissection, this method
@@ -267,7 +268,7 @@ namespace OpenDDS
       Sample_Enum ();
       virtual ~Sample_Enum ();
 
-      Sample_Field *add_value (const std::string &val);
+      Sample_Field *add_value (const std::string & ns, const std::string &val);
       virtual size_t compute_length (guint8 *data);
       bool index_of (const std::string &value, size_t &result);
       virtual std::string stringify (guint8 *data);

@@ -17,6 +17,7 @@
 #include <ace/Log_Msg.h>
 #include <ace/ACE.h>
 
+#include <cstdio>
 #include <cstring>
 
 #include <algorithm>
@@ -38,7 +39,7 @@ namespace OpenDDS
       return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
     }
 
-    Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)
+    Sample_Field::Sample_Field (IDLTypeID id, const std::string &ns, const std::string &label)
       : label_ (label),
         type_id_ (id),
         nested_ (0),
@@ -46,133 +47,120 @@ namespace OpenDDS
     {
     }
 
-    Sample_Field::Sample_Field (Sample_Dissector *n, const std::string &label)
+    Sample_Field::Sample_Field (Sample_Dissector *n, const std::string &ns, const std::string &label)
       : label_(label),
+        ns_(ns),
         type_id_ (Undefined),
         nested_ (n),
         next_(0)
     {
+        if (NULL == n->field_) {
+          return;
+        }
         // Prepare to Register Field
         //       (will be registered when DCPS is registered)
-        std::string full_name;
-        // TODO: remove duplicate full_name lines
         switch (n->field_->type_id_) {
 
         case Sample_Field::Boolean:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_BOOLEAN
+              &hf_, ns_, label, FT_BOOLEAN
           );
           break;
 
         case Sample_Field::Char:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_CHAR
+              &hf_, ns_, label, FT_CHAR
           );
           break;
 
         case Sample_Field::Octet:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_UINT8, BASE_HEX
+              &hf_, ns_, label, FT_UINT8, BASE_HEX
           );
           break;
 
         case Sample_Field::WChar:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_STRING
+              &hf_, ns_, label, FT_STRING
           );
           break;
 
         case Sample_Field::Short:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_INT16, BASE_DEC
+              &hf_, ns_, label, FT_INT16, BASE_DEC
           );
           break;
 
         case Sample_Field::Long:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_INT32, BASE_DEC
+              &hf_, ns_, label, FT_INT32, BASE_DEC
           );
           break;
 
         case Sample_Field::LongLong:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_INT64, BASE_DEC
+              &hf_, ns_, label, FT_INT64, BASE_DEC
           );
           break;
 
         case Sample_Field::UShort:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_UINT16, BASE_DEC
+              &hf_, ns_, label, FT_UINT16, BASE_DEC
           );
           break;
 
         case Sample_Field::ULong:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_UINT32, BASE_DEC
+              &hf_, ns_, label, FT_UINT32, BASE_DEC
           );
           break;
 
         case Sample_Field::ULongLong:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_UINT64, BASE_DEC
+              &hf_, ns_, label, FT_UINT64, BASE_DEC
           );
           break;
 
         case Sample_Field::Float:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_FLOAT
+              &hf_, ns_, label, FT_FLOAT
           );
           break;
 
         case Sample_Field::Double:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_DOUBLE
+              &hf_, ns_, label, FT_DOUBLE
           );
           break;
 
         case Sample_Field::LongDouble:
           // Long Doubles will be cast to doubles, resulting in possible 
           // data loss if long doubles are larger than doubles.
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_DOUBLE
+              &hf_, ns_, label, FT_DOUBLE
           );
           break;
 
         case Sample_Field::String:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_STRING
+              &hf_, ns_, label, FT_STRING
           );
           break;
 
         case Sample_Field::WString:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_STRING
+              &hf_, ns_, label, FT_STRING
           );
           break;
 
         case Sample_Field::Enumeration:
+          printf("Enum\n");
           // TODO
           break;
 
         default:
-          full_name = Sample_Manager::payload_namespace + "." + label;
           Sample_Manager::instance().add_protocol_field(
-              &hf_, full_name, label, FT_BYTES
+              &hf_, ns_, label, FT_BYTES
           );
           break;
         }
@@ -195,15 +183,15 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Field::chain (IDLTypeID ti, const std::string &l)
+    Sample_Field::chain (IDLTypeID ti, const std::string &ns, const std::string &l)
     {
-      return chain (new Sample_Field (ti, l));
+      return chain (new Sample_Field (ti, ns, l));
     }
 
     Sample_Field *
-    Sample_Field::chain (Sample_Dissector *n, const std::string &l)
+    Sample_Field::chain (Sample_Dissector *n, const std::string &ns, const std::string &l)
     {
-      return chain (new Sample_Field (n, l));
+      return chain (new Sample_Field (n, ns, l));
     }
 
     Sample_Field *
@@ -427,160 +415,160 @@ namespace OpenDDS
         params.last_known_hf = this->hf_;
 
       size_t len = 0;
-      if (this->nested_ == 0)
-        {
-          len = compute_field_length (params.data);
-          // Following are Used by String and WString
-          std::stringstream s;
-          guint32 l;
-          guint8 * last;
-          guint32 width;
-          ACE_CDR::WChar * clone;
-          switch (this->type_id_) {
+      if (this->nested_ == 0) {
+        len = compute_field_length (params.data);
+        // Following are Used by String and WString
+        std::stringstream s;
+        guint32 l;
+        guint8 * last;
+        guint32 width;
+        ACE_CDR::WChar * clone;
+        guint8 * str_data;
+        switch (this->type_id_) {
 
-          case Sample_Field::Boolean:
-            proto_tree_add_item(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Boolean *>(params.data));
-            break;
+        case Sample_Field::Boolean:
+          proto_tree_add_item(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::Boolean *>(params.data));
+          break;
 
-          case Sample_Field::Char:
-            proto_tree_add_item(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Char *>(params.data));
-            break;
+        case Sample_Field::Char:
+          proto_tree_add_item(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::Char *>(params.data));
+          break;
 
-          case Sample_Field::Octet:
-            proto_tree_add_uint(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Octet *>(params.data));
-            break;
+        case Sample_Field::Octet:
+          proto_tree_add_uint(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::Octet *>(params.data));
+          break;
 
-          case Sample_Field::WChar:
-            // TODO
-            /* proto_tree_add_string( */
-            /*   params.tree, params.last_known_hf, */
-            /*   params.tvb, params.offset, (gint)len, */
-            /*   reinterpret_cast<ACE_CDR::WChar *>(params.data)); */
-            break;
+        case Sample_Field::WChar:
+          // TODO
+          /* proto_tree_add_string( */
+          /*   params.tree, params.last_known_hf, */
+          /*   params.tvb, params.offset, (gint)len, */
+          /*   reinterpret_cast<ACE_CDR::WChar *>(params.data)); */
+          break;
 
-          case Sample_Field::Short:
-            proto_tree_add_int(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Short *>(params.data));
-            break;
+        case Sample_Field::Short:
+          proto_tree_add_int(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::Short *>(params.data));
+          break;
 
-          case Sample_Field::Long:
-            proto_tree_add_int(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Long *>(params.data));
-            break;
+        case Sample_Field::Long:
+          proto_tree_add_int(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::Long *>(params.data));
+          break;
 
-          case Sample_Field::LongLong:
-            proto_tree_add_int64(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::LongLong *>(params.data));
-            break;
+        case Sample_Field::LongLong:
+          proto_tree_add_int64(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::LongLong *>(params.data));
+          break;
 
-          case Sample_Field::UShort:
-            proto_tree_add_uint(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::UShort *>(params.data));
-            break;
+        case Sample_Field::UShort:
+          proto_tree_add_uint(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::UShort *>(params.data));
+          break;
 
-          case Sample_Field::ULong:
-            proto_tree_add_uint(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::ULong *>(params.data));
-            break;
+        case Sample_Field::ULong:
+          proto_tree_add_uint(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::ULong *>(params.data));
+          break;
 
-          case Sample_Field::ULongLong:
-            proto_tree_add_uint64(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::ULongLong *>(params.data));
-            break;
+        case Sample_Field::ULongLong:
+          proto_tree_add_uint64(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::ULongLong *>(params.data));
+          break;
 
-          case Sample_Field::Float:
-            proto_tree_add_float(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Float *>(params.data));
-            break;
+        case Sample_Field::Float:
+          proto_tree_add_float(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::Float *>(params.data));
+          break;
 
-          case Sample_Field::Double:
-            proto_tree_add_double(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Double *>(params.data));
-            break;
+        case Sample_Field::Double:
+          proto_tree_add_double(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            *reinterpret_cast<ACE_CDR::Double *>(params.data));
+          break;
 
-          case Sample_Field::LongDouble:
-            // Casting to double
-            proto_tree_add_double(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              (double) (*reinterpret_cast<ACE_CDR::LongDouble *>(params.data)));
-            break;
+        case Sample_Field::LongDouble:
+          // Casting to double
+          proto_tree_add_double(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            (double) (*reinterpret_cast<ACE_CDR::LongDouble *>(params.data)));
+          break;
 
-          case Sample_Field::String:
-            l = *(reinterpret_cast< guint32 * >(params.data));
-            params.data += 4;
-            last = params.data + l - 1; // len included the trailing null
-            while (params.data != last) {
-              s << *(params.data++);
-            }
-            proto_tree_add_string(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              s.str().c_str());
-            break;
-
-          case Sample_Field::WString:
-            // TODO: Investigate this more and make sure it works
-            // as it should.
-            /* len = *(reinterpret_cast< guint32 * >(params.data)); */
-            /* width = len * Serializer::WCHAR_SIZE; */
-            /* clone = new ACE_CDR::WChar[len + 1]; */
-            /* ACE_OS::memcpy(clone, params.data+4, width); */
-            /* clone[len] = 0; */
-            /* proto_tree_add_string_format( */
-            /*   params.tree, params.last_known_hf, */
-            /*   params.tvb, params.offset, width + 4, */
-            /*   (char *) params.data, */
-            /*   "%s %ls", params.data, clone); */
-            /* delete [] clone; */
-            break;
-
-          case Sample_Field::Enumeration:
-            // TODO
-            break;
-
-          default:
-            proto_tree_add_bytes(
-              params.tree, params.last_known_hf,
-              params.tvb, params.offset, (gint)len,
-              params.data);
-            break;
+        case Sample_Field::String:
+          str_data = params.data;
+          l = *(reinterpret_cast< guint32 * >(params.data));
+          str_data += 4;
+          last = str_data + l - 1; // len included the trailing null
+          while (str_data != last) {
+            s << *(str_data++);
           }
+          proto_tree_add_string(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            s.str().c_str());
+          break;
+
+        case Sample_Field::WString:
+          // TODO: Investigate this more and make sure it works
+          // as it should.
+          /* len = *(reinterpret_cast< guint32 * >(params.data)); */
+          /* width = len * Serializer::WCHAR_SIZE; */
+          /* clone = new ACE_CDR::WChar[len + 1]; */
+          /* ACE_OS::memcpy(clone, params.data+4, width); */
+          /* clone[len] = 0; */
+          /* proto_tree_add_string_format( */
+          /*   params.tree, params.last_known_hf, */
+          /*   params.tvb, params.offset, width + 4, */
+          /*   (char *) params.data, */
+          /*   "%s %ls", params.data, clone); */
+          /* delete [] clone; */
+          break;
+
+        case Sample_Field::Enumeration:
+          // TODO
+          printf("Enum\n");
+          break;
+
+        default:
+          proto_tree_add_bytes(
+            params.tree, params.last_known_hf,
+            params.tvb, params.offset, (gint)len,
+            params.data);
+          break;
         }
-      else
-        {
-          len = this->nested_->dissect_i (params, this->label_);
-        }
+      } else {
+        len = this->nested_->dissect_i(params, this->label_);
+      }
 
       params.offset += (gint)len;
       params.data += len;
       if (next_ != 0 && recur)
-        len += next_->dissect_i (params, this->label_);
+        len += next_->dissect_i(params, this->label_);
       return len;
     }
 
@@ -630,16 +618,16 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (Sample_Field::IDLTypeID type_id,
+    Sample_Dissector::add_field (Sample_Field::IDLTypeID type_id, const std::string &ns,
                                  const std::string &label)
     {
-      return add_field (new Sample_Field (type_id, label));
+      return add_field (new Sample_Field (type_id, ns, label));
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (Sample_Dissector *n, const std::string &label)
+    Sample_Dissector::add_field (Sample_Dissector *n, const std::string &ns, const std::string &label)
     {
-      return add_field (new Sample_Field (n, label));
+      return add_field (new Sample_Field (n, ns, label));
     }
 
     size_t
@@ -764,6 +752,7 @@ namespace OpenDDS
         ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
+      printf("Sequence: %s\n", outstream.str().c_str());
 
       size_t data_pos = 4;
       Wireshark_Bundle_i sp = params;
@@ -809,7 +798,7 @@ namespace OpenDDS
     Sample_Array::dissect_i (Wireshark_Bundle_i &params, const std::string &label)
     {
       guint8 * data = params.get_remainder();
-      size_t len = compute_length (data);
+      size_t len = compute_length(data);
 
       std::stringstream outstream;
       outstream << label;
@@ -824,13 +813,12 @@ namespace OpenDDS
       size_t data_pos = 0;
       Wireshark_Bundle_i sp = params;
       sp.tree = subtree;
-      for (guint32 ndx = 0; ndx < count_; ndx++)
-        {
-          sp.index = ndx;
-          sp.offset = params.offset + (gint)data_pos;
-          sp.use_index = true;
-          data_pos += element_->dissect_i (sp, label);
-        }
+      for (guint32 ndx = 0; ndx < count_; ndx++) {
+        sp.index = ndx;
+        sp.offset = params.offset + (gint)data_pos;
+        sp.use_index = true;
+        data_pos += element_->dissect_i(sp, label);
+      }
       return data_pos;
     }
 
@@ -838,12 +826,11 @@ namespace OpenDDS
     Sample_Array::compute_length (guint8 *data)
     {
       size_t len = 0;
-      for (guint32 i = 0; i < count_; i++)
-        {
-          size_t elen = element_->compute_length(data);
-          data += elen;
-          len += elen;
-        }
+      for (guint32 i = 0; i < count_; i++) {
+        size_t elen = element_->compute_length(data);
+        data += elen;
+        len += elen;
+      }
 
       return len;
     }
@@ -862,10 +849,10 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Enum::add_value (const std::string &name)
+    Sample_Enum::add_value(const std::string & ns,const std::string &name)
     {
-      Sample_Field *sf = new Sample_Field (Sample_Field::Enumeration, name);
-      return (value_ == 0) ? (value_ = sf) : value_->chain (sf);
+      Sample_Field *sf = new Sample_Field(Sample_Field::Enumeration, ns, name);
+      return (value_ == 0) ? (value_ = sf) : value_->chain(sf);
     }
 
     size_t
@@ -875,7 +862,7 @@ namespace OpenDDS
       guint8 * data = params.get_remainder();
       size_t len = 4;
       guint32 value = *(reinterpret_cast< guint32 * >(data));
-      Sample_Field *sf = value_->get_link (value);
+      Sample_Field *sf = value_->get_link(value);
 
       std::stringstream outstream;
       outstream << label;
@@ -886,7 +873,7 @@ namespace OpenDDS
       else
         outstream << ": " << sf->label_;
 
-      ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
+      ws_proto_tree_add_text(params.tree, params.tvb, params.offset,
                            (gint)len, "%s", outstream.str().c_str());
       return len;
     }
@@ -1000,6 +987,7 @@ namespace OpenDDS
         ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              (gint)len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
+      printf("Union: %s\n", outstream.str().c_str());
 
 
       Wireshark_Bundle_Field fp;
