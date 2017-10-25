@@ -22,7 +22,7 @@
 #include "OfferedDeadlineWatchdog.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
-#include "dds/DCPS/transport/framework/TransportDebug.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/debug.h"
 
@@ -129,19 +129,24 @@ WriteDataContainer::~WriteDataContainer()
   }
 
   if (this->sending_data_.size() > 0) {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
-               ACE_TEXT("destroyed with %d samples sending.\n"),
-               this->sending_data_.size()));
+    if (TransportRegistry::instance()->released()) {
+      for (DataSampleElement* e; sending_data_.dequeue_head(e);) {
+        release_buffer(e);
+      }
+    }
+    if (sending_data_.size() && DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
+                 ACE_TEXT("destroyed with %d samples sending.\n"),
+                 this->sending_data_.size()));
+    }
   }
 
   if (this->sent_data_.size() > 0) {
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) WriteDataContainer::~WriteDataContainer() - ")
-                 ACE_TEXT("destroyed with %d samples sent.\n"),
-                 this->sent_data_.size()));
-    }
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) WriteDataContainer::~WriteDataContainer() - ")
+               ACE_TEXT("destroyed with %d samples sent.\n"),
+               this->sent_data_.size()));
   }
 
   if (this->orphaned_to_transport_.size() > 0) {
