@@ -52,13 +52,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           exit(1);
         }
 
-        cout << "DataReaderListener:" << endl
-            << "   Message: subject    = " << message.subject.in() << endl
-            << "            subject_id = " << message.subject_id   << endl
-            << "            from       = " << message.from.in()    << endl
-            << "            count      = " << message.count        << endl
-            << "            text       = " << message.text.in()    << endl;
-        cout << "   SampleInfo.sample_rank = " << si.sample_rank << endl;
+        cout << "DataReaderListener: Message count = " << message.count << endl;
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
@@ -117,30 +111,35 @@ void DataReaderListenerImpl::on_subscription_matched (
 
   DDS::PublicationBuiltinTopicDataDataReader_var rdr =
     DDS::PublicationBuiltinTopicDataDataReader::_narrow(builtin_);
-  DDS::PublicationBuiltinTopicDataSeq data;
-  DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = rdr->read_instance(data, infos, 1,
-                                    status.last_publication_handle,
-                                    DDS::NOT_READ_SAMPLE_STATE,
-                                    DDS::ANY_VIEW_STATE,
-                                    DDS::ALIVE_INSTANCE_STATE);
+  for (int i = 0; i < 100; ++i) {
+    // BIT Data is not necessarily ready when this callback happens
+    DDS::PublicationBuiltinTopicDataSeq data;
+    DDS::SampleInfoSeq infos;
+    DDS::ReturnCode_t ret = rdr->read_instance(data, infos, 1,
+                                               status.last_publication_handle,
+                                               DDS::NOT_READ_SAMPLE_STATE,
+                                               DDS::ANY_VIEW_STATE,
+                                               DDS::ALIVE_INSTANCE_STATE);
+    switch (ret) {
+    case DDS::RETCODE_OK:
+      cerr << "read bit instance returned ok" << endl;
+      return;
+    case DDS::RETCODE_NO_DATA:
+      cerr << "read bit instance returned no data" << endl;
+      break;
+    case DDS::RETCODE_BAD_PARAMETER:
+      cerr << "read bit instance returned bad parameter" << endl;
+      break;
+    default:
+      cerr << "ERROR read bit instance returned " << ret << endl;
+      builtin_read_error_ = true;
+      return;
+    }
+    ACE_OS::sleep(ACE_Time_Value(0, 100000));
+  }
 
-  switch (ret)
-  {
-  case ::DDS::RETCODE_OK:
-    cerr << "read bit instance returned ok" << endl;
-    break;
-  case ::DDS::RETCODE_NO_DATA:
-    cerr << "read bit instance returned no data" << endl;
-    break;
-  case ::DDS::RETCODE_BAD_PARAMETER:
-    cerr << "ERROR read bit instance returned bad parameter" << endl;
-    builtin_read_error_ = true;
-    break;
-  default:
-    cerr << "read bit instance returned " << ret << endl;
-    builtin_read_error_ = true;
-  };
+  cerr << "ERROR read bit instance: giving up after retries" << endl;
+  builtin_read_error_ = true;
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
