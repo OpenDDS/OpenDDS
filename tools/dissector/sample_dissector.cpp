@@ -17,7 +17,6 @@
 #include <ace/Log_Msg.h>
 #include <ace/ACE.h>
 
-#include <cstdio>
 #include <cstring>
 
 #include <algorithm>
@@ -154,7 +153,6 @@ namespace OpenDDS
           break;
 
         case Sample_Field::Enumeration:
-          printf("Enum\n");
           // TODO
           break;
 
@@ -551,7 +549,6 @@ namespace OpenDDS
 
         case Sample_Field::Enumeration:
           // TODO
-          printf("Enum\n");
           break;
 
         default:
@@ -752,7 +749,6 @@ namespace OpenDDS
         ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
-      printf("Sequence: %s\n", outstream.str().c_str());
 
       size_t data_pos = 4;
       Wireshark_Bundle_i sp = params;
@@ -987,8 +983,6 @@ namespace OpenDDS
         ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              (gint)len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
-      printf("Union: %s\n", outstream.str().c_str());
-
 
       Wireshark_Bundle_Field fp;
       fp.tvb = params.tvb;

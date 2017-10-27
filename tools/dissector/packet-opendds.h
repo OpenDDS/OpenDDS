@@ -14,6 +14,7 @@ extern "C" {
 
 #include "config.h"
 
+
 #include <glib.h>
 #include <gmodule.h>
 
@@ -21,6 +22,8 @@ extern "C" {
 #include <epan/ipproto.h>
 #include <epan/packet.h>
 #include <epan/dissectors/packet-tcp.h>
+#include <epan/expert.h>
+#include <wsutil/report_message.h>
   //#include <epan/dissectors/packet-giop.h>
 } // extern "C"
 

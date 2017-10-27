@@ -16,6 +16,7 @@
 #include <ace/Message_Block.h>
 #include <ace/Log_Msg.h>
 #include <ace/ACE.h>
+#include <ace/Signal.h>
 
 #include <cstring>
 
@@ -90,7 +91,9 @@ int hf_sample_flags2            = -1;
 int hf_sample_flags2_cdr_encap  = -1;
 int hf_sample_flags2_key_only   = -1;
 // Payload IDL Type, ex "Messenger::Message"
-int hf_sample_payload = -1; 
+int hf_sample_payload = -1;
+// Payload "Expert" Error Field
+expert_field ei_sample_payload = EI_INIT;
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -452,6 +455,27 @@ namespace OpenDDS
         }
     }
 
+    // Try to gracefully handle a Seg Fault, give Wireshark a chance to
+    // finish it's business, and tell inform the user that their ITL file
+    // is invalid
+    void sample_dissect_handle_sigsegv(int signal) {
+      ACE_DEBUG ((LM_DEBUG,
+        "DDS_Dissector::dissect_sample_payload: "
+        "Encountered SIGSEGV (Segmentation Fault) signal during "
+        "sample payload dissection. "
+        "There is a pointer bug in the sample dissector or the ITL "
+        "file provided matched the type name but does not actually have the "
+        "same type."
+        "\n"
+      ));
+      report_failure(
+        "There has been a fatal error in the OpenDDS Dissector:\n"
+        "There is a pointer bug in the sample dissector or the ITL "
+        "file provided matched the type name but does not actually have the "
+        "same type."
+      );
+      exit(EXIT_FAILURE);
+    }
 
     void
     DDS_Dissector::dissect_sample_payload (proto_tree* ltree,
@@ -495,6 +519,19 @@ namespace OpenDDS
                     "no topic for %s\n",
                     std::string(converter).c_str()));
         offset += header.message_length_; // skip marshaled data
+
+        // Mark Packet
+        proto_tree_add_expert_format(
+          ltree,
+          pinfo_,
+          &ei_sample_payload,
+          tvb_,
+          offset,
+          (gint) header.message_length_,
+          "No Topic Found for %s \n",
+          std::string(converter).c_str()
+        );
+
         return;
       }
       
@@ -507,20 +544,34 @@ namespace OpenDDS
       // Try to Dissect Payload
       Sample_Dissector *data_dissector =
         Sample_Manager::instance().find (data_name);
-      if (data_dissector == 0)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "no dissector found for %s \n",
-                      data_name));
+      if (data_dissector == 0) {
+        ACE_DEBUG ((LM_DEBUG,
+                    "DDS_Dissector::dissect_sample_payload: "
+                    "no dissector found for %s \n",
+                    data_name));
 
-          offset += header.message_length_; // skip marshaled data
-        }
-      else
-        {
-          Wireshark_Bundle params = {tvb_, pinfo_, contents_tree, offset};
-          offset = data_dissector->dissect (params);
-        }
+        // Mark Packet
+        proto_tree_add_expert_format(
+          ltree,
+          pinfo_,
+          &ei_sample_payload,
+          tvb_,
+          offset,
+          (gint) header.message_length_,
+          "No Dissector Found for %s \n",
+          data_name
+        );
+
+        offset += header.message_length_; // skip marshaled data
+      } else {
+        Wireshark_Bundle params = {tvb_, pinfo_, contents_tree, offset};
+
+        // Handle Seg Faults that might be caused by incorrect ITL file
+        ACE_Sig_Action sig_act(sample_dissect_handle_sigsegv);
+        sig_act.register_action(SIGSEGV); // Handle Segfaults
+        offset = data_dissector->dissect(params);
+        sig_act.handler(SIG_DFL); // Restore default segfault behavior
+      }
     }
 
     int
@@ -817,14 +868,14 @@ namespace OpenDDS
                 "opendds.sample.content_filter_entries",
                 FT_UINT32, BASE_HEX, NULL_HFILL
                 }
-        },
-        { &hf_sample_payload,
-            { "Payload",
-                "opendds.sample.payload",
-                FT_STRING, BASE_NONE, NULL_HFILL
-                }
         }
       };
+
+      Sample_Manager::instance().add_protocol_field(
+        &hf_sample_payload,
+        payload_namespace, "Payload",
+        FT_STRING
+      );
 
       for (unsigned i = 0; i < array_length(hf); i++) {
           Sample_Manager::instance().add_protocol_field(hf[i]);
@@ -842,6 +893,17 @@ namespace OpenDDS
         &ett_sample_payload
       };
 
+      // Expert Information
+      static ei_register_info ei[] = {
+        { &ei_sample_payload, {
+          "opendds.sample.dissect_error",
+          PI_UNDECODED, PI_WARN,
+          "Unable to Dissect Sample Payload",
+          EXPFILL
+        }},
+      };
+
+      // Register Protocol
       proto_opendds =
         proto_register_protocol
         ("OpenDDS DCPS Protocol",  // name
@@ -853,6 +915,12 @@ namespace OpenDDS
         Sample_Manager::instance().number_of_fields()
       );
       proto_register_subtree_array(ett, array_length(ett));
+
+      // Register Expert Information
+      expert_register_field_array(
+        expert_register_protocol(proto_opendds),
+        ei, array_length(ei)
+      );
     }
 
     void
