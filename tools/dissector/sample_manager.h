@@ -76,15 +76,25 @@ namespace OpenDDS
       hf_register_info * fields_array();
       size_t number_of_fields();
 
+      // Get the current wireshark namespace based on the context
+      std::string get_ns();
+      void push_ns(const std::string & name);
+      std::string pop_ns();
+
     private:
       static Sample_Manager instance_;
 
       typedef std::map<std::string, Sample_Dissector*> DissectorsType;
       DissectorsType dissectors_;
+
       std::vector<hf_register_info> hf_vector_;
       hf_register_info * hf_array_ = NULL;
+
       /// Dynamic Field Names (Long and Short) to be deleted later
       std::forward_list<char *> field_names_;  
+
+      // Keep track of the wireshark namespace to use
+      std::list<std::string> ns_stack;
 
       void init_from_file (const ACE_TCHAR *filename);
     };

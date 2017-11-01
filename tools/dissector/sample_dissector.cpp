@@ -38,7 +38,7 @@ namespace OpenDDS
       return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
     }
 
-    Sample_Field::Sample_Field (IDLTypeID id, const std::string &ns, const std::string &label)
+    Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)
       : label_ (label),
         type_id_ (id),
         nested_ (0),
@@ -46,13 +46,13 @@ namespace OpenDDS
     {
     }
 
-    Sample_Field::Sample_Field (Sample_Dissector *n, const std::string &ns, const std::string &label)
+    Sample_Field::Sample_Field (Sample_Dissector *n, const std::string &label)
       : label_(label),
-        ns_(ns),
         type_id_ (Undefined),
         nested_ (n),
         next_(0)
     {
+        /*
         if (NULL == n->field_) {
           return;
         }
@@ -62,73 +62,73 @@ namespace OpenDDS
 
         case Sample_Field::Boolean:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_BOOLEAN
+              &hf_, label, FT_BOOLEAN
           );
           break;
 
         case Sample_Field::Char:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_CHAR
+              &hf_, label, FT_CHAR
           );
           break;
 
         case Sample_Field::Octet:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_UINT8, BASE_HEX
+              &hf_, label, FT_UINT8, BASE_HEX
           );
           break;
 
         case Sample_Field::WChar:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_STRING
+              &hf_, label, FT_STRING
           );
           break;
 
         case Sample_Field::Short:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_INT16, BASE_DEC
+              &hf_, label, FT_INT16, BASE_DEC
           );
           break;
 
         case Sample_Field::Long:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_INT32, BASE_DEC
+              &hf_, label, FT_INT32, BASE_DEC
           );
           break;
 
         case Sample_Field::LongLong:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_INT64, BASE_DEC
+              &hf_, label, FT_INT64, BASE_DEC
           );
           break;
 
         case Sample_Field::UShort:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_UINT16, BASE_DEC
+              &hf_, label, FT_UINT16, BASE_DEC
           );
           break;
 
         case Sample_Field::ULong:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_UINT32, BASE_DEC
+              &hf_, label, FT_UINT32, BASE_DEC
           );
           break;
 
         case Sample_Field::ULongLong:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_UINT64, BASE_DEC
+              &hf_, label, FT_UINT64, BASE_DEC
           );
           break;
 
         case Sample_Field::Float:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_FLOAT
+              &hf_, label, FT_FLOAT
           );
           break;
 
         case Sample_Field::Double:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_DOUBLE
+              &hf_, label, FT_DOUBLE
           );
           break;
 
@@ -136,19 +136,19 @@ namespace OpenDDS
           // Long Doubles will be cast to doubles, resulting in possible 
           // data loss if long doubles are larger than doubles.
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_DOUBLE
+              &hf_, label, FT_DOUBLE
           );
           break;
 
         case Sample_Field::String:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_STRING
+              &hf_, label, FT_STRING
           );
           break;
 
         case Sample_Field::WString:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_STRING
+              &hf_, label, FT_STRING
           );
           break;
 
@@ -158,10 +158,11 @@ namespace OpenDDS
 
         default:
           Sample_Manager::instance().add_protocol_field(
-              &hf_, ns_, label, FT_BYTES
+              &hf_, label, FT_BYTES
           );
           break;
         }
+        */
     }
 
     Sample_Field::~Sample_Field ()
@@ -181,15 +182,15 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Field::chain (IDLTypeID ti, const std::string &ns, const std::string &l)
+    Sample_Field::chain (IDLTypeID ti, const std::string &l)
     {
-      return chain (new Sample_Field (ti, ns, l));
+      return chain (new Sample_Field (ti, l));
     }
 
     Sample_Field *
-    Sample_Field::chain (Sample_Dissector *n, const std::string &ns, const std::string &l)
+    Sample_Field::chain (Sample_Dissector *n, const std::string &l)
     {
-      return chain (new Sample_Field (n, ns, l));
+      return chain (new Sample_Field (n, l));
     }
 
     Sample_Field *
@@ -569,10 +570,29 @@ namespace OpenDDS
       return len;
     }
 
+    void Sample_Field::init_ws_fields() {
+      if (!label_.empty() && nested_ == NULL) {
+        Sample_Manager::instance().push_ns(label_);
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s\n"), Sample_Manager::instance().get_ns().c_str()));
+        Sample_Manager::instance().pop_ns();
+      } else if (label_.empty()) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s\n"), Sample_Manager::instance().get_ns().c_str()));
+      } else {
+        Sample_Manager::instance().push_ns(label_);
+        if (nested_ != NULL) {
+          nested_->init_ws_fields();
+        }
+        Sample_Manager::instance().pop_ns();
+      }
+      if (next_ != NULL) {
+        next_->init_ws_fields();
+      }
+    }
+
     //------------------------------------------------------------------------
 
     Sample_Dissector::Sample_Dissector (const std::string &subtree)
-      :ett_payload_ (-1),
+      :ett_ (-1),
        subtree_label_(),
        field_ (0)
     {
@@ -594,7 +614,7 @@ namespace OpenDDS
           this->subtree_label_ = subtree;
 
           gint *ett[] = {
-            &ett_payload_
+            &ett_
           };
           proto_register_subtree_array(ett, array_length(ett));
         }
@@ -615,16 +635,17 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (Sample_Field::IDLTypeID type_id, const std::string &ns,
-                                 const std::string &label)
+    Sample_Dissector::add_field(Sample_Field::IDLTypeID type_id,
+                                const std::string &label)
     {
-      return add_field (new Sample_Field (type_id, ns, label));
+      return add_field(new Sample_Field(type_id, label));
     }
 
     Sample_Field *
-    Sample_Dissector::add_field (Sample_Dissector *n, const std::string &ns, const std::string &label)
+    Sample_Dissector::add_field(Sample_Dissector *n,
+                                const std::string &label)
     {
-      return add_field (new Sample_Field (n, ns, label));
+      return add_field(new Sample_Field(n, label));
     }
 
     size_t
@@ -658,7 +679,7 @@ namespace OpenDDS
           proto_item *item =
             ws_proto_tree_add_text (params.tree, params.tvb, params.offset, len,
                                  "%s", buffer.c_str());
-          subtree = proto_item_add_subtree (item, ett_payload_);
+          subtree = proto_item_add_subtree (item, ett_);
           use_index = false;
         }
 
@@ -719,6 +740,12 @@ namespace OpenDDS
       return outstream.str();
     }
 
+    void Sample_Dissector::init_ws_fields() {
+      if (field_ != NULL) {
+        field_->init_ws_fields();
+      }
+    }
+
     //----------------------------------------------------------------------
     Sample_Sequence::Sample_Sequence (Sample_Dissector *sub)
       : element_ (sub)
@@ -748,7 +775,7 @@ namespace OpenDDS
       proto_item *item =
         ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              len,"%s", outstream.str().c_str());
-      proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
+      proto_tree *subtree = proto_item_add_subtree (item, ett_);
 
       size_t data_pos = 4;
       Wireshark_Bundle_i sp = params;
@@ -781,6 +808,11 @@ namespace OpenDDS
       return len;
     }
 
+    void Sample_Sequence::init_ws_fields() {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is Sequence\n"), Sample_Manager::instance().get_ns().c_str()));
+      element_->init_ws_fields();
+    }
+
     //----------------------------------------------------------------------
 
     Sample_Array::Sample_Array (size_t count,
@@ -804,7 +836,7 @@ namespace OpenDDS
       proto_item *item =
         ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              (gint)len,"%s", outstream.str().c_str());
-      proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
+      proto_tree *subtree = proto_item_add_subtree (item, ett_);
 
       size_t data_pos = 0;
       Wireshark_Bundle_i sp = params;
@@ -831,6 +863,11 @@ namespace OpenDDS
       return len;
     }
 
+    void Sample_Array::init_ws_fields() {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is Array\n"), Sample_Manager::instance().get_ns().c_str()));
+      element_->init_ws_fields();
+    }
+
     //----------------------------------------------------------------------
 
     Sample_Enum::Sample_Enum ()
@@ -845,9 +882,9 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Enum::add_value(const std::string & ns,const std::string &name)
+    Sample_Enum::add_value(const std::string &name)
     {
-      Sample_Field *sf = new Sample_Field(Sample_Field::Enumeration, ns, name);
+      Sample_Field *sf = new Sample_Field(Sample_Field::Enumeration, name);
       return (value_ == 0) ? (value_ = sf) : value_->chain(sf);
     }
 
@@ -908,6 +945,12 @@ namespace OpenDDS
       std::stringstream outstream;
       outstream << value;
       return outstream.str();
+    }
+
+    void Sample_Enum::init_ws_fields() {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is an Enum\n"), Sample_Manager::instance().get_ns().c_str()));
+      if (value_ != NULL)
+          value_->init_ws_fields();
     }
 
     //----------------------------------------------------------------------
@@ -982,7 +1025,7 @@ namespace OpenDDS
       proto_item *item =
         ws_proto_tree_add_text (params.tree, params.tvb, params.offset,
                              (gint)len,"%s", outstream.str().c_str());
-      proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
+      proto_tree *subtree = proto_item_add_subtree (item, ett_);
 
       Wireshark_Bundle_Field fp;
       fp.tvb = params.tvb;
@@ -998,6 +1041,12 @@ namespace OpenDDS
       return data_pos;
     }
 
+    void Sample_Union::init_ws_fields() {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is an Union\n"), Sample_Manager::instance().get_ns().c_str()));
+      if (field_ != NULL) field_->init_ws_fields();
+      if (default_ != NULL) default_->init_ws_fields();
+    }
+
     //-----------------------------------------------------------------------
 
     Sample_Alias::Sample_Alias (Sample_Dissector *base)
@@ -1010,6 +1059,10 @@ namespace OpenDDS
     Sample_Alias::dissect_i (Wireshark_Bundle_i &p, const std::string &l)
     {
       return base_->dissect_i (p, l);
+    }
+
+    void Sample_Alias::init_ws_fields() {
+      base_->init_ws_fields();
     }
 
   }
