@@ -537,7 +537,9 @@ namespace OpenDDS
       
       // Set Payload Field/Tree
       proto_item * payload_item = proto_tree_add_string(
-        ltree, hf_sample_payload, tvb_, offset, (gint) header.message_length_, data_name);
+        ltree, hf_sample_payload, tvb_, offset,
+        (gint) header.message_length_,
+        data_name);
       proto_tree * contents_tree = proto_item_add_subtree(
           payload_item, ett_sample_payload);
 
@@ -600,7 +602,6 @@ namespace OpenDDS
         proto_tree* trans_tree =
           proto_item_add_subtree(item, ett_trans_header);
 
-
         this->dissect_transport_header (trans_tree, trans, offset);
 
         while (offset < gint(ws_tvb_length(tvb_)))
@@ -621,6 +622,7 @@ namespace OpenDDS
 
             proto_tree* sample_tree =
               proto_item_add_subtree(item, ett_sample_header);
+
             this->dissect_sample_header (sample_tree, sample, offset);
 
             sample_tree = proto_item_add_subtree (item, ett_sample_header);
@@ -878,7 +880,7 @@ namespace OpenDDS
       );
 
       for (unsigned i = 0; i < array_length(hf); i++) {
-          Sample_Manager::instance().add_protocol_field(hf[i]);
+        Sample_Manager::instance().add_protocol_field(hf[i]);
       }
 
       Sample_Manager::instance().init();

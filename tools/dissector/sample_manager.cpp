@@ -333,7 +333,38 @@ namespace OpenDDS
         i != primary_dissectors.end();
         i++
       ) {
-        (*i).second->init_ws_fields();
+        // Get Namespaces from name
+        clear_ns();
+        std::string name(i->first);
+
+        // If name begins with "IDL:", remove it
+        const std::string idl_prefix("IDL:");
+        if (name.substr(0, idl_prefix.size()) == idl_prefix) {
+            name.erase(0, idl_prefix.size());
+        }
+
+        // If name contains ':', remove everything after it
+        size_t l = name.rfind(":");
+        if (l != std::string::npos) {
+            name.erase(l, name.size() - l);
+        }
+
+        // Push namespace when we find a '/'
+        name.push_back('/'); // For last namespace
+        l = 0;
+        for (size_t i = 0; i != name.size(); i++) {
+            if (name[i] == '/') {
+                push_ns(name.substr(i - l, l));
+                l = 0;
+            } else {
+                l++;
+            }
+        }
+
+        // Create WS Fields off this namespace location
+        Sample_Dissector & dissector = *i->second;
+        dissector.init_ws_fields();
+        clear_ns();
       }
 
 #endif
@@ -429,6 +460,15 @@ namespace OpenDDS
     }
 
     void
+    Sample_Manager::add_protocol_field(
+      int * hf_index,
+      enum ftenum ft, field_display_e fd
+    ) {
+      std::string short_name = ns_stack.back();
+      add_protocol_field(hf_index, get_ns(), short_name, ft, fd);
+    }
+
+    void
     Sample_Manager::add_protocol_field(hf_register_info field)
     {
       hf_vector_.push_back(field);
@@ -462,6 +502,10 @@ namespace OpenDDS
 
     void Sample_Manager::push_ns(const std::string & name) {
         ns_stack.push_back(name);
+    }
+
+    void Sample_Manager::clear_ns() {
+        ns_stack.clear();
     }
 
     std::string Sample_Manager::pop_ns() {

@@ -68,6 +68,9 @@ namespace OpenDDS
         const std::string & full_name, const std::string & short_name,
         enum ftenum ft, field_display_e fd = BASE_NONE
       );
+      void add_protocol_field(
+        int * hf_index, enum ftenum ft, field_display_e fd = BASE_NONE
+      );
 
       /// Add a premade hf_register_info struct to register later
       void add_protocol_field(hf_register_info field);
@@ -80,6 +83,7 @@ namespace OpenDDS
       std::string get_ns();
       void push_ns(const std::string & name);
       std::string pop_ns();
+      void clear_ns();
 
     private:
       static Sample_Manager instance_;

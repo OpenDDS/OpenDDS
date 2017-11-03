@@ -43,8 +43,6 @@ namespace OpenDDS
       packet_info *info;
       proto_tree *tree;
       gint offset;
-      // Used to pass Header Field Id from Parent to its childern
-      int last_known_hf; 
 
       guint8 *get_remainder ();
     };
@@ -220,8 +218,7 @@ namespace OpenDDS
       gint ett_;
       std::string subtree_label_;
 
-      /// Way for init_ws_fields to see if it should visit this dissector
-      bool ws_initialized_ = false;
+      int hf_ = -1;
     };
 
     /*
@@ -266,6 +263,7 @@ namespace OpenDDS
     protected:
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
       size_t count_;
+      int hf_ = -1;
     };
 
     /*
