@@ -45,6 +45,9 @@ namespace OpenDDS
     /// Wireshark Namespace to set the payload in
     const std::string payload_namespace = "opendds.sample.payload";
 
+    /// Namespace for arrays and sequence elements
+    const std::string element_namespace = "_e";
+
     /*
      * The Sample_Manager is a singleton which contains a map
      * of Sample_Dissectors keyed to type identifiers. This singleton is
@@ -68,9 +71,6 @@ namespace OpenDDS
         const std::string & full_name, const std::string & short_name,
         enum ftenum ft, field_display_e fd = BASE_NONE
       );
-      void add_protocol_field(
-        int * hf_index, enum ftenum ft, field_display_e fd = BASE_NONE
-      );
 
       /// Add a premade hf_register_info struct to register later
       void add_protocol_field(hf_register_info field);
@@ -78,12 +78,6 @@ namespace OpenDDS
       /// What is passed to wireshark
       hf_register_info * fields_array();
       size_t number_of_fields();
-
-      // Get the current wireshark namespace based on the context
-      std::string get_ns();
-      void push_ns(const std::string & name);
-      std::string pop_ns();
-      void clear_ns();
 
     private:
       static Sample_Manager instance_;
@@ -96,9 +90,6 @@ namespace OpenDDS
 
       /// Dynamic Field Names (Long and Short) to be deleted later
       std::forward_list<char *> field_names_;  
-
-      // Keep track of the wireshark namespace to use
-      std::list<std::string> ns_stack;
 
       void init_from_file (const ACE_TCHAR *filename);
     };

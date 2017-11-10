@@ -58,6 +58,57 @@ namespace OpenDDS
       guint8 *data;
     };
 
+    /*
+     * Holds Wireshark field index in relationship to a namespace
+     */
+    struct Field_Context {
+      std::string label_; // Actual Label to give to wireshark
+      int hf_ = -1; // Wireshark Field Index
+    };
+    typedef std::map<std::string, Field_Context*> Field_Contexts;
+
+    /*
+     * Base for Sample_Dissector and Sample_Field. Helps build the wireshark
+     * protocol tree.
+     */
+    class Sample_Base {
+    private:
+      /// Associated Wireshark Header Field Contexts
+      Field_Contexts field_contexts_;
+
+      // Keep track of the wireshark namespace to use
+      static std::list<std::string> ns_stack_;
+      static std::string ns_;
+
+      // Make ns_ from ns_stack_
+      static void rebuild_ns();
+
+    protected:
+      // Get or Create Context for the current namespace
+      Field_Context * get_context();
+
+      // Get hf for wireshark, returns -1 if there is no such context
+      int get_hf();
+      
+      /// Add sample field to register later
+      void add_protocol_field(enum ftenum ft, field_display_e fd = BASE_NONE);
+
+    public:
+      ~Sample_Base();
+
+      /// Traverse the Dissector Tree nodes to build the Sample Payload Tree.
+      /// This is to be done after the ITL files have been parsed and before
+      /// Dissection.
+      virtual void init_ws_fields() = 0;
+
+      // Interact with the wireshark namespace
+      static std::string get_ns();
+      static void push_ns(const std::string & name);
+      static std::string pop_ns();
+      static void clear_ns();
+
+    };
+
     class dissector_Export Sample_Dissector;
     /*
      * Sample_Field decribes a single element of the sample. This can be
@@ -68,7 +119,7 @@ namespace OpenDDS
      * the data buffer
      */
 
-    class dissector_Export Sample_Field
+    class dissector_Export Sample_Field : public Sample_Base
     {
     public:
 
@@ -144,9 +195,6 @@ namespace OpenDDS
       /// top-level field is deleted, it will iterate over this list deleting
       /// each subsequent field.
       Sample_Field *next_;
-
-      /// Associated Wireshark Header Field
-      int hf_ = -1;
     };
 
     /*
@@ -160,7 +208,7 @@ namespace OpenDDS
      * would require reference counting, which currently isn't done.
      */
 
-    class dissector_Export Sample_Dissector
+    class dissector_Export Sample_Dissector : public Sample_Base
     {
     public:
       Sample_Dissector (const std::string &subtree_label = "");
@@ -217,8 +265,6 @@ namespace OpenDDS
       /// empty.
       gint ett_;
       std::string subtree_label_;
-
-      int hf_ = -1;
     };
 
     /*

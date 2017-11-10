@@ -568,11 +568,43 @@ namespace OpenDDS
       } else {
         Wireshark_Bundle params = {tvb_, pinfo_, contents_tree, offset};
 
-        // Handle Seg Faults that might be caused by incorrect ITL file
+        // Push DCPS Primary Data Type Namespace
+        std::string ns;
+        char c = 0xff;
+        bool delimiter = false;
+        for (size_t i = 0; c; i++) {
+          c = data_name[i];
+          if (c == ':') {
+            if (delimiter) {
+              Sample_Base::push_ns(ns);
+              ns = "";
+              delimiter = false;
+            } else {
+              delimiter = true;
+            }
+          } else if (c) { // Any value that's not : or NULL
+            ns.push_back(c);
+            delimiter = false;
+          }
+        }
+        Sample_Base::push_ns(ns);
+
+        /* 
+         * Handle Seg Faults that might be caused by incorrect ITL file
+         *
+         * Check for enviromental variable $OPENDDS_DISSECTORS_SIGSEGV,
+         * If it exists don't handle seg faults.
+         * Either way Wireshark will crash if the ITL file is the wrong type,
+         * or technically inconsistent size.
+         */
+        bool handle = ACE_OS::getenv(ACE_TEXT("OPENDDS_DISSECTOR_SIGSEGV")) == 0;
         ACE_Sig_Action sig_act(sample_dissect_handle_sigsegv);
-        sig_act.register_action(SIGSEGV); // Handle Segfaults
-        offset = data_dissector->dissect(params);
-        sig_act.handler(SIG_DFL); // Restore default segfault behavior
+        if (handle) sig_act.register_action(SIGSEGV); // Handle Segfaults
+        offset = data_dissector->dissect(params); // Dissect Sample Payload
+        if (handle) sig_act.handler(SIG_DFL); // Restore default segfault behavior
+
+        // Clear Primary Data Type Namespace
+        Sample_Base::clear_ns();
       }
     }
 

@@ -334,7 +334,7 @@ namespace OpenDDS
         i++
       ) {
         // Get Namespaces from name
-        clear_ns();
+        Sample_Base::clear_ns();
         std::string name(i->first);
 
         // If name begins with "IDL:", remove it
@@ -354,7 +354,7 @@ namespace OpenDDS
         l = 0;
         for (size_t i = 0; i != name.size(); i++) {
             if (name[i] == '/') {
-                push_ns(name.substr(i - l, l));
+                Sample_Base::push_ns(name.substr(i - l, l));
                 l = 0;
             } else {
                 l++;
@@ -364,7 +364,7 @@ namespace OpenDDS
         // Create WS Fields off this namespace location
         Sample_Dissector & dissector = *i->second;
         dissector.init_ws_fields();
-        clear_ns();
+        Sample_Base::clear_ns();
       }
 
 #endif
@@ -460,15 +460,6 @@ namespace OpenDDS
     }
 
     void
-    Sample_Manager::add_protocol_field(
-      int * hf_index,
-      enum ftenum ft, field_display_e fd
-    ) {
-      std::string short_name = ns_stack.back();
-      add_protocol_field(hf_index, get_ns(), short_name, ft, fd);
-    }
-
-    void
     Sample_Manager::add_protocol_field(hf_register_info field)
     {
       hf_vector_.push_back(field);
@@ -486,32 +477,6 @@ namespace OpenDDS
         std::copy(hf_vector_.begin(), hf_vector_.end(), &hf_array_[0]);
       }
       return hf_array_;
-    }
-
-    // Get the current wireshark namespace
-    std::string Sample_Manager::get_ns() {
-      std::stringstream ss;
-      ss << payload_namespace;
-      for (std::list<std::string>::iterator i = ns_stack.begin();
-        i != ns_stack.end(); i++
-      ) {
-        ss << "." << *i;
-      }
-      return ss.str();
-    }
-
-    void Sample_Manager::push_ns(const std::string & name) {
-        ns_stack.push_back(name);
-    }
-
-    void Sample_Manager::clear_ns() {
-        ns_stack.clear();
-    }
-
-    std::string Sample_Manager::pop_ns() {
-        std::string name = ns_stack.back();
-        ns_stack.pop_back();
-        return name;
     }
   }
 }
