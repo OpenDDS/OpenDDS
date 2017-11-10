@@ -15,7 +15,7 @@ OCI publishes Middleware News Brief articles on a number of topics.  The followi
 - [Comparing OpenDDS and ZeroMQ Usage and Performance](https://objectcomputing.com/resources/publications/mnb/comparing-opendds-and-zeromq-usage-and-performance)
 - [Code Generation with OpenDDS, Part I](https://objectcomputing.com/resources/publications/mnb/code-generation-with-opendds-part-i)
 - [Code Generation with OpenDDS, Part II](https://objectcomputing.com/resources/publications/mnb/code-generation-with-opendds-part-ii)
-- [Using Erland with CORBA and DDS](https://objectcomputing.com/resources/publications/mnb/using-erlang-with-corba-and-dds)
+- [Using Erlang with CORBA and DDS](https://objectcomputing.com/resources/publications/mnb/using-erlang-with-corba-and-dds)
 - [MPI and DDS (not?) So Different](https://objectcomputing.com/resources/publications/mnb/mpi-and-dds-not-so-different)
 - [Multi-Platform Serial Interfacing using Boost: A GPS Sensor and OpenDDS Part I](http://www.objectcomputing.com/resources/publications/mnb/multi-platform-serial-interfacing-using-boost-a-gps-sensor-and-opendds-part-i)
 - [Multi-Platform Serial Interfacing using Boost: A GPS Sensor and OpenDDS Part II](http://www.objectcomputing.com/resources/publications/mnb/multi-platform-serial-interfacing-using-boost-a-gps-sensor-and-opendds-part-ii)
