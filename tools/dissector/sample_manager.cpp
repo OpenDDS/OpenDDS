@@ -6,6 +6,7 @@
  */
 
 #include "tools/dissector/sample_manager.h"
+#include "ws_common.h"
 
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>

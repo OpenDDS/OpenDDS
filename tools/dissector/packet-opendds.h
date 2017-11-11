@@ -14,7 +14,6 @@ extern "C" {
 
 #include "config.h"
 
-
 #include <glib.h>
 #include <gmodule.h>
 
@@ -23,16 +22,22 @@ extern "C" {
 #include <epan/packet.h>
 #include <epan/dissectors/packet-tcp.h>
 #include <epan/expert.h>
-#include <wsutil/report_message.h>
   //#include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
-#include "tools/dissector/ws_common.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
+#include "tools/dissector/ws_common.h"
+
+extern "C" {
+#ifndef WS_1
+#include <wsutil/report_message.h>
+#endif
+}
+
 #include "ace/Hash_Map_Manager.h"
 
 #include <string>

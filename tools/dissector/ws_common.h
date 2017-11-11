@@ -48,6 +48,8 @@ inline proto_item* ws_proto_tree_add_text(proto_tree* tree, tvbuff_t* tvb, gint 
 //TODO
 }
 #else
+# define NO_ITL // Disable Sample Dissection on Wireshark 1.x
+# define WS_1
 # define WS_GET_PDU_LEN_EXTRA_PARAM
 # define WS_DISSECTOR_EXTRA_ARG
 # define ws_tvb_length tvb_length

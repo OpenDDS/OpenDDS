@@ -468,12 +468,14 @@ namespace OpenDDS
         "same type."
         "\n"
       ));
+#ifndef WS_1
       report_failure(
         "There has been a fatal error in the OpenDDS Dissector:\n"
         "There is a pointer bug in the sample dissector or the ITL "
         "file provided matched the type name but does not actually have the "
         "same type."
       );
+#endif
       exit(EXIT_FAILURE);
     }
 

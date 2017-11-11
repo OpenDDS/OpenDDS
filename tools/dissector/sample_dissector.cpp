@@ -547,9 +547,15 @@ namespace OpenDDS
           add_protocol_field(FT_BOOLEAN);
           break;
 
+/* Apparently FT_CHAR is not defined in Wireshark 1.x
+ * So this ifdef must be put here to allow the dissector to compile under
+ * Wireshark 1 even though it's never going to run this.
+ */
+#ifndef WS_1
         case Sample_Field::Char:
           add_protocol_field(FT_CHAR);
           break;
+#endif
 
         case Sample_Field::Octet:
           add_protocol_field(FT_UINT8, BASE_HEX);
