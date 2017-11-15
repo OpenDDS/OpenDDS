@@ -305,11 +305,13 @@ namespace OpenDDS
           if (
             note != NULL &&
             note->HasMember("is_dcps_data_type") &&
-            (*note)["is_dcps_data_type"].IsBool() &&
-            (*note)["is_dcps_data_type"].GetBool()
+            (*note)["is_dcps_data_type"].IsBool()
           ) {
-            primary_dissectors[a->name()] = sd;
-            no_dcps_data_types = false;
+            if ((*note)["is_dcps_data_type"].GetBool()) {
+                primary_dissectors[a->name()] = sd;
+                no_dcps_data_types = false;
+            }
+            sd->mark_struct();
           }
           dissectors_[a->name()] = sd;
         }
@@ -364,7 +366,7 @@ namespace OpenDDS
 
         // Create WS Fields off this namespace location
         Sample_Dissector & dissector = *i->second;
-        dissector.init_ws_fields();
+        dissector.init_ws_proto_tree();
         Sample_Base::clear_ns();
       }
 

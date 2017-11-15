@@ -106,6 +106,7 @@ namespace OpenDDS
       static void push_ns(const std::string & name);
       static std::string pop_ns();
       static void clear_ns();
+      static std::string get_label();
 
     };
 
@@ -241,6 +242,7 @@ namespace OpenDDS
       /// Traverse the Dissector Tree nodes to build the Sample Payload Tree.
       /// This is to be done after the ITL files have been parsed and before
       /// Dissection.
+      void init_ws_proto_tree();
       virtual void init_ws_fields();
 
       /// The actual dissector method. Since a sample can be composed of
@@ -257,6 +259,10 @@ namespace OpenDDS
 
       virtual std::string stringify (guint8 *data);
 
+      void mark_struct();
+      bool is_struct();
+
+    protected:
       /// The list of fields defining the sample.
       Sample_Field *field_;
 
@@ -265,6 +271,9 @@ namespace OpenDDS
       /// empty.
       gint ett_;
       std::string subtree_label_;
+
+      bool is_struct_ = false;
+      bool is_root_ = false;
     };
 
     /*

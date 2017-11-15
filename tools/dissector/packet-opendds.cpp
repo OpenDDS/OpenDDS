@@ -77,6 +77,7 @@ int hf_sample_lifespan    = -1;
 int hf_sample_publication = -1;
 int hf_sample_publisher   = -1;
 int hf_sample_content_filt= -1;
+int hf_sample_content_filt_entries = -1;
 
 int hf_sample_flags             = -1;
 int hf_sample_flags_byte_order  = -1;
@@ -435,15 +436,24 @@ namespace OpenDDS
                    i < sample.content_filter_entries_.length();
                    i++)
                 {
+                  // Get Entry Value
                   const GUID_t &filter = sample.content_filter_entries_[i];
                   DCPS::GuidConverter converter(filter);
                   std::stringstream strm;
-                  strm << "filter [" << i << "] = " << converter << std::ends;
+                  std::string guid = strm.str();
+                  
+                  // Get Entry Size
                   size = 0;
                   gen_find_size(filter, size, padding);
                   len = static_cast<gint>(size);
-                  ws_proto_tree_add_text (subtree, tvb_, offset, len, "%s",
-                                       strm.str().c_str());
+                  
+                  // Add to Wireshark
+                  proto_tree_add_string_format_value(
+                    subtree, hf_sample_content_filt_entries,
+                    tvb_, offset, len,
+                    guid.c_str(),
+                    "filter [%u] = %s", i, strm.str().c_str()
+                  );
                   offset += len;
                 }
 
@@ -901,8 +911,14 @@ namespace OpenDDS
         },
         { &hf_sample_content_filt,
             { "Content Filters",
+                "opendds.sample.content_filter",
+                FT_UINT32, BASE_DEC, NULL_HFILL
+                }
+        },
+        { &hf_sample_content_filt_entries,
+            { "Content Filters",
                 "opendds.sample.content_filter_entries",
-                FT_UINT32, BASE_HEX, NULL_HFILL
+                FT_STRING, BASE_NONE, NULL_HFILL
                 }
         }
       };

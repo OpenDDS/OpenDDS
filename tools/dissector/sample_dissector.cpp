@@ -95,6 +95,10 @@ namespace OpenDDS
       return name;
     }
 
+    std::string Sample_Base::get_label() {
+      return ns_stack_.back();
+    }
+
     void Sample_Base::add_protocol_field(enum ftenum ft, field_display_e fd) {
       Field_Context * fc = get_context();
       Sample_Manager::instance().add_protocol_field(
@@ -378,14 +382,6 @@ namespace OpenDDS
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is not a registered wireshark field.\n"),
                      get_ns().c_str()));
         } else {
-
-          // These Variables are Used by String and WString
-          std::stringstream s;
-          guint32 l;
-          guint8 * last;
-          guint32 width;
-          ACE_CDR::WChar * clone;
-          guint8 * str_data;
           
           // Set Field
           switch (this->type_id_) {
@@ -412,11 +408,16 @@ namespace OpenDDS
             break;
 
           case Sample_Field::WChar:
-            // TODO
-            /* proto_tree_add_string( */
-            /*   params.tree, hf, */
-            /*   params.tvb, params.offset, (gint)len, */
-            /*   reinterpret_cast<ACE_CDR::WChar *>(params.data)); */
+            /*
+             * Since FT_CHAR does not seem to support non ASCII encodings, we
+             * will pass it to wireshark as a one character long UTF-16
+             * String.
+             */
+            proto_tree_add_item(
+              params.tree, hf,
+              params.tvb, params.offset, (gint)len,
+              ENC_UTF_16
+            );
             break;
 
           case Sample_Field::Short:
@@ -484,33 +485,21 @@ namespace OpenDDS
             break;
 
           case Sample_Field::String:
-            str_data = params.data;
-            l = *(reinterpret_cast< guint32 * >(params.data));
-            str_data += 4;
-            last = str_data + l - 1; // len included the trailing null
-            while (str_data != last) {
-              s << *(str_data++);
-            }
-            proto_tree_add_string(
+            proto_tree_add_item(
               params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              s.str().c_str());
+              params.tvb, params.offset + sizeof(guint32),
+              *(reinterpret_cast< guint32 * >(params.data)),
+              ENC_UTF_8
+            );
             break;
 
           case Sample_Field::WString:
-            // TODO: Investigate this more and make sure it works
-            // as it should.
-            /* len = *(reinterpret_cast< guint32 * >(params.data)); */
-            /* width = len * Serializer::WCHAR_SIZE; */
-            /* clone = new ACE_CDR::WChar[len + 1]; */
-            /* ACE_OS::memcpy(clone, params.data+4, width); */
-            /* clone[len] = 0; */
-            /* proto_tree_add_string_format( */
-            /*   params.tree, hf, */
-            /*   params.tvb, params.offset, width + 4, */
-            /*   (char *) params.data, */
-            /*   "%s %ls", params.data, clone); */
-            /* delete [] clone; */
+            proto_tree_add_item(
+              params.tree, hf,
+              params.tvb, params.offset + 4,
+              Serializer::WCHAR_SIZE * *(reinterpret_cast< guint32 * >(params.data)),
+              ENC_UTF_16
+            );
             break;
 
           default:
@@ -536,10 +525,7 @@ namespace OpenDDS
     }
 
     void Sample_Field::init_ws_fields() {
-      if (!label_.empty() && nested_ == NULL) {
-        push_ns(label_);
-        pop_ns();
-      } else if (label_.empty()) {
+      if (label_.empty()) {
         
         switch (type_id_) {
 
@@ -562,7 +548,7 @@ namespace OpenDDS
           break;
 
         case Sample_Field::WChar:
-          add_protocol_field(FT_STRING);
+          add_protocol_field(FT_STRINGZ);
           break;
 
         case Sample_Field::Short:
@@ -604,22 +590,20 @@ namespace OpenDDS
           break;
 
         case Sample_Field::String:
-          add_protocol_field(FT_STRING);
+          add_protocol_field(FT_STRINGZ);
           break;
 
         case Sample_Field::WString:
-          add_protocol_field(FT_STRING);
+          add_protocol_field(FT_STRINGZ);
           break;
 
         default:
           add_protocol_field(FT_BYTES);
           break;
         }
-      } else {
+      } else if (nested_ != NULL) {
         push_ns(label_);
-        if (nested_ != NULL) {
-          nested_->init_ws_fields();
-        }
+        nested_->init_ws_fields();
         pop_ns();
       }
       if (next_ != NULL) {
@@ -691,10 +675,12 @@ namespace OpenDDS
                                  const std::string &label)
 
     {
-      size_t data_pos = 0;
 
+      size_t data_pos = 0;
       guint8* data = params.get_remainder();
-      guint32 len = (guint32)field_->compute_length (data);
+      guint32 len = (guint32) field_->compute_length(data);
+
+      /*
       std::stringstream outstream;
       bool top_level = true;
       if (!label.empty())
@@ -704,31 +690,24 @@ namespace OpenDDS
           if (params.use_index)
             outstream << "[" << params.index << "] ";
         }
-      proto_tree *subtree = params.tree;
-      bool use_index = params.use_index;
-      if (!this->subtree_label_.empty())
-        {
-          if (top_level)
-            outstream << "Sample Payload: ";
-          else
-            outstream << ": ";
-          outstream << subtree_label_;
-          std::string buffer = outstream.str();
-          proto_item *item =
-            ws_proto_tree_add_text (params.tree, params.tvb, params.offset, len,
-                                 "%s", buffer.c_str());
-          subtree = proto_item_add_subtree (item, ett_);
-          use_index = false;
-        }
-
+      */
       if (field_ != 0)
         {
           Wireshark_Bundle_Field fp;
           fp.tvb = params.tvb;
           fp.info = params.info;
-          fp.tree = subtree;
+          if (is_struct_ && !is_root_) {
+            proto_item *item = proto_tree_add_none_format(
+              params.tree, get_hf(), params.tvb, params.offset, (gint)len,
+              get_label().c_str()
+            );
+            fp.tree = proto_item_add_subtree(item, ett_);
+          } else {
+            fp.tree = params.tree;
+            if (is_root_) is_root_ = false;
+          }
           fp.offset = params.offset;
-          fp.use_index = use_index;
+          fp.use_index = params.use_index;
           fp.index = params.index;
           fp.data = data;
           data_pos += field_->dissect_i (fp, label);
@@ -755,6 +734,7 @@ namespace OpenDDS
       sp.use_index = false;
       sp.index = 0;
       std::string label;
+      is_root_ = true;
       return params.offset + (gint)this->dissect_i (sp, label);
     }
 
@@ -777,10 +757,28 @@ namespace OpenDDS
       return outstream.str();
     }
 
-    void Sample_Dissector::init_ws_fields() {
+    void Sample_Dissector::init_ws_proto_tree() {
       if (field_ != NULL) {
         field_->init_ws_fields();
       }
+    }
+
+    void Sample_Dissector::init_ws_fields() {
+      if (is_struct()) {
+        add_protocol_field(FT_NONE);
+        init("struct");
+      }
+      if (field_ != NULL) {
+        field_->init_ws_fields();
+      }
+    }
+
+    void Sample_Dissector::mark_struct() {
+      is_struct_ = true;
+    }
+
+    bool Sample_Dissector::is_struct() {
+      return is_struct_;
     }
 
     //----------------------------------------------------------------------
