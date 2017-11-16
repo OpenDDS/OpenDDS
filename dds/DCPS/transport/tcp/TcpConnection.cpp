@@ -952,6 +952,9 @@ OpenDDS::DCPS::TcpConnection::shutdown()
 
   this->shutdown_ = true;
 
+  ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>::shutdown();
+
+
   // Have to wait until the reconnect thread finishes because
   // the thread would access the reactor which is owned by TcpTransport.
   // Thus the thread has to be finished before the
