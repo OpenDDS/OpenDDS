@@ -30,10 +30,45 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    Wireshark_Bundle::Wireshark_Bundle(
+      char * data, size_t size, bool swap_bytes, Serializer::Alignment align
+    ) :
+      block(data, size),
+      serializer(&block, swap_bytes, align)
+    {
+      block.wr_ptr(data);
+    }
+
+    Wireshark_Bundle::Wireshark_Bundle(const Wireshark_Bundle & other) :
+      block(other.block.rd_ptr(), other.block.size()),
+      serializer(
+        &block,
+        other.serializer.swap_bytes(),
+        other.serializer.alignment()
+      )
+    {
+      block.wr_ptr(other.block.rd_ptr());
+
+      get_size_only = other.get_size_only;
+      tvb = other.tvb;
+      info = other.info;
+      offset = other.offset;
+      use_index = other.use_index;
+      index = other.index;
+    }
+
+    size_t Wireshark_Bundle::buffer_pos() {
+      return reinterpret_cast<size_t>(block.rd_ptr());
+    }
+
+    guint8 *
+    Wireshark_Bundle::get_remainder()
+    {
+      gint remainder = ws_tvb_length(tvb) - offset;
+      return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
+    }
+
     Sample_Base::~Sample_Base() {
-      /*
-       * Clean Up Field Contexts
-       */
       for (
         Field_Contexts::iterator i = field_contexts_.begin();
         i != field_contexts_.end();
@@ -106,13 +141,6 @@ namespace OpenDDS
       );
     }
 
-    guint8 *
-    Wireshark_Bundle::get_remainder ()
-    {
-      gint remainder = ws_tvb_length(tvb) - offset;
-      return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
-    }
-
     Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)
       : label_ (label),
         type_id_ (id),
@@ -166,360 +194,437 @@ namespace OpenDDS
       return (next_ == 0) ? 0 : next_->get_link (index - 1);
     }
 
+    void Sample_Field::to_stream(std::stringstream &s, Wireshark_Bundle & p) {
+      size_t location = p.buffer_pos();
+
+      switch (this->type_id_) {
+      case Char:
+        ACE_CDR::Char char_value;
+        p.serializer >> char_value;
+        s << char_value;
+        break;
+
+      case Boolean:
+        ACE_CDR::Boolean boolean_value;
+        p.serializer >> ACE_InputCDR::to_boolean(boolean_value);
+        if (boolean_value)
+          s << "true";
+        else
+          s << "false";
+        break;
+
+      case Octet:
+        ACE_CDR::Octet octet_value;
+        p.serializer >> ACE_InputCDR::to_octet(octet_value);
+        s << octet_value;
+        break;
+
+      case WChar:
+        ACE_CDR::WChar wchar_value;
+        p.serializer >> ACE_InputCDR::to_wchar(wchar_value);
+        s << wchar_value;
+        break;
+
+      case Short:
+        ACE_CDR::Short short_value;
+        p.serializer >> short_value;
+        s << short_value;
+        break;
+
+      case Long:
+        ACE_CDR::Long long_value;
+        p.serializer >> long_value;
+        s << long_value;
+        break;
+
+      case LongLong:
+        ACE_CDR::LongLong longlong_value;
+        p.serializer >> longlong_value;
+        s << longlong_value;
+        break;
+
+      case UShort:
+        ACE_CDR::UShort ushort_value;
+        p.serializer >> ushort_value;
+        s << ushort_value;
+        break;
+
+      case ULong:
+        ACE_CDR::ULong ulong_value;
+        p.serializer >> ulong_value;
+        s << ulong_value;
+        break;
+
+      case ULongLong:
+        ACE_CDR::ULongLong ulonglong_value;
+        p.serializer >> ulonglong_value;
+        s << ulonglong_value;
+        break;
+
+      case Float:
+        ACE_CDR::Float float_value;
+        p.serializer >> float_value;
+        s << float_value;
+        break;
+
+      case Double:
+        ACE_CDR::Double double_value;
+        p.serializer >> double_value;
+        s << double_value;
+        break;
+
+      case LongDouble:
+        ACE_CDR::LongDouble longdouble_value;
+        p.serializer >> longdouble_value;
+        s << longdouble_value;
+        break;
+
+      case String:
+        // Length
+        ACE_CDR::ULong string_length;
+        p.serializer >> string_length;
+        // Data
+        ACE_CDR::Char * string_value;
+        string_value = new ACE_CDR::Char[string_length];
+        p.serializer.read_char_array(string_value, string_length);
+        s << string_value;
+        delete [] string_value;
+        break;
+
+      case WString:
+        // Length
+        ACE_CDR::ULong wstring_length;
+        p.serializer >> wstring_length;
+        
+        // Data
+        // TODO
+        ACE_CDR::WChar * wstring_value;
+        wstring_value = new ACE_CDR::WChar[wstring_length];
+        p.serializer.read_wchar_array(wstring_value, wstring_length);
+        s << wstring_value;
+        delete [] wstring_value;
+        break;
+
+      case Enumeration:
+        break; // only the label is used, not directly presented
+
+      case Undefined:
+        s << "type undefined";
+
+      }
+
+      p.offset += (p.buffer_pos() - location);
+    }
+
+#define ADD_FIELD_PARAMS params.tree, hf, params.tvb, params.offset, (gint) len
     size_t
-    Sample_Field::compute_field_length (guint8 *data)
-    {
+    Sample_Field::dissect_i (Wireshark_Bundle &params, bool recur) {
+
       size_t len = 0;
-      switch (this->type_id_)
-        {
-        case Char:
-          {
-            len = sizeof (ACE_CDR::Char);
-            break;
-          }
-        case Boolean:
-          {
-            len = sizeof(ACE_CDR::Boolean);
-            break;
-          }
-        case Octet:
-          {
-            len = sizeof(ACE_CDR::Octet);
-            break;
-          }
-        case WChar:
-          {
-            len = 1 + Serializer::WCHAR_SIZE;
-            break;
-          }
-        case Short:
-          {
-            len = sizeof(ACE_CDR::Short);
-            break;
-          }
-        case UShort:
-          {
-            len = sizeof(ACE_CDR::UShort);
-            break;
-          }
-        case Long:
-          {
-            len = sizeof(ACE_CDR::Long);
-            break;
-          }
-        case ULong:
-          {
-            len = sizeof(ACE_CDR::ULong);
-            break;
-          }
-        case LongLong:
-          {
-            len = sizeof(ACE_CDR::LongLong);
-            break;
-          }
-        case ULongLong:
-          {
-            len = sizeof(ACE_CDR::ULongLong);
-            break;
-          }
-        case Float:
-          {
-            len = sizeof(ACE_CDR::Float);
-            break;
-          }
-        case Double:
-          {
-            len = sizeof(ACE_CDR::Double);
-            break;
-          }
-        case LongDouble:
-          {
-            len = sizeof(ACE_CDR::LongDouble);
-            break;
-          }
-        case String:
-          {
-            len = 4 + *(reinterpret_cast< guint32 * >(data));
-            break;
-          }
-        case WString:
-          {
-            len = 4 +
-              *(reinterpret_cast< guint32 * >(data)) * Serializer::WCHAR_SIZE;
-            break;
-          }
-        case Enumeration:
-          {
-            len = 4;
-            break;
-          }
-        case Undefined:
-          {
-            len =
-              (nested_ == 0) ? 0 : this->nested_->compute_length (data);
-          }
-        }
-      return len;
-    }
 
-    size_t
-    Sample_Field::compute_length (guint8 *data)
-    {
-      size_t len = this->compute_field_length (data);
-      if (next_ != 0)
-        len += next_->compute_length (data+len);
-      return len;
-    }
-
-    void
-    Sample_Field::to_stream (std::stringstream &s, guint8 *data)
-    {
-      switch (this->type_id_)
-        {
-        case Char:
-          {
-            s << *reinterpret_cast<ACE_CDR::Char *>(data);
-            break;
-          }
-        case Boolean:
-          {
-            if (*reinterpret_cast<ACE_CDR::Boolean *>(data))
-              s << "true";
-            else
-              s << "false";
-            break;
-          }
-        case Octet:
-          {
-            s << *reinterpret_cast<ACE_CDR::Octet *>(data);
-            break;
-          }
-        case WChar:
-          {
-            s << *reinterpret_cast<ACE_CDR::WChar *>(data);
-            break;
-          }
-        case Short:
-          {
-            s << *reinterpret_cast<ACE_CDR::Short *>(data);
-            break;
-          }
-        case UShort:
-          {
-            s << *reinterpret_cast<ACE_CDR::UShort *>(data);
-            break;
-          }
-        case Long:
-          {
-            s << *reinterpret_cast<ACE_CDR::Long *>(data);
-            break;
-          }
-        case ULong:
-          {
-            s << *reinterpret_cast<ACE_CDR::ULong *>(data);
-            break;
-          }
-        case LongLong:
-          {
-            s << *reinterpret_cast<ACE_CDR::LongLong *>(data);
-            break;
-          }
-        case ULongLong:
-          {
-            s << *reinterpret_cast<ACE_CDR::ULongLong *>(data);
-            break;
-          }
-        case Float:
-          {
-            s << *reinterpret_cast<ACE_CDR::Float *>(data);
-            break;
-          }
-        case Double:
-          {
-            s << *reinterpret_cast<ACE_CDR::Double *>(data);
-            break;
-          }
-        case LongDouble:
-          {
-            s << *reinterpret_cast<ACE_CDR::LongDouble *>(data);
-            break;
-          }
-        case String:
-          {
-            guint32 len = *(reinterpret_cast< guint32 * >(data));
-            data += 4;
-            guint8 *last = data + len - 1 /*len included the trailing null*/;
-            while (data != last)
-              s << *(data++);
-            break;
-          }
-        case WString:
-          {
-            break; // handled separately
-          }
-        case Enumeration:
-          {
-            break; // only the label is used, not directly presented
-          }
-        case Undefined:
-          {
-            s << "type undefined";
-          }
-        }
-    }
-
-    size_t
-    Sample_Field::dissect_i (Wireshark_Bundle_Field &params,
-                             const std::string &alt_label,
-                             bool recur)
-    {
-      size_t len = 0;
-      if (this->nested_ == 0) {
-        len = compute_field_length (params.data);
+      if (this->nested_) {
 
         int hf = get_hf();
         if (hf == -1) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is not a registered wireshark field.\n"),
                      get_ns().c_str()));
+          // TODO What to do after this
+
         } else {
-          
+
+          size_t location = params.buffer_pos();
+
           // Set Field
           switch (this->type_id_) {
 
           case Sample_Field::Boolean:
-            proto_tree_add_item(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Boolean *>(params.data));
+            ACE_CDR::Boolean boolean_value;
+            params.serializer >> ACE_InputCDR::to_boolean(boolean_value);
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_boolean_format_value(
+                  ADD_FIELD_PARAMS, boolean_value,
+                  "%s[%u]: %s", get_label().c_str(), params.index,
+                  boolean_value ? "True" : "False"
+                );
+              } else {
+                proto_tree_add_boolean(ADD_FIELD_PARAMS, boolean_value);
+              }
+            }
             break;
 
           case Sample_Field::Char:
-            proto_tree_add_item(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Char *>(params.data));
-            break;
-
-          case Sample_Field::Octet:
-            proto_tree_add_uint(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Octet *>(params.data));
+            ACE_CDR::Char char_value;
+            params.serializer >> char_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_string_format_value(
+                  ADD_FIELD_PARAMS, &char_value,
+                  "%s[%u]: %c", get_label().c_str(), params.index, char_value
+                );
+              } else {
+                proto_tree_add_string(ADD_FIELD_PARAMS, &char_value);
+              }
+            }
             break;
 
           case Sample_Field::WChar:
+            ACE_CDR::WChar wchar_value;
+            params.serializer >> ACE_InputCDR::to_wchar(wchar_value);
+            len = params.buffer_pos() - location;
             /*
-             * Since FT_CHAR does not seem to support non ASCII encodings, we
-             * will pass it to wireshark as a one character long UTF-16
-             * String.
-             */
-            proto_tree_add_item(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              ENC_UTF_16
-            );
+            if (params.use_index) {
+              proto_tree_add_string_format_value(
+                ADD_FIELD_PARAMS, &wchar_value,
+                "%s[%u]: %lc",
+                get_label().c_str(),
+                params.index,
+                wchar_value
+              );
+            } else {
+              proto_tree_add_string_format(
+                ADD_FIELD_PARAMS, &wchar_value,
+                "%lc", wchar_value
+              );
+            }
+            */
+            break;
+
+          case Sample_Field::Octet:
+            ACE_CDR::Octet octet_value;
+            params.serializer >> ACE_InputCDR::to_octet(octet_value);
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_uint_format_value(
+                  ADD_FIELD_PARAMS, octet_value,
+                  "%s[%u]: %x", get_label().c_str(), params.index, octet_value
+                );
+              } else {
+                proto_tree_add_uint(ADD_FIELD_PARAMS, octet_value);
+              }
+            }
             break;
 
           case Sample_Field::Short:
-            proto_tree_add_int(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Short *>(params.data));
+            ACE_CDR::Short short_value;
+            params.serializer >> short_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_int_format_value(
+                  ADD_FIELD_PARAMS, short_value,
+                  "%s[%u]: %d", get_label().c_str(), params.index, short_value
+                );
+              } else {
+                proto_tree_add_int(ADD_FIELD_PARAMS, short_value);
+              }
+            }
             break;
 
           case Sample_Field::Long:
-            proto_tree_add_int(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Long *>(params.data));
+            ACE_CDR::Long long_value;
+            params.serializer >> long_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_int_format_value(
+                  ADD_FIELD_PARAMS, long_value,
+                  "%s[%u]: %d", get_label().c_str(), params.index, long_value
+                );
+              } else {
+                proto_tree_add_int(ADD_FIELD_PARAMS, long_value);
+              }
+            }
             break;
 
           case Sample_Field::LongLong:
-            proto_tree_add_int64(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::LongLong *>(params.data));
+            ACE_CDR::LongLong longlong_value;
+            params.serializer >> longlong_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_int64_format_value(
+                  ADD_FIELD_PARAMS, longlong_value,
+                  "%s[%u]: %ld", get_label().c_str(), params.index,
+                  longlong_value
+                );
+              } else {
+                proto_tree_add_int64(ADD_FIELD_PARAMS, longlong_value);
+              }
+            }
             break;
 
           case Sample_Field::UShort:
-            proto_tree_add_uint(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::UShort *>(params.data));
+            ACE_CDR::UShort ushort_value;
+            params.serializer >> ushort_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_uint_format_value(
+                  ADD_FIELD_PARAMS, ushort_value,
+                  "%s[%u]: %u", get_label().c_str(), params.index,
+                  ushort_value
+                );
+              } else {
+                proto_tree_add_uint(ADD_FIELD_PARAMS, ushort_value);
+              }
+            }
             break;
 
           case Sample_Field::ULong:
-            proto_tree_add_uint(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::ULong *>(params.data));
+            ACE_CDR::ULong ulong_value;
+            params.serializer >> ulong_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_uint_format_value(
+                  ADD_FIELD_PARAMS, ulong_value,
+                  "%s[%u]: %u", get_label().c_str(), params.index,
+                  ulong_value
+                );
+              } else {
+                proto_tree_add_uint(ADD_FIELD_PARAMS, ulong_value);
+              }
+            }
             break;
 
           case Sample_Field::ULongLong:
-            proto_tree_add_uint64(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::ULongLong *>(params.data));
+            ACE_CDR::ULongLong ulonglong_value;
+            params.serializer >> ulonglong_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_uint64_format_value(
+                  ADD_FIELD_PARAMS, ulonglong_value,
+                  "%s[%u]: %lu", get_label().c_str(), params.index,
+                  ulonglong_value
+                );
+              } else {
+                proto_tree_add_uint64(ADD_FIELD_PARAMS, ulonglong_value);
+              }
+            }
             break;
 
           case Sample_Field::Float:
-            proto_tree_add_float(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Float *>(params.data));
+            ACE_CDR::Float float_value;
+            params.serializer >> float_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_float_format_value(
+                  ADD_FIELD_PARAMS, float_value,
+                  "%s[%u]: %f", get_label().c_str(), params.index,
+                  float_value
+                );
+              } else {
+                proto_tree_add_float(ADD_FIELD_PARAMS, float_value);
+              }
+            }
             break;
 
           case Sample_Field::Double:
-            proto_tree_add_double(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              *reinterpret_cast<ACE_CDR::Double *>(params.data));
+            ACE_CDR::Double double_value;
+            params.serializer >> double_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_double_format_value(
+                  ADD_FIELD_PARAMS, double_value,
+                  "%s[%u]: %lf", get_label().c_str(), params.index,
+                  double_value
+                );
+              } else {
+                proto_tree_add_double(ADD_FIELD_PARAMS, double_value);
+              }
+            }
             break;
 
           case Sample_Field::LongDouble:
-            // Casting to double
-            proto_tree_add_double(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              (double) (*reinterpret_cast<ACE_CDR::LongDouble *>(params.data)));
+            ACE_CDR::LongDouble longdouble_value;
+            params.serializer >> longdouble_value;
+            len = params.buffer_pos() - location;
+            if (!params.get_size_only) {
+              // Casting to double because ws doesn't support long double
+              double casted_value = static_cast<double>(longdouble_value);
+              if (params.use_index) {
+                proto_tree_add_double_format_value(
+                  ADD_FIELD_PARAMS, casted_value,
+                  "%s[%u]: %lf", get_label().c_str(), params.index,
+                  casted_value
+                );
+              } else {
+                proto_tree_add_double(ADD_FIELD_PARAMS, casted_value);
+              }
+            }
             break;
 
           case Sample_Field::String:
-            proto_tree_add_item(
-              params.tree, hf,
-              params.tvb, params.offset + sizeof(guint32),
-              *(reinterpret_cast< guint32 * >(params.data)),
-              ENC_UTF_8
-            );
+            // Length
+            ACE_CDR::ULong string_length;
+            params.serializer >> string_length;
+            // Data
+            ACE_CDR::Char * string_value;
+            string_value = new ACE_CDR::Char[string_length];
+            params.serializer.read_char_array(string_value, string_length);
+            len = params.buffer_pos() - location;
+
+            // Add to Tree
+            if (params.use_index) {
+              proto_tree_add_string_format_value(
+                ADD_FIELD_PARAMS,
+                string_value,
+                "%s[%u]: %s",
+                get_label().c_str(),
+                params.index,
+                string_value 
+              );
+            } else {
+              proto_tree_add_string(
+                ADD_FIELD_PARAMS, string_value 
+              );
+            }
+            delete [] string_value;
             break;
 
           case Sample_Field::WString:
+            // Length
+            ACE_CDR::ULong wstring_length;
+            params.serializer >> wstring_length;
+
+            // TODO
+            ACE_CDR::WChar throwaway;
+            for (unsigned i = 0; i < wstring_length; i++) {
+              params.serializer >> ACE_InputCDR::to_wchar(throwaway);
+            }
+            len = params.buffer_pos() - location;
+            /*
             proto_tree_add_item(
               params.tree, hf,
               params.tvb, params.offset + 4,
               Serializer::WCHAR_SIZE * *(reinterpret_cast< guint32 * >(params.data)),
               ENC_UTF_16
             );
+            */
             break;
 
           default:
-            proto_tree_add_bytes(
-              params.tree, hf,
-              params.tvb, params.offset, (gint)len,
-              params.data);
+            // TODO Figureout what to do here
             break;
           }
+
+          params.offset += len;
         }
       } else {
         push_ns(this->label_);
-        len = this->nested_->dissect_i(params, this->label_);
+        len = this->nested_->dissect_i(params);
         pop_ns();
       }
 
-      params.offset += (gint)len;
-      params.data += len;
       if (next_ != 0 && recur) {
-        len += next_->dissect_i(params, this->label_);
+        len += next_->dissect_i(params);
       }
       return len;
     }
@@ -598,7 +703,7 @@ namespace OpenDDS
           break;
 
         default:
-          add_protocol_field(FT_BYTES);
+          // TODO Handle Unknown Type
           break;
         }
       } else if (nested_ != NULL) {
@@ -609,6 +714,13 @@ namespace OpenDDS
       if (next_ != NULL) {
         next_->init_ws_fields();
       }
+    }
+
+    size_t
+    Sample_Field::compute_length(const Wireshark_Bundle & p) {
+      Wireshark_Bundle size_params(p);
+      size_params.get_size_only = true;
+      return dissect_i(size_params);
     }
 
     //------------------------------------------------------------------------
@@ -671,14 +783,12 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Dissector::dissect_i (Wireshark_Bundle_i &params,
-                                 const std::string &label)
-
+    Sample_Dissector::dissect_i (Wireshark_Bundle &params)
     {
-
-      size_t data_pos = 0;
-      guint8* data = params.get_remainder();
-      guint32 len = (guint32) field_->compute_length(data);
+      size_t len = 0;
+      if (!params.get_size_only) {
+        len = field_->compute_length(params);
+      }
 
       /*
       std::stringstream outstream;
@@ -691,51 +801,42 @@ namespace OpenDDS
             outstream << "[" << params.index << "] ";
         }
       */
-      if (field_ != 0)
-        {
-          Wireshark_Bundle_Field fp;
-          fp.tvb = params.tvb;
-          fp.info = params.info;
-          if (is_struct_ && !is_root_) {
-            proto_item *item = proto_tree_add_none_format(
-              params.tree, get_hf(), params.tvb, params.offset, (gint)len,
+
+      if (field_) {
+        proto_tree* keep_tree = params.tree;
+        if (is_struct_ && !is_root_) {
+          if (!params.get_size_only) {
+            int hf = get_hf();
+            // TODO HANDLE hf = -1
+            proto_item* item = proto_tree_add_none_format(
+              ADD_FIELD_PARAMS,
               get_label().c_str()
             );
-            fp.tree = proto_item_add_subtree(item, ett_);
-          } else {
-            fp.tree = params.tree;
-            if (is_root_) is_root_ = false;
+            params.tree = proto_item_add_subtree(item, ett_);
           }
-          fp.offset = params.offset;
-          fp.use_index = params.use_index;
-          fp.index = params.index;
-          fp.data = data;
-          data_pos += field_->dissect_i (fp, label);
+        } else {
+          if (is_root_) is_root_ = false;
         }
+        len = field_->dissect_i(params);
+        params.tree = keep_tree;
+      }
 
-      return data_pos;
+      return len;
     }
 
     size_t
-    Sample_Dissector::compute_length (guint8 *data)
-    {
-
-      return field_->compute_length (data);
+    Sample_Dissector::compute_length(const Wireshark_Bundle & p) {
+      Wireshark_Bundle size_params(p);
+      size_params.get_size_only = true;
+      return dissect_i(size_params);
     }
 
     gint
     Sample_Dissector::dissect (Wireshark_Bundle &params)
     {
-      Wireshark_Bundle_i sp;
-      sp.tvb = params.tvb;
-      sp.info = params.info;
-      sp.tree = params.tree;
-      sp.offset = params.offset;
-      sp.use_index = false;
-      sp.index = 0;
-      std::string label;
+      params.use_index = false;
       is_root_ = true;
-      return params.offset + (gint)this->dissect_i (sp, label);
+      return params.offset + (gint) this->dissect_i(params);
     }
 
     Sample_Field::IDLTypeID
@@ -746,19 +847,16 @@ namespace OpenDDS
       return field_->type_id_;
     }
 
-    std::string
-    Sample_Dissector::stringify (guint8 *data)
-    {
+    std::string Sample_Dissector::stringify(Wireshark_Bundle & p) {
       std::stringstream outstream;
-      if (field_ != 0)
-        {
-          field_->to_stream (outstream, data);
-        }
+      if (field_) {
+        field_->to_stream(outstream, p);
+      }
       return outstream.str();
     }
 
     void Sample_Dissector::init_ws_proto_tree() {
-      if (field_ != NULL) {
+      if (field_) {
         field_->init_ws_fields();
       }
     }
@@ -768,7 +866,7 @@ namespace OpenDDS
         add_protocol_field(FT_NONE);
         init("struct");
       }
-      if (field_ != NULL) {
+      if (field_) {
         field_->init_ws_fields();
       }
     }
@@ -795,53 +893,61 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Sequence::dissect_i (Wireshark_Bundle_i &params,
-                                const std::string &label)
+    Sample_Sequence::dissect_i (Wireshark_Bundle &params)
     {
-      guint8 *data = params.get_remainder();
-      guint32 len = (guint32)compute_length (data);
-      guint32 count = *(reinterpret_cast< guint32 * >(data));
+      size_t location = params.buffer_pos();
+      size_t len = 0;
+      if (!params.get_size_only) {
+        len = compute_length(params);
+      }
 
-      std::stringstream outstream;
-      if (params.use_index)
-        outstream << "[" << params.index << "] ";
-      outstream << "(length = " << count << ") ";
-      proto_item *item = proto_tree_add_uint_format_value(
-        params.tree, get_hf(), params.tvb, params.offset, (gint)len,
-        count, outstream.str().c_str()
-      );
-      proto_tree *subtree = proto_item_add_subtree (item, ett_);
+      // Get Count of Elements
+      ACE_CDR::ULong count;
+      params.serializer >> count;
+      size_t count_size = params.buffer_pos() - location;
+      if (params.get_size_only) {
+        len = count_size;
+      }
+      params.offset += count_size;
 
-      size_t data_pos = 4;
-      Wireshark_Bundle_i sp = params;
-      sp.tree = subtree;
+      // Add Item
+      proto_item *item;
+      if (!params.get_size_only) {
+        int hf = get_hf();
+        // TODO: HANDLE hf = -1
+        std::stringstream outstream;
+        if (params.use_index)
+          outstream << "[" << params.index << "] ";
+        outstream << "(length = " << count << ") ";
+        item = proto_tree_add_uint_format(
+          ADD_FIELD_PARAMS,
+          count, outstream.str().c_str()
+        );
+      }
+
+      // Push namespace and new tree
+      proto_tree* keep_tree;
+      if (!params.get_size_only) {
+        keep_tree = params.tree;
+        params.tree = proto_item_add_subtree(item, ett_);
+      }
       push_ns(element_namespace);
-      for (guint32 ndx = 0; ndx < count; ndx++)
-        {
-          sp.index = ndx;
-          sp.use_index = true;
-          sp.offset = params.offset + (gint)data_pos;
-          data_pos += element_->dissect_i (sp, label);
-        }
+
+      // Dissect Elements
+      size_t element_size = 0;
+      size_t all_elements_size = 0;
+      for (guint32 ndx = 0; ndx < count; ndx++) {
+        params.index = ndx;
+        params.use_index = true;
+        element_size = element_->dissect_i(params);
+        all_elements_size += element_size;
+      }
+
       pop_ns();
-      return data_pos;
-    }
-
-    size_t
-    Sample_Sequence::compute_length (guint8 *data)
-    {
-
-      size_t len = 4;
-      guint32 count = *(reinterpret_cast< guint32 * >(data));
-      data += 4;
-      while (count > 0)
-        {
-          size_t elen = element_->compute_length(data);
-          data += elen;
-          len += elen;
-          --count;
-        }
-
+      if (params.get_size_only) {
+        len += all_elements_size;
+      }
+      params.tree = keep_tree;
       return len;
     }
 
@@ -862,45 +968,53 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Array::dissect_i (Wireshark_Bundle_i &params, const std::string &label)
-    {
-      guint8 * data = params.get_remainder();
-      size_t len = compute_length(data);
+    Sample_Array::dissect_i(Wireshark_Bundle &params) {
+      size_t begin_field;
+      size_t len = 0;
+      if (params.get_size_only) {
+        begin_field = params.buffer_pos();
+      } else {
+        len = compute_length(params);
+      }
 
-      std::stringstream outstream;
-      if (params.use_index)
-        outstream << "[" << params.index << "] ";
-      outstream << "(length = " << count_ << ") ";
-      proto_item *item = proto_tree_add_uint_format_value(
-        params.tree, get_hf(), params.tvb, params.offset, (gint)len,
-        count_, outstream.str().c_str()
-      );
-      proto_tree *subtree = proto_item_add_subtree (item, ett_);
+      // Add Item
+      proto_item *item;
+      if (!params.get_size_only) {
+        int hf = get_hf();
+        // TODO: HANDLE hf = -1
+        std::stringstream outstream;
+        if (params.use_index)
+          outstream << "[" << params.index << "] ";
+        outstream << "(length = " << count_ << ") ";
+        item = proto_tree_add_uint_format(
+          ADD_FIELD_PARAMS,
+          count_, outstream.str().c_str()
+        );
+      }
 
-      size_t data_pos = 0;
-      Wireshark_Bundle_i sp = params;
-      sp.tree = subtree;
+      // Push namespace and new tree
+      proto_tree* keep_tree;
+      if (!params.get_size_only) {
+        keep_tree = params.tree;
+        params.tree = proto_item_add_subtree(item, ett_);
+      }
       push_ns(element_namespace);
+
+      // Dissect Elements
+      size_t element_size = 0;
+      size_t all_elements_size = 0;
       for (guint32 ndx = 0; ndx < count_; ndx++) {
-        sp.index = ndx;
-        sp.offset = params.offset + (gint)data_pos;
-        sp.use_index = true;
-        data_pos += element_->dissect_i(sp, label);
+        params.index = ndx;
+        params.use_index = true;
+        element_size = element_->dissect_i(params);
+        all_elements_size += element_size;
+      }
+
+      if (params.get_size_only) {
+        len += all_elements_size;
       }
       pop_ns();
-      return data_pos;
-    }
-
-    size_t
-    Sample_Array::compute_length (guint8 *data)
-    {
-      size_t len = 0;
-      for (guint32 i = 0; i < count_; i++) {
-        size_t elen = element_->compute_length(data);
-        data += elen;
-        len += elen;
-      }
-
+      params.tree = keep_tree;
       return len;
     }
 
@@ -932,14 +1046,27 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Enum::dissect_i (Wireshark_Bundle_i &params,
-                            const std::string &label)
+    Sample_Enum::dissect_i (Wireshark_Bundle &params)
     {
-      guint8 * data = params.get_remainder();
-      size_t len = 4;
-      guint32 value = *(reinterpret_cast< guint32 * >(data));
-      Sample_Field *sf = value_->get_link(value);
+      size_t begin_field;
+      size_t len = 0;
+      if (params.get_size_only) {
+        begin_field = params.buffer_pos();
+      } else {
+        len = compute_length(params);
+      }
 
+      // Get Enum Value
+      ACE_CDR::ULong value;
+      params.serializer >> value;
+      size_t value_size = params.buffer_pos() - begin_field;
+      params.offset += value_size;
+      if (params.get_size_only) {
+        return value_size;
+      }
+      Sample_Field* sf = value_->get_link(value);
+
+      // Add to Tree
       std::stringstream outstream;
       if (params.use_index)
         outstream << "[" << params.index << "] ";
@@ -947,16 +1074,11 @@ namespace OpenDDS
         outstream << "<value out of bounds: " << value << "> ";
       else
         outstream << sf->label_;
+      int hf = get_hf();
+      // TODO: HANDLE hf = -1
+      proto_tree_add_string(ADD_FIELD_PARAMS, outstream.str().c_str());
 
-      proto_tree_add_string(params.tree, get_hf(), params.tvb, params.offset,
-                           (gint)len, outstream.str().c_str());
       return len;
-    }
-
-    size_t
-    Sample_Enum::compute_length (guint8 *)
-    {
-      return 4;
     }
 
     bool
@@ -975,11 +1097,14 @@ namespace OpenDDS
     }
 
     std::string
-    Sample_Enum::stringify (guint8 *data)
+    Sample_Enum::stringify(Wireshark_Bundle & p)
     {
-      guint32 value = *(reinterpret_cast< guint32 * >(data));
-      Sample_Field *sf = value_->get_link (value);
+      size_t begin_field = p.buffer_pos();
+      ACE_CDR::ULong value;
+      p.serializer >> value;
+      p.offset += p.buffer_pos() - begin_field;
 
+      Sample_Field *sf = value_->get_link (value);
       if (sf) {
         return sf->label_;
       }
@@ -1027,58 +1152,37 @@ namespace OpenDDS
       this->default_ = value;
     }
 
-    size_t
-    Sample_Union::compute_length (guint8 *data)
-    {
-      size_t len = this->discriminator_->compute_length(data);
-      std::string _d = this->discriminator_->stringify(data);
+    size_t Sample_Union::dissect_i (Wireshark_Bundle &params) {
+      size_t len = discriminator_->compute_length(params);
+
+      // Get Union Value
       Sample_Field* value = this->default_;
+      std::string _d = discriminator_->stringify(params);
       MapType::const_iterator pos = map_.find(_d);
       if (pos != map_.end()) {
         value = pos->second;
       }
-      return len + value->compute_field_length(data + len);
-    }
 
-    size_t
-    Sample_Union::dissect_i (Wireshark_Bundle_i &params,
-                             const std::string &label)
-    {
-      guint8 * data = params.get_remainder();
-      size_t len = this->discriminator_->compute_length(data);
-      std::string _d = this->discriminator_->stringify(data);
-
-      size_t data_pos = len;
-      Sample_Field* value = this->default_;
-      MapType::const_iterator pos = map_.find(_d);
-      if (pos != map_.end()) {
-        value = pos->second;
+      proto_tree* subtree;
+      proto_tree* keep_tree = params.tree;
+      if (!params.get_size_only) {
+        std::stringstream outstream;
+        if (params.use_index)
+          outstream << "[" << params.index << "] ";
+        outstream << "(on " << _d << ") ";
+        int hf = get_hf();
+        // TODO: HANDLE hf = -1
+        proto_item* item = proto_tree_add_string_format_value(
+          ADD_FIELD_PARAMS,
+          _d.c_str(), outstream.str().c_str()
+        );
+        subtree = proto_item_add_subtree(item, ett_);
       }
-      len += value->compute_field_length (data + len);
 
-      std::stringstream outstream;
-      if (params.use_index)
-        outstream << "[" << params.index << "] ";
-      outstream << "(on " << _d << ") ";
+      len += value->dissect_i(params, false);
 
-      proto_item *item = proto_tree_add_string_format_value(
-        params.tree, get_hf(), params.tvb, params.offset, (gint)len,
-        _d.c_str(), outstream.str().c_str()
-      );
-      proto_tree *subtree = proto_item_add_subtree (item, ett_);
-
-      Wireshark_Bundle_Field fp;
-      fp.tvb = params.tvb;
-      fp.info = params.info;
-      fp.tree = subtree;
-      fp.offset = params.offset + (gint)data_pos;
-      fp.use_index = false;
-      fp.index = 0;
-      fp.data = data;
-
-      data_pos += value->dissect_i (fp, label, false);
-
-      return data_pos;
+      params.tree = keep_tree;
+      return len;
     }
 
     void Sample_Union::init_ws_fields() {
@@ -1096,9 +1200,9 @@ namespace OpenDDS
     }
 
     size_t
-    Sample_Alias::dissect_i (Wireshark_Bundle_i &p, const std::string &l)
+    Sample_Alias::dissect_i (Wireshark_Bundle &p)
     {
-      return base_->dissect_i (p, l);
+      return base_->dissect_i (p);
     }
 
     void Sample_Alias::init_ws_fields() {

@@ -10,6 +10,7 @@
 #include "tools/dissector/sample_manager.h"
 
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/Serializer.h"
 
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
@@ -466,7 +467,7 @@ namespace OpenDDS
     }
 
     // Try to gracefully handle a Seg Fault, give Wireshark a chance to
-    // finish it's business, and tell inform the user that their ITL file
+    // finish its business, and tell inform the user that their ITL file
     // is invalid
     void sample_dissect_handle_sigsegv(int signal) {
       ACE_DEBUG ((LM_DEBUG,
@@ -500,27 +501,28 @@ namespace OpenDDS
           return;
         }
 
-      if (header.cdr_encapsulation_)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "dissection of CDR-encapsulated data is not currently "
-                      "supported\n"));
-          offset += header.message_length_;
-          return;
-        }
-
-      if (header.byte_order_ != ACE_CDR_BYTE_ORDER)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "dissection of byte-swapped data is not currently "
-                      "supported\n"));
-          offset += header.message_length_;
-          return;
-        }
-
       GuidConverter converter(header.publication_id_);
+
+      if (header.cdr_encapsulation_) {
+        ACE_DEBUG ((LM_DEBUG,
+                    "DDS_Dissector::dissect_sample_payload: "
+                    "dissection of CDR-encapsulated data is not currently "
+                    "supported\n"));
+        offset += header.message_length_;
+
+        // Mark Packet
+        proto_tree_add_expert_format(
+          ltree,
+          pinfo_,
+          &ei_sample_payload,
+          tvb_,
+          offset,
+          (gint) header.message_length_,
+          "Dissecting CDR-encapsulated data is not currently supported.\n"
+        );
+
+        return;
+      }
 
       const char * data_name =
         InfoRepo_Dissector::instance().topic_for_pub(&header.publication_id_);
@@ -578,9 +580,8 @@ namespace OpenDDS
 
         offset += header.message_length_; // skip marshaled data
       } else {
-        Wireshark_Bundle params = {tvb_, pinfo_, contents_tree, offset};
-
         // Push DCPS Primary Data Type Namespace
+        // Convert, for example, "1::2::3" to "1.2.3"
         std::string ns;
         char c = 0xff;
         bool delimiter = false;
@@ -601,6 +602,21 @@ namespace OpenDDS
         }
         Sample_Base::push_ns(ns);
 
+        // Parameters to pass between the recursive dissect calls
+        guint8 * data = const_cast<guint8 *>(tvb_get_ptr(
+          tvb_, offset, header.message_length_
+        ));
+        size_t size = static_cast<size_t>(ws_tvb_length(tvb_) - offset);
+        Wireshark_Bundle params(
+          (char *) data, size,
+          header.byte_order_ != ACE_CDR_BYTE_ORDER,
+          Serializer::ALIGN_NONE // For now alignment is not supported
+        );
+        params.tvb = tvb_;
+        params.info = pinfo_;
+        params.tree = contents_tree;
+        params.offset = offset;
+
         /* 
          * Handle Seg Faults that might be caused by incorrect ITL file
          *
@@ -612,10 +628,11 @@ namespace OpenDDS
         bool handle = ACE_OS::getenv(ACE_TEXT("OPENDDS_DISSECTOR_SIGSEGV")) == 0;
         ACE_Sig_Action sig_act(sample_dissect_handle_sigsegv);
         if (handle) sig_act.register_action(SIGSEGV); // Handle Segfaults
-        offset = data_dissector->dissect(params); // Dissect Sample Payload
-        if (handle) sig_act.handler(SIG_DFL); // Restore default segfault behavior
 
-        // Clear Primary Data Type Namespace
+        offset = data_dissector->dissect(params); // Dissect Sample Payload
+
+        // Clean Up
+        if (handle) sig_act.handler(SIG_DFL); // Restore default segfault behavior
         Sample_Base::clear_ns();
       }
     }
@@ -688,7 +705,7 @@ namespace OpenDDS
       }
 
       // This was simplified from WS 1.x code,
-      // And modified to avoid adding
+      // And modified to avoid adding multiple DCPC subtrees to the packet tree
       if (pinfo_->ptype == PT_TCP)
       {
         // Compatibility Note: According to 1.x dissector,
