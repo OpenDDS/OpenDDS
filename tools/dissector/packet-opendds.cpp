@@ -603,9 +603,10 @@ namespace OpenDDS
         Sample_Base::push_ns(ns);
 
         // Parameters to pass between the recursive dissect calls
-        guint8 * data = const_cast<guint8 *>(tvb_get_ptr(
+        const guint8 * const_data = tvb_get_ptr(
           tvb_, offset, header.message_length_
-        ));
+        );
+        guint8 * data = const_cast<guint8 *>(const_data);
         size_t size = static_cast<size_t>(ws_tvb_length(tvb_) - offset);
         Wireshark_Bundle params(
           (char *) data, size,

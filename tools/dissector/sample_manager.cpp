@@ -190,7 +190,7 @@ namespace OpenDDS
           const rapidjson::Value& idl = (*note)["idl"];
           if (idl.IsObject() && idl.HasMember("type")) {
             const rapidjson::Value& type = idl["type"];
-            if (type.IsString() && type.GetString() == std::string("wchar")) {
+            if (type.IsString() && type.GetString() == std::string("wstring")) {
               dissector->add_field(new Sample_Field(Sample_Field::WString, ""));
               return;
             }

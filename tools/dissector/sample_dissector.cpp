@@ -36,7 +36,8 @@ namespace OpenDDS
       block(data, size),
       serializer(&block, swap_bytes, align)
     {
-      block.wr_ptr(data);
+      block.wr_ptr(data + size);
+      get_size_only = false;
     }
 
     Wireshark_Bundle::Wireshark_Bundle(const Wireshark_Bundle & other) :
@@ -47,7 +48,7 @@ namespace OpenDDS
         other.serializer.alignment()
       )
     {
-      block.wr_ptr(other.block.rd_ptr());
+      block.wr_ptr(other.block.wr_ptr() - other.block.rd_ptr());
 
       get_size_only = other.get_size_only;
       tvb = other.tvb;
@@ -319,13 +320,19 @@ namespace OpenDDS
 #define ADD_FIELD_PARAMS params.tree, hf, params.tvb, params.offset, (gint) len
     size_t
     Sample_Field::dissect_i (Wireshark_Bundle &params, bool recur) {
+      const char * wchar_error_msg = "Could not convert this wide character to from UTF-16BE to UTF-8";
+      const char * wstring_error_msg = "Could not convert this wide string to from UTF-16BE to UTF-8";
 
       size_t len = 0;
 
-      if (this->nested_) {
+      if (!this->nested_) {
 
-        int hf = get_hf();
-        if (hf == -1) {
+        int hf = -1;
+        if (!params.get_size_only) {
+           hf = get_hf();
+        }
+
+        if (hf == -1 && !params.get_size_only) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is not a registered wireshark field.\n"),
                      get_ns().c_str()));
           // TODO What to do after this
@@ -343,7 +350,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_boolean_format_value(
+                proto_tree_add_boolean_format(
                   ADD_FIELD_PARAMS, boolean_value,
                   "%s[%u]: %s", get_label().c_str(), params.index,
                   boolean_value ? "True" : "False"
@@ -360,7 +367,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_string_format_value(
+                proto_tree_add_string_format(
                   ADD_FIELD_PARAMS, &char_value,
                   "%s[%u]: %c", get_label().c_str(), params.index, char_value
                 );
@@ -374,22 +381,36 @@ namespace OpenDDS
             ACE_CDR::WChar wchar_value;
             params.serializer >> ACE_InputCDR::to_wchar(wchar_value);
             len = params.buffer_pos() - location;
-            /*
-            if (params.use_index) {
-              proto_tree_add_string_format_value(
-                ADD_FIELD_PARAMS, &wchar_value,
-                "%s[%u]: %lc",
-                get_label().c_str(),
-                params.index,
-                wchar_value
-              );
-            } else {
-              proto_tree_add_string_format(
-                ADD_FIELD_PARAMS, &wchar_value,
-                "%lc", wchar_value
-              );
+            if (!params.get_size_only) {
+              bool success = true;
+              GError * error = NULL;
+              gchar * wchar_ptr;
+              wchar_ptr = reinterpret_cast<gchar *>(&wchar_value);
+              char * utf8 = g_convert(wchar_ptr, sizeof(ACE_CDR::WChar), "UTF-8", "UTF-16", NULL, NULL, &error);
+              if (utf8 == NULL) {
+                success = false;
+              }
+              if (params.use_index) {
+                proto_tree_add_string_format(
+                  ADD_FIELD_PARAMS, success ? utf8 : "",
+                  "%s[%u]: %s",
+                  get_label().c_str(),
+                  params.index,
+                  success ? utf8 : wchar_error_msg 
+                );
+              } else {
+                proto_tree_add_string_format_value(
+                  ADD_FIELD_PARAMS, success ? utf8 : "",
+                  "%s", success ? utf8 : wchar_error_msg 
+                );
+              }
+              if (success) {
+                g_free(utf8);
+              } else {
+                ACE_DEBUG((LM_DEBUG, ACE_TEXT("WChar convertion failed: %s\n"), error->message));
+                g_clear_error(&error);
+              }
             }
-            */
             break;
 
           case Sample_Field::Octet:
@@ -398,7 +419,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_uint_format_value(
+                proto_tree_add_uint_format(
                   ADD_FIELD_PARAMS, octet_value,
                   "%s[%u]: %x", get_label().c_str(), params.index, octet_value
                 );
@@ -414,7 +435,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_int_format_value(
+                proto_tree_add_int_format(
                   ADD_FIELD_PARAMS, short_value,
                   "%s[%u]: %d", get_label().c_str(), params.index, short_value
                 );
@@ -430,7 +451,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_int_format_value(
+                proto_tree_add_int_format(
                   ADD_FIELD_PARAMS, long_value,
                   "%s[%u]: %d", get_label().c_str(), params.index, long_value
                 );
@@ -446,7 +467,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_int64_format_value(
+                proto_tree_add_int64_format(
                   ADD_FIELD_PARAMS, longlong_value,
                   "%s[%u]: %ld", get_label().c_str(), params.index,
                   longlong_value
@@ -463,7 +484,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_uint_format_value(
+                proto_tree_add_uint_format(
                   ADD_FIELD_PARAMS, ushort_value,
                   "%s[%u]: %u", get_label().c_str(), params.index,
                   ushort_value
@@ -480,7 +501,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_uint_format_value(
+                proto_tree_add_uint_format(
                   ADD_FIELD_PARAMS, ulong_value,
                   "%s[%u]: %u", get_label().c_str(), params.index,
                   ulong_value
@@ -497,7 +518,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_uint64_format_value(
+                proto_tree_add_uint64_format(
                   ADD_FIELD_PARAMS, ulonglong_value,
                   "%s[%u]: %lu", get_label().c_str(), params.index,
                   ulonglong_value
@@ -514,7 +535,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_float_format_value(
+                proto_tree_add_float_format(
                   ADD_FIELD_PARAMS, float_value,
                   "%s[%u]: %f", get_label().c_str(), params.index,
                   float_value
@@ -531,7 +552,7 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
-                proto_tree_add_double_format_value(
+                proto_tree_add_double_format(
                   ADD_FIELD_PARAMS, double_value,
                   "%s[%u]: %lf", get_label().c_str(), params.index,
                   double_value
@@ -550,7 +571,7 @@ namespace OpenDDS
               // Casting to double because ws doesn't support long double
               double casted_value = static_cast<double>(longdouble_value);
               if (params.use_index) {
-                proto_tree_add_double_format_value(
+                proto_tree_add_double_format(
                   ADD_FIELD_PARAMS, casted_value,
                   "%s[%u]: %lf", get_label().c_str(), params.index,
                   casted_value
@@ -572,19 +593,21 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
 
             // Add to Tree
-            if (params.use_index) {
-              proto_tree_add_string_format_value(
-                ADD_FIELD_PARAMS,
-                string_value,
-                "%s[%u]: %s",
-                get_label().c_str(),
-                params.index,
-                string_value 
-              );
-            } else {
-              proto_tree_add_string(
-                ADD_FIELD_PARAMS, string_value 
-              );
+            if (!params.get_size_only) {
+              if (params.use_index) {
+                proto_tree_add_string_format(
+                  ADD_FIELD_PARAMS,
+                  string_value,
+                  "%s[%u]: %s",
+                  get_label().c_str(),
+                  params.index,
+                  string_value 
+                );
+              } else {
+                proto_tree_add_string(
+                  ADD_FIELD_PARAMS, string_value 
+                );
+              }
             }
             delete [] string_value;
             break;
@@ -593,21 +616,37 @@ namespace OpenDDS
             // Length
             ACE_CDR::ULong wstring_length;
             params.serializer >> wstring_length;
+            len = params.buffer_pos() - location + wstring_length;
 
-            // TODO
-            ACE_CDR::WChar throwaway;
-            for (unsigned i = 0; i < wstring_length; i++) {
-              params.serializer >> ACE_InputCDR::to_wchar(throwaway);
+            // Data
+            if (!params.get_size_only) {
+              bool success = true;
+              GError * error = NULL;
+              char * utf8 = g_convert((char *) params.buffer_pos(), wstring_length, "UTF-8", "UTF-16BE", NULL, NULL, &error);
+              if (utf8 == NULL) {
+                success = false;
+              }
+              if (params.use_index) {
+                proto_tree_add_string_format(
+                  ADD_FIELD_PARAMS, success ? utf8 : "",
+                  "%s[%u]: %s",
+                  get_label().c_str(),
+                  params.index,
+                  success ? utf8 : wstring_error_msg 
+                );
+              } else {
+                proto_tree_add_string_format_value(
+                  ADD_FIELD_PARAMS, success ? utf8 : "",
+                  "%s", success ? utf8 : wstring_error_msg 
+                );
+              }
+              if (success) {
+                g_free(utf8);
+              } else {
+                ACE_DEBUG((LM_DEBUG, ACE_TEXT("WString convertion failed: %s\n"), error->message));
+                g_clear_error(&error);
+              }
             }
-            len = params.buffer_pos() - location;
-            /*
-            proto_tree_add_item(
-              params.tree, hf,
-              params.tvb, params.offset + 4,
-              Serializer::WCHAR_SIZE * *(reinterpret_cast< guint32 * >(params.data)),
-              ENC_UTF_16
-            );
-            */
             break;
 
           default:
@@ -790,35 +829,33 @@ namespace OpenDDS
         len = field_->compute_length(params);
       }
 
-      /*
-      std::stringstream outstream;
-      bool top_level = true;
-      if (!label.empty())
-        {
-          top_level = false;
-          outstream << label;
-          if (params.use_index)
-            outstream << "[" << params.index << "] ";
-        }
-      */
-
+      // Add Field and Dissect
       if (field_) {
+        bool prev_use_index = params.use_index;
         proto_tree* keep_tree = params.tree;
-        if (is_struct_ && !is_root_) {
-          if (!params.get_size_only) {
-            int hf = get_hf();
-            // TODO HANDLE hf = -1
-            proto_item* item = proto_tree_add_none_format(
-              ADD_FIELD_PARAMS,
-              get_label().c_str()
-            );
-            params.tree = proto_item_add_subtree(item, ett_);
-          }
+
+        if (is_struct_ && !is_root_ && !params.get_size_only) {
+          std::stringstream outstream;
+          outstream << get_label();
+          if (params.use_index)
+            outstream << "[" << params.index << "]";
+          int hf = get_hf();
+          // TODO HANDLE hf = -1
+          proto_item* item = proto_tree_add_none_format(
+            ADD_FIELD_PARAMS,
+            outstream.str().c_str()
+          );
+          params.tree = proto_item_add_subtree(item, ett_);
         } else {
           if (is_root_) is_root_ = false;
         }
+
+        // Dissect Child Field
+        params.use_index = false;
         len = field_->dissect_i(params);
+
         params.tree = keep_tree;
+        params.use_index = prev_use_index;
       }
 
       return len;
@@ -895,11 +932,12 @@ namespace OpenDDS
     size_t
     Sample_Sequence::dissect_i (Wireshark_Bundle &params)
     {
-      size_t location = params.buffer_pos();
       size_t len = 0;
       if (!params.get_size_only) {
         len = compute_length(params);
       }
+
+      size_t location = params.buffer_pos();
 
       // Get Count of Elements
       ACE_CDR::ULong count;
@@ -908,7 +946,6 @@ namespace OpenDDS
       if (params.get_size_only) {
         len = count_size;
       }
-      params.offset += count_size;
 
       // Add Item
       proto_item *item;
@@ -916,14 +953,17 @@ namespace OpenDDS
         int hf = get_hf();
         // TODO: HANDLE hf = -1
         std::stringstream outstream;
+        outstream << get_label();
         if (params.use_index)
-          outstream << "[" << params.index << "] ";
-        outstream << "(length = " << count << ") ";
+          outstream << "[" << params.index << "]";
+        outstream << " (length = " << count << ")";
         item = proto_tree_add_uint_format(
           ADD_FIELD_PARAMS,
           count, outstream.str().c_str()
         );
       }
+
+      params.offset += count_size;
 
       // Push namespace and new tree
       proto_tree* keep_tree;
@@ -934,6 +974,7 @@ namespace OpenDDS
       push_ns(element_namespace);
 
       // Dissect Elements
+      bool prev_use_index = params.use_index;
       size_t element_size = 0;
       size_t all_elements_size = 0;
       for (guint32 ndx = 0; ndx < count; ndx++) {
@@ -942,6 +983,7 @@ namespace OpenDDS
         element_size = element_->dissect_i(params);
         all_elements_size += element_size;
       }
+      params.use_index = prev_use_index;
 
       pop_ns();
       if (params.get_size_only) {
@@ -983,9 +1025,10 @@ namespace OpenDDS
         int hf = get_hf();
         // TODO: HANDLE hf = -1
         std::stringstream outstream;
+        outstream << get_label();
         if (params.use_index)
-          outstream << "[" << params.index << "] ";
-        outstream << "(length = " << count_ << ") ";
+          outstream << "[" << params.index << "]";
+        outstream << " (length = " << count_ << ")";
         item = proto_tree_add_uint_format(
           ADD_FIELD_PARAMS,
           count_, outstream.str().c_str()
@@ -1001,6 +1044,7 @@ namespace OpenDDS
       push_ns(element_namespace);
 
       // Dissect Elements
+      bool prev_use_index = params.use_index;
       size_t element_size = 0;
       size_t all_elements_size = 0;
       for (guint32 ndx = 0; ndx < count_; ndx++) {
@@ -1009,6 +1053,7 @@ namespace OpenDDS
         element_size = element_->dissect_i(params);
         all_elements_size += element_size;
       }
+      params.use_index = prev_use_index;
 
       if (params.get_size_only) {
         len += all_elements_size;
@@ -1163,13 +1208,14 @@ namespace OpenDDS
         value = pos->second;
       }
 
+      bool prev_use_index = params.use_index;
       proto_tree* subtree;
       proto_tree* keep_tree = params.tree;
       if (!params.get_size_only) {
         std::stringstream outstream;
         if (params.use_index)
           outstream << "[" << params.index << "] ";
-        outstream << "(on " << _d << ") ";
+        outstream << "(on " << _d << ")";
         int hf = get_hf();
         // TODO: HANDLE hf = -1
         proto_item* item = proto_tree_add_string_format_value(
@@ -1178,9 +1224,10 @@ namespace OpenDDS
         );
         subtree = proto_item_add_subtree(item, ett_);
       }
-
+      params.use_index = false;
       len += value->dissect_i(params, false);
 
+      params.use_index = prev_use_index;
       params.tree = keep_tree;
       return len;
     }
