@@ -18,6 +18,7 @@
 #include <ace/ACE.h>
 
 #include <cstring>
+#include <cstdint>
 
 #include <algorithm>
 #include <iomanip>
@@ -30,6 +31,63 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+
+    bool utf16_to_utf8(
+      std::string & to, ACE_CDR::WChar* from, size_t length = 1
+    ) {
+      size_t size = length * sizeof(ACE_CDR::WChar);
+      gchar* from_;
+
+#if ACE_SIZEOF_WCHAR == 4
+      /*
+       * We have to trim the extra 16 bits of zeros between the characters
+       * before we can pass it to glib's g_convert. Otherwise it will
+       * interpret them as NULL characters and stop after the first two bytes.
+       * g_convert doesn't respsect the size passed to it if it thinks it can
+       * keep going.
+       */
+      uint16_t* trimmed = NULL;
+      trimmed = new uint16_t[length + 1];
+      for (size_t i = 0; i < length; i++) {
+        trimmed[i] = from[i];
+      }
+      trimmed[length] = 0;
+      from_ = reinterpret_cast<gchar*>(trimmed);
+#else
+      from_ = reinterpret_cast<gchar*>(from);
+#endif
+
+      const char * error_msg = "UTF-16 to UTF-8 conversion failed: ";
+      GError * error = NULL;
+      gsize bytes_read = 0;
+      gsize bytes_written = 0;
+      char * utf8 = g_convert(
+        from_, size,
+        "UTF-8", "UTF-16", &bytes_read, &bytes_written, &error
+      );
+
+      if (utf8 != NULL) {
+        to = utf8;
+        g_free(utf8);
+      } else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s%s\n"),
+          error_msg,
+          error->message
+        ));
+        to = error_msg;
+        to += error->message;
+        g_clear_error(&error);
+      }
+
+#if ACE_SIZEOF_WCHAR == 4
+      if (trimmed != NULL) {
+        delete [] trimmed;
+      }
+#endif
+
+      return utf8 != NULL;
+    }
+
     Wireshark_Bundle::Wireshark_Bundle(
       char * data, size_t size, bool swap_bytes, Serializer::Alignment align
     ) :
@@ -197,6 +255,7 @@ namespace OpenDDS
 
     void Sample_Field::to_stream(std::stringstream &s, Wireshark_Bundle & p) {
       size_t location = p.buffer_pos();
+      std::string utf8;
 
       switch (this->type_id_) {
       case Char:
@@ -223,7 +282,8 @@ namespace OpenDDS
       case WChar:
         ACE_CDR::WChar wchar_value;
         p.serializer >> ACE_InputCDR::to_wchar(wchar_value);
-        s << wchar_value;
+        utf16_to_utf8(utf8, &wchar_value);
+        s << utf8;
         break;
 
       case Short:
@@ -281,29 +341,21 @@ namespace OpenDDS
         break;
 
       case String:
-        // Length
-        ACE_CDR::ULong string_length;
-        p.serializer >> string_length;
-        // Data
         ACE_CDR::Char * string_value;
-        string_value = new ACE_CDR::Char[string_length];
-        p.serializer.read_char_array(string_value, string_length);
+        string_value = NULL;
+        p.serializer.read_string(string_value);
         s << string_value;
         delete [] string_value;
         break;
 
       case WString:
-        // Length
-        ACE_CDR::ULong wstring_length;
-        p.serializer >> wstring_length;
-        
-        // Data
-        // TODO
+        size_t wstring_length;
         ACE_CDR::WChar * wstring_value;
-        wstring_value = new ACE_CDR::WChar[wstring_length];
-        p.serializer.read_wchar_array(wstring_value, wstring_length);
-        s << wstring_value;
+        wstring_value = NULL;
+        wstring_length = p.serializer.read_string(wstring_value);
+        utf16_to_utf8(utf8, wstring_value, wstring_length);
         delete [] wstring_value;
+        s << utf8;
         break;
 
       case Enumeration:
@@ -320,8 +372,6 @@ namespace OpenDDS
 #define ADD_FIELD_PARAMS params.tree, hf, params.tvb, params.offset, (gint) len
     size_t
     Sample_Field::dissect_i (Wireshark_Bundle &params, bool recur) {
-      const char * wchar_error_msg = "Could not convert this wide character to from UTF-16BE to UTF-8";
-      const char * wstring_error_msg = "Could not convert this wide string to from UTF-16BE to UTF-8";
 
       size_t len = 0;
 
@@ -335,8 +385,6 @@ namespace OpenDDS
         if (hf == -1 && !params.get_size_only) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is not a registered wireshark field.\n"),
                      get_ns().c_str()));
-          // TODO What to do after this
-
         } else {
 
           size_t location = params.buffer_pos();
@@ -352,8 +400,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_boolean_format(
                   ADD_FIELD_PARAMS, boolean_value,
-                  "%s[%u]: %s", get_label().c_str(), params.index,
-                  boolean_value ? "True" : "False"
+                  "[%u]: %s", params.index, boolean_value ? "True" : "False"
                 );
               } else {
                 proto_tree_add_boolean(ADD_FIELD_PARAMS, boolean_value);
@@ -369,7 +416,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS, &char_value,
-                  "%s[%u]: %c", get_label().c_str(), params.index, char_value
+                  "[%u]: %c", params.index, char_value
                 );
               } else {
                 proto_tree_add_string(ADD_FIELD_PARAMS, &char_value);
@@ -382,33 +429,18 @@ namespace OpenDDS
             params.serializer >> ACE_InputCDR::to_wchar(wchar_value);
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
-              bool success = true;
-              GError * error = NULL;
-              gchar * wchar_ptr;
-              wchar_ptr = reinterpret_cast<gchar *>(&wchar_value);
-              char * utf8 = g_convert(wchar_ptr, sizeof(ACE_CDR::WChar), "UTF-8", "UTF-16", NULL, NULL, &error);
-              if (utf8 == NULL) {
-                success = false;
-              }
+              std::string s;
+              utf16_to_utf8(s, &wchar_value);
               if (params.use_index) {
                 proto_tree_add_string_format(
-                  ADD_FIELD_PARAMS, success ? utf8 : "",
-                  "%s[%u]: %s",
-                  get_label().c_str(),
-                  params.index,
-                  success ? utf8 : wchar_error_msg 
+                  ADD_FIELD_PARAMS, s.c_str(),
+                  "[%u]: %s", params.index, s.c_str()
                 );
               } else {
                 proto_tree_add_string_format_value(
-                  ADD_FIELD_PARAMS, success ? utf8 : "",
-                  "%s", success ? utf8 : wchar_error_msg 
+                  ADD_FIELD_PARAMS, s.c_str(),
+                  s.c_str()
                 );
-              }
-              if (success) {
-                g_free(utf8);
-              } else {
-                ACE_DEBUG((LM_DEBUG, ACE_TEXT("WChar convertion failed: %s\n"), error->message));
-                g_clear_error(&error);
               }
             }
             break;
@@ -421,7 +453,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_uint_format(
                   ADD_FIELD_PARAMS, octet_value,
-                  "%s[%u]: %x", get_label().c_str(), params.index, octet_value
+                  "[%u]: %x", params.index, octet_value
                 );
               } else {
                 proto_tree_add_uint(ADD_FIELD_PARAMS, octet_value);
@@ -437,7 +469,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_int_format(
                   ADD_FIELD_PARAMS, short_value,
-                  "%s[%u]: %d", get_label().c_str(), params.index, short_value
+                  "[%u]: %d", params.index, short_value
                 );
               } else {
                 proto_tree_add_int(ADD_FIELD_PARAMS, short_value);
@@ -453,7 +485,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_int_format(
                   ADD_FIELD_PARAMS, long_value,
-                  "%s[%u]: %d", get_label().c_str(), params.index, long_value
+                  "[%u]: %d", params.index, long_value
                 );
               } else {
                 proto_tree_add_int(ADD_FIELD_PARAMS, long_value);
@@ -469,8 +501,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_int64_format(
                   ADD_FIELD_PARAMS, longlong_value,
-                  "%s[%u]: %ld", get_label().c_str(), params.index,
-                  longlong_value
+                  "[%u]: %ld", params.index, longlong_value
                 );
               } else {
                 proto_tree_add_int64(ADD_FIELD_PARAMS, longlong_value);
@@ -486,8 +517,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_uint_format(
                   ADD_FIELD_PARAMS, ushort_value,
-                  "%s[%u]: %u", get_label().c_str(), params.index,
-                  ushort_value
+                  "[%u]: %u", params.index, ushort_value
                 );
               } else {
                 proto_tree_add_uint(ADD_FIELD_PARAMS, ushort_value);
@@ -503,8 +533,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_uint_format(
                   ADD_FIELD_PARAMS, ulong_value,
-                  "%s[%u]: %u", get_label().c_str(), params.index,
-                  ulong_value
+                  "[%u]: %u", params.index, ulong_value
                 );
               } else {
                 proto_tree_add_uint(ADD_FIELD_PARAMS, ulong_value);
@@ -520,8 +549,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_uint64_format(
                   ADD_FIELD_PARAMS, ulonglong_value,
-                  "%s[%u]: %lu", get_label().c_str(), params.index,
-                  ulonglong_value
+                  "[%u]: %lu", params.index, ulonglong_value
                 );
               } else {
                 proto_tree_add_uint64(ADD_FIELD_PARAMS, ulonglong_value);
@@ -537,8 +565,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_float_format(
                   ADD_FIELD_PARAMS, float_value,
-                  "%s[%u]: %f", get_label().c_str(), params.index,
-                  float_value
+                  "[%u]: %f", params.index, float_value
                 );
               } else {
                 proto_tree_add_float(ADD_FIELD_PARAMS, float_value);
@@ -554,8 +581,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_double_format(
                   ADD_FIELD_PARAMS, double_value,
-                  "%s[%u]: %lf", get_label().c_str(), params.index,
-                  double_value
+                  "[%u]: %lf", params.index, double_value
                 );
               } else {
                 proto_tree_add_double(ADD_FIELD_PARAMS, double_value);
@@ -573,8 +599,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_double_format(
                   ADD_FIELD_PARAMS, casted_value,
-                  "%s[%u]: %lf", get_label().c_str(), params.index,
-                  casted_value
+                  "[%u]: %lf", params.index, casted_value
                 );
               } else {
                 proto_tree_add_double(ADD_FIELD_PARAMS, casted_value);
@@ -583,13 +608,10 @@ namespace OpenDDS
             break;
 
           case Sample_Field::String:
-            // Length
-            ACE_CDR::ULong string_length;
-            params.serializer >> string_length;
-            // Data
+            // Get String
             ACE_CDR::Char * string_value;
-            string_value = new ACE_CDR::Char[string_length];
-            params.serializer.read_char_array(string_value, string_length);
+            string_value = NULL;
+            params.serializer.read_string(string_value);
             len = params.buffer_pos() - location;
 
             // Add to Tree
@@ -598,14 +620,11 @@ namespace OpenDDS
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS,
                   string_value,
-                  "%s[%u]: %s",
-                  get_label().c_str(),
-                  params.index,
-                  string_value 
+                  "[%u]: %s", get_label().c_str(), params.index, string_value
                 );
               } else {
                 proto_tree_add_string(
-                  ADD_FIELD_PARAMS, string_value 
+                  ADD_FIELD_PARAMS, string_value
                 );
               }
             }
@@ -613,44 +632,33 @@ namespace OpenDDS
             break;
 
           case Sample_Field::WString:
-            // Length
-            ACE_CDR::ULong wstring_length;
-            params.serializer >> wstring_length;
-            len = params.buffer_pos() - location + wstring_length;
+            // Get String
+            size_t wstring_length;
+            ACE_CDR::WChar * wstring_value;
+            wstring_value = NULL;
+            wstring_length = params.serializer.read_string(wstring_value);
+            len = params.buffer_pos() - location;
 
-            // Data
+            // Add to Tree
             if (!params.get_size_only) {
-              bool success = true;
-              GError * error = NULL;
-              char * utf8 = g_convert((char *) params.buffer_pos(), wstring_length, "UTF-8", "UTF-16BE", NULL, NULL, &error);
-              if (utf8 == NULL) {
-                success = false;
-              }
+              // Get UTF8 Version of the String
+              std::string s;
+              utf16_to_utf8(s, wstring_value, wstring_length);
+
               if (params.use_index) {
                 proto_tree_add_string_format(
-                  ADD_FIELD_PARAMS, success ? utf8 : "",
-                  "%s[%u]: %s",
-                  get_label().c_str(),
-                  params.index,
-                  success ? utf8 : wstring_error_msg 
+                  ADD_FIELD_PARAMS, s.c_str(),
+                  "[%u]: %s", params.index, s.c_str()
                 );
               } else {
                 proto_tree_add_string_format_value(
-                  ADD_FIELD_PARAMS, success ? utf8 : "",
-                  "%s", success ? utf8 : wstring_error_msg 
+                  ADD_FIELD_PARAMS, s.c_str(),
+                  s.c_str()
                 );
               }
-              if (success) {
-                g_free(utf8);
-              } else {
-                ACE_DEBUG((LM_DEBUG, ACE_TEXT("WString convertion failed: %s\n"), error->message));
-                g_clear_error(&error);
-              }
             }
-            break;
 
-          default:
-            // TODO Figureout what to do here
+            delete [] wstring_value;
             break;
           }
 
@@ -670,7 +678,7 @@ namespace OpenDDS
 
     void Sample_Field::init_ws_fields() {
       if (label_.empty()) {
-        
+
         switch (type_id_) {
 
         case Sample_Field::Boolean:
@@ -728,7 +736,7 @@ namespace OpenDDS
           break;
 
         case Sample_Field::LongDouble:
-          // Long Doubles will be cast to doubles, resulting in possible 
+          // Long Doubles will be cast to doubles, resulting in possible
           // data loss if long doubles are larger than doubles.
           add_protocol_field(FT_DOUBLE);
           break;
@@ -739,10 +747,6 @@ namespace OpenDDS
 
         case Sample_Field::WString:
           add_protocol_field(FT_STRINGZ);
-          break;
-
-        default:
-          // TODO Handle Unknown Type
           break;
         }
       } else if (nested_ != NULL) {
@@ -832,29 +836,37 @@ namespace OpenDDS
       // Add Field and Dissect
       if (field_) {
         bool prev_use_index = params.use_index;
-        proto_tree* keep_tree = params.tree;
+        proto_tree* prev_tree = params.tree;
 
         if (is_struct_ && !is_root_ && !params.get_size_only) {
           std::stringstream outstream;
-          outstream << get_label();
-          if (params.use_index)
+          if (params.use_index) {
+            params.use_index = false;
             outstream << "[" << params.index << "]";
+          } else {
+            outstream << get_label();
+          }
           int hf = get_hf();
-          // TODO HANDLE hf = -1
-          proto_item* item = proto_tree_add_none_format(
-            ADD_FIELD_PARAMS,
-            outstream.str().c_str()
-          );
-          params.tree = proto_item_add_subtree(item, ett_);
+          if (hf == -1) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("%s is not a registered wireshark field.\n"),
+              get_ns().c_str())
+            );
+          } else {
+            proto_item* item = proto_tree_add_none_format(
+              ADD_FIELD_PARAMS,
+              outstream.str().c_str()
+            );
+            params.tree = proto_item_add_subtree(item, ett_);
+          }
         } else {
           if (is_root_) is_root_ = false;
         }
 
         // Dissect Child Field
-        params.use_index = false;
         len = field_->dissect_i(params);
 
-        params.tree = keep_tree;
+        params.tree = prev_tree;
         params.use_index = prev_use_index;
       }
 
@@ -949,26 +961,35 @@ namespace OpenDDS
 
       // Add Item
       proto_item *item;
+      int hf = -1;
       if (!params.get_size_only) {
-        int hf = get_hf();
-        // TODO: HANDLE hf = -1
-        std::stringstream outstream;
-        outstream << get_label();
-        if (params.use_index)
-          outstream << "[" << params.index << "]";
-        outstream << " (length = " << count << ")";
-        item = proto_tree_add_uint_format(
-          ADD_FIELD_PARAMS,
-          count, outstream.str().c_str()
-        );
+        hf = get_hf();
+        if (hf == -1) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("%s is not a registered wireshark field.\n"),
+            get_ns().c_str())
+          );
+        } else {
+          std::stringstream outstream;
+          if (params.use_index) {
+            outstream << "[" << params.index << "]";
+          } else {
+            outstream << get_label();
+          }
+          outstream << " (length = " << count << ")";
+          item = proto_tree_add_uint_format(
+            ADD_FIELD_PARAMS,
+            count, outstream.str().c_str()
+          );
+        }
       }
 
       params.offset += count_size;
 
       // Push namespace and new tree
-      proto_tree* keep_tree;
-      if (!params.get_size_only) {
-        keep_tree = params.tree;
+      proto_tree* prev_tree;
+      if (!(params.get_size_only || hf == -1)) {
+        prev_tree = params.tree;
         params.tree = proto_item_add_subtree(item, ett_);
       }
       push_ns(element_namespace);
@@ -983,13 +1004,15 @@ namespace OpenDDS
         element_size = element_->dissect_i(params);
         all_elements_size += element_size;
       }
-      params.use_index = prev_use_index;
-
-      pop_ns();
       if (params.get_size_only) {
         len += all_elements_size;
       }
-      params.tree = keep_tree;
+
+      // Cleanup
+      params.use_index = prev_use_index;
+      pop_ns();
+      params.tree = prev_tree;
+
       return len;
     }
 
@@ -1021,24 +1044,33 @@ namespace OpenDDS
 
       // Add Item
       proto_item *item;
+      int hf = -1;
       if (!params.get_size_only) {
-        int hf = get_hf();
-        // TODO: HANDLE hf = -1
-        std::stringstream outstream;
-        outstream << get_label();
-        if (params.use_index)
-          outstream << "[" << params.index << "]";
-        outstream << " (length = " << count_ << ")";
-        item = proto_tree_add_uint_format(
-          ADD_FIELD_PARAMS,
-          count_, outstream.str().c_str()
-        );
+        hf = get_hf();
+        if (hf == -1) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("%s is not a registered wireshark field.\n"),
+            get_ns().c_str())
+          );
+        } else {
+          std::stringstream outstream;
+          if (params.use_index) {
+            outstream << "[" << params.index << "]";
+          } else {
+            outstream << get_label();
+          }
+          outstream << " (length = " << count_ << ")";
+          item = proto_tree_add_uint_format(
+            ADD_FIELD_PARAMS,
+            count_, outstream.str().c_str()
+          );
+        }
       }
 
       // Push namespace and new tree
-      proto_tree* keep_tree;
-      if (!params.get_size_only) {
-        keep_tree = params.tree;
+      proto_tree* prev_tree;
+      if (!(params.get_size_only || hf == -1)) {
+        prev_tree = params.tree;
         params.tree = proto_item_add_subtree(item, ett_);
       }
       push_ns(element_namespace);
@@ -1053,13 +1085,15 @@ namespace OpenDDS
         element_size = element_->dissect_i(params);
         all_elements_size += element_size;
       }
-      params.use_index = prev_use_index;
-
       if (params.get_size_only) {
         len += all_elements_size;
       }
+
+      // Cleanup
+      params.use_index = prev_use_index;
       pop_ns();
-      params.tree = keep_tree;
+      params.tree = prev_tree;
+
       return len;
     }
 
@@ -1113,15 +1147,31 @@ namespace OpenDDS
 
       // Add to Tree
       std::stringstream outstream;
-      if (params.use_index)
-        outstream << "[" << params.index << "] ";
-      if (sf == 0)
+      std::string enum_label;
+      if (params.use_index) {
+        outstream << "[" << params.index << "]";
+      } else {
+        outstream << get_label();
+      }
+      outstream << ": ";
+      if (sf == 0) {
         outstream << "<value out of bounds: " << value << "> ";
-      else
+        enum_label = "INVALID VALUE";
+      } else {
         outstream << sf->label_;
+        enum_label = sf->label_;
+      }
       int hf = get_hf();
-      // TODO: HANDLE hf = -1
-      proto_tree_add_string(ADD_FIELD_PARAMS, outstream.str().c_str());
+      if (hf == -1) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("%s is not a registered wireshark field.\n"),
+          get_ns().c_str())
+        );
+      } else {
+        proto_tree_add_string_format(ADD_FIELD_PARAMS, enum_label.c_str(),
+          outstream.str().c_str()
+        );
+      }
 
       return len;
     }
@@ -1131,13 +1181,13 @@ namespace OpenDDS
     {
       result = 0;
       Sample_Field *iter = value_;
-      while (iter != 0)
-        {
-          if (iter->label_.compare (value) == 0)
-            return true;
-          result++;
-          iter = iter->next_;
+      while (iter != 0) {
+        if (iter->label_.compare (value) == 0) {
+          return true;
         }
+        result++;
+        iter = iter->next_;
+      }
       return false;
     }
 
@@ -1198,9 +1248,8 @@ namespace OpenDDS
     }
 
     size_t Sample_Union::dissect_i (Wireshark_Bundle &params) {
+      // Get Type
       size_t len = discriminator_->compute_length(params);
-
-      // Get Union Value
       Sample_Field* value = this->default_;
       std::string _d = discriminator_->stringify(params);
       MapType::const_iterator pos = map_.find(_d);
@@ -1208,34 +1257,51 @@ namespace OpenDDS
         value = pos->second;
       }
 
+      // Add Item
       bool prev_use_index = params.use_index;
-      proto_tree* subtree;
-      proto_tree* keep_tree = params.tree;
+      proto_tree* prev_tree = params.tree;
       if (!params.get_size_only) {
         std::stringstream outstream;
-        if (params.use_index)
-          outstream << "[" << params.index << "] ";
-        outstream << "(on " << _d << ")";
+        if (params.use_index) {
+          outstream << "[" << params.index << "]";
+        } else {
+          outstream << get_label();
+        }
+        outstream << " (on " << _d << ")";
         int hf = get_hf();
-        // TODO: HANDLE hf = -1
-        proto_item* item = proto_tree_add_string_format_value(
-          ADD_FIELD_PARAMS,
-          _d.c_str(), outstream.str().c_str()
-        );
-        subtree = proto_item_add_subtree(item, ett_);
+        if (hf == -1) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("%s is not a registered wireshark field.\n"),
+            get_ns().c_str())
+          );
+        } else {
+          proto_item* item = proto_tree_add_string_format(
+            ADD_FIELD_PARAMS,
+            _d.c_str(), outstream.str().c_str()
+          );
+          params.tree = proto_item_add_subtree(item, ett_);
+        }
       }
+      
+      // Dissect Value
       params.use_index = false;
       len += value->dissect_i(params, false);
 
+      // Cleanup
       params.use_index = prev_use_index;
-      params.tree = keep_tree;
+      params.tree = prev_tree;
+
       return len;
     }
 
     void Sample_Union::init_ws_fields() {
       add_protocol_field(FT_STRING);
-      if (field_ != NULL) field_->init_ws_fields();
-      if (default_ != NULL) default_->init_ws_fields();
+      if (field_ != NULL) {
+        field_->init_ws_fields();
+      }
+      if (default_ != NULL) {
+        default_->init_ws_fields();
+      }
     }
 
     //-----------------------------------------------------------------------
