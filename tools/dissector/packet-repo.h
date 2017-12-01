@@ -75,7 +75,7 @@ namespace OpenDDS
 
       static InfoRepo_Dissector& instance ();
 
-     virtual void init ();
+      virtual void init ();
       void register_handoff ();
 
       static bool assert_topic            (::MessageHeader *);

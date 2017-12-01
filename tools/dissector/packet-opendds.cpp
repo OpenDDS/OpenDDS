@@ -688,7 +688,17 @@ namespace OpenDDS
             this->dissect_sample_header (sample_tree, sample, offset);
 
             sample_tree = proto_item_add_subtree (item, ett_sample_header);
-            this->dissect_sample_payload (sample_tree, sample, offset);
+            try {
+              this->dissect_sample_payload (sample_tree, sample, offset);
+            } catch (Sample_Dissector_Error e) {
+              proto_tree_add_expert_format(
+                trans_tree, pinfo_, &ei_sample_payload,
+                tvb_, offset, -1, e.what()
+              );
+              ACE_DEBUG ((LM_DEBUG,
+                "DDS_Dissector::dissect_sample_payload: %s\n", e.what()
+              ));
+            }
 
           }
       }

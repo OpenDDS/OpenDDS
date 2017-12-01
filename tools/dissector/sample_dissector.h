@@ -25,6 +25,7 @@ extern "C" {
 
 #include <string>
 #include <map>
+#include <exception>
 
 #include <ace/Message_Block.h>
 
@@ -39,6 +40,24 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+
+    /// Thrown when there is a inconsistency in the sample dissection.
+    /// Packet should be marked by wireshark.
+    class Sample_Dissector_Error : public std::exception {
+    public:
+      Sample_Dissector_Error(const std::string & message) {
+        message_ = message;
+      }
+
+      const char* what() const throw (){
+        return message_.c_str();
+      }
+
+    private:
+      std::string message_;
+
+    };
+
     /// Bundle of Parameters passed between the recursive dissection calls.
     class Wireshark_Bundle {
     public:

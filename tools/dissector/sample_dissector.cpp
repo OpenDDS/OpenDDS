@@ -383,8 +383,9 @@ namespace OpenDDS
         }
 
         if (hf == -1 && !params.get_size_only) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s is not a registered wireshark field.\n"),
-                     get_ns().c_str()));
+          throw Sample_Dissector(
+            get_ns()  + " is not a registered wireshark field." 
+          );
         } else {
 
           size_t location = params.buffer_pos();
@@ -748,6 +749,11 @@ namespace OpenDDS
         case Sample_Field::WString:
           add_protocol_field(FT_STRINGZ);
           break;
+
+        default:
+          throw Sample_Dissector(
+            get_ns()  + " is not a valid Type Field." 
+          );
         }
       } else if (nested_ != NULL) {
         push_ns(label_);
@@ -848,9 +854,8 @@ namespace OpenDDS
           }
           int hf = get_hf();
           if (hf == -1) {
-            ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("%s is not a registered wireshark field.\n"),
-              get_ns().c_str())
+            throw Sample_Dissector(
+              get_ns()  + " is not a registered wireshark field." 
             );
           } else {
             proto_item* item = proto_tree_add_none_format(
@@ -965,9 +970,8 @@ namespace OpenDDS
       if (!params.get_size_only) {
         hf = get_hf();
         if (hf == -1) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("%s is not a registered wireshark field.\n"),
-            get_ns().c_str())
+          throw Sample_Dissector(
+            get_ns()  + " is not a registered wireshark field." 
           );
         } else {
           std::stringstream outstream;
@@ -1048,9 +1052,8 @@ namespace OpenDDS
       if (!params.get_size_only) {
         hf = get_hf();
         if (hf == -1) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("%s is not a registered wireshark field.\n"),
-            get_ns().c_str())
+          throw Sample_Dissector(
+            get_ns()  + " is not a registered wireshark field." 
           );
         } else {
           std::stringstream outstream;
@@ -1155,17 +1158,21 @@ namespace OpenDDS
       }
       outstream << ": ";
       if (sf == 0) {
-        outstream << "<value out of bounds: " << value << "> ";
-        enum_label = "INVALID VALUE";
+        outstream.str("");
+        outstream
+          << get_ns()
+          << " should be an enum but has an invalid discriminator: "
+          << value
+        ;
+        throw Sample_Dissector(outstream.str());
       } else {
         outstream << sf->label_;
         enum_label = sf->label_;
       }
       int hf = get_hf();
       if (hf == -1) {
-        ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("%s is not a registered wireshark field.\n"),
-          get_ns().c_str())
+        throw Sample_Dissector(
+          get_ns()  + " is not a registered wireshark field." 
         );
       } else {
         proto_tree_add_string_format(ADD_FIELD_PARAMS, enum_label.c_str(),
@@ -1270,9 +1277,8 @@ namespace OpenDDS
         outstream << " (on " << _d << ")";
         int hf = get_hf();
         if (hf == -1) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("%s is not a registered wireshark field.\n"),
-            get_ns().c_str())
+          throw Sample_Dissector(
+            get_ns()  + " is not a registered wireshark field." 
           );
         } else {
           proto_item* item = proto_tree_add_string_format(

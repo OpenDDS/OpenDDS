@@ -41,19 +41,13 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 0, 0)
 # define WS_GET_PDU_LEN_EXTRA_PARAM , void*
 # define WS_DISSECTOR_EXTRA_ARG , 0
-# define ws_tvb_length tvb_reported_length // TODO: Diff btwn tvb_reported_length and tvb_captured_length?
-inline proto_item* ws_proto_tree_add_text(proto_tree* tree, tvbuff_t* tvb, gint start,
-                                          gint length, const char* format, ...)
-{
-//TODO
-}
+# define ws_tvb_length tvb_reported_length
 #else
 # define NO_ITL // Disable Sample Dissection on Wireshark 1.x
 # define WS_1
 # define WS_GET_PDU_LEN_EXTRA_PARAM
 # define WS_DISSECTOR_EXTRA_ARG
 # define ws_tvb_length tvb_length
-# define ws_proto_tree_add_text proto_tree_add_text
 #endif
 #define WS_DISSECTOR_EXTRA_PARAM WS_GET_PDU_LEN_EXTRA_PARAM
 

@@ -205,8 +205,8 @@ namespace OpenDDS
     GIOP_Base::add_trans_info (int fieldId, int ett, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
-      proto_item *tf = ws_proto_tree_add_text (tree, tvb_, *offset_, -1,
-                                            "TransInfo");
+      proto_item *tf = proto_tree_add_none_format(
+        tree, fieldId, tvb_, *offset_, -1, "TransInfo");
       tree = proto_item_add_subtree (tf, ett);
       /*
         struct TransportInterfaceInfo {
@@ -250,8 +250,8 @@ namespace OpenDDS
 
        */
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
-      proto_item *tf = ws_proto_tree_add_text (tree, tvb_, *offset_, -1,
-                                            "TopicQos");
+      proto_item *tf = proto_tree_add_none_format(
+        tree, fieldId, tvb_, *offset_, -1, "TopicQos");
       tree = proto_item_add_subtree (tf, ett);
 
       int len = sizeof (TopicStatus);
