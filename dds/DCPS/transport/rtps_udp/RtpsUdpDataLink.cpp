@@ -45,6 +45,24 @@ bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
                   CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
 }
 
+bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
+{
+  for (CORBA::ULong i = 0; i < snSet.bitmap.length(); ++i) {
+    if (snSet.bitmap[i]) {
+      if (snSet.numBits >= (i + 1) * 32) {
+        return true;
+      }
+      for (int bit = 31; bit >= 0; --bit) {
+        if ((snSet.bitmap[i] & (1 << bit))
+            && snSet.numBits >= i * 32 + (31 - bit)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -1787,7 +1805,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   }
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
   // we don't need to do anything further.
-  if (!final) {
+  if (!final || bitmapNonEmpty(acknack.readerSNState)) {
     ri->second.requested_changes_.push_back(acknack.readerSNState);
   }
   process_acked_by_all_i(g, local);
