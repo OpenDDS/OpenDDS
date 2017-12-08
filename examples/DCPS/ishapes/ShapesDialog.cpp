@@ -52,7 +52,8 @@ static const std::string triangleTopicName("Triangle");
 
 
 ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
-                           const std::string& partition)
+                           const std::string& partition,
+                           int defaultSize)
   :   timer(this),
       participant_(participant),
       filterExpression_("(x BETWEEN %0 AND %1) AND (y BETWEEN %2 AND %3)")
@@ -153,8 +154,12 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
   color_[GRAY] = QColor(0x99, 0x99, 0x99);
   color_[BLACK] = QColor(0x33, 0x33, 0x33);
 
-  const int index = mainWidget.colorList->findText("Green");
+  const int index = mainWidget.colorList->findText("Orange");
   mainWidget.colorList->setCurrentIndex(index);
+
+  if (defaultSize) {
+    mainWidget.sizeSlider->setValue(defaultSize);
+  }
 
   timer.start(40);
 
