@@ -89,7 +89,7 @@ namespace OpenDDS
       hf_register_info * hf_array_ = NULL;
 
       /// Dynamic Field Names (Long and Short) to be deleted later
-      std::forward_list<char *> field_names_;  
+      std::forward_list<char *> field_names_;
 
       void init_from_file (const ACE_TCHAR *filename);
     };

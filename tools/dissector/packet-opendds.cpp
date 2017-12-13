@@ -442,12 +442,12 @@ namespace OpenDDS
                   DCPS::GuidConverter converter(filter);
                   std::stringstream strm;
                   std::string guid = strm.str();
-                  
+
                   // Get Entry Size
                   size = 0;
                   gen_find_size(filter, size, padding);
                   len = static_cast<gint>(size);
-                  
+
                   // Add to Wireshark
                   proto_tree_add_string_format_value(
                     subtree, hf_sample_content_filt_entries,
@@ -548,7 +548,7 @@ namespace OpenDDS
 
         return;
       }
-      
+
       // Set Payload Field/Tree
       proto_item * payload_item = proto_tree_add_string(
         ltree, hf_sample_payload, tvb_, offset,
@@ -618,7 +618,7 @@ namespace OpenDDS
         params.tree = contents_tree;
         params.offset = offset;
 
-        /* 
+        /*
          * Handle Seg Faults that might be caused by incorrect ITL file
          *
          * Check for environment variable $OPENDDS_DISSECTORS_SIGSEGV,

@@ -381,7 +381,7 @@ namespace OpenDDS
 
         if (hf == -1 && !params.get_size_only) {
           throw Sample_Dissector_Error(
-            get_ns()  + " is not a registered wireshark field." 
+            get_ns()  + " is not a registered wireshark field."
           );
         } else {
 
@@ -749,7 +749,7 @@ namespace OpenDDS
 
         default:
           throw Sample_Dissector_Error(
-            get_ns()  + " is not a valid Type Field." 
+            get_ns()  + " is not a valid Type Field."
           );
         }
       } else if (nested_ != NULL) {
@@ -852,7 +852,7 @@ namespace OpenDDS
           int hf = get_hf();
           if (hf == -1) {
             throw Sample_Dissector_Error(
-              get_ns()  + " is not a registered wireshark field." 
+              get_ns()  + " is not a registered wireshark field."
             );
           } else {
             proto_item* item = proto_tree_add_none_format(
@@ -968,7 +968,7 @@ namespace OpenDDS
         hf = get_hf();
         if (hf == -1) {
           throw Sample_Dissector_Error(
-            get_ns()  + " is not a registered wireshark field." 
+            get_ns()  + " is not a registered wireshark field."
           );
         } else {
           std::stringstream outstream;
@@ -1048,7 +1048,7 @@ namespace OpenDDS
         hf = get_hf();
         if (hf == -1) {
           throw Sample_Dissector_Error(
-            get_ns()  + " is not a registered wireshark field." 
+            get_ns()  + " is not a registered wireshark field."
           );
         } else {
           std::stringstream outstream;
@@ -1162,7 +1162,7 @@ namespace OpenDDS
       int hf = get_hf();
       if (hf == -1) {
         throw Sample_Dissector_Error(
-          get_ns()  + " is not a registered wireshark field." 
+          get_ns()  + " is not a registered wireshark field."
         );
       } else {
         proto_tree_add_string_format(ADD_FIELD_PARAMS, enum_label.c_str(),
@@ -1268,7 +1268,7 @@ namespace OpenDDS
         int hf = get_hf();
         if (hf == -1) {
           throw Sample_Dissector_Error(
-            get_ns()  + " is not a registered wireshark field." 
+            get_ns()  + " is not a registered wireshark field."
           );
         } else {
           proto_item* item = proto_tree_add_string_format(
@@ -1278,7 +1278,7 @@ namespace OpenDDS
           params.tree = proto_item_add_subtree(item, ett_);
         }
       }
-      
+
       // Dissect Value
       params.use_index = false;
       len += value->dissect_i(params, false);

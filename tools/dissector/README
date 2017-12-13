@@ -18,7 +18,7 @@ supported.
       <https://www.wireshark.org/docs/wsdg_html_chunked/>
   - doc/README.dissector located in the Wireshark source
       Has information not found in the Developer's Guide
-  - Wireshark Dissector API Doxygen 
+  - Wireshark Dissector API Doxygen
       <https://www.wireshark.org/docs/wsar_html/epan/modules.html>
 
 

@@ -87,7 +87,7 @@ namespace OpenDDS
       /// Actual Label to give to wireshark
       std::string label_;
       /// Wireshark Field Index
-      int hf_ = -1; 
+      int hf_ = -1;
     };
     typedef std::map<std::string, Field_Context*> Field_Contexts;
 
@@ -111,7 +111,7 @@ namespace OpenDDS
 
       /// Get hf for wireshark, returns -1 if there is no such context
       int get_hf();
-      
+
       /// Add sample field to register later
       void add_protocol_field(enum ftenum ft, field_display_e fd = BASE_NONE);
 
@@ -136,7 +136,7 @@ namespace OpenDDS
     /// Sample_Field decribes a single element of the sample. This can be
     /// a fixed length field, such as a short, long, etc. or variable length
     /// such as a string, enum, union, sequence, or another struct.
-    /// 
+    ///
     /// Fields are chained together to describe the layout of the sample in
     /// the data buffer
     class dissector_Export Sample_Field : public Sample_Base
@@ -189,8 +189,7 @@ namespace OpenDDS
       /// Sample_Dissector object for further evaluation.
       size_t dissect_i (Wireshark_Bundle &params, bool recur = true);
 
-      /// 
-      /// 
+      /// Compute the size of the field in bytes
       size_t compute_length(const Wireshark_Bundle & p);
 
       void to_stream(std::stringstream &s, Wireshark_Bundle & p);
