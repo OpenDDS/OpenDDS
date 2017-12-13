@@ -1066,7 +1066,7 @@ namespace OpenDDS
       }
 
       // Push namespace and new tree
-      proto_tree* prev_tree;
+      proto_tree* prev_tree = NULL;
       if (!(params.get_size_only || hf == -1)) {
         prev_tree = params.tree;
         params.tree = proto_item_add_subtree(item, ett_);
@@ -1075,12 +1075,11 @@ namespace OpenDDS
 
       // Dissect Elements
       bool prev_use_index = params.use_index;
-      size_t element_size = 0;
       size_t all_elements_size = 0;
       for (guint32 ndx = 0; ndx < count_; ndx++) {
         params.index = ndx;
         params.use_index = true;
-        element_size = element_->dissect_i(params);
+        size_t element_size = element_->dissect_i(params);
         all_elements_size += element_size;
       }
       if (params.get_size_only) {
@@ -1090,7 +1089,9 @@ namespace OpenDDS
       // Cleanup
       params.use_index = prev_use_index;
       pop_ns();
-      params.tree = prev_tree;
+      if (prev_tree) {
+        params.tree = prev_tree;
+      }
 
       return len;
     }
