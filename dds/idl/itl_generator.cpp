@@ -289,7 +289,7 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
   // Check if this is defined as a primary data type
                   << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
-                  << ((idl_global->is_dcps_type(name) == 0) ? "false" : "true")
+                  << (idl_global->is_dcps_type(name) ? "true" : "false")
                   << " },\n"
 
                   << Indent(this) << "\"type\" :\n"

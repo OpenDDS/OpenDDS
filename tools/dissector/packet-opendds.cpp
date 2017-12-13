@@ -621,7 +621,7 @@ namespace OpenDDS
         /* 
          * Handle Seg Faults that might be caused by incorrect ITL file
          *
-         * Check for enviromental variable $OPENDDS_DISSECTORS_SIGSEGV,
+         * Check for environment variable $OPENDDS_DISSECTORS_SIGSEGV,
          * If it exists don't handle seg faults.
          * Either way Wireshark will crash if the ITL file is the wrong type,
          * or technically inconsistent size.
@@ -690,7 +690,7 @@ namespace OpenDDS
             sample_tree = proto_item_add_subtree (item, ett_sample_header);
             try {
               this->dissect_sample_payload (sample_tree, sample, offset);
-            } catch (Sample_Dissector_Error e) {
+            } catch (Sample_Dissector_Error & e) {
               proto_tree_add_expert_format(
                 trans_tree, pinfo_, &ei_sample_payload,
                 tvb_, offset, -1, e.what()
@@ -715,14 +715,38 @@ namespace OpenDDS
         return false;
       }
 
-      // This was simplified from WS 1.x code,
-      // And modified to avoid adding multiple DCPC subtrees to the packet tree
-      if (pinfo_->ptype == PT_TCP)
-      {
-        // Compatibility Note: According to 1.x dissector,
-        // find_or_create_conversation didn't exist before WS 1.4.
-        conversation_t* conversation = ::find_or_create_conversation(pinfo_);
-        ::conversation_set_dissector(conversation, dcps_tcp_handle);
+      if ( pinfo_->ptype == PT_TCP )
+        {
+          // A converstion is used to keep track of a series of frames
+          // that carry data between a connected pair of TCP endpoints.
+
+          if (!pinfo_->fd->flags.visited)
+            {
+              // adapted this from the implementation of
+              // find_or_create_converation which was not available prior to
+              // 1.4.x wireshark.
+              conversation_t *conv =
+                ::find_conversation(pinfo_->fd->num,
+                                    &pinfo_->src, &pinfo_->dst,
+                                    pinfo_->ptype,
+                                    pinfo_->srcport,
+                                    pinfo_->destport, 0);
+              if (conv == 0)
+                {
+                  // this is a new conversation
+                  conv = ::conversation_new(pinfo_->fd->num,
+                                            &pinfo_->src, &pinfo_->dst,
+                                            pinfo_->ptype,
+                                            pinfo_->srcport,
+                                            pinfo_->destport, 0);
+                }
+              ::conversation_set_dissector(conv, dcps_tcp_handle);
+            }
+
+          /*
+           * dissect_dds() call removed to avoid adding multiple DCPS
+           * subtrees to the packet tree.
+           */
       } else {
         this->dissect();
       }

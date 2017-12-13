@@ -22,6 +22,7 @@
 #endif
 
 #include <cstring>
+#include <cstdlib>
 
 #include <algorithm>
 #include <iomanip>
@@ -267,10 +268,8 @@ namespace OpenDDS
         delete [] hf_array_;
       }
       // Free Dynamically Generated Field Names
-      char * ptr;
       while (!field_names_.empty()) {
-        ptr = field_names_.front();
-        free(ptr);
+        free(field_names_.front());
         field_names_.pop_front();
       }
     }
@@ -444,18 +443,18 @@ namespace OpenDDS
       enum ftenum ft, field_display_e fd
     ) {
       // Get copies of the names
-      char * _full_name = strdup(full_name.c_str());
-      char * _short_name = strdup(short_name.c_str());
+      char * full_name_copy = ACE_OS::strdup(full_name.c_str());
+      char * short_name_copy = ACE_OS::strdup(short_name.c_str());
 
       // Delete strings later
-      field_names_.push_front(_full_name);
-      field_names_.push_front(_short_name);
+      field_names_.push_front(full_name_copy);
+      field_names_.push_front(short_name_copy);
 
       // Push hf_info struct to hf_vector_
       hf_vector_.push_back({
         hf_index,
         {
-          _short_name, _full_name,
+          short_name_copy, full_name_copy,
           ft, fd,
           NULL, 0, NULL, HFILL
         }

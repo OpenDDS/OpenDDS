@@ -46,8 +46,7 @@ namespace OpenDDS
        * g_convert doesn't respsect the size passed to it if it thinks it can
        * keep going.
        */
-      uint16_t* trimmed = NULL;
-      trimmed = new uint16_t[length + 1];
+      uint16_t* trimmed = new uint16_t[length + 1];
       for (size_t i = 0; i < length; i++) {
         trimmed[i] = from[i];
       }
@@ -80,9 +79,7 @@ namespace OpenDDS
       }
 
 #if ACE_SIZEOF_WCHAR == 4
-      if (trimmed != NULL) {
-        delete [] trimmed;
-      }
+      delete [] trimmed;
 #endif
 
       return utf8 != NULL;
@@ -161,7 +158,7 @@ namespace OpenDDS
     void Sample_Base::rebuild_ns() {
       std::stringstream ss;
       for (std::list<std::string>::iterator i = ns_stack_.begin();
-        i != ns_stack_.end(); i++
+        i != ns_stack_.end(); ++i
       ) {
         ss << "." << *i;
       }
@@ -383,7 +380,7 @@ namespace OpenDDS
         }
 
         if (hf == -1 && !params.get_size_only) {
-          throw Sample_Dissector(
+          throw Sample_Dissector_Error(
             get_ns()  + " is not a registered wireshark field." 
           );
         } else {
@@ -751,7 +748,7 @@ namespace OpenDDS
           break;
 
         default:
-          throw Sample_Dissector(
+          throw Sample_Dissector_Error(
             get_ns()  + " is not a valid Type Field." 
           );
         }
@@ -854,7 +851,7 @@ namespace OpenDDS
           }
           int hf = get_hf();
           if (hf == -1) {
-            throw Sample_Dissector(
+            throw Sample_Dissector_Error(
               get_ns()  + " is not a registered wireshark field." 
             );
           } else {
@@ -970,7 +967,7 @@ namespace OpenDDS
       if (!params.get_size_only) {
         hf = get_hf();
         if (hf == -1) {
-          throw Sample_Dissector(
+          throw Sample_Dissector_Error(
             get_ns()  + " is not a registered wireshark field." 
           );
         } else {
@@ -991,7 +988,7 @@ namespace OpenDDS
       params.offset += count_size;
 
       // Push namespace and new tree
-      proto_tree* prev_tree;
+      proto_tree* prev_tree = NULL;
       if (!(params.get_size_only || hf == -1)) {
         prev_tree = params.tree;
         params.tree = proto_item_add_subtree(item, ett_);
@@ -1000,12 +997,11 @@ namespace OpenDDS
 
       // Dissect Elements
       bool prev_use_index = params.use_index;
-      size_t element_size = 0;
       size_t all_elements_size = 0;
       for (guint32 ndx = 0; ndx < count; ndx++) {
         params.index = ndx;
         params.use_index = true;
-        element_size = element_->dissect_i(params);
+        size_t element_size = element_->dissect_i(params);
         all_elements_size += element_size;
       }
       if (params.get_size_only) {
@@ -1015,7 +1011,9 @@ namespace OpenDDS
       // Cleanup
       params.use_index = prev_use_index;
       pop_ns();
-      params.tree = prev_tree;
+      if (prev_tree) {
+        params.tree = prev_tree;
+      }
 
       return len;
     }
@@ -1038,11 +1036,8 @@ namespace OpenDDS
 
     size_t
     Sample_Array::dissect_i(Wireshark_Bundle &params) {
-      size_t begin_field;
       size_t len = 0;
       if (params.get_size_only) {
-        begin_field = params.buffer_pos();
-      } else {
         len = compute_length(params);
       }
 
@@ -1052,7 +1047,7 @@ namespace OpenDDS
       if (!params.get_size_only) {
         hf = get_hf();
         if (hf == -1) {
-          throw Sample_Dissector(
+          throw Sample_Dissector_Error(
             get_ns()  + " is not a registered wireshark field." 
           );
         } else {
@@ -1130,21 +1125,15 @@ namespace OpenDDS
     size_t
     Sample_Enum::dissect_i (Wireshark_Bundle &params)
     {
-      size_t begin_field;
-      size_t len = 0;
-      if (params.get_size_only) {
-        begin_field = params.buffer_pos();
-      } else {
-        len = compute_length(params);
-      }
+      size_t begin_field = params.buffer_pos();
 
       // Get Enum Value
       ACE_CDR::ULong value;
       params.serializer >> value;
-      size_t value_size = params.buffer_pos() - begin_field;
-      params.offset += value_size;
+      size_t len = params.buffer_pos() - begin_field;
+      params.offset += len;
       if (params.get_size_only) {
-        return value_size;
+        return len;
       }
       Sample_Field* sf = value_->get_link(value);
 
@@ -1164,14 +1153,14 @@ namespace OpenDDS
           << " should be an enum but has an invalid discriminator: "
           << value
         ;
-        throw Sample_Dissector(outstream.str());
+        throw Sample_Dissector_Error(outstream.str());
       } else {
         outstream << sf->label_;
         enum_label = sf->label_;
       }
       int hf = get_hf();
       if (hf == -1) {
-        throw Sample_Dissector(
+        throw Sample_Dissector_Error(
           get_ns()  + " is not a registered wireshark field." 
         );
       } else {
@@ -1277,7 +1266,7 @@ namespace OpenDDS
         outstream << " (on " << _d << ")";
         int hf = get_hf();
         if (hf == -1) {
-          throw Sample_Dissector(
+          throw Sample_Dissector_Error(
             get_ns()  + " is not a registered wireshark field." 
           );
         } else {
