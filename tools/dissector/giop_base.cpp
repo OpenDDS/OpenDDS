@@ -140,10 +140,7 @@ namespace OpenDDS
     conversation_t *
     GIOP_Base::find_conversation()
     {
-      return ::find_conversation (pinfo_->fd->num,
-                                  &pinfo_->src, &pinfo_->dst,
-                                  pinfo_->ptype, pinfo_->srcport,
-                                  pinfo_->destport, 0);
+      return ws_find_conversation(pinfo_);
     }
 
     void

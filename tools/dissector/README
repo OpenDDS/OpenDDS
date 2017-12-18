@@ -70,13 +70,15 @@ according to the Wireshark Developer's Guide (see above).
    Linux and Solaris:
      To install it system wide:
        export WIRESHARK_ROOT=<path to the Wireshark installation root directory>
-       cp OpenDDS_Dissector.so* $WIRESHARK_ROOT/lib/wireshark/plugins/<ws-vers>/
+       sudo cp OpenDDS_Dissector.so* $WIRESHARK_ROOT/lib/wireshark/plugins/<ws-vers>/
 
-     To install it for the current user:
-       Wireshark 2.2 and after:
-         cp OpenDDS_Dissector.so* ~/.wireshark/plugins
-       Wireshark 2.1 and before:
+     To install it for current user:
+       Wireshark 2.5 and after:
+         cp OpenDDS_Dissector.so* ~/.local/lib/wireshark/plugins
+       Wireshark 2.2 and 2.4:
          cp OpenDDS_Dissector.so* $XDG_CONFIG_HOME/wireshark/plugins
+       Wireshark 2.1 and before:
+         cp OpenDDS_Dissector.so* ~/.wireshark/plugins
 
    Windows:
      The default Wireshark install directory is the wireshark-gtk2
@@ -84,6 +86,9 @@ according to the Wireshark Developer's Guide (see above).
      copy OpenDDS_Dissector.dll <full path to the Wireshark install>\plugins\<version>\
      -or-
      copy OpenDDS_Dissectord.dll <full path to the Wireshark install>\plugins\<version>\
+
+   See <https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html>
+   for macOS and other details on where Wireshark looks for plugins.
 
 6. Run Wireshark
 
@@ -192,8 +197,7 @@ NOTE: Coloring rules are applied on a first match basis; you may need to
 
 * Sample Dissectors
 
-Wireshark 2 can be configured to dissect sample data. Sample
-payload dissection has been dropped for Wireshark 1.
+Wireshark 2 can be configured to dissect sample data.
 
 1. Export type information using the OpenDDS IDL compiler.  The
    command "opendds_idl -Gitl <filename>.idl" will produce a file
@@ -250,11 +254,9 @@ Possible Considerations:
 
   - Wide Strings and Chars are assumed to be UTF-16BE and are
     converted to UTF-16 by the DCPS Serializer and to UTF-8
-    using glib's g_convert which uses on incov. Unlike Char, WChar is
-    presented to Wireshark as a string. Strings that are invalid
-    UTF-16 are replaced by a message saying that it was invalid
-    and what kind of problem incov had with it.
-
+    using glib's g_convert which uses incov. Strings that are
+    invalid UTF-16 are replaced by a message saying that it was
+    invalid and what kind of problem incov had with it.
 
 ======================================================================
 * Known Limitations

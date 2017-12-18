@@ -24,8 +24,13 @@ extern "C" {
 #include <fstream>
 
 #ifndef ACE_AS_STATIC_LIBS
-extern "C"
-dissector_Export const gchar version[] = DDS_VERSION;
+
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 5, 0)
+  extern "C" dissector_Export const gchar plugin_version[] = DDS_VERSION;
+  extern "C" dissector_Export const gchar plugin_release[] = VERSION_RELEASE;
+#else
+  extern "C"dissector_Export const gchar version[] = DDS_VERSION;
+#endif
 
 extern "C"
 dissector_Export void

@@ -618,7 +618,7 @@ namespace OpenDDS
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS,
                   string_value,
-                  "[%u]: %s", get_label().c_str(), params.index, string_value
+                  "[%u]: %s", params.index, string_value
                 );
               } else {
                 proto_tree_add_string(
@@ -683,22 +683,16 @@ namespace OpenDDS
           add_protocol_field(FT_BOOLEAN);
           break;
 
-/* Apparently FT_CHAR is not defined in Wireshark 1.x
- * So this ifdef must be put here to allow the dissector to compile under
- * Wireshark 1 even though it's never going to run this.
- */
-#ifndef WS_1
         case Sample_Field::Char:
-          add_protocol_field(FT_CHAR);
+          add_protocol_field(FT_STRING);
           break;
-#endif
 
         case Sample_Field::Octet:
           add_protocol_field(FT_UINT8, BASE_HEX);
           break;
 
         case Sample_Field::WChar:
-          add_protocol_field(FT_STRINGZ);
+          add_protocol_field(FT_STRING);
           break;
 
         case Sample_Field::Short:

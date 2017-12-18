@@ -33,8 +33,10 @@ extern "C" {
 #include "tools/dissector/ws_common.h"
 
 extern "C" {
-#ifndef WS_1
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 4, 0)
 #include <wsutil/report_message.h>
+#else
+#include <wsutil/report_err.h>
 #endif
 }
 

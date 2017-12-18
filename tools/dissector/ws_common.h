@@ -11,6 +11,40 @@
 MAJOR * 1000000 + MINOR * 1000 + MICRO
 #define WIRESHARK_VERSION WIRESHARK_VERSION_NUMBER(VERSION_MAJOR,VERSION_MINOR,VERSION_MICRO)
 
+
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 5, 0)
+// find_conversation after 2.5/2.6 takes endpoint_type instead of port_type
+// but also provides a shortcut function which we will use instead.
+inline conversation_t *ws_find_conversation(packet_info *pinfo) {
+  return find_conversation_pinfo(pinfo, 0);
+}
+#else // if 2.4.x or before
+inline conversation_t *ws_find_conversation(packet_info *pinfo) {
+  return find_conversation(
+    pinfo->fd->num, &pinfo->src, &pinfo->dst,
+    pinfo->ptype, pinfo->srcport, pinfo->destport, 0
+  );
+}
+#endif
+
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1,4,0)
+// 1.4 introduced find_or_create_conversation
+inline conversation_t *ws_find_or_create_conversation(packet_info *pinfo) {
+  return find_or_create_conversation(pinfo);
+}
+#else // if 1.3.x or before
+inline conversation_t *ws_find_or_create_conversation(packet_info *pinfo) {
+  conversation_t *conv = NULL;
+  if (!(conv = ws_find_conversation(pinfo))) {
+    conv = conversation_new(
+      pinfo->num, &pinfo->src, &pinfo->dst,
+      pinfo->ptype, pinfo->srcport, pinfo->destport, 0
+    );
+  }
+  return conv;
+}
+#endif
+
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 2, 0)
 inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
                                  gint offset, gint length)
@@ -25,31 +59,34 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 # define WS_DISSECTOR_RETURN_TYPE int
 # define WS_DISSECTOR_RETURN_VALUE return 0; //TODO
 # define ws_dissector_add_handle dissector_add_for_decode_as
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS1(ucase, lcase) \
-  "OpenDDS over " #ucase, "opendds_" #lcase,
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS2 , HEURISTIC_ENABLE
 # define WS_CONV_IDX conv_index
+// create_dissector_handle wants the new dissector_t here
+#define WS_DISSECTOR_EXTRA_PARAM , void*
 #else
 # define WS_DISSECTOR_RETURN_TYPE void
 # define WS_DISSECTOR_RETURN_VALUE
 # define ws_dissector_add_handle dissector_add_handle
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS1(A, B)
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS2
 # define WS_CONV_IDX index
+#define WS_DISSECTOR_EXTRA_PARAM
 #endif
 
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 0, 0)
-# define WS_GET_PDU_LEN_EXTRA_PARAM , void*
 # define WS_DISSECTOR_EXTRA_ARG , 0
 # define ws_tvb_length tvb_reported_length
+#define WS_DISSECTOR_T_EXTRA_PARAM ,void*
+# define WS_GET_PDU_LEN_EXTRA_PARAM , void*
+# define WS_HEUR_DISSECTOR_EXTRA_ARGS1(ucase, lcase) \
+  "OpenDDS over " #ucase, "opendds_" #lcase,
+# define WS_HEUR_DISSECTOR_EXTRA_ARGS2 , HEURISTIC_ENABLE
 #else
-# define NO_ITL // Disable Sample Dissection on Wireshark 1.x
 # define WS_1
-# define WS_GET_PDU_LEN_EXTRA_PARAM
 # define WS_DISSECTOR_EXTRA_ARG
 # define ws_tvb_length tvb_length
+#define WS_DISSECTOR_T_EXTRA_PARAM
+# define WS_GET_PDU_LEN_EXTRA_PARAM
+# define WS_HEUR_DISSECTOR_EXTRA_ARGS1(A, B)
+# define WS_HEUR_DISSECTOR_EXTRA_ARGS2
 #endif
-#define WS_DISSECTOR_EXTRA_PARAM WS_GET_PDU_LEN_EXTRA_PARAM
 
 #if (WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1,12,0) )
 inline guint8 *ws_tvb_get_ephemeral_string(tvbuff_t *tvb, const gint offset, const gint length) {
@@ -59,9 +96,9 @@ inline void *ws_ep_tvb_memdup(tvbuff_t *tvb, const gint offset, size_t remainder
   return ::tvb_memdup(wmem_packet_scope(), tvb, offset, remainder);
 }
 #define WS_TCP_DISSECT_PDUS_EXTRA_ARG ,0
-#define WS_DISSECTOR_T_EXTRA_PARAM ,void*
 #define WS_DISSECTOR_T_RETURN_TYPE int
 #define WS_DISSECTOR_T_RETURN_TYPE_INT
+#define WS_DISSECTOR_T_EXTRA_PARAM ,void*
 #else
 inline guint8 *ws_tvb_get_ephemeral_string(tvbuff_t *tvb, const gint offset, const gint length) {
   return ::tvb_get_ephemeral_string(tvb, offset, length);
@@ -70,8 +107,8 @@ inline void *ws_ep_tvb_memdup(tvbuff_t *tvb, const gint offset, size_t remainder
   return ::ep_tvb_memdup(tvb, offset, remainder);
 }
 #define WS_TCP_DISSECT_PDUS_EXTRA_ARG
-#define WS_DISSECTOR_T_EXTRA_PARAM
 #define WS_DISSECTOR_T_RETURN_TYPE void
+#define WS_DISSECTOR_T_EXTRA_PARAM
 #endif
 
 #if (WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1,8,0) )

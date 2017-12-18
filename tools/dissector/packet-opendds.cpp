@@ -479,14 +479,12 @@ namespace OpenDDS
         "same type."
         "\n"
       ));
-#ifndef WS_1
       report_failure(
         "There has been a fatal error in the OpenDDS Dissector:\n"
         "There is a pointer bug in the sample dissector or the ITL "
         "file provided matched the type name but does not actually have the "
         "same type."
       );
-#endif
       exit(EXIT_FAILURE);
     }
 
@@ -715,38 +713,8 @@ namespace OpenDDS
         return false;
       }
 
-      if ( pinfo_->ptype == PT_TCP )
-        {
-          // A converstion is used to keep track of a series of frames
-          // that carry data between a connected pair of TCP endpoints.
-
-          if (!pinfo_->fd->flags.visited)
-            {
-              // adapted this from the implementation of
-              // find_or_create_converation which was not available prior to
-              // 1.4.x wireshark.
-              conversation_t *conv =
-                ::find_conversation(pinfo_->fd->num,
-                                    &pinfo_->src, &pinfo_->dst,
-                                    pinfo_->ptype,
-                                    pinfo_->srcport,
-                                    pinfo_->destport, 0);
-              if (conv == 0)
-                {
-                  // this is a new conversation
-                  conv = ::conversation_new(pinfo_->fd->num,
-                                            &pinfo_->src, &pinfo_->dst,
-                                            pinfo_->ptype,
-                                            pinfo_->srcport,
-                                            pinfo_->destport, 0);
-                }
-              ::conversation_set_dissector(conv, dcps_tcp_handle);
-            }
-
-          /*
-           * dissect_dds() call removed to avoid adding multiple DCPS
-           * subtrees to the packet tree.
-           */
+      if ( pinfo_->ptype == PT_TCP ) {
+        conversation_set_dissector(ws_find_or_create_conversation(pinfo_), dcps_tcp_handle);
       } else {
         this->dissect();
       }
