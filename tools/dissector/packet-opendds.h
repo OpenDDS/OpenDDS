@@ -21,7 +21,6 @@ extern "C" {
 #include <epan/ipproto.h>
 #include <epan/packet.h>
 #include <epan/dissectors/packet-tcp.h>
-#include <epan/expert.h>
   //#include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
@@ -35,8 +34,14 @@ extern "C" {
 extern "C" {
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 4, 0)
 #include <wsutil/report_message.h>
-#else
+#elif WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1, 12, 0)
 #include <wsutil/report_err.h>
+#else // Before 1.12
+#include <epan/report_err.h>
+#endif
+
+#ifndef NO_EXPERT
+#include <epan/expert.h>
 #endif
 }
 

@@ -94,8 +94,10 @@ int hf_sample_flags2_cdr_encap  = -1;
 int hf_sample_flags2_key_only   = -1;
 // Payload IDL Type, ex "Messenger::Message"
 int hf_sample_payload = -1;
+#ifndef NO_EXPERT
 // Payload "Expert" Error Field
 expert_field ei_sample_payload = EI_INIT;
+#endif
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -509,6 +511,7 @@ namespace OpenDDS
         offset += header.message_length_;
 
         // Mark Packet
+#ifndef NO_EXPERT
         proto_tree_add_expert_format(
           ltree,
           pinfo_,
@@ -518,6 +521,7 @@ namespace OpenDDS
           (gint) header.message_length_,
           "Dissecting CDR-encapsulated data is not currently supported.\n"
         );
+#endif
 
         return;
       }
@@ -533,6 +537,7 @@ namespace OpenDDS
         offset += header.message_length_; // skip marshaled data
 
         // Mark Packet
+#ifndef NO_EXPERT
         proto_tree_add_expert_format(
           ltree,
           pinfo_,
@@ -543,6 +548,7 @@ namespace OpenDDS
           "No Topic Found for %s \n",
           std::string(converter).c_str()
         );
+#endif
 
         return;
       }
@@ -565,6 +571,7 @@ namespace OpenDDS
                     data_name));
 
         // Mark Packet
+#ifndef NO_EXPERT
         proto_tree_add_expert_format(
           ltree,
           pinfo_,
@@ -575,6 +582,7 @@ namespace OpenDDS
           "No Dissector Found for %s \n",
           data_name
         );
+#endif
 
         offset += header.message_length_; // skip marshaled data
       } else {
@@ -689,10 +697,12 @@ namespace OpenDDS
             try {
               this->dissect_sample_payload (sample_tree, sample, offset);
             } catch (Sample_Dissector_Error & e) {
+#ifndef NO_EXPERT
               proto_tree_add_expert_format(
                 trans_tree, pinfo_, &ei_sample_payload,
                 tvb_, offset, -1, e.what()
               );
+#endif
               ACE_DEBUG ((LM_DEBUG,
                 "DDS_Dissector::dissect_sample_payload: %s\n", e.what()
               ));
@@ -966,6 +976,7 @@ namespace OpenDDS
       };
 
       // Expert Information
+#ifndef NO_EXPERT
       static ei_register_info ei[] = {
         { &ei_sample_payload, {
           "opendds.sample.dissect_error",
@@ -974,6 +985,7 @@ namespace OpenDDS
           EXPFILL
         }},
       };
+#endif
 
       // Register Protocol
       proto_opendds =
@@ -988,11 +1000,13 @@ namespace OpenDDS
       );
       proto_register_subtree_array(ett, array_length(ett));
 
+#ifndef NO_EXPERT
       // Register Expert Information
       expert_register_field_array(
         expert_register_protocol(proto_opendds),
         ei, array_length(ei)
       );
+#endif
     }
 
     void

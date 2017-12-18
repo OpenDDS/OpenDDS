@@ -30,6 +30,7 @@ extern "C" {
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 
 #include "sample_dissector.h"
+#include "ws_common.h"
 
 #include <string>
 #include <map>

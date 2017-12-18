@@ -99,7 +99,7 @@ inline void *ws_ep_tvb_memdup(tvbuff_t *tvb, const gint offset, size_t remainder
 #define WS_DISSECTOR_T_RETURN_TYPE int
 #define WS_DISSECTOR_T_RETURN_TYPE_INT
 #define WS_DISSECTOR_T_EXTRA_PARAM ,void*
-#else
+#else // Before 1.12
 inline guint8 *ws_tvb_get_ephemeral_string(tvbuff_t *tvb, const gint offset, const gint length) {
   return ::tvb_get_ephemeral_string(tvb, offset, length);
 }
@@ -109,6 +109,12 @@ inline void *ws_ep_tvb_memdup(tvbuff_t *tvb, const gint offset, size_t remainder
 #define WS_TCP_DISSECT_PDUS_EXTRA_ARG
 #define WS_DISSECTOR_T_RETURN_TYPE void
 #define WS_DISSECTOR_T_EXTRA_PARAM
+// Field Display Enum was created for 1.12 and is used many places in the
+// sample dissector, so we're disabling sample dissection.
+#define NO_ITL
+typedef int field_display_e; // Dummy type for code outside NO_ITL blocks
+// Older expert info was completely different system before 1.12
+#define NO_EXPERT
 #endif
 
 #if (WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1,8,0) )
