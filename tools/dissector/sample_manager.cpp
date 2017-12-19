@@ -48,7 +48,7 @@ namespace OpenDDS
       Sample_Dissector* dissector;
       std::map<itl::Type*, Sample_Dissector*>& map;
 
-      visitor(std::map<itl::Type*, Sample_Dissector*>& m)
+      explicit visitor(std::map<itl::Type*, Sample_Dissector*>& m)
         : dissector(NULL)
         , map(m)
       { }
@@ -315,7 +315,7 @@ namespace OpenDDS
           dissectors_[a->name()] = sd;
         }
       }
-      catch(std::runtime_error e) {
+      catch(std::runtime_error & e) {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT("error parsing itl: %s\n"),
                     e.what()));
