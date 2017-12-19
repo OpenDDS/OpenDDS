@@ -6,6 +6,7 @@
 #ifndef WS_COMMON_H
 #define WS_COMMON_H
 
+
 // Make a simple integer value for version numbers
 #define WIRESHARK_VERSION_NUMBER(MAJOR,MINOR,MICRO) \
 MAJOR * 1000000 + MINOR * 1000 + MICRO

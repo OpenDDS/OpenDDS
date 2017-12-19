@@ -7,7 +7,7 @@
 
 extern "C" {
 
-#include "config.h"
+#include "ws_config.h"
 
 #include <glib.h>
 #include <gmodule.h>
@@ -29,7 +29,7 @@ extern "C" {
   extern "C" dissector_Export const gchar plugin_version[] = DDS_VERSION;
   extern "C" dissector_Export const gchar plugin_release[] = VERSION_RELEASE;
 #else
-  extern "C"dissector_Export const gchar version[] = DDS_VERSION;
+  extern "C" dissector_Export const gchar version[] = DDS_VERSION;
 #endif
 
 extern "C"

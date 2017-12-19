@@ -12,7 +12,7 @@
 
 extern "C" {
 
-#include "config.h"
+#include "ws_config.h"
 
 #include <glib.h>
 #include <gmodule.h>
