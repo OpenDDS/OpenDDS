@@ -32,57 +32,55 @@ variables defined.
 In addition, the Wireshark sources must be available and built locally
 according to the Wireshark Developer's Guide (see above).
 
-1. Define environment variables
+1. Set up the Build System to Build the Dissector
 
-   Linux and Solaris:
-     export GLIB_ROOT=<full path to the GLib root directory>
-     export WIRESHARK_SRC=<full path to the Wireshark source directory>
+   Run the DDS_ROOT/configure script again, passing these arguments:
 
-   Windows:
-     set GLIB_ROOT=<full path to the Wireshark win32-libs/gtk2 directory>
-     set WIRESHARK_SRC=<full path to the Wireshark source directory>
+     --wireshark=WIRESHARK_SRC
+       Where WIRESHARK_SRC is the location of the Wireshark source.
+
+     --glib
+       On systems where Glib installed is the same used by the Wireshark
+       build.
+     --glib=GLIB_ROOT
+       Where GLIB_ROOT is the install prefix for Glib. If building on Windows,
+       GLIB_ROOT is the location of gtk2 folder Wireshark creates in the
+       wireshark-win32-libs or wireshark-win64-libs folder when it is built.
+       Can be also be used on systems where the Glib installed is different
+       than what was used to build Wireshark.
+
+     --rapidjson
+       If using Wireshark 1.12 or later and sample payload data dissection is
+       desired. If RapidJSON is not installed on the system, it must be downloaded
+       using:
+         git submodule update --init --recursive
+       which will place it in:
+         DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson
+
+   If using Wireshark 1.x on Windows, then this must be specified:
      set WIRETAP_VERSION=<version of the wiretap DLL built by Wireshark>
 
-2. Update platform_macros.GNU (optional)
-
-   For Linux and Solaris, the platform_macros.GNU file must be modified
-   to contain the following:
-     versioned_so=0
-     wireshark=1
-
-3. Generate MPC workspace
-
-   Linux and Solaris:
-     cd $DDS_ROOT/tools/dissector/
-     perl $ACE_ROOT/bin/mwc.pl -type gnuace -features wireshark=1
-
-   Windows:
-     cd %DDS_ROOT%\tools\dissector\
-     perl %ACE_ROOT%\bin\mwc.pl -type [CompilerType] -features wireshark=1
-       "CompilerTypes" tested includes vc71, vc8, vc9, and nmake
-
-4. Build
+2. Build
 
    Build normally as described in the $DDS_ROOT/INSTALL document.
 
-5. Install plugin
+3. Install Plugin
 
-   To install the dissector plugin, copy the plugin file from
+   To install the dissector plugin, copy the plugin file  from
    DDS_ROOT/tools/dissector to one of the plugin directories listed in the
    Folders section in Wireshark's About Dialog which can be found in the Help
-   menu.
-
-   On Windows, the plugin file will be named OpenDDS_Dissector.dll or
+   menu. On Windows, the plugin file will be named OpenDDS_Dissector.dll or
    OpenDDS_Dissectord.dll. On UNIX-like systems it will be named
-   OpenDDS_Dissector.so or there will be a OpenDDS_Dissector.so which is link
-   to the plugin named "OpenDDS_Dissector.so" followed by the DDS version. If
-   the latter is the case, then copy both of the files to the Wireshark
-   plugins destination.
+   OpenDDS_Dissector.so.
 
    See <https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html>
    for details on where Wireshark looks for plugins.
 
-6. Run Wireshark
+4. Run Wireshark
+
+   setenv.sh or setenv.cmd must be sourced before running Wireshark or
+   it will complain that it couldn't load the dissector if the OpenDDS
+   libraries are not installed system-wide.
 
    You may verify the plugin is installed correctly by looking at the
    Supported Protocols list.  Depending on the wireshark version, this
@@ -90,10 +88,25 @@ according to the Wireshark Developer's Guide (see above).
    The OpenDDS_Dissector library we created above should appear in the
    list of plugins or protocols.
 
-   NOTE: You may need to define LD_LIBRARY_PATH (for Linux and Solaris)
-         or PATH (for Windows) to resolve dependent libraries when running
-         Wireshark once the plugin is installed.
+======================================================================
+* Environment Variables
 
+   OPENDDS_DISSECTORS
+     If set the dissector will look for ITL files in that location
+     to use for sample payload dissection.
+
+   There are two environment variables the dissector will use for debugging:
+
+   OPENDDS_DISSECTOR_LOG
+     If set, the dissector will write log output to
+     OpenDDS_wireshark.log in the current directory.
+
+   OPENDDS_DISSECTOR_SIGSEGV
+     If set, the dissector will not handle segfaults when they occur
+     during sample payload dissection. If not set, a segfault will
+     cause a dialog to appear to suggest that the ITL file is wrong
+     and close Wireshark. Setting this might be more helpful if
+     using a debugger to see where the segfault occurred.
 
 ======================================================================
 * Available Display Filters
@@ -189,7 +202,7 @@ NOTE: Coloring rules are applied on a first match basis; you may need to
 
 * Sample Dissection
 
-The dissector, when configured with "rapidjson", can dissect sample data on
+The dissector, when configured with RapidJSON, can dissect sample data on
 Wireshark 1.12 and later. To use this:
 
 1. Export type information using the OpenDDS IDL compiler.  The
@@ -265,8 +278,8 @@ Notes:
     to Wireshark as strings and must be filtered as such. This means that when
     filtering they must be typed with double quotes (") like a C string
     literal, not single quotes (') like a C character literal. The same
-    applies to WChars, but that's because at the time of writing Wireshark 2.5
-    still does not have a dedicated wide character type.
+    applies to WChars, but that's because Wireshark does not have a dedicated
+    wide character type.
 
 ======================================================================
 * Known Limitations
