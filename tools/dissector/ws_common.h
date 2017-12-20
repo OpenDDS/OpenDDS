@@ -53,40 +53,40 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
   return tvb_get_string_enc(alloc, tvb, offset, length, ENC_ASCII);
 }
 #else
-# define ws_tvb_get_string ::tvb_get_string
+#define ws_tvb_get_string ::tvb_get_string
 #endif
 
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 2, 0)
-# define WS_DISSECTOR_RETURN_TYPE int
-# define WS_DISSECTOR_RETURN_VALUE return 0; //TODO
-# define ws_dissector_add_handle dissector_add_for_decode_as
-# define WS_CONV_IDX conv_index
+#define WS_DISSECTOR_RETURN_TYPE int
+#define WS_DISSECTOR_RETURN_VALUE return 0; //TODO
+#define ws_dissector_add_handle dissector_add_for_decode_as
+#define WS_CONV_IDX conv_index
 // create_dissector_handle wants the new dissector_t here
-#define WS_DISSECTOR_EXTRA_PARAM , void*
+#define WS_DISSECTOR_EXTRA_PARAM ,void*
 #else
-# define WS_DISSECTOR_RETURN_TYPE void
-# define WS_DISSECTOR_RETURN_VALUE
-# define ws_dissector_add_handle dissector_add_handle
-# define WS_CONV_IDX index
+#define WS_DISSECTOR_RETURN_TYPE void
+#define WS_DISSECTOR_RETURN_VALUE
+#define ws_dissector_add_handle dissector_add_handle
+#define WS_CONV_IDX index
 #define WS_DISSECTOR_EXTRA_PARAM
 #endif
 
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 0, 0)
-# define WS_DISSECTOR_EXTRA_ARG , 0
-# define ws_tvb_length tvb_reported_length
+#define WS_DISSECTOR_EXTRA_ARG ,0
+#define ws_tvb_length tvb_reported_length
 #define WS_DISSECTOR_T_EXTRA_PARAM ,void*
-# define WS_GET_PDU_LEN_EXTRA_PARAM , void*
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS1(ucase, lcase) \
+#define WS_GET_PDU_LEN_EXTRA_PARAM ,void*
+#define WS_HEUR_DISSECTOR_EXTRA_ARGS1(ucase, lcase) \
   "OpenDDS over " #ucase, "opendds_" #lcase,
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS2 , HEURISTIC_ENABLE
+#define WS_HEUR_DISSECTOR_EXTRA_ARGS2 , HEURISTIC_ENABLE
 #else
-# define WS_1
-# define WS_DISSECTOR_EXTRA_ARG
-# define ws_tvb_length tvb_length
+#define WS_1
+#define WS_DISSECTOR_EXTRA_ARG
+#define ws_tvb_length tvb_length
 #define WS_DISSECTOR_T_EXTRA_PARAM
-# define WS_GET_PDU_LEN_EXTRA_PARAM
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS1(A, B)
-# define WS_HEUR_DISSECTOR_EXTRA_ARGS2
+#define WS_GET_PDU_LEN_EXTRA_PARAM
+#define WS_HEUR_DISSECTOR_EXTRA_ARGS1(A, B)
+#define WS_HEUR_DISSECTOR_EXTRA_ARGS2
 #endif
 
 #if (WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1,12,0) )

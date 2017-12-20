@@ -67,28 +67,20 @@ according to the Wireshark Developer's Guide (see above).
 
 5. Install plugin
 
-   Linux and Solaris:
-     To install it system wide:
-       export WIRESHARK_ROOT=<path to the Wireshark installation root directory>
-       sudo cp OpenDDS_Dissector.so* $WIRESHARK_ROOT/lib/wireshark/plugins/<ws-vers>/
+   To install the dissector plugin, copy the plugin file from
+   DDS_ROOT/tools/dissector to one of the plugin directories listed in the
+   Folders section in Wireshark's About Dialog which can be found in the Help
+   menu.
 
-     To install it for current user:
-       Wireshark 2.5 and after:
-         cp OpenDDS_Dissector.so* ~/.local/lib/wireshark/plugins
-       Wireshark 2.2 and 2.4:
-         cp OpenDDS_Dissector.so* $XDG_CONFIG_HOME/wireshark/plugins
-       Wireshark 2.1 and before:
-         cp OpenDDS_Dissector.so* ~/.wireshark/plugins
-
-   Windows:
-     The default Wireshark install directory is the wireshark-gtk2
-     subdirectory of the WIRESHARK_ROOT (top of the source tree).
-     copy OpenDDS_Dissector.dll <full path to the Wireshark install>\plugins\<version>\
-     -or-
-     copy OpenDDS_Dissectord.dll <full path to the Wireshark install>\plugins\<version>\
+   On Windows, the plugin file will be named OpenDDS_Dissector.dll or
+   OpenDDS_Dissectord.dll. On UNIX-like systems it will be named
+   OpenDDS_Dissector.so or there will be a OpenDDS_Dissector.so which is link
+   to the plugin named "OpenDDS_Dissector.so" followed by the DDS version. If
+   the latter is the case, then copy both of the files to the Wireshark
+   plugins destination.
 
    See <https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html>
-   for macOS and other details on where Wireshark looks for plugins.
+   for details on where Wireshark looks for plugins.
 
 6. Run Wireshark
 
@@ -184,7 +176,7 @@ A set of color filters are included in the source distribution which may
 be imported to highlight DCPS protocol packets.
 
 To import these filters, click on the View -> Coloring Rules menu item,
-followed by the the Import button.  Select the colorfilters file in the
+followed by the Import button.  Select the colorfilters file in the
 $DDS_ROOT/tools/dissector/ directory and click the Open button.
 
 NOTE: Coloring rules are applied on a first match basis; you may need to
@@ -195,9 +187,10 @@ NOTE: Coloring rules are applied on a first match basis; you may need to
 
 ======================================================================
 
-* Sample Dissectors
+* Sample Dissection
 
-Wireshark 2 can be configured to dissect sample data.
+The dissector, when configured with "rapidjson", can dissect sample data on
+Wireshark 1.12 and later. To use this:
 
 1. Export type information using the OpenDDS IDL compiler.  The
    command "opendds_idl -Gitl <filename>.idl" will produce a file
@@ -219,27 +212,30 @@ For more information, see
 
 * Sample Dissection Filtering
 
-Now the sample payload are properly registered fields in Wireshark so
-OpenDDS packets can be filtered by what values they contain in their
-sample payload.
+When the dissector can dissect sample data, it also allows Wireshark to filter
+OpenDDS packets based on contents.
 
-The base of this wireshark packet namespace is "opendds.sample.payload".
+The base of this filter namespace is "opendds.sample.payload".
 If the type "Messenger::Message" is being used by OpenDDS and the ITL
-file is located in OPENDDS_DISSECTORS, then packets that carry this can
-be filtered by "opendds.sample.payload.Messenger.Message". Further more
-packets can be filtered by the data in the payload, for example:
+file is located in OPENDDS_DISSECTORS (or the directory Wireshark was started
+in), then packets that carry this can be filtered by
+"opendds.sample.payload.Messenger.Message". Further more packets can be
+filtered by the data in the payload, for example:
 
   opendds.sample.payload.Messenger.Message.subject contains "DDS"
   opendds.sample.payload.Messenger.Message.count >= 4
 
 See <https://wiki.wireshark.org/DisplayFilters> for examples of how
-Wireshark display filters can be used.
+Wireshark display filters can be used in general.
 
-Possible Considerations:
+Notes:
 
   - IDL Arrays and Sequences value is the number of elements:
 
       opendds.sample.payload.Messenger.Message.seq < 3
+      
+      This will show all OpenDD packets with a payload of type
+      "Messenger::Message" where it's "seq" member has less than 3 elements.
 
     To filter the items inside use "_e" (element). Items can not be
     filtered by index of the elements:
@@ -248,15 +244,21 @@ Possible Considerations:
 
   - Values of Enums are represented by string names of the members.
 
-  - Union members are accessible by their name, not the Enum member.
+  - Union members are accessible by their name, not by their discriminator
+    value.
 
   - Long Doubles are cast down to doubles.
 
-  - Wide Strings and Chars are assumed to be UTF-16BE and are
-    converted to UTF-16 by the DCPS Serializer and to UTF-8
-    using glib's g_convert which uses incov. Strings that are
-    invalid UTF-16 are replaced by a message saying that it was
-    invalid and what kind of problem incov had with it.
+  - Wide strings and wide characters are converted from UTF-16 to UTF-8 using
+    iconv. Data that is invalid UTF-16 is replaced by a message saying that
+    it was invalid and what kind of problem iconv had with it.
+
+  - To retain compatibility with Wireshark 1.12, OpenDDS/IDL Chars are given
+    to Wireshark as strings and must be filtered as such. This means that when
+    filtering they must be typed with double quotes (") like a C string
+    literal, not single quotes (') like a C character literal. The same
+    applies to WChars, but that's because at the time of writing Wireshark 2.5
+    still does not have a dedicated wide character type.
 
 ======================================================================
 * Known Limitations
@@ -265,11 +267,12 @@ Possible Considerations:
     of the DCPS protocol.  This dissector is effective for the compiled
     protocol version only.
 
-  - The Sample Dissector can not distinguish between two IDL types that
-    have the same name. The results using a ITL file that does not match
-    what OpenDDS is using include:
-      - Crashing the dissector and Wireshark, but a pop up window
-        informs the user of the probable cause.
-      - OpenDDS Packet being marked as malformed.
-      - Sample payload having missing, wrong, or nonsense data.
+  - The sample dissector can not distinguish between two IDL types that
+    have the same name. When using an ITL file that does not match
+    what OpenDDS is using, the dissector will do one of following:
+      - Cause Wireshark to crash, but a pop up window informs the user of the
+        probable cause.
+      - Mark the OpenDDS packet as malformed, which will be colored red.
+      - Fill the sample payload fields with incorrect data, or omit fields
+        entirely.
 
