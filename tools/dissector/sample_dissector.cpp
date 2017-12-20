@@ -69,7 +69,7 @@ namespace OpenDDS
         to = utf8;
         g_free(utf8);
       } else {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%s%s\n"),
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C%C\n"),
           error_msg,
           error->message
         ));

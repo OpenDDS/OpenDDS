@@ -317,14 +317,14 @@ namespace OpenDDS
       }
       catch(std::runtime_error & e) {
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT("error parsing itl: %s\n"),
+                    ACE_TEXT("error parsing itl: %C\n"),
                     e.what()));
       }
 
       if (no_dcps_data_types) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT(
-                     "%s has no types defined as a primary DCPS data types.\n"),
+                     "%C has no types defined as a primary DCPS data types.\n"),
                    filename));
         primary_dissectors = dissectors_; // Evaluate All Dissectors
       }

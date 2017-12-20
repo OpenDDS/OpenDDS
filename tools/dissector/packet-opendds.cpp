@@ -533,7 +533,7 @@ namespace OpenDDS
       if (data_name == 0) {
         ACE_DEBUG ((LM_DEBUG,
                     "DDS_Dissector::dissect_sample_payload: "
-                    "no topic for %s\n",
+                    "no topic for %C\n",
                     std::string(converter).c_str()));
         offset += header.message_length_; // skip marshaled data
 
@@ -546,7 +546,7 @@ namespace OpenDDS
           tvb_,
           offset,
           (gint) header.message_length_,
-          "No Topic Found for %s \n",
+          "No Topic Found for %C \n",
           std::string(converter).c_str()
         );
 #endif
@@ -568,7 +568,7 @@ namespace OpenDDS
       if (data_dissector == 0) {
         ACE_DEBUG ((LM_DEBUG,
                     "DDS_Dissector::dissect_sample_payload: "
-                    "no dissector found for %s \n",
+                    "no dissector found for %C \n",
                     data_name));
 
         // Mark Packet
@@ -580,7 +580,7 @@ namespace OpenDDS
           tvb_,
           offset,
           (gint) header.message_length_,
-          "No Dissector Found for %s \n",
+          "No Dissector Found for %C \n",
           data_name
         );
 #endif
@@ -706,7 +706,7 @@ namespace OpenDDS
 #endif
               Sample_Base::clear_ns();
               ACE_DEBUG ((LM_DEBUG,
-                "DDS_Dissector::dissect_sample_payload: %s\n", e.what()
+                "DDS_Dissector::dissect_sample_payload: %C\n", e.what()
               ));
             }
 
