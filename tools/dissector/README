@@ -225,8 +225,9 @@ filtered by the data in the payload, for example:
   opendds.sample.payload.Messenger.Message.subject contains "DDS"
   opendds.sample.payload.Messenger.Message.count >= 4
 
-See <https://wiki.wireshark.org/DisplayFilters> for examples of how
-Wireshark display filters can be used in general.
+See <https://wiki.wireshark.org/DisplayFilters> and 
+<https://www.wireshark.org/docs/man-pages/wireshark-filter.html>
+for examples of how Wireshark display filters can be used.
 
 Notes:
 
@@ -242,10 +243,17 @@ Notes:
 
       opendds.sample.payload.Messenger.Message.seq._e.some_value == 1
 
-  - Values of Enums are represented by string names of the members.
+  - Values of Enums are represented by string names of the members. So if a
+    Enum has a member "Invalid", then you can filter for packets with that
+    value with:
+
+      opendds.sample.payload.Messenger.Message.enum == "Invalid"
 
   - Union members are accessible by their name, not by their discriminator
-    value.
+    value. If packets have a Union u on a boolean member u_b that is true,
+    then they can be found with:
+      
+      opendds.sample.payload.Messenger.Message.u.u_b == 1
 
   - Long Doubles are cast down to doubles.
 

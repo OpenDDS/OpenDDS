@@ -703,6 +703,7 @@ namespace OpenDDS
                 tvb_, offset, -1, e.what()
               );
 #endif
+              Sample_Base::clear_ns();
               ACE_DEBUG ((LM_DEBUG,
                 "DDS_Dissector::dissect_sample_payload: %s\n", e.what()
               ));

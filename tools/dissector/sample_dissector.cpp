@@ -1031,7 +1031,7 @@ namespace OpenDDS
     size_t
     Sample_Array::dissect_i(Wireshark_Bundle &params) {
       size_t len = 0;
-      if (params.get_size_only) {
+      if (!params.get_size_only) {
         len = compute_length(params);
       }
 
