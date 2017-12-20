@@ -443,6 +443,7 @@ namespace OpenDDS
                   const GUID_t &filter = sample.content_filter_entries_[i];
                   DCPS::GuidConverter converter(filter);
                   std::stringstream strm;
+                  strm << converter;
                   std::string guid = strm.str();
 
                   // Get Entry Size
@@ -451,11 +452,11 @@ namespace OpenDDS
                   len = static_cast<gint>(size);
 
                   // Add to Wireshark
-                  proto_tree_add_string_format_value(
+                  proto_tree_add_string_format(
                     subtree, hf_sample_content_filt_entries,
                     tvb_, offset, len,
                     guid.c_str(),
-                    "filter [%u] = %s", i, strm.str().c_str()
+                    "Content Filter [%u]: %s", i, guid.c_str()
                   );
                   offset += len;
                 }
