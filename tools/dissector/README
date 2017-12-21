@@ -238,7 +238,7 @@ filtered by the data in the payload, for example:
   opendds.sample.payload.Messenger.Message.subject contains "DDS"
   opendds.sample.payload.Messenger.Message.count >= 4
 
-See <https://wiki.wireshark.org/DisplayFilters> and 
+See <https://wiki.wireshark.org/DisplayFilters> and
 <https://www.wireshark.org/docs/man-pages/wireshark-filter.html>
 for examples of how Wireshark display filters can be used.
 
@@ -247,7 +247,7 @@ Notes:
   - IDL Arrays and Sequences value is the number of elements:
 
       opendds.sample.payload.Messenger.Message.seq < 3
-      
+
       This will show all OpenDD packets with a payload of type
       "Messenger::Message" where it's "seq" member has less than 3 elements.
 
@@ -265,7 +265,7 @@ Notes:
   - Union members are accessible by their name, not by their discriminator
     value. If packets have a Union u on a boolean member u_b that is true,
     then they can be found with:
-      
+
       opendds.sample.payload.Messenger.Message.u.u_b == 1
 
   - Long Doubles are cast down to doubles.
