@@ -48,7 +48,7 @@ my %platforminfo =
                                  19 => 'vc14', 19.1 => 'vs2017'},
               },
    'macosx' => {
-                'compilers' => ['g++'],
+                'compilers' => ['clang++'],
                 'libpath' => 'DYLD_LIBRARY_PATH',
                 'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
                                8 => 'mountainlion', 9 => 'mavericks',
