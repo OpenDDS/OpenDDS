@@ -17,6 +17,8 @@
 #include <ace/Log_Msg.h>
 #include <ace/ACE.h>
 
+#include <tao/String_Manager_T.h>
+
 #include <cstring>
 #include <cstdint>
 
@@ -24,6 +26,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -32,57 +35,48 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    bool utf16_to_utf8(
-      std::string & to, ACE_CDR::WChar* from, size_t length = 1
+    std::string utf16_to_utf8(
+       const ACE_CDR::WChar* from, const size_t length = 1
     ) {
-      size_t size = length * sizeof(ACE_CDR::WChar);
-      gchar* from_;
+      std::string result;
 
+      const gchar* from_;
 #if ACE_SIZEOF_WCHAR == 4
       /*
        * We have to trim the extra 16 bits of zeros between the characters
        * before we can pass it to glib's g_convert. Otherwise it will
        * interpret them as NULL characters and stop after the first two bytes.
-       * g_convert doesn't respsect the size passed to it if it thinks it can
-       * keep going.
        */
-      uint16_t* trimmed = new uint16_t[length + 1];
+      std::vector<uint16_t> trimmed(length + 1, 0);
       for (size_t i = 0; i < length; i++) {
         trimmed[i] = from[i];
       }
-      trimmed[length] = 0;
-      from_ = reinterpret_cast<gchar*>(trimmed);
+      from_ = reinterpret_cast<gchar*>(&trimmed[0]);
 #else
       from_ = reinterpret_cast<gchar*>(from);
 #endif
 
-      const char * error_msg = "UTF-16 to UTF-8 conversion failed: ";
       GError * error = NULL;
-      gsize bytes_read = 0;
-      gsize bytes_written = 0;
       char * utf8 = g_convert(
-        from_, size,
-        "UTF-8", "UTF-16", &bytes_read, &bytes_written, &error
+        from_, length * sizeof(ACE_CDR::WChar),
+        "UTF-8", "UTF-16", NULL, NULL, &error
       );
 
       if (utf8 != NULL) {
-        to = utf8;
+        result = utf8;
         g_free(utf8);
       } else {
+        const char * error_msg = "UTF-16 to UTF-8 conversion failed: ";
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C%C\n"),
           error_msg,
           error->message
         ));
-        to = error_msg;
-        to += error->message;
+        result = error_msg;
+        result += error->message;
         g_clear_error(&error);
       }
 
-#if ACE_SIZEOF_WCHAR == 4
-      delete [] trimmed;
-#endif
-
-      return utf8 != NULL;
+      return result;
     }
 
     Wireshark_Bundle::Wireshark_Bundle(
@@ -131,7 +125,6 @@ namespace OpenDDS
         ++i
       ) {
         delete i->second;
-        i->second = NULL;
       }
     }
 
@@ -252,7 +245,10 @@ namespace OpenDDS
 
     void Sample_Field::to_stream(std::stringstream &s, Wireshark_Bundle & p) {
       size_t location = p.buffer_pos();
-      std::string utf8;
+
+      TAO::String_Manager string_value;
+      size_t wstring_length;
+      TAO::WString_Manager wstring_value;
 
       switch (this->type_id_) {
       case Char:
@@ -279,8 +275,7 @@ namespace OpenDDS
       case WChar:
         ACE_CDR::WChar wchar_value;
         p.serializer >> ACE_InputCDR::to_wchar(wchar_value);
-        utf16_to_utf8(utf8, &wchar_value);
-        s << utf8;
+        s << utf16_to_utf8(&wchar_value);
         break;
 
       case Short:
@@ -338,21 +333,13 @@ namespace OpenDDS
         break;
 
       case String:
-        ACE_CDR::Char * string_value;
-        string_value = NULL;
-        p.serializer.read_string(string_value);
-        s << string_value;
-        delete [] string_value;
+        p.serializer.read_string(string_value.inout());
+        s << string_value.out();
         break;
 
       case WString:
-        size_t wstring_length;
-        ACE_CDR::WChar * wstring_value;
-        wstring_value = NULL;
-        wstring_length = p.serializer.read_string(wstring_value);
-        utf16_to_utf8(utf8, wstring_value, wstring_length);
-        delete [] wstring_value;
-        s << utf8;
+        wstring_length = p.serializer.read_string(wstring_value.inout());
+        s << utf16_to_utf8(wstring_value, wstring_length);
         break;
 
       case Enumeration:
@@ -387,10 +374,14 @@ namespace OpenDDS
 
           size_t location = params.buffer_pos();
 
+          TAO::String_Manager string_value;
+          size_t wstring_length;
+          TAO::WString_Manager wstring_value;
+
           // Set Field
           switch (this->type_id_) {
 
-          case Sample_Field::Boolean:
+          case Boolean:
             ACE_CDR::Boolean boolean_value;
             params.serializer >> ACE_InputCDR::to_boolean(boolean_value);
             len = params.buffer_pos() - location;
@@ -406,7 +397,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::Char:
+          case Char:
             ACE_CDR::Char char_value;
             params.serializer >> char_value;
             len = params.buffer_pos() - location;
@@ -422,13 +413,13 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::WChar:
+          case WChar:
             ACE_CDR::WChar wchar_value;
             params.serializer >> ACE_InputCDR::to_wchar(wchar_value);
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               std::string s;
-              utf16_to_utf8(s, &wchar_value);
+              s = utf16_to_utf8(&wchar_value);
               if (params.use_index) {
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS, s.c_str(),
@@ -443,7 +434,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::Octet:
+          case Octet:
             ACE_CDR::Octet octet_value;
             params.serializer >> ACE_InputCDR::to_octet(octet_value);
             len = params.buffer_pos() - location;
@@ -459,7 +450,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::Short:
+          case Short:
             ACE_CDR::Short short_value;
             params.serializer >> short_value;
             len = params.buffer_pos() - location;
@@ -475,7 +466,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::Long:
+          case Long:
             ACE_CDR::Long long_value;
             params.serializer >> long_value;
             len = params.buffer_pos() - location;
@@ -491,7 +482,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::LongLong:
+          case LongLong:
             ACE_CDR::LongLong longlong_value;
             params.serializer >> longlong_value;
             len = params.buffer_pos() - location;
@@ -507,7 +498,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::UShort:
+          case UShort:
             ACE_CDR::UShort ushort_value;
             params.serializer >> ushort_value;
             len = params.buffer_pos() - location;
@@ -523,7 +514,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::ULong:
+          case ULong:
             ACE_CDR::ULong ulong_value;
             params.serializer >> ulong_value;
             len = params.buffer_pos() - location;
@@ -539,7 +530,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::ULongLong:
+          case ULongLong:
             ACE_CDR::ULongLong ulonglong_value;
             params.serializer >> ulonglong_value;
             len = params.buffer_pos() - location;
@@ -555,7 +546,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::Float:
+          case Float:
             ACE_CDR::Float float_value;
             params.serializer >> float_value;
             len = params.buffer_pos() - location;
@@ -571,7 +562,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::Double:
+          case Double:
             ACE_CDR::Double double_value;
             params.serializer >> double_value;
             len = params.buffer_pos() - location;
@@ -587,7 +578,7 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::LongDouble:
+          case LongDouble:
             ACE_CDR::LongDouble longdouble_value;
             params.serializer >> longdouble_value;
             len = params.buffer_pos() - location;
@@ -605,11 +596,9 @@ namespace OpenDDS
             }
             break;
 
-          case Sample_Field::String:
+          case String:
             // Get String
-            ACE_CDR::Char * string_value;
-            string_value = NULL;
-            params.serializer.read_string(string_value);
+            params.serializer.read_string(string_value.inout());
             len = params.buffer_pos() - location;
 
             // Add to Tree
@@ -617,7 +606,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS,
-                  string_value,
+                  string_value.out(),
                   "[%u]: %s", params.index, string_value
                 );
               } else {
@@ -626,22 +615,19 @@ namespace OpenDDS
                 );
               }
             }
-            delete [] string_value;
+
             break;
 
-          case Sample_Field::WString:
+          case WString:
             // Get String
-            size_t wstring_length;
-            ACE_CDR::WChar * wstring_value;
-            wstring_value = NULL;
-            wstring_length = params.serializer.read_string(wstring_value);
+            wstring_length = params.serializer.read_string(wstring_value.inout());
             len = params.buffer_pos() - location;
 
             // Add to Tree
             if (!params.get_size_only) {
               // Get UTF8 Version of the String
               std::string s;
-              utf16_to_utf8(s, wstring_value, wstring_length);
+              s = utf16_to_utf8(wstring_value, wstring_length);
 
               if (params.use_index) {
                 proto_tree_add_string_format(
@@ -656,8 +642,12 @@ namespace OpenDDS
               }
             }
 
-            delete [] wstring_value;
             break;
+
+          default:
+            throw Sample_Dissector_Error(
+              get_ns()  + " is not a valid Field Type."
+            );
           }
 
           params.offset += len;
@@ -743,7 +733,7 @@ namespace OpenDDS
 
         default:
           throw Sample_Dissector_Error(
-            get_ns()  + " is not a valid Type Field."
+            get_ns()  + " is not a valid Field Type."
           );
         }
       } else if (nested_ != NULL) {
@@ -856,7 +846,7 @@ namespace OpenDDS
             params.tree = proto_item_add_subtree(item, ett_);
           }
         } else {
-          if (is_root_) is_root_ = false;
+          is_root_ = false;
         }
 
         // Dissect Child Field
@@ -937,25 +927,11 @@ namespace OpenDDS
       return element_;
     }
 
-    size_t
-    Sample_Sequence::dissect_i (Wireshark_Bundle &params)
-    {
-      size_t len = 0;
-      if (!params.get_size_only) {
-        len = compute_length(params);
-      }
+    void Sample_Sequence::dissect_elements(
+      Wireshark_Bundle &params, size_t &len, size_t count, size_t count_size
+    ) {
 
-      size_t location = params.buffer_pos();
-
-      // Get Count of Elements
-      ACE_CDR::ULong count;
-      params.serializer >> count;
-      size_t count_size = params.buffer_pos() - location;
-      if (params.get_size_only) {
-        len = count_size;
-      }
-
-      // Add Item
+      // Add Base Item
       proto_item *item;
       int hf = -1;
       if (!params.get_size_only) {
@@ -1008,6 +984,28 @@ namespace OpenDDS
       if (prev_tree) {
         params.tree = prev_tree;
       }
+    }
+
+    size_t
+    Sample_Sequence::dissect_i (Wireshark_Bundle &params)
+    {
+      size_t len = 0;
+      if (!params.get_size_only) {
+        len = compute_length(params);
+      }
+
+      size_t location = params.buffer_pos();
+
+      // Get Count of Elements
+      ACE_CDR::ULong count;
+      params.serializer >> count;
+      size_t count_size = params.buffer_pos() - location;
+      if (params.get_size_only) {
+        len = count_size;
+      }
+
+      // Create Tree and Dissect Elements
+      dissect_elements(params, len, count, count_size);
 
       return len;
     }
@@ -1035,66 +1033,10 @@ namespace OpenDDS
         len = compute_length(params);
       }
 
-      // Add Item
-      proto_item *item;
-      int hf = -1;
-      if (!params.get_size_only) {
-        hf = get_hf();
-        if (hf == -1) {
-          throw Sample_Dissector_Error(
-            get_ns()  + " is not a registered wireshark field."
-          );
-        } else {
-          std::stringstream outstream;
-          if (params.use_index) {
-            outstream << "[" << params.index << "]";
-          } else {
-            outstream << get_label();
-          }
-          outstream << " (length = " << count_ << ")";
-          item = proto_tree_add_uint_format(
-            ADD_FIELD_PARAMS,
-            count_, outstream.str().c_str()
-          );
-        }
-      }
-
-      // Push namespace and new tree
-      proto_tree* prev_tree = NULL;
-      if (!(params.get_size_only || hf == -1)) {
-        prev_tree = params.tree;
-        params.tree = proto_item_add_subtree(item, ett_);
-      }
-      push_ns(element_namespace);
-
-      // Dissect Elements
-      bool prev_use_index = params.use_index;
-      size_t all_elements_size = 0;
-      for (guint32 ndx = 0; ndx < count_; ndx++) {
-        params.index = ndx;
-        params.use_index = true;
-        size_t element_size = element_->dissect_i(params);
-        all_elements_size += element_size;
-      }
-      if (params.get_size_only) {
-        len += all_elements_size;
-      }
-
-      // Cleanup
-      params.use_index = prev_use_index;
-      pop_ns();
-      if (prev_tree) {
-        params.tree = prev_tree;
-      }
+      // Create Tree and Dissect Elements
+      dissect_elements(params, len, count_, 0);
 
       return len;
-    }
-
-    void Sample_Array::init_ws_fields() {
-      add_protocol_field(FT_UINT32, BASE_DEC);
-      push_ns(element_namespace);
-      element_->init_ws_fields();
-      pop_ns();
     }
 
     //----------------------------------------------------------------------

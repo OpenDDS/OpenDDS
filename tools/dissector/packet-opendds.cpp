@@ -427,11 +427,9 @@ namespace OpenDDS
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
               proto_item *item =
-                proto_tree_add_uint_format_value
+                proto_tree_add_uint
                 (ltree, hf_sample_content_filt, tvb_,
                  offset, len,
-                 sample.content_filter_entries_.length(),
-                 "%d entries",
                  sample.content_filter_entries_.length());
               offset += len;
               proto_tree *subtree = proto_item_add_subtree (item, ett_filters);
@@ -546,7 +544,7 @@ namespace OpenDDS
           tvb_,
           offset,
           (gint) header.message_length_,
-          "No Topic Found for %C \n",
+          "No Topic Found for %s \n",
           std::string(converter).c_str()
         );
 #endif
@@ -942,13 +940,13 @@ namespace OpenDDS
                 }
         },
         { &hf_sample_content_filt,
-            { "Content Filters",
+            { "Number of Content Filters",
                 "opendds.sample.content_filter",
                 FT_UINT32, BASE_DEC, NULL_HFILL
                 }
         },
         { &hf_sample_content_filt_entries,
-            { "Content Filters",
+            { "Content Filter",
                 "opendds.sample.content_filter_entries",
                 FT_STRING, BASE_NONE, NULL_HFILL
                 }

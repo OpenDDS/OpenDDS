@@ -21,9 +21,6 @@
 #include <itl/itl.hpp>
 #endif
 
-#include <cstring>
-#include <cstdlib>
-
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
@@ -269,7 +266,7 @@ namespace OpenDDS
       }
       // Free Dynamically Generated Field Names
       while (!field_names_.empty()) {
-        free(field_names_.front());
+        ACE_OS::free(field_names_.front());
         field_names_.pop_front();
       }
     }
@@ -345,7 +342,7 @@ namespace OpenDDS
             name.erase(0, idl_prefix.size());
         }
 
-        // If name contains ':', remove everything after it
+        // If name contains ':', remove everything after the last ':'
         size_t l = name.rfind(":");
         if (l != std::string::npos) {
             name.erase(l, name.size() - l);

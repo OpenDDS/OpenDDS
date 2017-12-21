@@ -46,8 +46,9 @@ namespace OpenDDS
     /// Packet should be marked by wireshark.
     class Sample_Dissector_Error : public std::exception {
     public:
-      Sample_Dissector_Error(const std::string & message) {
-        message_ = message;
+      explicit Sample_Dissector_Error(const std::string & message)
+      : message_(message)
+      {
       }
 
       const char* what() const throw (){
@@ -114,7 +115,7 @@ namespace OpenDDS
       int get_hf();
 
       /// Add sample field to register later
-      void add_protocol_field(enum ftenum ft, field_display_e fd = BASE_NONE);
+      void add_protocol_field(ftenum ft, field_display_e fd = BASE_NONE);
 
     public:
       ~Sample_Base();
@@ -292,8 +293,8 @@ namespace OpenDDS
       gint ett_;
       std::string subtree_label_;
 
-      bool is_struct_ = false;
-      bool is_root_ = false;
+      bool is_struct_;
+      bool is_root_;
     };
 
     /*
@@ -312,7 +313,12 @@ namespace OpenDDS
       virtual void init_ws_fields();
 
     protected:
-      virtual size_t dissect_i (Wireshark_Bundle &p);
+      /// Common Dissection Code for Arrays and Sequences
+      void dissect_elements(
+        Wireshark_Bundle &params, size_t &len, size_t count, size_t count_size
+      );
+
+      virtual size_t dissect_i(Wireshark_Bundle &params);
 
       Sample_Dissector *element_;
     };
@@ -329,10 +335,8 @@ namespace OpenDDS
     public:
       Sample_Array (size_t count, Sample_Dissector *sub);
 
-      virtual void init_ws_fields();
-
     protected:
-      virtual size_t dissect_i (Wireshark_Bundle &p);
+      virtual size_t dissect_i(Wireshark_Bundle &params);
       size_t count_;
       int hf_ = -1;
     };
