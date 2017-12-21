@@ -334,7 +334,7 @@ namespace OpenDDS
 
       case String:
         p.serializer.read_string(string_value.inout());
-        s << string_value.out();
+        s << string_value;
         break;
 
       case WString:
@@ -606,7 +606,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS,
-                  string_value.out(),
+                  string_value,
                   "[%u]: %s", params.index, string_value
                 );
               } else {
