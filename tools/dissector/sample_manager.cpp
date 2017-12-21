@@ -155,6 +155,8 @@ namespace OpenDDS
       }
 
       void visit (itl::Fixed&) {
+        // TODO Fixed types are supported in OpenDDS now, and the dissector
+        // should handle them.
         dissector = new Sample_Dissector();
         dissector->add_field(new Sample_Field(Sample_Field::Undefined, ""));
         ACE_DEBUG ((LM_WARNING, ACE_TEXT ("Fixed-point types are not supported\n")));
