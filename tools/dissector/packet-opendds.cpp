@@ -10,12 +10,14 @@
 #include "tools/dissector/sample_manager.h"
 
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/Serializer.h"
 
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
 #include <ace/Message_Block.h>
 #include <ace/Log_Msg.h>
 #include <ace/ACE.h>
+#include <ace/Signal.h>
 
 #include <cstring>
 
@@ -23,7 +25,6 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
-
 
 // value ABSOLUTE_TIME_LOCAL, 1.2.x does not.  This technique uses
 // the ABSOLUTE_TIME_LOCAL value if it is present (1.3.x),
@@ -77,6 +78,7 @@ int hf_sample_lifespan    = -1;
 int hf_sample_publication = -1;
 int hf_sample_publisher   = -1;
 int hf_sample_content_filt= -1;
+int hf_sample_content_filt_entries = -1;
 
 int hf_sample_flags             = -1;
 int hf_sample_flags_byte_order  = -1;
@@ -90,6 +92,12 @@ int hf_sample_flags_more_frags  = -1;
 int hf_sample_flags2            = -1;
 int hf_sample_flags2_cdr_encap  = -1;
 int hf_sample_flags2_key_only   = -1;
+// Payload IDL Type, ex "Messenger::Message"
+int hf_sample_payload = -1;
+#ifndef NO_EXPERT
+// Payload "Expert" Error Field
+expert_field ei_sample_payload = EI_INIT;
+#endif
 
 const int sample_flags_bits = 8;
 const int* sample_flags_fields[] = {
@@ -117,6 +125,7 @@ gint ett_sample_header = -1;
 gint ett_sample_flags  = -1;
 gint ett_sample_flags2 = -1;
 gint ett_filters = -1;
+gint ett_sample_payload = -1;
 
 const value_string byte_order_vals[] = {
   { 0x0,  "Big Endian"    },
@@ -179,7 +188,7 @@ namespace OpenDDS
     {
       T t;
 
-      guint len = std::min(tvb_length(tvb) - offset,
+      guint len = std::min(ws_tvb_length(tvb) - offset,
                            static_cast<guint>(t.max_marshaled_size()));
       const guint8* data = tvb_get_ptr(tvb, offset, len);
 
@@ -418,11 +427,9 @@ namespace OpenDDS
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
               proto_item *item =
-                proto_tree_add_uint_format_value
+                proto_tree_add_uint
                 (ltree, hf_sample_content_filt, tvb_,
                  offset, len,
-                 sample.content_filter_entries_.length(),
-                 "%d entries",
                  sample.content_filter_entries_.length());
               offset += len;
               proto_tree *subtree = proto_item_add_subtree (item, ett_filters);
@@ -430,15 +437,25 @@ namespace OpenDDS
                    i < sample.content_filter_entries_.length();
                    i++)
                 {
+                  // Get Entry Value
                   const GUID_t &filter = sample.content_filter_entries_[i];
                   DCPS::GuidConverter converter(filter);
                   std::stringstream strm;
-                  strm << "filter [" << i << "] = " << converter << std::ends;
+                  strm << converter;
+                  std::string guid = strm.str();
+
+                  // Get Entry Size
                   size = 0;
                   gen_find_size(filter, size, padding);
                   len = static_cast<gint>(size);
-                  proto_tree_add_text (subtree, tvb_, offset, len, "%s",
-                                       strm.str().c_str());
+
+                  // Add to Wireshark
+                  proto_tree_add_string_format(
+                    subtree, hf_sample_content_filt_entries,
+                    tvb_, offset, len,
+                    guid.c_str(),
+                    "Content Filter [%u]: %s", i, guid.c_str()
+                  );
                   offset += len;
                 }
 
@@ -450,6 +467,27 @@ namespace OpenDDS
         }
     }
 
+    // Try to gracefully handle a Seg Fault, give Wireshark a chance to
+    // finish its business, and tell inform the user that their ITL file
+    // is invalid
+    void sample_dissect_handle_sigsegv(int signal) {
+      ACE_DEBUG ((LM_DEBUG,
+        "DDS_Dissector::dissect_sample_payload: "
+        "Encountered SIGSEGV (Segmentation Fault) signal during "
+        "sample payload dissection. "
+        "There is a pointer bug in the sample dissector or the ITL "
+        "file provided matched the type name but does not actually have the "
+        "same type."
+        "\n"
+      ));
+      report_failure(
+        "There has been a fatal error in the OpenDDS Dissector:\n"
+        "There is a pointer bug in the sample dissector or the ITL "
+        "file provided matched the type name but does not actually have the "
+        "same type."
+      );
+      exit(EXIT_FAILURE);
+    }
 
     void
     DDS_Dissector::dissect_sample_payload (proto_tree* ltree,
@@ -462,56 +500,147 @@ namespace OpenDDS
           return;
         }
 
-      if (header.cdr_encapsulation_)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "dissection of CDR-encapsulated data is not currently "
-                      "supported\n"));
-          offset += header.message_length_;
-          return;
-        }
-
-      if (header.byte_order_ != ACE_CDR_BYTE_ORDER)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "dissection of byte-swapped data is not currently "
-                      "supported\n"));
-          offset += header.message_length_;
-          return;
-        }
-
       GuidConverter converter(header.publication_id_);
+
+      if (header.cdr_encapsulation_) {
+        ACE_DEBUG ((LM_DEBUG,
+                    "DDS_Dissector::dissect_sample_payload: "
+                    "dissection of CDR-encapsulated data is not currently "
+                    "supported\n"));
+        offset += header.message_length_;
+
+        // Mark Packet
+#ifndef NO_EXPERT
+        proto_tree_add_expert_format(
+          ltree,
+          pinfo_,
+          &ei_sample_payload,
+          tvb_,
+          offset,
+          (gint) header.message_length_,
+          "Dissecting CDR-encapsulated data is not currently supported.\n"
+        );
+#endif
+
+        return;
+      }
 
       const char * data_name =
         InfoRepo_Dissector::instance().topic_for_pub(&header.publication_id_);
-      if (data_name == 0)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "no topic for %s\n",
-                      std::string(converter).c_str()));
-          offset += header.message_length_; // skip marshaled data
-          return;
-        }
 
+      if (data_name == 0) {
+        ACE_DEBUG ((LM_DEBUG,
+                    "DDS_Dissector::dissect_sample_payload: "
+                    "no topic for %C\n",
+                    std::string(converter).c_str()));
+        offset += header.message_length_; // skip marshaled data
+
+        // Mark Packet
+#ifndef NO_EXPERT
+        proto_tree_add_expert_format(
+          ltree,
+          pinfo_,
+          &ei_sample_payload,
+          tvb_,
+          offset,
+          (gint) header.message_length_,
+          "No Topic Found for %s \n",
+          std::string(converter).c_str()
+        );
+#endif
+
+        return;
+      }
+
+      // Set Payload Field/Tree
+      proto_item * payload_item = proto_tree_add_string(
+        ltree, hf_sample_payload, tvb_, offset,
+        (gint) header.message_length_,
+        data_name);
+      proto_tree * contents_tree = proto_item_add_subtree(
+          payload_item, ett_sample_payload);
+
+      // Try to Dissect Payload
       Sample_Dissector *data_dissector =
         Sample_Manager::instance().find (data_name);
-      if (data_dissector == 0)
-        {
-          ACE_DEBUG ((LM_DEBUG,
-                      "DDS_Dissector::dissect_sample_payload: "
-                      "no dissector found for %s \n",
-                      data_name));
+      if (data_dissector == 0) {
+        ACE_DEBUG ((LM_DEBUG,
+                    "DDS_Dissector::dissect_sample_payload: "
+                    "no dissector found for %C \n",
+                    data_name));
 
-          offset += header.message_length_; // skip marshaled data
+        // Mark Packet
+#ifndef NO_EXPERT
+        proto_tree_add_expert_format(
+          ltree,
+          pinfo_,
+          &ei_sample_payload,
+          tvb_,
+          offset,
+          (gint) header.message_length_,
+          "No Dissector Found for %C \n",
+          data_name
+        );
+#endif
+
+        offset += header.message_length_; // skip marshaled data
+      } else {
+        // Push DCPS Primary Data Type Namespace
+        // Convert, for example, "1::2::3" to "1.2.3"
+        std::string ns;
+        char c = 0xff;
+        bool delimiter = false;
+        for (size_t i = 0; c; i++) {
+          c = data_name[i];
+          if (c == ':') {
+            if (delimiter) {
+              Sample_Base::push_ns(ns);
+              ns = "";
+              delimiter = false;
+            } else {
+              delimiter = true;
+            }
+          } else if (c) { // Any value that's not : or NULL
+            ns.push_back(c);
+            delimiter = false;
+          }
         }
-      else
-        {
-          Wireshark_Bundle params = {tvb_, pinfo_, ltree, offset};
-          offset = data_dissector->dissect (params);
-        }
+        Sample_Base::push_ns(ns);
+
+        // Parameters to pass between the recursive dissect calls
+        const guint8 * const_data = tvb_get_ptr(
+          tvb_, offset, header.message_length_
+        );
+        guint8 * data = const_cast<guint8 *>(const_data);
+        size_t size = static_cast<size_t>(ws_tvb_length(tvb_) - offset);
+        Wireshark_Bundle params(
+          (char *) data, size,
+          header.byte_order_ != ACE_CDR_BYTE_ORDER,
+          Serializer::ALIGN_NONE // For now alignment is not supported
+        );
+        params.tvb = tvb_;
+        params.info = pinfo_;
+        params.tree = contents_tree;
+        params.offset = offset;
+
+        /*
+         * Handle Seg Faults that might be caused by incorrect ITL file
+         *
+         * Check for environment variable $OPENDDS_DISSECTORS_SIGSEGV,
+         * If it exists don't handle seg faults.
+         * Either way Wireshark will crash if the ITL file is the wrong type,
+         * or technically inconsistent size.
+         */
+        bool handle = ACE_OS::getenv(ACE_TEXT("OPENDDS_DISSECTOR_SIGSEGV")) == 0;
+        ACE_Sig_Action sig_act(sample_dissect_handle_sigsegv);
+        if (handle) sig_act.register_action(SIGSEGV); // Handle Segfaults
+
+        offset = data_dissector->dissect(params); // Dissect Sample Payload
+
+        // Clean Up
+        if (handle) sig_act.handler(SIG_DFL); // Restore default segfault behavior
+        Sample_Base::clear_ns();
+      }
     }
 
     int
@@ -542,7 +671,7 @@ namespace OpenDDS
 
         this->dissect_transport_header (trans_tree, trans, offset);
 
-        while (offset < gint(tvb_length(tvb_)))
+        while (offset < gint(ws_tvb_length(tvb_)))
           {
             DataSampleHeader sample =
               demarshal_data<DataSampleHeader>(tvb_, offset);
@@ -560,10 +689,24 @@ namespace OpenDDS
 
             proto_tree* sample_tree =
               proto_item_add_subtree(item, ett_sample_header);
+
             this->dissect_sample_header (sample_tree, sample, offset);
 
             sample_tree = proto_item_add_subtree (item, ett_sample_header);
-            this->dissect_sample_payload (sample_tree, sample, offset);
+            try {
+              this->dissect_sample_payload (sample_tree, sample, offset);
+            } catch (Sample_Dissector_Error & e) {
+#ifndef NO_EXPERT
+              proto_tree_add_expert_format(
+                trans_tree, pinfo_, &ei_sample_payload,
+                tvb_, offset, -1, e.what()
+              );
+#endif
+              Sample_Base::clear_ns();
+              ACE_DEBUG ((LM_DEBUG,
+                "DDS_Dissector::dissect_sample_payload: %C\n", e.what()
+              ));
+            }
 
           }
       }
@@ -573,48 +716,18 @@ namespace OpenDDS
     bool
     DDS_Dissector::dissect_heur()
     {
+      // Check for Magic Number in Header
       gint len = sizeof(DCPS::TransportHeader::DCPS_PROTOCOL);
       guint8* data = ws_tvb_get_ephemeral_string(tvb_, 0, len);
+      if (std::memcmp(data, DCPS::TransportHeader::DCPS_PROTOCOL, len) != 0) {
+        return false;
+      }
 
-      if (std::memcmp(data, DCPS::TransportHeader::DCPS_PROTOCOL, len) != 0)
-        {
-          return false;
-        }
-
-      if ( pinfo_->ptype == PT_TCP )
-        {
-          // A converstion is used to keep track of a series of frames
-          // that carry data between a connected pair of TCP endpoints.
-
-          if (!pinfo_->fd->flags.visited)
-            {
-              // adapted this from the implementation of
-              // find_or_create_converation which was not available prior to
-              // 1.4.x wireshark.
-              conversation_t *conv =
-                ::find_conversation(pinfo_->fd->num,
-                                    &pinfo_->src, &pinfo_->dst,
-                                    pinfo_->ptype,
-                                    pinfo_->srcport,
-                                    pinfo_->destport, 0);
-              if (conv == 0)
-                {
-                  // this is a new conversation
-                  conv = ::conversation_new(pinfo_->fd->num,
-                                            &pinfo_->src, &pinfo_->dst,
-                                            pinfo_->ptype,
-                                            pinfo_->srcport,
-                                            pinfo_->destport, 0);
-                }
-              ::conversation_set_dissector(conv, dcps_tcp_handle);
-            }
-
-          dissect_dds (tvb_, pinfo_, tree_);
-        }
-      else
-        {
-          this->dissect ();
-        }
+      if ( pinfo_->ptype == PT_TCP ) {
+        conversation_set_dissector(ws_find_or_create_conversation(pinfo_), dcps_tcp_handle);
+      } else {
+        this->dissect();
+      }
 
       return true;
     }
@@ -622,7 +735,7 @@ namespace OpenDDS
     // function passed to tcp pdu parser for computing packet length
     extern "C"
     guint
-    get_pdu_len(packet_info *, tvbuff_t *tvb, int offset)
+    get_pdu_len(packet_info *, tvbuff_t *tvb, int offset WS_GET_PDU_LEN_EXTRA_PARAM)
     {
       if ( tvb_memeql(tvb, 0, reinterpret_cast<const guint8*>(DCPS_MAGIC) ,4) != 0)
         return 0;
@@ -647,8 +760,8 @@ namespace OpenDDS
     }
 
     extern "C"
-    void
-    dissect_dds (tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+    WS_DISSECTOR_RETURN_TYPE
+    dissect_dds (tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree WS_DISSECTOR_EXTRA_PARAM)
     {
       // this can filter between DCPS and RTPS as needed.
       tcp_dissect_pdus(tvb,
@@ -659,6 +772,7 @@ namespace OpenDDS
                        get_pdu_len,
                        dissect_common
                        WS_TCP_DISSECT_PDUS_EXTRA_ARG);
+      WS_DISSECTOR_RETURN_VALUE
     }
 
     extern "C"
@@ -678,8 +792,6 @@ namespace OpenDDS
       if (initialized_)
         return;
       initialized_ = true;
-
-      Sample_Manager::instance ().init();
 
       //#define HFILL 0, 0, HF_REF_TYPE_NONE, 0, NULL, NULL
 #define NULL_HFILL NULL, 0, NULL, HFILL
@@ -706,7 +818,7 @@ namespace OpenDDS
                 FT_BOOLEAN, flags_bits, BF_HFILL(2) }
         },
         { &hf_length,
-            { "opendds.length", "Length",
+            { "Length", "opendds.length",
                 FT_UINT16, BASE_HEX, NULL_HFILL
                 }
         },
@@ -828,12 +940,30 @@ namespace OpenDDS
                 }
         },
         { &hf_sample_content_filt,
-            { "Content Filters",
+            { "Number of Content Filters",
+                "opendds.sample.content_filter",
+                FT_UINT32, BASE_DEC, NULL_HFILL
+                }
+        },
+        { &hf_sample_content_filt_entries,
+            { "Content Filter",
                 "opendds.sample.content_filter_entries",
-                FT_UINT32, BASE_HEX, NULL_HFILL
+                FT_STRING, BASE_NONE, NULL_HFILL
                 }
         }
       };
+
+      Sample_Manager::instance().add_protocol_field(
+        &hf_sample_payload,
+        payload_namespace, "Payload",
+        FT_STRING
+      );
+
+      for (unsigned i = 0; i < array_length(hf); i++) {
+        Sample_Manager::instance().add_protocol_field(hf[i]);
+      }
+
+      Sample_Manager::instance().init();
 
       static gint *ett[] = {
         &ett_trans_header,
@@ -841,17 +971,42 @@ namespace OpenDDS
         &ett_sample_header,
         &ett_sample_flags,
         &ett_sample_flags2,
-        &ett_filters
+        &ett_filters,
+        &ett_sample_payload
       };
 
+      // Expert Information
+#ifndef NO_EXPERT
+      static ei_register_info ei[] = {
+        { &ei_sample_payload, {
+          "opendds.sample.dissect_error",
+          PI_UNDECODED, PI_WARN,
+          "Unable to Dissect Sample Payload",
+          EXPFILL
+        }},
+      };
+#endif
+
+      // Register Protocol
       proto_opendds =
         proto_register_protocol
         ("OpenDDS DCPS Protocol",  // name
          "OpenDDS",                // short_name
          "opendds");               // filter_name
 
-      proto_register_field_array(proto_opendds, hf, array_length(hf));
+      proto_register_field_array(proto_opendds,
+        Sample_Manager::instance().fields_array(),
+        Sample_Manager::instance().number_of_fields()
+      );
       proto_register_subtree_array(ett, array_length(ett));
+
+#ifndef NO_EXPERT
+      // Register Expert Information
+      expert_register_field_array(
+        expert_register_protocol(proto_opendds),
+        ei, array_length(ei)
+      );
+#endif
     }
 
     void
@@ -859,10 +1014,12 @@ namespace OpenDDS
     {
       dcps_tcp_handle = create_dissector_handle(dissect_dds, proto_opendds);
 
-      heur_dissector_add("tcp", dissect_dds_heur, proto_opendds);
-      heur_dissector_add("udp", dissect_dds_heur, proto_opendds);
+      heur_dissector_add("tcp", dissect_dds_heur, WS_HEUR_DISSECTOR_EXTRA_ARGS1(TCP, tcp)
+                         proto_opendds WS_HEUR_DISSECTOR_EXTRA_ARGS2);
+      heur_dissector_add("udp", dissect_dds_heur, WS_HEUR_DISSECTOR_EXTRA_ARGS1(UDP, udp)
+                         proto_opendds WS_HEUR_DISSECTOR_EXTRA_ARGS2);
 
-      dissector_add_handle("tcp.port", dcps_tcp_handle);  /* for "decode-as" */
+      ws_dissector_add_handle("tcp.port", dcps_tcp_handle);  /* for "decode-as" */
     }
 
   }

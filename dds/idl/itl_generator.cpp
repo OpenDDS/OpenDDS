@@ -7,6 +7,7 @@
 
 #include "itl_generator.h"
 #include "be_extern.h"
+#include "global_extern.h"
 
 #include "utl_identifier.h"
 #include "utl_labellist.h"
@@ -272,7 +273,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
   return true;
 }
 
-bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* /* name */,
+bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                                const std::vector<AST_Field*>& fields,
                                AST_Type::SIZE_TYPE, const char* repoid)
 {
@@ -285,6 +286,12 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* /* name */,
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
                   << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
+
+  // Check if this is defined as a primary data type
+                  << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
+                  << (idl_global->is_dcps_type(name) ? "true" : "false")
+                  << " },\n"
+
                   << Indent(this) << "\"type\" :\n"
                   << Open(this)
                   << Indent(this) << "{\n"

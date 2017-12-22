@@ -12,7 +12,7 @@
 
 extern "C" {
 
-#include "config.h"
+#include "ws_config.h"
 
 #include <glib.h>
 #include <gmodule.h>
@@ -25,11 +25,26 @@ extern "C" {
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
-#include "tools/dissector/ws_common.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
+#include "tools/dissector/ws_common.h"
+
+extern "C" {
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 4, 0)
+#include <wsutil/report_message.h>
+#elif WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1, 12, 0)
+#include <wsutil/report_err.h>
+#else // Before 1.12
+#include <epan/report_err.h>
+#endif
+
+#ifndef NO_EXPERT
+#include <epan/expert.h>
+#endif
+}
+
 #include "ace/Hash_Map_Manager.h"
 
 #include <string>
@@ -82,11 +97,11 @@ namespace OpenDDS
 
 
     extern "C" {
-      dissector_Export guint get_pdu_len (packet_info *, tvbuff_t *, int);
+      dissector_Export guint get_pdu_len (packet_info *, tvbuff_t *, int WS_GET_PDU_LEN_EXTRA_PARAM);
       dissector_Export WS_DISSECTOR_T_RETURN_TYPE dissect_common (
                              tvbuff_t*, packet_info*,
                              proto_tree* WS_DISSECTOR_T_EXTRA_PARAM);
-      dissector_Export void dissect_dds (tvbuff_t*, packet_info*, proto_tree*);
+      dissector_Export WS_DISSECTOR_RETURN_TYPE dissect_dds (tvbuff_t*, packet_info*, proto_tree* WS_DISSECTOR_EXTRA_PARAM);
       dissector_Export gboolean dissect_dds_heur (tvbuff_t*, packet_info*,
                                                   proto_tree* WS_HEUR_DISSECTOR_T_EXTRA_PARAM);
     }
