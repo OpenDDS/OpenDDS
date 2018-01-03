@@ -14,7 +14,7 @@ project(*LivelinessCompatibility): dcpsexe {
   }
 }
 
-project(*SequenceNumber): dcpsexe {
+project(*SequenceNumber): dcpsexe, googletest {
   exename   = *
 
   Source_Files {

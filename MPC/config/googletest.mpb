@@ -1,0 +1,5 @@
+project {
+  includes += $(DDS_ROOT)/tests/googletest/googletest/include
+  libpaths += $(DDS_ROOT)/tests/googletest/build/googlemock/gtest/$(Configuration)
+  lit_libs += gtest
+}
