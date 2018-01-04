@@ -578,7 +578,7 @@ namespace OpenDDS
           tvb_,
           offset,
           (gint) header.message_length_,
-          "No Dissector Found for %C \n",
+          "No Dissector Found for %s \n",
           data_name
         );
 #endif

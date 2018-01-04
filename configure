@@ -156,8 +156,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark 1.x Source (use WIRESHARK_SRC)',
 	'wireshark2:s', 'Wireshark 2.x Source (use WIRESHARK_SRC)',
-	'wireshark2_build:s', 'Wireshark 2 Build Location on Windows)',
-	'wireshark2_bin:s', 'Folder within Wireshark 2 Build Location with libs and bins on Windows (default: run\RelWithDebInfo)',
+	'wireshark2_build:s', 'Wireshark 2 Build Location on Windows',
+	'wireshark2_bin:s', 'Folder with Wireshark 2 libraries on Windows (default: $WIRESHARK2_BUILD\\run\\RelWithDebInfo)',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson', 'RapidJSON for Wireshark Sample Dissection(optional)',
     'qt:s', 'Qt (use QTDIR or system pkg)',
@@ -833,9 +833,9 @@ my %optdep =
    'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
    'wireshark2' =>['WIRESHARK_SRC', 'epan/packet.h',               'wireshark2'],
    'wireshark2_build' =>
-                  ['WIRESHARK2_BUILD', 'config.h',                  'wireshark_any'],
+                  ['WIRESHARK2_BUILD', 'config.h'],
    'wireshark2_bin' =>
-                  ['WIRESHARK2_BIN', 'wireshark.lib',               'wireshark2_bin'],
+                  ['WIRESHARK2_BIN'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
    'rapidjson' => [undef,           undef,                         'no_itl=0'],
    'qt' =>        ['QTDIR',         '',                            'qt4'],
@@ -978,7 +978,20 @@ if (exists $opts{'wireshark'} || exists $opts{'wireshark2'}) {
   if (!exists $opts{'glib'}) {
     die "ERROR: --glib is required for --wireshark and --wireshark2\n";
   }
-  push(@features, "wireshark_any")
+  
+  if (exists $opts{'wireshark'} && exists $opts{'wireshark2'}) {
+    die "ERROR: --wireshark and --wireshark2 can not be used at the same time.\n";
+  }
+
+  if ($^O eq 'MSWin32') {
+    if (exists $opts{'wireshark2'}) {
+      if (!exists $opts{'wireshark2_build'}) {
+        die "ERROR: --wireshark2_build is required on Windows with --wireshark2\n";
+      }
+    } elsif (exists $opts{'wireshark2_build'}) {
+      die "ERROR: --wireshark2 is required for --wireshark2_build\n";
+    }
+  }
 }
 
 if ($opts{'glib'}) {
@@ -996,19 +1009,6 @@ if ($opts{'glib'}) {
   }
 }
 
-if ($^O eq 'MSWin32') {
-  if (exists $opts{'wireshark2'}) {
-    if (!exists $opts{'wireshark2_build'}) {
-      die "ERROR: --wireshark2_build is required on Windows with --wireshark2\n";
-    }
-    if (!exists $opts{'wireshark2_bin'}) {
-      $opts{'wireshark2_bin'} = "run\\RelWithDebInfo";
-    }
-    $opts{'wireshark2_bin'} = $opts{'wireshark2_build'} . "\\" . $opts{'wireshark2_bin'};
-  } elsif (exists $opts{'wireshark2_build'}) {
-    die "ERROR: --wireshark2 is required for --wireshark2_build\n";
-  }
-}
 
 if ($opts{'qt-include'}) {
   setEnv('QT4_INCDIR', $opts{'qt-include'});

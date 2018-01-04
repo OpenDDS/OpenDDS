@@ -53,7 +53,7 @@ namespace OpenDDS
       }
       from_ = reinterpret_cast<gchar*>(&trimmed[0]);
 #else
-      from_ = reinterpret_cast<gchar*>(from);
+      from_ = reinterpret_cast<gchar*>(const_cast<ACE_CDR::WChar*>(from));
 #endif
 
       GError * error = NULL;
