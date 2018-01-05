@@ -1,0 +1,22 @@
+
+// Generates core security-related Makefiles.
+
+// See footnotes in dds/DdsDcps.mpc for tips on
+// what should be included in IDL projects.
+
+project(*idl): dcps {
+  requires += no_opendds_safety_profile
+
+  // When no files are specified this block
+  // prevents files from being parsed by the
+  // TAO IDL transpiler.
+  IDL_Files {
+  }
+
+  TypeSupport_Files {
+    DdsSecurityCore.idl
+  }
+
+  custom_only = 1
+}
+
