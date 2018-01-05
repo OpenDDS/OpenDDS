@@ -4,19 +4,22 @@
  * of DDS Entities and DDS Entity Qos
  */
  // DDSSEC11-96
-#include "DdsXTypesDiscovery.idl"  /* http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl */
+//#include "DdsXTypesDiscovery.idl"  /* http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl */
 
 // The types in this file shall be serialized with XCDR encoding version 1
 module OpenDDS {
-    module Security {
+  module Security {
 
+    typedef sequence<octet> OctetSeq;
+    
+      /*
         // DynamicData is in DDS-XTYPES but including the XTYPES IDL
         // Would make the file not compilable by legacy IDL compilers
         // that do not understand the new anotation syntax
         native DynamicData;
 
         typedef sequence<long long>  LongLongSeq;
-
+      */
         struct Property_t {
             string name;
             string value;
@@ -34,8 +37,9 @@ module OpenDDS {
         // DDSSEC11-96
         struct DataHolder {
             string             class_id;
-            @optional  PropertySeq        properties; 
-            @optional  BinaryPropertySeq  binary_properties; 
+	  //TODO: implement
+	  //@optional  PropertySeq        properties; 
+	  //@optional  BinaryPropertySeq  binary_properties; 
         };
         typedef sequence<DataHolder> DataHolderSeq;
 
@@ -45,16 +49,19 @@ module OpenDDS {
         typedef Token MessageToken;
         typedef MessageToken AuthRequestMessageToken;
         typedef MessageToken HandshakeMessageToken;
-      
+
         // DDSSEC11-82
         typedef Token IdentityStatusToken;
+    /*      
         typedef sequence<HandshakeMessageToken> HandshakeMessageTokenSeq;
-
+    */
         typedef Token  IdentityToken;
         typedef Token  PermissionsToken;
+    /*
         typedef Token  AuthenticatedPeerCredentialToken;
+    */
         typedef Token  PermissionsCredentialToken;
-
+    /*
         typedef Token  CryptoToken;
         typedef sequence<CryptoToken>  CryptoTokenSeq;
 
@@ -65,12 +72,15 @@ module OpenDDS {
         typedef CryptoTokenSeq  ParticipantCryptoTokenSeq;
         typedef CryptoTokenSeq  DatawriterCryptoTokenSeq;
         typedef CryptoTokenSeq  DatareaderCryptoTokenSeq;
-
+    */
         // DDSSEC11-88
         // From DDS-RTPS 2.2 clauses 8.4.2.1 and 9.3.1
         typedef octet GuidPrefix_t[12];
+
+        typedef octet EntityKey_t[3];
+
         struct EntityId_t {
-            octet entityKey[3];
+            EntityKey_t key;
             octet entityKind;
         };
 
@@ -79,7 +89,7 @@ module OpenDDS {
             GuidPrefix_t prefix;
             EntityId_t   entityId;
         };
-
+    /*
         // DDSSEC11-88
         struct MessageIdentity {
             GUID_t     source_guid;
@@ -88,9 +98,10 @@ module OpenDDS {
 
         // DDSSEC11-24
         const ReturnCode_t RETCODE_NOT_ALLOWED_BY_SECURITY = 1000;
-
+    */
         // DDSSEC11-96
-        @extensibility(APPENDABLE)
+        //TODO: implement
+        //@extensibility(APPENDABLE)
         struct PropertyQosPolicy {
             PropertySeq        value;
             BinaryPropertySeq  binary_value;
@@ -98,11 +109,12 @@ module OpenDDS {
 
         // DDSSEC11-96
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
-        @extensibility(MUTABLE)
-	struct DomainParticipantQos :  DDS::DomainParticipantQos {
+        //TODO: implement
+        //@extensibility(MUTABLE)
+        struct DomainParticipantQos { //:  DDS::DomainParticipantQos {
             PropertyQosPolicy  property;
         };
-
+    /*
         struct Tag {
             string name;
             string value;
@@ -201,7 +213,7 @@ module OpenDDS {
         struct SubscriptionBuiltinTopicDataSecure  :  DDS::SubscriptionBuiltinTopicData {
 	    @id(0x1003)  DataTags data_tags;
         };
-
+    */
         // DDSSEC11-15 typedef long SecurityExceptionCode;
         typedef long SecurityExceptionCode;
 
@@ -222,7 +234,9 @@ module OpenDDS {
 
         native IdentityHandle;
         native HandshakeHandle;
+
         native SharedSecretHandle;
+    /*
         native PermissionsHandle;
         native ParticipantCryptoHandle;
         native ParticipantCryptoHandleSeq;
@@ -230,15 +244,17 @@ module OpenDDS {
         native DatawriterCryptoHandleSeq;
         native DatareaderCryptoHandle;
         native DatareaderCryptoHandleSeq;
-
+    */
         // DDSSEC11-96
         interface Authentication;
 
         // DDSSEC11-82
         enum AuthStatusKind {
-	    @value(1) IDENTITY_STATUS
+	  //TODO: implement
+	  //@value(1) IDENTITY_STATUS
+	  IDENTITY_STATUS
         };
-      
+
         // DDSSEC11-96
         interface AuthenticationListener {
             boolean
@@ -255,7 +271,7 @@ module OpenDDS {
 		    in    AuthStatusKind     status_kind,
                     inout SecurityException  ex);
          };
-
+    /*      
         // DDSSEC11-96
         interface Authentication {
             // DDSSEC11-88
@@ -414,8 +430,9 @@ module OpenDDS {
       
         // DDSSEC11-96
         interface AccessControl;
+    */
         typedef long  DomainId_t;
-
+    /*
         // DDSSEC11-96
         interface AccessControlListener {
             boolean on_revoke_permissions(
@@ -910,6 +927,7 @@ module OpenDDS {
                     inout SecurityException ex);
 
         };
+      */
     };
 };
 
