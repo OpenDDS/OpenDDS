@@ -246,7 +246,7 @@ module OpenDDS {
         native DatareaderCryptoHandleSeq;
     */
         // DDSSEC11-96
-        interface Authentication;
+        local interface Authentication;
 
         // DDSSEC11-82
         enum AuthStatusKind {
@@ -256,7 +256,7 @@ module OpenDDS {
         };
 
         // DDSSEC11-96
-        interface AuthenticationListener {
+        local interface AuthenticationListener {
             boolean
                 on_revoke_identity(
                     in    Authentication     plugin,
@@ -275,7 +275,7 @@ module OpenDDS {
         typedef long  DomainId_t;
 
         // DDSSEC11-96
-        interface Authentication {
+        local interface Authentication {
             // DDSSEC11-88
             ValidationResult_t
                 validate_local_identity(
@@ -431,17 +431,17 @@ module OpenDDS {
         };
       
         // DDSSEC11-96
-        interface AccessControl;
+        local interface AccessControl;
 
         // DDSSEC11-96
-        interface AccessControlListener {
+        local interface AccessControlListener {
             boolean on_revoke_permissions(
                 in   AccessControl plugin,
                 in   PermissionsHandle handle);
        };
 
         // DDSSEC11-96
-        interface AccessControl {
+        local interface AccessControl {
             PermissionsHandle
                 validate_local_permissions(
                     in    Authentication         auth_plugin,
@@ -652,7 +652,7 @@ module OpenDDS {
         };
 
         // DDSSEC11-96
-        interface CryptoKeyFactory {
+        local interface CryptoKeyFactory {
 
             // DDSSEC11-3 DDSSEC11-85
             ParticipantCryptoHandle
@@ -720,7 +720,7 @@ module OpenDDS {
 
 
         // DDSSEC11-96
-        interface CryptoKeyExchange {
+        local interface CryptoKeyExchange {
             boolean
                 create_local_participant_crypto_tokens(
                     inout ParticipantCryptoTokenSeq  local_participant_crypto_tokens,
@@ -777,7 +777,7 @@ module OpenDDS {
 
         // DDSSEC11-96
         // DDSSEC11-123
-        interface CryptoTransform {
+        local interface CryptoTransform {
             boolean
                 encode_serialized_payload(
                     inout OctetSeq                encoded_buffer,
@@ -905,12 +905,12 @@ module OpenDDS {
         };
 
         // DDSSEC11-96
-        interface LoggerListener {
+        local interface LoggerListener {
             boolean on_log_message(in BuiltinLoggingType msg);
         };
         
         // DDSSEC11-96
-        interface Logging {
+        local interface Logging {
             boolean set_log_options(
                     in    LogOptions options,
                     inout SecurityException ex);
