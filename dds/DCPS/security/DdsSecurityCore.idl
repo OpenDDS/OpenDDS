@@ -57,9 +57,9 @@ module OpenDDS {
     */
         typedef Token  IdentityToken;
         typedef Token  PermissionsToken;
-    /*
+
         typedef Token  AuthenticatedPeerCredentialToken;
-    */
+
         typedef Token  PermissionsCredentialToken;
     /*
         typedef Token  CryptoToken;
@@ -271,7 +271,9 @@ module OpenDDS {
 		    in    AuthStatusKind     status_kind,
                     inout SecurityException  ex);
          };
-    /*      
+
+        typedef long  DomainId_t;
+
         // DDSSEC11-96
         interface Authentication {
             // DDSSEC11-88
@@ -300,7 +302,7 @@ module OpenDDS {
 	    boolean
                 set_permissions_credential_and_token(
                     in    IdentityHandle         handle,
-                    in    PermissionsCredential  permissions_credential,
+                    in    PermissionsCredentialToken  permissions_credential,
                     in    PermissionsToken       permissions_token,
                     inout SecurityException      ex );
 
@@ -392,7 +394,7 @@ module OpenDDS {
                     in    SharedSecretHandle  sharedsecret_handle,
                     inout SecurityException   ex);
         };
-
+    /*      
         // DDSSEC11-137 DDSEC11-85
         struct ParticipantSecurityAttributes {
             boolean     allow_unauthenticated_participants;
@@ -430,9 +432,7 @@ module OpenDDS {
       
         // DDSSEC11-96
         interface AccessControl;
-    */
-        typedef long  DomainId_t;
-    /*
+
         // DDSSEC11-96
         interface AccessControlListener {
             boolean on_revoke_permissions(
