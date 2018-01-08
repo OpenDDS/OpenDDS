@@ -7,20 +7,22 @@
 //#include "DdsXTypesDiscovery.idl"  /* http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl */
 #include "dds/DdsDcpsCore.idl"
 #include "dds/DdsDcpsGuid.idl"
+#include "dds/DdsDcpsPublication.idl"
+#include "dds/DdsDcpsSubscription.idl"
 
 // The types in this file shall be serialized with XCDR encoding version 1
 module DDS {
   module Security {
 
-//typedef sequence<octet> OctetSeq;
-    
-      /*
+        //TODO: implement
         // DynamicData is in DDS-XTYPES but including the XTYPES IDL
         // Would make the file not compilable by legacy IDL compilers
         // that do not understand the new anotation syntax
         native DynamicData;
 
-        typedef sequence<long long>  LongLongSeq;
+      /*
+	//TODO: remove this? It's not being used anywhere.
+        //typedef sequence<long long>  LongLongSeq;
       */
         struct Property_t {
             string name;
@@ -103,7 +105,7 @@ module DDS {
         struct DomainParticipantQos { //:  DDS::DomainParticipantQos {
             PropertyQosPolicy  property;
         };
-    /*
+
         struct Tag {
             string name;
             string value;
@@ -116,7 +118,7 @@ module DDS {
 
         // DDSSEC11-34
         typedef DataTags DataTagQosPolicy;
-
+    /*
         // DDSSEC11-96
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
         // DDSSEC11-34
@@ -134,9 +136,10 @@ module DDS {
             PropertyQosPolicy  property;
             DataTagQosPolicy   data_tags;
         };
-        
+    */
         // DDSSEC11-137
         typedef unsigned long ParticipantSecurityAttributesMask;
+    /*
         typedef unsigned long PluginParticipantSecurityAttributesMask;
 
         @extensibility(APPENDABLE)
@@ -150,7 +153,9 @@ module DDS {
 
         // DDSSEC11-106
         typedef unsigned long EndpointSecurityAttributesMask;
+    */
         typedef unsigned long PluginEndpointSecurityAttributesMask;
+    /*
         @extensibility(APPENDABLE)
         struct EndpointSecurityInfo {
             EndpointSecurityAttributesMask        endpoint_security_attributes; 
@@ -170,13 +175,15 @@ module DDS {
 	    @id(0x0059)  PropertyQosPolicy property;           
 	    @id(0x1005)  ParticipantSecurityInfo  security_info;
         };
-
+    */
+        //TODO: implement this
         // DDSSEC11-82
-        @extensibility(MUTABLE)
-        struct ParticipantBuiltinTopicDataSecure  :  ParticipantBuiltinTopicData {
-	    @id(0x1006) @optional IdentityStatusToken identity_status_token;
+        //@extensibility(MUTABLE)
+        struct ParticipantBuiltinTopicDataSecure { // :  ParticipantBuiltinTopicData {
+	    //@id(0x1006) @optional IdentityStatusToken identity_status_token;
+	    IdentityStatusToken identity_status_token;
         };
-
+    /*
         // DDSSEC11-85
         @extensibility(MUTABLE) 
         struct PublicationBuiltinTopicData: DDS::PublicationBuiltinTopicData {
@@ -188,21 +195,25 @@ module DDS {
         struct SubscriptionBuiltinTopicData: DDS::SubscriptionBuiltinTopicData {
 	     @id(0x1004) EndpointSecurityInfo  security_info;
         };
-      
+    */
+        //TODO: implement this
         // DDSSEC11-96
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
-        @extensibility(MUTABLE)
-        struct PublicationBuiltinTopicDataSecure  :  PublicationBuiltinTopicData {
-	    @id(0x1003)  DataTags data_tags;
+        //@extensibility(MUTABLE)
+        struct PublicationBuiltinTopicDataSecure {// :  PublicationBuiltinTopicData {
+	    //@id(0x1003)  DataTags data_tags;
+	    DataTags data_tags;
         };
 
+        //TODO: implement this
         // DDSSEC11-96
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
-        @extensibility(MUTABLE)
-        struct SubscriptionBuiltinTopicDataSecure  :  DDS::SubscriptionBuiltinTopicData {
-	    @id(0x1003)  DataTags data_tags;
+        //@extensibility(MUTABLE)
+        struct SubscriptionBuiltinTopicDataSecure { //  :  DDS::SubscriptionBuiltinTopicData {
+	    //@id(0x1003)  DataTags data_tags;
+	    DataTags data_tags;
         };
-    */
+
         // DDSSEC11-15 typedef long SecurityExceptionCode;
         typedef long SecurityExceptionCode;
 
@@ -225,8 +236,9 @@ module DDS {
         native HandshakeHandle;
 
         native SharedSecretHandle;
-    /*
+
         native PermissionsHandle;
+    /*
         native ParticipantCryptoHandle;
         native ParticipantCryptoHandleSeq;
         native DatawriterCryptoHandle;
@@ -383,7 +395,7 @@ module DDS {
                     in    SharedSecretHandle  sharedsecret_handle,
                     inout SecurityException   ex);
         };
-    /*      
+
         // DDSSEC11-137 DDSEC11-85
         struct ParticipantSecurityAttributes {
             boolean     allow_unauthenticated_participants;
@@ -402,23 +414,25 @@ module DDS {
             boolean  is_discovery_protected;
             boolean  is_liveliness_protected;
         };
-      
+
+        //TODO: implement this
+        // Does this need an explicit @extensibility annotation?
         // DDSSEC11-16 DDSSEC11-106 DDSEC11-85
-        struct EndpointSecurityAttributes : TopicSecurityAttributes {
+        struct EndpointSecurityAttributes { //: TopicSecurityAttributes {
             boolean     is_submessage_protected;
             boolean     is_payload_protected;
             boolean     is_key_protected;
             PluginEndpointSecurityAttributesMask  plugin_endpoint_attributes; 
             PropertySeq ac_endpoint_properties; 
         };
-
+    /*            
         // DDSSEC11-106      
         struct PluginEndpointSecurityAttributes {
             boolean     is_submessage_encrypted;
             boolean     is_payload_encrypted;
             boolean     is_submessage_origin_authenticated;
         };
-      
+    */      
         // DDSSEC11-96
         local interface AccessControl;
 
@@ -428,6 +442,7 @@ module DDS {
                 in   AccessControl plugin,
                 in   PermissionsHandle handle);
        };
+
 
         // DDSSEC11-96
         local interface AccessControl {
@@ -599,7 +614,7 @@ module DDS {
 	   boolean
 	       get_topic_sec_attributes (
 		    in    PermissionsHandle           permissions_handle, 
-                    in    String                      topic_name, 
+                    in    string                      topic_name, 
                     inout TopicSecurityAttributes     attributes, 
                     inout SecurityException           ex);
                  
@@ -639,6 +654,8 @@ module DDS {
                     in EndpointSecurityAttributes  attributes,
                     inout SecurityException        ex);
         };
+
+    /*
 
         // DDSSEC11-96
         local interface CryptoKeyFactory {
