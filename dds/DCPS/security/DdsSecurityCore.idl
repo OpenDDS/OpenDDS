@@ -5,12 +5,14 @@
  */
  // DDSSEC11-96
 //#include "DdsXTypesDiscovery.idl"  /* http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl */
+#include "dds/DdsDcpsCore.idl"
+#include "dds/DdsDcpsGuid.idl"
 
 // The types in this file shall be serialized with XCDR encoding version 1
-module OpenDDS {
+module DDS {
   module Security {
 
-    typedef sequence<octet> OctetSeq;
+//typedef sequence<octet> OctetSeq;
     
       /*
         // DynamicData is in DDS-XTYPES but including the XTYPES IDL
@@ -37,9 +39,13 @@ module OpenDDS {
         // DDSSEC11-96
         struct DataHolder {
             string             class_id;
-	  //TODO: implement
-	  //@optional  PropertySeq        properties; 
-	  //@optional  BinaryPropertySeq  binary_properties; 
+	    //TODO: In the spec these fields are optional
+	    //  but for now since the @optional tag is not
+	    //  supported we simply keep them.
+	    //@optional  PropertySeq        properties; 
+	    //@optional  BinaryPropertySeq  binary_properties; 
+	    PropertySeq        properties; 
+	    BinaryPropertySeq  binary_properties; 
         };
         typedef sequence<DataHolder> DataHolderSeq;
 
@@ -72,24 +78,7 @@ module OpenDDS {
         typedef CryptoTokenSeq  ParticipantCryptoTokenSeq;
         typedef CryptoTokenSeq  DatawriterCryptoTokenSeq;
         typedef CryptoTokenSeq  DatareaderCryptoTokenSeq;
-    */
-        // DDSSEC11-88
-        // From DDS-RTPS 2.2 clauses 8.4.2.1 and 9.3.1
-        typedef octet GuidPrefix_t[12];
 
-        typedef octet EntityKey_t[3];
-
-        struct EntityId_t {
-            EntityKey_t key;
-            octet entityKind;
-        };
-
-        // DDSSEC11-88
-        struct GUID_t {
-            GuidPrefix_t prefix;
-            EntityId_t   entityId;
-        };
-    /*
         // DDSSEC11-88
         struct MessageIdentity {
             GUID_t     source_guid;
@@ -280,10 +269,10 @@ module OpenDDS {
             ValidationResult_t
                 validate_local_identity(
                     inout IdentityHandle        local_identity_handle,
-                    inout GUID_t                adjusted_participant_guid,
+                    inout OpenDDS::DCPS::GUID_t adjusted_participant_guid,
                     in    DomainId_t            domain_id,
                     in    DomainParticipantQos  participant_qos,
-                    in    GUID_t                candidate_participant_guid,
+                    in    OpenDDS::DCPS::GUID_t candidate_participant_guid,
                     inout SecurityException     ex );
 
             boolean
@@ -316,7 +305,7 @@ module OpenDDS {
  	            in     AuthRequestMessageToken  remote_auth_request_token,	
                     in     IdentityHandle           local_identity_handle,
                     in     IdentityToken            remote_identity_token,
-                    in     GUID_t                   remote_participant_guid,
+                    in     OpenDDS::DCPS::GUID_t    remote_participant_guid,
                     inout  SecurityException        ex );
 
             // DDSSEC11-46
