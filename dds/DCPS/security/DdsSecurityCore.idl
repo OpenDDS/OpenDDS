@@ -69,18 +69,20 @@ module DDS {
         typedef Token  AuthenticatedPeerCredentialToken;
 
         typedef Token  PermissionsCredentialToken;
-    /*
+
         typedef Token  CryptoToken;
         typedef sequence<CryptoToken>  CryptoTokenSeq;
 
+    /*
         typedef Token  ParticipantCryptoToken;
         typedef Token  DatawriterCryptoToken;
         typedef Token  DatareaderCryptoToken;
-
+    */
         typedef CryptoTokenSeq  ParticipantCryptoTokenSeq;
         typedef CryptoTokenSeq  DatawriterCryptoTokenSeq;
         typedef CryptoTokenSeq  DatareaderCryptoTokenSeq;
 
+    /*
         // DDSSEC11-88
         struct MessageIdentity {
             GUID_t     source_guid;
@@ -238,14 +240,15 @@ module DDS {
         native SharedSecretHandle;
 
         native PermissionsHandle;
-    /*
+
         native ParticipantCryptoHandle;
         native ParticipantCryptoHandleSeq;
         native DatawriterCryptoHandle;
         native DatawriterCryptoHandleSeq;
+
         native DatareaderCryptoHandle;
         native DatareaderCryptoHandleSeq;
-    */
+
         // DDSSEC11-96
         local interface Authentication;
 
@@ -655,7 +658,7 @@ module DDS {
                     inout SecurityException        ex);
         };
 
-    /*
+
 
         // DDSSEC11-96
         local interface CryptoKeyFactory {
@@ -723,7 +726,6 @@ module DDS {
                     in    DatareaderCryptoHandle  datareader_crypto_handle,
                     inout SecurityException       ex  );
         };
-
 
         // DDSSEC11-96
         local interface CryptoKeyExchange {
@@ -865,6 +867,7 @@ module DDS {
                     inout SecurityException       ex);
         };
 
+    /*
         enum LoggingLevel {
             EMERGENCY_LEVEL, // System is unusable. Should not continue use.
             ALERT_LEVEL,     // Should be corrected immediately
