@@ -24,19 +24,6 @@ module DDS {
 	//TODO: remove this? It's not being used anywhere.
         //typedef sequence<long long>  LongLongSeq;
       */
-        struct Property_t {
-            string name;
-            string value;
-            boolean propagate;
-        };
-        typedef sequence< Property_t >  PropertySeq;
-
-        struct BinaryProperty_t {
-            string name;
-            OctetSeq value;
-            boolean propagate;
-        };
-        typedef sequence< BinaryProperty_t >  BinaryPropertySeq;
 
         // DDSSEC11-96
         struct DataHolder {
@@ -92,21 +79,6 @@ module DDS {
         // DDSSEC11-24
         const ReturnCode_t RETCODE_NOT_ALLOWED_BY_SECURITY = 1000;
     */
-        // DDSSEC11-96
-        //TODO: implement
-        //@extensibility(APPENDABLE)
-        struct PropertyQosPolicy {
-            PropertySeq        value;
-            BinaryPropertySeq  binary_value;
-        }; 
-
-        // DDSSEC11-96
-        // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
-        //TODO: implement
-        //@extensibility(MUTABLE)
-        struct DomainParticipantQos { //:  DDS::DomainParticipantQos {
-            PropertyQosPolicy  property;
-        };
 
         struct Tag {
             string name;
