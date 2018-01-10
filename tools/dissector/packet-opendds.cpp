@@ -470,7 +470,7 @@ namespace OpenDDS
     // Try to gracefully handle a Seg Fault, give Wireshark a chance to
     // finish its business, and tell inform the user that their ITL file
     // is invalid
-    void sample_dissect_handle_sigsegv(int signal) {
+    void sample_dissect_handle_sigsegv(int /* signal */) {
       ACE_DEBUG ((LM_DEBUG,
         "DDS_Dissector::dissect_sample_payload: "
         "Encountered SIGSEGV (Segmentation Fault) signal during "
@@ -588,7 +588,7 @@ namespace OpenDDS
         // Push DCPS Primary Data Type Namespace
         // Convert, for example, "1::2::3" to "1.2.3"
         std::string ns;
-        char c = 0xff;
+		char c = 'a';
         bool delimiter = false;
         for (size_t i = 0; c; i++) {
           c = data_name[i];
@@ -950,14 +950,14 @@ namespace OpenDDS
                 "opendds.sample.content_filter_entries",
                 FT_STRING, BASE_NONE, NULL_HFILL
                 }
-        }
+        },
+		{ &hf_sample_payload,
+		  { "Payload",
+			payload_namespace.c_str(),
+			FT_STRING, BASE_NONE, NULL_HFILL
+          }
+		}
       };
-
-      Sample_Manager::instance().add_protocol_field(
-        &hf_sample_payload,
-        payload_namespace, "Payload",
-        FT_STRING
-      );
 
       for (unsigned i = 0; i < array_length(hf); i++) {
         Sample_Manager::instance().add_protocol_field(hf[i]);

@@ -38,7 +38,7 @@ inline conversation_t *ws_find_or_create_conversation(packet_info *pinfo) {
   conversation_t *conv = NULL;
   if (!(conv = ws_find_conversation(pinfo))) {
     conv = conversation_new(
-      pinfo->num, &pinfo->src, &pinfo->dst,
+      pinfo->fd->num, &pinfo->src, &pinfo->dst,
       pinfo->ptype, pinfo->srcport, pinfo->destport, 0
     );
   }
@@ -74,7 +74,6 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 0, 0)
 #define WS_DISSECTOR_EXTRA_ARG ,0
 #define ws_tvb_length tvb_reported_length
-#define WS_DISSECTOR_T_EXTRA_PARAM ,void*
 #define WS_GET_PDU_LEN_EXTRA_PARAM ,void*
 #define WS_HEUR_DISSECTOR_EXTRA_ARGS1(ucase, lcase) \
   "OpenDDS over " #ucase, "opendds_" #lcase,
@@ -83,7 +82,6 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 #define WS_1
 #define WS_DISSECTOR_EXTRA_ARG
 #define ws_tvb_length tvb_length
-#define WS_DISSECTOR_T_EXTRA_PARAM
 #define WS_GET_PDU_LEN_EXTRA_PARAM
 #define WS_HEUR_DISSECTOR_EXTRA_ARGS1(A, B)
 #define WS_HEUR_DISSECTOR_EXTRA_ARGS2

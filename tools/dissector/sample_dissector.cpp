@@ -20,7 +20,6 @@
 #include <tao/String_Manager_T.h>
 
 #include <cstring>
-#include <cstdint>
 
 #include <algorithm>
 #include <iomanip>
@@ -47,7 +46,7 @@ namespace OpenDDS
        * before we can pass it to glib's g_convert. Otherwise it will
        * interpret them as NULL characters and stop after the first two bytes.
        */
-      std::vector<uint16_t> trimmed(length + 1, 0);
+      std::vector<guint16> trimmed(length + 1, 0);
       for (size_t i = 0; i < length; i++) {
         trimmed[i] = from[i];
       }
@@ -133,6 +132,7 @@ namespace OpenDDS
         return field_contexts_[ns_];
       }
       Field_Context * fc = new Field_Context;
+      fc->hf_ = -1;
       field_contexts_[ns_] = fc;
       fc->label_ = ns_stack_.back();
       return fc;
@@ -607,7 +607,7 @@ namespace OpenDDS
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS,
                   string_value,
-                  "[%u]: %s", params.index, string_value
+                  "[%u]: %s", params.index, string_value.in()
                 );
               } else {
                 proto_tree_add_string(
@@ -756,9 +756,11 @@ namespace OpenDDS
     //------------------------------------------------------------------------
 
     Sample_Dissector::Sample_Dissector (const std::string &subtree)
-      :ett_ (-1),
+      :field_(0),
+	   ett_(-1),
        subtree_label_(),
-       field_ (0)
+	   is_struct_(false),
+	   is_root_(false)
     {
       if (!subtree.empty())
         this->init (subtree);
