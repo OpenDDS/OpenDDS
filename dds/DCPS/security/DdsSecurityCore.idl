@@ -390,10 +390,14 @@ module DDS {
             boolean  is_liveliness_protected;
         };
 
-        //TODO: implement this
-        // Does this need an explicit @extensibility annotation?
         // DDSSEC11-16 DDSSEC11-106 DDSEC11-85
         struct EndpointSecurityAttributes { //: TopicSecurityAttributes {
+            // TODO
+            // Once structure inheritance from IDL v4 is implemented this field
+	    // can be replaced by the commented-out inheritance from base-struct
+            // TopicSecurityAttributes. See the OMG reference implementation
+	    // (dds_security_plugins_spis.idl).
+	    TopicSecurityAttributes base;
             boolean     is_submessage_protected;
             boolean     is_payload_protected;
             boolean     is_key_protected;
