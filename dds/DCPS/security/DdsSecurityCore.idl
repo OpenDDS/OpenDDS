@@ -185,14 +185,20 @@ module DDS {
 	    //@id(0x1004) EndpointSecurityInfo  security_info;
 	    EndpointSecurityInfo  security_info;
         };
-    /*
+
         // DDSSEC11-85
-        @extensibility(MUTABLE) 
-        struct SubscriptionBuiltinTopicData: DDS::SubscriptionBuiltinTopicData {
-	     @id(0x1004) EndpointSecurityInfo  security_info;
+        //@extensibility(MUTABLE) 
+        struct SubscriptionBuiltinTopicData { //: DDS::SubscriptionBuiltinTopicData {
+            // TODO
+            // Once structure inheritance from IDL v4 is implemented this field
+	    // can be replaced by the commented-out inheritance.
+            // See the OMG reference implementation dds_security_plugins_spis.idl.
+	    DDS::SubscriptionBuiltinTopicData base;
+
+	    //@id(0x1004) EndpointSecurityInfo  security_info;
+	    EndpointSecurityInfo  security_info;
         };
-    */
-        //TODO: implement this
+
         // DDSSEC11-96
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
         //@extensibility(MUTABLE)
@@ -211,7 +217,13 @@ module DDS {
         // DDSSEC11-96
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
         //@extensibility(MUTABLE)
-        struct SubscriptionBuiltinTopicDataSecure { //  :  DDS::SubscriptionBuiltinTopicData {
+        struct SubscriptionBuiltinTopicDataSecure { //  :  SubscriptionBuiltinTopicData {
+            // TODO
+            // Once structure inheritance from IDL v4 is implemented this field
+	    // can be replaced by the commented-out inheritance.
+            // See the OMG reference implementation dds_security_plugins_spis.idl.
+	    SubscriptionBuiltinTopicData base;
+
 	    //@id(0x1003)  DataTags data_tags;
 	    DataTags data_tags;
         };
