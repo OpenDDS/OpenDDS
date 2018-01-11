@@ -124,18 +124,18 @@ module DDS {
     /*
 #define PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
 #define PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}
-
+    */
         // DDSSEC11-106
         typedef unsigned long EndpointSecurityAttributesMask;
-    */
+
         typedef unsigned long PluginEndpointSecurityAttributesMask;
-    /*
-        @extensibility(APPENDABLE)
+
+        //@extensibility(APPENDABLE)
         struct EndpointSecurityInfo {
             EndpointSecurityAttributesMask        endpoint_security_attributes; 
             PluginEndpointSecurityAttributesMask  plugin_endpoint_security_attributes; 
         };     
-
+    /*
 #define ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
 #define ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}
     */
@@ -146,9 +146,8 @@ module DDS {
         struct ParticipantBuiltinTopicData { //  :  DDS::ParticipantBuiltinTopicData {
             // TODO
             // Once structure inheritance from IDL v4 is implemented this field
-	    // can be replaced by the commented-out inheritance from base-struct
-            // TopicSecurityAttributes. See the OMG reference implementation
-	    // (dds_security_plugins_spis.idl).
+	    // can be replaced by the commented-out inheritance.
+            // See the OMG reference implementation dds_security_plugins_spis.idl.
 	    DDS::ParticipantBuiltinTopicData base;
 
 	    //@id(0x1001)  IdentityToken     identity_token;     
@@ -166,21 +165,27 @@ module DDS {
         struct ParticipantBuiltinTopicDataSecure { // :  ParticipantBuiltinTopicData {
             // TODO
             // Once structure inheritance from IDL v4 is implemented this field
-	    // can be replaced by the commented-out inheritance from base-struct
-            // TopicSecurityAttributes. See the OMG reference implementation
-	    // (dds_security_plugins_spis.idl).
+	    // can be replaced by the commented-out inheritance.
+            // See the OMG reference implementation dds_security_plugins_spis.idl.
 	    ParticipantBuiltinTopicData base;
 
 	    //@id(0x1006) @optional IdentityStatusToken identity_status_token;
 	    IdentityStatusToken identity_status_token;
         };
-    /*
-        // DDSSEC11-85
-        @extensibility(MUTABLE) 
-        struct PublicationBuiltinTopicData: DDS::PublicationBuiltinTopicData {
-	    @id(0x1004) EndpointSecurityInfo  security_info;
-        };
 
+        // DDSSEC11-85
+        //@extensibility(MUTABLE) 
+        struct PublicationBuiltinTopicData { //: DDS::PublicationBuiltinTopicData {
+            // TODO
+            // Once structure inheritance from IDL v4 is implemented this field
+	    // can be replaced by the commented-out inheritance.
+            // See the OMG reference implementation dds_security_plugins_spis.idl.
+            DDS::PublicationBuiltinTopicData base;
+
+	    //@id(0x1004) EndpointSecurityInfo  security_info;
+	    EndpointSecurityInfo  security_info;
+        };
+    /*
         // DDSSEC11-85
         @extensibility(MUTABLE) 
         struct SubscriptionBuiltinTopicData: DDS::SubscriptionBuiltinTopicData {
@@ -192,6 +197,12 @@ module DDS {
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
         //@extensibility(MUTABLE)
         struct PublicationBuiltinTopicDataSecure {// :  PublicationBuiltinTopicData {
+            // TODO
+            // Once structure inheritance from IDL v4 is implemented this field
+	    // can be replaced by the commented-out inheritance.
+            // See the OMG reference implementation dds_security_plugins_spis.idl.
+	    PublicationBuiltinTopicData base;
+
 	    //@id(0x1003)  DataTags data_tags;
 	    DataTags data_tags;
         };
