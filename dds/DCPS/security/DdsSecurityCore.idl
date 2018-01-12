@@ -14,11 +14,9 @@
 module DDS {
   module Security {
 
-        //TODO: implement
-        // DynamicData is in DDS-XTYPES but including the XTYPES IDL
-        // Would make the file not compilable by legacy IDL compilers
-        // that do not understand the new anotation syntax
-        native DynamicData;
+        //native DynamicData;
+        local interface DynamicData {
+        };
 
       /*
 	//TODO: remove this? It's not being used anywhere.
@@ -246,20 +244,29 @@ module DDS {
             VALIDATION_OK_FINAL_MESSAGE
         };
 
-        native IdentityHandle;
-        native HandshakeHandle;
+        //native IdentityHandle;
+        //native HandshakeHandle;
+        //native SharedSecretHandle;
+        //native PermissionsHandle;
+        typedef long IdentityHandle;
+        typedef long HandshakeHandle;
+        typedef long SharedSecretHandle;
+        typedef long PermissionsHandle;
 
-        native SharedSecretHandle;
+        //native ParticipantCryptoHandle;
+        //native ParticipantCryptoHandleSeq;
+        typedef long ParticipantCryptoHandle;
+        typedef sequence<ParticipantCryptoHandle> ParticipantCryptoHandleSeq;
 
-        native PermissionsHandle;
+        //native DatawriterCryptoHandle;
+        //native DatawriterCryptoHandleSeq;
+        typedef long DatawriterCryptoHandle;
+        typedef sequence<DatawriterCryptoHandle> DatawriterCryptoHandleSeq;
 
-        native ParticipantCryptoHandle;
-        native ParticipantCryptoHandleSeq;
-        native DatawriterCryptoHandle;
-        native DatawriterCryptoHandleSeq;
-
-        native DatareaderCryptoHandle;
-        native DatareaderCryptoHandleSeq;
+        //native DatareaderCryptoHandle;
+        //native DatareaderCryptoHandleSeq;
+        typedef long DatareaderCryptoHandle;
+        typedef sequence<DatareaderCryptoHandle> DatareaderCryptoHandleSeq;
 
         // DDSSEC11-96
         local interface Authentication;
