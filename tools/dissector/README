@@ -36,8 +36,10 @@ according to the Wireshark Developer's Guide (see above).
    Run the DDS_ROOT/configure script, passing these arguments:
 
      --wireshark=WIRESHARK_SRC
-	 --wireshark2=WIRESHARK_SRC
-       Where WIRESHARK_SRC is the location of the Wireshark source.
+       If buidling against Wireshark 1.x, else:
+     --wireshark2=WIRESHARK_SRC
+       If building against Wireshark 2.x, where WIRESHARK_SRC is the location
+       of the Wireshark source.
 
      --glib
        On systems where Glib installed is the same used by the Wireshark
@@ -54,7 +56,7 @@ according to the Wireshark Developer's Guide (see above).
        desired. If RapidJSON is not installed on the system, it must be downloaded
        using:
          git submodule update --init --recursive
-       which will place it in:
+       This can also be done manunally by putting rapidjson at:
          DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson
 
    If using Wireshark 1.x on Windows, then this must be specified:
@@ -62,14 +64,15 @@ according to the Wireshark Developer's Guide (see above).
 
    If using Wireshark 2.x on Windows, then the Wireshark Developer's Guide will
    have you build Wireshark outside the Wireshark source folder. You will need
-   to pass the name of the build folder:
+   to pass the full path to the build folder you created, which should contain
+   config.h:
      --wireshark2_build WIRESHARK2_BUILD
 
-   As of writing building Wireshark 2 on Windows puts libraries in
-   WIRESHARK2_BUILD\run\RelWithDebInfo along with the application itself.
+   As of writing (Wireshark 2.4) building Wireshark 2 on Windows puts libraries
+   in WIRESHARK2_BUILD\run\RelWithDebInfo along with the application itself.
    This is handled by default, but if this is not true for some reason,
    the library location can be defined manually:
-	 --wireshark2_bin WIRESHARK2_BIN
+     --wireshark2_bin WIRESHARK2_BIN
 
 
 2. Build
