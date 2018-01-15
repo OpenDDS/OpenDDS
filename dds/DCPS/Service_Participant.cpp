@@ -416,6 +416,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
         ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
       if (this->monitor_factory_ == 0) {
         // Use the stubbed factory
+        MonitorFactory::service_initialize();
         this->monitor_factory_ =
           ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
       }
