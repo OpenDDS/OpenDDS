@@ -1,3 +1,10 @@
+Version 3.10.1 of OpenDDS
+-------------------------------------------------------------------------------
+
+##### Fixes:
+- OpenDDS can be completely shut down and restarted within a process,
+  requires a new ACE+TAO (OCI TAO 2.2a_p14 or DOCGroup 6.4.7).
+
 Version 3.10 of OpenDDS
 -------------------------------------------------------------------------------
 
