@@ -1,0 +1,67 @@
+/*
+ *
+ *
+ * Distributed under the DDS License.
+ * See: http://www.DDS.org/license.html
+ */
+
+
+
+#ifndef DDS_DCPS_TOKEN_WRAPPER_IMPL_H
+#define DDS_DCPS_TOKEN_READER_IMPL_H
+
+#include "dds/DCPS/security/DdsSecurityCoreC.h"
+#include "dds/Versioned_Namespace.h"
+
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+class DDS_TEST;
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace OpenDDS {
+namespace Security {
+
+
+/**
+* @class TokenReader
+*
+* @brief Implements some simple wrapper functions to provide a const API
+* around the Token data structure as specified in the DDS security specification
+*
+* See the DDS security specification, OMG formal/17-09-20, for a description of
+* the interface this class is implementing.
+*
+*/
+
+class TokenReader
+{
+public:
+
+  TokenReader(const DDS::Security::Token& token_ref);
+  virtual ~TokenReader();
+
+  bool is_nil() const;
+  const char* get_property_value(const std::string& property_name) const;
+  const DDS::OctetSeq& get_bin_property_value(const std::string& property_name) const;
+
+private:
+  const DDS::Security::Token& token_ref_;
+  const DDS::OctetSeq _empty_seq_;
+};
+
+inline bool TokenReader::is_nil() const
+{
+  return ((token_ref_.binary_properties.length() == 0)
+    && (token_ref_.properties.length() == 0)
+    && (token_ref_.class_id[0] == '\0'));
+}
+
+} // namespace Security
+} // namespace OpenDDS
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+#endif

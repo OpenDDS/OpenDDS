@@ -1,0 +1,12 @@
+project(AuthenticationTest): dcpsexe, googletest {
+  requires += no_opendds_safety_profile
+  exename = OpenDDS_AuthenticationTest
+
+  after += OpenDDS_Security
+  libs  += OpenDDS_Security
+
+  Source_Files {
+    AuthenticationTest.cpp
+  }
+}
+
