@@ -15,11 +15,13 @@ project(OpenDDS_Security): dcpslib {
   // TAO IDL transpiler.
   IDL_Files {
     DdsSecurityCore.idl
+    DdsSecurityParams.idl
   }
 
   TypeSupport_Files {
     //dcps_ts_flags += -Lspcpp
     DdsSecurityCore.idl
+    DdsSecurityParams.idl
   }
 
   // custom_only = 1

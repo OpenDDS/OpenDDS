@@ -1,14 +1,17 @@
-
 /*
- * dds-xtypes_discovery.idl needed for the declarations
- * of DDS Entities and DDS Entity Qos
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
  */
- // DDSSEC11-96
-//#include "DdsXTypesDiscovery.idl"  /* http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl */
-#include "dds/DdsDcpsCore.idl"
+
+#ifndef DDS_SECURITY_CORE_IDL
+#define DDS_SECURITY_CORE_IDL
+
 #include "dds/DdsDcpsGuid.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
+#include "DdsSecurityParams.idl"
 
 // The types in this file shall be serialized with XCDR encoding version 1
 module DDS {
@@ -18,39 +21,14 @@ module DDS {
         local interface DynamicData {
         };
 
-      /*
-	//TODO: remove this? It's not being used anywhere.
-        //typedef sequence<long long>  LongLongSeq;
-      */
-
-        // DDSSEC11-96
-        struct DataHolder {
-            string             class_id;
-	    //TODO: In the spec these fields are optional
-	    //  but for now since the @optional tag is not
-	    //  supported we simply keep them.
-	    //@optional  PropertySeq        properties; 
-	    //@optional  BinaryPropertySeq  binary_properties; 
-	    PropertySeq        properties; 
-	    BinaryPropertySeq  binary_properties; 
-        };
-        typedef sequence<DataHolder> DataHolderSeq;
-
-        typedef DataHolder Token;
-
         // DDSSEC11-43
         typedef Token MessageToken;
         typedef MessageToken AuthRequestMessageToken;
         typedef MessageToken HandshakeMessageToken;
 
-        // DDSSEC11-82
-        typedef Token IdentityStatusToken;
     /*      
         typedef sequence<HandshakeMessageToken> HandshakeMessageTokenSeq;
     */
-        typedef Token  IdentityToken;
-        typedef Token  PermissionsToken;
-
         typedef Token  AuthenticatedPeerCredentialToken;
 
         typedef Token  PermissionsCredentialToken;
@@ -78,16 +56,6 @@ module DDS {
         const ReturnCode_t RETCODE_NOT_ALLOWED_BY_SECURITY = 1000;
     */
 
-        struct Tag {
-            string name;
-            string value;
-        };
-
-        typedef sequence< Tag > TagSeq;
-        struct DataTags {
-            TagSeq tags;
-        };
-
         // DDSSEC11-34
         typedef DataTags DataTagQosPolicy;
     /*
@@ -108,34 +76,7 @@ module DDS {
             PropertyQosPolicy  property;
             DataTagQosPolicy   data_tags;
         };
-    */
-        // DDSSEC11-137
-        typedef unsigned long ParticipantSecurityAttributesMask;
 
-        typedef unsigned long PluginParticipantSecurityAttributesMask;
-
-        //@extensibility(APPENDABLE)
-        struct ParticipantSecurityInfo {
-            ParticipantSecurityAttributesMask        participant_security_attributes; 
-            PluginParticipantSecurityAttributesMask  plugin_participant_security_attributes; 
-        };
-    /*
-#define PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
-#define PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}
-    */
-        // DDSSEC11-106
-        typedef unsigned long EndpointSecurityAttributesMask;
-
-        typedef unsigned long PluginEndpointSecurityAttributesMask;
-
-        //@extensibility(APPENDABLE)
-        struct EndpointSecurityInfo {
-            EndpointSecurityAttributesMask        endpoint_security_attributes; 
-            PluginEndpointSecurityAttributesMask  plugin_endpoint_security_attributes; 
-        };     
-    /*
-#define ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
-#define ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}
     */
         // DDSSEC11-96
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
@@ -963,4 +904,4 @@ module DDS {
     };
 };
 
-
+#endif /* DDS_SECURITY_CORE_IDL */
