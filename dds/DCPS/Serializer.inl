@@ -9,6 +9,10 @@
 #include <ace/CDR_Stream.h>
 #include "Serializer.h"
 
+#ifndef OPENDDS_SAFETY_PROFILE
+#include <string>
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

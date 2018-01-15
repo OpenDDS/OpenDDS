@@ -145,6 +145,7 @@ static bool got_log_fname = false;
 static bool got_log_verbose = false;
 static bool got_default_address = false;
 static bool got_bidir_giop = false;
+static bool got_monitor = false;
 
 Service_Participant::Service_Participant()
   :
@@ -190,6 +191,7 @@ Service_Participant::Service_Participant()
 #endif
     pending_timeout_(ACE_Time_Value::zero),
     bidir_giop_(true),
+    monitor_enabled_(false),
     shut_down_(false)
 {
   initialize();
@@ -412,18 +414,36 @@ Service_Participant::get_domain_participant_factory(int &argc,
       if (reactor_task_.activate(THR_NEW_LWP | THR_JOINABLE) == -1) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                   ACE_TEXT("Failed to activate the reactor task.")));
+                   ACE_TEXT("Failed to activate the reactor task.\n")));
         return DDS::DomainParticipantFactory::_nil();
       }
 
       reactor_task_.wait_for_startup();
 
-      this->monitor_factory_ =
-        ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
+      if (this->monitor_enabled_) {
+#if !defined(ACE_AS_STATIC_LIBS)
+        ACE_TString directive = ACE_TEXT("dynamic OpenDDS_Monitor Service_Object * OpenDDS_monitor:_make_MonitorFactoryImpl()");
+        ACE_Service_Config::process_directive(directive.c_str());
+#endif
+        this->monitor_factory_ =
+          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
+
+        if (this->monitor_factory_ == 0) {
+          if (this->monitor_enabled_) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
+                       ACE_TEXT("Unable to enable monitor factory.\n")));
+          }
+        }
+      }
+
       if (this->monitor_factory_ == 0) {
         // Use the stubbed factory
         this->monitor_factory_ =
           ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
+      }
+      if (this->monitor_enabled_) {
+        this->monitor_factory_->initialize();
       }
       this->monitor_ = this->monitor_factory_->create_sp_monitor(this);
     }
@@ -450,8 +470,8 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_info = true;
 
-    } else if (!arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-DCPSRTISerialization"))) {
-      Serializer::set_use_rti_serialization(true);
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRTISerialization"))) != 0) {
+      Serializer::set_use_rti_serialization(ACE_OS::atoi(currentArg));
       arg_shifter.consume_arg();
       got_use_rti_serialization = true;
 
@@ -565,6 +585,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       this->default_address_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       arg_shifter.consume_arg();
       got_default_address = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSMonitor"))) != 0) {
+      this->monitor_enabled_ = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
+      got_monitor = true;
 
     } else {
       arg_shifter.ignore_arg();
@@ -1597,6 +1622,13 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSDefaultAddress value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), this->default_address_)
+    }
+
+    if (got_monitor) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSMonitor value from command option (overrides value if it's in config file).\n")));
+    } else {
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSMonitor"), monitor_enabled_, bool)
     }
 
     // These are not handled on the command line.

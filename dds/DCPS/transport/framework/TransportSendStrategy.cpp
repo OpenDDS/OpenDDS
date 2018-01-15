@@ -1306,11 +1306,11 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
     this->send_buffer_->retain_all(pub_id);
   }
 
-  do_remove_sample(pub_id, match);
+  do_remove_sample(pub_id, match, 0);
 }
 
 RemoveResult
-TransportSendStrategy::remove_sample(const DataSampleElement* sample)
+TransportSendStrategy::remove_sample(const DataSampleElement* sample, void* context)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "remove_sample", 6);
 
@@ -1334,12 +1334,13 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
   }
 
   GuardType guard(this->lock_);
-  return do_remove_sample(pub_id, modp);
+  return do_remove_sample(pub_id, modp, context);
 }
 
 RemoveResult
 TransportSendStrategy::do_remove_sample(const RepoId&,
-  const TransportQueueElement::MatchCriteria& criteria)
+  const TransportQueueElement::MatchCriteria& criteria,
+  void*)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
 

@@ -45,6 +45,24 @@ bitmap_num_longs(const OpenDDS::DCPS::SequenceNumber& low,
                   CORBA::ULong((high.getValue() - low.getValue() + 32) / 32));
 }
 
+bool bitmapNonEmpty(const OpenDDS::RTPS::SequenceNumberSet& snSet)
+{
+  for (CORBA::ULong i = 0; i < snSet.bitmap.length(); ++i) {
+    if (snSet.bitmap[i]) {
+      if (snSet.numBits >= (i + 1) * 32) {
+        return true;
+      }
+      for (int bit = 31; bit >= 0; --bit) {
+        if ((snSet.bitmap[i] & (1 << bit))
+            && snSet.numBits >= i * 32 + (31 - bit)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -97,7 +115,8 @@ RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
 }
 
 void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
-  const TransportQueueElement::MatchCriteria& criteria)
+  const TransportQueueElement::MatchCriteria& criteria,
+  ACE_Guard<ACE_Thread_Mutex>& guard)
 {
   RtpsWriter::SnToTqeMap sn_tqe_map;
   RtpsWriter::SnToTqeMap to_deliver;
@@ -127,8 +146,9 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
     }
   }
 
-  ACE_Reverse_Lock<ACE_Thread_Mutex> reverse(lock_);
-  ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, guard, reverse);
+  // see comment in RtpsUdpDataLink::send_i() for lock order
+  // reverse guard can't be used since that involves re-locking
+  guard.release();
 
   iter_t deliver_iter = to_deliver.begin();
   while (deliver_iter != to_deliver.end()) {
@@ -460,11 +480,11 @@ RtpsUdpDataLink::send_i(TransportQueueElement* element, bool relink)
 }
 
 RemoveResult
-RtpsUdpDataLink::remove_sample(const DataSampleElement* sample)
+RtpsUdpDataLink::remove_sample(const DataSampleElement* sample, void*)
 {
   // see comment in RtpsUdpDataLink::send_i() for lock order
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, REMOVE_ERROR);
-  return DataLink::remove_sample(sample);
+  return DataLink::remove_sample(sample, &g);
 }
 
 void
@@ -1785,7 +1805,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   }
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
   // we don't need to do anything further.
-  if (!final) {
+  if (!final || bitmapNonEmpty(acknack.readerSNState)) {
     ri->second.requested_changes_.push_back(acknack.readerSNState);
   }
   process_acked_by_all_i(g, local);

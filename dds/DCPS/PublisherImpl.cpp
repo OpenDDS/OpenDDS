@@ -277,6 +277,11 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     dw_servant->remove_all_associations();
     dw_servant->cleanup();
   }
+
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
+
   // not just unregister but remove any pending writes/sends.
   dw_servant->unregister_all();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
@@ -799,33 +804,39 @@ DDS::ReturnCode_t
 PublisherImpl::writer_enabled(const char*     topic_name,
     DataWriterImpl* writer)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->pi_lock_,
-      DDS::RETCODE_ERROR);
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+        guard,
+        this->pi_lock_,
+        DDS::RETCODE_ERROR);
 
-  DDS::DataWriter_var writer_var = DDS::DataWriter::_duplicate(writer);
-  writers_not_enabled_.erase(writer_var);
+    DDS::DataWriter_var writer_var = DDS::DataWriter::_duplicate(writer);
+    writers_not_enabled_.erase(writer_var);
 
-  datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
+    datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 
-  const RepoId publication_id = writer->get_publication_id();
+    const RepoId publication_id = writer->get_publication_id();
 
-  std::pair<PublicationMap::iterator, bool> pair =
-      publication_map_.insert(PublicationMap::value_type(publication_id, writer));
+    std::pair<PublicationMap::iterator, bool> pair =
+        publication_map_.insert(PublicationMap::value_type(publication_id, writer));
 
-  if (pair.second == false) {
-    GuidConverter converter(publication_id);
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::writer_enabled: ")
-        ACE_TEXT("insert publication %C failed.\n"),
-        OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
+    if (pair.second == false) {
+      GuidConverter converter(publication_id);
+      ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::writer_enabled: ")
+          ACE_TEXT("insert publication %C failed.\n"),
+          OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
+    }
+
+    // Increase ref count when the servant is added to the
+    // datawriter/publication map.
+    writer->_add_ref();
   }
 
-  // Increase ref count when the servant is added to the
-  // datawriter/publication map.
-  writer->_add_ref();
+  if (this->monitor_) {
+    this->monitor_->report();
+  }
 
   return DDS::RETCODE_OK;
 }

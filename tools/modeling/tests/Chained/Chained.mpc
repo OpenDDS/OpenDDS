@@ -1,4 +1,4 @@
-project(*Publisher) : dcpsexe, dds_model, Chained_Topic, Chained_Topic_paths {
+project(*Publisher) : dcpsexe, all_dcps_transports, dds_model, Chained_Topic, Chained_Topic_paths {
   exename   = publisher
   libpaths      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
   includes      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
@@ -10,7 +10,7 @@ project(*Publisher) : dcpsexe, dds_model, Chained_Topic, Chained_Topic_paths {
   }
 }
 
-project(*Subscriber) : dcpsexe, dds_model, Chained_Topic, Chained_Topic_paths {
+project(*Subscriber) : dcpsexe, all_dcps_transports, dds_model, Chained_Topic, Chained_Topic_paths {
   exename   = subscriber
   libpaths      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model
   includes      +=   $(DDS_ROOT)/tools/modeling/tests/Chained_Topic/model

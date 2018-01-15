@@ -210,10 +210,13 @@ RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
 
 RemoveResult
 RtpsUdpSendStrategy::do_remove_sample(const RepoId& pub_id,
-  const TransportQueueElement::MatchCriteria& criteria)
+  const TransportQueueElement::MatchCriteria& criteria,
+  void* context)
 {
-  link_->do_remove_sample(pub_id, criteria);
-  return TransportSendStrategy::do_remove_sample(pub_id, criteria);
+  ACE_Guard<ACE_Thread_Mutex>* guard =
+    static_cast<ACE_Guard<ACE_Thread_Mutex>*>(context);
+  link_->do_remove_sample(pub_id, criteria, *guard);
+  return TransportSendStrategy::do_remove_sample(pub_id, criteria, 0);
 }
 
 void

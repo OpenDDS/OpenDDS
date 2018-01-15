@@ -128,6 +128,9 @@ OpenDDS::DCPS::TransportInst::impl()
 void
 OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number)
 {
+#ifdef BUFSIZE
+#undef BUFSIZE
+#endif
   const int BUFSIZE=1024;
   char result[BUFSIZE];
 

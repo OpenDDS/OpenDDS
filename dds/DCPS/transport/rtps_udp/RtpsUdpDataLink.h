@@ -56,7 +56,11 @@ public:
                   const TransportReactorTask_rch& reactor_task);
 
   bool add_delayed_notification(TransportQueueElement* element);
-  void do_remove_sample(const RepoId& pub_id, const TransportQueueElement::MatchCriteria& criteria);
+
+  void do_remove_sample(const RepoId& pub_id,
+                        const TransportQueueElement::MatchCriteria& criteria,
+                        ACE_Guard<ACE_Thread_Mutex>& guard);
+
   RtpsUdpInst_rch config() const;
 
   ACE_Reactor* get_reactor();
@@ -126,7 +130,7 @@ public:
 private:
   virtual void stop_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
-  RemoveResult remove_sample(const DataSampleElement* sample);
+  RemoveResult remove_sample(const DataSampleElement* sample, void* context);
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);

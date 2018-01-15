@@ -23,7 +23,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.4.5';
+my $doc_tao_version = '6.4.6';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -48,7 +48,7 @@ my %platforminfo =
                                  19 => 'vc14', 19.1 => 'vs2017'},
               },
    'macosx' => {
-                'compilers' => ['g++'],
+                'compilers' => ['clang++'],
                 'libpath' => 'DYLD_LIBRARY_PATH',
                 'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
                                8 => 'mountainlion', 9 => 'mavericks',
@@ -1127,9 +1127,12 @@ sub generate_workspace {
 
   if ($mpctype eq 'gnuace') {
     if ($buildEnv->{'build'} eq 'target') {
-      print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
-        if $opts{'verbose'};
-      my $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
+      my $UM;
+      if (@features || $cross_compile) {
+        print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
+          if $opts{'verbose'};
+        $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
+      }
       for my $feat (@features) {
         my $key = $feat;
         $key =~ s/=.*//;
@@ -1145,8 +1148,8 @@ IDL2JNI_DEP = $(IDL2JNI)$(HOST_EXE_EXT)
 CROSS-COMPILE = 1
 EOT
       }
-      $UM->close;
-      dump_and_unlink($UM) if $opts{'dry-run'};
+      $UM->close if $UM;
+      dump_and_unlink($UM) if $UM && $opts{'dry-run'};
     }
   }
 

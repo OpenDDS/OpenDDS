@@ -1,4 +1,4 @@
-project(*xmlPublisher) : dcpsexe, dds_model, ReferExternalProj_paths, ReferExternalProj {
+project(*xmlPublisher) : dcpsexe, all_dcps_transports, dds_model, ReferExternalProj_paths, ReferExternalProj {
   exename   = publisher
   libpaths += model
 
@@ -7,7 +7,7 @@ project(*xmlPublisher) : dcpsexe, dds_model, ReferExternalProj_paths, ReferExter
   }
 }
 
-project(*xmlSubscriber) : dcpsexe, dds_model, ReferExternalProj_paths, ReferExternalProj {
+project(*xmlSubscriber) : dcpsexe, all_dcps_transports, dds_model, ReferExternalProj_paths, ReferExternalProj {
   exename   = subscriber
   libpaths += model
 

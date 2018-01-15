@@ -12,6 +12,7 @@ use ConvertFiles;
 use Pithub::Repos::Releases;
 use Data::Dumper;
 use Net::FTP::File;
+use File::Temp qw/ tempdir /;
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -148,10 +149,26 @@ sub verify_git_status_clean {
   return $clean;
 }
 
-sub message_git_status_clean {
-  my $settings = shift;
-  return "The working directory is not clean:\n" . $settings->{unclean} .
-         "  Commit to source control, or run git clean before continuing."
+sub remedy_git_status_clean {
+  my $settings = shift();
+  my $version = $settings->{version};
+  system("git diff") == 0 or die "Could not execute: git diff";
+  print "Would you like to add and commit these changes [y/n]? ";
+  while (<STDIN>) {
+    chomp;
+    if ($_ eq "n") {
+      return 0;
+    } elsif ($_ eq "y") {
+      last;
+    } else {
+      print "Please answer y or n. ";
+    }
+  }
+  system("git add docs/history/ChangeLog-$version") == 0 or die "Could not execute: git add docs/history/ChangeLog-$version";
+  system("git add -u") == 0 or die "Could not execute: git add -u";
+  my $message = "OpenDDS Release $version";
+  system("git commit -m '" . $message . "'") == 0 or die "Could not execute: git commit -m";
+  return 1;
 }
 ############################################################################
 sub verify_update_version_file {
@@ -664,7 +681,7 @@ sub remedy_git_changes_pushed {
   my $result = system("git push $remote $settings->{branch}");
   print "pushing tags with git push $remote --tags\n";
   $result = $result || system("git push $remote --tags");
-  print "pushing latest-release branch"
+  print "pushing latest-release branch";
   $result = $result || system("git push $remote $settings->{branch}:latest-release");
   return !$result;
 }
@@ -735,7 +752,7 @@ sub remedy_clone_tag {
   my $result = 0;
   if (!-d $settings->{clone_dir}) {
     print "Cloning url $settings->{git_url}\ninto $settings->{clone_dir}\n";
-    $result = system("git clone $settings->{git_url} $settings->{clone_dir}");
+    $result = system("git clone --branch $settings->{git_tag} --depth=1 $settings->{git_url} $settings->{clone_dir}");
   }
   if (!$result) {
     my $curdir = getcwd;
@@ -802,20 +819,28 @@ sub message_tgz_source {
 
 sub remedy_tgz_source {
   my $settings = shift();
+  my $tempdir = tempdir(CLEANUP => 1);
   my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
+  my $tfile = join("/", $tempdir, $settings->{tgz_src});
   my $curdir = getcwd;
-  chdir($settings->{parent_dir});
-  print "Creating file $settings->{tar_src}\n";
+  my $result = 0;
   my $basename = basename($settings->{clone_dir});
-  # --exclude-vcs nor available in some tar versions
-  print "Removing git-specific directories\n";
-  my $result = system("find . -name '.git*' | xargs rm -rf");
+
+  print "Copying $settings->{clone_dir} to $tempdir ($result)\n";
+  $result = $result || system("cp -aR $settings->{clone_dir} $tempdir");
+
+  chdir($tempdir);
+  print "Removing git-specific directories ($result)\n";
+  $result = $result || system("find . -name '.git*' | xargs rm -rf");
+  print "Creating tar file ($result)\n";
   $result = $result || system("tar -cf $settings->{tar_src} $basename");
-  if (!$result) {
-    print "Gzipping file $settings->{tar_src}\n";
-    $result = system("gzip $settings->{tar_src}");
-  }
+  print "Gzipping file $settings->{tar_src} ($result)\n";
+  $result = $result || system("gzip -9 $settings->{tar_src}");
   chdir($curdir);
+
+  print "Move gzip file ($result)\n";
+  $result = $result || system("mv $tfile $file");
+
   return !$result;
 }
 ############################################################################
@@ -833,26 +858,32 @@ sub message_zip_source {
 
 sub remedy_zip_source {
   my $settings = shift();
+  my $tempdir = tempdir(CLEANUP => 1);
   my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
+  my $tfile = join("/", $tempdir, $settings->{zip_src});
   my $curdir = getcwd;
-  chdir($settings->{clone_dir});
-  # zip -x .git .gitignore does not exclude as advertised
-  print "Removing git-specific directories\n";
-  my $result = system("find . -name '.git*' | xargs rm -rf");
-  # convert line endings
-  print "Converting source files to Windows line endings\n";
+  my $result = 0;
+
+  print "Copying $settings->{clone_dir} to $tempdir ($result)\n";
+  $result = $result || system("cp -aR $settings->{clone_dir} $tempdir");
+
+  chdir($tempdir);
+  print "Removing git-specific directories ($result)\n";
+  $result = $result || system("find . -name '.git*' | xargs rm -rf");
+  print "Converting source files to Windows line endings ($result)\n";
   my $converter = new ConvertFiles();
   my ($stat, $error) = $converter->convert(".");
   if (!$stat) {
     print $error;
-    return 0;
+    $result = 1;
   }
-
-  if (!$result) {
-    print "Creating file $settings->{zip_src}\n";
-    $result = system("zip ../$settings->{zip_src} -qq -r . -x '.git*'");
-  }
+  print "Creating file $settings->{zip_src} ($result)\n";
+  $result = $result || system("zip $settings->{zip_src} -9 -qq -r . -x '.git*'");
   chdir($curdir);
+
+  print "Move zip file ($result)\n";
+  $result = $result || system("mv $tfile $file");
+
   return !$result;
 }
 ############################################################################
@@ -937,7 +968,7 @@ sub remedy_tgz_doxygen {
   my $result = system("tar -cf ../$settings->{tar_dox} html");
   if (!$result) {
     print "Gzipping file $settings->{tar_dox}\n";
-    $result = system("gzip ../$settings->{tar_dox}");
+    $result = system("gzip -9 ../$settings->{tar_dox}");
   }
   chdir($curdir);
   return !$result;
@@ -969,7 +1000,7 @@ sub remedy_zip_doxygen {
   chdir("$settings->{clone_dir}/html");
   my $file = "../../$settings->{zip_dox}";
   print "Creating file $settings->{zip_dox}\n";
-  my $result = system("zip $file -qq -r dds");
+  my $result = system("zip $file -9 -qq -r dds");
   chdir($curdir);
   return !$result;
 }
@@ -1171,9 +1202,10 @@ sub remedy_github_upload {
     printf "error accessing github: %s\n", $release->response->status_line;
     $rc = 0;
   } else {
-    for my $f ("$settings->{parent_dir}/$settings->{tgz_src}",
-               "$settings->{parent_dir}/$settings->{zip_src}") {
-      open(my $fh, $f) or die "Can't open";
+    for my $f ($settings->{tgz_src},
+               $settings->{zip_src}) {
+      my $p = "$settings->{parent_dir}/$f";
+      open(my $fh, $p) or die "Can't open";
       binmode $fh;
       my $size = stat($fh)->size;
       my $data;
@@ -1354,7 +1386,8 @@ my %release_step_hash  = (
   },
   'Commit changes to GIT' => {
     verify  => sub{verify_git_status_clean(@_, 1)},
-    message => sub{message_commit_git_changes(@_)}
+    message => sub{message_commit_git_changes(@_)},
+    remedy  => sub{remedy_git_status_clean(@_)}
   },
   'Verify changes pushed' => {
     prereqs => ('Verify remote arg'),
@@ -1440,7 +1473,8 @@ my %release_step_hash  = (
   },
   'Commit NEWS Template Section' => {
     verify  => sub{verify_git_status_clean(@_, 1)},
-    message => sub{message_commit_git_changes(@_)}
+    message => sub{message_commit_git_changes(@_)},
+    remedy  => sub{remedy_git_status_clean(@_)}
   }
 
 );
