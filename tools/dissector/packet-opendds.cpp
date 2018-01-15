@@ -588,7 +588,7 @@ namespace OpenDDS
         // Push DCPS Primary Data Type Namespace
         // Convert, for example, "1::2::3" to "1.2.3"
         std::string ns;
-		char c = 'a';
+        char c = 'a';
         bool delimiter = false;
         for (size_t i = 0; c; i++) {
           c = data_name[i];
@@ -951,12 +951,12 @@ namespace OpenDDS
                 FT_STRING, BASE_NONE, NULL_HFILL
                 }
         },
-		{ &hf_sample_payload,
-		  { "Payload",
-			payload_namespace.c_str(),
-			FT_STRING, BASE_NONE, NULL_HFILL
+        { &hf_sample_payload,
+          {"Payload",
+            payload_namespace.c_str(),
+            FT_STRING, BASE_NONE, NULL_HFILL
           }
-		}
+        }
       };
 
       for (unsigned i = 0; i < array_length(hf); i++) {

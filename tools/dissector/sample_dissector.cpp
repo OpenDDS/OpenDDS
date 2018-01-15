@@ -756,11 +756,11 @@ namespace OpenDDS
     //------------------------------------------------------------------------
 
     Sample_Dissector::Sample_Dissector (const std::string &subtree)
-      :field_(0),
-	   ett_(-1),
-       subtree_label_(),
-	   is_struct_(false),
-	   is_root_(false)
+      : field_(0),
+        ett_(-1),
+        subtree_label_(),
+        is_struct_(false),
+        is_root_(false)
     {
       if (!subtree.empty())
         this->init (subtree);
