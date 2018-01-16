@@ -31,21 +31,37 @@ public:
                  const char* repoid);
 
 private:
-  struct is_special_case {
+
+  enum SPECIAL_T
+  {
+    SPECIAL_SEQUENCE,
+    SPECIAL_STRUCT,
+    SPECIAL_UNION,
+  };
+
+  struct is_special_case
+  {
     typedef ACE_Strong_Bound_Ptr<is_special_case, ACE_Null_Mutex> ptr;
 
     virtual ~is_special_case() {}
     virtual bool operator()(const std::string& cxx) const = 0;
   };
 
-  struct gen_special_case {
+  struct gen_special_case
+  {
     typedef ACE_Strong_Bound_Ptr<gen_special_case, ACE_Null_Mutex> ptr;
 
     virtual ~gen_special_case() {}
     virtual bool operator()(const std::string& cxx) = 0;
   };
 
-  std::map<is_special_case::ptr, gen_special_case::ptr> special_case_handlers;
+  struct special_case
+  {
+    is_special_case::ptr check;
+    gen_special_case::ptr gen;
+  };
+
+  std::map<SPECIAL_T, std::vector<special_case> > special_case_handlers;
 
 };
 

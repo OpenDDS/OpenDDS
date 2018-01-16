@@ -17,6 +17,7 @@ using std::string;
 using namespace AstTypeClassification;
 
 marshal_generator::marshal_generator()
+  : dds_generator()
 {
 }
 
