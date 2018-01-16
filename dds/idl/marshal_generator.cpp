@@ -7,17 +7,18 @@
 
 #include "marshal_generator.h"
 #include "be_extern.h"
-
 #include "utl_identifier.h"
-
 #include <string>
-#include <map>
 #include <sstream>
 #include <iostream>
 #include <cctype>
-using std::string;
 
+using std::string;
 using namespace AstTypeClassification;
+
+marshal_generator::marshal_generator()
+{
+}
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>&, const char*)
