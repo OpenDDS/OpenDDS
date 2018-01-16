@@ -20,21 +20,37 @@ using namespace AstTypeClassification;
 #define LENGTH(CARRAY) (sizeof(CARRAY)/sizeof(CARRAY[0]))
 
 namespace {
-  enum SPECIAL_T
-    {
-      SPECIAL_SEQUENCE,
-      SPECIAL_STRUCT,
-      SPECIAL_UNION,
-    };
 
   typedef bool (*is_special_case)(const std::string& cxx);
   typedef bool (*gen_special_case)(const std::string& cxx);
 
-  struct special_case
+  typedef is_special_case  is_special_sequence;
+  typedef gen_special_case  gen_special_sequence;
+
+  typedef is_special_case  is_special_struct;
+  typedef gen_special_case  gen_special_struct;
+
+  typedef is_special_case  is_special_union;
+  typedef bool (*gen_special_union)(const string& cxx,
+				    AST_Type* discriminator,
+				    const std::vector<AST_UnionBranch*>& branches);
+
+  struct special_sequence
   {
-    SPECIAL_T type;
-    is_special_case check;
-    gen_special_case gen;
+    is_special_sequence check;
+    gen_special_sequence gen;
+  };
+
+  struct special_struct
+  {
+    is_special_struct check;
+    gen_special_struct gen;
+  };
+
+  struct special_union
+  {
+    is_special_union check;
+    gen_special_union gen;
   };
 
   bool isRtpsSpecialSequence(const string& cxx);
@@ -43,17 +59,30 @@ namespace {
   bool isRtpsSpecialStruct(const string& cxx);
   bool genRtpsSpecialStruct(const string& cxx);
 
-  const special_case special_cases[] = {
+  bool isRtpsSpecialUnion(const string& cxx);
+  bool genRtpsSpecialUnion(const string& cxx,
+			   AST_Type* discriminator,
+                           const std::vector<AST_UnionBranch*>& branches);
+
+  const special_sequence special_sequences[] = {
     {
-      SPECIAL_SEQUENCE,
       isRtpsSpecialSequence,
       genRtpsSpecialSequence,
     },
+  };
+
+  const special_struct special_structs[] = {
     {
-      SPECIAL_STRUCT,
       isRtpsSpecialStruct,
       genRtpsSpecialStruct,
-    }
+    },
+  };
+
+  const special_union special_unions[] = {
+    {
+      isRtpsSpecialUnion,
+      genRtpsSpecialUnion,
+    },
   };
 
 } /* namespace */
@@ -254,12 +283,10 @@ namespace {
     NamespaceGuard ng;
     string cxx = scoped(tdname);
     
-    for (size_t i = 0; i < LENGTH(special_cases); ++i) {
-      if (special_cases[i].type == SPECIAL_SEQUENCE) {
-	if (special_cases[i].check(cxx)) {
-	  special_cases[i].gen(cxx);
-	  return;
-	}
+    for (size_t i = 0; i < LENGTH(special_sequences); ++i) {
+      if (special_sequences[i].check(cxx)) {
+	special_sequences[i].gen(cxx);
+	return;
       }
     }
 
@@ -1116,11 +1143,9 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
 
-  for (size_t i = 0; i < LENGTH(special_cases); ++i) {
-    if (special_cases[i].type == SPECIAL_STRUCT) {
-      if (special_cases[i].check(cxx)) {
-	return special_cases[i].gen(cxx);
-      }
+  for (size_t i = 0; i < LENGTH(special_structs); ++i) {
+    if (special_structs[i].check(cxx)) {
+      return special_structs[i].gen(cxx);
     }
   }
 
@@ -1531,9 +1556,13 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
-  if (isRtpsSpecialUnion(cxx)) {
-    return genRtpsSpecialUnion(cxx, discriminator, branches);
+
+  for (size_t i = 0; i < LENGTH(special_unions); ++i) {
+    if (special_unions[i].check(cxx)) {
+      return special_unions[i].gen(cxx, discriminator, branches);
+    }
   }
+
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
     Function find_size("gen_find_size", "void");
