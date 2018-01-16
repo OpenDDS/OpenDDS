@@ -687,7 +687,7 @@ namespace {
         if (config.is_nil()) return INVALID_PARAM;
         try {
           TheTransportRegistry->bind_config(config, sub);
-        } catch (const OpenDDS::DCPS::Transport::MiscProblem& mp) {
+        } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
           return INVALID_PARAM;
         }
       }
