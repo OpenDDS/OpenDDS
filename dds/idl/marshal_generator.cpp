@@ -40,11 +40,19 @@ namespace {
   bool isRtpsSpecialSequence(const string& cxx);
   bool genRtpsSpecialSequence(const string& cxx);
 
+  bool isRtpsSpecialStruct(const string& cxx);
+  bool genRtpsSpecialStruct(const string& cxx);
+
   const special_case special_cases[] = {
     {
       SPECIAL_SEQUENCE,
       isRtpsSpecialSequence,
       genRtpsSpecialSequence,
+    },
+    {
+      SPECIAL_STRUCT,
+      isRtpsSpecialStruct,
+      genRtpsSpecialStruct,
     }
   };
 
@@ -1107,9 +1115,15 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
-  if (isRtpsSpecialStruct(cxx)) {
-    return genRtpsSpecialStruct(cxx);
+
+  for (size_t i = 0; i < LENGTH(special_cases); ++i) {
+    if (special_cases[i].type == SPECIAL_STRUCT) {
+      if (special_cases[i].check(cxx)) {
+	return special_cases[i].gen(cxx);
+      }
+    }
   }
+
   RtpsFieldCustomizer rtpsCustom(cxx);
   {
     Function find_size("gen_find_size", "void");
