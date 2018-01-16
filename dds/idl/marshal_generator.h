@@ -9,13 +9,9 @@
 #define marshal_generator_H
 
 #include "dds_generator.h"
-#include "ace/Bound_Ptr.h"
-#include <map>
 
 class marshal_generator : public dds_generator {
 public:
-  marshal_generator();
-
   bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
@@ -29,40 +25,6 @@ public:
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
                  const char* repoid);
-
-private:
-
-  enum SPECIAL_T
-  {
-    SPECIAL_SEQUENCE,
-    SPECIAL_STRUCT,
-    SPECIAL_UNION,
-  };
-
-  struct is_special_case
-  {
-    typedef ACE_Strong_Bound_Ptr<is_special_case, ACE_Null_Mutex> ptr;
-
-    virtual ~is_special_case() {}
-    virtual bool operator()(const std::string& cxx) const = 0;
-  };
-
-  struct gen_special_case
-  {
-    typedef ACE_Strong_Bound_Ptr<gen_special_case, ACE_Null_Mutex> ptr;
-
-    virtual ~gen_special_case() {}
-    virtual bool operator()(const std::string& cxx) = 0;
-  };
-
-  struct special_case
-  {
-    is_special_case::ptr check;
-    gen_special_case::ptr gen;
-  };
-
-  std::map<SPECIAL_T, std::vector<special_case> > special_case_handlers;
-
 };
 
 #endif

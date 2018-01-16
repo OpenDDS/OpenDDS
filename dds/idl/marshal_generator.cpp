@@ -12,14 +12,43 @@
 #include <sstream>
 #include <iostream>
 #include <cctype>
+#include <map>
 
 using std::string;
 using namespace AstTypeClassification;
 
-marshal_generator::marshal_generator()
-  : dds_generator()
-{
-}
+#define LENGTH(CARRAY) (sizeof(CARRAY)/sizeof(CARRAY[0]))
+
+namespace {
+  enum SPECIAL_T
+    {
+      SPECIAL_SEQUENCE,
+      SPECIAL_STRUCT,
+      SPECIAL_UNION,
+    };
+
+  typedef bool (*is_special_case)(const std::string& cxx);
+  typedef bool (*gen_special_case)(const std::string& cxx);
+
+  struct special_case
+  {
+    SPECIAL_T type;
+    is_special_case check;
+    gen_special_case gen;
+  };
+
+  bool isRtpsSpecialSequence(const string& cxx);
+  bool genRtpsSpecialSequence(const string& cxx);
+
+  const special_case special_cases[] = {
+    {
+      SPECIAL_SEQUENCE,
+      isRtpsSpecialSequence,
+      genRtpsSpecialSequence,
+    }
+  };
+
+} /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>&, const char*)
@@ -216,10 +245,16 @@ namespace {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     string cxx = scoped(tdname);
-    if (isRtpsSpecialSequence(cxx)) {
-      genRtpsSpecialSequence(cxx);
-      return;
+    
+    for (size_t i = 0; i < LENGTH(special_cases); ++i) {
+      if (special_cases[i].type == SPECIAL_SEQUENCE) {
+	if (special_cases[i].check(cxx)) {
+	  special_cases[i].gen(cxx);
+	  return;
+	}
+      }
     }
+
     AST_Type* elem = resolveActualType(seq->base_type());
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()) {
