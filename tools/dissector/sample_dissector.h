@@ -51,7 +51,9 @@ namespace OpenDDS
       {
       }
 
-      const char* what() const throw (){
+      ~Sample_Dissector_Error() {}
+
+      const char* what() const throw() {
         return message_.c_str();
       }
 
@@ -89,7 +91,7 @@ namespace OpenDDS
       /// Actual Label to give to wireshark
       std::string label_;
       /// Wireshark Field Index
-      int hf_ = -1;
+      int hf_;
     };
     typedef std::map<std::string, Field_Context*> Field_Contexts;
 
@@ -118,7 +120,7 @@ namespace OpenDDS
       void add_protocol_field(ftenum ft, field_display_e fd = BASE_NONE);
 
     public:
-      ~Sample_Base();
+      virtual ~Sample_Base();
 
       /// Traverse the Dissector Tree nodes to build the Sample Payload Tree.
       /// This is to be done after the ITL files have been parsed and before
@@ -338,7 +340,6 @@ namespace OpenDDS
     protected:
       virtual size_t dissect_i(Wireshark_Bundle &params);
       size_t count_;
-      int hf_ = -1;
     };
 
     /*

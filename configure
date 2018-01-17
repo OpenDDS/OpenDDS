@@ -154,9 +154,12 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'java:s', 'Java development kit (use JAVA_HOME)',
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
-    'wireshark:s', 'Wireshark (use WIRESHARK_SRC)',
-    'glib:s', 'GLib for wireshark (use GLIB_ROOT or system pkg)',
-    'rapidjson', 'RapidJSON for wireshark itl (optional)',
+    'wireshark:s', 'Wireshark 1.x Source (use WIRESHARK_SRC)',
+    'wireshark2:s', 'Wireshark 2.x Source (use WIRESHARK_SRC)',
+    'wireshark2_build:s', 'Wireshark 2 Build Location on Windows',
+    'wireshark2_bin:s', 'Folder with Wireshark 2 libraries on Windows (default: $WIRESHARK2_BUILD\\run\\RelWithDebInfo)',
+    'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
+    'rapidjson', 'RapidJSON for Wireshark Sample Dissection(optional)',
     'qt:s', 'Qt (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
@@ -828,6 +831,11 @@ my %optdep =
    'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
    'ant' =>       ['ANT_HOME',      'bin/ant'],
    'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
+   'wireshark2' =>['WIRESHARK_SRC', 'epan/packet.h',               'wireshark2'],
+   'wireshark2_build' =>
+                  ['WIRESHARK2_BUILD', 'config.h'],
+   'wireshark2_bin' =>
+                  ['WIRESHARK2_BIN'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
    'rapidjson' => [undef,           undef,                         'no_itl=0'],
    'qt' =>        ['QTDIR',         '',                            'qt4'],
@@ -966,8 +974,24 @@ if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
   die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider)\n";
 }
 
-if (exists $opts{'wireshark'} && !exists $opts{'glib'}) {
-  die "ERROR: --glib is required for --wireshark\n";
+if (exists $opts{'wireshark'} || exists $opts{'wireshark2'}) {
+  if (!exists $opts{'glib'}) {
+    die "ERROR: --glib is required for --wireshark and --wireshark2\n";
+  }
+  
+  if (exists $opts{'wireshark'} && exists $opts{'wireshark2'}) {
+    die "ERROR: --wireshark and --wireshark2 can not be used at the same time.\n";
+  }
+
+  if ($^O eq 'MSWin32') {
+    if (exists $opts{'wireshark2'}) {
+      if (!exists $opts{'wireshark2_build'}) {
+        die "ERROR: --wireshark2_build is required on Windows with --wireshark2\n";
+      }
+    } elsif (exists $opts{'wireshark2_build'}) {
+      die "ERROR: --wireshark2 is required for --wireshark2_build\n";
+    }
+  }
 }
 
 if ($opts{'glib'}) {

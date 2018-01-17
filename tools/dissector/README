@@ -25,19 +25,21 @@ supported.
 ======================================================================
 * Building the OpenDDS DCPS dissector
 
-These instructions assume you have completed the installation steps in
-the $DDS_ROOT/INSTALL document, including having the various environment
-variables defined.
+Follow the steps in the INSTALL file in the root of OpenDDS directory, along
+with the steps here.
 
 In addition, the Wireshark sources must be available and built locally
 according to the Wireshark Developer's Guide (see above).
 
 1. Set up the Build System to Build the Dissector
 
-   Run the DDS_ROOT/configure script again, passing these arguments:
+   Run the DDS_ROOT/configure script, passing these arguments:
 
      --wireshark=WIRESHARK_SRC
-       Where WIRESHARK_SRC is the location of the Wireshark source.
+       If buidling against Wireshark 1.x, else:
+     --wireshark2=WIRESHARK_SRC
+       If building against Wireshark 2.x, where WIRESHARK_SRC is the location
+       of the Wireshark source.
 
      --glib
        On systems where Glib installed is the same used by the Wireshark
@@ -54,11 +56,24 @@ according to the Wireshark Developer's Guide (see above).
        desired. If RapidJSON is not installed on the system, it must be downloaded
        using:
          git submodule update --init --recursive
-       which will place it in:
+       This can also be done manunally by putting rapidjson at:
          DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson
 
    If using Wireshark 1.x on Windows, then this must be specified:
      set WIRETAP_VERSION=<version of the wiretap DLL built by Wireshark>
+
+   If using Wireshark 2.x on Windows, then the Wireshark Developer's Guide will
+   have you build Wireshark outside the Wireshark source folder. You will need
+   to pass the full path to the build folder you created, which should contain
+   config.h:
+     --wireshark2_build WIRESHARK2_BUILD
+
+   As of writing (Wireshark 2.4) building Wireshark 2 on Windows puts libraries
+   in WIRESHARK2_BUILD\run\RelWithDebInfo along with the application itself.
+   This is handled by default, but if this is not true for some reason,
+   the library location can be defined manually:
+     --wireshark2_bin WIRESHARK2_BIN
+
 
 2. Build
 
