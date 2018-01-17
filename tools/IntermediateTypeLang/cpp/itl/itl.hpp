@@ -115,6 +115,12 @@ namespace itl {
   };
 
   class Fixed : public Type, public ConstrainedType {
+
+  public:
+    unsigned int base() { return base_; }
+    unsigned int digits() { return digits_; }
+    unsigned int scale() { return scale_; }
+
   private:
     Fixed(const rapidjson::Value* note,
           unsigned int base,

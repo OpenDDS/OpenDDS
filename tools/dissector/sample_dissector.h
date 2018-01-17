@@ -161,6 +161,7 @@ namespace OpenDDS
         Float,
         Double,
         LongDouble,
+        Fixed,
         String,  // not fixed, but pre-defined in IDL
         WString,
         Enumeration,
