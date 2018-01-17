@@ -67,6 +67,9 @@ namespace {
   bool isProperty_t(const string& cxx);
   bool genProperty_t(const string& cxx);
 
+  bool isBinaryProperty_t(const string& cxx);
+  bool genBinaryProperty_t(const string& cxx);
+
   const special_sequence special_sequences[] = {
     {
       isRtpsSpecialSequence,
@@ -82,6 +85,10 @@ namespace {
     {
       isProperty_t,
       genProperty_t,
+    },
+    {
+      isBinaryProperty_t,
+      genBinaryProperty_t,
     }
   };
 
@@ -1027,6 +1034,51 @@ namespace {
     }
   }
 
+  bool isBinaryProperty_t(const string& cxx)
+  {
+    return cxx == "DDS::BinaryProperty_t";
+  }
+
+  bool genBinaryProperty_t(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+	"  if (stru.propagate) {\n"
+	"    find_size_ulong(size, padding);\n"
+	"    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
+	"    gen_find_size(stru.value, size, padding);\n"
+	"  } else {\n"
+	"    size = 0;\n"
+	"  }\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if (stru.propagate) {\n"
+	"    return (strm << stru.name.in()) && (strm << stru.value);\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+	"  stru.propagate = true;\n"
+	"  return (strm >> stru.name.out()) && (strm >> stru.value);\n";
+    }
+    return true;
+  }
+
   bool isProperty_t(const string& cxx)
   {
     return cxx == "DDS::Property_t";
@@ -1041,14 +1093,14 @@ namespace {
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       be_global->impl_ <<
-	"if (stru.propagate) {\n"
-	"  find_size_ulong(size, padding);\n"
-	"  size += ACE_OS::strlen(stru.name.in()) + 1;\n"
-	"  find_size_ulong(size, padding);\n"
-	"  size += ACE_OS::strlen(stru.value.in()) + 1;\n"
-	"}else {\n"
-	"  size = 0;\n"
-	"}\n";
+	"  if (stru.propagate) {\n"
+	"    find_size_ulong(size, padding);\n"
+	"    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
+	"    find_size_ulong(size, padding);\n"
+	"    size += ACE_OS::strlen(stru.value.in()) + 1;\n"
+	"  } else {\n"
+	"    size = 0;\n"
+	"  }\n";
     }
     {
       Function insertion("operator<<", "bool");
@@ -1067,8 +1119,8 @@ namespace {
       extraction.addArg("stru", cxx + "&");
       extraction.endArgs();
       be_global->impl_ <<
-	"stru.propagate = true;\n"
-	"return (strm >> stru.name.out()) && (strm >> stru.value.out());\n";
+	"  stru.propagate = true;\n"
+	"  return (strm >> stru.name.out()) && (strm >> stru.value.out());\n";
     }
     return true;
   }
