@@ -155,9 +155,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark 1.x Source (use WIRESHARK_SRC)',
-	'wireshark2:s', 'Wireshark 2.x Source (use WIRESHARK_SRC)',
-	'wireshark2_build:s', 'Wireshark 2 Build Location on Windows',
-	'wireshark2_bin:s', 'Folder with Wireshark 2 libraries on Windows (default: $WIRESHARK2_BUILD\\run\\RelWithDebInfo)',
+    'wireshark2:s', 'Wireshark 2.x Source (use WIRESHARK_SRC)',
+    'wireshark2_build:s', 'Wireshark 2 Build Location on Windows',
+    'wireshark2_bin:s', 'Folder with Wireshark 2 libraries on Windows (default: $WIRESHARK2_BUILD\\run\\RelWithDebInfo)',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson', 'RapidJSON for Wireshark Sample Dissection(optional)',
     'qt:s', 'Qt (use QTDIR or system pkg)',
@@ -1008,7 +1008,6 @@ if ($opts{'glib'}) {
     }
   }
 }
-
 
 if ($opts{'qt-include'}) {
   setEnv('QT4_INCDIR', $opts{'qt-include'});

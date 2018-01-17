@@ -53,7 +53,7 @@ namespace OpenDDS
 
       ~Sample_Dissector_Error() {}
 
-      const char* what() const throw() override {
+      const char* what() const throw() {
         return message_.c_str();
       }
 
