@@ -64,6 +64,9 @@ namespace {
 			   AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches);
 
+  bool isProperty_t(const string& cxx);
+  bool genProperty_t(const string& cxx);
+
   const special_sequence special_sequences[] = {
     {
       isRtpsSpecialSequence,
@@ -76,6 +79,10 @@ namespace {
       isRtpsSpecialStruct,
       genRtpsSpecialStruct,
     },
+    {
+      isProperty_t,
+      genProperty_t,
+    }
   };
 
   const special_union special_unions[] = {
@@ -1020,6 +1027,52 @@ namespace {
     }
   }
 
+  bool isProperty_t(const string& cxx)
+  {
+    return cxx == "DDS::Property_t";
+  }
+
+  bool genProperty_t(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+	"if (stru.propagate) {\n"
+	"  find_size_ulong(size, padding);\n"
+	"  size += ACE_OS::strlen(stru.name.in()) + 1;\n"
+	"  find_size_ulong(size, padding);\n"
+	"  size += ACE_OS::strlen(stru.value.in()) + 1;\n"
+	"}else {\n"
+	"  size = 0;\n"
+	"}\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if (stru.propagate) {\n"
+	"    return (strm << stru.name.in()) && (strm << stru.value.in());\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+	"stru.propagate = true;\n"
+	"return (strm >> stru.name.out()) && (strm >> stru.value.out());\n";
+    }
+    return true;
+  }
+
   bool isRtpsSpecialStruct(const string& cxx)
   {
     return cxx == "OpenDDS::RTPS::SequenceNumberSet"
@@ -1136,8 +1189,11 @@ namespace {
   };
 }
 
-bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
+bool marshal_generator::gen_struct(AST_Structure* /* node */,
+				   UTL_ScopedName* name,
+				   const std::vector<AST_Field*>& fields,
+				   AST_Type::SIZE_TYPE /* size */,
+				   const char* /* repoid */)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
