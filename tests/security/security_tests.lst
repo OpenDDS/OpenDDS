@@ -1,0 +1,3 @@
+tests/security/run_test.pl OpenDDS_AuthenticationTest
+tests/security/run_test.pl OpenDDS_CryptoKeyFactoryTest
+tests/security/IDL_Serialization/run_test.pl
