@@ -1052,8 +1052,6 @@ namespace {
 	"    find_size_ulong(size, padding);\n"
 	"    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
 	"    gen_find_size(stru.value, size, padding);\n"
-	"  } else {\n"
-	"    size = 0;\n"
 	"  }\n";
     }
     {
@@ -1098,8 +1096,6 @@ namespace {
 	"    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
 	"    find_size_ulong(size, padding);\n"
 	"    size += ACE_OS::strlen(stru.value.in()) + 1;\n"
-	"  } else {\n"
-	"    size = 0;\n"
 	"  }\n";
     }
     {
