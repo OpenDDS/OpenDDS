@@ -10,3 +10,26 @@ project(AuthenticationTest): dcpsexe, googletest {
   }
 }
 
+project(CryptoKeyFactoryTest): dcpsexe, googletest {
+  requires += no_opendds_safety_profile
+  exename = OpenDDS_CryptoKeyFactoryTest
+
+  after += OpenDDS_Security
+  libs  += OpenDDS_Security
+
+  Source_Files {
+    CryptoKeyFactoryTest.cpp
+  }
+}
+
+//project(CryptoKeyExchangeTest): dcpsexe, googlemock {
+//  requires += no_opendds_safety_profile
+//  exename = OpenDDS_CryptoKeyExchangeTest
+//
+//  after += OpenDDS_Security
+//  libs  += OpenDDS_Security
+//
+//  Source_Files {
+//    CryptoKeyExchangeTest.cpp
+//  }
+//}
