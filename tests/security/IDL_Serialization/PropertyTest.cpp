@@ -32,31 +32,32 @@ TEST_F(SerializePropertyTest, Basic_Serialize)
   out.name = "none";
   out.value = "none";
   out.propagate = false;
-  
-  serializer << in;
-  serializer >> out;
+
+  ASSERT_TRUE(buffer.length() == 0);
+  ASSERT_TRUE(serializer << in);
+  ASSERT_TRUE(buffer.length() > 0);
+  ASSERT_TRUE(serializer >> out);
+  ASSERT_TRUE(buffer.length() == 0);
 
   ASSERT_TRUE(std::strcmp(out.name.in(), in.name.in()) == 0);
   ASSERT_TRUE(std::strcmp(out.value.in(), in.value.in()) == 0);
+
   ASSERT_TRUE(out.propagate);
 }
 
-/* TODO: Fix segfault
+
 TEST_F(SerializePropertyTest, When_Propagate_False)
 {
   in.name = "com.objectcomputing.param";
   in.value = "com.objectcomputing.value";
   in.propagate = false;
 
-  out.name = "none";
-  out.value = "none";
-  out.propagate = false;
-
+  ASSERT_TRUE(buffer.length() == 0);
   serializer << in;
-  serializer >> out;
+  ASSERT_TRUE(buffer.length() == 0);
 
-  ASSERT_TRUE(std::strcmp(out.name.in(), in.name.in()) == 0);
-  ASSERT_TRUE(std::strcmp(out.value.in(), in.value.in()) == 0);
-  ASSERT_TRUE(in.propagate);
+  ASSERT_TRUE(std::strcmp(in.name.in(), "com.objectcomputing.param") == 0);
+  ASSERT_TRUE(std::strcmp(in.value.in(), "com.objectcomputing.value") == 0);
+  ASSERT_FALSE(in.propagate);
 }
-*/
+
