@@ -1,8 +1,8 @@
-Starting with release 2.1.1, OpenDDS provides support for Wireshark.
-The OpenDDS DCPS dissector provides a Wireshark 1.2.x/1.3.x compatible
-dissector which supports the TCP/IP, UDP/IP, and IP multicast transports.
-Dissection of transport headers and encapsulated sample headers are fully
-supported.
+The OpenDDS DCPS Wireshark dissector supports the TCP/IP, UDP/IP, and IP
+multicast transports. Dissection of transport headers and encapsulated sample
+headers are fully supported. Optional dissection of sample payloads is also
+supported from Wireshark 1.12 on. The dissector is compatible with Wireshark
+1.2 up to at least 2.4 and has been tested with Windows, macOS, and, Linux.
 
 
 ======================================================================
@@ -29,51 +29,67 @@ Follow the steps in the INSTALL file in the root of OpenDDS directory, along
 with the steps here.
 
 In addition, the Wireshark sources must be available and built locally
-according to the Wireshark Developer's Guide (see above).
+according to the Wireshark Developer's Guide (see above) or the headers and
+libraries must be installed through a development package like:
+ - "wireshark-devel" on Fedora derived Linux distribution.
+ - "wireshark-dev" on Debian derived Linux distribution.
 
 1. Set up the Build System to Build the Dissector
 
-   Run the DDS_ROOT/configure script, passing these arguments:
+   There are two ways to build against Wireshark depending on how Wireshark
+   was built or was acquired:
 
-     --wireshark=WIRESHARK_SRC
-       If buidling against Wireshark 1.x, else:
-     --wireshark2=WIRESHARK_SRC
-       If building against Wireshark 2.x, where WIRESHARK_SRC is the location
-       of the Wireshark source.
+    - The older method, "--wireshark" passed with the location of the
+      Wireshark headers and libraries. This should be used with:
 
-     --glib
-       On systems where Glib installed is the same used by the Wireshark
-       build.
-     --glib=GLIB_ROOT
-       Where GLIB_ROOT is the install prefix for Glib. If building on Windows,
-       GLIB_ROOT is the location of gtk2 folder Wireshark creates in the
-       wireshark-win32-libs or wireshark-win64-libs folder when it is built.
-       Can be also be used on systems where the Glib installed is different
-       than what was used to build Wireshark.
+       - Any version of Wireshark built with autoconf, which is try if you
+         ran autogen.sh. This is the recommended way to build on Linux as
+         of Wireshark 2.4.
 
-     --rapidjson
-       If using Wireshark 1.12 or later and sample payload data dissection is
-       desired. If RapidJSON is not installed on the system, it must be downloaded
-       using:
-         git submodule update --init --recursive
-       This can also be done manunally by putting rapidjson at:
-         DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson
+       - Wireshark 1.x built on Windows. Also %WIRETAP_VERSION% should also
+         be set to the version of wiretap in the build.
 
-   If using Wireshark 1.x on Windows, then this must be specified:
-     set WIRETAP_VERSION=<version of the wiretap DLL built by Wireshark>
+       - If there is a development package available for your system
+         and you want to use it to avoid having to build Wireshark.
+         This option defaults to /usr/include/wireshark if it exists, so
+         supplying the path isn't necessary.
 
-   If using Wireshark 2.x on Windows, then the Wireshark Developer's Guide will
-   have you build Wireshark outside the Wireshark source folder. You will need
-   to pass the full path to the build folder you created, which should contain
-   config.h:
-     --wireshark2_build WIRESHARK2_BUILD
+    - The newer out-of-source method, "--wireshark_cmake", should be used if
+      Wireshark was built using CMake, which can put "config.h" header and
+      the Wireshark libraries somewhere other than the source tree. This is
+      Wireshark's recommended method for Windows and macOS and can optionally
+      be used on Linux. This method has two more parameters:
 
-   As of writing (Wireshark 2.4) building Wireshark 2 on Windows puts libraries
-   in WIRESHARK2_BUILD\run\RelWithDebInfo along with the application itself.
-   This is handled by default, but if this is not true for some reason,
-   the library location can be defined manually:
-     --wireshark2_bin WIRESHARK2_BIN
+       --wireshark_build
+         Is the build directory the user choose before building Wireshark.
+         This is required and an absolute path.
 
+       --wireshark_lib
+         Is the location of the Wireshark libraries RELATIVE to the build
+         location. It's optional but it might have to be supplied depending
+         on the version of Wireshark as these defaults are based on
+         Wireshark 2.4:
+           - On Windows the default is "run\RelWithDebInfo".
+           - On macOS the default is "run\Wireshark.app\Contents\Frameworks".
+           - On Linux the default is "" (They are in the build directory).
+
+   Glib is also required to build the dissector, so "--glib" must be passed.
+   If Wireshark was not built with the system Glib or Glib is not installed,
+   the install prefix of Glib must be passed as well:
+    - On Windows this will be something like: wireshark-win(32|64)-libs-*\gtk2
+    - On macOS it depends on if the built-in dependency script or a package
+      manager like Homebrew was used to install Wireshark's dependencies.
+    - On the average Linux, it shouldn't be necessary unless you needed to use
+      a Glib that is not installed to build Wireshark.
+
+   For optional sample payload dissection support, RapidJSON must be available
+   and "--rapidjson" must be passed. It might already be available if OpenDDS
+   was recursively cloned by a git client or RapidJSON is installed in a
+   default include location (RapidJSON is header only library).
+   If RapidJSON is not installed on the system, it must be downloaded using:
+     git submodule update --init --recursive
+   or equivalent for your git client or manually downloading and placing the
+   library at DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson.
 
 2. Build
 
@@ -98,7 +114,7 @@ according to the Wireshark Developer's Guide (see above).
    libraries are not installed system-wide.
 
    You may verify the plugin is installed correctly by looking at the
-   Supported Protocols list.  Depending on the wireshark version, this
+   Supported Protocols list.  Depending on the Wireshark version, this
    can usually be found somewhere under the Help or Internals menus.
    The OpenDDS_Dissector library we created above should appear in the
    list of plugins or protocols.
@@ -263,7 +279,7 @@ Notes:
 
       opendds.sample.payload.Messenger.Message.seq < 3
 
-      This will show all OpenDD packets with a payload of type
+      This will show all OpenDDS packets with a payload of type
       "Messenger::Message" where it's "seq" member has less than 3 elements.
 
     To filter the items inside use "_e" (element). Items can not be
