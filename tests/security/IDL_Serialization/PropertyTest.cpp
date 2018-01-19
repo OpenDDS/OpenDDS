@@ -23,7 +23,7 @@ public:
   Serializer serializer;
 };
 
-TEST_F(SerializePropertyTest, Basic_Serialize)
+TEST_F(SerializePropertyTest, Round_Trip)
 {
   in.name = "com.objectcomputing.param";
   in.value = "com.objectcomputing.value";
@@ -32,6 +32,9 @@ TEST_F(SerializePropertyTest, Basic_Serialize)
   out.name = "none";
   out.value = "none";
   out.propagate = false;
+
+  ASSERT_FALSE(std::strcmp(out.name.in(), in.name.in()) == 0);
+  ASSERT_FALSE(std::strcmp(out.value.in(), in.value.in()) == 0);
 
   ASSERT_TRUE(buffer.length() == 0);
   ASSERT_TRUE(serializer << in);
