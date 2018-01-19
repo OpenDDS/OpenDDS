@@ -70,7 +70,7 @@ libraries must be installed through a development package like:
          on the version of Wireshark as these defaults are based on
          Wireshark 2.4:
            - On Windows the default is "run\RelWithDebInfo".
-           - On macOS the default is "run\Wireshark.app\Contents\Frameworks".
+           - On macOS the default is "run/Wireshark.app/Contents/Frameworks".
            - On Linux the default is "" (They are in the build directory).
 
    Glib is also required to build the dissector, so "--glib" must be passed.

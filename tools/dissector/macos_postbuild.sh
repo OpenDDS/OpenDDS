@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # This script takes care of two problems with the dissector file on macOS:
 #
 #   $DYLD_LIBRARY_PATH is not persevered between processes after
