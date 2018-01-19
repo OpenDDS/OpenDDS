@@ -63,19 +63,30 @@ TEST_F(SerializeBinaryPropertyTest, Round_Trip)
   ASSERT_TRUE(out.propagate);
 }
 
-/*
 TEST_F(SerializeBinaryPropertyTest, When_Propagate_False)
 {
+  const unsigned char indata[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  const size_t inlen = sizeof(indata);
+
   in.name = "com.objectcomputing.param";
-  in.value = "com.objectcomputing.value";
+  in.value.length(inlen);
+  std::memcpy(in.value.get_buffer(), &indata, inlen);
   in.propagate = false;
+
+  out.name = in.name;
+  out.value = in.value;
+  out.propagate = in.propagate;
+
+  ASSERT_TRUE(std::strcmp(out.name.in(), in.name.in()) == 0);
+  ASSERT_TRUE(std::memcmp(out.value.get_buffer(), in.value.get_buffer(), inlen) == 0);
 
   ASSERT_TRUE(buffer.length() == 0);
   serializer << in;
   ASSERT_TRUE(buffer.length() == 0);
 
-  ASSERT_TRUE(std::strcmp(in.name.in(), "com.objectcomputing.param") == 0);
-  ASSERT_TRUE(std::strcmp(in.value.in(), "com.objectcomputing.value") == 0);
+  ASSERT_TRUE(std::strcmp(out.name.in(), in.name.in()) == 0);
+  ASSERT_TRUE(std::memcmp(out.value.get_buffer(), in.value.get_buffer(), inlen) == 0);
+
   ASSERT_FALSE(in.propagate);
 }
-*/
+
