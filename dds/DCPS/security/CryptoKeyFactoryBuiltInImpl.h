@@ -12,12 +12,8 @@
 
 #include "dds/DCPS/security/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
-#include "dds/DCPS/dcps_export.h"
-
+#include "tao/LocalObject.h"
 #include "ace/Thread_Mutex.h"
-#include <map>
-//#include <string>
-//#include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -42,6 +38,7 @@ namespace Security {
 */
 class DdsSecurity_Export  CryptoKeyFactoryBuiltInImpl
 	: public virtual DDS::Security::CryptoKeyFactory
+  , public virtual CORBA::LocalObject
 {
   
 public:

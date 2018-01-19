@@ -22,14 +22,26 @@ project(CryptoKeyFactoryTest): dcpsexe, googletest {
   }
 }
 
-//project(CryptoKeyExchangeTest): dcpsexe, googlemock {
-//  requires += no_opendds_safety_profile
-//  exename = OpenDDS_CryptoKeyExchangeTest
-//
-//  after += OpenDDS_Security
-//  libs  += OpenDDS_Security
-//
-//  Source_Files {
-//    CryptoKeyExchangeTest.cpp
-//  }
-//}
+project(CryptoKeyExchangeTest): dcpsexe, googletest {
+  requires += no_opendds_safety_profile
+  exename = OpenDDS_CryptoKeyExchangeTest
+
+  after += OpenDDS_Security
+  libs  += OpenDDS_Security
+
+  Source_Files {
+    CryptoKeyExchangeTest.cpp
+  }
+}
+
+project(CryptoTransformTest): dcpsexe, googletest {
+  requires += no_opendds_safety_profile
+  exename = OpenDDS_CryptoTransformTest
+
+  after += OpenDDS_Security
+  libs  += OpenDDS_Security
+
+  Source_Files {
+    CryptoTransformTest.cpp
+  }
+}

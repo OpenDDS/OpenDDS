@@ -16,12 +16,14 @@ project(OpenDDS_Security): dcpslib {
   IDL_Files {
     DdsSecurityCore.idl
     DdsSecurityParams.idl
+    CryptoBuiltIn.idl
   }
 
   TypeSupport_Files {
     //dcps_ts_flags += -Lspcpp
     DdsSecurityCore.idl
     DdsSecurityParams.idl
+    CryptoBuiltIn.idl
   }
 
   // custom_only = 1

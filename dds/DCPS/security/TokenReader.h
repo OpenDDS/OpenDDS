@@ -47,6 +47,9 @@ public:
   const char* get_property_value(const std::string& property_name) const;
   const DDS::OctetSeq& get_bin_property_value(const std::string& property_name) const;
 
+  CORBA::ULong get_num_properties() const;
+  CORBA::ULong get_num_bin_properties() const;
+
 private:
   const DDS::Security::Token& token_ref_;
   const DDS::OctetSeq _empty_seq_;
@@ -59,6 +62,15 @@ inline bool TokenReader::is_nil() const
     && (token_ref_.class_id[0] == '\0'));
 }
 
+inline CORBA::ULong TokenReader::get_num_properties() const
+{
+  return token_ref_.properties.length();
+}
+
+inline CORBA::ULong TokenReader::get_num_bin_properties() const
+{
+  return token_ref_.binary_properties.length();
+}
 } // namespace Security
 } // namespace OpenDDS
 

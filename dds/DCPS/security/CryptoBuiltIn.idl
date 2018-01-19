@@ -1,0 +1,108 @@
+
+
+//#include "dds/DdsSecurityCore.idl"
+
+#include "dds/DdsDcpsCore.idl"
+
+module OpenDDS {
+  module Security {
+
+    /* No encryption, no authentication tag */
+    #define CRYPTO_TRANSFORMATION_KIND_NONE         {0, 0, 0, 0}
+
+    /* 
+      No encryption.
+      One AES128-GMAC authentication tag using the sender_key
+      Zero or more AES128-GMAC auth. tags with receiver specfic keys 
+    */ 
+    #define CRYPTO_TRANSFORMATION_KIND_AES128_GMAC  {0, 0, 0, 1}    
+    
+    /*
+      Authenticated Encryption using AES-128 in Galois Counter Mode
+      (GCM) using the sender key.
+      The authentication tag using the sender_key obtained from GCM
+      Zero or more AES128-GMAC auth. tags with receiver specfic keys 
+    */
+    #define CRYPTO_TRANSFORMATION_KIND_AES128_GCM   {0, 0, 0, 2}       
+
+    /*
+      No encryption.
+      One AES256-GMAC authentication tag using the sender_key
+      Zero or more AES256-GMAC auth.
+      tags with receiver specfic keys 
+    */
+    #define CRYPTO_TRANSFORMATION_KIND_AES256_GMAC  {0, 0, 0, 3}    
+    
+    /*
+      Authenticated Encryption using AES-256 in Galois Counter Mode
+      (GCM) using the sender key.
+      The authentication tag using the sender_key obtained from GCM
+      Zero or more AES256-GMAC auth.
+      tags with receiver specfic keys
+    */
+    #define CRYPTO_TRANSFORMATION_KIND_AES256_GCM   {0, 0, 0, 4}
+
+    typedef octet CryptoTransformKind[4];
+    typedef octet CryptoTransformKeyId[4];
+    struct CryptoTransformIdentifier {
+      CryptoTransformKind transformation_kind;
+      CryptoTransformKeyId transformation_key_id;
+    };
+
+    typedef sequence<octet, 32> KeyOctetSeq;
+
+    //@extensibility(FINAL)
+    struct KeyMaterial_AES_GCM_GMAC {
+      CryptoTransformKind   transformation_kind;
+      KeyOctetSeq   master_salt;
+
+      CryptoTransformKeyId  sender_key_id;
+      KeyOctetSeq   master_sender_key;
+
+      CryptoTransformKeyId  receiver_specific_key_id;
+      KeyOctetSeq   master_receiver_specific_key;
+    };
+
+    typedef sequence<KeyMaterial_AES_GCM_GMAC> KeyMaterial_AES_GCM_GMAC_Seq;
+
+
+    // Serialized as Big Endian
+    //@extensibility(FINAL)
+    typedef octet SessionIdType[4];
+    typedef octet IV_SuffixType[8];
+    struct CryptoHeader {
+      CryptoTransformIdentifier transform_identifier;
+      SessionIdType             session_id;
+      IV_SuffixType             initialization_vector_suffix;
+    };
+
+    // Serialized as Big Endian
+    //@extensibility(FINAL)
+    struct CryptoContent  {
+      DDS::OctetSeq crypto_content;
+    };
+
+    // Serialized as Big Endian
+    //@extensibility(FINAL)
+    typedef octet ReceiverMAC_Type[16];
+    struct ReceiverSpecificMAC {
+      CryptoTransformKeyId  receiver_mac_key_id;
+      ReceiverMAC_Type      receiver_mac;
+    };
+
+    typedef sequence<ReceiverSpecificMAC> ReceiverSpecificMACSeq;
+    typedef octet CommonMAC_Type[6];
+
+    // Serialized as Big Endian
+    //@extensibility(FINAL)
+    struct CryptoFooter {
+      CommonMAC_Type          common_mac;
+      ReceiverSpecificMACSeq  receiver_specific_macs;
+    };
+
+  };
+};
+
+
+
+
