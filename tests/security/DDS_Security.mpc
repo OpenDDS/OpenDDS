@@ -10,6 +10,18 @@ project(AuthenticationTest): dcpsexe, googletest {
   }
 }
 
+project(AccessControlTest): dcpsexe, googlemock {
+  requires += no_opendds_safety_profile
+  exename = OpenDDS_AccessControlTest
+
+  after += OpenDDS_Security
+  libs  += OpenDDS_Security
+
+  Source_Files {
+    AccessControlTest.cpp
+  }
+}
+
 project(CryptoKeyFactoryTest): dcpsexe, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_CryptoKeyFactoryTest
