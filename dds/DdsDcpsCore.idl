@@ -49,11 +49,6 @@ module DDS {
     const long DURATION_ZERO_SEC = 0;
     const unsigned long DURATION_ZERO_NSEC = 0;
 
-    // TODO
-    // Property_t, PropertySeq, BinaryProperty_t, BinaryPropertySeq, and PropertyQosPolicy
-    // can all be moved to dds/DCPS/security/DdsSecurityCore.idl once struct inheritance
-    // from IDL v4 has been implemented. These structs/typedefs are here as dependencies for 
-    // DomainParticipantQos (which was extended in the security specification).
     struct Property_t {
       string name;
       string value;

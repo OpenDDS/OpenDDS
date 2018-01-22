@@ -17,6 +17,14 @@
 module DDS {
   module Security {
 
+        // Per the security spec these types are expected to be visible in
+        // the DDS::Security namespace.
+        typedef DDS::Property_t Property_t;
+        typedef DDS::PropertySeq PropertySeq;
+        typedef DDS::BinaryProperty_t BinaryProperty_t;
+        typedef DDS::BinaryPropertySeq BinaryPropertySeq;
+        typedef DDS::PropertyQosPolicy PropertyQosPolicy;
+    
         //native DynamicData;
         local interface DynamicData {
         };
