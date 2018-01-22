@@ -18,6 +18,13 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   //this as an include path.
   includes += $(DDS_ROOT)/dds
 
+  // Ensure security-related exports are included in IDL-Generation.
+  idlflags += -Wb,export_macro=DdsSecurity_Export \
+  	      -Wb,export_include=dds/DCPS/security/DdsSecurity_Export.h
+
+  dcps_ts_flags += -Wb,export_macro=DdsSecurity_Export \
+  		   -Wb,export_include=dds/DCPS/security/DdsSecurity_Export.h
+
   // These should only contain interfaces and unserialized types.
   // They will be processed by tao_idl.
   IDL_Files {
@@ -29,6 +36,13 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsSubscriptionExt.idl
     DdsDcpsTopic.idl
     DdsDcpsTypeSupportExt.idl
+    DdsSecurityCore.idl
+    DdsSecurityParams.idl
+  }
+
+  TypeSupport_Files {
+    DdsSecurityCore.idl
+    DdsSecurityParams.idl
   }
 
   Source_Files {

@@ -10,7 +10,7 @@
 #ifndef DDS_DCPS_TOKEN_WRAPPER_IMPL_H
 #define DDS_DCPS_TOKEN_READER_IMPL_H
 
-#include "dds/DCPS/security/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

@@ -8,7 +8,7 @@
 #ifndef DDS_CRYPTO_KEY_EXHANGE_BUILT_IN_IMPL_H
 #define DDS_CRYPTO_KEY_EXHANGE_BUILT_IN_IMPL_H
 
-#include "dds/DCPS/security/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "tao/LocalObject.h"
 

@@ -13,7 +13,7 @@
 #ifndef DDS_SECURITY_PARAMS_IDL
 #define DDS_SECURITY_PARAMS_IDL
 
-#include "dds/DdsDcpsCore.idl"
+#include "DdsDcpsCore.idl"
 
 module DDS {
     module Security {

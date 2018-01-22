@@ -9,7 +9,7 @@
 #define RTPS_RTPSCORE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
-#include "dds/DCPS/security/DdsSecurityParams.idl"
+#include "dds/DdsSecurityParams.idl"
 
 module OpenDDS {
   module RTPS {

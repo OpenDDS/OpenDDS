@@ -11,7 +11,7 @@
 #define DDS_DCPS_AUTHENTICATION_BUILTIN_IMPL_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/security/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"
 

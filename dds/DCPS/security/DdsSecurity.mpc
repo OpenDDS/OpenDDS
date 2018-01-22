@@ -10,19 +10,11 @@ project(OpenDDS_Security): dcpslib {
   requires += no_opendds_safety_profile
   dynamicflags  = DDSSECURITY_BUILD_DLL
 
-  // When no files are specified this block
-  // prevents files from being parsed by the
-  // TAO IDL transpiler.
   IDL_Files {
-    DdsSecurityCore.idl
-    DdsSecurityParams.idl
     CryptoBuiltIn.idl
   }
 
   TypeSupport_Files {
-    //dcps_ts_flags += -Lspcpp
-    DdsSecurityCore.idl
-    DdsSecurityParams.idl
     CryptoBuiltIn.idl
   }
 

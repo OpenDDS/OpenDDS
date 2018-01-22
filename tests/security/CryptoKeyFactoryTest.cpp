@@ -1,6 +1,6 @@
 
 #include "dds/DCPS/security/CryptoKeyFactoryBuiltInImpl.h"
-#include "dds/DCPS/security/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "gtest/gtest.h"
 

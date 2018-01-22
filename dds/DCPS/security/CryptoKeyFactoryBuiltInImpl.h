@@ -10,7 +10,7 @@
 #ifndef DDS_CRYPTO_KEY_FACTORY_BUILTIN_IMPL_H
 #define DDS_CRYPTO_KEY_FACTORY_BUILTIN_IMPL_H
 
-#include "dds/DCPS/security/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "tao/LocalObject.h"
 #include "ace/Thread_Mutex.h"

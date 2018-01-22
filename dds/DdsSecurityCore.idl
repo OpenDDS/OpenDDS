@@ -8,9 +8,9 @@
 #ifndef DDS_SECURITY_CORE_IDL
 #define DDS_SECURITY_CORE_IDL
 
-#include "dds/DdsDcpsGuid.idl"
-#include "dds/DdsDcpsPublication.idl"
-#include "dds/DdsDcpsSubscription.idl"
+#include "DdsDcpsGuid.idl"
+#include "DdsDcpsPublication.idl"
+#include "DdsDcpsSubscription.idl"
 #include "DdsSecurityParams.idl"
 
 // The types in this file shall be serialized with XCDR encoding version 1
