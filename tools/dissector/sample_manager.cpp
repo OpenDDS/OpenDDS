@@ -155,10 +155,9 @@ namespace OpenDDS
       }
 
       void visit (itl::Fixed& fixed) {
-#ifndef ACE_HAS_CDR_FIXED
         dissector = new Sample_Dissector();
         dissector->add_field(new Sample_Field(Sample_Field::Fixed, ""));
-#else
+#ifndef ACE_HAS_CDR_FIXED
         ACE_DEBUG((LM_WARNING, ACE_TEXT("ACE is missing Fixed support.\n")));
 #endif
       }

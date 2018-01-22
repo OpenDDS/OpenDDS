@@ -7,12 +7,9 @@
 #   libraries is relative. To remedy this we add a absolute rpath to
 #   $DDS_ROOT/lib.
 #
-#   It produces dylib files which Wireshark will except but only if they have
+#   It produces dylib files which Wireshark will accept but only if they have
 #   a "so" file extention. To remedy this we just make a copy with the "so"
 #   extension.
-#
-# These are probably are possible with MPC alone, but it was easier to do it
-# here.
 
 filename="OpenDDS_Dissector"
 d="$filename.dylib"
