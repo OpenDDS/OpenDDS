@@ -1261,8 +1261,9 @@ EOT
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
         while (my $row = <$fh>) {
           chomp $row;
-          unless ($row =~ /^include/) {
-            my ($key, $value) = split(/=/, $row);
+          $row =~ s/\s*#.*$//;
+          if ($row =~ /^\s*(\w+)\s*[:?+]?=\s*(.*)$/) {
+            my ($key, $value) = ($1, $2);
             $existing_macros{$key} = $value;
           }
         }
