@@ -154,10 +154,10 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'java:s', 'Java development kit (use JAVA_HOME)',
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
     'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
-    'wireshark:s', 'Wireshark 1.x Source (use WIRESHARK_SRC)',
-    'wireshark2:s', 'Wireshark 2.x Source (use WIRESHARK_SRC)',
-    'wireshark2_build:s', 'Wireshark 2 Build Location on Windows',
-    'wireshark2_bin:s', 'Folder with Wireshark 2 libraries on Windows (default: $WIRESHARK2_BUILD\\run\\RelWithDebInfo)',
+    'wireshark:s', 'Wireshark source, "non-CMake" based (use WIRESHARK_SRC)',
+    'wireshark_cmake:s', 'Wireshark built with CMake, requires wireshark_build and wireshark_lib (use WIRESHARK_SRC)',
+    'wireshark_build:s', 'Wireshark CMake Build Location',
+    'wireshark_lib:s', 'Wireshark CMake libraries location, relative to wireshark_build',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson', 'RapidJSON for Wireshark Sample Dissection(optional)',
     'qt:s', 'Qt (use QTDIR or system pkg)',
@@ -831,11 +831,11 @@ my %optdep =
    'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
    'ant' =>       ['ANT_HOME',      'bin/ant'],
    'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
-   'wireshark2' =>['WIRESHARK_SRC', 'epan/packet.h',               'wireshark2'],
-   'wireshark2_build' =>
-                  ['WIRESHARK2_BUILD', 'config.h'],
-   'wireshark2_bin' =>
-                  ['WIRESHARK2_BIN'],
+   'wireshark_cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
+   'wireshark_build' =>
+                  ['WIRESHARK_BUILD', 'config.h'],
+   'wireshark_lib' =>
+                  ['WIRESHARK_LIB'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
    'rapidjson' => [undef,           undef,                         'no_itl=0'],
    'qt' =>        ['QTDIR',         '',                            'qt4'],
@@ -854,6 +854,31 @@ if (exists $opts{'java'}) {
 
 $opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
 $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
+
+# Default to Wireshark Development Package if installed
+my $wireshark_install = '/usr/include/wireshark';
+if (exists $opts{'wireshark'} && $opts{'wireshark'} eq '') {
+  if (-d $wireshark_install) {
+    $opts{'wireshark'} = $wireshark_install;
+  } else {
+    die "ERROR: --wireshark must be given a value because there is not a " .
+        "development package installed at " . $wireshark_install;
+  }
+}
+
+my $wireshark_lib_defaulted = 0;
+if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
+  if ($^O =~ /MSWin32/) {
+    $opts{'wirehshark_lib'} = "run\\RelWithDebInfo";
+  } elsif ($^O =~ /darwin/) {
+    $opts{'wirehshark_lib'} = "run/Wireshark.app/Contents/Frameworks";
+  } elsif ($^O =~ /linux/) {
+    $opts{'wirehshark_lib'} = "";
+  } else {
+    die "ERROR: --wireshark_lib is needed because we couldn't decide on a default value";
+  }
+  $wireshark_lib_defaulted = 1;
+}
 
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3/;
 my %use_win_default = ('boost' => 'c:\\Boost');
@@ -974,25 +999,40 @@ if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
   die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider)\n";
 }
 
-if (exists $opts{'wireshark'} || exists $opts{'wireshark2'}) {
+if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
   if (!exists $opts{'glib'}) {
-    die "ERROR: --glib is required for --wireshark and --wireshark2\n";
+    die "ERROR: --glib is required for --wireshark and --wireshark_cmake\n";
   }
   
-  if (exists $opts{'wireshark'} && exists $opts{'wireshark2'}) {
-    die "ERROR: --wireshark and --wireshark2 can not be used at the same time.\n";
-  }
+  if (exists $opts{'wireshark_cmake'}) {
 
-  if ($^O eq 'MSWin32') {
-    if (exists $opts{'wireshark2'}) {
-      if (!exists $opts{'wireshark2_build'}) {
-        die "ERROR: --wireshark2_build is required on Windows with --wireshark2\n";
+    if (exists $opts{'wireshark'}) {
+      die "ERROR: --wireshark and --wireshark_cmake can not be used at the same time.\n";
+    }
+
+    if (! -d ($opts{'wireshark_build'} . '/' . $opts{'wireshark_lib'})) {
+      if ($wireshark_lib_defaulted) {
+        die "ERROR: The default value for wireshark_lib: " . $opts{'wireshark_lib'} .
+            " does not exist, please sypply wireshark_lib with the correct value";
+      } else {
+        die "ERROR: The supplied wireshark_lib: " . $opts{'wireshark_lib'} . " does not exist.";
       }
-    } elsif (exists $opts{'wireshark2_build'}) {
-      die "ERROR: --wireshark2 is required for --wireshark2_build\n";
     }
   }
 }
+
+if (exists $opts{'wireshark_cmake'} && !exists $opts{'wireshark_build'}) {
+  die "ERROR: --wireshark_build are required with --wireshark_cmake\n";
+}
+
+if (exists $opts{'wireshark_lib'} && !exists $opts{'wireshark_cmake'}) {
+  die "ERROR: --wireshark_cmake and --wireshark_build is required for --wireshark_lib\n";
+}
+
+if (exists $opts{'wireshark_build'} && !exists $opts{'wireshark_cmake'}) {
+  die "ERROR: --wireshark_cmake is required for --wireshark_build\n";
+}
+
 
 if ($opts{'glib'}) {
   if (!-r "$opts{'glib'}/lib/glib-2.0/include/glibconfig.h") {

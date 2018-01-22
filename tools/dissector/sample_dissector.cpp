@@ -58,7 +58,7 @@ namespace OpenDDS
       GError * error = NULL;
       char * utf8 = g_convert(
         from_, length * sizeof(ACE_CDR::WChar),
-        "UTF-8", "UTF-16", NULL, NULL, &error
+        "UTF-8", "UTF-16LE", NULL, NULL, &error
       );
 
       if (utf8 != NULL) {
