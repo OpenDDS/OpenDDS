@@ -1,3 +1,4 @@
+tests/security/run_test.pl OpenDDS_AccessControlTest
 tests/security/run_test.pl OpenDDS_AuthenticationTest
 tests/security/run_test.pl OpenDDS_CryptoKeyFactoryTest
 tests/security/run_test.pl OpenDDS_CryptoKeyExchangeTest

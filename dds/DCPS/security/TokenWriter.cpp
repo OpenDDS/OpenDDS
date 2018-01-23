@@ -36,8 +36,7 @@ TokenWriter::~TokenWriter()
 
 void TokenWriter::set_property(int prop_index, const char* prop_name, const char* prop_value, bool propagate)
 {
-  // No error checking here
-  DDS::Property_t prop_ref = token_ref_.properties[prop_index];
+  DDS::Property_t& prop_ref = token_ref_.properties[prop_index];
   prop_ref.name = prop_name;
   prop_ref.value = prop_value;
   prop_ref.propagate = propagate;
