@@ -79,7 +79,7 @@ public:
   virtual ::CORBA::Boolean preprocess_secure_submsg(
     ::DDS::Security::DatawriterCryptoHandle & datawriter_crypto,
     ::DDS::Security::DatareaderCryptoHandle & datareader_crypto,
-    ::DDS::Security::SecureSumessageCategory_t & secure_submessage_category,
+    ::DDS::Security::SecureSubmessageCategory_t & secure_submessage_category,
     const ::DDS::OctetSeq & encoded_rtps_submessage,
     ::DDS::Security::ParticipantCryptoHandle receiving_participant_crypto,
     ::DDS::Security::ParticipantCryptoHandle sending_participant_crypto,

@@ -411,7 +411,7 @@ TEST_F(CryptoTransformTest, preprocess_secure_submsg_NilHandles)
 {
   ::DDS::Security::DatawriterCryptoHandle datawriter_crypto = DDS::HANDLE_NIL;
   ::DDS::Security::DatawriterCryptoHandle datareader_crypto = DDS::HANDLE_NIL;
-  ::DDS::Security::SecureSumessageCategory_t submsgcat = DDS::Security::INFO_SUBMESSAGE;
+  ::DDS::Security::SecureSubmessageCategory_t submsgcat = DDS::Security::INFO_SUBMESSAGE;
   ::DDS::Security::SecurityException ex;
 
   // Good recv handle, bad send handle
@@ -431,7 +431,7 @@ TEST_F(CryptoTransformTest, preprocess_secure_submsg_Success)
 {
   ::DDS::Security::DatawriterCryptoHandle datawriter_crypto = DDS::HANDLE_NIL;
   ::DDS::Security::DatawriterCryptoHandle datareader_crypto = DDS::HANDLE_NIL;
-  ::DDS::Security::SecureSumessageCategory_t submsgcat = DDS::Security::INFO_SUBMESSAGE;
+  ::DDS::Security::SecureSubmessageCategory_t submsgcat = DDS::Security::INFO_SUBMESSAGE;
   ::DDS::Security::SecurityException ex;
   ::DDS::Security::ParticipantCryptoHandle send_handle = 2;
   ::DDS::Security::ParticipantCryptoHandle recv_handle = 1;

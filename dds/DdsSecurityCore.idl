@@ -790,7 +790,7 @@ module DDS {
 			   inout SecurityException  ex);
     };
 
-    enum SecureSumessageCategory_t {
+    enum SecureSubmessageCategory_t {
       INFO_SUBMESSAGE,
       DATAWRITER_SUBMESSAGE,
       DATAREADER_SUBMESSAGE
@@ -847,7 +847,7 @@ module DDS {
       preprocess_secure_submsg(
 			       inout DatawriterCryptoHandle         datawriter_crypto,
 			       inout DatareaderCryptoHandle         datareader_crypto,
-			       inout SecureSumessageCategory_t      secure_submessage_category,
+			       inout SecureSubmessageCategory_t      secure_submessage_category,
 			       in    OctetSeq                       encoded_rtps_submessage,
 			       in    ParticipantCryptoHandle        receiving_participant_crypto,
 			       in    ParticipantCryptoHandle        sending_participant_crypto,

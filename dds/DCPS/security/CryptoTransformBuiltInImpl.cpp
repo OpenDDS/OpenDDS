@@ -159,7 +159,7 @@ namespace Security {
 ::CORBA::Boolean CryptoTransformBuiltInImpl::preprocess_secure_submsg(
   ::DDS::Security::DatawriterCryptoHandle & datawriter_crypto,
   ::DDS::Security::DatareaderCryptoHandle & datareader_crypto,
-  ::DDS::Security::SecureSumessageCategory_t & secure_submessage_category,
+  ::DDS::Security::SecureSubmessageCategory_t & secure_submessage_category,
   const ::DDS::OctetSeq & encoded_rtps_submessage,
   ::DDS::Security::ParticipantCryptoHandle receiving_participant_crypto,
   ::DDS::Security::ParticipantCryptoHandle sending_participant_crypto,
@@ -182,7 +182,7 @@ namespace Security {
     datawriter_crypto = 1;
     datareader_crypto = 2;
     
-    //enum SecureSumessageCategory_t
+    //enum SecureSubmessageCategory_t
     //{
     //  INFO_SUBMESSAGE,
     //  DATAWRITER_SUBMESSAGE,
