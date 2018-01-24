@@ -155,11 +155,12 @@ namespace OpenDDS
       }
 
       void visit (itl::Fixed& fixed) {
-        dissector = new Sample_Dissector();
-        dissector->add_field(new Sample_Field(Sample_Field::Fixed, ""));
 #ifndef ACE_HAS_CDR_FIXED
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("ACE is missing Fixed support.\n")));
+        ACE_DEBUG((LM_WARNING, ACE_TEXT(
+          "A Fixed type has been specified but ACE is missing Fixed.\n"
+        )));
 #endif
+        dissector = new Sample_Fixed(fixed.digits(), fixed.scale());
       }
 
       Sample_Dissector* do_array(std::vector<unsigned int>::const_iterator pos,

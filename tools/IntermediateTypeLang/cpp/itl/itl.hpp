@@ -606,13 +606,15 @@ namespace itl {
       std::map<std::string, std::string> values;
       bool isConstrained = false;
 
-      if (!extractUint("base", value, base)) throw std::runtime_error("No base for fixed");
+      // if (!extractUint("base", value, base)) throw std::runtime_error("No base for fixed");
       if (!extractUint("digits", value, digits)) throw std::runtime_error("No digits for fixed");
       if (!extractUint("scale", value, scale)) throw std::runtime_error("No scale for fixed");
 
+      /*
       if (base == 0) {
         throw std::runtime_error("Illegal base for fixed");
       }
+      */
 
       if (scale > digits) {
         throw std::runtime_error("Scale exceeds digits in fixed");

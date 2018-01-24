@@ -32,6 +32,7 @@ extern "C" {
 #include "tools/dissector/dissector_export.h"
 #include "ws_common.h"
 
+#include "FACE/Fixed.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/DataSampleHeader.h"
 
@@ -73,6 +74,7 @@ namespace OpenDDS
       packet_info* info;
       proto_tree* tree;
       size_t offset;
+      expert_field * warning_ef;
 
       bool use_index;
       guint32 index;
@@ -161,7 +163,6 @@ namespace OpenDDS
         Float,
         Double,
         LongDouble,
-        Fixed,
         String,  // not fixed, but pre-defined in IDL
         WString,
         Enumeration,
@@ -194,7 +195,6 @@ namespace OpenDDS
       /// Sample_Dissector object for further evaluation.
       size_t dissect_i (Wireshark_Bundle &params, bool recur = true);
 
-      /// Compute the size of the field in bytes
       size_t compute_length(const Wireshark_Bundle & p);
 
       void to_stream(std::stringstream &s, Wireshark_Bundle & p);
@@ -413,6 +413,24 @@ namespace OpenDDS
       Sample_Dissector *base_;
     };
 
+    /*
+     * A Dissector for Fixed Point Types (FACE/Fixed.h)
+     */
+    class dissector_Export Sample_Fixed : public Sample_Dissector
+    {
+    public:
+      Sample_Fixed(unsigned digits, unsigned scale);
+
+      unsigned digits() { return digits_; }
+      unsigned scale() { return scale_; }
+
+    protected:
+      virtual void init_ws_fields();
+      virtual size_t dissect_i(Wireshark_Bundle &params);
+
+    private:
+      unsigned digits_, scale_;
+    };
   }
 }
 
