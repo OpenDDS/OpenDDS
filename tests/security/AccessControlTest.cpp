@@ -365,7 +365,6 @@ TEST_F(AccessControlTest, check_create_topic_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   ::DDS::Security::DomainId_t domain_id = 1;
-  const char * topic_name = "MyTopic";
   ::DDS::TopicQos qos;
   ::DDS::Security::SecurityException ex;
 
