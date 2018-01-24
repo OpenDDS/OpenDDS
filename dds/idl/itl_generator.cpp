@@ -269,8 +269,8 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
         << Indent(this) << "\"type\" : { "
           << "\"kind\" : \"fixed\", "
           << "\"digits\" : " << digits << ", "
-          << "\"scale\" : " << scale
-          << " }\n"
+          << "\"scale\" : " << scale << ", "
+          << "\"base\" : 10 }\n"
         << Close(this) << Indent(this) << "}\n" << Close(this);
       break;
     }

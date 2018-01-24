@@ -1316,7 +1316,7 @@ namespace OpenDDS
 #ifdef ACE_HAS_CDR_FIXED
         // Extract a ACE_CDR::Fixed, give it to WS as a double, and display
         // it using Fixed.to_string().
-        FACE::Octet raw[len];
+        FACE::Octet raw[(ACE_CDR::Fixed::MAX_DIGITS + 2) / 2];
         if (params.serializer.read_octet_array(raw, len)) {
           ACE_CDR::Fixed fixed_value = ACE_CDR::Fixed::from_octets(
             raw, len, scale_);
