@@ -1342,13 +1342,12 @@ namespace OpenDDS
 #else
         // Place Dummy value and inform user
         const char * missing_fixed = "Fixed Type Support is missing from ACE";
-        proto_item * item;
         if (params.use_index) {
-          item = proto_tree_add_double_format(
+          proto_tree_add_double_format(
             ADD_FIELD_PARAMS, 0, "[%u]: %s", params.index, missing_fixed
           );
         } else {
-          item = proto_tree_add_double_format_value(
+          proto_tree_add_double_format_value(
             ADD_FIELD_PARAMS, 0, "%s", missing_fixed
           );
         }
