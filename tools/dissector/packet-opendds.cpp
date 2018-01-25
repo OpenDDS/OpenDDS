@@ -92,11 +92,16 @@ int hf_sample_flags_more_frags  = -1;
 int hf_sample_flags2            = -1;
 int hf_sample_flags2_cdr_encap  = -1;
 int hf_sample_flags2_key_only   = -1;
+
 // Payload IDL Type, ex "Messenger::Message"
 int hf_sample_payload = -1;
+
 #ifndef NO_EXPERT
-// Payload "Expert" Error Field
-expert_field ei_sample_payload = EI_INIT;
+// This signifies a problem with the structure of the payload
+expert_field ei_sample_payload_error = EI_INIT;
+// All other problems that are considered less serious, like missing
+// dissector ITL file or problems with individual fields of payload.
+expert_field ei_sample_payload_warning = EI_INIT;
 #endif
 
 const int sample_flags_bits = 8;
@@ -514,7 +519,7 @@ namespace OpenDDS
         proto_tree_add_expert_format(
           ltree,
           pinfo_,
-          &ei_sample_payload,
+          &ei_sample_payload_warning,
           tvb_,
           offset,
           (gint) header.message_length_,
@@ -540,7 +545,7 @@ namespace OpenDDS
         proto_tree_add_expert_format(
           ltree,
           pinfo_,
-          &ei_sample_payload,
+          &ei_sample_payload_warning,
           tvb_,
           offset,
           (gint) header.message_length_,
@@ -574,7 +579,7 @@ namespace OpenDDS
         proto_tree_add_expert_format(
           ltree,
           pinfo_,
-          &ei_sample_payload,
+          &ei_sample_payload_warning,
           tvb_,
           offset,
           (gint) header.message_length_,
@@ -622,6 +627,7 @@ namespace OpenDDS
         params.info = pinfo_;
         params.tree = contents_tree;
         params.offset = offset;
+        params.warning_ef = &ei_sample_payload_warning;
 
         /*
          * Handle Seg Faults that might be caused by incorrect ITL file
@@ -698,7 +704,7 @@ namespace OpenDDS
             } catch (Sample_Dissector_Error & e) {
 #ifndef NO_EXPERT
               proto_tree_add_expert_format(
-                trans_tree, pinfo_, &ei_sample_payload,
+                trans_tree, pinfo_, &ei_sample_payload_error,
                 tvb_, offset, -1, e.what()
               );
 #endif
@@ -978,12 +984,18 @@ namespace OpenDDS
       // Expert Information
 #ifndef NO_EXPERT
       static ei_register_info ei[] = {
-        { &ei_sample_payload, {
-          "opendds.sample.dissect_error",
+        {&ei_sample_payload_warning, {
+          "opendds.sample.dissect_warning",
           PI_UNDECODED, PI_WARN,
-          "Unable to Dissect Sample Payload",
+          "Unable dissect a field in the sample payload successfully.",
           EXPFILL
         }},
+        {&ei_sample_payload_error, {
+          "opendds.sample.dissect_error",
+          PI_MALFORMED, PI_ERROR,
+          "Unable to dissect sample payload because data not match ITL file.",
+          EXPFILL
+        }}
       };
 #endif
 
