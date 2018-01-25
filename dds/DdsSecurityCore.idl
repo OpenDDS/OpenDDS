@@ -62,35 +62,12 @@ module DDS {
     
     //@extensibility(APPENDABLE)
     struct ParticipantGenericMessage {
-      /* target for the request. Can be GUID_UNKNOWN */
       MessageIdentity message_identity;
-
-      /*The related_message_identity uniquely identifies another ParticipantStatelessMessage that
-	is related to the message being processed. It shall be set to either the tuple {GUID_UNKNOWN, 0} if
-	the message is not related to any other message, or else set to match the message_identity of the
-	related ParticipantStatelessMessage.*/
       MessageIdentity related_message_identity;
-
-      /*The destination_participant_guid shall contain either the value GUID_UNKNOWN (see sub clause
-	9.3.1.5 of the DDS Interoperability Wire Protocol [2]) or else the GUID_t of the destination
-	DomainParticipant.*/
       OpenDDS::DCPS::GUID_t destination_participant_guid;
-
-      /*The destination_endpoint_guid provides a mechanism to specify finer granularity on the intended
-	recipient of a message beyond the granularity provided by the destination_participant_guid. It can
-	contain either GUID_UNKNOWN or else the GUID of a specific endpoint within destination
-	DomainParticipant. The targeted endpoint is the one whose Endpoint (DataWriter or
-	DataReader) GUID_t matches the destination_endpoint_guid.*/
       OpenDDS::DCPS::GUID_t destination_endpoint_guid;
-
       OpenDDS::DCPS::GUID_t source_endpoint_guid;
       GenericMessageClassId message_class_id;
-
-      /*The destination_endpoint_guid provides a mechanism to specify finer granularity on the intended
-	recipient of a message beyond the granularity provided by the destination_participant_guid. It can
-	contain either GUID_UNKNOWN or else the GUID of a specific endpoint within destination
-	DomainParticipant. The targeted endpoint is the one whose Endpoint (DataWriter or
-	DataReader) GUID_t matches the destination_endpoint_guid.*/
       DataHolderSeq message_data;
     };
 
