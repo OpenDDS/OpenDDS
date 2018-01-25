@@ -36,6 +36,8 @@
 #include "ace/Condition_Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
 
+#include "dds/DdsSecurityCoreC.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -104,28 +106,48 @@ private:
   Spdp& spdp_;
 
   struct Msg : public OpenDDS::DCPS::PoolAllocationBase {
-    enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER, MSG_PARTICIPANT_DATA,
-                   MSG_REMOVE_FROM_PUB_BIT, MSG_REMOVE_FROM_SUB_BIT,
-                   MSG_FINI_BIT, MSG_STOP } type_;
+    enum MsgType {
+      MSG_PARTICIPANT,
+      MSG_WRITER,
+      MSG_READER,
+      MSG_PARTICIPANT_DATA,
+      MSG_REMOVE_FROM_PUB_BIT,
+      MSG_REMOVE_FROM_SUB_BIT,
+      MSG_FINI_BIT,
+      MSG_STOP,
+      MSG_PARTICIPANT_STATELESS_DATA,
+    } type_;
+
     DCPS::MessageId id_;
+
     union {
       const SPDPdiscoveredParticipantData* dpdata_;
       const OpenDDS::DCPS::DiscoveredWriterData* wdata_;
       const OpenDDS::DCPS::DiscoveredReaderData* rdata_;
       const ParticipantMessageData* pmdata_;
       DDS::InstanceHandle_t ih_;
+      const DDS::Security::ParticipantStatelessMessage* psmdata_;
     };
+
     Msg(MsgType mt, DCPS::MessageId id, const SPDPdiscoveredParticipantData* dpdata)
       : type_(mt), id_(id), dpdata_(dpdata) {}
+
     Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata)
       : type_(mt), id_(id), wdata_(wdata) {}
+
     Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata)
       : type_(mt), id_(id), rdata_(rdata) {}
+
     Msg(MsgType mt, DCPS::MessageId id, const ParticipantMessageData* pmdata)
       : type_(mt), id_(id), pmdata_(pmdata) {}
+
     Msg(MsgType mt, DCPS::MessageId id, DDS::InstanceHandle_t ih)
       : type_(mt), id_(id), ih_(ih) {}
+
+    Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* psmdata)
+      : type_(mt), id_(id), psmdata_(psmdata) {}
   };
+
 
   class Endpoint : public DCPS::TransportClient {
   public:
