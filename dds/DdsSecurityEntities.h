@@ -8,9 +8,12 @@
 #ifndef DDS_SECURITY_ENTITIES
 #define DDS_SECURITY_ENTITIES
 
-#include "dds/DdsDcpsGuidC.h";
+#include "dds/DdsDcpsGuidC.h"
 
 using OpenDDS::DCPS::EntityId_t;
+
+namespace DDS {
+namespace Security {
 
 /*
  * The below entities are from the security spec. V1.1
@@ -28,5 +31,7 @@ const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER = {{0xf
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER = {{0xff, 0x02, 0x02}, 0xc4};
 const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER = {{0xff, 0x01, 0x01}, 0xc2};
 const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER = {{0xff, 0x01, 0x01}, 0xc7};
+
+}} /* DDS::Security */
 
 #endif
