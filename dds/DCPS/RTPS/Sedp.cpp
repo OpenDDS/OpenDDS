@@ -32,6 +32,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DdsSecurityEntities.h"
 
 #include <ace/Reverse_Lock_T.h>
 #include <ace/Auto_Ptr.h>
@@ -1281,6 +1282,14 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
 }
 
 void
+Sedp::Task::svc_i(DCPS::MessageId id,
+		  const DDS::Security::ParticipantStatelessMessage* data)
+{
+  DCPS::unique_ptr<const DDS::Security::ParticipantStatelessMessage> delete_the_data(data);
+  sedp_->data_received(id, *data);
+}
+
+void
 Sedp::data_received(DCPS::MessageId /*message_id*/,
                     const ParticipantMessageData& data)
 {
@@ -1313,6 +1322,13 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
       sub_pos->second.subscription_->signal_liveliness(guid_participant);
     }
   }
+}
+
+void
+Sedp::data_received(DCPS::MessageId /* message_id */,
+                    const DDS::Security::ParticipantStatelessMessage& /* data */)
+{
+  /* TODO */
 }
 
 // helper for match(), below
@@ -1740,8 +1756,22 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("failed to deserialize data\n")));
         return;
       }
-
       sedp_.task_.enqueue(id, move(data));
+
+    } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER
+	|| sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
+
+	/* TODO:
+	 * Determine if READER and WRITER cases are handled differently. This difference may be handled within the
+	 * Sedp::data_received(...) routine or in the next layer above Sedp... */
+	DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data(new DDS::Security::ParticipantStatelessMessage);
+
+	if (!(ser >> *data)) {
+	  ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+		     ACE_TEXT("failed to deserialize data\n")));
+	  return;
+	}
+	sedp_.task_.enqueue(id, move(data));
 
     }
   }
@@ -2002,6 +2032,13 @@ Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
+void
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data)
+{
+  if (spdp_->shutting_down()) { return; }
+  putq(new Msg(Msg::MSG_PARTICIPANT_STATELESS_DATA, id, data.release()));
+}
+
 int
 Sedp::Task::svc()
 {
@@ -2015,25 +2052,35 @@ Sedp::Task::svc()
     case Msg::MSG_PARTICIPANT:
       svc_i(msg->dpdata_);
       break;
+
     case Msg::MSG_WRITER:
       svc_i(msg->id_, msg->wdata_);
       break;
+
     case Msg::MSG_READER:
       svc_i(msg->id_, msg->rdata_);
       break;
+
     case Msg::MSG_PARTICIPANT_DATA:
       svc_i(msg->id_, msg->pmdata_);
       break;
+
+    case Msg::MSG_PARTICIPANT_STATELESS_DATA:
+      svc_i(msg->id_, msg->psmdata_);
+      break;
+
     case Msg::MSG_REMOVE_FROM_PUB_BIT:
     case Msg::MSG_REMOVE_FROM_SUB_BIT:
       svc_i(msg->type_, msg->ih_);
       break;
+
     case Msg::MSG_FINI_BIT:
       // acknowledge that fini_bit has been called (this just ensures that
       // this task is not in the act of using one of BIT Subscriber's Data
       // Readers while it is being deleted
       spdp_->wait_for_acks().ack();
       break;
+
     case Msg::MSG_STOP:
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
@@ -2041,6 +2088,7 @@ Sedp::Task::svc()
       }
       return 0;
     }
+
     if (DCPS::DCPS_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc done with message\n"));
     }

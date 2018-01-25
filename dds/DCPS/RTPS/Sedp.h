@@ -36,7 +36,7 @@
 #include "ace/Condition_Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include "dds/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityCoreTypeSupportImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -281,6 +281,7 @@ private:
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data);
 
     void acknowledge();
     void shutdown();
@@ -292,6 +293,7 @@ private:
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
+    void svc_i(DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* data);
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
     Spdp* spdp_;
@@ -332,6 +334,8 @@ private:
                      const OpenDDS::DCPS::DiscoveredReaderData& rdata);
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
+  void data_received(DCPS::MessageId message_id,
+                     const DDS::Security::ParticipantStatelessMessage& data);
 
   typedef std::pair<DCPS::MessageId, OpenDDS::DCPS::DiscoveredWriterData> MsgIdWtrDataPair;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdWtrDataPair,
