@@ -855,9 +855,10 @@ if (exists $opts{'java'}) {
 $opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
 $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 
-# Default to Wireshark Development Package if installed
+# Default to Wireshark Development Package if installed and a path wasn't
+# supplied.
 my $wireshark_install = '/usr/include/wireshark';
-if (exists $opts{'wireshark'} && $opts{'wireshark'} eq '') {
+if (exists $opts{'wireshark'} && !defined $ENV{'WIRESHARK_SRC'} && $opts{'wireshark'} eq '') {
   if (-d $wireshark_install) {
     $opts{'wireshark'} = $wireshark_install;
   } else {
@@ -1013,7 +1014,7 @@ if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
     if (! -d ($opts{'wireshark_build'} . '/' . $opts{'wireshark_lib'})) {
       if ($wireshark_lib_defaulted) {
         die "ERROR: The default value for wireshark_lib: " . $opts{'wireshark_lib'} .
-            " does not exist, please sypply wireshark_lib with the correct value";
+            " does not exist, please supply wireshark_lib with the correct value";
       } else {
         die "ERROR: The supplied wireshark_lib: " . $opts{'wireshark_lib'} . " does not exist.";
       }
