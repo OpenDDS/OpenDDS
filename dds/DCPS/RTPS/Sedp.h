@@ -37,6 +37,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
+//#include "dds/DdsSecurityCoreC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -203,9 +204,15 @@ private:
     DDS::ReturnCode_t write_sample(const ParameterList& plist,
                                    const DCPS::RepoId& reader,
                                    DCPS::SequenceNumber& sequence);
+
     DDS::ReturnCode_t write_sample(const ParticipantMessageData& pmd,
                                    const DCPS::RepoId& reader,
                                    DCPS::SequenceNumber& sequence);
+
+    DDS::ReturnCode_t write_sample(const DDS::Security::ParticipantStatelessMessage& psm,
+                                   const DCPS::RepoId& reader,
+                                   DCPS::SequenceNumber& sequence);
+
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
     void end_historic_samples(const DCPS::RepoId& reader);
@@ -229,7 +236,12 @@ private:
     void _add_ref() {}
     void _remove_ref() {}
 
-  } publications_writer_, subscriptions_writer_, participant_message_writer_;
+  };
+
+  Writer publications_writer_;
+  Writer subscriptions_writer_;
+  Writer participant_message_writer_;
+  Writer participant_stateless_message_writer_;
 
   class Reader
     : public DCPS::TransportReceiveListener
@@ -264,7 +276,10 @@ private:
 
   typedef DCPS::RcHandle<Reader> Reader_rch;
 
-  Reader_rch publications_reader_, subscriptions_reader_, participant_message_reader_;
+  Reader_rch publications_reader_;
+  Reader_rch subscriptions_reader_;
+  Reader_rch participant_message_reader_;
+  Reader_rch participant_stateless_message_reader_;
 
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
