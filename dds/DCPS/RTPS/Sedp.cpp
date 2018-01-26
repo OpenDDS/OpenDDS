@@ -1356,9 +1356,35 @@ Sedp::Task::svc_i(DCPS::MessageId id,
 
 void
 Sedp::data_received(DCPS::MessageId /* message_id */,
-                    const DDS::Security::ParticipantStatelessMessage& /* data */)
+                    const DDS::Security::ParticipantStatelessMessage& data)
 {
-  /* TODO */
+  using OpenDDS::DCPS::GUID_t;
+  using OpenDDS::DCPS::GUID_UNKNOWN;
+
+  if (spdp_.shutting_down()) { return; }
+
+  const GUID_t src_endpoint = data.source_endpoint_guid;
+  const GUID_t dst_endpoint = data.destination_endpoint_guid;
+  const GUID_t this_endpoint = participant_stateless_message_reader_->get_repo_id();
+  const GUID_t dst_participant = data.destination_participant_guid;
+  const GUID_t this_participant = participant_id_;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (ignoring(src_endpoint)) {
+    return;
+  }
+
+  if((dst_participant != GUID_UNKNOWN) && (dst_participant != this_participant)) {
+      return;
+  }
+
+  if((dst_endpoint != GUID_UNKNOWN) && (dst_endpoint != this_endpoint)) {
+      return;
+  }
+
+  /* TODO: Handle the rest of the message... See 7.4.3 in the security spec. */
+
 }
 
 void
