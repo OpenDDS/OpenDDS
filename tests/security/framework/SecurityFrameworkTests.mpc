@@ -1,0 +1,8 @@
+project(SecurityConfigTest): dcpsexe, googlemock {
+  requires += no_opendds_safety_profile
+  exename = OpenDDS_SecurityConfigTest
+
+  Source_Files {
+    SecurityConfigTest.cpp
+  }
+}
