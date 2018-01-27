@@ -13754,7 +13754,7 @@ namespace dds
       virtual ::dds::Writer::destinationOrderKind,
       virtual ::dds::Writer::historyQosPolicy,
       virtual ::dds::Writer::historyKind,
-      virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::positiveInteger, ACE_TCHAR >,
+      //virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::positiveInteger, ACE_TCHAR >,
       virtual ::dds::Writer::resourceLimitsQosPolicy,
       virtual ::dds::Writer::userDataQosPolicy,
       virtual ::dds::Writer::ownershipQosPolicy,
@@ -13779,8 +13779,8 @@ namespace dds
       virtual ::dds::Writer::partitionQosPolicy,
       virtual ::dds::Writer::stringSeq,
       virtual ::dds::Writer::groupDataQosPolicy,
-      virtual ::dds::Writer::subscriberQos,
-      virtual ::XSCRT::Writer<ACE_TCHAR>
+      virtual ::dds::Writer::subscriberQos
+      //virtual ::XSCRT::Writer<ACE_TCHAR>
       {
         W (::XSCRT::XML::Element<ACE_TCHAR>& e)
         : ::XSCRT::Writer<ACE_TCHAR> (e)
