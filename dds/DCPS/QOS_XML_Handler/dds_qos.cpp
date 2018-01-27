@@ -11878,7 +11878,7 @@ namespace dds
 
     destinationOrderKind::
     destinationOrderKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -11913,7 +11913,7 @@ namespace dds
 
     durabilityKind::
     durabilityKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -11950,7 +11950,7 @@ namespace dds
 
     historyKind::
     historyKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -11985,7 +11985,7 @@ namespace dds
 
     livelinessKind::
     livelinessKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12021,7 +12021,7 @@ namespace dds
 
     presentationAccessScopeKind::
     presentationAccessScopeKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12057,7 +12057,7 @@ namespace dds
 
     reliabilityKind::
     reliabilityKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12092,7 +12092,7 @@ namespace dds
 
     ownershipKind::
     ownershipKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12126,7 +12126,7 @@ namespace dds
     // duration
     duration::
     duration (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12160,7 +12160,7 @@ namespace dds
     // stringSeq
     stringSeq::
     stringSeq (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12197,7 +12197,7 @@ namespace dds
     // deadlineQosPolicy
     deadlineQosPolicy::
     deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12223,7 +12223,7 @@ namespace dds
     // destinationOrderQosPolicy
     destinationOrderQosPolicy::
     destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12249,7 +12249,7 @@ namespace dds
     // durabilityQosPolicy
     durabilityQosPolicy::
     durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12275,7 +12275,7 @@ namespace dds
     // durabilityServiceQosPolicy
     durabilityServiceQosPolicy::
     durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12341,7 +12341,7 @@ namespace dds
     // entityFactoryQosPolicy
     entityFactoryQosPolicy::
     entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12367,7 +12367,7 @@ namespace dds
     // groupDataQosPolicy
     groupDataQosPolicy::
     groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12393,7 +12393,7 @@ namespace dds
     // historyQosPolicy
     historyQosPolicy::
     historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12427,7 +12427,7 @@ namespace dds
     // latencyBudgetQosPolicy
     latencyBudgetQosPolicy::
     latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12453,7 +12453,7 @@ namespace dds
     // lifespanQosPolicy
     lifespanQosPolicy::
     lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12479,7 +12479,7 @@ namespace dds
     // livelinessQosPolicy
     livelinessQosPolicy::
     livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12513,7 +12513,7 @@ namespace dds
     // ownershipQosPolicy
     ownershipQosPolicy::
     ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12539,7 +12539,7 @@ namespace dds
     // ownershipStrengthQosPolicy
     ownershipStrengthQosPolicy::
     ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12565,7 +12565,7 @@ namespace dds
     // partitionQosPolicy
     partitionQosPolicy::
     partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12591,7 +12591,7 @@ namespace dds
     // presentationQosPolicy
     presentationQosPolicy::
     presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12633,7 +12633,7 @@ namespace dds
     // readerDataLifecycleQosPolicy
     readerDataLifecycleQosPolicy::
     readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12667,7 +12667,7 @@ namespace dds
     // reliabilityQosPolicy
     reliabilityQosPolicy::
     reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12701,7 +12701,7 @@ namespace dds
     // resourceLimitsQosPolicy
     resourceLimitsQosPolicy::
     resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12759,7 +12759,7 @@ namespace dds
     // timeBasedFilterQosPolicy
     timeBasedFilterQosPolicy::
     timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12785,7 +12785,7 @@ namespace dds
     // topicDataQosPolicy
     topicDataQosPolicy::
     topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12811,7 +12811,7 @@ namespace dds
     // transportPriorityQosPolicy
     transportPriorityQosPolicy::
     transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12837,7 +12837,7 @@ namespace dds
     // userDataQosPolicy
     userDataQosPolicy::
     userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12863,7 +12863,7 @@ namespace dds
     // writerDataLifecycleQosPolicy
     writerDataLifecycleQosPolicy::
     writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12889,7 +12889,7 @@ namespace dds
     // domainparticipantQos
     domainparticipantQos::
     domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -12941,7 +12941,7 @@ namespace dds
     // publisherQos
     publisherQos::
     publisherQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -13009,7 +13009,7 @@ namespace dds
     // subscriberQos
     subscriberQos::
     subscriberQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -13077,7 +13077,7 @@ namespace dds
     // topicQos
     topicQos::
     topicQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -13226,7 +13226,7 @@ namespace dds
     // datareaderQos
     datareaderQos::
     datareaderQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -13367,7 +13367,7 @@ namespace dds
     // datawriterQos
     datawriterQos::
     datawriterQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -13532,7 +13532,7 @@ namespace dds
     // qosProfile
     qosProfile::
     qosProfile (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -13682,7 +13682,7 @@ namespace dds
     // qosProfile_seq
     qosProfile_seq::
     qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer< ACE_TCHAR > (e)
+    : ::XSCRT::Writer<ACE_TCHAR> (e)
     {
     }
 
@@ -13780,10 +13780,10 @@ namespace dds
       virtual ::dds::Writer::stringSeq,
       virtual ::dds::Writer::groupDataQosPolicy,
       virtual ::dds::Writer::subscriberQos,
-      virtual ::XSCRT::Writer< ACE_TCHAR >
+      virtual ::XSCRT::Writer<ACE_TCHAR>
       {
         W (::XSCRT::XML::Element<ACE_TCHAR>& e)
-        : ::XSCRT::Writer< ACE_TCHAR > (e)
+        : ::XSCRT::Writer<ACE_TCHAR> (e)
         {
         }
       };

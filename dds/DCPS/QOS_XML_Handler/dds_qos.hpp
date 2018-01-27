@@ -365,19 +365,19 @@ namespace dds
 
     // element
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > >::iterator element_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > >::const_iterator element_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > >::iterator element_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > >::const_iterator element_const_iterator;
     element_iterator begin_element ();
     element_iterator end_element ();
     element_const_iterator begin_element () const;
     element_const_iterator end_element () const;
-    void add_element ( ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > const& );
+    void add_element (ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > const& );
     XSCRT::Type* get_element_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_element_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_element (void) const;
+    size_t count_element () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > > element_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > > element_;
 
     public:
     stringSeq ();
@@ -1894,99 +1894,99 @@ namespace dds
 
     // datareader_qos
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > >::iterator datareader_qos_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > >::const_iterator datareader_qos_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > >::iterator datareader_qos_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > >::const_iterator datareader_qos_const_iterator;
     datareader_qos_iterator begin_datareader_qos ();
     datareader_qos_iterator end_datareader_qos ();
     datareader_qos_const_iterator begin_datareader_qos () const;
     datareader_qos_const_iterator end_datareader_qos () const;
-    void add_datareader_qos ( ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > const& );
+    void add_datareader_qos (ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > const& );
     XSCRT::Type* get_datareader_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_datareader_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_datareader_qos (void) const;
+    size_t count_datareader_qos () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > > datareader_qos_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > > datareader_qos_;
 
     // datawriter_qos
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > >::iterator datawriter_qos_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > >::const_iterator datawriter_qos_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > >::iterator datawriter_qos_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > >::const_iterator datawriter_qos_const_iterator;
     datawriter_qos_iterator begin_datawriter_qos ();
     datawriter_qos_iterator end_datawriter_qos ();
     datawriter_qos_const_iterator begin_datawriter_qos () const;
     datawriter_qos_const_iterator end_datawriter_qos () const;
-    void add_datawriter_qos ( ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > const& );
+    void add_datawriter_qos (ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > const& );
     XSCRT::Type* get_datawriter_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_datawriter_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_datawriter_qos (void) const;
+    size_t count_datawriter_qos () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > > datawriter_qos_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > > datawriter_qos_;
 
     // topic_qos
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > >::iterator topic_qos_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > >::const_iterator topic_qos_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > >::iterator topic_qos_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > >::const_iterator topic_qos_const_iterator;
     topic_qos_iterator begin_topic_qos ();
     topic_qos_iterator end_topic_qos ();
     topic_qos_const_iterator begin_topic_qos () const;
     topic_qos_const_iterator end_topic_qos () const;
-    void add_topic_qos ( ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > const& );
+    void add_topic_qos (ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > const& );
     XSCRT::Type* get_topic_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_topic_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_topic_qos (void) const;
+    size_t count_topic_qos () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > > topic_qos_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > > topic_qos_;
 
     // domainparticipant_qos
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > >::iterator domainparticipant_qos_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > >::const_iterator domainparticipant_qos_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > >::iterator domainparticipant_qos_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > >::const_iterator domainparticipant_qos_const_iterator;
     domainparticipant_qos_iterator begin_domainparticipant_qos ();
     domainparticipant_qos_iterator end_domainparticipant_qos ();
     domainparticipant_qos_const_iterator begin_domainparticipant_qos () const;
     domainparticipant_qos_const_iterator end_domainparticipant_qos () const;
-    void add_domainparticipant_qos ( ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > const& );
+    void add_domainparticipant_qos (ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > const& );
     XSCRT::Type* get_domainparticipant_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_domainparticipant_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_domainparticipant_qos (void) const;
+    size_t count_domainparticipant_qos () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > > domainparticipant_qos_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > > domainparticipant_qos_;
 
     // publisher_qos
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > >::iterator publisher_qos_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > >::const_iterator publisher_qos_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > >::iterator publisher_qos_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > >::const_iterator publisher_qos_const_iterator;
     publisher_qos_iterator begin_publisher_qos ();
     publisher_qos_iterator end_publisher_qos ();
     publisher_qos_const_iterator begin_publisher_qos () const;
     publisher_qos_const_iterator end_publisher_qos () const;
-    void add_publisher_qos ( ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > const& );
+    void add_publisher_qos (ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > const& );
     XSCRT::Type* get_publisher_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_publisher_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_publisher_qos (void) const;
+    size_t count_publisher_qos () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > > publisher_qos_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > > publisher_qos_;
 
     // subscriber_qos
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > >::iterator subscriber_qos_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > >::const_iterator subscriber_qos_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > >::iterator subscriber_qos_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > >::const_iterator subscriber_qos_const_iterator;
     subscriber_qos_iterator begin_subscriber_qos ();
     subscriber_qos_iterator end_subscriber_qos ();
     subscriber_qos_const_iterator begin_subscriber_qos () const;
     subscriber_qos_const_iterator end_subscriber_qos () const;
-    void add_subscriber_qos ( ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > const& );
+    void add_subscriber_qos (ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > const& );
     XSCRT::Type* get_subscriber_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_subscriber_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_subscriber_qos (void) const;
+    size_t count_subscriber_qos () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > > subscriber_qos_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > > subscriber_qos_;
 
     // name
     public:
@@ -2029,19 +2029,19 @@ namespace dds
 
     // qos_profile
     public:
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > >::iterator qos_profile_iterator;
-    typedef std::list< ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > >::const_iterator qos_profile_const_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > >::iterator qos_profile_iterator;
+    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > >::const_iterator qos_profile_const_iterator;
     qos_profile_iterator begin_qos_profile ();
     qos_profile_iterator end_qos_profile ();
     qos_profile_const_iterator begin_qos_profile () const;
     qos_profile_const_iterator end_qos_profile () const;
-    void add_qos_profile ( ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > const& );
+    void add_qos_profile (ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > const& );
     XSCRT::Type* get_qos_profile_ptr (const std::basic_string<ACE_TCHAR>& idref);
     void set_qos_profile_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    size_t count_qos_profile (void) const;
+    size_t count_qos_profile () const;
 
     protected:
-    std::list< ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > > qos_profile_;
+    std::list<ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > > qos_profile_;
 
     public:
     qosProfile_seq ();
@@ -4287,9 +4287,9 @@ namespace dds
   namespace Writer
   {
     struct destinationOrderKind : Traversal::destinationOrderKind,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
-      destinationOrderKind (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit destinationOrderKind (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4305,9 +4305,9 @@ namespace dds
     };
 
     struct durabilityKind : Traversal::durabilityKind,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
-      durabilityKind (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit durabilityKind (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4323,9 +4323,9 @@ namespace dds
     };
 
     struct historyKind : Traversal::historyKind,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
-      historyKind (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit historyKind (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4341,9 +4341,9 @@ namespace dds
     };
 
     struct livelinessKind : Traversal::livelinessKind,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
-      livelinessKind (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit livelinessKind (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4359,9 +4359,9 @@ namespace dds
     };
 
     struct presentationAccessScopeKind : Traversal::presentationAccessScopeKind,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
-      presentationAccessScopeKind (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit presentationAccessScopeKind (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4377,9 +4377,9 @@ namespace dds
     };
 
     struct reliabilityKind : Traversal::reliabilityKind,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
-      reliabilityKind (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit reliabilityKind (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4395,9 +4395,9 @@ namespace dds
     };
 
     struct ownershipKind : Traversal::ownershipKind,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
-      ownershipKind (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit ownershipKind (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4413,10 +4413,10 @@ namespace dds
     };
 
     struct duration : Traversal::duration,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::duration Type;
-      duration (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit duration (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4450,10 +4450,10 @@ namespace dds
     };
 
     struct stringSeq : Traversal::stringSeq,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::stringSeq Type;
-      stringSeq (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit stringSeq (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4496,10 +4496,10 @@ namespace dds
     };
 
     struct deadlineQosPolicy : Traversal::deadlineQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::deadlineQosPolicy Type;
-      deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4524,10 +4524,10 @@ namespace dds
     };
 
     struct destinationOrderQosPolicy : Traversal::destinationOrderQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::destinationOrderQosPolicy Type;
-      destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4552,10 +4552,10 @@ namespace dds
     };
 
     struct durabilityQosPolicy : Traversal::durabilityQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::durabilityQosPolicy Type;
-      durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4580,10 +4580,10 @@ namespace dds
     };
 
     struct durabilityServiceQosPolicy : Traversal::durabilityServiceQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::durabilityServiceQosPolicy Type;
-      durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4653,10 +4653,10 @@ namespace dds
     };
 
     struct entityFactoryQosPolicy : Traversal::entityFactoryQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::entityFactoryQosPolicy Type;
-      entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4681,10 +4681,10 @@ namespace dds
     };
 
     struct groupDataQosPolicy : Traversal::groupDataQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::groupDataQosPolicy Type;
-      groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4709,10 +4709,10 @@ namespace dds
     };
 
     struct historyQosPolicy : Traversal::historyQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::historyQosPolicy Type;
-      historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4746,10 +4746,10 @@ namespace dds
     };
 
     struct latencyBudgetQosPolicy : Traversal::latencyBudgetQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::latencyBudgetQosPolicy Type;
-      latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4774,10 +4774,10 @@ namespace dds
     };
 
     struct lifespanQosPolicy : Traversal::lifespanQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::lifespanQosPolicy Type;
-      lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4802,10 +4802,10 @@ namespace dds
     };
 
     struct livelinessQosPolicy : Traversal::livelinessQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::livelinessQosPolicy Type;
-      livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4839,10 +4839,10 @@ namespace dds
     };
 
     struct ownershipQosPolicy : Traversal::ownershipQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::ownershipQosPolicy Type;
-      ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4867,10 +4867,10 @@ namespace dds
     };
 
     struct ownershipStrengthQosPolicy : Traversal::ownershipStrengthQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::ownershipStrengthQosPolicy Type;
-      ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4895,10 +4895,10 @@ namespace dds
     };
 
     struct partitionQosPolicy : Traversal::partitionQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::partitionQosPolicy Type;
-      partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4923,10 +4923,10 @@ namespace dds
     };
 
     struct presentationQosPolicy : Traversal::presentationQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::presentationQosPolicy Type;
-      presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -4969,10 +4969,10 @@ namespace dds
     };
 
     struct readerDataLifecycleQosPolicy : Traversal::readerDataLifecycleQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::readerDataLifecycleQosPolicy Type;
-      readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5006,10 +5006,10 @@ namespace dds
     };
 
     struct reliabilityQosPolicy : Traversal::reliabilityQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::reliabilityQosPolicy Type;
-      reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5043,10 +5043,10 @@ namespace dds
     };
 
     struct resourceLimitsQosPolicy : Traversal::resourceLimitsQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::resourceLimitsQosPolicy Type;
-      resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5107,10 +5107,10 @@ namespace dds
     };
 
     struct timeBasedFilterQosPolicy : Traversal::timeBasedFilterQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::timeBasedFilterQosPolicy Type;
-      timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5135,10 +5135,10 @@ namespace dds
     };
 
     struct topicDataQosPolicy : Traversal::topicDataQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::topicDataQosPolicy Type;
-      topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5163,10 +5163,10 @@ namespace dds
     };
 
     struct transportPriorityQosPolicy : Traversal::transportPriorityQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::transportPriorityQosPolicy Type;
-      transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5191,10 +5191,10 @@ namespace dds
     };
 
     struct userDataQosPolicy : Traversal::userDataQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::userDataQosPolicy Type;
-      userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5219,10 +5219,10 @@ namespace dds
     };
 
     struct writerDataLifecycleQosPolicy : Traversal::writerDataLifecycleQosPolicy,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::writerDataLifecycleQosPolicy Type;
-      writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5247,10 +5247,10 @@ namespace dds
     };
 
     struct domainparticipantQos : Traversal::domainparticipantQos,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::domainparticipantQos Type;
-      domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5302,10 +5302,10 @@ namespace dds
     };
 
     struct publisherQos : Traversal::publisherQos,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::publisherQos Type;
-      publisherQos (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit publisherQos (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5375,10 +5375,10 @@ namespace dds
     };
 
     struct subscriberQos : Traversal::subscriberQos,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::subscriberQos Type;
-      subscriberQos (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit subscriberQos (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5448,10 +5448,10 @@ namespace dds
     };
 
     struct topicQos : Traversal::topicQos,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::topicQos Type;
-      topicQos (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit topicQos (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5611,10 +5611,10 @@ namespace dds
     };
 
     struct datareaderQos : Traversal::datareaderQos,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::datareaderQos Type;
-      datareaderQos (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit datareaderQos (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5765,10 +5765,10 @@ namespace dds
     };
 
     struct datawriterQos : Traversal::datawriterQos,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::datawriterQos Type;
-      datawriterQos (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit datawriterQos (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -5946,10 +5946,10 @@ namespace dds
     };
 
     struct qosProfile : Traversal::qosProfile,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::qosProfile Type;
-      qosProfile (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit qosProfile (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
@@ -6145,10 +6145,10 @@ namespace dds
     };
 
     struct qosProfile_seq : Traversal::qosProfile_seq,
-    virtual ::XSCRT::Writer< ACE_TCHAR >
+    virtual ::XSCRT::Writer<ACE_TCHAR>
     {
       typedef ::dds::qosProfile_seq Type;
-      qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR>&);
+      explicit qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR>&);
 
       virtual void
       traverse (Type &o)
