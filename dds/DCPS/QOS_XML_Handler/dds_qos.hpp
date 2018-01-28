@@ -323,7 +323,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::duration, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::duration, ACE_Null_Mutex> _ptr;
 
     // sec
     public:
@@ -332,7 +332,8 @@ namespace dds
     void sec (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > sec_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > sec_auto_ptr_type;
+    sec_auto_ptr_type sec_;
 
     // nanosec
     public:
@@ -341,7 +342,8 @@ namespace dds
     void nanosec (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > nanosec_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > nanosec_auto_ptr_type;
+    nanosec_auto_ptr_type nanosec_;
 
     public:
     duration ();
@@ -361,23 +363,23 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::stringSeq, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::stringSeq, ACE_Null_Mutex> _ptr;
 
     // element
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > >::iterator element_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > >::const_iterator element_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex> element_value_type;
+    typedef std::list<element_value_type> element_container_type;
+    typedef element_container_type::iterator element_iterator;
+    typedef element_container_type::const_iterator element_const_iterator;
     element_iterator begin_element ();
     element_iterator end_element ();
     element_const_iterator begin_element () const;
     element_const_iterator end_element () const;
-    void add_element (ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_element_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_element_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_element (element_value_type const&);
     size_t count_element () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex > > element_;
+    element_container_type element_;
 
     public:
     stringSeq ();
@@ -397,7 +399,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::deadlineQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::deadlineQosPolicy, ACE_Null_Mutex> _ptr;
 
     // period
     public:
@@ -406,7 +408,8 @@ namespace dds
     void period (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > period_;
+    typedef std::auto_ptr< ::dds::duration > period_auto_ptr_type;
+    period_auto_ptr_type period_;
 
     public:
     deadlineQosPolicy ();
@@ -426,7 +429,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::destinationOrderQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::destinationOrderQosPolicy, ACE_Null_Mutex> _ptr;
 
     // kind
     public:
@@ -435,7 +438,8 @@ namespace dds
     void kind (::dds::destinationOrderKind const& );
 
     protected:
-    std::auto_ptr< ::dds::destinationOrderKind > kind_;
+    typedef std::auto_ptr< ::dds::destinationOrderKind > kind_auto_ptr_type;
+    kind_auto_ptr_type kind_;
 
     public:
     destinationOrderQosPolicy ();
@@ -455,7 +459,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::durabilityQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::durabilityQosPolicy, ACE_Null_Mutex> _ptr;
 
     // kind
     public:
@@ -464,7 +468,8 @@ namespace dds
     void kind (::dds::durabilityKind const& );
 
     protected:
-    std::auto_ptr< ::dds::durabilityKind > kind_;
+    typedef std::auto_ptr< ::dds::durabilityKind > kind_auto_ptr_type;
+    kind_auto_ptr_type kind_;
 
     public:
     durabilityQosPolicy ();
@@ -484,7 +489,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::durabilityServiceQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::durabilityServiceQosPolicy, ACE_Null_Mutex> _ptr;
 
     // service_cleanup_delay
     public:
@@ -493,7 +498,8 @@ namespace dds
     void service_cleanup_delay (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > service_cleanup_delay_;
+    typedef std::auto_ptr< ::dds::duration > service_cleanup_delay_auto_ptr_type;
+    service_cleanup_delay_auto_ptr_type service_cleanup_delay_;
 
     // history_kind
     public:
@@ -502,7 +508,8 @@ namespace dds
     void history_kind (::dds::historyKind const& );
 
     protected:
-    std::auto_ptr< ::dds::historyKind > history_kind_;
+    typedef std::auto_ptr< ::dds::historyKind > history_kind_auto_ptr_type;
+    history_kind_auto_ptr_type history_kind_;
 
     // history_depth
     public:
@@ -511,7 +518,8 @@ namespace dds
     void history_depth (::XMLSchema::positiveInteger const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::positiveInteger > history_depth_;
+    typedef std::auto_ptr< ::XMLSchema::positiveInteger > history_depth_auto_ptr_type;
+    history_depth_auto_ptr_type history_depth_;
 
     // max_samples
     public:
@@ -520,7 +528,8 @@ namespace dds
     void max_samples (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_auto_ptr_type;
+    max_samples_auto_ptr_type max_samples_;
 
     // max_instances
     public:
@@ -529,7 +538,8 @@ namespace dds
     void max_instances (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_instances_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_instances_auto_ptr_type;
+    max_instances_auto_ptr_type max_instances_;
 
     // max_samples_per_instance
     public:
@@ -538,7 +548,8 @@ namespace dds
     void max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_per_instance_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_per_instance_auto_ptr_type;
+    max_samples_per_instance_auto_ptr_type max_samples_per_instance_;
 
     public:
     durabilityServiceQosPolicy ();
@@ -558,7 +569,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::entityFactoryQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::entityFactoryQosPolicy, ACE_Null_Mutex> _ptr;
 
     // autoenable_created_entities
     public:
@@ -567,7 +578,8 @@ namespace dds
     void autoenable_created_entities (::XMLSchema::boolean const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::boolean > autoenable_created_entities_;
+    typedef std::auto_ptr< ::XMLSchema::boolean > autoenable_created_entities_auto_ptr_type;
+    autoenable_created_entities_auto_ptr_type autoenable_created_entities_;
 
     public:
     entityFactoryQosPolicy ();
@@ -587,7 +599,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::groupDataQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::groupDataQosPolicy, ACE_Null_Mutex> _ptr;
 
     // value
     public:
@@ -596,7 +608,8 @@ namespace dds
     void value (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > value_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > value_auto_ptr_type;
+    value_auto_ptr_type value_;
 
     public:
     groupDataQosPolicy ();
@@ -616,7 +629,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::historyQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::historyQosPolicy, ACE_Null_Mutex> _ptr;
 
     // kind
     public:
@@ -625,7 +638,8 @@ namespace dds
     void kind (::dds::historyKind const& );
 
     protected:
-    std::auto_ptr< ::dds::historyKind > kind_;
+    typedef std::auto_ptr< ::dds::historyKind > kind_auto_ptr_type;
+    kind_auto_ptr_type kind_;
 
     // depth
     public:
@@ -634,7 +648,8 @@ namespace dds
     void depth (::XMLSchema::positiveInteger const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::positiveInteger > depth_;
+    typedef std::auto_ptr< ::XMLSchema::positiveInteger > depth_auto_ptr_type;
+    depth_auto_ptr_type depth_;
 
     public:
     historyQosPolicy ();
@@ -654,7 +669,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::latencyBudgetQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::latencyBudgetQosPolicy, ACE_Null_Mutex> _ptr;
 
     // duration
     public:
@@ -663,7 +678,8 @@ namespace dds
     void duration (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > duration_;
+    typedef std::auto_ptr< ::dds::duration > duration_auto_ptr_type;
+    duration_auto_ptr_type duration_;
 
     public:
     latencyBudgetQosPolicy ();
@@ -683,7 +699,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::lifespanQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::lifespanQosPolicy, ACE_Null_Mutex> _ptr;
 
     // duration
     public:
@@ -692,7 +708,8 @@ namespace dds
     void duration (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > duration_;
+    typedef std::auto_ptr< ::dds::duration > duration_auto_ptr_type;
+    duration_auto_ptr_type duration_;
 
     public:
     lifespanQosPolicy ();
@@ -712,7 +729,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::livelinessQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::livelinessQosPolicy, ACE_Null_Mutex> _ptr;
 
     // kind
     public:
@@ -721,7 +738,8 @@ namespace dds
     void kind (::dds::livelinessKind const& );
 
     protected:
-    std::auto_ptr< ::dds::livelinessKind > kind_;
+    typedef std::auto_ptr< ::dds::livelinessKind > kind_auto_ptr_type;
+    kind_auto_ptr_type kind_;
 
     // lease_duration
     public:
@@ -730,7 +748,8 @@ namespace dds
     void lease_duration (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > lease_duration_;
+    typedef std::auto_ptr< ::dds::duration > lease_duration_auto_ptr_type;
+    lease_duration_auto_ptr_type lease_duration_;
 
     public:
     livelinessQosPolicy ();
@@ -750,7 +769,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::ownershipQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::ownershipQosPolicy, ACE_Null_Mutex> _ptr;
 
     // kind
     public:
@@ -759,7 +778,8 @@ namespace dds
     void kind (::dds::ownershipKind const& );
 
     protected:
-    std::auto_ptr< ::dds::ownershipKind > kind_;
+    typedef std::auto_ptr< ::dds::ownershipKind > kind_auto_ptr_type;
+    kind_auto_ptr_type kind_;
 
     public:
     ownershipQosPolicy ();
@@ -779,7 +799,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::ownershipStrengthQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::ownershipStrengthQosPolicy, ACE_Null_Mutex> _ptr;
 
     // value
     public:
@@ -788,7 +808,8 @@ namespace dds
     void value (::XMLSchema::nonNegativeInteger const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::nonNegativeInteger > value_;
+    typedef std::auto_ptr< ::XMLSchema::nonNegativeInteger > value_auto_ptr_type;
+    value_auto_ptr_type value_;
 
     public:
     ownershipStrengthQosPolicy ();
@@ -808,7 +829,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::partitionQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::partitionQosPolicy, ACE_Null_Mutex> _ptr;
 
     // name
     public:
@@ -817,7 +838,8 @@ namespace dds
     void name (::dds::stringSeq const& );
 
     protected:
-    std::auto_ptr< ::dds::stringSeq > name_;
+    typedef std::auto_ptr< ::dds::stringSeq > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     public:
     partitionQosPolicy ();
@@ -837,7 +859,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::presentationQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::presentationQosPolicy, ACE_Null_Mutex> _ptr;
 
     // access_scope
     public:
@@ -846,7 +868,8 @@ namespace dds
     void access_scope (::dds::presentationAccessScopeKind const& );
 
     protected:
-    std::auto_ptr< ::dds::presentationAccessScopeKind > access_scope_;
+    typedef std::auto_ptr< ::dds::presentationAccessScopeKind > access_scope_auto_ptr_type;
+    access_scope_auto_ptr_type access_scope_;
 
     // coherent_access
     public:
@@ -855,7 +878,8 @@ namespace dds
     void coherent_access (::XMLSchema::boolean const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::boolean > coherent_access_;
+    typedef std::auto_ptr< ::XMLSchema::boolean > coherent_access_auto_ptr_type;
+    coherent_access_auto_ptr_type coherent_access_;
 
     // ordered_access
     public:
@@ -864,7 +888,8 @@ namespace dds
     void ordered_access (::XMLSchema::boolean const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::boolean > ordered_access_;
+    typedef std::auto_ptr< ::XMLSchema::boolean > ordered_access_auto_ptr_type;
+    ordered_access_auto_ptr_type ordered_access_;
 
     public:
     presentationQosPolicy ();
@@ -884,7 +909,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::readerDataLifecycleQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::readerDataLifecycleQosPolicy, ACE_Null_Mutex> _ptr;
 
     // autopurge_nowriter_samples_delay
     public:
@@ -893,7 +918,8 @@ namespace dds
     void autopurge_nowriter_samples_delay (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > autopurge_nowriter_samples_delay_;
+    typedef std::auto_ptr< ::dds::duration > autopurge_nowriter_samples_delay_auto_ptr_type;
+    autopurge_nowriter_samples_delay_auto_ptr_type autopurge_nowriter_samples_delay_;
 
     // autopurge_disposed_samples_delay
     public:
@@ -902,7 +928,8 @@ namespace dds
     void autopurge_disposed_samples_delay (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > autopurge_disposed_samples_delay_;
+    typedef std::auto_ptr< ::dds::duration > autopurge_disposed_samples_delay_auto_ptr_type;
+    autopurge_disposed_samples_delay_auto_ptr_type autopurge_disposed_samples_delay_;
 
     public:
     readerDataLifecycleQosPolicy ();
@@ -922,7 +949,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::reliabilityQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::reliabilityQosPolicy, ACE_Null_Mutex> _ptr;
 
     // kind
     public:
@@ -931,7 +958,8 @@ namespace dds
     void kind (::dds::reliabilityKind const& );
 
     protected:
-    std::auto_ptr< ::dds::reliabilityKind > kind_;
+    typedef std::auto_ptr< ::dds::reliabilityKind > kind_auto_ptr_type;
+    kind_auto_ptr_type kind_;
 
     // max_blocking_time
     public:
@@ -940,7 +968,8 @@ namespace dds
     void max_blocking_time (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > max_blocking_time_;
+    typedef std::auto_ptr< ::dds::duration > max_blocking_time_auto_ptr_type;
+    max_blocking_time_auto_ptr_type max_blocking_time_;
 
     public:
     reliabilityQosPolicy ();
@@ -960,7 +989,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::resourceLimitsQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::resourceLimitsQosPolicy, ACE_Null_Mutex> _ptr;
 
     // max_samples
     public:
@@ -969,7 +998,8 @@ namespace dds
     void max_samples (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_auto_ptr_type;
+    max_samples_auto_ptr_type max_samples_;
 
     // max_instances
     public:
@@ -978,7 +1008,8 @@ namespace dds
     void max_instances (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_instances_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_instances_auto_ptr_type;
+    max_instances_auto_ptr_type max_instances_;
 
     // max_samples_per_instance
     public:
@@ -987,7 +1018,8 @@ namespace dds
     void max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_per_instance_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > max_samples_per_instance_auto_ptr_type;
+    max_samples_per_instance_auto_ptr_type max_samples_per_instance_;
 
     // initial_samples
     public:
@@ -996,7 +1028,8 @@ namespace dds
     void initial_samples (::XMLSchema::positiveInteger const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::positiveInteger > initial_samples_;
+    typedef std::auto_ptr< ::XMLSchema::positiveInteger > initial_samples_auto_ptr_type;
+    initial_samples_auto_ptr_type initial_samples_;
 
     // initial_instances
     public:
@@ -1005,7 +1038,8 @@ namespace dds
     void initial_instances (::XMLSchema::positiveInteger const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::positiveInteger > initial_instances_;
+    typedef std::auto_ptr< ::XMLSchema::positiveInteger > initial_instances_auto_ptr_type;
+    initial_instances_auto_ptr_type initial_instances_;
 
     public:
     resourceLimitsQosPolicy ();
@@ -1025,7 +1059,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::timeBasedFilterQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::timeBasedFilterQosPolicy, ACE_Null_Mutex> _ptr;
 
     // minimum_separation
     public:
@@ -1034,7 +1068,8 @@ namespace dds
     void minimum_separation (::dds::duration const& );
 
     protected:
-    std::auto_ptr< ::dds::duration > minimum_separation_;
+    typedef std::auto_ptr< ::dds::duration > minimum_separation_auto_ptr_type;
+    minimum_separation_auto_ptr_type minimum_separation_;
 
     public:
     timeBasedFilterQosPolicy ();
@@ -1054,7 +1089,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::topicDataQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::topicDataQosPolicy, ACE_Null_Mutex> _ptr;
 
     // value
     public:
@@ -1063,7 +1098,8 @@ namespace dds
     void value (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > value_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > value_auto_ptr_type;
+    value_auto_ptr_type value_;
 
     public:
     topicDataQosPolicy ();
@@ -1083,7 +1119,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::transportPriorityQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::transportPriorityQosPolicy, ACE_Null_Mutex> _ptr;
 
     // value
     public:
@@ -1092,7 +1128,8 @@ namespace dds
     void value (::XMLSchema::nonNegativeInteger const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::nonNegativeInteger > value_;
+    typedef std::auto_ptr< ::XMLSchema::nonNegativeInteger > value_auto_ptr_type;
+    value_auto_ptr_type value_;
 
     public:
     transportPriorityQosPolicy ();
@@ -1112,7 +1149,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::userDataQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::userDataQosPolicy, ACE_Null_Mutex> _ptr;
 
     // value
     public:
@@ -1121,7 +1158,8 @@ namespace dds
     void value (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > value_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > value_auto_ptr_type;
+    value_auto_ptr_type value_;
 
     public:
     userDataQosPolicy ();
@@ -1141,7 +1179,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::writerDataLifecycleQosPolicy, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::writerDataLifecycleQosPolicy, ACE_Null_Mutex> _ptr;
 
     // autodispose_unregistered_instances
     public:
@@ -1150,7 +1188,8 @@ namespace dds
     void autodispose_unregistered_instances (::XMLSchema::boolean const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::boolean > autodispose_unregistered_instances_;
+    typedef std::auto_ptr< ::XMLSchema::boolean > autodispose_unregistered_instances_auto_ptr_type;
+    autodispose_unregistered_instances_auto_ptr_type autodispose_unregistered_instances_;
 
     public:
     writerDataLifecycleQosPolicy ();
@@ -1170,7 +1209,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex> _ptr;
 
     // user_data
     public:
@@ -1179,7 +1218,8 @@ namespace dds
     void user_data (::dds::userDataQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::userDataQosPolicy > user_data_;
+    typedef std::auto_ptr< ::dds::userDataQosPolicy > user_data_auto_ptr_type;
+    user_data_auto_ptr_type user_data_;
 
     // entity_factory
     public:
@@ -1188,7 +1228,8 @@ namespace dds
     void entity_factory (::dds::entityFactoryQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::entityFactoryQosPolicy > entity_factory_;
+    typedef std::auto_ptr< ::dds::entityFactoryQosPolicy > entity_factory_auto_ptr_type;
+    entity_factory_auto_ptr_type entity_factory_;
 
     // name
     public:
@@ -1198,7 +1239,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     // base_name
     public:
@@ -1208,7 +1250,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_auto_ptr_type;
+    base_name_auto_ptr_type base_name_;
 
     public:
     domainparticipantQos ();
@@ -1228,7 +1271,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex> _ptr;
 
     // presentation
     public:
@@ -1237,7 +1280,8 @@ namespace dds
     void presentation (::dds::presentationQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::presentationQosPolicy > presentation_;
+    typedef std::auto_ptr< ::dds::presentationQosPolicy > presentation_auto_ptr_type;
+    presentation_auto_ptr_type presentation_;
 
     // partition
     public:
@@ -1246,7 +1290,8 @@ namespace dds
     void partition (::dds::partitionQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::partitionQosPolicy > partition_;
+    typedef std::auto_ptr< ::dds::partitionQosPolicy > partition_auto_ptr_type;
+    partition_auto_ptr_type partition_;
 
     // group_data
     public:
@@ -1255,7 +1300,8 @@ namespace dds
     void group_data (::dds::groupDataQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::groupDataQosPolicy > group_data_;
+    typedef std::auto_ptr< ::dds::groupDataQosPolicy > group_data_auto_ptr_type;
+    group_data_auto_ptr_type group_data_;
 
     // entity_factory
     public:
@@ -1264,7 +1310,8 @@ namespace dds
     void entity_factory (::dds::entityFactoryQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::entityFactoryQosPolicy > entity_factory_;
+    typedef std::auto_ptr< ::dds::entityFactoryQosPolicy > entity_factory_auto_ptr_type;
+    entity_factory_auto_ptr_type entity_factory_;
 
     // name
     public:
@@ -1274,7 +1321,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     // base_name
     public:
@@ -1284,7 +1332,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_auto_ptr_type;
+    base_name_auto_ptr_type base_name_;
 
     public:
     publisherQos ();
@@ -1304,7 +1353,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex> _ptr;
 
     // presentation
     public:
@@ -1313,7 +1362,8 @@ namespace dds
     void presentation (::dds::presentationQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::presentationQosPolicy > presentation_;
+    typedef std::auto_ptr< ::dds::presentationQosPolicy > presentation_auto_ptr_type;
+    presentation_auto_ptr_type presentation_;
 
     // partition
     public:
@@ -1322,7 +1372,8 @@ namespace dds
     void partition (::dds::partitionQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::partitionQosPolicy > partition_;
+    typedef std::auto_ptr< ::dds::partitionQosPolicy > partition_auto_ptr_type;
+    partition_auto_ptr_type partition_;
 
     // group_data
     public:
@@ -1331,7 +1382,8 @@ namespace dds
     void group_data (::dds::groupDataQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::groupDataQosPolicy > group_data_;
+    typedef std::auto_ptr< ::dds::groupDataQosPolicy > group_data_auto_ptr_type;
+    group_data_auto_ptr_type group_data_;
 
     // entity_factory
     public:
@@ -1340,7 +1392,8 @@ namespace dds
     void entity_factory (::dds::entityFactoryQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::entityFactoryQosPolicy > entity_factory_;
+    typedef std::auto_ptr< ::dds::entityFactoryQosPolicy > entity_factory_auto_ptr_type;
+    entity_factory_auto_ptr_type entity_factory_;
 
     // name
     public:
@@ -1350,7 +1403,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     // base_name
     public:
@@ -1360,7 +1414,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_auto_ptr_type;
+    base_name_auto_ptr_type base_name_;
 
     public:
     subscriberQos ();
@@ -1380,7 +1435,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex> _ptr;
 
     // topic_data
     public:
@@ -1389,7 +1444,8 @@ namespace dds
     void topic_data (::dds::topicDataQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::topicDataQosPolicy > topic_data_;
+    typedef std::auto_ptr< ::dds::topicDataQosPolicy > topic_data_auto_ptr_type;
+    topic_data_auto_ptr_type topic_data_;
 
     // durability
     public:
@@ -1398,7 +1454,8 @@ namespace dds
     void durability (::dds::durabilityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::durabilityQosPolicy > durability_;
+    typedef std::auto_ptr< ::dds::durabilityQosPolicy > durability_auto_ptr_type;
+    durability_auto_ptr_type durability_;
 
     // durability_service
     public:
@@ -1407,7 +1464,8 @@ namespace dds
     void durability_service (::dds::durabilityServiceQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::durabilityServiceQosPolicy > durability_service_;
+    typedef std::auto_ptr< ::dds::durabilityServiceQosPolicy > durability_service_auto_ptr_type;
+    durability_service_auto_ptr_type durability_service_;
 
     // deadline
     public:
@@ -1416,7 +1474,8 @@ namespace dds
     void deadline (::dds::deadlineQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::deadlineQosPolicy > deadline_;
+    typedef std::auto_ptr< ::dds::deadlineQosPolicy > deadline_auto_ptr_type;
+    deadline_auto_ptr_type deadline_;
 
     // latency_budget
     public:
@@ -1425,7 +1484,8 @@ namespace dds
     void latency_budget (::dds::latencyBudgetQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::latencyBudgetQosPolicy > latency_budget_;
+    typedef std::auto_ptr< ::dds::latencyBudgetQosPolicy > latency_budget_auto_ptr_type;
+    latency_budget_auto_ptr_type latency_budget_;
 
     // liveliness
     public:
@@ -1434,7 +1494,8 @@ namespace dds
     void liveliness (::dds::livelinessQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::livelinessQosPolicy > liveliness_;
+    typedef std::auto_ptr< ::dds::livelinessQosPolicy > liveliness_auto_ptr_type;
+    liveliness_auto_ptr_type liveliness_;
 
     // reliability
     public:
@@ -1443,7 +1504,8 @@ namespace dds
     void reliability (::dds::reliabilityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::reliabilityQosPolicy > reliability_;
+    typedef std::auto_ptr< ::dds::reliabilityQosPolicy > reliability_auto_ptr_type;
+    reliability_auto_ptr_type reliability_;
 
     // destination_order
     public:
@@ -1452,7 +1514,8 @@ namespace dds
     void destination_order (::dds::destinationOrderQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::destinationOrderQosPolicy > destination_order_;
+    typedef std::auto_ptr< ::dds::destinationOrderQosPolicy > destination_order_auto_ptr_type;
+    destination_order_auto_ptr_type destination_order_;
 
     // history
     public:
@@ -1461,7 +1524,8 @@ namespace dds
     void history (::dds::historyQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::historyQosPolicy > history_;
+    typedef std::auto_ptr< ::dds::historyQosPolicy > history_auto_ptr_type;
+    history_auto_ptr_type history_;
 
     // resource_limits
     public:
@@ -1470,7 +1534,8 @@ namespace dds
     void resource_limits (::dds::resourceLimitsQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::resourceLimitsQosPolicy > resource_limits_;
+    typedef std::auto_ptr< ::dds::resourceLimitsQosPolicy > resource_limits_auto_ptr_type;
+    resource_limits_auto_ptr_type resource_limits_;
 
     // transport_priority
     public:
@@ -1479,7 +1544,8 @@ namespace dds
     void transport_priority (::dds::transportPriorityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::transportPriorityQosPolicy > transport_priority_;
+    typedef std::auto_ptr< ::dds::transportPriorityQosPolicy > transport_priority_auto_ptr_type;
+    transport_priority_auto_ptr_type transport_priority_;
 
     // lifespan
     public:
@@ -1488,7 +1554,8 @@ namespace dds
     void lifespan (::dds::lifespanQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::lifespanQosPolicy > lifespan_;
+    typedef std::auto_ptr< ::dds::lifespanQosPolicy > lifespan_auto_ptr_type;
+    lifespan_auto_ptr_type lifespan_;
 
     // ownership
     public:
@@ -1497,7 +1564,8 @@ namespace dds
     void ownership (::dds::ownershipQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::ownershipQosPolicy > ownership_;
+    typedef std::auto_ptr< ::dds::ownershipQosPolicy > ownership_auto_ptr_type;
+    ownership_auto_ptr_type ownership_;
 
     // name
     public:
@@ -1507,7 +1575,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     // base_name
     public:
@@ -1517,7 +1586,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_auto_ptr_type;
+    base_name_auto_ptr_type base_name_;
 
     // topic_filter
     public:
@@ -1527,7 +1597,8 @@ namespace dds
     void topic_filter (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > topic_filter_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > topic_filter_auto_ptr_type;
+    topic_filter_auto_ptr_type topic_filter_;
 
     public:
     topicQos ();
@@ -1547,7 +1618,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex> _ptr;
 
     // durability
     public:
@@ -1556,7 +1627,8 @@ namespace dds
     void durability (::dds::durabilityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::durabilityQosPolicy > durability_;
+    typedef std::auto_ptr< ::dds::durabilityQosPolicy > durability_auto_ptr_type;
+    durability_auto_ptr_type durability_;
 
     // deadline
     public:
@@ -1565,7 +1637,8 @@ namespace dds
     void deadline (::dds::deadlineQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::deadlineQosPolicy > deadline_;
+    typedef std::auto_ptr< ::dds::deadlineQosPolicy > deadline_auto_ptr_type;
+    deadline_auto_ptr_type deadline_;
 
     // latency_budget
     public:
@@ -1574,7 +1647,8 @@ namespace dds
     void latency_budget (::dds::latencyBudgetQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::latencyBudgetQosPolicy > latency_budget_;
+    typedef std::auto_ptr< ::dds::latencyBudgetQosPolicy > latency_budget_auto_ptr_type;
+    latency_budget_auto_ptr_type latency_budget_;
 
     // liveliness
     public:
@@ -1583,7 +1657,8 @@ namespace dds
     void liveliness (::dds::livelinessQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::livelinessQosPolicy > liveliness_;
+    typedef std::auto_ptr< ::dds::livelinessQosPolicy > liveliness_auto_ptr_type;
+    liveliness_auto_ptr_type liveliness_;
 
     // reliability
     public:
@@ -1592,7 +1667,8 @@ namespace dds
     void reliability (::dds::reliabilityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::reliabilityQosPolicy > reliability_;
+    typedef std::auto_ptr< ::dds::reliabilityQosPolicy > reliability_auto_ptr_type;
+    reliability_auto_ptr_type reliability_;
 
     // destination_order
     public:
@@ -1601,7 +1677,8 @@ namespace dds
     void destination_order (::dds::destinationOrderQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::destinationOrderQosPolicy > destination_order_;
+    typedef std::auto_ptr< ::dds::destinationOrderQosPolicy > destination_order_auto_ptr_type;
+    destination_order_auto_ptr_type destination_order_;
 
     // history
     public:
@@ -1610,7 +1687,8 @@ namespace dds
     void history (::dds::historyQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::historyQosPolicy > history_;
+    typedef std::auto_ptr< ::dds::historyQosPolicy > history_auto_ptr_type;
+    history_auto_ptr_type history_;
 
     // resource_limits
     public:
@@ -1619,7 +1697,8 @@ namespace dds
     void resource_limits (::dds::resourceLimitsQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::resourceLimitsQosPolicy > resource_limits_;
+    typedef std::auto_ptr< ::dds::resourceLimitsQosPolicy > resource_limits_auto_ptr_type;
+    resource_limits_auto_ptr_type resource_limits_;
 
     // user_data
     public:
@@ -1628,7 +1707,8 @@ namespace dds
     void user_data (::dds::userDataQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::userDataQosPolicy > user_data_;
+    typedef std::auto_ptr< ::dds::userDataQosPolicy > user_data_auto_ptr_type;
+    user_data_auto_ptr_type user_data_;
 
     // ownership
     public:
@@ -1637,7 +1717,8 @@ namespace dds
     void ownership (::dds::ownershipQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::ownershipQosPolicy > ownership_;
+    typedef std::auto_ptr< ::dds::ownershipQosPolicy > ownership_auto_ptr_type;
+    ownership_auto_ptr_type ownership_;
 
     // time_based_filter
     public:
@@ -1646,7 +1727,8 @@ namespace dds
     void time_based_filter (::dds::timeBasedFilterQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::timeBasedFilterQosPolicy > time_based_filter_;
+    typedef std::auto_ptr< ::dds::timeBasedFilterQosPolicy > time_based_filter_auto_ptr_type;
+    time_based_filter_auto_ptr_type time_based_filter_;
 
     // reader_data_lifecycle
     public:
@@ -1655,7 +1737,8 @@ namespace dds
     void reader_data_lifecycle (::dds::readerDataLifecycleQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::readerDataLifecycleQosPolicy > reader_data_lifecycle_;
+    typedef std::auto_ptr< ::dds::readerDataLifecycleQosPolicy > reader_data_lifecycle_auto_ptr_type;
+    reader_data_lifecycle_auto_ptr_type reader_data_lifecycle_;
 
     // name
     public:
@@ -1665,7 +1748,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     // base_name
     public:
@@ -1675,7 +1759,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_auto_ptr_type;
+    base_name_auto_ptr_type base_name_;
 
     // topic_filter
     public:
@@ -1685,7 +1770,8 @@ namespace dds
     void topic_filter (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > topic_filter_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > topic_filter_auto_ptr_type;
+    topic_filter_auto_ptr_type topic_filter_;
 
     public:
     datareaderQos ();
@@ -1705,7 +1791,7 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex> _ptr;
 
     // durability
     public:
@@ -1714,7 +1800,8 @@ namespace dds
     void durability (::dds::durabilityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::durabilityQosPolicy > durability_;
+    typedef std::auto_ptr< ::dds::durabilityQosPolicy > durability_auto_ptr_type;
+    durability_auto_ptr_type durability_;
 
     // durability_service
     public:
@@ -1723,7 +1810,8 @@ namespace dds
     void durability_service (::dds::durabilityServiceQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::durabilityServiceQosPolicy > durability_service_;
+    typedef std::auto_ptr< ::dds::durabilityServiceQosPolicy > durability_service_auto_ptr_type;
+    durability_service_auto_ptr_type durability_service_;
 
     // deadline
     public:
@@ -1732,7 +1820,8 @@ namespace dds
     void deadline (::dds::deadlineQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::deadlineQosPolicy > deadline_;
+    typedef std::auto_ptr< ::dds::deadlineQosPolicy > deadline_auto_ptr_type;
+    deadline_auto_ptr_type deadline_;
 
     // latency_budget
     public:
@@ -1741,7 +1830,8 @@ namespace dds
     void latency_budget (::dds::latencyBudgetQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::latencyBudgetQosPolicy > latency_budget_;
+    typedef std::auto_ptr< ::dds::latencyBudgetQosPolicy > latency_budget_auto_ptr_type;
+    latency_budget_auto_ptr_type latency_budget_;
 
     // liveliness
     public:
@@ -1750,7 +1840,8 @@ namespace dds
     void liveliness (::dds::livelinessQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::livelinessQosPolicy > liveliness_;
+    typedef std::auto_ptr< ::dds::livelinessQosPolicy > liveliness_auto_ptr_type;
+    liveliness_auto_ptr_type liveliness_;
 
     // reliability
     public:
@@ -1759,7 +1850,8 @@ namespace dds
     void reliability (::dds::reliabilityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::reliabilityQosPolicy > reliability_;
+    typedef std::auto_ptr< ::dds::reliabilityQosPolicy > reliability_auto_ptr_type;
+    reliability_auto_ptr_type reliability_;
 
     // destination_order
     public:
@@ -1768,7 +1860,8 @@ namespace dds
     void destination_order (::dds::destinationOrderQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::destinationOrderQosPolicy > destination_order_;
+    typedef std::auto_ptr< ::dds::destinationOrderQosPolicy > destination_order_auto_ptr_type;
+    destination_order_auto_ptr_type destination_order_;
 
     // history
     public:
@@ -1777,7 +1870,8 @@ namespace dds
     void history (::dds::historyQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::historyQosPolicy > history_;
+    typedef std::auto_ptr< ::dds::historyQosPolicy > history_auto_ptr_type;
+    history_auto_ptr_type history_;
 
     // resource_limits
     public:
@@ -1786,7 +1880,8 @@ namespace dds
     void resource_limits (::dds::resourceLimitsQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::resourceLimitsQosPolicy > resource_limits_;
+    typedef std::auto_ptr< ::dds::resourceLimitsQosPolicy > resource_limits_auto_ptr_type;
+    resource_limits_auto_ptr_type resource_limits_;
 
     // transport_priority
     public:
@@ -1795,7 +1890,8 @@ namespace dds
     void transport_priority (::dds::transportPriorityQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::transportPriorityQosPolicy > transport_priority_;
+    typedef std::auto_ptr< ::dds::transportPriorityQosPolicy > transport_priority_auto_ptr_type;
+    transport_priority_auto_ptr_type transport_priority_;
 
     // lifespan
     public:
@@ -1804,7 +1900,8 @@ namespace dds
     void lifespan (::dds::lifespanQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::lifespanQosPolicy > lifespan_;
+    typedef std::auto_ptr< ::dds::lifespanQosPolicy > lifespan_auto_ptr_type;
+    lifespan_auto_ptr_type lifespan_;
 
     // user_data
     public:
@@ -1813,7 +1910,8 @@ namespace dds
     void user_data (::dds::userDataQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::userDataQosPolicy > user_data_;
+    typedef std::auto_ptr< ::dds::userDataQosPolicy > user_data_auto_ptr_type;
+    user_data_auto_ptr_type user_data_;
 
     // ownership
     public:
@@ -1822,7 +1920,8 @@ namespace dds
     void ownership (::dds::ownershipQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::ownershipQosPolicy > ownership_;
+    typedef std::auto_ptr< ::dds::ownershipQosPolicy > ownership_auto_ptr_type;
+    ownership_auto_ptr_type ownership_;
 
     // ownership_strength
     public:
@@ -1831,7 +1930,8 @@ namespace dds
     void ownership_strength (::dds::ownershipStrengthQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::ownershipStrengthQosPolicy > ownership_strength_;
+    typedef std::auto_ptr< ::dds::ownershipStrengthQosPolicy > ownership_strength_auto_ptr_type;
+    ownership_strength_auto_ptr_type ownership_strength_;
 
     // writer_data_lifecycle
     public:
@@ -1840,7 +1940,8 @@ namespace dds
     void writer_data_lifecycle (::dds::writerDataLifecycleQosPolicy const& );
 
     protected:
-    std::auto_ptr< ::dds::writerDataLifecycleQosPolicy > writer_data_lifecycle_;
+    typedef std::auto_ptr< ::dds::writerDataLifecycleQosPolicy > writer_data_lifecycle_auto_ptr_type;
+    writer_data_lifecycle_auto_ptr_type writer_data_lifecycle_;
 
     // name
     public:
@@ -1850,7 +1951,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     // base_name
     public:
@@ -1860,7 +1962,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_auto_ptr_type;
+    base_name_auto_ptr_type base_name_;
 
     // topic_filter
     public:
@@ -1870,7 +1973,8 @@ namespace dds
     void topic_filter (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > topic_filter_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > topic_filter_auto_ptr_type;
+    topic_filter_auto_ptr_type topic_filter_;
 
     public:
     datawriterQos ();
@@ -1890,103 +1994,103 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex> _ptr;
 
     // datareader_qos
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > >::iterator datareader_qos_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > >::const_iterator datareader_qos_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex> datareader_qos_value_type;
+    typedef std::list<datareader_qos_value_type> datareader_qos_container_type;
+    typedef datareader_qos_container_type::iterator datareader_qos_iterator;
+    typedef datareader_qos_container_type::const_iterator datareader_qos_const_iterator;
     datareader_qos_iterator begin_datareader_qos ();
     datareader_qos_iterator end_datareader_qos ();
     datareader_qos_const_iterator begin_datareader_qos () const;
     datareader_qos_const_iterator end_datareader_qos () const;
-    void add_datareader_qos (ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_datareader_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_datareader_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_datareader_qos (datareader_qos_value_type const&);
     size_t count_datareader_qos () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex > > datareader_qos_;
+    datareader_qos_container_type datareader_qos_;
 
     // datawriter_qos
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > >::iterator datawriter_qos_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > >::const_iterator datawriter_qos_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex> datawriter_qos_value_type;
+    typedef std::list<datawriter_qos_value_type> datawriter_qos_container_type;
+    typedef datawriter_qos_container_type::iterator datawriter_qos_iterator;
+    typedef datawriter_qos_container_type::const_iterator datawriter_qos_const_iterator;
     datawriter_qos_iterator begin_datawriter_qos ();
     datawriter_qos_iterator end_datawriter_qos ();
     datawriter_qos_const_iterator begin_datawriter_qos () const;
     datawriter_qos_const_iterator end_datawriter_qos () const;
-    void add_datawriter_qos (ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_datawriter_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_datawriter_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_datawriter_qos (datawriter_qos_value_type const&);
     size_t count_datawriter_qos () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex > > datawriter_qos_;
+    datawriter_qos_container_type datawriter_qos_;
 
     // topic_qos
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > >::iterator topic_qos_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > >::const_iterator topic_qos_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex> topic_qos_value_type;
+    typedef std::list<topic_qos_value_type> topic_qos_container_type;
+    typedef topic_qos_container_type::iterator topic_qos_iterator;
+    typedef topic_qos_container_type::const_iterator topic_qos_const_iterator;
     topic_qos_iterator begin_topic_qos ();
     topic_qos_iterator end_topic_qos ();
     topic_qos_const_iterator begin_topic_qos () const;
     topic_qos_const_iterator end_topic_qos () const;
-    void add_topic_qos (ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_topic_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_topic_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_topic_qos (topic_qos_value_type const&);
     size_t count_topic_qos () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex > > topic_qos_;
+    topic_qos_container_type topic_qos_;
 
     // domainparticipant_qos
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > >::iterator domainparticipant_qos_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > >::const_iterator domainparticipant_qos_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex> domainparticipant_qos_value_type;
+    typedef std::list<domainparticipant_qos_value_type> domainparticipant_qos_container_type;
+    typedef domainparticipant_qos_container_type::iterator domainparticipant_qos_iterator;
+    typedef domainparticipant_qos_container_type::const_iterator domainparticipant_qos_const_iterator;
     domainparticipant_qos_iterator begin_domainparticipant_qos ();
     domainparticipant_qos_iterator end_domainparticipant_qos ();
     domainparticipant_qos_const_iterator begin_domainparticipant_qos () const;
     domainparticipant_qos_const_iterator end_domainparticipant_qos () const;
-    void add_domainparticipant_qos (ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_domainparticipant_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_domainparticipant_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_domainparticipant_qos (domainparticipant_qos_value_type const&);
     size_t count_domainparticipant_qos () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex > > domainparticipant_qos_;
+    domainparticipant_qos_container_type domainparticipant_qos_;
 
     // publisher_qos
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > >::iterator publisher_qos_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > >::const_iterator publisher_qos_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex> publisher_qos_value_type;
+    typedef std::list<publisher_qos_value_type> publisher_qos_container_type;
+    typedef publisher_qos_container_type::iterator publisher_qos_iterator;
+    typedef publisher_qos_container_type::const_iterator publisher_qos_const_iterator;
     publisher_qos_iterator begin_publisher_qos ();
     publisher_qos_iterator end_publisher_qos ();
     publisher_qos_const_iterator begin_publisher_qos () const;
     publisher_qos_const_iterator end_publisher_qos () const;
-    void add_publisher_qos (ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_publisher_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_publisher_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_publisher_qos (publisher_qos_value_type const&);
     size_t count_publisher_qos () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex > > publisher_qos_;
+    publisher_qos_container_type publisher_qos_;
 
     // subscriber_qos
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > >::iterator subscriber_qos_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > >::const_iterator subscriber_qos_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex> subscriber_qos_value_type;
+    typedef std::list<subscriber_qos_value_type> subscriber_qos_container_type;
+    typedef subscriber_qos_container_type::iterator subscriber_qos_iterator;
+    typedef subscriber_qos_container_type::const_iterator subscriber_qos_const_iterator;
     subscriber_qos_iterator begin_subscriber_qos ();
     subscriber_qos_iterator end_subscriber_qos ();
     subscriber_qos_const_iterator begin_subscriber_qos () const;
     subscriber_qos_const_iterator end_subscriber_qos () const;
-    void add_subscriber_qos (ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_subscriber_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_subscriber_qos_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_subscriber_qos (subscriber_qos_value_type const&);
     size_t count_subscriber_qos () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex > > subscriber_qos_;
+    subscriber_qos_container_type subscriber_qos_;
 
     // name
     public:
@@ -1995,7 +2099,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > name_auto_ptr_type;
+    name_auto_ptr_type name_;
 
     // base_name
     public:
@@ -2005,7 +2110,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_;
+    typedef std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > base_name_auto_ptr_type;
+    base_name_auto_ptr_type base_name_;
 
     public:
     qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__);
@@ -2025,23 +2131,23 @@ namespace dds
     typedef ::XSCRT::Type Base;
 
     public:
-    typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile_seq, ACE_Null_Mutex > _ptr;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile_seq, ACE_Null_Mutex> _ptr;
 
     // qos_profile
     public:
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > >::iterator qos_profile_iterator;
-    typedef std::list<ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > >::const_iterator qos_profile_const_iterator;
+    typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex> qos_profile_value_type;
+    typedef std::list<qos_profile_value_type> qos_profile_container_type;
+    typedef qos_profile_container_type::iterator qos_profile_iterator;
+    typedef qos_profile_container_type::const_iterator qos_profile_const_iterator;
     qos_profile_iterator begin_qos_profile ();
     qos_profile_iterator end_qos_profile ();
     qos_profile_const_iterator begin_qos_profile () const;
     qos_profile_const_iterator end_qos_profile () const;
-    void add_qos_profile (ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > const& );
-    XSCRT::Type* get_qos_profile_ptr (const std::basic_string<ACE_TCHAR>& idref);
-    void set_qos_profile_ptr (const std::basic_string<ACE_TCHAR>& idref);
+    void add_qos_profile (qos_profile_value_type const&);
     size_t count_qos_profile () const;
 
     protected:
-    std::list<ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex > > qos_profile_;
+    qos_profile_container_type qos_profile_;
 
     public:
     qosProfile_seq ();

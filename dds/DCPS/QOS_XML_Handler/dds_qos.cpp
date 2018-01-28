@@ -255,7 +255,7 @@ namespace dds
 
     else
     {
-      sec_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      sec_ = duration::sec_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       sec_->container (this);
     }
   }
@@ -283,7 +283,7 @@ namespace dds
 
     else
     {
-      nanosec_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      nanosec_ = duration::nanosec_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       nanosec_->container (this);
     }
   }
@@ -342,7 +342,7 @@ namespace dds
   }
 
   void stringSeq::
-  add_element (ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex >  const& e)
+  add_element (stringSeq::element_value_type const& e)
   {
     element_.push_back (e);
   }
@@ -408,7 +408,7 @@ namespace dds
 
     else
     {
-      period_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      period_ = deadlineQosPolicy::period_auto_ptr_type (new ::dds::duration (e));
       period_->container (this);
     }
   }
@@ -468,7 +468,7 @@ namespace dds
 
     else
     {
-      kind_ = std::auto_ptr< ::dds::destinationOrderKind > (new ::dds::destinationOrderKind (e));
+      kind_ = destinationOrderQosPolicy::kind_auto_ptr_type (new ::dds::destinationOrderKind (e));
       kind_->container (this);
     }
   }
@@ -528,7 +528,7 @@ namespace dds
 
     else
     {
-      kind_ = std::auto_ptr< ::dds::durabilityKind > (new ::dds::durabilityKind (e));
+      kind_ = durabilityQosPolicy::kind_auto_ptr_type (new ::dds::durabilityKind (e));
       kind_->container (this);
     }
   }
@@ -623,7 +623,7 @@ namespace dds
 
     else
     {
-      service_cleanup_delay_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      service_cleanup_delay_ = durabilityServiceQosPolicy::service_cleanup_delay_auto_ptr_type (new ::dds::duration (e));
       service_cleanup_delay_->container (this);
     }
   }
@@ -651,7 +651,7 @@ namespace dds
 
     else
     {
-      history_kind_ = std::auto_ptr< ::dds::historyKind > (new ::dds::historyKind (e));
+      history_kind_ = durabilityServiceQosPolicy::history_kind_auto_ptr_type (new ::dds::historyKind (e));
       history_kind_->container (this);
     }
   }
@@ -679,7 +679,7 @@ namespace dds
 
     else
     {
-      history_depth_ = std::auto_ptr< ::XMLSchema::positiveInteger > (new ::XMLSchema::positiveInteger (e));
+      history_depth_ = durabilityServiceQosPolicy::history_depth_auto_ptr_type (new ::XMLSchema::positiveInteger (e));
       history_depth_->container (this);
     }
   }
@@ -707,7 +707,7 @@ namespace dds
 
     else
     {
-      max_samples_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_ = durabilityServiceQosPolicy::max_samples_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       max_samples_->container (this);
     }
   }
@@ -735,7 +735,7 @@ namespace dds
 
     else
     {
-      max_instances_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_instances_ = durabilityServiceQosPolicy::max_instances_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       max_instances_->container (this);
     }
   }
@@ -763,7 +763,7 @@ namespace dds
 
     else
     {
-      max_samples_per_instance_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_per_instance_ = durabilityServiceQosPolicy::max_samples_per_instance_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       max_samples_per_instance_->container (this);
     }
   }
@@ -823,7 +823,7 @@ namespace dds
 
     else
     {
-      autoenable_created_entities_ = std::auto_ptr< ::XMLSchema::boolean > (new ::XMLSchema::boolean (e));
+      autoenable_created_entities_ = entityFactoryQosPolicy::autoenable_created_entities_auto_ptr_type (new ::XMLSchema::boolean (e));
       autoenable_created_entities_->container (this);
     }
   }
@@ -883,7 +883,7 @@ namespace dds
 
     else
     {
-      value_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      value_ = groupDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       value_->container (this);
     }
   }
@@ -950,7 +950,7 @@ namespace dds
 
     else
     {
-      kind_ = std::auto_ptr< ::dds::historyKind > (new ::dds::historyKind (e));
+      kind_ = historyQosPolicy::kind_auto_ptr_type (new ::dds::historyKind (e));
       kind_->container (this);
     }
   }
@@ -978,7 +978,7 @@ namespace dds
 
     else
     {
-      depth_ = std::auto_ptr< ::XMLSchema::positiveInteger > (new ::XMLSchema::positiveInteger (e));
+      depth_ = historyQosPolicy::depth_auto_ptr_type (new ::XMLSchema::positiveInteger (e));
       depth_->container (this);
     }
   }
@@ -1038,7 +1038,7 @@ namespace dds
 
     else
     {
-      duration_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      duration_ = latencyBudgetQosPolicy::duration_auto_ptr_type (new ::dds::duration (e));
       duration_->container (this);
     }
   }
@@ -1098,7 +1098,7 @@ namespace dds
 
     else
     {
-      duration_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      duration_ = lifespanQosPolicy::duration_auto_ptr_type (new ::dds::duration (e));
       duration_->container (this);
     }
   }
@@ -1165,7 +1165,7 @@ namespace dds
 
     else
     {
-      kind_ = std::auto_ptr< ::dds::livelinessKind > (new ::dds::livelinessKind (e));
+      kind_ = livelinessQosPolicy::kind_auto_ptr_type (new ::dds::livelinessKind (e));
       kind_->container (this);
     }
   }
@@ -1193,7 +1193,7 @@ namespace dds
 
     else
     {
-      lease_duration_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      lease_duration_ = livelinessQosPolicy::lease_duration_auto_ptr_type (new ::dds::duration (e));
       lease_duration_->container (this);
     }
   }
@@ -1253,7 +1253,7 @@ namespace dds
 
     else
     {
-      kind_ = std::auto_ptr< ::dds::ownershipKind > (new ::dds::ownershipKind (e));
+      kind_ = ownershipQosPolicy::kind_auto_ptr_type (new ::dds::ownershipKind (e));
       kind_->container (this);
     }
   }
@@ -1313,7 +1313,7 @@ namespace dds
 
     else
     {
-      value_ = std::auto_ptr< ::XMLSchema::nonNegativeInteger > (new ::XMLSchema::nonNegativeInteger (e));
+      value_ = ownershipStrengthQosPolicy::value_auto_ptr_type (new ::XMLSchema::nonNegativeInteger (e));
       value_->container (this);
     }
   }
@@ -1373,7 +1373,7 @@ namespace dds
 
     else
     {
-      name_ = std::auto_ptr< ::dds::stringSeq > (new ::dds::stringSeq (e));
+      name_ = partitionQosPolicy::name_auto_ptr_type (new ::dds::stringSeq (e));
       name_->container (this);
     }
   }
@@ -1447,7 +1447,7 @@ namespace dds
 
     else
     {
-      access_scope_ = std::auto_ptr< ::dds::presentationAccessScopeKind > (new ::dds::presentationAccessScopeKind (e));
+      access_scope_ = presentationQosPolicy::access_scope_auto_ptr_type (new ::dds::presentationAccessScopeKind (e));
       access_scope_->container (this);
     }
   }
@@ -1475,7 +1475,7 @@ namespace dds
 
     else
     {
-      coherent_access_ = std::auto_ptr< ::XMLSchema::boolean > (new ::XMLSchema::boolean (e));
+      coherent_access_ = presentationQosPolicy::coherent_access_auto_ptr_type (new ::XMLSchema::boolean (e));
       coherent_access_->container (this);
     }
   }
@@ -1503,7 +1503,7 @@ namespace dds
 
     else
     {
-      ordered_access_ = std::auto_ptr< ::XMLSchema::boolean > (new ::XMLSchema::boolean (e));
+      ordered_access_ = presentationQosPolicy::ordered_access_auto_ptr_type (new ::XMLSchema::boolean (e));
       ordered_access_->container (this);
     }
   }
@@ -1570,7 +1570,7 @@ namespace dds
 
     else
     {
-      autopurge_nowriter_samples_delay_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      autopurge_nowriter_samples_delay_ = readerDataLifecycleQosPolicy::autopurge_nowriter_samples_delay_auto_ptr_type (new ::dds::duration (e));
       autopurge_nowriter_samples_delay_->container (this);
     }
   }
@@ -1598,7 +1598,7 @@ namespace dds
 
     else
     {
-      autopurge_disposed_samples_delay_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      autopurge_disposed_samples_delay_ = readerDataLifecycleQosPolicy::autopurge_disposed_samples_delay_auto_ptr_type (new ::dds::duration (e));
       autopurge_disposed_samples_delay_->container (this);
     }
   }
@@ -1665,7 +1665,7 @@ namespace dds
 
     else
     {
-      kind_ = std::auto_ptr< ::dds::reliabilityKind > (new ::dds::reliabilityKind (e));
+      kind_ = reliabilityQosPolicy::kind_auto_ptr_type (new ::dds::reliabilityKind (e));
       kind_->container (this);
     }
   }
@@ -1693,7 +1693,7 @@ namespace dds
 
     else
     {
-      max_blocking_time_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      max_blocking_time_ = reliabilityQosPolicy::max_blocking_time_auto_ptr_type (new ::dds::duration (e));
       max_blocking_time_->container (this);
     }
   }
@@ -1781,7 +1781,7 @@ namespace dds
 
     else
     {
-      max_samples_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_ = resourceLimitsQosPolicy::max_samples_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       max_samples_->container (this);
     }
   }
@@ -1809,7 +1809,7 @@ namespace dds
 
     else
     {
-      max_instances_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_instances_ = resourceLimitsQosPolicy::max_instances_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       max_instances_->container (this);
     }
   }
@@ -1837,7 +1837,7 @@ namespace dds
 
     else
     {
-      max_samples_per_instance_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_per_instance_ = resourceLimitsQosPolicy::max_samples_per_instance_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       max_samples_per_instance_->container (this);
     }
   }
@@ -1865,7 +1865,7 @@ namespace dds
 
     else
     {
-      initial_samples_ = std::auto_ptr< ::XMLSchema::positiveInteger > (new ::XMLSchema::positiveInteger (e));
+      initial_samples_ = resourceLimitsQosPolicy::initial_samples_auto_ptr_type (new ::XMLSchema::positiveInteger (e));
       initial_samples_->container (this);
     }
   }
@@ -1893,7 +1893,7 @@ namespace dds
 
     else
     {
-      initial_instances_ = std::auto_ptr< ::XMLSchema::positiveInteger > (new ::XMLSchema::positiveInteger (e));
+      initial_instances_ = resourceLimitsQosPolicy::initial_instances_auto_ptr_type (new ::XMLSchema::positiveInteger (e));
       initial_instances_->container (this);
     }
   }
@@ -1953,7 +1953,7 @@ namespace dds
 
     else
     {
-      minimum_separation_ = std::auto_ptr< ::dds::duration > (new ::dds::duration (e));
+      minimum_separation_ = timeBasedFilterQosPolicy::minimum_separation_auto_ptr_type (new ::dds::duration (e));
       minimum_separation_->container (this);
     }
   }
@@ -2013,7 +2013,7 @@ namespace dds
 
     else
     {
-      value_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      value_ = topicDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       value_->container (this);
     }
   }
@@ -2073,7 +2073,7 @@ namespace dds
 
     else
     {
-      value_ = std::auto_ptr< ::XMLSchema::nonNegativeInteger > (new ::XMLSchema::nonNegativeInteger (e));
+      value_ = transportPriorityQosPolicy::value_auto_ptr_type (new ::XMLSchema::nonNegativeInteger (e));
       value_->container (this);
     }
   }
@@ -2133,7 +2133,7 @@ namespace dds
 
     else
     {
-      value_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      value_ = userDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       value_->container (this);
     }
   }
@@ -2193,7 +2193,7 @@ namespace dds
 
     else
     {
-      autodispose_unregistered_instances_ = std::auto_ptr< ::XMLSchema::boolean > (new ::XMLSchema::boolean (e));
+      autodispose_unregistered_instances_ = writerDataLifecycleQosPolicy::autodispose_unregistered_instances_auto_ptr_type (new ::XMLSchema::boolean (e));
       autodispose_unregistered_instances_->container (this);
     }
   }
@@ -2270,7 +2270,7 @@ namespace dds
 
     else
     {
-      user_data_ = std::auto_ptr< ::dds::userDataQosPolicy > (new ::dds::userDataQosPolicy (e));
+      user_data_ = domainparticipantQos::user_data_auto_ptr_type (new ::dds::userDataQosPolicy (e));
       user_data_->container (this);
     }
   }
@@ -2298,7 +2298,7 @@ namespace dds
 
     else
     {
-      entity_factory_ = std::auto_ptr< ::dds::entityFactoryQosPolicy > (new ::dds::entityFactoryQosPolicy (e));
+      entity_factory_ = domainparticipantQos::entity_factory_auto_ptr_type (new ::dds::entityFactoryQosPolicy (e));
       entity_factory_->container (this);
     }
   }
@@ -2332,7 +2332,7 @@ namespace dds
 
     else
     {
-      name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = domainparticipantQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       name_->container (this);
     }
   }
@@ -2366,7 +2366,7 @@ namespace dds
 
     else
     {
-      base_name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = domainparticipantQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       base_name_->container (this);
     }
   }
@@ -2457,7 +2457,7 @@ namespace dds
 
     else
     {
-      presentation_ = std::auto_ptr< ::dds::presentationQosPolicy > (new ::dds::presentationQosPolicy (e));
+      presentation_ = publisherQos::presentation_auto_ptr_type (new ::dds::presentationQosPolicy (e));
       presentation_->container (this);
     }
   }
@@ -2485,7 +2485,7 @@ namespace dds
 
     else
     {
-      partition_ = std::auto_ptr< ::dds::partitionQosPolicy > (new ::dds::partitionQosPolicy (e));
+      partition_ = publisherQos::partition_auto_ptr_type (new ::dds::partitionQosPolicy (e));
       partition_->container (this);
     }
   }
@@ -2513,7 +2513,7 @@ namespace dds
 
     else
     {
-      group_data_ = std::auto_ptr< ::dds::groupDataQosPolicy > (new ::dds::groupDataQosPolicy (e));
+      group_data_ = publisherQos::group_data_auto_ptr_type (new ::dds::groupDataQosPolicy (e));
       group_data_->container (this);
     }
   }
@@ -2541,7 +2541,7 @@ namespace dds
 
     else
     {
-      entity_factory_ = std::auto_ptr< ::dds::entityFactoryQosPolicy > (new ::dds::entityFactoryQosPolicy (e));
+      entity_factory_ = publisherQos::entity_factory_auto_ptr_type (new ::dds::entityFactoryQosPolicy (e));
       entity_factory_->container (this);
     }
   }
@@ -2575,7 +2575,7 @@ namespace dds
 
     else
     {
-      name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = publisherQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       name_->container (this);
     }
   }
@@ -2609,7 +2609,7 @@ namespace dds
 
     else
     {
-      base_name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = publisherQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       base_name_->container (this);
     }
   }
@@ -2700,7 +2700,7 @@ namespace dds
 
     else
     {
-      presentation_ = std::auto_ptr< ::dds::presentationQosPolicy > (new ::dds::presentationQosPolicy (e));
+      presentation_ = subscriberQos::presentation_auto_ptr_type (new ::dds::presentationQosPolicy (e));
       presentation_->container (this);
     }
   }
@@ -2728,7 +2728,7 @@ namespace dds
 
     else
     {
-      partition_ = std::auto_ptr< ::dds::partitionQosPolicy > (new ::dds::partitionQosPolicy (e));
+      partition_ = subscriberQos::partition_auto_ptr_type (new ::dds::partitionQosPolicy (e));
       partition_->container (this);
     }
   }
@@ -2756,7 +2756,7 @@ namespace dds
 
     else
     {
-      group_data_ = std::auto_ptr< ::dds::groupDataQosPolicy > (new ::dds::groupDataQosPolicy (e));
+      group_data_ = subscriberQos::group_data_auto_ptr_type (new ::dds::groupDataQosPolicy (e));
       group_data_->container (this);
     }
   }
@@ -2784,7 +2784,7 @@ namespace dds
 
     else
     {
-      entity_factory_ = std::auto_ptr< ::dds::entityFactoryQosPolicy > (new ::dds::entityFactoryQosPolicy (e));
+      entity_factory_ = subscriberQos::entity_factory_auto_ptr_type (new ::dds::entityFactoryQosPolicy (e));
       entity_factory_->container (this);
     }
   }
@@ -2818,7 +2818,7 @@ namespace dds
 
     else
     {
-      name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = subscriberQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       name_->container (this);
     }
   }
@@ -2852,7 +2852,7 @@ namespace dds
 
     else
     {
-      base_name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = subscriberQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       base_name_->container (this);
     }
   }
@@ -3011,7 +3011,7 @@ namespace dds
 
     else
     {
-      topic_data_ = std::auto_ptr< ::dds::topicDataQosPolicy > (new ::dds::topicDataQosPolicy (e));
+      topic_data_ = topicQos::topic_data_auto_ptr_type (new ::dds::topicDataQosPolicy (e));
       topic_data_->container (this);
     }
   }
@@ -3039,7 +3039,7 @@ namespace dds
 
     else
     {
-      durability_ = std::auto_ptr< ::dds::durabilityQosPolicy > (new ::dds::durabilityQosPolicy (e));
+      durability_ = topicQos::durability_auto_ptr_type (new ::dds::durabilityQosPolicy (e));
       durability_->container (this);
     }
   }
@@ -3067,7 +3067,7 @@ namespace dds
 
     else
     {
-      durability_service_ = std::auto_ptr< ::dds::durabilityServiceQosPolicy > (new ::dds::durabilityServiceQosPolicy (e));
+      durability_service_ = topicQos::durability_service_auto_ptr_type (new ::dds::durabilityServiceQosPolicy (e));
       durability_service_->container (this);
     }
   }
@@ -3095,7 +3095,7 @@ namespace dds
 
     else
     {
-      deadline_ = std::auto_ptr< ::dds::deadlineQosPolicy > (new ::dds::deadlineQosPolicy (e));
+      deadline_ = topicQos::deadline_auto_ptr_type (new ::dds::deadlineQosPolicy (e));
       deadline_->container (this);
     }
   }
@@ -3123,7 +3123,7 @@ namespace dds
 
     else
     {
-      latency_budget_ = std::auto_ptr< ::dds::latencyBudgetQosPolicy > (new ::dds::latencyBudgetQosPolicy (e));
+      latency_budget_ = topicQos::latency_budget_auto_ptr_type (new ::dds::latencyBudgetQosPolicy (e));
       latency_budget_->container (this);
     }
   }
@@ -3151,7 +3151,7 @@ namespace dds
 
     else
     {
-      liveliness_ = std::auto_ptr< ::dds::livelinessQosPolicy > (new ::dds::livelinessQosPolicy (e));
+      liveliness_ = topicQos::liveliness_auto_ptr_type (new ::dds::livelinessQosPolicy (e));
       liveliness_->container (this);
     }
   }
@@ -3179,7 +3179,7 @@ namespace dds
 
     else
     {
-      reliability_ = std::auto_ptr< ::dds::reliabilityQosPolicy > (new ::dds::reliabilityQosPolicy (e));
+      reliability_ = topicQos::reliability_auto_ptr_type (new ::dds::reliabilityQosPolicy (e));
       reliability_->container (this);
     }
   }
@@ -3207,7 +3207,7 @@ namespace dds
 
     else
     {
-      destination_order_ = std::auto_ptr< ::dds::destinationOrderQosPolicy > (new ::dds::destinationOrderQosPolicy (e));
+      destination_order_ = topicQos::destination_order_auto_ptr_type (new ::dds::destinationOrderQosPolicy (e));
       destination_order_->container (this);
     }
   }
@@ -3235,7 +3235,7 @@ namespace dds
 
     else
     {
-      history_ = std::auto_ptr< ::dds::historyQosPolicy > (new ::dds::historyQosPolicy (e));
+      history_ = topicQos::history_auto_ptr_type (new ::dds::historyQosPolicy (e));
       history_->container (this);
     }
   }
@@ -3263,7 +3263,7 @@ namespace dds
 
     else
     {
-      resource_limits_ = std::auto_ptr< ::dds::resourceLimitsQosPolicy > (new ::dds::resourceLimitsQosPolicy (e));
+      resource_limits_ = topicQos::resource_limits_auto_ptr_type (new ::dds::resourceLimitsQosPolicy (e));
       resource_limits_->container (this);
     }
   }
@@ -3291,7 +3291,7 @@ namespace dds
 
     else
     {
-      transport_priority_ = std::auto_ptr< ::dds::transportPriorityQosPolicy > (new ::dds::transportPriorityQosPolicy (e));
+      transport_priority_ = topicQos::transport_priority_auto_ptr_type (new ::dds::transportPriorityQosPolicy (e));
       transport_priority_->container (this);
     }
   }
@@ -3319,7 +3319,7 @@ namespace dds
 
     else
     {
-      lifespan_ = std::auto_ptr< ::dds::lifespanQosPolicy > (new ::dds::lifespanQosPolicy (e));
+      lifespan_ = topicQos::lifespan_auto_ptr_type (new ::dds::lifespanQosPolicy (e));
       lifespan_->container (this);
     }
   }
@@ -3347,7 +3347,7 @@ namespace dds
 
     else
     {
-      ownership_ = std::auto_ptr< ::dds::ownershipQosPolicy > (new ::dds::ownershipQosPolicy (e));
+      ownership_ = topicQos::ownership_auto_ptr_type (new ::dds::ownershipQosPolicy (e));
       ownership_->container (this);
     }
   }
@@ -3381,7 +3381,7 @@ namespace dds
 
     else
     {
-      name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = topicQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       name_->container (this);
     }
   }
@@ -3415,7 +3415,7 @@ namespace dds
 
     else
     {
-      base_name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = topicQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       base_name_->container (this);
     }
   }
@@ -3449,7 +3449,7 @@ namespace dds
 
     else
     {
-      topic_filter_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      topic_filter_ = topicQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       topic_filter_->container (this);
     }
   }
@@ -3601,7 +3601,7 @@ namespace dds
 
     else
     {
-      durability_ = std::auto_ptr< ::dds::durabilityQosPolicy > (new ::dds::durabilityQosPolicy (e));
+      durability_ = datareaderQos::durability_auto_ptr_type (new ::dds::durabilityQosPolicy (e));
       durability_->container (this);
     }
   }
@@ -3629,7 +3629,7 @@ namespace dds
 
     else
     {
-      deadline_ = std::auto_ptr< ::dds::deadlineQosPolicy > (new ::dds::deadlineQosPolicy (e));
+      deadline_ = datareaderQos::deadline_auto_ptr_type (new ::dds::deadlineQosPolicy (e));
       deadline_->container (this);
     }
   }
@@ -3657,7 +3657,7 @@ namespace dds
 
     else
     {
-      latency_budget_ = std::auto_ptr< ::dds::latencyBudgetQosPolicy > (new ::dds::latencyBudgetQosPolicy (e));
+      latency_budget_ = datareaderQos::latency_budget_auto_ptr_type (new ::dds::latencyBudgetQosPolicy (e));
       latency_budget_->container (this);
     }
   }
@@ -3685,7 +3685,7 @@ namespace dds
 
     else
     {
-      liveliness_ = std::auto_ptr< ::dds::livelinessQosPolicy > (new ::dds::livelinessQosPolicy (e));
+      liveliness_ = datareaderQos::liveliness_auto_ptr_type (new ::dds::livelinessQosPolicy (e));
       liveliness_->container (this);
     }
   }
@@ -3713,7 +3713,7 @@ namespace dds
 
     else
     {
-      reliability_ = std::auto_ptr< ::dds::reliabilityQosPolicy > (new ::dds::reliabilityQosPolicy (e));
+      reliability_ = datareaderQos::reliability_auto_ptr_type (new ::dds::reliabilityQosPolicy (e));
       reliability_->container (this);
     }
   }
@@ -3741,7 +3741,7 @@ namespace dds
 
     else
     {
-      destination_order_ = std::auto_ptr< ::dds::destinationOrderQosPolicy > (new ::dds::destinationOrderQosPolicy (e));
+      destination_order_ = datareaderQos::destination_order_auto_ptr_type (new ::dds::destinationOrderQosPolicy (e));
       destination_order_->container (this);
     }
   }
@@ -3769,7 +3769,7 @@ namespace dds
 
     else
     {
-      history_ = std::auto_ptr< ::dds::historyQosPolicy > (new ::dds::historyQosPolicy (e));
+      history_ = datareaderQos::history_auto_ptr_type (new ::dds::historyQosPolicy (e));
       history_->container (this);
     }
   }
@@ -3797,7 +3797,7 @@ namespace dds
 
     else
     {
-      resource_limits_ = std::auto_ptr< ::dds::resourceLimitsQosPolicy > (new ::dds::resourceLimitsQosPolicy (e));
+      resource_limits_ = datareaderQos::resource_limits_auto_ptr_type (new ::dds::resourceLimitsQosPolicy (e));
       resource_limits_->container (this);
     }
   }
@@ -3825,7 +3825,7 @@ namespace dds
 
     else
     {
-      user_data_ = std::auto_ptr< ::dds::userDataQosPolicy > (new ::dds::userDataQosPolicy (e));
+      user_data_ = datareaderQos::user_data_auto_ptr_type (new ::dds::userDataQosPolicy (e));
       user_data_->container (this);
     }
   }
@@ -3853,7 +3853,7 @@ namespace dds
 
     else
     {
-      ownership_ = std::auto_ptr< ::dds::ownershipQosPolicy > (new ::dds::ownershipQosPolicy (e));
+      ownership_ = datareaderQos::ownership_auto_ptr_type (new ::dds::ownershipQosPolicy (e));
       ownership_->container (this);
     }
   }
@@ -3881,7 +3881,7 @@ namespace dds
 
     else
     {
-      time_based_filter_ = std::auto_ptr< ::dds::timeBasedFilterQosPolicy > (new ::dds::timeBasedFilterQosPolicy (e));
+      time_based_filter_ = datareaderQos::time_based_filter_auto_ptr_type (new ::dds::timeBasedFilterQosPolicy (e));
       time_based_filter_->container (this);
     }
   }
@@ -3909,7 +3909,7 @@ namespace dds
 
     else
     {
-      reader_data_lifecycle_ = std::auto_ptr< ::dds::readerDataLifecycleQosPolicy > (new ::dds::readerDataLifecycleQosPolicy (e));
+      reader_data_lifecycle_ = datareaderQos::reader_data_lifecycle_auto_ptr_type (new ::dds::readerDataLifecycleQosPolicy (e));
       reader_data_lifecycle_->container (this);
     }
   }
@@ -3943,7 +3943,7 @@ namespace dds
 
     else
     {
-      name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = datareaderQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       name_->container (this);
     }
   }
@@ -3977,7 +3977,7 @@ namespace dds
 
     else
     {
-      base_name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = datareaderQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       base_name_->container (this);
     }
   }
@@ -4011,7 +4011,7 @@ namespace dds
 
     else
     {
-      topic_filter_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      topic_filter_ = datareaderQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       topic_filter_->container (this);
     }
   }
@@ -4184,7 +4184,7 @@ namespace dds
 
     else
     {
-      durability_ = std::auto_ptr< ::dds::durabilityQosPolicy > (new ::dds::durabilityQosPolicy (e));
+      durability_ = datawriterQos::durability_auto_ptr_type (new ::dds::durabilityQosPolicy (e));
       durability_->container (this);
     }
   }
@@ -4212,7 +4212,7 @@ namespace dds
 
     else
     {
-      durability_service_ = std::auto_ptr< ::dds::durabilityServiceQosPolicy > (new ::dds::durabilityServiceQosPolicy (e));
+      durability_service_ = datawriterQos::durability_service_auto_ptr_type (new ::dds::durabilityServiceQosPolicy (e));
       durability_service_->container (this);
     }
   }
@@ -4240,7 +4240,7 @@ namespace dds
 
     else
     {
-      deadline_ = std::auto_ptr< ::dds::deadlineQosPolicy > (new ::dds::deadlineQosPolicy (e));
+      deadline_ = datawriterQos::deadline_auto_ptr_type (new ::dds::deadlineQosPolicy (e));
       deadline_->container (this);
     }
   }
@@ -4268,7 +4268,7 @@ namespace dds
 
     else
     {
-      latency_budget_ = std::auto_ptr< ::dds::latencyBudgetQosPolicy > (new ::dds::latencyBudgetQosPolicy (e));
+      latency_budget_ = datawriterQos::latency_budget_auto_ptr_type (new ::dds::latencyBudgetQosPolicy (e));
       latency_budget_->container (this);
     }
   }
@@ -4296,7 +4296,7 @@ namespace dds
 
     else
     {
-      liveliness_ = std::auto_ptr< ::dds::livelinessQosPolicy > (new ::dds::livelinessQosPolicy (e));
+      liveliness_ = datawriterQos::liveliness_auto_ptr_type (new ::dds::livelinessQosPolicy (e));
       liveliness_->container (this);
     }
   }
@@ -4324,7 +4324,7 @@ namespace dds
 
     else
     {
-      reliability_ = std::auto_ptr< ::dds::reliabilityQosPolicy > (new ::dds::reliabilityQosPolicy (e));
+      reliability_ = datawriterQos::reliability_auto_ptr_type (new ::dds::reliabilityQosPolicy (e));
       reliability_->container (this);
     }
   }
@@ -4352,7 +4352,7 @@ namespace dds
 
     else
     {
-      destination_order_ = std::auto_ptr< ::dds::destinationOrderQosPolicy > (new ::dds::destinationOrderQosPolicy (e));
+      destination_order_ = datawriterQos::destination_order_auto_ptr_type (new ::dds::destinationOrderQosPolicy (e));
       destination_order_->container (this);
     }
   }
@@ -4380,7 +4380,7 @@ namespace dds
 
     else
     {
-      history_ = std::auto_ptr< ::dds::historyQosPolicy > (new ::dds::historyQosPolicy (e));
+      history_ = datawriterQos::history_auto_ptr_type (new ::dds::historyQosPolicy (e));
       history_->container (this);
     }
   }
@@ -4408,7 +4408,7 @@ namespace dds
 
     else
     {
-      resource_limits_ = std::auto_ptr< ::dds::resourceLimitsQosPolicy > (new ::dds::resourceLimitsQosPolicy (e));
+      resource_limits_ = datawriterQos::resource_limits_auto_ptr_type (new ::dds::resourceLimitsQosPolicy (e));
       resource_limits_->container (this);
     }
   }
@@ -4436,7 +4436,7 @@ namespace dds
 
     else
     {
-      transport_priority_ = std::auto_ptr< ::dds::transportPriorityQosPolicy > (new ::dds::transportPriorityQosPolicy (e));
+      transport_priority_ = datawriterQos::transport_priority_auto_ptr_type (new ::dds::transportPriorityQosPolicy (e));
       transport_priority_->container (this);
     }
   }
@@ -4464,7 +4464,7 @@ namespace dds
 
     else
     {
-      lifespan_ = std::auto_ptr< ::dds::lifespanQosPolicy > (new ::dds::lifespanQosPolicy (e));
+      lifespan_ = datawriterQos::lifespan_auto_ptr_type (new ::dds::lifespanQosPolicy (e));
       lifespan_->container (this);
     }
   }
@@ -4492,7 +4492,7 @@ namespace dds
 
     else
     {
-      user_data_ = std::auto_ptr< ::dds::userDataQosPolicy > (new ::dds::userDataQosPolicy (e));
+      user_data_ = datawriterQos::user_data_auto_ptr_type (new ::dds::userDataQosPolicy (e));
       user_data_->container (this);
     }
   }
@@ -4520,7 +4520,7 @@ namespace dds
 
     else
     {
-      ownership_ = std::auto_ptr< ::dds::ownershipQosPolicy > (new ::dds::ownershipQosPolicy (e));
+      ownership_ = datawriterQos::ownership_auto_ptr_type (new ::dds::ownershipQosPolicy (e));
       ownership_->container (this);
     }
   }
@@ -4548,7 +4548,7 @@ namespace dds
 
     else
     {
-      ownership_strength_ = std::auto_ptr< ::dds::ownershipStrengthQosPolicy > (new ::dds::ownershipStrengthQosPolicy (e));
+      ownership_strength_ = datawriterQos::ownership_strength_auto_ptr_type (new ::dds::ownershipStrengthQosPolicy (e));
       ownership_strength_->container (this);
     }
   }
@@ -4576,7 +4576,7 @@ namespace dds
 
     else
     {
-      writer_data_lifecycle_ = std::auto_ptr< ::dds::writerDataLifecycleQosPolicy > (new ::dds::writerDataLifecycleQosPolicy (e));
+      writer_data_lifecycle_ = datawriterQos::writer_data_lifecycle_auto_ptr_type (new ::dds::writerDataLifecycleQosPolicy (e));
       writer_data_lifecycle_->container (this);
     }
   }
@@ -4610,7 +4610,7 @@ namespace dds
 
     else
     {
-      name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = datawriterQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       name_->container (this);
     }
   }
@@ -4644,7 +4644,7 @@ namespace dds
 
     else
     {
-      base_name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = datawriterQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       base_name_->container (this);
     }
   }
@@ -4678,7 +4678,7 @@ namespace dds
 
     else
     {
-      topic_filter_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      topic_filter_ = datawriterQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       topic_filter_->container (this);
     }
   }
@@ -4763,7 +4763,7 @@ namespace dds
   }
 
   void qosProfile::
-  add_datareader_qos (ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex >  const& e)
+  add_datareader_qos (qosProfile::datareader_qos_value_type const& e)
   {
     datareader_qos_.push_back (e);
   }
@@ -4800,7 +4800,7 @@ namespace dds
   }
 
   void qosProfile::
-  add_datawriter_qos (ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex >  const& e)
+  add_datawriter_qos (qosProfile::datawriter_qos_value_type const& e)
   {
     datawriter_qos_.push_back (e);
   }
@@ -4837,7 +4837,7 @@ namespace dds
   }
 
   void qosProfile::
-  add_topic_qos (ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex >  const& e)
+  add_topic_qos (qosProfile::topic_qos_value_type const& e)
   {
     topic_qos_.push_back (e);
   }
@@ -4874,7 +4874,7 @@ namespace dds
   }
 
   void qosProfile::
-  add_domainparticipant_qos (ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex >  const& e)
+  add_domainparticipant_qos (qosProfile::domainparticipant_qos_value_type const& e)
   {
     domainparticipant_qos_.push_back (e);
   }
@@ -4911,7 +4911,7 @@ namespace dds
   }
 
   void qosProfile::
-  add_publisher_qos (ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex >  const& e)
+  add_publisher_qos (qosProfile::publisher_qos_value_type const& e)
   {
     publisher_qos_.push_back (e);
   }
@@ -4948,7 +4948,7 @@ namespace dds
   }
 
   void qosProfile::
-  add_subscriber_qos (ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex >  const& e)
+  add_subscriber_qos (qosProfile::subscriber_qos_value_type const& e)
   {
     subscriber_qos_.push_back (e);
   }
@@ -5007,7 +5007,7 @@ namespace dds
 
     else
     {
-      base_name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = qosProfile::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
       base_name_->container (this);
     }
   }
@@ -5066,7 +5066,7 @@ namespace dds
   }
 
   void qosProfile_seq::
-  add_qos_profile (ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex >  const& e)
+  add_qos_profile (qosProfile_seq::qos_profile_value_type const& e)
   {
     qos_profile_.push_back (e);
   }
@@ -5357,7 +5357,7 @@ namespace dds
 
       if (n == ACE_TEXT("element"))
       {
-        ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex >  t (new ::XMLSchema::string<ACE_TCHAR> (e));
+        ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex>  t (new ::XMLSchema::string<ACE_TCHAR> (e));
         add_element (t);
       }
 
@@ -6609,37 +6609,37 @@ namespace dds
 
       if (n == ACE_TEXT("datareader_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex >  t (new ::dds::datareaderQos (e));
+        ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex>  t (new ::dds::datareaderQos (e));
         add_datareader_qos (t);
       }
 
       else if (n == ACE_TEXT("datawriter_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex >  t (new ::dds::datawriterQos (e));
+        ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex>  t (new ::dds::datawriterQos (e));
         add_datawriter_qos (t);
       }
 
       else if (n == ACE_TEXT("topic_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex >  t (new ::dds::topicQos (e));
+        ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex>  t (new ::dds::topicQos (e));
         add_topic_qos (t);
       }
 
       else if (n == ACE_TEXT("domainparticipant_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex >  t (new ::dds::domainparticipantQos (e));
+        ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex>  t (new ::dds::domainparticipantQos (e));
         add_domainparticipant_qos (t);
       }
 
       else if (n == ACE_TEXT("publisher_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex >  t (new ::dds::publisherQos (e));
+        ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex>  t (new ::dds::publisherQos (e));
         add_publisher_qos (t);
       }
 
       else if (n == ACE_TEXT("subscriber_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex >  t (new ::dds::subscriberQos (e));
+        ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex>  t (new ::dds::subscriberQos (e));
         add_subscriber_qos (t);
       }
 
@@ -6654,7 +6654,7 @@ namespace dds
       std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
       if (n == ACE_TEXT ("name"))
       {
-        name_ = std::auto_ptr< ::XMLSchema::string<ACE_TCHAR> > (new ::XMLSchema::string<ACE_TCHAR> (a));
+        name_ = qosProfile::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (a));
         name_->container (this);
       }
 
@@ -6686,7 +6686,7 @@ namespace dds
 
       if (n == ACE_TEXT("qos_profile"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex >  t (new ::dds::qosProfile (e));
+        ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex>  t (new ::dds::qosProfile (e));
         add_qos_profile (t);
       }
 
