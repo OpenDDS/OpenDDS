@@ -1305,7 +1305,9 @@ namespace OpenDDS
       // Fixed_T could not be used here because it is a templated class
       size_t len = (digits_ + 2) / 2;
 
-      if (!params.get_size_only) {
+      if (params.get_size_only) {
+        params.serializer.skip(len);
+      } else {
         int hf = get_hf();
         if (hf == -1) {
           throw Sample_Dissector_Error(
@@ -1356,9 +1358,15 @@ namespace OpenDDS
             params.tree, params.info, params.warning_ef, params.tvb,
             params.offset, len, missing_fixed
         );
-#endif
-#endif
+#endif // NO_EXPERT
+
+        // and skip it.
+        params.serializer.skip(len);
+
+#endif // ACE_HAS_CDR_FIXED
+
       }
+
       return len;
     }
 

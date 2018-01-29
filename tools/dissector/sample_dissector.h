@@ -74,7 +74,9 @@ namespace OpenDDS
       packet_info* info;
       proto_tree* tree;
       size_t offset;
+#ifndef NO_EXPERT
       expert_field * warning_ef;
+#endif
 
       bool use_index;
       guint32 index;
