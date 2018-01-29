@@ -627,7 +627,9 @@ namespace OpenDDS
         params.info = pinfo_;
         params.tree = contents_tree;
         params.offset = offset;
+#ifndef NO_EXPERT
         params.warning_ef = &ei_sample_payload_warning;
+#endif
 
         /*
          * Handle Seg Faults that might be caused by incorrect ITL file

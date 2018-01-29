@@ -114,7 +114,9 @@ namespace OpenDDS
       offset = other.offset;
       use_index = other.use_index;
       index = other.index;
+#ifndef NO_EXPERT
       warning_ef = other.warning_ef;
+#endif
     }
 
     size_t Wireshark_Bundle::buffer_pos() {
