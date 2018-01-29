@@ -117,6 +117,7 @@ private:
       MSG_FINI_BIT,
       MSG_STOP,
       MSG_PARTICIPANT_STATELESS_DATA,
+      MSG_PARTICIPANT_VOLATILE_SECURE,
     } type_;
 
     DCPS::MessageId id_;
@@ -128,6 +129,7 @@ private:
       const ParticipantMessageData* pmdata_;
       DDS::InstanceHandle_t ih_;
       const DDS::Security::ParticipantStatelessMessage* psmdata_;
+      const DDS::Security::ParticipantVolatileMessageSecure* pvmdata_;
     };
 
     Msg(MsgType mt, DCPS::MessageId id, const SPDPdiscoveredParticipantData* dpdata)
@@ -209,9 +211,13 @@ private:
                                    const DCPS::RepoId& reader,
                                    DCPS::SequenceNumber& sequence);
 
-    DDS::ReturnCode_t write_sample(const DDS::Security::ParticipantStatelessMessage& psm,
+    DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                    const DCPS::RepoId& reader,
                                    DCPS::SequenceNumber& sequence);
+
+    DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                       const DCPS::RepoId& reader,
+                                       DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
@@ -242,6 +248,7 @@ private:
   Writer subscriptions_writer_;
   Writer participant_message_writer_;
   Writer participant_stateless_message_writer_;
+  Writer participant_volatile_message_secure_writer_;
 
   class Reader
     : public DCPS::TransportReceiveListener
@@ -280,6 +287,7 @@ private:
   Reader_rch subscriptions_reader_;
   Reader_rch participant_message_reader_;
   Reader_rch participant_stateless_message_reader_;
+  Reader_rch participant_volatile_message_secure_reader_;
 
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
@@ -296,7 +304,9 @@ private:
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data);
+
+    void enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data);
+    void enqueue_volatile_message_secure(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data);
 
     void acknowledge();
     void shutdown();
@@ -308,8 +318,10 @@ private:
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
-    void svc_i(DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* data);
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
+
+    void svc_stateless_message(DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* data);
+    void svc_volatile_message_secure(DCPS::MessageId id, const DDS::Security::ParticipantVolatileMessageSecure* data);
 
     Spdp* spdp_;
     Sedp* sedp_;
@@ -349,8 +361,14 @@ private:
                      const OpenDDS::DCPS::DiscoveredReaderData& rdata);
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
-  void data_received(DCPS::MessageId message_id,
+
+  bool should_drop_message(const DDS::Security::ParticipantGenericMessage& msg);
+
+  void received_stateless_message(DCPS::MessageId message_id,
                      const DDS::Security::ParticipantStatelessMessage& data);
+
+  void received_volatile_message_secure(DCPS::MessageId message_id,
+                     const DDS::Security::ParticipantVolatileMessageSecure& data);
 
   typedef std::pair<DCPS::MessageId, OpenDDS::DCPS::DiscoveredWriterData> MsgIdWtrDataPair;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdWtrDataPair,

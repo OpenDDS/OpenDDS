@@ -25,24 +25,6 @@ module DDS {
     typedef DDS::BinaryPropertySeq BinaryPropertySeq;
     typedef DDS::PropertyQosPolicy PropertyQosPolicy;
 
-    // TODO
-    // This type is duplicated from OpenDDS::RTPS::BuiltinEndpointSet_t. Should these
-    // be merged together?
-    typedef unsigned long BuiltinEndpointSet_t;
-
-    const BuiltinEndpointSet_t SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER = 1 << 16;
-    const BuiltinEndpointSet_t SEDP_BUILTIN_PUBLICATIONS_SECURE_READER = 1 << 17;
-    const BuiltinEndpointSet_t SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER = 1 << 18;
-    const BuiltinEndpointSet_t SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER = 1 << 19;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER = 1 << 20;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER = 1 << 21;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER = 1 << 22;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER = 1 << 23;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER = 1 << 24;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER = 1 << 25;
-    const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER = 1 << 26;
-    const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_READER = 1 << 27;
-    
     //native DynamicData;
     local interface DynamicData {
     };
@@ -70,7 +52,21 @@ module DDS {
     typedef CryptoTokenSeq  ParticipantCryptoTokenSeq;
     typedef CryptoTokenSeq  DatawriterCryptoTokenSeq;
     typedef CryptoTokenSeq  DatareaderCryptoTokenSeq;
-    
+
+    typedef unsigned long BuiltinEndpointSet_t;
+    const BuiltinEndpointSet_t SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER = 1 << 16;
+    const BuiltinEndpointSet_t SEDP_BUILTIN_PUBLICATIONS_SECURE_READER = 1 << 17;
+    const BuiltinEndpointSet_t SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER = 1 << 18;
+    const BuiltinEndpointSet_t SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER = 1 << 19;
+    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER = 1 << 20;
+    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER = 1 << 21;
+    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER = 1 << 22;
+    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER = 1 << 23;
+    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER = 1 << 24;
+    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER = 1 << 25;
+    const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER = 1 << 26;
+    const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_READER = 1 << 27;
+        
     struct MessageIdentity {
       OpenDDS::DCPS::GUID_t source_guid;
       long long sequence_number;
@@ -90,6 +86,7 @@ module DDS {
     };
 
     typedef ParticipantGenericMessage ParticipantStatelessMessage;
+    typedef ParticipantGenericMessage ParticipantVolatileMessageSecure;
     
 #define GMCLASSID_SECURITY_AUTH_REQUEST “dds.sec.auth_request”
 #define GMCLASSID_SECURITY_AUTH_HANDSHAKE “dds.sec.auth”
