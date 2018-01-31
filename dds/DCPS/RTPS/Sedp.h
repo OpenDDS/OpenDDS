@@ -118,6 +118,7 @@ private:
       MSG_STOP,
       MSG_PARTICIPANT_STATELESS_DATA,
       MSG_PARTICIPANT_VOLATILE_SECURE,
+      MSG_PARTICIPANT_DATA_SECURE,
     } type_;
 
     DCPS::MessageId id_;
@@ -128,8 +129,7 @@ private:
       const OpenDDS::DCPS::DiscoveredReaderData* rdata_;
       const ParticipantMessageData* pmdata_;
       DDS::InstanceHandle_t ih_;
-      const DDS::Security::ParticipantStatelessMessage* psmdata_;
-      const DDS::Security::ParticipantVolatileMessageSecure* pvmdata_;
+      const DDS::Security::ParticipantGenericMessage* pgmdata_;
     };
 
     Msg(MsgType mt, DCPS::MessageId id, const SPDPdiscoveredParticipantData* dpdata)
@@ -147,8 +147,9 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, DDS::InstanceHandle_t ih)
       : type_(mt), id_(id), ih_(ih) {}
 
-    Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* psmdata)
-      : type_(mt), id_(id), psmdata_(psmdata) {}
+    Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantGenericMessage* data)
+      : type_(mt), id_(id), pgmdata_(data) {}
+
   };
 
 
@@ -211,13 +212,17 @@ private:
                                    const DCPS::RepoId& reader,
                                    DCPS::SequenceNumber& sequence);
 
+    DDS::ReturnCode_t write_participant_message_secure(const ParticipantMessageData& data,
+						       const DCPS::RepoId& reader,
+						       DCPS::SequenceNumber& sequence);
+
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                                   const DCPS::RepoId& reader,
-                                   DCPS::SequenceNumber& sequence);
+					      const DCPS::RepoId& reader,
+					      DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-                                       const DCPS::RepoId& reader,
-                                       DCPS::SequenceNumber& sequence);
+						    const DCPS::RepoId& reader,
+						    DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
@@ -247,6 +252,7 @@ private:
   Writer publications_writer_;
   Writer subscriptions_writer_;
   Writer participant_message_writer_;
+  Writer participant_message_secure_writer_;
   Writer participant_stateless_message_writer_;
   Writer participant_volatile_message_secure_writer_;
 
@@ -286,6 +292,7 @@ private:
   Reader_rch publications_reader_;
   Reader_rch subscriptions_reader_;
   Reader_rch participant_message_reader_;
+  Reader_rch participant_message_secure_reader_;
   Reader_rch participant_stateless_message_reader_;
   Reader_rch participant_volatile_message_secure_reader_;
 
@@ -305,6 +312,7 @@ private:
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
+    void enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data);
     void enqueue_volatile_message_secure(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data);
 
@@ -320,6 +328,7 @@ private:
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
+    void svc_participant_message_data_secure(DCPS::MessageId id, const ParticipantMessageData* data);
     void svc_stateless_message(DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* data);
     void svc_volatile_message_secure(DCPS::MessageId id, const DDS::Security::ParticipantVolatileMessageSecure* data);
 
@@ -361,6 +370,9 @@ private:
                      const OpenDDS::DCPS::DiscoveredReaderData& rdata);
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
+
+  void received_participant_message_data_secure(DCPS::MessageId message_id,
+						const ParticipantMessageData& data);
 
   bool should_drop_message(const DDS::Security::ParticipantGenericMessage& msg);
 

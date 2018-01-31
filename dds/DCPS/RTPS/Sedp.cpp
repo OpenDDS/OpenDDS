@@ -175,6 +175,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , publications_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), *this)
   , subscriptions_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), *this)
   , participant_message_writer_(make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), *this)
+  , participant_message_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), *this)
   , participant_stateless_message_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this)
   , participant_volatile_message_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this)
 
@@ -189,6 +190,10 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , participant_message_reader_(make_rch<Reader>(
 				  make_id(participant_id,ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
                                   ref(*this)))
+
+  , participant_message_secure_reader_(make_rch<Reader>(
+					make_id(participant_id,DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER),
+					ref(*this)))
 
   , participant_stateless_message_reader_(make_rch<Reader>(
 					    make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER),
@@ -283,6 +288,9 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 
   participant_message_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   participant_message_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+
+  participant_message_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
+  participant_message_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
   participant_stateless_message_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   participant_stateless_message_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
@@ -442,6 +450,15 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     participant_message_reader_->assoc(peer);
   }
+
+  /*
+   * Security-Related associations.
+   */
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+    participant_message_secure_reader_->assoc(peer);
+  }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
@@ -486,6 +503,15 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     sedp_->participant_message_writer_.assoc(peer);
+  }
+
+  /*
+   * Security-Related associations.
+   */
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+    sedp_->participant_message_secure_writer_.assoc(peer);
   }
   if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
       DCPS::AssociationData peer = proto;
@@ -629,6 +655,17 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
     /*
      * Security-Related associations.
      */
+    if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+      RepoId id = part;
+      id.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+      participant_message_secure_writer_.disassociate(id);
+    }
+    if (avail & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
+      RepoId id = part;
+      id.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
+      participant_message_secure_reader_->disassociate(id);
+    }
+
     if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
       RepoId id = part;
       id.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
@@ -1374,6 +1411,52 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
   }
 }
 
+void
+Sedp::Task::svc_participant_message_data_secure(DCPS::MessageId message_id,
+						const ParticipantMessageData* data)
+{
+  DCPS::unique_ptr<const ParticipantMessageData> delete_the_data(data);
+  sedp_->received_participant_message_data_secure(message_id, *data);
+}
+
+void
+Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
+						const ParticipantMessageData& /*data*/)
+{
+  if (spdp_.shutting_down()) { return; }
+
+/* TODO
+  const RepoId& guid = data.participantGuid;
+  RepoId guid_participant = guid;
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  RepoId prefix = data.participantGuid;
+  prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)) {
+    return;
+  }
+
+  if (!spdp_.has_discovered_participant (guid_participant)) {
+    return;
+  }
+
+  for (LocalSubscriptionMap::const_iterator sub_pos = local_subscriptions_.begin(),
+         sub_limit = local_subscriptions_.end();
+       sub_pos != sub_limit; ++sub_pos) {
+    const DCPS::RepoIdSet::const_iterator pos =
+      sub_pos->second.matched_endpoints_.lower_bound(prefix);
+    if (pos != sub_pos->second.matched_endpoints_.end() &&
+        OpenDDS::DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
+      sub_pos->second.subscription_->signal_liveliness(guid_participant);
+    }
+  }
+*/
+
+}
+
 bool Sedp::should_drop_message(const DDS::Security::ParticipantGenericMessage& msg) {
   using OpenDDS::DCPS::GUID_t;
   using OpenDDS::DCPS::GUID_UNKNOWN;
@@ -1657,6 +1740,61 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
 }
 
 DDS::ReturnCode_t
+Sedp::Writer::write_participant_message_secure(const ParticipantMessageData& /*data*/,
+					       const DCPS::RepoId& /*reader*/,
+					       DCPS::SequenceNumber& /*sequence*/)
+{
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+
+/* TODO
+  // Determine message length
+  size_t size = 0, padding = 0;
+  DCPS::find_size_ulong(size, padding);
+  DCPS::gen_find_size(pmd, size, padding);
+
+  // Build RTPS message
+  ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
+                            ACE_Message_Block::MB_DATA,
+                            new ACE_Message_Block(size));
+  using DCPS::Serializer;
+  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
+            (ser << ACE_OutputCDR::from_octet(1)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << pmd);
+  if (!ok) {
+    result = DDS::RETCODE_ERROR;
+  }
+
+  if (result == DDS::RETCODE_OK) {
+    // Send sample
+    DCPS::DataSampleElement* list_el =
+      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
+    set_header_fields(list_el->get_header(), size, reader, sequence);
+
+    DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
+    list_el->set_sample(DCPS::move(sample));
+    *list_el->get_sample() << list_el->get_header();
+    list_el->get_sample()->cont(payload.duplicate());
+
+    if (reader != GUID_UNKNOWN) {
+      list_el->set_sub_id(0, reader);
+      list_el->set_num_subs(1);
+    }
+
+    DCPS::SendStateDataSampleList list;
+    list.enqueue_tail(list_el);
+
+    send(list);
+  }
+  delete payload.cont();
+*/
+
+  return result;
+}
+
+DDS::ReturnCode_t
 Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& /* msg */,
                            const DCPS::RepoId& /* reader */,
                            DCPS::SequenceNumber& /* sequence */)
@@ -1900,6 +2038,18 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
       sedp_.task_.enqueue(id, move(data));
+
+    } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER
+		&& !sample.header_.key_fields_only_) {
+
+	DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
+
+	if (!(ser >> *data)) {
+	    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+            ACE_TEXT("failed to deserialize data\n")));
+	    return;
+	}
+	sedp_.task_.enqueue_participant_message_secure(id, move(data));
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
 
@@ -2181,6 +2331,14 @@ Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
+//enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
+void
+Sedp::Task::enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data)
+{
+  if (spdp_->shutting_down()) { return; }
+  putq(new Msg(Msg::MSG_PARTICIPANT_DATA_SECURE, id, data.release()));
+}
+
 void
 Sedp::Task::enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data)
 {
@@ -2221,12 +2379,16 @@ Sedp::Task::svc()
       svc_i(msg->id_, msg->pmdata_);
       break;
 
+    case Msg::MSG_PARTICIPANT_DATA_SECURE:
+      svc_participant_message_data_secure(msg->id_, msg->pmdata_);
+      break;
+
     case Msg::MSG_PARTICIPANT_STATELESS_DATA:
-      svc_stateless_message(msg->id_, msg->psmdata_);
+      svc_stateless_message(msg->id_, msg->pgmdata_);
       break;
 
     case Msg::MSG_PARTICIPANT_VOLATILE_SECURE:
-      svc_volatile_message_secure(msg->id_, msg->pvmdata_);
+      svc_volatile_message_secure(msg->id_, msg->pgmdata_);
       break;
 
     case Msg::MSG_REMOVE_FROM_PUB_BIT:
