@@ -101,6 +101,8 @@ public:
                             const DCPS::RepoId& remoteId);
 
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
+  void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
+  void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 
   static const bool host_is_bigendian_;
 private:
@@ -447,6 +449,9 @@ private:
 
   DCPS::SequenceNumber automatic_liveliness_seq_;
   DCPS::SequenceNumber manual_liveliness_seq_;
+
+  DCPS::SequenceNumber secure_automatic_liveliness_seq_;
+  DCPS::SequenceNumber secure_manual_liveliness_seq_;
 };
 
 /// A class to wait on acknowledgments from other threads

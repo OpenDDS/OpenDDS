@@ -205,6 +205,8 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , task_(this)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , secure_automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , secure_manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
   pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
   sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
@@ -1421,11 +1423,12 @@ Sedp::Task::svc_participant_message_data_secure(DCPS::MessageId message_id,
 
 void
 Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
-						const ParticipantMessageData& /*data*/)
+						const ParticipantMessageData& data)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (spdp_.shutting_down()) {
+      return;
+  }
 
-/* TODO
   const RepoId& guid = data.participantGuid;
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
@@ -1434,8 +1437,7 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (ignoring(guid)
-      || ignoring(guid_participant)) {
+  if (ignoring(guid) || ignoring(guid_participant)) {
     return;
   }
 
@@ -1443,18 +1445,14 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
     return;
   }
 
-  for (LocalSubscriptionMap::const_iterator sub_pos = local_subscriptions_.begin(),
-         sub_limit = local_subscriptions_.end();
-       sub_pos != sub_limit; ++sub_pos) {
-    const DCPS::RepoIdSet::const_iterator pos =
-      sub_pos->second.matched_endpoints_.lower_bound(prefix);
-    if (pos != sub_pos->second.matched_endpoints_.end() &&
-        OpenDDS::DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
-      sub_pos->second.subscription_->signal_liveliness(guid_participant);
+  LocalSubscriptionMap::const_iterator i, n;
+  for (i = local_subscriptions_.begin(), n = local_subscriptions_.end(); i != n; ++i) {
+    const DCPS::RepoIdSet::const_iterator pos = i->second.matched_endpoints_.lower_bound(prefix);
+
+    if (pos != i->second.matched_endpoints_.end() && OpenDDS::DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
+      (i->second.subscription_)->signal_liveliness(guid_participant);
     }
   }
-*/
-
 }
 
 bool Sedp::should_drop_message(const DDS::Security::ParticipantGenericMessage& msg) {
@@ -1554,20 +1552,57 @@ Sedp::association_complete(const RepoId& localId,
   }
 }
 
-void
-Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
+void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
-  ParticipantMessageData pmd;
-  pmd.participantGuid = participant_id_;
+  signal_liveliness_unsecure(kind);
+  signal_liveliness_secure(kind);
+}
+
+void
+Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
+{
+  ParticipantMessageData data;
+  data.participantGuid = participant_id_;
+
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
-    pmd.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
-    participant_message_writer_.write_sample(pmd, GUID_UNKNOWN, automatic_liveliness_seq_);
+    data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
+    participant_message_writer_.write_sample(data, GUID_UNKNOWN, automatic_liveliness_seq_);
     break;
+
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
-    pmd.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
-    participant_message_writer_.write_sample(pmd, GUID_UNKNOWN, manual_liveliness_seq_);
+    data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
+    participant_message_writer_.write_sample(data, GUID_UNKNOWN, manual_liveliness_seq_);
     break;
+
+  case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
+    // Do nothing.
+    break;
+  }
+}
+
+void
+Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
+{
+  /*
+   * TODO: Pull security attributes from the proper source.
+   */
+  DDS::Security::EndpointSecurityAttributes attr;
+
+  ParticipantMessageData data;
+  data.participantGuid = participant_id_;
+
+  switch (kind) {
+  case DDS::AUTOMATIC_LIVELINESS_QOS:
+    data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
+    participant_message_secure_writer_.write_sample(data, GUID_UNKNOWN, secure_automatic_liveliness_seq_);
+    break;
+
+  case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
+    data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
+    participant_message_secure_writer_.write_sample(data, GUID_UNKNOWN, secure_manual_liveliness_seq_);
+    break;
+
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
     // Do nothing.
     break;
