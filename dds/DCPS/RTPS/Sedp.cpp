@@ -1672,9 +1672,9 @@ Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& /* sample */, bool)
 }
 
 void Sedp::Writer::send_sample(const ACE_Message_Block& data,
-                     size_t size,
-                     const DCPS::RepoId& reader,
-                     DCPS::SequenceNumber& sequence)
+                               size_t size,
+                               const DCPS::RepoId& reader,
+                               DCPS::SequenceNumber& sequence)
 {
   DCPS::DataSampleElement* el = new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
   set_header_fields(el->get_header(), size, reader, sequence);
@@ -1767,8 +1767,8 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
 
 DDS::ReturnCode_t
 Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                           const DCPS::RepoId& reader,
-                           DCPS::SequenceNumber& sequence)
+                                      const DCPS::RepoId& reader,
+                                      DCPS::SequenceNumber& sequence)
 {
   using DCPS::Serializer;
 
@@ -1802,17 +1802,40 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& /* msg */,
-					    const DCPS::RepoId& /* reader */,
-					    DCPS::SequenceNumber& /* sequence */)
+Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
+					    const DCPS::RepoId& reader,
+					    DCPS::SequenceNumber& sequence)
 {
+  using DCPS::Serializer;
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
-  /* TODO */
+  size_t size = 0, padding = 0;
+  DCPS::find_size_ulong(size, padding);
+  DCPS::gen_find_size(msg, size, padding);
 
+  ACE_Message_Block payload(
+      DCPS::DataSampleHeader::max_marshaled_size(),
+      ACE_Message_Block::MB_DATA,
+      new ACE_Message_Block(size));
+
+  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
+            (ser << ACE_OutputCDR::from_octet(1)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << msg);
+
+  if (ok) {
+      send_sample(payload, size, reader, sequence);
+
+  } else {
+      result = DDS::RETCODE_ERROR;
+  }
+
+  delete payload.cont();
   return result;
 }
-
 
 DDS::ReturnCode_t
 Sedp::Writer::write_unregister_dispose(const RepoId& rid)
