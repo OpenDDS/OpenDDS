@@ -1573,12 +1573,12 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
     data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
-    participant_message_writer_.write_sample(data, GUID_UNKNOWN, automatic_liveliness_seq_);
+    participant_message_writer_.write_participant_message(data, GUID_UNKNOWN, automatic_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
     data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
-    participant_message_writer_.write_sample(data, GUID_UNKNOWN, manual_liveliness_seq_);
+    participant_message_writer_.write_participant_message(data, GUID_UNKNOWN, manual_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
@@ -1596,12 +1596,12 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
   switch (kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
     data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
-    participant_message_secure_writer_.write_sample(data, GUID_UNKNOWN, secure_automatic_liveliness_seq_);
+    participant_message_secure_writer_.write_participant_message(data, GUID_UNKNOWN, secure_automatic_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
     data.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
-    participant_message_secure_writer_.write_sample(data, GUID_UNKNOWN, secure_manual_liveliness_seq_);
+    participant_message_secure_writer_.write_participant_message(data, GUID_UNKNOWN, secure_manual_liveliness_seq_);
     break;
 
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
@@ -1671,10 +1671,34 @@ Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& /* sample */, bool)
 {
 }
 
+void Sedp::Writer::send_sample(const ACE_Message_Block& data,
+                     size_t size,
+                     const DCPS::RepoId& reader,
+                     DCPS::SequenceNumber& sequence)
+{
+  DCPS::DataSampleElement* el = new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
+  set_header_fields(el->get_header(), size, reader, sequence);
+
+  DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
+  el->set_sample(DCPS::move(sample));
+  *el->get_sample() << el->get_header();
+  el->get_sample()->cont(data.duplicate());
+
+  if (reader != GUID_UNKNOWN) {
+    el->set_sub_id(0, reader);
+    el->set_num_subs(1);
+  }
+
+  DCPS::SendStateDataSampleList list;
+  list.enqueue_tail(el);
+
+  send(list);
+}
+
 DDS::ReturnCode_t
-Sedp::Writer::write_sample(const ParameterList& plist,
-                           const DCPS::RepoId& reader,
-                           DCPS::SequenceNumber& sequence)
+Sedp::Writer::write_parameter_list(const ParameterList& plist,
+                                   const DCPS::RepoId& reader,
+                                   DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -1694,39 +1718,22 @@ Sedp::Writer::write_sample(const ParameterList& plist,
             (ser << ACE_OutputCDR::from_octet(0)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
             (ser << plist);
-  if (!ok) {
-    result = DDS::RETCODE_ERROR;
+
+  if (ok) {
+      send_sample(payload, size, reader, sequence);
+
+  } else {
+      result = DDS::RETCODE_ERROR;
   }
 
-  if (result == DDS::RETCODE_OK) {
-    // Send sample
-    DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
-    set_header_fields(list_el->get_header(), size, reader, sequence);
-
-    DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
-    list_el->set_sample(DCPS::move(sample));
-    *list_el->get_sample() << list_el->get_header();
-    list_el->get_sample()->cont(payload.duplicate());
-
-    if (reader != GUID_UNKNOWN) {
-      list_el->set_sub_id(0, reader);
-      list_el->set_num_subs(1);
-    }
-
-    DCPS::SendStateDataSampleList list;
-    list.enqueue_tail(list_el);
-
-    send(list);
-  }
   delete payload.cont();
   return result;
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
-                           const DCPS::RepoId& reader,
-                           DCPS::SequenceNumber& sequence)
+Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
+                                        const DCPS::RepoId& reader,
+                                        DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -1746,44 +1753,51 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
             (ser << ACE_OutputCDR::from_octet(0)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
             (ser << pmd);
-  if (!ok) {
-    result = DDS::RETCODE_ERROR;
+
+  if (ok) {
+      send_sample(payload, size, reader, sequence);
+
+  } else {
+      result = DDS::RETCODE_ERROR;
   }
 
-  if (result == DDS::RETCODE_OK) {
-    // Send sample
-    DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
-    set_header_fields(list_el->get_header(), size, reader, sequence);
-
-    DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
-    list_el->set_sample(DCPS::move(sample));
-    *list_el->get_sample() << list_el->get_header();
-    list_el->get_sample()->cont(payload.duplicate());
-
-    if (reader != GUID_UNKNOWN) {
-      list_el->set_sub_id(0, reader);
-      list_el->set_num_subs(1);
-    }
-
-    DCPS::SendStateDataSampleList list;
-    list.enqueue_tail(list_el);
-
-    send(list);
-  }
   delete payload.cont();
   return result;
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& /* msg */,
-                           const DCPS::RepoId& /* reader */,
-                           DCPS::SequenceNumber& /* sequence */)
+Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
+                           const DCPS::RepoId& reader,
+                           DCPS::SequenceNumber& sequence)
 {
+  using DCPS::Serializer;
+
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
-  /* TODO */
+  size_t size = 0, padding = 0;
+  DCPS::find_size_ulong(size, padding);
+  DCPS::gen_find_size(msg, size, padding);
 
+  ACE_Message_Block payload(
+      DCPS::DataSampleHeader::max_marshaled_size(),
+      ACE_Message_Block::MB_DATA,
+      new ACE_Message_Block(size));
+
+  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
+            (ser << ACE_OutputCDR::from_octet(1)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << msg);
+
+  if (ok) {
+      send_sample(payload, size, reader, sequence);
+
+  } else {
+      result = DDS::RETCODE_ERROR;
+  }
+
+  delete payload.cont();
   return result;
 }
 
@@ -2194,7 +2208,7 @@ Sedp::write_publication_data(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      result = publications_writer_.write_sample(plist, reader, lp.sequence_);
+      result = publications_writer_.write_parameter_list(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
@@ -2225,7 +2239,7 @@ Sedp::write_subscription_data(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      result = subscriptions_writer_.write_sample(plist, reader, ls.sequence_);
+      result = subscriptions_writer_.write_parameter_list(plist, reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
@@ -2245,7 +2259,7 @@ Sedp::write_participant_message_data(
                              !associated_participants_.empty())) {
     ParticipantMessageData pmd;
     pmd.participantGuid = rid;
-    result = participant_message_writer_.write_sample(pmd, reader, pm.sequence_);
+    result = participant_message_writer_.write_participant_message(pmd, reader, pm.sequence_);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_participant_message_data - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));

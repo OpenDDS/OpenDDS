@@ -206,13 +206,18 @@ private:
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
-    DDS::ReturnCode_t write_sample(const ParameterList& plist,
-                                   const DCPS::RepoId& reader,
-                                   DCPS::SequenceNumber& sequence);
+    void send_sample(const ACE_Message_Block& data,
+                     size_t size,
+                     const DCPS::RepoId& reader,
+                     DCPS::SequenceNumber& sequence);
 
-    DDS::ReturnCode_t write_sample(const ParticipantMessageData& pmd,
-                                   const DCPS::RepoId& reader,
-                                   DCPS::SequenceNumber& sequence);
+    DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
+                                           const DCPS::RepoId& reader,
+                                           DCPS::SequenceNumber& sequence);
+
+    DDS::ReturnCode_t write_participant_message(const ParticipantMessageData& pmd,
+                                                const DCPS::RepoId& reader,
+                                                DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
 					      const DCPS::RepoId& reader,
