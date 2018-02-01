@@ -1598,8 +1598,16 @@ DomainParticipantImpl::enable()
   if (monitor_) {
     monitor_->report();
   }
+
   if (TheServiceParticipant->monitor_) {
     TheServiceParticipant->monitor_->report();
+  }
+
+  if (!security_config_) {
+    security_config_ = TheSecurityRegistry->default_config();
+    if (!security_config_) {
+      security_config_ = TheSecurityRegistry->fix_empty_default();
+    }
   }
 
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
@@ -2166,6 +2174,12 @@ void
 DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
 {
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
+}
+
+void
+DomainParticipantImpl::security_config(const Security::SecurityConfig_rch& cfg)
+{
+  security_config_ = cfg;
 }
 
 int

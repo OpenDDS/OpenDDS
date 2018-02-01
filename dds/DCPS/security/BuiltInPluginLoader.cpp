@@ -24,8 +24,13 @@ BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TheSecurityRegistry->register_plugin(PLUGIN_NAME,
-                                       DCPS::make_rch<BuiltInSecurityPluginInst>());
+  SecurityPluginInst_rch plugin = DCPS::make_rch<BuiltInSecurityPluginInst>();
+  TheSecurityRegistry->register_plugin(PLUGIN_NAME, plugin);
+
+  SecurityConfig_rch default_config =
+    TheSecurityRegistry->create_config(SecurityRegistry::DEFAULT_CONFIG_NAME,
+                                       plugin);
+  TheSecurityRegistry->default_config(default_config);
 
   initialized = true;
 

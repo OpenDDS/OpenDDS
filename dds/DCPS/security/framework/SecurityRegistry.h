@@ -9,8 +9,12 @@
 #define OPENDDS_DCPS_SECURITYREGISTRY_H
 
 #include "dds/DCPS/dcps_export.h"
+
+#include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsSecurityCoreC.h"
+
 #include "dds/DCPS/PoolAllocator.h"
+
 #include "dds/DCPS/security/framework/SecurityPluginInst_rch.h"
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #include "dds/DCPS/security/framework/SecurityConfigPropertyList.h"
@@ -40,6 +44,8 @@ public:
   /// Close the singleton instance of this class.
   static void close();
 
+  static const OPENDDS_STRING DEFAULT_CONFIG_NAME;
+
   /// This will shutdown all Security plugin objects.
   ///
   /// Client Application calls this method to tear down the security framework.
@@ -53,6 +59,19 @@ public:
   // in the configuration file
   SecurityConfig_rch create_config(const OPENDDS_STRING& config_name);
 
+  SecurityConfig_rch create_config(const OPENDDS_STRING& config_name,
+                                   SecurityPluginInst_rch plugin);
+
+  SecurityConfig_rch get_config(const OPENDDS_STRING& config_name) const;
+
+  SecurityConfig_rch default_config() const;
+  void default_config(const SecurityConfig_rch& cfg);
+
+  void bind_config(const OPENDDS_STRING& name,
+                   DDS::DomainParticipant_ptr domain_participant);
+  void bind_config(const SecurityConfig_rch& config,
+                   DDS::DomainParticipant_ptr domain_participant);
+
   /// For internal use by OpenDDS DCPS layer:
   /// Transfer the configuration in ACE_Configuration_Heap object to
   /// the SecurityRegistry.  This is called by the Service_Participant
@@ -61,10 +80,11 @@ public:
   /// objects and adds them to the registry.
   int load_security_configuration(ACE_Configuration_Heap& cf);
 
+  SecurityConfig_rch fix_empty_default();
+
 private:
   friend class ACE_Singleton<SecurityRegistry, ACE_Recursive_Thread_Mutex>;
 
-  static const OPENDDS_STRING DEFAULT_CONFIG_NAME;
   static const OPENDDS_STRING DEFAULT_INST_PREFIX;
   static const OPENDDS_STRING DEFAULT_PLUGIN_NAME;
   static const OPENDDS_STRING SECURITY_SECTION_NAME;
@@ -124,6 +144,7 @@ private:
   ConfigMap config_map_;
   InstMap registered_plugins_;
   LibDirectiveMap lib_directive_map_;
+  SecurityConfig_rch default_config_;
 
   mutable LockType lock_;
 };

@@ -43,18 +43,22 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject<ACE_SYNCH_MUTEX
   {
     return authentication_plugin_;
   }
+
   AccessControl_var get_access_control() const
   {
     return access_control_plugin_;
   }
+
   CryptoKeyExchange_var get_crypto_key_exchange() const
   {
     return key_exchange_plugin_;
   }
+
   CryptoKeyFactory_var get_crypto_key_factory() const
   {
     return key_factory_plugin_;
   }
+
   CryptoTransform_var get_crypto_transform() const
   {
     return transform_plugin_;

@@ -14,6 +14,7 @@
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -23,8 +24,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
-
-#define NULL_FACTORY_PTR SecurityPluginFactory_rch()
 
 const OPENDDS_STRING SecurityRegistry::DEFAULT_CONFIG_NAME("_OPENDDS_DEFAULT_CONFIG");
 const OPENDDS_STRING SecurityRegistry::DEFAULT_INST_PREFIX("_OPENDDS_");
@@ -119,7 +118,7 @@ SecurityRegistry::register_plugin(const OPENDDS_STRING& plugin_name,
     guard.release();
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::register_plugin: ")
-               ACE_TEXT("plugin=%s already exists.\n"),
+               ACE_TEXT("plugin=%C already exists.\n"),
                plugin_name.c_str()));
   } else {
     registered_plugins_.insert(std::make_pair(plugin_name, plugin));
@@ -143,7 +142,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   if (iEntry == config_entries_.end()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
-               ACE_TEXT("config=%s does not exist.\n"),
+               ACE_TEXT("config=%C does not exist.\n"),
                config_name.c_str()));
     return SecurityConfig_rch();
   }
@@ -155,7 +154,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   if (auth_plugin_inst.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
-               ACE_TEXT("Failed to load authentication plugin %s\n"),
+               ACE_TEXT("Failed to load authentication plugin %C\n"),
                entry->get_auth_name().c_str()));
     return SecurityConfig_rch();
   }
@@ -164,7 +163,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   if (auth_plugin_inst.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
-               ACE_TEXT("Failed to load access control plugin %s\n"),
+               ACE_TEXT("Failed to load access control plugin %C\n"),
                entry->get_access_control_name().c_str()));
     return SecurityConfig_rch();
   }
@@ -173,7 +172,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   if (auth_plugin_inst.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
-               ACE_TEXT("Failed to load crypto plugin %s\n"),
+               ACE_TEXT("Failed to load crypto plugin %C\n"),
                entry->get_crypto_name().c_str()));
     return SecurityConfig_rch();
   }
@@ -193,12 +192,79 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   if (!add_config(config_name, new_config)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
-               ACE_TEXT("Error storing config instance %s\n"),
+               ACE_TEXT("Error storing config instance %C\n"),
                config_name.c_str()));
-    new_config.reset();
   }
 
   return new_config;
+}
+
+SecurityConfig_rch
+SecurityRegistry::create_config(const OPENDDS_STRING& config_name,
+                                SecurityPluginInst_rch plugin)
+{
+  SecurityConfig_rch existing_config;
+  if (find_config(config_name, existing_config)) {
+    return existing_config;
+  }
+
+  SecurityConfig_rch new_config =
+    DCPS::make_rch<SecurityConfig>(config_name,
+                                   plugin->create_authentication(),
+                                   plugin->create_access_control(),
+                                   plugin->create_crypto_key_exchange(),
+                                   plugin->create_crypto_key_factory(),
+                                   plugin->create_crypto_transform(),
+                                   ConfigPropertyList());
+
+  if (!add_config(config_name, new_config)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
+               ACE_TEXT("Error storing config instance %C\n"),
+               config_name.c_str()));
+  }
+
+  return new_config;
+}
+
+SecurityConfig_rch
+SecurityRegistry::get_config(const OPENDDS_STRING& config_name) const
+{
+  GuardType guard(lock_);
+  ConfigMap::const_iterator found = config_map_.find(config_name);
+  return found == config_map_.end() ? SecurityConfig_rch() : found->second;
+}
+
+SecurityConfig_rch
+SecurityRegistry::default_config() const
+{
+  GuardType guard(lock_);
+  return default_config_;
+}
+
+void
+SecurityRegistry::default_config(const SecurityConfig_rch& config)
+{
+  GuardType guard(lock_);
+  default_config_ = config;
+}
+
+void
+SecurityRegistry::bind_config(const OPENDDS_STRING& name,
+                              DDS::DomainParticipant_ptr domain_participant)
+{
+  bind_config(get_config(name), domain_participant);
+}
+
+void
+SecurityRegistry::bind_config(const SecurityConfig_rch& config,
+                              DDS::DomainParticipant_ptr domain_participant)
+{
+  DCPS::DomainParticipantImpl* const dpi =
+    dynamic_cast<DCPS::DomainParticipantImpl*>(domain_participant);
+  if (dpi) {
+    dpi->security_config(config);
+  }
 }
 
 int
@@ -246,7 +312,7 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
         if (config_entries_.find(entry_name) != config_entries_.end()) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) SecurityRegistry::load_plugin_properties: ")
-                            ACE_TEXT("duplicate sections named [%s/%s].\n"),
+                            ACE_TEXT("duplicate sections named [%s/%C].\n"),
                             sect_name.c_str(), entry_name.c_str()),
                            -1);
         }
@@ -269,6 +335,15 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
   return 0;
 }
 
+SecurityConfig_rch
+SecurityRegistry::fix_empty_default()
+{
+  if (!default_config()) {
+    load_security_plugin_lib(DEFAULT_PLUGIN_NAME);
+  }
+  return default_config();
+}
+
 void
 SecurityRegistry::load_security_plugin_lib(const OPENDDS_STRING& security_plugin_type)
 {
@@ -278,8 +353,6 @@ SecurityRegistry::load_security_plugin_lib(const OPENDDS_STRING& security_plugin
   LibDirectiveMap::iterator lib_iter = lib_directive_map_.find(security_plugin_type);
   if (lib_iter != lib_directive_map_.end()) {
     ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
-    // Release the lock, because loading a transport library will
-    // recursively call this function to add its default inst.
     guard.release();
     ACE_Service_Config::process_directive(directive.c_str());
   }

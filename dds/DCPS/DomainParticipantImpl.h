@@ -34,6 +34,9 @@
 #include "Recorder.h"
 #include "Replayer.h"
 
+#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#include "dds/DCPS/security/framework/SecurityRegistry.h"
+
 #include "ace/Null_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
@@ -369,6 +372,8 @@ private:
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
+  void security_config(const Security::SecurityConfig_rch& config);
+
 private:
 
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
@@ -488,6 +493,8 @@ private:
 
   RecorderSet recorders_;
   ReplayerSet replayers_;
+
+  Security::SecurityConfig_rch security_config_;
 
   /// Protect the recorders collection.
   ACE_Recursive_Thread_Mutex recorders_protector_;
