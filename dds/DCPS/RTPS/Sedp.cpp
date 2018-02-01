@@ -1554,8 +1554,14 @@ Sedp::association_complete(const RepoId& localId,
 
 void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
-  signal_liveliness_unsecure(kind);
-  signal_liveliness_secure(kind);
+  DDS::Security::TopicSecurityAttributes attribs; /* TODO: pull from security plugin */
+
+  if (attribs.is_liveliness_protected) {
+      signal_liveliness_secure(kind);
+
+  } else {
+      signal_liveliness_unsecure(kind);
+  }
 }
 
 void
@@ -1584,11 +1590,6 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 void
 Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 {
-  /*
-   * TODO: Pull security attributes from the proper source.
-   */
-  DDS::Security::EndpointSecurityAttributes attr;
-
   ParticipantMessageData data;
   data.participantGuid = participant_id_;
 
@@ -1771,61 +1772,6 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
     send(list);
   }
   delete payload.cont();
-  return result;
-}
-
-DDS::ReturnCode_t
-Sedp::Writer::write_participant_message_secure(const ParticipantMessageData& /*data*/,
-					       const DCPS::RepoId& /*reader*/,
-					       DCPS::SequenceNumber& /*sequence*/)
-{
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
-
-/* TODO
-  // Determine message length
-  size_t size = 0, padding = 0;
-  DCPS::find_size_ulong(size, padding);
-  DCPS::gen_find_size(pmd, size, padding);
-
-  // Build RTPS message
-  ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
-                            ACE_Message_Block::MB_DATA,
-                            new ACE_Message_Block(size));
-  using DCPS::Serializer;
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
-  bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
-            (ser << ACE_OutputCDR::from_octet(1)) &&
-            (ser << ACE_OutputCDR::from_octet(0)) &&
-            (ser << ACE_OutputCDR::from_octet(0)) &&
-            (ser << pmd);
-  if (!ok) {
-    result = DDS::RETCODE_ERROR;
-  }
-
-  if (result == DDS::RETCODE_OK) {
-    // Send sample
-    DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
-    set_header_fields(list_el->get_header(), size, reader, sequence);
-
-    DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
-    list_el->set_sample(DCPS::move(sample));
-    *list_el->get_sample() << list_el->get_header();
-    list_el->get_sample()->cont(payload.duplicate());
-
-    if (reader != GUID_UNKNOWN) {
-      list_el->set_sub_id(0, reader);
-      list_el->set_num_subs(1);
-    }
-
-    DCPS::SendStateDataSampleList list;
-    list.enqueue_tail(list_el);
-
-    send(list);
-  }
-  delete payload.cont();
-*/
-
   return result;
 }
 

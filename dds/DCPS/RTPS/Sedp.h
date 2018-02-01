@@ -214,10 +214,6 @@ private:
                                    const DCPS::RepoId& reader,
                                    DCPS::SequenceNumber& sequence);
 
-    DDS::ReturnCode_t write_participant_message_secure(const ParticipantMessageData& data,
-						       const DCPS::RepoId& reader,
-						       DCPS::SequenceNumber& sequence);
-
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
 					      const DCPS::RepoId& reader,
 					      DCPS::SequenceNumber& sequence);
