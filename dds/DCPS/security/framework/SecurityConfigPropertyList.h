@@ -13,14 +13,14 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Security {
 
 
 typedef std::pair<OPENDDS_STRING, OPENDDS_STRING> ConfigProperty;
 typedef OPENDDS_VECTOR(ConfigProperty) ConfigPropertyList;
 
 
-} // namespace DCPS
+} // namespace Security
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

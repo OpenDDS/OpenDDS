@@ -24,9 +24,8 @@ BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TheSecurityRegistry->register_plugin(
-  		PLUGIN_NAME,
-  		OpenDDS::DCPS::make_rch<BuiltInSecurityPluginInst>());
+  TheSecurityRegistry->register_plugin(PLUGIN_NAME,
+                                       DCPS::make_rch<BuiltInSecurityPluginInst>());
 
   initialized = true;
 
@@ -35,7 +34,7 @@ BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
 ACE_FACTORY_DEFINE(DdsSecurity, BuiltInPluginLoader);
 ACE_STATIC_SVC_DEFINE(
-	BuiltInPluginLoader,
+  BuiltInPluginLoader,
   ACE_TEXT("OpenDDS_Security"),
   ACE_SVC_OBJ_T,
   &ACE_SVC_NAME(BuiltInPluginLoader),

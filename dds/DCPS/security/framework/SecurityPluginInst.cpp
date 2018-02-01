@@ -8,7 +8,7 @@
 #include "SecurityPluginInst.h"
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Security {
 
 
 SecurityPluginInst::SecurityPluginInst()
@@ -19,5 +19,5 @@ SecurityPluginInst::~SecurityPluginInst()
 {
 }
 
-} // namespace OpenDDS
-} // namespace DCPS
+}
+}

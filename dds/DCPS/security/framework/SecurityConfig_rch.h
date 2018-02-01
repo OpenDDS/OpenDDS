@@ -19,9 +19,9 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Security {
 
-typedef RcHandle<SecurityConfig> SecurityConfig_rch;
+typedef DCPS::RcHandle<SecurityConfig> SecurityConfig_rch;
 
 }
 }
