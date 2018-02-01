@@ -14,11 +14,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Security {
 
-typedef RcHandle<OpenDDS::DCPS::SecurityPluginInst> SecurityPluginInst_rch;
+typedef DCPS::RcHandle<SecurityPluginInst> SecurityPluginInst_rch;
 
-} // namespace DCPS
+} // namespace Security
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

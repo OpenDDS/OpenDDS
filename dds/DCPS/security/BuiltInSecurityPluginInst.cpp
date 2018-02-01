@@ -24,31 +24,34 @@ BuiltInSecurityPluginInst::~BuiltInSecurityPluginInst()
 {
 }
 
-OpenDDS::DCPS::Authentication_rch BuiltInSecurityPluginInst::create_authentication()
+Authentication_var BuiltInSecurityPluginInst::create_authentication()
 {
-	return OpenDDS::DCPS::rchandle_from(new AuthenticationBuiltInImpl());
+  return new AuthenticationBuiltInImpl;
 }
 
-OpenDDS::DCPS::AccessControl_rch BuiltInSecurityPluginInst::create_access_control()
+AccessControl_var BuiltInSecurityPluginInst::create_access_control()
 {
-	return OpenDDS::DCPS::rchandle_from(new AccessControlBuiltInImpl());
+  return new AccessControlBuiltInImpl;
 }
-OpenDDS::DCPS::CryptoKeyExchange_rch BuiltInSecurityPluginInst::create_crypto_key_exchange()
+
+CryptoKeyExchange_var BuiltInSecurityPluginInst::create_crypto_key_exchange()
 {
-	return OpenDDS::DCPS::rchandle_from(new CryptoKeyExchangeBuiltInImpl());
+  return new CryptoKeyExchangeBuiltInImpl;
 }
-OpenDDS::DCPS::CryptoKeyFactory_rch BuiltInSecurityPluginInst::create_crypto_key_factory()
+
+CryptoKeyFactory_var BuiltInSecurityPluginInst::create_crypto_key_factory()
 {
-	return OpenDDS::DCPS::rchandle_from(new CryptoKeyFactoryBuiltInImpl());
+  return new CryptoKeyFactoryBuiltInImpl;
 }
-OpenDDS::DCPS::CryptoTransform_rch BuiltInSecurityPluginInst::create_crypto_transform()
+
+CryptoTransform_var BuiltInSecurityPluginInst::create_crypto_transform()
 {
-	return OpenDDS::DCPS::rchandle_from(new CryptoTransformBuiltInImpl());
+  return new CryptoTransformBuiltInImpl;
 }
 
 void BuiltInSecurityPluginInst::shutdown()
 {
-	// No actions
+  // No actions
 }
 
 } // namespace Security

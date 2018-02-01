@@ -22,15 +22,10 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-//namespace DDS {
-//  class Entity;
-//  typedef Entity* Entity_ptr;
-//}
-
-#define TheSecurityRegistry OpenDDS::DCPS::SecurityRegistry::instance()
+#define TheSecurityRegistry OpenDDS::Security::SecurityRegistry::instance()
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Security {
 
 /**
  * The TheSecurityRegistry is a singleton object which provides a mechanism to
@@ -51,9 +46,8 @@ public:
   void release();
 
   // Called by plugins to register their factory interface
-  void register_plugin(
-  		const OPENDDS_STRING& plugin_name,
-  		SecurityPluginInst_rch plugin);
+  void register_plugin(const OPENDDS_STRING& plugin_name,
+                       SecurityPluginInst_rch plugin);
 
   // Create or get an existing SecurityConfig object based off the name
   // in the configuration file
@@ -78,33 +72,33 @@ private:
   static const OPENDDS_STRING AUTHENTICATION_PLUGIN_NAME;
   static const OPENDDS_STRING CRYPTO_PLUGIN_NAME;
 
-  // Internal classe used to store configuration information
-  class SecurityConfigEntry : public RcObject<ACE_SYNCH_MUTEX>
+  // Internal class used to store configuration information
+  class SecurityConfigEntry : public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
   public:
 
-  	SecurityConfigEntry(const OPENDDS_STRING& entryNamee);
-  	~SecurityConfigEntry();
+    SecurityConfigEntry(const OPENDDS_STRING& entryNamee);
+    ~SecurityConfigEntry();
 
-  	void add_property(const OPENDDS_STRING& name, const OPENDDS_STRING& value);
+    void add_property(const OPENDDS_STRING& name, const OPENDDS_STRING& value);
 
-  	const OPENDDS_STRING& get_entry_name() const { return entry_name_; }
-  	const OPENDDS_STRING& get_auth_name() const {return auth_name_;}
-  	const OPENDDS_STRING& get_access_control_name() const {return access_ctrl_name_;}
-  	const OPENDDS_STRING& get_crypto_name() const {return crypto_name_;}
+    const OPENDDS_STRING& get_entry_name() const { return entry_name_; }
+    const OPENDDS_STRING& get_auth_name() const { return auth_name_; }
+    const OPENDDS_STRING& get_access_control_name() const { return access_ctrl_name_; }
+    const OPENDDS_STRING& get_crypto_name() const { return crypto_name_; }
 
-  	const ConfigPropertyList& get_properties() const { return properties_; }
+    const ConfigPropertyList& get_properties() const { return properties_; }
 
   private:
-  	const OPENDDS_STRING entry_name_;
+    const OPENDDS_STRING entry_name_;
 
-  	OPENDDS_STRING auth_name_;
-  	OPENDDS_STRING access_ctrl_name_;
-  	OPENDDS_STRING crypto_name_;
-  	ConfigPropertyList properties_;
+    OPENDDS_STRING auth_name_;
+    OPENDDS_STRING access_ctrl_name_;
+    OPENDDS_STRING crypto_name_;
+    ConfigPropertyList properties_;
   };
 
-  typedef RcHandle<SecurityConfigEntry> SecurityConfigEntry_rch;
+  typedef DCPS::RcHandle<SecurityConfigEntry> SecurityConfigEntry_rch;
   typedef OPENDDS_MAP(OPENDDS_STRING, SecurityConfig_rch) ConfigMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, SecurityPluginInst_rch) InstMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) LibDirectiveMap;
@@ -134,7 +128,7 @@ private:
   mutable LockType lock_;
 };
 
-} // namespace DCPS
+} // namespace Security
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

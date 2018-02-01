@@ -10,6 +10,7 @@
 #include "gmock/gmock.h"
 
 using namespace OpenDDS::DCPS;
+using namespace OpenDDS::Security;
 using namespace testing;
 
 
@@ -55,11 +56,11 @@ TEST_F(SecurityConfigTest, TestConfig1)
 	EXPECT_FALSE(config.is_nil());
 
 	// Interface check
-	EXPECT_FALSE(config->get_access_control().is_nil());
-	EXPECT_FALSE(config->get_authentication().is_nil());
-	EXPECT_FALSE(config->get_crypto_key_exchange().is_nil());
-	EXPECT_FALSE(config->get_crypto_key_factory().is_nil());
-	EXPECT_FALSE(config->get_crypto_transform().is_nil());
+	EXPECT_TRUE(config->get_access_control());
+	EXPECT_TRUE(config->get_authentication());
+	EXPECT_TRUE(config->get_crypto_key_exchange());
+	EXPECT_TRUE(config->get_crypto_key_factory());
+	EXPECT_TRUE(config->get_crypto_transform());
 
 	//Check the properties
 	DDS::Security::PropertyQosPolicy property_data;
@@ -79,11 +80,11 @@ TEST_F(SecurityConfigTest, TestConfig2)
 	EXPECT_FALSE(config.is_nil());
 
 	// Interface check
-	EXPECT_FALSE(config->get_access_control().is_nil());
-	EXPECT_FALSE(config->get_authentication().is_nil());
-	EXPECT_FALSE(config->get_crypto_key_exchange().is_nil());
-	EXPECT_FALSE(config->get_crypto_key_factory().is_nil());
-	EXPECT_FALSE(config->get_crypto_transform().is_nil());
+	EXPECT_TRUE(config->get_access_control());
+	EXPECT_TRUE(config->get_authentication());
+	EXPECT_TRUE(config->get_crypto_key_exchange());
+	EXPECT_TRUE(config->get_crypto_key_factory());
+	EXPECT_TRUE(config->get_crypto_transform());
 
 	//Check the properties
 	DDS::Security::PropertyQosPolicy property_data;
@@ -105,11 +106,11 @@ TEST_F(SecurityConfigTest, TestConfig_NoProperties)
 	EXPECT_FALSE(config.is_nil());
 
 	// Interface check
-	EXPECT_FALSE(config->get_access_control().is_nil());
-	EXPECT_FALSE(config->get_authentication().is_nil());
-	EXPECT_FALSE(config->get_crypto_key_exchange().is_nil());
-	EXPECT_FALSE(config->get_crypto_key_factory().is_nil());
-	EXPECT_FALSE(config->get_crypto_transform().is_nil());
+	EXPECT_TRUE(config->get_access_control());
+	EXPECT_TRUE(config->get_authentication());
+	EXPECT_TRUE(config->get_crypto_key_exchange());
+	EXPECT_TRUE(config->get_crypto_key_factory());
+	EXPECT_TRUE(config->get_crypto_transform());
 
 	//Check the properties
 	DDS::Security::PropertyQosPolicy property_data;

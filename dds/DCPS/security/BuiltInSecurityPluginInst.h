@@ -20,20 +20,18 @@ namespace Security {
  * @class BuiltInSecurityPluginInst
  *
  * @brief Factory object to create interfaces for the BuiltIn plugin.
-
  */
-
-class OpenDDS_Dcps_Export BuiltInSecurityPluginInst : public OpenDDS::DCPS::SecurityPluginInst {
+class OpenDDS_Dcps_Export BuiltInSecurityPluginInst : public SecurityPluginInst {
 public:
 
-	BuiltInSecurityPluginInst();
-	~BuiltInSecurityPluginInst();
+  BuiltInSecurityPluginInst();
+  ~BuiltInSecurityPluginInst();
 
-  virtual OpenDDS::DCPS::Authentication_rch create_authentication();
-  virtual OpenDDS::DCPS::AccessControl_rch create_access_control();
-  virtual OpenDDS::DCPS::CryptoKeyExchange_rch create_crypto_key_exchange();
-  virtual OpenDDS::DCPS::CryptoKeyFactory_rch create_crypto_key_factory();
-  virtual OpenDDS::DCPS::CryptoTransform_rch create_crypto_transform();
+  virtual Authentication_var create_authentication();
+  virtual AccessControl_var create_access_control();
+  virtual CryptoKeyExchange_var create_crypto_key_exchange();
+  virtual CryptoKeyFactory_var create_crypto_key_factory();
+  virtual CryptoTransform_var create_crypto_transform();
 
   virtual void shutdown();
 
