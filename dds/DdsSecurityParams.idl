@@ -16,69 +16,69 @@
 #include "DdsDcpsCore.idl"
 
 module DDS {
-    module Security {
+  module Security {
 
-      typedef unsigned short ParameterId_t;
-  
-      // Security-specific parameters
-      // The DDS Security specification reserves ParameterIDs in the range: 0x1000 to
-      // 0x1FFF and 0x5000 to 0x5FFF.
-      const ParameterId_t PID_IDENTITY_TOKEN = 0x1001;
-      const ParameterId_t PID_PERMISSIONS_TOKEN = 0x1002;
-      const ParameterId_t PID_DATA_TAGS = 0x1003;
-      const ParameterId_t PID_ENDPOINT_SECURITY_INFO = 0x1004;
-      const ParameterId_t PID_PARTICIPANT_SECURITY_INFO = 0x1005;
-      const ParameterId_t PID_IDENTITY_STATUS_TOKEN = 0x1006;
-      
-      struct DataHolder {
-	string             class_id;
-	//@optional  PropertySeq        properties; 
-	//@optional  BinaryPropertySeq  binary_properties; 
-	PropertySeq        properties; 
-	BinaryPropertySeq  binary_properties; 
-      };
-      typedef sequence<DataHolder> DataHolderSeq;
-      
-      typedef DataHolder Token;
-      typedef Token IdentityToken;
-      typedef Token PermissionsToken;
-      typedef Token IdentityStatusToken;
+    typedef unsigned short ParameterId_t;
 
-      struct Tag {
-	string name;
-	string value;
-      };
-      
-      typedef sequence< Tag > TagSeq;
-      struct DataTags {
-	TagSeq tags;
-      };
+    // Security-specific parameters
+    // The DDS Security specification reserves ParameterIDs in the range: 0x1000 to
+    // 0x1FFF and 0x5000 to 0x5FFF.
+    const ParameterId_t PID_IDENTITY_TOKEN = 0x1001;
+    const ParameterId_t PID_PERMISSIONS_TOKEN = 0x1002;
+    const ParameterId_t PID_DATA_TAGS = 0x1003;
+    const ParameterId_t PID_ENDPOINT_SECURITY_INFO = 0x1004;
+    const ParameterId_t PID_PARTICIPANT_SECURITY_INFO = 0x1005;
+    const ParameterId_t PID_IDENTITY_STATUS_TOKEN = 0x1006;
 
-      #define PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
-      #define PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}
-
-      typedef unsigned long ParticipantSecurityAttributesMask;
-      typedef unsigned long PluginParticipantSecurityAttributesMask;
-      
-      //@extensibility(APPENDABLE)
-      struct ParticipantSecurityInfo {
-	ParticipantSecurityAttributesMask        participant_security_attributes; 
-	PluginParticipantSecurityAttributesMask  plugin_participant_security_attributes; 
-      };
-
-      #define ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
-      #define ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}      
-
-      typedef unsigned long EndpointSecurityAttributesMask;
-      typedef unsigned long PluginEndpointSecurityAttributesMask;
-
-      //@extensibility(APPENDABLE)
-      struct EndpointSecurityInfo {
-	EndpointSecurityAttributesMask        endpoint_security_attributes; 
-	PluginEndpointSecurityAttributesMask  plugin_endpoint_security_attributes; 
-      };
-      
+    struct DataHolder {
+      string             class_id;
+      //@optional  PropertySeq        properties;
+      //@optional  BinaryPropertySeq  binary_properties;
+      PropertySeq        properties;
+      BinaryPropertySeq  binary_properties;
     };
+    typedef sequence<DataHolder> DataHolderSeq;
+
+    typedef DataHolder Token;
+    typedef Token IdentityToken;
+    typedef Token PermissionsToken;
+    typedef Token IdentityStatusToken;
+
+    struct Tag {
+      string name;
+      string value;
+    };
+
+    typedef sequence< Tag > TagSeq;
+    struct DataTags {
+      TagSeq tags;
+    };
+
+    #define PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
+    #define PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}
+
+    typedef unsigned long ParticipantSecurityAttributesMask;
+    typedef unsigned long PluginParticipantSecurityAttributesMask;
+
+    //@extensibility(APPENDABLE)
+    struct ParticipantSecurityInfo {
+      ParticipantSecurityAttributesMask        participant_security_attributes;
+      PluginParticipantSecurityAttributesMask  plugin_participant_security_attributes;
+    };
+
+    #define ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID (0x1 << 31)
+    #define ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT  {0, 0}
+
+    typedef unsigned long EndpointSecurityAttributesMask;
+    typedef unsigned long PluginEndpointSecurityAttributesMask;
+
+    //@extensibility(APPENDABLE)
+    struct EndpointSecurityInfo {
+      EndpointSecurityAttributesMask        endpoint_security_attributes;
+      PluginEndpointSecurityAttributesMask  plugin_endpoint_security_attributes;
+    };
+
+  };
 };
 
 #endif /* DDS_SECURITY_PARAMS_IDL */
