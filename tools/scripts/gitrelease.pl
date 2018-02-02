@@ -924,7 +924,7 @@ sub remedy_gen_doxygen {
     my $curdir = getcwd;
     chdir($settings->{clone_dir});
     $ENV{DDS_ROOT} = getcwd;
-    my $result = system("$ENV{ACE_ROOT}/bin/generate_doxygen.pl -exclude_ace -include_dds -is_release");
+    my $result = system("$ENV{DDS_ROOT}/tools/scripts/generate_combined_doxygen.pl . -is_release");
     chdir($curdir);
     if (!$result) {
       $generated = 1;
