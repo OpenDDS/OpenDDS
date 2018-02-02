@@ -29,6 +29,8 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 
+#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -44,8 +46,12 @@ class RtpsDiscovery;
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp : public OpenDDS::DCPS::LocalParticipant<Sedp> {
 public:
-  Spdp(DDS::DomainId_t domain, DCPS::RepoId& guid,
-       const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco);
+
+  Spdp(DDS::DomainId_t domain,
+       DCPS::RepoId& guid,
+       const DDS::DomainParticipantQos& qos,
+       RtpsDiscovery* disco);
+
   ~Spdp();
 
   // Participant
@@ -66,6 +72,8 @@ public:
   bool has_discovered_participant(const DCPS::RepoId& guid);
 
   WaitForAcks& wait_for_acks();
+
+  OpenDDS::Security::SecurityConfig_rch get_security_config() { return security_config_; }
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }
@@ -126,6 +134,8 @@ private:
   // wait for acknowledgments from SpdpTransport and Sedp::Task
   // when BIT is being removed (fini_bit)
   WaitForAcks wait_for_acks_;
+
+  OpenDDS::Security::SecurityConfig_rch security_config_;
 };
 
 }

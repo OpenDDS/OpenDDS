@@ -240,14 +240,17 @@ module DDS {
     typedef long ParticipantCryptoHandle;
     typedef sequence<ParticipantCryptoHandle> ParticipantCryptoHandleSeq;
 
+    // Used internally by OpenDDS Implementation
+    typedef long NativeCryptoHandle;
+    
     //native DatawriterCryptoHandle;
     //native DatawriterCryptoHandleSeq;
-    typedef long DatawriterCryptoHandle;
+    typedef NativeCryptoHandle DatawriterCryptoHandle;
     typedef sequence<DatawriterCryptoHandle> DatawriterCryptoHandleSeq;
 
     //native DatareaderCryptoHandle;
     //native DatareaderCryptoHandleSeq;
-    typedef long DatareaderCryptoHandle;
+    typedef NativeCryptoHandle DatareaderCryptoHandle;
     typedef sequence<DatareaderCryptoHandle> DatareaderCryptoHandleSeq;
 
     // DDSSEC11-96

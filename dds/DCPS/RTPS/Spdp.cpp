@@ -19,6 +19,8 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 
+#include "dds/DCPS/security/framework/SecurityRegistry.h"
+
 #include "ace/Reactor.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
@@ -51,14 +53,26 @@ namespace {
 }
 
 
-Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
-           const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
+Spdp::Spdp(DDS::DomainId_t domain,
+           RepoId& guid,
+           const DDS::DomainParticipantQos& qos,
+           RtpsDiscovery* disco)
+
   : OpenDDS::DCPS::LocalParticipant<Sedp>(qos)
-  , disco_(disco), domain_(domain), guid_(guid)
-  , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), shutdown_flag_(false), sedp_(guid_, *this, lock_)
+  , disco_(disco)
+  , domain_(domain)
+  , guid_(guid)
+  , tport_(new SpdpTransport(this))
+  , eh_(tport_)
+  , eh_shutdown_(false)
+  , shutdown_cond_(lock_)
+  , shutdown_flag_(false)
+  , sedp_(guid_, *this, lock_)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  security_config_ = OpenDDS::Security::SecurityRegistry::instance()->default_config();
+
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
