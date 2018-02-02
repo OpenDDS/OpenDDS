@@ -4,11 +4,11 @@
 # documentation with ACE/TAO documentation built-in.
 
 use strict;
-use File::Path qw(make_path);
+use File::Path qw(make_path rmtree);
 use File::Copy qw(move);
-use File::Spec;
 use File::Find;
 use File::Basename;
+use Cwd 'abs_path';
 
 # Parse Arguments
 my $usage = "usage: generate_combined_doxygen.pl [-h|--help] DESTINATION ...\n";
@@ -31,7 +31,7 @@ if (! -d $ARGV[0]) {
 }
 
 # Set up paths
-my $dest = File::Spec->rel2abs(shift);
+my $dest = abs_path(shift);
 my @doxygen = (
   "perl", $ENV{"ACE_ROOT"} . "/bin/generate_doxygen.pl", "-html_output", $dest
 );
@@ -39,9 +39,10 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
   push(@doxygen, $ARGV[$i]);
 }
 my $ace_dest = "$dest/html/dds/ace_tao";
-if (! -d $ace_dest) {
-  make_path($ace_dest) or die "ERROR: $!";
+if (-d "$dest/html") {
+  rmtree("$dest/html");
 }
+make_path($ace_dest) or die "ERROR: $!";
 
 # Build ACE/TAO Documentation
 chdir $ENV{"ACE_ROOT"};
@@ -64,6 +65,16 @@ foreach $a (@tagfiles) {
   );
 }
 $ENV{ace_tao_tagfiles} = $ace_tao_tagfiles;
+
+# Generate ACE/TAO links page
+open(my $f, '>', $ENV{'DDS_ROOT'} . "/docs/doxygen_ace_tao_generated_links.h");
+print $f "/*! \\page ace_tao_links Built-In ACE/TAO Documentation\n";
+foreach $a (@tagfiles) {
+  my $link = "ace_tao" . dirname(substr($a, (length $ace_dest)));
+  print $f sprintf(" * <a href=\"%s/index.html\">%s</a><br>\n", $link, $link);
+}
+print $f " */\n";
+close $f;
 
 # Build OpenDDS Documentation
 chdir $ENV{"DDS_ROOT"};
