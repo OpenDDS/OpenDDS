@@ -198,6 +198,7 @@ module DDS {
 
     struct SecurityException {
       string  message;
+      long    code;
       long    minor_code;
     };
 

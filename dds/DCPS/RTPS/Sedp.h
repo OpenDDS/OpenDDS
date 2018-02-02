@@ -37,7 +37,6 @@
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
-//#include "dds/DdsSecurityCoreC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -64,6 +63,10 @@ public:
   DDS::ReturnCode_t init(const DCPS::RepoId& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
+
+  DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
+                                  DDS::Security::PermissionsHandle perm_handle,
+                                  DDS::Security::ParticipantCryptoHandle crypto_handle);
 
   /// request for acknowledgement from all Sedp threads (Task)
   void acknowledge();

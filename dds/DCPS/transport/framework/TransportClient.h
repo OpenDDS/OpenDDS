@@ -63,6 +63,16 @@ public:
   virtual void _add_ref() {}
   virtual void _remove_ref() {}
 
+  void set_crypto_handle(DDS::Security::NativeCryptoHandle h)
+  {
+    crypto_handle_ = h;
+  }
+
+  DDS::Security::NativeCryptoHandle get_crypto_handle()
+  {
+    return crypto_handle_;
+  }
+
 protected:
   TransportClient();
   virtual ~TransportClient();
@@ -133,16 +143,6 @@ protected:
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
   void on_notification_of_connection_deletion(const RepoId& peerId);
-
-  void set_crypto_handle(DDS::Security::NativeCryptoHandle h)
-  {
-    crypto_handle_ = h;
-  }
-
-  DDS::Security::NativeCryptoHandle get_crypto_handle()
-  {
-    return crypto_handle_;
-  }
 
 private:
 

@@ -169,7 +169,10 @@ using DCPS::make_rch;
 
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
-Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
+Sedp::Sedp(const RepoId& participant_id,
+           Spdp& owner,
+           ACE_Thread_Mutex& lock)
+
   : OpenDDS::DCPS::EndpointManager<SPDPdiscoveredParticipantData>(participant_id, lock)
   , spdp_(owner)
   , publications_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), *this)
@@ -221,7 +224,8 @@ Sedp::make_id(const RepoId& participant_id, const EntityId_t& entity)
 }
 
 DDS::ReturnCode_t
-Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
+Sedp::init(const RepoId& guid,
+           const RtpsDiscovery& disco,
            DDS::DomainId_t domainId)
 {
   char domainStr[16];
@@ -301,6 +305,46 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   participant_volatile_message_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
   return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle */,
+                                      DDS::Security::PermissionsHandle /* perm_handle */,
+                                      DDS::Security::ParticipantCryptoHandle crypto_handle)
+{
+  using namespace OpenDDS::Security;
+  using namespace DDS::Security;
+
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+
+  CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+  AccessControl_var access_control = spdp_.get_security_config()->get_access_control();
+  Authentication_var auth = spdp_.get_security_config()->get_authentication();
+
+  // BuiltinParticipantVolatileMessageSecureWriter
+  // See 8.8.8.1 in the security spec.
+  {
+    PropertySeq properties(1);
+    properties[0].name = "dds.sec.builtin_endpoint_name";
+    properties[0].value = "BuiltinParticipantVolatileMessageSecureWriter";
+
+    EndpointSecurityAttributes attribs;
+    attribs.base.is_read_protected = false;
+    attribs.base.is_write_protected = false;
+    attribs.base.is_discovery_protected = false;
+    attribs.base.is_liveliness_protected = false;
+    attribs.is_submessage_protected = true;
+    attribs.is_payload_protected = false;
+    attribs.is_key_protected = false;
+
+    SecurityException exception;
+
+    participant_volatile_message_secure_writer_.set_crypto_handle(
+        key_factory->register_local_datawriter(crypto_handle, properties, attribs, exception));
+
+    /* TODO: Handle SecurityException */
+  }
+
+  return result;
 }
 
 void
@@ -1555,6 +1599,7 @@ Sedp::association_complete(const RepoId& localId,
 void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
   DDS::Security::TopicSecurityAttributes attribs; /* TODO: pull from security plugin */
+  attribs.is_liveliness_protected = true; /* TODO: Don't do this */
 
   if (attribs.is_liveliness_protected) {
       signal_liveliness_secure(kind);

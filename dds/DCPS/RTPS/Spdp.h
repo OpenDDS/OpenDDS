@@ -52,6 +52,14 @@ public:
        const DDS::DomainParticipantQos& qos,
        RtpsDiscovery* disco);
 
+  Spdp(DDS::DomainId_t domain,
+       DCPS::RepoId& guid,
+       const DDS::DomainParticipantQos& qos,
+       RtpsDiscovery* disco,
+       DDS::Security::IdentityHandle id_handle,
+       DDS::Security::PermissionsHandle perm_handle,
+       DDS::Security::ParticipantCryptoHandle crypto_handle);
+
   ~Spdp();
 
   // Participant

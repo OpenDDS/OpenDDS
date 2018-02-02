@@ -71,8 +71,6 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  security_config_ = OpenDDS::Security::SecurityRegistry::instance()->default_config();
-
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
@@ -89,6 +87,22 @@ Spdp::Spdp(DDS::DomainId_t domain,
     sedp_multicast_.length(1);
     sedp_multicast_[0] = mc_locator;
   }
+}
+
+Spdp::Spdp(DDS::DomainId_t domain,
+           DCPS::RepoId& guid,
+           const DDS::DomainParticipantQos& qos,
+           RtpsDiscovery* disco,
+           DDS::Security::IdentityHandle id_handle,
+           DDS::Security::PermissionsHandle perm_handle,
+           DDS::Security::ParticipantCryptoHandle crypto_handle)
+
+: Spdp(domain, guid, qos, disco)
+
+{
+  security_config_ = OpenDDS::Security::SecurityRegistry::instance()->default_config();
+
+  sedp_.init_security(id_handle, perm_handle, crypto_handle);
 }
 
 Spdp::~Spdp()
