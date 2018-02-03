@@ -47,6 +47,13 @@ public:
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos);
 
+  virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
+    DDS::DomainId_t domain,
+    const DDS::DomainParticipantQos& qos,
+    DDS::Security::IdentityHandle id,
+    DDS::Security::PermissionsHandle perm,
+    DDS::Security::ParticipantCryptoHandle part_crypto);
+
   virtual bool supports_liveliness() const { return true; }
 
   virtual void signal_liveliness(const DDS::DomainId_t domain_id,

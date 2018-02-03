@@ -131,11 +131,9 @@ private:
 
   DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
                         const DDS::DomainId_t&             domain_id,
-                        const RepoId&                      dp_id,
                         const DDS::DomainParticipantQos &  qos,
                         DDS::DomainParticipantListener_ptr a_listener,
-                        const DDS::StatusMask &            mask,
-                        bool                               federated = false);
+                        const DDS::StatusMask &            mask);
 
   virtual ~DomainParticipantImpl();
 
