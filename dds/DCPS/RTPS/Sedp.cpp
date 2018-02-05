@@ -1660,7 +1660,7 @@ Sedp::association_complete(const RepoId& localId,
 
 void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
-
+  // TODO: Pending issue DDSSEC12-28 this may change.
   if (dcps_participant_message_secure_attribs.is_liveliness_protected) {
       signal_liveliness_secure(kind);
 
