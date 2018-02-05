@@ -321,7 +321,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   Authentication_var auth = spdp_.get_security_config()->get_authentication();
 
   // BuiltinParticipantVolatileMessageSecureWriter
-  // See 8.8.8.1 in the security spec.
   {
     PropertySeq properties(1);
     properties[0].name = "dds.sec.builtin_endpoint_name";
@@ -340,6 +339,29 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
     participant_volatile_message_secure_writer_.set_crypto_handle(
         key_factory->register_local_datawriter(crypto_handle, properties, attribs, exception));
+
+    /* TODO: Handle SecurityException */
+  }
+
+  // BuiltinParticipantVolatileMessageSecureReader
+  {
+    PropertySeq properties(1);
+    properties[0].name = "dds.sec.builtin_endpoint_name";
+    properties[0].value = "BuiltinParticipantVolatileMessageSecureReader";
+
+    EndpointSecurityAttributes attribs;
+    attribs.base.is_read_protected = false;
+    attribs.base.is_write_protected = false;
+    attribs.base.is_discovery_protected = false;
+    attribs.base.is_liveliness_protected = false;
+    attribs.is_submessage_protected = true;
+    attribs.is_payload_protected = false;
+    attribs.is_key_protected = false;
+
+    SecurityException exception;
+
+    participant_volatile_message_secure_reader_->set_crypto_handle(
+        key_factory->register_local_datareader(crypto_handle, properties, attribs, exception));
 
     /* TODO: Handle SecurityException */
   }
