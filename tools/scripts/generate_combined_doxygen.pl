@@ -39,9 +39,6 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
   push(@doxygen, $ARGV[$i]);
 }
 my $ace_dest = "$dest/html/dds/ace_tao";
-if (-d "$dest/html") {
-  rmtree("$dest/html");
-}
 mkpath($ace_dest) or die "ERROR: $!";
 
 # Build ACE/TAO Documentation
