@@ -72,19 +72,17 @@ namespace DCPS {
 // Implementation skeleton constructor
 DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
                                              const DDS::DomainId_t&             domain_id,
-                                             const RepoId&                      dp_id,
                                              const DDS::DomainParticipantQos &  qos,
                                              DDS::DomainParticipantListener_ptr a_listener,
-                                             const DDS::StatusMask &            mask,
-                                             bool                               federated)
+                                             const DDS::StatusMask &            mask)
   : factory_(factory),
     default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
     default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
     qos_(qos),
     domain_id_(domain_id),
-    dp_id_(dp_id),
-    federated_(federated),
+    dp_id_(GUID_UNKNOWN),
+    federated_(false),
     shutdown_condition_(shutdown_mutex_),
     shutdown_complete_(false),
     monitor_(0),
@@ -1594,6 +1592,30 @@ DomainParticipantImpl::enable()
   }
 
   DDS::ReturnCode_t ret = this->set_enabled();
+
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+
+  if (disco.is_nil()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantFactory::enable, ")
+               ACE_TEXT("no repository found for domain id: %d.\n"), domain_id_));
+    return DDS::RETCODE_ERROR;
+  }
+
+  const AddDomainStatus value =
+    disco->add_domain_participant(domain_id_, qos_);
+
+  if (value.id == GUID_UNKNOWN) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantFactory::enable, ")
+               ACE_TEXT("add_domain_participant returned invalid id.\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
+  dp_id_ = value.id;
+  federated_ = value.federated;
 
   if (monitor_) {
     monitor_->report();
