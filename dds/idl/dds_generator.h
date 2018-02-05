@@ -240,41 +240,34 @@ namespace AstTypeClassification {
     {
       AST_InterfaceFwd* td = AST_InterfaceFwd::narrow_from_decl(element);
       return td->full_definition();
-      break;
     }
     case AST_Decl::NT_valuetype_fwd:
     {
       AST_ValueTypeFwd* td = AST_ValueTypeFwd::narrow_from_decl(element);
       return td->full_definition();
-      break;
     }
     case AST_Decl::NT_union_fwd:
     {
       AST_UnionFwd* td = AST_UnionFwd::narrow_from_decl(element);
       return td->full_definition();
-      break;
     }
     case AST_Decl::NT_struct_fwd:
     {
       AST_StructureFwd* td = AST_StructureFwd::narrow_from_decl(element);
       return td->full_definition();
-      break;
     }
     case AST_Decl::NT_component_fwd:
     {
       AST_ComponentFwd* td = AST_ComponentFwd::narrow_from_decl(element);
       return td->full_definition();
-      break;
     }
     case AST_Decl::NT_eventtype_fwd:
     {
       AST_EventTypeFwd* td = AST_EventTypeFwd::narrow_from_decl(element);
       return td->full_definition();
-      break;
     }
-    default :
+    default:
       return element;
-      break;
     }
   }
 

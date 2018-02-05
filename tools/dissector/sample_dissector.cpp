@@ -20,13 +20,18 @@
 #include <tao/String_Manager_T.h>
 
 #include <cstring>
-#include <cstdint>
 
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#ifndef NO_EXPERT
+extern "C" {
+#include <epan/expert.h>
+}
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,10 +40,14 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    std::string utf16_to_utf8(
-       const ACE_CDR::WChar* from, const size_t length = 1
+    /*
+     * To make it easy to pass to Wireshark, we should convert DDS wide chars
+     * and strings to UTF-8. Returns true if there was an error and sets
+     * result to the reason it failed.
+     */
+    bool utf16_to_utf8(
+       std::string &result, const ACE_CDR::WChar* from, const size_t length = 1
     ) {
-      std::string result;
 
       const gchar* from_;
 #if ACE_SIZEOF_WCHAR == 4
@@ -47,24 +56,25 @@ namespace OpenDDS
        * before we can pass it to glib's g_convert. Otherwise it will
        * interpret them as NULL characters and stop after the first two bytes.
        */
-      std::vector<uint16_t> trimmed(length + 1, 0);
+      std::vector<guint16> trimmed(length + 1, 0);
       for (size_t i = 0; i < length; i++) {
         trimmed[i] = from[i];
       }
       from_ = reinterpret_cast<gchar*>(&trimmed[0]);
 #else
-      from_ = reinterpret_cast<gchar*>(from);
+      from_ = reinterpret_cast<gchar*>(const_cast<ACE_CDR::WChar*>(from));
 #endif
 
       GError * error = NULL;
       char * utf8 = g_convert(
         from_, length * sizeof(ACE_CDR::WChar),
-        "UTF-8", "UTF-16", NULL, NULL, &error
+        "UTF-8", "UTF-16LE", NULL, NULL, &error
       );
 
       if (utf8 != NULL) {
         result = utf8;
         g_free(utf8);
+        return false;
       } else {
         const char * error_msg = "UTF-16 to UTF-8 conversion failed: ";
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C%C\n"),
@@ -74,9 +84,8 @@ namespace OpenDDS
         result = error_msg;
         result += error->message;
         g_clear_error(&error);
+        return true;
       }
-
-      return result;
     }
 
     Wireshark_Bundle::Wireshark_Bundle(
@@ -105,6 +114,9 @@ namespace OpenDDS
       offset = other.offset;
       use_index = other.use_index;
       index = other.index;
+#ifndef NO_EXPERT
+      warning_ef = other.warning_ef;
+#endif
     }
 
     size_t Wireshark_Bundle::buffer_pos() {
@@ -133,6 +145,7 @@ namespace OpenDDS
         return field_contexts_[ns_];
       }
       Field_Context * fc = new Field_Context;
+      fc->hf_ = -1;
       field_contexts_[ns_] = fc;
       fc->label_ = ns_stack_.back();
       return fc;
@@ -249,6 +262,7 @@ namespace OpenDDS
       TAO::String_Manager string_value;
       size_t wstring_length;
       TAO::WString_Manager wstring_value;
+      std::string converted;
 
       switch (this->type_id_) {
       case Char:
@@ -275,7 +289,8 @@ namespace OpenDDS
       case WChar:
         ACE_CDR::WChar wchar_value;
         p.serializer >> ACE_InputCDR::to_wchar(wchar_value);
-        s << utf16_to_utf8(&wchar_value);
+        utf16_to_utf8(converted, &wchar_value);
+        s << converted;
         break;
 
       case Short:
@@ -339,7 +354,8 @@ namespace OpenDDS
 
       case WString:
         wstring_length = p.serializer.read_string(wstring_value.inout());
-        s << utf16_to_utf8(wstring_value, wstring_length);
+        utf16_to_utf8(converted, wstring_value, wstring_length);
+        s << converted;
         break;
 
       case Enumeration:
@@ -419,7 +435,15 @@ namespace OpenDDS
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               std::string s;
-              s = utf16_to_utf8(&wchar_value);
+              bool utf_fail = utf16_to_utf8(s, &wchar_value);
+#ifndef NO_EXPERT
+              if (utf_fail) {
+                proto_tree_add_expert_format(
+                    params.tree, params.info, params.warning_ef, params.tvb,
+                    params.offset, len, s.c_str()
+                );
+              }
+#endif
               if (params.use_index) {
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS, s.c_str(),
@@ -607,7 +631,7 @@ namespace OpenDDS
                 proto_tree_add_string_format(
                   ADD_FIELD_PARAMS,
                   string_value,
-                  "[%u]: %s", params.index, string_value
+                  "[%u]: %s", params.index, string_value.in()
                 );
               } else {
                 proto_tree_add_string(
@@ -627,7 +651,15 @@ namespace OpenDDS
             if (!params.get_size_only) {
               // Get UTF8 Version of the String
               std::string s;
-              s = utf16_to_utf8(wstring_value, wstring_length);
+              bool utf_fail = utf16_to_utf8(s, wstring_value, wstring_length);
+#ifndef NO_EXPERT
+              if (utf_fail) {
+                proto_tree_add_expert_format(
+                    params.tree, params.info, params.warning_ef, params.tvb,
+                    params.offset, len, s.c_str()
+                );
+              }
+#endif
 
               if (params.use_index) {
                 proto_tree_add_string_format(
@@ -756,9 +788,11 @@ namespace OpenDDS
     //------------------------------------------------------------------------
 
     Sample_Dissector::Sample_Dissector (const std::string &subtree)
-      :ett_ (-1),
-       subtree_label_(),
-       field_ (0)
+      : field_(0),
+        ett_(-1),
+        subtree_label_(),
+        is_struct_(false),
+        is_root_(false)
     {
       if (!subtree.empty())
         this->init (subtree);
@@ -1252,6 +1286,90 @@ namespace OpenDDS
 
     void Sample_Alias::init_ws_fields() {
       base_->init_ws_fields();
+    }
+
+    //-----------------------------------------------------------------------
+
+    Sample_Fixed::Sample_Fixed(unsigned digits, unsigned scale)
+    :
+      Sample_Dissector(""),
+      digits_(digits),
+      scale_(scale)
+    {
+    }
+
+    void Sample_Fixed::init_ws_fields() {
+      add_protocol_field(FT_DOUBLE);
+    }
+
+    size_t Sample_Fixed::dissect_i(Wireshark_Bundle &params) {
+      // Based on FACE/Fixed.h
+      // Fixed_T could not be used here because it is a templated class
+      size_t len = (digits_ + 2) / 2;
+
+      if (params.get_size_only) {
+        params.serializer.skip(len);
+      } else {
+        int hf = get_hf();
+        if (hf == -1) {
+          throw Sample_Dissector_Error(
+            get_ns()  + " is not a registered wireshark field."
+          );
+        }
+
+#ifdef ACE_HAS_CDR_FIXED
+        // Extract a ACE_CDR::Fixed, give it to WS as a double, and display
+        // it using Fixed.to_string().
+        FACE::Octet raw[(ACE_CDR::Fixed::MAX_DIGITS + 2) / 2];
+        if (params.serializer.read_octet_array(raw, len)) {
+          ACE_CDR::Fixed fixed_value = ACE_CDR::Fixed::from_octets(
+            raw, len, scale_);
+          char string_value[ACE_CDR::Fixed::MAX_STRING_SIZE];
+          fixed_value.to_string(
+            &string_value[0], ACE_CDR::Fixed::MAX_STRING_SIZE);
+          double double_value = static_cast<ACE_CDR::LongDouble>(
+            fixed_value);
+          if (params.use_index) {
+            proto_tree_add_double_format(
+              ADD_FIELD_PARAMS, double_value,
+              "[%u]: %s", params.index, &string_value[0]
+            );
+          } else {
+            proto_tree_add_double_format_value(
+              ADD_FIELD_PARAMS, double_value,
+              "%s", &string_value[0]
+            );
+          }
+        } else {
+          throw Sample_Dissector_Error("Error Reading Fixed Type");
+        }
+#else
+        // Place Dummy value and inform user
+        const char * missing_fixed = "Fixed Type Support is missing from ACE";
+        if (params.use_index) {
+          proto_tree_add_double_format(
+            ADD_FIELD_PARAMS, 0, "[%u]: %s", params.index, missing_fixed
+          );
+        } else {
+          proto_tree_add_double_format_value(
+            ADD_FIELD_PARAMS, 0, "%s", missing_fixed
+          );
+        }
+#ifndef NO_EXPERT
+        proto_tree_add_expert(
+            params.tree, params.info, params.warning_ef, params.tvb,
+            params.offset, len, missing_fixed
+        );
+#endif // NO_EXPERT
+
+        // and skip it.
+        params.serializer.skip(len);
+
+#endif // ACE_HAS_CDR_FIXED
+
+      }
+
+      return len;
     }
 
   }

@@ -87,7 +87,7 @@ namespace OpenDDS
       DissectorsType dissectors_;
 
       std::vector<hf_register_info> hf_vector_;
-      hf_register_info * hf_array_ = NULL;
+      hf_register_info * hf_array_;
 
       /// Dynamic Field Names (Long and Short) to be deleted later
       std::list<char *> field_names_;

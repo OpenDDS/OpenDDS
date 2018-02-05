@@ -32,6 +32,7 @@ extern "C" {
 #include "tools/dissector/dissector_export.h"
 #include "ws_common.h"
 
+#include "FACE/Fixed.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/DataSampleHeader.h"
 
@@ -51,7 +52,9 @@ namespace OpenDDS
       {
       }
 
-      const char* what() const throw (){
+      ~Sample_Dissector_Error() throw() {}
+
+      const char* what() const throw() {
         return message_.c_str();
       }
 
@@ -71,6 +74,9 @@ namespace OpenDDS
       packet_info* info;
       proto_tree* tree;
       size_t offset;
+#ifndef NO_EXPERT
+      expert_field * warning_ef;
+#endif
 
       bool use_index;
       guint32 index;
@@ -89,7 +95,7 @@ namespace OpenDDS
       /// Actual Label to give to wireshark
       std::string label_;
       /// Wireshark Field Index
-      int hf_ = -1;
+      int hf_;
     };
     typedef std::map<std::string, Field_Context*> Field_Contexts;
 
@@ -118,7 +124,7 @@ namespace OpenDDS
       void add_protocol_field(ftenum ft, field_display_e fd = BASE_NONE);
 
     public:
-      ~Sample_Base();
+      virtual ~Sample_Base();
 
       /// Traverse the Dissector Tree nodes to build the Sample Payload Tree.
       /// This is to be done after the ITL files have been parsed and before
@@ -191,7 +197,6 @@ namespace OpenDDS
       /// Sample_Dissector object for further evaluation.
       size_t dissect_i (Wireshark_Bundle &params, bool recur = true);
 
-      /// Compute the size of the field in bytes
       size_t compute_length(const Wireshark_Bundle & p);
 
       void to_stream(std::stringstream &s, Wireshark_Bundle & p);
@@ -338,7 +343,6 @@ namespace OpenDDS
     protected:
       virtual size_t dissect_i(Wireshark_Bundle &params);
       size_t count_;
-      int hf_ = -1;
     };
 
     /*
@@ -411,6 +415,24 @@ namespace OpenDDS
       Sample_Dissector *base_;
     };
 
+    /*
+     * A Dissector for Fixed Point Types (FACE/Fixed.h)
+     */
+    class dissector_Export Sample_Fixed : public Sample_Dissector
+    {
+    public:
+      Sample_Fixed(unsigned digits, unsigned scale);
+
+      unsigned digits() { return digits_; }
+      unsigned scale() { return scale_; }
+
+    protected:
+      virtual void init_ws_fields();
+      virtual size_t dissect_i(Wireshark_Bundle &params);
+
+    private:
+      unsigned digits_, scale_;
+    };
   }
 }
 

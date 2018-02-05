@@ -91,7 +91,7 @@ class InstanceDataMap
                         -1);
       ssize_t num_samples = 0;
       typename DataMap::iterator it;
-      for (it = map_.begin (); it != map_.end (); it ++)
+      for (it = map_.begin(); it != map_.end(); ++it)
       {
         num_samples += it->second.size ();
       }
