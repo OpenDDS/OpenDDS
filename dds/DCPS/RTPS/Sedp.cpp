@@ -316,6 +316,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
+  // TODO: Handle all exceptions below once error-codes have been defined, etc.
   SecurityException ex;
 
   CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
@@ -323,74 +324,87 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   Authentication_var auth = spdp_.get_security_config()->get_authentication();
 
   ParticipantSecurityAttributes participant_attribs;
-  acl->get_participant_sec_attributes(perm_handle, participant_attribs, ex);
+  bool ok = acl->get_participant_sec_attributes(perm_handle, participant_attribs, ex);
+  if (ok) {
 
-  // Volatile-Message-Secure Writer
-  {
-    PropertySeq properties(1);
-    properties[0].name = "dds.sec.builtin_endpoint_name";
-    properties[0].value = "BuiltinParticipantVolatileMessageSecureWriter";
+    // Volatile-Message-Secure Writer
+    {
+      PropertySeq properties(1);
+      properties[0].name = "dds.sec.builtin_endpoint_name";
+      properties[0].value = "BuiltinParticipantVolatileMessageSecureWriter";
 
-    EndpointSecurityAttributes attribs;
-    attribs.base.is_read_protected = false;
-    attribs.base.is_write_protected = false;
-    attribs.base.is_discovery_protected = false;
-    attribs.base.is_liveliness_protected = false;
-    attribs.is_submessage_protected = true;
-    attribs.is_payload_protected = false;
-    attribs.is_key_protected = false;
+      EndpointSecurityAttributes attribs;
+      attribs.base.is_read_protected = false;
+      attribs.base.is_write_protected = false;
+      attribs.base.is_discovery_protected = false;
+      attribs.base.is_liveliness_protected = false;
+      attribs.is_submessage_protected = true;
+      attribs.is_payload_protected = false;
+      attribs.is_key_protected = false;
 
-    NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
-    participant_volatile_message_secure_writer_.set_crypto_handle(h);
-  }
+      NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
+      participant_volatile_message_secure_writer_.set_crypto_handle(h);
+    }
 
-  // Volatile-Message-Secure Reader
-  {
-    PropertySeq properties(1);
-    properties[0].name = "dds.sec.builtin_endpoint_name";
-    properties[0].value = "BuiltinParticipantVolatileMessageSecureReader";
+    // Volatile-Message-Secure Reader
+    {
+      PropertySeq properties(1);
+      properties[0].name = "dds.sec.builtin_endpoint_name";
+      properties[0].value = "BuiltinParticipantVolatileMessageSecureReader";
 
-    EndpointSecurityAttributes attribs;
-    attribs.base.is_read_protected = false;
-    attribs.base.is_write_protected = false;
-    attribs.base.is_discovery_protected = false;
-    attribs.base.is_liveliness_protected = false;
-    attribs.is_submessage_protected = true;
-    attribs.is_payload_protected = false;
-    attribs.is_key_protected = false;
+      EndpointSecurityAttributes attribs;
+      attribs.base.is_read_protected = false;
+      attribs.base.is_write_protected = false;
+      attribs.base.is_discovery_protected = false;
+      attribs.base.is_liveliness_protected = false;
+      attribs.is_submessage_protected = true;
+      attribs.is_payload_protected = false;
+      attribs.is_key_protected = false;
 
-    NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
-    participant_volatile_message_secure_reader_->set_crypto_handle(h);
-  }
+      NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
+      participant_volatile_message_secure_reader_->set_crypto_handle(h);
+    }
 
-  // Participant-Message-Secure Writer
-  {
-    PropertySeq properties;
+    // Participant-Message-Secure Writer
+    {
+      PropertySeq properties;
 
-    EndpointSecurityAttributes attribs;
-    attribs.base.is_read_protected = false;
-    attribs.base.is_write_protected = false;
-    attribs.is_payload_protected = false;
-    attribs.is_key_protected = false;
-    attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
+      EndpointSecurityAttributes attribs;
+      attribs.base.is_read_protected = false;
+      attribs.base.is_write_protected = false;
+      attribs.is_payload_protected = false;
+      attribs.is_key_protected = false;
+      attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
 
-    NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
-    participant_message_secure_writer_.set_crypto_handle(h);
-  }
+      NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
+      participant_message_secure_writer_.set_crypto_handle(h);
+    }
 
-  // Participant-Message-Secure Reader
-  {
-    PropertySeq properties;
+    // Participant-Message-Secure Reader
+    {
+      PropertySeq properties;
 
-    EndpointSecurityAttributes attribs;
-    attribs.base.is_read_protected = false;
-    attribs.base.is_write_protected = false;
-    attribs.is_payload_protected = false;
-    attribs.is_key_protected = false;
-    attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
+      EndpointSecurityAttributes attribs;
+      attribs.base.is_read_protected = false;
+      attribs.base.is_write_protected = false;
+      attribs.is_payload_protected = false;
+      attribs.is_key_protected = false;
+      attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
 
-    NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
-    participant_message_secure_reader_->set_crypto_handle(h);
+      NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
+      participant_message_secure_reader_->set_crypto_handle(h);
+    }
+
+    // For signal_liveliness(...)
+    ok = acl->get_topic_sec_attributes(perm_handle, "DCPSParticipantMessageSecure", dcps_participant_message_secure_attribs, ex);
+    if (! ok) {
+        result = DDS::RETCODE_ERROR;
+        // TODO: log error
+    }
+
+  } else {
+      result = DDS::RETCODE_ERROR;
+      // TODO: log error
   }
   return result;
 }
@@ -1646,10 +1660,8 @@ Sedp::association_complete(const RepoId& localId,
 
 void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
-  DDS::Security::TopicSecurityAttributes attribs; /* TODO: pull from security plugin */
-  attribs.is_liveliness_protected = true; /* TODO: Don't do this */
 
-  if (attribs.is_liveliness_protected) {
+  if (dcps_participant_message_secure_attribs.is_liveliness_protected) {
       signal_liveliness_secure(kind);
 
   } else {
