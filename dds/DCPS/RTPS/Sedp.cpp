@@ -308,7 +308,7 @@ Sedp::init(const RepoId& guid,
 }
 
 DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle */,
-                                      DDS::Security::PermissionsHandle /* perm_handle */,
+                                      DDS::Security::PermissionsHandle perm_handle,
                                       DDS::Security::ParticipantCryptoHandle crypto_handle)
 {
   using namespace OpenDDS::Security;
@@ -316,11 +316,16 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
+  SecurityException ex;
+
   CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
-  AccessControl_var access_control = spdp_.get_security_config()->get_access_control();
+  AccessControl_var acl = spdp_.get_security_config()->get_access_control();
   Authentication_var auth = spdp_.get_security_config()->get_authentication();
 
-  // BuiltinParticipantVolatileMessageSecureWriter
+  ParticipantSecurityAttributes participant_attribs;
+  acl->get_participant_sec_attributes(perm_handle, participant_attribs, ex);
+
+  // Volatile-Message-Secure Writer
   {
     PropertySeq properties(1);
     properties[0].name = "dds.sec.builtin_endpoint_name";
@@ -335,15 +340,11 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     attribs.is_payload_protected = false;
     attribs.is_key_protected = false;
 
-    SecurityException exception;
-
-    participant_volatile_message_secure_writer_.set_crypto_handle(
-        key_factory->register_local_datawriter(crypto_handle, properties, attribs, exception));
-
-    /* TODO: Handle SecurityException */
+    NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
+    participant_volatile_message_secure_writer_.set_crypto_handle(h);
   }
 
-  // BuiltinParticipantVolatileMessageSecureReader
+  // Volatile-Message-Secure Reader
   {
     PropertySeq properties(1);
     properties[0].name = "dds.sec.builtin_endpoint_name";
@@ -358,14 +359,39 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     attribs.is_payload_protected = false;
     attribs.is_key_protected = false;
 
-    SecurityException exception;
-
-    participant_volatile_message_secure_reader_->set_crypto_handle(
-        key_factory->register_local_datareader(crypto_handle, properties, attribs, exception));
-
-    /* TODO: Handle SecurityException */
+    NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
+    participant_volatile_message_secure_reader_->set_crypto_handle(h);
   }
 
+  // Participant-Message-Secure Writer
+  {
+    PropertySeq properties;
+
+    EndpointSecurityAttributes attribs;
+    attribs.base.is_read_protected = false;
+    attribs.base.is_write_protected = false;
+    attribs.is_payload_protected = false;
+    attribs.is_key_protected = false;
+    attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
+
+    NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
+    participant_message_secure_writer_.set_crypto_handle(h);
+  }
+
+  // Participant-Message-Secure Reader
+  {
+    PropertySeq properties;
+
+    EndpointSecurityAttributes attribs;
+    attribs.base.is_read_protected = false;
+    attribs.base.is_write_protected = false;
+    attribs.is_payload_protected = false;
+    attribs.is_key_protected = false;
+    attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
+
+    NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
+    participant_message_secure_reader_->set_crypto_handle(h);
+  }
   return result;
 }
 
