@@ -52,6 +52,29 @@ namespace {
   }
 }
 
+void Spdp::init(DDS::DomainId_t domain,
+                       DCPS::RepoId& guid,
+                       const DDS::DomainParticipantQos& qos,
+                       RtpsDiscovery* disco)
+{
+  guid = guid_; // may have changed in SpdpTransport constructor
+  sedp_.ignore(guid);
+  sedp_.init(guid_, *disco, domain_);
+
+  // Append metatraffic unicast locator
+  sedp_.unicast_locators(sedp_unicast_);
+
+  if (disco->sedp_multicast()) { // Append metatraffic multicast locator
+    const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
+    OpenDDS::DCPS::Locator_t mc_locator;
+    mc_locator.kind = address_to_kind(mc_addr);
+    mc_locator.port = mc_addr.get_port_number();
+    address_to_bytes(mc_locator.address, mc_addr);
+    sedp_multicast_.length(1);
+    sedp_multicast_[0] = mc_locator;
+  }
+}
+
 
 Spdp::Spdp(DDS::DomainId_t domain,
            RepoId& guid,
@@ -71,22 +94,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  guid = guid_; // may have changed in SpdpTransport constructor
-  sedp_.ignore(guid);
-  sedp_.init(guid_, *disco, domain_);
-
-  // Append metatraffic unicast locator
-  sedp_.unicast_locators(sedp_unicast_);
-
-  if (disco->sedp_multicast()) { // Append metatraffic multicast locator
-    const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
-    OpenDDS::DCPS::Locator_t mc_locator;
-    mc_locator.kind = address_to_kind(mc_addr);
-    mc_locator.port = mc_addr.get_port_number();
-    address_to_bytes(mc_locator.address, mc_addr);
-    sedp_multicast_.length(1);
-    sedp_multicast_[0] = mc_locator;
-  }
+  init(domain, guid, qos, disco);
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -97,9 +105,21 @@ Spdp::Spdp(DDS::DomainId_t domain,
            DDS::Security::PermissionsHandle perm_handle,
            DDS::Security::ParticipantCryptoHandle crypto_handle)
 
-: Spdp(domain, guid, qos, disco)
-
+: OpenDDS::DCPS::LocalParticipant<Sedp>(qos)
+, disco_(disco)
+, domain_(domain)
+, guid_(guid)
+, tport_(new SpdpTransport(this))
+, eh_(tport_)
+, eh_shutdown_(false)
+, shutdown_cond_(lock_)
+, shutdown_flag_(false)
+, sedp_(guid_, *this, lock_)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  init(domain, guid, qos, disco);
+
   security_config_ = OpenDDS::Security::SecurityRegistry::instance()->default_config();
 
   sedp_.init_security(id_handle, perm_handle, crypto_handle);

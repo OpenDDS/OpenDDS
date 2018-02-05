@@ -87,6 +87,12 @@ protected:
   Sedp& endpoint_manager() { return sedp_; }
 
 private:
+
+  void init(DDS::DomainId_t domain,
+            DCPS::RepoId& guid,
+            const DDS::DomainParticipantQos& qos,
+            RtpsDiscovery* disco);
+
   ACE_Reactor* reactor() const;
 
   RtpsDiscovery* disco_;
