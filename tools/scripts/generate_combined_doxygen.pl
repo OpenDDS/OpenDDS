@@ -4,7 +4,7 @@
 # documentation with ACE/TAO documentation built-in.
 
 use strict;
-use File::Path qw(make_path rmtree);
+use File::Path qw(mkpath rmtree);
 use File::Copy qw(move);
 use File::Find;
 use File::Basename;
@@ -42,7 +42,7 @@ my $ace_dest = "$dest/html/dds/ace_tao";
 if (-d "$dest/html") {
   rmtree("$dest/html");
 }
-make_path($ace_dest) or die "ERROR: $!";
+mkpath($ace_dest) or die "ERROR: $!";
 
 # Build ACE/TAO Documentation
 chdir $ENV{"ACE_ROOT"};
