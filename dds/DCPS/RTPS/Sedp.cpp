@@ -327,11 +327,16 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   bool ok = acl->get_participant_sec_attributes(perm_handle, participant_attribs, ex);
   if (ok) {
 
-    // Volatile-Message-Secure Writer
+    NativeCryptoHandle h = DDS::HANDLE_NIL;
+
+    // Volatile-Message-Secure
     {
-      PropertySeq properties(1);
-      properties[0].name = "dds.sec.builtin_endpoint_name";
-      properties[0].value = "BuiltinParticipantVolatileMessageSecureWriter";
+      PropertySeq writer_props(1), reader_props(1);
+      writer_props[0].name = "dds.sec.builtin_endpoint_name";
+      writer_props[0].value = "BuiltinParticipantVolatileMessageSecureWriter";
+
+      reader_props[0].name = "dds.sec.builtin_endpoint_name";
+      reader_props[0].value = "BuiltinParticipantVolatileMessageSecureReader";
 
       EndpointSecurityAttributes attribs;
       attribs.base.is_read_protected = false;
@@ -342,32 +347,16 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       attribs.is_payload_protected = false;
       attribs.is_key_protected = false;
 
-      NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
       participant_volatile_message_secure_writer_.set_crypto_handle(h);
-    }
 
-    // Volatile-Message-Secure Reader
-    {
-      PropertySeq properties(1);
-      properties[0].name = "dds.sec.builtin_endpoint_name";
-      properties[0].value = "BuiltinParticipantVolatileMessageSecureReader";
-
-      EndpointSecurityAttributes attribs;
-      attribs.base.is_read_protected = false;
-      attribs.base.is_write_protected = false;
-      attribs.base.is_discovery_protected = false;
-      attribs.base.is_liveliness_protected = false;
-      attribs.is_submessage_protected = true;
-      attribs.is_payload_protected = false;
-      attribs.is_key_protected = false;
-
-      NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
       participant_volatile_message_secure_reader_->set_crypto_handle(h);
     }
 
-    // Participant-Message-Secure Writer
+    // Participant-Message-Secure
     {
-      PropertySeq properties;
+      PropertySeq reader_props, writer_props;
 
       EndpointSecurityAttributes attribs;
       attribs.base.is_read_protected = false;
@@ -376,22 +365,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       attribs.is_key_protected = false;
       attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
 
-      NativeCryptoHandle h = key_factory->register_local_datawriter(crypto_handle, properties, attribs, ex);
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
       participant_message_secure_writer_.set_crypto_handle(h);
-    }
 
-    // Participant-Message-Secure Reader
-    {
-      PropertySeq properties;
-
-      EndpointSecurityAttributes attribs;
-      attribs.base.is_read_protected = false;
-      attribs.base.is_write_protected = false;
-      attribs.is_payload_protected = false;
-      attribs.is_key_protected = false;
-      attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
-
-      NativeCryptoHandle h = key_factory->register_local_datareader(crypto_handle, properties, attribs, ex);
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
       participant_message_secure_reader_->set_crypto_handle(h);
     }
 
@@ -400,6 +377,42 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     if (! ok) {
         result = DDS::RETCODE_ERROR;
         // TODO: log error
+    }
+
+    // DCPS-Publications-Secure
+    {
+      PropertySeq reader_props, writer_props;
+
+      EndpointSecurityAttributes attribs;
+      attribs.base.is_read_protected = false;
+      attribs.base.is_write_protected = false;
+      attribs.is_payload_protected = false;
+      attribs.is_key_protected = false;
+      attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      publications_secure_writer_.set_crypto_handle(h);
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      publications_secure_reader_->set_crypto_handle(h);
+    }
+
+    // DCPS-Subscriptions-Secure
+    {
+      PropertySeq reader_props, writer_props;
+
+      EndpointSecurityAttributes attribs;
+      attribs.base.is_read_protected = false;
+      attribs.base.is_write_protected = false;
+      attribs.is_payload_protected = false;
+      attribs.is_key_protected = false;
+      attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      subscriptions_secure_writer_.set_crypto_handle(h);
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      subscriptions_secure_reader_->set_crypto_handle(h);
     }
 
   } else {

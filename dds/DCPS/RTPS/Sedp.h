@@ -124,6 +124,8 @@ private:
       MSG_PARTICIPANT_STATELESS_DATA,
       MSG_PARTICIPANT_VOLATILE_SECURE,
       MSG_PARTICIPANT_DATA_SECURE,
+      MSG_WRITER_SECURE,
+      MSG_READER_SECURE,
     } type_;
 
     DCPS::MessageId id_;
@@ -256,7 +258,9 @@ private:
   };
 
   Writer publications_writer_;
+  Writer publications_secure_writer_;
   Writer subscriptions_writer_;
+  Writer subscriptions_secure_writer_;
   Writer participant_message_writer_;
   Writer participant_message_secure_writer_;
   Writer participant_stateless_message_writer_;
@@ -296,7 +300,9 @@ private:
   typedef DCPS::RcHandle<Reader> Reader_rch;
 
   Reader_rch publications_reader_;
+  Reader_rch publications_secure_reader_;
   Reader_rch subscriptions_reader_;
+  Reader_rch subscriptions_secure_reader_;
   Reader_rch participant_message_reader_;
   Reader_rch participant_message_secure_reader_;
   Reader_rch participant_stateless_message_reader_;
