@@ -2375,6 +2375,38 @@ Sedp::write_publication_data(
 }
 
 DDS::ReturnCode_t
+Sedp::write_publication_data_secure(
+    const RepoId& rid,
+    LocalPublication& lp,
+    const DCPS::RepoId& reader)
+{
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  if (spdp_.associated() && (reader != GUID_UNKNOWN ||
+                             !associated_participants_.empty())) {
+
+    OpenDDS::DCPS::DiscoveredWriterData dwd;
+    ParameterList plist;
+    populate_discovered_writer_msg(dwd, rid, lp);
+
+    // Convert to parameter list
+    if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                 ACE_TEXT("Failed to convert DiscoveredWriterData ")
+                 ACE_TEXT(" to ParameterList\n")));
+      result = DDS::RETCODE_ERROR;
+    }
+    if (DDS::RETCODE_OK == result) {
+      result = publications_writer_.write_parameter_list(plist, reader, lp.sequence_);
+    }
+  } else if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
+                        ACE_TEXT("not currently associated, dropping msg.\n")));
+  }
+  return result;
+}
+
+DDS::ReturnCode_t
 Sedp::write_subscription_data(
     const RepoId& rid,
     LocalSubscription& ls,
