@@ -353,9 +353,9 @@ namespace {
       switch (op_) {
       case OP_MOD:
         {
-          if (children_.size () != 2) {
+          if (children_.size() != 2) {
             std::stringstream ss;
-            ss << MOD << " expects 2 arguments, given " << 2;
+            ss << MOD << " expects 2 arguments, given " << children_.size();
             throw std::runtime_error(ss.str ());
           }
           Value left = children_[0]->eval(data);

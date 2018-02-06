@@ -12,6 +12,8 @@
 #include "utl_identifier.h"
 #include "utl_labellist.h"
 
+#include <ast_fixed.h>
+
 using namespace AstTypeClassification;
 
 std::ostream&
@@ -253,6 +255,23 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
                       << Close(this)
                       << Indent(this) << "}\n"
                       << Close(this);
+      break;
+    }
+  case AST_Decl::NT_fixed:
+    {
+      AST_Fixed* fixed = AST_Fixed::narrow_from_decl(base);
+      unsigned digits = fixed->digits()->ev()->u.ulval;
+      unsigned scale = fixed->scale()->ev()->u.ulval;
+      be_global->itl_
+        << Open(this) << Indent(this) << "{\n" << Open(this)
+        << Indent(this) << "\"kind\" : \"alias\",\n"
+        << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
+        << Indent(this) << "\"type\" : { "
+          << "\"kind\" : \"fixed\", "
+          << "\"digits\" : " << digits << ", "
+          << "\"scale\" : " << scale << ", "
+          << "\"base\" : 10 }\n"
+        << Close(this) << Indent(this) << "}\n" << Close(this);
       break;
     }
   default:

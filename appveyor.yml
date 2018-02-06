@@ -9,7 +9,7 @@ clone_depth: 15
 install:
   - mkdir ext && cd ext
   - git clone --depth 1 git://github.com/DOCGroup/MPC.git
-  - git clone -q -b Latest_Micro --depth 1 git://github.com/DOCGroup/ACE_TAO.git
+  - git clone -q --depth 1 git://github.com/DOCGroup/ACE_TAO.git
   - cd ..
   - set MPC_ROOT=%CD%\ext\MPC
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64

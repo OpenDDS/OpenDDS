@@ -154,12 +154,13 @@ namespace OpenDDS
         }
       }
 
-      void visit (itl::Fixed&) {
-        // TODO Fixed types are supported in OpenDDS now, and the dissector
-        // should handle them.
-        dissector = new Sample_Dissector();
-        dissector->add_field(new Sample_Field(Sample_Field::Undefined, ""));
-        ACE_DEBUG ((LM_WARNING, ACE_TEXT ("Fixed-point types are not supported\n")));
+      void visit (itl::Fixed& fixed) {
+#ifndef ACE_HAS_CDR_FIXED
+        ACE_DEBUG((LM_WARNING, ACE_TEXT(
+          "A Fixed type has been specified but ACE is missing Fixed.\n"
+        )));
+#endif
+        dissector = new Sample_Fixed(fixed.digits(), fixed.scale());
       }
 
       Sample_Dissector* do_array(std::vector<unsigned int>::const_iterator pos,
@@ -290,6 +291,9 @@ namespace OpenDDS
       itl::Dictionary d;
       bool no_dcps_data_types = true;
       DissectorsType primary_dissectors;
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("Found Dissector ITL File: %C\n"),
+        filename));
       try {
         d.fromJson(str);
         std::map<itl::Type*, Sample_Dissector*> map;
@@ -311,6 +315,9 @@ namespace OpenDDS
             }
             sd->mark_struct();
           }
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("    Data Type: %C\n"),
+            a->name().c_str()));
           dissectors_[a->name()] = sd;
         }
       }
@@ -374,6 +381,8 @@ namespace OpenDDS
     void
     Sample_Manager::init ()
     {
+      hf_array_ = NULL;
+
       // - from env get directory for config files use "." by default
       // - use dirent to iterate over all *.ini files in config dir
       // - for each file load the configuration and iterate over sections
@@ -450,14 +459,10 @@ namespace OpenDDS
       field_names_.push_front(short_name_copy);
 
       // Push hf_info struct to hf_vector_
-      hf_vector_.push_back({
-        hf_index,
-        {
-          short_name_copy, full_name_copy,
-          ft, fd,
-          NULL, 0, NULL, HFILL
-        }
-      });
+      hf_register_info hfri = { hf_index,
+        { short_name_copy, full_name_copy, ft, fd, NULL, 0, NULL, HFILL }
+      };
+      hf_vector_.push_back(hfri);
     }
 
     void

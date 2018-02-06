@@ -28,4 +28,9 @@ project : dcpslib, wireshark, itl {
     LIB_UNCHECKED   = $(LIB_NAME).$(LIBEXT)
     SHLIB_UNCHECKED = $(LIB_NAME).$(SOEXT)
   }
+
+  // Make corrections for macOS, see macos_postbuild.sh for details
+  specific(!prop:windows) {
+    postbuild += bash macos_postbuild.sh
+  }
 }
