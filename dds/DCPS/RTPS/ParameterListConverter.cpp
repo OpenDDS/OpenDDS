@@ -526,6 +526,14 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
   return 0;
 }
 
+int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& /*reader_data*/,
+                  ParameterList& /*param_list*/,
+                  bool /*map*/)
+{
+  // TODO: Implement
+  return 0;
+}
+
 int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
                   ParameterList& param_list,
                   bool map)
@@ -694,6 +702,14 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
     param._d(PID_OPENDDS_ASSOCIATED_WRITER);
     add_param(param_list, param);
   }
+  return 0;
+}
+
+int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& /*reader_data*/,
+                  ParameterList& /*param_list*/,
+                  bool /*map*/)
+{
+  // TODO: Implement
   return 0;
 }
 
