@@ -39,7 +39,7 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
   push(@doxygen, $ARGV[$i]);
 }
 my $ace_dest = "$dest/html/dds/ace_tao";
-mkpath($ace_dest) or die "ERROR: $!";
+mkpath($ace_dest);
 
 # Build ACE/TAO Documentation
 chdir $ENV{"ACE_ROOT"};
