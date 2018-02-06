@@ -176,7 +176,9 @@ Sedp::Sedp(const RepoId& participant_id,
   : OpenDDS::DCPS::EndpointManager<SPDPdiscoveredParticipantData>(participant_id, lock)
   , spdp_(owner)
   , publications_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), *this)
+  , publications_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER), *this)
   , subscriptions_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), *this)
+  , subscriptions_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER), *this)
   , participant_message_writer_(make_id(participant_id, ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER), *this)
   , participant_message_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), *this)
   , participant_stateless_message_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this)
@@ -186,8 +188,16 @@ Sedp::Sedp(const RepoId& participant_id,
 			   make_id(participant_id,ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
                            ref(*this)))
 
+  , publications_secure_reader_(make_rch<Reader>(
+                           make_id(participant_id,DDS::Security::ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER),
+                           ref(*this)))
+
   , subscriptions_reader_(make_rch<Reader>(
 			    make_id(participant_id,ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
+                            ref(*this)))
+
+  , subscriptions_secure_reader_(make_rch<Reader>(
+                            make_id(participant_id,DDS::Security::ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER),
                             ref(*this)))
 
   , participant_message_reader_(make_rch<Reader>(
@@ -289,8 +299,14 @@ Sedp::init(const RepoId& guid,
   publications_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   publications_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
+  publications_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
+  publications_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+
   subscriptions_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   subscriptions_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+
+  subscriptions_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
+  subscriptions_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
   participant_message_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   participant_message_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
