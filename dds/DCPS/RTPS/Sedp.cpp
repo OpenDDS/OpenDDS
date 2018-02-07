@@ -348,9 +348,11 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     // Volatile-Message-Secure
     {
       PropertySeq writer_props(1), reader_props(1);
+      writer_props.length(1);
       writer_props[0].name = "dds.sec.builtin_endpoint_name";
       writer_props[0].value = "BuiltinParticipantVolatileMessageSecureWriter";
 
+      reader_props.length(1);
       reader_props[0].name = "dds.sec.builtin_endpoint_name";
       reader_props[0].value = "BuiltinParticipantVolatileMessageSecureReader";
 
