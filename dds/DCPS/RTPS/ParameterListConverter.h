@@ -23,19 +23,23 @@ namespace ParameterListConverter {
 
   OpenDDS_Rtps_Export
   int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
-                    ParameterList& param_list, bool map = false /*map IPV4 to IPV6 addr*/);
+                    ParameterList& param_list,
+                    bool map = false /*map IPV4 to IPV6 addr*/);
 
   OpenDDS_Rtps_Export
   int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
-                    ParameterList& param_list, bool map = false /*map IPV4 to IPV6 addr*/);
+                    ParameterList& param_list,
+                    bool map = false /*map IPV4 to IPV6 addr*/);
 
   OpenDDS_Rtps_Export
   int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data,
-                    ParameterList& param_list, bool map = false /*map IPV4 to IPV6 addr*/);
+                    ParameterList& param_list,
+                    bool map = false /*map IPV4 to IPV6 addr*/);
 
   OpenDDS_Rtps_Export
   int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data,
-                    ParameterList& param_list, bool map = false /*map IPV4 to IPV6 addr*/);
+                    ParameterList& param_list,
+                    bool map = false /*map IPV4 to IPV6 addr*/);
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,

@@ -526,12 +526,38 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
   return 0;
 }
 
-int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& /*reader_data*/,
-                  ParameterList& /*param_list*/,
-                  bool /*map*/)
+// Local security-related helper functions.
+namespace {
+
+  inline void to_param_list(const DDS::Security::EndpointSecurityInfo& security_info,
+                            const DDS::Security::DataTags& data_tags,
+                            ParameterList& param_list)
+  {
+    {
+      Parameter param;
+      param.endpoint_security_info(security_info);
+      param._d(DDS::Security::PID_ENDPOINT_SECURITY_INFO);
+      add_param(param_list, param);
+    }
+    {
+      Parameter param;
+      param.data_tags(data_tags);
+      param._d(DDS::Security::PID_DATA_TAGS);
+      add_param(param_list, param);
+    }
+  }
+
+}
+
+int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data,
+                  ParameterList& param_list,
+                  bool map)
 {
-  // TODO: Implement
-  return 0;
+  int result = to_param_list(writer_data.data, param_list, map);
+
+  to_param_list(writer_data.security_info, writer_data.data_tags, param_list);
+
+  return result;
 }
 
 int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
@@ -705,12 +731,15 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
   return 0;
 }
 
-int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& /*reader_data*/,
-                  ParameterList& /*param_list*/,
-                  bool /*map*/)
+int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data,
+                  ParameterList& param_list,
+                  bool map)
 {
-  // TODO: Implement
-  return 0;
+  int result = to_param_list(reader_data.data, param_list, map);
+
+  to_param_list(reader_data.security_info, reader_data.data_tags, param_list);
+
+  return result;
 }
 
 int from_param_list(const ParameterList& param_list,

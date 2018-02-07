@@ -2384,9 +2384,9 @@ Sedp::write_publication_data_secure(
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
-    OpenDDS::DCPS::DiscoveredWriterData dwd;
+    OpenDDS::Security::DiscoveredWriterData_SecurityWrapper dwd;
     ParameterList plist;
-    populate_discovered_writer_msg(dwd, rid, lp);
+    populate_discovered_writer_msg(dwd.data, rid, lp);
 
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
@@ -2397,7 +2397,7 @@ Sedp::write_publication_data_secure(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      result = publications_writer_.write_parameter_list(plist, reader, lp.sequence_);
+      result = publications_secure_writer_.write_parameter_list(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
@@ -2436,6 +2436,39 @@ Sedp::write_subscription_data(
   }
   return result;
 }
+
+DDS::ReturnCode_t
+Sedp::write_subscription_data_secure(
+    const RepoId& rid,
+    LocalSubscription& ls,
+    const DCPS::RepoId& reader)
+{
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  if (spdp_.associated() && (reader != GUID_UNKNOWN ||
+                             !associated_participants_.empty())) {
+
+    OpenDDS::Security::DiscoveredReaderData_SecurityWrapper drd;
+    ParameterList plist;
+    populate_discovered_reader_msg(drd.data, rid, ls);
+
+    // Convert to parameter list
+    if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
+                 ACE_TEXT("Failed to convert DiscoveredReaderData ")
+                 ACE_TEXT("to ParameterList\n")));
+      result = DDS::RETCODE_ERROR;
+    }
+    if (DDS::RETCODE_OK == result) {
+      result = subscriptions_secure_writer_.write_parameter_list(plist, reader, ls.sequence_);
+    }
+  } else if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
+                        ACE_TEXT("not currently associated, dropping msg.\n")));
+  }
+  return result;
+}
+
 
 DDS::ReturnCode_t
 Sedp::write_participant_message_data(
