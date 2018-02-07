@@ -19,6 +19,8 @@
 #include "ace/Select_Reactor.h"
 #include "ace/Condition_Thread_Mutex.h"
 
+#include "dds/DdsSecurityCoreC.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -127,6 +129,7 @@ namespace OpenDDS {
         , publication_counter_(0)
         , subscription_counter_(0)
         , topic_counter_(0)
+        , permissions_handle_(DDS::HANDLE_NIL)
       { }
 
       virtual ~EndpointManager() { }
@@ -901,6 +904,26 @@ namespace OpenDDS {
                    ACE_TEXT("ran out of builtin topic keys\n")));
       }
 
+      inline void set_permissions_handle(DDS::Security::PermissionsHandle h)
+      {
+        permissions_handle_ = h;
+      }
+
+      inline DDS::Security::PermissionsHandle get_permissions_handle() const
+      {
+        return permissions_handle_;
+      }
+
+      inline void set_access_control(DDS::Security::AccessControl_var acl)
+      {
+        access_control_ = acl;
+      }
+
+      inline DDS::Security::AccessControl_var get_access_control() const
+      {
+        return access_control_;
+      }
+
       ACE_Thread_Mutex& lock_;
       DCPS::RepoId participant_id_;
       BitKeyMap pub_key_to_id_, sub_key_to_id_;
@@ -914,6 +937,9 @@ namespace OpenDDS {
       TopicNameMap topic_names_;
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
+
+      DDS::Security::PermissionsHandle permissions_handle_;
+      DDS::Security::AccessControl_var access_control_;
     };
 
     template <typename EndpointManagerType>

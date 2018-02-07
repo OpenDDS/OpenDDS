@@ -332,12 +332,15 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
-  // TODO: Handle all exceptions below once error-codes have been defined, etc.
-  SecurityException ex;
-
   CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
   AccessControl_var acl = spdp_.get_security_config()->get_access_control();
   Authentication_var auth = spdp_.get_security_config()->get_authentication();
+
+  set_permissions_handle(perm_handle);
+  set_access_control(acl);
+
+  // TODO: Handle all exceptions below once error-codes have been defined, etc.
+  SecurityException ex;
 
   ParticipantSecurityAttributes participant_attribs;
   bool ok = acl->get_participant_sec_attributes(perm_handle, participant_attribs, ex);
@@ -388,13 +391,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
       participant_message_secure_reader_->set_crypto_handle(h);
-    }
-
-    // For signal_liveliness(...)
-    ok = acl->get_topic_sec_attributes(perm_handle, "DCPSParticipantMessageSecure", dcps_participant_message_secure_attribs, ex);
-    if (! ok) {
-        result = DDS::RETCODE_ERROR;
-        // TODO: log error
     }
 
     // DCPS-Publications-Secure
@@ -1691,12 +1687,29 @@ Sedp::association_complete(const RepoId& localId,
 
 void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
-  // TODO: Pending issue DDSSEC12-28 this may change.
-  if (dcps_participant_message_secure_attribs.is_liveliness_protected) {
-      signal_liveliness_secure(kind);
+
+  DDS::Security::SecurityException ex;
+  DDS::Security::TopicSecurityAttributes attribs;
+
+  // TODO: Pending issue DDSSEC12-28 Topic security attributes
+  // may get changed to a different set of security attributes.
+  bool ok = get_access_control()->get_topic_sec_attributes(
+      get_permissions_handle(),
+      "DCPSParticipantMessageSecure",
+      attribs,
+      ex);
+
+  if (ok) {
+
+      if (attribs.is_liveliness_protected) {
+          signal_liveliness_secure(kind);
+
+      } else {
+          signal_liveliness_unsecure(kind);
+      }
 
   } else {
-      signal_liveliness_unsecure(kind);
+      // TODO: log error
   }
 }
 

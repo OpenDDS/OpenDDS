@@ -473,7 +473,6 @@ private:
   DCPS::SequenceNumber secure_automatic_liveliness_seq_;
   DCPS::SequenceNumber secure_manual_liveliness_seq_;
 
-  DDS::Security::TopicSecurityAttributes dcps_participant_message_secure_attribs;
 };
 
 /// A class to wait on acknowledgments from other threads
