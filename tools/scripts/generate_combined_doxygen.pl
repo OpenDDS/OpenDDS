@@ -4,8 +4,7 @@
 # documentation with ACE/TAO documentation built-in.
 
 use strict;
-use File::Path qw(mkpath rmtree);
-use File::Copy qw(move);
+use File::Path 'mkpath';
 use File::Find;
 use File::Basename;
 use Cwd 'abs_path';
@@ -14,46 +13,47 @@ use Cwd 'abs_path';
 my $usage = "usage: generate_combined_doxygen.pl [-h|--help] DESTINATION ...\n";
 my $argc = $#ARGV + 1;
 if (!(defined $ENV{"ACE_ROOT"} && defined $ENV{"DDS_ROOT"})) {
-  die "ERROR: \$ACE_ROOT and \$DDS_ROOT must be defined\n";
+  die("ERROR: \$ACE_ROOT and \$DDS_ROOT must be defined\n");
 }
 if ($argc == 0) {
-  die "ERROR: $usage";
+  die("ERROR: $usage");
 }
 if ($ARGV[0] eq "-h" || $ARGV[0] eq "--help") {
-  print $usage;
-  print "\nGenerates OpenDDS Doxygen documentation with ACE/TAO documentation built-in.\n";
-  print "Extra arguments are passed to generate_doxygen.pl.\n";
+  print($usage);
+  print("\nGenerates OpenDDS Doxygen documentation with ACE/TAO documentation built-in.\n");
+  print("Extra arguments are passed to generate_doxygen.pl.\n");
 
-  exit 0;
+  exit(0);
 }
 if (! -d $ARGV[0]) {
-  die "ERROR: destination directory $ARGV[0] does not exist!\n";
+  die("ERROR: destination directory $ARGV[0] does not exist!\n");
 }
 
 # Set up paths
 my $dest = abs_path(shift);
-my @doxygen = (
-  "perl", $ENV{"ACE_ROOT"} . "/bin/generate_doxygen.pl", "-html_output", $dest
-);
+my @doxygen = ("perl", $ENV{"ACE_ROOT"} . "/bin/generate_doxygen.pl");
 for (my $i = 0; $i <= $#ARGV; $i++) {
   push(@doxygen, $ARGV[$i]);
 }
+push(@doxygen, "-html_output");
 my $ace_dest = "$dest/html/dds/ace_tao";
-mkpath($ace_dest);
+mkpath($ace_dest, {error => \my $error});
+if (@$error) {
+  exit($!);
+}
 
 # Build ACE/TAO Documentation
-chdir $ENV{"ACE_ROOT"};
+chdir($ENV{"ACE_ROOT"});
+push(@doxygen, $ace_dest);
 system(@doxygen) == 0 or die "ERROR: ACE/TAO Doxygen failed ($!)\n";
-move("$dest/html/libace-doc", "$ace_dest/libace-doc") or die $!;
-move("$dest/html/libacexml-doc", "$ace_dest/libacexml-doc") or die $!;
-move("$dest/html/libtao-doc", "$ace_dest/libtao-doc") or die $!;
+pop(@doxygen);
 
 # Find Tagfiles and Inject into dds.doxygen using $ace_tao_tagfiles
 my $ace_tao_tagfiles = "";
 my (@tagfiles)=();
-find (\&check_if_tag, $ace_dest);
+find(\&check_if_tag, $ace_dest);
 sub check_if_tag {
-  push (@tagfiles, $File::Find::name) if (!-d && $File::Find::name =~ /.*\.tag$/);
+  push(@tagfiles, $File::Find::name) if (!-d && $File::Find::name =~ /.*\.tag$/);
 }
 foreach $a (@tagfiles) {
   my $file = "ace_tao" . dirname(substr($a, (length $ace_dest)));
@@ -71,9 +71,10 @@ foreach $a (@tagfiles) {
   print $f sprintf(" * <a href=\"%s/index.html\">%s</a><br>\n", $link, $link);
 }
 print $f " */\n";
-close $f;
+close($f);
 
 # Build OpenDDS Documentation
-chdir $ENV{"DDS_ROOT"};
+chdir($ENV{"DDS_ROOT"});
+push(@doxygen, $dest);
 system(@doxygen) == 0 or die "ERROR: DDS Doxygen failed ($!)\n";
 
