@@ -45,7 +45,7 @@ if ($@) {
 # Build ACE/TAO Documentation
 chdir($ENV{"ACE_ROOT"});
 push(@doxygen, $ace_dest);
-system(@doxygen) == 0 or die "ERROR: ACE/TAO Doxygen failed ($!)\n";
+system(@doxygen) == 0 or die "ERROR: ACE/TAO Doxygen failed ($?)\n";
 pop(@doxygen);
 
 # Find Tagfiles and Inject into dds.doxygen using $ace_tao_tagfiles
@@ -76,5 +76,5 @@ close($f);
 # Build OpenDDS Documentation
 chdir($ENV{"DDS_ROOT"});
 push(@doxygen, $dest);
-system(@doxygen) == 0 or die "ERROR: DDS Doxygen failed ($!)\n";
+system(@doxygen) == 0 or die "ERROR: DDS Doxygen failed ($?)\n";
 
