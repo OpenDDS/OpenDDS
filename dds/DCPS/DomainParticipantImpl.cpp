@@ -1629,8 +1629,8 @@ DomainParticipantImpl::enable()
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipant::enable, ")
-      ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %s\n"),
-        se.code, se.minor_code, se.message));
+      ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
     return DDS::RETCODE_ERROR;
   }
 
@@ -1642,8 +1642,8 @@ DomainParticipantImpl::enable()
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipant::enable, ")
-      ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %s\n"),
-        se.code, se.minor_code, se.message));
+      ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
     return DDS::RETCODE_ERROR;
   }
 
@@ -1652,8 +1652,8 @@ DomainParticipantImpl::enable()
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipant::enable, ")
-      ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %s\n"),
-        se.code, se.minor_code, se.message));
+      ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
     return DDS::RETCODE_ERROR;
   }
 
@@ -1666,8 +1666,8 @@ DomainParticipantImpl::enable()
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipant::enable, ")
-      ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %s\n"),
-        se.code, se.minor_code, se.message));
+      ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
     return DDS::RETCODE_ERROR;
   }
 
@@ -1677,8 +1677,8 @@ DomainParticipantImpl::enable()
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("DomainParticipant::enable, ")
-      ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %s\n"),
-        se.code, se.minor_code, se.message));
+      ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
     return DDS::RETCODE_ERROR;
   }
  
