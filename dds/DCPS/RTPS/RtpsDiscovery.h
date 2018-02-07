@@ -50,6 +50,7 @@ public:
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
+    const OpenDDS::DCPS::RepoId& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
     DDS::Security::ParticipantCryptoHandle part_crypto);

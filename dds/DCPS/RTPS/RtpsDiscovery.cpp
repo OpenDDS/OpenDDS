@@ -302,30 +302,18 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
 DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant_secure(DDS::DomainId_t domain,
                                       const DDS::DomainParticipantQos& qos,
+                                      const OpenDDS::DCPS::RepoId& guid,
                                       DDS::Security::IdentityHandle id,
                                       DDS::Security::PermissionsHandle perm,
                                       DDS::Security::ParticipantCryptoHandle part_crypto)
 {
-  DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
-  if (!guid_interface_.empty()) {
-    if (guid_gen_.interfaceName(guid_interface_.c_str()) != 0) {
-      if (DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
-      }
-    }
-  }
-  guid_gen_.populate(ads.id);
+  DCPS::AddDomainStatus ads = {guid, false /*federated*/};
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this, id, perm, part_crypto));
-    // ads.id may change during Spdp constructor
+    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ads.id, qos, this, id, perm, part_crypto));
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
-    ads.id = GUID_UNKNOWN;
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsDiscovery::add_domain_participant() - "
+    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsDiscovery::add_domain_participant_secure() - "
       "failed to initialize RTPS Simple Participant Discovery Protocol: %C\n",
       e.what()));
   }

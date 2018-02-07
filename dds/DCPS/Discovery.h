@@ -18,6 +18,7 @@
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DdsSecurityCoreC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -84,6 +85,14 @@ public:
   virtual AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos) = 0;
+
+  virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
+    DDS::DomainId_t domain,
+    const DDS::DomainParticipantQos& qos,
+    const OpenDDS::DCPS::RepoId& guid,
+    DDS::Security::IdentityHandle id,
+    DDS::Security::PermissionsHandle perm,
+    DDS::Security::ParticipantCryptoHandle part_crypto) = 0;
 
   virtual bool remove_domain_participant(
     DDS::DomainId_t domainId,

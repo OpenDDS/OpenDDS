@@ -424,6 +424,12 @@ private:
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask listener_mask_;
+  /// This participant id handle given by authentication.
+  DDS::Security::IdentityHandle id_handle_;
+  /// This participant permissions handle given by access constrol.
+  DDS::Security::PermissionsHandle perm_handle_;
+  /// This participant crypto handle given by crypto
+  DDS::Security::ParticipantCryptoHandle part_crypto_handle_;
   /// The id of the domain that creates this participant.
   DDS::DomainId_t domain_id_;
   /// This participant id given by discovery.

@@ -692,6 +692,22 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
+AddDomainStatus
+StaticDiscovery::add_domain_participant_secure(
+  DDS::DomainId_t /*domain*/,
+  const DDS::DomainParticipantQos& /*qos*/,
+  const OpenDDS::DCPS::RepoId& /*guid*/,
+  DDS::Security::IdentityHandle /*id*/,
+  DDS::Security::PermissionsHandle /*perm*/,
+  DDS::Security::ParticipantCryptoHandle /*part_crypto*/)
+{
+  const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::add_domain_participant_secure ")
+              ACE_TEXT("Security not supported for static discovery.\n")));
+  return ads;
+}
+
 namespace {
   const ACE_TCHAR TOPIC_SECTION_NAME[] = ACE_TEXT("topic");
   const ACE_TCHAR DATAWRITERQOS_SECTION_NAME[] = ACE_TEXT("datawriterqos");

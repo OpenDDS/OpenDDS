@@ -98,7 +98,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
-           DCPS::RepoId& guid,
+           const DCPS::RepoId& guid,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco,
            DDS::Security::IdentityHandle id_handle,
@@ -118,7 +118,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  init(domain, guid, qos, disco);
+  init(domain, guid_, qos, disco);
 
   security_config_ = OpenDDS::Security::SecurityRegistry::instance()->default_config();
 
