@@ -16,14 +16,14 @@ namespace OpenDDS {
 
     struct DiscoveredWriterData_SecurityWrapper {
       OpenDDS::DCPS::DiscoveredWriterData data;
-      DDS::Security::EndpointSecurityInfo info;
-      DDS::Security::DataTags tags;
+      DDS::Security::EndpointSecurityInfo security_info;
+      DDS::Security::DataTags data_tags;
     };
 
     struct DiscoveredReaderData_SecurityWrapper {
       OpenDDS::DCPS::DiscoveredReaderData data;
-      DDS::Security::EndpointSecurityInfo info;
-      DDS::Security::DataTags tags;
+      DDS::Security::EndpointSecurityInfo security_info;
+      DDS::Security::DataTags data_tags;
     };
 
   }
