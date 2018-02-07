@@ -2446,6 +2446,24 @@ Sedp::write_subscription_data(
     const DCPS::RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
+
+  if (ls.security_attribs_.is_discovery_protected) {
+      result = write_subscription_data_secure(rid, ls, reader);
+
+  } else {
+      result = write_subscription_data_unsecure(rid, ls, reader);
+  }
+
+  return result;
+}
+
+DDS::ReturnCode_t
+Sedp::write_subscription_data_unsecure(
+    const RepoId& rid,
+    LocalSubscription& ls,
+    const DCPS::RepoId& reader)
+{
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
     OpenDDS::DCPS::DiscoveredReaderData drd;

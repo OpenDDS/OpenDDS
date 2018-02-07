@@ -459,13 +459,17 @@ private:
                                                     LocalPublication& pub,
                                                     const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-  DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
-                                            LocalSubscription& pub,
-                                            const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+  inline DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
+                                                   LocalSubscription& pub,
+                                                   const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::RepoId& rid,
                                                    LocalSubscription& pub,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+
+  DDS::ReturnCode_t write_subscription_data_unsecure(const DCPS::RepoId& rid,
+                                                     LocalSubscription& pub,
+                                                     const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
                                                    LocalParticipantMessage& part,

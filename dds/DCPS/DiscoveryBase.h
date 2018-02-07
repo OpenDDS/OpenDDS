@@ -346,6 +346,7 @@ namespace OpenDDS {
                                     const DDS::StringSeq& params)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+
         RepoId rid = participant_id_;
         assign_subscription_key(rid, topicId, qos);
         LocalSubscription& sb = local_subscriptions_[rid];
@@ -357,6 +358,18 @@ namespace OpenDDS {
         sb.filterProperties.filterClassName = filterClassName;
         sb.filterProperties.filterExpression = filterExpr;
         sb.filterProperties.expressionParameters = params;
+
+        DDS::Security::SecurityException ex;
+
+        bool ok = get_access_control()->get_topic_sec_attributes(
+            get_permissions_handle(),
+            topic_names_[topicId].c_str(),
+            sb.security_attribs_,
+            ex);
+
+        if (!ok) {
+            // TODO: log error / throw exception??
+        }
 
         TopicDetails& td = topics_[topic_names_[topicId]];
         td.endpoints_.insert(rid);
