@@ -267,6 +267,7 @@ namespace OpenDDS {
                                    const DDS::PublisherQos& publisherQos)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+
         RepoId rid = participant_id_;
         assign_publication_key(rid, topicId, qos);
         LocalPublication& pb = local_publications_[rid];
@@ -275,6 +276,19 @@ namespace OpenDDS {
         pb.qos_ = qos;
         pb.trans_info_ = transInfo;
         pb.publisher_qos_ = publisherQos;
+
+        DDS::Security::SecurityException ex;
+
+        bool ok = get_access_control()->get_topic_sec_attributes(
+            get_permissions_handle(),
+            topic_names_[topicId].c_str(),
+            pb.security_attribs_,
+            ex);
+
+        if (!ok) {
+            // TODO: log error / throw exception??
+        }
+
         TopicDetails& td = topics_[topic_names_[topicId]];
         td.endpoints_.insert(rid);
 
@@ -413,6 +427,7 @@ namespace OpenDDS {
         DCPS::DataWriterCallbacks* publication_;
         DDS::DataWriterQos qos_;
         DDS::PublisherQos publisher_qos_;
+        DDS::Security::TopicSecurityAttributes security_attribs_;
       };
 
       struct LocalSubscription : LocalEndpoint {
@@ -420,6 +435,7 @@ namespace OpenDDS {
         DDS::DataReaderQos qos_;
         DDS::SubscriberQos subscriber_qos_;
         OpenDDS::DCPS::ContentFilterProperty_t filterProperties;
+        DDS::Security::TopicSecurityAttributes security_attribs_;
       };
 
       typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, DCPS::RepoId,
