@@ -37,9 +37,9 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 }
 push(@doxygen, "-html_output");
 my $ace_dest = "$dest/html/dds/ace_tao";
-mkpath($ace_dest, {error => \my $error});
-if (@$error) {
-  exit($!);
+eval { mkpath($ace_dest) };
+if ($@) {
+  die("Couldn’t create $ace_dest: $@");
 }
 
 # Build ACE/TAO Documentation
