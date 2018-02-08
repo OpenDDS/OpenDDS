@@ -15,7 +15,7 @@
 #include <vector>
 
 // Temporary include for get macaddress for unique guids
-#include <ACE_wrappers/ace/OS_NS_netdb.h>
+#include <ace/OS_NS_netdb.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

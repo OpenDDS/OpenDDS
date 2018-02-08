@@ -1619,7 +1619,6 @@ DomainParticipantImpl::enable()
   }
 
   if (TheServiceParticipant->get_security()) {
-    throw 1;
     Security::Authentication_var auth = security_config_->get_authentication();
 
     DDS::Security::SecurityException se;

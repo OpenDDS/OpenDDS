@@ -52,9 +52,9 @@ namespace {
   }
 }
 
-void Spdp::init(DDS::DomainId_t domain,
+void Spdp::init(DDS::DomainId_t /*domain*/,
                        DCPS::RepoId& guid,
-                       const DDS::DomainParticipantQos& qos,
+                       const DDS::DomainParticipantQos& /*qos*/,
                        RtpsDiscovery* disco)
 {
   guid = guid_; // may have changed in SpdpTransport constructor
