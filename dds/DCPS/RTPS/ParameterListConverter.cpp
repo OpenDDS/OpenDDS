@@ -547,7 +547,40 @@ namespace {
     }
   }
 
-}
+  inline int from_param_list(const ParameterList& param_list,
+                             DDS::Security::EndpointSecurityInfo& security_info,
+                             DDS::Security::DataTags& data_tags)
+  {
+
+    data_tags.tags.length(0);
+    security_info.endpoint_security_attributes = 0;
+    security_info.plugin_endpoint_security_attributes = 0;
+
+    size_t len = param_list.length();
+    for (size_t i = 0; i < len; ++i) {
+
+        const Parameter& p = param_list[i];
+
+        switch(p._d()) {
+          case DDS::Security::PID_DATA_TAGS:
+            data_tags = p.data_tags();
+            break;
+
+          case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
+            security_info = p.endpoint_security_info();
+            break;
+
+          default:
+            if (p._d() & PIDMASK_INCOMPATIBLE) {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+  }
+
+} /* local security-related helpers */
 
 int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data,
                   ParameterList& param_list,
@@ -1025,10 +1058,8 @@ int from_param_list(const ParameterList& param_list,
 int from_param_list(const ParameterList& param_list,
                     OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data)
 {
-  int result = from_param_list(param_list, writer_data.data);
-
-  // TODO
-  // Add security-specific unwrapping.
+  int result = from_param_list(param_list, writer_data.data) ||
+                  from_param_list(param_list, writer_data.security_info, writer_data.data_tags);
 
   return result;
 }
@@ -1188,10 +1219,8 @@ int from_param_list(const ParameterList& param_list,
 int from_param_list(const ParameterList& param_list,
                     OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data)
 {
-  int result = from_param_list(param_list, reader_data.data);
-
-  // TODO
-  // Add security-specific unwrapping.
+  int result = from_param_list(param_list, reader_data.data) ||
+                  from_param_list(param_list, reader_data.security_info, reader_data.data_tags);
 
   return result;
 }
