@@ -287,6 +287,14 @@ public:
   void bit_lookup_duration_msec(int msec);
   //@}
 
+  bool get_security() {
+    return security_enabled_;
+  }
+
+  void set_security(bool b) {
+    security_enabled_ = b;
+  }
+
   bool get_BIT() {
     return bit_enabled_;
   }
@@ -509,6 +517,8 @@ private:
   int bit_transport_port_;
 
   bool bit_enabled_;
+
+  bool security_enabled_;
 
   /// The timeout for lookup data from the builtin topic
   /// @c DataReader.
