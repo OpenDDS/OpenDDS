@@ -1306,6 +1306,21 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
+                  const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* data)
+{
+  DCPS::unique_ptr<const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> delete_the_data(data);
+  sedp_->data_received(message_id, *data);
+}
+
+void Sedp::data_received(DCPS::MessageId message_id,
+                         const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& data)
+{
+  // TODO
+  // Work some security-magic and then delegate to data_received on the writer-data.
+}
+
+void
+Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const OpenDDS::DCPS::DiscoveredReaderData* prdata)
 {
   DCPS::unique_ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
@@ -1501,6 +1516,21 @@ Sedp::data_received(DCPS::MessageId message_id,
       discovered_subscriptions_.erase(iter);
     }
   }
+}
+
+void
+Sedp::Task::svc_i(DCPS::MessageId message_id,
+                  const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper* data)
+{
+  DCPS::unique_ptr<const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> delete_the_data(data);
+  sedp_->data_received(message_id, *data);
+}
+
+void Sedp::data_received(DCPS::MessageId message_id,
+                         const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& data)
+{
+  // TODO
+  // Work some security-magic and then delegate to data_received on the reader-data.
 }
 
 void
@@ -2175,6 +2205,28 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       sedp_.task_.enqueue(id, move(wdata));
 
+
+    } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
+        ParameterList data;
+        if (!decode_parameter_list(sample, ser, encap, data)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                     ACE_TEXT("failed to deserialize data\n")));
+          return;
+        }
+
+        DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wdata_secure(
+            new OpenDDS::Security::DiscoveredWriterData_SecurityWrapper);
+
+        if (ParameterListConverter::from_param_list(data, *wdata_secure) < 0) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+                     ACE_TEXT("failed to convert from ParameterList ")
+                     ACE_TEXT("to DiscoveredWriterData\n")));
+          return;
+        }
+        sedp_.task_.enqueue(id, move(wdata_secure));
+
+
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
       ParameterList data;
       if (!decode_parameter_list(sample, ser, encap, data)) {
@@ -2196,7 +2248,31 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       sedp_.task_.enqueue(id, move(rdata));
 
-    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
+
+    } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+        ParameterList data;
+        if (!decode_parameter_list(sample, ser, encap, data)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                     ACE_TEXT("failed to deserialize data\n")));
+          return;
+        }
+
+        DCPS::unique_ptr<OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> rdata(
+            new OpenDDS::Security::DiscoveredReaderData_SecurityWrapper);
+
+        if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
+                     ACE_TEXT("failed to convert from ParameterList ")
+                     ACE_TEXT("to DiscoveredReaderData\n")));
+          return;
+        }
+        if ((rdata->data).readerProxy.expectsInlineQos) {
+          set_inline_qos((rdata->data).readerProxy.allLocators);
+        }
+        sedp_.task_.enqueue(id, move(rdata));
+
+      } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
                && !sample.header_.key_fields_only_) {
       DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
       if (!(ser >> *data)) {
@@ -2205,6 +2281,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
       sedp_.task_.enqueue(id, move(data));
+
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER
 		&& !sample.header_.key_fields_only_) {
@@ -2574,10 +2651,24 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::Discover
 }
 
 void
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wdata_secure)
+{
+  if (spdp_->shutting_down()) { return; }
+  putq(new Msg(Msg::MSG_WRITER_SECURE, id, wdata_secure.release()));
+}
+
+void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_READER, id, rdata.release()));
+}
+
+void
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> rdata_secure)
+{
+  if (spdp_->shutting_down()) { return; }
+  putq(new Msg(Msg::MSG_READER_SECURE, id, rdata_secure.release()));
 }
 
 void

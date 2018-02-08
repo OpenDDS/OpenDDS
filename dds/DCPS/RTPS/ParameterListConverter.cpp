@@ -1023,6 +1023,17 @@ int from_param_list(const ParameterList& param_list,
 }
 
 int from_param_list(const ParameterList& param_list,
+                    OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data)
+{
+  int result = from_param_list(param_list, writer_data.data);
+
+  // TODO
+  // Add security-specific unwrapping.
+
+  return result;
+}
+
+int from_param_list(const ParameterList& param_list,
                     OpenDDS::DCPS::DiscoveredReaderData& reader_data)
 {
   LocatorState last_state = locator_undefined;  // Track state of locator
@@ -1172,6 +1183,17 @@ int from_param_list(const ParameterList& param_list,
                              rtps_udp_locators);
   rtps_udp_locators.length(0);
   return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data)
+{
+  int result = from_param_list(param_list, reader_data.data);
+
+  // TODO
+  // Add security-specific unwrapping.
+
+  return result;
 }
 
 }

@@ -51,7 +51,15 @@ namespace ParameterListConverter {
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
-                      OpenDDS::DCPS::DiscoveredReaderData& writer_data);
+                      OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data);
+
+  OpenDDS_Rtps_Export
+  int from_param_list(const ParameterList& param_list,
+                      OpenDDS::DCPS::DiscoveredReaderData& reader_data);
+
+  OpenDDS_Rtps_Export
+  int from_param_list(const ParameterList& param_list,
+                      OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data);
 
 }}}
 
