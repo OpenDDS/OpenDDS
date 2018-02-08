@@ -90,9 +90,7 @@ module DDS {
 #define GMCLASSID_SECURITY_AUTH_REQUEST “dds.sec.auth_request”
 #define GMCLASSID_SECURITY_AUTH_HANDSHAKE “dds.sec.auth”
 
-    /*
     const ReturnCode_t RETCODE_NOT_ALLOWED_BY_SECURITY = 1000;
-    */
 
     typedef DataTags DataTagQosPolicy;
 

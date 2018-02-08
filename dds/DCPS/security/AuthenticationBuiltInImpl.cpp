@@ -8,10 +8,14 @@
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/security/TokenReader.h"
 #include "dds/DCPS/security/TokenWriter.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "ace/config-macros.h"
 #include "ace/Guard_T.h"
 #include <sstream>
 #include <vector>
+
+// Temporary include for get macaddress for unique guids
+#include <ACE_wrappers/ace/OS_NS_netdb.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -34,6 +38,9 @@ static const DDS::OctetSeq Empty_Seq;
 static const std::string AlgoName("RSASSA-PSS-SHA256");
 static const std::string AgreementAlgo("DH+MODP-2048-256");
 static const DDS::Security::Token TokenNil;
+
+// Temporary const for generating unique guids until real validation is in place
+static const short NODE_ID_SIZE = 6;
 
 AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 : listener_ptr_()
@@ -67,7 +74,30 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   local_identity_handle = get_next_handle();
   IdentityData_Ptr newDataPtr(new IdentityData());
-  adjusted_participant_guid = candidate_participant_guid;
+
+  // Temporary hack to produce unique guids until real auth is written
+  // TODO Replace this!
+  if (candidate_participant_guid == OpenDDS::DCPS::GUID_UNKNOWN) {
+
+    static ACE_UINT16 counter = 1024;
+    ACE_UINT16 pid = ACE_OS::getpid();
+
+    ACE_OS::macaddr_node_t macaddress;
+    ACE_OS::getmacaddress(&macaddress); // ignore return, assume success!
+
+    adjusted_participant_guid.guidPrefix[0] = DCPS::VENDORID_OCI[0];
+    adjusted_participant_guid.guidPrefix[1] = DCPS::VENDORID_OCI[1];
+    ACE_OS::memcpy(&adjusted_participant_guid.guidPrefix[2], macaddress.node, NODE_ID_SIZE);
+    adjusted_participant_guid.guidPrefix[8] = static_cast<CORBA::Octet>(pid >> 8);
+    adjusted_participant_guid.guidPrefix[9] = static_cast<CORBA::Octet>(pid & 0xFF);
+    adjusted_participant_guid.guidPrefix[10] = static_cast<CORBA::Octet>(counter >> 8);
+    adjusted_participant_guid.guidPrefix[11] = static_cast<CORBA::Octet>(counter & 0xFF);
+
+    ++counter;
+  }
+  else {
+    adjusted_participant_guid = candidate_participant_guid;
+  }
   newDataPtr->participant_guid = adjusted_participant_guid;
 
   // Mutex used to protect the identity_data structure
