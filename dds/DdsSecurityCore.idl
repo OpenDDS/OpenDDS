@@ -87,8 +87,8 @@ module DDS {
     typedef ParticipantGenericMessage ParticipantStatelessMessage;
     typedef ParticipantGenericMessage ParticipantVolatileMessageSecure;
 
-#define GMCLASSID_SECURITY_AUTH_REQUEST “dds.sec.auth_request”
-#define GMCLASSID_SECURITY_AUTH_HANDSHAKE “dds.sec.auth”
+    const string GMCLASSID_SECURITY_AUTH_REQUEST = "dds.sec.auth_request";
+    const string GMCLASSID_SECURITY_AUTH_HANDSHAKE = "dds.sec.auth";
 
     const ReturnCode_t RETCODE_NOT_ALLOWED_BY_SECURITY = 1000;
 
@@ -225,7 +225,7 @@ module DDS {
 
     // Used internally by OpenDDS Implementation
     typedef long NativeCryptoHandle;
-    
+
     //native DatawriterCryptoHandle;
     //native DatawriterCryptoHandleSeq;
     typedef NativeCryptoHandle DatawriterCryptoHandle;
