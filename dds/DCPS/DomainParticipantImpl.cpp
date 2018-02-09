@@ -1591,8 +1591,6 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  DDS::ReturnCode_t ret = this->set_enabled();
-
   if (monitor_) {
     monitor_->report();
   }
@@ -1704,13 +1702,15 @@ DomainParticipantImpl::enable()
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("DomainParticipant::enable, ")
-                 ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
+                 ACE_TEXT("add_domain_participant returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
 
     dp_id_ = value.id;
     federated_ = value.federated;
   }
+
+  DDS::ReturnCode_t ret = this->set_enabled();
 
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
