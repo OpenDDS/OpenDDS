@@ -1380,13 +1380,12 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
   sedp_->data_received(message_id, *data);
 }
 
-void Sedp::data_received(DCPS::MessageId /*message_id*/,
-                         const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& /*data*/)
+void Sedp::data_received(DCPS::MessageId message_id,
+                         const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& data)
 {
   // TODO
-  // Work some security-magic and then delegate to data_received on the writer-data.
-  //const DDS::Security::EndpointSecurityInfo& info = data.security_info;
-
+  // Do something with the other fields in the security-wrapper?
+  data_received(message_id, data.data);
 }
 
 void
@@ -1600,11 +1599,12 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
   sedp_->data_received(message_id, *data);
 }
 
-void Sedp::data_received(DCPS::MessageId /*message_id*/,
-                         const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& /*data*/)
+void Sedp::data_received(DCPS::MessageId message_id,
+                         const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& data)
 {
   // TODO
-  // Work some security-magic and then delegate to data_received on the reader-data.
+  // Do something with the other fields in the security-wrapper?
+  data_received(message_id, data.data);
 }
 
 void
