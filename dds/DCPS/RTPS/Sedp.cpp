@@ -2420,6 +2420,38 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
   }
 }
 
+DDS::Security::EndpointSecurityAttributesMask
+  Sedp::security_attribs_to_bitmask(const DDS::Security::EndpointSecurityAttributes& attribs)
+{
+  using namespace DDS::Security;
+
+  EndpointSecurityAttributesMask result = 0u;
+
+  if (attribs.base.is_read_protected)
+    result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_READ_PROTECTED;
+
+  if (attribs.base.is_write_protected)
+    result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_WRITE_PROTECTED;
+
+  if (attribs.base.is_discovery_protected)
+    result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+
+  if (attribs.base.is_liveliness_protected)
+    result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+
+  if (attribs.is_submessage_protected)
+    result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED;
+
+  if (attribs.is_payload_protected)
+    result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED;
+
+  if (attribs.is_key_protected)
+    result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_KEY_PROTECTED;
+
+  return result;
+
+}
+
 void
 Sedp::populate_discovered_writer_msg(
     OpenDDS::DCPS::DiscoveredWriterData& dwd,
@@ -2558,7 +2590,7 @@ Sedp::write_publication_data(
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
-  if (lp.security_attribs_.is_discovery_protected) {
+  if (lp.security_attribs_.base.is_discovery_protected) {
       result = write_publication_data_secure(rid, lp, reader);
 
   } else {
@@ -2613,6 +2645,9 @@ Sedp::write_publication_data_secure(
     ParameterList plist;
     populate_discovered_writer_msg(dwd.data, rid, lp);
 
+    dwd.security_info.endpoint_security_attributes = security_attribs_to_bitmask(lp.security_attribs_);
+    // TODO: Handle dwd.security_info.plugin_endpoint_security_attributes??
+
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
       ACE_ERROR((LM_ERROR,
@@ -2639,7 +2674,7 @@ Sedp::write_subscription_data(
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
-  if (ls.security_attribs_.is_discovery_protected) {
+  if (ls.security_attribs_.base.is_discovery_protected) {
       result = write_subscription_data_secure(rid, ls, reader);
 
   } else {
@@ -2693,6 +2728,9 @@ Sedp::write_subscription_data_secure(
     OpenDDS::Security::DiscoveredReaderData_SecurityWrapper drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd.data, rid, ls);
+
+    drd.security_info.endpoint_security_attributes = security_attribs_to_bitmask(ls.security_attribs_);
+    // TODO: Handle dwd.security_info.plugin_endpoint_security_attributes??
 
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {

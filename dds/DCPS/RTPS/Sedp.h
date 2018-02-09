@@ -380,6 +380,10 @@ private:
   OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
+
+  DDS::Security::EndpointSecurityAttributesMask
+    security_attribs_to_bitmask(const DDS::Security::EndpointSecurityAttributes& attribs);
+
   void populate_discovered_writer_msg(
       OpenDDS::DCPS::DiscoveredWriterData& dwd,
       const DCPS::RepoId& publication_id,

@@ -279,9 +279,11 @@ namespace OpenDDS {
 
         DDS::Security::SecurityException ex;
 
-        bool ok = get_access_control()->get_topic_sec_attributes(
+        bool ok = get_access_control()->get_datawriter_sec_attributes(
             get_permissions_handle(),
             topic_names_[topicId].c_str(),
+            publisherQos.partition,
+            DDS::Security::DataTagQosPolicy(),
             pb.security_attribs_,
             ex);
 
@@ -361,9 +363,11 @@ namespace OpenDDS {
 
         DDS::Security::SecurityException ex;
 
-        bool ok = get_access_control()->get_topic_sec_attributes(
+        bool ok = get_access_control()->get_datareader_sec_attributes(
             get_permissions_handle(),
             topic_names_[topicId].c_str(),
+            subscriberQos.partition,
+            DDS::Security::DataTagQosPolicy(),
             sb.security_attribs_,
             ex);
 
@@ -440,7 +444,7 @@ namespace OpenDDS {
         DCPS::DataWriterCallbacks* publication_;
         DDS::DataWriterQos qos_;
         DDS::PublisherQos publisher_qos_;
-        DDS::Security::TopicSecurityAttributes security_attribs_;
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
       };
 
       struct LocalSubscription : LocalEndpoint {
@@ -448,7 +452,7 @@ namespace OpenDDS {
         DDS::DataReaderQos qos_;
         DDS::SubscriberQos subscriber_qos_;
         OpenDDS::DCPS::ContentFilterProperty_t filterProperties;
-        DDS::Security::TopicSecurityAttributes security_attribs_;
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
       };
 
       typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, DCPS::RepoId,
