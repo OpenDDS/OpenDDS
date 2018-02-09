@@ -277,18 +277,20 @@ namespace OpenDDS {
         pb.trans_info_ = transInfo;
         pb.publisher_qos_ = publisherQos;
 
-        DDS::Security::SecurityException ex;
+        if (is_security_enabled()) {
+            DDS::Security::SecurityException ex;
 
-        bool ok = get_access_control()->get_datawriter_sec_attributes(
-            get_permissions_handle(),
-            topic_names_[topicId].c_str(),
-            publisherQos.partition,
-            DDS::Security::DataTagQosPolicy(),
-            pb.security_attribs_,
-            ex);
+            bool ok = get_access_control()->get_datawriter_sec_attributes(
+                get_permissions_handle(),
+                topic_names_[topicId].c_str(),
+                publisherQos.partition,
+                DDS::Security::DataTagQosPolicy(),
+                pb.security_attribs_,
+                ex);
 
-        if (!ok) {
-            // TODO: log error / throw exception??
+            if (!ok) {
+                // TODO: log error / throw exception??
+            }
         }
 
         TopicDetails& td = topics_[topic_names_[topicId]];
@@ -361,18 +363,20 @@ namespace OpenDDS {
         sb.filterProperties.filterExpression = filterExpr;
         sb.filterProperties.expressionParameters = params;
 
-        DDS::Security::SecurityException ex;
+        if (is_security_enabled()) {
+            DDS::Security::SecurityException ex;
 
-        bool ok = get_access_control()->get_datareader_sec_attributes(
-            get_permissions_handle(),
-            topic_names_[topicId].c_str(),
-            subscriberQos.partition,
-            DDS::Security::DataTagQosPolicy(),
-            sb.security_attribs_,
-            ex);
+            bool ok = get_access_control()->get_datareader_sec_attributes(
+                get_permissions_handle(),
+                topic_names_[topicId].c_str(),
+                subscriberQos.partition,
+                DDS::Security::DataTagQosPolicy(),
+                sb.security_attribs_,
+                ex);
 
-        if (!ok) {
-            // TODO: log error / throw exception??
+            if (!ok) {
+                // TODO: log error / throw exception??
+            }
         }
 
         TopicDetails& td = topics_[topic_names_[topicId]];
@@ -935,6 +939,11 @@ namespace OpenDDS {
         }
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::increment_key - ")
                    ACE_TEXT("ran out of builtin topic keys\n")));
+      }
+
+      inline bool is_security_enabled()
+      {
+        return (permissions_handle_ != DDS::HANDLE_NIL) && (access_control_ != 0);
       }
 
       inline void set_permissions_handle(DDS::Security::PermissionsHandle h)
