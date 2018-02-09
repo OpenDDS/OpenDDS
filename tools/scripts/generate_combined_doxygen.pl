@@ -37,15 +37,15 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 }
 push(@doxygen, "-html_output");
 my $ace_dest = "$dest/html/dds/ace_tao";
-mkpath($ace_dest, {error => \my $error});
-if (@$error) {
-  exit($!);
+eval { mkpath($ace_dest) };
+if ($@) {
+  die("Couldn’t create $ace_dest: $@");
 }
 
 # Build ACE/TAO Documentation
 chdir($ENV{"ACE_ROOT"});
 push(@doxygen, $ace_dest);
-system(@doxygen) == 0 or die "ERROR: ACE/TAO Doxygen failed ($!)\n";
+system(@doxygen) == 0 or die "ERROR: ACE/TAO Doxygen failed ($?)\n";
 pop(@doxygen);
 
 # Find Tagfiles and Inject into dds.doxygen using $ace_tao_tagfiles
@@ -76,5 +76,5 @@ close($f);
 # Build OpenDDS Documentation
 chdir($ENV{"DDS_ROOT"});
 push(@doxygen, $dest);
-system(@doxygen) == 0 or die "ERROR: DDS Doxygen failed ($!)\n";
+system(@doxygen) == 0 or die "ERROR: DDS Doxygen failed ($?)\n";
 
