@@ -782,7 +782,7 @@ TEST_F(AccessControlTest, get_datawriter_sec_attributes_InvalidInput)
 
   // Nil handle
   EXPECT_FALSE(get_inst().get_datawriter_sec_attributes(
-    DDS::HANDLE_NIL, partition, data_tag, attributes, ex));
+    DDS::HANDLE_NIL, "TestTopic", partition, data_tag, attributes, ex));
 }
 
 TEST_F(AccessControlTest, get_datawriter_sec_attributes_Success)
@@ -794,7 +794,7 @@ TEST_F(AccessControlTest, get_datawriter_sec_attributes_Success)
   ::DDS::Security::SecurityException ex;
 
   EXPECT_TRUE(get_inst().get_datawriter_sec_attributes(
-    permissions_handle, partition, data_tag, attributes, ex)); 
+    permissions_handle, "TestTopic", partition, data_tag, attributes, ex));
   EXPECT_TRUE(attributes.is_submessage_protected);
   EXPECT_TRUE(attributes.is_payload_protected);
   EXPECT_TRUE(attributes.is_key_protected);
@@ -810,7 +810,7 @@ TEST_F(AccessControlTest, get_datareader_sec_attributes_InvalidInput)
 
   // Nil handle
   EXPECT_FALSE(get_inst().get_datareader_sec_attributes(
-    DDS::HANDLE_NIL, partition, data_tag, attributes, ex));
+    DDS::HANDLE_NIL, "TestTopic", partition, data_tag, attributes, ex));
 }
 
 TEST_F(AccessControlTest, get_datareader_sec_attributes_Success)
@@ -822,7 +822,7 @@ TEST_F(AccessControlTest, get_datareader_sec_attributes_Success)
   ::DDS::Security::SecurityException ex;
 
   EXPECT_TRUE(get_inst().get_datareader_sec_attributes(
-    permissions_handle, partition, data_tag, attributes, ex)); 
+    permissions_handle, "TestTopic", partition, data_tag, attributes, ex));
   EXPECT_TRUE(attributes.is_submessage_protected);
   EXPECT_TRUE(attributes.is_payload_protected);
   EXPECT_TRUE(attributes.is_key_protected);
