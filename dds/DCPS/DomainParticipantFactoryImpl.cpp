@@ -82,7 +82,13 @@ DomainParticipantFactoryImpl::create_participant(
   }
 
   if (qos_.entity_factory.autoenable_created_entities) {
-    dp->enable();
+    if (dp->enable() != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                 ACE_TEXT("unable to enable DomainParticipant.\n")));
+      return DDS::DomainParticipant::_nil();
+    }
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
