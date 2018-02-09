@@ -417,6 +417,7 @@ private:
 						const ParticipantMessageData& data);
 
   bool should_drop_message(const DDS::Security::ParticipantGenericMessage& msg);
+  bool should_drop_message(const char* unsecure_topic_name);
 
   void received_stateless_message(DCPS::MessageId message_id,
                      const DDS::Security::ParticipantStatelessMessage& data);

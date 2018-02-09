@@ -1226,10 +1226,15 @@ Sedp::data_received(DCPS::MessageId message_id,
   guid_participant.entityId = ENTITYID_PARTICIPANT;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
   if (ignoring(guid)
       || ignoring(guid_participant)
       || ignoring(wdata.ddsPublicationData.topic_name)) {
     return;
+  }
+
+  if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
+      return;
   }
 
   if (!spdp_.has_discovered_participant (guid_participant)) {
@@ -1408,6 +1413,10 @@ Sedp::data_received(DCPS::MessageId message_id,
       || ignoring(guid_participant)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
     return;
+  }
+
+  if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
+      return;
   }
 
   if (!spdp_.has_discovered_participant (guid_participant)) {
@@ -1683,7 +1692,8 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
   }
 }
 
-bool Sedp::should_drop_message(const DDS::Security::ParticipantGenericMessage& msg) {
+bool Sedp::should_drop_message(const DDS::Security::ParticipantGenericMessage& msg)
+{
   using OpenDDS::DCPS::GUID_t;
   using OpenDDS::DCPS::GUID_UNKNOWN;
 
@@ -1706,6 +1716,26 @@ bool Sedp::should_drop_message(const DDS::Security::ParticipantGenericMessage& m
   }
 
   return drop;
+}
+
+bool Sedp::should_drop_message(const char* unsecure_topic_name)
+{
+  bool result = false;
+
+  DDS::Security::TopicSecurityAttributes attribs;
+  DDS::Security::SecurityException ex;
+
+  bool ok = get_access_control()->get_topic_sec_attributes(
+      get_permissions_handle(),
+      unsecure_topic_name,
+      attribs,
+      ex);
+
+  if (!ok || attribs.is_discovery_protected) {
+      result = true;
+  }
+
+  return result;
 }
 
 void
