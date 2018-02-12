@@ -50,11 +50,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-
-
-#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-
 DataReaderImpl::DataReaderImpl()
 : qos_(TheServiceParticipant->initial_DataReaderQos()),
   reverse_sample_lock_(sample_lock_),
