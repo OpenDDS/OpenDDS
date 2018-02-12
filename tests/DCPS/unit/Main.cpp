@@ -297,7 +297,8 @@ void run_sample_list_test ()
   iter = list.begin();
   iter1 = SendStateDataSampleListIterator(headDiffList.head(), headDiffList.tail(), headDiffList.head());
   // verify both iters have same current
-  TEST_CHECK( ++iter->get_pub_id().entityId.entityKey[2] == 1 );
+  ++iter;
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( iter1->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( iter != iter1 );
 

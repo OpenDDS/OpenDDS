@@ -292,7 +292,7 @@ namespace OpenDDS
            node != 0;
            node = node->next_)
         {
-          if (pt.conv_->index == node->conv_->index &&
+          if (pt.conv_->WS_CONV_IDX == node->conv_->WS_CONV_IDX &&
               pt.request_ == node->request_)
             {
               gulong hash_rid = ACE::hash_pjw(reinterpret_cast<const char *>(rid), sizeof (RepoId));
@@ -329,7 +329,7 @@ namespace OpenDDS
            node != 0;
            node = node->next_)
         {
-          if (pt.conv_->index == node->conv_->index &&
+          if (pt.conv_->WS_CONV_IDX == node->conv_->WS_CONV_IDX &&
               pt.request_ == node->request_)
             {
               if (prev_node == 0)

@@ -12,7 +12,7 @@
 
 extern "C" {
 
-#include "config.h"
+#include "ws_config.h"
 
 #include <glib.h>
 #include <gmodule.h>
@@ -75,7 +75,7 @@ namespace OpenDDS
 
       static InfoRepo_Dissector& instance ();
 
-     virtual void init ();
+      virtual void init ();
       void register_handoff ();
 
       static bool assert_topic            (::MessageHeader *);

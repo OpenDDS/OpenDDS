@@ -27,8 +27,8 @@
 #endif
 
 #if defined ACE_WIN32 && !defined ACE_HAS_WINCE
-# include <WinSock2.h>
-# include <Iphlpapi.h>
+# include <winsock2.h>
+# include <iphlpapi.h>
 # include "ace/Version.h"
 // older versions of ACE don't link to IPHlpApi.Lib, see acedefaults.mpb
 # if ACE_MAJOR_VERSION == 6 && ACE_MINOR_VERSION == 0 && defined _MSC_VER

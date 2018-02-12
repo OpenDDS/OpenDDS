@@ -34,7 +34,7 @@ lib*.dylib
 /.cproject
 /.project
 /.settings/
-/user_macros.GNU
+/user_macros.GNU*
 /build
 /ipch
 /ACE_wrappers

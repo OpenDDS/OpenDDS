@@ -36,7 +36,7 @@ class ShapesDialog : public QDialog {
   };
 
 public:
-  ShapesDialog(DDS::DomainParticipant_var participant, const std::string& partition);
+  ShapesDialog(DDS::DomainParticipant_var participant, const std::string& partition, int defaultSize);
   virtual ~ShapesDialog();
 
 public slots:

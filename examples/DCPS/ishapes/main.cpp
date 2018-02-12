@@ -52,6 +52,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     bool multicast = true;
     unsigned int resend = 1;
     std::string partition;
+    int defaultSize = 0;
 
     int curr = 1;
     if (argc > 1 && argv[1][0] != ACE_TEXT('-')) {
@@ -59,7 +60,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       std::cout << "Connecting to domain: " << domain << std::endl;
       ++curr;
     }
-
 
     RtpsDiscovery_rch disc = make_rch<RtpsDiscovery>("RtpsDiscovery");
     for (; curr < argc; ++curr) {
@@ -106,6 +106,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         partition = ACE_TEXT_ALWAYS_CHAR(argv[++curr]);
         std::cout << "Partition[0]: " << partition << std::endl;
       }
+      else if ((ACE_OS::strcmp(ACE_TEXT("-defaultSize"), argv[curr]) == 0) &&
+               (curr + 1 < argc)) {
+        defaultSize = ACE_OS::atoi(argv[++curr]);
+      }
       else {
         std::cout << "Ignoring unknown param: " << ACE_TEXT_ALWAYS_CHAR(argv[curr]) << std::endl;
       }
@@ -132,7 +136,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     QApplication app(argc, atc.get_ASCII_argv());
     Q_INIT_RESOURCE(ishape);
     // create and show your widgets here
-    ShapesDialog shapes(participant, partition);
+    ShapesDialog shapes(participant, partition, defaultSize);
     shapes.show();
     retval = app.exec();
 

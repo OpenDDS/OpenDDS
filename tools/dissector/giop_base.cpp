@@ -140,10 +140,7 @@ namespace OpenDDS
     conversation_t *
     GIOP_Base::find_conversation()
     {
-      return ::find_conversation (pinfo_->fd->num,
-                                  &pinfo_->src, &pinfo_->dst,
-                                  pinfo_->ptype, pinfo_->srcport,
-                                  pinfo_->destport, 0);
+      return ws_find_conversation(pinfo_);
     }
 
     void
@@ -205,8 +202,8 @@ namespace OpenDDS
     GIOP_Base::add_trans_info (int fieldId, int ett, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
-      proto_item *tf = proto_tree_add_text (tree, tvb_, *offset_, -1,
-                                            "TransInfo");
+      proto_item *tf = proto_tree_add_none_format(
+        tree, fieldId, tvb_, *offset_, -1, "TransInfo");
       tree = proto_item_add_subtree (tf, ett);
       /*
         struct TransportInterfaceInfo {
@@ -250,8 +247,8 @@ namespace OpenDDS
 
        */
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
-      proto_item *tf = proto_tree_add_text (tree, tvb_, *offset_, -1,
-                                            "TopicQos");
+      proto_item *tf = proto_tree_add_none_format(
+        tree, fieldId, tvb_, *offset_, -1, "TopicQos");
       tree = proto_item_add_subtree (tf, ett);
 
       int len = sizeof (TopicStatus);

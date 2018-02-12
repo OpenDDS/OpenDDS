@@ -7,9 +7,12 @@
 
 #include "itl_generator.h"
 #include "be_extern.h"
+#include "global_extern.h"
 
 #include "utl_identifier.h"
 #include "utl_labellist.h"
+
+#include <ast_fixed.h>
 
 using namespace AstTypeClassification;
 
@@ -254,6 +257,23 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
                       << Close(this);
       break;
     }
+  case AST_Decl::NT_fixed:
+    {
+      AST_Fixed* fixed = AST_Fixed::narrow_from_decl(base);
+      unsigned digits = fixed->digits()->ev()->u.ulval;
+      unsigned scale = fixed->scale()->ev()->u.ulval;
+      be_global->itl_
+        << Open(this) << Indent(this) << "{\n" << Open(this)
+        << Indent(this) << "\"kind\" : \"alias\",\n"
+        << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
+        << Indent(this) << "\"type\" : { "
+          << "\"kind\" : \"fixed\", "
+          << "\"digits\" : " << digits << ", "
+          << "\"scale\" : " << scale << ", "
+          << "\"base\" : 10 }\n"
+        << Close(this) << Indent(this) << "}\n" << Close(this);
+      break;
+    }
   default:
     {
       be_global->itl_ << Open(this)
@@ -272,7 +292,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
   return true;
 }
 
-bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* /* name */,
+bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                                const std::vector<AST_Field*>& fields,
                                AST_Type::SIZE_TYPE, const char* repoid)
 {
@@ -285,6 +305,12 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* /* name */,
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
                   << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
+
+  // Check if this is defined as a primary data type
+                  << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
+                  << (idl_global->is_dcps_type(name) ? "true" : "false")
+                  << " },\n"
+
                   << Indent(this) << "\"type\" :\n"
                   << Open(this)
                   << Indent(this) << "{\n"
