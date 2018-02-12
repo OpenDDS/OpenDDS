@@ -1722,17 +1722,19 @@ bool Sedp::should_drop_message(const char* unsecure_topic_name)
 {
   bool result = false;
 
-  DDS::Security::TopicSecurityAttributes attribs;
-  DDS::Security::SecurityException ex;
+  if (is_security_enabled()) {
+      DDS::Security::TopicSecurityAttributes attribs;
+      DDS::Security::SecurityException ex;
 
-  bool ok = get_access_control()->get_topic_sec_attributes(
-      get_permissions_handle(),
-      unsecure_topic_name,
-      attribs,
-      ex);
+      bool ok = get_access_control()->get_topic_sec_attributes(
+          get_permissions_handle(),
+          unsecure_topic_name,
+          attribs,
+          ex);
 
-  if (!ok || attribs.is_discovery_protected) {
-      result = true;
+      if (!ok || attribs.is_discovery_protected) {
+          result = true;
+      }
   }
 
   return result;
@@ -1816,25 +1818,30 @@ void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
   DDS::Security::SecurityException ex;
   DDS::Security::TopicSecurityAttributes attribs;
 
-  // TODO: Pending issue DDSSEC12-28 Topic security attributes
-  // may get changed to a different set of security attributes.
-  bool ok = get_access_control()->get_topic_sec_attributes(
-      get_permissions_handle(),
-      "DCPSParticipantMessageSecure",
-      attribs,
-      ex);
+  if (is_security_enabled()) {
+      // TODO: Pending issue DDSSEC12-28 Topic security attributes
+      // may get changed to a different set of security attributes.
+      bool ok = get_access_control()->get_topic_sec_attributes(
+          get_permissions_handle(),
+          "DCPSParticipantMessageSecure",
+          attribs,
+          ex);
 
-  if (ok) {
+      if (ok) {
 
-      if (attribs.is_liveliness_protected) {
-          signal_liveliness_secure(kind);
+          if (attribs.is_liveliness_protected) {
+              signal_liveliness_secure(kind);
+
+          } else {
+              signal_liveliness_unsecure(kind);
+          }
 
       } else {
-          signal_liveliness_unsecure(kind);
+          // TODO: log error
       }
 
   } else {
-      // TODO: log error
+      signal_liveliness_unsecure(kind);
   }
 }
 
