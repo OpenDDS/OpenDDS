@@ -557,7 +557,7 @@ Spdp::SpdpTransport::write()
 void
 Spdp::SpdpTransport::write_i()
 {
-  static const BuiltinEndpointSet_t availableBuiltinEndpoints =
+  BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
     DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
@@ -567,6 +567,22 @@ Spdp::SpdpTransport::write_i()
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
     ;
+  if (outer_->security_config_) {
+    availableBuiltinEndpoints |=
+      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
+      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
+      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
+      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
+    ;
+  }
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
 
   // This locator list should not be empty, but we won't actually be using it.
@@ -641,7 +657,25 @@ Spdp::SpdpTransport::write_i()
 
     pbtd.property = outer_->qos_.property;
 
-    // TODO set ParticipantSecurityInfo
+    DDS::Security::ParticipantSecurityAttributes attr;
+    if (access->get_participant_sec_attributes(outer_->perm_handle_, attr, ex) == false) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("failed to retrieve participant security attributes\n")));
+      return;
+    }
+
+    pbtd.security_info.plugin_participant_security_attributes = attr.plugin_participant_attributes;
+    pbtd.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    if (attr.is_rtps_protected) {
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+    }
+    if (attr.is_discovery_protected) {
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+    }
+    if (attr.is_liveliness_protected) {
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+    }
 
     if (ParameterListConverter::to_param_list(pbtd, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
