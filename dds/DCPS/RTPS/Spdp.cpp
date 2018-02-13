@@ -117,13 +117,48 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
   , security_config_(OpenDDS::Security::SecurityRegistry::instance()->default_config())
-  , id_handle_(id_handle)
-  , perm_handle_(perm_handle)
+  , identity_handle_(id_handle)
+  , permissions_handle_(perm_handle)
   , crypto_handle_(crypto_handle)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   init(domain, guid_, qos, disco);
+
+  DDS::Security::Authentication_var auth = security_config_->get_authentication();
+  DDS::Security::AccessControl_var access = security_config_->get_access_control();
+
+  DDS::Security::SecurityException se;
+
+  if (auth->get_identity_token(identity_token_, identity_handle_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::Spdp() - ")
+      ACE_TEXT("unable to get identity token. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    throw std::runtime_error("unable to get identity token");
+  }
+  if (access->get_permissions_token(permissions_token_, permissions_handle_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::Spdp() - ")
+      ACE_TEXT("unable to get permissions handle. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    throw std::runtime_error("unable to get permissions token");
+  }
+  if (access->get_permissions_credential_token(permissions_token_, permissions_handle_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::Spdp() - ")
+      ACE_TEXT("unable to get permissions credential handle. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    throw std::runtime_error("unable to get permissions credential token");
+  }
+
+  if (auth->set_permissions_credential_and_token(identity_handle_, permissions_credential_token_, permissions_token_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::Spdp() - ")
+      ACE_TEXT("unable to set permissions credential and token. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    throw std::runtime_error("unable to set permissions credential and token");
+  }
 
   sedp_.init_security(id_handle, perm_handle, crypto_handle);
 }
@@ -637,31 +672,22 @@ Spdp::SpdpTransport::write_i()
   }
 
   if (outer_->security_config_) {
+    DDS::Security::ParticipantBuiltinTopicData pbtd;
+
+    pbtd.identity_token = outer_->identity_token_;
+    pbtd.permissions_token = outer_->permissions_token_;
+    pbtd.property = outer_->qos_.property;
+
     DDS::Security::Authentication_var auth = outer_->security_config_->get_authentication();
     DDS::Security::AccessControl_var access = outer_->security_config_->get_access_control();
 
-    DDS::Security::ParticipantBuiltinTopicData pbtd;
-    DDS::Security::SecurityException ex;
-    if (auth->get_identity_token(pbtd.identity_token, outer_->id_handle_, ex) == false) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Spdp::SpdpTransport::write() - ")
-        ACE_TEXT("unable to tokenize identity handle\n")));
-      return;
-    }
-    if (access->get_permissions_token(pbtd.permissions_token, outer_->perm_handle_, ex) == false) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Spdp::SpdpTransport::write() - ")
-        ACE_TEXT("unable to tokenize permissions handle\n")));
-      return;
-    }
-
-    pbtd.property = outer_->qos_.property;
-
     DDS::Security::ParticipantSecurityAttributes attr;
-    if (access->get_participant_sec_attributes(outer_->perm_handle_, attr, ex) == false) {
+    DDS::Security::SecurityException se;
+    if (access->get_participant_sec_attributes(outer_->permissions_handle_, attr, se) == false) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("Spdp::SpdpTransport::write() - ")
-        ACE_TEXT("failed to retrieve participant security attributes\n")));
+        ACE_TEXT("failed to retrieve participant security attributes. Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
       return;
     }
 
