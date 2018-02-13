@@ -509,7 +509,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_datawriter_sec_attributes(
   ::DDS::Security::PermissionsHandle permissions_handle,
-  const char * topic_name,
+  const char * /*topic_name*/,
   const ::DDS::PartitionQosPolicy & partition,
   const ::DDS::Security::DataTagQosPolicy & data_tag,
   ::DDS::Security::EndpointSecurityAttributes & attributes,
@@ -541,7 +541,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_datareader_sec_attributes(
   ::DDS::Security::PermissionsHandle permissions_handle,
-  const char * topic_name,
+  const char * /*topic_name*/,
   const ::DDS::PartitionQosPolicy & partition,
   const ::DDS::Security::DataTagQosPolicy & data_tag,
   ::DDS::Security::EndpointSecurityAttributes & attributes,

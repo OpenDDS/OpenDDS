@@ -43,6 +43,7 @@ module DDS {
     typedef Token IdentityToken;
     typedef Token PermissionsToken;
     typedef Token IdentityStatusToken;
+    typedef Token ParticipantCryptoToken;
 
     struct Tag {
       string name;
