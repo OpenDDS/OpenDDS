@@ -137,6 +137,13 @@ Spdp::Spdp(DDS::DomainId_t domain,
         se.code, se.minor_code, se.message.in()));
     throw std::runtime_error("unable to get identity token");
   }
+  if (auth->get_identity_status_token(identity_status_token_, identity_handle_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::Spdp() - ")
+      ACE_TEXT("unable to get identity status token. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    throw std::runtime_error("unable to get identity status token");
+  }
   if (access->get_permissions_token(permissions_token_, permissions_handle_, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")

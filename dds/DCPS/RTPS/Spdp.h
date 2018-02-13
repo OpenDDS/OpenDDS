@@ -156,6 +156,7 @@ private:
   DDS::Security::ParticipantCryptoHandle crypto_handle_;
 
   DDS::Security::IdentityToken identity_token_;
+  DDS::Security::IdentityStatusToken identity_status_token_;
   DDS::Security::PermissionsToken permissions_token_;
   DDS::Security::PermissionsCredentialToken permissions_credential_token_;
   DDS::Security::ParticipantCryptoToken crypto_token_;
