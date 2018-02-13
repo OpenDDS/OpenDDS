@@ -89,23 +89,44 @@ namespace OpenDDS {
     template <typename DiscoveredParticipantData_>
     class EndpointManager {
     protected:
+
       struct DiscoveredSubscription {
-        DiscoveredSubscription() : bit_ih_(DDS::HANDLE_NIL) {}
+        DiscoveredSubscription()
+        : bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         explicit DiscoveredSubscription(const OpenDDS::DCPS::DiscoveredReaderData& r)
-          : reader_data_(r), bit_ih_(DDS::HANDLE_NIL) {}
+        : reader_data_(r)
+        , bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         OpenDDS::DCPS::DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
       };
+
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredSubscription,
                               DCPS::GUID_tKeyLessThan) DiscoveredSubscriptionMap;
+
       typedef typename DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
 
       struct DiscoveredPublication {
-        DiscoveredPublication() : bit_ih_(DDS::HANDLE_NIL) {}
+        DiscoveredPublication()
+        : bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         explicit DiscoveredPublication(const OpenDDS::DCPS::DiscoveredWriterData& w)
-          : writer_data_(w), bit_ih_(DDS::HANDLE_NIL) {}
+        : writer_data_(w)
+        , bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         OpenDDS::DCPS::DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
       };
 
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredPublication,

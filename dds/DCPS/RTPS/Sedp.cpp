@@ -1249,34 +1249,13 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
   sedp_->data_received(message_id, *pwdata);
 }
 
-void
-Sedp::data_received(DCPS::MessageId message_id,
-                    const OpenDDS::DCPS::DiscoveredWriterData& wdata)
+void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
+                                          const OpenDDS::DCPS::DiscoveredWriterData& wdata,
+                                          const RepoId& guid)
 {
-  if (spdp_.shutting_down()) { return; }
-
-  const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
-
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
-  if (ignoring(guid)
-      || ignoring(guid_participant)
-      || ignoring(wdata.ddsPublicationData.topic_name)) {
-    return;
-  }
-
-  if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
-      return;
-  }
-
-  if (!spdp_.has_discovered_participant (guid_participant)) {
-    deferred_publications_[guid] = std::make_pair (message_id, wdata);
-    return;
-  }
 
   OPENDDS_STRING topic_name;
+
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
 
@@ -1407,6 +1386,37 @@ Sedp::data_received(DCPS::MessageId message_id,
 }
 
 void
+Sedp::data_received(DCPS::MessageId message_id,
+                    const OpenDDS::DCPS::DiscoveredWriterData& wdata)
+{
+  if (spdp_.shutting_down()) { return; }
+
+  const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
+  RepoId guid_participant = guid;
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)
+      || ignoring(wdata.ddsPublicationData.topic_name)) {
+    return;
+  }
+
+  if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
+      return;
+  }
+
+  if (!spdp_.has_discovered_participant (guid_participant)) {
+    deferred_publications_[guid] = std::make_pair (message_id, wdata);
+    return;
+  }
+
+  process_discovered_writer_data(message_id, wdata, guid);
+
+}
+
+void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* data)
 {
@@ -1415,28 +1425,11 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
 }
 
 void Sedp::data_received(DCPS::MessageId message_id,
-                         const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& data)
-{
-  // TODO
-  // Do something with the other fields in the security-wrapper?
-  data_received(message_id, data.data);
-}
-
-void
-Sedp::Task::svc_i(DCPS::MessageId message_id,
-                  const OpenDDS::DCPS::DiscoveredReaderData* prdata)
-{
-  DCPS::unique_ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
-  sedp_->data_received(message_id, *prdata);
-}
-
-void
-Sedp::data_received(DCPS::MessageId message_id,
-                    const OpenDDS::DCPS::DiscoveredReaderData& rdata)
+                         const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper)
 {
   if (spdp_.shutting_down()) { return; }
 
-  const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
+  const RepoId& guid = wrapper.data.writerProxy.remoteWriterGuid;
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
 
@@ -1444,20 +1437,35 @@ Sedp::data_received(DCPS::MessageId message_id,
 
   if (ignoring(guid)
       || ignoring(guid_participant)
-      || ignoring(rdata.ddsSubscriptionData.topic_name)) {
+      || ignoring(wrapper.data.ddsPublicationData.topic_name)) {
     return;
   }
 
-  if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
-      return;
-  }
+// TODO
+// Should we add deferred_publications_secure_ ??
+//
+//  if (!spdp_.has_discovered_participant (guid_participant)) {
+//    deferred_publications_[guid] = std::make_pair (message_id, wrapper);
+//    return;
+//  }
 
-  if (!spdp_.has_discovered_participant (guid_participant)) {
-    deferred_subscriptions_[guid] = std::make_pair (message_id, rdata);
-    return;
-  }
+  process_discovered_writer_data(message_id, wrapper.data, guid);
+
+  DiscoveredPublication& pub = discovered_publications_[guid];
+  security_bitmask_to_attribs(wrapper.security_info.endpoint_security_attributes,
+                              pub.security_attribs_);
+
+  // TODO
+  // Handle wrapper.security_info.plugin_endpoint_security_attributes
+}
+
+void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
+                                    const OpenDDS::DCPS::DiscoveredReaderData& rdata,
+                                    const RepoId& guid)
+{
 
   OPENDDS_STRING topic_name;
+
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
@@ -1627,6 +1635,45 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
+                  const OpenDDS::DCPS::DiscoveredReaderData* prdata)
+{
+  DCPS::unique_ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
+  sedp_->data_received(message_id, *prdata);
+}
+
+void
+Sedp::data_received(DCPS::MessageId message_id,
+                    const OpenDDS::DCPS::DiscoveredReaderData& rdata)
+{
+  if (spdp_.shutting_down()) { return; }
+
+  const RepoId& guid = rdata.readerProxy.remoteReaderGuid;
+  RepoId guid_participant = guid;
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)
+      || ignoring(rdata.ddsSubscriptionData.topic_name)) {
+    return;
+  }
+
+  if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
+      return;
+  }
+
+  if (!spdp_.has_discovered_participant (guid_participant)) {
+    deferred_subscriptions_[guid] = std::make_pair (message_id, rdata);
+    return;
+  }
+
+  process_discovered_reader_data(message_id, rdata, guid);
+
+}
+
+void
+Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper* data)
 {
   DCPS::unique_ptr<const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> delete_the_data(data);
@@ -1634,11 +1681,39 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
 }
 
 void Sedp::data_received(DCPS::MessageId message_id,
-                         const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& data)
+                         const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& wrapper)
 {
+  if (spdp_.shutting_down()) { return; }
+
+  const RepoId& guid = wrapper.data.readerProxy.remoteReaderGuid;
+  RepoId guid_participant = guid;
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)
+      || ignoring(wrapper.data.ddsSubscriptionData.topic_name)) {
+    return;
+  }
+
   // TODO
-  // Do something with the other fields in the security-wrapper?
-  data_received(message_id, data.data);
+  // Should we add deferred_subscriptions_secure_ ??
+  //
+  //  if (!spdp_.has_discovered_participant (guid_participant)) {
+  //    deferred_subscriptions_[guid] = std::make_pair (message_id, wrapper.data);
+  //    return;
+  //  }
+
+  process_discovered_reader_data(message_id, wrapper.data, guid);
+
+  DiscoveredSubscription& sub = discovered_subscriptions_[guid];
+  security_bitmask_to_attribs(wrapper.security_info.endpoint_security_attributes,
+                              sub.security_attribs_);
+
+  // TODO
+  // Handle wrapper.security_info.plugin_endpoint_security_attributes
+
 }
 
 void
@@ -2490,7 +2565,20 @@ DDS::Security::EndpointSecurityAttributesMask
     result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_KEY_PROTECTED;
 
   return result;
+}
 
+void Sedp::security_bitmask_to_attribs(const DDS::Security::EndpointSecurityAttributesMask& src,
+                                       DDS::Security::EndpointSecurityAttributes& dest)
+{
+  using namespace DDS::Security;
+
+  dest.base.is_read_protected = (src & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_READ_PROTECTED);
+  dest.base.is_write_protected = (src & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_WRITE_PROTECTED);
+  dest.base.is_discovery_protected = (src & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED);
+  dest.base.is_liveliness_protected = (src & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED);
+  dest.is_submessage_protected = (src & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED);
+  dest.is_payload_protected = (src & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED);
+  dest.is_key_protected = (src & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_KEY_PROTECTED);
 }
 
 void

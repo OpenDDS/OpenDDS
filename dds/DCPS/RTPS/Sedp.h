@@ -386,6 +386,9 @@ private:
   DDS::Security::EndpointSecurityAttributesMask
     security_attribs_to_bitmask(const DDS::Security::EndpointSecurityAttributes& attribs);
 
+  void security_bitmask_to_attribs(const DDS::Security::EndpointSecurityAttributesMask& src,
+                                   DDS::Security::EndpointSecurityAttributes& dest);
+
   void populate_discovered_writer_msg(
       OpenDDS::DCPS::DiscoveredWriterData& dwd,
       const DCPS::RepoId& publication_id,
@@ -404,17 +407,25 @@ private:
   typedef LocalParticipantMessageMap::const_iterator LocalParticipantMessageCIter;
   LocalParticipantMessageMap local_participant_messages_;
 
+  void process_discovered_writer_data(DCPS::MessageId message_id,
+                                      const OpenDDS::DCPS::DiscoveredWriterData& wdata,
+                                      const DCPS::RepoId& guid);
+
   void data_received(DCPS::MessageId message_id,
                      const OpenDDS::DCPS::DiscoveredWriterData& wdata);
 
   void data_received(DCPS::MessageId message_id,
-                     const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& data);
+                     const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper);
+
+  void process_discovered_reader_data(DCPS::MessageId message_id,
+                                      const OpenDDS::DCPS::DiscoveredReaderData& rdata,
+                                      const DCPS::RepoId& guid);
 
   void data_received(DCPS::MessageId message_id,
                      const OpenDDS::DCPS::DiscoveredReaderData& rdata);
 
   void data_received(DCPS::MessageId message_id,
-                     const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& data);
+                     const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& wrapper);
 
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
