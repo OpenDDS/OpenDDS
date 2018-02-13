@@ -243,6 +243,11 @@ namespace {
         TheServiceParticipant->initial_PartitionQosPolicy();
     return qos != def_qos;
   }
+  bool not_default(const DDS::PropertyQosPolicy& qos) {
+    DDS::PropertyQosPolicy def_qos =
+        TheServiceParticipant->initial_PropertyQosPolicy();
+    return qos != def_qos;
+  }
 
   bool not_default(const DDS::TimeBasedFilterQosPolicy& qos)
   {
@@ -357,6 +362,31 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
     ld_param.duration(participant_data.leaseDuration);
     add_param(param_list, ld_param);
   }
+
+  return 0;
+}
+
+int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
+                  ParameterList& param_list)
+{
+  Parameter param_it;
+  param_it.identity_token(pbtd.identity_token);
+  add_param(param_list, param_it);
+
+  Parameter param_pt;
+  param_pt.permissions_token(pbtd.permissions_token);
+  add_param(param_list, param_pt);
+
+  if (not_default(pbtd.property))
+  {
+    Parameter param_p;
+    param_pt.property(pbtd.property);
+    add_param(param_list, param_p);
+  }
+
+  Parameter param_psi;
+  param_psi.participant_security_info(pbtd.security_info);
+  add_param(param_list, param_psi);
 
   return 0;
 }

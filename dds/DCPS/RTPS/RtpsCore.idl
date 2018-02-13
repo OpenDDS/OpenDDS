@@ -376,7 +376,9 @@ module OpenDDS {
         BuiltinEndpointSet_t builtin_endpoints;
 
       case PID_PROPERTY_LIST:
-        PropertySeq properties;
+        // TODO : Implement backwards compatability
+        // PropertySeq properties;
+        DDS::PropertyQosPolicy property;
 
       case PID_TYPE_MAX_SIZE_SERIALIZED:
         long type_max_size_serialized;
@@ -406,22 +408,22 @@ module OpenDDS {
         DCPS::TransportLocator opendds_locator;
 
       case DDS::Security::PID_IDENTITY_TOKEN:
-	DDS::Security::IdentityToken identity_token;
+        DDS::Security::IdentityToken identity_token;
 
       case DDS::Security::PID_PERMISSIONS_TOKEN:
-	DDS::Security::PermissionsToken permissions_token;
+        DDS::Security::PermissionsToken permissions_token;
 
       case DDS::Security::PID_DATA_TAGS:
-	DDS::Security::DataTags data_tags;
+        DDS::Security::DataTags data_tags;
 
       case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
-	DDS::Security::EndpointSecurityInfo endpoint_security_info;
+        DDS::Security::EndpointSecurityInfo endpoint_security_info;
 
       case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
-	DDS::Security::ParticipantSecurityInfo participant_security_info;
+        DDS::Security::ParticipantSecurityInfo participant_security_info;
 
       case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
-	DDS::Security::IdentityStatusToken identity_status_token;
+        DDS::Security::IdentityStatusToken identity_status_token;
 
       default:
         DDS::OctetSeq unknown_data;

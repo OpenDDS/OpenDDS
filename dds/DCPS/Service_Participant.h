@@ -133,6 +133,7 @@ public:
   DDS::EntityFactoryQosPolicy       initial_EntityFactoryQosPolicy() const;
   DDS::WriterDataLifecycleQosPolicy initial_WriterDataLifecycleQosPolicy() const;
   DDS::ReaderDataLifecycleQosPolicy initial_ReaderDataLifecycleQosPolicy() const;
+  DDS::PropertyQosPolicy            initial_PropertyQosPolicy() const;
 
   DDS::DomainParticipantFactoryQos  initial_DomainParticipantFactoryQos() const;
   DDS::DomainParticipantQos         initial_DomainParticipantQos() const;
@@ -489,6 +490,7 @@ private:
   DDS::EntityFactoryQosPolicy         initial_EntityFactoryQosPolicy_;
   DDS::WriterDataLifecycleQosPolicy   initial_WriterDataLifecycleQosPolicy_;
   DDS::ReaderDataLifecycleQosPolicy   initial_ReaderDataLifecycleQosPolicy_;
+  DDS::PropertyQosPolicy              initial_PropertyQosPolicy_;
 
   DDS::DomainParticipantQos           initial_DomainParticipantQos_;
   DDS::TopicQos                       initial_TopicQos_;
