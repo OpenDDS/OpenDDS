@@ -449,6 +449,10 @@ bool operator!=(const DDS::ReaderDataLifecycleQosPolicy& qos1,
                 const DDS::ReaderDataLifecycleQosPolicy& qos2);
 
 ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::PropertyQosPolicy& qos1,
+                const DDS::PropertyQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::DomainParticipantQos& qos1,
                 const DDS::DomainParticipantQos& qos2);
 

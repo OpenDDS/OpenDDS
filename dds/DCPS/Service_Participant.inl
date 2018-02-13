@@ -181,6 +181,13 @@ Service_Participant::initial_ReaderDataLifecycleQosPolicy() const
 }
 
 ACE_INLINE
+DDS::PropertyQosPolicy
+Service_Participant::initial_PropertyQosPolicy() const
+{
+  return initial_PropertyQosPolicy_;
+}
+
+ACE_INLINE
 DDS::DomainParticipantFactoryQos
 Service_Participant::initial_DomainParticipantFactoryQos() const
 {

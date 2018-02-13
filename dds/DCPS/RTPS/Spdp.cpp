@@ -91,6 +91,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
+  , security_config_()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -105,22 +106,24 @@ Spdp::Spdp(DDS::DomainId_t domain,
            DDS::Security::PermissionsHandle perm_handle,
            DDS::Security::ParticipantCryptoHandle crypto_handle)
 
-: OpenDDS::DCPS::LocalParticipant<Sedp>(qos)
-, disco_(disco)
-, domain_(domain)
-, guid_(guid)
-, tport_(new SpdpTransport(this))
-, eh_(tport_)
-, eh_shutdown_(false)
-, shutdown_cond_(lock_)
-, shutdown_flag_(false)
-, sedp_(guid_, *this, lock_)
+  : OpenDDS::DCPS::LocalParticipant<Sedp>(qos)
+  , disco_(disco)
+  , domain_(domain)
+  , guid_(guid)
+  , tport_(new SpdpTransport(this))
+  , eh_(tport_)
+  , eh_shutdown_(false)
+  , shutdown_cond_(lock_)
+  , shutdown_flag_(false)
+  , sedp_(guid_, *this, lock_)
+  , security_config_(OpenDDS::Security::SecurityRegistry::instance()->default_config())
+  , id_handle_(id_handle)
+  , perm_handle_(perm_handle)
+  , crypto_handle_(crypto_handle)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   init(domain, guid_, qos, disco);
-
-  security_config_ = OpenDDS::Security::SecurityRegistry::instance()->default_config();
 
   sedp_.init_security(id_handle, perm_handle, crypto_handle);
 }
@@ -554,7 +557,7 @@ Spdp::SpdpTransport::write()
 void
 Spdp::SpdpTransport::write_i()
 {
-  static const BuiltinEndpointSet_t availableBuiltinEndpoints =
+  BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
     DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
@@ -564,6 +567,22 @@ Spdp::SpdpTransport::write_i()
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
     ;
+  if (outer_->security_config_) {
+    availableBuiltinEndpoints |=
+      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
+      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
+      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
+      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
+    ;
+  }
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
 
   // This locator list should not be empty, but we won't actually be using it.
@@ -615,6 +634,56 @@ Spdp::SpdpTransport::write_i()
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
       ACE_TEXT("to ParameterList\n")));
     return;
+  }
+
+  if (outer_->security_config_) {
+    DDS::Security::Authentication_var auth = outer_->security_config_->get_authentication();
+    DDS::Security::AccessControl_var access = outer_->security_config_->get_access_control();
+
+    DDS::Security::ParticipantBuiltinTopicData pbtd;
+    DDS::Security::SecurityException ex;
+    if (auth->get_identity_token(pbtd.identity_token, outer_->id_handle_, ex) == false) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("unable to tokenize identity handle\n")));
+      return;
+    }
+    if (access->get_permissions_token(pbtd.permissions_token, outer_->perm_handle_, ex) == false) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("unable to tokenize permissions handle\n")));
+      return;
+    }
+
+    pbtd.property = outer_->qos_.property;
+
+    DDS::Security::ParticipantSecurityAttributes attr;
+    if (access->get_participant_sec_attributes(outer_->perm_handle_, attr, ex) == false) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("failed to retrieve participant security attributes\n")));
+      return;
+    }
+
+    pbtd.security_info.plugin_participant_security_attributes = attr.plugin_participant_attributes;
+    pbtd.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    if (attr.is_rtps_protected) {
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+    }
+    if (attr.is_discovery_protected) {
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+    }
+    if (attr.is_liveliness_protected) {
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+    }
+
+    if (ParameterListConverter::to_param_list(pbtd, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("failed to convert from ParticipantBuiltinTopicData ")
+        ACE_TEXT("to ParameterList\n")));
+      return;
+    }
   }
 
   wbuff_.reset();

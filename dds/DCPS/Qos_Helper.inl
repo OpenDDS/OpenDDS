@@ -209,6 +209,25 @@ bool operator==(const DDS::ReaderDataLifecycleQosPolicy& qos1,
 
 }
 
+template <typename T>
+ACE_INLINE
+bool operator==(const TAO::unbounded_value_sequence<T>& seq1, const TAO::unbounded_value_sequence<T>& seq2)
+{
+  bool result = seq1.length() == seq2.length();
+  for (size_t i = 0; result == true && i < seq1.length(); ++i)
+  {
+    result = (seq1[i].name == seq2[i].name && seq1[i].value == seq2[i].value && seq1[i].propagate == seq2[i].propagate);
+  }
+  return result;
+}
+
+ACE_INLINE
+bool operator==(const DDS::PropertyQosPolicy& qos1,
+                const DDS::PropertyQosPolicy& qos2)
+{
+  return qos1.value == qos2.value && qos1.binary_value == qos2.binary_value;
+}
+
 ACE_INLINE
 bool operator==(const DDS::DomainParticipantQos& qos1,
                 const DDS::DomainParticipantQos& qos2)
@@ -461,6 +480,13 @@ bool operator!=(const DDS::WriterDataLifecycleQosPolicy& qos1,
 ACE_INLINE
 bool operator!=(const DDS::ReaderDataLifecycleQosPolicy& qos1,
                 const DDS::ReaderDataLifecycleQosPolicy& qos2)
+{
+  return !(qos1 == qos2);
+}
+
+ACE_INLINE
+bool operator!=(const DDS::PropertyQosPolicy& qos1,
+                const DDS::PropertyQosPolicy& qos2)
 {
   return !(qos1 == qos2);
 }

@@ -22,6 +22,10 @@ namespace ParameterListConverter {
                     ParameterList& param_list);
 
   OpenDDS_Rtps_Export
+  int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
+                    ParameterList& param_list);
+
+  OpenDDS_Rtps_Export
   int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
                     ParameterList& param_list,
                     bool map = false /*map IPV4 to IPV6 addr*/);

@@ -378,7 +378,7 @@ module DDS {
       boolean     is_rtps_protected;
       boolean     is_discovery_protected;
       boolean     is_liveliness_protected;
-      ParticipantSecurityAttributesMask plugin_participant_attributes;
+      PluginParticipantSecurityAttributesMask plugin_participant_attributes;
       PropertySeq ac_endpoint_properties;
     };
 

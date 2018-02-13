@@ -150,6 +150,9 @@ private:
   WaitForAcks wait_for_acks_;
 
   OpenDDS::Security::SecurityConfig_rch security_config_;
+  DDS::Security::IdentityHandle id_handle_;
+  DDS::Security::PermissionsHandle perm_handle_;
+  DDS::Security::ParticipantCryptoHandle crypto_handle_;
 };
 
 }
