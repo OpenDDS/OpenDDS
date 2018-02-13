@@ -587,10 +587,29 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
   }
 
   /*
-   * Security-Related associations.
+   * Stateless messages are associated here because they are the first step in the
+   * security-enablement process and as such they are sent in the clear.
    */
 
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    participant_stateless_message_reader_->assoc(peer);
+  }
+
+  DCPS::unique_ptr<SPDPdiscoveredParticipantData> dpd(
+    new SPDPdiscoveredParticipantData(pdata));
+  task_.enqueue(move(dpd));
+}
+
+void Sedp::associate_secure_writers_to_readers(const SPDPdiscoveredParticipantData& pdata)
+{
   using namespace DDS::Security;
+
+  DCPS::AssociationData proto;
+  create_association_data_proto(proto, pdata);
+
+  const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
 
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
@@ -607,20 +626,67 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
     participant_message_secure_reader_->assoc(peer);
   }
-  if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
-    DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-    participant_stateless_message_reader_->assoc(peer);
-  }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
     participant_volatile_message_secure_reader_->assoc(peer);
   }
+}
 
-  DCPS::unique_ptr<SPDPdiscoveredParticipantData> dpd(
-    new SPDPdiscoveredParticipantData(pdata));
-  task_.enqueue(move(dpd));
+void Sedp::associate_secure_readers_to_writers(const SPDPdiscoveredParticipantData& pdata)
+{
+  using namespace DDS::Security;
+
+  DCPS::AssociationData proto;
+  create_association_data_proto(proto, pdata);
+
+  const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
+
+  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+    publications_secure_writer_.assoc(peer);
+  }
+  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+    subscriptions_secure_writer_.assoc(peer);
+  }
+  if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
+    participant_message_secure_writer_.assoc(peer);
+  }
+  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
+      DCPS::AssociationData peer = proto;
+      peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+      participant_volatile_message_secure_writer_.assoc(peer);
+  }
+
+  /*
+   * Security-Related durable-data handling.
+   *
+   * TODO
+   * Is this the right spot for durable-data handling? Or is it safe to call it in the
+   * Sedp::Task::svc_i(...) where the other durable-data handling occurs?
+   */
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  if (spdp_.shutting_down()) {
+      return;
+  }
+
+  proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
+  associated_participants_.insert(proto.remote_id_);
+
+  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
+    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+    write_durable_publication_data_secure(proto.remote_id_);
+  }
+  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
+    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+    write_durable_subscription_data_secure(proto.remote_id_);
+  }
 }
 
 void
@@ -654,36 +720,16 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   }
 
   /*
-   * Security-Related associations.
+   * Stateless messages are associated here because they are the first step in the
+   * security-enablement process and as such they are sent in the clear.
    */
 
-  using namespace DDS::Security;
-
-  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
-    DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-    sedp_->publications_secure_writer_.assoc(peer);
-  }
-  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
-    DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-    sedp_->subscriptions_secure_writer_.assoc(peer);
-  }
-  if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
-    DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
-    sedp_->participant_message_secure_writer_.assoc(peer);
-  }
-  if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
       DCPS::AssociationData peer = proto;
-      peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+      peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
       sedp_->participant_stateless_message_writer_.assoc(peer);
   }
-  if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
-      DCPS::AssociationData peer = proto;
-      peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-      sedp_->participant_volatile_message_secure_writer_.assoc(peer);
-  }
+
   //FUTURE: if/when topic propagation is supported, add it here
 
   // Process deferred publications and subscriptions.
@@ -720,18 +766,6 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     proto.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     sedp_->write_durable_participant_message_data(proto.remote_id_);
-  }
-
-  /*
-   * Security-Related durable-data handling.
-   */
-  if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
-    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-    sedp_->write_durable_publication_data_secure(proto.remote_id_);
-  }
-  if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
-    proto.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-    sedp_->write_durable_subscription_data_secure(proto.remote_id_);
   }
 
   for (DCPS::RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();

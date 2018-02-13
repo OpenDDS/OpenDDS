@@ -82,6 +82,8 @@ public:
   bool map_ipv4_to_ipv6() const;
 
   void associate(const SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_writers_to_readers(const SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_readers_to_writers(const SPDPdiscoveredParticipantData& pdata);
   bool disassociate(const SPDPdiscoveredParticipantData& pdata);
 
   // Topic
