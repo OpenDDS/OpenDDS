@@ -600,10 +600,10 @@ inline void generateSwitchForUnion(const std::string& switchExpr, CommonFn commo
         if (label->label_kind() == AST_UnionLabel::UL_default) {
           default_branch = branch;
         }
-        if (label->label_val()->ev()->u.bval) {
+        else if (label->label_val()->ev()->u.bval) {
           true_branch = branch;
         }
-        if (!label->label_val()->ev()->u.bval) {
+        else if (!label->label_val()->ev()->u.bval) {
           false_branch = branch;
         }
       }
@@ -613,10 +613,14 @@ inline void generateSwitchForUnion(const std::string& switchExpr, CommonFn commo
       "  if (" << switchExpr << ") \n";
     if (true_branch || default_branch) {
       generateCaseBody(commonFn, true_branch ? true_branch : default_branch, statementPrefix, namePrefix, uni, false, parens);
+    } else {
+      be_global->impl_ <<
+        "    ;\n";
     }
-    be_global->impl_ <<
-      "  else \n";
+
     if (false_branch || default_branch) {
+      be_global->impl_ <<
+        "  else \n";
       generateCaseBody(commonFn, false_branch ? false_branch : default_branch, statementPrefix, namePrefix, uni, false, parens);
     }
   }
