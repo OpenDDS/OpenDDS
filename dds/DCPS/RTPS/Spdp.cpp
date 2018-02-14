@@ -151,7 +151,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
         se.code, se.minor_code, se.message.in()));
     throw std::runtime_error("unable to get permissions token");
   }
-  if (access->get_permissions_credential_token(permissions_token_, permissions_handle_, se) == false) {
+  if (access->get_permissions_credential_token(permissions_credential_token_, permissions_handle_, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("unable to get permissions credential handle. Security Exception[%d.%d]: %C\n"),
