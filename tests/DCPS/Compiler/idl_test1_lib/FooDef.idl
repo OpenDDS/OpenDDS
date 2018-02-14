@@ -149,6 +149,35 @@ module Xyz {
   case TRUE:
     StructWithTypedefedEnum swte;
   };
+
+  union TestUnion2 switch (boolean) {
+  case FALSE:
+    octet o;
+  };
+
+  union TestUnion3 switch (boolean) {
+  case TRUE:
+    octet o;
+  };
+
+  union TestUnion4 switch (boolean) {
+  default:
+    octet o;
+  };
+
+  union TestUnion5 switch (boolean) {
+  case FALSE:
+    TestEnum te;
+  default:
+    octet o;
+  };
+
+  union TestUnion6 switch (boolean) {
+  case TRUE:
+    TestEnum te;
+  default:
+    octet o;
+  };
 };
 
 module N1 {
