@@ -454,18 +454,22 @@ DomainParticipantImpl::create_topic_i(
       }
       has_keys = type_support->has_dcps_key();
     }
-    RepoId topic_id;
 
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    TopicStatus status = disco->assert_topic(topic_id,
-                                             domain_id_,
-                                             dp_id_,
-                                             topic_name,
-                                             type_name,
-                                             topic_qos,
-                                             has_keys);
+    RepoId topic_id = GUID_UNKNOWN;
+    TopicStatus status = TOPIC_DISABLED;
 
-    if (status == CREATED || status == FOUND) {
+    if (is_enabled()) {
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      status = disco->assert_topic(topic_id,
+                                   domain_id_,
+                                   dp_id_,
+                                   topic_name,
+                                   type_name,
+                                   topic_qos,
+                                   has_keys);
+    }
+
+    if (status == CREATED || status == FOUND || status == TOPIC_DISABLED) {
       DDS::Topic_ptr new_topic = create_new_topic(topic_id,
                                                 topic_name,
                                                 type_name,
@@ -1680,7 +1684,7 @@ DomainParticipantImpl::enable()
           se.code, se.minor_code, se.message.in()));
       return DDS::RETCODE_ERROR;
     }
-   
+
     const AddDomainStatus value =
       disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
