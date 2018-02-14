@@ -26,6 +26,14 @@ namespace OpenDDS {
       DDS::Security::DataTags data_tags;
     };
 
+    struct SPDPdiscoveredParticipantData_SecurityWrapper {
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData data;
+      DDS::Security::IdentityToken identity_token;
+      DDS::Security::PermissionsToken permissions_token;
+      DDS::Security::ParticipantSecurityInfo security_info;
+      DDS::Security::IdentityStatusToken identity_status_token;
+    };
+
   }
 }
 

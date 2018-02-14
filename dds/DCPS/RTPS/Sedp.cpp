@@ -183,6 +183,7 @@ Sedp::Sedp(const RepoId& participant_id,
   , participant_message_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER), *this)
   , participant_stateless_message_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this)
   , participant_volatile_message_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this)
+  , dcps_participant_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), *this)
 
   , publications_reader_(make_rch<Reader>(
 			   make_id(participant_id,ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
@@ -215,6 +216,11 @@ Sedp::Sedp(const RepoId& participant_id,
   , participant_volatile_message_secure_reader_(make_rch<Reader>(
 					    make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER),
 					    ref(*this)))
+
+  , dcps_participant_secure_reader_(make_rch<Reader>(
+                                            make_id(participant_id, DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER),
+                                            ref(*this)))
+
   , task_(this)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
@@ -320,6 +326,9 @@ Sedp::init(const RepoId& guid,
   participant_volatile_message_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   participant_volatile_message_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
+  dcps_participant_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
+  dcps_participant_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+
   return DDS::RETCODE_OK;
 }
 
@@ -346,6 +355,15 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   bool ok = acl->get_participant_sec_attributes(perm_handle, participant_attribs, ex);
   if (ok) {
 
+    EndpointSecurityAttributes proto;
+    proto.base.is_read_protected = false;
+    proto.base.is_write_protected = false;
+    proto.base.is_discovery_protected = false;
+    proto.base.is_liveliness_protected = false;
+    proto.is_submessage_protected = false;
+    proto.is_payload_protected = false;
+    proto.is_key_protected = false;
+
     NativeCryptoHandle h = DDS::HANDLE_NIL;
 
     // Volatile-Message-Secure
@@ -359,14 +377,8 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       reader_props[0].name = "dds.sec.builtin_endpoint_name";
       reader_props[0].value = "BuiltinParticipantVolatileMessageSecureReader";
 
-      EndpointSecurityAttributes attribs;
-      attribs.base.is_read_protected = false;
-      attribs.base.is_write_protected = false;
-      attribs.base.is_discovery_protected = false;
-      attribs.base.is_liveliness_protected = false;
+      EndpointSecurityAttributes attribs(proto);
       attribs.is_submessage_protected = true;
-      attribs.is_payload_protected = false;
-      attribs.is_key_protected = false;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
       participant_volatile_message_secure_writer_.set_crypto_handle(h);
@@ -379,11 +391,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      EndpointSecurityAttributes attribs;
-      attribs.base.is_read_protected = false;
-      attribs.base.is_write_protected = false;
-      attribs.is_payload_protected = false;
-      attribs.is_key_protected = false;
+      EndpointSecurityAttributes attribs(proto);
       attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
@@ -397,11 +405,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      EndpointSecurityAttributes attribs;
-      attribs.base.is_read_protected = false;
-      attribs.base.is_write_protected = false;
-      attribs.is_payload_protected = false;
-      attribs.is_key_protected = false;
+      EndpointSecurityAttributes attribs(proto);
       attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
@@ -415,11 +419,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      EndpointSecurityAttributes attribs;
-      attribs.base.is_read_protected = false;
-      attribs.base.is_write_protected = false;
-      attribs.is_payload_protected = false;
-      attribs.is_key_protected = false;
+      EndpointSecurityAttributes attribs(proto);
       attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
@@ -427,6 +427,20 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
       subscriptions_secure_reader_->set_crypto_handle(h);
+    }
+
+    // DCPS-Participants-Secure
+    {
+      PropertySeq reader_props, writer_props;
+
+      EndpointSecurityAttributes attribs(proto);
+      attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      dcps_participant_secure_writer_.set_crypto_handle(h);
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      dcps_participant_secure_reader_->set_crypto_handle(h);
     }
 
   } else {
@@ -668,7 +682,8 @@ void Sedp::associate_secure_readers_to_writers(const SPDPdiscoveredParticipantDa
    *
    * TODO
    * Is this the right spot for durable-data handling? Or is it safe to call it in the
-   * Sedp::Task::svc_i(...) where the other durable-data handling occurs?
+   * Sedp::Task::svc_i(...) where the other durable-data handling occurs? Or do we not
+   * care about handling durable data?
    */
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -810,6 +825,14 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
       ++it;
     }
   }
+}
+
+void
+Sedp::Task::svc_i(DCPS::MessageId message_id,
+                  const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper* wrapper)
+{
+  DCPS::unique_ptr<const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper> delete_the_data(wrapper);
+  sedp_->data_received(message_id, *wrapper);
 }
 
 bool
@@ -1239,6 +1262,13 @@ Sedp::Task::shutdown()
     putq(new Msg(Msg::MSG_STOP, DCPS::GRACEFUL_DISCONNECT, 0));
     wait();
   }
+}
+
+void Sedp::data_received(DCPS::MessageId message_id,
+                     const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper)
+{
+  // TODO
+  // Handle received participant-data.
 }
 
 void
@@ -2228,6 +2258,37 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
 }
 
 DDS::ReturnCode_t
+Sedp::Writer::write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& msg,
+                                            const DCPS::RepoId& reader,
+                                            DCPS::SequenceNumber& sequence)
+{
+  using DCPS::Serializer;
+
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+
+  // TODO
+  // Handle preconditions?
+
+  ParameterList plist;
+
+  bool err = ParameterListConverter::to_param_list(msg, plist);
+
+  if (err) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                 ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData_SecurityWrapper ")
+                 ACE_TEXT(" to ParameterList\n")));
+
+      result = DDS::RETCODE_ERROR;
+
+  } else {
+      result = write_parameter_list(plist, reader, sequence);
+  }
+
+  return result;
+}
+
+DDS::ReturnCode_t
 Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 {
   // Build param list for message
@@ -2432,7 +2493,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
                      ACE_TEXT("failed to convert from ParameterList ")
-                     ACE_TEXT("to DiscoveredWriterData\n")));
+                     ACE_TEXT("to DiscoveredWriterData_SecurityWrapper\n")));
           return;
         }
         sedp_.task_.enqueue(id, move(wdata_secure));
@@ -2475,7 +2536,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
                      ACE_TEXT("failed to convert from ParameterList ")
-                     ACE_TEXT("to DiscoveredReaderData\n")));
+                     ACE_TEXT("to DiscoveredReaderData_SecurityWrapper\n")));
           return;
         }
         if ((rdata->data).readerProxy.expectsInlineQos) {
@@ -2527,6 +2588,27 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 	  return;
 	}
 	sedp_.task_.enqueue_volatile_message_secure(id, move(data));
+
+    } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+
+        ParameterList data;
+        if (!decode_parameter_list(sample, ser, encap, data)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                     ACE_TEXT("failed to deserialize data\n")));
+          return;
+        }
+
+        DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper> wrapper(
+            new OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper);
+
+        if (ParameterListConverter::from_param_list(data, *wrapper) < 0) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+                     ACE_TEXT("failed to convert from ParameterList ")
+                     ACE_TEXT("to SPDPdiscoveredParticipantData_SecurityWrapper\n")));
+          return;
+        }
+        sedp_.task_.enqueue(id, move(wrapper));
     }
   }
     break;
@@ -2925,6 +3007,12 @@ Sedp::Task::enqueue(DCPS::unique_ptr<SPDPdiscoveredParticipantData> pdata)
   putq(new Msg(Msg::MSG_PARTICIPANT, DCPS::SAMPLE_DATA, pdata.release()));
 }
 
+void Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper> wrapper)
+{
+  if (spdp_->shutting_down()) { return; }
+  putq(new Msg(Msg::MSG_DCPS_PARTICIPANT_SECURE, id, wrapper.release()));
+}
+
 void
 Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata)
 {
@@ -2933,10 +3021,10 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::Discover
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wdata_secure)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wrapper)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_WRITER_SECURE, id, wdata_secure.release()));
+  putq(new Msg(Msg::MSG_WRITER_SECURE, id, wrapper.release()));
 }
 
 void
@@ -2947,10 +3035,10 @@ Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::Discover
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> rdata_secure)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> wrapper)
 {
   if (spdp_->shutting_down()) { return; }
-  putq(new Msg(Msg::MSG_READER_SECURE, id, rdata_secure.release()));
+  putq(new Msg(Msg::MSG_READER_SECURE, id, wrapper.release()));
 }
 
 void
@@ -3038,6 +3126,10 @@ Sedp::Task::svc()
 
     case Msg::MSG_PARTICIPANT_VOLATILE_SECURE:
       svc_volatile_message_secure(msg->id_, msg->pgmdata_);
+      break;
+
+    case Msg::MSG_DCPS_PARTICIPANT_SECURE:
+      svc_i(msg->id_, msg->dpdata_secure_);
       break;
 
     case Msg::MSG_REMOVE_FROM_PUB_BIT:

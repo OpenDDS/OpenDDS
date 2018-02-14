@@ -36,12 +36,16 @@ namespace ParameterListConverter {
                     bool map = false /*map IPV4 to IPV6 addr*/);
 
   OpenDDS_Rtps_Export
-  int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data,
+  int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper,
+                    ParameterList& param_list);
+
+  OpenDDS_Rtps_Export
+  int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper,
                     ParameterList& param_list,
                     bool map = false /*map IPV4 to IPV6 addr*/);
 
   OpenDDS_Rtps_Export
-  int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data,
+  int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& wrapper,
                     ParameterList& param_list,
                     bool map = false /*map IPV4 to IPV6 addr*/);
 
@@ -51,11 +55,15 @@ namespace ParameterListConverter {
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
+                      OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper);
+
+  OpenDDS_Rtps_Export
+  int from_param_list(const ParameterList& param_list,
                       OpenDDS::DCPS::DiscoveredWriterData& writer_data);
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
-                      OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data);
+                      OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper);
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
@@ -63,7 +71,7 @@ namespace ParameterListConverter {
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
-                      OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data);
+                      OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& wrapper);
 
 }}}
 

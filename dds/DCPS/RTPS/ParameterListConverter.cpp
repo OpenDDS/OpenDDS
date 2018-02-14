@@ -559,22 +559,61 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
 // Local security-related helper functions.
 namespace {
 
-  inline void to_param_list(const DDS::Security::EndpointSecurityInfo& security_info,
-                            const DDS::Security::DataTags& data_tags,
-                            ParameterList& param_list)
+  inline void to_param_list(const DDS::Security::EndpointSecurityInfo& src, ParameterList& dest)
   {
-    {
-      Parameter param;
-      param.endpoint_security_info(security_info);
-      param._d(DDS::Security::PID_ENDPOINT_SECURITY_INFO);
-      add_param(param_list, param);
+    Parameter param;
+    param.endpoint_security_info(src);
+    param._d(DDS::Security::PID_ENDPOINT_SECURITY_INFO);
+    add_param(dest, param);
+  }
+
+  inline void to_param_list(const DDS::Security::DataTags& src, ParameterList& dest)
+  {
+    Parameter param;
+    param.data_tags(src);
+    param._d(DDS::Security::PID_DATA_TAGS);
+    add_param(dest, param);
+  }
+
+  inline void to_param_list(const DDS::Security::ParticipantSecurityInfo& src, ParameterList& dest)
+  {
+    Parameter param;
+    param.participant_security_info(src);
+    param._d(DDS::Security::PID_PARTICIPANT_SECURITY_INFO);
+    add_param(dest, param);
+  }
+
+  inline int to_param_list(const DDS::Security::Token& src,
+                            CORBA::UShort pid,
+                            ParameterList& dest)
+  {
+    int result = 0;
+
+    Parameter param;
+    param._d(pid);
+
+    switch (pid) {
+      case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+        param.identity_status_token(src);
+        add_param(dest, param);
+        break;
+
+      case DDS::Security::PID_IDENTITY_TOKEN:
+        param.identity_token(src);
+        add_param(dest, param);
+        break;
+
+      case DDS::Security::PID_PERMISSIONS_TOKEN:
+        param.permissions_token(src);
+        add_param(dest, param);
+        break;
+
+      default:
+        result = -1;
+        break;
     }
-    {
-      Parameter param;
-      param.data_tags(data_tags);
-      param._d(DDS::Security::PID_DATA_TAGS);
-      add_param(param_list, param);
-    }
+
+    return result;
   }
 
   inline int from_param_list(const ParameterList& param_list,
@@ -610,15 +649,97 @@ namespace {
     return 0;
   }
 
+  inline int from_param_list(const ParameterList& param_list,
+                             DDS::Security::IdentityStatusToken& id_status_token,
+                             DDS::Security::IdentityToken& id_token,
+                             DDS::Security::PermissionsToken& perm_token,
+                             DDS::Security::ParticipantSecurityInfo& security_info)
+  {
+
+    id_status_token.binary_properties.length(0);
+    id_status_token.class_id = "";
+    id_status_token.properties.length(0);
+
+    id_token.binary_properties.length(0);
+    id_token.class_id = "";
+    id_token.properties.length(0);
+
+    perm_token.binary_properties.length(0);
+    perm_token.class_id = "";
+    perm_token.properties.length(0);
+
+    security_info.participant_security_attributes = 0;
+    security_info.plugin_participant_security_attributes = 0;
+
+    size_t len = param_list.length();
+    for (size_t i = 0; i < len; ++i) {
+        const Parameter& p = param_list[i];
+
+        switch (p._d()) {
+          case DDS::Security::PID_IDENTITY_TOKEN:
+            id_token = p.identity_token();
+            break;
+
+          case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+            id_status_token = p.identity_status_token();
+            break;
+
+          case DDS::Security::PID_PERMISSIONS_TOKEN:
+            perm_token = p.permissions_token();
+            break;
+
+          case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+            security_info = p.participant_security_info();
+            break;
+
+          default:
+            if (p._d() & PIDMASK_INCOMPATIBLE) {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+  }
+
 } /* local security-related helpers */
 
-int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data,
+
+int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper,
+                    ParameterList& param_list)
+{
+  int err = to_param_list(wrapper.data, param_list) ||
+               to_param_list(wrapper.identity_token, DDS::Security::PID_IDENTITY_TOKEN, param_list) ||
+               to_param_list(wrapper.permissions_token, DDS::Security::PID_PERMISSIONS_TOKEN, param_list) ||
+               to_param_list(wrapper.identity_status_token, DDS::Security::PID_IDENTITY_STATUS_TOKEN, param_list);
+
+  if (! err) {
+      to_param_list(wrapper.security_info, param_list);
+  }
+
+  return err;
+}
+
+int from_param_list(const ParameterList& param_list,
+                      OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper)
+{
+  int result = from_param_list(param_list, wrapper.data) ||
+               from_param_list(param_list,
+                               wrapper.identity_status_token,
+                               wrapper.identity_token,
+                               wrapper.permissions_token,
+                               wrapper.security_info);
+  return result;
+}
+
+int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
 {
-  int result = to_param_list(writer_data.data, param_list, map);
+  int result = to_param_list(wrapper.data, param_list, map);
 
-  to_param_list(writer_data.security_info, writer_data.data_tags, param_list);
+  to_param_list(wrapper.security_info, param_list);
+  to_param_list(wrapper.data_tags, param_list);
 
   return result;
 }
@@ -794,13 +915,14 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
   return 0;
 }
 
-int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data,
+int to_param_list(const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
 {
-  int result = to_param_list(reader_data.data, param_list, map);
+  int result = to_param_list(wrapper.data, param_list, map);
 
-  to_param_list(reader_data.security_info, reader_data.data_tags, param_list);
+  to_param_list(wrapper.security_info, param_list);
+  to_param_list(wrapper.data_tags, param_list);
 
   return result;
 }
@@ -1086,10 +1208,10 @@ int from_param_list(const ParameterList& param_list,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& writer_data)
+                    OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper)
 {
-  int result = from_param_list(param_list, writer_data.data) ||
-                  from_param_list(param_list, writer_data.security_info, writer_data.data_tags);
+  int result = from_param_list(param_list, wrapper.data) ||
+                  from_param_list(param_list, wrapper.security_info, wrapper.data_tags);
 
   return result;
 }
@@ -1247,10 +1369,10 @@ int from_param_list(const ParameterList& param_list,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& reader_data)
+                    OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& wrapper)
 {
-  int result = from_param_list(param_list, reader_data.data) ||
-                  from_param_list(param_list, reader_data.security_info, reader_data.data_tags);
+  int result = from_param_list(param_list, wrapper.data) ||
+                  from_param_list(param_list, wrapper.security_info, wrapper.data_tags);
 
   return result;
 }
