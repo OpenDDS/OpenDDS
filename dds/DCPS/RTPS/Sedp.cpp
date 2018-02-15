@@ -1264,8 +1264,8 @@ Sedp::Task::shutdown()
   }
 }
 
-void Sedp::data_received(DCPS::MessageId message_id,
-                     const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper)
+void Sedp::data_received(DCPS::MessageId /*message_id*/,
+                     const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& /*wrapper*/)
 {
   // TODO
   // Handle received participant-data.
