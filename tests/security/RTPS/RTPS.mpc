@@ -1,0 +1,13 @@
+project (Security*): dcpsexe, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  after += OpenDDS_Security OpenDDS_Rtps
+  libs  += OpenDDS_Security OpenDDS_Rtps
+
+  Source_Files {
+    Main.cpp
+    ParameterListConverterTest.cpp
+  }
+}
+
