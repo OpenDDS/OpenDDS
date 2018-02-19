@@ -90,6 +90,25 @@ BUILDING OpenDDS
   Any testing has to be done manually.
 
 
+* Raspberry Pi
+
+  Like any other cross compiled build, to build OpenDDS for Linux on the
+  Raspberry Pi, you need the toolchain specific for the architecture:
+      https://github.com/raspberrypi/tools
+
+  This toolchain is precompiled GNU gcc and binutils for x86 Linux.
+  To configure OpenDDS to use it, assuming $PITOOLS is set to the location of
+  the toolchain:
+
+  ./configure --target=linux-cross --target-compiler=$PITOOLS/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++
+
+  If running a 32-bit development host system, remove the "-x64" part from
+  the command.
+
+  Then build as normal and once done, OpenDDS for Raspberry Pi will be in
+  DDS_ROOT/build/target.
+
+
 * Getting Started building your own applications:
 
   See the OpenDDS Developer's Guide:
