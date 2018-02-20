@@ -42,6 +42,7 @@ public:
       group_coherent_(header.group_coherent_),
       publisher_id_ (header.publisher_id_),
 #endif
+      valid_data_ (received_data != 0),
       disposed_generation_count_(0),
       no_writers_generation_count_(0),
       zero_copy_cnt_(0),
@@ -51,11 +52,19 @@ public:
       ref_count_(1),
       mx_(mx)
   {
-
     this->destination_timestamp_ = time_value_to_time(ACE_OS::gettimeofday());
 
     this->source_timestamp_.sec = header.source_timestamp_sec_;
     this->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
+
+    // When we have a dispose or unregister instance we shouldn't let the
+    // user read our received data
+    if (header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
+        header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE ||
+        header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE ||
+        header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+        valid_data_ = false;
+      }
   }
 
   virtual ~ReceivedDataElement(){}
@@ -75,14 +84,15 @@ public:
 
   PublicationId pub_;
 
-  /// Data sample received
+  /// Data sample received, could only be the keyed fields
+  /// in case we received a dispose message
   void * const registered_data_;  // ugly, but works....
 
   /// Sample state for this data sample:
   /// DDS::NOT_READ_SAMPLE_STATE/DDS::READ_SAMPLE_STATE
   DDS::SampleStateKind sample_state_ ;
 
-  ///Source time stamp for this data sample
+  /// Source time stamp for this data sample
   DDS::Time_t source_timestamp_;
 
   /// Reception time stamp for this data sample
@@ -98,6 +108,9 @@ public:
   /// Publisher id represent group identifier.
   RepoId publisher_id_;
 #endif
+
+  /// Do we contain valid data
+  bool valid_data_;
 
   /// The data sample's instance's disposed_generation_count_
   /// at the time the sample was received

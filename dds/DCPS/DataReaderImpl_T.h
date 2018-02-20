@@ -1617,7 +1617,6 @@ void store_instance_data(
     return;
   }
 
-
   if (it == instance_map_.end())
   {
     std::size_t instances_size = 0;
@@ -1911,12 +1910,6 @@ void finish_store_instance_data(MessageTypeWithAllocator* instance_data, const D
         item->dec_ref();
       }
     }
-  }
-
-  if (is_dispose_msg || is_unregister_msg)
-  {
-    delete instance_data;
-    instance_data = 0;
   }
 
   bool event_notify = false;
