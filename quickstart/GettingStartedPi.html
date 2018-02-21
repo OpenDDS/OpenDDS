@@ -33,7 +33,15 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
     <li>
       Run the following as a single command, replacing &lt;PITOOLS&gt; with the absolute path of the toolchain:
       <pre><code>./configure --target=linux-cross\</br>  --target-compiler="&lt;PITOOLS&gt;/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++"</code></pre>
-      If you have a 32-bit system, remove the "-x64" part of the command. This shouldn't be necessary though, unless you are running an older system.
+      <ul>
+        <li>
+          If you want to use OpenDDS's Java bindings and examples, add <code> --java</code> to the end of this command.
+        </li>
+        <li>
+          If you have a 32-bit system, remove the "-x64" part of the command.
+          This shouldn't be necessary though, unless you are running an older system.
+        </li>
+      </ul>
     </br>
     <li><code>make</code></li>
   </ol>
