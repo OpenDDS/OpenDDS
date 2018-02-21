@@ -1559,15 +1559,15 @@ DDS::ReturnCode_t take_next_instance_i (
 #else
       0);
 #endif
-  if (status != DDS::RETCODE_NO_DATA)
-    {
-      total_samples();  // see if we are empty
-      post_read_or_take();
-      return status;
-    }
-}
-post_read_or_take();
-return DDS::RETCODE_NO_DATA;
+    if (status != DDS::RETCODE_NO_DATA)
+      {
+        total_samples();  // see if we are empty
+        post_read_or_take();
+        return status;
+      }
+  }
+  post_read_or_take();
+  return DDS::RETCODE_NO_DATA;
 }
 
 void store_instance_data(
@@ -2183,6 +2183,7 @@ public:
       }
     } else {
       // we only care about the most recently filtered sample, so clean up the last one
+
       sample.message = move(data);
       sample.header = hdr;
       sample.new_instance = just_registered;
