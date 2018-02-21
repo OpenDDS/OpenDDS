@@ -22,8 +22,8 @@ namespace Security {
 
 using DDS::Security::Authentication_var;
 using DDS::Security::AccessControl_var;
-using DDS::Security::CryptoKeyExchange_var;
 using DDS::Security::CryptoKeyFactory_var;
+using DDS::Security::CryptoKeyExchange_var;
 using DDS::Security::CryptoTransform_var;
 
 /**

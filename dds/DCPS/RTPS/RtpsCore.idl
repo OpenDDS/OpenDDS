@@ -266,7 +266,7 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_BASE = PIDMASK_VENDOR_SPECIFIC + 0x3000;
     const ParameterId_t PID_OPENDDS_LOCATOR           = PID_OPENDDS_BASE + 1;
     const ParameterId_t PID_OPENDDS_ASSOCIATED_WRITER = PID_OPENDDS_BASE + 2;
-    
+
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -675,7 +675,38 @@ module OpenDDS {
       HEARTBEAT_FRAG, /* = 0x13, HeartbeatFrag */
       RESERVED_20,
       DATA,           /* = 0x15, Data */
-      DATA_FRAG       /* = 0x16, DataFrag */
+      DATA_FRAG,      /* = 0x16, DataFrag */
+      RESERVED_23,
+      RESERVED_24,
+      RESERVED_25,
+      RESERVED_26,
+      RESERVED_27,
+      RESERVED_28,
+      RESERVED_29,
+      RESERVED_30,
+      RESERVED_31,
+      RESERVED_32,
+      RESERVED_33,
+      RESERVED_34,
+      RESERVED_35,
+      RESERVED_36,
+      RESERVED_37,
+      RESERVED_38,
+      RESERVED_39,
+      RESERVED_40,
+      RESERVED_41,
+      RESERVED_42,
+      RESERVED_43,
+      RESERVED_44,
+      RESERVED_45,
+      RESERVED_46,
+      RESERVED_47,
+      SEC_BODY,  // SubmessageKinds 0x30-3f reserved for security
+      SEC_PREFIX,
+      SEC_POSTFIX,
+      SRTPS_PREFIX,
+      SRTPS_POSTFIX,
+      RESERVED_53_SECURITY
     };
 
     union Submessage switch (SubmessageKind) {

@@ -1,4 +1,4 @@
-#include "dds/DCPS/security/CryptoTransformBuiltInImpl.h"
+#include "dds/DCPS/security/CryptoBuiltInImpl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "gtest/gtest.h"
 
@@ -17,7 +17,7 @@ public:
   , participants_()
   {
     // Initialize a simple buffer
-    //CORBA::Octet* buffer_alloc 
+    //CORBA::Octet* buffer_alloc
   }
 
   ~CryptoTransformTest()
@@ -75,7 +75,7 @@ public:
   }
 
 private:
-  
+
   template<class T>
   void init_seq(T& seq, CORBA::ULong length)
   {
@@ -85,7 +85,7 @@ private:
     }
   }
 
-  CryptoTransformBuiltInImpl test_class_;
+  CryptoBuiltInImpl test_class_;
   DDS::OctetSeq test_buffer_;
   DDS::Security::DatareaderCryptoHandleSeq readers_;
   DDS::Security::DatawriterCryptoHandleSeq writers_;
@@ -188,7 +188,7 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_NilReaderAtN)
 
     EXPECT_FALSE(get_inst().encode_datawriter_submessage(
       output, get_buffer(), handle, readers, index, ex));
-    EXPECT_EQ(0U, output.length());   
+    EXPECT_EQ(0U, output.length());
     EXPECT_EQ(n, index);
 
     // Restore the handle before next iteration
@@ -216,13 +216,13 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_MultiPass)
     if (index < NUM_READERS) {
       EXPECT_TRUE(get_inst().encode_datawriter_submessage(
         output, get_buffer(), handle, get_readers(), index, ex));
-      EXPECT_EQ(get_buffer(), output);   
-      EXPECT_EQ((n + 1), index); 
+      EXPECT_EQ(get_buffer(), output);
+      EXPECT_EQ((n + 1), index);
     } else {
       // Out of bounds test
       EXPECT_FALSE(get_inst().encode_datawriter_submessage(
         output, get_buffer(), handle, get_readers(), index, ex));
-      EXPECT_EQ(n, index); 
+      EXPECT_EQ(n, index);
     }
   }
 }
@@ -345,7 +345,7 @@ TEST_F(CryptoTransformTest, encode_rtps_message_NilReaderAtN)
 
     EXPECT_FALSE(get_inst().encode_rtps_message(
       output, get_buffer(), handle, participants, index, ex));
-    EXPECT_EQ(0U, output.length());   
+    EXPECT_EQ(0U, output.length());
     EXPECT_EQ(n, index);
 
     // Restore the handle before next iteration
@@ -369,13 +369,13 @@ TEST_F(CryptoTransformTest, encode_rtps_message_MultiPass)
     if (index < NUM_PARTS) {
       EXPECT_TRUE(get_inst().encode_rtps_message(
         output, get_buffer(), handle, get_participants(), index, ex));
-      EXPECT_EQ(get_buffer(), output);   
-      EXPECT_EQ((n + 1), index); 
+      EXPECT_EQ(get_buffer(), output);
+      EXPECT_EQ((n + 1), index);
     } else {
       // Out of bounds test
       EXPECT_FALSE(get_inst().encode_rtps_message(
         output, get_buffer(), handle, get_participants(), index, ex));
-      EXPECT_EQ(n, index); 
+      EXPECT_EQ(n, index);
     }
   }
 }

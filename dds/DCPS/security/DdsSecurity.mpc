@@ -1,12 +1,6 @@
-
-// Generates core security-related Makefiles.
-
-// See footnotes in dds/DdsDcps.mpc for tips on
-// what should be included in IDL projects.
-
 project(OpenDDS_Security): dcpslib {
   idlflags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h -SS
-  dcps_ts_flags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h 
+  dcps_ts_flags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h
   requires += no_opendds_safety_profile
   dynamicflags  = DDSSECURITY_BUILD_DLL
 
@@ -18,5 +12,4 @@ project(OpenDDS_Security): dcpslib {
     CryptoBuiltIn.idl
   }
 
-  // custom_only = 1
 }

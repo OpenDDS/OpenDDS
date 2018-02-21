@@ -1,5 +1,5 @@
 
-#include "dds/DCPS/security/CryptoKeyFactoryBuiltInImpl.h"
+#include "dds/DCPS/security/CryptoBuiltInImpl.h"
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "gtest/gtest.h"
@@ -41,7 +41,7 @@ public:
 
     // Register local particpant with authentiation only
     auth_only_handle_ = GetFactory().register_local_participant(
-      Auth_Only_Id_Handle, 
+      Auth_Only_Id_Handle,
       Auth_Only_Perm_Handle,
       part_props,
       sec_attributes,
@@ -49,12 +49,12 @@ public:
 
     // Register local particpant with encryption
     encryption_handle_ = GetFactory().register_local_participant(
-      Encrypt_Identity_Handle, 
+      Encrypt_Identity_Handle,
       Encrypt_Perm_Handle,
       part_props,
       sec_attributes,
       ex);
-    
+
     ASSERT_FALSE(auth_only_handle_ == DDS::HANDLE_NIL) << "AuthOnly handle was Null";
     ASSERT_FALSE(encryption_handle_ == DDS::HANDLE_NIL) << "Encrypt handle was Null";
 
@@ -74,7 +74,7 @@ public:
     // Let the destructor do the work here
   }
 
-  CryptoKeyFactoryBuiltInImpl& GetFactory()
+  DDS::Security::CryptoKeyFactory& GetFactory()
   {
     return factory_;
   }
@@ -95,8 +95,8 @@ public:
   }
 private:
 
-  CryptoKeyFactoryBuiltInImpl factory_;
-  
+  CryptoBuiltInImpl factory_;
+
   DDS::Security::ParticipantCryptoHandle auth_only_handle_;
   DDS::Security::ParticipantCryptoHandle encryption_handle_;
   DDS::Security::ParticipantCryptoHandle remote_handle_;
@@ -104,7 +104,7 @@ private:
 
 TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
 {
-  CryptoKeyFactoryBuiltInImpl test_class;
+  DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
   DDS::Security::IdentityHandle part_id_handle = 1;
   DDS::Security::PermissionsHandle part_perm = 2;
   DDS::PropertySeq part_props;
@@ -112,8 +112,8 @@ TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
   DDS::Security::SecurityException ex;
 
   // Test will Null ID handle, should return a NIL handle
-  EXPECT_EQ(DDS::HANDLE_NIL, test_class.register_local_participant(
-    DDS::HANDLE_NIL, 
+  EXPECT_EQ(DDS::HANDLE_NIL, test_class->register_local_participant(
+    DDS::HANDLE_NIL,
     part_perm,
     part_props,
     sec_attributes,
@@ -121,8 +121,8 @@ TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
 
   // Test will Null permissions handle, should return a NIL handle
   part_id_handle = 1;
-  EXPECT_TRUE(DDS::HANDLE_NIL == test_class.register_local_participant(
-    part_id_handle, 
+  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_local_participant(
+    part_id_handle,
     DDS::HANDLE_NIL,
     part_props,
     sec_attributes,
@@ -140,11 +140,11 @@ TEST(CryptoKeyFactoryBuiltInImplTest, TestRegisterLocal)
 
   // Create an instance of the factory and register a set of
   // participants and check the return data.
-  CryptoKeyFactoryBuiltInImpl test_class;
+  DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
 
   // RTPS not protected, returns a valid handle
-  EXPECT_FALSE(DDS::HANDLE_NIL == test_class.register_local_participant(
-    part_id_handle, 
+  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
+    part_id_handle,
     part_perm,
     part_props,
     sec_attributes,
@@ -152,8 +152,8 @@ TEST(CryptoKeyFactoryBuiltInImplTest, TestRegisterLocal)
 
   // Re-register same handle?
   // Disabled for stub as the stub does not actually track what's registered
-  //EXPECT_TRUE(DDS::HANDLE_NIL == test_class.register_local_participant(
-  //  part_id_handle, 
+  //EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_local_participant(
+  //  part_id_handle,
   //  part_perm,
   //  part_props,
   //  sec_attributes,
@@ -163,8 +163,8 @@ TEST(CryptoKeyFactoryBuiltInImplTest, TestRegisterLocal)
   sec_attributes.is_rtps_protected = true;
   ++part_id_handle;
   ++part_perm;
-  EXPECT_FALSE(DDS::HANDLE_NIL == test_class.register_local_participant(
-    part_id_handle, 
+  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
+    part_id_handle,
     part_perm,
     part_props,
     sec_attributes,
@@ -173,7 +173,7 @@ TEST(CryptoKeyFactoryBuiltInImplTest, TestRegisterLocal)
 
 TEST(CryptoKeyFactoryBuiltInImplTest, RegisterRemoteParticipant)
 {
-  CryptoKeyFactoryBuiltInImpl test_class;
+  DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
 
   // Register a single local participant to support remote participants
   ::DDS::Security::IdentityHandle local_id_handle = 1;
@@ -182,8 +182,8 @@ TEST(CryptoKeyFactoryBuiltInImplTest, RegisterRemoteParticipant)
   ::DDS::Security::ParticipantSecurityAttributes sec_attributes;
   ::DDS::Security::SecurityException ex;
 
-  ::DDS::Security::IdentityHandle local_handle = test_class.register_local_participant(
-    local_id_handle, 
+  ::DDS::Security::IdentityHandle local_handle = test_class->register_local_participant(
+    local_id_handle,
     local_perm_handle,
     part_props,
     sec_attributes,
@@ -192,30 +192,30 @@ TEST(CryptoKeyFactoryBuiltInImplTest, RegisterRemoteParticipant)
   ::DDS::Security::IdentityHandle remote_id_handle = 4;
   ::DDS::Security::PermissionsHandle remote_perm_handle = 5;
   ::DDS::Security::SharedSecretHandle secret_handle = 6;
-  
+
   // Register with combinations of Null handles
-  EXPECT_TRUE(DDS::HANDLE_NIL == test_class.register_matched_remote_participant(
+  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     DDS::HANDLE_NIL,
     remote_id_handle,
     remote_perm_handle,
     secret_handle,
     ex));
 
-  EXPECT_TRUE(DDS::HANDLE_NIL == test_class.register_matched_remote_participant(
+  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     local_handle,
     DDS::HANDLE_NIL,
     remote_perm_handle,
     secret_handle,
     ex));
 
-  EXPECT_TRUE(DDS::HANDLE_NIL == test_class.register_matched_remote_participant(
+  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     local_handle,
     remote_id_handle,
     DDS::HANDLE_NIL,
     secret_handle,
     ex));
 
-  EXPECT_TRUE(DDS::HANDLE_NIL == test_class.register_matched_remote_participant(
+  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     local_handle,
     remote_id_handle,
     remote_perm_handle,
@@ -223,21 +223,21 @@ TEST(CryptoKeyFactoryBuiltInImplTest, RegisterRemoteParticipant)
     ex));
 
   // Register with valid handles
-  EXPECT_FALSE(DDS::HANDLE_NIL == test_class.register_matched_remote_participant(
+  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     local_handle,
     remote_id_handle,
     remote_perm_handle,
     secret_handle,
-    ex));  
+    ex));
 
   // Disabled because the stub does not track what is registered
   //// Re-register same handle relationship
-  //EXPECT_TRUE(DDS::HANDLE_NIL == test_class.register_matched_remote_participant(
+  //EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
   //  local_handle,
   //  remote_id_handle,
   //  remote_perm_handle,
   //  secret_handle,
-  //  ex));  
+  //  ex));
 }
 
 TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
@@ -245,7 +245,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
   ::DDS::PropertySeq datawriter_properties;
   ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes;
   ::DDS::Security::SecurityException ex;
-  
+
   // Register with a Null handle
   EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_local_datawriter(
     DDS::HANDLE_NIL,
@@ -340,7 +340,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterDataReaderAndRemoteWriter)
     DDS::HANDLE_NIL,
     ex));
 
-  // Register using valid handles, this will return a valid output handle  
+  // Register using valid handles, this will return a valid output handle
   EXPECT_FALSE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datawriter(
     local_handle,
     GetRemoteParticipant(),
@@ -367,7 +367,7 @@ TEST_F(CryptoKeyFactoryFixture, UnregisterDataWriter)
   ::DDS::PropertySeq datawriter_properties;
   ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes;
   ::DDS::Security::SecurityException ex;
-  
+
   // Register a writer and then unregister it
   ::DDS::Security::DatawriterCryptoHandle local_handle = GetFactory().register_local_datawriter(
     Auth_Only_Id_Handle,
@@ -389,7 +389,7 @@ TEST_F(CryptoKeyFactoryFixture, UnRegisterDataReader)
   ::DDS::PropertySeq datareader_properties;
   ::DDS::Security::EndpointSecurityAttributes datareader_security_attributes;
   ::DDS::Security::SecurityException ex;
-  
+
   // Register a writer and then unregister it
   ::DDS::Security::DatareaderCryptoHandle local_handle = GetFactory().register_local_datareader(
     Auth_Only_Id_Handle,

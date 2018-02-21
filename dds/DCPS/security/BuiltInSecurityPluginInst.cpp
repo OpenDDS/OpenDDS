@@ -8,15 +8,20 @@
 #include "dds/DCPS/security/BuiltInSecurityPluginInst.h"
 #include "dds/DCPS/security/AccessControlBuiltInImpl.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
-#include "dds/DCPS/security/CryptoKeyExchangeBuiltInImpl.h"
-#include "dds/DCPS/security/CryptoKeyFactoryBuiltInImpl.h"
-#include "dds/DCPS/security/CryptoTransformBuiltInImpl.h"
-#include "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/security/CryptoBuiltInImpl.h"
 
 namespace OpenDDS {
 namespace Security {
 
+using DDS::Security::CryptoKeyExchange;
+using DDS::Security::CryptoTransform;
+
 BuiltInSecurityPluginInst::BuiltInSecurityPluginInst()
+  : authentication_(new AuthenticationBuiltInImpl)
+  , access_control_(new AccessControlBuiltInImpl)
+  , key_factory_(new CryptoBuiltInImpl)
+  , key_exchange_(CryptoKeyExchange::_narrow(key_factory_))
+  , transform_(CryptoTransform::_narrow(key_factory_))
 {
 }
 
@@ -26,27 +31,27 @@ BuiltInSecurityPluginInst::~BuiltInSecurityPluginInst()
 
 Authentication_var BuiltInSecurityPluginInst::create_authentication()
 {
-  return new AuthenticationBuiltInImpl;
+  return authentication_;
 }
 
 AccessControl_var BuiltInSecurityPluginInst::create_access_control()
 {
-  return new AccessControlBuiltInImpl;
-}
-
-CryptoKeyExchange_var BuiltInSecurityPluginInst::create_crypto_key_exchange()
-{
-  return new CryptoKeyExchangeBuiltInImpl;
+  return access_control_;
 }
 
 CryptoKeyFactory_var BuiltInSecurityPluginInst::create_crypto_key_factory()
 {
-  return new CryptoKeyFactoryBuiltInImpl;
+  return key_factory_;
+}
+
+CryptoKeyExchange_var BuiltInSecurityPluginInst::create_crypto_key_exchange()
+{
+  return key_exchange_;
 }
 
 CryptoTransform_var BuiltInSecurityPluginInst::create_crypto_transform()
 {
-  return new CryptoTransformBuiltInImpl;
+  return transform_;
 }
 
 void BuiltInSecurityPluginInst::shutdown()

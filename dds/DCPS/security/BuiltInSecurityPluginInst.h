@@ -29,16 +29,21 @@ public:
 
   virtual Authentication_var create_authentication();
   virtual AccessControl_var create_access_control();
-  virtual CryptoKeyExchange_var create_crypto_key_exchange();
   virtual CryptoKeyFactory_var create_crypto_key_factory();
+  virtual CryptoKeyExchange_var create_crypto_key_exchange();
   virtual CryptoTransform_var create_crypto_transform();
 
   virtual void shutdown();
 
 private:
+  Authentication_var authentication_;
+  AccessControl_var access_control_;
+  CryptoKeyFactory_var key_factory_;
+  CryptoKeyExchange_var key_exchange_;
+  CryptoTransform_var transform_;
 
-  BuiltInSecurityPluginInst(const BuiltInSecurityPluginInst& right);
-  BuiltInSecurityPluginInst& operator=(const BuiltInSecurityPluginInst& right);
+  BuiltInSecurityPluginInst(const BuiltInSecurityPluginInst&);
+  BuiltInSecurityPluginInst& operator=(const BuiltInSecurityPluginInst&);
 };
 
 

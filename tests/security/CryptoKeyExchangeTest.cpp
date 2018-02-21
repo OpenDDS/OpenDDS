@@ -1,5 +1,5 @@
 
-#include "dds/DCPS/security/CryptoKeyExchangeBuiltInImpl.h"
+#include "dds/DCPS/security/CryptoBuiltInImpl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "gtest/gtest.h"
 
@@ -35,8 +35,8 @@ public:
   }
 
 private:
-  
-  CryptoKeyExchangeBuiltInImpl test_class_;
+
+  CryptoBuiltInImpl test_class_;
 };
 
 // In general the actual use of the internal interface isn't
