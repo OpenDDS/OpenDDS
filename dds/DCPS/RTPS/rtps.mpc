@@ -2,9 +2,6 @@ project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety {
   sharedname = OpenDDS_Rtps
   dynamicflags = OPENDDS_RTPS_BUILD_DLL
 
-  after += OpenDDS_Security
-  libs += OpenDDS_Security
-
   IDL_Files {
   }
 
