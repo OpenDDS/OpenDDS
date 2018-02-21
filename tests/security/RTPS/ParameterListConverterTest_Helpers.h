@@ -3,6 +3,10 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
+#ifndef PARAMETER_LIST_CONVERTER_TEST_HELPERS_H
+#define PARAMETER_LIST_CONVERTER_TEST_HELPERS_H
+
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
@@ -457,3 +461,6 @@ namespace {
 
   } // Factory namespace
 } // anon namespace
+
+#endif
+
