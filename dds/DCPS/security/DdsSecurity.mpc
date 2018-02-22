@@ -1,4 +1,4 @@
-project(OpenDDS_Security): dcpslib {
+project(OpenDDS_Security): dcpslib, openssl {
   idlflags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h -SS
   dcps_ts_flags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h
   requires += no_opendds_safety_profile

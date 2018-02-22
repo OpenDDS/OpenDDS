@@ -86,7 +86,7 @@ struct AuthenticationTest : public ::testing::Test
       Property_t idca, pkey, pass, idcert;
 
       idca.name = "dds.sec.auth.identity_ca";
-      idca.value = "file:/./identity_ca.pem";
+      idca.value = "file:TESTONLY_identity_ca_cert.pem";
       idca.propagate = false;
 
       pkey.name = "dds.sec.auth.private_key";
@@ -144,6 +144,7 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
 
+#if 0
 TEST_F(AuthenticationTest, NoLocalIdentity)
 {
   // This will just do some simple testing of calling various
@@ -203,7 +204,7 @@ TEST_F(AuthenticationTest, TestValidateRemoteIdentity)
   EXPECT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, validate_result);
 }
 
-
+#endif
 
 int main(int argc, char** argv)
 {

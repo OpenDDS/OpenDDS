@@ -14,6 +14,12 @@
 #include <sstream>
 #include <vector>
 
+#include <openssl/pem.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <utility>
+
 // Temporary include for get macaddress for unique guids
 #include <ace/OS_NS_netdb.h>
 
@@ -56,6 +62,118 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   // - Clean up resources used by this implementation
 }
 
+struct LocalIdentityData
+{
+  enum URI_SCHEME {
+    URI_UNKNOWN,
+    URI_FILE,
+    URI_DATA,
+    URI_PKCS11,
+  };
+
+  typedef std::pair<std::string, URI_SCHEME> Resource;
+
+  LocalIdentityData(const DDS::PropertySeq& props)
+  : idca("", URI_UNKNOWN), pkey("", URI_UNKNOWN), cert("", URI_UNKNOWN), pass(""),
+    idca_ptr(NULL)
+  {
+    std::string name, value;
+    for (size_t i = 0; i < props.length(); ++i) {
+      name = props[i].name;
+      value = props[i].value;
+
+      if (name == "dds.sec.auth.identity_ca") {
+          resource_from_path(idca, value);
+
+      } else if (name == "dds.sec.auth.private_key") {
+          resource_from_path(pkey, value);
+
+      } else if (name == "dds.sec.auth.identity_certificate") {
+          resource_from_path(cert, value);
+
+      } else if (name == "dds.sec.auth.password") {
+          pass = value;
+      }
+    }
+  }
+
+  ~LocalIdentityData()
+  {
+  }
+
+  X509* load_idca() {
+    if (idca_ptr) return idca_ptr;
+
+    switch(idca.second) {
+      case URI_FILE:
+        idca_ptr = x509_fromfile(idca.first);
+        break;
+
+      case URI_DATA:
+      case URI_PKCS11:
+      case URI_UNKNOWN:
+      default:
+        /* TODO use ACE logging */
+        fprintf(stderr, "LocalIdentityData::load_idca: Unsupported URI scheme in idca path '%s'\n", idca.first.c_str());
+        break;
+    }
+
+    return idca_ptr;
+  }
+
+  static void resource_from_path(Resource& resource, const std::string& path)
+  {
+    typedef std::vector<std::pair<std::string, URI_SCHEME> > uri_pattern_t;
+
+    resource.first = path;
+    resource.second = URI_UNKNOWN;
+
+    uri_pattern_t uri_patterns;
+    uri_patterns.push_back(std::make_pair("file:", URI_FILE));
+    uri_patterns.push_back(std::make_pair("data:", URI_DATA));
+    uri_patterns.push_back(std::make_pair("pkcs11:", URI_PKCS11));
+
+    for(uri_pattern_t::iterator i = uri_patterns.begin(); i != uri_patterns.end(); ++i) {
+      const std::string& pfx = i->first;
+      size_t pfx_end = pfx.length();
+
+      if (path.substr(0, pfx_end) == pfx) {
+          resource.first = path.substr(pfx_end, std::string::npos);
+          resource.second = i->second;
+          break;
+      }
+    }
+  }
+
+  static X509* x509_fromfile(const std::string& path, const std::string& pass = "") {
+    X509* result = NULL;
+
+    FILE* fp = fopen(path.c_str(), "r");
+    if (fp) {
+      if (pass != "") {
+          result = PEM_read_X509_AUX(fp, NULL, NULL, (void*)pass.c_str());
+
+      } else {
+          result = PEM_read_X509_AUX(fp, NULL, NULL, NULL);
+      }
+
+      fclose(fp);
+
+    } else {
+      /* TODO use ACE logging */
+      fprintf(stderr, "LocalIdentityData::x509_fromfile: Error '%s' reading file '%s'\n", strerror(errno), path.c_str());
+    }
+
+    return result;
+  }
+  Resource idca;
+  Resource pkey;
+  Resource cert;
+  std::string pass;
+  X509* idca_ptr;
+
+};
+
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::validate_local_identity(
   ::DDS::Security::IdentityHandle & local_identity_handle,
   ::OpenDDS::DCPS::GUID_t & adjusted_participant_guid,
@@ -67,47 +185,57 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   ACE_UNUSED_ARG(domain_id);
   ACE_UNUSED_ARG(participant_qos);
   ACE_UNUSED_ARG(ex);
+
   // The stub implementation will always succeed and will just overwrite any
   // existing entry with the same handle if it were to somehow overflow the
   // handle values. 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
 
-  local_identity_handle = get_next_handle();
-  IdentityData_Ptr newDataPtr(new IdentityData());
+  LocalIdentityData id_data(participant_qos.property.value);
 
-  // Temporary hack to produce unique guids until real auth is written
-  // TODO Replace this!
-  if (candidate_participant_guid == OpenDDS::DCPS::GUID_UNKNOWN) {
+  if (id_data.load_idca()) {
+    local_identity_handle = get_next_handle();
+    IdentityData_Ptr newDataPtr(new IdentityData());
 
-    static ACE_UINT16 counter = 1024;
-    ACE_UINT16 pid = ACE_OS::getpid();
+    // Temporary hack to produce unique guids until real auth is written
+    // TODO Replace this!
+    if (candidate_participant_guid == OpenDDS::DCPS::GUID_UNKNOWN) {
 
-    ACE_OS::macaddr_node_t macaddress;
-    ACE_OS::getmacaddress(&macaddress); // ignore return, assume success!
+      static ACE_UINT16 counter = 1024;
+      ACE_UINT16 pid = ACE_OS::getpid();
 
-    adjusted_participant_guid.guidPrefix[0] = DCPS::VENDORID_OCI[0];
-    adjusted_participant_guid.guidPrefix[1] = DCPS::VENDORID_OCI[1];
-    ACE_OS::memcpy(&adjusted_participant_guid.guidPrefix[2], macaddress.node, NODE_ID_SIZE);
-    adjusted_participant_guid.guidPrefix[8] = static_cast<CORBA::Octet>(pid >> 8);
-    adjusted_participant_guid.guidPrefix[9] = static_cast<CORBA::Octet>(pid & 0xFF);
-    adjusted_participant_guid.guidPrefix[10] = static_cast<CORBA::Octet>(counter >> 8);
-    adjusted_participant_guid.guidPrefix[11] = static_cast<CORBA::Octet>(counter & 0xFF);
+      ACE_OS::macaddr_node_t macaddress;
+      ACE_OS::getmacaddress(&macaddress); // ignore return, assume success!
 
-    ++counter;
+      adjusted_participant_guid.guidPrefix[0] = DCPS::VENDORID_OCI[0];
+      adjusted_participant_guid.guidPrefix[1] = DCPS::VENDORID_OCI[1];
+      ACE_OS::memcpy(&adjusted_participant_guid.guidPrefix[2], macaddress.node, NODE_ID_SIZE);
+      adjusted_participant_guid.guidPrefix[8] = static_cast<CORBA::Octet>(pid >> 8);
+      adjusted_participant_guid.guidPrefix[9] = static_cast<CORBA::Octet>(pid & 0xFF);
+      adjusted_participant_guid.guidPrefix[10] = static_cast<CORBA::Octet>(counter >> 8);
+      adjusted_participant_guid.guidPrefix[11] = static_cast<CORBA::Octet>(counter & 0xFF);
+
+      ++counter;
+    }
+    else {
+      adjusted_participant_guid = candidate_participant_guid;
+
+    }
+    newDataPtr->participant_guid = adjusted_participant_guid;
+
+    // Mutex used to protect the identity_data structure
+    // Probably not needed in the stub
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+      identity_data_[local_identity_handle] = newDataPtr;
+    }
+
+  } else {
+    result = DDS::Security::VALIDATION_FAILED;
+
   }
-  else {
-    adjusted_participant_guid = candidate_participant_guid;
-  }
-  newDataPtr->participant_guid = adjusted_participant_guid;
 
-  // Mutex used to protect the identity_data structure
-  // Probably not needed in the stub
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-    identity_data_[local_identity_handle] = newDataPtr;
-  }
-
-    return result;
+  return result;
 }
 
 ::CORBA::Boolean AuthenticationBuiltInImpl::get_identity_token(
