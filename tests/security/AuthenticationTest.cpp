@@ -105,13 +105,9 @@ struct AuthenticationTest : public ::testing::Test
       add_property(pkey);
       add_property(pass);
       add_property(idcert);
-
-      /* TODO generate some PEM files which stand-in for the above */
   }
 
   ~AuthenticationTest(){
-
-    /* TODO delete the generated PEM files */
   }
 
   void add_property(Property_t p) {
