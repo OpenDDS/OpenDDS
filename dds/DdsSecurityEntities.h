@@ -9,6 +9,7 @@
 #define DDS_SECURITY_ENTITIES
 
 #include "dds/DdsDcpsGuidC.h"
+#include "dds/DdsSecurityCoreC.h"
 
 using OpenDDS::DCPS::EntityId_t;
 
@@ -34,6 +35,8 @@ const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER = {{0x
 
 const ParticipantSecurityInfo PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
 const EndpointSecurityInfo ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
+
+const Token TokenNIL;
 
 }} /* DDS::Security */
 

@@ -366,9 +366,24 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
   return 0;
 }
 
+int to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
+                  ParameterList& param_list)
+{
+  if (not_default(pbtd.user_data))
+  {
+    Parameter param_ud;
+    param_ud.user_data(pbtd.user_data);
+    add_param(param_list, param_ud);
+  }
+
+  return 0;
+}
+
 int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
                   ParameterList& param_list)
 {
+  to_param_list(pbtd.base, param_list);
+
   Parameter param_it;
   param_it.identity_token(pbtd.identity_token);
   add_param(param_list, param_it);
@@ -387,6 +402,46 @@ int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   Parameter param_psi;
   param_psi.participant_security_info(pbtd.security_info);
   add_param(param_list, param_psi);
+
+  return 0;
+}
+
+int to_param_list(const DDS::Security::IdentityToken& identity_token,
+                  const DDS::Security::PermissionsToken& permissions_token,
+                  const DDS::PropertyQosPolicy& property_qos,
+                  const DDS::Security::ParticipantSecurityInfo& security_info,
+                  ParameterList& param_list)
+{
+  Parameter param_it;
+  param_it.identity_token(identity_token);
+  add_param(param_list, param_it);
+
+  Parameter param_pt;
+  param_pt.permissions_token(permissions_token);
+  add_param(param_list, param_pt);
+
+  if (not_default(property_qos))
+  {
+    Parameter param_p;
+    param_pt.property(property_qos);
+    add_param(param_list, param_p);
+  }
+
+  Parameter param_psi;
+  param_psi.participant_security_info(security_info);
+  add_param(param_list, param_psi);
+
+  return 0;
+}
+
+int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
+                  ParameterList& param_list)
+{
+  to_param_list(pbtds.base, param_list);
+
+  Parameter param_ist;
+  param_ist.identity_status_token(pbtds.identity_status_token);
+  add_param(param_list, param_ist);
 
   return 0;
 }
@@ -583,7 +638,7 @@ namespace {
     add_param(dest, param);
   }
 
-  inline int to_param_list(const DDS::Security::Token& src,
+  int to_param_list(const DDS::Security::Token& src,
                             CORBA::UShort pid,
                             ParameterList& dest)
   {
@@ -616,7 +671,7 @@ namespace {
     return result;
   }
 
-  inline int from_param_list(const ParameterList& param_list,
+  int from_param_list(const ParameterList& param_list,
                              DDS::Security::EndpointSecurityInfo& security_info,
                              DDS::Security::DataTags& data_tags)
   {
@@ -637,59 +692,6 @@ namespace {
 
           case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
             security_info = p.endpoint_security_info();
-            break;
-
-          default:
-            if (p._d() & PIDMASK_INCOMPATIBLE) {
-                return -1;
-            }
-        }
-    }
-
-    return 0;
-  }
-
-  inline int from_param_list(const ParameterList& param_list,
-                             DDS::Security::IdentityStatusToken& id_status_token,
-                             DDS::Security::IdentityToken& id_token,
-                             DDS::Security::PermissionsToken& perm_token,
-                             DDS::Security::ParticipantSecurityInfo& security_info)
-  {
-
-    id_status_token.binary_properties.length(0);
-    id_status_token.class_id = "";
-    id_status_token.properties.length(0);
-
-    id_token.binary_properties.length(0);
-    id_token.class_id = "";
-    id_token.properties.length(0);
-
-    perm_token.binary_properties.length(0);
-    perm_token.class_id = "";
-    perm_token.properties.length(0);
-
-    security_info.participant_security_attributes = 0;
-    security_info.plugin_participant_security_attributes = 0;
-
-    size_t len = param_list.length();
-    for (size_t i = 0; i < len; ++i) {
-        const Parameter& p = param_list[i];
-
-        switch (p._d()) {
-          case DDS::Security::PID_IDENTITY_TOKEN:
-            id_token = p.identity_token();
-            break;
-
-          case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
-            id_status_token = p.identity_status_token();
-            break;
-
-          case DDS::Security::PID_PERMISSIONS_TOKEN:
-            perm_token = p.permissions_token();
-            break;
-
-          case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
-            security_info = p.participant_security_info();
             break;
 
           default:
@@ -730,6 +732,59 @@ int from_param_list(const ParameterList& param_list,
                                wrapper.permissions_token,
                                wrapper.security_info);
   return result;
+}
+
+int from_param_list(const ParameterList& param_list,
+                           DDS::Security::IdentityStatusToken& id_status_token,
+                           DDS::Security::IdentityToken& id_token,
+                           DDS::Security::PermissionsToken& perm_token,
+                           DDS::Security::ParticipantSecurityInfo& security_info)
+{
+
+  id_status_token.binary_properties.length(0);
+  id_status_token.class_id = "";
+  id_status_token.properties.length(0);
+
+  id_token.binary_properties.length(0);
+  id_token.class_id = "";
+  id_token.properties.length(0);
+
+  perm_token.binary_properties.length(0);
+  perm_token.class_id = "";
+  perm_token.properties.length(0);
+
+  security_info.participant_security_attributes = 0;
+  security_info.plugin_participant_security_attributes = 0;
+
+  size_t len = param_list.length();
+  for (size_t i = 0; i < len; ++i) {
+      const Parameter& p = param_list[i];
+
+      switch (p._d()) {
+        case DDS::Security::PID_IDENTITY_TOKEN:
+          id_token = p.identity_token();
+          break;
+
+        case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+          id_status_token = p.identity_status_token();
+          break;
+
+        case DDS::Security::PID_PERMISSIONS_TOKEN:
+          perm_token = p.permissions_token();
+          break;
+
+        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+          security_info = p.participant_security_info();
+          break;
+
+        default:
+          if (p._d() & PIDMASK_INCOMPATIBLE) {
+              return -1;
+          }
+      }
+  }
+
+  return 0;
 }
 
 int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper,

@@ -104,6 +104,9 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
+  void match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata, const ACE_Time_Value& time);
+  bool attempt_handshake(const DCPS::RepoId& guid, const DDS::Security::IdentityToken& id_token);
+
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -160,6 +163,8 @@ private:
   DDS::Security::PermissionsToken permissions_token_;
   DDS::Security::PermissionsCredentialToken permissions_credential_token_;
   DDS::Security::ParticipantCryptoToken crypto_token_;
+
+  DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 };
 
 }

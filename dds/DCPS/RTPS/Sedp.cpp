@@ -2750,6 +2750,15 @@ Sedp::write_durable_participant_message_data(const DCPS::RepoId& reader)
 }
 
 DDS::ReturnCode_t
+Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
+                              const DCPS::RepoId& reader,
+                              DCPS::SequenceNumber& sequence)
+{
+  msg.message_identity.source_guid = participant_stateless_message_writer_.get_repo_id();
+  return participant_stateless_message_writer_.write_stateless_message(msg, reader, sequence);
+}
+
+DDS::ReturnCode_t
 Sedp::write_publication_data(
     const RepoId& rid,
     LocalPublication& lp,

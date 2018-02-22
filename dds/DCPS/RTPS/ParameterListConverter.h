@@ -22,7 +22,22 @@ namespace ParameterListConverter {
                     ParameterList& param_list);
 
   OpenDDS_Rtps_Export
+  int to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
+                    ParameterList& param_list);
+
+  OpenDDS_Rtps_Export
   int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
+                    ParameterList& param_list);
+
+  OpenDDS_Rtps_Export
+  int to_param_list(const DDS::Security::IdentityToken& id_token,
+                    const DDS::Security::PermissionsToken& perm_token,
+                    const DDS::PropertyQosPolicy& property_qos,
+                    const DDS::Security::ParticipantSecurityInfo& security_info,
+                    ParameterList& param_list);
+
+  OpenDDS_Rtps_Export
+  int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
                     ParameterList& param_list);
 
   OpenDDS_Rtps_Export
@@ -52,6 +67,13 @@ namespace ParameterListConverter {
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
                       SPDPdiscoveredParticipantData& participant_data);
+
+  OpenDDS_Rtps_Export
+  int from_param_list(const ParameterList& param_list,
+                             DDS::Security::IdentityStatusToken& id_status_token,
+                             DDS::Security::IdentityToken& id_token,
+                             DDS::Security::PermissionsToken& perm_token,
+                             DDS::Security::ParticipantSecurityInfo& security_info);
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
