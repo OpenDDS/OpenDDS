@@ -1,0 +1,11 @@
+
+In order to regenerate the files here use the following commands:
+
+  openssl genrsa -out opendds_identity_ca_private_key.pem 2048
+  openssl req -config identity_ca_openssl.cnf -new -key opendds_identity_ca_private_key.pem opendds_identity_ca.csr
+  openssl req -config identity_ca_openssl.cnf -new -key opendds_identity_ca_private_key.pem -out opendds_identity_ca.csr
+  openssl x509 -req -days 3650 -in opendds_identity_ca.csr -signkey opendds_identity_ca_private_key.pem -out opendds_identity_ca_cert.pem
+  openssl genrsa -out opendds_participant_private_key.pem 2048
+  openssl req -config identity_ca_openssl.cnf -new -key opendds_participant_private_key.pem -out opendds_participant.csr
+  touch index.txt; echo "01" > serial
+  openssl ca -config identity_ca_openssl.cnf -days 3650 -in opendds_participant.csr -out opendds_participant_cert.pem

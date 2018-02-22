@@ -129,8 +129,6 @@ private:
     switch(r.second) {
       case URI_FILE:
         result = x509_fromfile(r.first);
-        /* TODO remove this */
-        print_cert_info(result);
         break;
 
       case URI_DATA:

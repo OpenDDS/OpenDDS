@@ -86,7 +86,7 @@ struct AuthenticationTest : public ::testing::Test
       Property_t idca, pkey, pass, idcert;
 
       idca.name = "dds.sec.auth.identity_ca";
-      idca.value = "file:TESTONLY_identity_ca_cert.pem";
+      idca.value = "file:certs/opendds_identity_ca_cert.pem";
       idca.propagate = false;
 
       pkey.name = "dds.sec.auth.private_key";
@@ -98,7 +98,7 @@ struct AuthenticationTest : public ::testing::Test
       pass.propagate = false;
 
       idcert.name = "dds.sec.auth.identity_certificate";
-      idcert.value = "file:TESTONLY_rti_connect_dds_identity_cert.pem";
+      idcert.value = "file:certs/opendds_participant_cert.pem";
       idcert.propagate = false;
 
       add_property(idca);
