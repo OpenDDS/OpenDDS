@@ -293,7 +293,8 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
           match_unauthenticated(guid, pdata, time);
         }
       }
-      return;
+    } else {
+      match_unauthenticated(guid, pdata, time);
     }
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
     remove_discovered_participant(iter);
