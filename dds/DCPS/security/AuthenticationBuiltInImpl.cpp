@@ -5,6 +5,7 @@
 * See: http://www.opendds.org/license.html
 */
 
+#include "dds/DdsSecurityEntities.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/security/TokenReader.h"
 #include "dds/DCPS/security/TokenWriter.h"
@@ -43,7 +44,6 @@ static const std::string Handshake_Final_Class_Ext("Final");
 static const DDS::OctetSeq Empty_Seq;
 static const std::string AlgoName("RSASSA-PSS-SHA256");
 static const std::string AgreementAlgo("DH+MODP-2048-256");
-static const DDS::Security::Token TokenNil;
 
 // Temporary const for generating unique guids until real validation is in place
 static const short NODE_ID_SIZE = 6;
@@ -330,7 +330,7 @@ struct LocalIdentityData
 
   // If the remote_auth_request_token is TokenNIL, then the local_auth_request_token
   // needs to be populated and have a future_challenge property supplied.  Otherwise
-  // make sure it is set to TokenNil
+  // make sure it is set to TokenNIL
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
   OpenDDS::Security::TokenReader remote_request(remote_auth_request_token);
   if (remote_request.is_nil()) {
@@ -340,7 +340,7 @@ struct LocalIdentityData
                                         0);
     auth_req_wrapper.set_property(0, "future_challenge", "TODO", true);
   } else {
-    local_auth_request_token = TokenNil;
+    local_auth_request_token = DDS::Security::TokenNIL;
   }
 
   // Retain all of the data needed for a handshake with the remote participant
@@ -403,7 +403,7 @@ struct LocalIdentityData
   handshake_wrapper.set_bin_property(prop_index++, "c.hash_c1", Empty_Seq, true);
   handshake_wrapper.set_bin_property(prop_index++, "c.ocsp_status", Empty_Seq, true);
 
-  // If the remote_auth_request_token is not TokenNil, then use the challenge from it.
+  // If the remote_auth_request_token is not TokenNIL, then use the challenge from it.
   // Otherwise just use a stubbed out sequence
   OpenDDS::Security::TokenReader auth_wrapper(remoteDataPtr->local_auth_request);
   if (!auth_wrapper.is_nil()) {
@@ -473,7 +473,7 @@ struct LocalIdentityData
   reply_msg.set_bin_property(prop_index++, "ocsp_status", Empty_Seq, true);
   reply_msg.set_bin_property(prop_index++, "signature", Empty_Seq, true);
 
-  // If the local_auth_request_token is not TokenNil, then use the challenge from it.
+  // If the local_auth_request_token is not TokenNIL, then use the challenge from it.
   // Otherwise just use a stubbed out sequence
   OpenDDS::Security::TokenReader auth_wrapper(remoteDataPtr->local_auth_request);
   if (!auth_wrapper.is_nil()) {

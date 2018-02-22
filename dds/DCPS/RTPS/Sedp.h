@@ -86,6 +86,10 @@ public:
   void associate_secure_readers_to_writers(const SPDPdiscoveredParticipantData& pdata);
   bool disassociate(const SPDPdiscoveredParticipantData& pdata);
 
+  DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
+                                            const DCPS::RepoId& reader,
+                                            DCPS::SequenceNumber& sequence);
+
   // Topic
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
                         OPENDDS_STRING& name);
@@ -243,9 +247,9 @@ private:
                                                 const DCPS::RepoId& reader,
                                                 DCPS::SequenceNumber& sequence);
 
-    DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-					      const DCPS::RepoId& reader,
-					      DCPS::SequenceNumber& sequence);
+  DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
+              const DCPS::RepoId& reader,
+              DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
 						    const DCPS::RepoId& reader,
