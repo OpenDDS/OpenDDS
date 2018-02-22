@@ -90,11 +90,11 @@ struct AuthenticationTest : public ::testing::Test
       idca.propagate = false;
 
       pkey.name = "dds.sec.auth.private_key";
-      pkey.value = "file:/./private_key.pem";
+      pkey.value = "file:certs/opendds_participant_private_key.pem";
       pkey.propagate = false;
 
       pass.name = "dds.sec.auth.password";
-      pass.value = "abc"; /* TODO generate a base64 encoding of AES-128 key to decrypt private key using AES128-CBC */
+      pass.value = "";
       pass.propagate = false;
 
       idcert.name = "dds.sec.auth.identity_certificate";
