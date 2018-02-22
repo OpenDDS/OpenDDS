@@ -61,7 +61,60 @@ static void CallFunctionsWithInvalidLocalHandle(
   EXPECT_EQ(::DDS::Security::VALIDATION_FAILED, validate_result);
 }
 
-TEST(AuthenticationTest, NoLocalIdentity)
+struct AuthenticationTest : public ::testing::Test
+{
+  AuthenticationTest() {
+      DDS::Property_t idca, pkey, pass, idcert;
+
+      idca.name = "dds.sec.auth.identity_ca";
+      idca.value = "file:/./identity_ca.pem";
+      idca.propagate = false;
+
+      pkey.name = "dds.sec.auth.private_key";
+      pkey.value = "file:/./private_key.pem";
+      pkey.propagate = false;
+
+      pass.name = "dds.sec.auth.password";
+      pass.value = "abc"; /* TODO generate a base64 encoding of AES-128 key to decrypt private key using AES128-CBC */
+      pass.propagate = false;
+
+      idcert.name = "dds.sec.auth.identity_certificate";
+      idcert.value = "file:/./public_key.pem";
+      idcert.propagate = false;
+
+      add_property(idca);
+      add_property(pkey);
+      add_property(pass);
+      add_property(idcert);
+  }
+
+  ~AuthenticationTest(){
+
+  }
+
+  void add_property(DDS::Property_t p) {
+    DDS::PropertySeq& seq = domain_participant_qos.property.value;
+    size_t len = seq.length();
+    seq.length(len + 1);
+    seq[len] = p;
+  }
+
+  void add_binary_property(DDS::BinaryProperty_t p) {
+    DDS::BinaryPropertySeq& seq = domain_participant_qos.property.binary_value;
+    size_t len = seq.length();
+    seq.length(len + 1);
+    seq[len] = p;
+  }
+
+  DDS::DomainParticipantQos domain_participant_qos;
+};
+
+TEST_F(AuthenticationTest, ValidateLocalIdentity)
+{
+
+}
+
+TEST_F(AuthenticationTest, NoLocalIdentity)
 {
   // This will just do some simple testing of calling various
   // functions of the API with an invalid local identity handle
@@ -69,7 +122,7 @@ TEST(AuthenticationTest, NoLocalIdentity)
   CallFunctionsWithInvalidLocalHandle(test_class, 0);
 }
 
-TEST(AuthenticationTest, WrongLocalIdentity)
+TEST_F(AuthenticationTest, WrongLocalIdentity)
 {
   // This will just do some simple testing of calling various
   // functions of the API with an invalid local identity handle
@@ -80,7 +133,7 @@ TEST(AuthenticationTest, WrongLocalIdentity)
   CallFunctionsWithInvalidLocalHandle(test_class, local_handle + 1);
 }
 
-TEST(AuthenticationTest, TestValidateRemoteIdentity)
+TEST_F(AuthenticationTest, TestValidateRemoteIdentity)
 {
   // This will just do some simple testing of calling various
   // functions of the API with an invalid local identity handle
