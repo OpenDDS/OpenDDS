@@ -41,7 +41,6 @@ TransportClient::TransportClient()
   , durable_(false)
   , reverse_lock_(lock_)
   , repo_id_(GUID_UNKNOWN)
-  , crypto_handle_(DDS::HANDLE_NIL)
 {
 }
 

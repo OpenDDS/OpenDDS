@@ -188,6 +188,8 @@ private:
     Endpoint(const DCPS::RepoId& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
       , sedp_(sedp)
+      , participant_crypto_handle_(0)
+      , endpoint_crypto_handle_(0)
     {}
 
     virtual ~Endpoint();
@@ -205,9 +207,18 @@ private:
     using DCPS::TransportClient::enable_transport_using_config;
     using DCPS::TransportClient::disassociate;
 
+    void crypto_handles(DDS::Security::ParticipantCryptoHandle p,
+                        DDS::Security::NativeCryptoHandle e)
+    {
+      participant_crypto_handle_ = p;
+      endpoint_crypto_handle_ = e;
+    }
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
+    DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
+    DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;
   };
 
   class Writer : public DCPS::TransportSendListener, public Endpoint {

@@ -27,6 +27,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , recvd_sample_(0)
   , receiver_(local_prefix)
 {
+  secure_prefix_.smHeader.submessageId = 0;
 }
 
 int
@@ -78,6 +79,25 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   const RtpsSampleHeader& rsh = received_sample_header();
   const SubmessageKind kind = rsh.submessage_._d();
 
+  if ((secure_prefix_.smHeader.submessageId == SRTPS_PREFIX
+       && kind != SRTPS_POSTFIX) ||
+      (secure_prefix_.smHeader.submessageId == SEC_PREFIX
+       && kind != SEC_POSTFIX)) {
+    // secure envelope in progress, defer processing
+    secure_submessages_.push_back(rsh.submessage_);
+    return;
+  }
+
+  deliver_sample_i(sample, rsh.submessage_);
+}
+
+void
+RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
+                                         const RTPS::Submessage& submessage)
+{
+  using namespace RTPS;
+  const SubmessageKind kind = submessage._d();
+
   switch (kind) {
   case INFO_SRC:
   case INFO_REPLY_IP4:
@@ -90,7 +110,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 
   case DATA: {
     receiver_.fill_header(sample.header_);
-    const DataSubmessage& data = rsh.submessage_.data_sm();
+    const DataSubmessage& data = submessage.data_sm();
     recvd_sample_ = &sample;
     readers_selected_.clear();
     readers_withheld_.clear();
@@ -154,39 +174,68 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     break;
   }
   case GAP:
-    link_->received(rsh.submessage_.gap_sm(), receiver_.source_guid_prefix_);
+    link_->received(submessage.gap_sm(), receiver_.source_guid_prefix_);
     break;
 
   case HEARTBEAT:
-    link_->received(rsh.submessage_.heartbeat_sm(),
+    link_->received(submessage.heartbeat_sm(),
                     receiver_.source_guid_prefix_);
-    if (rsh.submessage_.heartbeat_sm().smHeader.flags & 4 /*FLAG_L*/) {
+    if (submessage.heartbeat_sm().smHeader.flags & 4 /*FLAG_L*/) {
       // Liveliness has been asserted.  Create a DATAWRITER_LIVELINESS message.
       sample.header_.message_id_ = DATAWRITER_LIVELINESS;
       receiver_.fill_header(sample.header_);
-      sample.header_.publication_id_.entityId = rsh.submessage_.heartbeat_sm().writerId;
+      sample.header_.publication_id_.entityId = submessage.heartbeat_sm().writerId;
       link_->data_received(sample);
     }
     break;
 
   case ACKNACK:
-    link_->received(rsh.submessage_.acknack_sm(),
+    link_->received(submessage.acknack_sm(),
                     receiver_.source_guid_prefix_);
     break;
 
   case HEARTBEAT_FRAG:
-    link_->received(rsh.submessage_.hb_frag_sm(),
+    link_->received(submessage.hb_frag_sm(),
                     receiver_.source_guid_prefix_);
     break;
 
   case NACK_FRAG:
-    link_->received(rsh.submessage_.nack_frag_sm(),
+    link_->received(submessage.nack_frag_sm(),
                     receiver_.source_guid_prefix_);
     break;
 
   /* no case DATA_FRAG: by the time deliver_sample() is called, reassemble()
      has successfully reassembled the fragments and we now have a DATA submsg
    */
+
+  case SEC_PREFIX:
+  case SRTPS_PREFIX:
+    secure_prefix_ = submessage.security_sm();
+    break;
+
+  case SEC_POSTFIX:
+  case SRTPS_POSTFIX:
+    // prepare args to crypto plugin
+    // call crypto plugin, bail out if failed validation
+
+    // a. if(SRTPS_POSTFIX) decode_rtps_message -- not yet supported
+
+    // b. preprocess_secure_submsg
+
+    // c1. decode_datawriter_submessage
+    // c2. decode_datareader_submessage
+
+    secure_prefix_.smHeader.submessageId = 0;
+
+    //    for (size_t i = 0; i < secure_submessages_.size(); ++i) {
+    //      RtpsSampleHeader sampleHeader;
+    //      sampleHeader.submessage_ = secure_submessages_[i];
+    //      if (check_header(sampleHeader)) {
+    //        deliver_sample_i(sample, sampleHeader.submessage_);
+    //      }
+    //    }
+    break;
+
   default:
     break;
   }
@@ -264,12 +313,17 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 {
   receiver_.reset(remote_address_, header.header_);
+  secure_prefix_.smHeader.submessageId = 0;
   return header.valid();
 }
 
 bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
+  if (secure_prefix_.smHeader.submessageId) {
+    return header.valid();
+  }
+
   receiver_.submsg(header.submessage_);
 
   // save fragmentation details for use in reassemble()

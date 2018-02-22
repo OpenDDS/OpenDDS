@@ -25,8 +25,6 @@
 #include "ace/Event_Handler.h"
 #include "ace/Reverse_Lock_T.h"
 
-#include "dds/DdsSecurityCoreC.h"
-
 // Forward definition of a test-friendly class in the global name space
 class DDS_TEST;
 
@@ -63,17 +61,6 @@ public:
   virtual void _add_ref() {}
   virtual void _remove_ref() {}
 
-  void set_crypto_handle(DDS::Security::NativeCryptoHandle h)
-  {
-    crypto_handle_ = h;
-  }
-
-  DDS::Security::NativeCryptoHandle get_crypto_handle()
-  {
-    return crypto_handle_;
-  }
-
-protected:
   TransportClient();
   virtual ~TransportClient();
 
@@ -143,6 +130,7 @@ protected:
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
   void on_notification_of_connection_deletion(const RepoId& peerId);
+
 
 private:
 
@@ -319,8 +307,6 @@ private:
   Reverse_Lock_t reverse_lock_;
 
   RepoId repo_id_;
-
-  DDS::Security::NativeCryptoHandle crypto_handle_;
 };
 
 typedef RcHandle<TransportClient> TransportClient_rch;

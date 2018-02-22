@@ -113,6 +113,26 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   CASE_SMKIND(HEARTBEAT_FRAG, HeartBeatFragSubmessage, hb_frag)
   CASE_SMKIND(DATA, DataSubmessage, data)
   CASE_SMKIND(DATA_FRAG, DataFragSubmessage, data_frag)
+
+  case SEC_BODY:
+  case SEC_PREFIX:
+  case SEC_POSTFIX:
+  case SRTPS_PREFIX:
+  case SRTPS_POSTFIX: {
+    SecuritySubmessage submessage;
+    if (ser >> submessage.smHeader) {
+      octetsToNextHeader = submessage.smHeader.submessageLength;
+      submessage.content.length(octetsToNextHeader);
+      if (ser.read_octet_array(submessage.content.get_buffer(),
+                               octetsToNextHeader)) {
+        submessage_.security_sm(submessage);
+        submessage_._d(kind);
+        valid_ = true;
+      }
+    }
+    break;
+  }
+
   default:
     {
       SubmessageHeader submessage;
