@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <openssl/pem.h>
+#include <openssl/x509v3.h>
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -62,20 +63,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   // - Clean up resources used by this implementation
 }
 
-struct LocalIdentityData
+class LocalIdentityData
 {
-  enum URI_SCHEME {
-    URI_UNKNOWN,
-    URI_FILE,
-    URI_DATA,
-    URI_PKCS11,
-  };
-
-  typedef std::pair<std::string, URI_SCHEME> Resource;
-
+public:
   LocalIdentityData(const DDS::PropertySeq& props)
   : idca("", URI_UNKNOWN), pkey("", URI_UNKNOWN), cert("", URI_UNKNOWN), pass(""),
-    idca_ptr(NULL)
+    idca_ptr(NULL), cert_ptr(NULL)
   {
     std::string name, value;
     for (size_t i = 0; i < props.length(); ++i) {
@@ -101,12 +94,43 @@ struct LocalIdentityData
   {
   }
 
-  X509* load_idca() {
-    if (idca_ptr) return idca_ptr;
+  bool load_idca()
+  {
+    idca_ptr = idca_ptr ? idca_ptr : x509_from_resource(idca);
+    return idca_ptr;
+  }
 
-    switch(idca.second) {
+  bool load_cert()
+  {
+    cert_ptr = cert_ptr ? cert_ptr : x509_from_resource(cert);
+    return cert_ptr;
+  }
+
+  bool validate_cert()
+  {
+    return true;
+  }
+
+private:
+
+  enum URI_SCHEME {
+    URI_UNKNOWN,
+    URI_FILE,
+    URI_DATA,
+    URI_PKCS11,
+  };
+
+  typedef std::pair<std::string, URI_SCHEME> Resource;
+
+  static X509* x509_from_resource(const Resource& r)
+  {
+    X509* result = NULL;
+
+    switch(r.second) {
       case URI_FILE:
-        idca_ptr = x509_fromfile(idca.first);
+        result = x509_fromfile(r.first);
+        /* TODO remove this */
+        print_cert_info(result);
         break;
 
       case URI_DATA:
@@ -114,11 +138,10 @@ struct LocalIdentityData
       case URI_UNKNOWN:
       default:
         /* TODO use ACE logging */
-        fprintf(stderr, "LocalIdentityData::load_idca: Unsupported URI scheme in idca path '%s'\n", idca.first.c_str());
+        fprintf(stderr, "LocalIdentityData::load_cert: Unsupported URI scheme in cert path '%s'\n", r.first.c_str());
         break;
     }
-
-    return idca_ptr;
+    return result;
   }
 
   static void resource_from_path(Resource& resource, const std::string& path)
@@ -145,7 +168,8 @@ struct LocalIdentityData
     }
   }
 
-  static X509* x509_fromfile(const std::string& path, const std::string& pass = "") {
+  static X509* x509_fromfile(const std::string& path, const std::string& pass = "")
+  {
     X509* result = NULL;
 
     FILE* fp = fopen(path.c_str(), "r");
@@ -166,12 +190,18 @@ struct LocalIdentityData
 
     return result;
   }
+
+  static void print_cert_info(X509* cert)
+  {
+    printf("is ca cert? '%s'\n", X509_check_ca(cert) ? "yes": "no");
+  }
+
   Resource idca;
   Resource pkey;
   Resource cert;
   std::string pass;
   X509* idca_ptr;
-
+  X509* cert_ptr;
 };
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::validate_local_identity(
@@ -193,7 +223,8 @@ struct LocalIdentityData
 
   LocalIdentityData id_data(participant_qos.property.value);
 
-  if (id_data.load_idca()) {
+  if (id_data.load_idca() && id_data.load_cert() && id_data.validate_cert()) {
+
     local_identity_handle = get_next_handle();
     IdentityData_Ptr newDataPtr(new IdentityData());
 

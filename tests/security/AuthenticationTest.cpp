@@ -98,7 +98,7 @@ struct AuthenticationTest : public ::testing::Test
       pass.propagate = false;
 
       idcert.name = "dds.sec.auth.identity_certificate";
-      idcert.value = "file:/./public_key.pem";
+      idcert.value = "file:TESTONLY_rti_connect_dds_identity_cert.pem";
       idcert.propagate = false;
 
       add_property(idca);
