@@ -652,6 +652,13 @@ module OpenDDS {
       LocatorUDPv4_t multicastLocator; // if M
     };
 
+    // Security Submessages (0x30-0x3f) don't have a defined structure since
+    // each plugin can impose its own definitions of CryptoContent/Header/Footer
+    struct SecuritySubmessage {
+      SubmessageHeader smHeader;
+      DDS::OctetSeq content;
+    };
+
     enum SubmessageKind {
       RESERVED_0,
       PAD,            /* = 0x01, Pad */
@@ -748,6 +755,13 @@ module OpenDDS {
 
       case DATA_FRAG:
         DataFragSubmessage data_frag_sm;
+
+      case SEC_BODY:
+      case SEC_PREFIX:
+      case SEC_POSTFIX:
+      case SRTPS_PREFIX:
+      case SRTPS_POSTFIX:
+        SecuritySubmessage security_sm;
 
       default:
         SubmessageHeader unknown_sm;

@@ -382,10 +382,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       attribs.is_submessage_protected = true;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
-      participant_volatile_message_secure_writer_.set_crypto_handle(h);
+      participant_volatile_message_secure_writer_.crypto_handles(crypto_handle, h);
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
-      participant_volatile_message_secure_reader_->set_crypto_handle(h);
+      participant_volatile_message_secure_reader_->crypto_handles(crypto_handle, h);
     }
 
     // Participant-Message-Secure
@@ -396,10 +396,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
-      participant_message_secure_writer_.set_crypto_handle(h);
+      participant_message_secure_writer_.crypto_handles(crypto_handle, h);
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
-      participant_message_secure_reader_->set_crypto_handle(h);
+      participant_message_secure_reader_->crypto_handles(crypto_handle, h);
     }
 
     // DCPS-Publications-Secure
@@ -410,10 +410,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
-      publications_secure_writer_.set_crypto_handle(h);
+      publications_secure_writer_.crypto_handles(crypto_handle, h);
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
-      publications_secure_reader_->set_crypto_handle(h);
+      publications_secure_reader_->crypto_handles(crypto_handle, h);
     }
 
     // DCPS-Subscriptions-Secure
@@ -424,10 +424,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
-      subscriptions_secure_writer_.set_crypto_handle(h);
+      subscriptions_secure_writer_.crypto_handles(crypto_handle, h);
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
-      subscriptions_secure_reader_->set_crypto_handle(h);
+      subscriptions_secure_reader_->crypto_handles(crypto_handle, h);
     }
 
     // DCPS-Participants-Secure
@@ -438,10 +438,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
 
       h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
-      dcps_participant_secure_writer_.set_crypto_handle(h);
+      dcps_participant_secure_writer_.crypto_handles(crypto_handle, h);
 
       h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
-      dcps_participant_secure_reader_->set_crypto_handle(h);
+      dcps_participant_secure_reader_->crypto_handles(crypto_handle, h);
     }
 
   } else {

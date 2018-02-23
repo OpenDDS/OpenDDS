@@ -57,7 +57,8 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION_2_0 = { 2, 0 };
     const ProtocolVersion_t PROTOCOLVERSION_2_1 = { 2, 1 };
     const ProtocolVersion_t PROTOCOLVERSION_2_2 = { 2, 2 };
-    const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_2;
+    const ProtocolVersion_t PROTOCOLVERSION_2_3 = { 2, 3 }; // DDS-Security 1.1
+    const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_3;
   }
 }
 
