@@ -2154,20 +2154,27 @@ public:
     MessageTypeWithAllocator* instance_data = data.get();
 
     DataSampleHeader_ptr hdr(new OpenDDS::DCPS::DataSampleHeader(header));
-    std::pair<typename FilterDelayedSampleMap::iterator, bool> result =
+
+    typename FilterDelayedSampleMap::iterator i = map_.find(handle);
+    if (i == map_.end()) {
+
+      // emplace()/insert() only if the sample is going to be
+      // new (otherwise we call move(data) twice).
+      std::pair<typename FilterDelayedSampleMap::iterator, bool> result =
 #ifdef ACE_HAS_CPP11
-    map_.emplace(std::piecewise_construct,
-                 std::forward_as_tuple(handle),
-                 std::forward_as_tuple(move(data), hdr, just_registered));
+      map_.emplace(std::piecewise_construct,
+                   std::forward_as_tuple(handle),
+                   std::forward_as_tuple(move(data), hdr, just_registered));
 #else
-    map_.insert(std::make_pair(handle, FilterDelayedSample(move(data), hdr, just_registered)));
+      map_.insert(std::make_pair(handle, FilterDelayedSample(move(data), hdr, just_registered)));
 #endif
+      FilterDelayedSample& sample = result.first->second;
 
-    FilterDelayedSample& sample = result.first->second;
-    if (result.second) {
-      const ACE_Time_Value interval = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation);
+      const ACE_Time_Value interval = duration_to_time_value(
+        data_reader_impl->qos_.time_based_filter.minimum_separation);
 
-      const ACE_Time_Value filter_time_remaining = duration_to_time_value(data_reader_impl->qos_.time_based_filter.minimum_separation) - filter_time_expired;
+      const ACE_Time_Value filter_time_remaining = duration_to_time_value(
+        data_reader_impl->qos_.time_based_filter.minimum_separation) - filter_time_expired;
 
       long timer_id = -1;
 
@@ -2182,6 +2189,7 @@ public:
         sample.timer_id = timer_id;
       }
     } else {
+      FilterDelayedSample& sample = i->second;
       // we only care about the most recently filtered sample, so clean up the last one
 
       sample.message = move(data);
@@ -2227,7 +2235,6 @@ private:
 
   int handle_timeout(const ACE_Time_Value&, const void* act)
   {
-
     DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
 
     RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());
