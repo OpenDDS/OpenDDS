@@ -12,4 +12,8 @@ project(OpenDDS_Security): dcpslib, openssl {
     CryptoBuiltIn.idl
   }
 
+  Source_Files {
+    SSL/
+  }
+
 }
