@@ -3,8 +3,8 @@
  * See: http://www.DDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_H
-#define OPENDDS_SECURITY_SSL_H
+#ifndef OPENDDS_SECURITY_SSL_CERTIFICATE_H
+#define OPENDDS_SECURITY_SSL_CERTIFICATE_H
 
 #include <string>
 #include <iostream>

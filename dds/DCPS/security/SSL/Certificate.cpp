@@ -6,6 +6,7 @@
 #include <vector>
 #include <utility>
 #include <cstring>
+#include <cerrno>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 #include "Certificate.h"
