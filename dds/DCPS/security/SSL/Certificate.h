@@ -34,16 +34,7 @@ namespace OpenDDS {
 
       private:
 
-        enum URI_SCHEME
-        {
-          URI_UNKNOWN,
-          URI_FILE,
-          URI_DATA,
-          URI_PKCS11,
-        };
-
         static X509* x509_from_pem(const std::string& path, const std::string& password = "");
-        static URI_SCHEME extract_uri_info(const std::string& uri, std::string& path);
 
         X509* x_;
       };
