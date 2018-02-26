@@ -5,8 +5,6 @@
 
 #include "Certificate.h"
 #include "Utils.h"
-#include <vector>
-#include <utility>
 #include <cstring>
 #include <cerrno>
 #include <openssl/pem.h>
@@ -16,14 +14,12 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      Certificate::Certificate(const std::string& uri, const std::string& password)
-      : x_(NULL)
+      Certificate::Certificate(const std::string& uri, const std::string& password) : x_(NULL)
       {
         load(uri, password);
       }
 
-      Certificate::Certificate()
-      : x_(NULL)
+      Certificate::Certificate() : x_(NULL)
       {
 
       }

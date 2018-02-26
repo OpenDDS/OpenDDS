@@ -5,6 +5,7 @@
 
 #include "Utils.h"
 #include <vector>
+#include <utility>
 
 namespace OpenDDS {
   namespace Security {

@@ -83,7 +83,7 @@ public:
       }
     }
 
-    participant_pkey_ = SSL::PrivateKey(); //(pkey_uri, password);
+    participant_pkey_ = SSL::PrivateKey(pkey_uri, password);
   }
 
   ~LocalIdentityData()
