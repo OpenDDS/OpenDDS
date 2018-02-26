@@ -13,7 +13,8 @@ project(OpenDDS_Security): dcpslib, openssl {
   }
 
   Source_Files {
-    SSL/
+    .
+    ./SSL
   }
 
 }

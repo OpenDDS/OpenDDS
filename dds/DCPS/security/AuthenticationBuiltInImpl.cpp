@@ -70,20 +70,20 @@ public:
       value = props[i].value;
 
       if (name == "dds.sec.auth.identity_ca") {
-          ca_cert_(value);
+          ca_cert_ = SSL::Certificate(value);
 
       } else if (name == "dds.sec.auth.private_key") {
           pkey_uri = value;
 
       } else if (name == "dds.sec.auth.identity_certificate") {
-          participant_cert_(value);
+          participant_cert_ = SSL::Certificate(value);
 
       } else if (name == "dds.sec.auth.password") {
           password = value;
       }
     }
 
-    participant_pkey_(pkey_uri, password);
+    participant_pkey_ = SSL::PrivateKey(); //(pkey_uri, password);
   }
 
   ~LocalIdentityData()

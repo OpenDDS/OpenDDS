@@ -7,6 +7,7 @@
 #define OPENDDS_SECURITY_SSL_PRIVATEKEY_H
 
 #include <string>
+#include <openssl/evp.h>
 
 namespace OpenDDS {
   namespace Security {
@@ -15,10 +16,16 @@ namespace OpenDDS {
       class PrivateKey
       {
       public:
-        PrivateKey(const std::string& uri, const std::string password);
+        //PrivateKey(const std::string& uri, const std::string password = "");
+
+        PrivateKey();
+
         ~PrivateKey();
 
+        PrivateKey& operator=(const PrivateKey& rhs);
+
       private:
+        EVP_PKEY* k_;
 
       };
 

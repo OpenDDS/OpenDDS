@@ -3,26 +3,59 @@
  * See: http://www.DDS.org/license.html
  */
 
+#include "Certificate.h"
 #include <vector>
 #include <utility>
 #include <cstring>
 #include <cerrno>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
-#include "Certificate.h"
 
 namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      Certificate::Certificate(const std::string& uri, const std::string& password) : x_(NULL)
+      Certificate::Certificate(const std::string& uri, const std::string& password)
+      : x_(NULL)
       {
-        std::string p;
-        URI_SCHEME s = extract_uri_info(uri, p);
+        load(uri, password);
+      }
+
+      Certificate::Certificate()
+      : x_(NULL)
+      {
+
+      }
+
+      Certificate::~Certificate()
+      {
+        if (x_) X509_free(x_);
+      }
+
+      Certificate& Certificate::operator=(const Certificate& rhs)
+      {
+        if (this != &rhs) {
+            if (rhs.x_) {
+                x_ = rhs.x_;
+                X509_up_ref(x_);
+
+            } else {
+                x_ = NULL;
+            }
+        }
+        return *this;
+      }
+
+      void Certificate::load(const std::string& uri, const std::string& password)
+      {
+        if (x_) return;
+
+        std::string path;
+        URI_SCHEME s = extract_uri_info(uri, path);
 
         switch(s) {
           case URI_FILE:
-            x_ = x509_from_pem(p, password);
+            x_ = x509_from_pem(path, password);
             break;
 
           case URI_DATA:
@@ -33,11 +66,6 @@ namespace OpenDDS {
             fprintf(stderr, "Certificate::Certificate: Unsupported URI scheme in cert path '%s'\n", uri.c_str());
             break;
         }
-      }
-
-      Certificate::~Certificate()
-      {
-        if (x_) X509_free(x_);
       }
 
       Certificate::URI_SCHEME Certificate::extract_uri_info(const std::string& uri, std::string& path)

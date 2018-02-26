@@ -18,7 +18,14 @@ namespace OpenDDS {
       {
       public:
         Certificate(const std::string& uri, const std::string& password = "");
+
+        Certificate();
+
         ~Certificate();
+
+        Certificate& operator=(const Certificate& rhs);
+
+        void load(const std::string& uri, const std::string& password = "");
 
         X509* get()
         {
