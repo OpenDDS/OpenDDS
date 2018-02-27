@@ -7,6 +7,7 @@
 #define OPENDDS_SECURITY_SSL_CERTIFICATE_H
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <openssl/x509.h>
 
@@ -17,6 +18,7 @@ namespace OpenDDS {
       class Certificate
       {
       public:
+
         Certificate(const std::string& uri, const std::string& password = "");
 
         Certificate();
@@ -33,6 +35,12 @@ namespace OpenDDS {
         }
 
         int validate(Certificate& ca, unsigned long int flags = 0u);
+
+        int subject_name_to_DER(std::vector<unsigned char>& dst);
+
+        int subject_name_to_str(std::string& dst);
+
+        int subject_name_digest(std::vector<unsigned char>& dst);
 
       private:
 
