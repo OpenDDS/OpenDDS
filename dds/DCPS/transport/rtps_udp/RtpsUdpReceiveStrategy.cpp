@@ -223,8 +223,10 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     // prepare args to crypto plugin
     const DDS::Security::ParticipantCryptoHandle local_pch =
       link_->local_crypto_handle();
-    const DDS::RepoId peer = {receiver_.source_guid_prefix_,
-                              ENTITYID_PARTICIPANT};
+    RepoId peer;
+    std::memcpy(peer.guidPrefix, receiver_.source_guid_prefix_,
+                sizeof(GuidPrefix_t));
+    peer.entityId = ENTITYID_PARTICIPANT;
     const DDS::Security::ParticipantCryptoHandle peer_pch =
       link_->peer_crypto_handle(peer);
 
@@ -247,7 +249,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     //      }
     //    }
 
-    secure_sample_ = ReceivedDataSample();
+    secure_sample_ = ReceivedDataSample(0);
     break;
   }
   default:
