@@ -21,6 +21,8 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
+
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
@@ -2480,6 +2482,42 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
   else {
     ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_heartbeats_manual() - "
                "failed to serialize HEARTBEAT submessage\n"));
+  }
+}
+
+
+void RtpsUdpDataLink::security_from_blob(const RepoId& remote_id,
+                                         const unsigned char* buffer,
+                                         unsigned int buffer_size)
+{
+  using DDS::Security::ParticipantCryptoHandle;
+  ACE_Data_Block db(buffer_size, ACE_Message_Block::MB_DATA,
+    reinterpret_cast<const char*>(buffer),
+    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
+  ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
+  mb.wr_ptr(mb.space());
+  DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
+
+  while (mb.length()) {
+    DDS::BinaryProperty_t prop;
+    if (!(ser >> prop)) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::security_from_blob() - "
+                 "failed to deserialize BinaryProperty_t\n"));
+      return;
+    }
+
+    if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_PART_CRYPTO_HANDLE) == 0
+        && prop.value.length() >= sizeof(ParticipantCryptoHandle)) {
+      unsigned int handle = 0;
+      for (unsigned int i = 0; i < prop.value.length(); ++i) {
+        handle = handle << 8 | prop.value[i];
+      }
+
+      RepoId remote_participant;
+      RTPS::assign(remote_participant.guidPrefix, remote_id.guidPrefix);
+      remote_participant.entityId = ENTITYID_PARTICIPANT;
+      peer_crypto_handles_[remote_participant] = handle;
+    }
   }
 }
 

@@ -220,12 +220,11 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
   case SEC_POSTFIX:
   case SRTPS_POSTFIX: {
-    // prepare args to crypto plugin
     const DDS::Security::ParticipantCryptoHandle local_pch =
       link_->local_crypto_handle();
+
     RepoId peer;
-    std::memcpy(peer.guidPrefix, receiver_.source_guid_prefix_,
-                sizeof(GuidPrefix_t));
+    RTPS::assign(peer.guidPrefix, receiver_.source_guid_prefix_);
     peer.entityId = ENTITYID_PARTICIPANT;
     const DDS::Security::ParticipantCryptoHandle peer_pch =
       link_->peer_crypto_handle(peer);

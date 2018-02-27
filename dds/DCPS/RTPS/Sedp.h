@@ -509,6 +509,10 @@ private:
                                                    DiscoveredPublicationIter& iter,
                                                    const DCPS::RepoId& writer);
 
+  DCPS::TransportLocatorSeq
+  add_security_info(const DCPS::TransportLocatorSeq& locators,
+                    const DCPS::RepoId& entity);
+
   virtual bool defer_writer(const DCPS::RepoId& writer,
                             const DCPS::RepoId& writer_participant);
 

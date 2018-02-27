@@ -133,6 +133,9 @@ public:
 
   DDS::Security::ParticipantCryptoHandle peer_crypto_handle(const RepoId& peer) const;
 
+  void security_from_blob(const RepoId& remote_id, const unsigned char* buffer,
+                          unsigned int buffer_size);
+
 private:
   virtual void stop_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
