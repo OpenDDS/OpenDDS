@@ -658,6 +658,8 @@ private:
     return data.publication_transport_priority_;
   }
 
+  DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
+
   /// when done handling historic samples, resume
   void resume_sample_processing(const PublicationId& pub_id);
 

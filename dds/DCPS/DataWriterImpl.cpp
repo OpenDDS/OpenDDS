@@ -2637,6 +2637,11 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
   qos_data.topic_name = this->topic_name_.in();
 }
 
+DDS::Security::ParticipantCryptoHandle DataWriterImpl::get_crypto_handle() const
+{
+  return participant_servant_->crypto_handle();
+}
+
 bool
 DataWriterImpl::need_sequence_repair()
 {

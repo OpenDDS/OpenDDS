@@ -26,6 +26,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , last_received_()
   , recvd_sample_(0)
   , receiver_(local_prefix)
+  , secure_sample_(0)
 {
   secure_prefix_.smHeader.submessageId = 0;
 }
@@ -85,6 +86,10 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
        && kind != SEC_POSTFIX)) {
     // secure envelope in progress, defer processing
     secure_submessages_.push_back(rsh.submessage_);
+    if (kind == DATA) {
+      // FUTURE: support >1 data payload in SRTPS authenticated+unencrypted
+      secure_sample_ = sample;
+    }
     return;
   }
 
@@ -214,8 +219,16 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     break;
 
   case SEC_POSTFIX:
-  case SRTPS_POSTFIX:
-    // prepare args to crypto plugin
+  case SRTPS_POSTFIX: {
+    const DDS::Security::ParticipantCryptoHandle local_pch =
+      link_->local_crypto_handle();
+
+    RepoId peer;
+    RTPS::assign(peer.guidPrefix, receiver_.source_guid_prefix_);
+    peer.entityId = ENTITYID_PARTICIPANT;
+    const DDS::Security::ParticipantCryptoHandle peer_pch =
+      link_->peer_crypto_handle(peer);
+
     // call crypto plugin, bail out if failed validation
 
     // a. if(SRTPS_POSTFIX) decode_rtps_message -- not yet supported
@@ -234,8 +247,10 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     //        deliver_sample_i(sample, sampleHeader.submessage_);
     //      }
     //    }
-    break;
 
+    secure_sample_ = ReceivedDataSample(0);
+    break;
+  }
   default:
     break;
   }

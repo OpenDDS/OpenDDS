@@ -29,6 +29,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
+  : local_crypto_handle_(DDS::HANDLE_NIL)
 {
   if (!inst.is_nil()) {
     if (!configure(inst)) {
@@ -59,6 +60,8 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   // RtpsUdpDataLink now owns the socket
   unicast_socket_.set_handle(ACE_INVALID_HANDLE);
+
+  link->local_crypto_handle(local_crypto_handle_);
 
   return link;
 }
@@ -148,20 +151,30 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                bool local_durable, bool remote_durable)
 {
   bool requires_inline_qos;
-  ACE_INET_Addr addr = get_connection_addr(remote_data, requires_inline_qos);
+  unsigned int blob_bytes_read;
+  ACE_INET_Addr addr = get_connection_addr(remote_data, requires_inline_qos,
+                                           blob_bytes_read);
   link_->add_locator(remote_id, addr, requires_inline_qos);
+
+  if (remote_data.length() > blob_bytes_read) {
+    link_->security_from_blob(remote_id,
+                              remote_data.get_buffer() + blob_bytes_read,
+                              remote_data.length() - blob_bytes_read);
+  }
+
   link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                     local_durable, remote_durable);
 }
 
 ACE_INET_Addr
 RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
-                                      bool& requires_inline_qos) const
+                                      bool& requires_inline_qos,
+                                      unsigned int& blob_bytes_read) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
   DDS::ReturnCode_t result =
-    blob_to_locators(remote, locators, requires_inline_qos);
+    blob_to_locators(remote, locators, requires_inline_qos, &blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
     return ACE_INET_Addr();
   }
@@ -202,7 +215,10 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
   bool requires_inline_qos;
-  link_->register_for_reader(writerid, readerid, get_connection_addr(*blob, requires_inline_qos), listener);
+  unsigned int b; // bytes read (ignored)
+  link_->register_for_reader(writerid, readerid,
+                             get_connection_addr(*blob, requires_inline_qos, b),
+                             listener);
 }
 
 void
@@ -229,7 +245,10 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
   bool requires_inline_qos;
-  link_->register_for_writer(readerid, writerid, get_connection_addr(*blob, requires_inline_qos), listener);
+  unsigned int b; // bytes read (ignored)
+  link_->register_for_writer(readerid, writerid,
+                             get_connection_addr(*blob, requires_inline_qos, b),
+                             listener);
 }
 
 void

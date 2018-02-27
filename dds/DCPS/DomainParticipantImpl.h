@@ -372,6 +372,11 @@ private:
 
   void security_config(const Security::SecurityConfig_rch& config);
 
+  DDS::Security::ParticipantCryptoHandle crypto_handle() const
+  {
+    return part_crypto_handle_;
+  }
+
 private:
 
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
