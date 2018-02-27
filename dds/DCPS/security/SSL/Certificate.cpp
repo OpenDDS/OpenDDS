@@ -118,7 +118,7 @@ namespace OpenDDS {
       }
 
 
-      int Certificate::subject_name_to_DER(std::vector<unsigned char>& dst)
+      int Certificate::subject_name_to_DER(std::vector<unsigned char>& dst) const
       {
         int result = 1, len = 0;
         unsigned char* buffer = NULL;
@@ -126,19 +126,19 @@ namespace OpenDDS {
         dst.clear();
 
         if (x_) {
-            X509_NAME* name = X509_get_subject_name(x_);
-            if (name) {
-                len = i2d_X509_NAME(name, &buffer);
-                if (len > 0) {
-                    dst.insert(dst.begin(), buffer, buffer + len);
-                    result = 0;
 
-                } else {
-                    fprintf(stderr, "Certificate::subject_name_to_DER: Error, failed to convert X509_NAME to DER");
-                }
+          /* Do not free name */
+          X509_NAME* name = X509_get_subject_name(x_);
+          if (name) {
+            len = i2d_X509_NAME(name, &buffer);
+            if (len > 0) {
+              dst.insert(dst.begin(), buffer, buffer + len);
+              result = 0;
 
-                X509_NAME_free(name);
+            } else {
+                fprintf(stderr, "Certificate::subject_name_to_DER: Error, failed to convert X509_NAME to DER");
             }
+          }
         }
 
         if (buffer) free(buffer);
@@ -146,7 +146,7 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::subject_name_to_str(std::string& dst)
+      int Certificate::subject_name_to_str(std::string& dst) const
       {
         int result = 1, len = 0;
         char* tmp = NULL;
@@ -155,34 +155,33 @@ namespace OpenDDS {
 
         if (x_) {
 
-            X509_NAME* name = X509_get_subject_name(x_);
-            if (name) {
+          /* Do not free name */
+          X509_NAME* name = X509_get_subject_name(x_);
+          if (name) {
 
-                BIO* buffer = BIO_new(BIO_s_mem());
-                if (buffer) {
+            BIO* buffer = BIO_new(BIO_s_mem());
+            if (buffer) {
 
-                    len = X509_NAME_print_ex(buffer, name, 0, 0);
-                    if (len > 0) {
+              len = X509_NAME_print_ex(buffer, name, 0, 0);
+              if (len > 0) {
 
-                        tmp = new char[len];
-                        len = BIO_gets(buffer, tmp, len);
-                        if (len > 0) {
-                            dst = tmp;
-                            result = 0;
+                tmp = new char[len];
+                len = BIO_gets(buffer, tmp, len);
+                if (len > 0) {
+                  dst = tmp;
+                  result = 0;
 
-                        } else {
-                            fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to write BIO to string");
-                        }
-
-                    } else {
-                        fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to read X509_NAME into BIO buffer");
-                    }
-
-                    BIO_free(buffer);
+                } else {
+                    fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to write BIO to string");
                 }
 
-                X509_NAME_free(name);
+              } else {
+                  fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to read X509_NAME into BIO buffer");
+              }
+
+              BIO_free(buffer);
             }
+          }
         }
 
         if (tmp) delete[] tmp;
@@ -190,7 +189,7 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::subject_name_digest(std::vector<unsigned char>& dst)
+      int Certificate::subject_name_digest(std::vector<unsigned char>& dst) const
       {
         int result = 1;
         unsigned int len = 0;
@@ -199,17 +198,17 @@ namespace OpenDDS {
         dst.clear();
 
         if (x_) {
-            X509_NAME* name = X509_get_subject_name(x_);
-            if (name) {
 
-                buffer = new unsigned char[EVP_MAX_MD_SIZE];
-                if (X509_NAME_digest(name, EVP_sha256(), buffer, &len) == 1) {
-                    dst.insert(dst.begin(), buffer, buffer + len);
-                    result = 0;
-                }
+          /* Do not free name */
+          X509_NAME* name = X509_get_subject_name(x_);
+          if (name) {
 
-                X509_NAME_free(name);
+            buffer = new unsigned char[EVP_MAX_MD_SIZE];
+            if (X509_NAME_digest(name, EVP_sha256(), buffer, &len) == 1) {
+              dst.insert(dst.begin(), buffer, buffer + len);
+              result = 0;
             }
+          }
         }
 
         if (buffer) delete[] buffer;

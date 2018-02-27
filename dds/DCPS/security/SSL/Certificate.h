@@ -36,11 +36,11 @@ namespace OpenDDS {
 
         int validate(Certificate& ca, unsigned long int flags = 0u);
 
-        int subject_name_to_DER(std::vector<unsigned char>& dst);
+        int subject_name_to_DER(std::vector<unsigned char>& dst) const;
 
-        int subject_name_to_str(std::string& dst);
+        int subject_name_to_str(std::string& dst) const;
 
-        int subject_name_digest(std::vector<unsigned char>& dst);
+        int subject_name_digest(std::vector<unsigned char>& dst) const;
 
       private:
 
