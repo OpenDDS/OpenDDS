@@ -6,6 +6,8 @@
 #ifndef OPENDDS_SECURITY_SSL_UTILS_H
 #define OPENDDS_SECURITY_SSL_UTILS_H
 
+#include "Certificate.h"
+#include "dds/DdsDcpsGuidC.h"
 #include <string>
 
 namespace OpenDDS {
@@ -21,6 +23,8 @@ namespace OpenDDS {
       };
 
       URI_SCHEME extract_uri_info(const std::string& uri, std::string& path);
+
+      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t dst, const Certificate& target);
 
     }
   }

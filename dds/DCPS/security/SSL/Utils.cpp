@@ -4,6 +4,7 @@
  */
 
 #include "Utils.h"
+#include "dds/DCPS/GuidUtils.h"
 #include <vector>
 #include <utility>
 
@@ -33,6 +34,20 @@ namespace OpenDDS {
               break;
           }
         }
+        return result;
+      }
+
+      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t dst, const Certificate& target)
+      {
+        int result = 1;
+
+        dst = OpenDDS::DCPS::GUID_UNKNOWN;
+
+        std::vector<unsigned char> asn1_der_digest;
+        target.subject_name_digest(asn1_der_digest);
+
+        dst.guidPrefix[0] = 1;
+
         return result;
       }
 

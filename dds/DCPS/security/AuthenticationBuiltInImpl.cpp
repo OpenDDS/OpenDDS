@@ -17,6 +17,7 @@
 
 #include "SSL/Certificate.h"
 #include "SSL/PrivateKey.h"
+#include "SSL/Utils.h"
 
 // Temporary include for get macaddress for unique guids
 #include <ace/OS_NS_netdb.h>
@@ -130,14 +131,15 @@ private:
   ACE_UNUSED_ARG(participant_qos);
   ACE_UNUSED_ARG(ex);
 
-  // The stub implementation will always succeed and will just overwrite any
-  // existing entry with the same handle if it were to somehow overflow the
-  // handle values. 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
 
   LocalIdentityData id_data(participant_qos.property.value);
 
   if (id_data.validate()) {
+
+    SSL::make_adjusted_guid(candidate_participant_guid,
+                            adjusted_participant_guid,
+                            id_data.get_participant_cert());
 
     local_identity_handle = get_next_handle();
     IdentityData_Ptr newDataPtr(new IdentityData());
