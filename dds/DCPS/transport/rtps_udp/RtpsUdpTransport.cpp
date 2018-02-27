@@ -29,6 +29,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
+  : local_crypto_handle_(DDS::HANDLE_NIL)
 {
   if (!inst.is_nil()) {
     if (!configure(inst)) {
@@ -59,6 +60,8 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   // RtpsUdpDataLink now owns the socket
   unicast_socket_.set_handle(ACE_INVALID_HANDLE);
+
+  link->local_crypto_handle(local_crypto_handle_);
 
   return link;
 }

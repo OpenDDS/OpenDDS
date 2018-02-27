@@ -85,6 +85,11 @@ private:
                     bool local_reliable, bool remote_reliable,
                     bool local_durable, bool remote_durable);
 
+  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
+  {
+    local_crypto_handle_ = pch;
+  }
+
   //protects access to link_ for duration of make_datalink
   typedef ACE_Thread_Mutex         ThreadLockType;
   typedef ACE_Guard<ThreadLockType>     GuardThreadType;
@@ -107,6 +112,7 @@ private:
   ACE_SOCK_Dgram unicast_socket_;
 
   TransportClient_rch default_listener_;
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 };
 
 } // namespace DCPS

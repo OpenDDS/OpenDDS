@@ -3397,6 +3397,10 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 }
 
+DDS::Security::ParticipantCryptoHandle DataReaderImpl::get_crypto_handle() const
+{
+  return participant_servant_->crypto_handle();
+}
 
 EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                                                  ACE_thread_t owner,

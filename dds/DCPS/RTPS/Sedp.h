@@ -214,6 +214,11 @@ private:
       endpoint_crypto_handle_ = e;
     }
 
+    DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
+    {
+      return participant_crypto_handle_;
+    }
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;

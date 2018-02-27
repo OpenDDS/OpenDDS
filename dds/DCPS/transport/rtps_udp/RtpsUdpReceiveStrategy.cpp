@@ -85,6 +85,10 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
        && kind != SEC_POSTFIX)) {
     // secure envelope in progress, defer processing
     secure_submessages_.push_back(rsh.submessage_);
+    if (kind == DATA) {
+      // FUTURE: support >1 data payload in SRTPS authenticated+unencrypted
+      secure_sample_ = sample;
+    }
     return;
   }
 
@@ -214,8 +218,15 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     break;
 
   case SEC_POSTFIX:
-  case SRTPS_POSTFIX:
+  case SRTPS_POSTFIX: {
     // prepare args to crypto plugin
+    const DDS::Security::ParticipantCryptoHandle local_pch =
+      link_->local_crypto_handle();
+    const DDS::RepoId peer = {receiver_.source_guid_prefix_,
+                              ENTITYID_PARTICIPANT};
+    const DDS::Security::ParticipantCryptoHandle peer_pch =
+      link_->peer_crypto_handle(peer);
+
     // call crypto plugin, bail out if failed validation
 
     // a. if(SRTPS_POSTFIX) decode_rtps_message -- not yet supported
@@ -234,6 +245,8 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     //        deliver_sample_i(sample, sampleHeader.submessage_);
     //      }
     //    }
+
+    secure_sample_ = ReceivedDataSample();
     break;
 
   default:
