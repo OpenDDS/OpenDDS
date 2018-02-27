@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>
 #include <bitset>
+#include <openssl/evp.h>
 
 namespace OpenDDS {
   namespace Security {
@@ -47,22 +48,44 @@ namespace OpenDDS {
 
         dst = OpenDDS::DCPS::GUID_UNKNOWN;
 
-        /* Grab hash for first 48 bytes of prefix */
+        /* Grab hash to populate bits 1 through 47 of prefix */
 
         std::vector<unsigned char> hash;
         result = target.subject_name_digest(hash);
 
         if (result == 0 && hash.size() >= 6) {
-            unsigned char bytes[] = reinterpret_cast<unsigned char[]>(dst);
-            bytes[0] = 0x80 | ((hash[0] >> 7u) & 0x7F);
-            bytes[1] = HASH_RSHIFT_1BIT(hash, 1);
-            bytes[2] = HASH_RSHIFT_1BIT(hash, 2);
-            bytes[3] = HASH_RSHIFT_1BIT(hash, 3);
-            bytes[4] = HASH_RSHIFT_1BIT(hash, 4);
-            bytes[5] = HASH_RSHIFT_1BIT(hash, 5);
+          unsigned char* bytes = reinterpret_cast<unsigned char*>(&dst);
+          bytes[0] = 0x80 | ((hash[0] >> 7u) & 0x7F); /* First bit set to 1 */
+          bytes[1] = HASH_RSHIFT_1BIT(hash, 1);
+          bytes[2] = HASH_RSHIFT_1BIT(hash, 2);
+          bytes[3] = HASH_RSHIFT_1BIT(hash, 3);
+          bytes[4] = HASH_RSHIFT_1BIT(hash, 4);
+          bytes[5] = HASH_RSHIFT_1BIT(hash, 5);
 
-            /* Now calculate hash from src guid for remaining 48 bytes */
+          /* Now calculate hash from src guid for bits 48 through 95 */
 
+          unsigned char hash2[EVP_MAX_MD_SIZE] = {0};
+          unsigned int len = 0u;
+
+          EVP_MD_CTX* hash_ctx = EVP_MD_CTX_new();
+          if (hash_ctx) {
+
+            EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
+            EVP_DigestUpdate(hash_ctx, &src, sizeof(OpenDDS::DCPS::GUID_t));
+            EVP_DigestFinal_ex(hash_ctx, hash2, &len);
+            if (len > 6) {
+                bytes[6] = hash2[0];
+                bytes[7] = hash2[1];
+                bytes[8] = hash2[2];
+                bytes[9] = hash2[3];
+                bytes[10] = hash2[4];
+                bytes[11] = hash2[5];
+
+                result = 0;
+            }
+
+            EVP_MD_CTX_free(hash_ctx);
+          }
         }
 
         return result;
