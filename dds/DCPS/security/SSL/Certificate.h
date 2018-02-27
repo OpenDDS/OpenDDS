@@ -32,6 +32,8 @@ namespace OpenDDS {
           return x_;
         }
 
+        int validate(Certificate& ca, unsigned long int flags = 0u);
+
       private:
 
         static X509* x509_from_pem(const std::string& path, const std::string& password = "");

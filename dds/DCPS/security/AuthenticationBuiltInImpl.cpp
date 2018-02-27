@@ -108,7 +108,7 @@ public:
 
   bool validate()
   {
-    return true;
+    return (X509_V_OK == participant_cert_.validate(ca_cert_));
   }
 
 private:
