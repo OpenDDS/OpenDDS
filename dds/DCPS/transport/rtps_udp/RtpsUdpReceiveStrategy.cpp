@@ -26,6 +26,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , last_received_()
   , recvd_sample_(0)
   , receiver_(local_prefix)
+  , secure_sample_(0)
 {
   secure_prefix_.smHeader.submessageId = 0;
 }
@@ -248,7 +249,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
     secure_sample_ = ReceivedDataSample();
     break;
-
+  }
   default:
     break;
   }
