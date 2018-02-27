@@ -7,6 +7,7 @@
 #include "dds/DCPS/GuidUtils.h"
 #include <vector>
 #include <utility>
+#include <bitset>
 
 namespace OpenDDS {
   namespace Security {
@@ -37,16 +38,32 @@ namespace OpenDDS {
         return result;
       }
 
+/* Gets hash[i] given i > 0 with the entire byte-array right-shifted by 1 bit. */
+#define HASH_RSHIFT_1BIT(HASH, IDX) ((((HASH)[(IDX)-1] << 7u) & 0x80) | (((HASH)[(IDX)] >> 1u) & 0x7F))
+
       int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t dst, const Certificate& target)
       {
         int result = 1;
 
         dst = OpenDDS::DCPS::GUID_UNKNOWN;
 
-        std::vector<unsigned char> asn1_der_digest;
-        target.subject_name_digest(asn1_der_digest);
+        /* Grab hash for first 48 bytes of prefix */
 
-        dst.guidPrefix[0] = 1;
+        std::vector<unsigned char> hash;
+        result = target.subject_name_digest(hash);
+
+        if (result == 0 && hash.size() >= 6) {
+            unsigned char bytes[] = reinterpret_cast<unsigned char[]>(dst);
+            bytes[0] = 0x80 | ((hash[0] >> 7u) & 0x7F);
+            bytes[1] = HASH_RSHIFT_1BIT(hash, 1);
+            bytes[2] = HASH_RSHIFT_1BIT(hash, 2);
+            bytes[3] = HASH_RSHIFT_1BIT(hash, 3);
+            bytes[4] = HASH_RSHIFT_1BIT(hash, 4);
+            bytes[5] = HASH_RSHIFT_1BIT(hash, 5);
+
+            /* Now calculate hash from src guid for remaining 48 bytes */
+
+        }
 
         return result;
       }
