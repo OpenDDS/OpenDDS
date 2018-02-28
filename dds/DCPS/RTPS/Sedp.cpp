@@ -3230,9 +3230,55 @@ DCPS::TransportLocatorSeq
 Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
                         const DCPS::RepoId& entity)
 {
-  //TODO: [DDS-Security] Get crypto handle from DiscoveredParticipant and add
-  // it to the transport locator(s) for rtps_udp matching RtpsUdpDataLink
-  return locators;
+  using DCPS::Serializer;
+
+  if (std::memcmp(entity.guidPrefix, spdp_.guid().guidPrefix,
+                  sizeof(DCPS::GuidPrefix_t)) == 0) {
+    return locators;
+  }
+
+  //TODO: [DDS-Security] Get crypto handle from DiscoveredParticipant
+  const DDS::Security::ParticipantCryptoHandle handle = 0x12345678;
+
+  if (handle == DDS::HANDLE_NIL) {
+    return locators;
+  }
+
+  DCPS::TransportLocatorSeq_var newLoc;
+  DDS::OctetSeq added;
+  for (unsigned int i = 0; i < locators.length(); ++i) {
+    if (std::strcmp(locators[i].transport_type.in(), "rtps_udp") == 0) {
+      if (!newLoc) {
+        newLoc = new DCPS::TransportLocatorSeq(locators);
+
+        DDS::OctetSeq handleOctets(sizeof handle);
+        handleOctets.length(handleOctets.maximum());
+        unsigned char* rawHandleOctets = handleOctets.get_buffer();
+        unsigned int handleTmp = handle;
+        for (unsigned int j = sizeof handle; j > 0; --j) {
+          rawHandleOctets[j - 1] = handleTmp & 0xff;
+          handleTmp >>= 8;
+        }
+
+        const DDS::BinaryProperty_t prop = {BLOB_PROP_PART_CRYPTO_HANDLE,
+                                            handleOctets, true /*serialize*/};
+        size_t size = 0, padding = 0;
+        DCPS::gen_find_size(prop, size, padding);
+        ACE_Message_Block mb(size + padding);
+        Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+        ser << prop;
+        added.length(mb.size());
+        std::memcpy(added.get_buffer(), mb.rd_ptr(), mb.size());
+      }
+
+      const unsigned int prevLen = newLoc[i].data.length();
+      newLoc[i].data.length(prevLen + added.length());
+      std::memcpy(newLoc[i].data.get_buffer() + prevLen, added.get_buffer(),
+                  added.length());
+    }
+  }
+
+  return newLoc ? newLoc : locators;
 }
 
 bool

@@ -63,6 +63,7 @@ public:
   ~Spdp();
 
   // Participant
+  const DCPS::RepoId& guid() const { return guid_; }
   void init_bit(const DDS::Subscriber_var& bit_subscriber);
   void fini_bit();
 
