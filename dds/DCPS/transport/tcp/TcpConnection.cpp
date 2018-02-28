@@ -44,6 +44,7 @@ const ACE_Time_Value reconnect_delay(2);
 OpenDDS::DCPS::TcpConnection::TcpConnection()
   : connected_(false)
   , is_connector_(false)
+  , tcp_config_(0)
   , passive_reconnect_timer_id_(-1)
   , reconnect_state_(INIT_STATE)
   , last_reconnect_attempted_(ACE_Time_Value::zero)
@@ -53,6 +54,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , passive_setup_buffer_(sizeof(ACE_UINT32))
   , id_(0)
   , reconnect_thread_(0)
+  , transport_during_setup_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
@@ -75,6 +77,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , passive_setup_(false)
   , id_(0)
   , reconnect_thread_(0)
+  , transport_during_setup_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);

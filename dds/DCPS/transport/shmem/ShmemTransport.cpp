@@ -189,8 +189,8 @@ ShmemTransport::shutdown_i()
 
   read_task_.reset();
 
-  void* mem = 0;
   if (alloc_) {
+    void* mem = 0;
     alloc_->find("Semaphore", mem);
     ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #ifdef ACE_WIN32

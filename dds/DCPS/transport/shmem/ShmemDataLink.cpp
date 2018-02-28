@@ -32,6 +32,7 @@ ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
   , send_strategy_( make_rch<ShmemSendStrategy>(this))
   , recv_strategy_( make_rch<ShmemReceiveStrategy>(this))
   , peer_alloc_(0)
+  , config_(NULL)
 {
 }
 
