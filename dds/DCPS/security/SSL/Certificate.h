@@ -20,6 +20,8 @@ namespace OpenDDS {
       {
       public:
 
+        friend std::ostream& operator<<(std::ostream&, const Certificate&);
+
         Certificate(const std::string& uri, const std::string& password = "");
 
         Certificate();
@@ -29,11 +31,6 @@ namespace OpenDDS {
         Certificate& operator=(const Certificate& rhs);
 
         void load(const std::string& uri, const std::string& password = "");
-
-        X509* get()
-        {
-          return x_;
-        }
 
         int validate(Certificate& ca, unsigned long int flags = 0u);
 
@@ -50,7 +47,7 @@ namespace OpenDDS {
         X509* x_;
       };
 
-      std::ostream& operator<<(std::ostream& lhs, Certificate& rhs);
+      std::ostream& operator<<(std::ostream&, const Certificate&);
     }
   }
 }

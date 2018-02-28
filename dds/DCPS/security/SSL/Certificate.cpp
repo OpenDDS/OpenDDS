@@ -239,12 +239,10 @@ namespace OpenDDS {
         return result;
       }
 
-      std::ostream& operator<<(std::ostream& lhs, Certificate& rhs)
+      std::ostream& operator<<(std::ostream& lhs, const Certificate& rhs)
       {
-        X509* x = rhs.get();
-
-        if (x) {
-            lhs << "Certificate: { is_ca? '" << (X509_check_ca(x) ? "yes": "no") << "'; }";
+        if (rhs.x_) {
+            lhs << "Certificate: { is_ca? '" << (X509_check_ca(rhs.x_) ? "yes": "no") << "'; }";
 
         } else {
             lhs << "NULL";
