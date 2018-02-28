@@ -3,27 +3,27 @@
  * See: http://www.DDS.org/license.html
  */
 
-#include "LocalIdentityData.h"
+#include "LocalCredentialData.h"
 
 namespace OpenDDS {
   namespace Security {
 
-    LocalIdentityData::LocalIdentityData(const DDS::PropertySeq& props)
+    LocalCredentialData::LocalCredentialData(const DDS::PropertySeq& props)
     {
       load(props);
     }
 
-    LocalIdentityData::LocalIdentityData()
+    LocalCredentialData::LocalCredentialData()
     {
 
     }
 
-    LocalIdentityData::~LocalIdentityData()
+    LocalCredentialData::~LocalCredentialData()
     {
 
     }
 
-    void LocalIdentityData::load(const DDS::PropertySeq& props)
+    void LocalCredentialData::load(const DDS::PropertySeq& props)
     {
       std::string name, value, pkey_uri, password;
       for (size_t i = 0; i < props.length(); ++i) {

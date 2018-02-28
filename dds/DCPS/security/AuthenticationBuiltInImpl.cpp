@@ -68,7 +68,7 @@ AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 , handshake_mutex_()
 , handle_mutex_()
 , next_handle_(1ULL)
-, local_auth_data_()
+, local_credential_data_()
 {
 }
 
@@ -93,16 +93,25 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   ACE_Guard<ACE_Thread_Mutex> guard(local_auth_data_mutex_);
 
-  local_auth_data_.id_data.load(participant_qos.property.value);
+  local_credential_data_.load(participant_qos.property.value);
 
-  if (local_auth_data_.id_data.validate()) {
+  if (local_credential_data_.validate()) {
 
     int err = SSL::make_adjusted_guid(candidate_participant_guid,
                                       adjusted_participant_guid,
-                                      local_auth_data_.id_data.get_participant_cert());
+                                      local_credential_data_.get_participant_cert());
     if (! err) {
-      local_auth_data_.handle = get_next_handle();
-      local_auth_data_.guid = adjusted_participant_guid;
+      local_identity_handle = get_next_handle();
+
+      IdentityData_Ptr local_identity(new IdentityData());
+      local_identity->participant_guid = adjusted_participant_guid;
+
+      /* TODO pre-populate local identity data */
+
+      {
+        ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+        identity_data_[local_identity_handle] = local_identity;
+      }
 
       result = DDS::Security::VALIDATION_OK;
     }

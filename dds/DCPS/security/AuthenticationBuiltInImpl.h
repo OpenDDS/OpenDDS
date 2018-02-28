@@ -20,7 +20,7 @@
 #include <string>
 #include <memory>
 
-#include "Authentication/LocalIdentityData.h"
+#include "Authentication/LocalCredentialData.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -145,15 +145,6 @@ public:
 
 private:
 
-  struct LocalAuthData
-  {
-    DDS::Security::IdentityHandle handle;
-    OpenDDS::DCPS::GUID_t guid;
-    LocalIdentityData id_data;
-  };
-
-  // Temporary storage for the handle lookup data
-  // Just using a single structure for both local and remote identity info
   struct IdentityData
   {
     OpenDDS::DCPS::GUID_t participant_guid;
@@ -218,7 +209,7 @@ private:
 
   uint64_t next_handle_;
 
-  LocalAuthData local_auth_data_;
+  LocalCredentialData local_credential_data_;
 };
 } // namespace Security
 } // namespace OpenDDS
