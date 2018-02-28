@@ -14,7 +14,8 @@ class CertificateTest : public ::testing::Test
 public:
   CertificateTest() :
     ca_("file:../certs/opendds_identity_ca_cert.pem"),
-    signed_("file:../certs/opendds_participant_cert.pem")
+    signed_("file:../certs/opendds_participant_cert.pem"),
+    not_signed_("file:../certs/opendds_not_signed.pem")
   {
 
   }
@@ -26,6 +27,7 @@ public:
 
   Certificate ca_;
   Certificate signed_;
+  Certificate not_signed_;
 };
 
 TEST_F(CertificateTest, Validate_Success)
@@ -41,6 +43,21 @@ TEST_F(CertificateTest, Validate_Failure_LoadingWrongKeyType)
 
 TEST_F(CertificateTest, Validate_Failure_SelfSigned)
 {
-  Certificate not_signed("file:../certs/opendds_not_signed.pem");
-  ASSERT_NE(not_signed.validate(ca_), X509_V_OK);
+  ASSERT_NE(not_signed_.validate(ca_), X509_V_OK);
 }
+
+#if 0 /* TODO */
+TEST_F(CertificateTest, SubjectNameDigest)
+{
+  typedef std::vector<unsigned char> hash_vec;
+
+  hash_vec hash;
+  not_signed_.subject_name_digest(hash);
+
+  hash_vec::const_iterator i;
+  for (i = hash.cbegin(); i != hash.cend(); ++i) {
+    /* Do something with the bytes... */
+  }
+}
+#endif
+
