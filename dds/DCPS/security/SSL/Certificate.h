@@ -7,6 +7,7 @@
 #define OPENDDS_SECURITY_SSL_CERTIFICATE_H
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <openssl/x509.h>
 
@@ -17,6 +18,7 @@ namespace OpenDDS {
       class Certificate
       {
       public:
+
         Certificate(const std::string& uri, const std::string& password = "");
 
         Certificate();
@@ -32,18 +34,17 @@ namespace OpenDDS {
           return x_;
         }
 
+        int validate(Certificate& ca, unsigned long int flags = 0u);
+
+        int subject_name_to_DER(std::vector<unsigned char>& dst) const;
+
+        int subject_name_to_str(std::string& dst) const;
+
+        int subject_name_digest(std::vector<unsigned char>& dst) const;
+
       private:
 
-        enum URI_SCHEME
-        {
-          URI_UNKNOWN,
-          URI_FILE,
-          URI_DATA,
-          URI_PKCS11,
-        };
-
         static X509* x509_from_pem(const std::string& path, const std::string& password = "");
-        static URI_SCHEME extract_uri_info(const std::string& uri, std::string& path);
 
         X509* x_;
       };

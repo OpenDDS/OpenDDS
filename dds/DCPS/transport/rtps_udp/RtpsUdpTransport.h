@@ -70,7 +70,8 @@ private:
 
   virtual bool connection_info_i(TransportLocator& info) const;
   ACE_INET_Addr get_connection_addr(const TransportBLOB& data,
-                                    bool& requires_inline_qos) const;
+                                    bool& requires_inline_qos,
+                                    unsigned int& blob_bytes_read) const;
 
   virtual void release_datalink(DataLink* link);
   void pre_detach(const TransportClient_rch& client);
@@ -84,6 +85,11 @@ private:
                     const TransportBLOB& remote_data,
                     bool local_reliable, bool remote_reliable,
                     bool local_durable, bool remote_durable);
+
+  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
+  {
+    local_crypto_handle_ = pch;
+  }
 
   //protects access to link_ for duration of make_datalink
   typedef ACE_Thread_Mutex         ThreadLockType;
@@ -107,6 +113,7 @@ private:
   ACE_SOCK_Dgram unicast_socket_;
 
   TransportClient_rch default_listener_;
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 };
 
 } // namespace DCPS

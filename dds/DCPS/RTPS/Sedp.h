@@ -213,6 +213,11 @@ private:
       endpoint_crypto_handle_ = e;
     }
 
+    DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
+    {
+      return participant_crypto_handle_;
+    }
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
@@ -502,6 +507,10 @@ private:
   virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& tls,
                                                    DiscoveredPublicationIter& iter,
                                                    const DCPS::RepoId& writer);
+
+  DCPS::TransportLocatorSeq
+  add_security_info(const DCPS::TransportLocatorSeq& locators,
+                    const DCPS::RepoId& entity);
 
   virtual bool defer_writer(const DCPS::RepoId& writer,
                             const DCPS::RepoId& writer_participant);

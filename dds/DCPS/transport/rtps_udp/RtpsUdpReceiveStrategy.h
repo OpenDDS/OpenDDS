@@ -123,6 +123,7 @@ private:
 
   RTPS::SecuritySubmessage secure_prefix_;
   OPENDDS_VECTOR(RTPS::Submessage) secure_submessages_;
+  ReceivedDataSample secure_sample_;
 };
 
 } // namespace DCPS

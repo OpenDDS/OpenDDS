@@ -44,6 +44,27 @@ RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
   locators_.erase(remote_id);
 }
 
+ACE_INLINE DDS::Security::ParticipantCryptoHandle
+RtpsUdpDataLink::local_crypto_handle() const
+{
+  return local_crypto_handle_;
+}
+
+ACE_INLINE void
+RtpsUdpDataLink::local_crypto_handle(DDS::Security::ParticipantCryptoHandle h)
+{
+  local_crypto_handle_ = h;
+}
+
+ACE_INLINE DDS::Security::ParticipantCryptoHandle
+RtpsUdpDataLink::peer_crypto_handle(const RepoId& peer) const
+{
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::ParticipantCryptoHandle,
+                          GUID_tKeyLessThan)::const_iterator iter_t;
+  const iter_t it = peer_crypto_handles_.find(peer);
+  return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

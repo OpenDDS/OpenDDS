@@ -33,6 +33,7 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RcEventHandler.h"
 
+#include "dds/DdsSecurityCoreC.h"
 
 class DDS_TEST;
 
@@ -126,6 +127,14 @@ public:
   virtual void pre_stop_i();
 
   virtual void send_final_acks (const RepoId& readerid);
+
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle() const;
+  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
+
+  DDS::Security::ParticipantCryptoHandle peer_crypto_handle(const RepoId& peer) const;
+
+  void security_from_blob(const RepoId& remote_id, const unsigned char* buffer,
+                          unsigned int buffer_size);
 
 private:
   virtual void stop_i();
@@ -508,6 +517,10 @@ private:
     HeldData held_data_;
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
+
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
+  OPENDDS_MAP_CMP(RepoId, DDS::Security::ParticipantCryptoHandle,
+                  GUID_tKeyLessThan) peer_crypto_handles_;
 };
 
 } // namespace DCPS

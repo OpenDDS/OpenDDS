@@ -173,7 +173,6 @@ const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 Sedp::Sedp(const RepoId& participant_id,
            Spdp& owner,
            ACE_Thread_Mutex& lock)
-
   : OpenDDS::DCPS::EndpointManager<SPDPdiscoveredParticipantData>(participant_id, lock)
   , spdp_(owner)
   , publications_writer_(make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), *this)
@@ -3224,6 +3223,16 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
                  ACE_TEXT("and no default locators\n")));
     }
   }
+}
+
+
+DCPS::TransportLocatorSeq
+Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
+                        const DCPS::RepoId& entity)
+{
+  //TODO: [DDS-Security] Get crypto handle from DiscoveredParticipant and add
+  // it to the transport locator(s) for rtps_udp matching RtpsUdpDataLink
+  return locators;
 }
 
 bool

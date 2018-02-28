@@ -4,8 +4,8 @@
  */
 
 #include "Certificate.h"
-#include <vector>
-#include <utility>
+#include "Utils.h"
+#include <algorithm>
 #include <cstring>
 #include <cerrno>
 #include <openssl/pem.h>
@@ -15,14 +15,12 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      Certificate::Certificate(const std::string& uri, const std::string& password)
-      : x_(NULL)
+      Certificate::Certificate(const std::string& uri, const std::string& password) : x_(NULL)
       {
         load(uri, password);
       }
 
-      Certificate::Certificate()
-      : x_(NULL)
+      Certificate::Certificate() : x_(NULL)
       {
 
       }
@@ -63,36 +61,160 @@ namespace OpenDDS {
           case URI_UNKNOWN:
           default:
             /* TODO use ACE logging */
-            fprintf(stderr, "Certificate::Certificate: Unsupported URI scheme in cert path '%s'\n", uri.c_str());
+            fprintf(stderr, "Certificate::Certificate: Error, unsupported URI scheme in cert path '%s'\n", uri.c_str());
             break;
         }
       }
 
-      Certificate::URI_SCHEME Certificate::extract_uri_info(const std::string& uri, std::string& path)
+      int Certificate::validate(Certificate& ca, unsigned long int flags)
       {
-        typedef std::vector<std::pair<std::string, URI_SCHEME> > uri_pattern_t;
+        int result = X509_V_ERR_UNSPECIFIED;
 
-        URI_SCHEME result = URI_UNKNOWN;
-        path = "";
+        if (x_) {
+            if (ca.x_) {
 
-        uri_pattern_t uri_patterns;
-        uri_patterns.push_back(std::make_pair("file:", URI_FILE));
-        uri_patterns.push_back(std::make_pair("data:", URI_DATA));
-        uri_patterns.push_back(std::make_pair("pkcs11:", URI_PKCS11));
+                X509_STORE* certs = X509_STORE_new();
+                if (certs) {
+                    X509_STORE_add_cert(certs, ca.x_);
 
-        for(uri_pattern_t::iterator i = uri_patterns.begin(); i != uri_patterns.end(); ++i) {
-          const std::string& pfx = i->first;
-          size_t pfx_end = pfx.length();
+                    X509_STORE_CTX* validation_ctx = X509_STORE_CTX_new();
+                    if (validation_ctx) {
+                        X509_STORE_CTX_init(validation_ctx, certs, x_, NULL);
+                        X509_STORE_CTX_set_flags(validation_ctx, flags);
 
-          if (uri.substr(0, pfx_end) == pfx) {
-              path = uri.substr(pfx_end, std::string::npos);
-              result = i->second;
-              break;
-          }
+                        if (X509_verify_cert(validation_ctx) == 1) {
+                            result = X509_V_OK;
+
+                        } else {
+                            int err = X509_STORE_CTX_get_error(validation_ctx),
+                                depth = X509_STORE_CTX_get_error_depth(validation_ctx);
+
+                            fprintf(stderr,
+                                    "Certificate::verify: Error '%s' occurred using cert at depth '%d', validation failed.",
+                                    X509_verify_cert_error_string(err),
+                                    depth);
+
+                            result = err;
+                        }
+
+                        X509_STORE_CTX_free(validation_ctx);
+                    }
+
+                    X509_STORE_free(certs);
+
+                } else {
+                    fprintf(stderr, "Certificate::verify: Error, failed to create X509_STORE");
+                }
+
+            } else {
+                fprintf(stderr, "Certificate::verify: Error, passed-in CA has not loaded a certificate");
+            }
+
+        } else {
+            fprintf(stderr, "Certificate::verify: Error, a certificate must be loaded before it can be verified");
         }
+
         return result;
       }
 
+
+      int Certificate::subject_name_to_DER(std::vector<unsigned char>& dst) const
+      {
+        int result = 1, len = 0;
+        unsigned char* buffer = NULL;
+
+        dst.clear();
+
+        if (x_) {
+
+          /* Do not free name */
+          X509_NAME* name = X509_get_subject_name(x_);
+          if (name) {
+            len = i2d_X509_NAME(name, &buffer);
+            if (len > 0) {
+              dst.insert(dst.begin(), buffer, buffer + len);
+              result = 0;
+
+            } else {
+                fprintf(stderr, "Certificate::subject_name_to_DER: Error, failed to convert X509_NAME to DER");
+            }
+          }
+        }
+
+        if (buffer) free(buffer);
+
+        return result;
+      }
+
+      int Certificate::subject_name_to_str(std::string& dst) const
+      {
+        int result = 1, len = 0;
+        char* tmp = NULL;
+
+        dst.clear();
+
+        if (x_) {
+
+          /* Do not free name */
+          X509_NAME* name = X509_get_subject_name(x_);
+          if (name) {
+
+            BIO* buffer = BIO_new(BIO_s_mem());
+            if (buffer) {
+
+              len = X509_NAME_print_ex(buffer, name, 0, 0);
+              if (len > 0) {
+
+                tmp = new char[len];
+                len = BIO_gets(buffer, tmp, len);
+                if (len > 0) {
+                  dst = tmp;
+                  result = 0;
+
+                } else {
+                    fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to write BIO to string");
+                }
+
+              } else {
+                  fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to read X509_NAME into BIO buffer");
+              }
+
+              BIO_free(buffer);
+            }
+          }
+        }
+
+        if (tmp) delete[] tmp;
+
+        return result;
+      }
+
+      int Certificate::subject_name_digest(std::vector<unsigned char>& dst) const
+      {
+        int result = 1;
+        unsigned int len = 0;
+        unsigned char* buffer = NULL;
+
+        dst.clear();
+
+        if (x_) {
+
+          /* Do not free name */
+          X509_NAME* name = X509_get_subject_name(x_);
+          if (name) {
+
+            buffer = new unsigned char[EVP_MAX_MD_SIZE];
+            if (X509_NAME_digest(name, EVP_sha256(), buffer, &len) == 1) {
+              dst.insert(dst.begin(), buffer, buffer + len);
+              result = 0;
+            }
+          }
+        }
+
+        if (buffer) delete[] buffer;
+
+        return result;
+      }
 
       X509* Certificate::x509_from_pem(const std::string& path, const std::string& password)
       {

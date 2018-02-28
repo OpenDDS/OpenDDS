@@ -59,6 +59,8 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION_2_2 = { 2, 2 };
     const ProtocolVersion_t PROTOCOLVERSION_2_3 = { 2, 3 }; // DDS-Security 1.1
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_3;
+
+    const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
   }
 }
 

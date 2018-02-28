@@ -17,6 +17,7 @@
 
 #include "SSL/Certificate.h"
 #include "SSL/PrivateKey.h"
+#include "SSL/Utils.h"
 
 // Temporary include for get macaddress for unique guids
 #include <ace/OS_NS_netdb.h>
@@ -84,7 +85,7 @@ public:
       }
     }
 
-    participant_pkey_ = SSL::PrivateKey(); //(pkey_uri, password);
+    participant_pkey_ = SSL::PrivateKey(pkey_uri, password);
   }
 
   ~LocalIdentityData()
@@ -109,7 +110,7 @@ public:
 
   bool validate()
   {
-    return true;
+    return (X509_V_OK == participant_cert_.validate(ca_cert_));
   }
 
 private:
@@ -131,54 +132,55 @@ private:
   ACE_UNUSED_ARG(participant_qos);
   ACE_UNUSED_ARG(ex);
 
-  // The stub implementation will always succeed and will just overwrite any
-  // existing entry with the same handle if it were to somehow overflow the
-  // handle values. 
-  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
+  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   LocalIdentityData id_data(participant_qos.property.value);
 
   if (id_data.validate()) {
 
-    local_identity_handle = get_next_handle();
-    IdentityData_Ptr newDataPtr(new IdentityData());
+    int err = SSL::make_adjusted_guid(candidate_participant_guid,
+                                      adjusted_participant_guid,
+                                      id_data.get_participant_cert());
+    if (! err) {
 
-    // Temporary hack to produce unique guids until real auth is written
-    // TODO Replace this!
-    if (candidate_participant_guid == OpenDDS::DCPS::GUID_UNKNOWN) {
+      local_identity_handle = get_next_handle();
+      IdentityData_Ptr newDataPtr(new IdentityData());
 
-      static ACE_UINT16 counter = 1024;
-      ACE_UINT16 pid = ACE_OS::getpid();
+      // Temporary hack to produce unique guids until real auth is written
+      // TODO Replace this!
+      if (candidate_participant_guid == OpenDDS::DCPS::GUID_UNKNOWN) {
 
-      ACE_OS::macaddr_node_t macaddress;
-      ACE_OS::getmacaddress(&macaddress); // ignore return, assume success!
+        static ACE_UINT16 counter = 1024;
+        ACE_UINT16 pid = ACE_OS::getpid();
 
-      adjusted_participant_guid.guidPrefix[0] = DCPS::VENDORID_OCI[0];
-      adjusted_participant_guid.guidPrefix[1] = DCPS::VENDORID_OCI[1];
-      ACE_OS::memcpy(&adjusted_participant_guid.guidPrefix[2], macaddress.node, NODE_ID_SIZE);
-      adjusted_participant_guid.guidPrefix[8] = static_cast<CORBA::Octet>(pid >> 8);
-      adjusted_participant_guid.guidPrefix[9] = static_cast<CORBA::Octet>(pid & 0xFF);
-      adjusted_participant_guid.guidPrefix[10] = static_cast<CORBA::Octet>(counter >> 8);
-      adjusted_participant_guid.guidPrefix[11] = static_cast<CORBA::Octet>(counter & 0xFF);
+        ACE_OS::macaddr_node_t macaddress;
+        ACE_OS::getmacaddress(&macaddress); // ignore return, assume success!
 
-      ++counter;
+        adjusted_participant_guid.guidPrefix[0] = DCPS::VENDORID_OCI[0];
+        adjusted_participant_guid.guidPrefix[1] = DCPS::VENDORID_OCI[1];
+        ACE_OS::memcpy(&adjusted_participant_guid.guidPrefix[2], macaddress.node, NODE_ID_SIZE);
+        adjusted_participant_guid.guidPrefix[8] = static_cast<CORBA::Octet>(pid >> 8);
+        adjusted_participant_guid.guidPrefix[9] = static_cast<CORBA::Octet>(pid & 0xFF);
+        adjusted_participant_guid.guidPrefix[10] = static_cast<CORBA::Octet>(counter >> 8);
+        adjusted_participant_guid.guidPrefix[11] = static_cast<CORBA::Octet>(counter & 0xFF);
+
+        ++counter;
+      }
+      else {
+        adjusted_participant_guid = candidate_participant_guid;
+
+      }
+      newDataPtr->participant_guid = adjusted_participant_guid;
+
+      // Mutex used to protect the identity_data structure
+      // Probably not needed in the stub
+      {
+        ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+        identity_data_[local_identity_handle] = newDataPtr;
+      }
+
+      result = DDS::Security::VALIDATION_OK;
     }
-    else {
-      adjusted_participant_guid = candidate_participant_guid;
-
-    }
-    newDataPtr->participant_guid = adjusted_participant_guid;
-
-    // Mutex used to protect the identity_data structure
-    // Probably not needed in the stub
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-      identity_data_[local_identity_handle] = newDataPtr;
-    }
-
-  } else {
-    result = DDS::Security::VALIDATION_FAILED;
-
   }
 
   return result;

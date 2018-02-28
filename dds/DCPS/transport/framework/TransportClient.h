@@ -141,6 +141,11 @@ private:
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
 
+  virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
+  {
+    return DDS::HANDLE_NIL;
+  }
+
   // transport_detached() is called from TransportImpl when it shuts down
   friend class TransportImpl;
   void transport_detached(TransportImpl* which);
