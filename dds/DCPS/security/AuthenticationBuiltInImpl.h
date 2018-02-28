@@ -20,6 +20,8 @@
 #include <string>
 #include <memory>
 
+#include "Authentication/LocalIdentityData.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -143,6 +145,13 @@ public:
 
 private:
 
+  struct LocalAuthData
+  {
+    DDS::Security::IdentityHandle handle;
+    OpenDDS::DCPS::GUID_t guid;
+    LocalIdentityData id_data;
+  };
+
   // Temporary storage for the handle lookup data
   // Just using a single structure for both local and remote identity info
   struct IdentityData
@@ -202,11 +211,14 @@ private:
 
   DDS::Security::AuthenticationListener_ptr listener_ptr_;
 
+  ACE_Thread_Mutex local_auth_data_mutex_;
   ACE_Thread_Mutex identity_mutex_;
   ACE_Thread_Mutex handshake_mutex_;
   ACE_Thread_Mutex handle_mutex_;
 
   uint64_t next_handle_;
+
+  LocalAuthData local_auth_data_;
 };
 } // namespace Security
 } // namespace OpenDDS

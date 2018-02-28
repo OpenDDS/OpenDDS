@@ -15,9 +15,7 @@
 #include <sstream>
 #include <vector>
 
-#include "SSL/Certificate.h"
-#include "SSL/PrivateKey.h"
-#include "SSL/Utils.h"
+#include "dds/DCPS/security/SSL/Utils.h"
 
 // Temporary include for get macaddress for unique guids
 #include <ace/OS_NS_netdb.h>
@@ -44,15 +42,15 @@ static const DDS::OctetSeq Empty_Seq;
 static const std::string AlgoName("RSASSA-PSS-SHA256");
 static const std::string AgreementAlgo("DH+MODP-2048-256");
 
-// Temporary const for generating unique guids until real validation is in place
-static const short NODE_ID_SIZE = 6;
 
 AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 : listener_ptr_()
+, local_auth_data_mutex_()
 , identity_mutex_()
 , handshake_mutex_()
 , handle_mutex_()
 , next_handle_(1ULL)
+, local_auth_data_()
 {
 }
 
@@ -60,65 +58,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   // - Clean up resources used by this implementation
 }
-
-class LocalIdentityData
-{
-public:
-  LocalIdentityData(const DDS::PropertySeq& props)
-  {
-    std::string name, value, pkey_uri, password;
-    for (size_t i = 0; i < props.length(); ++i) {
-      name = props[i].name;
-      value = props[i].value;
-
-      if (name == "dds.sec.auth.identity_ca") {
-          ca_cert_ = SSL::Certificate(value);
-
-      } else if (name == "dds.sec.auth.private_key") {
-          pkey_uri = value;
-
-      } else if (name == "dds.sec.auth.identity_certificate") {
-          participant_cert_ = SSL::Certificate(value);
-
-      } else if (name == "dds.sec.auth.password") {
-          password = value;
-      }
-    }
-
-    participant_pkey_ = SSL::PrivateKey(pkey_uri, password);
-  }
-
-  ~LocalIdentityData()
-  {
-
-  }
-
-  SSL::Certificate& get_ca_cert()
-  {
-    return ca_cert_;
-  }
-
-  SSL::Certificate& get_participant_cert()
-  {
-    return participant_cert_;
-  }
-
-  SSL::PrivateKey& get_participant_private_key()
-  {
-    return participant_pkey_;
-  }
-
-  bool validate()
-  {
-    return (X509_V_OK == participant_cert_.validate(ca_cert_));
-  }
-
-private:
-
-  SSL::Certificate ca_cert_;
-  SSL::Certificate participant_cert_;
-  SSL::PrivateKey participant_pkey_;
-};
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::validate_local_identity(
   ::DDS::Security::IdentityHandle & local_identity_handle,
@@ -134,50 +73,18 @@ private:
 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
-  LocalIdentityData id_data(participant_qos.property.value);
+  ACE_Guard<ACE_Thread_Mutex> guard(local_auth_data_mutex_);
 
-  if (id_data.validate()) {
+  local_auth_data_.id_data.load(participant_qos.property.value);
+
+  if (local_auth_data_.id_data.validate()) {
 
     int err = SSL::make_adjusted_guid(candidate_participant_guid,
                                       adjusted_participant_guid,
-                                      id_data.get_participant_cert());
+                                      local_auth_data_.id_data.get_participant_cert());
     if (! err) {
-
-      local_identity_handle = get_next_handle();
-      IdentityData_Ptr newDataPtr(new IdentityData());
-
-      // Temporary hack to produce unique guids until real auth is written
-      // TODO Replace this!
-      if (candidate_participant_guid == OpenDDS::DCPS::GUID_UNKNOWN) {
-
-        static ACE_UINT16 counter = 1024;
-        ACE_UINT16 pid = ACE_OS::getpid();
-
-        ACE_OS::macaddr_node_t macaddress;
-        ACE_OS::getmacaddress(&macaddress); // ignore return, assume success!
-
-        adjusted_participant_guid.guidPrefix[0] = DCPS::VENDORID_OCI[0];
-        adjusted_participant_guid.guidPrefix[1] = DCPS::VENDORID_OCI[1];
-        ACE_OS::memcpy(&adjusted_participant_guid.guidPrefix[2], macaddress.node, NODE_ID_SIZE);
-        adjusted_participant_guid.guidPrefix[8] = static_cast<CORBA::Octet>(pid >> 8);
-        adjusted_participant_guid.guidPrefix[9] = static_cast<CORBA::Octet>(pid & 0xFF);
-        adjusted_participant_guid.guidPrefix[10] = static_cast<CORBA::Octet>(counter >> 8);
-        adjusted_participant_guid.guidPrefix[11] = static_cast<CORBA::Octet>(counter & 0xFF);
-
-        ++counter;
-      }
-      else {
-        adjusted_participant_guid = candidate_participant_guid;
-
-      }
-      newDataPtr->participant_guid = adjusted_participant_guid;
-
-      // Mutex used to protect the identity_data structure
-      // Probably not needed in the stub
-      {
-        ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-        identity_data_[local_identity_handle] = newDataPtr;
-      }
+      local_auth_data_.handle = get_next_handle();
+      local_auth_data_.guid = adjusted_participant_guid;
 
       result = DDS::Security::VALIDATION_OK;
     }
