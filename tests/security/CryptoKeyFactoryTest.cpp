@@ -232,7 +232,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
     local_handle,
     remote_id_handle,
     remote_perm_handle,
-    DDS::HANDLE_NIL,
+    0,
     ex));
 
   // Register with valid handles
