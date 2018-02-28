@@ -79,7 +79,7 @@ DDS::Security::ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remot
   DDS::Security::ParticipantCryptoHandle local_participant_crypto_handle,
   DDS::Security::IdentityHandle remote_participant_identity,
   DDS::Security::PermissionsHandle remote_participant_permissions,
-  DDS::Security::SharedSecretHandle shared_secret,
+  DDS::Security::SharedSecretHandle* shared_secret,
   DDS::Security::SecurityException& ex)
 {
   // Conditions required for this to succeed
@@ -100,7 +100,7 @@ DDS::Security::ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remot
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote permissions ID");
     return DDS::HANDLE_NIL;
   }
-  if (DDS::HANDLE_NIL == shared_secret) {
+  if (!shared_secret) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Shared Secret data");
     return DDS::HANDLE_NIL;
   }
@@ -134,7 +134,7 @@ DDS::Security::DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawrit
 DDS::Security::DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
   DDS::Security::DatawriterCryptoHandle local_datawriter_crypto_handle,
   DDS::Security::ParticipantCryptoHandle remote_participant_crypto,
-  DDS::Security::SharedSecretHandle shared_secret,
+  DDS::Security::SharedSecretHandle* shared_secret,
   bool relay_only,
   DDS::Security::SecurityException& ex)
 {
@@ -151,7 +151,7 @@ DDS::Security::DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote Participant Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  if (DDS::HANDLE_NIL == shared_secret) {
+  if (!shared_secret) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Shared Secret Handle");
     return DDS::HANDLE_NIL;
   }
@@ -182,7 +182,7 @@ DDS::Security::DatareaderCryptoHandle CryptoBuiltInImpl::register_local_dataread
 DDS::Security::DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
   DDS::Security::DatareaderCryptoHandle local_datareader_crypto_handle,
   DDS::Security::ParticipantCryptoHandle remote_participant_crypt,
-  DDS::Security::SharedSecretHandle shared_secret,
+  DDS::Security::SharedSecretHandle* shared_secret,
   DDS::Security::SecurityException& ex)
 {
   // Conditions for success
@@ -196,7 +196,7 @@ DDS::Security::DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote Participant Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  if (DDS::HANDLE_NIL == shared_secret) {
+  if (!shared_secret) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Shared Secret Handle");
     return DDS::HANDLE_NIL;
   }
