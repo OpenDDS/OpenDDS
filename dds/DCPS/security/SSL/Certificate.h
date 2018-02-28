@@ -6,6 +6,7 @@
 #ifndef OPENDDS_SECURITY_SSL_CERTIFICATE_H
 #define OPENDDS_SECURITY_SSL_CERTIFICATE_H
 
+#include "dds/DCPS/security/DdsSecurity_Export.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -15,7 +16,7 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      class Certificate
+      class DdsSecurity_Export Certificate
       {
       public:
 

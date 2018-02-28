@@ -90,7 +90,7 @@ namespace OpenDDS {
                                 depth = X509_STORE_CTX_get_error_depth(validation_ctx);
 
                             fprintf(stderr,
-                                    "Certificate::verify: Error '%s' occurred using cert at depth '%d', validation failed.",
+                                    "Certificate::verify: Error '%s' occurred using cert at depth '%d', validation failed.\n",
                                     X509_verify_cert_error_string(err),
                                     depth);
 
@@ -103,15 +103,15 @@ namespace OpenDDS {
                     X509_STORE_free(certs);
 
                 } else {
-                    fprintf(stderr, "Certificate::verify: Error, failed to create X509_STORE");
+                    fprintf(stderr, "Certificate::verify: Error, failed to create X509_STORE\n");
                 }
 
             } else {
-                fprintf(stderr, "Certificate::verify: Error, passed-in CA has not loaded a certificate");
+                fprintf(stderr, "Certificate::verify: Error, passed-in CA has not loaded a certificate\n");
             }
 
         } else {
-            fprintf(stderr, "Certificate::verify: Error, a certificate must be loaded before it can be verified");
+            fprintf(stderr, "Certificate::verify: Error, a certificate must be loaded before it can be verified\n");
         }
 
         return result;
@@ -136,7 +136,7 @@ namespace OpenDDS {
               result = 0;
 
             } else {
-                fprintf(stderr, "Certificate::subject_name_to_DER: Error, failed to convert X509_NAME to DER");
+                fprintf(stderr, "Certificate::subject_name_to_DER: Error, failed to convert X509_NAME to DER\n");
             }
           }
         }
@@ -172,11 +172,11 @@ namespace OpenDDS {
                   result = 0;
 
                 } else {
-                    fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to write BIO to string");
+                    fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to write BIO to string\n");
                 }
 
               } else {
-                  fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to read X509_NAME into BIO buffer");
+                  fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to read X509_NAME into BIO buffer\n");
               }
 
               BIO_free(buffer);

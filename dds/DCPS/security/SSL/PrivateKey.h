@@ -6,6 +6,7 @@
 #ifndef OPENDDS_SECURITY_SSL_PRIVATEKEY_H
 #define OPENDDS_SECURITY_SSL_PRIVATEKEY_H
 
+#include "dds/DCPS/security/DdsSecurity_Export.h"
 #include <string>
 #include <openssl/evp.h>
 
@@ -13,7 +14,7 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      class PrivateKey
+      class DdsSecurity_Export PrivateKey
       {
       public:
         PrivateKey(const std::string& uri, const std::string password = "");
