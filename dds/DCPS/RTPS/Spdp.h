@@ -104,8 +104,9 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
-  void match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata, const ACE_Time_Value& time);
-  bool attempt_handshake(const DCPS::RepoId& guid, const DDS::Security::IdentityToken& id_token);
+  void match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata);
+  bool match_authenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata, DiscoveredParticipant& dp);
+  void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();

@@ -2202,7 +2202,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   ACE_Message_Block payload(
       DCPS::DataSampleHeader::max_marshaled_size(),
       ACE_Message_Block::MB_DATA,
-      new ACE_Message_Block(size));
+      new ACE_Message_Block(size + padding));
 
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
@@ -2751,11 +2751,11 @@ Sedp::write_durable_participant_message_data(const DCPS::RepoId& reader)
 
 DDS::ReturnCode_t
 Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
-                              const DCPS::RepoId& reader,
-                              DCPS::SequenceNumber& sequence)
+                              const DCPS::RepoId& reader)
 {
+  static DCPS::SequenceNumber sequence = 0;
   msg.message_identity.source_guid = participant_stateless_message_writer_.get_repo_id();
-  return participant_stateless_message_writer_.write_stateless_message(msg, reader, sequence);
+  return participant_stateless_message_writer_.write_stateless_message(msg, reader, ++sequence);
 }
 
 DDS::ReturnCode_t

@@ -20,6 +20,7 @@
 #include "ace/Condition_Thread_Mutex.h"
 
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityEntities.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -1170,15 +1171,39 @@ namespace OpenDDS {
 
     protected:
 
+      typedef enum {
+        AS_UNKNOWN,
+        AS_VALIDATING_REMOTE,
+        AS_HANDSHAKE_REQUEST,
+        AS_HANDSHAKE_REQUEST_SENT,
+        AS_HANDSHAKE_REPLY,
+        AS_HANDSHAKE_REPLY_SENT,
+        AS_AUTHENTICATED,
+        AS_UNAUTHENTICATED
+      } AuthState;
+
       struct DiscoveredParticipant {
-        DiscoveredParticipant() : bit_ih_(0) {}
+        DiscoveredParticipant()
+          : bit_ih_(0), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
         DiscoveredParticipant(const DiscoveredParticipantData& p,
                               const ACE_Time_Value& t)
-          : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL) {}
+          : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
 
         DiscoveredParticipantData pdata_;
         ACE_Time_Value last_seen_;
         DDS::InstanceHandle_t bit_ih_;
+
+        AuthState auth_state_;
+        DDS::Security::IdentityStatusToken id_status_token_;
+        DDS::Security::IdentityToken id_token_;
+        DDS::Security::PermissionsToken perm_token_;
+        DDS::Security::ParticipantSecurityInfo security_info_;
+        DDS::Security::IdentityHandle identity_handle_;
+        DDS::Security::AuthRequestMessageToken local_auth_request_token_;
+        DDS::Security::AuthRequestMessageToken remote_auth_request_token_;
+        DDS::Security::SharedSecretHandle shared_secret_handle_;
+        DDS::Security::PermissionsHandle permissions_handle_;
+        DDS::Security::ParticipantCryptoHandle crypto_handle_;
       };
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
                               DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;

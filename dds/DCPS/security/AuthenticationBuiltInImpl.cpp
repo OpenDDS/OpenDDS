@@ -31,6 +31,7 @@ static const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
 static const std::string Auth_Plugin_Major_Version("1");
 static const std::string Auth_Plugin_Minor_Version("0");
 static const std::string Identity_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
+static const std::string Identity_Status_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
 static const std::string Auth_Peer_Cred_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
 static const std::string Auth_Request_Class_Ext("AuthReq");
 static const std::string Handshake_Request_Class_Ext("Req");
@@ -193,7 +194,7 @@ private:
   // Populate a simple version of an IdentityToken as long as the handle is known
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
-    OpenDDS::Security::TokenWriter identity_wrapper(identity_token, Auth_Plugin_Name, 4, 0);
+    OpenDDS::Security::TokenWriter identity_wrapper(identity_token, Identity_Token_Class_Id, 4, 0);
     identity_wrapper.set_property(0, "dds.cert.sn", "MySubjectName", true);
     identity_wrapper.set_property(1, "dds.cert.algo", "RSA-2048", true);
     identity_wrapper.set_property(2, "dds.ca.sn", "MyCASubjectName", true);
@@ -217,7 +218,7 @@ private:
   // Populate a simple version of an IdentityStatusToken as long as the handle is known
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
-    OpenDDS::Security::TokenWriter identity_stat_wrapper(identity_status_token, Auth_Plugin_Name, 1, 0);
+    OpenDDS::Security::TokenWriter identity_stat_wrapper(identity_status_token, Identity_Status_Token_Class_Id, 1, 0);
     identity_stat_wrapper.set_property(0, "dds.ocps_status", "TBD", true);
 
     status = true;

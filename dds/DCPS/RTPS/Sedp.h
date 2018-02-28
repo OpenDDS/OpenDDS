@@ -87,8 +87,7 @@ public:
   bool disassociate(const SPDPdiscoveredParticipantData& pdata);
 
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
-                                            const DCPS::RepoId& reader,
-                                            DCPS::SequenceNumber& sequence);
+                                            const DCPS::RepoId& reader);
 
   // Topic
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,

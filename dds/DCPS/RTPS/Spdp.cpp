@@ -234,20 +234,6 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     return;
   }
 
-  bool has_security_data = false;
-  DDS::Security::IdentityStatusToken id_status_token;
-  DDS::Security::IdentityToken id_token;
-  DDS::Security::PermissionsToken perm_token;
-  DDS::Security::ParticipantSecurityInfo security_info;
-  if (security_config_) {
-    if (ParameterListConverter::from_param_list(plist, id_status_token, id_token, perm_token, security_info) < 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
-      ACE_TEXT("failed to parse security data from convert from ParameterList\n")));
-    } else {
-      has_security_data = true;
-    }
-  }
-
   DCPS::RepoId guid;
   std::memcpy(guid.guidPrefix, pdata.participantProxy.guidPrefix,
               sizeof(guid.guidPrefix));
@@ -277,24 +263,50 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         pdata.leaseDuration.seconds));
     }
 
+    // add a new participant
+    participants_[guid] = DiscoveredParticipant(pdata, time);
+    DiscoveredParticipant& dp = participants_[guid];
+
+    // Since we've just seen a new participant, let's send out our
+    // own announcement, so they don't have to wait.
+    this->tport_->write_i();
+
     if (security_config_) {
+      bool has_security_data = false;
+      if (ParameterListConverter::from_param_list(plist, dp.id_status_token_, dp.id_token_, dp.perm_token_, dp.security_info_) < 0) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
+          ACE_TEXT("failed to parse security data from convert from ParameterList\n")));
+      } else {
+        has_security_data = true;
+      }
+
       if (has_security_data == false) {
         if (participant_sec_attr_.allow_unauthenticated_participants == false) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
             ACE_TEXT("Incompatible security attributes in discovered participant\n")));
+            participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
-          match_unauthenticated(guid, pdata, time);
+          match_unauthenticated(guid, pdata);
         }
       } else { // has_security_data == true
-        if (attempt_handshake(guid, id_token) == false && participant_sec_attr_.allow_unauthenticated_participants == false) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
-            ACE_TEXT("Incompatible security attributes in discovered participant\n")));
-        } else {
-          match_unauthenticated(guid, pdata, time);
+        attempt_authentication(guid, dp);
+        if (dp.auth_state_ == AS_UNAUTHENTICATED) {
+          if (participant_sec_attr_.allow_unauthenticated_participants == false) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
+              ACE_TEXT("Incompatible security attributes in discovered participant\n")));
+            participants_.erase(guid);
+          } else { // allow_unauthenticated_participants == true
+            match_unauthenticated(guid, pdata);
+          }
+        } else if (dp.auth_state_ == AS_AUTHENTICATED) {
+          if (match_authenticated(guid, pdata, dp) == false) {
+            participants_.erase(guid);
+          }
         }
+        // otherwise just return, since we're waiting for input to finish authentication
       }
     } else {
-      match_unauthenticated(guid, pdata, time);
+      match_unauthenticated(guid, pdata);
     }
   } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
     remove_discovered_participant(iter);
@@ -333,13 +345,11 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 }
 
 void
-Spdp::match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata, const ACE_Time_Value& time)
+Spdp::match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata)
 {
   // Must unlock when calling into part_bit() as it may call back into us
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
-  // add a new participant
-  participants_[guid] = DiscoveredParticipant(pdata, time);
   DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
@@ -356,10 +366,6 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredPartic
   // This is what the participant must be added before this call to associate.
   sedp_.associate(pdata);
 
-  // Since we've just seen a new participant, let's send out our
-  // own announcement, so they don't have to wait.
-  this->tport_->write_i();
-
   // Iterator is no longer valid
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter != participants_.end()) {
@@ -368,92 +374,166 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredPartic
 }
 
 bool
-Spdp::attempt_handshake(const DCPS::RepoId& guid, const DDS::Security::IdentityToken& id_token)
+Spdp::match_authenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata, DiscoveredParticipant& dp)
+{
+  DDS::Security::SecurityException se;
+
+  // TODO - get remote permissions handle (8.8.6)
+  //Security::AccessControl_var access = security_config_->get_access_control();
+
+
+  Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+
+  dp.crypto_handle_ = crypto->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
+  if (dp.crypto_handle_ == DDS::HANDLE_NIL) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::match_authenticated() - ")
+      ACE_TEXT("unable to get identity token. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    return false;
+  }
+
+  // Must unlock when calling into part_bit() as it may call back into us
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+
+  DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+  if (bit) {
+    ACE_GUARD_REACTION(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock, return false);
+    bit_instance_handle =
+      bit->store_synthetic_data(pdata.ddsParticipantData,
+                                DDS::NEW_VIEW_STATE);
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
+
+  // notify Sedp of association
+  // Sedp may call has_discovered_participant.
+  // This is what the participant must be added before this call to associate.
+  sedp_.associate(pdata);
+  sedp_.associate_secure_writers_to_readers(pdata);
+  sedp_.associate_secure_readers_to_writers(pdata);
+
+  // Iterator is no longer valid
+  DiscoveredParticipantIter iter = participants_.find(guid);
+  if (iter != participants_.end()) {
+    iter->second.bit_ih_ = bit_instance_handle;
+  }
+  return true;
+}
+
+void
+Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
-
-  DDS::Security::IdentityHandle remote_identity_handle;
-  DDS::Security::AuthRequestMessageToken local_auth_request_token;
-  DDS::Security::AuthRequestMessageToken remote_auth_request_token = DDS::Security::TokenNIL;
-
   DDS::Security::SecurityException se;
-  if (auth->validate_remote_identity(remote_identity_handle, local_auth_request_token, remote_auth_request_token, identity_handle_, id_token, guid, se) != DDS::Security::VALIDATION_OK) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_handshake() - ")
-      ACE_TEXT("Unable to validate remote participant identity. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
+
+  switch (dp.auth_state_) {
+    case AS_UNKNOWN: {
+      dp.auth_state_ = AS_VALIDATING_REMOTE;
+    }
+    case AS_VALIDATING_REMOTE: {
+      DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.id_token_, guid, se);
+      switch (vr) {
+        case DDS::Security::VALIDATION_OK: {
+          dp.auth_state_ = AS_AUTHENTICATED;
+          return;
+        }
+        case DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE: {
+          dp.auth_state_ = AS_HANDSHAKE_REPLY;
+          return; // We'll need to wait for an inbound handshake request from the remote participant
+        }
+        case DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST: {
+          dp.auth_state_ = AS_HANDSHAKE_REQUEST;
+          break; // We've got more to do, move on to handshake request
+        }
+        case DDS::Security::VALIDATION_FAILED: {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
+            ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
+              se.code, se.minor_code, se.message.in()));
+          dp.auth_state_ = AS_UNAUTHENTICATED;
+          return;
+        }
+        default: {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
+            ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
+              se.code, se.minor_code, se.message.in()));
+          dp.auth_state_ = AS_UNAUTHENTICATED;
+          return;
+        }
+      }
+    }
+    case AS_HANDSHAKE_REQUEST: {
+      DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
+        { // DDS::Security::ParticipantBuiltinTopicData
+          { // ParticipantBuiltinTopicData
+            DDS::BuiltinTopicKey_t() /*ignored*/,
+            qos_.user_data
+          },
+          identity_token_,
+          permissions_token_,
+          qos_.property,
+          DDS::Security::ParticipantSecurityInfo()
+        },
+        identity_status_token_
+      };
+
+      pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+      pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+      if (participant_sec_attr_.is_rtps_protected) {
+        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+      }
+      if (participant_sec_attr_.is_discovery_protected) {
+        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+      }
+      if (participant_sec_attr_.is_liveliness_protected) {
+        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+      }
+
+      ParameterList plist;
+      if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+          ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
+        return;
+      }
+
+      ACE_Message_Block temp_buff(64 * 1024);
+      DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
+      if (!(ser << plist)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+          ACE_TEXT("Failed to serialize parameter list.\n")));
+        return;
+      }
+
+      DDS::Security::HandshakeHandle hs_handle;
+      DDS::Security::HandshakeMessageToken hs_mt;
+
+      if (auth->begin_handshake_request(hs_handle, hs_mt, identity_handle_, dp.identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se) != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+          ACE_TEXT("Failed to begin handshake_request. Security Exception[%d.%d]: %C\n"),
+            se.code, se.minor_code, se.message.in()));
+        return;
+      }
+
+      DDS::Security::ParticipantStatelessMessage msg;
+      msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
+      msg.destination_participant_guid = guid;
+      msg.destination_endpoint_guid = GUID_UNKNOWN;
+      msg.source_endpoint_guid = GUID_UNKNOWN;
+      msg.message_data.length(1);
+      msg.message_data[0] = hs_mt;
+
+      if (sedp_.write_stateless_message(msg, guid) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+          ACE_TEXT("Unable to write stateless message.\n")));
+        return;
+      }
+    }
+    default: {
+      return;
+    }
   }
-
-  DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-    { // DDS::Security::ParticipantBuiltinTopicData
-      { // ParticipantBuiltinTopicData
-        DDS::BuiltinTopicKey_t() /*ignored*/,
-        qos_.user_data
-      },
-      identity_token_,
-      permissions_token_,
-      qos_.property,
-      DDS::Security::ParticipantSecurityInfo()
-    },
-    identity_status_token_
-  };
-
-  pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-  pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
-  if (participant_sec_attr_.is_rtps_protected) {
-    pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
-  }
-  if (participant_sec_attr_.is_discovery_protected) {
-    pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-  }
-  if (participant_sec_attr_.is_liveliness_protected) {
-    pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
-  }
-
-  ParameterList plist;
-  if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_handshake() - ")
-      ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
-    return false;
-  }
-
-  ACE_Message_Block buff;
-  DCPS::Serializer ser(&buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
-  if (!(ser << plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_handshake() - ")
-      ACE_TEXT("Failed to serialize parameter list.\n")));
-    return false;
-  }
-
-  DDS::Security::HandshakeHandle hs_handle;
-  DDS::Security::HandshakeMessageToken hs_mt;
-
-  if (auth->begin_handshake_request(hs_handle, hs_mt, identity_handle_, remote_identity_handle, DDS::OctetSeq(buff.length(), &buff), se) != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_handshake() - ")
-      ACE_TEXT("Failed to begin handshake_request. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    return false;
-  }
-
-  static DCPS::SequenceNumber sn = 0;
-
-  DDS::Security::ParticipantStatelessMessage msg;
-  msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-  msg.destination_participant_guid = guid;
-  msg.destination_endpoint_guid = GUID_UNKNOWN;
-  msg.source_endpoint_guid = GUID_UNKNOWN;
-  msg.message_data.length(1);
-  msg.message_data[1] = hs_mt;
-
-  if (sedp_.write_stateless_message(msg, guid, ++sn) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_handshake() - ")
-      ACE_TEXT("Unable to write stateless message.\n")));
-    return false;
-  }
-
-  // Handshake Initiated - Can't match yet, so flag & return.
-  // TODO flag handshake
-  return true;
+  return;
 }
 
 void
