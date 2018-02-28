@@ -106,7 +106,7 @@ public:
     ::DDS::Security::HandshakeHandle handshake_handle,
     ::DDS::Security::SecurityException & ex);
 
-  virtual ::DDS::Security::SharedSecretHandle get_shared_secret(
+  virtual ::DDS::Security::SharedSecretHandle* get_shared_secret(
     ::DDS::Security::HandshakeHandle handshake_handle,
     ::DDS::Security::SecurityException & ex);
 
@@ -140,7 +140,7 @@ public:
     ::DDS::Security::SecurityException & ex);
 
   virtual ::CORBA::Boolean return_sharedsecret_handle(
-    ::DDS::Security::SharedSecretHandle sharedsecret_handle,
+    ::DDS::Security::SharedSecretHandle* sharedsecret_handle,
     ::DDS::Security::SecurityException & ex);
 
 private:
@@ -172,7 +172,7 @@ private:
   {
     DDS::Security::IdentityHandle local_identity_handle;
     DDS::Security::IdentityHandle remote_identity_handle;
-    DDS::Security::SharedSecretHandle secret_handle;
+    DDS::Security::SharedSecretHandle_var secret_handle;
     DDS::Security::HandshakeMessageToken req_msg;
     DDS::Security::HandshakeMessageToken reply_msg;
     DDS::Security::ValidationResult_t validation_state;
@@ -181,7 +181,7 @@ private:
   typedef HandshakeData* HandshakeData_Ptr;
   typedef 	std::map<DDS::Security::HandshakeHandle, HandshakeData_Ptr> Handshake_Handle_Data;
   Handshake_Handle_Data handshake_data_;
-  
+
 
   DDS::Security::ValidationResult_t process_handshake_reply(
     DDS::Security::HandshakeMessageToken & handshake_message_out,

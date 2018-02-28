@@ -1206,7 +1206,7 @@ namespace OpenDDS {
         DDS::Security::IdentityHandle identity_handle_;
         DDS::Security::AuthRequestMessageToken local_auth_request_token_;
         DDS::Security::AuthRequestMessageToken remote_auth_request_token_;
-        DDS::Security::SharedSecretHandle shared_secret_handle_;
+        DDS::Security::SharedSecretHandle_var shared_secret_handle_;
         DDS::Security::PermissionsHandle permissions_handle_;
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
       };

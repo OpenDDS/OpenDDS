@@ -100,7 +100,7 @@ class MockDataReader : public DDS::DataReader {
       ::DDS::ReturnCode_t(::DDS::InstanceHandleSeq & publication_handles));
   MOCK_METHOD2(get_matched_publication_data,
       ::DDS::ReturnCode_t(::DDS::PublicationBuiltinTopicData & publication_data, ::DDS::InstanceHandle_t publication_handle));
-  
+
   MOCK_METHOD0(enable,
       ::DDS::ReturnCode_t(void));
   MOCK_METHOD0(get_statuscondition,
@@ -132,7 +132,7 @@ class MockAuthentication : public DDS::Security::Authentication {
   MOCK_METHOD4(process_handshake,
       ::DDS::Security::ValidationResult_t(::DDS::Security::HandshakeMessageToken & handshake_message_out, const ::DDS::Security::HandshakeMessageToken & handshake_message_in, ::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(get_shared_secret,
-      ::DDS::Security::SharedSecretHandle(::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
+      ::DDS::Security::SharedSecretHandle*(::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD3(get_authenticated_peer_credential_token,
       ::CORBA::Boolean(::DDS::Security::AuthenticatedPeerCredentialToken & peer_credential_token, ::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(set_listener,
@@ -148,7 +148,7 @@ class MockAuthentication : public DDS::Security::Authentication {
   MOCK_METHOD2(return_identity_handle,
       ::CORBA::Boolean(::DDS::Security::IdentityHandle identity_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(return_sharedsecret_handle,
-      ::CORBA::Boolean(::DDS::Security::SharedSecretHandle sharedsecret_handle, ::DDS::Security::SecurityException & ex));
+      ::CORBA::Boolean(::DDS::Security::SharedSecretHandle* sharedsecret_handle, ::DDS::Security::SecurityException & ex));
 };
 
 class MockAccessControlListener : public DDS::Security::AccessControlListener
@@ -187,7 +187,7 @@ public:
   }
 
 private:
-  
+
   AccessControlBuiltInImpl test_class_;
 };
 
@@ -195,11 +195,11 @@ TEST_F(AccessControlTest, validate_local_permissions_InvalidInput)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
-  EXPECT_EQ(DDS::HANDLE_NIL, 
+  EXPECT_EQ(DDS::HANDLE_NIL,
     get_inst().validate_local_permissions(0, 1, 1, qos, ex));
 
   MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
-  EXPECT_EQ(DDS::HANDLE_NIL, 
+  EXPECT_EQ(DDS::HANDLE_NIL,
     get_inst().validate_local_permissions(auth_plugin.get(), DDS::HANDLE_NIL, 1, qos, ex));
 }
 
@@ -209,7 +209,7 @@ TEST_F(AccessControlTest, validate_local_permissions_Success)
   ::DDS::Security::SecurityException ex;
   MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
-  ::DDS::Security::PermissionsHandle out_handle =  
+  ::DDS::Security::PermissionsHandle out_handle =
     get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, qos, ex);
   EXPECT_FALSE(DDS::HANDLE_NIL == out_handle);
 }
@@ -219,7 +219,7 @@ TEST_F(AccessControlTest, validate_remote_permissions_InvalidInput)
   ::DDS::Security::PermissionsToken remote_perm;
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_cred;
   ::DDS::Security::SecurityException ex;
- 
+
   // Null authentication
   EXPECT_EQ(DDS::HANDLE_NIL, get_inst().validate_remote_permissions(
     0, 1, 2, remote_perm, remote_cred, ex));
@@ -249,7 +249,7 @@ TEST_F(AccessControlTest, check_create_participant_InvalidInput)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
-  
+
   EXPECT_EQ(DDS::HANDLE_NIL, get_inst().check_create_participant(
     DDS::HANDLE_NIL, 1, qos, ex));
 }
@@ -621,7 +621,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_register_instance_InvalidInput
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
     perm_handle, 0, pub_handle, key.get(), in_handle, ex));
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, 0, in_handle, ex));   
+    perm_handle, reader.get(), pub_handle, 0, in_handle, ex));
 }
 
 TEST_F(AccessControlTest, check_remote_datawriter_register_instance_Success)
@@ -634,7 +634,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_register_instance_Success)
   ::DDS::Security::SecurityException ex;
 
   EXPECT_TRUE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, key.get(), in_handle, ex));   
+    perm_handle, reader.get(), pub_handle, key.get(), in_handle, ex));
 }
 
 TEST_F(AccessControlTest, check_remote_datawriter_dispose_instance_InvalidInput)
@@ -655,7 +655,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_dispose_instance_InvalidInput)
   EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
     perm_handle, 0, pub_handle, key.get(), ex));
   EXPECT_FALSE(get_inst().check_remote_datawriter_dispose_instance(
-    perm_handle, reader.get(), pub_handle, 0, ex));   
+    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(AccessControlTest, get_permissions_token_InvalidInput)
@@ -763,7 +763,7 @@ TEST_F(AccessControlTest, get_topic_sec_attributes_InvalidInput)
 }
 
 TEST_F(AccessControlTest, get_topic_sec_attributes_Success)
-{     
+{
   ::DDS::Security::TopicSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().get_topic_sec_attributes(1, "TopicName", attributes, ex));

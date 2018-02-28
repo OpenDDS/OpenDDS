@@ -10,6 +10,7 @@
 #include "dds/DCPS/security/TokenReader.h"
 #include "dds/DCPS/security/TokenWriter.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/LocalObject.h"
 #include "ace/config-macros.h"
 #include "ace/Guard_T.h"
 #include <sstream>
@@ -42,6 +43,23 @@ static const DDS::OctetSeq Empty_Seq;
 static const std::string AlgoName("RSASSA-PSS-SHA256");
 static const std::string AgreementAlgo("DH+MODP-2048-256");
 
+
+struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
+
+  SharedSecret(DDS::OctetSeq challenge1,
+               DDS::OctetSeq challenge2,
+               DDS::OctetSeq sharedSecret)
+    : challenge1_(challenge1)
+    , challenge2_(challenge2)
+    , shared_secret_(sharedSecret)
+  {}
+
+  DDS::OctetSeq* challenge1() { return new DDS::OctetSeq(challenge1_); }
+  DDS::OctetSeq* challenge2() { return new DDS::OctetSeq(challenge1_); }
+  DDS::OctetSeq* sharedSecret() { return new DDS::OctetSeq(shared_secret_); }
+
+  DDS::OctetSeq challenge1_, challenge2_, shared_secret_;
+};
 
 AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 : listener_ptr_()
@@ -189,9 +207,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
   OpenDDS::Security::TokenReader remote_request(remote_auth_request_token);
   if (remote_request.is_nil()) {
-    OpenDDS::Security::TokenWriter auth_req_wrapper(local_auth_request_token, 
-                                        build_class_id(Auth_Request_Class_Ext), 
-                                        1, 
+    OpenDDS::Security::TokenWriter auth_req_wrapper(local_auth_request_token,
+                                        build_class_id(Auth_Request_Class_Ext),
+                                        1,
                                         0);
     auth_req_wrapper.set_property(0, "future_challenge", "TODO", true);
   } else {
@@ -378,21 +396,19 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   return result;
 }
 
-::DDS::Security::SharedSecretHandle AuthenticationBuiltInImpl::get_shared_secret(
+::DDS::Security::SharedSecretHandle* AuthenticationBuiltInImpl::get_shared_secret(
   ::DDS::Security::HandshakeHandle handshake_handle,
   ::DDS::Security::SecurityException & ex)
 {
-  DDS::Security::SharedSecretHandle secret_handle = 0; // Nil for invalid handle
-
   // Return a non-zero value if the handshake handle is valid
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
-    secret_handle = handshakeData->secret_handle;
+    DDS::Security::SharedSecretHandle_var handle = handshakeData->secret_handle;
+    return handle._retn();
   } else {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
+    return 0;
   }
-
-  return secret_handle;
 }
 
 ::CORBA::Boolean AuthenticationBuiltInImpl::get_authenticated_peer_credential_token(
@@ -505,7 +521,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 }
 
 ::CORBA::Boolean AuthenticationBuiltInImpl::return_sharedsecret_handle(
-  ::DDS::Security::SharedSecretHandle sharedsecret_handle,
+  ::DDS::Security::SharedSecretHandle* sharedsecret_handle,
   ::DDS::Security::SecurityException & ex)
 {
   // Nothing to do here in the stub version
@@ -557,7 +573,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   // The handshake is now complete, assign a shared secret handle in the stub
   handshakePtr->validation_state = DDS::Security::VALIDATION_OK_FINAL_MESSAGE;
-  handshakePtr->secret_handle = get_next_handle();
+  handshakePtr->secret_handle = new SharedSecret(Empty_Seq, Empty_Seq, Empty_Seq);
 
   return DDS::Security::VALIDATION_OK_FINAL_MESSAGE;
 }
@@ -591,7 +607,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   // This function is only ever called for a handshake final message, so handshaking is complete
   // Just create a shared secret handle in the stub
   handshakePtr->validation_state = DDS::Security::VALIDATION_OK;
-  handshakePtr->secret_handle = get_next_handle();
+  handshakePtr->secret_handle = new SharedSecret(Empty_Seq, Empty_Seq, Empty_Seq);
 
   return DDS::Security::VALIDATION_OK;
 }

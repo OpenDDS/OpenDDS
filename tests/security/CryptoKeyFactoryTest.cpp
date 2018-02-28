@@ -1,11 +1,22 @@
 
 #include "dds/DCPS/security/CryptoBuiltInImpl.h"
+
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+
+#include "dds/DCPS/LocalObject.h"
+
 #include "gtest/gtest.h"
 
-
 using namespace OpenDDS::Security;
+
+struct FakeSharedSecret
+  : OpenDDS::DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
+
+  DDS::OctetSeq* challenge1() { return new DDS::OctetSeq; }
+  DDS::OctetSeq* challenge2() { return new DDS::OctetSeq; }
+  DDS::OctetSeq* sharedSecret() { return new DDS::OctetSeq; }
+};
 
 // Test fixture to allow a repeatable scenario where multiple participants are
 // registered for each test case without having to repeat the code
@@ -20,12 +31,12 @@ public:
   static const DDS::Security::PermissionsHandle Encrypt_Perm_Handle   = 4;
   static const DDS::Security::IdentityHandle Remote_Id_Handle         = 5;
   static const DDS::Security::PermissionsHandle Remote_Perm_Handle    = 6;
-  static const DDS::Security::SharedSecretHandle Secret_Handle        = 7;
 
   CryptoKeyFactoryFixture()
     : auth_only_handle_(DDS::HANDLE_NIL)
     , encryption_handle_(DDS::HANDLE_NIL)
     , remote_handle_(DDS::HANDLE_NIL)
+    , secret_handle_(new FakeSharedSecret)
   {
   }
 
@@ -63,7 +74,7 @@ public:
       encryption_handle_,
       Remote_Id_Handle,
       Remote_Perm_Handle,
-      Secret_Handle,
+      secret_handle_,
       ex);
 
     ASSERT_FALSE(remote_handle_ == DDS::HANDLE_NIL) << "Remote handle was Null";
@@ -93,13 +104,16 @@ public:
   {
     return remote_handle_;
   }
-private:
 
+private:
   CryptoBuiltInImpl factory_;
 
   DDS::Security::ParticipantCryptoHandle auth_only_handle_;
   DDS::Security::ParticipantCryptoHandle encryption_handle_;
   DDS::Security::ParticipantCryptoHandle remote_handle_;
+
+protected:
+  DDS::Security::SharedSecretHandle_var secret_handle_;
 };
 
 TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
@@ -129,7 +143,7 @@ TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
     ex));
 }
 
-TEST(CryptoKeyFactoryBuiltInImplTest, TestRegisterLocal)
+TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
 {
   // Provide a local identity and some permissions
   DDS::Security::IdentityHandle part_id_handle = 1;
@@ -171,7 +185,7 @@ TEST(CryptoKeyFactoryBuiltInImplTest, TestRegisterLocal)
     ex));
 }
 
-TEST(CryptoKeyFactoryBuiltInImplTest, RegisterRemoteParticipant)
+TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
 {
   DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
 
@@ -191,28 +205,27 @@ TEST(CryptoKeyFactoryBuiltInImplTest, RegisterRemoteParticipant)
 
   ::DDS::Security::IdentityHandle remote_id_handle = 4;
   ::DDS::Security::PermissionsHandle remote_perm_handle = 5;
-  ::DDS::Security::SharedSecretHandle secret_handle = 6;
 
   // Register with combinations of Null handles
   EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     DDS::HANDLE_NIL,
     remote_id_handle,
     remote_perm_handle,
-    secret_handle,
+    secret_handle_,
     ex));
 
   EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     local_handle,
     DDS::HANDLE_NIL,
     remote_perm_handle,
-    secret_handle,
+    secret_handle_,
     ex));
 
   EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     local_handle,
     remote_id_handle,
     DDS::HANDLE_NIL,
-    secret_handle,
+    secret_handle_,
     ex));
 
   EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
@@ -227,7 +240,7 @@ TEST(CryptoKeyFactoryBuiltInImplTest, RegisterRemoteParticipant)
     local_handle,
     remote_id_handle,
     remote_perm_handle,
-    secret_handle,
+    secret_handle_,
     ex));
 
   // Disabled because the stub does not track what is registered
@@ -273,28 +286,28 @@ TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
   EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datareader(
     DDS::HANDLE_NIL,
     GetRemoteParticipant(),
-    Secret_Handle,
+    secret_handle_,
     false,
     ex));
 
  EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datareader(
     local_handle,
     DDS::HANDLE_NIL,
-    Secret_Handle,
+    secret_handle_,
     false,
     ex));
 
  EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datareader(
     local_handle,
     GetRemoteParticipant(),
-    DDS::HANDLE_NIL,
+    0,
     false,
     ex));
 
  EXPECT_FALSE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datareader(
     local_handle,
     GetRemoteParticipant(),
-    Secret_Handle,
+    secret_handle_,
     false,
     ex));
 }
@@ -325,26 +338,26 @@ TEST_F(CryptoKeyFactoryFixture, RegisterDataReaderAndRemoteWriter)
   EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datawriter(
     DDS::HANDLE_NIL,
     GetRemoteParticipant(),
-    Secret_Handle,
+    secret_handle_,
     ex));
 
   EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datawriter(
     local_handle,
     DDS::HANDLE_NIL,
-    Secret_Handle,
+    secret_handle_,
     ex));
 
   EXPECT_TRUE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datawriter(
     local_handle,
     GetRemoteParticipant(),
-    DDS::HANDLE_NIL,
+    0,
     ex));
 
   // Register using valid handles, this will return a valid output handle
   EXPECT_FALSE(DDS::HANDLE_NIL == GetFactory().register_matched_remote_datawriter(
     local_handle,
     GetRemoteParticipant(),
-    Secret_Handle,
+    secret_handle_,
     ex));
 }
 

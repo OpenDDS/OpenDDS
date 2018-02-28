@@ -215,8 +215,12 @@ module DDS {
     //native PermissionsHandle;
     typedef long IdentityHandle;
     typedef long HandshakeHandle;
-    typedef long SharedSecretHandle;
     typedef long PermissionsHandle;
+
+    // https://issues.omg.org/issues/DDSSEC12-2
+    local interface SharedSecretHandle {
+      readonly attribute OctetSeq challenge1, challenge2, sharedSecret;
+    };
 
     //native ParticipantCryptoHandle;
     //native ParticipantCryptoHandleSeq;

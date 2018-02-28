@@ -54,7 +54,7 @@ private:
     DDS::Security::ParticipantCryptoHandle local_participant_crypto_handle,
     DDS::Security::IdentityHandle remote_participant_identity,
     DDS::Security::PermissionsHandle remote_participant_permissions,
-    DDS::Security::SharedSecretHandle shared_secret,
+    DDS::Security::SharedSecretHandle* shared_secret,
     DDS::Security::SecurityException& ex);
 
   virtual DDS::Security::DatawriterCryptoHandle register_local_datawriter(
@@ -66,7 +66,7 @@ private:
   virtual DDS::Security::DatareaderCryptoHandle register_matched_remote_datareader(
     DDS::Security::DatawriterCryptoHandle local_datawriter_crypto_handle,
     DDS::Security::ParticipantCryptoHandle remote_participant_crypto,
-    DDS::Security::SharedSecretHandle shared_secret,
+    DDS::Security::SharedSecretHandle* shared_secret,
     bool relay_only,
     DDS::Security::SecurityException& ex);
 
@@ -79,7 +79,7 @@ private:
   virtual DDS::Security::DatawriterCryptoHandle register_matched_remote_datawriter(
     DDS::Security::DatareaderCryptoHandle local_datareader_crypto_handle,
     DDS::Security::ParticipantCryptoHandle remote_participant_crypt,
-    DDS::Security::SharedSecretHandle shared_secret,
+    DDS::Security::SharedSecretHandle* shared_secret,
     DDS::Security::SecurityException& ex);
 
   virtual bool unregister_participant(
