@@ -14,7 +14,7 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/RcObject_T.h"
 #include "ace/Thread_Mutex.h"
 #include <map>
 #include <string>
@@ -145,7 +145,7 @@ public:
 
 private:
 
-  struct IdentityData
+  struct IdentityData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
     OpenDDS::DCPS::GUID_t participant_guid;
     DDS::Security::PermissionsCredentialToken permissions_cred_token;
@@ -159,7 +159,7 @@ private:
   typedef std::map<DDS::Security::IdentityHandle, IdentityData_Ptr> Identity_Handle_Data;
   Identity_Handle_Data identity_data_;
 
-  struct HandshakeData
+  struct HandshakeData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
     DDS::Security::IdentityHandle local_identity_handle;
     DDS::Security::IdentityHandle remote_identity_handle;

@@ -8,6 +8,7 @@
 
 #include "Certificate.h"
 #include "dds/DdsDcpsGuidC.h"
+#include "dds/DdsDcpsCoreC.h"
 #include <string>
 
 namespace OpenDDS {
@@ -29,6 +30,9 @@ namespace OpenDDS {
 
       DdsSecurity_Export
       int make_nonce_256(std::vector<unsigned char>& nonce);
+
+      DdsSecurity_Export
+      int make_nonce_256(DDS::OctetSeq& nonce);
 
     }
   }

@@ -103,7 +103,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     if (! err) {
       local_identity_handle = get_next_handle();
 
-      IdentityData_Ptr local_identity(new IdentityData());
+      IdentityData_Ptr local_identity = DCPS::make_rch<IdentityData>();
       local_identity->participant_guid = adjusted_participant_guid;
 
       {
@@ -225,19 +225,33 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   // needs to be populated and have a future_challenge property supplied.  Otherwise
   // make sure it is set to TokenNIL
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
-  OpenDDS::Security::TokenReader remote_request(remote_auth_request_token);
+
+  TokenReader remote_request(remote_auth_request_token);
   if (remote_request.is_nil()) {
-    OpenDDS::Security::TokenWriter auth_req_wrapper(local_auth_request_token,
-                                        build_class_id(Auth_Request_Class_Ext),
-                                        1,
-                                        0);
-    auth_req_wrapper.set_property(0, "future_challenge", "TODO", true);
+
+    DDS::OctetSeq nonce;
+    int err = SSL::make_nonce_256(nonce);
+    if (! err) {
+      TokenWriter auth_req_wrapper(local_auth_request_token,
+                                   build_class_id(Auth_Request_Class_Ext),
+                                   0,
+                                   1);
+
+      auth_req_wrapper.set_bin_property(0, "future_challenge", nonce, true);
+
+      result = DDS::Security::VALIDATION_OK;
+
+    } else {
+
+        return DDS::Security::VALIDATION_FAILED;
+    }
+
   } else {
     local_auth_request_token = DDS::Security::TokenNIL;
   }
 
   // Retain all of the data needed for a handshake with the remote participant
-  IdentityData_Ptr newIdentityData(new IdentityData());
+  IdentityData_Ptr newIdentityData = DCPS::make_rch<IdentityData>();
   newIdentityData->participant_guid = remote_participant_guid;
   newIdentityData->local_handle = local_identity_handle;
   newIdentityData->local_auth_request = local_auth_request_token;
@@ -308,7 +322,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   // The stub doesn't worry about any pre-existing handshakes between these two participants
   // and will always just create a new handshake session
-  HandshakeData_Ptr newHandshakeData(new HandshakeData());
+  HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
   newHandshakeData->local_identity_handle = initiator_identity_handle;
   newHandshakeData->remote_identity_handle = replier_identity_handle;
   newHandshakeData->local_initiator = true;
@@ -379,7 +393,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   // The stub doesn't worry about any pre-existing handshakes between these two participants
   // and will always just create a new handshake session
-  HandshakeData_Ptr newHandshakeData(new HandshakeData());
+  HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
   newHandshakeData->local_identity_handle = replier_identity_handle;
   newHandshakeData->remote_identity_handle = initiator_identity_handle;
   newHandshakeData->local_initiator = false;
@@ -509,10 +523,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   Handshake_Handle_Data::iterator iHandshake = handshake_data_.find(handshake_handle);
   if (iHandshake != handshake_data_.end()) {
-    delete iHandshake->second;
-    iHandshake->second = 0;
     handshake_data_.erase(iHandshake);
     results = true;
+
   } else {
     set_security_error(ex, -1, 0, "Handshake handle not recognized");
   }
@@ -530,10 +543,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   Identity_Handle_Data::iterator iData = identity_data_.find(identity_handle);
   if (iData != identity_data_.end()) {
-    delete iData->second;
-    iData->second = 0;
     identity_data_.erase(iData);
     results = true;
+
   } else {
     set_security_error(ex, -1, 0, "Handshake handle not recognized");
   }
@@ -637,7 +649,7 @@ AuthenticationBuiltInImpl::HandshakeData_Ptr AuthenticationBuiltInImpl::get_hand
   ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
 
   // Mutex controls adding/removing handshakes, but not the contents of the handshakes
-  HandshakeData_Ptr dataPtr(0);
+  HandshakeData_Ptr dataPtr;
   Handshake_Handle_Data::iterator iData = handshake_data_.find(handle);
   if (iData != handshake_data_.end()) {
     dataPtr = iData->second;
@@ -651,7 +663,7 @@ AuthenticationBuiltInImpl::IdentityData_Ptr AuthenticationBuiltInImpl::get_ident
   ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
 
   // Mutex controls adding/removing identitiy data, but not the contents of the data
-  IdentityData_Ptr dataPtr(0);
+  IdentityData_Ptr dataPtr;
   Identity_Handle_Data::iterator iData = identity_data_.find(handle);
   if (iData != identity_data_.end()) {
     dataPtr = iData->second;

@@ -96,6 +96,8 @@ namespace OpenDDS {
       template <size_t N = 256>
       int make_nonce(std::vector<unsigned char>& nonce)
       {
+        nonce.clear();
+
         unsigned char tmp[N/8] = {0};
 
         int result = RAND_bytes(tmp, sizeof(tmp));
@@ -122,6 +124,20 @@ namespace OpenDDS {
       int make_nonce_256(std::vector<unsigned char>& nonce)
       {
         return make_nonce<256>(nonce);
+      }
+
+      int make_nonce_256(DDS::OctetSeq& nonce)
+      {
+        /* A bit slower but the impl. for vectors is already complete */
+        std::vector<unsigned char> tmp;
+        int err = make_nonce<256>(tmp);
+        if (! err) {
+            nonce.length(tmp.size());
+            for (size_t i = 0; i < tmp.size(); ++i) {
+                nonce[i] = tmp[i];
+            }
+        }
+        return err;
       }
 
     }
