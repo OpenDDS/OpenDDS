@@ -7,8 +7,10 @@
 #include "dds/DCPS/GuidUtils.h"
 #include <vector>
 #include <utility>
-#include <bitset>
+#include <cstdio>
 #include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <openssl/err.h>
 
 namespace OpenDDS {
   namespace Security {
@@ -89,6 +91,37 @@ namespace OpenDDS {
         }
 
         return result;
+      }
+
+      template <size_t N = 256>
+      int make_nonce(std::vector<unsigned char>& nonce)
+      {
+        unsigned char tmp[N/8] = {0};
+
+        int result = RAND_bytes(tmp, sizeof(tmp));
+        if (1 == result) {
+
+          /* Copy data to nonce */
+          nonce.insert(nonce.begin(), tmp, tmp + sizeof(tmp));
+
+          return 0;
+
+        } else {
+
+          unsigned long err = ERR_get_error();
+          char msg[256] = {0};
+          ERR_error_string_n(err, msg, sizeof(msg));
+
+          fprintf(stderr, "SSL::make_nonce: Error '%s' returned by RAND_bytes(...)\n", msg);
+
+        }
+
+        return 1;
+      }
+
+      int make_nonce_256(std::vector<unsigned char>& nonce)
+      {
+        return make_nonce<256>(nonce);
       }
 
     }
