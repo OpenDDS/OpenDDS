@@ -127,7 +127,7 @@ namespace OpenDDS {
 
         if (x_) {
 
-          /* Do not free name */
+          /* Do not free name! */
           X509_NAME* name = X509_get_subject_name(x_);
           if (name) {
             len = i2d_X509_NAME(name, &buffer);
@@ -146,7 +146,7 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::subject_name_to_str(std::string& dst) const
+      int Certificate::subject_name_to_str(std::string& dst, unsigned long flags) const
       {
         int result = 1, len = 0;
         char* tmp = NULL;
@@ -155,18 +155,18 @@ namespace OpenDDS {
 
         if (x_) {
 
-          /* Do not free name */
+          /* Do not free name! */
           X509_NAME* name = X509_get_subject_name(x_);
           if (name) {
 
             BIO* buffer = BIO_new(BIO_s_mem());
             if (buffer) {
 
-              len = X509_NAME_print_ex(buffer, name, 0, 0);
+              len = X509_NAME_print_ex(buffer, name, 0, flags);
               if (len > 0) {
 
                 tmp = new char[len];
-                len = BIO_gets(buffer, tmp, len);
+                len = BIO_gets(buffer, tmp, len + 1 /* BIO_gets reads up to len-1, so we add 1 */);
                 if (len > 0) {
                   dst = tmp;
                   result = 0;
@@ -199,7 +199,7 @@ namespace OpenDDS {
 
         if (x_) {
 
-          /* Do not free name */
+          /* Do not free name! */
           X509_NAME* name = X509_get_subject_name(x_);
           if (name) {
 
