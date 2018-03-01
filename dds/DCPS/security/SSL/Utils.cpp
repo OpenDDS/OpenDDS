@@ -93,7 +93,7 @@ namespace OpenDDS {
         return result;
       }
 
-      template <size_t N = 256>
+      template <size_t N>
       int make_nonce(std::vector<unsigned char>& nonce)
       {
         nonce.clear();
