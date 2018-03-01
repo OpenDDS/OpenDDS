@@ -1888,7 +1888,7 @@ Sedp::Task::svc_stateless_message(DCPS::MessageId id,
 }
 
 void
-Sedp::received_stateless_message(DCPS::MessageId /* message_id */,
+Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
                     const DDS::Security::ParticipantStatelessMessage& msg)
 {
   if (spdp_.shutting_down()) {
