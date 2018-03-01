@@ -5,9 +5,6 @@
 * See: http://www.opendds.org/license.html
 */
 
-#include <fstream>
-#include <iostream>
-#include <algorithm>
 #include "dds/DCPS/security/AccessControlBuiltInImpl.h"
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -26,7 +23,10 @@
 #include "AccessControlBuiltInImpl.h"
 #include <xercesc/util/PlatformUtils.hpp>
 
-
+#include <fstream>
+#include <iostream>
+#include <algorithm>
+#include <stdexcept>
 
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -333,7 +333,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Topic Key");
     return false;
   }
-  
+
   return true;
 }
 
@@ -606,7 +606,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
    attributes.is_discovery_protected = true;
    attributes.is_liveliness_protected = true;
    attributes.plugin_participant_attributes = 0xFFFFFFFF;
- 
+
   return true;
 }
 
@@ -644,7 +644,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
   ACE_UNUSED_ARG(partition);
   ACE_UNUSED_ARG(data_tag);
-  
+
   // The spec claims there is supposed to be a topic name parameter
   // to this function which is not in the IDL at this time
 
