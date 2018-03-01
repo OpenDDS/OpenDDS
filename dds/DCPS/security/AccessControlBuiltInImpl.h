@@ -16,6 +16,9 @@
 
 #include "ace/Thread_Mutex.h"
 #include <map>
+#include <set>
+#include <list>
+#include <vector>
 #include <string>
 #include <memory>
 
@@ -221,12 +224,48 @@ public:
     const ::DDS::Security::EndpointSecurityAttributes & attributes,
     ::DDS::Security::SecurityException & ex);
 
+
 private:
 
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl& right);
   AccessControlBuiltInImpl& operator-=(const AccessControlBuiltInImpl& right);
-  
+
+
+    typedef struct {
+        const char * topic_expression;
+        ::DDS::Security::TopicSecurityAttributes topic_attrs;
+    } TopicAccessRule;
+
+    typedef std::vector<TopicAccessRule> TopicAccessRules;
+
+    typedef struct {
+        std::set< ::DDS::Security::DomainId_t > domain_list;
+        ::DDS::Security::ParticipantSecurityAttributes domain_attrs;
+        TopicAccessRules topic_rules;
+    } domain_rule;
+
+
+    typedef std::list<domain_rule> domain_access_rules;
+
+
+    typedef struct {
+        ::CORBA::Long participant_id;
+        ::DDS::Security::PermissionsHandle permissions_handle;
+    } perm_rule;
+
+    // TODO: the ParticipantGovMapType needs to support multiple domain_rule(s). See domain_access_rules above
+    typedef std::map< ::DDS::Security::PermissionsHandle, domain_rule > ParticipantGovMapType;
+    typedef std::map< ::DDS::Security::PermissionsHandle, perm_rule > ParticipantPermMapType;
+
+    ParticipantGovMapType pgov_map;
+    ParticipantPermMapType pperm_map;
+
   ::CORBA::Long generate_handle();
+  ::CORBA::Long load_governance_file(std::string);
+  ::CORBA::Long load_permissions_file(std::string);
+
+
+
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;

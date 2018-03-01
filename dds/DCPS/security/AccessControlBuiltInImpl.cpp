@@ -5,15 +5,29 @@
 * See: http://www.opendds.org/license.html
 */
 
+#include <fstream>
+#include <iostream>
+#include <algorithm>
 #include "dds/DCPS/security/AccessControlBuiltInImpl.h"
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 //#include "dds/DCPS/security/TokenReader.h"
-#include "dds/DCPS/security/TokenWriter.h"
 #include "ace/config-macros.h"
+
+#include "dds/DCPS/security/TokenWriter.h"
+
 //#include "ace/Guard_T.h"
 //#include <sstream>
 //#include <vector>
+#include "xercesc/parsers/XercesDOMParser.hpp"
+#include "xercesc/dom/DOM.hpp"
+#include "xercesc/sax/HandlerBase.hpp"
+#include "xercesc/util/XMLString.hpp"
+#include "AccessControlBuiltInImpl.h"
+#include <xercesc/util/PlatformUtils.hpp>
+
+
+
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,6 +40,8 @@ static const std::string AccessControl_Major_Version("1");
 static const std::string AccessControl_Minor_Version("0");
 
 static const std::string PermissionsCredentialTokenClassId("DDS:Access:PermissionsCredential");
+
+
 
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   : handle_mutex_()
@@ -57,7 +73,47 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACE_UNUSED_ARG(domain_id);
   ACE_UNUSED_ARG(participant_qos);
 
-  return generate_handle();
+    // Pull file attribute info from qos
+    // Place holder for not having qos populated
+  std::string ac_files_path = "/home/neeleym/dev/ddsinterop/bg/Security_Demo_12_2017_Burlingame/configuration_files/";
+  std::string gov_file = ac_files_path.append("governance/Governance_SC0_SecurityDisabled.xml");
+  std::string perm_file = ac_files_path.append("permissions/Permissions_JoinDomain_OCI.xml");
+
+  ::DDS::Security::PermissionsHandle perm_handle = load_governance_file(gov_file);
+  if(-1 == perm_handle) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
+    return DDS::HANDLE_NIL;
+  };
+
+
+//Test get_participant_sec_attributes
+
+   ::DDS::Security::ParticipantSecurityAttributes attrs;
+   get_participant_sec_attributes(perm_handle,attrs,ex);
+
+
+  std::cout <<"created handle:"
+            << perm_handle
+            << std::endl
+            << " allow_unauthenticated_participants:" << attrs.allow_unauthenticated_participants
+            << std::endl
+            << " is_rtps_protected:" << attrs.is_rtps_protected
+            << std::endl;
+
+  // Test check_create_participant
+
+  ::DDS::Security::DomainId_t d_id;
+  ::CORBA::Boolean z = check_create_participant(perm_handle, 0,participant_qos,ex) ;
+  std::cout << "check_create_participant: "  << z << std::endl;
+  /*
+  if(0 != load_permissions_file(perm_file)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
+    return DDS::HANDLE_NIL;
+  };
+   */
+
+
+  return perm_handle ;
 }
 
 ::DDS::Security::PermissionsHandle AccessControlBuiltInImpl::validate_remote_permissions(
@@ -102,7 +158,62 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  return true;
+  // This is dummy data
+/*
+  ::DDS::Security::DomainId_t  dummy_domain = 0;
+  ::DDS::Security::ParticipantSecurityAttributes psa;
+  ::DDS::Security::SecurityException exc;
+*/
+
+/*
+ *  The rules of this method need to be evaluated in this order, however, we need to check
+ *  to make sure the permission handle exists in our store prior to assessing these rules
+*/
+  /* From Table 63 of the spec.
+     This operation shall use the permissions_handle to retrieve
+     the cached Permissions and Governance information.
+             If the Governance specifies any topics on the
+     DomainParticipant domain_id with
+     enable_read_access_control set to FALSE or with
+     enable_write_access_control set to FALSE, then the
+     operation shall succeed and return TRUE.
+             If the ParticipantSecurityAttributes has
+     is_access_protected set to FALSE, then the operation shall
+     succeed and return TRUE.
+             Otherwise the operation shall return FALSE.
+ */
+
+  // TODO: Optional checking of QoS is not completed ( see  8.4.2.9.3 )
+
+
+  ParticipantGovMapType::iterator iter = pgov_map.begin();
+  iter = pgov_map.find(permissions_handle);
+  if(iter == pgov_map.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
+
+  // 1. Domain element
+
+  if ( iter->second.domain_list.find(domain_id) == iter->second.domain_list.end()){
+      std::cout << "Domain ID of " << domain_id << "not found" << std::endl;
+    return false;
+      //TODO: this checks the governance file, but do we also need to look at the permissions file?
+  }
+
+  // Check topic rules for the given domain id.
+
+  for(int r = 0; r < iter->second.topic_rules.size(); r++) {
+    if(iter->second.topic_rules[r].topic_attrs.is_read_protected == false ||
+       iter->second.topic_rules[r].topic_attrs.is_write_protected == false)
+      return true;
+  }
+
+    // Check is_access_protected
+  if( iter->second.domain_attrs.is_access_protected == false)
+    return true;
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_create_datawriter(
@@ -472,13 +583,29 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+    // TODO: Need to add the ac_endpoints properties to the returned attributes
+
+   ParticipantGovMapType::iterator iter = pgov_map.begin();
+   iter = pgov_map.find(permissions_handle);
+   if(iter != pgov_map.end()) {
+     std::cout << "aup:" << iter->second.domain_attrs.allow_unauthenticated_participants << std::endl;
+     attributes.allow_unauthenticated_participants = iter->second.domain_attrs.allow_unauthenticated_participants;
+     attributes.is_access_protected = iter->second.domain_attrs.is_access_protected;
+     attributes.is_rtps_protected = iter->second.domain_attrs.is_rtps_protected;
+     attributes.is_discovery_protected = iter->second.domain_attrs.is_discovery_protected;
+     attributes.is_liveliness_protected = iter->second.domain_attrs.is_liveliness_protected;
+     attributes.plugin_participant_attributes = iter->second.domain_attrs.plugin_participant_attributes;
+     return true;
+   }
+
+
   // Set all permissions to true in the stub
-  attributes.allow_unauthenticated_participants = true;
-  attributes.is_access_protected = true;
-  attributes.is_rtps_protected = true;
-  attributes.is_discovery_protected = true;
-  attributes.is_liveliness_protected = true;
-  attributes.plugin_participant_attributes = 0xFFFFFFFF;
+   attributes.allow_unauthenticated_participants = true;
+   attributes.is_access_protected = true;
+   attributes.is_rtps_protected = true;
+   attributes.is_discovery_protected = true;
+   attributes.is_liveliness_protected = true;
+   attributes.plugin_participant_attributes = 0xFFFFFFFF;
  
   return true;
 }
@@ -610,6 +737,221 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     new_handle = next_handle_++;
   }
   return new_handle;
+}
+
+
+::CORBA::Long AccessControlBuiltInImpl::load_governance_file(std::string g_file)
+{
+
+
+  /* Set all permissions to true in the stub
+      domain_rule gov_config_data;
+      gov_config_data.domain_list.insert(0);
+      gov_config_data.domain_attrs.allow_unauthenticated_participants = true;
+      gov_config_data.domain_attrs.is_access_protected = false;
+      gov_config_data.domain_attrs.is_discovery_protected = false;
+      gov_config_data.domain_attrs.is_liveliness_protected = false;
+      gov_config_data.domain_attrs.is_rtps_protected = false;
+     gov_config_data.domain_attrs.plugin_participant_attributes = 0xFFFFFFFF;
+
+     TopicAccessRule t_rules;
+
+     t_rules.topic_expression = "*";
+     t_rules.topic_attrs.is_liveliness_protected = 0;
+     t_rules.topic_attrs.is_discovery_protected = 0;
+     t_rules.topic_attrs.is_read_protected = 1;
+     t_rules.topic_attrs.is_write_protected = 1;
+
+     gov_config_data.topic_rules.push_back(t_rules);
+
+     domain_access_rules gov_domain_access_rules;
+     gov_domain_access_rules.push_back(gov_config_data);
+     */
+
+     ::DDS::Security::PermissionsHandle ph = generate_handle();
+     // pgov_map.insert(std::make_pair(ph , gov_config_data ));
+
+     ParticipantGovMapType::iterator iter = pgov_map.begin();
+     iter = pgov_map.find(ph);
+     if(iter != pgov_map.end()) {
+        std::cout << "handle:" << iter->first << std::endl;
+     }
+
+  //std::cout << "Gov size:" << pgov_map.size() <<  "Gov entry:" << pgov_map.count(1) << std::endl;
+
+
+  try
+  {
+    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
+    std::cout  << "Xerces initialized..." << std::endl;
+  }
+  catch( xercesc::XMLException& e )
+  {
+    char* message = xercesc::XMLString::transcode( e.getMessage() );
+    std::cerr << "XML toolkit initialization error: " << message << std::endl;
+    xercesc::XMLString::release( &message );
+    // throw exception here to return ERROR_XERCES_INIT
+  }
+
+    xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser();
+    parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
+    parser->setDoNamespaces(true);    // optional
+
+    xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
+    parser->setErrorHandler(errHandler);
+
+    try {
+        parser->parse(g_file.c_str());
+    }
+    catch (const xercesc::XMLException& toCatch) {
+        char* message = xercesc::XMLString::transcode(toCatch.getMessage());
+        std::cout << "Exception message is: \n"
+             << message << "\n";
+      xercesc::XMLString::release(&message);
+        return -1;
+    }
+    catch (const xercesc::DOMException& toCatch) {
+        char* message = xercesc::XMLString::transcode(toCatch.msg);
+        std::cout << "Exception message is: \n"
+             << message << "\n";
+        xercesc::XMLString::release(&message);
+        return -1;
+    }
+    catch (...) {
+        std::cout << "Unexpected Exception \n" ;
+        return -1;
+    }
+
+
+  // Successfully parsed the governance file
+
+   xercesc::DOMDocument* xmlDoc = parser->getDocument();
+
+   xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
+  if( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
+
+   // Find the domain rules
+   xercesc::DOMNodeList * domainRules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("domain_rule"));
+
+
+   for(XMLSize_t r=0;r<domainRules->getLength();r++) {
+       domain_rule rule_holder_;
+
+       // Pull out domain ids used in the rule. We are NOT supporting ranges at this time
+       xercesc::DOMNodeList * ruleNodes = domainRules->item(r)->getChildNodes();
+       for( XMLSize_t rn = 0; rn<ruleNodes->getLength();rn++) {
+           char * dn_tag = xercesc::XMLString::transcode(ruleNodes->item(rn)->getNodeName());
+           if ( strcmp("domains", dn_tag) == 0 ) {
+             std::cout << xercesc::XMLString::transcode(ruleNodes->item(rn)->getNodeName()) << std::endl;
+             xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
+               for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
+                 if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+                   rule_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+                 }
+               }
+
+           }
+       }
+
+     // Process allow_unauthenticated_participants
+     xercesc::DOMNodeList * allow_unauthenticated_participants_ =
+              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("allow_unauthenticated_participants"));
+     char * attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
+     std::cout << "attr_aup:" << attr_aup << std::endl;
+     rule_holder_.domain_attrs.allow_unauthenticated_participants = (strcmp(attr_aup,"false") == 0 ? false : true);
+
+
+     // Process enable_join_access_control
+     xercesc::DOMNodeList * enable_join_access_control_ =
+             xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("enable_join_access_control"));
+     char * attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
+     rule_holder_.domain_attrs.is_access_protected = (strcmp(attr_ejac, "false") == 0 ? false : true);
+
+
+     // Process discovery_protection_kind
+     xercesc::DOMNodeList * discovery_protection_kind_ =
+             xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("discovery_protection_kind"));
+     char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
+     rule_holder_.domain_attrs.is_discovery_protected= (strcmp(attr_dpk, "NONE") == 0 ? false : true);
+
+     // Process liveliness_protection_kind
+     xercesc::DOMNodeList * liveliness_protection_kind_ =
+             xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("liveliness_protection_kind"));
+     char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
+     rule_holder_.domain_attrs.is_liveliness_protected = (strcmp(attr_lpk, "NONE") == 0 ? false : true);
+
+     // Process rtps_protection_kind
+     xercesc::DOMNodeList * rtps_protection_kind_ =
+             xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("rtps_protection_kind"));
+     char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
+     rule_holder_.domain_attrs.is_rtps_protected = (strcmp(attr_rpk, "NONE") == 0 ? false : true);
+
+
+
+     // Process topic rules
+
+       xercesc::DOMNodeList * topic_rules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("topic_rule"));
+
+       for( XMLSize_t tr = 0; tr<topic_rules->getLength(); tr++) {
+         xercesc::DOMNodeList * topic_rule_nodes = topic_rules->item(tr)->getChildNodes();
+         TopicAccessRule t_rules;
+         for (XMLSize_t trn = 0; trn<topic_rule_nodes->getLength(); trn++) {
+           char * tr_tag = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getNodeName());
+           char * tr_val = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getTextContent());
+             if (strcmp(tr_tag,"topic_expression") == 0){
+               t_rules.topic_expression = tr_val;
+             } else if(strcmp(tr_tag, "enable_discovery_protection") == 0) {
+               t_rules.topic_attrs.is_discovery_protected = strcmp(tr_val,"false") == 0 ? false : true;
+             } else if(strcmp(tr_tag, "enable_liveliness_protection") == 0) {
+               t_rules.topic_attrs.is_liveliness_protected = strcmp(tr_val,"false") == 0 ? false : true;
+             } else if(strcmp(tr_tag, "enable_read_access_control") == 0) {
+               t_rules.topic_attrs.is_read_protected = strcmp(tr_val,"false") == 0 ? false : true;
+             } else if(strcmp(tr_tag, "enable_write_access_control") == 0) {
+               t_rules.topic_attrs.is_write_protected = strcmp(tr_val,"false") == 0 ? false : true;
+             }
+           /* The following two Topic Rules are not supported at this time
+                        <metadata_protection_kind>NONE</metadata_protection_kind>
+                        <data_protection_kind>NONE</data_protection_kind>
+           */
+
+         }
+         rule_holder_.topic_rules.push_back(t_rules);
+       }
+
+
+       std::cout << "Inserting:" << ph << std::endl;
+       std::cout << "allow_unauthenticated_participants: " << rule_holder_.domain_attrs.allow_unauthenticated_participants << std::endl;
+       pgov_map.insert(std::make_pair(ph , rule_holder_));
+
+   } // domain_rule
+
+  std::cout << "domain rules count:" << domainRules->getLength() << std::endl;
+
+
+
+    delete parser;
+    delete errHandler;
+
+
+  return ph;
+}
+
+
+::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(std::string p_file)
+{
+  try
+  {
+    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
+    std::cout  << "Xerces initialized..." << std::endl;
+  }
+  catch( xercesc::XMLException& e )
+  {
+    char* message = xercesc::XMLString::transcode( e.getMessage() );
+    std::cerr << "XML toolkit initialization error: " << message << std::endl;
+    xercesc::XMLString::release( &message );
+    // throw exception here to return ERROR_XERCES_INIT
+  }
+  return 0;
 }
 
 
