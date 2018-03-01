@@ -209,64 +209,65 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::OpenDDS::DCPS::GUID_t & remote_participant_guid,
   ::DDS::Security::SecurityException & ex)
 {
-  // Validate that the local idenitiy handle is valid, and that the class IDs for
-  // the local and remote identity token's are compatible.
+  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
+
   IdentityData_Ptr local_data = get_identity_data(local_identity_handle);
-  if (!local_data) {
-    set_security_error(ex, -1, 0, "Local participant ID not found");
-    return DDS::Security::VALIDATION_FAILED;
-  }
-  if (!check_class_versions(remote_identity_token.class_id)) {
-    set_security_error(ex, -1, 0, "Remote class ID is not compatible");
-    return DDS::Security::VALIDATION_FAILED;
-  }
+  if (local_data) {
+    if (check_class_versions(remote_identity_token.class_id)) {
 
-  // If the remote_auth_request_token is TokenNIL, then the local_auth_request_token
-  // needs to be populated and have a future_challenge property supplied.  Otherwise
-  // make sure it is set to TokenNIL
-  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
+      TokenReader remote_request(remote_auth_request_token);
+      if (remote_request.is_nil()) {
 
-  TokenReader remote_request(remote_auth_request_token);
-  if (remote_request.is_nil()) {
+        DDS::OctetSeq nonce;
+        int err = SSL::make_nonce_256(nonce);
+        if (! err) {
+          TokenWriter auth_req_wrapper(local_auth_request_token,
+                                       build_class_id(Auth_Request_Class_Ext),
+                                       0,
+                                       1);
 
-    DDS::OctetSeq nonce;
-    int err = SSL::make_nonce_256(nonce);
-    if (! err) {
-      TokenWriter auth_req_wrapper(local_auth_request_token,
-                                   build_class_id(Auth_Request_Class_Ext),
-                                   0,
-                                   1);
+          auth_req_wrapper.set_bin_property(0, "future_challenge", nonce, true);
 
-      auth_req_wrapper.set_bin_property(0, "future_challenge", nonce, true);
+        } else {
+          result = DDS::Security::VALIDATION_FAILED;
+        }
 
-      result = DDS::Security::VALIDATION_OK;
+      } else {
+        local_auth_request_token = DDS::Security::TokenNIL;
+      }
+
+      if (result == DDS::Security::VALIDATION_OK) {
+
+        /* Retain all of the data needed for a handshake with the remote participant */
+        IdentityData_Ptr newIdentityData = DCPS::make_rch<IdentityData>();
+        newIdentityData->participant_guid = remote_participant_guid;
+        newIdentityData->local_handle = local_identity_handle;
+        newIdentityData->local_auth_request = local_auth_request_token;
+        newIdentityData->remote_auth_request = remote_auth_request_token;
+
+        remote_identity_handle = get_next_handle();
+        {
+          ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+          identity_data_[remote_identity_handle] = newIdentityData;
+        }
+
+        /* A Lexigraphical comparison of the guids determines which direction the handshake takes */
+        if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
+          result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
+
+        } else {
+          result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+        }
+      }
 
     } else {
-
-        return DDS::Security::VALIDATION_FAILED;
+      set_security_error(ex, -1, 0, "Remote class ID is not compatible");
+      result = DDS::Security::VALIDATION_FAILED;
     }
 
   } else {
-    local_auth_request_token = DDS::Security::TokenNIL;
-  }
-
-  // Retain all of the data needed for a handshake with the remote participant
-  IdentityData_Ptr newIdentityData = DCPS::make_rch<IdentityData>();
-  newIdentityData->participant_guid = remote_participant_guid;
-  newIdentityData->local_handle = local_identity_handle;
-  newIdentityData->local_auth_request = local_auth_request_token;
-  newIdentityData->remote_auth_request = remote_auth_request_token;
-
-  remote_identity_handle = get_next_handle();
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-    identity_data_[remote_identity_handle] = newIdentityData;
-  }
-  // A Lexigraphical comparison of the guids determines which direction the handshake takes
-  if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
-    result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
-  } else {
-    result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+    set_security_error(ex, -1, 0, "Local participant ID not found");
+    result = DDS::Security::VALIDATION_FAILED;
   }
 
   return result;
