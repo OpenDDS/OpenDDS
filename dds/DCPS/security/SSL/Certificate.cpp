@@ -66,7 +66,7 @@ namespace OpenDDS {
         }
       }
 
-      int Certificate::validate(Certificate& ca, unsigned long int flags)
+      int Certificate::validate(Certificate& ca, unsigned long int flags) const
       {
         int result = X509_V_ERR_UNSPECIFIED;
 

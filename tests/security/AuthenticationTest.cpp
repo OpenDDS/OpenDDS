@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
+#include <cstring>
 
 using OpenDDS::DCPS::GUID_t;
 using OpenDDS::Security::AuthenticationBuiltInImpl;
@@ -124,6 +125,16 @@ struct AuthenticationTest : public ::testing::Test
     seq[len] = p;
   }
 
+  static std::string value_of(const std::string& key, const PropertySeq& s)
+  {
+    size_t n = s.length();
+    for (size_t i = 0; i < n; ++i) {
+        if (strcmp(s[i].name, key.c_str()) == 0)
+          return static_cast<const char*>(s[i].value);
+    }
+    return NULL;
+  }
+
   DomainParticipantQos domain_participant_qos;
   GUID_t guid;
   DomainId_t domain_id;
@@ -139,6 +150,32 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
+
+TEST_F(AuthenticationTest, GetIdentityToken_Success)
+{
+  /* From this cmd:  openssl x509 -noout -subject -in certs/opendds_participant_cert.pem */
+  std::string cert_sn("C = US, ST = MO, O = Object Computing (Test Identity CA), CN = Object Computing (Test Identity CA), emailAddress = info@objectcomputing.com");
+
+  /* Same thing but with certs/opendds_identity_ca_cert.pem */
+  std::string ca_sn("C = US, ST = MO, L = Saint Louis, O = Object Computing (Test Identity CA), CN = Object Computing (Test Iden CA), emailAddress = info@objectcomputing.com");
+
+  AuthenticationBuiltInImpl auth;
+  IdentityHandle h;
+  IdentityToken t;
+  GUID_t adjusted;
+
+  auth.validate_local_identity(h, adjusted, domain_id, domain_participant_qos, guid, ex);
+
+  ASSERT_EQ(true, auth.get_identity_token(t, h, ex));
+
+  ASSERT_EQ(cert_sn, value_of("dds.cert.sn", t.properties));
+  ASSERT_EQ(ca_sn, value_of("dds.ca.sn", t.properties));
+
+  ASSERT_EQ(std::string("RSA-2048"), value_of("dds.cert.algo", t.properties));
+  ASSERT_EQ(std::string("RSA-2048"), value_of("dds.ca.algo", t.properties));
+}
+
+
 
 #if 0
 TEST_F(AuthenticationTest, NoLocalIdentity)

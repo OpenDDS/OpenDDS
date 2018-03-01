@@ -70,8 +70,8 @@ TEST_F(CertificateTest, Algorithm_RSA_2048_Success)
 
 TEST_F(CertificateTest, SubjectNameToString_Success)
 {
-  /* From this cmd:  openssl x509 -noout -subject -in ../certs/opendds_participant_cert.pem -nameopt -oneline */
-  std::string expected("C=US, ST=MO, O=Object Computing (Test Identity CA), CN=Object Computing (Test Identity CA), emailAddress=info@objectcomputing.com");
+  /* From this cmd:  openssl x509 -noout -subject -in ../certs/opendds_participant_cert.pem */
+  std::string expected("C = US, ST = MO, O = Object Computing (Test Identity CA), CN = Object Computing (Test Identity CA), emailAddress = info@objectcomputing.com");
   std::string name;
   ASSERT_EQ(signed_.subject_name_to_str(name), 0 /* success! */);
   ASSERT_EQ(name, expected);

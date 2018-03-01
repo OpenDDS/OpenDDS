@@ -30,7 +30,7 @@ namespace Security {
 static const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
 static const std::string Auth_Plugin_Major_Version("1");
 static const std::string Auth_Plugin_Minor_Version("0");
-static const std::string Identity_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
+
 static const std::string Identity_Status_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
 static const std::string Auth_Peer_Cred_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
 static const std::string Auth_Request_Class_Ext("AuthReq");
@@ -106,8 +106,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       IdentityData_Ptr local_identity(new IdentityData());
       local_identity->participant_guid = adjusted_participant_guid;
 
-      /* TODO pre-populate local identity data */
-
       {
         ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
         identity_data_[local_identity_handle] = local_identity;
@@ -127,16 +125,29 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   ::CORBA::Boolean status = false;
 
-  // Populate a simple version of an IdentityToken as long as the handle is known
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
-    OpenDDS::Security::TokenWriter identity_wrapper(identity_token, Identity_Token_Class_Id, 4, 0);
-    identity_wrapper.set_property(0, "dds.cert.sn", "MySubjectName", true);
-    identity_wrapper.set_property(1, "dds.cert.algo", "RSA-2048", true);
-    identity_wrapper.set_property(2, "dds.ca.sn", "MyCASubjectName", true);
-    identity_wrapper.set_property(3, "dds.ca.algo", "RSA-204", true);
+    const SSL::Certificate& pcert = local_credential_data_.get_participant_cert();
+    const SSL::Certificate& cacert = local_credential_data_.get_ca_cert();
+
+    std::string tmp;
+
+    OpenDDS::Security::TokenWriter identity_wrapper(identity_token, "DDS:Auth:PKI-DH:1.0", 4, 0);
+
+    pcert.subject_name_to_str(tmp);
+    identity_wrapper.set_property(0, "dds.cert.sn", tmp.c_str(), true);
+
+    pcert.algorithm(tmp);
+    identity_wrapper.set_property(1, "dds.cert.algo", tmp.c_str(), true);
+
+    cacert.subject_name_to_str(tmp);
+    identity_wrapper.set_property(2, "dds.ca.sn", tmp.c_str(), true);
+
+    cacert.algorithm(tmp);
+    identity_wrapper.set_property(3, "dds.ca.algo", tmp.c_str(), true);
 
     status = true;
+
   } else {
     // No real information on what should be in these security exceptions
     set_security_error(ex, -1, 0, "Unknown Identity handle");

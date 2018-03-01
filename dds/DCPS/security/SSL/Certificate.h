@@ -32,7 +32,7 @@ namespace OpenDDS {
 
         void load(const std::string& uri, const std::string& password = "");
 
-        int validate(Certificate& ca, unsigned long int flags = 0u);
+        int validate(Certificate& ca, unsigned long int flags = 0u) const;
 
         int subject_name_to_DER(std::vector<unsigned char>& dst) const;
 
