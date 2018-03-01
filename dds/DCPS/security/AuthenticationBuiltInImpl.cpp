@@ -15,6 +15,7 @@
 #include "ace/Guard_T.h"
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include "dds/DCPS/security/SSL/Utils.h"
 
@@ -251,7 +252,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           identity_data_[remote_identity_handle] = newIdentityData;
         }
 
-        /* A Lexigraphical comparison of the guids determines which direction the handshake takes */
         if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
           result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
 
@@ -675,11 +675,13 @@ AuthenticationBuiltInImpl::IdentityData_Ptr AuthenticationBuiltInImpl::get_ident
 
 bool AuthenticationBuiltInImpl::is_handshake_initiator(const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote)
 {
-  // Stub will just return true
-  ACE_UNUSED_ARG(local);
-  ACE_UNUSED_ARG(remote);
+  const unsigned char* local_ = reinterpret_cast<const unsigned char*>(&local);
+  const unsigned char* remote_ = reinterpret_cast<const unsigned char*>(&remote);
 
-  return true;
+  /* if remote > local, pending request; else pending handshake message */
+  return std::lexicographical_compare(local_, local_ + sizeof(local),
+                                      remote_, remote_ + sizeof(remote));
+
 }
 
 bool AuthenticationBuiltInImpl::check_class_versions(const char* remote_class_id)
