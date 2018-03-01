@@ -195,11 +195,11 @@ TEST_F(AccessControlTest, validate_local_permissions_InvalidInput)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
-  EXPECT_EQ(DDS::HANDLE_NIL, 
+  EXPECT_EQ(DDS::HANDLE_NIL,
     get_inst().validate_local_permissions(0, 1, 1, qos, ex));
 
   MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
-  EXPECT_EQ(DDS::HANDLE_NIL, 
+  EXPECT_EQ(DDS::HANDLE_NIL,
     get_inst().validate_local_permissions(auth_plugin.get(), DDS::HANDLE_NIL, 1, qos, ex));
 }
 

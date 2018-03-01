@@ -4,7 +4,7 @@
 // See footnotes in dds/DdsDcps.mpc for tips on
 // what should be included in IDL projects.
 
-project(OpenDDS_Security): dcpslib {
+project(OpenDDS_Security): dcpslib , xerces3 {
   idlflags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h -SS
   dcps_ts_flags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h 
   requires += no_opendds_safety_profile
