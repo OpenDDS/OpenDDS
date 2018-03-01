@@ -2,7 +2,7 @@ project(OpenDDS_Security): dcpslib, openssl, xerces {
   idlflags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h -SS
   dcps_ts_flags += -Wb,export_macro=DdsSecurity_Export -Wb,export_include=DdsSecurity_Export.h
   requires += no_opendds_safety_profile
-  dynamicflags  = DDSSECURITY_BUILD_DLL
+  dynamicflags = DDSSECURITY_BUILD_DLL
 
   IDL_Files {
     CryptoBuiltIn.idl
@@ -14,8 +14,8 @@ project(OpenDDS_Security): dcpslib, openssl, xerces {
 
   Source_Files {
     .
-    ./SSL
-    ./Authentication
+    SSL
+    Authentication
   }
 
 }

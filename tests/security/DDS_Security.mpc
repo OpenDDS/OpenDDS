@@ -1,57 +1,42 @@
-project(AuthenticationTest): dcpsexe, googletest {
+project(AuthenticationTest): dcpsexe, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_AuthenticationTest
-
-  after += OpenDDS_Security
-  libs  += OpenDDS_Security
 
   Source_Files {
     AuthenticationTest.cpp
   }
 }
 
-project(AccessControlTest): dcpsexe, googlemock {
+project(AccessControlTest): dcpsexe, opendds_security, googlemock {
   requires += no_opendds_safety_profile
   exename = OpenDDS_AccessControlTest
-
-  after += OpenDDS_Security
-  libs  += OpenDDS_Security
 
   Source_Files {
     AccessControlTest.cpp
   }
 }
 
-project(CryptoKeyFactoryTest): dcpsexe, googletest {
+project(CryptoKeyFactoryTest): dcpsexe, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_CryptoKeyFactoryTest
-
-  after += OpenDDS_Security
-  libs  += OpenDDS_Security
 
   Source_Files {
     CryptoKeyFactoryTest.cpp
   }
 }
 
-project(CryptoKeyExchangeTest): dcpsexe, googletest {
+project(CryptoKeyExchangeTest): dcpsexe, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_CryptoKeyExchangeTest
-
-  after += OpenDDS_Security
-  libs  += OpenDDS_Security
 
   Source_Files {
     CryptoKeyExchangeTest.cpp
   }
 }
 
-project(CryptoTransformTest): dcpsexe, googletest {
+project(CryptoTransformTest): dcpsexe, opendds_security, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_CryptoTransformTest
-
-  after += OpenDDS_Security
-  libs  += OpenDDS_Security
 
   Source_Files {
     CryptoTransformTest.cpp
