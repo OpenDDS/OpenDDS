@@ -104,7 +104,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
            const DCPS::RepoId& guid,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco,
-           DDS::Security::IdentityHandle id_handle,
+           DDS::Security::IdentityHandle identity_handle,
            DDS::Security::PermissionsHandle perm_handle,
            DDS::Security::ParticipantCryptoHandle crypto_handle)
 
@@ -119,7 +119,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
   , security_config_(OpenDDS::Security::SecurityRegistry::instance()->default_config())
-  , identity_handle_(id_handle)
+  , identity_handle_(identity_handle)
   , permissions_handle_(perm_handle)
   , crypto_handle_(crypto_handle)
 {
@@ -177,7 +177,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
     throw std::runtime_error("unable to retrieve participant security attributes");
   }
 
-  sedp_.init_security(id_handle, perm_handle, crypto_handle);
+  sedp_.init_security(identity_handle, perm_handle, crypto_handle);
 }
 
 Spdp::~Spdp()
@@ -273,7 +273,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 
     if (security_config_) {
       bool has_security_data = false;
-      if (ParameterListConverter::from_param_list(plist, dp.id_status_token_, dp.id_token_, dp.perm_token_, dp.security_info_) < 0) {
+      if (ParameterListConverter::from_param_list(plist, dp.identity_status_token_, dp.identity_token_, dp.permissions_token_, dp.security_info_) < 0) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
           ACE_TEXT("failed to parse security data from convert from ParameterList\n")));
       } else {
@@ -373,22 +373,92 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredPartic
   }
 }
 
+void
+Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
+{
+}
+
+void
+Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg)
+{
+}
+
 bool
 Spdp::match_authenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata, DiscoveredParticipant& dp)
 {
   DDS::Security::SecurityException se;
 
-  // TODO - get remote permissions handle (8.8.6)
-  //Security::AccessControl_var access = security_config_->get_access_control();
-
-
+  Security::Authentication_var auth = security_config_->get_authentication();
+  Security::AccessControl_var access = security_config_->get_access_control();
   Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+
+  dp.shared_secret_handle_ = auth->get_shared_secret(dp.handshake_handle_, se);
+  if (dp.shared_secret_handle_ == DDS::HANDLE_NIL) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::match_authenticated() - ")
+      ACE_TEXT("Unable to get shared secret handle. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    return false;
+  }
+
+  if (auth->get_authenticated_peer_credential_token(dp.authenticated_peer_credential_token_, dp.handshake_handle_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::match_authenticated() - ")
+      ACE_TEXT("Unable to get authenticated peer credential token. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    return false;
+  }
+
+  dp.permissions_handle_ = access->validate_remote_permissions(auth, identity_handle_, dp.identity_handle_, dp.permissions_token_, dp.authenticated_peer_credential_token_, se);
+  if (participant_sec_attr_.is_access_protected == true && dp.permissions_handle_ == DDS::HANDLE_NIL) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::match_authenticated() - ")
+      ACE_TEXT("Unable to validate remote participant with access control plugin. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    return false;
+  }
+
+  if (participant_sec_attr_.is_access_protected == true) {
+    DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
+      { // DDS::Security::ParticipantBuiltinTopicData
+        { // ParticipantBuiltinTopicData
+          DDS::BuiltinTopicKey_t() /*ignored*/,
+          qos_.user_data
+        },
+        identity_token_,
+        permissions_token_,
+        qos_.property,
+        DDS::Security::ParticipantSecurityInfo()
+      },
+      identity_status_token_
+    };
+
+    pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    if (participant_sec_attr_.is_rtps_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+    }
+    if (participant_sec_attr_.is_discovery_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+    }
+    if (participant_sec_attr_.is_liveliness_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+    }
+
+    if (access->check_remote_participant(dp.permissions_handle_, domain_, pbtds, se) == false) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::match_authenticated() - ")
+        ACE_TEXT("Remote participant check failed. Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return false;
+    }
+  }
 
   dp.crypto_handle_ = crypto->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
   if (dp.crypto_handle_ == DDS::HANDLE_NIL) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("unable to get identity token. Security Exception[%d.%d]: %C\n"),
+      ACE_TEXT("Unable to register remote participant with crypto plugin. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     return false;
   }
@@ -433,7 +503,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       dp.auth_state_ = AS_VALIDATING_REMOTE;
     }
     case AS_VALIDATING_REMOTE: {
-      DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.id_token_, guid, se);
+      DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
       switch (vr) {
         case DDS::Security::VALIDATION_OK: {
           dp.auth_state_ = AS_AUTHENTICATED;
@@ -505,10 +575,9 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
         return;
       }
 
-      DDS::Security::HandshakeHandle hs_handle;
       DDS::Security::HandshakeMessageToken hs_mt;
 
-      if (auth->begin_handshake_request(hs_handle, hs_mt, identity_handle_, dp.identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se) != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+      if (auth->begin_handshake_request(dp.handshake_handle_, hs_mt, identity_handle_, dp.identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se) != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
           ACE_TEXT("Failed to begin handshake_request. Security Exception[%d.%d]: %C\n"),
             se.code, se.minor_code, se.message.in()));

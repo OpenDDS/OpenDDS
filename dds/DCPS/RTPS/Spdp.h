@@ -84,6 +84,9 @@ public:
 
   OpenDDS::Security::SecurityConfig_rch get_security_config() { return security_config_; }
 
+  void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
+  void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 

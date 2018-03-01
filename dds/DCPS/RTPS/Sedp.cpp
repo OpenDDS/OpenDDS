@@ -1889,7 +1889,7 @@ Sedp::Task::svc_stateless_message(DCPS::MessageId id,
 
 void
 Sedp::received_stateless_message(DCPS::MessageId /* message_id */,
-                    const DDS::Security::ParticipantStatelessMessage& data)
+                    const DDS::Security::ParticipantStatelessMessage& msg)
 {
   if (spdp_.shutting_down()) {
       return;
@@ -1897,11 +1897,18 @@ Sedp::received_stateless_message(DCPS::MessageId /* message_id */,
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (should_drop_message(data)) {
+  if (should_drop_message(msg)) {
       return;
   }
 
   /* TODO: Handle the rest of the message... See 7.4.3 in the security spec. */
+
+  // Without thinking too much about 7.4.3 for the moment, we need to forward auth request and handshake messages up to Spdp
+  if (msg.message_class_id == DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST) {
+    spdp_.handle_auth_request(msg);
+  } else if (msg.message_class_id == DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE) {
+    spdp_.handle_handshake_message(msg);
+  }
 
 }
 
