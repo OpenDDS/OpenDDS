@@ -74,7 +74,7 @@ AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 
 AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
-  // - Clean up resources used by this implementation
+
 }
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::validate_local_identity(
