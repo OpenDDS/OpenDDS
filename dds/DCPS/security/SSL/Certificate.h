@@ -40,6 +40,8 @@ namespace OpenDDS {
 
         int subject_name_digest(std::vector<unsigned char>& dst) const;
 
+        int algorithm(std::string& dst) const;
+
       private:
 
         static X509* x509_from_pem(const std::string& path, const std::string& password = "");

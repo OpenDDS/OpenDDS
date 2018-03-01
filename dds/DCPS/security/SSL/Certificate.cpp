@@ -216,6 +216,52 @@ namespace OpenDDS {
         return result;
       }
 
+      int Certificate::algorithm(std::string& dst) const
+      {
+        int result = 1, keylen = 0;
+
+        dst.clear();
+
+        if (x_) {
+
+          EVP_PKEY* pkey = X509_get_pubkey(x_);
+          if (pkey) {
+
+            RSA* rsa = EVP_PKEY_get1_RSA(pkey);
+            if (rsa) {
+
+              keylen = RSA_bits(rsa);
+              if (keylen == 2048) {
+
+                dst = "RSA-2048";
+                result = 0;
+
+              } else {
+                fprintf(stderr,
+                        "Certificate::algorithm: Error, currently RSA-2048 is the only supported algorithm; "
+                        "received RSA cert with '%d' bits\n",
+                        keylen);
+              }
+
+              RSA_free(rsa);
+
+            } else {
+
+              /* TODO add support for "EC-prime256v1" */
+
+              fprintf(stderr, "Certificate::algorithm: Error, only RSA-2048 is currently supported\n");
+            }
+
+          } else {
+              fprintf(stderr, "Certificate::algorithm: Error, failed to get pubkey from X509 cert\n");
+          }
+
+          EVP_PKEY_free(pkey);
+        }
+
+        return result;
+      }
+
       X509* Certificate::x509_from_pem(const std::string& path, const std::string& password)
       {
         X509* result = NULL;

@@ -61,3 +61,12 @@ TEST_F(CertificateTest, SubjectNameDigest)
 }
 #endif
 
+TEST_F(CertificateTest, Algorithm_RSA_2048_Success)
+{
+  std::string algo;
+  signed_.algorithm(algo);
+  ASSERT_EQ(std::string("RSA-2048"), algo);
+}
+
+
+
