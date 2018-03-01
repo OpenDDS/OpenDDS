@@ -393,7 +393,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticip
   Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
 
   dp.shared_secret_handle_ = auth->get_shared_secret(dp.handshake_handle_, se);
-  if (dp.shared_secret_handle_ == DDS::HANDLE_NIL) {
+  if (dp.shared_secret_handle_ == 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::match_authenticated() - ")
       ACE_TEXT("Unable to get shared secret handle. Security Exception[%d.%d]: %C\n"),
