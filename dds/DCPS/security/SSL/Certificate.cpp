@@ -165,8 +165,8 @@ namespace OpenDDS {
               len = X509_NAME_print_ex(buffer, name, 0, flags);
               if (len > 0) {
 
-                tmp = new char[len];
-                len = BIO_gets(buffer, tmp, len + 1 /* BIO_gets reads up to len-1, so we add 1 */);
+                tmp = new char[len + 1]; /* Add 1 for null-terminator */
+                len = BIO_gets(buffer, tmp, len + 1 /* Writes up to len-1 and adds null-terminator */);
                 if (len > 0) {
                   dst = tmp;
                   result = 0;

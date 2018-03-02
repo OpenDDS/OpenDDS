@@ -108,8 +108,8 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
-  void match_unauthenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata);
-  bool match_authenticated(const DCPS::RepoId& guid, const SPDPdiscoveredParticipantData& pdata, DiscoveredParticipant& dp);
+  void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+  bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
 
 #ifndef DDS_HAS_MINIMUM_BIT

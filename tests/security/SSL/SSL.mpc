@@ -1,13 +1,3 @@
-project (Security*): dcpsexe, googletest {
+project(Security*): dcpsexe, opendds_security, googletest {
   requires += no_opendds_safety_profile
-  exename = *
-
-  after += OpenDDS_Security
-  libs  += OpenDDS_Security
-  
-  Source_Files {
-  	.
-  }
-
 }
-

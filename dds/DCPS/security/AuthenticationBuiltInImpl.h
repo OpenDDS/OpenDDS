@@ -14,7 +14,7 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"
-
+#include "dds/DCPS/RcObject_T.h"
 #include "ace/Thread_Mutex.h"
 #include <map>
 #include <string>
@@ -145,7 +145,7 @@ public:
 
 private:
 
-  struct IdentityData
+  struct IdentityData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
     OpenDDS::DCPS::GUID_t participant_guid;
     DDS::Security::PermissionsCredentialToken permissions_cred_token;
@@ -155,11 +155,11 @@ private:
     DDS::Security::AuthRequestMessageToken local_auth_request;
     DDS::Security::AuthRequestMessageToken remote_auth_request;
   };
-  typedef IdentityData* IdentityData_Ptr;
-  typedef 	std::map<DDS::Security::IdentityHandle, IdentityData_Ptr> Identity_Handle_Data;
+  typedef DCPS::RcHandle<IdentityData> IdentityData_Ptr;
+  typedef std::map<DDS::Security::IdentityHandle, IdentityData_Ptr> Identity_Handle_Data;
   Identity_Handle_Data identity_data_;
 
-  struct HandshakeData
+  struct HandshakeData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
     DDS::Security::IdentityHandle local_identity_handle;
     DDS::Security::IdentityHandle remote_identity_handle;
@@ -169,10 +169,9 @@ private:
     DDS::Security::ValidationResult_t validation_state;
     bool local_initiator;
   };
-  typedef HandshakeData* HandshakeData_Ptr;
-  typedef 	std::map<DDS::Security::HandshakeHandle, HandshakeData_Ptr> Handshake_Handle_Data;
+  typedef DCPS::RcHandle<HandshakeData> HandshakeData_Ptr;
+  typedef std::map<DDS::Security::HandshakeHandle, HandshakeData_Ptr> Handshake_Handle_Data;
   Handshake_Handle_Data handshake_data_;
-
 
   DDS::Security::ValidationResult_t process_handshake_reply(
     DDS::Security::HandshakeMessageToken & handshake_message_out,
