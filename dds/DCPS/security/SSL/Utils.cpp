@@ -44,11 +44,12 @@ namespace OpenDDS {
 /* Gets hash[i] given i > 0 with the entire byte-array right-shifted by 1 bit. */
 #define HASH_RSHIFT_1BIT(HASH, IDX) ((((HASH)[(IDX)-1] << 7u) & 0x80) | (((HASH)[(IDX)] >> 1u) & 0x7F))
 
-      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t dst, const Certificate& target)
+      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t& dst, const Certificate& target)
       {
         int result = 1;
 
         dst = OpenDDS::DCPS::GUID_UNKNOWN;
+        dst.entityId = src.entityId;
 
         /* Grab hash to populate bits 1 through 47 of prefix */
 

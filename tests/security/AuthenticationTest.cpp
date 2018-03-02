@@ -6,7 +6,6 @@
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/GuidBuilder.h"
 #include "dds/DdsSecurityEntities.h"
 #include <cstring>
 
@@ -27,6 +26,7 @@ using DDS::Security::AuthRequestMessageToken;
 using DDS::Security::ValidationResult_t;
 using DDS::Security::DomainId_t;
 
+
 struct MockParticipantData
 {
   DomainParticipantQos qos;
@@ -39,6 +39,20 @@ struct MockParticipantData
   IdentityToken id_token;
   AuthRequestMessageToken auth_request_message_token;
 
+  static unsigned char next_guid_modifier;
+
+  static GUID_t make_guid()
+  {
+    /* Each subsequent call should have a lexicographically-greater value than the previous */
+    GUID_t result = { {0x01,0x03, /* Vendor ID */
+                       0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, next_guid_modifier},
+                      { {0x01, 0x02, next_guid_modifier}, 0xFF} };
+
+    next_guid_modifier++;
+
+    return result;
+  }
+
   MockParticipantData() :
     guid(OpenDDS::DCPS::GUID_UNKNOWN),
     guid_adjusted(OpenDDS::DCPS::GUID_UNKNOWN),
@@ -48,7 +62,7 @@ struct MockParticipantData
     id_token(DDS::Security::TokenNIL),
     auth_request_message_token(DDS::Security::TokenNIL)
   {
-    guid = OpenDDS::DCPS::GuidBuilder::create();
+    guid = make_guid();
   }
 
   void add_property(Property_t p) {
@@ -65,6 +79,9 @@ struct MockParticipantData
     seq[len] = p;
   }
 };
+
+unsigned char MockParticipantData::next_guid_modifier = 0x01;
+
 
 struct AuthenticationTest : public ::testing::Test
 {
@@ -173,7 +190,7 @@ TEST_F(AuthenticationTest, GetIdentityToken_Success)
   ASSERT_EQ(std::string("RSA-2048"), value_of("dds.ca.algo", mp1.id_token.properties));
 }
 
-TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_Success)
+TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_PendingHandshakeRequest)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -197,8 +214,27 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_Suc
                                     mp2.guid_adjusted,
                                     ex);
 
-  /* Expected: Local auth request token non-nil */
-  ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
+  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
+  ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
+  ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
+
+  /*  Given the hash of the subject names in the local/remote keys, the first 11 bytes of
+   *  the adjusted GUIDs are shown below. Since byte 2 in the remote GUID is lexicographically
+   *  greater than byte 2 in the local GUID we have: remote > local and hence the
+   *  VALIDATION_PENDING_HANDSHAKE_REQUEST is returned. Otherwise per the spec we would get
+   *  VALIDATION_PENDING_HANDSHAKE_MESSAGE.
+   *
+   *  (gdb) x/11bx &local
+   *    0x6e9268:       0x80    0x07    0xbb    0xb3    0x1d    0x43    0xbd    0x8d
+   *    0x6e9270:       0x42    0x60    0x62
+   *
+   *  (gdb) x/11bx &remote
+   *    0x6cc8e0:       0x80    0xa0    0x5c    0xda    0xc4    0x66    0xd3    0x6c
+   *    0x6cc8e8:       0x0c    0xd8    0xfc
+   *
+   */
+  ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, r);
 
 }
 
