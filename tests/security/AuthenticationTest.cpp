@@ -91,7 +91,7 @@ struct AuthenticationTest : public ::testing::Test
       idca.propagate = false;
 
       pkey.name = "dds.sec.auth.private_key";
-      pkey.value = "file:certs/opendds_participant_private_key.pem";
+      pkey.value = "file:certs/mock_participant_1/opendds_participant_private_key.pem";
       pkey.propagate = false;
 
       pass.name = "dds.sec.auth.password";
@@ -99,7 +99,7 @@ struct AuthenticationTest : public ::testing::Test
       pass.propagate = false;
 
       idcert.name = "dds.sec.auth.identity_certificate";
-      idcert.value = "file:certs/opendds_participant_cert.pem";
+      idcert.value = "file:certs/mock_participant_1/opendds_participant_cert.pem";
       idcert.propagate = false;
 
       add_property(idca);
@@ -175,6 +175,17 @@ TEST_F(AuthenticationTest, GetIdentityToken_Success)
   ASSERT_EQ(std::string("RSA-2048"), value_of("dds.ca.algo", t.properties));
 }
 
+#if 0
+TEST_F(AuthenticationTest, ValidateRemoteIdentity_Success)
+{
+  AuthenticationBuiltInImpl auth;
+  IdentityHandle h;
+  GUID_t adjusted;
+  ValidationResult_t r = auth.validate_local_identity(h, adjusted, domain_id, domain_participant_qos, guid, ex);
+
+
+}
+#endif
 
 
 #if 0

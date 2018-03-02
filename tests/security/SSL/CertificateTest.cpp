@@ -14,7 +14,7 @@ class CertificateTest : public ::testing::Test
 public:
   CertificateTest() :
     ca_("file:../certs/opendds_identity_ca_cert.pem"),
-    signed_("file:../certs/opendds_participant_cert.pem"),
+    signed_("file:../certs/mock_participant_1/opendds_participant_cert.pem"),
     not_signed_("file:../certs/opendds_not_signed.pem")
   {
 
@@ -37,7 +37,7 @@ TEST_F(CertificateTest, Validate_Success)
 
 TEST_F(CertificateTest, Validate_Failure_LoadingWrongKeyType)
 {
-  Certificate wrong_key_type("file:../certs/opendds_participant_private_key.pem");
+  Certificate wrong_key_type("file:../certs/mock_participant_1/opendds_participant_private_key.pem");
   ASSERT_NE(wrong_key_type.validate(ca_), X509_V_OK);
 }
 
