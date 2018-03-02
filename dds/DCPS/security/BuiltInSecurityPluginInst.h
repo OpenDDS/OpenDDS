@@ -21,7 +21,7 @@ namespace Security {
  *
  * @brief Factory object to create interfaces for the BuiltIn plugin.
  */
-class OpenDDS_Dcps_Export BuiltInSecurityPluginInst : public SecurityPluginInst {
+class DdsSecurity_Export BuiltInSecurityPluginInst : public SecurityPluginInst {
 public:
 
   BuiltInSecurityPluginInst();
