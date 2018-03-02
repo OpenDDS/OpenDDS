@@ -8,6 +8,9 @@
 #include "gmock/gmock.h"
 
 using namespace OpenDDS::Security;
+using DDS::Property_t;
+using DDS::PropertySeq;
+using DDS::DomainParticipantQos;
 using namespace testing;
 
 static const char* Expected_Permissions_Token_Class_Id ="DDS:Access:Permissions:1.0";
@@ -175,10 +178,64 @@ public:
   AccessControlTest()
   : test_class_()
   {
+    Property_t permca;
+    Property_t  gov_0, gov_1, gov_2, gov_3, gov_4, gov_5, gov_6;
+    Property_t perm_join, perm_topic;
+
+    permca.name = "dds.sec.access.permissions_ca";
+    permca.value = "file:certs/opendds_permissions_ca_cert.pem";
+    permca.propagate = false;
+
+    gov_0.name = "dds.sec.access.governance";
+    gov_0.value = "file:governance/Governance_SC0_SecurityDisabled.xml";
+    gov_0.propagate = false;
+
+    gov_1.name = "dds.sec.access.governance";
+    gov_1.value = "file:governance/Governance_SC1_ProtectedDomain1.xml";
+    gov_1.propagate = false;
+
+    gov_2.name = "dds.sec.access.governance";
+    gov_2.value = "file:governance/Governance_SC2_ProtectedDomain2.xml";
+    gov_2.propagate = false;
+
+    gov_3.name = "dds.sec.access.governance";
+    gov_3.value = "file:governance/Governance_SC3_ProtectedDomain3.xml";
+    gov_3.propagate = false;
+
+    gov_4.name = "dds.sec.access.governance";
+    gov_4.value = "file:governance/Governance_SC4_ProtectedDomain4.xml";
+    gov_4.propagate = false;
+
+    gov_5.name = "dds.sec.access.governance";
+    gov_5.value = "file:governance/Governance_SC5_ProtectedDomain5.xml";
+    gov_5.propagate = false;
+
+    gov_6.name = "dds.sec.access.governance";
+    gov_6.value = "file:governance/Governance_SC6_ProtectedDomain6.xml";
+    gov_6.propagate = false;
+
+    perm_join.name = "dds.sec.access.permissions";
+    perm_join.value = "file:permissions/Permissions_JoinDomain_OCI.xml";
+    perm_join.propagate = false;
+
+    perm_topic.name = "dds.sec.access.permissions";
+    perm_topic.value = "file:permissions/Permissions_TopicLevel_OCI.xml";
+    perm_topic.propagate = false;
+
+    add_property(permca);
+    add_property(gov_0);
+    add_property(perm_join);
   }
 
   ~AccessControlTest()
   {
+  }
+
+  void add_property(Property_t p) {
+      PropertySeq& seq = domain_participant_qos.property.value;
+      size_t len = seq.length();
+      seq.length(len + 1);
+      seq[len] = p;
   }
 
   DDS::Security::AccessControl& get_inst()
@@ -186,6 +243,7 @@ public:
     return test_class_;
   }
 
+  DomainParticipantQos domain_participant_qos;
 private:
 
   AccessControlBuiltInImpl test_class_;
@@ -205,12 +263,11 @@ TEST_F(AccessControlTest, validate_local_permissions_InvalidInput)
 
 TEST_F(AccessControlTest, validate_local_permissions_Success)
 {
-  ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
   MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
   ::DDS::Security::PermissionsHandle out_handle =
-    get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, qos, ex);
+    get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
   EXPECT_FALSE(DDS::HANDLE_NIL == out_handle);
 }
 

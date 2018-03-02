@@ -263,8 +263,8 @@ private:
   ::CORBA::Long generate_handle();
   ::CORBA::Long load_governance_file(std::string);
   ::CORBA::Long load_permissions_file(std::string);
-
-
+  ::CORBA::Boolean file_exists(const std::string&);
+  std::string extract_file_name(const std::string&);
 
 
   ACE_Thread_Mutex handle_mutex_;

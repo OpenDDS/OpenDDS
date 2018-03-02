@@ -75,9 +75,46 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // Pull file attribute info from qos
     // Place holder for not having qos populated
-  std::string ac_files_path = "/home/neeleym/dev/ddsinterop/bg/Security_Demo_12_2017_Burlingame/configuration_files/";
-  std::string gov_file = ac_files_path.append("governance/Governance_SC0_SecurityDisabled.xml");
-  std::string perm_file = ac_files_path.append("permissions/Permissions_JoinDomain_OCI.xml");
+  //std::string ac_files_path = "/home/neeleym/dev/ddsinterop/bg/Security_Demo_12_2017_Burlingame/configuration_files/";
+  //std::string gov_file = ac_files_path.append("governance/Governance_SC0_SecurityDisabled.xml");
+  //std::string perm_file = ac_files_path.append("permissions/Permissions_JoinDomain_OCI.xml");
+
+  const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
+  std::string name, value, permca_file, gov_file, perm_file;
+
+  for (size_t i = 0; i < props.length(); ++i) {
+    name = props[i].name;
+    value = props[i].value;
+    if (name == "dds.sec.access.permissions_ca") {
+        std::string fn = extract_file_name(value);
+        if(!fn.empty()) {
+          if(file_exists(fn)) {
+            permca_file = fn;
+          }else {
+            CommonUtilities::set_security_error(ex,-1, 0, "Invalid permissions_ca file property." );
+          }
+        }
+
+    } else if (name == "dds.sec.access.governance") {
+      std::string fn = extract_file_name(value);
+        if(!fn.empty()) {
+          if(file_exists(fn)) {
+            gov_file = fn;
+          }else {
+            CommonUtilities::set_security_error(ex,-1, 0, "Invalid governance file property." );
+          }
+        }
+    } else if (name == "dds.sec.access.permissions") {
+      std::string fn = extract_file_name(value);
+      if(!fn.empty()) {
+        if(file_exists(fn)) {
+          perm_file = fn;
+        }else {
+          CommonUtilities::set_security_error(ex,-1, 0, "Invalid permissions file property." );
+        }
+      }
+    }
+  }
 
   ::DDS::Security::PermissionsHandle perm_handle = load_governance_file(gov_file);
   if(-1 == perm_handle) {
@@ -157,13 +194,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions handle");
     return false;
   }
-
-  // This is dummy data
-/*
-  ::DDS::Security::DomainId_t  dummy_domain = 0;
-  ::DDS::Security::ParticipantSecurityAttributes psa;
-  ::DDS::Security::SecurityException exc;
-*/
 
 /*
  *  The rules of this method need to be evaluated in this order, however, we need to check
@@ -588,7 +618,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
    ParticipantGovMapType::iterator iter = pgov_map.begin();
    iter = pgov_map.find(permissions_handle);
    if(iter != pgov_map.end()) {
-     std::cout << "aup:" << iter->second.domain_attrs.allow_unauthenticated_participants << std::endl;
      attributes.allow_unauthenticated_participants = iter->second.domain_attrs.allow_unauthenticated_participants;
      attributes.is_access_protected = iter->second.domain_attrs.is_access_protected;
      attributes.is_rtps_protected = iter->second.domain_attrs.is_rtps_protected;
@@ -743,47 +772,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Long AccessControlBuiltInImpl::load_governance_file(std::string g_file)
 {
 
+  ::DDS::Security::PermissionsHandle ph = generate_handle();
 
-  /* Set all permissions to true in the stub
-      domain_rule gov_config_data;
-      gov_config_data.domain_list.insert(0);
-      gov_config_data.domain_attrs.allow_unauthenticated_participants = true;
-      gov_config_data.domain_attrs.is_access_protected = false;
-      gov_config_data.domain_attrs.is_discovery_protected = false;
-      gov_config_data.domain_attrs.is_liveliness_protected = false;
-      gov_config_data.domain_attrs.is_rtps_protected = false;
-     gov_config_data.domain_attrs.plugin_participant_attributes = 0xFFFFFFFF;
-
-     TopicAccessRule t_rules;
-
-     t_rules.topic_expression = "*";
-     t_rules.topic_attrs.is_liveliness_protected = 0;
-     t_rules.topic_attrs.is_discovery_protected = 0;
-     t_rules.topic_attrs.is_read_protected = 1;
-     t_rules.topic_attrs.is_write_protected = 1;
-
-     gov_config_data.topic_rules.push_back(t_rules);
-
-     domain_access_rules gov_domain_access_rules;
-     gov_domain_access_rules.push_back(gov_config_data);
-     */
-
-     ::DDS::Security::PermissionsHandle ph = generate_handle();
-     // pgov_map.insert(std::make_pair(ph , gov_config_data ));
-
-     ParticipantGovMapType::iterator iter = pgov_map.begin();
-     iter = pgov_map.find(ph);
-     if(iter != pgov_map.end()) {
-        std::cout << "handle:" << iter->first << std::endl;
-     }
-
-  //std::cout << "Gov size:" << pgov_map.size() <<  "Gov entry:" << pgov_map.count(1) << std::endl;
-
+  ParticipantGovMapType::iterator iter = pgov_map.begin();
+  iter = pgov_map.find(ph);
+  if(iter != pgov_map.end()) {
+    std::cout << "handle:" << iter->first << std::endl;
+  }
 
   try
   {
     xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-    std::cout  << "Xerces initialized..." << std::endl;
   }
   catch( xercesc::XMLException& e )
   {
@@ -842,7 +841,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
        for( XMLSize_t rn = 0; rn<ruleNodes->getLength();rn++) {
            char * dn_tag = xercesc::XMLString::transcode(ruleNodes->item(rn)->getNodeName());
            if ( strcmp("domains", dn_tag) == 0 ) {
-             std::cout << xercesc::XMLString::transcode(ruleNodes->item(rn)->getNodeName()) << std::endl;
              xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
                for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
                  if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
@@ -857,7 +855,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      xercesc::DOMNodeList * allow_unauthenticated_participants_ =
               xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("allow_unauthenticated_participants"));
      char * attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
-     std::cout << "attr_aup:" << attr_aup << std::endl;
      rule_holder_.domain_attrs.allow_unauthenticated_participants = (strcmp(attr_aup,"false") == 0 ? false : true);
 
 
@@ -918,15 +915,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
          rule_holder_.topic_rules.push_back(t_rules);
        }
 
-
-       std::cout << "Inserting:" << ph << std::endl;
-       std::cout << "allow_unauthenticated_participants: " << rule_holder_.domain_attrs.allow_unauthenticated_participants << std::endl;
        pgov_map.insert(std::make_pair(ph , rule_holder_));
 
    } // domain_rule
-
-  std::cout << "domain rules count:" << domainRules->getLength() << std::endl;
-
 
 
     delete parser;
@@ -937,23 +928,34 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(std::string p_file)
-{
-  try
-  {
+::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(std::string p_file) {
+  try {
     xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-    std::cout  << "Xerces initialized..." << std::endl;
+    std::cout << "Xerces initialized..." << std::endl;
   }
-  catch( xercesc::XMLException& e )
-  {
-    char* message = xercesc::XMLString::transcode( e.getMessage() );
+  catch (xercesc::XMLException &e) {
+    char *message = xercesc::XMLString::transcode(e.getMessage());
     std::cerr << "XML toolkit initialization error: " << message << std::endl;
-    xercesc::XMLString::release( &message );
+    xercesc::XMLString::release(&message);
     // throw exception here to return ERROR_XERCES_INIT
   }
   return 0;
 }
 
+::CORBA::Boolean AccessControlBuiltInImpl::file_exists(const std::string& name) {
+  struct stat buffer;
+  return (stat (name.c_str(), &buffer) == 0);
+}
+
+std::string AccessControlBuiltInImpl::extract_file_name(const std::string& file_parm) {
+  std::string del = ":";
+  int pos = file_parm.find_last_of(del);
+  if ((pos > 0 ) && (pos != file_parm.length() - 1) ) {
+    return file_parm.substr(pos + 1);
+  } else {
+    return std::string("");
+  }
+}
 
 } // namespace Security
 } // namespace OpenDDS
