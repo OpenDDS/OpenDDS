@@ -6,9 +6,13 @@
 #ifndef OPENDDS_CRYPTO_BUILTIN_IMPL_H
 #define OPENDDS_CRYPTO_BUILTIN_IMPL_H
 
+#include "DdsSecurity_Export.h"
+
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
+
 #include "tao/LocalObject.h"
+
 #include "ace/Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
