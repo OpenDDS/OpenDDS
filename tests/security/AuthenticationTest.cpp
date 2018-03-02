@@ -25,6 +25,33 @@ using DDS::Security::AuthRequestMessageToken;
 using DDS::Security::ValidationResult_t;
 using DDS::Security::DomainId_t;
 
+struct MockParticipantData
+{
+  DomainParticipantQos qos;
+  GUID_t guid;
+  DomainId_t domain_id;
+  SecurityException ex;
+
+  MockParticipantData() : guid(OpenDDS::DCPS::GUID_UNKNOWN), domain_id(), ex()
+  {
+
+  }
+
+  void add_property(Property_t p) {
+    PropertySeq& seq = qos.property.value;
+    size_t len = seq.length();
+    seq.length(len + 1);
+    seq[len] = p;
+  }
+
+  void add_binary_property(BinaryProperty_t p) {
+    BinaryPropertySeq& seq = qos.property.binary_value;
+    size_t len = seq.length();
+    seq.length(len + 1);
+    seq[len] = p;
+  }
+};
+
 struct AuthenticationTest : public ::testing::Test
 {
   static IdentityHandle ValidateLocalParticipant(AuthenticationBuiltInImpl& test_class)
@@ -83,47 +110,63 @@ struct AuthenticationTest : public ::testing::Test
     EXPECT_EQ(DDS::Security::VALIDATION_FAILED, validate_result);
   }
 
-  AuthenticationTest() : guid(OpenDDS::DCPS::GUID_UNKNOWN) {
-      Property_t idca, pkey, pass, idcert;
-
-      idca.name = "dds.sec.auth.identity_ca";
-      idca.value = "file:certs/opendds_identity_ca_cert.pem";
-      idca.propagate = false;
-
-      pkey.name = "dds.sec.auth.private_key";
-      pkey.value = "file:certs/mock_participant_1/opendds_participant_private_key.pem";
-      pkey.propagate = false;
-
-      pass.name = "dds.sec.auth.password";
-      pass.value = "";
-      pass.propagate = false;
-
-      idcert.name = "dds.sec.auth.identity_certificate";
-      idcert.value = "file:certs/mock_participant_1/opendds_participant_cert.pem";
-      idcert.propagate = false;
-
-      add_property(idca);
-      add_property(pkey);
-      add_property(pass);
-      add_property(idcert);
+  AuthenticationTest() {
+    init_mock_participant_1();
+    init_mock_participant_2();
   }
 
-  ~AuthenticationTest(){
+  void init_mock_participant_1()
+  {
+    Property_t idca, pkey, pass, idcert;
+
+    idca.name = "dds.sec.auth.identity_ca";
+    idca.value = "file:certs/opendds_identity_ca_cert.pem";
+    idca.propagate = false;
+
+    pkey.name = "dds.sec.auth.private_key";
+    pkey.value = "file:certs/mock_participant_1/opendds_participant_private_key.pem";
+    pkey.propagate = false;
+
+    pass.name = "dds.sec.auth.password";
+    pass.value = "";
+    pass.propagate = false;
+
+    idcert.name = "dds.sec.auth.identity_certificate";
+    idcert.value = "file:certs/mock_participant_1/opendds_participant_cert.pem";
+    idcert.propagate = false;
+
+    mp1.add_property(idca);
+    mp1.add_property(pkey);
+    mp1.add_property(pass);
+    mp1.add_property(idcert);
   }
 
-  void add_property(Property_t p) {
-    PropertySeq& seq = domain_participant_qos.property.value;
-    size_t len = seq.length();
-    seq.length(len + 1);
-    seq[len] = p;
+  void init_mock_participant_2()
+  {
+    Property_t idca, pkey, pass, idcert;
+
+    idca.name = "dds.sec.auth.identity_ca";
+    idca.value = "file:certs/opendds_identity_ca_cert.pem";
+    idca.propagate = false;
+
+    pkey.name = "dds.sec.auth.private_key";
+    pkey.value = "file:certs/mock_participant_2/opendds_participant_private_key.pem";
+    pkey.propagate = false;
+
+    pass.name = "dds.sec.auth.password";
+    pass.value = "";
+    pass.propagate = false;
+
+    idcert.name = "dds.sec.auth.identity_certificate";
+    idcert.value = "file:certs/mock_participant_2/opendds_participant_cert.pem";
+    idcert.propagate = false;
+
+    mp2.add_property(idca);
+    mp2.add_property(pkey);
+    mp2.add_property(pass);
+    mp2.add_property(idcert);
   }
 
-  void add_binary_property(BinaryProperty_t p) {
-    BinaryPropertySeq& seq = domain_participant_qos.property.binary_value;
-    size_t len = seq.length();
-    seq.length(len + 1);
-    seq[len] = p;
-  }
 
   static std::string value_of(const std::string& key, const PropertySeq& s)
   {
@@ -135,10 +178,9 @@ struct AuthenticationTest : public ::testing::Test
     return NULL;
   }
 
-  DomainParticipantQos domain_participant_qos;
-  GUID_t guid;
-  DomainId_t domain_id;
-  SecurityException ex;
+
+  MockParticipantData mp1;
+  MockParticipantData mp2;
 };
 
 TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
@@ -146,7 +188,7 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
   AuthenticationBuiltInImpl auth;
   IdentityHandle h;
   GUID_t adjusted;
-  ValidationResult_t r = auth.validate_local_identity(h, adjusted, domain_id, domain_participant_qos, guid, ex);
+  ValidationResult_t r = auth.validate_local_identity(h, adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
@@ -164,9 +206,9 @@ TEST_F(AuthenticationTest, GetIdentityToken_Success)
   IdentityToken t;
   GUID_t adjusted;
 
-  auth.validate_local_identity(h, adjusted, domain_id, domain_participant_qos, guid, ex);
+  auth.validate_local_identity(h, adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
 
-  ASSERT_EQ(true, auth.get_identity_token(t, h, ex));
+  ASSERT_EQ(true, auth.get_identity_token(t, h, mp1.ex));
 
   ASSERT_EQ(cert_sn, value_of("dds.cert.sn", t.properties));
   ASSERT_EQ(ca_sn, value_of("dds.ca.sn", t.properties));
@@ -175,17 +217,15 @@ TEST_F(AuthenticationTest, GetIdentityToken_Success)
   ASSERT_EQ(std::string("RSA-2048"), value_of("dds.ca.algo", t.properties));
 }
 
-#if 0
 TEST_F(AuthenticationTest, ValidateRemoteIdentity_Success)
 {
   AuthenticationBuiltInImpl auth;
   IdentityHandle h;
   GUID_t adjusted;
-  ValidationResult_t r = auth.validate_local_identity(h, adjusted, domain_id, domain_participant_qos, guid, ex);
+  ValidationResult_t r = auth.validate_local_identity(h, adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
 
 
 }
-#endif
 
 
 #if 0
