@@ -235,8 +235,51 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_Pen
    *
    */
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, r);
-
 }
+
+TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_PendingHandshakeMessage)
+{
+  AuthenticationBuiltInImpl auth;
+  SecurityException ex;
+
+  /* Local participant: notice how it is mp2 this time */
+  ValidationResult_t r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
+
+  /* Remote participant: mp1 this time */
+  r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
+
+  /* First, generate an auth-request-token for the "remote" participant mp1. TokenNil is passed in this time
+   * so it will force-generate a local token associated with mp1. The results for this don't matter that much
+   * because the next call to validate_remote_identity is where the magic (in this test) happens. */
+  r = auth.validate_remote_identity(mp2.id_handle,
+                                    mp1.auth_request_message_token,
+                                    mp2.auth_request_message_token,
+                                    mp1.id_handle,
+                                    mp2.id_token,
+                                    mp2.guid_adjusted,
+                                    ex);
+
+  r = auth.validate_remote_identity(mp1.id_handle,
+                                    mp2.auth_request_message_token,
+                                    mp1.auth_request_message_token,
+                                    mp2.id_handle,
+                                    mp1.id_token,
+                                    mp1.guid_adjusted,
+                                    ex);
+
+  /* Make sure mp2 auth-request-token is TokenNil per the spec */
+  ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
+  ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
+  ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
+
+  /* Expected since now lexicographical GUID comparison yields: local > remote (in contrast to the test above) */
+  ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
+}
+
 
 int main(int argc, char** argv)
 {
