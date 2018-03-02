@@ -21,6 +21,8 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
+#include "dds/DCPS/security/framework/SecurityRegistry.h"
+
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #include "ace/Default_Constants.h"
@@ -94,6 +96,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
     heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
     heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
     held_data_delivery_handler_(this),
+    security_config_(Security::SecurityRegistry::instance()->default_config()),
     local_crypto_handle_(DDS::HANDLE_NIL)
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));

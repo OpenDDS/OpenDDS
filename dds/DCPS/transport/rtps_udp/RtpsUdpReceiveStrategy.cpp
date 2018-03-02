@@ -229,11 +229,23 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     const DDS::Security::ParticipantCryptoHandle peer_pch =
       link_->peer_crypto_handle(peer);
 
+    DDS::Security::CryptoTransform_var crypto =
+      link_->security_config()->get_crypto_transform();
+
     // call crypto plugin, bail out if failed validation
 
     // a. if(SRTPS_POSTFIX) decode_rtps_message -- not yet supported
 
     // b. preprocess_secure_submsg
+    DDS::Security::DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
+    DDS::Security::DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
+    DDS::Security::SecureSubmessageCategory_t category =
+      DDS::Security::INFO_SUBMESSAGE;
+    DDS::Security::SecurityException ex = {"", 0, 0};
+    DDS::OctetSeq encoded_subm; //TODO
+    const bool result =
+      crypto->preprocess_secure_submsg(dwch, drch, category, encoded_subm,
+                                       local_pch, peer_pch, ex);
 
     // c1. decode_datawriter_submessage
     // c2. decode_datareader_submessage
