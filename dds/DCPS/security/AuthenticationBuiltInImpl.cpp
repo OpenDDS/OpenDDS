@@ -16,6 +16,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <cstdio>
 
 #include "dds/DCPS/security/SSL/Utils.h"
 
@@ -97,22 +98,28 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   local_credential_data_.load(participant_qos.property.value);
 
   if (local_credential_data_.validate()) {
+    if (candidate_participant_guid != DCPS::GUID_UNKNOWN) {
 
-    int err = SSL::make_adjusted_guid(candidate_participant_guid,
-                                      adjusted_participant_guid,
-                                      local_credential_data_.get_participant_cert());
-    if (! err) {
-      local_identity_handle = get_next_handle();
+      int err = SSL::make_adjusted_guid(candidate_participant_guid,
+                                        adjusted_participant_guid,
+                                        local_credential_data_.get_participant_cert());
+      if (! err) {
+        local_identity_handle = get_next_handle();
 
-      IdentityData_Ptr local_identity = DCPS::make_rch<IdentityData>();
-      local_identity->participant_guid = adjusted_participant_guid;
+        IdentityData_Ptr local_identity = DCPS::make_rch<IdentityData>();
+        local_identity->participant_guid = adjusted_participant_guid;
 
-      {
-        ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-        identity_data_[local_identity_handle] = local_identity;
+        {
+          ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+          identity_data_[local_identity_handle] = local_identity;
+        }
+
+        result = DDS::Security::VALIDATION_OK;
       }
-
-      result = DDS::Security::VALIDATION_OK;
+    } else {
+        fprintf(stderr,
+                "AuthenticationBuiltInImpl::validate_local_identity: "
+                "Error, GUID_UNKNOWN passed in for candidate_participant_guid\n");
     }
   }
 

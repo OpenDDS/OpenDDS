@@ -6,6 +6,8 @@
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/GuidBuilder.h"
+#include "dds/DdsSecurityEntities.h"
 #include <cstring>
 
 using OpenDDS::DCPS::GUID_t;
@@ -29,12 +31,24 @@ struct MockParticipantData
 {
   DomainParticipantQos qos;
   GUID_t guid;
+  GUID_t guid_adjusted;
   DomainId_t domain_id;
   SecurityException ex;
 
-  MockParticipantData() : guid(OpenDDS::DCPS::GUID_UNKNOWN), domain_id(), ex()
-  {
+  IdentityHandle id_handle;
+  IdentityToken id_token;
+  AuthRequestMessageToken auth_request_message_token;
 
+  MockParticipantData() :
+    guid(OpenDDS::DCPS::GUID_UNKNOWN),
+    guid_adjusted(OpenDDS::DCPS::GUID_UNKNOWN),
+    domain_id(),
+    ex(),
+    id_handle(DDS::HANDLE_NIL),
+    id_token(DDS::Security::TokenNIL),
+    auth_request_message_token(DDS::Security::TokenNIL)
+  {
+    guid = OpenDDS::DCPS::GuidBuilder::create();
   }
 
   void add_property(Property_t p) {
@@ -54,61 +68,6 @@ struct MockParticipantData
 
 struct AuthenticationTest : public ::testing::Test
 {
-  static IdentityHandle ValidateLocalParticipant(AuthenticationBuiltInImpl& test_class)
-  {
-    // Just excercise the interface and return the handle/status
-    // No GUID or QoS checking is needed at this time
-    // THis also never fails in the stub, so don't bother checking
-    IdentityHandle local_handle = 0;
-    GUID_t adjusted_participant_guid;
-    GUID_t initial_guid;
-    DomainParticipantQos qos;
-    SecurityException ex;
-
-    test_class.validate_local_identity(
-      local_handle,
-      adjusted_participant_guid,
-      1,
-      qos,
-      initial_guid,
-      ex);
-
-      return local_handle;
-  }
-
-  static void CallFunctionsWithInvalidLocalHandle(
-    AuthenticationBuiltInImpl& test_class,
-    IdentityHandle handle)
-  {
-    SecurityException ex;
-
-    // Can't get or set tokens without a validated handle
-    IdentityToken token;
-    IdentityStatusToken status_token;
-    EXPECT_FALSE(test_class.get_identity_token(token, handle, ex));
-    EXPECT_FALSE(test_class.get_identity_token(status_token, handle, ex));
-
-    PermissionsCredentialToken cred_token;
-    PermissionsToken perm_token;
-    EXPECT_FALSE(test_class.set_permissions_credential_and_token(handle, cred_token, perm_token, ex));
-
-    // Can't validate a remote paticipant without validating local first
-    IdentityHandle remote_handle_out = 0;
-    IdentityToken remote_token;
-    AuthRequestMessageToken local_auth_request_token;
-    AuthRequestMessageToken remote_auth_request_token;
-    GUID_t remote_guid;
-    ValidationResult_t validate_result =
-      test_class.validate_remote_identity(
-        remote_handle_out,
-        local_auth_request_token,
-        remote_auth_request_token,
-        handle,
-        remote_token,
-        remote_guid,
-        ex);
-    EXPECT_EQ(DDS::Security::VALIDATION_FAILED, validate_result);
-  }
 
   AuthenticationTest() {
     init_mock_participant_1();
@@ -202,93 +161,46 @@ TEST_F(AuthenticationTest, GetIdentityToken_Success)
   std::string ca_sn("C = US, ST = MO, L = Saint Louis, O = Object Computing (Test Identity CA), CN = Object Computing (Test Iden CA), emailAddress = info@objectcomputing.com");
 
   AuthenticationBuiltInImpl auth;
-  IdentityHandle h;
-  IdentityToken t;
-  GUID_t adjusted;
 
-  auth.validate_local_identity(h, adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
+  auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
 
-  ASSERT_EQ(true, auth.get_identity_token(t, h, mp1.ex));
+  ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
 
-  ASSERT_EQ(cert_sn, value_of("dds.cert.sn", t.properties));
-  ASSERT_EQ(ca_sn, value_of("dds.ca.sn", t.properties));
+  ASSERT_EQ(cert_sn, value_of("dds.cert.sn", mp1.id_token.properties));
+  ASSERT_EQ(ca_sn, value_of("dds.ca.sn", mp1.id_token.properties));
 
-  ASSERT_EQ(std::string("RSA-2048"), value_of("dds.cert.algo", t.properties));
-  ASSERT_EQ(std::string("RSA-2048"), value_of("dds.ca.algo", t.properties));
+  ASSERT_EQ(std::string("RSA-2048"), value_of("dds.cert.algo", mp1.id_token.properties));
+  ASSERT_EQ(std::string("RSA-2048"), value_of("dds.ca.algo", mp1.id_token.properties));
 }
 
-TEST_F(AuthenticationTest, ValidateRemoteIdentity_Success)
+TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_Success)
 {
   AuthenticationBuiltInImpl auth;
-  IdentityHandle h;
-  GUID_t adjusted;
-  ValidationResult_t r = auth.validate_local_identity(h, adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
-
-
-}
-
-
-#if 0
-TEST_F(AuthenticationTest, NoLocalIdentity)
-{
-  // This will just do some simple testing of calling various
-  // functions of the API with an invalid local identity handle
-  AuthenticationBuiltInImpl test_class;
-  CallFunctionsWithInvalidLocalHandle(test_class, 0);
-}
-
-TEST_F(AuthenticationTest, WrongLocalIdentity)
-{
-  // This will just do some simple testing of calling various
-  // functions of the API with an invalid local identity handle
-  // In this test, there will be an identity registered, but the
-  // wrong handle will be used
-  AuthenticationBuiltInImpl test_class;
-  IdentityHandle local_handle = ValidateLocalParticipant(test_class);
-  CallFunctionsWithInvalidLocalHandle(test_class, local_handle + 1);
-}
-
-TEST_F(AuthenticationTest, TestValidateRemoteIdentity)
-{
-  // This will just do some simple testing of calling various
-  // functions of the API with an invalid local identity handle
-  AuthenticationBuiltInImpl test_class;
   SecurityException ex;
-  IdentityHandle handle = ValidateLocalParticipant(test_class);
 
-  // Get tokens
-  IdentityToken token;
-  EXPECT_TRUE(test_class.get_identity_token(token, handle, ex));
-  IdentityStatusToken status_token;
-  EXPECT_TRUE(test_class.get_identity_token(status_token, handle, ex));
+  /* Local participant */
+  ValidationResult_t r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
 
-  PermissionsCredentialToken cred_token;
-  PermissionsToken perm_token;
-  EXPECT_TRUE(test_class.set_permissions_credential_and_token(handle, cred_token, perm_token, ex));
+  /* Remote participant */
+  r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  // Can't validate a remote paticipant without validating local first
-  IdentityHandle remote_handle_out = 0;
-  IdentityToken remote_token;
-  AuthRequestMessageToken local_auth_request_token;
-  AuthRequestMessageToken remote_auth_request_token;
-  GUID_t remote_guid;
+  /* Leave the remote-auth-request-token set to TokenNil to force local-auth-request */
+  r = auth.validate_remote_identity(mp2.id_handle,
+                                    mp1.auth_request_message_token,
+                                    mp2.auth_request_message_token,
+                                    mp1.id_handle,
+                                    mp2.id_token,
+                                    mp2.guid_adjusted,
+                                    ex);
 
-  // The remote token needs to have a valid ID
-  remote_token.class_id = "DDS:Auth:PKI-DH:1.0";
+  /* Expected: Local auth request token non-nil */
+  ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
-  ValidationResult_t validate_result =
-    test_class.validate_remote_identity(
-      remote_handle_out,
-      local_auth_request_token,
-      remote_auth_request_token,
-      handle,
-      remote_token,
-      remote_guid,
-      ex);
-  EXPECT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, validate_result);
 }
-
-#endif
 
 int main(int argc, char** argv)
 {
