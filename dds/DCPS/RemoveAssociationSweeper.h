@@ -153,7 +153,6 @@ int RemoveAssociationSweeper<T>::handle_timeout(
   {
     // info may be destroyed at this moment, we can only access it
     // if it is in the info_set_. This could happen when cancel_timer() handle it first.
-    bool valid = false;
     ACE_Guard<ACE_Thread_Mutex> guard(this->mutex_);
     if (this->remove_info(info) == -1)
       return 0;
