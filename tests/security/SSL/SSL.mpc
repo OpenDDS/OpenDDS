@@ -1,3 +1,4 @@
 project(Security*): dcpsexe, opendds_security, googletest {
   requires += no_opendds_safety_profile
+  exename = *
 }
