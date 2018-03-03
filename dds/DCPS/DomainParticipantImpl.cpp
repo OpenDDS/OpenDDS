@@ -1620,6 +1620,14 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
+  if (TheServiceParticipant->get_security() && !security_config_) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipant::enable, ")
+               ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
   if (TheServiceParticipant->get_security()) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
