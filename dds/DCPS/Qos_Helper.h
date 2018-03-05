@@ -127,6 +127,8 @@ public:
 
   static bool valid(const DDS::EntityFactoryQosPolicy& qos);
 
+  static bool valid(const DDS::PropertyQosPolicy& qos);
+
   static bool valid(const DDS::WriterDataLifecycleQosPolicy& qos);
 
   static bool valid(const DDS::ReaderDataLifecycleQosPolicy& qos);
