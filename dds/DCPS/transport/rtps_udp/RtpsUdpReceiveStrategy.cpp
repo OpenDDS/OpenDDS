@@ -137,7 +137,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
                                sample.header_.sequence_.getValue(),
                                OPENDDS_STRING(reader_conv).c_str()));
         }
-        link_->data_received(sample, reader);
+        if (decode_payload(sample, data)) {
+          link_->data_received(sample, reader);
+        }
       }
 
     } else {
@@ -167,13 +169,17 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n", this,
                                sample.header_.sequence_.getValue()));
         }
-        link_->data_received(sample);
+        if (decode_payload(sample, data)) {
+          link_->data_received(sample);
+        }
       } else {
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received_include for seq: %q to readers_selected_\n", this,
                                sample.header_.sequence_.getValue()));
         }
-        link_->data_received_include(sample, readers_selected_);
+        if (decode_payload(sample, data)) {
+          link_->data_received_include(sample, readers_selected_);
+        }
       }
     }
     break;
@@ -232,40 +238,99 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     DDS::Security::CryptoTransform_var crypto =
       link_->security_config()->get_crypto_transform();
 
-    // call crypto plugin, bail out if failed validation
+    // if(SRTPS_POSTFIX) decode_rtps_message -- not yet supported
 
-    // a. if(SRTPS_POSTFIX) decode_rtps_message -- not yet supported
+    DDS::OctetSeq encoded_submsg, plain_submsg;
+    sec_submsg_to_octets(encoded_submsg, submessage);
+    secure_prefix_.smHeader.submessageId = 0;
+    secure_sample_ = ReceivedDataSample(0);
 
-    // b. preprocess_secure_submsg
     DDS::Security::DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
     DDS::Security::DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
     DDS::Security::SecureSubmessageCategory_t category =
       DDS::Security::INFO_SUBMESSAGE;
     DDS::Security::SecurityException ex = {"", 0, 0};
-    DDS::OctetSeq encoded_subm; //TODO
     const bool result =
-      crypto->preprocess_secure_submsg(dwch, drch, category, encoded_subm,
+      crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
                                        local_pch, peer_pch, ex);
+    bool ok;
 
-    // c1. decode_datawriter_submessage
-    // c2. decode_datareader_submessage
+    if (result && category == DDS::Security::DATAWRITER_SUBMESSAGE) {
+      ok = crypto->decode_datawriter_submessage(plain_submsg, encoded_submsg,
+                                                drch, dwch, ex);
 
-    secure_prefix_.smHeader.submessageId = 0;
+    } else if (result && category == DDS::Security::DATAREADER_SUBMESSAGE) {
+      ok = crypto->decode_datareader_submessage(plain_submsg, encoded_submsg,
+                                                dwch, drch, ex);
 
-    //    for (size_t i = 0; i < secure_submessages_.size(); ++i) {
-    //      RtpsSampleHeader sampleHeader;
-    //      sampleHeader.submessage_ = secure_submessages_[i];
-    //      if (check_header(sampleHeader)) {
-    //        deliver_sample_i(sample, sampleHeader.submessage_);
-    //      }
-    //    }
+    } else {
+      // ?? INFO_SUBMESSAGE case -- shouldn't be used inside SEC_PREFIX
+      // !result case
+      ok = false;
+    }
 
-    secure_sample_ = ReceivedDataSample(0);
+    if (ok) {
+      const char* buffer =
+        reinterpret_cast<const char*>(plain_submsg.get_buffer());
+      ACE_Message_Block mb(buffer, plain_submsg.length());
+      mb.wr_ptr(plain_submsg.length());
+      RtpsSampleHeader rsh(mb);
+      if (check_header(rsh)) {
+        ReceivedDataSample plain_sample(mb.duplicate());
+        if (rsh.into_received_data_sample(plain_sample)) {
+          deliver_sample_i(plain_sample, rsh.submessage_);
+        }
+      }
+    }
+
     break;
   }
   default:
     break;
   }
+}
+
+void
+RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
+                                             const RTPS::Submessage& submessage)
+{
+  size_t size = 0, padding = 0;
+  for (size_t i = 0; i < secure_submessages_.size(); ++i) {
+    gen_find_size(secure_submessages_[i], size, padding);
+    const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
+    if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
+      size += secure_sample_.sample_->size();
+    }
+    if ((size + padding) % 4) {
+      padding += 4 - ((size + padding) % 4);
+    }
+  }
+  gen_find_size(submessage, size, padding);
+
+  ACE_Message_Block mb(size + padding);
+  Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+
+  for (size_t i = 0; i < secure_submessages_.size(); ++i) {
+    ser << secure_submessages_[i];
+    const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
+    if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
+      const CORBA::Octet* sample_bytes =
+        reinterpret_cast<const CORBA::Octet*>(secure_sample_.sample_->rd_ptr());
+      ser.write_octet_array(sample_bytes, secure_sample_.sample_->length());
+    }
+    ser.skip(0, 4);
+  }
+  ser << submessage;
+
+  encoded.length(mb.length());
+  std::memcpy(encoded.get_buffer(), mb.rd_ptr(), mb.length());
+}
+
+bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
+                                            const RTPS::DataSubmessage& submsg)
+{
+  //TODO: call plugin
+  return true;
 }
 
 int
