@@ -7,6 +7,7 @@
 #define OPENDDS_SECURITY_SSL_CERTIFICATE_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
+#include "dds/DdsDcpsCoreC.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -41,6 +42,12 @@ namespace OpenDDS {
         int subject_name_digest(std::vector<unsigned char>& dst) const;
 
         int algorithm(std::string& dst) const;
+
+        int serialize(std::vector<unsigned char>& dst);
+
+        int serialize(DDS::OctetSeq& dst);
+
+        int deserialize(const DDS::OctetSeq& src);
 
       private:
 

@@ -285,6 +285,93 @@ namespace OpenDDS {
         return result;
       }
 
+      int Certificate::serialize(std::vector<unsigned char>& dst)
+      {
+        int result = 1;
+
+        if (x_) {
+
+          BIO* buffer = BIO_new(BIO_s_mem());
+          if (buffer) {
+
+            if (1 == PEM_write_bio_X509(buffer, x_)) {
+
+              unsigned char tmp[32] = {0};
+              int len = 0;
+              while ((len = BIO_read(buffer, tmp, sizeof(tmp))) > 0) {
+                dst.insert(dst.end(), tmp, tmp + len);
+                result = 0;
+              }
+
+            } else {
+              fprintf(stderr, "Certificate::serialize: Error, failed to write X509 to PEM\n");
+            }
+
+            BIO_free(buffer);
+
+          } else {
+            fprintf(stderr, "Certificate::serialize: Error, failed to allocate buffer with BIO_new\n");
+          }
+        }
+
+        return result;
+      }
+
+      int Certificate::serialize(DDS::OctetSeq& dst)
+      {
+        std::vector<unsigned char> tmp;
+        int err = serialize(tmp);
+        if (! err) {
+            dst.length(tmp.size());
+            for (size_t i = 0; i < tmp.size(); ++i) {
+              dst[i] = tmp[i];
+            }
+        }
+        return err;
+      }
+
+      int Certificate::deserialize(const DDS::OctetSeq& src)
+      {
+        int result = 1;
+
+        if (! x_) {
+            if (src.length() > 0) {
+
+              BIO* buffer = BIO_new(BIO_s_mem());
+              if (buffer) {
+
+                int len = BIO_write(buffer, src.get_buffer(), src.length());
+                if (len > 0) {
+                  x_ = PEM_read_bio_X509_AUX(buffer, NULL, NULL, NULL);
+
+                  if (x_) {
+                      result = 0;
+
+                  } else {
+                      fprintf(stderr, "Certificate::deserialize: Error, failed to read X509 from BIO\n");
+                  }
+
+                } else {
+                    fprintf(stderr, "Certificate::deserialize: Error, failed to write OctetSeq to BIO\n");
+                }
+
+                BIO_free(buffer);
+
+              } else {
+                fprintf(stderr, "Certificate::deserialize: Error, failed to allocate buffer with BIO_new\n");
+              }
+
+            } else {
+              fprintf(stderr, "Certificate::deserialize: Error, source OctetSeq contains no data\n");
+            }
+
+        } else {
+          fprintf(stderr, "Certificate::deserialize: Error, an X509 certificate has already been loaded\n");
+        }
+
+        return result;
+      }
+
       std::ostream& operator<<(std::ostream& lhs, const Certificate& rhs)
       {
         if (rhs.x_) {
