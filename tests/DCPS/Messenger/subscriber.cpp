@@ -31,8 +31,30 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Args.h"
 
+const char auth_ca_file[] = "file:../../security/certs/opendds_identity_ca_cert.pem";
+const char perm_ca_file[] = "file:../../security/certs/opendds_permissions_ca_cert.pem";
+const char id_cert_file[] = "file:../../security/certs/mock_participant_2/opendds_participant_cert.pem";
+const char id_key_file[] = "file:../../security/certs/mock_participant_2/opendds_participant_private_key.pem";
+const char governance_file[] = "file:./governance.xml";
+const char permissions_file[] = "file:./permissions.xml";
+
+const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
+const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
+const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
+const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
+const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
+const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
+
 bool reliable = false;
 bool wait_for_acks = false;
+
+void append(DDS::PropertySeq& props, const char* name, const char* value)
+{
+  const DDS::Property_t prop = {name, value, false /*propagate*/};
+  const unsigned int len = props.length();
+  props.length(len + 1);
+  props[len] = prop;
+}
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -48,10 +70,23 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return error;
     }
 
+    DDS::DomainParticipantQos part_qos;
+    dpf->get_default_participant_qos(part_qos);
+
+    if (TheServiceParticipant->get_security()) {
+      DDS::PropertySeq& props = part_qos.property.value;
+      append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
+      append(props, DDSSEC_PROP_IDENTITY_CERT, id_cert_file);
+      append(props, DDSSEC_PROP_IDENTITY_PRIVKEY, id_key_file);
+      append(props, DDSSEC_PROP_PERM_CA, perm_ca_file);
+      append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
+      append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
+    }
+
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
       dpf->create_participant(4,
-                              PARTICIPANT_QOS_DEFAULT,
+                              part_qos,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 

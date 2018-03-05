@@ -658,6 +658,12 @@ EndpointRegistry::build_id(DDS::DomainId_t domain,
   return id;
 }
 
+OpenDDS::DCPS::RepoId
+StaticDiscovery::generate_participant_guid()
+{
+  return GUID_UNKNOWN;
+}
+
 AddDomainStatus
 StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
                                         const DDS::DomainParticipantQos& qos)

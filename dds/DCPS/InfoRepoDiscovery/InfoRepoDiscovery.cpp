@@ -443,6 +443,12 @@ InfoRepoDiscovery::attach_participant(DDS::DomainId_t domainId,
   }
 }
 
+OpenDDS::DCPS::RepoId
+InfoRepoDiscovery::generate_participant_guid()
+{
+  return GUID_UNKNOWN;
+}
+
 DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
                                           const DDS::DomainParticipantQos& qos)
