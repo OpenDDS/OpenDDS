@@ -315,7 +315,10 @@ TEST_F(AccessControlTest, check_create_participant_Success)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
-  EXPECT_FALSE(DDS::HANDLE_NIL == get_inst().check_create_participant(1, 1, qos, ex));
+    MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+    ::DDS::Security::PermissionsHandle out_handle =
+            get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+  EXPECT_FALSE(DDS::HANDLE_NIL == get_inst().check_create_participant(out_handle, 0, domain_participant_qos, ex));
 }
 
 TEST_F(AccessControlTest, check_create_datawriter_InvalidInput)

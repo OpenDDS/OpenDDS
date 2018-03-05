@@ -82,6 +82,8 @@ public:
     DDS::DomainId_t domainId,
     const RepoId& participantId) = 0;
 
+  virtual OpenDDS::DCPS::RepoId generate_participant_guid() = 0;
+
   virtual AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos) = 0;

@@ -234,7 +234,8 @@ bool operator==(const DDS::DomainParticipantQos& qos1,
 {
   return
     qos1.user_data == qos2.user_data
-    && qos1.entity_factory == qos2.entity_factory;
+    && qos1.entity_factory == qos2.entity_factory
+    && qos1.property == qos2.property;
 }
 
 ACE_INLINE
@@ -851,6 +852,12 @@ bool Qos_Helper::valid(const DDS::EntityFactoryQosPolicy& qos)
 }
 
 ACE_INLINE
+bool Qos_Helper::valid(const DDS::PropertyQosPolicy& /* qos */)
+{
+  return true;
+}
+
+ACE_INLINE
 bool Qos_Helper::valid(const DDS::WriterDataLifecycleQosPolicy&)
 {
   return true;
@@ -865,7 +872,7 @@ bool Qos_Helper::valid(const DDS::ReaderDataLifecycleQosPolicy&)
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::DomainParticipantQos& qos)
 {
-  return valid(qos.user_data) && valid(qos.entity_factory);
+  return valid(qos.user_data) && valid(qos.entity_factory) && valid(qos.property);
 }
 
 ACE_INLINE

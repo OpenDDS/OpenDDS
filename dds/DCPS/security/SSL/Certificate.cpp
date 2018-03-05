@@ -11,6 +11,11 @@
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 
+// https://www.openssl.org/docs/faq.html#PROG3
+#ifdef _MSC_VER
+# include <openssl/applink.c>
+#endif
+
 namespace OpenDDS {
   namespace Security {
     namespace SSL {
@@ -385,4 +390,3 @@ namespace OpenDDS {
     }
   }
 }
-

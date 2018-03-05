@@ -34,6 +34,7 @@
 #include "dds/DCPS/RcEventHandler.h"
 
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 
 class DDS_TEST;
 
@@ -127,6 +128,9 @@ public:
   virtual void pre_stop_i();
 
   virtual void send_final_acks (const RepoId& readerid);
+
+  Security::SecurityConfig_rch security_config() const
+  { return security_config_; }
 
   DDS::Security::ParticipantCryptoHandle local_crypto_handle() const;
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
@@ -518,6 +522,7 @@ private:
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
 
+  Security::SecurityConfig_rch security_config_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
   OPENDDS_MAP_CMP(RepoId, DDS::Security::ParticipantCryptoHandle,
                   GUID_tKeyLessThan) peer_crypto_handles_;
