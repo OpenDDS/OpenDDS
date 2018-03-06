@@ -395,7 +395,7 @@ int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   if (not_default(pbtd.property))
   {
     Parameter param_p;
-    param_pt.property(pbtd.property);
+    param_p.property(pbtd.property);
     add_param(param_list, param_p);
   }
 
@@ -423,7 +423,7 @@ int to_param_list(const DDS::Security::IdentityToken& identity_token,
   if (not_default(property_qos))
   {
     Parameter param_p;
-    param_pt.property(property_qos);
+    param_p.property(property_qos);
     add_param(param_list, param_p);
   }
 
