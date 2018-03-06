@@ -31,11 +31,6 @@ namespace OpenDDS {
 
         void load(const std::string& uri, const std::string& password = "");
 
-        EVP_PKEY* get()
-        {
-          return k_;
-        }
-
       private:
 
         static EVP_PKEY* EVP_PKEY_from_pem(const std::string& path, const std::string& password = "");
