@@ -5,9 +5,8 @@
 
 #include "DiffieHellman.h"
 #include "Utils.h"
+#include "Err.h"
 #include <openssl/dh.h>
-#include <cstring>
-#include <cerrno>
 
 namespace OpenDDS {
   namespace Security {
@@ -45,30 +44,34 @@ namespace OpenDDS {
 
             EVP_PKEY_CTX* keygen_ctx = EVP_PKEY_CTX_new(pkey, NULL);
             if (keygen_ctx) {
-              if (1 == EVP_PKEY_keygen_init(keygen_ctx)) {
-                if (1 == EVP_PKEY_keygen(keygen_ctx, &pkey)) {
+
+              int result = EVP_PKEY_keygen_init(keygen_ctx);
+              if (1 == result) {
+
+                result = EVP_PKEY_keygen(keygen_ctx, &pkey);
+                if (1 == result) {
                   k_ = pkey;
 
                 } else {
-                  fprintf(stderr, "DiffieHellman::load: Error, EVP_PKEY_keygen failed\n");
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen failed");
                 }
 
               } else {
-                fprintf(stderr, "DiffieHellman::load: Error, EVP_PKEY_keygen_init failed\n");
+                OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen_init failed");
               }
 
             } else {
-              fprintf(stderr, "DiffieHellman::load: Error, EVP_PKEY_CTX_new allocation failed\n");
+              OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new allocation failed");
             }
 
             EVP_PKEY_CTX_free(keygen_ctx);
 
           } else {
-            fprintf(stderr, "DiffieHellman::load: Error, failed to set EVP_PKEY to DH_get_2048_256()\n");
+            OPENDDS_SSL_LOG_ERR("failed to set EVP_PKEY to DH_get_2048_256()");
           }
 
         } else {
-          fprintf(stderr, "DiffieHellman::load: Error, failed to allocate new EVP_PKKEY\n");
+          OPENDDS_SSL_LOG_ERR("failed to allocate new EVP_PKKEY");
         }
       }
 
@@ -90,7 +93,7 @@ namespace OpenDDS {
                   result = 0;
 
               } else {
-                  fprintf(stderr, "DiffieHellman::pub_key: Error, BN_bn2bin failed\n");
+                  OPENDDS_SSL_LOG_ERR("BN_bn2bin failed");
               }
             }
           }
