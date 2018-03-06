@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include "dds/DCPS/security/SSL/PrivateKey.h"
+#include "dds/DCPS/security/SSL/DiffieHellman.h"
 
 #include "dds/DdsDcpsCoreC.h"
 
@@ -42,6 +43,11 @@ namespace OpenDDS {
         return participant_pkey_;
       }
 
+      SSL::DiffieHellman& get_diffie_hellman_key()
+      {
+        return dhkey_;
+      }
+
       bool validate()
       {
         return (X509_V_OK == participant_cert_.validate(ca_cert_));
@@ -52,6 +58,7 @@ namespace OpenDDS {
       SSL::Certificate ca_cert_;
       SSL::Certificate participant_cert_;
       SSL::PrivateKey participant_pkey_;
+      SSL::DiffieHellman dhkey_;
     };
 
   }

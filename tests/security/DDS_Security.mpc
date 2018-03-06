@@ -1,4 +1,4 @@
-project(AuthenticationTest): dcpsexe, opendds_security, googletest {
+project(AuthenticationTest): dcpsexe, opendds_security, dcps_rtps, googletest {
   requires += no_opendds_safety_profile
   exename = OpenDDS_AuthenticationTest
 

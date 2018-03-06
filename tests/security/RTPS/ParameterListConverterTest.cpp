@@ -1,11 +1,11 @@
 
 #include "gtest/gtest.h"
 #include "dds/DCPS/RTPS/ParameterListConverter.h"
-#include "ParameterListConverterTest_Helpers.h"
-
 #include <sstream>
 #include <memory>
 #include <cstring>
+
+#include "../Utils.h"
 
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::Security;

@@ -42,9 +42,6 @@ static const std::string Handshake_Final_Class_Ext("Final");
 
 // Until a real implementation is created, a stub sequence will be sent for data
 static const DDS::OctetSeq Empty_Seq;
-static const std::string AlgoName("RSASSA-PSS-SHA256");
-static const std::string AgreementAlgo("DH+MODP-2048-256");
-
 
 struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
@@ -288,60 +285,70 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::DDS::OctetSeq & serialized_local_participant_data,
   ::DDS::Security::SecurityException & ex)
 {
-  // Verify that the serialize data is not empty, and that the local and remote
-  // handles were linked by a call to validate_remote_identity
-  if (serialized_local_participant_data.length() == 0) {
-    set_security_error(ex, -1, 0, "No participant data provided");
-    return DDS::Security::VALIDATION_FAILED;
-}
+  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
-  IdentityData_Ptr remoteDataPtr = get_identity_data(replier_identity_handle);
-  if (!remoteDataPtr) {
-    set_security_error(ex, -1, 0, "Unknown remote participant");
-    return DDS::Security::VALIDATION_FAILED;
-  }
-  if (remoteDataPtr->local_handle != initiator_identity_handle) {
-    set_security_error(ex, -1, 0, "Participants are not matched");
-    return DDS::Security::VALIDATION_FAILED;
-  }
+  if (serialized_local_participant_data.length() != 0) {
 
-  // Populate the handshake output message with some stubbed out properties
-  OpenDDS::Security::TokenWriter handshake_wrapper(
-  handshake_message, build_class_id(Handshake_Request_Class_Ext), 0, 8);
+      IdentityData_Ptr replier_data = get_identity_data(replier_identity_handle);
+      if (replier_data) {
+        if (replier_data->local_handle == initiator_identity_handle) {
 
-  unsigned int prop_index = 0;
-  handshake_wrapper.set_bin_property(prop_index++, "c.id", Empty_Seq, true);
-  handshake_wrapper.set_bin_property(prop_index++, "c.perm", Empty_Seq, true);
-  handshake_wrapper.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
-  handshake_wrapper.set_bin_property(prop_index++, "c.dsign_algo", AlgoName, true);
-  handshake_wrapper.set_bin_property(prop_index++, "c.kagree_algo", AgreementAlgo, true);
-  handshake_wrapper.set_bin_property(prop_index++, "c.hash_c1", Empty_Seq, true);
-  handshake_wrapper.set_bin_property(prop_index++, "c.ocsp_status", Empty_Seq, true);
+          // Populate the handshake output message with some stubbed out properties
+          OpenDDS::Security::TokenWriter handshake_wrapper(handshake_message,
+                                                           build_class_id(Handshake_Request_Class_Ext),
+                                                           0, 7);
+          unsigned int prop_index = 0;
+          DDS::OctetSeq tmp;
 
-  // If the remote_auth_request_token is not TokenNIL, then use the challenge from it.
-  // Otherwise just use a stubbed out sequence
-  OpenDDS::Security::TokenReader auth_wrapper(remoteDataPtr->local_auth_request);
-  if (!auth_wrapper.is_nil()) {
-    const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
-    handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", challenge_data, true);
+          local_credential_data_.get_participant_cert().serialize(tmp);
+          handshake_wrapper.set_bin_property(prop_index++, "c.id", tmp, true);
+
+          handshake_wrapper.set_bin_property(prop_index++, "c.perm", Empty_Seq, true); /* TODO */
+          handshake_wrapper.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
+          handshake_wrapper.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
+          handshake_wrapper.set_bin_property(prop_index++, "c.kagree_algo", "DH+MODP-2048-256", true);
+
+          local_credential_data_.get_diffie_hellman_key().pub_key(tmp);
+          handshake_wrapper.set_bin_property(prop_index++, "dh1", tmp, true);
+
+          // If the remote_auth_request_token is not TokenNIL, then use the challenge from it.
+          // Otherwise just use a stubbed out sequence
+          OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
+          if (!auth_wrapper.is_nil()) {
+            const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
+            handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", challenge_data, true);
+          } else {
+            handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", Empty_Seq, true);
+          }
+
+          // The stub doesn't worry about any pre-existing handshakes between these two participants
+          // and will always just create a new handshake session
+          HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
+          newHandshakeData->local_identity_handle = initiator_identity_handle;
+          newHandshakeData->remote_identity_handle = replier_identity_handle;
+          newHandshakeData->local_initiator = true;
+          newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+          handshake_handle = get_next_handle();
+          {
+            ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
+            handshake_data_[handshake_handle] = newHandshakeData;
+          }
+
+          result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+
+        } else {
+            set_security_error(ex, -1, 0, "Participants are not matched");
+        }
+
+      } else {
+        set_security_error(ex, -1, 0, "Unknown remote participant");
+      }
+
   } else {
-    handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", Empty_Seq, true);
+      set_security_error(ex, -1, 0, "No participant data provided");
   }
 
-  // The stub doesn't worry about any pre-existing handshakes between these two participants
-  // and will always just create a new handshake session
-  HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
-  newHandshakeData->local_identity_handle = initiator_identity_handle;
-  newHandshakeData->remote_identity_handle = replier_identity_handle;
-  newHandshakeData->local_initiator = true;
-  newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
-  handshake_handle = get_next_handle();
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
-    handshake_data_[handshake_handle] = newHandshakeData;
-  }
-
-  return DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+  return result;
 }
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::begin_handshake_reply(
@@ -377,8 +384,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   reply_msg.set_bin_property(prop_index++, "c.id", Empty_Seq, true);
   reply_msg.set_bin_property(prop_index++, "c.perm", Empty_Seq, true);
   reply_msg.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
-  reply_msg.set_bin_property(prop_index++, "c.dsign_algo", AlgoName, true);
-  reply_msg.set_bin_property(prop_index++, "c.kagree_algo", AgreementAlgo, true);
+  reply_msg.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
+  reply_msg.set_bin_property(prop_index++, "c.kagree_algo", "DH+MODP-2048-256", true);
   reply_msg.set_bin_property(prop_index++, "hash_c2", Empty_Seq, true);
   reply_msg.set_bin_property(prop_index++, "dh2", Empty_Seq, true);
   reply_msg.set_bin_property(prop_index++, "hash_c1", Empty_Seq, true);

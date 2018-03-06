@@ -7,6 +7,7 @@
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsSecurityEntities.h"
+#include "Utils.h"
 #include <cstring>
 
 using OpenDDS::DCPS::GUID_t;
@@ -23,6 +24,8 @@ using DDS::Security::IdentityToken;
 using DDS::Security::PermissionsCredentialToken;
 using DDS::Security::PermissionsToken;
 using DDS::Security::AuthRequestMessageToken;
+using DDS::Security::HandshakeHandle;
+using DDS::Security::HandshakeMessageToken;
 using DDS::Security::ValidationResult_t;
 using DDS::Security::DomainId_t;
 
@@ -38,6 +41,10 @@ struct MockParticipantData
   IdentityHandle id_handle;
   IdentityToken id_token;
   AuthRequestMessageToken auth_request_message_token;
+  HandshakeHandle handshake_handle;
+  HandshakeMessageToken handshake_message_token;
+
+  DDS::ParticipantBuiltinTopicData data;
 
   static unsigned char next_guid_modifier;
 
@@ -60,7 +67,9 @@ struct MockParticipantData
     ex(),
     id_handle(DDS::HANDLE_NIL),
     id_token(DDS::Security::TokenNIL),
-    auth_request_message_token(DDS::Security::TokenNIL)
+    auth_request_message_token(DDS::Security::TokenNIL),
+    handshake_handle(DDS::HANDLE_NIL),
+    handshake_message_token(DDS::Security::TokenNIL)
   {
     guid = make_guid();
   }
@@ -278,6 +287,42 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_Pendi
 
   /* Expected since now lexicographical GUID comparison yields: local > remote (in contrast to the test above) */
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
+}
+
+TEST_F(AuthenticationTest, BeginHandshakeRequest_Success)
+{
+  AuthenticationBuiltInImpl auth;
+  SecurityException ex;
+
+  /* Local participant */
+  ValidationResult_t r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
+
+  /* Remote participant */
+  r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
+
+  /* Leave the remote-auth-request-token set to TokenNil to force local-auth-request */
+  r = auth.validate_remote_identity(mp2.id_handle,
+                                    mp1.auth_request_message_token,
+                                    mp2.auth_request_message_token,
+                                    mp1.id_handle,
+                                    mp2.id_token,
+                                    mp2.guid_adjusted,
+                                    ex);
+
+  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
+  ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
+  ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
+
+  ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, r);
+
+  /* WORK IN PROGRESS!! */
+  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  //r = auth.begin_handshake_request(mp1.handshake_handle, mp1.handshake_message_token, mp1.id_handle, mp2.id_handle, blah, ex);
 }
 
 

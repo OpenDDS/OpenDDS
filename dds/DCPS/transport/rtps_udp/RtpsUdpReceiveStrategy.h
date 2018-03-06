@@ -82,6 +82,11 @@ private:
 
   virtual bool reassemble(ReceivedDataSample& data);
 
+  void sec_submsg_to_octets(DDS::OctetSeq& encoded,
+                            const RTPS::Submessage& submessage);
+
+  bool decode_payload(ReceivedDataSample& sample,
+                      const RTPS::DataSubmessage& submessage);
 
   RtpsUdpDataLink* link_;
   SequenceNumber last_received_;

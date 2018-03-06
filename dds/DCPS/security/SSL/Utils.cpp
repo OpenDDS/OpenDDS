@@ -94,12 +94,12 @@ namespace OpenDDS {
         return result;
       }
 
-      template <size_t N>
+      template <size_t Bits>
       int make_nonce(std::vector<unsigned char>& nonce)
       {
         nonce.clear();
 
-        unsigned char tmp[N/8] = {0};
+        unsigned char tmp[Bits/8] = {0};
 
         int result = RAND_bytes(tmp, sizeof(tmp));
         if (1 == result) {
