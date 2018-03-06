@@ -19,9 +19,8 @@
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
 #include "xercesc/sax/HandlerBase.hpp"
-#include "xercesc/util/XMLString.hpp"
 #include "AccessControlBuiltInImpl.h"
-#include <xercesc/util/PlatformUtils.hpp>
+
 
 #include <fstream>
 #include <iostream>
@@ -137,18 +136,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             << " is_rtps_protected:" << attrs.is_rtps_protected
             << std::endl;
 
-  // Test check_create_participant
 
-  ::DDS::Security::DomainId_t d_id;
-  ::CORBA::Boolean z = check_create_participant(perm_handle, 0,participant_qos,ex) ;
-  std::cout << "check_create_participant: "  << z << std::endl;
-  /*
-  if(0 != load_permissions_file(perm_file)) {
+  if(0 != load_permissions_file(perm_file, perm_handle)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
-   */
-
+    std::cout << pperm_map.begin()->second.begin()->subject << std::endl;
 
   return perm_handle ;
 }
@@ -928,18 +921,196 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(std::string p_file) {
-  try {
-    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-    std::cout << "Xerces initialized..." << std::endl;
+::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(std::string p_file, ::DDS::Security::PermissionsHandle p_handle) {
+
+
+  ParticipantPermMapType::iterator iter = pperm_map.begin();
+  iter = pperm_map.find(p_handle);
+  if(iter != pperm_map.end()) {
+    std::cout << "handle:" << iter->first << std::endl;
   }
-  catch (xercesc::XMLException &e) {
-    char *message = xercesc::XMLString::transcode(e.getMessage());
+
+  try
+  {
+    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
+  }
+  catch( xercesc::XMLException& e )
+  {
+    char* message = xercesc::XMLString::transcode( e.getMessage() );
     std::cerr << "XML toolkit initialization error: " << message << std::endl;
-    xercesc::XMLString::release(&message);
+    xercesc::XMLString::release( &message );
     // throw exception here to return ERROR_XERCES_INIT
   }
-  return 0;
+
+  xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser();
+  parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
+  parser->setDoNamespaces(true);    // optional
+
+  xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
+  parser->setErrorHandler(errHandler);
+
+  try {
+    parser->parse(p_file.c_str());
+  }
+  catch (const xercesc::XMLException& toCatch) {
+    char* message = xercesc::XMLString::transcode(toCatch.getMessage());
+    std::cout << "Exception message is: \n"
+              << message << "\n";
+    xercesc::XMLString::release(&message);
+    return -1;
+  }
+  catch (const xercesc::DOMException& toCatch) {
+    char* message = xercesc::XMLString::transcode(toCatch.msg);
+    std::cout << "Exception message is: \n"
+              << message << "\n";
+    xercesc::XMLString::release(&message);
+    return -1;
+  }
+  catch (...) {
+    std::cout << "Unexpected Exception \n" ;
+    return -1;
+  }
+
+
+  // Successfully parsed the permissions file
+
+  xercesc::DOMDocument* xmlDoc = parser->getDocument();
+
+  xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
+  if( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
+
+
+  //TODO:  WARNING - this implementation only supports 1 permissions/grant set
+ // Different from governance from here forward
+  // Find the validity rules
+  xercesc::DOMNodeList * grantRules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("grant"));
+
+    permission_grant_rules grant_rules_list_holder_;
+
+  for(XMLSize_t r=0;r<grantRules->getLength();r++) {
+    permission_grant_rule rule_holder_;
+
+    // Pull out the grant name for this grant
+    xercesc::DOMNamedNodeMap * rattrs = grantRules->item(r)->getAttributes();
+    rule_holder_.grant_name = xercesc::XMLString::transcode(rattrs->item(0)->getTextContent());
+
+
+    // Pull out subject name and validity
+    xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
+    for( XMLSize_t gn = 0; gn<grantNodes->getLength();gn++) {
+      char *g_tag = xercesc::XMLString::transcode(grantNodes->item(gn)->getNodeName());
+      if (strcmp(g_tag, "subject_name") == 0) {
+        rule_holder_.subject = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
+      } else if (strcmp(g_tag, "validity") == 0) {
+          Validity_t gn_validity;
+          xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
+          for (XMLSize_t vn = 0; vn < validityNodes->getLength(); vn++) {
+              char *v_tag = xercesc::XMLString::transcode((validityNodes->item(vn)->getNodeName()));
+              if (strcmp(v_tag, "not_before") == 0) {
+                rule_holder_.validity.not_before = xercesc::XMLString::transcode(
+                        (validityNodes->item(vn)->getTextContent()));
+              } else if (strcmp(v_tag, "not_after") == 0) {
+                rule_holder_.validity.not_after = xercesc::XMLString::transcode(
+                        (validityNodes->item(vn)->getTextContent()));
+              }
+          }
+      }
+    }
+//          t_rules.topic_attrs.is_discovery_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        } else if(strcmp(tr_tag, "enable_liveliness_protection") == 0) {
+//          t_rules.topic_attrs.is_liveliness_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        } else if(strcmp(tr_tag, "enable_read_access_control") == 0) {
+//          t_rules.topic_attrs.is_read_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        } else if(strcmp(tr_tag, "enable_write_access_control") == 0) {
+//          t_rules.topic_attrs.is_write_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        }
+//      if ( strcmp("validity", v_tag) == 0 ) {
+//        xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
+//        for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
+//          if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+//            rule_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+//          }
+//        }
+//
+//      }
+//
+//    // Process allow_unauthenticated_participants
+//    xercesc::DOMNodeList * allow_unauthenticated_participants_ =
+//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("allow_unauthenticated_participants"));
+//    char * attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
+//    rule_holder_.domain_attrs.allow_unauthenticated_participants = (strcmp(attr_aup,"false") == 0 ? false : true);
+//
+//
+//    // Process enable_join_access_control
+//    xercesc::DOMNodeList * enable_join_access_control_ =
+//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("enable_join_access_control"));
+//    char * attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
+//    rule_holder_.domain_attrs.is_access_protected = (strcmp(attr_ejac, "false") == 0 ? false : true);
+//
+//
+//    // Process discovery_protection_kind
+//    xercesc::DOMNodeList * discovery_protection_kind_ =
+//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("discovery_protection_kind"));
+//    char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
+//    rule_holder_.domain_attrs.is_discovery_protected= (strcmp(attr_dpk, "NONE") == 0 ? false : true);
+//
+//    // Process liveliness_protection_kind
+//    xercesc::DOMNodeList * liveliness_protection_kind_ =
+//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("liveliness_protection_kind"));
+//    char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
+//    rule_holder_.domain_attrs.is_liveliness_protected = (strcmp(attr_lpk, "NONE") == 0 ? false : true);
+//
+//    // Process rtps_protection_kind
+//    xercesc::DOMNodeList * rtps_protection_kind_ =
+//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("rtps_protection_kind"));
+//    char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
+//    rule_holder_.domain_attrs.is_rtps_protected = (strcmp(attr_rpk, "NONE") == 0 ? false : true);
+//
+//
+//
+//    // Process topic rules
+//
+//    xercesc::DOMNodeList * topic_rules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("topic_rule"));
+//
+//    for( XMLSize_t tr = 0; tr<topic_rules->getLength(); tr++) {
+//      xercesc::DOMNodeList * topic_rule_nodes = topic_rules->item(tr)->getChildNodes();
+//      TopicAccessRule t_rules;
+//      for (XMLSize_t trn = 0; trn<topic_rule_nodes->getLength(); trn++) {
+//        char * tr_tag = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getNodeName());
+//        char * tr_val = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getTextContent());
+//        if (strcmp(tr_tag,"topic_expression") == 0){
+//          t_rules.topic_expression = tr_val;
+//        } else if(strcmp(tr_tag, "enable_discovery_protection") == 0) {
+//          t_rules.topic_attrs.is_discovery_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        } else if(strcmp(tr_tag, "enable_liveliness_protection") == 0) {
+//          t_rules.topic_attrs.is_liveliness_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        } else if(strcmp(tr_tag, "enable_read_access_control") == 0) {
+//          t_rules.topic_attrs.is_read_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        } else if(strcmp(tr_tag, "enable_write_access_control") == 0) {
+//          t_rules.topic_attrs.is_write_protected = strcmp(tr_val,"false") == 0 ? false : true;
+//        }
+//        /* The following two Topic Rules are not supported at this time
+//                     <metadata_protection_kind>NONE</metadata_protection_kind>
+//                     <data_protection_kind>NONE</data_protection_kind>
+//        */
+//
+//      }
+//      rule_holder_.topic_rules.push_back(t_rules);
+//    }
+
+      grant_rules_list_holder_.push_back(rule_holder_);
+//
+
+//
+  } // domain_rule
+
+    pperm_map.insert(std::make_pair(p_handle , grant_rules_list_holder_));
+
+
+
+  delete parser;
+  delete errHandler;
+  return 0;  // TODO: determine return value
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::file_exists(const std::string& name) {
@@ -956,6 +1127,7 @@ std::string AccessControlBuiltInImpl::extract_file_name(const std::string& file_
     return std::string("");
   }
 }
+
 
 } // namespace Security
 } // namespace OpenDDS
