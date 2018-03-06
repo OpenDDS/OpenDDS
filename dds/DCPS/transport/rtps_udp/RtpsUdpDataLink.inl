@@ -59,9 +59,18 @@ RtpsUdpDataLink::local_crypto_handle(DDS::Security::ParticipantCryptoHandle h)
 ACE_INLINE DDS::Security::ParticipantCryptoHandle
 RtpsUdpDataLink::peer_crypto_handle(const RepoId& peer) const
 {
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::ParticipantCryptoHandle,
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
                           GUID_tKeyLessThan)::const_iterator iter_t;
   const iter_t it = peer_crypto_handles_.find(peer);
+  return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
+}
+
+ACE_INLINE DDS::Security::DatawriterCryptoHandle
+RtpsUdpDataLink::writer_crypto_handle(const RepoId& writer) const
+{
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
+                          GUID_tKeyLessThan)::const_iterator iter_t;
+  const iter_t it = peer_crypto_handles_.find(writer);
   return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
 }
 

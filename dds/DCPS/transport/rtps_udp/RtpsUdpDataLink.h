@@ -137,6 +137,8 @@ public:
 
   DDS::Security::ParticipantCryptoHandle peer_crypto_handle(const RepoId& peer) const;
 
+  DDS::Security::DatawriterCryptoHandle writer_crypto_handle(const RepoId& writer) const;
+
   void security_from_blob(const RepoId& remote_id, const unsigned char* buffer,
                           unsigned int buffer_size);
 
@@ -524,7 +526,7 @@ private:
 
   Security::SecurityConfig_rch security_config_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
-  OPENDDS_MAP_CMP(RepoId, DDS::Security::ParticipantCryptoHandle,
+  OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
                   GUID_tKeyLessThan) peer_crypto_handles_;
 };
 

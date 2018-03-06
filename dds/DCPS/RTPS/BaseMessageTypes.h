@@ -61,6 +61,7 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_3;
 
     const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
+    const char BLOB_PROP_DW_CRYPTO_HANDLE[] = "DatawriterCryptoHandle";
   }
 }
 
