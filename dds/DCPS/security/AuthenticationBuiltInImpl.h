@@ -208,7 +208,7 @@ private:
 
   uint64_t next_handle_;
 
-  LocalCredentialData local_credential_data_;
+  LocalAuthCredentialData local_credential_data_;
 };
 } // namespace Security
 } // namespace OpenDDS

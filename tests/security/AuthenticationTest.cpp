@@ -7,7 +7,7 @@
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsSecurityEntities.h"
-#include "Utils.h"
+//#include "Utils.h"
 #include <cstring>
 
 using OpenDDS::DCPS::GUID_t;

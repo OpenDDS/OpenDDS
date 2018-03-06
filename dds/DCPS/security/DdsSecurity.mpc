@@ -16,6 +16,7 @@ project(OpenDDS_Security): dcpslib, openssl, xerces {
     .
     SSL
     Authentication
+    AccessControl
   }
 
 }

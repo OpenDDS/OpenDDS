@@ -311,14 +311,21 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           local_credential_data_.get_diffie_hellman_key().pub_key(tmp);
           handshake_wrapper.set_bin_property(prop_index++, "dh1", tmp, true);
 
-          // If the remote_auth_request_token is not TokenNIL, then use the challenge from it.
-          // Otherwise just use a stubbed out sequence
           OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
           if (!auth_wrapper.is_nil()) {
             const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
             handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", challenge_data, true);
+
           } else {
-            handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", Empty_Seq, true);
+            DDS::OctetSeq nonce;
+            int err = SSL::make_nonce_256(nonce);
+            if (! err) {
+              handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", nonce, true);
+
+            } else {
+              return DDS::Security::VALIDATION_FAILED;
+            }
+
           }
 
           // The stub doesn't worry about any pre-existing handshakes between these two participants

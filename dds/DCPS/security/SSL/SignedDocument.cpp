@@ -3,7 +3,7 @@
  * See: http://www.DDS.org/license.html
  */
 
-#include "PrivateKey.h"
+#include "SignedDocument.h"
 #include "Utils.h"
 #include "Err.h"
 #include <openssl/pem.h>
@@ -12,67 +12,66 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      PrivateKey::PrivateKey(const std::string& uri, const std::string password) : k_(NULL)
+      SignedDocument::SignedDocument(const std::string& uri, const std::string password) : doc_(NULL)
       {
         load(uri, password);
       }
 
-      PrivateKey::PrivateKey() : k_(NULL)
+      SignedDocument::SignedDocument() : doc_(NULL)
       {
 
       }
 
-      PrivateKey::~PrivateKey()
+      SignedDocument::~SignedDocument()
       {
-        if (k_) EVP_PKEY_free(k_);
+        if (doc_) PKCS7_free(doc_);
       }
 
-      PrivateKey& PrivateKey::operator=(const PrivateKey& rhs)
+      SignedDocument& SignedDocument::operator=(const SignedDocument& rhs)
       {
         if (this != &rhs) {
-            if (rhs.k_) {
-                k_ = rhs.k_;
-                EVP_PKEY_up_ref(k_);
+            if (rhs.doc_) {
+                doc_ = PKCS7_dup(rhs.doc_);
 
             } else {
-                k_ = NULL;
+                doc_ = NULL;
             }
         }
         return *this;
       }
 
-      void PrivateKey::load(const std::string& uri, const std::string& password)
+      void SignedDocument::load(const std::string& uri, const std::string& password)
       {
-        if (k_) return;
+        if (doc_) return;
 
         std::string path;
         URI_SCHEME s = extract_uri_info(uri, path);
 
         switch(s) {
           case URI_FILE:
-            k_ = EVP_PKEY_from_pem(path, password);
+            doc_ = PKCS7_from_pem(path, password);
             break;
 
           case URI_DATA:
           case URI_PKCS11:
           case URI_UNKNOWN:
           default:
-            fprintf(stderr, "PrivateKey::load: Unsupported URI scheme in cert path '%s'\n", uri.c_str());
+            fprintf(stderr, "SignedDocument::load: Unsupported URI scheme '%s'\n", uri.c_str());
             break;
         }
       }
 
-      EVP_PKEY* PrivateKey::EVP_PKEY_from_pem(const std::string& path, const std::string& password)
+      PKCS7* SignedDocument::PKCS7_from_pem(const std::string& path, const std::string& password)
       {
-        EVP_PKEY* result = NULL;
+        PKCS7* result = NULL;
 
         BIO* filebuf = BIO_new_file(path.c_str(), "r");
         if (filebuf) {
           if (password != "") {
-              result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, (void*)password.c_str());
+              result = PEM_read_bio_PKCS7(filebuf, NULL, NULL, (void*)password.c_str());
 
           } else {
-              result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, NULL);
+              result = PEM_read_bio_PKCS7(filebuf, NULL, NULL, NULL);
           }
 
           BIO_free(filebuf);

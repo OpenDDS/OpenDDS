@@ -45,6 +45,7 @@ static const std::string PermissionsCredentialTokenClassId("DDS:Access:Permissio
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   : handle_mutex_()
   , next_handle_(1)
+  , local_credential_data_()
 {
 }
 

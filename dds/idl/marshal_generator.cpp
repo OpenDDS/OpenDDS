@@ -56,6 +56,9 @@ namespace {
   bool isRtpsSpecialSequence(const string& cxx);
   bool genRtpsSpecialSequence(const string& cxx);
 
+  bool isPropertySpecialSequence(const string& cxx);
+  bool genPropertySpecialSequence(const string& cxx);
+
   bool isRtpsSpecialStruct(const string& cxx);
   bool genRtpsSpecialStruct(const string& cxx);
 
@@ -74,6 +77,10 @@ namespace {
     {
       isRtpsSpecialSequence,
       genRtpsSpecialSequence,
+    },
+    {
+      isPropertySpecialSequence,
+      genPropertySpecialSequence,
     },
   };
 
@@ -291,12 +298,74 @@ namespace {
     return true;
   }
 
+  bool isPropertySpecialSequence(const string& cxx)
+  {
+    return cxx == "DDS::PropertySeq"
+      || cxx == "DDS::BinaryPropertySeq";
+  }
+
+  bool genPropertySpecialSequence(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("seq", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    gen_find_size(seq[i], size, padding);\n"
+        "  }\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("seq", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  CORBA::ULong serlen = 0;\n"
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (seq[i].propagate) {\n"
+        "      ++serlen;\n"
+        "    }\n"
+        "  }\n"
+        "  if (!(strm << serlen)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (!(strm << seq[i])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("seq", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  CORBA::ULong length;\n"
+        "  if (!(strm >> length)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  seq.length(length);\n"
+        "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+        "    if (!(strm >> seq[i])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    return true;
+  }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     string cxx = scoped(tdname);
-    
+
     for (size_t i = 0; i < LENGTH(special_sequences); ++i) {
       if (special_sequences[i].check(cxx)) {
 	special_sequences[i].gen(cxx);

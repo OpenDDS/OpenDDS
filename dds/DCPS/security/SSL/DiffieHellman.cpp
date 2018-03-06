@@ -5,9 +5,8 @@
 
 #include "DiffieHellman.h"
 #include "Utils.h"
+#include "Err.h"
 #include <openssl/dh.h>
-#include <cstring>
-#include <cerrno>
 
 namespace OpenDDS {
   namespace Security {
@@ -15,37 +14,7 @@ namespace OpenDDS {
 
       DiffieHellman::DiffieHellman() : k_(NULL)
       {
-        EVP_PKEY* pkey = EVP_PKEY_new();
-        if (pkey) {
-          if (1 == EVP_PKEY_set1_DH(pkey, DH_get_2048_256())) {
-
-            EVP_PKEY_CTX* keygen_ctx = EVP_PKEY_CTX_new(pkey, NULL);
-            if (keygen_ctx) {
-              if (1 == EVP_PKEY_keygen_init(keygen_ctx)) {
-                if (1 == EVP_PKEY_keygen(keygen_ctx, &pkey)) {
-                  k_ = pkey;
-
-                } else {
-                  fprintf(stderr, "DiffieHellman::load: Error, EVP_PKEY_keygen failed\n");
-                }
-
-              } else {
-                fprintf(stderr, "DiffieHellman::load: Error, EVP_PKEY_keygen_init failed\n");
-              }
-
-            } else {
-              fprintf(stderr, "DiffieHellman::load: Error, EVP_PKEY_CTX_new allocation failed\n");
-            }
-
-            EVP_PKEY_CTX_free(keygen_ctx);
-
-          } else {
-            fprintf(stderr, "DiffieHellman::load: Error, failed to set EVP_PKEY to DH_get_2048_256()\n");
-          }
-
-        } else {
-          fprintf(stderr, "DiffieHellman::load: Error, failed to allocate new EVP_PKKEY\n");
-        }
+        load();
       }
 
       DiffieHellman::~DiffieHellman()
@@ -67,6 +36,47 @@ namespace OpenDDS {
         return *this;
       }
 
+      void DiffieHellman::load()
+      {
+        /* Although params is an EVP_PKEY pointer, it is only used temporarily to generate
+         * the parameters for key-generation. k_ gets set in the EVP_PKEY_keygen routine. It
+         * is easy to confuse the two given their types. */
+
+        EVP_PKEY* params = EVP_PKEY_new();
+        if (params) {
+          if (1 == EVP_PKEY_set1_DH(params, DH_get_2048_256())) {
+
+            EVP_PKEY_CTX* keygen_ctx = EVP_PKEY_CTX_new(params, NULL);
+            if (keygen_ctx) {
+
+              int result = EVP_PKEY_keygen_init(keygen_ctx);
+              if (1 == result) {
+
+                if (1 != EVP_PKEY_keygen(keygen_ctx, &k_)) {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen failed");
+                }
+
+              } else {
+                OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen_init failed");
+              }
+
+            } else {
+              OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new allocation failed");
+            }
+
+            EVP_PKEY_CTX_free(keygen_ctx);
+
+          } else {
+            OPENDDS_SSL_LOG_ERR("failed to set EVP_PKEY to DH_get_2048_256()");
+          }
+
+          EVP_PKEY_free(params);
+
+        } else {
+          OPENDDS_SSL_LOG_ERR("failed to allocate new params EVP_PKEY");
+        }
+      }
+
       int DiffieHellman::pub_key(DDS::OctetSeq& dst)
       {
         int result = 1;
@@ -85,7 +95,7 @@ namespace OpenDDS {
                   result = 0;
 
               } else {
-                  fprintf(stderr, "DiffieHellman::pub_key: Error, BN_bn2bin failed\n");
+                  OPENDDS_SSL_LOG_ERR("BN_bn2bin failed");
               }
             }
           }

@@ -22,6 +22,8 @@
 #include <string>
 #include <memory>
 
+#include "AccessControl/LocalCredentialData.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -295,6 +297,8 @@ private:
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;
+
+  LocalAccessCredentialData local_credential_data_;
 
 };
 

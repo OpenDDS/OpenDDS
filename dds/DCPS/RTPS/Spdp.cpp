@@ -393,125 +393,121 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
   DiscoveredParticipant& dp = participants_[msg.message_identity.source_guid];
 
-  switch (dp.auth_state_) {
-    case AS_HANDSHAKE_REPLY: {
-      DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-        { // DDS::Security::ParticipantBuiltinTopicData
-          { // ParticipantBuiltinTopicData
-            DDS::BuiltinTopicKey_t() /*ignored*/,
-            qos_.user_data
-          },
-          identity_token_,
-          permissions_token_,
-          qos_.property,
-          DDS::Security::ParticipantSecurityInfo()
+  if (dp.auth_state_ == AS_HANDSHAKE_REPLY) {
+    DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
+      { // DDS::Security::ParticipantBuiltinTopicData
+        { // ParticipantBuiltinTopicData
+          DDS::BuiltinTopicKey_t() /*ignored*/,
+          qos_.user_data
         },
-        identity_status_token_
-      };
+        identity_token_,
+        permissions_token_,
+        qos_.property,
+        DDS::Security::ParticipantSecurityInfo()
+      },
+      identity_status_token_
+    };
 
-      pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-      pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
-      if (participant_sec_attr_.is_rtps_protected) {
-        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
-      }
-      if (participant_sec_attr_.is_discovery_protected) {
-        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-      }
-      if (participant_sec_attr_.is_liveliness_protected) {
-        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
-      }
-
-      ParameterList plist;
-      if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
-        return;
-      }
-
-      ACE_Message_Block temp_buff(64 * 1024);
-      DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
-      if (!(ser << plist)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Failed to serialize parameter list.\n")));
-        return;
-      }
-
-      DDS::Security::ParticipantStatelessMessage reply;
-      reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-      reply.destination_participant_guid = msg.message_identity.source_guid;
-      reply.destination_endpoint_guid = GUID_UNKNOWN;
-      reply.source_endpoint_guid = GUID_UNKNOWN;
-      reply.message_data.length(1);
-      reply.message_data[0] = msg.message_data[0];
-
-      DDS::Security::ValidationResult_t vr = auth->begin_handshake_reply(dp.handshake_handle_, reply.message_data[0], dp.identity_handle_, identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se);
-      if (vr == DDS::Security::VALIDATION_FAILED) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
-            se.code, se.minor_code, se.message.in()));
-        return;
-      } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
-        if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-            ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
-          return;
-        }
-        dp.auth_state_ = AS_HANDSHAKE_REPLY_SENT;
-      } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
-        // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
-        if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-            ACE_TEXT("Unable to write stateless message for final message.\n")));
-          return;
-        }
-        dp.auth_state_ = AS_AUTHENTICATED;
-        match_authenticated(msg.message_identity.source_guid, dp);
-      } else if (vr == DDS::Security::VALIDATION_OK) {
-        // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
-        dp.auth_state_ = AS_AUTHENTICATED;
-        match_authenticated(msg.message_identity.source_guid, dp);
-      }
+    pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    if (participant_sec_attr_.is_rtps_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
     }
-    case AS_HANDSHAKE_REQUEST_SENT:
-    case AS_HANDSHAKE_REPLY_SENT: {
-
-      DDS::Security::ParticipantStatelessMessage reply;
-      reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-      reply.destination_participant_guid = msg.message_identity.source_guid;
-      reply.destination_endpoint_guid = GUID_UNKNOWN;
-      reply.source_endpoint_guid = GUID_UNKNOWN;
-      reply.message_data.length(1);
-
-      DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
-      if (vr == DDS::Security::VALIDATION_FAILED) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-          ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
-            se.code, se.minor_code, se.message.in()));
-        return;
-      } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
-        // Theoretically, this shouldn't happen unless handshakes can involve more than 3 messages
-        if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-            ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
-          return;
-        }
-      } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
-        if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-            ACE_TEXT("Unable to write stateless message for final message.\n")));
-          return;
-        }
-        dp.auth_state_ = AS_AUTHENTICATED;
-        match_authenticated(msg.message_identity.source_guid, dp);
-      } else if (vr == DDS::Security::VALIDATION_OK) {
-        dp.auth_state_ = AS_AUTHENTICATED;
-        match_authenticated(msg.message_identity.source_guid, dp);
-      }
+    if (participant_sec_attr_.is_discovery_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
     }
-    default: {
+    if (participant_sec_attr_.is_liveliness_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+    }
+
+    ParameterList plist;
+    if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
       return;
     }
+
+    ACE_Message_Block temp_buff(64 * 1024);
+    DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
+    if (!(ser << plist)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+        ACE_TEXT("Failed to serialize parameter list.\n")));
+      return;
+    }
+
+    DDS::Security::ParticipantStatelessMessage reply;
+    reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
+    reply.destination_participant_guid = msg.message_identity.source_guid;
+    reply.destination_endpoint_guid = GUID_UNKNOWN;
+    reply.source_endpoint_guid = GUID_UNKNOWN;
+    reply.message_data.length(1);
+    reply.message_data[0] = msg.message_data[0];
+
+    DDS::Security::ValidationResult_t vr = auth->begin_handshake_reply(dp.handshake_handle_, reply.message_data[0], dp.identity_handle_, identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se);
+    if (vr == DDS::Security::VALIDATION_FAILED) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+        ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return;
+    } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
+        return;
+      }
+      dp.auth_state_ = AS_HANDSHAKE_REPLY_SENT;
+    } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
+      // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
+      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Unable to write stateless message for final message.\n")));
+        return;
+      }
+      dp.auth_state_ = AS_AUTHENTICATED;
+      match_authenticated(msg.message_identity.source_guid, dp);
+    } else if (vr == DDS::Security::VALIDATION_OK) {
+      // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
+      dp.auth_state_ = AS_AUTHENTICATED;
+      match_authenticated(msg.message_identity.source_guid, dp);
+    }
   }
+
+  if (dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT || dp.auth_state_ == AS_HANDSHAKE_REPLY_SENT) {
+    DDS::Security::ParticipantStatelessMessage reply;
+    reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
+    reply.destination_participant_guid = msg.message_identity.source_guid;
+    reply.destination_endpoint_guid = GUID_UNKNOWN;
+    reply.source_endpoint_guid = GUID_UNKNOWN;
+    reply.message_data.length(1);
+
+    DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
+    if (vr == DDS::Security::VALIDATION_FAILED) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+        ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return;
+    } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+      // Theoretically, this shouldn't happen unless handshakes can involve more than 3 messages
+      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
+        return;
+      }
+    } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
+      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Unable to write stateless message for final message.\n")));
+        return;
+      }
+      dp.auth_state_ = AS_AUTHENTICATED;
+      match_authenticated(msg.message_identity.source_guid, dp);
+    } else if (vr == DDS::Security::VALIDATION_OK) {
+      dp.auth_state_ = AS_AUTHENTICATED;
+      match_authenticated(msg.message_identity.source_guid, dp);
+    }
+  }
+
+  return;
 }
 
 bool
@@ -629,111 +625,109 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::SecurityException se;
 
-  switch (dp.auth_state_) {
-    case AS_UNKNOWN: {
-      dp.auth_state_ = AS_VALIDATING_REMOTE;
-    }
-    case AS_VALIDATING_REMOTE: {
-      DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
-      switch (vr) {
-        case DDS::Security::VALIDATION_OK: {
-          dp.auth_state_ = AS_AUTHENTICATED;
-          return;
-        }
-        case DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE: {
-          dp.auth_state_ = AS_HANDSHAKE_REPLY;
-          return; // We'll need to wait for an inbound handshake request from the remote participant
-        }
-        case DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST: {
-          dp.auth_state_ = AS_HANDSHAKE_REQUEST;
-          break; // We've got more to do, move on to handshake request
-        }
-        case DDS::Security::VALIDATION_FAILED: {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
-            ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
-              se.code, se.minor_code, se.message.in()));
-          dp.auth_state_ = AS_UNAUTHENTICATED;
-          return;
-        }
-        default: {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
-            ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
-              se.code, se.minor_code, se.message.in()));
-          dp.auth_state_ = AS_UNAUTHENTICATED;
-          return;
-        }
-      }
-    }
-    case AS_HANDSHAKE_REQUEST: {
-      DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-        { // DDS::Security::ParticipantBuiltinTopicData
-          { // ParticipantBuiltinTopicData
-            DDS::BuiltinTopicKey_t() /*ignored*/,
-            qos_.user_data
-          },
-          identity_token_,
-          permissions_token_,
-          qos_.property,
-          DDS::Security::ParticipantSecurityInfo()
-        },
-        identity_status_token_
-      };
+  if (dp.auth_state_ == AS_UNKNOWN) {
+    dp.auth_state_ = AS_VALIDATING_REMOTE;
+  }
 
-      pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-      pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
-      if (participant_sec_attr_.is_rtps_protected) {
-        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
-      }
-      if (participant_sec_attr_.is_discovery_protected) {
-        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-      }
-      if (participant_sec_attr_.is_liveliness_protected) {
-        pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
-      }
-
-      ParameterList plist;
-      if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
+  if (dp.auth_state_ == AS_VALIDATING_REMOTE) {
+    DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
+    switch (vr) {
+      case DDS::Security::VALIDATION_OK: {
+        dp.auth_state_ = AS_AUTHENTICATED;
         return;
       }
-
-      ACE_Message_Block temp_buff(64 * 1024);
-      DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
-      if (!(ser << plist)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Failed to serialize parameter list.\n")));
-        return;
+      case DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE: {
+        dp.auth_state_ = AS_HANDSHAKE_REPLY;
+        return; // We'll need to wait for an inbound handshake request from the remote participant
       }
-
-      DDS::Security::HandshakeMessageToken hs_mt;
-
-      if (auth->begin_handshake_request(dp.handshake_handle_, hs_mt, identity_handle_, dp.identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se) != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Failed to begin handshake_request. Security Exception[%d.%d]: %C\n"),
+      case DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST: {
+        dp.auth_state_ = AS_HANDSHAKE_REQUEST;
+        break; // We've got more to do, move on to handshake request
+      }
+      case DDS::Security::VALIDATION_FAILED: {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
+          ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
             se.code, se.minor_code, se.message.in()));
+        dp.auth_state_ = AS_UNAUTHENTICATED;
         return;
       }
-
-      DDS::Security::ParticipantStatelessMessage msg;
-      msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-      msg.destination_participant_guid = guid;
-      msg.destination_endpoint_guid = GUID_UNKNOWN;
-      msg.source_endpoint_guid = GUID_UNKNOWN;
-      msg.message_data.length(1);
-      msg.message_data[0] = hs_mt;
-
-      if (sedp_.write_stateless_message(msg, guid) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-          ACE_TEXT("Unable to write stateless message.\n")));
+      default: {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
+          ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
+            se.code, se.minor_code, se.message.in()));
+        dp.auth_state_ = AS_UNAUTHENTICATED;
         return;
       }
-      dp.auth_state_ = AS_HANDSHAKE_REQUEST_SENT;
-    }
-    default: {
-      return;
     }
   }
+
+  if (dp.auth_state_ == AS_HANDSHAKE_REQUEST) {
+    DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
+      { // DDS::Security::ParticipantBuiltinTopicData
+        { // ParticipantBuiltinTopicData
+          DDS::BuiltinTopicKey_t() /*ignored*/,
+          qos_.user_data
+        },
+        identity_token_,
+        permissions_token_,
+        qos_.property,
+        DDS::Security::ParticipantSecurityInfo()
+      },
+      identity_status_token_
+    };
+
+    pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    if (participant_sec_attr_.is_rtps_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+    }
+    if (participant_sec_attr_.is_discovery_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+    }
+    if (participant_sec_attr_.is_liveliness_protected) {
+      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+    }
+
+    ParameterList plist;
+    if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
+      return;
+    }
+
+    ACE_Message_Block temp_buff(64 * 1024);
+    DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
+    if (!(ser << plist)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+        ACE_TEXT("Failed to serialize parameter list.\n")));
+      return;
+    }
+
+    DDS::Security::HandshakeMessageToken hs_mt;
+
+    if (auth->begin_handshake_request(dp.handshake_handle_, hs_mt, identity_handle_, dp.identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se) != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+        ACE_TEXT("Failed to begin handshake_request. Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return;
+    }
+
+    DDS::Security::ParticipantStatelessMessage msg;
+    msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
+    msg.destination_participant_guid = guid;
+    msg.destination_endpoint_guid = GUID_UNKNOWN;
+    msg.source_endpoint_guid = GUID_UNKNOWN;
+    msg.message_data.length(1);
+    msg.message_data[0] = hs_mt;
+
+    if (sedp_.write_stateless_message(msg, guid) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+        ACE_TEXT("Unable to write stateless message.\n")));
+      return;
+    }
+    dp.auth_state_ = AS_HANDSHAKE_REQUEST_SENT;
+  }
+
   return;
 }
 

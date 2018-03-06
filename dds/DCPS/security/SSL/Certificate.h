@@ -7,6 +7,7 @@
 #define OPENDDS_SECURITY_SSL_CERTIFICATE_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
+#include "dds/DCPS/unique_ptr.h"
 #include "dds/DdsDcpsCoreC.h"
 #include <string>
 #include <vector>
@@ -21,6 +22,8 @@ namespace OpenDDS {
       {
       public:
 
+        typedef DCPS::unique_ptr<Certificate> unique_ptr;
+
         friend std::ostream& operator<<(std::ostream&, const Certificate&);
 
         Certificate(const std::string& uri, const std::string& password = "");
@@ -34,8 +37,6 @@ namespace OpenDDS {
         void load(const std::string& uri, const std::string& password = "");
 
         int validate(Certificate& ca, unsigned long int flags = 0u) const;
-
-        int subject_name_to_DER(std::vector<unsigned char>& dst) const;
 
         int subject_name_to_str(std::string& dst, unsigned long flags = XN_FLAG_ONELINE) const;
 

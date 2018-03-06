@@ -5,16 +5,12 @@
 
 #include "Certificate.h"
 #include "Utils.h"
+#include "Err.h"
 #include <algorithm>
 #include <cstring>
-#include <cerrno>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 
-// https://www.openssl.org/docs/faq.html#PROG3
-#ifdef _MSC_VER
-# include <openssl/applink.c>
-#endif
 
 namespace OpenDDS {
   namespace Security {
@@ -65,7 +61,6 @@ namespace OpenDDS {
           case URI_PKCS11:
           case URI_UNKNOWN:
           default:
-            /* TODO use ACE logging */
             fprintf(stderr, "Certificate::Certificate: Error, unsupported URI scheme in cert path '%s'\n", uri.c_str());
             break;
         }
@@ -76,77 +71,48 @@ namespace OpenDDS {
         int result = X509_V_ERR_UNSPECIFIED;
 
         if (x_) {
-            if (ca.x_) {
+          if (ca.x_) {
 
-                X509_STORE* certs = X509_STORE_new();
-                if (certs) {
-                    X509_STORE_add_cert(certs, ca.x_);
+            X509_STORE* certs = X509_STORE_new();
+            if (certs) {
+                X509_STORE_add_cert(certs, ca.x_);
 
-                    X509_STORE_CTX* validation_ctx = X509_STORE_CTX_new();
-                    if (validation_ctx) {
-                        X509_STORE_CTX_init(validation_ctx, certs, x_, NULL);
-                        X509_STORE_CTX_set_flags(validation_ctx, flags);
+                X509_STORE_CTX* validation_ctx = X509_STORE_CTX_new();
+                if (validation_ctx) {
+                    X509_STORE_CTX_init(validation_ctx, certs, x_, NULL);
+                    X509_STORE_CTX_set_flags(validation_ctx, flags);
 
-                        if (X509_verify_cert(validation_ctx) == 1) {
-                            result = X509_V_OK;
+                    if (X509_verify_cert(validation_ctx) == 1) {
+                        result = X509_V_OK;
 
-                        } else {
-                            int err = X509_STORE_CTX_get_error(validation_ctx),
-                                depth = X509_STORE_CTX_get_error_depth(validation_ctx);
+                    } else {
+                        int err = X509_STORE_CTX_get_error(validation_ctx),
+                            depth = X509_STORE_CTX_get_error_depth(validation_ctx);
 
-                            fprintf(stderr,
-                                    "Certificate::verify: Error '%s' occurred using cert at depth '%d', validation failed.\n",
-                                    X509_verify_cert_error_string(err),
-                                    depth);
+                        fprintf(stderr,
+                                "Certificate::verify: Error '%s' occurred using cert at depth '%d', validation failed.\n",
+                                X509_verify_cert_error_string(err),
+                                depth);
 
-                            result = err;
-                        }
-
-                        X509_STORE_CTX_free(validation_ctx);
+                        result = err;
                     }
 
-                    X509_STORE_free(certs);
-
-                } else {
-                    fprintf(stderr, "Certificate::verify: Error, failed to create X509_STORE\n");
+                    X509_STORE_CTX_free(validation_ctx);
                 }
 
+                X509_STORE_free(certs);
+
             } else {
-                fprintf(stderr, "Certificate::verify: Error, passed-in CA has not loaded a certificate\n");
+                OPENDDS_SSL_LOG_ERR("failed to create X509_STORE");
             }
+
+          } else {
+              fprintf(stderr, "Certificate::verify: Error, passed-in CA has not loaded a certificate\n");
+          }
 
         } else {
             fprintf(stderr, "Certificate::verify: Error, a certificate must be loaded before it can be verified\n");
         }
-
-        return result;
-      }
-
-
-      int Certificate::subject_name_to_DER(std::vector<unsigned char>& dst) const
-      {
-        int result = 1, len = 0;
-        unsigned char* buffer = NULL;
-
-        dst.clear();
-
-        if (x_) {
-
-          /* Do not free name! */
-          X509_NAME* name = X509_get_subject_name(x_);
-          if (name) {
-            len = i2d_X509_NAME(name, &buffer);
-            if (len > 0) {
-              dst.insert(dst.begin(), buffer, buffer + len);
-              result = 0;
-
-            } else {
-                fprintf(stderr, "Certificate::subject_name_to_DER: Error, failed to convert X509_NAME to DER\n");
-            }
-          }
-        }
-
-        if (buffer) free(buffer);
 
         return result;
       }
@@ -177,11 +143,11 @@ namespace OpenDDS {
                   result = 0;
 
                 } else {
-                    fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to write BIO to string\n");
+                    OPENDDS_SSL_LOG_ERR("failed to write BIO to string");
                 }
 
               } else {
-                  fprintf(stderr, "Certificate::subject_name_to_str: Error, failed to read X509_NAME into BIO buffer\n");
+                  OPENDDS_SSL_LOG_ERR("failed to read X509_NAME into BIO buffer");
               }
 
               BIO_free(buffer);
@@ -271,20 +237,20 @@ namespace OpenDDS {
       {
         X509* result = NULL;
 
-        FILE* fp = fopen(path.c_str(), "r");
-        if (fp) {
+        BIO* filebuf = BIO_new_file(path.c_str(), "r");
+        if (filebuf) {
           if (password != "") {
-              result = PEM_read_X509_AUX(fp, NULL, NULL, (void*)password.c_str());
+              result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, (void*)password.c_str());
 
           } else {
-              result = PEM_read_X509_AUX(fp, NULL, NULL, NULL);
+              result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, NULL);
           }
 
-          fclose(fp);
+          BIO_free(filebuf);
 
         } else {
-          /* TODO use ACE logging */
-          fprintf(stderr, "Certificate::x509_from_pem: Error '%s' reading file '%s'\n", strerror(errno), path.c_str());
+          std::stringstream errmsg; errmsg << "failed to read file '" << path << "' using BIO_new_file";
+          OPENDDS_SSL_LOG_ERR(errmsg.str());
         }
 
         return result;
@@ -309,13 +275,13 @@ namespace OpenDDS {
               }
 
             } else {
-              fprintf(stderr, "Certificate::serialize: Error, failed to write X509 to PEM\n");
+                OPENDDS_SSL_LOG_ERR("failed to write X509 to PEM");
             }
 
             BIO_free(buffer);
 
           } else {
-            fprintf(stderr, "Certificate::serialize: Error, failed to allocate buffer with BIO_new\n");
+            OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
           }
         }
 
@@ -340,35 +306,35 @@ namespace OpenDDS {
         int result = 1;
 
         if (! x_) {
-            if (src.length() > 0) {
+          if (src.length() > 0) {
 
-              BIO* buffer = BIO_new(BIO_s_mem());
-              if (buffer) {
+            BIO* buffer = BIO_new(BIO_s_mem());
+            if (buffer) {
 
-                int len = BIO_write(buffer, src.get_buffer(), src.length());
-                if (len > 0) {
-                  x_ = PEM_read_bio_X509_AUX(buffer, NULL, NULL, NULL);
+              int len = BIO_write(buffer, src.get_buffer(), src.length());
+              if (len > 0) {
+                x_ = PEM_read_bio_X509_AUX(buffer, NULL, NULL, NULL);
 
-                  if (x_) {
-                      result = 0;
-
-                  } else {
-                      fprintf(stderr, "Certificate::deserialize: Error, failed to read X509 from BIO\n");
-                  }
+                if (x_) {
+                    result = 0;
 
                 } else {
-                    fprintf(stderr, "Certificate::deserialize: Error, failed to write OctetSeq to BIO\n");
+                    OPENDDS_SSL_LOG_ERR("failed to read X509 from BIO");
                 }
 
-                BIO_free(buffer);
-
               } else {
-                fprintf(stderr, "Certificate::deserialize: Error, failed to allocate buffer with BIO_new\n");
+                  OPENDDS_SSL_LOG_ERR("failed to write OctetSeq to BIO");
               }
 
+              BIO_free(buffer);
+
             } else {
-              fprintf(stderr, "Certificate::deserialize: Error, source OctetSeq contains no data\n");
+              OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
             }
+
+          } else {
+            fprintf(stderr, "Certificate::deserialize: Error, source OctetSeq contains no data\n");
+          }
 
         } else {
           fprintf(stderr, "Certificate::deserialize: Error, an X509 certificate has already been loaded\n");

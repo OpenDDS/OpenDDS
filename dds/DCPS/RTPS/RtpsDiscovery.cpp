@@ -284,6 +284,7 @@ RtpsDiscovery::generate_participant_guid() {
   }
   guid_gen_.populate(id);
   id.entityId = ENTITYID_PARTICIPANT;
+  return id;
 }
 
 DCPS::AddDomainStatus
