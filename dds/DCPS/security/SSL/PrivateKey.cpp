@@ -5,8 +5,7 @@
 
 #include "PrivateKey.h"
 #include "Utils.h"
-#include <cstring>
-#include <cerrno>
+#include "Err.h"
 #include <openssl/pem.h>
 
 namespace OpenDDS {
@@ -58,7 +57,6 @@ namespace OpenDDS {
           case URI_PKCS11:
           case URI_UNKNOWN:
           default:
-            /* TODO use ACE logging */
             fprintf(stderr, "PrivateKey::load: Unsupported URI scheme in cert path '%s'\n", uri.c_str());
             break;
         }
@@ -68,20 +66,20 @@ namespace OpenDDS {
       {
         EVP_PKEY* result = NULL;
 
-        FILE* fp = fopen(path.c_str(), "r");
-        if (fp) {
+        BIO* filebuf = BIO_new_file(path.c_str(), "r");
+        if (filebuf) {
           if (password != "") {
-              result = PEM_read_PrivateKey(fp, NULL, NULL, (void*)password.c_str());
+              result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, (void*)password.c_str());
 
           } else {
-              result = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
+              result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, NULL);
           }
 
-          fclose(fp);
+          BIO_free(filebuf);
 
         } else {
-          /* TODO use ACE logging */
-          fprintf(stderr, "PrivateKey::EVP_PKEY_from_pem: Error '%s' reading file '%s'\n", strerror(errno), path.c_str());
+          std::stringstream errmsg; errmsg << "failed to read file '" << path << "' using BIO_new_file";
+          OPENDDS_SSL_LOG_ERR(errmsg.str());
         }
 
         return result;

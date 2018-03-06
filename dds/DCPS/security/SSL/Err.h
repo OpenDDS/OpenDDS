@@ -3,14 +3,15 @@
  * See: http://www.DDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_PRIVATEKEY_H
-#define OPENDDS_SECURITY_SSL_PRIVATEKEY_H
+#ifndef OPENDDS_SECURITY_SSL_ERR_H
+#define OPENDDS_SECURITY_SSL_ERR_H
 
 #include <openssl/err.h>
 #include <iostream>
 #include <sstream>
 #include <cstdio>
 #include <cerrno>
+#include <cstring>
 
 
 #define OPENDDS_SSL_LOG_ERR(MSG) do {\
