@@ -7,6 +7,7 @@
 #define OPENDDS_SECURITY_SSL_PRIVATEKEY_H
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
+#include "dds/DCPS/unique_ptr.h"
 #include <string>
 #include <openssl/evp.h>
 
@@ -17,6 +18,9 @@ namespace OpenDDS {
       class DdsSecurity_Export PrivateKey
       {
       public:
+
+        typedef DCPS::unique_ptr<PrivateKey> unique_ptr;
+
         PrivateKey(const std::string& uri, const std::string password = "");
 
         PrivateKey();

@@ -15,6 +15,30 @@ namespace OpenDDS {
 
       DiffieHellman::DiffieHellman() : k_(NULL)
       {
+        load();
+      }
+
+      DiffieHellman::~DiffieHellman()
+      {
+        if (k_) EVP_PKEY_free(k_);
+      }
+
+      DiffieHellman& DiffieHellman::operator=(const DiffieHellman& rhs)
+      {
+        if (this != &rhs) {
+          if (rhs.k_) {
+            k_ = rhs.k_;
+            EVP_PKEY_up_ref(k_);
+
+          } else {
+            k_ = NULL;
+          }
+        }
+        return *this;
+      }
+
+      void DiffieHellman::load()
+      {
         EVP_PKEY* pkey = EVP_PKEY_new();
         if (pkey) {
           if (1 == EVP_PKEY_set1_DH(pkey, DH_get_2048_256())) {
@@ -46,25 +70,6 @@ namespace OpenDDS {
         } else {
           fprintf(stderr, "DiffieHellman::load: Error, failed to allocate new EVP_PKKEY\n");
         }
-      }
-
-      DiffieHellman::~DiffieHellman()
-      {
-        if (k_) EVP_PKEY_free(k_);
-      }
-
-      DiffieHellman& DiffieHellman::operator=(const DiffieHellman& rhs)
-      {
-        if (this != &rhs) {
-          if (rhs.k_) {
-            k_ = rhs.k_;
-            EVP_PKEY_up_ref(k_);
-
-          } else {
-            k_ = NULL;
-          }
-        }
-        return *this;
       }
 
       int DiffieHellman::pub_key(DDS::OctetSeq& dst)

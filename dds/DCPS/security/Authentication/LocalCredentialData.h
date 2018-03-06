@@ -30,35 +30,35 @@ namespace OpenDDS {
 
       SSL::Certificate& get_ca_cert()
       {
-        return ca_cert_;
+        return *ca_cert_;
       }
 
       SSL::Certificate& get_participant_cert()
       {
-        return participant_cert_;
+        return *participant_cert_;
       }
 
       SSL::PrivateKey& get_participant_private_key()
       {
-        return participant_pkey_;
+        return *participant_pkey_;
       }
 
       SSL::DiffieHellman& get_diffie_hellman_key()
       {
-        return dhkey_;
+        return *dhkey_;
       }
 
       bool validate()
       {
-        return (X509_V_OK == participant_cert_.validate(ca_cert_));
+        return (X509_V_OK == participant_cert_->validate(*ca_cert_));
       }
 
     private:
 
-      SSL::Certificate ca_cert_;
-      SSL::Certificate participant_cert_;
-      SSL::PrivateKey participant_pkey_;
-      SSL::DiffieHellman dhkey_;
+      SSL::Certificate::unique_ptr ca_cert_;
+      SSL::Certificate::unique_ptr participant_cert_;
+      SSL::PrivateKey::unique_ptr participant_pkey_;
+      SSL::DiffieHellman::unique_ptr dhkey_;
     };
 
   }

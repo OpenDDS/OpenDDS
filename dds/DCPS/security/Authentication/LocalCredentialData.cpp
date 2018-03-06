@@ -25,26 +25,28 @@ namespace OpenDDS {
 
     void LocalCredentialData::load(const DDS::PropertySeq& props)
     {
+      dhkey_.reset(new SSL::DiffieHellman());
+
       std::string name, value, pkey_uri, password;
       for (size_t i = 0; i < props.length(); ++i) {
         name = props[i].name;
         value = props[i].value;
 
         if (name == "dds.sec.auth.identity_ca") {
-            ca_cert_ = SSL::Certificate(value);
+            ca_cert_.reset(new SSL::Certificate(value));
 
         } else if (name == "dds.sec.auth.private_key") {
             pkey_uri = value;
 
         } else if (name == "dds.sec.auth.identity_certificate") {
-            participant_cert_ = SSL::Certificate(value);
+            participant_cert_.reset(new SSL::Certificate(value));
 
         } else if (name == "dds.sec.auth.password") {
             password = value;
         }
       }
 
-      participant_pkey_ = SSL::PrivateKey(pkey_uri, password);
+      participant_pkey_.reset(new SSL::PrivateKey(pkey_uri, password));
     }
   }
 }
