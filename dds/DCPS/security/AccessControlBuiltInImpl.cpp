@@ -72,11 +72,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACE_UNUSED_ARG(domain_id);
   ACE_UNUSED_ARG(participant_qos);
 
-    // Pull file attribute info from qos
-    // Place holder for not having qos populated
-  //std::string ac_files_path = "/home/neeleym/dev/ddsinterop/bg/Security_Demo_12_2017_Burlingame/configuration_files/";
-  //std::string gov_file = ac_files_path.append("governance/Governance_SC0_SecurityDisabled.xml");
-  //std::string perm_file = ac_files_path.append("permissions/Permissions_JoinDomain_OCI.xml");
 
   const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
   std::string name, value, permca_file, gov_file, perm_file;
@@ -115,7 +110,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  ::DDS::Security::PermissionsHandle perm_handle = load_governance_file(gov_file);
+
+
+    // Read in permissions_ca
+
+
+  // Read in governance file
+
+    ac_perms perm_set;
+
+  ::DDS::Security::PermissionsHandle perm_handle = load_governance_file(perm_set, gov_file);
   if(-1 == perm_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
     return DDS::HANDLE_NIL;
@@ -209,16 +213,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // TODO: Optional checking of QoS is not completed ( see  8.4.2.9.3 )
 
 
-  ParticipantGovMapType::iterator iter = pgov_map.begin();
-  iter = pgov_map.find(permissions_handle);
-  if(iter == pgov_map.end()) {
+  ACPermsMap::iterator iter = local_ac_perms.begin();
+  iter = local_ac_perms.find(permissions_handle);
+  if(iter == local_ac_perms.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
     return false;
   }
 
   // 1. Domain element
 
-  if ( iter->second.domain_list.find(domain_id) == iter->second.domain_list.end()){
+  if ( iter->second.gov_rules[0].domain_list.find(domain_id) == iter->second.gov_rules[0].domain_list.end()){
       std::cout << "Domain ID of " << domain_id << "not found" << std::endl;
     return false;
       //TODO: this checks the governance file, but do we also need to look at the permissions file?
@@ -226,14 +230,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check topic rules for the given domain id.
 
-  for(int r = 0; r < iter->second.topic_rules.size(); r++) {
-    if(iter->second.topic_rules[r].topic_attrs.is_read_protected == false ||
-       iter->second.topic_rules[r].topic_attrs.is_write_protected == false)
+  for(int r = 0; r < iter->second.gov_rules[0].topic_rules.size(); r++) {
+    if(iter->second.gov_rules[0].topic_rules[r].topic_attrs.is_read_protected == false ||
+       iter->second.gov_rules[0].topic_rules[r].topic_attrs.is_write_protected == false)
       return true;
   }
 
     // Check is_access_protected
-  if( iter->second.domain_attrs.is_access_protected == false)
+  if( iter->second.gov_rules[0].domain_attrs.is_access_protected == false)
     return true;
 
   return false;
@@ -607,16 +611,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
     // TODO: Need to add the ac_endpoints properties to the returned attributes
+    // TODO: How do we handle multiple domain_rules within a PermissionHandle
 
-   ParticipantGovMapType::iterator iter = pgov_map.begin();
-   iter = pgov_map.find(permissions_handle);
-   if(iter != pgov_map.end()) {
-     attributes.allow_unauthenticated_participants = iter->second.domain_attrs.allow_unauthenticated_participants;
-     attributes.is_access_protected = iter->second.domain_attrs.is_access_protected;
-     attributes.is_rtps_protected = iter->second.domain_attrs.is_rtps_protected;
-     attributes.is_discovery_protected = iter->second.domain_attrs.is_discovery_protected;
-     attributes.is_liveliness_protected = iter->second.domain_attrs.is_liveliness_protected;
-     attributes.plugin_participant_attributes = iter->second.domain_attrs.plugin_participant_attributes;
+   ACPermsMap::iterator iter = local_ac_perms.begin();
+   iter = local_ac_perms.find(permissions_handle);
+   if(iter != local_ac_perms.end()) {
+     attributes.allow_unauthenticated_participants = iter->second.gov_rules[0].domain_attrs.allow_unauthenticated_participants;
+     attributes.is_access_protected = iter->second.gov_rules[0].domain_attrs.is_access_protected;
+     attributes.is_rtps_protected = iter->second.gov_rules[0].domain_attrs.is_rtps_protected;
+     attributes.is_discovery_protected = iter->second.gov_rules[0].domain_attrs.is_discovery_protected;
+     attributes.is_liveliness_protected = iter->second.gov_rules[0].domain_attrs.is_liveliness_protected;
+     attributes.plugin_participant_attributes = iter->second.gov_rules[0].domain_attrs.plugin_participant_attributes;
      return true;
    }
 
@@ -762,16 +767,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_governance_file(std::string g_file)
+::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms ac_perms_holder , std::string g_file)
 {
 
   ::DDS::Security::PermissionsHandle ph = generate_handle();
 
-  ParticipantGovMapType::iterator iter = pgov_map.begin();
-  iter = pgov_map.find(ph);
-  if(iter != pgov_map.end()) {
+  ACPermsMap::iterator iter = local_ac_perms.begin();
+  iter = local_ac_perms.find(ph);
+  if(iter != local_ac_perms.end()) {
     std::cout << "handle:" << iter->first << std::endl;
   }
+
+    //TODO: Need to return existing governance content if found.
 
   try
   {
@@ -908,7 +915,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
          rule_holder_.topic_rules.push_back(t_rules);
        }
 
-       pgov_map.insert(std::make_pair(ph , rule_holder_));
+       ac_perms_holder.gov_rules.push_back( rule_holder_);
 
    } // domain_rule
 
@@ -921,14 +928,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(std::string p_file, ::DDS::Security::PermissionsHandle p_handle) {
+::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(ac_perms ac_perms_holder, std::string p_file) {
 
-
-  ParticipantPermMapType::iterator iter = pperm_map.begin();
-  iter = pperm_map.find(p_handle);
-  if(iter != pperm_map.end()) {
-    std::cout << "handle:" << iter->first << std::endl;
-  }
 
   try
   {
@@ -985,7 +986,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Find the validity rules
   xercesc::DOMNodeList * grantRules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("grant"));
 
-    permission_grant_rules grant_rules_list_holder_;
+    PermissionGrantRules grant_rules_list_holder_;
 
   for(XMLSize_t r=0;r<grantRules->getLength();r++) {
     permission_grant_rule rule_holder_;
