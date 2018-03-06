@@ -8,6 +8,9 @@
 
 #include <openssl/err.h>
 #include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cerrno>
 
 
 #define OPENDDS_SSL_LOG_ERR(MSG) do {\
