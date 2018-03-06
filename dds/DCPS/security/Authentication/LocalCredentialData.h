@@ -17,14 +17,14 @@
 namespace OpenDDS {
   namespace Security {
 
-    class LocalCredentialData
+    class LocalAuthCredentialData
     {
     public:
-      LocalCredentialData(const DDS::PropertySeq& props);
+      LocalAuthCredentialData(const DDS::PropertySeq& props);
 
-      LocalCredentialData();
+      LocalAuthCredentialData();
 
-      ~LocalCredentialData();
+      ~LocalAuthCredentialData();
 
       void load(const DDS::PropertySeq& props);
 

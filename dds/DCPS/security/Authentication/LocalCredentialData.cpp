@@ -8,22 +8,22 @@
 namespace OpenDDS {
   namespace Security {
 
-    LocalCredentialData::LocalCredentialData(const DDS::PropertySeq& props)
+    LocalAuthCredentialData::LocalAuthCredentialData(const DDS::PropertySeq& props)
     {
       load(props);
     }
 
-    LocalCredentialData::LocalCredentialData()
+    LocalAuthCredentialData::LocalAuthCredentialData()
     {
 
     }
 
-    LocalCredentialData::~LocalCredentialData()
+    LocalAuthCredentialData::~LocalAuthCredentialData()
     {
 
     }
 
-    void LocalCredentialData::load(const DDS::PropertySeq& props)
+    void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
     {
       dhkey_.reset(new SSL::DiffieHellman());
 
