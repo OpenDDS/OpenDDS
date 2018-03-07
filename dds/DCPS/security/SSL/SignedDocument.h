@@ -35,9 +35,11 @@ namespace OpenDDS {
 
       private:
 
-        static PKCS7* PKCS7_from_SMIME(const std::string& path);
+        PKCS7* PKCS7_from_SMIME(const std::string& path);
 
         PKCS7* doc_;
+        BIO* content_;
+        std::string plaintext_;
       };
 
     }

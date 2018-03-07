@@ -63,35 +63,31 @@ namespace OpenDDS {
 
       int SignedDocument::get_content(std::string& dst)
       {
+        if (!plaintext_.empty()) {
+          dst = plaintext_;
+          return 0;
+        }
+
         int result = 1;
 
         dst.clear();
 
         if (doc_) {
-          BIO* docbuf = BIO_new(BIO_s_mem());
-          if (docbuf) {
-            /* TODO FIX THIS! There should be a routine somewhere that can read the PKCS7.
-             * Perhaps try PKCS7_decrypt and PKCS7_dataDecode. However, we do not encrypt
-             * the content of the PKCS7 so the expected params to those functions might pose
-             * problems...  */
-            if (1 == PKCS7_print_ctx(docbuf, doc_, 0, NULL)) {
-
-              unsigned char tmp[32] = {0};
-              int len = 0;
-              while ((len = BIO_read(docbuf, tmp, sizeof(tmp))) > 0) {
-                dst.insert(dst.end(), tmp, tmp + len);
-                result = 0;
-              }
-
-            } else {
-              OPENDDS_SSL_LOG_ERR("PKCS7_decrypt failed");
+          if (content_) {
+            unsigned char tmp[32] = {0};
+            int len = 0;
+            while ((len = BIO_read(content_, tmp, sizeof(tmp))) > 0) {
+              dst.insert(dst.end(), tmp, tmp + len);
+              result = 0;
             }
 
-            BIO_free(docbuf);
-
           } else {
-            OPENDDS_SSL_LOG_ERR("BIO_new failed");
+            OPENDDS_SSL_LOG_ERR("PKCS7_decrypt failed");
           }
+
+          BIO_free(content_);
+          content_ = 0;
+          plaintext_ = dst;
         }
 
         return result;
@@ -104,9 +100,10 @@ namespace OpenDDS {
         BIO* filebuf = BIO_new_file(path.c_str(), "r");
         if (filebuf) {
 
-          result = SMIME_read_PKCS7(filebuf, NULL);
+          result = SMIME_read_PKCS7(filebuf, &content_);
           if (! result) {
-              OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
+            OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
+            content_ = 0;
           }
 
           BIO_free(filebuf);
