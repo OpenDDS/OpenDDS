@@ -307,7 +307,7 @@ TEST_F(AccessControlTest, check_create_participant_InvalidInput)
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
 
-  EXPECT_EQ(DDS::HANDLE_NIL, get_inst().check_create_participant(
+  EXPECT_EQ(false, get_inst().check_create_participant(
     DDS::HANDLE_NIL, 1, qos, ex));
 }
 
