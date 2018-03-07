@@ -243,10 +243,15 @@ namespace {
         TheServiceParticipant->initial_PartitionQosPolicy();
     return qos != def_qos;
   }
+
   bool not_default(const DDS::PropertyQosPolicy& qos) {
-    DDS::PropertyQosPolicy def_qos =
-        TheServiceParticipant->initial_PropertyQosPolicy();
-    return qos != def_qos;
+    for (unsigned int i = 0; i < qos.value.length(); ++i) {
+      if (qos.value[i].propagate) {
+        return true;
+      }
+    }
+    // binary_value is not sent in the parameter list (DDSSEC12-37)
+    return false;
   }
 
   bool not_default(const DDS::TimeBasedFilterQosPolicy& qos)
@@ -423,7 +428,10 @@ int to_param_list(const DDS::Security::IdentityToken& identity_token,
   if (not_default(property_qos))
   {
     Parameter param_p;
-    param_p.property(property_qos);
+    // binary_value is not sent in the parameter list (DDSSEC12-37)
+    DDS::PropertyQosPolicy policy_serialized(property_qos);
+    policy_serialized.binary_value.length(0);
+    param_p.property(policy_serialized);
     add_param(param_list, param_p);
   }
 
