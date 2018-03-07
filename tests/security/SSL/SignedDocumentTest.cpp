@@ -15,7 +15,7 @@ class SignedDocumentTest : public ::testing::Test
 public:
   SignedDocumentTest() :
     ca_("file:../certs/opendds_identity_ca_cert.pem"),
-    doc_("file:../certs/mock_participant_1/opendds_participant_cert.pem")
+    doc_("file:../governance/Governance_SC0_SecurityDisabled.p7s")
   {
 
   }
@@ -29,7 +29,9 @@ public:
   SignedDocument doc_;
 };
 
-TEST_F(SignedDocumentTest, GetName_CompareName_Success)
+TEST_F(SignedDocumentTest, GetContent_Success)
 {
-  // TODO
+  std::string content;
+  doc_.get_content(content);
+  ASSERT_TRUE(0 < content.length());
 }
