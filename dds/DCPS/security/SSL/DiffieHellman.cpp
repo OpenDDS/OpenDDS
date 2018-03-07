@@ -12,72 +12,63 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      DiffieHellman::DiffieHellman() : k_(NULL)
+      DH_2048_MODP_256_PRIME::DH_2048_MODP_256_PRIME()
       {
-        load();
+        init();
       }
 
-      DiffieHellman::~DiffieHellman()
+      int DH_2048_MODP_256_PRIME::init()
       {
-        if (k_) EVP_PKEY_free(k_);
-      }
+        int result = 1;
 
-      DiffieHellman& DiffieHellman::operator=(const DiffieHellman& rhs)
-      {
-        if (this != &rhs) {
-          if (rhs.k_) {
-            k_ = rhs.k_;
-            EVP_PKEY_up_ref(k_);
+        if (! k_) {
 
-          } else {
-            k_ = NULL;
-          }
-        }
-        return *this;
-      }
+          /* Although params is an EVP_PKEY pointer, it is only used temporarily to generate
+           * the parameters for key-generation. k_ gets set in the EVP_PKEY_keygen routine. It
+           * is easy to confuse the two given their types. */
 
-      void DiffieHellman::load()
-      {
-        /* Although params is an EVP_PKEY pointer, it is only used temporarily to generate
-         * the parameters for key-generation. k_ gets set in the EVP_PKEY_keygen routine. It
-         * is easy to confuse the two given their types. */
+          EVP_PKEY* params = EVP_PKEY_new();
+          if (params) {
+            if (1 == EVP_PKEY_set1_DH(params, DH_get_2048_256())) {
 
-        EVP_PKEY* params = EVP_PKEY_new();
-        if (params) {
-          if (1 == EVP_PKEY_set1_DH(params, DH_get_2048_256())) {
+              EVP_PKEY_CTX* keygen_ctx = EVP_PKEY_CTX_new(params, NULL);
+              if (keygen_ctx) {
 
-            EVP_PKEY_CTX* keygen_ctx = EVP_PKEY_CTX_new(params, NULL);
-            if (keygen_ctx) {
+                int success = EVP_PKEY_keygen_init(keygen_ctx);
+                if (1 == success) {
 
-              int result = EVP_PKEY_keygen_init(keygen_ctx);
-              if (1 == result) {
+                  if (1 == EVP_PKEY_keygen(keygen_ctx, &k_)) {
+                    result = 0;
 
-                if (1 != EVP_PKEY_keygen(keygen_ctx, &k_)) {
-                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen failed");
+                  } else {
+                    OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen failed");
+                  }
+
+                } else {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen_init failed");
                 }
 
               } else {
-                OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen_init failed");
+                OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new allocation failed");
               }
 
+              EVP_PKEY_CTX_free(keygen_ctx);
+
             } else {
-              OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new allocation failed");
+              OPENDDS_SSL_LOG_ERR("failed to set EVP_PKEY to DH_get_2048_256()");
             }
 
-            EVP_PKEY_CTX_free(keygen_ctx);
+            EVP_PKEY_free(params);
 
           } else {
-            OPENDDS_SSL_LOG_ERR("failed to set EVP_PKEY to DH_get_2048_256()");
+            OPENDDS_SSL_LOG_ERR("failed to allocate new params EVP_PKEY");
           }
-
-          EVP_PKEY_free(params);
-
-        } else {
-          OPENDDS_SSL_LOG_ERR("failed to allocate new params EVP_PKEY");
         }
+
+        return result;
       }
 
-      int DiffieHellman::pub_key(DDS::OctetSeq& dst)
+      int DH_2048_MODP_256_PRIME::pub_key(DDS::OctetSeq& dst)
       {
         int result = 1;
 
@@ -92,10 +83,10 @@ namespace OpenDDS {
 
               dst.length(BN_num_bytes(pubkey));
               if (0 < BN_bn2bin(pubkey, dst.get_buffer())) {
-                  result = 0;
+                result = 0;
 
               } else {
-                  OPENDDS_SSL_LOG_ERR("BN_bn2bin failed");
+                OPENDDS_SSL_LOG_ERR("BN_bn2bin failed");
               }
             }
           }
