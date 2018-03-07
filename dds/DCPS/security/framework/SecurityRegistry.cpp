@@ -239,6 +239,15 @@ SecurityConfig_rch
 SecurityRegistry::default_config() const
 {
   GuardType guard(lock_);
+  if (!default_config_ && !TheServiceParticipant->get_security()) {
+    Authentication_var a;
+    AccessControl_var b;
+    CryptoKeyExchange_var c;
+    CryptoKeyFactory_var d;
+    CryptoTransform_var e;
+    default_config_ = DCPS::make_rch<SecurityConfig>("NoPlugins", a, b, c, d, e,
+                                                     ConfigPropertyList());
+  }
   return default_config_;
 }
 

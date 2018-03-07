@@ -144,7 +144,7 @@ private:
   ConfigMap config_map_;
   InstMap registered_plugins_;
   LibDirectiveMap lib_directive_map_;
-  SecurityConfig_rch default_config_;
+  mutable SecurityConfig_rch default_config_;
 
   mutable LockType lock_;
 };
