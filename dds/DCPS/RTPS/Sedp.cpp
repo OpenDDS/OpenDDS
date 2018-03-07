@@ -3232,6 +3232,22 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
   }
 }
 
+namespace {
+
+DDS::OctetSeq handle_to_octets(DDS::Security::NativeCryptoHandle handle)
+{
+  DDS::OctetSeq handleOctets(sizeof handle);
+  handleOctets.length(handleOctets.maximum());
+  unsigned char* rawHandleOctets = handleOctets.get_buffer();
+  unsigned int handleTmp = handle;
+  for (unsigned int j = sizeof handle; j > 0; --j) {
+    rawHandleOctets[j - 1] = handleTmp & 0xff;
+    handleTmp >>= 8;
+  }
+  return handleOctets;
+}
+
+}
 
 DCPS::TransportLocatorSeq
 Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
@@ -3244,10 +3260,11 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
     return locators;
   }
 
-  //TODO: [DDS-Security] Get crypto handle from DiscoveredParticipant
-  const DDS::Security::ParticipantCryptoHandle handle = 0x12345678;
+  //TODO: [DDS-Security] Get crypto handles from DiscoveredParticipant/Publicat.
+  const DDS::Security::ParticipantCryptoHandle part_handle = 0x12345678;
+  const DDS::Security::DatawriterCryptoHandle dw_handle = 0;
 
-  if (handle == DDS::HANDLE_NIL) {
+  if (part_handle == DDS::HANDLE_NIL) {
     return locators;
   }
 
@@ -3258,22 +3275,23 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
       if (!newLoc) {
         newLoc = new DCPS::TransportLocatorSeq(locators);
 
-        DDS::OctetSeq handleOctets(sizeof handle);
-        handleOctets.length(handleOctets.maximum());
-        unsigned char* rawHandleOctets = handleOctets.get_buffer();
-        unsigned int handleTmp = handle;
-        for (unsigned int j = sizeof handle; j > 0; --j) {
-          rawHandleOctets[j - 1] = handleTmp & 0xff;
-          handleTmp >>= 8;
-        }
-
+        DDS::OctetSeq handleOctets = handle_to_octets(part_handle);
         const DDS::BinaryProperty_t prop = {BLOB_PROP_PART_CRYPTO_HANDLE,
                                             handleOctets, true /*serialize*/};
+        DDS::OctetSeq handleOctetsDw = handle_to_octets(dw_handle);
+        const DDS::BinaryProperty_t dw_p = {BLOB_PROP_DW_CRYPTO_HANDLE,
+                                            handleOctetsDw, true /*serialize*/};
         size_t size = 0, padding = 0;
         DCPS::gen_find_size(prop, size, padding);
+        if (dw_handle != DDS::HANDLE_NIL) {
+          DCPS::gen_find_size(dw_p, size, padding);
+        }
         ACE_Message_Block mb(size + padding);
         Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
         ser << prop;
+        if (dw_handle != DDS::HANDLE_NIL) {
+          ser << dw_p;
+        }
         added.length(mb.size());
         std::memcpy(added.get_buffer(), mb.rd_ptr(), mb.size());
       }

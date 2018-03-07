@@ -2494,6 +2494,8 @@ void RtpsUdpDataLink::security_from_blob(const RepoId& remote_id,
                                          unsigned int buffer_size)
 {
   using DDS::Security::ParticipantCryptoHandle;
+  using DDS::Security::DatawriterCryptoHandle;
+
   ACE_Data_Block db(buffer_size, ACE_Message_Block::MB_DATA,
     reinterpret_cast<const char*>(buffer),
     0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
@@ -2521,6 +2523,16 @@ void RtpsUdpDataLink::security_from_blob(const RepoId& remote_id,
       remote_participant.entityId = ENTITYID_PARTICIPANT;
       peer_crypto_handles_[remote_participant] = handle;
     }
+
+    else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DW_CRYPTO_HANDLE) == 0
+             && prop.value.length() >= sizeof(DatawriterCryptoHandle)) {
+      unsigned int handle = 0;
+      for (unsigned int i = 0; i < prop.value.length(); ++i) {
+        handle = handle << 8 | prop.value[i];
+      }
+      peer_crypto_handles_[remote_id] = handle;
+    }
+
   }
 }
 

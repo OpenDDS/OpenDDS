@@ -219,13 +219,18 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
      has successfully reassembled the fragments and we now have a DATA submsg
    */
 
-  case SEC_PREFIX:
   case SRTPS_PREFIX:
+  case SEC_PREFIX:
     secure_prefix_ = submessage.security_sm();
     break;
 
-  case SEC_POSTFIX:
-  case SRTPS_POSTFIX: {
+  case SRTPS_POSTFIX:
+    secure_prefix_.smHeader.submessageId = 0;
+    secure_sample_ = ReceivedDataSample(0);
+    ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy SRTPS unsupported.\n"));
+    break;
+
+  case SEC_POSTFIX: {
     const DDS::Security::ParticipantCryptoHandle local_pch =
       link_->local_crypto_handle();
 
@@ -238,34 +243,36 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     DDS::Security::CryptoTransform_var crypto =
       link_->security_config()->get_crypto_transform();
 
-    // if(SRTPS_POSTFIX) decode_rtps_message -- not yet supported
-
     DDS::OctetSeq encoded_submsg, plain_submsg;
     sec_submsg_to_octets(encoded_submsg, submessage);
     secure_prefix_.smHeader.submessageId = 0;
     secure_sample_ = ReceivedDataSample(0);
+
+    if (local_pch == DDS::HANDLE_NIL || peer_pch == DDS::HANDLE_NIL
+        || !crypto) {
+      ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
+                 "precondition unmet %d %d %@\n", local_pch, peer_pch, crypto));
+      break;
+    }
 
     DDS::Security::DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
     DDS::Security::DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
     DDS::Security::SecureSubmessageCategory_t category =
       DDS::Security::INFO_SUBMESSAGE;
     DDS::Security::SecurityException ex = {"", 0, 0};
-    const bool result =
+    bool ok =
       crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
                                        local_pch, peer_pch, ex);
-    bool ok;
 
-    if (result && category == DDS::Security::DATAWRITER_SUBMESSAGE) {
+    if (ok && category == DDS::Security::DATAWRITER_SUBMESSAGE) {
       ok = crypto->decode_datawriter_submessage(plain_submsg, encoded_submsg,
                                                 drch, dwch, ex);
 
-    } else if (result && category == DDS::Security::DATAREADER_SUBMESSAGE) {
+    } else if (ok && category == DDS::Security::DATAREADER_SUBMESSAGE) {
       ok = crypto->decode_datareader_submessage(plain_submsg, encoded_submsg,
                                                 dwch, drch, ex);
 
     } else {
-      // ?? INFO_SUBMESSAGE case -- shouldn't be used inside SEC_PREFIX
-      // !result case
       ok = false;
     }
 
@@ -329,8 +336,47 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
 bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                             const RTPS::DataSubmessage& submsg)
 {
-  //TODO: call plugin
-  return true;
+  const DDS::Security::DatawriterCryptoHandle writer_crypto_handle =
+    link_->writer_crypto_handle(sample.header_.publication_id_);
+  DDS::Security::CryptoTransform_var crypto =
+    link_->security_config()->get_crypto_transform();
+
+  if (writer_crypto_handle == DDS::HANDLE_NIL || !crypto) {
+    return true;
+  }
+
+  DDS::OctetSeq encoded, plain, iQos;
+  encoded.length(sample.sample_->total_length());
+  ACE_Message_Block* mb(sample.sample_.get());
+  for (CORBA::ULong i = 0; mb; mb = mb->cont()) {
+    std::memcpy(encoded.get_buffer() + i, mb->rd_ptr(), mb->length());
+    i += mb->length();
+  }
+
+  size_t iQosSize = 0, iQosPadding = 0;
+  gen_find_size(submsg.inlineQos, iQosSize, iQosPadding);
+  iQos.length(iQosSize + iQosPadding);
+  const char* iQos_raw = reinterpret_cast<const char*>(iQos.get_buffer());
+  ACE_Message_Block iQosMb(iQos_raw, iQos.length());
+  Serializer ser(&iQosMb, ACE_CDR_BYTE_ORDER != (submsg.smHeader.flags & 1),
+                 Serializer::ALIGN_CDR);
+  ser << submsg.inlineQos;
+
+  DDS::Security::SecurityException ex = {"", 0, 0};
+  // DDS-Security: since origin authentication for payload is not yet supported
+  // the reader's crypto handle is NIL here (could be multiple readers in this
+  // participant)
+  const bool ok = crypto->decode_serialized_payload(plain, encoded, iQos,
+                                                    DDS::HANDLE_NIL,
+                                                    writer_crypto_handle, ex);
+  if (ok) {
+    Message_Block_Ptr plain_mb(new ACE_Message_Block(plain.length()));
+    const char* buffer_raw = reinterpret_cast<const char*>(plain.get_buffer());
+    plain_mb->copy(buffer_raw, plain.length());
+    sample.sample_.swap(plain_mb);
+  }
+
+  return ok;
 }
 
 int
