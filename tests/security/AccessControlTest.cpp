@@ -730,9 +730,15 @@ TEST_F(AccessControlTest, get_permissions_token_InvalidInput)
 
 TEST_F(AccessControlTest, get_permissions_token_Success)
 {
+
+  ::DDS::DomainParticipantQos qos;
+  ::DDS::Security::SecurityException ex;
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+  ::DDS::Security::PermissionsHandle out_handle =
+          get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::Security::PermissionsToken token;
-  ::DDS::Security::SecurityException ex;
 
   EXPECT_TRUE(get_inst().get_permissions_token(token, perm_handle, ex));
   EXPECT_STREQ(Expected_Permissions_Token_Class_Id, token.class_id);

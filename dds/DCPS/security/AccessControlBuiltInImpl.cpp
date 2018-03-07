@@ -24,7 +24,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include <stdexcept>
 
 
@@ -120,33 +119,42 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     ac_perms perm_set;
 
-  ::DDS::Security::PermissionsHandle perm_handle = load_governance_file(perm_set, gov_file);
-  if(-1 == perm_handle) {
+  if( 0 != load_governance_file(&perm_set , gov_file)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
     return DDS::HANDLE_NIL;
   };
 
-
-//Test get_participant_sec_attributes
-
-   ::DDS::Security::ParticipantSecurityAttributes attrs;
-   get_participant_sec_attributes(perm_handle,attrs,ex);
-
-
-  std::cout <<"created handle:"
-            << perm_handle
-            << std::endl
-            << " allow_unauthenticated_participants:" << attrs.allow_unauthenticated_participants
-            << std::endl
-            << " is_rtps_protected:" << attrs.is_rtps_protected
-            << std::endl;
-
-
-  if(0 != load_permissions_file(perm_file, perm_handle)) {
+  if(0 != load_permissions_file(&perm_set , perm_file)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
-    std::cout << pperm_map.begin()->second.begin()->subject << std::endl;
+
+
+    // This will just return a fixed token
+    ::DDS::Security::PermissionsToken permissions_token;
+    TokenWriter writer(permissions_token, PermissionsTokenClassId, 2, 0);
+    writer.set_property(0, "dds.perm_ca.sn", "MyCA Name", true);
+    writer.set_property(1, "dds.perm_ca.algo", "RSA-2048", true);
+
+    perm_set.perm_token = permissions_token;
+
+    ::CORBA::Boolean perm_handle = generate_handle();
+    local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
+
+
+    //Test get_participant_sec_attributes
+
+    ::DDS::Security::ParticipantSecurityAttributes attrs;
+    get_participant_sec_attributes(perm_handle,attrs,ex);
+
+
+    std::cout <<"created handle:"
+              << perm_handle
+              << std::endl
+              << " allow_unauthenticated_participants:" << attrs.allow_unauthenticated_participants
+              << std::endl
+              << " is_rtps_protected:" << attrs.is_rtps_protected
+              << std::endl;
 
   return perm_handle ;
 }
@@ -542,12 +550,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  // This will just return a fixed token
-  TokenWriter writer(permissions_token, PermissionsTokenClassId, 2, 0);
-  writer.set_property(0, "dds.perm_ca.sn", "MyCA Name", true);
-  writer.set_property(1, "dds.perm_ca.algo", "RSA-2048", true);
-
-  return true;
+    ACPermsMap::iterator iter = local_ac_perms.begin();
+    iter = local_ac_perms.find(handle);
+    if(iter != local_ac_perms.end()) {
+        permissions_token = iter->second.perm_token;
+        return true;
+    } else {
+        CommonUtilities::set_security_error(ex, -1, 0, "No PermissionToken found");
+        return false;
+    }
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_permissions_credential_token(
@@ -624,6 +635,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      attributes.is_liveliness_protected = iter->second.gov_rules[0].domain_attrs.is_liveliness_protected;
      attributes.plugin_participant_attributes = iter->second.gov_rules[0].domain_attrs.plugin_participant_attributes;
      return true;
+   } else {
+
    }
 
 
@@ -768,16 +781,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms ac_perms_holder , std::string g_file)
+::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_file)
 {
-
-  ::DDS::Security::PermissionsHandle ph = generate_handle();
-
-  ACPermsMap::iterator iter = local_ac_perms.begin();
-  iter = local_ac_perms.find(ph);
-  if(iter != local_ac_perms.end()) {
-    std::cout << "handle:" << iter->first << std::endl;
-  }
 
     //TODO: Need to return existing governance content if found.
 
@@ -916,7 +921,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
          rule_holder_.topic_rules.push_back(t_rules);
        }
 
-       ac_perms_holder.gov_rules.push_back( rule_holder_);
+       ac_perms_holder->gov_rules.push_back( rule_holder_);
 
    } // domain_rule
 
@@ -925,11 +930,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     delete errHandler;
 
 
-  return ph;
+  return 0;
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(ac_perms ac_perms_holder, std::string p_file) {
+::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(ac_perms * ac_perms_holder, std::string p_file) {
 
 
   try
@@ -1000,119 +1005,34 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     // Pull out subject name and validity
     xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
     for( XMLSize_t gn = 0; gn<grantNodes->getLength();gn++) {
-      char *g_tag = xercesc::XMLString::transcode(grantNodes->item(gn)->getNodeName());
-      if (strcmp(g_tag, "subject_name") == 0) {
-        rule_holder_.subject = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
-      } else if (strcmp(g_tag, "validity") == 0) {
-          Validity_t gn_validity;
-          xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
-          for (XMLSize_t vn = 0; vn < validityNodes->getLength(); vn++) {
-              char *v_tag = xercesc::XMLString::transcode((validityNodes->item(vn)->getNodeName()));
-              if (strcmp(v_tag, "not_before") == 0) {
-                rule_holder_.validity.not_before = xercesc::XMLString::transcode(
-                        (validityNodes->item(vn)->getTextContent()));
-              } else if (strcmp(v_tag, "not_after") == 0) {
-                rule_holder_.validity.not_after = xercesc::XMLString::transcode(
-                        (validityNodes->item(vn)->getTextContent()));
-              }
-          }
-      }
+        char *g_tag = xercesc::XMLString::transcode(grantNodes->item(gn)->getNodeName());
+        if (strcmp(g_tag, "subject_name") == 0) {
+            rule_holder_.subject = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
+        } else if (strcmp(g_tag, "validity") == 0) {
+            Validity_t gn_validity;
+            xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
+            for (XMLSize_t vn = 0; vn < validityNodes->getLength(); vn++) {
+                char *v_tag = xercesc::XMLString::transcode((validityNodes->item(vn)->getNodeName()));
+                if (strcmp(v_tag, "not_before") == 0) {
+                    rule_holder_.validity.not_before = xercesc::XMLString::transcode(
+                            (validityNodes->item(vn)->getTextContent()));
+                } else if (strcmp(v_tag, "not_after") == 0) {
+                    rule_holder_.validity.not_after = xercesc::XMLString::transcode(
+                            (validityNodes->item(vn)->getTextContent()));
+                }
+            }
+        }
     }
-//          t_rules.topic_attrs.is_discovery_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        } else if(strcmp(tr_tag, "enable_liveliness_protection") == 0) {
-//          t_rules.topic_attrs.is_liveliness_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        } else if(strcmp(tr_tag, "enable_read_access_control") == 0) {
-//          t_rules.topic_attrs.is_read_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        } else if(strcmp(tr_tag, "enable_write_access_control") == 0) {
-//          t_rules.topic_attrs.is_write_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        }
-//      if ( strcmp("validity", v_tag) == 0 ) {
-//        xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
-//        for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
-//          if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
-//            rule_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
-//          }
-//        }
-//
-//      }
-//
-//    // Process allow_unauthenticated_participants
-//    xercesc::DOMNodeList * allow_unauthenticated_participants_ =
-//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("allow_unauthenticated_participants"));
-//    char * attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
-//    rule_holder_.domain_attrs.allow_unauthenticated_participants = (strcmp(attr_aup,"false") == 0 ? false : true);
-//
-//
-//    // Process enable_join_access_control
-//    xercesc::DOMNodeList * enable_join_access_control_ =
-//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("enable_join_access_control"));
-//    char * attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
-//    rule_holder_.domain_attrs.is_access_protected = (strcmp(attr_ejac, "false") == 0 ? false : true);
-//
-//
-//    // Process discovery_protection_kind
-//    xercesc::DOMNodeList * discovery_protection_kind_ =
-//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("discovery_protection_kind"));
-//    char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
-//    rule_holder_.domain_attrs.is_discovery_protected= (strcmp(attr_dpk, "NONE") == 0 ? false : true);
-//
-//    // Process liveliness_protection_kind
-//    xercesc::DOMNodeList * liveliness_protection_kind_ =
-//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("liveliness_protection_kind"));
-//    char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
-//    rule_holder_.domain_attrs.is_liveliness_protected = (strcmp(attr_lpk, "NONE") == 0 ? false : true);
-//
-//    // Process rtps_protection_kind
-//    xercesc::DOMNodeList * rtps_protection_kind_ =
-//            xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("rtps_protection_kind"));
-//    char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
-//    rule_holder_.domain_attrs.is_rtps_protected = (strcmp(attr_rpk, "NONE") == 0 ? false : true);
-//
-//
-//
-//    // Process topic rules
-//
-//    xercesc::DOMNodeList * topic_rules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("topic_rule"));
-//
-//    for( XMLSize_t tr = 0; tr<topic_rules->getLength(); tr++) {
-//      xercesc::DOMNodeList * topic_rule_nodes = topic_rules->item(tr)->getChildNodes();
-//      TopicAccessRule t_rules;
-//      for (XMLSize_t trn = 0; trn<topic_rule_nodes->getLength(); trn++) {
-//        char * tr_tag = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getNodeName());
-//        char * tr_val = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getTextContent());
-//        if (strcmp(tr_tag,"topic_expression") == 0){
-//          t_rules.topic_expression = tr_val;
-//        } else if(strcmp(tr_tag, "enable_discovery_protection") == 0) {
-//          t_rules.topic_attrs.is_discovery_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        } else if(strcmp(tr_tag, "enable_liveliness_protection") == 0) {
-//          t_rules.topic_attrs.is_liveliness_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        } else if(strcmp(tr_tag, "enable_read_access_control") == 0) {
-//          t_rules.topic_attrs.is_read_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        } else if(strcmp(tr_tag, "enable_write_access_control") == 0) {
-//          t_rules.topic_attrs.is_write_protected = strcmp(tr_val,"false") == 0 ? false : true;
-//        }
-//        /* The following two Topic Rules are not supported at this time
-//                     <metadata_protection_kind>NONE</metadata_protection_kind>
-//                     <data_protection_kind>NONE</data_protection_kind>
-//        */
-//
-//      }
-//      rule_holder_.topic_rules.push_back(t_rules);
-//    }
 
-      grant_rules_list_holder_.push_back(rule_holder_);
-//
+    ac_perms_holder->perm_rules.push_back(rule_holder_);
 
-//
-  } // domain_rule
-
-    pperm_map.insert(std::make_pair(p_handle , grant_rules_list_holder_));
+  } // grant_rules
 
 
 
   delete parser;
   delete errHandler;
-  return 0;  // TODO: determine return value
+  return 0;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::file_exists(const std::string& name) {

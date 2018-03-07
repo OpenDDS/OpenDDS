@@ -252,7 +252,6 @@ private:
 
 
     // TODO: the ParticipantGovMapType needs to support multiple domain_rule(s). See domain_access_rules above
-    typedef std::map< domain_rule > ParticipantGovMapType;
 
 
 
@@ -271,26 +270,24 @@ private:
 
     } permission_grant_rule;
 
-    typedef std::list<permission_grant_rule> PermissionGrantRules;
+    typedef std::vector<permission_grant_rule> PermissionGrantRules;
 
-    // typedef std::map< permission_grant_rules > ParticipantPermMapType;
-
-    ParticipantPermMapType pperm_map;
 
 
     typedef struct {
         GovernanceAccessRules gov_rules;
-        ParticipantGrantRules perm_rules;
+        PermissionGrantRules perm_rules;
+        ::DDS::Security::PermissionsToken perm_token;
     } ac_perms;
 
-    typedef std::map<::DDS::Security::PermissionsHandle , ac_perms> ACPermsMap;
+    typedef std::map< ::DDS::Security::PermissionsHandle , ac_perms > ACPermsMap;
 
     ACPermsMap local_ac_perms;
 
 
   ::CORBA::Long generate_handle();
-  ::CORBA::Long load_governance_file(ac_perms, std::string);
-  ::CORBA::Long load_permissions_file(ac_perms, std::string);
+  ::CORBA::Long load_governance_file(ac_perms *, std::string);
+  ::CORBA::Long load_permissions_file(ac_perms *, std::string);
   ::CORBA::Boolean file_exists(const std::string&);
   std::string extract_file_name(const std::string&);
 
