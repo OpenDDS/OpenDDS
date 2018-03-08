@@ -21,6 +21,11 @@ namespace OpenDDS {
         load(uri, password);
       }
 
+      Certificate::Certificate(const DDS::OctetSeq& src) : x_(NULL)
+      {
+        deserialize(src);
+      }
+
       Certificate::Certificate() : x_(NULL)
       {
 
@@ -358,6 +363,11 @@ namespace OpenDDS {
             lhs << "NULL";
         }
         return lhs;
+      }
+
+      bool operator==(const Certificate& lhs, const Certificate& rhs)
+      {
+        return 0 == X509_cmp(lhs.x_, rhs.x_);
       }
     }
   }

@@ -62,6 +62,36 @@ namespace OpenDDS {
         }
       }
 
+      int PrivateKey::sign(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst)
+      {
+
+        /* TODO Whoops this calculates the hash! Sign the document instead... */
+        EVP_MD_CTX* hash_ctx = EVP_MD_CTX_new();
+        if (! hash_ctx) {
+          OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
+          return 1;
+        }
+
+        EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
+
+        unsigned char hash[EVP_MAX_MD_SIZE] = {0};
+        unsigned int len = 0u;
+
+        std::vector<const DDS::OctetSeq*>::const_iterator i, n = src.cend();
+        for (i = src.cbegin(); i != n; ++i) {
+          EVP_DigestUpdate(hash_ctx, (*i)->get_buffer(), (*i)->length());
+        }
+
+        EVP_DigestFinal_ex(hash_ctx, hash, &len);
+
+        dst.length(len);
+        std::memcpy(dst.get_buffer(), hash, len);
+
+        EVP_MD_CTX_free(hash_ctx);
+
+        return 0;
+      }
+
       EVP_PKEY* PrivateKey::EVP_PKEY_from_pem(const std::string& path, const std::string& password)
       {
         EVP_PKEY* result = NULL;
@@ -70,9 +100,15 @@ namespace OpenDDS {
         if (filebuf) {
           if (password != "") {
               result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, (void*)password.c_str());
+              if (! result) {
+                OPENDDS_SSL_LOG_ERR("PEM_read_bio_PrivateKey failed");
+              }
 
           } else {
               result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, NULL);
+              if (! result) {
+                OPENDDS_SSL_LOG_ERR("PEM_read_bio_PrivateKey failed");
+              }
           }
 
           BIO_free(filebuf);

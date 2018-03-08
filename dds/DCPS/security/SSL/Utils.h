@@ -34,6 +34,14 @@ namespace OpenDDS {
       DdsSecurity_Export
       int make_nonce_256(DDS::OctetSeq& nonce);
 
+      /* Get byte i starting from one-bit-to-the-right in source array */
+      DdsSecurity_Export
+      unsigned char offset_1bit(const unsigned char array[], size_t i);
+
+      DdsSecurity_Export
+      int hash(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst);
+
+
     }
   }
 }

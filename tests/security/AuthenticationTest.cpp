@@ -96,6 +96,11 @@ unsigned char MockParticipantData::next_guid_modifier = 0x01;
 struct AuthenticationTest : public ::testing::Test
 {
 
+  virtual ~AuthenticationTest()
+  {
+
+  }
+
   AuthenticationTest() {
     init_mock_participant_1();
     init_mock_participant_2();
@@ -369,7 +374,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
                                        prop.length())));
   }
 
-  ASSERT_EQ(32u, value_of("c.challenge1", bprops).length());
+  ASSERT_EQ(32u, value_of("challenge1", bprops).length());
 
   /* The operation shall check the content of the local_auth_request_token associated
    * with the remote_identity_handle. If the value is _not_ TokenNIL then "challenge1"
@@ -379,7 +384,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
    * a non-nil local_auth_request_token. As such, "future_challenge" and "challenge1"
    * should be equivalent. */
   {
-    const DDS::OctetSeq& prop1 = value_of("c.challenge1", bprops);
+    const DDS::OctetSeq& prop1 = value_of("challenge1", bprops);
     const DDS::OctetSeq& prop2 = value_of("future_challenge", mp1.auth_request_message_token.binary_properties);
     ASSERT_EQ(0, std::memcmp(prop1.get_buffer(),
                              prop2.get_buffer(),
@@ -387,6 +392,70 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
                                       prop2.length())));
   }
 
+}
+
+struct BeginHandshakeReplyTest : public AuthenticationTest
+{
+  BeginHandshakeReplyTest()
+  {
+
+  }
+};
+
+TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_Success)
+{
+  AuthenticationBuiltInImpl auth;
+  SecurityException ex;
+
+  /* Local participant: notice how it is mp2 this time */
+  ValidationResult_t r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
+
+  /* Remote participant: mp1 this time */
+  r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
+  ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
+  ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
+
+  /* Both sides of the handshake validate remote identity */
+  r = auth.validate_remote_identity(mp2.id_handle,
+                                    mp1.auth_request_message_token,
+                                    mp2.auth_request_message_token,
+                                    mp1.id_handle,
+                                    mp2.id_token,
+                                    mp2.guid_adjusted,
+                                    ex);
+
+  r = auth.validate_remote_identity(mp1.id_handle,
+                                    mp2.auth_request_message_token,
+                                    mp1.auth_request_message_token,
+                                    mp2.id_handle,
+                                    mp1.id_token,
+                                    mp1.guid_adjusted,
+                                    ex);
+
+  /* Make sure mp2 auth-request-token is TokenNil per the spec */
+  ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
+  ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
+  ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
+
+  /* mp2 is the one performing the handhsake reply */
+  ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
+
+  /* Fill this with data directly from the cert */
+  DDS::OctetSeq pretend_topic_data;
+  pretend_topic_data.length(1);
+  pretend_topic_data[0] = 'A';
+
+  r = auth.begin_handshake_reply(mp2.handshake_handle,
+                                 mp2.handshake_message_token,
+                                 mp1.id_handle,
+                                 mp2.id_handle,
+                                 pretend_topic_data,
+                                 ex);
+
+  // Work in progress!
+  //ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 }
 
 

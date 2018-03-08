@@ -4,6 +4,7 @@
  */
 
 #include "Utils.h"
+#include "Err.h"
 #include "dds/DCPS/GuidUtils.h"
 #include <vector>
 #include <utility>
@@ -139,6 +140,40 @@ namespace OpenDDS {
             }
         }
         return err;
+      }
+
+      unsigned char offset_1bit(const unsigned char array[], size_t i)
+      {
+        return (((array[i] << 7u) & 0x80) | ((array[i + 1] >> 1u) & 0x7F));
+      }
+
+      int hash(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst)
+      {
+
+        EVP_MD_CTX* hash_ctx = EVP_MD_CTX_new();
+        if (! hash_ctx) {
+          OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
+          return 1;
+        }
+
+        EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
+
+        unsigned char hash[EVP_MAX_MD_SIZE] = {0};
+        unsigned int len = 0u;
+
+        std::vector<const DDS::OctetSeq*>::const_iterator i, n = src.cend();
+        for (i = src.cbegin(); i != n; ++i) {
+          EVP_DigestUpdate(hash_ctx, (*i)->get_buffer(), (*i)->length());
+        }
+
+        EVP_DigestFinal_ex(hash_ctx, hash, &len);
+
+        dst.length(len);
+        std::memcpy(dst.get_buffer(), hash, len);
+
+        EVP_MD_CTX_free(hash_ctx);
+
+        return 0;
       }
 
     }
