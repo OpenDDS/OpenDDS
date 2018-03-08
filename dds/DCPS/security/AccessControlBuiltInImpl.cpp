@@ -14,7 +14,7 @@
 #include "dds/DCPS/security/TokenWriter.h"
 
 //#include "ace/Guard_T.h"
-//#include <sstream>
+
 //#include <vector>
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
@@ -23,6 +23,7 @@
 
 
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <stdexcept>
 
@@ -44,7 +45,7 @@ static const std::string PermissionsCredentialTokenClassId("DDS:Access:Permissio
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   : handle_mutex_()
   , next_handle_(1)
-  , local_credential_data_()
+  , local_access_control_data_()
 {
 }
 
@@ -71,6 +72,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ACE_UNUSED_ARG(domain_id);
   ACE_UNUSED_ARG(participant_qos);
+
+
 
 
   const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
@@ -110,6 +113,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
+//    local_access_control_data_.load(participant_qos.property.value);
+//
+//    SSL::SignedDocument local_gov = local_access_control_data_.get_governance_doc();
 
 
     // Read in permissions_ca
@@ -130,7 +136,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   };
 
 
-    // This will just return a fixed token
+    // Set and store the permissions token
     ::DDS::Security::PermissionsToken permissions_token;
     TokenWriter writer(permissions_token, PermissionsTokenClassId, 2, 0);
     writer.set_property(0, "dds.perm_ca.sn", "MyCA Name", true);
@@ -138,23 +144,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     perm_set.perm_token = permissions_token;
 
+    // Set and store the permissions credential token
+    ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
+    TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId, 1, 0);
+    pctWriter.set_property(0, "dds.perm.cert", get_file_contents(perm_file.c_str()).c_str(), true);
+
+    perm_set.perm_cred_token = permissions_cred_token;
+
     ::CORBA::Boolean perm_handle = generate_handle();
     local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
 
-
-    //Test get_participant_sec_attributes
-
-    ::DDS::Security::ParticipantSecurityAttributes attrs;
-    get_participant_sec_attributes(perm_handle,attrs,ex);
-
-
-    std::cout <<"created handle:"
-              << perm_handle
-              << std::endl
-              << " allow_unauthenticated_participants:" << attrs.allow_unauthenticated_participants
-              << std::endl
-              << " is_rtps_protected:" << attrs.is_rtps_protected
-              << std::endl;
 
   return perm_handle ;
 }
@@ -573,9 +572,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  // This will just return a fixed token
-  TokenWriter writer(permissions_credential_token, PermissionsCredentialTokenClassId, 1, 0);
-  writer.set_property(0, "dds.perm.cert", "TheContentofThePermDocument", true);
+
+    ACPermsMap::iterator iter = local_ac_perms.begin();
+    iter = local_ac_perms.find(handle);
+    if(iter != local_ac_perms.end()) {
+        permissions_credential_token = iter->second.perm_cred_token;
+        return true;
+    } else {
+        CommonUtilities::set_security_error(ex, -1, 0, "No PermissionToken found");
+        return false;
+    }
 
   return true;
 }
@@ -608,6 +614,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
   ACE_UNUSED_ARG(permissions_credential_token);
   ACE_UNUSED_ARG(ex);
+
+
 
   return true;
 }
@@ -1050,6 +1058,17 @@ std::string AccessControlBuiltInImpl::extract_file_name(const std::string& file_
   }
 }
 
+std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
+  std::ifstream in(filename, std::ios::in | std::ios::binary);
+  if (in)
+    {
+      std::ostringstream contents;
+      contents << in.rdbuf();
+      in.close();
+          return(contents.str());
+    }
+        throw(errno);
+}
 
 } // namespace Security
 } // namespace OpenDDS
