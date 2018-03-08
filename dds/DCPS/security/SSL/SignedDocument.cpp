@@ -93,6 +93,20 @@ namespace OpenDDS {
         return result;
       }
 
+      int SignedDocument::verify_signature(const Certificate& cert)
+      {
+        int result = 1; /* 1 = failure, 0 = success */
+
+        /*
+         * TODO something similar to the implementation of Certificate.validate(...)
+         * using:
+         *
+         * int PKCS7_verify(PKCS7 *p7, STACK_OF(X509) *certs, X509_STORE *store, BIO *indata, BIO *out, int flags);
+         */
+
+        return result;
+      }
+
       PKCS7* SignedDocument::PKCS7_from_SMIME(const std::string& path)
       {
         PKCS7* result = NULL;

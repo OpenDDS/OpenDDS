@@ -8,6 +8,7 @@
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/unique_ptr.h"
+#include "Certificate.h"
 #include <string>
 #include <openssl/pkcs7.h>
 
@@ -32,6 +33,8 @@ namespace OpenDDS {
         void load(const std::string& uri);
 
         int get_content(std::string& dst);
+
+        int verify_signature(const Certificate& cert);
 
       private:
 

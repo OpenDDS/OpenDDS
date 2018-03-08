@@ -18,9 +18,12 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
+      class SignedDocument;
+
       class DdsSecurity_Export Certificate
       {
       public:
+        friend class SignedDocument;
 
         typedef DCPS::unique_ptr<Certificate> unique_ptr;
 
