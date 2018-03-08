@@ -271,7 +271,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 
 OpenDDS::DCPS::RepoId
 RtpsDiscovery::generate_participant_guid() {
-  OpenDDS::DCPS::RepoId id;
+  OpenDDS::DCPS::RepoId id = GUID_UNKNOWN;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, id);
   if (!guid_interface_.empty()) {
     if (guid_gen_.interfaceName(guid_interface_.c_str()) != 0) {

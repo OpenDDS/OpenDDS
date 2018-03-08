@@ -21,7 +21,7 @@ namespace OpenDDS {
 
         typedef DCPS::unique_ptr<SignedDocument> unique_ptr;
 
-        SignedDocument(const std::string& uri, const std::string password = "");
+        SignedDocument(const std::string& uri);
 
         SignedDocument();
 
@@ -29,13 +29,17 @@ namespace OpenDDS {
 
         SignedDocument& operator=(const SignedDocument& rhs);
 
-        void load(const std::string& uri, const std::string& password = "");
+        void load(const std::string& uri);
+
+        int get_content(std::string& dst);
 
       private:
 
-        static PKCS7* PKCS7_from_pem(const std::string& path, const std::string& password = "");
+        PKCS7* PKCS7_from_SMIME(const std::string& path);
 
         PKCS7* doc_;
+        BIO* content_;
+        std::string plaintext_;
       };
 
     }

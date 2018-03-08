@@ -313,6 +313,7 @@ namespace {
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
       be_global->impl_ <<
+        "  find_size_ulong(size, padding);\n"
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    gen_find_size(seq[i], size, padding);\n"
         "  }\n";

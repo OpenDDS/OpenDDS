@@ -1603,7 +1603,7 @@ DomainParticipantImpl::enable()
     TheServiceParticipant->monitor_->report();
   }
 
-  if (!security_config_) {
+  if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
     if (!security_config_) {
       security_config_ = TheSecurityRegistry->fix_empty_default();

@@ -12,9 +12,9 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
-      SignedDocument::SignedDocument(const std::string& uri, const std::string password) : doc_(NULL)
+      SignedDocument::SignedDocument(const std::string& uri) : doc_(NULL)
       {
-        load(uri, password);
+        load(uri);
       }
 
       SignedDocument::SignedDocument() : doc_(NULL)
@@ -40,7 +40,7 @@ namespace OpenDDS {
         return *this;
       }
 
-      void SignedDocument::load(const std::string& uri, const std::string& password)
+      void SignedDocument::load(const std::string& uri)
       {
         if (doc_) return;
 
@@ -49,7 +49,7 @@ namespace OpenDDS {
 
         switch(s) {
           case URI_FILE:
-            doc_ = PKCS7_from_pem(path, password);
+            doc_ = PKCS7_from_SMIME(path);
             break;
 
           case URI_DATA:
@@ -61,17 +61,49 @@ namespace OpenDDS {
         }
       }
 
-      PKCS7* SignedDocument::PKCS7_from_pem(const std::string& path, const std::string& password)
+      int SignedDocument::get_content(std::string& dst)
+      {
+        if (!plaintext_.empty()) {
+          dst = plaintext_;
+          return 0;
+        }
+
+        int result = 1;
+
+        dst.clear();
+
+        if (doc_) {
+          if (content_) {
+            unsigned char tmp[32] = {0};
+            int len = 0;
+            while ((len = BIO_read(content_, tmp, sizeof(tmp))) > 0) {
+              dst.insert(dst.end(), tmp, tmp + len);
+              result = 0;
+            }
+
+          } else {
+            OPENDDS_SSL_LOG_ERR("PKCS7_decrypt failed");
+          }
+
+          BIO_free(content_);
+          content_ = 0;
+          plaintext_ = dst;
+        }
+
+        return result;
+      }
+
+      PKCS7* SignedDocument::PKCS7_from_SMIME(const std::string& path)
       {
         PKCS7* result = NULL;
 
         BIO* filebuf = BIO_new_file(path.c_str(), "r");
         if (filebuf) {
-          if (password != "") {
-              result = PEM_read_bio_PKCS7(filebuf, NULL, NULL, (void*)password.c_str());
 
-          } else {
-              result = PEM_read_bio_PKCS7(filebuf, NULL, NULL, NULL);
+          result = SMIME_read_PKCS7(filebuf, &content_);
+          if (! result) {
+            OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
+            content_ = 0;
           }
 
           BIO_free(filebuf);
