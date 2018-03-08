@@ -54,91 +54,82 @@ DDS::BuiltinTopicKey_t keyFromSample(TopicType* sample);
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-// changed from member function template to class template
-// to avoid VC++ v6 build problem.
-/*
- * Template method to retrieve the repository id by instance handle
- * from builtin topic.
- */
-template <class BIT_Reader, class BIT_Reader_var, class BIT_DataSeq>
-class BIT_Helper_1 {
-public:
-  DDS::ReturnCode_t instance_handle_to_bit_data(
-    DomainParticipantImpl*       dp,
-    const char*                  bit_name,
-    const DDS::InstanceHandle_t& handle,
-    BIT_DataSeq&                 data)
-  {
-    DDS::Subscriber_var bit_subscriber = dp->get_builtin_subscriber();
+template<class BIT_Reader_var, class BIT_DataSeq>
+DDS::ReturnCode_t instance_handle_to_bit_data(
+  DomainParticipantImpl* dp,
+  const char* bit_name,
+  const DDS::InstanceHandle_t& handle,
+  BIT_DataSeq& data)
+{
+  DDS::Subscriber_var bit_subscriber = dp->get_builtin_subscriber();
 
-    DDS::DataReader_var reader =
-      bit_subscriber->lookup_datareader(bit_name);
+  DDS::DataReader_var reader = bit_subscriber->lookup_datareader(bit_name);
 
-    BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
+  typedef typename BIT_Reader_var::_obj_type BIT_Reader;
+  BIT_Reader_var bit_reader = BIT_Reader::_narrow(reader.in());
 
-    ACE_Time_Value due = ACE_OS::gettimeofday() +
-      ACE_Time_Value(TheServiceParticipant->bit_lookup_duration_msec() / 1000,
-                     (TheServiceParticipant->bit_lookup_duration_msec() % 1000)*1000);
-
-    DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+  const ACE_Time_Value due = ACE_OS::gettimeofday() +
+    ACE_Time_Value(TheServiceParticipant->bit_lookup_duration_msec() / 1000,
+                   (TheServiceParticipant->bit_lookup_duration_msec() % 1000)
+                   * 1000);
 
     // Look for the data from builtin topic datareader until we get results or
     // timeout.
     // This is to resolve the problem of lookup return nothing. This could happen
     // when the add_association is called before the builtin topic datareader got
     // the published data.
-    while (1) {
-      DDS::SampleInfoSeq the_info;
-      BIT_DataSeq the_data;
-      ret = bit_reader->read_instance(the_data,
-                                      the_info,
-                                      DDS::LENGTH_UNLIMITED, // zero-copy
-                                      handle,
-                                      DDS::ANY_SAMPLE_STATE,
-                                      DDS::ANY_VIEW_STATE,
-                                      DDS::ANY_INSTANCE_STATE);
+  while (true) {
+    DDS::SampleInfoSeq the_info;
+    BIT_DataSeq the_data;
+    const DDS::ReturnCode_t ret =
+      bit_reader->read_instance(the_data,
+                                the_info,
+                                DDS::LENGTH_UNLIMITED,
+                                handle,
+                                DDS::ANY_SAMPLE_STATE,
+                                DDS::ANY_VIEW_STATE,
+                                DDS::ANY_INSTANCE_STATE);
 
-      if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_id, ")
-                          ACE_TEXT(" read instance 0x%x returned error %d. \n"),
-                          handle, ret),
-                         ret);
+    if (ret == DDS::RETCODE_OK) {
+      data.length(1);
+      data[0] = the_data[0];
+      return ret;
+    }
+
+    if (ret != DDS::RETCODE_BAD_PARAMETER && ret != DDS::RETCODE_NO_DATA) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: instance_handle_to_repo_id, ")
+                        ACE_TEXT("read instance 0x%x returned error %d.\n"),
+                        handle, ret),
+                       ret);
+    }
+
+    const ACE_Time_Value now = ACE_OS::gettimeofday();
+
+    if (now < due) {
+      if (DCPS_debug_level >= 10) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) instance_handle_to_repo_id, ")
+                   ACE_TEXT("BIT reader read_instance failed - trying again.\n")));
       }
 
-      if (ret == DDS::RETCODE_OK) {
-        data.length(1);
-        data[0] = the_data[0];
-        return ret;
+      ACE_Time_Value tv = due - now;
+
+      if (tv > ACE_Time_Value(0, 100000)) {
+        tv = ACE_Time_Value(0, 100000);
       }
 
-      ACE_Time_Value now = ACE_OS::gettimeofday();
+      ACE_OS::sleep(tv);
 
-      if (now < due) {
-        if (DCPS_debug_level >= 10)
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) BIT_Helper::instance_handle_to_repo_id, ")
-                     ACE_TEXT(" BIT reader read_instance failed - trying again. \n")));
-
-        ACE_Time_Value tv = due - now;
-
-        if (tv > ACE_Time_Value(0, 100000)) {
-          tv = ACE_Time_Value(0, 100000);
-        }
-
-        ACE_OS::sleep(tv);
-
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: BIT_Helper::instance_handle_to_repo_id, ")
-                          ACE_TEXT(" timeout. \n")),
-                         DDS::RETCODE_ERROR);
-        return DDS::RETCODE_TIMEOUT;
-      }
+    } else {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: instance_handle_to_repo_id,")
+                        ACE_TEXT(" timeout. \n")),
+                       DDS::RETCODE_ERROR);
+      return DDS::RETCODE_TIMEOUT;
     }
   }
-};
-
+}
 #endif
 
 inline

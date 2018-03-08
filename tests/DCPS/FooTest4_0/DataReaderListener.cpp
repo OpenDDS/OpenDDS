@@ -144,13 +144,3 @@ void DataReaderListenerImpl::on_subscription_matched (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_budget_exceeded \n")));
   }
 
-
-  void DataReaderListenerImpl::on_connection_deleted (
-    ::DDS::DataReader_ptr reader
-  )
-  {
-    ACE_UNUSED_ARG(reader) ;
-
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_connection_deleted \n")));
-  }

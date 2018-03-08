@@ -34,9 +34,9 @@ ShmemInst::ShmemInst(const std::string& name)
 }
 
 TransportImpl_rch
-ShmemInst::new_impl(const TransportInst_rch& inst)
+ShmemInst::new_impl()
 {
-  return make_rch<ShmemTransport>(inst);
+  return make_rch<ShmemTransport>(ref(*this));
 }
 
 int
@@ -52,7 +52,7 @@ ShmemInst::load(ACE_Configuration_Heap& cf,
 }
 
 OPENDDS_STRING
-ShmemInst::dump_to_str()
+ShmemInst::dump_to_str() const
 {
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;

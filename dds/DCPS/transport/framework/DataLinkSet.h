@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_DATALINKSET_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "DataLink_rch.h"
 #include "SendResponseListener.h"
@@ -27,7 +27,7 @@ class DataSampleElement;
 class DataLinkSet;
 typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
-class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export DataLinkSet : public RcObject {
 public:
 
   DataLinkSet();
@@ -49,8 +49,7 @@ public:
   SendControlStatus send_control(RepoId                           pub_id,
                                  const TransportSendListener_rch& listener,
                                  const DataSampleHeader&          header,
-                                 Message_Block_Ptr                msg,
-                                 TransportSendControlElementAllocator* allocator = 0);
+                                 Message_Block_Ptr                msg);
 
   void send_response(RepoId sub_id,
                      const DataSampleHeader& header,
@@ -86,17 +85,10 @@ public:
   MapType& map() { return map_; }
   //@}
 
-  TransportSendControlElementAllocator& tsce_allocator() {
-    return send_control_element_allocator_;
-  }
-
 private:
 
   /// Hash map for DataLinks.
   MapType map_;
-
-  /// Allocator for TransportSendControlElement.
-  TransportSendControlElementAllocator send_control_element_allocator_;
 
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.

@@ -87,10 +87,3 @@ void DataWriterListenerImpl::on_publication_lost (
   ACE_UNUSED_ARG(writer) ;
   ACE_UNUSED_ARG(status) ;
 }
-
-void DataWriterListenerImpl::on_connection_deleted (
-      ::DDS::DataWriter_ptr writer
-    )
-{
-  ACE_UNUSED_ARG(writer) ;
-}

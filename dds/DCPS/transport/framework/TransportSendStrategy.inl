@@ -24,7 +24,7 @@ OpenDDS::DCPS::TransportSendStrategy::synch() const
 {
   DBG_ENTRY_LVL("TransportSendStrategy","synch",6);
 
-  return synch_;
+  return synch_.get();
 }
 
 ACE_INLINE void
@@ -87,7 +87,7 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
   } else if (this->mode_ == MODE_SUSPEND) {
     this->mode_ = this->mode_before_suspend_;
     this->mode_before_suspend_ = MODE_NOT_SET;
-    if (this->queue_->size() > 0) {
+    if (this->queue_.size() > 0) {
       this->mode_ = MODE_QUEUE;
       this->synch_->work_available();
     }
@@ -133,12 +133,6 @@ OpenDDS::DCPS::TransportSendStrategy::get_handle()
 }
 
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportSendStrategy::transport_shutdown ()
-{
-  this->transport_shutdown_ = true;
-}
-
 ACE_INLINE size_t
 OpenDDS::DCPS::TransportSendStrategy::max_message_size() const
 {
@@ -148,7 +142,7 @@ OpenDDS::DCPS::TransportSendStrategy::max_message_size() const
 ACE_INLINE OpenDDS::DCPS::TransportQueueElement*
 OpenDDS::DCPS::TransportSendStrategy::current_packet_first_element() const
 {
-  return this->elems_->peek();
+  return this->elems_.peek();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

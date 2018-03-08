@@ -12,6 +12,8 @@
 #include "DataReaderRemoteS.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/DataReaderCallbacks.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -21,8 +23,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
-class DataReaderCallbacks;
 
 /**
 * @class DataReaderRemoteImpl
@@ -35,7 +35,7 @@ class DataReaderRemoteImpl
   : public virtual POA_OpenDDS::DCPS::DataReaderRemote {
 public:
 
-  explicit DataReaderRemoteImpl(DataReaderCallbacks* parent);
+  explicit DataReaderRemoteImpl(DataReaderCallbacks& parent);
 
   virtual ~DataReaderRemoteImpl();
 
@@ -53,7 +53,7 @@ public:
   void detach_parent();
 
 private:
-  RcHandle<DataReaderCallbacks> parent_;
+  WeakRcHandle<DataReaderCallbacks> parent_;
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

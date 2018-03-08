@@ -24,7 +24,7 @@ public:
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 
-  virtual OPENDDS_STRING dump_to_str();
+  virtual OPENDDS_STRING dump_to_str() const;
 
   /// Size (in bytes) of the single shared-memory pool allocated by this
   /// transport instance.  Defaults to 16 megabytes.
@@ -48,7 +48,7 @@ private:
   friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit ShmemInst(const std::string& name);
 
-  TransportImpl_rch new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl();
   std::string hostname_;
   std::string poolname_;
 };

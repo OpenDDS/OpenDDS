@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_RECORDERIMPL_H
 #define OPENDDS_DCPS_RECORDERIMPL_H
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/WriterInfo.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
@@ -76,7 +76,6 @@ public:
   virtual void notify_subscription_disconnected(const WriterIdSeq& pubids);
   virtual void notify_subscription_reconnected(const WriterIdSeq& pubids);
   virtual void notify_subscription_lost(const WriterIdSeq& pubids);
-  virtual void notify_connection_deleted(const RepoId&);
 
   // Implement DataReaderCallbacks
 
@@ -148,16 +147,13 @@ private:
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void _add_ref() { EntityImpl::_add_ref(); }
-  void _remove_ref() { EntityImpl::_remove_ref(); }
-
   DDS::DataReaderQos qos_;
 
   /// lock protecting sample container as well as statuses.
   ACE_Recursive_Thread_Mutex sample_lock_;
 
   DomainParticipantImpl*       participant_servant_;
-  TopicImpl*                   topic_servant_;
+  TopicDescriptionPtr<TopicImpl>              topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;

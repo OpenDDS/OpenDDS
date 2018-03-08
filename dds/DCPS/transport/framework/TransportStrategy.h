@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_TRANSPORTSTRATEGY
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -22,7 +22,7 @@ namespace DCPS {
  * TransportReceiveStrategy.
  */
 class OpenDDS_Dcps_Export TransportStrategy
-  : public RcObject<ACE_SYNCH_MUTEX> {
+  : public RcObject {
 public:
 
   virtual ~TransportStrategy();

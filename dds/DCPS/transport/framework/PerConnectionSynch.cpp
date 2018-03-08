@@ -72,6 +72,12 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
   ThreadSynchWorker::WorkOutcome work_outcome =
     ThreadSynchWorker::WORK_OUTCOME_NO_MORE_TO_DO;
 
+
+  RcHandle<ThreadSynchWorker> worker = this->worker().lock();
+
+  if (! worker)
+    return ThreadSynchWorker::WORK_OUTCOME_NO_MORE_TO_DO;
+
   // Loop until we honor the shutdown_ flag.
   while (1) {
     VDBG((LM_DEBUG,"(%P|%t) DBG:   "
@@ -145,7 +151,7 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
 
     // Without the lock, ask the worker to perform some work.  It tells
     // us if it completed with more work to still be performed (or not).
-    work_outcome = this->perform_work();
+    work_outcome = worker->perform_work();
 
     VDBG_LVL((LM_DEBUG,"(%P|%t) DBG:   "
               "call to perform_work() returned %d\n",work_outcome), 5);

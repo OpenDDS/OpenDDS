@@ -19,7 +19,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class TransportReceiveListener;
 class ReceivedDataSample;
 
 class OpenDDS_Dcps_Export ReceiveListenerSetMap {
@@ -32,7 +31,7 @@ public:
 
   int insert(RepoId                              publisher_id,
              RepoId                              subscriber_id,
-             const TransportReceiveListener_rch& receive_listener);
+             const TransportReceiveListener_wrch& receive_listener);
 
   ReceiveListenerSet_rch find(RepoId publisher_id) const;
 

@@ -24,13 +24,14 @@ OpenDDS::DCPS::ReactorSynch::ReactorSynch(
 
   if (DCPS_debug_level > 4) {
     std::size_t id = 0;
-    if( worker()) {
-      id = worker()->id();
+    RcHandle<ThreadSynchWorker> worker = this->worker().lock();
+    if( worker) {
+      id = worker->id();
     }
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ReactorSynch::ReactorSynch() [%d] - ")
                ACE_TEXT("establishing synch %C a worker.\n"),
-               id,(worker()?"with":"without")));
+               id,(worker ? "with":"without")));
   }
 }
 

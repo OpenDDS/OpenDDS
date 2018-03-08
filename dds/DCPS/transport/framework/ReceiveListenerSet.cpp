@@ -32,7 +32,7 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
 
   last = true;
 
-  TransportReceiveListener_rch listener;
+  TransportReceiveListener_wrch listener;
 
   if (find(map_, local_id, listener) == -1) {
     GuidConverter converter(local_id);
@@ -73,9 +73,7 @@ bool
 ReceiveListenerSet::exist(const RepoId& local_id)
 {
   GuardType guard(this->lock_);
-
-  TransportReceiveListener_rch listener;
-  return (find(map_, local_id, listener) == -1 ? false : true);
+  return map_.count(local_id) > 0;
 }
 
 void
@@ -91,7 +89,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
                                   ConstrainReceiveSet constrain)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);
-  OPENDDS_VECTOR(RcHandle<TransportReceiveListener>) handles;
+  OPENDDS_VECTOR(TransportReceiveListener_wrch) handles;
   {
     GuardType guard(this->lock_);
     for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
@@ -110,13 +108,16 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
   }
 
   for (size_t i = 0; i < handles.size(); ++i) {
+    TransportReceiveListener_rch listener = handles[i].lock();
+    if (!listener)
+      continue;
     if (i < handles.size() - 1 && sample.sample_) {
       // demarshal (in data_received()) updates the rd_ptr() of any of
       // the message blocks in the chain, so give it a duplicated chain.
       ReceivedDataSample rds(sample);
-      handles[i]->data_received(rds);
+      listener->data_received(rds);
     } else {
-      handles[i]->data_received(sample);
+      listener->data_received(sample);
     }
   }
 }
@@ -126,7 +127,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
                                   const RepoId& readerId)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received(sample, readerId)", 6);
-  RcHandle<TransportReceiveListener> h;
+  TransportReceiveListener_wrch h;
   {
     GuardType guard(this->lock_);
     MapType::iterator itr = map_.find(readerId);
@@ -134,7 +135,9 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
       h = itr->second;
     }
   }
-  if (h) h->data_received(sample);
+  TransportReceiveListener_rch listener = h.lock();
+  if (listener)
+    listener->data_received(sample);
 }
 
 }

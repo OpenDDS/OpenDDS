@@ -55,18 +55,6 @@ DCPS_IR_Participant::DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federat
 
 DCPS_IR_Participant::~DCPS_IR_Participant()
 {
-  for (DCPS_IR_Subscription_Map::const_iterator current = this->subscriptions_.begin();
-       current != this->subscriptions_.end();
-       ++current) {
-    delete current->second;
-  }
-
-  for (DCPS_IR_Publication_Map::const_iterator current = this->publications_.begin();
-       current != this->publications_.end();
-       ++current) {
-    delete current->second;
-  }
-
 }
 
 const DCPS_IR_Publication_Map&
@@ -159,17 +147,18 @@ DCPS_IR_Participant::isBitPublisher() const
   return this->isBitPublisher_;
 }
 
-int DCPS_IR_Participant::add_publication(DCPS_IR_Publication* pub)
+int DCPS_IR_Participant::add_publication(OpenDDS::DCPS::unique_ptr<DCPS_IR_Publication> pub)
 {
   OpenDDS::DCPS::RepoId pubId = pub->get_id();
   DCPS_IR_Publication_Map::iterator where = this->publications_.find(pubId);
 
   if (where == this->publications_.end()) {
+    DCPS_IR_Publication* pubptr = pub.get();
     this->publications_.insert(
-      where, DCPS_IR_Publication_Map::value_type(pubId, pub));
+      where, DCPS_IR_Publication_Map::value_type(pubId, OpenDDS::DCPS::move(pub)));
 
     if (isBitPublisher_) {
-      pub->set_bit_status(isBitPublisher_);
+      pubptr->set_bit_status(isBitPublisher_);
     }
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -180,7 +169,7 @@ int DCPS_IR_Participant::add_publication(DCPS_IR_Publication* pub)
                  ACE_TEXT("participant %C successfully added publication %C at 0x%x.\n"),
                  std::string(part_converter).c_str(),
                  std::string(pub_converter).c_str(),
-                 pub));
+                 pubptr));
     }
 
     return 0;
@@ -206,7 +195,7 @@ int DCPS_IR_Participant::find_publication_reference(OpenDDS::DCPS::RepoId pubId,
   DCPS_IR_Publication_Map::iterator where = this->publications_.find(pubId);
 
   if (where != this->publications_.end()) {
-    pub = where->second;
+    pub = where->second.get();
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
@@ -242,7 +231,7 @@ int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::RepoId pubId)
 
   if (where != this->publications_.end()) {
     DCPS_IR_Topic* topic = where->second->get_topic();
-    topic->remove_publication_reference(where->second);
+    topic->remove_publication_reference(where->second.get());
 
     if (0 != where->second->remove_associations(false)) {
       // N.B. As written today, this branch will never be taken.
@@ -256,8 +245,7 @@ int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::RepoId pubId)
       return -1;
     }
 
-    this->domain_->dispose_publication_bit(where->second);
-    delete where->second;
+    this->domain_->dispose_publication_bit(where->second.get());
     topic->release(false);
     this->publications_.erase(where);
 
@@ -285,17 +273,19 @@ int DCPS_IR_Participant::remove_publication(OpenDDS::DCPS::RepoId pubId)
   }
 }
 
-int DCPS_IR_Participant::add_subscription(DCPS_IR_Subscription* sub)
+int DCPS_IR_Participant::add_subscription(OpenDDS::DCPS::unique_ptr<DCPS_IR_Subscription> sub)
 {
   OpenDDS::DCPS::RepoId subId = sub->get_id();
   DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find(subId);
 
   if (where == this->subscriptions_.end()) {
+
+    DCPS_IR_Subscription* subptr = sub.get();
     this->subscriptions_.insert(
-      where, DCPS_IR_Subscription_Map::value_type(subId, sub));
+      where, DCPS_IR_Subscription_Map::value_type(subId, OpenDDS::DCPS::move(sub)));
 
     if (isBitPublisher_) {
-      sub->set_bit_status(isBitPublisher_);
+      subptr->set_bit_status(isBitPublisher_);
     }
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -306,7 +296,7 @@ int DCPS_IR_Participant::add_subscription(DCPS_IR_Subscription* sub)
                  ACE_TEXT("participant %C successfully added subscription %C at 0x%x.\n"),
                  std::string(part_converter).c_str(),
                  std::string(sub_converter).c_str(),
-                 sub));
+                 subptr));
     }
 
     return 0;
@@ -332,7 +322,7 @@ int DCPS_IR_Participant::find_subscription_reference(OpenDDS::DCPS::RepoId subId
   DCPS_IR_Subscription_Map::iterator where = this->subscriptions_.find(subId);
 
   if (where != this->subscriptions_.end()) {
-    sub = where->second;
+    sub = where->second.get();
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       OpenDDS::DCPS::RepoIdConverter part_converter(id_);
@@ -368,7 +358,7 @@ int DCPS_IR_Participant::remove_subscription(OpenDDS::DCPS::RepoId subId)
 
   if (where != this->subscriptions_.end()) {
     DCPS_IR_Topic* topic = where->second->get_topic();
-    topic->remove_subscription_reference(where->second);
+    topic->remove_subscription_reference(where->second.get());
 
     if (0 != where->second->remove_associations(false)) {
       // N.B. As written today, this branch will never be taken.
@@ -382,8 +372,7 @@ int DCPS_IR_Participant::remove_subscription(OpenDDS::DCPS::RepoId subId)
       return -1;
     }
 
-    this->domain_->dispose_subscription_bit(where->second);
-    delete where->second;
+    this->domain_->dispose_subscription_bit(where->second.get());
     topic->release(false);
     this->subscriptions_.erase(where);
 
@@ -533,7 +522,7 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
       DCPS_IR_Publication_Map::const_iterator current = next;
       ++ next;
       DCPS_IR_Topic* topic = current->second->get_topic();
-      topic->remove_publication_reference(current->second);
+      topic->remove_publication_reference(current->second.get());
 
       if (0 != current->second->remove_associations(notify_lost)) {
         return;
@@ -550,7 +539,7 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
       DCPS_IR_Subscription_Map::const_iterator current = next;
       ++ next;
       DCPS_IR_Topic* topic = current->second->get_topic();
-      topic->remove_subscription_reference(current->second);
+      topic->remove_subscription_reference(current->second.get());
 
       if (0 != current->second->remove_associations(notify_lost)) {
         return;
@@ -640,8 +629,6 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
                    this->domain_->get_id()));
       }
     }
-    // delete the publication
-    delete current->second;
   }
 
   // Clear the container.
@@ -670,8 +657,6 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
                    this->domain_->get_id()));
       }
     }
-    // delete the subscription
-    delete current->second;
   }
 
   // Clear the container.
@@ -681,7 +666,7 @@ void DCPS_IR_Participant::remove_all_dependents(CORBA::Boolean notify_lost)
 void DCPS_IR_Participant::mark_dead()
 {
   aliveStatus_ = 0;
-  domain_->add_dead_participant(this);
+  domain_->add_dead_participant(OpenDDS::DCPS::rchandle_from(this));
 }
 
 OpenDDS::DCPS::RepoId DCPS_IR_Participant::get_id()

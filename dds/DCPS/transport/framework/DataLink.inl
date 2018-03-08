@@ -17,20 +17,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-TransportImpl*
-DataLink::transport()
-{
-  return this->impl_.in();
-}
-
-ACE_INLINE
-bool
-DataLink::issues_on_deleted_callback() const
-{
-  return false;
-}
-
-ACE_INLINE
 Priority&
 DataLink::transport_priority()
 {
@@ -147,7 +133,7 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
     strategy = this->send_strategy_;
   }
 
-  if (!strategy.is_nil()) {
+  if (strategy) {
     strategy->send(element, relink);
   }
 }
@@ -359,7 +345,7 @@ DataLink::send_listener_for(const RepoId& pub_id) const
   if (found == this->send_listeners_.end()) {
     return TransportSendListener_rch();
   }
-  return found->second;
+  return found->second.lock();
 }
 
 ACE_INLINE
@@ -373,19 +359,19 @@ DataLink::recv_listener_for(const RepoId& sub_id) const
   if (found == this->recv_listeners_.end()) {
     return TransportReceiveListener_rch();
   }
-  return found->second;
+  return found->second.lock();
 }
 
 ACE_INLINE
 void
-DataLink::default_listener(const TransportReceiveListener_rch& trl)
+DataLink::default_listener(const TransportReceiveListener_wrch& trl)
 {
   GuardType guard(this->pub_sub_maps_lock_);
   this->default_listener_ = trl;
 }
 
 ACE_INLINE
-const TransportReceiveListener_rch&
+TransportReceiveListener_wrch
 DataLink::default_listener() const
 {
   GuardType guard(this->pub_sub_maps_lock_);

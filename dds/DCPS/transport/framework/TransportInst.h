@@ -14,7 +14,7 @@
 #endif
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
@@ -47,10 +47,10 @@ namespace DCPS {
  * The TransportInst object is supplied to the
  * TransportImpl::configure() method.
  */
-class OpenDDS_Dcps_Export TransportInst : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export TransportInst : public RcObject {
 public:
 
-  OPENDDS_STRING name() const { return name_; }
+  const OPENDDS_STRING& name() const { return name_; }
 
   /// Overwrite the default configurations with the configuration from the
   /// given section in the ACE_Configuration_Heap object.
@@ -58,8 +58,8 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  void dump();
-  virtual OPENDDS_STRING dump_to_str();
+  void dump() const ;
+  virtual OPENDDS_STRING dump_to_str() const;
 
   /// Format name of transport configuration parameter for use in
   /// conjunction with dump(std::ostream& os).
@@ -124,8 +124,8 @@ private:
   void shutdown();
 
   friend class TransportClient;
-  TransportImpl_rch impl();
-  virtual TransportImpl_rch new_impl(const RcHandle<TransportInst>& inst) = 0;
+  TransportImpl* impl();
+  virtual TransportImpl_rch new_impl() = 0;
 
   const OPENDDS_STRING name_;
 

@@ -68,13 +68,6 @@ module OpenDDS
         in ::DDS::DataReader reader,
         in SubscriptionLostStatus status);
 
-      /// Called when the connection object is cleaned up and
-      /// the reconnect thread exits.
-      /// This hook is added for testing the reconnect thread
-      /// leaking problem when the subscriber crashes.
-      void on_connection_deleted(
-        in ::DDS::DataReader reader);
-
       /// Called when the latency budget has been exceeded.
       void on_budget_exceeded(
         in ::DDS::DataReader reader,

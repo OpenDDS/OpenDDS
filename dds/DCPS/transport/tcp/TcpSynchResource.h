@@ -17,10 +17,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class TcpDataLink;
+
 class TcpSynchResource : public ThreadSynchResource {
 public:
 
-  TcpSynchResource(const TcpConnection_rch& connection,
+  TcpSynchResource(TcpDataLink& link,
                    const int& max_output_pause_period_ms);
   virtual ~TcpSynchResource();
 
@@ -28,7 +30,7 @@ public:
 
 private:
 
-  TcpConnection_rch connection_;
+  TcpDataLink& link_;
 };
 
 } // namespace DCPS

@@ -52,12 +52,6 @@ public:
       ::DDS::DataWriter_ptr writer,
       const ::OpenDDS::DCPS::PublicationLostStatus & status
     );
-
-
-  virtual void on_connection_deleted (
-      ::DDS::DataWriter_ptr writer
-    );
-
 protected:
 
   virtual ~DataWriterListenerImpl (void);

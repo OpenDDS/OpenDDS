@@ -18,7 +18,6 @@ ACE_INLINE
 TransportRegistry::~TransportRegistry()
 {
   DBG_ENTRY_LVL("TransportRegistry", "~TransportRegistry", 6);
-  release();
 }
 
 ACE_INLINE
@@ -57,14 +56,6 @@ TransportRegistry::domain_default_config(DDS::DomainId_t domain) const
     domain_default_config_map_.find(domain);
   return (iter == domain_default_config_map_.end())
     ? TransportConfig_rch() : iter->second;
-}
-
-ACE_INLINE
-void
-TransportRegistry::remove_inst(const TransportInst_rch& inst)
-{
-  GuardType guard(this->lock_);
-  this->inst_map_.erase(inst->name());
 }
 
 ACE_INLINE

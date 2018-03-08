@@ -10,13 +10,12 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/RcEventHandler.h"
 #include "ReceiveListenerSetMap.h"
 #include "SendResponseListener.h"
 #include "TransportDefs.h"
-#include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 #include "TransportStrategy.h"
@@ -48,8 +47,11 @@ class  ReceivedDataSample;
 class  DataSampleElement;
 class  ThreadPerConnectionSendTask;
 class  TransportClient;
+class TransportImpl;
 
 typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetMap;
+
+typedef WeakRcHandle<TransportSendListener> TransportSendListener_wrch;
 
 /**
  * This class manages the reservations based on the associations between datareader
@@ -62,8 +64,7 @@ typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetM
  *    is enabled.
  */
 class OpenDDS_Dcps_Export DataLink
-  : public RcEventHandler,
-    public PoolAllocationBase {
+: public RcEventHandler {
 
   friend class DataLinkCleanupTask;
 
@@ -80,10 +81,8 @@ public:
   /// created this DataLink.  The ability to specify a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback, bool is_active);
+  DataLink(TransportImpl& impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
-
-  TransportImpl* transport();
 
   //Reactor invokes this after being notified in schedule_stop or cancel_release
   int handle_exception(ACE_HANDLE /* fd */);
@@ -105,7 +104,7 @@ public:
   ///              -1 means failure.
   int make_reservation(const RepoId& remote_subscription_id,
                        const RepoId& local_publication_id,
-                       const TransportSendListener_rch& send_listener);
+                       const TransportSendListener_wrch& send_listener);
 
   /// Only called by our TransportImpl object.
   ///
@@ -113,7 +112,7 @@ public:
   ///              -1 means failure.
   int make_reservation(const RepoId& remote_publication_id,
                        const RepoId& local_subcription_id,
-                       const TransportReceiveListener_rch& receive_listener);
+                       const TransportReceiveListener_wrch& receive_listener);
 
   // ciju: Called by LinkSet with locks held
   /// This will release reservations that were made by one of the
@@ -179,9 +178,6 @@ public:
   /// will notify the corresponding listener.
   void notify(ConnectionNotice notice);
 
-  void notify_connection_deleted();
-  virtual bool issues_on_deleted_callback() const;
-
   /// Called before release the datalink or before shutdown to let
   /// the concrete DataLink to do anything necessary.
   virtual void pre_stop_i();
@@ -244,14 +240,15 @@ public:
   /// targets of this DataLink (see is_target()).
   GUIDSeq* target_intersection(const RepoId& pub_id, const GUIDSeq& in, size_t& n_subs);
 
-  TransportImpl_rch impl() const;
+  TransportImpl& impl() const;
 
-  void default_listener(const TransportReceiveListener_rch& trl);
-  const TransportReceiveListener_rch& default_listener() const;
-  typedef RcHandle<TransportClient> TransportClient_rch;
-  typedef std::pair<TransportClient_rch, RepoId> OnStartCallback;
-  bool add_on_start_callback(const TransportClient_rch& client, const RepoId& remote);
-  void remove_on_start_callback(const TransportClient_rch& client, const RepoId& remote);
+  void default_listener(const TransportReceiveListener_wrch& trl);
+  TransportReceiveListener_wrch default_listener() const;
+
+  typedef WeakRcHandle<TransportClient> TransportClient_wrch;
+  typedef std::pair<TransportClient_wrch, RepoId> OnStartCallback;
+  bool add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
+  void remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
 
   void set_scheduling_release(bool scheduling_release);
@@ -351,17 +348,17 @@ private:
   ACE_Time_Value scheduled_to_stop_at_;
 
   /// Map publication Id value to TransportSendListener.
-  typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener_rch, GUID_tKeyLessThan) IdToSendListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener_wrch, GUID_tKeyLessThan) IdToSendListenerMap;
   IdToSendListenerMap send_listeners_;
 
   /// Map subscription Id value to TransportReceieveListener.
-  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener_rch, GUID_tKeyLessThan) IdToRecvListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener_wrch, GUID_tKeyLessThan) IdToRecvListenerMap;
   IdToRecvListenerMap recv_listeners_;
 
   /// If default_listener_ is not null and this DataLink receives a sample
   /// from a publication GUID that's not in pub_map_, it will call
   /// data_received() on the default_listener_.
-  TransportReceiveListener_rch default_listener_;
+  TransportReceiveListener_wrch default_listener_;
 
   mutable LockType pub_sub_maps_lock_;
 
@@ -371,11 +368,8 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
-  mutable LockType released_assoc_by_local_lock_;
-  AssocByLocal released_assoc_by_local_;
-
   /// A (smart) pointer to the TransportImpl that created this DataLink.
-  TransportImpl_rch impl_;
+  TransportImpl& impl_;
 
   /// The id for this DataLink
   ACE_UINT64 id_;
@@ -383,7 +377,7 @@ private:
   /// The task used to do the sending. This ThreadPerConnectionSendTask
   /// object is created when the thread_per_connection configuration is
   /// true. It only dedicate to this datalink.
-  ThreadPerConnectionSendTask* thr_per_con_send_task_;
+  unique_ptr<ThreadPerConnectionSendTask> thr_per_con_send_task_;
 
   // snapshot of associations when the release_resources() is called.
   AssocByLocal assoc_releasing_;
@@ -407,14 +401,10 @@ protected:
   /// should be released after all associations are removed.
   ACE_Time_Value datalink_release_delay_;
 
-  /// Allocator for TransportSendControlElements created when
-  /// send_control is called.
-  TransportSendControlElementAllocator* send_control_allocator_;
-
   /// Allocators for data and message blocks used by transport
   /// control samples when send_control is called.
-  MessageBlockAllocator* mb_allocator_;
-  DataBlockAllocator* db_allocator_;
+  unique_ptr<MessageBlockAllocator> mb_allocator_;
+  unique_ptr<DataBlockAllocator> db_allocator_;
 
   /// Is remote attached to same transport ?
   bool is_loopback_;

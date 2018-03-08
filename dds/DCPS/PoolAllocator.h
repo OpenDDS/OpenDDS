@@ -64,6 +64,13 @@ public:
     new (static_cast<void*>(ptr)) T(value);
   }
 
+#ifdef ACE_HAS_CPP11
+  static void construct(T* ptr, T&& value)
+  {
+    new (static_cast<void*>(ptr)) T(std::move(value));
+  }
+#endif
+
   static void destroy(T* ptr)
   {
     ptr->~T();
@@ -111,6 +118,8 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
           OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_LIST(T) std::list<T, \
           OpenDDS::DCPS::PoolAllocator<T > >
+#define OPENDDS_DEQUE(T) std::deque<T, \
+          OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_QUEUE(T) std::queue<T, std::deque<T, \
           OpenDDS::DCPS::PoolAllocator<T > > >
 
@@ -125,6 +134,7 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C >
 #define OPENDDS_VECTOR(T) std::vector<T >
 #define OPENDDS_LIST(T) std::list<T >
+#define OPENDDS_DEQUE(T) std::deque<T >
 #define OPENDDS_QUEUE(T) std::queue<T >
 
 #endif // OPENDDS_SAFETY_PROFILE && ACE_HAS_ALLOC_HOOKS

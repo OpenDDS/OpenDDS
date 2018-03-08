@@ -217,8 +217,8 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
                        OPENDDS_STRING("_SEDPTransportInst_") + key.c_str() + domainStr,
                        "rtps_udp");
   // Use a static cast to avoid dependency on the RtpsUdp library
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+      static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   // The SEDP endpoints may need to wait at least one resend period before
   // the handshake completes (allows time for our SPDP multicast to be
   // received by the other side).  Arbitrary constant of 5 to account for
@@ -282,8 +282,8 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 void
 Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+    static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   using namespace OpenDDS::RTPS;
 
   CORBA::ULong idx = 0;
@@ -330,16 +330,16 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
 const ACE_INET_Addr&
 Sedp::local_address() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+      static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   return rtps_inst->local_address_;
 }
 
 const ACE_INET_Addr&
 Sedp::multicast_group() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-      DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  DCPS::RtpsUdpInst* rtps_inst =
+      static_cast<DCPS::RtpsUdpInst*>(transport_inst_);
   return rtps_inst->multicast_group_address_;
 }
 bool
@@ -1363,8 +1363,7 @@ Sedp::Endpoint::~Endpoint()
 
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
-  : Endpoint(pub_id, sedp),
-    alloc_(2, sizeof(DCPS::TransportSendElementAllocator))
+  : Endpoint(pub_id, sedp)
 {
   header_.prefix[0] = 'R';
   header_.prefix[1] = 'T';
@@ -1384,6 +1383,11 @@ Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
   header_.guidPrefix[9] = pub_id.guidPrefix[9];
   header_.guidPrefix[10] = pub_id.guidPrefix[10];
   header_.guidPrefix[11] = pub_id.guidPrefix[11];
+
+  // The reference count is explicited incremented to avoid been explcitly deleted
+  // via the RcHandle<TransportClient> because the object is always been created
+  // on the stack.
+  RcObject::_add_ref();
 }
 
 Sedp::Writer::~Writer()
@@ -1448,7 +1452,7 @@ Sedp::Writer::write_sample(const ParameterList& plist,
   if (result == DDS::RETCODE_OK) {
     // Send sample
     DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
+      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch());
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
     DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
@@ -1500,7 +1504,7 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
   if (result == DDS::RETCODE_OK) {
     // Send sample
     DCPS::DataSampleElement* list_el =
-      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
+      new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch());
     set_header_fields(list_el->get_header(), size, reader, sequence);
 
     DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));

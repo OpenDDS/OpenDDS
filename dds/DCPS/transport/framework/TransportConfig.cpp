@@ -24,7 +24,7 @@ TransportConfig::~TransportConfig()
 {}
 
 void
-TransportConfig::sorted_insert(const TransportInst_rch& inst)
+TransportConfig::sorted_insert(TransportInst* inst)
 {
   const OPENDDS_STRING name = inst->name();
   InstancesType::iterator it = instances_.begin();

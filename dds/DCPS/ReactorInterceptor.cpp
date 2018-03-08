@@ -30,13 +30,6 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
 
 ReactorInterceptor::~ReactorInterceptor()
 {
-  ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-
-  // Dump the command queue.
-  while (!command_queue_.empty ()) {
-    delete command_queue_.front ();
-    command_queue_.pop ();
-  }
 }
 
 bool ReactorInterceptor::should_execute_immediately()
@@ -70,19 +63,17 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 void ReactorInterceptor::process_command_queue()
 {
   while (!command_queue_.empty()) {
-    Command* command = command_queue_.front();
+    CommandPtr command = move(command_queue_.front());
     command_queue_.pop();
-    command->execute();
-    delete command;
+    if (command)
+      command->execute();
   }
 }
 
 int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>&)
 {
   process_command_queue();
-
   condition_.signal();
-
   return 0;
 }
 

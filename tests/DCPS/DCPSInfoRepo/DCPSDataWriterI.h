@@ -14,11 +14,10 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "DiscReceivedCalls.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 
 class TAO_DDS_DCPSDataWriter_i
   : public OpenDDS::DCPS::DataWriterCallbacks
-  , public OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>
 {
 public:
   TAO_DDS_DCPSDataWriter_i (void);
@@ -52,8 +51,6 @@ public:
       return received_;
     }
 
-  void _add_ref();
-  void _remove_ref();
 private:
   DiscReceivedCalls received_;
 };

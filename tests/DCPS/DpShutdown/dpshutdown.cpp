@@ -52,10 +52,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
             OpenDDS::DCPS::TransportRegistry::instance()->create_config("dds4ccm_rtps");
         }
 
-      OpenDDS::DCPS::TransportInst_rch inst =
+      OpenDDS::DCPS::TransportInst* inst =
         OpenDDS::DCPS::TransportRegistry::instance()->get_inst("the_rtps_transport");
 
-      if (inst.is_nil())
+      if (!inst)
         {
           inst =
             OpenDDS::DCPS::TransportRegistry::instance()->create_inst("the_rtps_transport",
@@ -77,10 +77,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
             OpenDDS::DCPS::TransportRegistry::instance()->create_config("dds4ccm_rtps_2");
         }
 
-      OpenDDS::DCPS::TransportInst_rch inst2 =
+      OpenDDS::DCPS::TransportInst* inst2 =
         OpenDDS::DCPS::TransportRegistry::instance()->get_inst("the_rtps_transport_2");
 
-      if (inst2.is_nil())
+      if (!inst2)
         {
           inst2 =
             OpenDDS::DCPS::TransportRegistry::instance()->create_inst("the_rtps_transport_2",

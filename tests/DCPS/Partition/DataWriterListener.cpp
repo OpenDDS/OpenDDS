@@ -89,12 +89,6 @@ Test::DataWriterListener::on_publication_lost (
 }
 
 void
-Test::DataWriterListener::on_connection_deleted (
-    ::DDS::DataWriter_ptr /* writer */)
-{
-}
-
-void
 Test::DataWriterListener::display_partitions (
   DDS::DataWriter_ptr writer) const
 {

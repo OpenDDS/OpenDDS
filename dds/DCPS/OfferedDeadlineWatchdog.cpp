@@ -17,14 +17,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::OfferedDeadlineWatchdog::OfferedDeadlineWatchdog(
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
-  OpenDDS::DCPS::DataWriterImpl * writer_impl,
+  OpenDDS::DCPS::DataWriterImpl & writer_impl,
   DDS::OfferedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
   : Watchdog(duration_to_time_value(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
   , writer_impl_(writer_impl)
-  , writer_(DDS::DataWriter::_duplicate(writer_impl))
   , status_(status)
   , last_total_count_(last_total_count)
 {
@@ -56,16 +55,22 @@ int
 OpenDDS::DCPS::OfferedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
 {
   DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
-  OpenDDS::DCPS::PublicationInstance_rch instance =
-    writer_impl_->get_handle_instance(handle);
-  if (instance)
-    execute(instance, true);
+  RcHandle<DataWriterImpl> writer = writer_impl_.lock();
+  if (writer) {
+    OpenDDS::DCPS::PublicationInstance_rch instance =
+      writer->get_handle_instance(handle);
+    if (instance)
+      execute(*writer, instance, true);
+  }
   return 0;
 }
 
 
 void
-OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(OpenDDS::DCPS::PublicationInstance_rch instance, bool timer_called)
+OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(
+  DataWriterImpl& writer,
+  PublicationInstance_rch instance,
+  bool timer_called)
 {
   if (instance->deadline_timer_id_ != -1) {
     bool missed = false;
@@ -91,11 +96,11 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(OpenDDS::DCPS::PublicationInstan
           this->status_.total_count - this->last_total_count_;
         this->status_.last_instance_handle = instance->instance_handle_;
 
-        this->writer_impl_->set_status_changed_flag(
+        writer.set_status_changed_flag(
           DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
 
         DDS::DataWriterListener_var listener =
-          this->writer_impl_->listener_for(
+          writer.listener_for(
             DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
         if (! CORBA::is_nil(listener.in())) {
@@ -107,11 +112,11 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(OpenDDS::DCPS::PublicationInstan
 
           // @todo Will this operation ever throw?  If so we may want to
           //       catch all exceptions, and act accordingly.
-          listener->on_offered_deadline_missed(this->writer_.in(),
+          listener->on_offered_deadline_missed(&writer,
                                               status);
         }
 
-        this->writer_impl_->notify_status_condition();
+        writer.notify_status_condition();
       }
     }
 
@@ -130,7 +135,9 @@ OpenDDS::DCPS::OfferedDeadlineWatchdog::execute(OpenDDS::DCPS::PublicationInstan
 void
 OpenDDS::DCPS::OfferedDeadlineWatchdog::reschedule_deadline()
 {
-  this->writer_impl_->reschedule_deadline();
+  RcHandle<DataWriterImpl> writer = writer_impl_.lock();
+  if (writer)
+    writer->reschedule_deadline();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

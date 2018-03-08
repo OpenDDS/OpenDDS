@@ -501,14 +501,6 @@ private:
   /// objects.
   DataSampleElementAllocator sample_list_element_allocator_;
 
-  /// The allocator for TransportSendElement.
-  /// The TransportSendElement allocator is put here because it
-  /// needs the number of chunks information that WriteDataContainer
-  /// has.
-  TransportSendElementAllocator  transport_send_element_allocator_;
-
-  TransportCustomizedElementAllocator transport_customized_element_allocator_;
-
   /// The flag indicates the datawriter will be destroyed.
   bool shutdown_;
 

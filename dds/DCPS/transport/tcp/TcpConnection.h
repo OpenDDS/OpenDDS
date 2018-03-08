@@ -19,7 +19,7 @@
 #include "TcpReconnectTask.h"
 #include "TcpTransport_rch.h"
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/SOCK_Stream.h"
@@ -33,8 +33,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TcpConnection
-  : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
-  , public RcObject<ACE_SYNCH_MUTEX> {
+  : public RcObject
+  , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> {
 public:
 
   /// States are used during reconnecting.
@@ -52,7 +52,7 @@ public:
   /// Active side constructor (connector)
   TcpConnection(const ACE_INET_Addr& remote_address,
                 Priority priority,
-                const TcpInst_rch& config);
+                const TcpInst& config);
 
   virtual ~TcpConnection();
 
@@ -73,15 +73,8 @@ public:
   // itself in as a void*.
   virtual int open(void* arg);
 
-  void set_receive_strategy(const TcpReceiveStrategy_rch& receive_strategy);
-
-  void remove_receive_strategy();
-
-  /// Give a "copy" of the TcpSendStrategy object to this
-  /// connection object.
-  void set_send_strategy(const TcpSendStrategy_rch& send_strategy);
-
-  void remove_send_strategy();
+  TcpSendStrategy* send_strategy();
+  TcpReceiveStrategy* receive_strategy();
 
   /// We pass this "event" along to the receive_strategy.
   virtual int handle_input(ACE_HANDLE);
@@ -92,7 +85,7 @@ public:
   virtual int close(u_long);
   virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
 
-  void set_sock_options(TcpInst* tcp_config);
+  void set_sock_options(const TcpInst* tcp_config);
 
   int reconnect(bool on_new_association = false);
 
@@ -155,6 +148,12 @@ private:
   /// redirecting handle_input() events here (there is no recv strategy yet).
   int handle_setup_input(ACE_HANDLE h);
 
+  const std::string& config_name() const;
+
+  void spawn_reconnect_thread();
+  static ACE_THR_FUNC_RETURN reconnect_thread_fun(void* conn);
+
+
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
@@ -170,12 +169,6 @@ private:
   /// Flag indicate this connection object is the connector or acceptor.
   bool is_connector_;
 
-  /// Reference to the receiving strategy.
-  TcpReceiveStrategy_rch receive_strategy_;
-
-  /// Reference to the send strategy.
-  TcpSendStrategy_rch send_strategy_;
-
   /// Remote address.
   ACE_INET_Addr remote_address_;
 
@@ -183,7 +176,7 @@ private:
   ACE_INET_Addr local_address_;
 
   /// The configuration used by this connection.
-  TcpInst_rch tcp_config_;
+  const TcpInst* tcp_config_;
 
   /// Datalink object which is needed for connection lost callback.
   TcpDataLink_rch link_;
@@ -193,12 +186,6 @@ private:
   /// that the timer is just scheduled once when there are multiple threads detect
   /// the lost connection.
   int passive_reconnect_timer_id_;
-
-  /// The task to do the reconnecting.
-  /// @todo We might need reuse the PerConnectionSynch thread
-  /// to do the reconnecting or create the reconnect task when
-  /// we need reconnect.
-  TcpReconnectTask reconnect_task_;
 
   /// The state indicates each step of the reconnecting.
   ReconnectState reconnect_state_;
@@ -214,10 +201,11 @@ private:
 
   bool passive_setup_;
   ACE_Message_Block passive_setup_buffer_;
-  TcpTransport_rch transport_during_setup_;
+  TcpTransport* transport_during_setup_;
 
   /// Small unique identifying value.
   std::size_t id_;
+  ACE_thread_t reconnect_thread_;
 };
 
 } // namespace DCPS

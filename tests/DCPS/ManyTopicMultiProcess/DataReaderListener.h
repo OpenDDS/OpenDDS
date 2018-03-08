@@ -73,10 +73,6 @@ public:
     const ::OpenDDS::DCPS::BudgetExceededStatus& status
   );
 
-  virtual void on_connection_deleted(
-    ::DDS::DataReader_ptr reader
-  );
-
   virtual void read(::DDS::DataReader_ptr reader) = 0;
 
   int num_samples() const { return num_samples_; }

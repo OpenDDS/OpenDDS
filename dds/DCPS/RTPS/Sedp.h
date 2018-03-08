@@ -29,7 +29,6 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
@@ -174,7 +173,6 @@ private:
     void notify_publication_disconnected(const DCPS::ReaderIdSeq&) {}
     void notify_publication_reconnected(const DCPS::ReaderIdSeq&) {}
     void notify_publication_lost(const DCPS::ReaderIdSeq&) {}
-    void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
@@ -189,7 +187,6 @@ private:
     void end_historic_samples(const DCPS::RepoId& reader);
 
   private:
-    DCPS::TransportSendElementAllocator alloc_;
     Header header_;
     DCPS::SequenceNumber seq_;
 
@@ -204,15 +201,11 @@ private:
                            DCPS::SequenceNumber& sequence,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
-    void _add_ref() {}
-    void _remove_ref() {}
-
   } publications_writer_, subscriptions_writer_, participant_message_writer_;
 
   class Reader
     : public DCPS::TransportReceiveListener
     , public Endpoint
-    , public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
   public:
     Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
@@ -231,11 +224,7 @@ private:
     void notify_subscription_disconnected(const DCPS::WriterIdSeq&) {}
     void notify_subscription_reconnected(const DCPS::WriterIdSeq&) {}
     void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
-    void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
-
-    virtual void _add_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref(); }
-    virtual void _remove_ref() { DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref(); }
 
     ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> shutting_down_;
   };
@@ -278,7 +267,7 @@ private:
   } task_;
 
   // Transport
-  DCPS::TransportInst_rch transport_inst_;
+  DCPS::TransportInst* transport_inst_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
   OpenDDS::DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();

@@ -49,13 +49,13 @@ class OpenDDS_Tcp_Export TcpTransport
 {
 public:
 
-  explicit TcpTransport(const TransportInst_rch& inst);
+  explicit TcpTransport(TcpInst& inst);
   virtual ~TcpTransport();
 
   int fresh_link(TcpConnection_rch connection);
 
   virtual void unbind_link(DataLink* link);
-  TcpInst_rch config() const;
+  TcpInst& config() const;
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -66,13 +66,12 @@ private:
                                               const ConnectionAttribs& attribs,
                                               const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
+  virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id);
 
-  virtual bool configure_i(TransportInst* config);
+  virtual bool configure_i(TcpInst& config);
 
   virtual void shutdown_i();
-  virtual void pre_shutdown_i();
 
   virtual bool connection_info_i(TransportLocator& local_info) const;
 
@@ -102,7 +101,7 @@ private:
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
-  int connect_tcp_datalink(const TcpDataLink_rch& link,
+  int connect_tcp_datalink(TcpDataLink& link,
                            const TcpConnection_rch& connection);
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
@@ -138,7 +137,7 @@ private:
 //            assume it has been done for us (in various situations).
 
   /// Used to accept passive connections on our local_address_.
-  TcpAcceptor* acceptor_;
+  unique_ptr<TcpAcceptor> acceptor_;
 
   /// Open TcpConnections using non-blocking connect.
   ACE_Connector<TcpConnection, ACE_SOCK_Connector> connector_;
@@ -162,7 +161,7 @@ private:
   /// during reconnecting.
   /// TODO: reuse the reconnect_task in the TcpConnection
   ///       for new connection checking.
-  TcpConnectionReplaceTask* con_checker_;
+  unique_ptr<TcpConnectionReplaceTask> con_checker_;
 };
 
 } // namespace DCPS

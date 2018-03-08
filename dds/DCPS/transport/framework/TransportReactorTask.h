@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_TRANSPORTREACTORTASK_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "ace/Task.h"
 #include "ace/Barrier.h"
 #include "ace/Synch_Traits.h"
@@ -27,7 +27,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
-public virtual RcObject<ACE_SYNCH_MUTEX> {
+public virtual RcObject {
 public:
 
   TransportReactorTask(bool useAsyncSend);

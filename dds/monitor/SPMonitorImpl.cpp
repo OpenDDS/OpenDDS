@@ -56,7 +56,7 @@ SPMonitorImpl::report()
            iter != mapIter->second.end();
            ++iter) {
         report.domain_participants.length(length+1);
-        report.domain_participants[length] = iter->svt_->get_id();
+        report.domain_participants[length] = (*iter)->get_id();
         length++;
       }
     }

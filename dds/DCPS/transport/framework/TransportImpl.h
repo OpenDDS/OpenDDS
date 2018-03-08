@@ -9,14 +9,13 @@
 #define OPENDDS_DCPS_TRANSPORTIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportInst.h"
-#include "TransportInst_rch.h"
 #include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
 #include "DataLinkCleanupTask.h"
@@ -32,9 +31,11 @@ namespace DCPS {
 class TransportClient;
 class TransportReceiveListener;
 class DataLink;
+class TransportInst;
 class Monitor;
 struct AssociationData;
 typedef RcHandle<TransportClient> TransportClient_rch;
+typedef WeakRcHandle<TransportClient> TransportClient_wrch;
 
 /** The TransportImpl class includes the abstract methods that must be implemented
 *   by any implementation to provide data delivery service to the DCPS implementation.
@@ -53,7 +54,7 @@ typedef RcHandle<TransportClient> TransportClient_rch;
 *     but has a references via smart pointer then the reference should be freed;
 *     if this object has ownership of task objects then the tasks should be closed.
 */
-class OpenDDS_Dcps_Export TransportImpl : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export TransportImpl : public RcObject {
 public:
 
   virtual ~TransportImpl();
@@ -68,7 +69,7 @@ public:
 
   /// Expose the configuration information so others can see what
   /// we can do.
-  TransportInst_rch config() const;
+  TransportInst& config() const;
 
   /// Called by our connection_info() method to allow the concrete
   /// TransportImpl subclass to do the dirty work since it really
@@ -148,9 +149,9 @@ public:
   };
 
 protected:
-  TransportImpl();
+  TransportImpl(TransportInst& config);
 
-  bool configure(const TransportInst_rch& config);
+  bool open();
 
   /// connect_datalink() is called from TransportClient to initiate an
   /// association as the active peer.  A DataLink may be returned if
@@ -179,31 +180,24 @@ protected:
   /// up any resources associated with this pending connection.
   /// The TransportClient* passed in to accept or connect is not
   /// valid after this method is called.
-  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
+  virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id) = 0;
 
-  /// Concrete subclass gets a shot at the config object.  The subclass
-  /// will likely downcast the TransportInst object to a
-  /// subclass type that it expects/requires.
-  virtual bool configure_i(TransportInst* config) = 0;
 
   /// Called during the shutdown() method in order to give the
   /// concrete TransportImpl subclass a chance to do something when
   /// the shutdown "event" occurs.
   virtual void shutdown_i() = 0;
 
-  /// Called before transport is shutdown to let the
-  /// concrete transport to do anything necessary.
-  virtual void pre_shutdown_i();
-
   /// Accessor to obtain a "copy" of the reference to the reactor task.
   /// Caller is responsible for the "copy" of the reference that is
   /// returned.
   TransportReactorTask_rch reactor_task();
 
-  typedef OPENDDS_MULTIMAP(TransportClient_rch, DataLink_rch) PendConnMap;
+  typedef OPENDDS_MULTIMAP(TransportClient_wrch, DataLink_rch) PendConnMap;
   PendConnMap pending_connections_;
   void add_pending_connection(const TransportClient_rch& client, DataLink_rch link);
+  void shutdown();
 
 private:
   /// We have a few friends in the transport framework so that they
@@ -215,7 +209,6 @@ private:
   /// Called by the TransportRegistry when this TransportImpl object
   /// is released while the TransportRegistry is handling a release()
   /// "event".
-  void shutdown();
 
   /// The DataLink itself calls this method when it thinks it is
   /// no longer used for any associations.  This occurs during
@@ -225,10 +218,6 @@ private:
   /// so there won't be any reserve_datalink() calls being made from
   /// any other threads while we perform this release.
   virtual void release_datalink(DataLink* link) = 0;
-
-  void attach_client(const TransportClient_rch& client);
-  void detach_client(const TransportClient_rch& client);
-  virtual void pre_detach(const TransportClient_rch&) {}
 
   DataLink* find_connect_i(const RepoId& local_id,
                            const AssociationData& remote_association,
@@ -264,11 +253,9 @@ public:
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;
 
-  OPENDDS_SET(TransportClient_rch) clients_;
-
-  /// A reference (via a smart pointer) to the TransportInst
+  /// A reference to the TransportInst
   /// object that was supplied to us during our configure() method.
-  TransportInst_rch config_;
+  TransportInst& config_;
 
   /// The reactor (task) object - may not even be used if the concrete
   /// subclass (of TransportImpl) doesn't require a reactor.

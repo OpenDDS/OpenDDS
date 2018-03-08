@@ -109,7 +109,7 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str();
+  virtual OPENDDS_STRING dump_to_str() const;
 
   bool is_reliable() const { return this->reliable_; }
 
@@ -125,7 +125,7 @@ private:
 
   void default_group_address(ACE_INET_Addr& group_address);
 
-  TransportImpl_rch new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl();
 };
 
 } // namespace DCPS

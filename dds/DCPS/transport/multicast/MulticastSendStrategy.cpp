@@ -15,8 +15,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link, const TransportInst_rch& inst)
-  : TransportSendStrategy(0, inst,
+MulticastSendStrategy::MulticastSendStrategy(MulticastDataLink* link)
+  : TransportSendStrategy(0, link->impl(),
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>()),
@@ -40,7 +40,7 @@ MulticastSendStrategy::prepare_header_i()
 ssize_t
 MulticastSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
-  return (this->link_->config()->async_send() ? async_send(iov, n) : sync_send(iov, n));
+  return (this->link_->config().async_send() ? async_send(iov, n) : sync_send(iov, n));
 }
 
 ssize_t
@@ -89,7 +89,7 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
 
   size_t bytes_sent = 0;
   ssize_t result = async_writer_.send(mb, bytes_sent, 0 /*flags*/,
-                                      this->link_->config()->group_address_);
+                                      this->link_->config().group_address_);
 
   if (result < 0) {
     if (mb) mb->release();

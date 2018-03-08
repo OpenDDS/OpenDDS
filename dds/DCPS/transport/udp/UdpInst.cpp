@@ -34,9 +34,9 @@ UdpInst::UdpInst(const std::string& name)
 }
 
 TransportImpl_rch
-UdpInst::new_impl(const TransportInst_rch& inst)
+UdpInst::new_impl()
 {
-  return make_rch<UdpTransport>(inst);
+  return make_rch<UdpTransport>(ref(*this));
 }
 
 int
@@ -61,7 +61,7 @@ UdpInst::load(ACE_Configuration_Heap& cf,
 }
 
 OPENDDS_STRING
-UdpInst::dump_to_str()
+UdpInst::dump_to_str() const
 {
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;

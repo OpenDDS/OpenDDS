@@ -24,7 +24,7 @@ my $lost_publication_callback = 0;
 my $lost_subscription_callback = 0;
 my $end_with_publisher = 0;
 my $kill_subscriber = 0;
-my $expected_deleted_connections = 1;
+my $expected_total_publication_count = 1;
 my $verify_lost_sub_notification = 1;
 
 my $num_reads_deviation;
@@ -47,7 +47,7 @@ if ($ARGV[0] eq 'restart_sub') {
   # because we do not know how many messages are lost. We give a deviation on the
   # number of expected messages.
   $num_reads_deviation = 2;
-  $expected_deleted_connections = 2;
+  $expected_total_publication_count = 2;
 }
 elsif ($ARGV[0] eq 'dl_clean') {
 
@@ -56,13 +56,14 @@ elsif ($ARGV[0] eq 'dl_clean') {
   $num_reads_before_crash = 2;
   $lost_publication_callback = 1;
   $num_reads_deviation = 2;
-  $expected_deleted_connections = 1;
+  $expected_total_publication_count = 1;
 }
 elsif ($ARGV[0] eq 'restart_pub') {
   $restart_delay = 10;
   $num_writes_before_crash = 2;
   $num_expected_reads = $num_writes + $num_writes_before_crash;
   $lost_subscription_callback = 1;
+  $expected_total_publication_count = 1;
 }
 elsif ($ARGV[0] eq 'bp_timeout') {
   # no delay between writes.
@@ -100,11 +101,11 @@ unlink $subscriber_completed;
 unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
-unlink $testoutputfilename;
+unlink 'publisher1.log';
+unlink 'publisher2.log';
+unlink 'subscriber1.log';
+unlink 'subscriber2.log';
 
-# Save the output to check after execution
-open(SAVEERR, ">&STDERR");
-open(STDERR, ">$testoutputfilename") || die "ERROR: Can't redirect stderr";
 
 my $DCPSREPO = PerlDDS::create_process
       ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo", "-o $dcpsrepo_ior");
@@ -113,13 +114,13 @@ my $Subscriber = PerlDDS::create_process
        , "-a $num_reads_before_crash"
        . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
        . " -c $verify_lost_sub_notification -e $end_with_publisher -DCPSConfigFile opendds.ini"
-       . " -DCPSDebugLevel 2");
+       . " -DCPSDebugLevel 2 -ORBLogFile subscriber1.log");
 my $Publisher = PerlDDS::create_process
       ("publisher"
        , "-a $num_writes_before_crash"
        . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
-       . " -d $expected_deleted_connections -DCPSConfigFile opendds.ini"
-       . " -DCPSDebugLevel 2");
+       . " -d $expected_total_publication_count -DCPSConfigFile opendds.ini"
+       . " -DCPSDebugLevel 2 -ORBLogFile publisher1.log");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();
@@ -149,9 +150,7 @@ my($PublisherResult, $SubscriberResult);
 # The subscriber crashes and we need restart the subscriber.
 if ($num_reads_before_crash > 0)
 {
-  if (PerlACE::waitforfileoutput_timed ($testoutputfilename, "Subscriber crash after", 90) == -1) {
-    close(STDERR);
-    open(STDERR, ">&SAVEERR");
+  if (PerlACE::waitforfileoutput_timed ("subscriber1.log", "Subscriber crash after", 90) == -1) {
     print STDERR "ERROR: waiting for 'Subscriber crash after' output.\n";
     $Subscriber->Kill ();
     $Publisher->Kill ();
@@ -181,7 +180,7 @@ if ($num_reads_before_crash > 0)
   $Subscriber = PerlDDS::create_process
         ("subscriber"
          , "-n $num_expected_reads_restart_sub"
-         . " -r $num_reads_deviation -DCPSConfigFile opendds.ini");
+         . " -r $num_reads_deviation -DCPSConfigFile opendds.ini -ORBLogFile subscriber2.log");
 
   print "\n\n!!! Restart subscriber !!! \n\n";;
   print $Subscriber->CommandLine () . "\n";
@@ -198,7 +197,7 @@ if ($num_writes_before_crash > 0) {
 
   $Publisher = PerlDDS::create_process
         ("publisher"
-         , "-DCPSConfigFile opendds.ini -n $num_writes");
+         , "-DCPSConfigFile opendds.ini -ORBLogFile publisher2.log -n $num_writes");
 
   sleep($restart_delay);
 
@@ -236,10 +235,6 @@ if ($ir != 0) {
     $status = 1;
 }
 
-# Stop capturing the output
-close(STDERR);
-open(STDERR, ">&SAVEERR");
-
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
 unlink $subscriber_ready;
@@ -249,7 +244,11 @@ unlink $publisher_ready;
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
-  print STDERR "test FAILED. Please see the $testoutputfilename for details.\n";
+  print STDERR "test FAILED.\n";
+  PerlDDS::print_file('subscriber1.log');
+  PerlDDS::print_file('publisher1.log');
+  PerlDDS::print_file('subscriber2.log') if -f 'subscriber2.log';
+  PerlDDS::print_file('publisher2.log') if -f 'publisher2.log';
 }
 
 exit $status;

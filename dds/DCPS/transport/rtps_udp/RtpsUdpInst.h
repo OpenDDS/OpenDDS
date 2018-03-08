@@ -43,7 +43,7 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str();
+  virtual OPENDDS_STRING dump_to_str() const;
 
   bool is_reliable() const { return true; }
   bool requires_cdr() const { return true; }
@@ -75,7 +75,7 @@ private:
   friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit RtpsUdpInst(const OPENDDS_STRING& name);
 
-  TransportImpl_rch new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl();
 
   friend class RTPS::Sedp;
   friend class RtpsUdpTransport;

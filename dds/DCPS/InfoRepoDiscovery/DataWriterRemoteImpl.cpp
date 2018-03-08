@@ -14,8 +14,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-DataWriterRemoteImpl::DataWriterRemoteImpl(DataWriterCallbacks* parent)
-  : parent_(rchandle_from(parent))
+DataWriterRemoteImpl::DataWriterRemoteImpl(DataWriterCallbacks& parent)
+  : parent_(parent)
 {
 }
 
@@ -28,7 +28,6 @@ DataWriterRemoteImpl::~DataWriterRemoteImpl()
 void
 DataWriterRemoteImpl::detach_parent()
 {
-  this->parent_.reset();
 }
 
 void
@@ -46,7 +45,7 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
   }
 
   // the local copy of parent_ is necessary to prevent race condition
-  RcHandle<DataWriterCallbacks> parent = parent_;
+  RcHandle<DataWriterCallbacks> parent = parent_.lock();
   if (parent.in()) {
     parent->add_association(yourId, reader, active);
   }
@@ -56,7 +55,7 @@ void
 DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
 {
   // the local copy of parent_ is necessary to prevent race condition
-  RcHandle<DataWriterCallbacks> parent = parent_;
+  RcHandle<DataWriterCallbacks> parent = parent_.lock();
   if (parent.in()) {
     parent->association_complete(remote_id);
   }
@@ -67,7 +66,7 @@ DataWriterRemoteImpl::remove_associations(const ReaderIdSeq& readers,
                                           CORBA::Boolean notify_lost)
 {
   // the local copy of parent_ is necessary to prevent race condition
-  RcHandle<DataWriterCallbacks> parent = parent_;
+  RcHandle<DataWriterCallbacks> parent = parent_.lock();
   if (parent.in()) {
     parent->remove_associations(readers, notify_lost);
   }
@@ -78,7 +77,7 @@ DataWriterRemoteImpl::update_incompatible_qos(
   const IncompatibleQosStatus& status)
 {
   // the local copy of parent_ is necessary to prevent race condition
-  RcHandle<DataWriterCallbacks> parent = parent_;
+  RcHandle<DataWriterCallbacks> parent = parent_.lock();
   if (parent.in()) {
     parent->update_incompatible_qos(status);
   }
@@ -89,7 +88,7 @@ DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
                                                  const DDS::StringSeq& params)
 {
   // the local copy of parent_ is necessary to prevent race condition
-  RcHandle<DataWriterCallbacks> parent = parent_;
+  RcHandle<DataWriterCallbacks> parent = parent_.lock();
   if (parent.in()) {
     parent->update_subscription_params(readerId, params);
   }

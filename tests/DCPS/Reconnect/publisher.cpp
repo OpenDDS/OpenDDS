@@ -31,8 +31,8 @@ int num_writes = 10;
 int write_delay_ms = 1000;
 int expected_lost_pub_notification = 0;
 int actual_lost_pub_notification = 0;
-int expected_deleted_connections = 1;
-int num_deleted_connections = 0;
+int expected_total_publication_count = 1;
+int total_publication_count = 0;
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
@@ -59,7 +59,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
         expected_lost_pub_notification = ACE_OS::atoi (get_opts.opt_arg ());
         break;
       case 'd':
-        expected_deleted_connections = ACE_OS::atoi (get_opts.opt_arg ());
+        expected_total_publication_count = ACE_OS::atoi (get_opts.opt_arg ());
         break;
       case '?':
       default:
@@ -69,7 +69,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
                            "-n <num_writers> "
                            "-i <write_delay_ms> "
                            "-l <expected_lost_pub_notification> "
-                           "-d <expected_deleted_connections> "
+                           "-d <expected_total_publication_count> "
                            "-v "
                            "\n",
                            argv [0]),
@@ -206,8 +206,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     writer->end ();
 
 
-    // Sleep a while before deleting writer so that DataWriterListenerImpl::on_connection_deleted()
-    // can be called.
     ACE_OS::sleep (10);
     delete writer;
 
@@ -228,11 +226,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     return 1;
   }
 
-  if (num_deleted_connections != expected_deleted_connections)
+  if (total_publication_count != expected_total_publication_count)
   {
-    ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: on_connection_deleted called %d times "
-      "and expected %d times\n", num_deleted_connections,
-      expected_deleted_connections));
+    ACE_ERROR ((LM_ERROR, "(%P|%t) ERROR: total_publication_count == %d "
+      "and expected %d\n", total_publication_count,
+      expected_total_publication_count));
     return 1;
   }
 

@@ -9,7 +9,7 @@
 #define OPENDDS_TCPDATALINK_H
 
 #include "TcpConnection_rch.h"
-#include "TcpTransport_rch.h"
+#include "TcpTransport.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
 
@@ -18,14 +18,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class TransportSendStrategy;
-class TransportStrategy;
+class TcpSendStrategy;
+class TcpReceiveStrategy;
 
 class TcpDataLink : public DataLink {
 public:
 
   TcpDataLink(const ACE_INET_Addr& remote_address,
-              const TcpTransport_rch&  transport_impl,
+                    TcpTransport&  transport_impl,
                     Priority           priority,
                     bool               is_loopback,
                     bool               is_active);
@@ -38,16 +38,13 @@ public:
   /// for this TcpDataLink.  Called by the TcpTransport's
   /// connect_datalink() method.
   int connect(const TcpConnection_rch& connection,
-              const TransportSendStrategy_rch& send_strategy,
-              const TransportStrategy_rch& receive_strategy);
+              const RcHandle<TcpSendStrategy>& send_strategy,
+              const RcHandle<TcpReceiveStrategy>& receive_strategy);
 
   int reuse_existing_connection(const TcpConnection_rch& connection);
   int reconnect(const TcpConnection_rch& connection);
 
   TcpConnection_rch get_connection();
-  TcpTransport_rch get_transport_impl();
-
-  virtual bool issues_on_deleted_callback() const;
 
   virtual void pre_stop_i();
 
@@ -59,6 +56,9 @@ public:
   void ack_received(const ReceivedDataSample& sample);
   void request_ack_received(const ReceivedDataSample& sample);
   void drop_pending_request_acks();
+
+  TcpSendStrategy* send_strategy();
+  TcpReceiveStrategy* receive_strategy();
 
 protected:
 
@@ -72,8 +72,7 @@ private:
   void send_graceful_disconnect_message();
 
   ACE_INET_Addr           remote_address_;
-  TcpConnection_rch connection_;
-  TcpTransport_rch  transport_;
+  WeakRcHandle<TcpConnection> connection_;
   bool graceful_disconnect_sent_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
   typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;

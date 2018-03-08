@@ -17,7 +17,7 @@
 #include "ace/OS_NS_string.h"
 
 #include "RcHandle_T.h"
-#include "RcObject_T.h"
+#include "RcObject.h"
 #include "RakeData.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class ComparatorBase : public RcObject<ACE_SYNCH_MUTEX> {
+class ComparatorBase : public RcObject {
 public:
   typedef RcHandle<ComparatorBase> Ptr;
 

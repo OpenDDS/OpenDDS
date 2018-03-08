@@ -30,7 +30,7 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str();
+  virtual OPENDDS_STRING dump_to_str() const;
 
   bool is_reliable() const { return false; }
 
@@ -61,7 +61,7 @@ private:
   friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit UdpInst(const std::string& name);
 
-  TransportImpl_rch new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl();
 
   /// The address from which to send/receive data.
   /// The default value is: none.

@@ -14,7 +14,7 @@
 
 #include "ace/Synch_Traits.h"
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/RcHandle_T.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -31,7 +31,7 @@ class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastSessionFactory
-  : public RcObject<ACE_SYNCH_MUTEX> {
+  : public RcObject {
 public:
   virtual ~MulticastSessionFactory();
 

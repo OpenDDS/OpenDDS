@@ -167,7 +167,6 @@ public:
   void notify_subscription_disconnected(const WriterIdSeq&) {}
   void notify_subscription_reconnected(const WriterIdSeq&) {}
   void notify_subscription_lost(const WriterIdSeq&) {}
-  void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const WriterIdSeq&, bool) {}
 
   void _add_ref() {}
@@ -224,10 +223,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1;
     }
 
-    TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
+    TransportInst* inst = TheTransportRegistry->create_inst("my_rtps",
                                                                "rtps_udp");
 
-    RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+    RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst);
 #ifdef OPENDDS_SAFETY_PROFILE
     if (host == "localhost") {
       host = "127.0.0.1";

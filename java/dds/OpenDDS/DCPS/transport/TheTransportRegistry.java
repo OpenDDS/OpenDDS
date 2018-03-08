@@ -21,7 +21,6 @@ public final class TheTransportRegistry {
     public static native TransportInst create_inst(String name,
                                                    String transport_type);
     public static native TransportInst get_inst(String name);
-    public static native void remove_inst(TransportInst inst);
 
     public static native TransportConfig create_config(String name);
     public static native TransportConfig get_config(String name);

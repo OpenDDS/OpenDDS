@@ -11,6 +11,7 @@
 #include "tao/LocalObject.h"
 #include "tao/Version.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/RcObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,6 +22,20 @@ namespace DCPS {
 typedef CORBA::LocalObject_ptr LocalObject_ptr;
 typedef CORBA::LocalObject_var LocalObject_var;
 
+
+class LocalObjectBase
+  : public virtual CORBA::LocalObject
+  , public virtual RcObject
+{
+public:
+  virtual void _add_ref() {
+    RcObject::_add_ref();
+  }
+  virtual void _remove_ref() {
+    RcObject::_remove_ref();
+  }
+};
+
 /// OpenDDS::DCPS::LocalObject resolves ambigously-inherited members like
 /// _narrow and _ptr_type.  It is used from client code like so:
 /// class MyReaderListener
@@ -28,8 +43,7 @@ typedef CORBA::LocalObject_var LocalObject_var;
 template <class Stub>
 class LocalObject
   : public virtual Stub
-  , public virtual CORBA::LocalObject
-  , public virtual PoolAllocationBase
+  , public virtual LocalObjectBase
 {
 public:
   typedef typename Stub::_ptr_type _ptr_type;
@@ -37,24 +51,6 @@ public:
   static _ptr_type _narrow(CORBA::Object_ptr obj) {
     return Stub::_narrow(obj);
   }
-};
-
-/// OpenDDS::DCPS::LocalObject_NoRefCount is the same as LocalObject, but needs to
-/// be inherited from if the user wishes to allocate a "Local Object" on the stack.
-/// class MyReaderListener
-///   : public OpenDDS::DCPS::LocalObject_NoRefCount<OpenDDS::DCPS::DataReaderListener> {...};
-template <class Stub>
-class LocalObject_NoRefCount
-  : public virtual Stub {
-public:
-  typedef typename Stub::_ptr_type _ptr_type;
-  static _ptr_type _narrow(CORBA::Object_ptr obj) {
-    return Stub::_narrow(obj);
-  }
-
-  // we want to keep refcounting from happening
-  virtual void _add_ref() {}
-  virtual void _remove_ref() {}
 };
 
 } // namespace DCPS

@@ -70,7 +70,7 @@ private:
 /// domain of SequenceNumbers -- for a given SingleSendBuffer object, the
 /// sequence numbers passed to insert() must be generated from the same place.
 class OpenDDS_Dcps_Export SingleSendBuffer
-  : public TransportSendBuffer, public RcObject<ACE_SYNCH_MUTEX> {
+  : public TransportSendBuffer, public RcObject {
 public:
 
   static const size_t UNLIMITED;
@@ -116,10 +116,8 @@ private:
 
   size_t n_chunks_;
 
-  TransportRetainedElementAllocator retained_allocator_;
   MessageBlockAllocator retained_mb_allocator_;
   DataBlockAllocator retained_db_allocator_;
-  TransportReplacedElementAllocator replaced_allocator_;
   MessageBlockAllocator replaced_mb_allocator_;
   DataBlockAllocator replaced_db_allocator_;
 

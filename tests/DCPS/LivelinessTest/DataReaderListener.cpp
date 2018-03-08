@@ -268,10 +268,3 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded \n"));
   }
 
-  void DataReaderListenerImpl::on_connection_deleted (
-    ::DDS::DataReader_ptr
-    )
-  {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_connection_deleted  \n"));
-  }
-

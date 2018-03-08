@@ -25,35 +25,20 @@ OpenDDS::DCPS::CopyChainVisitor::visit_element(TransportQueueElement* element)
 
   // Create a new copy of the current element.
   // fails.
-  TransportRetainedElement* copiedElement = 0;
-  ACE_NEW_MALLOC_NORETURN(
-    copiedElement,
-    (TransportRetainedElement*)this->allocator_->malloc(),
+  TransportRetainedElement* copiedElement = new
     TransportRetainedElement(
       element->msg(),
       element->publication_id(),
-      this->allocator_,
       this->mb_allocator_,
       this->db_allocator_
-    )
-  );
-  if( copiedElement) {
-    // Add the copy to the target.
-    this->target_.put( copiedElement);
+    );
 
-    // Visit entire queue.
-    return 1;
 
-  } else {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: CopyChainVisitor::visit_element - ")
-      ACE_TEXT("failed to allocate a new TransportRetainedElement.")
-    ));
-    this->status_ = -1;
+  // Add the copy to the target.
+  this->target_.put( copiedElement);
 
-    // Stop visitation.
-    return 0;
-  }
+  // Visit entire queue.
+  return 1;
 
 
 }

@@ -14,7 +14,6 @@
 #include "TransportReactorTask_rch.h"
 #include "TransportType.h"
 #include "TransportType_rch.h"
-#include "TransportInst_rch.h"
 #include "TransportConfig_rch.h"
 #include "TransportConfig.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -55,10 +54,9 @@ public:
   /// framework.
   void release();
 
-  TransportInst_rch create_inst(const OPENDDS_STRING& name,
-                                const OPENDDS_STRING& transport_type);
-  TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
-  void remove_inst(const TransportInst_rch& inst);
+  TransportInst* create_inst(const OPENDDS_STRING& name,
+                             const OPENDDS_STRING& transport_type);
+  TransportInst* get_inst(const OPENDDS_STRING& name) const;
 
   static const char DEFAULT_CONFIG_NAME[];
   static const char DEFAULT_INST_PREFIX[];
@@ -101,6 +99,8 @@ public:
   /// Dynamically load the library for the supplied transport type.
   void load_transport_lib(const OPENDDS_STRING& transport_type);
 
+  bool released() const;
+
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
 
@@ -123,6 +123,7 @@ private:
   DomainConfigMap domain_default_config_map_;
 
   TransportConfig_rch global_config_;
+  bool released_;
 
   mutable LockType lock_;
 };

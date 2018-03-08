@@ -26,9 +26,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
-                                         const TransportInst_rch& inst,
                                          const GuidPrefix_t& local_prefix)
-  : TransportSendStrategy(0, inst,
+  : TransportSendStrategy(0, link->impl(),
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>()),

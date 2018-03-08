@@ -205,13 +205,6 @@ module OpenDDS {
       void on_publication_lost(
         in ::DDS::DataWriter writer,
         in PublicationLostStatus status);
-
-      /// called when the connection object is cleaned up and
-      /// the reconnect thread exits.
-      /// This hook is added for testing the reconnect thread
-      /// leaking problem when the subscriber crashes.
-      void on_connection_deleted(
-        in ::DDS::DataWriter writer);
     };
 
   }; // End of module DCPS

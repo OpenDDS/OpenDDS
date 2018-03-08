@@ -33,7 +33,8 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // typedef declarations
-typedef std::map<DDS::DomainId_t, DCPS_IR_Domain*> DCPS_IR_Domain_Map;
+typedef std::map<DDS::DomainId_t,
+                 OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Domain> > DCPS_IR_Domain_Map;
 
 // Forward declaration
 namespace Update {

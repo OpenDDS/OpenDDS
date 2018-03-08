@@ -18,13 +18,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link, const ShmemInst_rch& inst)
-  : TransportSendStrategy(0, inst,
+ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link)
+  : TransportSendStrategy(0, link->impl(),
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>())
   , link_(link)
   , current_data_(0)
+  , datalink_control_size_(link->impl().config().datalink_control_size_)
 {
 #ifdef ACE_HAS_POSIX_SEM
   memset(&peer_semaphore_, 0, sizeof(peer_semaphore_));
@@ -37,14 +38,13 @@ ShmemSendStrategy::start_i()
   bound_name_ = "Write-" + link_->peer_address();
   ShmemAllocator* alloc = link_->local_allocator();
 
-  const size_t n_bytes = link_->config()->datalink_control_size_,
-    n_elems = n_bytes / sizeof(ShmemData),
-    extra = n_bytes % sizeof(ShmemData);
+  const size_t n_elems = datalink_control_size_ / sizeof(ShmemData),
+    extra = datalink_control_size_ % sizeof(ShmemData);
 
-  void* mem = alloc->calloc(n_bytes);
+  void* mem = alloc->calloc(datalink_control_size_);
   if (mem == 0) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ failed "
-              "to allocate %B bytes for control\n", link_, n_bytes), 0);
+              "to allocate %B bytes for control\n", link_, datalink_control_size_), 0);
     return false;
   }
 

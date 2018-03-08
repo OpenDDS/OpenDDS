@@ -93,7 +93,7 @@ public:
 
   class OpenDDS_Dcps_Export RepoIdSequence {
 public:
-    explicit RepoIdSequence(RepoId& base);
+    explicit RepoIdSequence(const RepoId& base);
     RepoId next();
 private:
     RepoId base_;          // will be combined with serial to produce next
@@ -422,9 +422,9 @@ private:
   /// can be notified by the listener of this entity.
   DDS::StatusMask listener_mask_;
   /// The id of the domain that creates this participant.
-  DDS::DomainId_t domain_id_;
+  const DDS::DomainId_t domain_id_;
   /// This participant id given by discovery.
-  RepoId dp_id_;
+  const RepoId dp_id_;
 
   /// Whether this DomainParticipant is attached to a federated
   /// repository.

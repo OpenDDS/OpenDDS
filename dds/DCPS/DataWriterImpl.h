@@ -54,6 +54,10 @@ class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
+class LivenessTimer;
+
+
+
 
 /**
 * @class DataWriterImpl
@@ -77,12 +81,11 @@ struct AssociationData;
 *        up ownership to this WriteDataContainer.
 */
 class OpenDDS_Dcps_Export DataWriterImpl
-  : public virtual DDS::DataWriter,
+  : public virtual LocalObject<DDS::DataWriter>,
     public virtual DataWriterCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
-    public virtual TransportSendListener,
-    private RcEventHandler {
+    public virtual TransportSendListener {
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
@@ -189,13 +192,6 @@ public:
   virtual void inconsistent_topic();
 
 
-  virtual void _add_ref();
-  virtual void _remove_ref();
-
-  virtual ACE_Event_Handler::Reference_Count add_reference();
-  virtual ACE_Event_Handler::Reference_Count remove_reference();
-
-
   /**
    * cleanup the DataWriter.
    */
@@ -210,7 +206,7 @@ public:
     const DDS::DataWriterQos &            qos,
     DDS::DataWriterListener_ptr           a_listener,
     const DDS::StatusMask &               mask,
-    OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
+    WeakRcHandle<OpenDDS::DCPS::DomainParticipantImpl> participant_servant,
     OpenDDS::DCPS::PublisherImpl*         publisher_servant);
 
   void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
@@ -385,9 +381,6 @@ public:
   virtual int handle_timeout(const ACE_Time_Value &tv,
                              const void *arg);
 
-  virtual int handle_close(ACE_HANDLE,
-                           ACE_Reactor_Mask);
-
   /// Called by the PublisherImpl to indicate that the Publisher is now
   /// resumed and any data collected while it was suspended should now be sent.
   void send_suspended_data();
@@ -407,8 +400,6 @@ public:
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);
   void notify_publication_lost(const ReaderIdSeq& subids);
-
-  virtual void notify_connection_deleted(const RepoId& peerId);
 
   /// Statistics counter.
   int         data_dropped_count_;
@@ -448,7 +439,7 @@ public:
    */
   DDS::InstanceHandle_t get_next_handle();
 
-  virtual EntityImpl* parent() const;
+  virtual RcHandle<EntityImpl> parent() const;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   bool filter_out(const DataSampleElement& elt,
@@ -498,14 +489,14 @@ protected:
 
   /// The participant servant which creats the publisher that
   /// creates this datawriter.
-  DomainParticipantImpl*          participant_servant_;
+  WeakRcHandle<DomainParticipantImpl>          participant_servant_;
 
   //This lock should be used to protect access to reader_info_
   ACE_Thread_Mutex reader_info_lock_;
 
   struct ReaderInfo {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-    DomainParticipantImpl* participant_;
+    WeakRcHandle<DomainParticipantImpl> participant_;
     OPENDDS_STRING filter_class_name_;
     OPENDDS_STRING filter_;
     DDS::StringSeq expression_params_;
@@ -514,7 +505,7 @@ protected:
     SequenceNumber expected_sequence_;
     bool durable_;
     ReaderInfo(const char* filter_class_name, const char* filter, const DDS::StringSeq& params,
-               DomainParticipantImpl* participant, bool durable);
+               WeakRcHandle<DomainParticipantImpl> participant, bool durable);
     ~ReaderInfo();
   };
 
@@ -573,14 +564,16 @@ private:
 
   friend class ::DDS_TEST; // allows tests to get at privates
 
+
+  // Data block local pool for this data writer.
+  unique_ptr<DataBlockLockPool>  db_lock_pool_;
+
   /// The name of associated topic.
   CORBA::String_var               topic_name_;
   /// The associated topic repository id.
   RepoId                          topic_id_;
-  /// The object reference of the associated topic.
-  DDS::Topic_var                  topic_objref_;
   /// The topic servant.
-  TopicImpl*                      topic_servant_;
+  TopicDescriptionPtr<TopicImpl>                 topic_servant_;
 
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
@@ -589,8 +582,9 @@ private:
   DDS::DataWriterListener_var     listener_;
   /// The domain id.
   DDS::DomainId_t                 domain_id_;
+  RepoId                          dp_id_;
   /// The publisher servant which creates this datawriter.
-  PublisherImpl*                  publisher_servant_;
+  WeakRcHandle<PublisherImpl>     publisher_servant_;
   /// The repository id of this datawriter/publication.
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.
@@ -602,7 +596,7 @@ private:
   /// coherent change set.
   ACE_UINT32                      coherent_samples_;
   /// The sample data container.
-  WriteDataContainer*             data_container_;
+  unique_ptr<WriteDataContainer>  data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
   ACE_Recursive_Thread_Mutex      lock_;
@@ -636,11 +630,11 @@ private:
   // PublicationReconnectingStatus       publication_reconnecting_status_;
 
   /// The message block allocator.
-  MessageBlockAllocator*     mb_allocator_;
+  unique_ptr<MessageBlockAllocator>     mb_allocator_;
   /// The data block allocator.
-  DataBlockAllocator*        db_allocator_;
+  unique_ptr<DataBlockAllocator>        db_allocator_;
   /// The header data allocator.
-  DataSampleHeaderAllocator* header_allocator_;
+  unique_ptr<DataSampleHeaderAllocator> header_allocator_;
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
@@ -655,9 +649,6 @@ private:
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
   RcHandle<OfferedDeadlineWatchdog> watchdog_;
-  /// The flag indicates whether the liveliness timer is scheduled and
-  /// needs be cancelled.
-  bool                       cancel_timer_;
 
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
@@ -676,8 +667,6 @@ private:
   /// Periodic Monitor object for this entity
   Monitor* periodic_monitor_;
 
-  // Data block local pool for this data writer.
-  DataBlockLockPool*  db_lock_pool_;
 
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number
@@ -692,6 +681,26 @@ private:
   // Lock used to synchronize remove_associations calls from discovery
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
+  RcHandle<LivenessTimer> liveness_timer_;
+};
+
+typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
+
+
+class LivenessTimer : public RcEventHandler
+{
+public:
+  LivenessTimer(DataWriterImpl& writer)
+    : writer_(writer)
+  {
+  }
+
+  /// Handle the assert liveliness timeout.
+  virtual int handle_timeout(const ACE_Time_Value &tv,
+                             const void *arg);
+
+private:
+  WeakRcHandle<DataWriterImpl> writer_;
 };
 
 } // namespace DCPS

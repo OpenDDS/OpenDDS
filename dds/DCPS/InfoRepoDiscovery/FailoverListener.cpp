@@ -147,15 +147,6 @@ FailoverListener::on_subscription_lost(
   TheServiceParticipant->repository_lost(this->key_);
 }
 
-void
-FailoverListener::on_connection_deleted(
-  DDS::DataReader_ptr /* reader */)
-{
-  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) FailoverListener::on_connection_deleted\n")));
-  }
-}
 
 void
 FailoverListener::on_budget_exceeded(

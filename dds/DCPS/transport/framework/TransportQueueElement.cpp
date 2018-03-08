@@ -46,12 +46,12 @@ TransportQueueElement::fragment(size_t size)
   Message_Block_Ptr tail;
   DataSampleHeader::split(*msg(), size, head, tail);
 
-  TransportCustomizedElement* frag = TransportCustomizedElement::alloc(0, true);
+  TransportCustomizedElement* frag = new TransportCustomizedElement(0, true);
   frag->set_publication_id(publication_id());
   frag->set_msg(move(head));
 
   TransportCustomizedElement* rest =
-    TransportCustomizedElement::alloc(this, true);
+    new TransportCustomizedElement(this, true);
   rest->set_msg(move(tail));
 
   return ElementPair(frag, rest);

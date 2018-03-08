@@ -25,12 +25,8 @@ OpenDDS::DCPS::TransportReplacedElement::release_element(bool dropped_by_transpo
   ACE_UNUSED_ARG(dropped_by_transport);
   DBG_ENTRY_LVL("TransportReplacedElement","release_element",6);
 
-  if (allocator_) {
-    OPENDDS_DES_FREE_THIS(allocator_->free, TransportReplacedElement);
-  }
-  else {
-    delete this;
-  }
+
+  delete this;
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

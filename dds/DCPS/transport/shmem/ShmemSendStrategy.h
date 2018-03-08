@@ -29,7 +29,7 @@ typedef RcHandle<ShmemInst> ShmemInst_rch;
 class OpenDDS_Shmem_Export ShmemSendStrategy
   : public TransportSendStrategy {
 public:
-  ShmemSendStrategy(ShmemDataLink* link, const ShmemInst_rch& inst);
+  ShmemSendStrategy(ShmemDataLink* link);
 
   virtual bool start_i();
   virtual void stop_i();
@@ -42,6 +42,7 @@ private:
   std::string bound_name_;
   ACE_sema_t peer_semaphore_;
   ShmemData* current_data_;
+  const size_t datalink_control_size_;
 };
 
 } // namespace DCPS

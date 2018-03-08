@@ -14,6 +14,7 @@
 
 #include "dds/DCPS/RepoIdGenerator.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/RcObject.h"
 
 #include /**/ "ace/Map_Manager.h"
 
@@ -39,12 +40,15 @@ class Manager;
 
 } // namespace Update
 
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Subscription*,
-  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Subscription_Map;
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Publication*,
-  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Publication_Map;
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Topic*,
-  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Topic_Map;
+typedef std::map<OpenDDS::DCPS::RepoId,
+                 OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Subscription>,
+                 OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Subscription_Map;
+typedef std::map<OpenDDS::DCPS::RepoId,
+                 OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Publication>,
+                 OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Publication_Map;
+typedef std::map<OpenDDS::DCPS::RepoId,
+                 DCPS_IR_Topic*,
+                 OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Topic_Map;
 
 typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
 
@@ -55,7 +59,9 @@ typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
  *
  *
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Participant {
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Participant
+  : public OpenDDS::DCPS::RcObject
+{
 public:
   /// Special owner to enforce no callbacks.
   enum { OWNER_NONE};
@@ -87,7 +93,7 @@ public:
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_publication(DCPS_IR_Publication* pub);
+  int add_publication(OpenDDS::DCPS::unique_ptr<DCPS_IR_Publication> pub);
 
   /// Return the publication object.
   int find_publication_reference(OpenDDS::DCPS::RepoId pubId,
@@ -101,7 +107,7 @@ public:
   /// Add a subscription
   /// This takes ownership of the memory pointed to by aub
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_subscription(DCPS_IR_Subscription* sub);
+  int add_subscription(OpenDDS::DCPS::unique_ptr<DCPS_IR_Subscription> sub);
 
   /// Return the subscription object.
   int find_subscription_reference(OpenDDS::DCPS::RepoId subId,

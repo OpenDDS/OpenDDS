@@ -16,7 +16,7 @@
 #include "ace/Message_Block.h"
 #include "ace/Synch_Traits.h"
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
@@ -56,7 +56,7 @@ private:
 };
 
 class OpenDDS_Multicast_Export MulticastSession
-  : public RcObject<ACE_SYNCH_MUTEX> {
+  : public RcObject {
 public:
   virtual ~MulticastSession();
 

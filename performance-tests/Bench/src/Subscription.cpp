@@ -148,7 +148,7 @@ Subscription::enable(
   if (this->verbose_) {
     OpenDDS::DCPS::MulticastInst* mcconfig
       = dynamic_cast<OpenDDS::DCPS::MulticastInst*>(
-          transport->instances_[0].in()
+          transport->instances_[0]
         );
     bool isMcast    = false;
     bool isReliable = false;

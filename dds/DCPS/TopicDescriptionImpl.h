@@ -62,11 +62,13 @@ public:
   }
 
   void add_entity_ref() {
+    RcObject::_add_ref();
     ++entity_refs_;
   }
 
   void remove_entity_ref() {
     --entity_refs_;
+    RcObject::_remove_ref();
   }
 
 protected:
@@ -83,6 +85,63 @@ protected:
 
   /// The number of entities using this topic
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> entity_refs_;
+};
+
+template <typename Topic>
+class TopicDescriptionPtr
+{
+public:
+  TopicDescriptionPtr(Topic* topic=0)
+    : topic_(topic)
+  {
+    if (topic_)
+      topic_->add_entity_ref();
+  }
+
+  ~TopicDescriptionPtr()
+  {
+    if (topic_)
+      topic_->remove_entity_ref();
+  }
+
+  TopicDescriptionPtr(const TopicDescriptionPtr& other)
+    : topic_(other.topic_)
+  {
+    if (topic_)
+      topic_->add_entity_ref();
+  }
+
+  TopicDescriptionPtr& operator = (Topic* other)
+  {
+    TopicDescriptionPtr tmp(other);
+    std::swap(this->topic_, tmp.topic_);
+    return *this;
+  }
+
+  TopicDescriptionPtr& operator = (const TopicDescriptionPtr& other)
+  {
+    TopicDescriptionPtr tmp(other);
+    std::swap(this->topic_, tmp.topic_);
+    return *this;
+  }
+
+  Topic* operator->() const
+  {
+    return topic_;
+  }
+
+  Topic* get() const
+  {
+    return topic_;
+  }
+
+  operator bool() const
+  {
+    return topic_;
+  }
+
+private:
+  Topic* topic_;
 };
 
 } // namespace DCPS

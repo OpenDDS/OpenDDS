@@ -48,9 +48,6 @@ public:
       ::DDS::DataWriter_ptr writer,
       const ::OpenDDS::DCPS::PublicationLostStatus & status);
 
-
-  virtual void on_connection_deleted (::DDS::DataWriter_ptr writer);
-
   virtual ~DataWriterListenerImpl (void);
 
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> publication_matched_;

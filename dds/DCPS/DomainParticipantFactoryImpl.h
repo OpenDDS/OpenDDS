@@ -41,9 +41,7 @@ class OpenDDS_Dcps_Export DomainParticipantFactoryImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipantFactory> {
 public:
 
-  typedef Objref_Servant_Pair <DomainParticipantImpl, DDS::DomainParticipant,
-    DDS::DomainParticipant_ptr, DDS::DomainParticipant_var> Participant_Pair;
-  typedef OPENDDS_SET(Participant_Pair) DPSet;
+  typedef OPENDDS_SET(RcHandle<DomainParticipantImpl>) DPSet;
   typedef OPENDDS_MAP(DDS::DomainId_t, DPSet) DPMap;
 
   DomainParticipantFactoryImpl();
@@ -78,6 +76,8 @@ public:
 
   /// Expose the participants for reading.
   const DPMap& participants() const;
+
+  void cleanup();
 
 private:
 

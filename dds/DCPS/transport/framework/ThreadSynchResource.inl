@@ -9,9 +9,9 @@
 #include "ace/ACE.h"
 
 ACE_INLINE
-OpenDDS::DCPS::ThreadSynchResource::ThreadSynchResource(ACE_HANDLE handle)
-  : handle_(handle),
-    timeout_(0)
+OpenDDS::DCPS::ThreadSynchResource::ThreadSynchResource()
+  : handle_(ACE_INVALID_HANDLE)
+  , timeout_(0)
 {
   DBG_ENTRY_LVL("ThreadSynchResource","ThreadSynchResource",6);
 }
@@ -36,4 +36,10 @@ OpenDDS::DCPS::ThreadSynchResource::wait_to_unclog()
   }
 
   return 0;
+}
+
+ACE_INLINE void
+OpenDDS::DCPS::ThreadSynchResource::set_handle(ACE_HANDLE handle)
+{
+  handle_ = handle;
 }

@@ -24,7 +24,7 @@ ReceiveListenerSet::ReceiveListenerSet()
 
 ACE_INLINE
 ReceiveListenerSet::ReceiveListenerSet(const ReceiveListenerSet& rhs)
-  : RcObject<ACE_SYNCH_MUTEX>()
+  : RcObject()
   , lock_()
   , map_(rhs.map_)
 {
@@ -42,7 +42,7 @@ ReceiveListenerSet::operator=(const ReceiveListenerSet& rhs)
 
 ACE_INLINE int
 ReceiveListenerSet::insert(RepoId subscriber_id,
-                           const TransportReceiveListener_rch& listener)
+                           const TransportReceiveListener_wrch& listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "insert", 6);
   GuardType guard(this->lock_);
