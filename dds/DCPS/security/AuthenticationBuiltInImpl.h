@@ -164,8 +164,8 @@ private:
     DDS::Security::IdentityHandle local_identity_handle;
     DDS::Security::IdentityHandle remote_identity_handle;
     DDS::Security::SharedSecretHandle_var secret_handle;
-    DDS::Security::HandshakeMessageToken req_msg;
-    DDS::Security::HandshakeMessageToken reply_msg;
+    DDS::Security::HandshakeMessageToken request_token;
+    DDS::Security::HandshakeMessageToken reply_token;
     DDS::Security::ValidationResult_t validation_state;
     bool local_initiator;
   };

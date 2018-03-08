@@ -240,10 +240,16 @@ namespace OpenDDS {
         BIO* filebuf = BIO_new_file(path.c_str(), "r");
         if (filebuf) {
           if (password != "") {
-              result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, (void*)password.c_str());
+            result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, (void*)password.c_str());
+            if (! result) {
+                OPENDDS_SSL_LOG_ERR("PEM_read_bio_X509_AUX failed");
+            }
 
           } else {
-              result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, NULL);
+            result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, NULL);
+            if (! result) {
+                OPENDDS_SSL_LOG_ERR("PEM_read_bio_X509_AUX failed");
+            }
           }
 
           BIO_free(filebuf);
