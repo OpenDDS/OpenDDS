@@ -5,6 +5,7 @@
 * See: http://www.DDS.org/license.html
 */
 #include "dds/DCPS/security/TokenWriter.h"
+#include <cstring>
 #
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -55,12 +56,10 @@ void TokenWriter::set_bin_property(int prop_index, const char* prop_name, const 
   DDS::BinaryProperty_t& prop_ref = token_ref_.binary_properties[prop_index];
   prop_ref.name = prop_name;
   prop_ref.propagate = propagate;
-
-  prop_ref.value.replace(
-    static_cast<CORBA::ULong>(prop_value.length()),
-    static_cast<CORBA::ULong>(prop_value.length()),
-    reinterpret_cast<CORBA::Octet*>(const_cast<char*>(prop_value.c_str())),
-    false);
+  prop_ref.value.length(prop_value.length());
+  std::memcpy(prop_ref.value.get_buffer(),
+              prop_value.c_str(),
+              prop_ref.value.length());
 }
 
 } // namespace Security

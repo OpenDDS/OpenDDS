@@ -293,7 +293,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       if (replier_data) {
         if (replier_data->local_handle == initiator_identity_handle) {
 
-          // Populate the handshake output message with some stubbed out properties
           OpenDDS::Security::TokenWriter handshake_wrapper(handshake_message,
                                                            build_class_id(Handshake_Request_Class_Ext),
                                                            0, 7);
@@ -312,11 +311,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           handshake_wrapper.set_bin_property(prop_index++, "dh1", tmp, true);
 
           OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
-          if (!auth_wrapper.is_nil()) {
-            const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
-            handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", challenge_data, true);
-
-          } else {
+          if (auth_wrapper.is_nil()) {
             DDS::OctetSeq nonce;
             int err = SSL::make_nonce_256(nonce);
             if (! err) {
@@ -326,15 +321,20 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
               return DDS::Security::VALIDATION_FAILED;
             }
 
+          } else {
+            const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
+            handshake_wrapper.set_bin_property(prop_index++, "c.challenge1", challenge_data, true);
+
           }
 
-          // The stub doesn't worry about any pre-existing handshakes between these two participants
-          // and will always just create a new handshake session
           HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
           newHandshakeData->local_identity_handle = initiator_identity_handle;
           newHandshakeData->remote_identity_handle = replier_identity_handle;
           newHandshakeData->local_initiator = true;
           newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+          newHandshakeData->request_token = handshake_message;
+          newHandshakeData->reply_token = DDS::Security::TokenNIL;
+
           handshake_handle = get_next_handle();
           {
             ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);

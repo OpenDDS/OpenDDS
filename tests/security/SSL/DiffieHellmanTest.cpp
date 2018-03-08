@@ -33,5 +33,5 @@ TEST_F(DiffieHellmanTest, PubKey_Generation)
 {
   DDS::OctetSeq pubserial;
   dh1.pub_key(pubserial);
-  ASSERT_NE(0u, pubserial.length());
+  ASSERT_EQ(256u, pubserial.length());
 }

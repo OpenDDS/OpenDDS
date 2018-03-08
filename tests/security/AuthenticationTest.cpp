@@ -7,8 +7,9 @@
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsSecurityEntities.h"
-//#include "Utils.h"
+//#include "dds/DdsSecurityWrappers.h"
 #include <cstring>
+#include <algorithm>
 
 using OpenDDS::DCPS::GUID_t;
 using OpenDDS::Security::AuthenticationBuiltInImpl;
@@ -163,6 +164,15 @@ struct AuthenticationTest : public ::testing::Test
     return NULL;
   }
 
+  static const DDS::OctetSeq& value_of(const std::string& key, const BinaryPropertySeq& s)
+  {
+    size_t n = s.length();
+    for (size_t i = 0; i < n; ++i) {
+        if (strcmp(s[i].name, key.c_str()) == 0)
+          return s[i].value;
+    }
+    return NULL;
+  }
 
   MockParticipantData mp1;
   MockParticipantData mp2;
@@ -289,7 +299,7 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_Pendi
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 }
 
-TEST_F(AuthenticationTest, BeginHandshakeRequest_Success)
+TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Success)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -320,9 +330,63 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_Success)
 
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, r);
 
-  /* WORK IN PROGRESS!! */
+  /* Arbitrary... This isn't used in begin_handshake_request anyway! */
+  DDS::OctetSeq pretend_topic_data;
+  pretend_topic_data.length(1);
+  pretend_topic_data[0] = 'A';
+
   /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
-  //r = auth.begin_handshake_request(mp1.handshake_handle, mp1.handshake_message_token, mp1.id_handle, mp2.id_handle, blah, ex);
+  r = auth.begin_handshake_request(mp1.handshake_handle,
+                                   mp1.handshake_message_token,
+                                   mp1.id_handle,
+                                   mp2.id_handle,
+                                   pretend_topic_data,
+                                   ex);
+
+  ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
+
+  /* Since many of the out-params are randomly-generated it is only
+   * practical to check the lengths of the resultant parameters */
+  const DDS::BinaryPropertySeq& bprops = mp1.handshake_message_token.binary_properties;
+  const DDS::PropertySeq& props = mp1.handshake_message_token.properties;
+  ASSERT_EQ(7u, bprops.length());
+  ASSERT_EQ(0u, props.length());
+  ASSERT_EQ(256u, value_of("dh1", bprops).length());
+  {
+    std::string expected("DH+MODP-2048-256");
+    const DDS::OctetSeq& prop = value_of("c.kagree_algo", bprops);
+    ASSERT_EQ(0, std::memcmp(expected.c_str(),
+                              prop.get_buffer(),
+                              std::min(CORBA::ULong(expected.length()),
+                                       prop.length())));
+  }
+  {
+    std::string expected("RSASSA-PSS-SHA256");
+    const DDS::OctetSeq& prop = value_of("c.dsign_algo", bprops);
+    ASSERT_EQ(0, std::memcmp(expected.c_str(),
+                              prop.get_buffer(),
+                              std::min(CORBA::ULong(expected.length()),
+                                       prop.length())));
+  }
+
+  ASSERT_EQ(32u, value_of("c.challenge1", bprops).length());
+
+  /* The operation shall check the content of the local_auth_request_token associated
+   * with the remote_identity_handle. If the value is _not_ TokenNIL then "challenge1"
+   * should be equal to the local_auth_request_token "future_challenge" property.
+   *
+   * Above the local-auth-request was forced, so the remote_identity_handle must map to
+   * a non-nil local_auth_request_token. As such, "future_challenge" and "challenge1"
+   * should be equivalent. */
+  {
+    const DDS::OctetSeq& prop1 = value_of("c.challenge1", bprops);
+    const DDS::OctetSeq& prop2 = value_of("future_challenge", mp1.auth_request_message_token.binary_properties);
+    ASSERT_EQ(0, std::memcmp(prop1.get_buffer(),
+                             prop2.get_buffer(),
+                             std::min(prop1.length(),
+                                      prop2.length())));
+  }
+
 }
 
 
