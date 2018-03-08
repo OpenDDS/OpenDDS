@@ -823,8 +823,8 @@ TEST_F(AccessControlTest, get_permissions_token_Success)
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
   MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
-  ::DDS::Security::PermissionsHandle out_handle =
-          get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
+  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
 
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::Security::PermissionsToken token;
@@ -851,34 +851,26 @@ TEST_F(AccessControlTest, get_permissions_credential_token_InvalidInput)
 
 }
 
-//TEST_F(AccessControlTest, get_permissions_credential_token_Success)
-//{
-//  ::DDS::Security::PermissionsHandle perm_handle = 1;
-//  ::DDS::Security::PermissionsCredentialToken token;
-//  ::DDS::Security::SecurityException ex;
-//
-//  ::DDS::DomainParticipantQos qos;
-//  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
-//  ::DDS::Security::PermissionsHandle out_handle =
-//            get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
-//
-//  LocalAccessCredentialData local_creds;
-//  local_creds.load(qos.property.value);
-//  SSL::SignedDocument& local_perm_file = local_creds.get_permissions_doc();
-//
-//  std::string p_file;
-//  local_perm_file.get_content(p_file);
-//  clean_smime_content(p_file);
-//
-//  std::string f(domain_participant_qos.property.value[2].value);
-//  std::string comp_file_ = get_file_contents(extract_file_name(f).c_str());
-//  EXPECT_TRUE(get_inst().get_permissions_credential_token(token, perm_handle, ex));
-//  EXPECT_STREQ(Expected_Permissions_Cred_Token_Class_Id, token.class_id);
-//  ASSERT_EQ(1U, token.properties.length());
-//  EXPECT_STREQ("dds.perm.cert", token.properties[0].name);
-//  EXPECT_STREQ(p_file.c_str(), token.properties[0].value);
-//
-//}
+TEST_F(AccessControlTest, get_permissions_credential_token_Success)
+{
+  ::DDS::Security::PermissionsHandle perm_handle = 1;
+  ::DDS::Security::PermissionsCredentialToken token;
+  ::DDS::Security::SecurityException ex;
+
+  ::DDS::DomainParticipantQos qos;
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+            get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
+
+  std::string f(domain_participant_qos.property.value[2].value);
+  std::string comp_file_ = get_file_contents(extract_file_name(f).c_str());
+  EXPECT_TRUE(get_inst().get_permissions_credential_token(token, perm_handle, ex));
+  EXPECT_STREQ(Expected_Permissions_Cred_Token_Class_Id, token.class_id);
+  ASSERT_EQ(1U, token.properties.length());
+  EXPECT_STREQ("dds.perm.cert", token.properties[0].name);
+  EXPECT_STREQ(comp_file_.c_str(), token.properties[0].value);
+
+}
 
 TEST_F(AccessControlTest, set_listener)
 {
@@ -915,13 +907,18 @@ TEST_F(AccessControlTest, get_participant_sec_attributes_Success)
 {
   ::DDS::Security::ParticipantSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
+
+
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
   EXPECT_TRUE(get_inst().get_participant_sec_attributes(1, attributes, ex));
   EXPECT_TRUE(attributes.allow_unauthenticated_participants);
-  EXPECT_TRUE(attributes.is_access_protected);
-  EXPECT_TRUE(attributes.is_rtps_protected);
-  EXPECT_TRUE(attributes.is_discovery_protected);
-  EXPECT_TRUE(attributes.is_liveliness_protected);
-  EXPECT_EQ(0xFFFFFFFF, attributes.plugin_participant_attributes);
+  EXPECT_FALSE(attributes.is_access_protected);
+  EXPECT_FALSE(attributes.is_rtps_protected);
+  EXPECT_FALSE(attributes.is_discovery_protected);
+  EXPECT_FALSE(attributes.is_liveliness_protected);
+  EXPECT_EQ(0x80000000, attributes.plugin_participant_attributes);
 }
 
 TEST_F(AccessControlTest, get_topic_sec_attributes_InvalidInput)
