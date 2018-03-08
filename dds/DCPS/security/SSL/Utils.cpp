@@ -141,6 +141,11 @@ namespace OpenDDS {
         return err;
       }
 
+      unsigned char offset_1bit(const unsigned char array[], size_t i)
+      {
+        return (((array[i] << 7u) & 0x80) | ((array[i + 1] >> 1u) & 0x7F));
+      }
+
     }
   }
 }

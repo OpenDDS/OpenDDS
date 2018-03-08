@@ -77,5 +77,14 @@ TEST_F(CertificateTest, SubjectNameToString_Success)
   ASSERT_EQ(name, expected);
 }
 
+TEST_F(CertificateTest, SerializeDeserialize_Success)
+{
+  DDS::OctetSeq tmp;
+  ASSERT_EQ(0, signed_.serialize(tmp));
+
+  Certificate copy(tmp);
+  ASSERT_EQ(copy, signed_);
+}
+
 
 

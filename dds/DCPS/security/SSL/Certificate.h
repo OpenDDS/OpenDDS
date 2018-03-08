@@ -29,7 +29,11 @@ namespace OpenDDS {
 
         friend std::ostream& operator<<(std::ostream&, const Certificate&);
 
+        friend bool operator==(const Certificate& lhs, const Certificate& rhs);
+
         Certificate(const std::string& uri, const std::string& password = "");
+
+        Certificate(const DDS::OctetSeq& src);
 
         Certificate();
 
@@ -60,7 +64,11 @@ namespace OpenDDS {
         X509* x_;
       };
 
+      DdsSecurity_Export
       std::ostream& operator<<(std::ostream&, const Certificate&);
+
+      DdsSecurity_Export
+      bool operator==(const Certificate& lhs, const Certificate& rhs);
     }
   }
 }
