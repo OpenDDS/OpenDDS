@@ -278,6 +278,7 @@ private:
         GovernanceAccessRules gov_rules;
         PermissionGrantRules perm_rules;
         ::DDS::Security::PermissionsToken perm_token;
+        ::DDS::Security::PermissionsCredentialToken perm_cred_token;
     } ac_perms;
 
     typedef std::map< ::DDS::Security::PermissionsHandle , ac_perms > ACPermsMap;
@@ -290,12 +291,12 @@ private:
   ::CORBA::Long load_permissions_file(ac_perms *, std::string);
   ::CORBA::Boolean file_exists(const std::string&);
   std::string extract_file_name(const std::string&);
-
+  std::string get_file_contents(const char *);
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;
 
-  LocalAccessCredentialData local_credential_data_;
+  LocalAccessCredentialData local_access_control_data_;
 
 };
 

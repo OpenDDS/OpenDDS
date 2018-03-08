@@ -6,6 +6,8 @@
 // These are just used to meet signature requirements for a test
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include <sstream>
+#include <fstream>
 
 using namespace OpenDDS::Security;
 using DDS::Property_t;
@@ -178,13 +180,19 @@ public:
   AccessControlTest()
   : test_class_()
   {
-    Property_t permca;
+    Property_t permca, permca_p7s;
     Property_t  gov_0, gov_1, gov_2, gov_3, gov_4, gov_5, gov_6;
+    Property_t  gov_0_p7s, gov_1_p7s, gov_2_p7s, gov_3_p7s,gov_4_p7s, gov_5_p7s, gov_6_p7s;
     Property_t perm_join, perm_topic;
+    Property_t perm_join_p7s, perm_topic_p7s;
 
     permca.name = "dds.sec.access.permissions_ca";
-    permca.value = "file:certs/opendds_permissions_ca_cert.pem";
+    permca.value = "file:certs/opendds_identity_ca_cert.pem";
     permca.propagate = false;
+
+    permca_p7s.name = "dds.sec.access.permissions_ca";
+    permca_p7s.value = "file:certs/opendds_identity_ca_cert.pem";
+    permca_p7s.propagate = false;
 
     gov_0.name = "dds.sec.access.governance";
     gov_0.value = "file:governance/Governance_SC0_SecurityDisabled.xml";
@@ -214,17 +222,57 @@ public:
     gov_6.value = "file:governance/Governance_SC6_ProtectedDomain6.xml";
     gov_6.propagate = false;
 
+    gov_0_p7s.name = "dds.sec.access.governance";
+    gov_0_p7s.value = "file:governance/Governance_SC0_SecurityDisabled.p7s";
+    gov_0_p7s.propagate = false;
+
+    gov_1_p7s.name = "dds.sec.access.governance";
+    gov_1_p7s.value = "file:governance/Governance_SC1_ProtectedDomain1.p7s";
+    gov_1_p7s.propagate = false;
+
+    gov_2_p7s.name = "dds.sec.access.governance";
+    gov_2_p7s.value = "file:governance/Governance_SC2_ProtectedDomain2.p7s";
+    gov_2_p7s.propagate = false;
+
+    gov_3_p7s.name = "dds.sec.access.governance";
+    gov_3_p7s.value = "file:governance/Governance_SC3_ProtectedDomain3.p7s";
+    gov_3_p7s.propagate = false;
+
+    gov_4_p7s.name = "dds.sec.access.governance";
+    gov_4_p7s.value = "file:governance/Governance_SC4_ProtectedDomain4.p7s";
+    gov_4_p7s.propagate = false;
+
+    gov_5_p7s.name = "dds.sec.access.governance";
+    gov_5_p7s.value = "file:governance/Governance_SC5_ProtectedDomain5.p7s";
+    gov_5_p7s.propagate = false;
+
+    gov_6_p7s.name = "dds.sec.access.governance";
+    gov_6_p7s.value = "file:governance/Governance_SC6_ProtectedDomain6.p7s";
+    gov_6_p7s.propagate = false;
+
+
     perm_join.name = "dds.sec.access.permissions";
     perm_join.value = "file:permissions/Permissions_JoinDomain_OCI.xml";
     perm_join.propagate = false;
+
+    perm_join_p7s.name = "dds.sec.access.permissions";
+    perm_join_p7s.value = "file:permissions/Permissions_JoinDomain_OCI.p7s";
+    perm_join_p7s.propagate = false;
 
     perm_topic.name = "dds.sec.access.permissions";
     perm_topic.value = "file:permissions/Permissions_TopicLevel_OCI.xml";
     perm_topic.propagate = false;
 
+    perm_topic_p7s.name = "dds.sec.access.permissions";
+    perm_topic_p7s.value = "file:permissions/Permissions_TopicLevel_OCI.p7s";
+    perm_topic_p7s.propagate = false;
+
     add_property(permca);
     add_property(gov_0);
     add_property(perm_join);
+
+
+
   }
 
   ~AccessControlTest()
@@ -238,12 +286,36 @@ public:
       seq[len] = p;
   }
 
+
+    std::string extract_file_name(const std::string& file_parm) {
+        std::string del = ":";
+        int pos = file_parm.find_last_of(del);
+        if ((pos > 0 ) && (pos != file_parm.length() - 1) ) {
+            return file_parm.substr(pos + 1);
+        } else {
+            return std::string("");
+        }
+    }
+
+std::string get_file_contents(const char *filename) {
+    std::ifstream in(filename, std::ios::in | std::ios::binary);
+    if (in)
+    {
+        std::ostringstream contents;
+        contents << in.rdbuf();
+        in.close();
+        return(contents.str());
+    }
+    throw(errno);
+}
+
   DDS::Security::AccessControl& get_inst()
   {
     return test_class_;
   }
 
   DomainParticipantQos domain_participant_qos;
+
 private:
 
   AccessControlBuiltInImpl test_class_;
@@ -752,6 +824,8 @@ TEST_F(AccessControlTest, get_permissions_token_Success)
 
 TEST_F(AccessControlTest, get_permissions_credential_token_InvalidInput)
 {
+
+
   ::DDS::Security::PermissionsCredentialToken token;
   ::DDS::Security::SecurityException ex;
 
@@ -766,10 +840,18 @@ TEST_F(AccessControlTest, get_permissions_credential_token_Success)
   ::DDS::Security::PermissionsCredentialToken token;
   ::DDS::Security::SecurityException ex;
 
+  ::DDS::DomainParticipantQos qos;
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+  ::DDS::Security::PermissionsHandle out_handle =
+            get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
+  std::string f(domain_participant_qos.property.value[2].value);
+  std::string comp_file_ = get_file_contents(extract_file_name(f).c_str());
   EXPECT_TRUE(get_inst().get_permissions_credential_token(token, perm_handle, ex));
   EXPECT_STREQ(Expected_Permissions_Cred_Token_Class_Id, token.class_id);
   ASSERT_EQ(1U, token.properties.length());
   EXPECT_STREQ("dds.perm.cert", token.properties[0].name);
+  EXPECT_STREQ(comp_file_.c_str(), token.properties[0].value);
 
 }
 
