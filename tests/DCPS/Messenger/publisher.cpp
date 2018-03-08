@@ -34,8 +34,8 @@ const char auth_ca_file[] = "file:../../security/certs/opendds_identity_ca_cert.
 const char perm_ca_file[] = "file:../../security/certs/opendds_identity_ca_cert.pem";
 const char id_cert_file[] = "file:../../security/certs/mock_participant_1/opendds_participant_cert.pem";
 const char id_key_file[] = "file:../../security/certs/mock_participant_1/opendds_participant_private_key.pem";
-const char governance_file[] = "file:./governance.xml";
-const char permissions_file[] = "file:./permissions.xml";
+const char governance_file[] = "file:./governance_signed.p7s";
+const char permissions_file[] = "file:./permissions_signed.p7s";
 
 const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
 const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
