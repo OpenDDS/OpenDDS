@@ -369,6 +369,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   using OpenDDS::Security::TokenWriter;
   using OpenDDS::Security::TokenReader;
 
+  DDS::OctetSeq challenge1, challenge2, dh2;
+
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED,
                                           Pending = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
 
@@ -393,7 +395,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     return Failure;
 
   } else {
-    const DDS::OctetSeq& challenge1 = message_in.get_bin_property_value("challenge1");
+    challenge1 = message_in.get_bin_property_value("challenge1");
 
     TokenReader initiator_remote_auth_request(initiator_id_data->remote_auth_request);
     if (! initiator_remote_auth_request.is_nil()) {
@@ -428,9 +430,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       return Failure;
     }
 
-    /* Verify first bit of "c.pdata" is set to 1 and check the following 47 bits match the
-     * SHA-256 hash of SubjectName appearing in the IdentityCredential */
-
     const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
     if (cpdata.length() > 5u) { /* Enough to withstand the hash-comparison below */
 
@@ -440,6 +439,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         return Failure;
       }
 
+      /* Check the following 47 bits match the subject-hash */
       std::vector<unsigned char> hash;
       if (0 != cert.subject_name_digest(hash)) {
         return Failure;
@@ -462,45 +462,51 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
    * Most of this logic would probably be placed in the Certificate directly
    * or an OCSP abstraction that the Certificate uses. */
 
-
-  /* Add routines to get property by index and modify them inline */
-
-
-  // Populate a stub handshake reply message.
-  TokenWriter message_out(handshake_message_out,
-                          build_class_id(Handshake_Reply_Class_Ext), 0, 13);
   int prop_index = 0;
-  message_out.set_bin_property(prop_index++, "c.id", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "c.perm", Empty_Seq, true);
+  DDS::OctetSeq tmp;
+
+  TokenWriter message_out(handshake_message_out,
+                          build_class_id(Handshake_Reply_Class_Ext),
+                          0, 9);
+
+  local_credential_data_.get_participant_cert().serialize(tmp);
+  message_out.set_bin_property(prop_index++, "c.id", tmp, true);
+
+  message_out.set_bin_property(prop_index++, "c.perm", Empty_Seq, true); /* TODO */
   message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
   message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
   message_out.set_bin_property(prop_index++, "c.kagree_algo", "DH+MODP-2048-256", true);
-  message_out.set_bin_property(prop_index++, "hash_c2", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "dh2", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "hash_c1", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "dh1", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "challenge1", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "challenge2", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "ocsp_status", Empty_Seq, true);
-  message_out.set_bin_property(prop_index++, "signature", Empty_Seq, true);
 
+  local_credential_data_.get_diffie_hellman_key().pub_key(tmp);
+  message_out.set_bin_property(prop_index++, "dh2", tmp, true);
+
+  message_out.set_bin_property(prop_index++, "challenge1", challenge1, true);
 
   TokenReader initiator_local_auth_request(initiator_id_data->local_auth_request);
   if (! initiator_local_auth_request.is_nil()) {
     const DDS::OctetSeq& future_challenge = initiator_local_auth_request.get_bin_property_value("future_challenge");
     message_out.set_bin_property(prop_index++, "challenge2", future_challenge, true);
+    challenge2 = future_challenge;
 
   } else {
     DDS::OctetSeq nonce;
     int err = SSL::make_nonce_256(nonce);
     if (! err) {
         message_out.set_bin_property(prop_index++, "challenge2", nonce, true);
+        challenge2 = nonce;
 
     } else {
       return Failure;
     }
   }
 
+  std::vector<const DDS::OctetSeq*> sign_these;
+  sign_these.push_back(&challenge2);
+  sign_these.push_back(&dh2);
+  sign_these.push_back(&challenge1);
+
+  local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
+  message_out.set_bin_property(prop_index++, "signature", tmp, true);
 
   HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
   newHandshakeData->local_identity_handle = replier_identity_handle;

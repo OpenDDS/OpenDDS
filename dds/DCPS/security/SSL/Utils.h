@@ -38,6 +38,9 @@ namespace OpenDDS {
       DdsSecurity_Export
       unsigned char offset_1bit(const unsigned char array[], size_t i);
 
+      DdsSecurity_Export
+      int hash(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst);
+
 
     }
   }

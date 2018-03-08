@@ -8,7 +8,9 @@
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/unique_ptr.h"
+#include "dds/DdsDcpsCoreC.h"
 #include <string>
+#include <vector>
 #include <openssl/evp.h>
 
 namespace OpenDDS {
@@ -30,6 +32,8 @@ namespace OpenDDS {
         PrivateKey& operator=(const PrivateKey& rhs);
 
         void load(const std::string& uri, const std::string& password = "");
+
+        int sign(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst);
 
       private:
 
