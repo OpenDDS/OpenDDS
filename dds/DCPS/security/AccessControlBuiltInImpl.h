@@ -292,6 +292,7 @@ private:
   ::CORBA::Boolean file_exists(const std::string&);
   std::string extract_file_name(const std::string&);
   std::string get_file_contents(const char *);
+  ::CORBA::Boolean clean_smime_content(std::string&);
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;

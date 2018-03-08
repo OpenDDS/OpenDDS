@@ -8,17 +8,13 @@
 #include "dds/DCPS/security/AccessControlBuiltInImpl.h"
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DdsDcpsInfrastructureC.h"
-//#include "dds/DCPS/security/TokenReader.h"
 #include "ace/config-macros.h"
-
 #include "dds/DCPS/security/TokenWriter.h"
 
-//#include "ace/Guard_T.h"
-
-//#include <vector>
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
 #include "xercesc/sax/HandlerBase.hpp"
+#include "xercesc/framework/MemBufInputSource.hpp"
 #include "AccessControlBuiltInImpl.h"
 
 
@@ -113,24 +109,42 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-//    local_access_control_data_.load(participant_qos.property.value);
-//
-//    SSL::SignedDocument local_gov = local_access_control_data_.get_governance_doc();
+  local_access_control_data_.load(participant_qos.property.value);
+
+
+  std::string gov_content, perm_content;
+
+  SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
+    local_gov.get_content(gov_content);
+    clean_smime_content(gov_content);
 
 
     // Read in permissions_ca
 
+    SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
+    local_perm.get_content(perm_content);
+
+    // Set and store the permissions credential token  while we have the raw content
+    ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
+    TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId, 1, 0);
+    pctWriter.set_property(0, "dds.perm.cert", perm_content.c_str(), true);
+
+
+
+
+
+    clean_smime_content(perm_content);
 
   // Read in governance file
 
     ac_perms perm_set;
 
-  if( 0 != load_governance_file(&perm_set , gov_file)) {
+  if( 0 != load_governance_file(&perm_set , gov_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
     return DDS::HANDLE_NIL;
   };
 
-  if(0 != load_permissions_file(&perm_set , perm_file)) {
+  if(0 != load_permissions_file(&perm_set , perm_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
@@ -143,11 +157,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     writer.set_property(1, "dds.perm_ca.algo", "RSA-2048", true);
 
     perm_set.perm_token = permissions_token;
-
-    // Set and store the permissions credential token
-    ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
-    TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId, 1, 0);
-    pctWriter.set_property(0, "dds.perm.cert", get_file_contents(perm_file.c_str()).c_str(), true);
 
     perm_set.perm_cred_token = permissions_cred_token;
 
@@ -789,10 +798,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_file)
+::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_content)
 {
 
     //TODO: Need to return existing governance content if found.
+
+  static const char* gMemBufId = "gov buffer id";
 
   try
   {
@@ -813,8 +824,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
     parser->setErrorHandler(errHandler);
 
+
+    // buffer for parsing
+
+    xercesc::MemBufInputSource contentbuf((const XMLByte*)g_content.c_str(),
+                                          g_content.size(),
+                                          gMemBufId);
+
     try {
-        parser->parse(g_file.c_str());
+        parser->parse(contentbuf);
     }
     catch (const xercesc::XMLException& toCatch) {
         char* message = xercesc::XMLString::transcode(toCatch.getMessage());
@@ -942,7 +960,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 
-::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(ac_perms * ac_perms_holder, std::string p_file) {
+::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(ac_perms * ac_perms_holder, std::string p_content) {
+
+  static const char* gMemBufId = "gov buffer id";
 
 
   try
@@ -964,8 +984,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
   parser->setErrorHandler(errHandler);
 
+
+    xercesc::MemBufInputSource contentbuf((const XMLByte*)p_content.c_str(),
+                                          p_content.size(),
+                                          gMemBufId);
+
   try {
-    parser->parse(p_file.c_str());
+    parser->parse(contentbuf);
   }
   catch (const xercesc::XMLException& toCatch) {
     char* message = xercesc::XMLString::transcode(toCatch.getMessage());
@@ -1050,12 +1075,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 std::string AccessControlBuiltInImpl::extract_file_name(const std::string& file_parm) {
   std::string del = ":";
-  int pos = file_parm.find_last_of(del);
-  if ((pos > 0 ) && (pos != file_parm.length() - 1) ) {
-    return file_parm.substr(pos + 1);
-  } else {
-    return std::string("");
-  }
+  u_long pos = file_parm.find_last_of(del);
+    if ((pos > 0UL) && (pos != file_parm.length() - 1)) {
+        return file_parm.substr(pos + 1);
+    } else {
+        return std::string("");
+    }
 }
 
 std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
@@ -1068,6 +1093,21 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
           return(contents.str());
     }
         throw(errno);
+}
+
+::CORBA::Boolean AccessControlBuiltInImpl::clean_smime_content(std::string& content_) {
+
+    std::string search_str("<?xml");
+
+    size_t found = content_.find(search_str);
+    if(found!=std::string::npos){
+        std::string holder_(content_.substr(found));
+        content_.clear();
+        content_.assign(holder_);
+        return true;
+    }
+
+    return false;
 }
 
 } // namespace Security
