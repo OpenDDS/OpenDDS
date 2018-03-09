@@ -25,8 +25,6 @@ namespace OpenDDS {
 
     void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
     {
-      dhkey_.reset(new SSL::DiffieHellman());
-
       std::string name, value, pkey_uri, password;
       for (size_t i = 0; i < props.length(); ++i) {
         name = props[i].name;

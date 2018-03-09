@@ -46,6 +46,8 @@ namespace OpenDDS {
 
         virtual int init() = 0;
         virtual int pub_key(DDS::OctetSeq& dst) = 0;
+        virtual int gen_shared_secret(const DDS::OctetSeq& pub_key) = 0;
+        virtual const char* kagree_algo() = 0;
 
       protected:
         EVP_PKEY* k_;
@@ -55,8 +57,15 @@ namespace OpenDDS {
       {
       public:
         DH_2048_MODP_256_PRIME();
+
         int init();
+
         int pub_key(DDS::OctetSeq& dst);
+        int gen_shared_secret(const DDS::OctetSeq& pub_key);
+
+        const char* kagree_algo() {
+          return "DH+MODP-2048-256";
+        }
       };
 
 
@@ -89,6 +98,22 @@ namespace OpenDDS {
           } else {
            return 1;
           }
+        }
+
+        int gen_shared_secret(const DDS::OctetSeq& pub_key)
+        {
+          if (algo_) {
+              return algo_->gen_shared_secret(pub_key);
+
+          } else {
+              return 1;
+          }
+        }
+
+        const char* kagree_algo()
+        {
+          if (algo_) return algo_->kagree_algo();
+          else return "NULL";
         }
 
       private:

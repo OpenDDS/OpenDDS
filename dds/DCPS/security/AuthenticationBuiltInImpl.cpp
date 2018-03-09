@@ -293,6 +293,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       if (replier_data) {
         if (replier_data->local_handle == initiator_identity_handle) {
 
+          SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman);
+
           OpenDDS::Security::TokenWriter handshake_wrapper(handshake_message,
                                                            build_class_id(Handshake_Request_Class_Ext),
                                                            0, 7);
@@ -305,9 +307,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           handshake_wrapper.set_bin_property(prop_index++, "c.perm", Empty_Seq, true); /* TODO */
           handshake_wrapper.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
           handshake_wrapper.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
-          handshake_wrapper.set_bin_property(prop_index++, "c.kagree_algo", "DH+MODP-2048-256", true);
+          handshake_wrapper.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
 
-          local_credential_data_.get_diffie_hellman_key().pub_key(tmp);
+          diffie_hellman->pub_key(tmp);
           handshake_wrapper.set_bin_property(prop_index++, "dh1", tmp, true);
 
           OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
@@ -334,6 +336,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
           newHandshakeData->request_token = handshake_message;
           newHandshakeData->reply_token = DDS::Security::TokenNIL;
+          newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
 
           handshake_handle = get_next_handle();
           {
@@ -370,6 +373,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   using OpenDDS::Security::TokenReader;
 
   DDS::OctetSeq challenge1, challenge2, dh2;
+  SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
 
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED,
                                           Pending = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
@@ -413,13 +417,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       }
     }
 
-    SSL::Certificate cert;
-
     const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
     if (cid.length() > 0) {
 
-      cert.deserialize(cid);
-      if (X509_V_OK != cert.validate(local_credential_data_.get_ca_cert()))
+      remote_cert->deserialize(cid);
+      if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
       {
         set_security_error(ex, -1, 0, "Certificate validation failed");
         return Failure;
@@ -441,7 +443,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
       /* Check the following 47 bits match the subject-hash */
       std::vector<unsigned char> hash;
-      if (0 != cert.subject_name_digest(hash)) {
+      if (0 != remote_cert->subject_name_digest(hash)) {
         return Failure;
       }
 
@@ -480,9 +482,13 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   message_out.set_bin_property(prop_index++, "c.perm", Empty_Seq, true); /* TODO */
   message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
   message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
-  message_out.set_bin_property(prop_index++, "c.kagree_algo", "DH+MODP-2048-256", true);
 
-  local_credential_data_.get_diffie_hellman_key().pub_key(tmp);
+  /* TODO configure DH algorithm depending on the c.kagree_algo sent by begin_handshake_request */
+  SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman);
+
+  message_out.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
+
+  diffie_hellman->pub_key(tmp);
   message_out.set_bin_property(prop_index++, "dh2", tmp, true);
 
   message_out.set_bin_property(prop_index++, "challenge1", challenge1, true);
@@ -518,6 +524,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   newHandshakeData->remote_identity_handle = initiator_identity_handle;
   newHandshakeData->local_initiator = false;
   newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+  newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
+  newHandshakeData->remote_cert = DCPS::move(remote_cert);
+
   handshake_handle = get_next_handle();
   {
     ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
@@ -538,6 +547,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   // Handle differently based on which direction this handshake is going
   std::string incoming_class_ext = get_extension(handshake_message_in.class_id);
+
   if (0 == Handshake_Reply_Class_Ext.compare(incoming_class_ext))
   {
     result = process_handshake_reply(handshake_message_out, handshake_message_in, handshake_handle, ex);
@@ -689,45 +699,129 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   DDS::Security::HandshakeHandle handshake_handle,
   DDS::Security::SecurityException & ex)
 {
-  // The real version of this method will have to validate the credentials on the input message
-  // but this stub version will just verify that the pre-requistes have been met and then fill
-  // out a simple final message
-  ACE_UNUSED_ARG(handshake_message_in);
+  using OpenDDS::Security::TokenWriter;
+  using OpenDDS::Security::TokenReader;
+
+  DDS::OctetSeq challenge1, challenge2;
+  SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
+
+  const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
+  const DDS::Security::ValidationResult_t FinalMessage = DDS::Security::VALIDATION_OK_FINAL_MESSAGE;
 
   HandshakeData_Ptr handshakePtr = get_handshake_data(handshake_handle);
   if (!handshakePtr) {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
-    return DDS::Security::VALIDATION_FAILED;
+    return Failure;
   }
 
   IdentityData_Ptr remoteDataPtr = get_identity_data(handshakePtr->remote_identity_handle);
   if (!remoteDataPtr) {
     set_security_error(ex, -1, 0, "Unknown remote participant for handshake");
-    return DDS::Security::VALIDATION_FAILED;
+    return Failure;
   }
 
   if (handshakePtr->validation_state != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
     set_security_error(ex, -1, 0, "Handshake state is not valid");
-    return DDS::Security::VALIDATION_FAILED;
+    return Failure;
   }
 
-  // This stub just verifies that the handshake was started properly, it doesn't
-  // actually verify anything
-  OpenDDS::Security::TokenWriter final_msg(handshake_message_out, build_class_id(Handshake_Final_Class_Ext), 0, 7);
+  TokenReader message_in(handshake_message_in);
+  if (message_in.is_nil()) {
+    set_security_error(ex, -1, 0, "Handshake_message_in must not be nil");
+    return Failure;
+  }
+
+  TokenReader auth_wrapper(remoteDataPtr->remote_auth_request);
+  if (! auth_wrapper.is_nil()) {
+    challenge2 = message_in.get_bin_property_value("challenge2");
+    const DDS::OctetSeq& future_challenge = auth_wrapper.get_bin_property_value("future_challenge");
+
+    if ((challenge2.length()) < 1 || (future_challenge.length() < 1)) {
+      return Failure;
+    }
+    if (challenge2.length() != future_challenge.length()) {
+      return Failure;
+    }
+
+    if (0 != std::memcmp(challenge2.get_buffer(), future_challenge.get_buffer(), future_challenge.length())) {
+      return Failure;
+    }
+  }
+
+  const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
+  if (cid.length() > 0) {
+
+      remote_cert->deserialize(cid);
+
+    if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
+    {
+      set_security_error(ex, -1, 0, "Certificate validation failed");
+      return Failure;
+    }
+
+  } else {
+    set_security_error(ex, -1, 0, "Certificate validation failed due to empty 'c.id' property supplied");
+    return Failure;
+  }
+
+  /* Check that challenge1 on message_in matches the one sent in HandshakeRequestMessageToken */
+
+  TokenReader handshake_request_token(handshakePtr->request_token);
+  if (handshake_request_token.is_nil()) {
+    set_security_error(ex, -1, 0, "Handshake-request-token is nil");
+    return Failure;
+
+  } else {
+    challenge1 = handshake_request_token.get_bin_property_value("challenge1");
+    const DDS::OctetSeq& challenge1_reply =  message_in.get_bin_property_value("challenge1");
+
+    if ((challenge1.length()) < 1 || (challenge1_reply.length() < 1)) {
+      return Failure;
+    }
+    if (challenge1.length() != challenge1_reply.length()) {
+      return Failure;
+    }
+
+    if (0 != std::memcmp(challenge1.get_buffer(), challenge1_reply.get_buffer(), challenge1_reply.length())) {
+      return Failure;
+    }
+  }
+
+  /* Compute/Store the Diffie-Hellman shared-secret */
+
+  const DDS::OctetSeq& dh_pub_key = message_in.get_bin_property_value("dh2");
+  if (0 != handshakePtr->diffie_hellman->gen_shared_secret(dh_pub_key)) {
+    set_security_error(ex, -1, 0, "Failed to generate shared secret from dh1 and dh2");
+    return Failure;
+  }
+
+  /* Validate Signature field */
+
+  const DDS::OctetSeq& remote_signature = message_in.get_bin_property_value("signature");
+  if (0 != remote_cert->verify_signature(remote_signature)) {
+    set_security_error(ex, -1, 0, "Remote 'signature' field failed signature verification");
+    return Failure;
+  }
+
   int prop_index = 0;
-  final_msg.set_bin_property(prop_index++, "hash_c1", Empty_Seq, true); // Optional (troubleshooting)
-  final_msg.set_bin_property(prop_index++, "hash_c2", Empty_Seq, true); // Optional (troubleshooting)
-  final_msg.set_bin_property(prop_index++, "dh1", Empty_Seq, true);     // Optional (troubleshooting)
-  final_msg.set_bin_property(prop_index++, "dh2", Empty_Seq, true);     // Optional (troubleshooting)
-  final_msg.set_bin_property(prop_index++, "challenge_1", Empty_Seq, true);
-  final_msg.set_bin_property(prop_index++, "challenge_2", Empty_Seq, true);
-  final_msg.set_bin_property(prop_index++, "signature", Empty_Seq, true);
+  OpenDDS::Security::TokenWriter final_msg(handshake_message_out,
+                                           build_class_id(Handshake_Final_Class_Ext),
+                                           0, 3);
 
-  // The handshake is now complete, assign a shared secret handle in the stub
-  handshakePtr->validation_state = DDS::Security::VALIDATION_OK_FINAL_MESSAGE;
-  handshakePtr->secret_handle = new SharedSecret(Empty_Seq, Empty_Seq, Empty_Seq);
+  final_msg.set_bin_property(prop_index++, "challenge1", challenge1, true);
+  final_msg.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
-  return DDS::Security::VALIDATION_OK_FINAL_MESSAGE;
+  std::vector<const DDS::OctetSeq*> sign_these;
+  sign_these.push_back(&challenge1);
+  sign_these.push_back(&challenge2);
+
+  DDS::OctetSeq tmp;
+  local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
+  final_msg.set_bin_property(prop_index++, "signature", tmp, true);
+
+  handshakePtr->remote_cert = DCPS::move(remote_cert);
+  handshakePtr->validation_state = FinalMessage;
+  return FinalMessage;
 }
 
 DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_handshake(
