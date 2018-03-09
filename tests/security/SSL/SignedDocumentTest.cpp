@@ -35,3 +35,13 @@ TEST_F(SignedDocumentTest, GetContent_Success)
   doc_.get_content(content);
   ASSERT_TRUE(0 < content.length());
 }
+
+TEST_F(SignedDocumentTest, SerializeDeserialize_Success)
+{
+  std::string tmp;
+  doc_.serialize(tmp);
+
+  SignedDocument copy;
+  copy.deserialize(tmp);
+  ASSERT_EQ(copy, doc_);
+}

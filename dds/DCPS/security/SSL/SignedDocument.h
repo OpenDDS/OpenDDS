@@ -22,6 +22,9 @@ namespace OpenDDS {
 
         typedef DCPS::unique_ptr<SignedDocument> unique_ptr;
 
+        friend DdsSecurity_Export
+        bool operator==(const SignedDocument& lhs, const SignedDocument& rhs);
+
         SignedDocument(const std::string& uri);
 
         SignedDocument();
@@ -32,11 +35,17 @@ namespace OpenDDS {
 
         void load(const std::string& uri);
 
-        int get_content(std::string& dst);
+        void get_content(std::string& dst);
 
         int verify_signature(const Certificate& cert);
 
+        void serialize(std::string& dst);
+
+        int deserialize(const std::string& src);
+
       private:
+
+        int cache_plaintext();
 
         PKCS7* PKCS7_from_SMIME(const std::string& path);
 
@@ -44,6 +53,9 @@ namespace OpenDDS {
         BIO* content_;
         std::string plaintext_;
       };
+
+      DdsSecurity_Export
+      bool operator==(const SignedDocument& lhs, const SignedDocument& rhs);
 
     }
   }
