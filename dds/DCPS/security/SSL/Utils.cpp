@@ -161,8 +161,8 @@ namespace OpenDDS {
         unsigned char hash[EVP_MAX_MD_SIZE] = {0};
         unsigned int len = 0u;
 
-        std::vector<const DDS::OctetSeq*>::const_iterator i, n = src.cend();
-        for (i = src.cbegin(); i != n; ++i) {
+        std::vector<const DDS::OctetSeq*>::const_iterator i, n = src.end();
+        for (i = src.begin(); i != n; ++i) {
           EVP_DigestUpdate(hash_ctx, (*i)->get_buffer(), (*i)->length());
         }
 
