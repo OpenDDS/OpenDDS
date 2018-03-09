@@ -114,28 +114,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   std::string gov_content, perm_content;
 
+  // Read in permissions_ca
+
+  // Read in governance file
+
   SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
     local_gov.get_content(gov_content);
     clean_smime_content(gov_content);
-
-
-    // Read in permissions_ca
-
-    SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
-    local_perm.get_content(perm_content);
-
-    // Set and store the permissions credential token  while we have the raw content
-    ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
-    TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId, 1, 0);
-    pctWriter.set_property(0, "dds.perm.cert", perm_content.c_str(), true);
-
-
-
-
-
-    clean_smime_content(perm_content);
-
-  // Read in governance file
 
     ac_perms perm_set;
 
@@ -144,24 +129,39 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   };
 
+
+  // permissions file
+
+  SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
+  local_perm.get_content(perm_content);
+
+  // Set and store the permissions credential token  while we have the raw content
+
+  //TODO: the SignedDocument class does not allow the retrieval of the raw file.
+  // The file will have to be pulled from the file system until that is fixed.
+
+  ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
+  TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId, 1, 0);
+  pctWriter.set_property(0, "dds.perm.cert",get_file_contents(perm_file.c_str()).c_str(), true);
+  clean_smime_content(perm_content);
+
+  // Set and store the permissions token
+  ::DDS::Security::PermissionsToken permissions_token;
+  TokenWriter writer(permissions_token, PermissionsTokenClassId, 2, 0);
+  writer.set_property(0, "dds.perm_ca.sn", "MyCA Name", true);
+  writer.set_property(1, "dds.perm_ca.algo", "RSA-2048", true);
+
+  perm_set.perm_token = permissions_token;
+
+  perm_set.perm_cred_token = permissions_cred_token;
+
   if(0 != load_permissions_file(&perm_set , perm_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
 
-
-    // Set and store the permissions token
-    ::DDS::Security::PermissionsToken permissions_token;
-    TokenWriter writer(permissions_token, PermissionsTokenClassId, 2, 0);
-    writer.set_property(0, "dds.perm_ca.sn", "MyCA Name", true);
-    writer.set_property(1, "dds.perm_ca.algo", "RSA-2048", true);
-
-    perm_set.perm_token = permissions_token;
-
-    perm_set.perm_cred_token = permissions_cred_token;
-
-    ::CORBA::Boolean perm_handle = generate_handle();
-    local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
+  ::CORBA::Boolean perm_handle = generate_handle();
+  local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
 
 
   return perm_handle ;
@@ -653,17 +653,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      attributes.plugin_participant_attributes = iter->second.gov_rules[0].domain_attrs.plugin_participant_attributes;
      return true;
    } else {
-
+     return false;
    }
-
-
-  // Set all permissions to true in the stub
-   attributes.allow_unauthenticated_participants = true;
-   attributes.is_access_protected = true;
-   attributes.is_rtps_protected = true;
-   attributes.is_discovery_protected = true;
-   attributes.is_liveliness_protected = true;
-   attributes.plugin_participant_attributes = 0xFFFFFFFF;
 
   return true;
 }
@@ -866,7 +857,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 
    for(XMLSize_t r=0;r<domainRules->getLength();r++) {
-       domain_rule rule_holder_;
+     domain_rule rule_holder_;
+     rule_holder_.domain_attrs.plugin_participant_attributes = 0;
 
        // Pull out domain ids used in the rule. We are NOT supporting ranges at this time
        xercesc::DOMNodeList * ruleNodes = domainRules->item(r)->getChildNodes();
@@ -894,27 +886,46 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      xercesc::DOMNodeList * enable_join_access_control_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("enable_join_access_control"));
      char * attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
-     rule_holder_.domain_attrs.is_access_protected = (strcmp(attr_ejac, "false") == 0 ? false : true);
+     rule_holder_.domain_attrs.is_access_protected = strcmp(attr_ejac, "false") == 0 ? false : true;
 
 
      // Process discovery_protection_kind
      xercesc::DOMNodeList * discovery_protection_kind_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("discovery_protection_kind"));
      char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
-     rule_holder_.domain_attrs.is_discovery_protected= (strcmp(attr_dpk, "NONE") == 0 ? false : true);
+     if (strcmp(attr_dpk, "NONE") == 0) {
+       rule_holder_.domain_attrs.is_discovery_protected = false;
+     } else {
+       rule_holder_.domain_attrs.is_discovery_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
+     }
 
      // Process liveliness_protection_kind
      xercesc::DOMNodeList * liveliness_protection_kind_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("liveliness_protection_kind"));
      char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
-     rule_holder_.domain_attrs.is_liveliness_protected = (strcmp(attr_lpk, "NONE") == 0 ? false : true);
+     if (strcmp(attr_lpk, "NONE") == 0) {
+       rule_holder_.domain_attrs.is_liveliness_protected = false;
+     } else {
+       rule_holder_.domain_attrs.is_liveliness_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
+     }
 
      // Process rtps_protection_kind
      xercesc::DOMNodeList * rtps_protection_kind_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("rtps_protection_kind"));
      char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
-     rule_holder_.domain_attrs.is_rtps_protected = (strcmp(attr_rpk, "NONE") == 0 ? false : true);
+     if (strcmp(attr_rpk, "NONE") == 0) {
+       rule_holder_.domain_attrs.is_rtps_protected = false;
+     } else {
+       rule_holder_.domain_attrs.is_rtps_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
+     }
 
+     rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
 
 
      // Process topic rules
