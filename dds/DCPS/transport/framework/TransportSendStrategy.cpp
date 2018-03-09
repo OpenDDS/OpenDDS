@@ -1722,12 +1722,14 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   }
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
+  Message_Block_Ptr alternate(pre_send_packet(packet));
+
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Populate the iovec array using the packet.\n"), 5);
 
   iovec iov[MAX_SEND_BLOCKS];
 
-  int num_blocks = mb_to_iov(*packet, iov);
+  const int num_blocks = mb_to_iov(alternate ? *alternate : *packet, iov);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "There are [%d] number of entries in the iovec array.\n",

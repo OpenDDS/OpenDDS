@@ -136,10 +136,11 @@ public:
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
 
   DDS::Security::ParticipantCryptoHandle peer_crypto_handle(const RepoId& peer) const;
-
   DDS::Security::DatawriterCryptoHandle writer_crypto_handle(const RepoId& writer) const;
+  DDS::Security::DatareaderCryptoHandle reader_crypto_handle(const RepoId& reader) const;
 
-  void security_from_blob(const RepoId& remote_id, const unsigned char* buffer,
+  void security_from_blob(const RepoId& local_id, const RepoId& remote_id,
+                          const unsigned char* buffer,
                           unsigned int buffer_size);
 
 private:

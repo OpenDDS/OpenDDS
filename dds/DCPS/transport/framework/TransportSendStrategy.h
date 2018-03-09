@@ -240,6 +240,14 @@ private:
   /// Form an IOV and call the send_bytes() template method.
   ssize_t do_send_packet(const ACE_Message_Block* packet, int& bp);
 
+  /// Derived classes can override to transform the data right before it's
+  /// sent.  If the returned value is non-NULL it will be sent instead of
+  /// sending the parameter.
+  virtual ACE_Message_Block* pre_send_packet(const ACE_Message_Block*)
+  {
+    return 0;
+  }
+
   /// This is called from the send_packet() method after it has
   /// sent at least one byte from the current packet.  This method
   /// will update the current packet appropriately, as well as deal
