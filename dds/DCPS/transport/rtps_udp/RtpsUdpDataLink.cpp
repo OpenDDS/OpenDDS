@@ -779,6 +779,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
+  send_strategy_->encode_payload(pub_id, data, subm);
+
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
@@ -2488,13 +2490,15 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
   }
 }
 
-
-void RtpsUdpDataLink::security_from_blob(const RepoId& remote_id,
-                                         const unsigned char* buffer,
-                                         unsigned int buffer_size)
+void
+RtpsUdpDataLink::security_from_blob(const RepoId& local_id,
+                                    const RepoId& remote_id,
+                                    const unsigned char* buffer,
+                                    unsigned int buffer_size)
 {
   using DDS::Security::ParticipantCryptoHandle;
   using DDS::Security::DatawriterCryptoHandle;
+  using DDS::Security::DatareaderCryptoHandle;
 
   ACE_Data_Block db(buffer_size, ACE_Message_Block::MB_DATA,
     reinterpret_cast<const char*>(buffer),
@@ -2502,6 +2506,10 @@ void RtpsUdpDataLink::security_from_blob(const RepoId& remote_id,
   ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
   mb.wr_ptr(mb.space());
   DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
+
+  const EntityKind localKind(GuidConverter(local_id).entityKind());
+  const RepoId& writer_id = (localKind == KIND_WRITER) ? local_id : remote_id;
+  const RepoId& reader_id = (localKind == KIND_WRITER) ? remote_id : local_id;
 
   while (mb.length()) {
     DDS::BinaryProperty_t prop;
@@ -2530,7 +2538,16 @@ void RtpsUdpDataLink::security_from_blob(const RepoId& remote_id,
       for (unsigned int i = 0; i < prop.value.length(); ++i) {
         handle = handle << 8 | prop.value[i];
       }
-      peer_crypto_handles_[remote_id] = handle;
+      peer_crypto_handles_[writer_id] = handle;
+    }
+
+    else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DR_CRYPTO_HANDLE) == 0
+             && prop.value.length() >= sizeof(DatareaderCryptoHandle)) {
+      unsigned int handle = 0;
+      for (unsigned int i = 0; i < prop.value.length(); ++i) {
+        handle = handle << 8 | prop.value[i];
+      }
+      peer_crypto_handles_[reader_id] = handle;
     }
 
   }

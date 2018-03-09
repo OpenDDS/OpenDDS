@@ -62,6 +62,7 @@ namespace OpenDDS {
 
     const char BLOB_PROP_PART_CRYPTO_HANDLE[] = "ParticipantCryptoHandle";
     const char BLOB_PROP_DW_CRYPTO_HANDLE[] = "DatawriterCryptoHandle";
+    const char BLOB_PROP_DR_CRYPTO_HANDLE[] = "DatareaderCryptoHandle";
   }
 }
 
