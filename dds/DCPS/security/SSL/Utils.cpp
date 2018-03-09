@@ -144,8 +144,7 @@ namespace OpenDDS {
 
       unsigned char offset_1bit(const unsigned char array[], size_t i)
       {
-        if (i == 0u) return ((array[i] >> 1u) & 0x7F);
-        return (((array[i] << 7u) & 0x80) | ((array[i + 1] >> 1u) & 0x7F));
+        return (((array[i] << 1u) & 0xFE) | (array[i + 1] & 0x80));
       }
 
       int hash(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst)

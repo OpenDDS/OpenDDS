@@ -434,7 +434,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     if (cpdata.length() > 5u) { /* Enough to withstand the hash-comparison below */
 
       /* Make sure first bit is set */
-      if (! cpdata[0] & 0x80) {
+      if ((cpdata[0] & 0x80) != 0x80) {
         set_security_error(ex, -1, 0, "Malformed ParticipantBuiltinTopicData in 'c.pdata'; First bit must be set.");
         return Failure;
       }
@@ -446,7 +446,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       }
 
       for (size_t i = 0; i <= 5u; ++i) {
-        if (hash[i] != SSL::offset_1bit(cpdata.get_buffer(), i)) {
+        if (cpdata[i] != SSL::offset_1bit(&hash[0], i)) { /* Slide the hash to the right 1 so it aligns with cpdata */
           set_security_error(ex, -1, 0, "Bits 2 - 48 of 'c.pdata' does not match first 47 bits of subject-name hash in 'c.id'");
           return Failure;
         }
