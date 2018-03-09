@@ -422,7 +422,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
     ParameterList plist;
     if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
         ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
       return;
     }
@@ -430,7 +430,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     ACE_Message_Block temp_buff(64 * 1024);
     DCPS::Serializer ser(&temp_buff, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
     if (!(ser << plist)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
         ACE_TEXT("Failed to serialize parameter list.\n")));
       return;
     }
@@ -645,14 +645,14 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
         break; // We've got more to do, move on to handshake request
       }
       case DDS::Security::VALIDATION_FAILED: {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - ")
           ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
             se.code, se.minor_code, se.message.in()));
         dp.auth_state_ = AS_UNAUTHENTICATED;
         return;
       }
       default: {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Sppd::attempt_authentication() - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - ")
           ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
             se.code, se.minor_code, se.message.in()));
         dp.auth_state_ = AS_UNAUTHENTICATED;
