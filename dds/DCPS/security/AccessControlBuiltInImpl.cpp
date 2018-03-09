@@ -67,10 +67,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(participant_qos);
-
-
-
 
   const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
   std::string name, value, permca_file, gov_file, perm_file;
@@ -116,11 +112,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Read in permissions_ca
 
+  SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
+  std::string ca_subject;
+
+  local_ca.subject_name_to_str(ca_subject);
+
+  //TODO: need to implement subject name check ( see Table 63 validate_local_permissions )
+
   // Read in governance file
 
   SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
     local_gov.get_content(gov_content);
     clean_smime_content(gov_content);
+
 
     ac_perms perm_set;
 
