@@ -122,6 +122,12 @@ namespace OpenDDS {
         return result;
       }
 
+      int Certificate::verify_signature(const DDS::OctetSeq& src)
+      {
+        /* Extract public key from X509 and use it to very that src was signed properly */
+        return 0; /* TODO */
+      }
+
       int Certificate::subject_name_to_str(std::string& dst, unsigned long flags) const
       {
         int result = 1, len = 0;

@@ -43,11 +43,6 @@ namespace OpenDDS {
         return *participant_pkey_;
       }
 
-      SSL::DiffieHellman& get_diffie_hellman_key()
-      {
-        return *dhkey_;
-      }
-
       bool validate()
       {
         return (X509_V_OK == participant_cert_->validate(*ca_cert_));
@@ -58,7 +53,6 @@ namespace OpenDDS {
       SSL::Certificate::unique_ptr ca_cert_;
       SSL::Certificate::unique_ptr participant_cert_;
       SSL::PrivateKey::unique_ptr participant_pkey_;
-      SSL::DiffieHellman::unique_ptr dhkey_;
     };
 
   }

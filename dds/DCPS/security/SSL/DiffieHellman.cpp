@@ -94,6 +94,11 @@ namespace OpenDDS {
         return result;
       }
 
+      int DH_2048_MODP_256_PRIME::gen_shared_secret(const DDS::OctetSeq& /*pub_key*/)
+      {
+        return 0; /* TODO */
+      }
+
     }
   }
 }
