@@ -42,9 +42,6 @@ namespace OpenDDS {
         return result;
       }
 
-/* Gets hash[i] given i > 0 with the entire byte-array right-shifted by 1 bit. */
-#define HASH_RSHIFT_1BIT(HASH, IDX) ((((HASH)[(IDX)-1] << 7u) & 0x80) | (((HASH)[(IDX)] >> 1u) & 0x7F))
-
       int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t& dst, const Certificate& target)
       {
         int result = 1;
@@ -59,12 +56,12 @@ namespace OpenDDS {
 
         if (result == 0 && hash.size() >= 6) {
           unsigned char* bytes = reinterpret_cast<unsigned char*>(&dst);
-          bytes[0] = 0x80 | ((hash[0] >> 7u) & 0x7F); /* First bit set to 1 */
-          bytes[1] = HASH_RSHIFT_1BIT(hash, 1);
-          bytes[2] = HASH_RSHIFT_1BIT(hash, 2);
-          bytes[3] = HASH_RSHIFT_1BIT(hash, 3);
-          bytes[4] = HASH_RSHIFT_1BIT(hash, 4);
-          bytes[5] = HASH_RSHIFT_1BIT(hash, 5);
+
+          for (size_t i = 0; i < 6; ++i) { /* First 6 bytes of guid prefix */
+            bytes[i] = offset_1bit(&hash[0], i);
+          }
+
+          bytes[0] = 0x80 | bytes[0]; /* Set first bit */
 
           /* Now calculate hash from src guid for bits 48 through 95 */
 
@@ -77,7 +74,7 @@ namespace OpenDDS {
             EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
             EVP_DigestUpdate(hash_ctx, &src, sizeof(OpenDDS::DCPS::GUID_t));
             EVP_DigestFinal_ex(hash_ctx, hash2, &len);
-            if (len > 6) {
+            if (len > 6) { /* Remaining 6 bytes of guid prefix */
                 bytes[6] = hash2[0];
                 bytes[7] = hash2[1];
                 bytes[8] = hash2[2];
@@ -144,7 +141,7 @@ namespace OpenDDS {
 
       unsigned char offset_1bit(const unsigned char array[], size_t i)
       {
-        return (((array[i] << 1u) & 0xFE) | (array[i + 1] & 0x80));
+        return (array[i] & 0xFE) | ((array[i + 1] >> 7u) & 0x01);
       }
 
       int hash(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst)

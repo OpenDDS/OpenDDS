@@ -445,8 +445,13 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         return Failure;
       }
 
-      for (size_t i = 0; i <= 5u; ++i) {
-        if (cpdata[i] != SSL::offset_1bit(&hash[0], i)) { /* Slide the hash to the right 1 so it aligns with cpdata */
+      /* First byte needs to remove the manually-set first-bit before comparison */
+      if ((cpdata[0] & 0x7F) != SSL::offset_1bit(&hash[0], 0)) { /* Slide the hash to the right 1 so it aligns with cpdata */
+        set_security_error(ex, -1, 0, "First byte in 'c.pdata' does not match bits of subject-name hash in 'c.id'");
+        return Failure;
+      }
+      for (size_t i = 1; i <= 5u; ++i) { /* Compare remaining 5 bytes */
+        if (cpdata[i] != SSL::offset_1bit(&hash[0], i)) {
           set_security_error(ex, -1, 0, "Bits 2 - 48 of 'c.pdata' does not match first 47 bits of subject-name hash in 'c.id'");
           return Failure;
         }
