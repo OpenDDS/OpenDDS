@@ -27,9 +27,11 @@ namespace OpenDDS {
 
         typedef DCPS::unique_ptr<Certificate> unique_ptr;
 
-        friend std::ostream& operator<<(std::ostream&, const Certificate&);
+        friend DdsSecurity_Export
+        std::ostream& operator<<(std::ostream&, const Certificate&);
 
-        friend bool operator==(const Certificate& lhs, const Certificate& rhs);
+        friend DdsSecurity_Export
+        bool operator==(const Certificate& lhs, const Certificate& rhs);
 
         Certificate(const std::string& uri, const std::string& password = "");
 
