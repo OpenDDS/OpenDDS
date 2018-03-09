@@ -519,7 +519,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     handshake_data_[handshake_handle] = newHandshakeData;
   }
 
-  return DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+  return Pending;
 }
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake(

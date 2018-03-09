@@ -7,7 +7,8 @@
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DdsSecurityEntities.h"
-//#include "dds/DdsSecurityWrappers.h"
+#include "dds/DCPS/security/SSL/Certificate.h"
+#include "dds/DCPS/security/SSL/Utils.h"
 #include <cstring>
 #include <algorithm>
 
@@ -166,7 +167,7 @@ struct AuthenticationTest : public ::testing::Test
         if (strcmp(s[i].name, key.c_str()) == 0)
           return static_cast<const char*>(s[i].value);
     }
-    return NULL;
+    return "";
   }
 
   static const DDS::OctetSeq& value_of(const std::string& key, const BinaryPropertySeq& s)
@@ -176,12 +177,16 @@ struct AuthenticationTest : public ::testing::Test
         if (strcmp(s[i].name, key.c_str()) == 0)
           return s[i].value;
     }
-    return NULL;
+    return EmptySequence;
   }
+
+  static DDS::OctetSeq EmptySequence;
 
   MockParticipantData mp1;
   MockParticipantData mp2;
 };
+
+DDS::OctetSeq AuthenticationTest::EmptySequence = DDS::OctetSeq();
 
 TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
 {
@@ -402,7 +407,7 @@ struct BeginHandshakeReplyTest : public AuthenticationTest
   }
 };
 
-TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_Success)
+TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Success)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -442,10 +447,23 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_Success)
   /* mp2 is the one performing the handhsake reply */
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
-  /* Fill this with data directly from the cert */
+  /* Fill this with data directly from the cert. This assumes that the data was previously
+   * populated by the participant who handled begin_handshake_request (in this case mp1) */
+
+  /* Check the following 47 bits match the subject-hash */
+  OpenDDS::Security::SSL::Certificate tmp("file:certs/mock_participant_1/opendds_participant_cert.pem");
+
+  std::vector<unsigned char> hash;
+  tmp.subject_name_digest(hash);
+
   DDS::OctetSeq pretend_topic_data;
-  pretend_topic_data.length(1);
-  pretend_topic_data[0] = 'A';
+  pretend_topic_data.length(hash.size());
+
+  pretend_topic_data[0] = 0x80; /* Set first bit */
+
+  for (size_t i = 0; i < pretend_topic_data.length(); ++i) { /* Set remaining bits */
+    pretend_topic_data[i] = OpenDDS::Security::SSL::offset_1bit(&hash[0], i);
+  }
 
   r = auth.begin_handshake_reply(mp2.handshake_handle,
                                  mp2.handshake_message_token,
@@ -454,8 +472,7 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_Success)
                                  pretend_topic_data,
                                  ex);
 
-  // Work in progress!
-  //ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
+  ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 }
 
 

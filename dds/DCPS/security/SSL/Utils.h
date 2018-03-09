@@ -34,7 +34,7 @@ namespace OpenDDS {
       DdsSecurity_Export
       int make_nonce_256(DDS::OctetSeq& nonce);
 
-      /* Get byte i starting from one-bit-to-the-right in source array */
+      /* Gets byte from array as though it were shifted to the right by one bit */
       DdsSecurity_Export
       unsigned char offset_1bit(const unsigned char array[], size_t i);
 
