@@ -292,6 +292,12 @@ namespace {
                           mb.space());
     return out;
   }
+
+  struct Chunk {
+    char* start_;
+    unsigned int length_;
+    DDS::OctetSeq encoded_;
+  };
 }
 
 ACE_Message_Block*
@@ -315,12 +321,6 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
   DatareaderCryptoHandleSeq emptyReaderHandles;
   ParticipantCryptoHandleSeq emptyParticipantHandles;
   DDS::Security::SecurityException ex = {"", 0, 0};
-
-  struct Chunk {
-    char* start_;
-    unsigned int length_;
-    DDS::OctetSeq encoded_;
-  };
 
   Message_Block_Ptr in(plain->duplicate());
   ACE_Message_Block* current = in.get();
