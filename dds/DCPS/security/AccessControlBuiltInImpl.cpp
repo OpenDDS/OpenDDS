@@ -1065,7 +1065,45 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                             (validityNodes->item(vn)->getTextContent()));
                 }
             }
+        } else if (strcmp(g_tag, "default") == 0) {
+          rule_holder_.default_permission = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
         }
+    }
+
+    // Pull out allow/deny rules
+    xercesc::DOMNodeList * adGrantNodes = grantRules->item(r)->getChildNodes();
+    for( XMLSize_t gn = 0; gn<adGrantNodes->getLength();gn++) {
+      char *g_tag = xercesc::XMLString::transcode(adGrantNodes->item(gn)->getNodeName());
+      if (strcmp(g_tag, "allow_rule") == 0 || strcmp(g_tag, "deny_rule") == 0) {
+        permissions_topic_rule ptr_holder_;
+        ptr_holder_.ad_type = (strcmp(g_tag,"allow_rule") ==  0 ? ALLOW : DENY);
+        xercesc::DOMNodeList * adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
+        for( XMLSize_t anc = 0; anc<adNodeChildren->getLength(); anc++) {
+          char *anc_tag = xercesc::XMLString::transcode(adGrantNodes->item(gn)->getNodeName());
+          if (strcmp(anc_tag, "domains") == 0) {   //domain list
+            xercesc::DOMNodeList * domainIdNodes = adNodeChildren->item(anc)->getChildNodes();
+            for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
+              if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+                ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+              }
+            }
+
+          } else if (strcmp(anc_tag, "publish") == 0 || strcmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
+            permission_topic_ps_rule anc_ps_rule_holder_;
+            anc_ps_rule_holder_.ps_type = (strcmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
+            xercesc::DOMNodeList * topicNodes = adNodeChildren->item(anc)->getChildNodes();
+            for(XMLSize_t tid = 0; tid<topicNodes->getLength();tid++) {
+              if(strcmp("topic" , xercesc::XMLString::transcode(topicNodes->item(tid)->getNodeName())) == 0) {
+                anc_ps_rule_holder_.topic_list.insert(xercesc::XMLString::transcode(topicNodes->item(tid)->getTextContent()));
+              }
+            }
+
+            ptr_holder_.topic_ps_rules.push_back(anc_ps_rule_holder_);
+
+          }
+        }
+        rule_holder_.PermissionTopicRules.push_back(ptr_holder_);
+      }
     }
 
     ac_perms_holder->perm_rules.push_back(rule_holder_);

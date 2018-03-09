@@ -257,17 +257,42 @@ private:
 
     // Permission Rule definitions
 
+    enum AllowDeny_t
+    {
+        ALLOW,
+        DENY
+    };
+
+    enum PublishSubscribe_t
+    {
+        PUBLISH,
+        SUBSCRIBE
+    };
+
     typedef struct {
         std::string not_before;
         std::string not_after;
     } Validity_t;
+
+    typedef  struct {
+        PublishSubscribe_t  ps_type;
+        std::set<std::string> topic_list;
+
+    } permission_topic_ps_rule;
+
+    typedef struct {
+        AllowDeny_t ad_type;
+        std::set< ::DDS::Security::DomainId_t > domain_list;
+        std::list<permission_topic_ps_rule> topic_ps_rules;
+    } permissions_topic_rule;
 
 
     typedef struct {
         std::string grant_name;
         std::string subject;
         Validity_t validity;
-
+        std::string default_permission;
+        std::list<permissions_topic_rule> PermissionTopicRules;
     } permission_grant_rule;
 
     typedef std::vector<permission_grant_rule> PermissionGrantRules;
