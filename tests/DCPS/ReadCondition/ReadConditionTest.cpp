@@ -247,7 +247,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
   catch (const CORBA::BAD_PARAM& ex)
   {
-    ex._tao_print_exception("Exception caught in GuardConditionTest.cpp:");
+    ex._tao_print_exception("Exception caught in ReadConditionTest.cpp:");
     return 1;
   }
   return ret;
