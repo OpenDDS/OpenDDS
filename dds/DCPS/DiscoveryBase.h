@@ -1199,11 +1199,10 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
 
         AuthState auth_state_;
+        DDS::Security::IdentityStatusToken identity_status_token_;
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;
-        DDS::Security::PropertyQosPolicy property_qos_;
         DDS::Security::ParticipantSecurityInfo security_info_;
-        DDS::Security::IdentityStatusToken identity_status_token_;
         DDS::Security::IdentityHandle identity_handle_;
         DDS::Security::HandshakeHandle handshake_handle_;
         DDS::Security::AuthRequestMessageToken local_auth_request_token_;

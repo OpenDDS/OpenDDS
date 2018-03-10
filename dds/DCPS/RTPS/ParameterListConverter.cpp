@@ -714,6 +714,7 @@ namespace {
 
 } /* local security-related helpers */
 
+
 int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper,
                     ParameterList& param_list)
 {
@@ -734,98 +735,34 @@ int from_param_list(const ParameterList& param_list,
 {
   int result = from_param_list(param_list, wrapper.data) ||
                from_param_list(param_list,
+                               wrapper.identity_status_token,
                                wrapper.identity_token,
                                wrapper.permissions_token,
-                               wrapper.property_qos,
-                               wrapper.security_info,
-                               wrapper.identity_status_token);
+                               wrapper.security_info);
   return result;
 }
 
 int from_param_list(const ParameterList& param_list,
-                    DDS::Security::IdentityToken& id_token,
-                    DDS::Security::PermissionsToken& perm_token,
-                    DDS::PropertyQosPolicy& property_qos,
-                    DDS::Security::ParticipantSecurityInfo& security_info)
-{
-  id_token.class_id = "";
-  id_token.properties.length(0);
-  id_token.binary_properties.length(0);
-
-  perm_token.class_id = "";
-  perm_token.properties.length(0);
-  perm_token.binary_properties.length(0);
-
-  property_qos.value.length(0);
-  property_qos.binary_value.length(0);
-
-  security_info.participant_security_attributes = 0;
-  security_info.plugin_participant_security_attributes = 0;
-
-  unsigned char fieldmask = 0x00;
-
-  size_t len = param_list.length();
-  for (size_t i = 0; i < len; ++i) {
-      const Parameter& p = param_list[i];
-
-      switch (p._d()) {
-        case DDS::Security::PID_IDENTITY_TOKEN:
-          id_token = p.identity_token();
-          fieldmask |= 0x01;
-          break;
-
-        case DDS::Security::PID_PERMISSIONS_TOKEN:
-          perm_token = p.permissions_token();
-          fieldmask |= 0x02;
-          break;
-
-        case OpenDDS::RTPS::PID_PROPERTY_LIST:
-          property_qos = p.property();
-          fieldmask |= 0x04;
-          break;
-
-        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
-          security_info = p.participant_security_info();
-          fieldmask |= 0x08;
-          break;
-
-        default:
-          if (p._d() & PIDMASK_INCOMPATIBLE) {
-              return -1;
-          }
-      }
-  }
-
-  return (fieldmask == 0x0F || fieldmask == 0x0B) ? 0 : -1;
-}
-
-int from_param_list(const ParameterList& param_list,
-                    DDS::Security::IdentityToken& id_token,
-                    DDS::Security::PermissionsToken& perm_token,
-                    DDS::PropertyQosPolicy& property_qos,
-                    DDS::Security::ParticipantSecurityInfo& security_info,
-                    DDS::Security::IdentityStatusToken& id_status_token)
+                           DDS::Security::IdentityStatusToken& id_status_token,
+                           DDS::Security::IdentityToken& id_token,
+                           DDS::Security::PermissionsToken& perm_token,
+                           DDS::Security::ParticipantSecurityInfo& security_info)
 {
 
-  id_token.class_id = "";
-  id_token.properties.length(0);
-  id_token.binary_properties.length(0);
-
-  perm_token.class_id = "";
-  perm_token.properties.length(0);
-  perm_token.binary_properties.length(0);
-
-  property_qos.value.length(0);
-  property_qos.binary_value.length(0);
-
-  security_info.participant_security_attributes = 0;
-  security_info.plugin_participant_security_attributes = 0;
-
+  id_status_token.binary_properties.length(0);
   id_status_token.class_id = "";
   id_status_token.properties.length(0);
-  id_status_token.binary_properties.length(0);
 
-  unsigned char fieldmask = 0x00;
+  id_token.binary_properties.length(0);
+  id_token.class_id = "";
+  id_token.properties.length(0);
+
+  perm_token.binary_properties.length(0);
+  perm_token.class_id = "";
+  perm_token.properties.length(0);
+
+  security_info.participant_security_attributes = 0;
+  security_info.plugin_participant_security_attributes = 0;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
@@ -834,27 +771,18 @@ int from_param_list(const ParameterList& param_list,
       switch (p._d()) {
         case DDS::Security::PID_IDENTITY_TOKEN:
           id_token = p.identity_token();
-          fieldmask |= 0x01;
-          break;
-
-        case DDS::Security::PID_PERMISSIONS_TOKEN:
-          perm_token = p.permissions_token();
-          fieldmask |= 0x02;
-          break;
-
-        case OpenDDS::RTPS::PID_PROPERTY_LIST:
-          property_qos = p.property();
-          fieldmask |= 0x04;
-          break;
-
-        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
-          security_info = p.participant_security_info();
-          fieldmask |= 0x08;
           break;
 
         case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
           id_status_token = p.identity_status_token();
-          fieldmask |= 0x10;
+          break;
+
+        case DDS::Security::PID_PERMISSIONS_TOKEN:
+          perm_token = p.permissions_token();
+          break;
+
+        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+          security_info = p.participant_security_info();
           break;
 
         default:
@@ -864,7 +792,7 @@ int from_param_list(const ParameterList& param_list,
       }
   }
 
-  return (fieldmask == 0x1F || fieldmask == 0x1B) ? 0 : -1;
+  return 0;
 }
 
 int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper,

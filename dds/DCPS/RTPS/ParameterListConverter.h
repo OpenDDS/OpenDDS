@@ -70,18 +70,10 @@ namespace ParameterListConverter {
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
-                      DDS::Security::IdentityToken& id_token,
-                      DDS::Security::PermissionsToken& perm_token,
-                      DDS::PropertyQosPolicy& property_qos,
-                      DDS::Security::ParticipantSecurityInfo& security_info);
-
-  OpenDDS_Rtps_Export
-  int from_param_list(const ParameterList& param_list,
-                      DDS::Security::IdentityToken& id_token,
-                      DDS::Security::PermissionsToken& perm_token,
-                      DDS::PropertyQosPolicy& property_qos,
-                      DDS::Security::ParticipantSecurityInfo& security_info,
-                      DDS::Security::IdentityStatusToken& id_status_token);
+                             DDS::Security::IdentityStatusToken& id_status_token,
+                             DDS::Security::IdentityToken& id_token,
+                             DDS::Security::PermissionsToken& perm_token,
+                             DDS::Security::ParticipantSecurityInfo& security_info);
 
   OpenDDS_Rtps_Export
   int from_param_list(const ParameterList& param_list,
