@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "Authentication/LocalCredentialData.h"
+#include "SSL/DiffieHellman.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -167,6 +168,8 @@ private:
     DDS::Security::HandshakeMessageToken request_token;
     DDS::Security::HandshakeMessageToken reply_token;
     DDS::Security::ValidationResult_t validation_state;
+    OpenDDS::Security::SSL::DiffieHellman::unique_ptr diffie_hellman;
+    OpenDDS::Security::SSL::Certificate::unique_ptr remote_cert;
     bool local_initiator;
   };
   typedef DCPS::RcHandle<HandshakeData> HandshakeData_Ptr;

@@ -27,9 +27,11 @@ namespace OpenDDS {
 
         typedef DCPS::unique_ptr<Certificate> unique_ptr;
 
-        friend std::ostream& operator<<(std::ostream&, const Certificate&);
+        friend DdsSecurity_Export
+        std::ostream& operator<<(std::ostream&, const Certificate&);
 
-        friend bool operator==(const Certificate& lhs, const Certificate& rhs);
+        friend DdsSecurity_Export
+        bool operator==(const Certificate& lhs, const Certificate& rhs);
 
         Certificate(const std::string& uri, const std::string& password = "");
 
@@ -44,6 +46,8 @@ namespace OpenDDS {
         void load(const std::string& uri, const std::string& password = "");
 
         int validate(Certificate& ca, unsigned long int flags = 0u) const;
+
+        int verify_signature(const DDS::OctetSeq& src);
 
         int subject_name_to_str(std::string& dst, unsigned long flags = XN_FLAG_ONELINE) const;
 

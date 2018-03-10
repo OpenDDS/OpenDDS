@@ -3263,6 +3263,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
   //TODO: [DDS-Security] Get crypto handles from DiscoveredParticipant/Publicat.
   const DDS::Security::ParticipantCryptoHandle part_handle = 0x12345678;
   const DDS::Security::DatawriterCryptoHandle dw_handle = 0;
+  const DDS::Security::DatareaderCryptoHandle dr_handle = 0;
 
   if (part_handle == DDS::HANDLE_NIL) {
     return locators;
@@ -3281,16 +3282,25 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         DDS::OctetSeq handleOctetsDw = handle_to_octets(dw_handle);
         const DDS::BinaryProperty_t dw_p = {BLOB_PROP_DW_CRYPTO_HANDLE,
                                             handleOctetsDw, true /*serialize*/};
+        DDS::OctetSeq handleOctetsDr = handle_to_octets(dr_handle);
+        const DDS::BinaryProperty_t dr_p = {BLOB_PROP_DR_CRYPTO_HANDLE,
+                                            handleOctetsDr, true /*serialize*/};
         size_t size = 0, padding = 0;
         DCPS::gen_find_size(prop, size, padding);
         if (dw_handle != DDS::HANDLE_NIL) {
           DCPS::gen_find_size(dw_p, size, padding);
+        }
+        if (dr_handle != DDS::HANDLE_NIL) {
+          DCPS::gen_find_size(dr_p, size, padding);
         }
         ACE_Message_Block mb(size + padding);
         Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
         ser << prop;
         if (dw_handle != DDS::HANDLE_NIL) {
           ser << dw_p;
+        }
+        if (dr_handle != DDS::HANDLE_NIL) {
+          ser << dr_p;
         }
         added.length(mb.size());
         std::memcpy(added.get_buffer(), mb.rd_ptr(), mb.size());

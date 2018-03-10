@@ -49,6 +49,11 @@ public:
   void send_rtps_control(ACE_Message_Block& submessages,
                          const OPENDDS_SET(ACE_INET_Addr)& destinations);
 
+  void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
+                      RTPS::SubmessageSeq& submessages);
+
+  ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
+
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
 
