@@ -333,7 +333,9 @@ private:
 template <typename T>
 typename unique_ptr<T>::rv_reference move(container_supported_unique_ptr<T>& ptr)
 {
-  assert(ptr->ref_count()==1);
+# ifndef OPENDDS_SAFETY_PROFILE
+  assert(ptr->ref_count() == 1);
+# endif
   return reinterpret_cast<typename unique_ptr<T>::rv_reference>(ptr);
 }
 
