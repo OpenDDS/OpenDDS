@@ -40,4 +40,10 @@ sleep 5;
 
 $test->process('Publisher', 'Publisher/publisher', "$config");
 $test->start_process('Publisher');
+
+sleep 10;
+
+$test->process('SingleProcess', 'SingleProcess/singleprocess', "$config $callback");
+$test->start_process('SingleProcess');
+
 exit $test->finish(30);
