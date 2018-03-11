@@ -47,25 +47,36 @@ namespace OpenDDS {
         virtual int init() = 0;
         virtual int pub_key(DDS::OctetSeq& dst) = 0;
         virtual int gen_shared_secret(const DDS::OctetSeq& pub_key) = 0;
+        virtual const DDS::OctetSeq& get_shared_secret() const
+        {
+          return shared_secret_;
+        }
+        virtual bool cmp_shared_secret(const DHAlgorithm& other) = 0;
         virtual const char* kagree_algo() = 0;
 
       protected:
         EVP_PKEY* k_;
+        DDS::OctetSeq shared_secret_;
       };
 
       class DdsSecurity_Export DH_2048_MODP_256_PRIME : public DHAlgorithm
       {
       public:
         DH_2048_MODP_256_PRIME();
+        ~DH_2048_MODP_256_PRIME();
 
         int init();
 
         int pub_key(DDS::OctetSeq& dst);
+
         int gen_shared_secret(const DDS::OctetSeq& pub_key);
+
+        bool cmp_shared_secret(const DHAlgorithm& other);
 
         const char* kagree_algo() {
           return "DH+MODP-2048-256";
         }
+
       };
 
 
@@ -76,6 +87,12 @@ namespace OpenDDS {
         typedef DCPS::unique_ptr<DiffieHellman> unique_ptr;
 
         DiffieHellman() : algo_(new DH_2048_MODP_256_PRIME())
+        {
+
+        }
+
+        template <typename Algorithm>
+        DiffieHellman() : algo_(new Algorithm)
         {
 
         }
@@ -92,28 +109,27 @@ namespace OpenDDS {
 
         int pub_key(DDS::OctetSeq& dst)
         {
-          if (algo_) {
-            return algo_->pub_key(dst);
-
-          } else {
-           return 1;
-          }
+          return algo_->pub_key(dst);
         }
 
         int gen_shared_secret(const DDS::OctetSeq& pub_key)
         {
-          if (algo_) {
-              return algo_->gen_shared_secret(pub_key);
+          return algo_->gen_shared_secret(pub_key);
+        }
 
-          } else {
-              return 1;
-          }
+        const DDS::OctetSeq& get_shared_secret()
+        {
+          return algo_->get_shared_secret();
+        }
+
+        bool cmp_shared_secret(const DiffieHellman& other)
+        {
+          return algo_->cmp_shared_secret(* other.algo_);
         }
 
         const char* kagree_algo()
         {
-          if (algo_) return algo_->kagree_algo();
-          else return "NULL";
+          return algo_->kagree_algo();
         }
 
       private:

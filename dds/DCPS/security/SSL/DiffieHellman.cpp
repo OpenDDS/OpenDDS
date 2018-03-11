@@ -17,6 +17,11 @@ namespace OpenDDS {
         init();
       }
 
+      DH_2048_MODP_256_PRIME::~DH_2048_MODP_256_PRIME()
+      {
+
+      }
+
       int DH_2048_MODP_256_PRIME::init()
       {
         int result = 1;
@@ -94,9 +99,38 @@ namespace OpenDDS {
         return result;
       }
 
-      int DH_2048_MODP_256_PRIME::gen_shared_secret(const DDS::OctetSeq& /*pub_key*/)
+      int DH_2048_MODP_256_PRIME::gen_shared_secret(const DDS::OctetSeq& pub_key)
       {
-        return 0; /* TODO */
+        if (! k_) return 1;
+        BIGNUM* pubkey = BN_bin2bn(pub_key.get_buffer(), pub_key.length(), NULL);
+        if (! pubkey) {
+            OPENDDS_SSL_LOG_ERR("BN_bin2bn failed");
+            return 1;
+        }
+
+        DH* dh_keypair = EVP_PKEY_get1_DH(k_);
+        if (! dh_keypair) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_DH failed");
+            return 1;
+        }
+
+        shared_secret_.length(DH_size(dh_keypair));
+        if (1 != DH_compute_key(shared_secret_.get_buffer(), pubkey, dh_keypair)) {
+            OPENDDS_SSL_LOG_ERR("DH_compute_key failed");
+            return 1;
+        }
+
+        return 0;
+      }
+
+      bool DH_2048_MODP_256_PRIME::cmp_shared_secret(const DHAlgorithm& other)
+      {
+        if (shared_secret_.length() != other.get_shared_secret().length()) {
+            return false;
+        }
+        return (0 == std::memcmp(shared_secret_.get_buffer(),
+                                 other.get_shared_secret().get_buffer(),
+                                 shared_secret_.length()));
       }
 
     }
