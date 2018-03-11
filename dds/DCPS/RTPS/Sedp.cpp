@@ -302,6 +302,7 @@ Sedp::init(const RepoId& guid,
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
   const bool reliability = true, durability = true;
+  const bool besteffort = false, nondurable = false;
   publications_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   publications_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
@@ -320,11 +321,11 @@ Sedp::init(const RepoId& guid,
   participant_message_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   participant_message_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
-  participant_stateless_message_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  participant_stateless_message_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  participant_stateless_message_writer_.enable_transport_using_config(besteffort, nondurable, transport_cfg);
+  participant_stateless_message_reader_->enable_transport_using_config(besteffort, nondurable, transport_cfg);
 
-  participant_volatile_message_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
-  participant_volatile_message_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
+  participant_volatile_message_secure_writer_.enable_transport_using_config(reliability, nondurable, transport_cfg);
+  participant_volatile_message_secure_reader_->enable_transport_using_config(reliability, nondurable, transport_cfg);
 
   dcps_participant_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   dcps_participant_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
