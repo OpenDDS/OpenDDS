@@ -1939,6 +1939,14 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
 
 }
 
+bool
+Sedp::is_opendds(const GUID_t& endpoint) const
+{
+  GUID_t participant = endpoint;
+  participant.entityId = DCPS::ENTITYID_PARTICIPANT;
+  return spdp_.is_opendds(participant);
+}
+
 void
 Sedp::association_complete(const RepoId& localId,
                            const RepoId& remoteId)

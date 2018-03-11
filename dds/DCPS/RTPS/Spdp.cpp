@@ -807,6 +807,17 @@ Spdp::wait_for_acks()
   return wait_for_acks_;
 }
 
+bool
+Spdp::is_opendds(const GUID_t& participant) const
+{
+  const DiscoveredParticipantConstIter iter = participants_.find(participant);
+  if (iter == participants_.end()) {
+    return false;
+  }
+  return 0 == std::memcmp(&iter->second.pdata_.participantProxy.vendorId,
+                          DCPS::VENDORID_OCI, sizeof(VendorId_t));
+}
+
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)

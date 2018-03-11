@@ -891,7 +891,7 @@ namespace OpenDDS {
         }
       }
 
-      static bool is_opendds(const GUID_t& endpoint)
+      virtual bool is_opendds(const GUID_t& endpoint) const
       {
         return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
                             sizeof(DCPS::VENDORID_OCI));
@@ -1216,6 +1216,8 @@ namespace OpenDDS {
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
                               DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;
       typedef typename DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+      typedef typename DiscoveredParticipantMap::const_iterator
+        DiscoveredParticipantConstIter;
 
       virtual EndpointManagerType& endpoint_manager() = 0;
 

@@ -559,6 +559,8 @@ private:
                                                    LocalParticipantMessage& part,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
+  bool is_opendds(const GUID_t& endpoint) const;
+
   DCPS::SequenceNumber automatic_liveliness_seq_;
   DCPS::SequenceNumber manual_liveliness_seq_;
 

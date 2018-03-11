@@ -87,6 +87,8 @@ public:
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
 
+  bool is_opendds(const GUID_t& participant) const;
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 
