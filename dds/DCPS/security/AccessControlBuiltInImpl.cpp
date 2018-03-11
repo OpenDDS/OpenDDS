@@ -149,6 +149,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   pctWriter.set_property(0, "dds.perm.cert",get_file_contents(perm_file.c_str()).c_str(), true);
   clean_smime_content(perm_content);
 
+  std::cout <<"[" <<  perm_content << "]" << std::endl;
+
   // Set and store the permissions token
   ::DDS::Security::PermissionsToken permissions_token;
   TokenWriter writer(permissions_token, PermissionsTokenClassId, 2, 0);
@@ -195,7 +197,73 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  return generate_handle();
+
+  ::CORBA::Boolean perm_handle = generate_handle();
+  return perm_handle;
+  // local_access_control_data_.load(remote_credential_token.properties);
+
+
+  std::string perm_content;
+
+  // Read in permissions_ca
+
+  SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
+  std::string ca_subject;
+
+  local_ca.subject_name_to_str(ca_subject);
+
+  //TODO: need to implement subject name check ( see Table 63 validate_local_permissions )
+
+
+
+
+  ac_perms perm_set;
+
+
+  // permissions file
+
+  // SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
+  // local_perm.get_content(perm_content);
+
+
+  // Instead of pulling the content from a SignedDocument yet, we can strip it from the
+  // c.perm parm of the AuthenticatedCredentialToken properties until SignedDocument is implemented
+
+  OpenDDS::Security::TokenReader remote_perm_wrapper(remote_credential_token);
+  if (remote_credential_token.binary_properties.length() > 0) {
+    const DDS::OctetSeq& perm_content  = remote_perm_wrapper.get_bin_property_value("c.perm");
+
+  } else {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
+    return DDS::HANDLE_NIL;
+  }
+
+  // Try to locate the payload
+
+  clean_smime_content(perm_content);
+
+
+  // Set and store the permissions credential token  while we have the raw content
+
+  //TODO: the SignedDocument class does not allow the retrieval of the raw file.
+  // The file will have to be pulled from the file system until that is fixed.
+
+
+  perm_set.perm_token = remote_permissions_token;
+
+  perm_set.perm_cred_token = remote_credential_token;
+
+  if(0 != load_permissions_file(&perm_set , perm_content)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
+    return DDS::HANDLE_NIL;
+  };
+
+//  ::CORBA::Boolean perm_handle = generate_handle();
+//  local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
+//
+//
+//  return perm_handle ;
+
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_create_participant(
@@ -1150,11 +1218,12 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
 
 ::CORBA::Boolean AccessControlBuiltInImpl::clean_smime_content(std::string& content_) {
 
-    std::string search_str("<?xml");
+    std::string start_str("<?xml") , end_str("dds>");
 
-    size_t found = content_.find(search_str);
-    if(found!=std::string::npos){
-        std::string holder_(content_.substr(found));
+    size_t found_begin = content_.find(start_str);
+    size_t found_end = content_.find(end_str);
+    if(found_begin!=std::string::npos && found_end != std::string::npos){
+      std::string holder_(content_.substr(found_begin,found_end));
         content_.clear();
         content_.assign(holder_);
         return true;

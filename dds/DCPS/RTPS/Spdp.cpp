@@ -273,7 +273,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 
     if (security_config_) {
       bool has_security_data = false;
-      if (ParameterListConverter::from_param_list(plist, dp.identity_token_, dp.permissions_token_, dp.property_qos_, dp.security_info_, dp.identity_status_token_) < 0) {
+      if (ParameterListConverter::from_param_list(plist, dp.identity_token_, dp.permissions_token_, dp.property_qos_, dp.security_info_) < 0) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
           ACE_TEXT("failed to parse security data from convert from ParameterList\n")));
       } else {
