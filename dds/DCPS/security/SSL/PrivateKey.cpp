@@ -64,30 +64,38 @@ namespace OpenDDS {
 
       int PrivateKey::sign(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst)
       {
-
-        /* TODO Whoops this calculates the hash! Sign the document instead... */
-        EVP_MD_CTX* hash_ctx = EVP_MD_CTX_new();
-        if (! hash_ctx) {
+        EVP_MD_CTX* signature_ctx = EVP_MD_CTX_new();
+        if (! signature_ctx) {
           OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
           return 1;
         }
 
-        EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
-
-        unsigned char hash[EVP_MAX_MD_SIZE] = {0};
-        unsigned int len = 0u;
+        if (1 != EVP_DigestSignInit(signature_ctx, NULL, EVP_sha256(), NULL, k_)) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestSignInit failed");
+          return 1;
+        }
 
         std::vector<const DDS::OctetSeq*>::const_iterator i, n = src.end();
         for (i = src.begin(); i != n; ++i) {
-          EVP_DigestUpdate(hash_ctx, (*i)->get_buffer(), (*i)->length());
+          EVP_DigestSignUpdate(signature_ctx, (*i)->get_buffer(), (*i)->length());
         }
 
-        EVP_DigestFinal_ex(hash_ctx, hash, &len);
+        unsigned long int len = 0u;
 
+        /* First call with NULL to extract size */
+        if (1 != EVP_DigestSignFinal(signature_ctx, NULL, &len)) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
+          return 1;
+        }
+
+        /* Second call to extract the data */
         dst.length(len);
-        std::memcpy(dst.get_buffer(), hash, len);
+        if (1 != EVP_DigestSignFinal(signature_ctx, dst.get_buffer(), &len)) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
+          return 1;
+        }
 
-        EVP_MD_CTX_free(hash_ctx);
+        EVP_MD_CTX_free(signature_ctx);
 
         return 0;
       }

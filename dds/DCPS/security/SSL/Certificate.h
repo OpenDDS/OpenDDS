@@ -47,7 +47,7 @@ namespace OpenDDS {
 
         int validate(Certificate& ca, unsigned long int flags = 0u) const;
 
-        int verify_signature(const DDS::OctetSeq& src);
+        int verify_signature(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*> expected_contents);
 
         int subject_name_to_str(std::string& dst, unsigned long flags = XN_FLAG_ONELINE) const;
 

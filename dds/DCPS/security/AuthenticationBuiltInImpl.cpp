@@ -788,9 +788,13 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   }
 
   /* Validate Signature field */
+  std::vector<const DDS::OctetSeq*> verify_these;
+  verify_these.push_back(&challenge2);
+  verify_these.push_back(&dh_pub_key);
+  verify_these.push_back(&challenge1);
 
   const DDS::OctetSeq& remote_signature = message_in.get_bin_property_value("signature");
-  if (0 != remote_cert->verify_signature(remote_signature)) {
+  if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {
     set_security_error(ex, -1, 0, "Remote 'signature' field failed signature verification");
     return Failure;
   }
@@ -885,8 +889,12 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
   const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
 
+  std::vector<const DDS::OctetSeq*> verify_these;
+  verify_these.push_back(&challenge1_reply);
+  verify_these.push_back(&challenge2_reply);
+
   const DDS::OctetSeq& remote_signature = handshake_final_token.get_bin_property_value("signature");
-  if (0 != remote_cert->verify_signature(remote_signature)) {
+  if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {
     set_security_error(ex, -1, 0, "Remote 'signature' field failed signature verification");
     return Failure;
   }
