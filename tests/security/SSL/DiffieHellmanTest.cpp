@@ -35,3 +35,17 @@ TEST_F(DiffieHellmanTest, PubKey_Generation)
   dh1.pub_key(pubserial);
   ASSERT_EQ(256u, pubserial.length());
 }
+
+TEST_F(DiffieHellmanTest, SharedSecret_GenerationAndComparison)
+{
+  DDS::OctetSeq dh1_pubkey;
+  dh1.pub_key(dh1_pubkey);
+
+  DDS::OctetSeq dh2_pubkey;
+  dh2.pub_key(dh2_pubkey);
+
+  dh1.gen_shared_secret(dh2_pubkey);
+  dh2.gen_shared_secret(dh1_pubkey);
+
+  ASSERT_TRUE(dh1.cmp_shared_secret(dh2));
+}

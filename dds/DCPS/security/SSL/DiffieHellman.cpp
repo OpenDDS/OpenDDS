@@ -94,9 +94,24 @@ namespace OpenDDS {
         return result;
       }
 
-      int DH_2048_MODP_256_PRIME::gen_shared_secret(const DDS::OctetSeq& /*pub_key*/)
+      int DH_2048_MODP_256_PRIME::gen_shared_secret(const DDS::OctetSeq& pub_key)
       {
-        return 0; /* TODO */
+        if (! k_) return 1;
+#if 0
+        BIGNUM* pubkey = BN_bin2bn(pub_key.get_buffer(), pub_key.length(), NULL);
+        if (! pubkey) {
+            OPENDDS_SSL_LOG_ERR("BN_bin2bn failed");
+            return 1;
+        }
+
+        EVP_PKEY_CTX* derivation_ctx = EVP_PKEY_CTX_new(k_);
+#endif
+        return 0;
+      }
+
+      bool DH_2048_MODP_256_PRIME::cmp_shared_secret(const DHAlgorithm& /*other*/)
+      {
+        return false;
       }
 
     }
