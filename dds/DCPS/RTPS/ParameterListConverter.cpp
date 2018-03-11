@@ -864,7 +864,7 @@ int from_param_list(const ParameterList& param_list,
       }
   }
 
-  return (fieldmask == 0x1F || fieldmask == 0x1B) ? 0 : -1;
+  return ((fieldmask & 0xb) == 0xb) ? 0 : -1;
 }
 
 int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper,
