@@ -510,7 +510,7 @@ private:
 
   DCPS::TransportLocatorSeq
   add_security_info(const DCPS::TransportLocatorSeq& locators,
-                    const DCPS::RepoId& entity);
+                    const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 
   virtual bool defer_writer(const DCPS::RepoId& writer,
                             const DCPS::RepoId& writer_participant);

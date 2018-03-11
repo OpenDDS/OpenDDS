@@ -802,7 +802,7 @@ namespace OpenDDS {
           wa.writerQos = *dwQos;
 #else
           const DCPS::ReaderAssociation ra =
-            {add_security_info(*rTls, reader), reader, *subQos, *drQos,
+            {add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
              cfProp->filterClassName, cfProp->filterExpression,
 #else
@@ -811,7 +811,7 @@ namespace OpenDDS {
              cfProp->expressionParameters};
 
           const DCPS::WriterAssociation wa =
-            {add_security_info(*wTls, writer), writer, *pubQos, *dwQos};
+            {add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos};
 #endif
 
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
@@ -909,7 +909,8 @@ namespace OpenDDS {
 
       virtual DCPS::TransportLocatorSeq
       add_security_info(const DCPS::TransportLocatorSeq& locators,
-                        const RepoId&) { return locators; }
+                        const RepoId& /*writer*/, const RepoId& /*reader*/)
+      { return locators; }
 
       virtual bool defer_writer(const RepoId& writer,
                                 const RepoId& writer_participant) = 0;

@@ -2109,7 +2109,7 @@ Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& /* sample */, bool)
 
 void Sedp::Writer::send_sample(const ACE_Message_Block& data,
                                size_t size,
-                               const DCPS::RepoId& reader,
+                               const RepoId& reader,
                                DCPS::SequenceNumber& sequence)
 {
   DCPS::DataSampleElement* el = new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
@@ -2133,7 +2133,7 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
 
 DDS::ReturnCode_t
 Sedp::Writer::write_parameter_list(const ParameterList& plist,
-                                   const DCPS::RepoId& reader,
+                                   const RepoId& reader,
                                    DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
@@ -2168,7 +2168,7 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
 
 DDS::ReturnCode_t
 Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
-                                        const DCPS::RepoId& reader,
+                                        const RepoId& reader,
                                         DCPS::SequenceNumber& sequence)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
@@ -2203,7 +2203,7 @@ Sedp::Writer::write_participant_message(const ParticipantMessageData& pmd,
 
 DDS::ReturnCode_t
 Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-                                      const DCPS::RepoId& reader,
+                                      const RepoId& reader,
                                       DCPS::SequenceNumber& sequence)
 {
   using DCPS::Serializer;
@@ -2239,7 +2239,7 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
 
 DDS::ReturnCode_t
 Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-					    const DCPS::RepoId& reader,
+					    const RepoId& reader,
 					    DCPS::SequenceNumber& sequence)
 {
   using DCPS::Serializer;
@@ -2275,7 +2275,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
 
 DDS::ReturnCode_t
 Sedp::Writer::write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& msg,
-                                            const DCPS::RepoId& reader,
+                                            const RepoId& reader,
                                             DCPS::SequenceNumber& sequence)
 {
   using DCPS::Serializer;
@@ -2353,7 +2353,7 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 }
 
 void
-Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
+Sedp::Writer::end_historic_samples(const RepoId& reader)
 {
   const void* pReader = static_cast<const void*>(&reader);
   DCPS::Message_Block_Ptr mb(new ACE_Message_Block (DCPS::DataSampleHeader::max_marshaled_size(),
@@ -2387,7 +2387,7 @@ Sedp::Writer::write_control_msg(DCPS::Message_Block_Ptr payload,
 void
 Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
                                 size_t size,
-                                const DCPS::RepoId& reader,
+                                const RepoId& reader,
                                 DCPS::SequenceNumber& sequence,
                                 DCPS::MessageId id)
 {
@@ -2715,7 +2715,7 @@ Sedp::populate_discovered_reader_msg(
 }
 
 void
-Sedp::write_durable_publication_data(const DCPS::RepoId& reader)
+Sedp::write_durable_publication_data(const RepoId& reader)
 {
   LocalPublicationIter pub, end = local_publications_.end();
   for (pub = local_publications_.begin(); pub != end; ++pub) {
@@ -2725,7 +2725,7 @@ Sedp::write_durable_publication_data(const DCPS::RepoId& reader)
 }
 
 void
-Sedp::write_durable_publication_data_secure(const DCPS::RepoId& reader)
+Sedp::write_durable_publication_data_secure(const RepoId& reader)
 {
   LocalPublicationIter pub, end = local_publications_.end();
   for (pub = local_publications_.begin(); pub != end; ++pub) {
@@ -2735,7 +2735,7 @@ Sedp::write_durable_publication_data_secure(const DCPS::RepoId& reader)
 }
 
 void
-Sedp::write_durable_subscription_data(const DCPS::RepoId& reader)
+Sedp::write_durable_subscription_data(const RepoId& reader)
 {
   LocalSubscriptionIter sub, end = local_subscriptions_.end();
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
@@ -2745,7 +2745,7 @@ Sedp::write_durable_subscription_data(const DCPS::RepoId& reader)
 }
 
 void
-Sedp::write_durable_subscription_data_secure(const DCPS::RepoId& reader)
+Sedp::write_durable_subscription_data_secure(const RepoId& reader)
 {
   LocalSubscriptionIter sub, end = local_subscriptions_.end();
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
@@ -2755,7 +2755,7 @@ Sedp::write_durable_subscription_data_secure(const DCPS::RepoId& reader)
 }
 
 void
-Sedp::write_durable_participant_message_data(const DCPS::RepoId& reader)
+Sedp::write_durable_participant_message_data(const RepoId& reader)
 {
   LocalParticipantMessageIter part, end = local_participant_messages_.end();
   for (part = local_participant_messages_.begin(); part != end; ++part) {
@@ -2766,7 +2766,7 @@ Sedp::write_durable_participant_message_data(const DCPS::RepoId& reader)
 
 DDS::ReturnCode_t
 Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
-                              const DCPS::RepoId& reader)
+                              const RepoId& reader)
 {
   static DCPS::SequenceNumber sequence = 0;
   msg.message_identity.source_guid = participant_stateless_message_writer_.get_repo_id();
@@ -2777,7 +2777,7 @@ DDS::ReturnCode_t
 Sedp::write_publication_data(
     const RepoId& rid,
     LocalPublication& lp,
-    const DCPS::RepoId& reader)
+    const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -2795,7 +2795,7 @@ DDS::ReturnCode_t
 Sedp::write_publication_data_unsecure(
     const RepoId& rid,
     LocalPublication& lp,
-    const DCPS::RepoId& reader)
+    const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
@@ -2826,7 +2826,7 @@ DDS::ReturnCode_t
 Sedp::write_publication_data_secure(
     const RepoId& rid,
     LocalPublication& lp,
-    const DCPS::RepoId& reader)
+    const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
@@ -2861,7 +2861,7 @@ DDS::ReturnCode_t
 Sedp::write_subscription_data(
     const RepoId& rid,
     LocalSubscription& ls,
-    const DCPS::RepoId& reader)
+    const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -2879,7 +2879,7 @@ DDS::ReturnCode_t
 Sedp::write_subscription_data_unsecure(
     const RepoId& rid,
     LocalSubscription& ls,
-    const DCPS::RepoId& reader)
+    const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
@@ -2910,7 +2910,7 @@ DDS::ReturnCode_t
 Sedp::write_subscription_data_secure(
     const RepoId& rid,
     LocalSubscription& ls,
-    const DCPS::RepoId& reader)
+    const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
@@ -2946,7 +2946,7 @@ DDS::ReturnCode_t
 Sedp::write_participant_message_data(
     const RepoId& rid,
     LocalParticipantMessage& pm,
-    const DCPS::RepoId& reader)
+    const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
@@ -3157,7 +3157,7 @@ Sedp::shutting_down() const
 void
 Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
                                           DiscoveredSubscriptionIter& dsi,
-                                          const DCPS::RepoId& reader)
+                                          const RepoId& reader)
 {
   OpenDDS::DCPS::LocatorSeq locs;
   bool participantExpectsInlineQos = false;
@@ -3202,7 +3202,7 @@ Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
 void
 Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
                                           DiscoveredPublicationIter& /*dpi*/,
-                                          const DCPS::RepoId& writer)
+                                          const RepoId& writer)
 {
   OpenDDS::DCPS::LocatorSeq locs;
   bool participantExpectsInlineQos = false;
@@ -3260,21 +3260,26 @@ DDS::OctetSeq handle_to_octets(DDS::Security::NativeCryptoHandle handle)
 
 DCPS::TransportLocatorSeq
 Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
-                        const DCPS::RepoId& entity)
+                        const RepoId& writer, const RepoId& reader)
 {
   using DCPS::Serializer;
 
-  if (std::memcmp(entity.guidPrefix, spdp_.guid().guidPrefix,
+  if (std::memcmp(writer.guidPrefix, reader.guidPrefix,
                   sizeof(DCPS::GuidPrefix_t)) == 0) {
+    // writer and reader belong to the same participant, no security needed
     return locators;
   }
 
-  //TODO: [DDS-Security] Get crypto handles from DiscoveredParticipant/Publicat.
+  //TODO: [DDS-Security] Exactly one of 'writer' or 'reader' belongs to the
+  // participant that's local to this instance.  Get crypto handles for the
+  // *discovered* participant (the one from non-local writer/reader) and for
+  // both the DataWriter and DataReader involved in the association.
   const DDS::Security::ParticipantCryptoHandle part_handle = 0x12345678;
   const DDS::Security::DatawriterCryptoHandle dw_handle = 0;
   const DDS::Security::DatareaderCryptoHandle dr_handle = 0;
 
   if (part_handle == DDS::HANDLE_NIL) {
+    // security not enabled for this discovered participant
     return locators;
   }
 
