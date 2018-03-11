@@ -122,7 +122,7 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::verify_signature(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*> expected_contents)
+      int Certificate::verify_signature(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*>& expected_contents)
       {
         int err = 0;
         std::vector<const DDS::OctetSeq*>::const_iterator i, n;

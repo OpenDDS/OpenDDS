@@ -80,7 +80,7 @@ namespace OpenDDS {
           EVP_DigestSignUpdate(signature_ctx, (*i)->get_buffer(), (*i)->length());
         }
 
-        unsigned long int len = 0u;
+        size_t len = 0u;
 
         /* First call with NULL to extract size */
         if (1 != EVP_DigestSignFinal(signature_ctx, NULL, &len)) {
@@ -89,7 +89,7 @@ namespace OpenDDS {
         }
 
         /* Second call to extract the data */
-        dst.length(len);
+        dst.length(static_cast<unsigned int>(len));
         if (1 != EVP_DigestSignFinal(signature_ctx, dst.get_buffer(), &len)) {
           OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
           return 1;
