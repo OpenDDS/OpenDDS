@@ -7,6 +7,7 @@
 #define OPENDDS_CRYPTO_BUILTIN_IMPL_H
 
 #include "DdsSecurity_Export.h"
+#include "CryptoBuiltInC.h"
 
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
@@ -14,6 +15,8 @@
 #include "tao/LocalObject.h"
 
 #include "ace/Thread_Mutex.h"
+
+#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -38,7 +41,7 @@ public:
 
 
 private:
-  // Object
+  // Local Object
 
   bool _is_a(const char*);
   const char* _interface_repository_id() const;
@@ -215,10 +218,18 @@ private:
   CryptoBuiltInImpl(const CryptoBuiltInImpl&);
   CryptoBuiltInImpl& operator=(const CryptoBuiltInImpl&);
 
-  int generate_handle();
+  DDS::Security::NativeCryptoHandle generate_handle();
 
-  ACE_Thread_Mutex handle_mutex_;
-  int next_handle_;
+  ACE_Thread_Mutex mutex_;
+  unsigned int next_handle_;
+
+  typedef KeyMaterial_AES_GCM_GMAC KeyMaterial;
+  typedef KeyMaterial_AES_GCM_GMAC_Seq KeySeq;
+  typedef std::map<DDS::Security::NativeCryptoHandle, KeySeq> KeyTable_t;
+  KeyTable_t keys_;
+
+  std::multimap<DDS::Security::ParticipantCryptoHandle,
+                DDS::Security::NativeCryptoHandle> participant_to_entity_;
 };
 
 } // Security
