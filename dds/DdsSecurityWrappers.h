@@ -30,6 +30,7 @@ namespace OpenDDS {
       OpenDDS::RTPS::SPDPdiscoveredParticipantData data;
       DDS::Security::IdentityToken identity_token;
       DDS::Security::PermissionsToken permissions_token;
+      DDS::Security::PropertyQosPolicy property_qos;
       DDS::Security::ParticipantSecurityInfo security_info;
       DDS::Security::IdentityStatusToken identity_status_token;
     };
