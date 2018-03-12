@@ -148,9 +148,11 @@ namespace OpenDDS {
 
         n = expected_contents.end();
         for (i = expected_contents.begin(); i != n; ++i) {
-          if (1 != EVP_DigestVerifyUpdate(verify_ctx, (*i)->get_buffer(), (*i)->length())) {
-            OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyUpdate failed");
-            goto error;
+          if ((*i)->length() > 0) {
+            if (1 != EVP_DigestVerifyUpdate(verify_ctx, (*i)->get_buffer(), (*i)->length())) {
+              OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyUpdate failed");
+              goto error;
+            }
           }
         }
 

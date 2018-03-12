@@ -115,9 +115,14 @@ namespace OpenDDS {
         }
 
         shared_secret_.length(DH_size(dh_keypair));
-        if (1 != DH_compute_key(shared_secret_.get_buffer(), pubkey, dh_keypair)) {
+        int newlen = DH_compute_key(shared_secret_.get_buffer(), pubkey, dh_keypair);
+        if (newlen < 0 ) {
             OPENDDS_SSL_LOG_ERR("DH_compute_key failed");
+            shared_secret_.length(0u);
             return 1;
+
+        } else {
+            shared_secret_.length(newlen);
         }
 
         return 0;

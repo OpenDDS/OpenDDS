@@ -407,15 +407,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     if (! initiator_remote_auth_request.is_nil()) {
       const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
 
-      if ((challenge1.length()) < 1 || (future_challenge.length() < 1)) {
-        return Failure;
-      }
-      if (challenge1.length() != future_challenge.length()) {
-        return Failure;
-      }
-
-      if (0 != std::memcmp(challenge1.get_buffer(), future_challenge.get_buffer(), future_challenge.length())) {
-        return Failure;
+      if (! challenges_match(challenge1, future_challenge)) {
+          return Failure;
       }
     }
 
@@ -502,11 +495,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     challenge2 = future_challenge;
 
   } else {
-    DDS::OctetSeq nonce;
-    int err = SSL::make_nonce_256(nonce);
+    int err = SSL::make_nonce_256(challenge2);
     if (! err) {
-        message_out.set_bin_property(prop_index++, "challenge2", nonce, true);
-        challenge2 = nonce;
+        message_out.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
     } else {
       return Failure;
