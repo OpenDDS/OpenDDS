@@ -348,6 +348,8 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
   set_permissions_handle(perm_handle);
   set_access_control(acl);
+  set_crypto_key_factory(key_factory);
+  crypto_handle_ = crypto_handle;
 
   // TODO: Handle all exceptions below once error-codes have been defined, etc.
   SecurityException ex;
