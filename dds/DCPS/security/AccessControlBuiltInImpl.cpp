@@ -257,8 +257,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Try to locate the payload
 
-  std::string message(static_cast<unsigned char*>(perm_content), perm_content.size());
-
   clean_smime_content(perm_content);
 
 
