@@ -2231,14 +2231,15 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
             (ser << ACE_OutputCDR::from_octet(1)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
-            (ser << ACE_OutputCDR::from_octet(0)) &&
-            (ser << msg);
+            (ser << ACE_OutputCDR::from_octet(0));
+  ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
+  ok &= (ser << msg);
 
   if (ok) {
-      send_sample(payload, size, reader, sequence);
+    send_sample(payload, size, reader, sequence);
 
   } else {
-      result = DDS::RETCODE_ERROR;
+    result = DDS::RETCODE_ERROR;
   }
 
   delete payload.cont();
@@ -2267,14 +2268,15 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
             (ser << ACE_OutputCDR::from_octet(1)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
-            (ser << ACE_OutputCDR::from_octet(0)) &&
-            (ser << msg);
+            (ser << ACE_OutputCDR::from_octet(0));
+  ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
+  ok &= (ser << msg);
 
   if (ok) {
-      send_sample(payload, size, reader, sequence);
+    send_sample(payload, size, reader, sequence);
 
   } else {
-      result = DDS::RETCODE_ERROR;
+    result = DDS::RETCODE_ERROR;
   }
 
   delete payload.cont();
@@ -2594,7 +2596,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
 
 	DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data(new DDS::Security::ParticipantStatelessMessage);
-
+        ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
 	if (!(ser >> *data)) {
 	  ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
 		     ACE_TEXT("failed to deserialize data\n")));
@@ -2605,7 +2607,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
 
 	DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data(new DDS::Security::ParticipantVolatileMessageSecure);
-
+        ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
 	if (!(ser >> *data)) {
 	  ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
 		     ACE_TEXT("failed to deserialize data\n")));
