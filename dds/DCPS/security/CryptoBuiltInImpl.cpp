@@ -291,13 +291,13 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
     return DDS::HANDLE_NIL;
   }
 
+  const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!keys_.count(local_datawriter_crypto_handle)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
     return DDS::HANDLE_NIL;
   }
   const KeySeq& dw_keys = keys_[local_datawriter_crypto_handle];
-  const DatareaderCryptoHandle h = generate_handle();
 
   if (dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0])) {
     // Create a key from SharedSecret and track it as if Key Exchange happened
@@ -367,13 +367,13 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
     return DDS::HANDLE_NIL;
   }
 
+  const DatareaderCryptoHandle h = generate_handle();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!keys_.count(local_datareader_crypto_handle)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataReader Crypto Handle");
     return DDS::HANDLE_NIL;
   }
   const KeySeq& dr_keys = keys_[local_datareader_crypto_handle];
-  const DatareaderCryptoHandle h = generate_handle();
 
   if (dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0])) {
     // Create a key from SharedSecret and track it as if Key Exchange happened

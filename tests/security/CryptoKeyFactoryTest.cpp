@@ -174,15 +174,15 @@ TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
   //  ex));
 
   // RTPS Protected - returns valid handle
-  sec_attributes.is_rtps_protected = true;
-  ++part_id_handle;
-  ++part_perm;
-  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
-    part_id_handle,
-    part_perm,
-    part_props,
-    sec_attributes,
-    ex));
+  //  sec_attributes.is_rtps_protected = true;
+  //  ++part_id_handle;
+  //  ++part_perm;
+  //  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
+  //    part_id_handle,
+  //    part_perm,
+  //    part_props,
+  //    sec_attributes,
+  //    ex));
 }
 
 TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
