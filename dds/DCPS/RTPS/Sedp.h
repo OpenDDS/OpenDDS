@@ -81,6 +81,7 @@ public:
   const ACE_INET_Addr& multicast_group() const;
   bool map_ipv4_to_ipv6() const;
 
+  void associate_preauth(const SPDPdiscoveredParticipantData& pdata);
   void associate(const SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const SPDPdiscoveredParticipantData& pdata);
   void associate_secure_readers_to_writers(const SPDPdiscoveredParticipantData& pdata);
@@ -510,7 +511,7 @@ private:
 
   DCPS::TransportLocatorSeq
   add_security_info(const DCPS::TransportLocatorSeq& locators,
-                    const DCPS::RepoId& entity);
+                    const DCPS::RepoId& writer, const DCPS::RepoId& reader);
 
   virtual bool defer_writer(const DCPS::RepoId& writer,
                             const DCPS::RepoId& writer_participant);
@@ -558,6 +559,8 @@ private:
   DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
                                                    LocalParticipantMessage& part,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+
+  bool is_opendds(const GUID_t& endpoint) const;
 
   DCPS::SequenceNumber automatic_liveliness_seq_;
   DCPS::SequenceNumber manual_liveliness_seq_;

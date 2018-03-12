@@ -763,11 +763,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  // Set all permissions to true in the stub
-  attributes.is_read_protected = true;
-  attributes.is_write_protected = true;
-  attributes.is_discovery_protected = true;
-  attributes.is_liveliness_protected = true;
+  attributes.is_read_protected = false;
+  attributes.is_write_protected = false;
+  attributes.is_discovery_protected = false;
+  attributes.is_liveliness_protected = false;
 
   return true;
 }
@@ -1254,5 +1253,3 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-

@@ -122,10 +122,54 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::verify_signature(const DDS::OctetSeq& src)
+      int Certificate::verify_signature(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*>& expected_contents)
       {
-        /* Extract public key from X509 and use it to very that src was signed properly */
-        return 0; /* TODO */
+        int err = 0;
+        std::vector<const DDS::OctetSeq*>::const_iterator i, n;
+        EVP_PKEY* pubkey = NULL;
+        EVP_MD_CTX* verify_ctx = NULL;
+
+        pubkey = X509_get_pubkey(x_);
+        if (! pubkey) {
+          OPENDDS_SSL_LOG_ERR("X509_get_pubkey failed");
+          goto error;
+        }
+
+        verify_ctx = EVP_MD_CTX_new();
+        if (! verify_ctx) {
+          OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
+          goto error;
+        }
+
+        if (1 != EVP_DigestVerifyInit(verify_ctx, NULL, EVP_sha256(), NULL, pubkey)) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyInit failed");
+          goto error;
+        }
+
+        n = expected_contents.end();
+        for (i = expected_contents.begin(); i != n; ++i) {
+          if ((*i)->length() > 0) {
+            if (1 != EVP_DigestVerifyUpdate(verify_ctx, (*i)->get_buffer(), (*i)->length())) {
+              OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyUpdate failed");
+              goto error;
+            }
+          }
+        }
+
+        err = EVP_DigestVerifyFinal(verify_ctx, src.get_buffer(), src.length());
+        if (0 == err) {
+          goto error; /* Verification failed, but no error occurred*/
+
+        } else if (1 != err) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyFinal failed");
+          goto error;
+        }
+
+        return 0;
+
+        error:
+          if (pubkey) EVP_PKEY_free(pubkey);
+          return 1;
       }
 
       int Certificate::subject_name_to_str(std::string& dst, unsigned long flags) const

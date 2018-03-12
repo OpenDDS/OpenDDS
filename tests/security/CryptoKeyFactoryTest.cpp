@@ -47,7 +47,11 @@ public:
   virtual void SetUp()
   {
     DDS::PropertySeq part_props;
-    DDS::Security::ParticipantSecurityAttributes sec_attributes;
+    DDS::Security::ParticipantSecurityAttributes sec_attributes =
+      {
+        false, false, false, false, false,
+        0, part_props
+      };
     DDS::Security::SecurityException ex;
 
     // Register local particpant with authentiation only
@@ -122,7 +126,11 @@ TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
   DDS::Security::IdentityHandle part_id_handle = 1;
   DDS::Security::PermissionsHandle part_perm = 2;
   DDS::PropertySeq part_props;
-  DDS::Security::ParticipantSecurityAttributes sec_attributes;
+  DDS::Security::ParticipantSecurityAttributes sec_attributes =
+    {
+      false, false, false, false, false,
+      0, part_props
+    };
   DDS::Security::SecurityException ex;
 
   // Test will Null ID handle, should return a NIL handle
@@ -149,7 +157,11 @@ TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
   DDS::Security::IdentityHandle part_id_handle = 1;
   DDS::Security::PermissionsHandle part_perm = 1;
   DDS::PropertySeq part_props;
-  DDS::Security::ParticipantSecurityAttributes sec_attributes;
+  DDS::Security::ParticipantSecurityAttributes sec_attributes =
+    {
+      false, false, false, false, false,
+      0, part_props
+    };
   DDS::Security::SecurityException ex;
 
   // Create an instance of the factory and register a set of
@@ -174,15 +186,15 @@ TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
   //  ex));
 
   // RTPS Protected - returns valid handle
-  sec_attributes.is_rtps_protected = true;
-  ++part_id_handle;
-  ++part_perm;
-  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
-    part_id_handle,
-    part_perm,
-    part_props,
-    sec_attributes,
-    ex));
+  //  sec_attributes.is_rtps_protected = true;
+  //  ++part_id_handle;
+  //  ++part_perm;
+  //  EXPECT_FALSE(DDS::HANDLE_NIL == test_class->register_local_participant(
+  //    part_id_handle,
+  //    part_perm,
+  //    part_props,
+  //    sec_attributes,
+  //    ex));
 }
 
 TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
@@ -193,7 +205,11 @@ TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
   ::DDS::Security::IdentityHandle local_id_handle = 1;
   ::DDS::Security::IdentityHandle local_perm_handle = 2;
   ::DDS::PropertySeq part_props;
-  ::DDS::Security::ParticipantSecurityAttributes sec_attributes;
+  ::DDS::Security::ParticipantSecurityAttributes sec_attributes =
+      {
+        false, false, false, false, false,
+        0, part_props
+      };
   ::DDS::Security::SecurityException ex;
 
   ::DDS::Security::IdentityHandle local_handle = test_class->register_local_participant(
@@ -256,7 +272,11 @@ TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
 TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
 {
   ::DDS::PropertySeq datawriter_properties;
-  ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes;
+  ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes =
+      {
+        {false, false, false, false},
+        false, false, false, 0, datawriter_properties
+      };
   ::DDS::Security::SecurityException ex;
 
   // Register with a Null handle
@@ -315,7 +335,11 @@ TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
 TEST_F(CryptoKeyFactoryFixture, RegisterDataReaderAndRemoteWriter)
 {
   ::DDS::PropertySeq datareader_properties;
-  ::DDS::Security::EndpointSecurityAttributes datareader_security_attributes;
+  ::DDS::Security::EndpointSecurityAttributes datareader_security_attributes =
+      {
+        {false, false, false, false},
+        false, false, false, 0, datareader_properties
+      };
   ::DDS::Security::SecurityException ex;
 
   // Register with a Null handle
@@ -378,7 +402,11 @@ TEST_F(CryptoKeyFactoryFixture, UnregisterParticipants)
 TEST_F(CryptoKeyFactoryFixture, UnregisterDataWriter)
 {
   ::DDS::PropertySeq datawriter_properties;
-  ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes;
+  ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes =
+      {
+        {false, false, false, false},
+        false, false, false, 0, datawriter_properties
+      };
   ::DDS::Security::SecurityException ex;
 
   // Register a writer and then unregister it
@@ -400,7 +428,11 @@ TEST_F(CryptoKeyFactoryFixture, UnregisterDataWriter)
 TEST_F(CryptoKeyFactoryFixture, UnRegisterDataReader)
 {
   ::DDS::PropertySeq datareader_properties;
-  ::DDS::Security::EndpointSecurityAttributes datareader_security_attributes;
+  ::DDS::Security::EndpointSecurityAttributes datareader_security_attributes =
+      {
+        {false, false, false, false},
+        false, false, false, 0, datareader_properties
+      };
   ::DDS::Security::SecurityException ex;
 
   // Register a writer and then unregister it

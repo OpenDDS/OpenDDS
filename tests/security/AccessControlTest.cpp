@@ -974,10 +974,10 @@ TEST_F(AccessControlTest, get_topic_sec_attributes_Success)
   ::DDS::Security::TopicSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().get_topic_sec_attributes(1, "TopicName", attributes, ex));
-  EXPECT_TRUE(attributes.is_read_protected);
-  EXPECT_TRUE(attributes.is_write_protected);
-  EXPECT_TRUE(attributes.is_discovery_protected);
-  EXPECT_TRUE(attributes.is_liveliness_protected);
+  EXPECT_FALSE(attributes.is_read_protected);
+  EXPECT_FALSE(attributes.is_write_protected);
+  EXPECT_FALSE(attributes.is_discovery_protected);
+  EXPECT_FALSE(attributes.is_liveliness_protected);
 }
 
 TEST_F(AccessControlTest, get_datawriter_sec_attributes_InvalidInput)

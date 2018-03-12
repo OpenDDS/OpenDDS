@@ -1,14 +1,28 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #include "CryptoBuiltInImpl.h"
 #include "CommonUtilities.h"
 #include "TokenWriter.h"
 
+#include "SSL/Utils.h"
+
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsSecurityParamsC.h"
+
+#include "dds/DCPS/GuidUtils.h"
+
+#include <openssl/evp.h>
+
+using namespace DDS::Security;
 
 namespace OpenDDS {
 namespace Security {
 
 CryptoBuiltInImpl::CryptoBuiltInImpl()
-  : handle_mutex_()
+  : mutex_()
   , next_handle_(1)
 {}
 
@@ -32,36 +46,64 @@ bool CryptoBuiltInImpl::marshal(TAO_OutputCDR&)
   return false;
 }
 
-int CryptoBuiltInImpl::generate_handle()
+NativeCryptoHandle CryptoBuiltInImpl::generate_handle()
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(handle_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   int new_handle = next_handle_++;
 
   if (new_handle == DDS::HANDLE_NIL) {
     new_handle = next_handle_++;
   }
-  return new_handle;
+  return static_cast<NativeCryptoHandle>(new_handle);
 }
 
 
 // Key Factory
 
-DDS::Security::ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
-  DDS::Security::IdentityHandle participant_identity,
-  DDS::Security::PermissionsHandle participant_permissions,
-  const DDS::PropertySeq& participant_properties,
-  const DDS::Security::ParticipantSecurityAttributes& participant_security_attributes,
-  DDS::Security::SecurityException& ex)
-{
-  ACE_UNUSED_ARG(participant_properties);
-  ACE_UNUSED_ARG(participant_security_attributes);
+namespace {
 
-  // Conditions required for this to succeed
-  // - Local Domain Participant identified by participant_identity must have been
-  //   authenticated and granted access to DDS Domain
-  // - Handles are not DDS::HANDLE_NIL
-  // - No requirements for participant_properties.  It is used for optional configuration
-  // - participant_security_attributes is used to generate the key material
+  KeyMaterial_AES_GCM_GMAC make_key(unsigned int key_id, bool encrypt)
+  {
+    KeyMaterial_AES_GCM_GMAC k;
+
+    for (unsigned int i = 0; i < TransformKindIndex; ++i)
+      k.transformation_kind[i] = 0;
+    k.transformation_kind[TransformKindIndex] =
+      encrypt ? CRYPTO_TRANSFORMATION_KIND_AES256_GCM
+      : CRYPTO_TRANSFORMATION_KIND_AES256_GMAC;
+
+    k.master_salt.length(0);
+
+    for (unsigned int i = 0; i < sizeof k.sender_key_id; ++i) {
+      k.sender_key_id[i] = key_id >> (8 * i);
+    }
+
+    k.master_sender_key.length(0);
+
+    for (unsigned int i = 0; i < sizeof k.receiver_specific_key_id; ++i) {
+      k.receiver_specific_key_id[i] = 0;
+    }
+
+    k.master_receiver_specific_key.length(0);
+    return k;
+  }
+
+  template <typename T, typename TSeq>
+  void push_back(TSeq& seq, const T& t)
+  {
+    const unsigned int i = seq.length();
+    seq.length(i + 1);
+    seq[i] = t;
+  }
+}
+
+ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
+  IdentityHandle participant_identity,
+  PermissionsHandle participant_permissions,
+  const DDS::PropertySeq&,
+  const ParticipantSecurityAttributes& participant_security_attributes,
+  SecurityException& ex)
+{
   if (DDS::HANDLE_NIL == participant_identity) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid local participant ID");
     return DDS::HANDLE_NIL;
@@ -71,23 +113,22 @@ DDS::Security::ParticipantCryptoHandle CryptoBuiltInImpl::register_local_partici
     return DDS::HANDLE_NIL;
   }
 
-  // The stub will just generate a new handle value each time this is called
-  return generate_handle();
+  const NativeCryptoHandle h = generate_handle();
+  if (!participant_security_attributes.is_rtps_protected) {
+    return h;
+  }
+
+  CommonUtilities::set_security_error(ex, -1, 0, "Unsupported configuration");
+  return DDS::HANDLE_NIL;
 }
 
-DDS::Security::ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
-  DDS::Security::ParticipantCryptoHandle local_participant_crypto_handle,
-  DDS::Security::IdentityHandle remote_participant_identity,
-  DDS::Security::PermissionsHandle remote_participant_permissions,
-  DDS::Security::SharedSecretHandle* shared_secret,
-  DDS::Security::SecurityException& ex)
+ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
+  ParticipantCryptoHandle local_participant_crypto_handle,
+  IdentityHandle remote_participant_identity,
+  PermissionsHandle remote_participant_permissions,
+  SharedSecretHandle* shared_secret,
+  SecurityException& ex)
 {
-  // Conditions required for this to succeed
-  // - local_participant_crypto_handle must have been returned by a prior
-  //   call to register_local_participant
-  // - remote_participant_identity must have been authenticated and granted
-  //   access to DDS Domain
-  // - Handles are not DDS::HANDLE_NIL
   if (DDS::HANDLE_NIL == local_participant_crypto_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid local participant crypto handle");
     return DDS::HANDLE_NIL;
@@ -105,46 +146,138 @@ DDS::Security::ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remot
     return DDS::HANDLE_NIL;
   }
 
-  // The stub won't keep track of what has been registered, it
-  // just returns a new handle
   return generate_handle();
 }
 
-DDS::Security::DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
-  DDS::Security::ParticipantCryptoHandle participant_crypto,
-  const DDS::PropertySeq& datawriter_properties,
-  const DDS::Security::EndpointSecurityAttributes& datawriter_security_attributes,
-  DDS::Security::SecurityException& ex)
+namespace {
+  bool is_builtin_volatile(const DDS::PropertySeq& props)
+  {
+    for (unsigned int i = 0; i < props.length(); ++i) {
+      if (0 == std::strcmp(props[i].name.in(),
+                           "dds.sec.builtin_endpoint_name")) {
+        return 0 == std::strcmp(props[i].value.in(),
+                                "BuiltinParticipantVolatileMessageSecureWriter")
+          || 0 == std::strcmp(props[i].value.in(),
+                              "BuiltinParticipantVolatileMessageSecureReader");
+      }
+    }
+    return false;
+  }
+
+  bool is_volatile_placeholder(const KeyMaterial_AES_GCM_GMAC& keymat)
+  {
+    static const CryptoTransformKind placeholder =
+      {DCPS::VENDORID_OCI[0], DCPS::VENDORID_OCI[1], 0, 1};
+    return 0 == std::memcmp(placeholder, keymat.transformation_kind,
+                            sizeof placeholder);
+  }
+
+  KeyMaterial_AES_GCM_GMAC make_volatile_placeholder()
+  {
+    // not an actual key, just used to identify the local datawriter/reader
+    // crypto handle for a Built-In Participant Volatile Msg endpoint
+    const KeyMaterial_AES_GCM_GMAC k = {
+      {DCPS::VENDORID_OCI[0], DCPS::VENDORID_OCI[1], 0, 1},
+      KeyOctetSeq(), {0, 0, 0, 0}, KeyOctetSeq(), {0, 0, 0, 0}, KeyOctetSeq()
+    };
+    return k;
+  }
+
+  void hkdf(KeyOctetSeq& result, const DDS::OctetSeq_var& prefix,
+            const char (&cookie)[17], const DDS::OctetSeq_var& suffix,
+            const DDS::OctetSeq_var& data)
+  {
+    char* cookie_buffer = const_cast<char*>(cookie); // OctetSeq has no const
+    DDS::OctetSeq cookieSeq(16, 16,
+                            reinterpret_cast<CORBA::Octet*>(cookie_buffer));
+    std::vector<const DDS::OctetSeq*> input(3);
+    input[0] = prefix.ptr();
+    input[1] = &cookieSeq;
+    input[2] = suffix.ptr();
+    DDS::OctetSeq key;
+    SSL::hash(input, key);
+
+    EVP_PKEY* pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, 0, key.get_buffer(),
+                                          key.length());
+    EVP_MD_CTX* ctx = EVP_MD_CTX_create();
+    const EVP_MD* md = EVP_get_digestbyname("SHA256");
+    EVP_DigestInit_ex(ctx, md, 0);
+    EVP_DigestSignInit(ctx, 0, md, 0, pkey);
+    EVP_DigestSignUpdate(ctx, data->get_buffer(), data->length());
+    size_t req = 0;
+    EVP_DigestSignFinal(ctx, 0, &req);
+    result.length(static_cast<unsigned int>(req));
+    EVP_DigestSignFinal(ctx, result.get_buffer(), &req);
+    EVP_MD_CTX_destroy(ctx);
+    EVP_PKEY_free(pkey);
+  }
+
+  KeyMaterial_AES_GCM_GMAC
+  make_volatile_key(const DDS::OctetSeq_var& challenge1,
+                    const DDS::OctetSeq_var& challenge2,
+                    const DDS::OctetSeq_var& sharedSec)
+  {
+    static const char KxSaltCookie[] = "keyexchange salt";
+    static const char KxKeyCookie[] = "key exchange key";
+    KeyMaterial_AES_GCM_GMAC k = {
+      {0, 0, 0, CRYPTO_TRANSFORMATION_KIND_AES256_GCM},
+      KeyOctetSeq(), {0, 0, 0, 0}, KeyOctetSeq(), {0, 0, 0, 0}, KeyOctetSeq()
+    };
+    hkdf(k.master_salt, challenge1, KxSaltCookie, challenge2, sharedSec);
+    hkdf(k.master_sender_key, challenge2, KxKeyCookie, challenge1, sharedSec);
+    return k;
+  }
+}
+
+DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
+  ParticipantCryptoHandle participant_crypto,
+  const DDS::PropertySeq& properties,
+  const EndpointSecurityAttributes& security_attributes,
+  SecurityException& ex)
 {
-  ACE_UNUSED_ARG(datawriter_properties);
-  ACE_UNUSED_ARG(datawriter_security_attributes);
-
-  // Conditions for success
-  // - participant_crypto must be a registered local participant crypto handle
-
-  // The stub always generates a new handle as long as the input handle isn't NIL
   if (DDS::HANDLE_NIL == participant_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Participant Crypto Handle");
     return DDS::HANDLE_NIL;
   }
 
-  return generate_handle();
+  const NativeCryptoHandle h = generate_handle();
+  const PluginEndpointSecurityAttributesMask plugin_attribs =
+    security_attributes.plugin_endpoint_attributes;
+  KeySeq keys;
+
+  if (is_builtin_volatile(properties)) {
+    push_back(keys, make_volatile_placeholder());
+
+  } else {
+    bool used_h = false;
+    if (security_attributes.is_submessage_protected) {
+      push_back(keys,
+                make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
+      used_h = true;
+    }
+    if (security_attributes.is_payload_protected) {
+      const unsigned int key_id = used_h ? generate_handle() : h;
+      push_back(keys,
+                make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED));
+    }
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  keys_[h] = keys;
+  participant_to_entity_.insert(std::make_pair(participant_crypto, h));
+
+  return h;
 }
 
-DDS::Security::DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
-  DDS::Security::DatawriterCryptoHandle local_datawriter_crypto_handle,
-  DDS::Security::ParticipantCryptoHandle remote_participant_crypto,
-  DDS::Security::SharedSecretHandle* shared_secret,
-  bool relay_only,
-  DDS::Security::SecurityException& ex)
+DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
+  DatawriterCryptoHandle local_datawriter_crypto_handle,
+  ParticipantCryptoHandle remote_participant_crypto,
+  SharedSecretHandle* shared_secret,
+  bool /*relay_only*/,
+  SecurityException& ex)
 {
-  ACE_UNUSED_ARG(relay_only);
-
-  // Conditions for success
-  // - local_datawriter_crypto_handle must be a registered local participant crypto handle
-  // - remote_participant_crypto must be a registered remote participant crypto handle
   if (DDS::HANDLE_NIL == local_datawriter_crypto_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local Participant Crypto Handle");
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
     return DDS::HANDLE_NIL;
   }
   if (DDS::HANDLE_NIL == remote_participant_crypto) {
@@ -156,43 +289,72 @@ DDS::Security::DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote
     return DDS::HANDLE_NIL;
   }
 
-  // The stub always generates a new handle as long as the input handle isn't NIL
-  return generate_handle();
-}
-
-DDS::Security::DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
-  DDS::Security::ParticipantCryptoHandle participant_crypto,
-  const DDS::PropertySeq& datareader_properties,
-  const DDS::Security::EndpointSecurityAttributes& datareader_security_attributes,
-  DDS::Security::SecurityException& ex)
-{
-  ACE_UNUSED_ARG(datareader_properties);
-  ACE_UNUSED_ARG(datareader_security_attributes);
-
-  // Conditions for success
-  // - participant_crypto must be a registered local participant crypto handle
-  if (DDS::HANDLE_NIL == participant_crypto) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local Participant Crypto Handle");
+  const DatareaderCryptoHandle h = generate_handle();
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!keys_.count(local_datawriter_crypto_handle)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  // The stub always generates a new handle as long as the input handle isn't NIL
-  return generate_handle();
+  const KeySeq& dw_keys = keys_[local_datawriter_crypto_handle];
+
+  if (dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0])) {
+    // Create a key from SharedSecret and track it as if Key Exchange happened
+    KeySeq dr_keys(1);
+    dr_keys.length(1);
+    dr_keys[0] = make_volatile_key(shared_secret->challenge1(),
+                                   shared_secret->challenge2(),
+                                   shared_secret->sharedSecret());
+    keys_[h] = dr_keys;
+  }
+
+  participant_to_entity_.insert(std::make_pair(remote_participant_crypto, h));
+  return h;
 }
 
-DDS::Security::DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
-  DDS::Security::DatareaderCryptoHandle local_datareader_crypto_handle,
-  DDS::Security::ParticipantCryptoHandle remote_participant_crypt,
-  DDS::Security::SharedSecretHandle* shared_secret,
-  DDS::Security::SecurityException& ex)
+DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
+  ParticipantCryptoHandle participant_crypto,
+  const DDS::PropertySeq& properties,
+  const EndpointSecurityAttributes& security_attributes,
+  SecurityException& ex)
 {
-  // Conditions for success
-  // - local_datawriter_crypto_handle must be a registered local participant crypto handle
-  // - remote_participant_crypto must be a registered remote participant crypto handle
+  if (DDS::HANDLE_NIL == participant_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Participant Crypto Handle");
+    return DDS::HANDLE_NIL;
+  }
+
+  const NativeCryptoHandle h = generate_handle();
+  const PluginEndpointSecurityAttributesMask plugin_attribs =
+    security_attributes.plugin_endpoint_attributes;
+  KeySeq keys;
+
+  if (is_builtin_volatile(properties)) {
+    push_back(keys, make_volatile_placeholder());
+
+  } else {
+    if (security_attributes.is_submessage_protected) {
+      push_back(keys,
+                make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED));
+    }
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  keys_[h] = keys;
+  participant_to_entity_.insert(std::make_pair(participant_crypto, h));
+
+  return h;
+}
+
+DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
+  DatareaderCryptoHandle local_datareader_crypto_handle,
+  ParticipantCryptoHandle remote_participant_crypto,
+  SharedSecretHandle* shared_secret,
+  SecurityException& ex)
+{
   if (DDS::HANDLE_NIL == local_datareader_crypto_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
     return DDS::HANDLE_NIL;
   }
-  if (DDS::HANDLE_NIL == remote_participant_crypt) {
+  if (DDS::HANDLE_NIL == remote_participant_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote Participant Crypto Handle");
     return DDS::HANDLE_NIL;
   }
@@ -201,13 +363,31 @@ DDS::Security::DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote
     return DDS::HANDLE_NIL;
   }
 
-  // The stub always generates a new handle as long as the input handle isn't NIL
-  return generate_handle();
+  const DatareaderCryptoHandle h = generate_handle();
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!keys_.count(local_datareader_crypto_handle)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataReader Crypto Handle");
+    return DDS::HANDLE_NIL;
+  }
+  const KeySeq& dr_keys = keys_[local_datareader_crypto_handle];
+
+  if (dr_keys.length() == 1 && is_volatile_placeholder(dr_keys[0])) {
+    // Create a key from SharedSecret and track it as if Key Exchange happened
+    KeySeq dw_keys(1);
+    dw_keys.length(1);
+    dw_keys[0] = make_volatile_key(shared_secret->challenge1(),
+                                   shared_secret->challenge2(),
+                                   shared_secret->sharedSecret());
+    keys_[h] = dw_keys;
+  }
+
+  participant_to_entity_.insert(std::make_pair(remote_participant_crypto, h));
+  return h;
 }
 
 bool CryptoBuiltInImpl::unregister_participant(
-  DDS::Security::ParticipantCryptoHandle participant_crypto_handle,
-  DDS::Security::SecurityException& ex)
+  ParticipantCryptoHandle participant_crypto_handle,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(participant_crypto_handle);
   ACE_UNUSED_ARG(ex);
@@ -217,8 +397,8 @@ bool CryptoBuiltInImpl::unregister_participant(
 }
 
 bool CryptoBuiltInImpl::unregister_datawriter(
-  DDS::Security::DatawriterCryptoHandle datawriter_crypto_handle,
-  DDS::Security::SecurityException& ex)
+  DatawriterCryptoHandle datawriter_crypto_handle,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(datawriter_crypto_handle);
   ACE_UNUSED_ARG(ex);
@@ -228,8 +408,8 @@ bool CryptoBuiltInImpl::unregister_datawriter(
 }
 
 bool CryptoBuiltInImpl::unregister_datareader(
-  DDS::Security::DatareaderCryptoHandle datareader_crypto_handle,
-  DDS::Security::SecurityException& ex)
+  DatareaderCryptoHandle datareader_crypto_handle,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(datareader_crypto_handle);
   ACE_UNUSED_ARG(ex);
@@ -249,10 +429,10 @@ namespace
 }
 
 bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
-  DDS::Security::ParticipantCryptoTokenSeq& local_participant_crypto_tokens,
-  DDS::Security::ParticipantCryptoHandle local_participant_crypto,
-  DDS::Security::ParticipantCryptoHandle remote_participant_crypto,
-  DDS::Security::SecurityException& ex)
+  ParticipantCryptoTokenSeq& local_participant_crypto_tokens,
+  ParticipantCryptoHandle local_participant_crypto,
+  ParticipantCryptoHandle remote_participant_crypto,
+  SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == local_participant_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid local participant handle");
@@ -279,10 +459,10 @@ bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
 }
 
 bool CryptoBuiltInImpl::set_remote_participant_crypto_tokens(
-  DDS::Security::ParticipantCryptoHandle local_participant_crypto,
-  DDS::Security::ParticipantCryptoHandle remote_participant_crypto,
-  const DDS::Security::ParticipantCryptoTokenSeq& remote_participant_tokens,
-  DDS::Security::SecurityException& ex)
+  ParticipantCryptoHandle local_participant_crypto,
+  ParticipantCryptoHandle remote_participant_crypto,
+  const ParticipantCryptoTokenSeq& remote_participant_tokens,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(local_participant_crypto);
   ACE_UNUSED_ARG(remote_participant_crypto);
@@ -295,10 +475,10 @@ bool CryptoBuiltInImpl::set_remote_participant_crypto_tokens(
 }
 
 bool CryptoBuiltInImpl::create_local_datawriter_crypto_tokens(
-  DDS::Security::DatawriterCryptoTokenSeq& local_datawriter_crypto_tokens,
-  DDS::Security::DatawriterCryptoHandle local_datawriter_crypto,
-  DDS::Security::DatareaderCryptoHandle remote_datareader_crypto,
-  DDS::Security::SecurityException& ex)
+  DatawriterCryptoTokenSeq& local_datawriter_crypto_tokens,
+  DatawriterCryptoHandle local_datawriter_crypto,
+  DatareaderCryptoHandle remote_datareader_crypto,
+  SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == local_datawriter_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid local writer handle");
@@ -325,10 +505,10 @@ bool CryptoBuiltInImpl::create_local_datawriter_crypto_tokens(
 }
 
 bool CryptoBuiltInImpl::set_remote_datawriter_crypto_tokens(
-  DDS::Security::DatareaderCryptoHandle local_datareader_crypto,
-  DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto,
-  const DDS::Security::DatawriterCryptoTokenSeq& remote_datawriter_tokens,
-  DDS::Security::SecurityException& ex)
+  DatareaderCryptoHandle local_datareader_crypto,
+  DatawriterCryptoHandle remote_datawriter_crypto,
+  const DatawriterCryptoTokenSeq& remote_datawriter_tokens,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(local_datareader_crypto);
   ACE_UNUSED_ARG(remote_datawriter_crypto);
@@ -341,10 +521,10 @@ bool CryptoBuiltInImpl::set_remote_datawriter_crypto_tokens(
 }
 
 bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
-  DDS::Security::DatareaderCryptoTokenSeq& local_datareader_cryto_tokens,
-  DDS::Security::DatareaderCryptoHandle local_datareader_crypto,
-  DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto,
-  DDS::Security::SecurityException& ex)
+  DatareaderCryptoTokenSeq& local_datareader_cryto_tokens,
+  DatareaderCryptoHandle local_datareader_crypto,
+  DatawriterCryptoHandle remote_datawriter_crypto,
+  SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == local_datareader_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid local writer handle");
@@ -371,10 +551,10 @@ bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
 }
 
 bool CryptoBuiltInImpl::set_remote_datareader_crypto_tokens(
-  DDS::Security::DatawriterCryptoHandle local_datawriter_crypto,
-  DDS::Security::DatareaderCryptoHandle remote_datareader_crypto,
-  const DDS::Security::DatareaderCryptoTokenSeq& remote_datareader_tokens,
-  DDS::Security::SecurityException& ex)
+  DatawriterCryptoHandle local_datawriter_crypto,
+  DatareaderCryptoHandle remote_datareader_crypto,
+  const DatareaderCryptoTokenSeq& remote_datareader_tokens,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(local_datawriter_crypto);
   ACE_UNUSED_ARG(remote_datareader_crypto);
@@ -387,8 +567,8 @@ bool CryptoBuiltInImpl::set_remote_datareader_crypto_tokens(
 }
 
 bool CryptoBuiltInImpl::return_crypto_tokens(
-  const DDS::Security::CryptoTokenSeq& crypto_tokens,
-  DDS::Security::SecurityException& ex)
+  const CryptoTokenSeq& crypto_tokens,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(crypto_tokens);
   ACE_UNUSED_ARG(ex);
@@ -407,8 +587,8 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   DDS::OctetSeq& encoded_buffer,
   DDS::OctetSeq& extra_inline_qos,
   const DDS::OctetSeq& plain_buffer,
-  DDS::Security::DatawriterCryptoHandle sending_datawriter_crypto,
-  DDS::Security::SecurityException& ex)
+  DatawriterCryptoHandle sending_datawriter_crypto,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(extra_inline_qos);
 
@@ -427,10 +607,10 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
 bool CryptoBuiltInImpl::encode_datawriter_submessage(
   DDS::OctetSeq& encoded_rtps_submessage,
   const DDS::OctetSeq& plain_rtps_submessage,
-  DDS::Security::DatawriterCryptoHandle sending_datawriter_crypto,
-  const DDS::Security::DatareaderCryptoHandleSeq& receiving_datareader_crypto_list,
+  DatawriterCryptoHandle sending_datawriter_crypto,
+  const DatareaderCryptoHandleSeq& receiving_datareader_crypto_list,
   CORBA::Long& receiving_datareader_crypto_list_index,
-  DDS::Security::SecurityException& ex)
+  SecurityException& ex)
 {
   // Verify the input handles are valid before doing the transformation
   if (DDS::HANDLE_NIL == sending_datawriter_crypto) {
@@ -438,7 +618,7 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
     return false;
   }
 
-  DDS::Security::DatareaderCryptoHandle reader_handle = DDS::HANDLE_NIL;
+  DatareaderCryptoHandle reader_handle = DDS::HANDLE_NIL;
   if (receiving_datareader_crypto_list_index >= 0) {
     // Need to make this unsigned to get prevent warnings when comparing to length()
     CORBA::ULong index = static_cast<CORBA::ULong>(receiving_datareader_crypto_list_index);
@@ -466,9 +646,9 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
 bool CryptoBuiltInImpl::encode_datareader_submessage(
   DDS::OctetSeq& encoded_rtps_submessage,
   const DDS::OctetSeq& plain_rtps_submessage,
-  DDS::Security::DatareaderCryptoHandle sending_datareader_crypto,
-  const DDS::Security::DatawriterCryptoHandleSeq& receiving_datawriter_crypto_list,
-  DDS::Security::SecurityException& ex)
+  DatareaderCryptoHandle sending_datareader_crypto,
+  const DatawriterCryptoHandleSeq& receiving_datawriter_crypto_list,
+  SecurityException& ex)
 {
   // Perform sanity checking on input data
   if (DDS::HANDLE_NIL == sending_datareader_crypto) {
@@ -490,10 +670,10 @@ bool CryptoBuiltInImpl::encode_datareader_submessage(
 bool CryptoBuiltInImpl::encode_rtps_message(
   DDS::OctetSeq& encoded_rtps_message,
   const DDS::OctetSeq& plain_rtps_message,
-  DDS::Security::ParticipantCryptoHandle sending_participant_crypto,
-  const DDS::Security::ParticipantCryptoHandleSeq& receiving_participant_crypto_list,
+  ParticipantCryptoHandle sending_participant_crypto,
+  const ParticipantCryptoHandleSeq& receiving_participant_crypto_list,
   CORBA::Long& receiving_participant_crypto_list_index,
-  DDS::Security::SecurityException& ex)
+  SecurityException& ex)
 {
   // Perform sanity checking on input data
   if (DDS::HANDLE_NIL == sending_participant_crypto) {
@@ -505,7 +685,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
     return false;
   }
 
-  DDS::Security::ParticipantCryptoHandle dest_handle = DDS::HANDLE_NIL;
+  ParticipantCryptoHandle dest_handle = DDS::HANDLE_NIL;
   if (receiving_participant_crypto_list_index >= 0) {
     // Need to make this unsigned to get prevent warnings when comparing to length()
     CORBA::ULong index = static_cast<CORBA::ULong>(receiving_participant_crypto_list_index);
@@ -533,9 +713,9 @@ bool CryptoBuiltInImpl::encode_rtps_message(
 bool CryptoBuiltInImpl::decode_rtps_message(
   DDS::OctetSeq& plain_buffer,
   const DDS::OctetSeq& encoded_buffer,
-  DDS::Security::ParticipantCryptoHandle receiving_participant_crypto,
-  DDS::Security::ParticipantCryptoHandle sending_participant_crypto,
-  DDS::Security::SecurityException& ex)
+  ParticipantCryptoHandle receiving_participant_crypto,
+  ParticipantCryptoHandle sending_participant_crypto,
+  SecurityException& ex)
 {
   // Perform sanity checking on input data
   if (DDS::HANDLE_NIL == receiving_participant_crypto) {
@@ -555,13 +735,13 @@ bool CryptoBuiltInImpl::decode_rtps_message(
 }
 
 bool CryptoBuiltInImpl::preprocess_secure_submsg(
-  DDS::Security::DatawriterCryptoHandle& datawriter_crypto,
-  DDS::Security::DatareaderCryptoHandle& datareader_crypto,
-  DDS::Security::SecureSubmessageCategory_t& secure_submessage_category,
+  DatawriterCryptoHandle& datawriter_crypto,
+  DatareaderCryptoHandle& datareader_crypto,
+  SecureSubmessageCategory_t& secure_submessage_category,
   const DDS::OctetSeq& encoded_rtps_submessage,
-  DDS::Security::ParticipantCryptoHandle receiving_participant_crypto,
-  DDS::Security::ParticipantCryptoHandle sending_participant_crypto,
-  DDS::Security::SecurityException& ex)
+  ParticipantCryptoHandle receiving_participant_crypto,
+  ParticipantCryptoHandle sending_participant_crypto,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(encoded_rtps_submessage);
 
@@ -576,7 +756,7 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
 
   // For now, just set some simple values, but this won't
   // be very useful as a stub
-  secure_submessage_category = DDS::Security::DATAWRITER_SUBMESSAGE;
+  secure_submessage_category = DATAWRITER_SUBMESSAGE;
   datawriter_crypto = 1;
   datareader_crypto = 2;
 
@@ -605,9 +785,9 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
 bool CryptoBuiltInImpl::decode_datawriter_submessage(
   DDS::OctetSeq& plain_rtps_submessage,
   const DDS::OctetSeq& encoded_rtps_submessage,
-  DDS::Security::DatareaderCryptoHandle receiving_datareader_crypto,
-  DDS::Security::DatawriterCryptoHandle sending_datawriter_crypto,
-  const DDS::Security::SecurityException& ex)
+  DatareaderCryptoHandle receiving_datareader_crypto,
+  DatawriterCryptoHandle sending_datawriter_crypto,
+  const SecurityException& ex)
 {
   // Error ex is marked as const in this function call
   ACE_UNUSED_ARG(ex);
@@ -631,9 +811,9 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
 bool CryptoBuiltInImpl::decode_datareader_submessage(
   DDS::OctetSeq& plain_rtps_message,
   const DDS::OctetSeq& encoded_rtps_message,
-  DDS::Security::DatawriterCryptoHandle receiving_datawriter_crypto,
-  DDS::Security::DatareaderCryptoHandle sending_datareader_crypto,
-  DDS::Security::SecurityException& ex)
+  DatawriterCryptoHandle receiving_datawriter_crypto,
+  DatareaderCryptoHandle sending_datareader_crypto,
+  SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == sending_datareader_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datareader handle");
@@ -655,9 +835,9 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   DDS::OctetSeq& plain_buffer,
   const DDS::OctetSeq& encoded_buffer,
   const DDS::OctetSeq& inline_qos,
-  DDS::Security::DatareaderCryptoHandle receiving_datareader_crypto,
-  DDS::Security::DatawriterCryptoHandle sending_datawriter_crypto,
-  DDS::Security::SecurityException& ex)
+  DatareaderCryptoHandle receiving_datareader_crypto,
+  DatawriterCryptoHandle sending_datawriter_crypto,
+  SecurityException& ex)
 {
   ACE_UNUSED_ARG(inline_qos);
 

@@ -407,15 +407,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     if (! initiator_remote_auth_request.is_nil()) {
       const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
 
-      if ((challenge1.length()) < 1 || (future_challenge.length() < 1)) {
-        return Failure;
-      }
-      if (challenge1.length() != future_challenge.length()) {
-        return Failure;
-      }
-
-      if (0 != std::memcmp(challenge1.get_buffer(), future_challenge.get_buffer(), future_challenge.length())) {
-        return Failure;
+      if (! challenges_match(challenge1, future_challenge)) {
+          return Failure;
       }
     }
 
@@ -502,11 +495,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     challenge2 = future_challenge;
 
   } else {
-    DDS::OctetSeq nonce;
-    int err = SSL::make_nonce_256(nonce);
+    int err = SSL::make_nonce_256(challenge2);
     if (! err) {
-        message_out.set_bin_property(prop_index++, "challenge2", nonce, true);
-        challenge2 = nonce;
+        message_out.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
     } else {
       return Failure;
@@ -514,9 +505,14 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   }
 
   std::vector<const DDS::OctetSeq*> sign_these;
+  const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
+  const DDS::OctetSeq& hash_c1 = message_in.get_bin_property_value("hash_c1");
+  /* Skip 'hash_c2' because currently the value isn't required and it is determined by OpenDDS */
   sign_these.push_back(&challenge2);
   sign_these.push_back(&dh2);
   sign_these.push_back(&challenge1);
+  sign_these.push_back(&dh1);
+  sign_these.push_back(&hash_c1);
 
   local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
   message_out.set_bin_property(prop_index++, "signature", tmp, true);
@@ -781,16 +777,27 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   /* Compute/Store the Diffie-Hellman shared-secret */
 
-  const DDS::OctetSeq& dh_pub_key = message_in.get_bin_property_value("dh2");
-  if (0 != handshakePtr->diffie_hellman->gen_shared_secret(dh_pub_key)) {
+  const DDS::OctetSeq& dh2 = message_in.get_bin_property_value("dh2");
+  if (0 != handshakePtr->diffie_hellman->gen_shared_secret(dh2)) {
     set_security_error(ex, -1, 0, "Failed to generate shared secret from dh1 and dh2");
     return Failure;
   }
 
   /* Validate Signature field */
 
+  std::vector<const DDS::OctetSeq*> verify_these;
+  const DDS::OctetSeq& hash_c2 = message_in.get_bin_property_value("hash_c2");
+  const DDS::OctetSeq& hash_c1 = message_in.get_bin_property_value("hash_c1");
+  const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
+  verify_these.push_back(&hash_c2);
+  verify_these.push_back(&challenge2);
+  verify_these.push_back(&dh2);
+  verify_these.push_back(&challenge1);
+  verify_these.push_back(&dh1);
+  verify_these.push_back(&hash_c1);
+
   const DDS::OctetSeq& remote_signature = message_in.get_bin_property_value("signature");
-  if (0 != remote_cert->verify_signature(remote_signature)) {
+  if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {
     set_security_error(ex, -1, 0, "Remote 'signature' field failed signature verification");
     return Failure;
   }
@@ -813,6 +820,10 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   handshakePtr->remote_cert = DCPS::move(remote_cert);
   handshakePtr->validation_state = FinalMessage;
+
+  handshakePtr->secret_handle = new SharedSecret(challenge1,
+                                                 challenge2,
+                                                 handshakePtr->diffie_hellman->get_shared_secret());
   return FinalMessage;
 }
 
@@ -885,8 +896,20 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
   const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
 
+  std::vector<const DDS::OctetSeq*> verify_these;
+  const DDS::OctetSeq& hash_c1 = handshake_reply_token.get_bin_property_value("hash_c1");
+  const DDS::OctetSeq& hash_c2 = handshake_reply_token.get_bin_property_value("hash_c1");
+  const DDS::OctetSeq& dh1 = handshake_reply_token.get_bin_property_value("dh1");
+  const DDS::OctetSeq& dh2 = handshake_reply_token.get_bin_property_value("dh2");
+  verify_these.push_back(&hash_c1);
+  verify_these.push_back(&challenge1_reply);
+  verify_these.push_back(&dh1);
+  verify_these.push_back(&challenge2_reply);
+  verify_these.push_back(&dh2);
+  verify_these.push_back(&hash_c2);
+
   const DDS::OctetSeq& remote_signature = handshake_final_token.get_bin_property_value("signature");
-  if (0 != remote_cert->verify_signature(remote_signature)) {
+  if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {
     set_security_error(ex, -1, 0, "Remote 'signature' field failed signature verification");
     return Failure;
   }
@@ -900,6 +923,10 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   }
 
   handshakePtr->validation_state = DDS::Security::VALIDATION_OK;
+
+  handshakePtr->secret_handle = new SharedSecret(challenge1_reply,
+                                                 challenge2_reply,
+                                                 handshakePtr->diffie_hellman->get_shared_secret());
 
   return ValidationOkay;
 }

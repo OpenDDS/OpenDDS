@@ -44,10 +44,9 @@ TEST_F(DiffieHellmanTest, SharedSecret_GenerationAndComparison)
   DDS::OctetSeq dh2_pubkey;
   dh2.pub_key(dh2_pubkey);
 
-  dh1.gen_shared_secret(dh2_pubkey);
-  dh2.gen_shared_secret(dh1_pubkey);
+  ASSERT_EQ(0, dh1.gen_shared_secret(dh2_pubkey));
+  ASSERT_EQ(0, dh2.gen_shared_secret(dh1_pubkey));
 
   bool was_successful = dh1.cmp_shared_secret(dh2);
-
   ASSERT_TRUE(was_successful);
 }

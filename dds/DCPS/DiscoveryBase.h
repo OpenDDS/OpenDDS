@@ -35,6 +35,9 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan) DatareaderCryptoHandleMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoHandle, DCPS::GUID_tKeyLessThan) DatawriterCryptoHandleMap;
+
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
     {
       lhs[0] = static_cast<CORBA::Octet>(rhs);
@@ -300,19 +303,30 @@ namespace OpenDDS {
         pb.publisher_qos_ = publisherQos;
 
         if (is_security_enabled()) {
-            DDS::Security::SecurityException ex;
+          DDS::Security::SecurityException ex;
 
-            bool ok = get_access_control()->get_datawriter_sec_attributes(
-                get_permissions_handle(),
-                topic_names_[topicId].c_str(),
-                publisherQos.partition,
-                DDS::Security::DataTagQosPolicy(),
-                pb.security_attribs_,
-                ex);
+          bool ok = get_access_control()->get_datawriter_sec_attributes(
+              get_permissions_handle(),
+              topic_names_[topicId].c_str(),
+              publisherQos.partition,
+              DDS::Security::DataTagQosPolicy(),
+              pb.security_attribs_,
+              ex);
 
-            if (!ok) {
-                // TODO: log error / throw exception??
-            }
+          if (!ok) {
+              // TODO: log error / throw exception??
+          }
+
+          DDS::Security::DatawriterCryptoHandle handle = get_crypto_key_factory()->register_local_datawriter(crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
+
+          if (handle == DDS::HANDLE_NIL) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_publication() - ")
+              ACE_TEXT("unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
+                ex.code, ex.minor_code, ex.message.in()));
+          }
+
+          local_writer_crypto_handles_[rid] = handle;
         }
 
         TopicDetails& td = topics_[topic_names_[topicId]];
@@ -386,19 +400,30 @@ namespace OpenDDS {
         sb.filterProperties.expressionParameters = params;
 
         if (is_security_enabled()) {
-            DDS::Security::SecurityException ex;
+          DDS::Security::SecurityException ex;
 
-            bool ok = get_access_control()->get_datareader_sec_attributes(
-                get_permissions_handle(),
-                topic_names_[topicId].c_str(),
-                subscriberQos.partition,
-                DDS::Security::DataTagQosPolicy(),
-                sb.security_attribs_,
-                ex);
+          bool ok = get_access_control()->get_datareader_sec_attributes(
+              get_permissions_handle(),
+              topic_names_[topicId].c_str(),
+              subscriberQos.partition,
+              DDS::Security::DataTagQosPolicy(),
+              sb.security_attribs_,
+              ex);
 
-            if (!ok) {
-                // TODO: log error / throw exception??
-            }
+          if (!ok) {
+              // TODO: log error / throw exception??
+          }
+
+          DDS::Security::DatareaderCryptoHandle handle = get_crypto_key_factory()->register_local_datareader(crypto_handle_, DDS::PropertySeq(), sb.security_attribs_, ex);
+
+          if (handle == DDS::HANDLE_NIL) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_subscription() - ")
+              ACE_TEXT("unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
+                ex.code, ex.minor_code, ex.message.in()));
+          }
+
+          local_reader_crypto_handles_[rid] = handle;
         }
 
         TopicDetails& td = topics_[topic_names_[topicId]];
@@ -802,7 +827,7 @@ namespace OpenDDS {
           wa.writerQos = *dwQos;
 #else
           const DCPS::ReaderAssociation ra =
-            {add_security_info(*rTls, reader), reader, *subQos, *drQos,
+            {add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
              cfProp->filterClassName, cfProp->filterExpression,
 #else
@@ -811,7 +836,7 @@ namespace OpenDDS {
              cfProp->expressionParameters};
 
           const DCPS::WriterAssociation wa =
-            {add_security_info(*wTls, writer), writer, *pubQos, *dwQos};
+            {add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos};
 #endif
 
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
@@ -891,7 +916,7 @@ namespace OpenDDS {
         }
       }
 
-      static bool is_opendds(const GUID_t& endpoint)
+      virtual bool is_opendds(const GUID_t& endpoint) const
       {
         return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
                             sizeof(DCPS::VENDORID_OCI));
@@ -909,7 +934,8 @@ namespace OpenDDS {
 
       virtual DCPS::TransportLocatorSeq
       add_security_info(const DCPS::TransportLocatorSeq& locators,
-                        const RepoId&) { return locators; }
+                        const RepoId& /*writer*/, const RepoId& /*reader*/)
+      { return locators; }
 
       virtual bool defer_writer(const RepoId& writer,
                                 const RepoId& writer_participant) = 0;
@@ -993,6 +1019,16 @@ namespace OpenDDS {
         return access_control_;
       }
 
+      inline void set_crypto_key_factory(DDS::Security::CryptoKeyFactory_var ckf)
+      {
+        crypto_key_factory_ = ckf;
+      }
+
+      inline DDS::Security::CryptoKeyFactory_var get_crypto_key_factory() const
+      {
+        return crypto_key_factory_;
+      }
+
       ACE_Thread_Mutex& lock_;
       DCPS::RepoId participant_id_;
       BitKeyMap pub_key_to_id_, sub_key_to_id_;
@@ -1007,8 +1043,14 @@ namespace OpenDDS {
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
 
-      DDS::Security::PermissionsHandle permissions_handle_;
       DDS::Security::AccessControl_var access_control_;
+      DDS::Security::CryptoKeyFactory_var crypto_key_factory_;
+
+      DDS::Security::PermissionsHandle permissions_handle_;
+      DDS::Security::ParticipantCryptoHandle crypto_handle_;
+
+      DatareaderCryptoHandleMap local_reader_crypto_handles_;
+      DatawriterCryptoHandleMap local_writer_crypto_handles_;
     };
 
     template <typename EndpointManagerType>
@@ -1212,10 +1254,15 @@ namespace OpenDDS {
         DDS::Security::SharedSecretHandle_var shared_secret_handle_;
         DDS::Security::PermissionsHandle permissions_handle_;
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
+
+        DatareaderCryptoHandleMap reader_crypto_handles_;
+        DatawriterCryptoHandleMap writer_crypto_handles_;
       };
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
                               DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;
       typedef typename DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+      typedef typename DiscoveredParticipantMap::const_iterator
+        DiscoveredParticipantConstIter;
 
       virtual EndpointManagerType& endpoint_manager() = 0;
 

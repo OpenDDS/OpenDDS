@@ -64,32 +64,49 @@ namespace OpenDDS {
 
       int PrivateKey::sign(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst)
       {
+        EVP_MD_CTX* signature_ctx = NULL;
+        std::vector<const DDS::OctetSeq*>::const_iterator i, n;
+        size_t len = 0u;
 
-        /* TODO Whoops this calculates the hash! Sign the document instead... */
-        EVP_MD_CTX* hash_ctx = EVP_MD_CTX_new();
-        if (! hash_ctx) {
+        signature_ctx = EVP_MD_CTX_new();
+        if (! signature_ctx) {
           OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
-          return 1;
+          goto error;
         }
 
-        EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
+        if (1 != EVP_DigestSignInit(signature_ctx, NULL, EVP_sha256(), NULL, k_)) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestSignInit failed");
+          goto error;
+        }
 
-        unsigned char hash[EVP_MAX_MD_SIZE] = {0};
-        unsigned int len = 0u;
-
-        std::vector<const DDS::OctetSeq*>::const_iterator i, n = src.end();
+        n = src.end();
         for (i = src.begin(); i != n; ++i) {
-          EVP_DigestUpdate(hash_ctx, (*i)->get_buffer(), (*i)->length());
+          if ((*i)->length() > 0) {
+            if (1 != EVP_DigestSignUpdate(signature_ctx, (*i)->get_buffer(), (*i)->length())) {
+              OPENDDS_SSL_LOG_ERR("EVP_DigestSignUpdate failed");
+              goto error;
+            }
+          }
         }
 
-        EVP_DigestFinal_ex(hash_ctx, hash, &len);
+        /* First call with NULL to extract size */
+        if (1 != EVP_DigestSignFinal(signature_ctx, NULL, &len)) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
+          goto error;
+        }
 
-        dst.length(len);
-        std::memcpy(dst.get_buffer(), hash, len);
-
-        EVP_MD_CTX_free(hash_ctx);
+        /* Second call to extract the data */
+        dst.length(static_cast<unsigned int>(len));
+        if (1 != EVP_DigestSignFinal(signature_ctx, dst.get_buffer(), &len)) {
+          OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
+          goto error;
+        }
 
         return 0;
+
+        error:
+          if (signature_ctx) EVP_MD_CTX_free(signature_ctx);
+          return 1;
       }
 
       EVP_PKEY* PrivateKey::EVP_PKEY_from_pem(const std::string& path, const std::string& password)
