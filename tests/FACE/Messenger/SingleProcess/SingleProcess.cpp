@@ -32,7 +32,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
 
 void pub_once (FACE::CONNECTION_ID_TYPE& connId,
               FACE::MESSAGE_SIZE_TYPE& size,
-              FACE::RETURN_CODE_TYPE status) 
+              FACE::RETURN_CODE_TYPE status)
 {
   ACE_OS::sleep(5); // connection established with Subscriber
 
@@ -80,7 +80,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                               FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  pub_once(pub_connId, pub_max_msg_size, status); 
+  pub_once(pub_connId, pub_max_msg_size, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   bool testPassed = true;
