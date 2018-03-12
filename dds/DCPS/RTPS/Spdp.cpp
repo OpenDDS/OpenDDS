@@ -267,6 +267,11 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     participants_[guid] = DiscoveredParticipant(pdata, time);
     DiscoveredParticipant& dp = participants_[guid];
 
+    // notify Sedp of association
+    // Sedp may call has_discovered_participant.
+    // This is what the participant must be added before this call to associate.
+    sedp_.associate(dp.pdata_);
+
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     this->tport_->write_i();
@@ -360,11 +365,6 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
                                 DDS::NEW_VIEW_STATE);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
-
-  // notify Sedp of association
-  // Sedp may call has_discovered_participant.
-  // This is what the participant must be added before this call to associate.
-  sedp_.associate(dp.pdata_);
 
   // Iterator is no longer valid
   DiscoveredParticipantIter iter = participants_.find(guid);
@@ -607,7 +607,6 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   // notify Sedp of association
   // Sedp may call has_discovered_participant.
   // This is what the participant must be added before this call to associate.
-  sedp_.associate(dp.pdata_);
   sedp_.associate_secure_writers_to_readers(dp.pdata_);
   sedp_.associate_secure_readers_to_writers(dp.pdata_);
 
