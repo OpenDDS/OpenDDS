@@ -2779,8 +2779,8 @@ Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                               const RepoId& reader)
 {
   static DCPS::SequenceNumber sequence = 0;
-  msg.message_identity.source_guid = participant_stateless_message_writer_.get_repo_id();
-  return participant_stateless_message_writer_.write_stateless_message(msg, reader, ++sequence);
+  msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
+  return participant_stateless_message_writer_.write_stateless_message(msg, reader, sequence);
 }
 
 DDS::ReturnCode_t

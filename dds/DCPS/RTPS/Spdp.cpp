@@ -440,10 +440,17 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
 
+    DCPS::RepoId writer = guid_;
+    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+
+    DCPS::RepoId reader = msg.message_identity.source_guid;
+    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+
     DDS::Security::ParticipantStatelessMessage reply;
+    reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.destination_participant_guid = msg.message_identity.source_guid;
-    reply.destination_endpoint_guid = GUID_UNKNOWN;
+    reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
     reply.message_data[0] = msg.message_data[0];
@@ -478,10 +485,17 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   if (dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT || dp.auth_state_ == AS_HANDSHAKE_REPLY_SENT) {
+    DCPS::RepoId writer = guid_;
+    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+
+    DCPS::RepoId reader = msg.message_identity.source_guid;
+    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+
     DDS::Security::ParticipantStatelessMessage reply;
+    reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.destination_participant_guid = msg.message_identity.source_guid;
-    reply.destination_endpoint_guid = GUID_UNKNOWN;
+    reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
 
@@ -717,10 +731,14 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       return;
     }
 
+    DCPS::RepoId writer = guid_;
+    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+
     DCPS::RepoId reader = guid;
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage msg;
+    msg.message_identity.source_guid = writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     msg.destination_participant_guid = guid;
     msg.destination_endpoint_guid = reader;
