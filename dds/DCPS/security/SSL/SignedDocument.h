@@ -27,6 +27,8 @@ namespace OpenDDS {
 
         SignedDocument(const std::string& uri);
 
+        SignedDocument(const DDS::OctetSeq& src);
+
         SignedDocument();
 
         ~SignedDocument();
@@ -39,9 +41,11 @@ namespace OpenDDS {
 
         int verify_signature(const Certificate& cert);
 
-        void serialize(std::string& dst);
+        int serialize(std::vector<unsigned char>& dst);
 
-        int deserialize(const std::string& src);
+        int serialize(DDS::OctetSeq& dst);
+
+        int deserialize(const DDS::OctetSeq& src);
 
       private:
 
