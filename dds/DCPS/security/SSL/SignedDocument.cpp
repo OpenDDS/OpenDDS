@@ -22,6 +22,11 @@ namespace OpenDDS {
 
       }
 
+      SignedDocument::SignedDocument(const DDS::OctetSeq& src) : doc_(NULL), content_(NULL), plaintext_("")
+      {
+        deserialize(src);
+      }
+
       SignedDocument::~SignedDocument()
       {
         if (doc_) PKCS7_free(doc_);
@@ -81,12 +86,52 @@ namespace OpenDDS {
         return result;
       }
 
-      void SignedDocument::serialize(std::string& dst)
+      int SignedDocument::serialize(std::vector<unsigned char>& dst)
       {
-        get_content(dst);
+        int result = 1;
+
+        if (doc_) {
+
+          BIO* buffer = BIO_new(BIO_s_mem());
+          if (buffer) {
+
+            if (1 == SMIME_write_PKCS7(buffer, doc_, NULL, 0)) {
+
+              unsigned char tmp[32] = {0};
+              int len = 0;
+              while ((len = BIO_read(buffer, tmp, sizeof(tmp))) > 0) {
+                dst.insert(dst.end(), tmp, tmp + len);
+                result = 0;
+              }
+
+            } else {
+                OPENDDS_SSL_LOG_ERR("failed to write X509 to PEM");
+            }
+
+            BIO_free(buffer);
+
+          } else {
+            OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
+          }
+        }
+
+        return result;
       }
 
-      int SignedDocument::deserialize(const std::string& src)
+      int SignedDocument::serialize(DDS::OctetSeq& dst)
+      {
+        std::vector<unsigned char> tmp;
+        int err = serialize(tmp);
+        if (! err) {
+            dst.length(tmp.size());
+            for (size_t i = 0; i < tmp.size(); ++i) {
+              dst[i] = tmp[i];
+            }
+        }
+        return err;
+      }
+
+      int SignedDocument::deserialize(const DDS::OctetSeq& src)
       {
         int result = 1;
 
@@ -96,7 +141,7 @@ namespace OpenDDS {
             BIO* buffer = BIO_new(BIO_s_mem());
             if (buffer) {
 
-              int len = BIO_write(buffer, reinterpret_cast<const unsigned char*>(src.c_str()), src.length());
+              int len = BIO_write(buffer, src.get_buffer(), src.length());
               if (len > 0) {
 
                 doc_ = SMIME_read_PKCS7(buffer, &content_);
@@ -105,7 +150,7 @@ namespace OpenDDS {
                     cache_plaintext();
 
                 } else {
-                    OPENDDS_SSL_LOG_ERR("failed to read X509 from BIO");
+                    OPENDDS_SSL_LOG_ERR("failed to read SMIME from BIO");
                     content_ = NULL;
                 }
 

@@ -15,7 +15,7 @@ class SignedDocumentTest : public ::testing::Test
 public:
   SignedDocumentTest() :
     ca_("file:../certs/opendds_identity_ca_cert.pem"),
-    doc_("file:../governance/Governance_SC0_SecurityDisabled.p7s")
+    doc_("file:../governance/Governance_SC1_ProtectedDomain1.p7s")
   {
 
   }
@@ -38,10 +38,9 @@ TEST_F(SignedDocumentTest, GetContent_Success)
 
 TEST_F(SignedDocumentTest, SerializeDeserialize_Success)
 {
-  std::string tmp;
+  DDS::OctetSeq tmp;
   doc_.serialize(tmp);
 
-  SignedDocument copy;
-  copy.deserialize(tmp);
+  SignedDocument copy(tmp);
   ASSERT_EQ(copy, doc_);
 }
