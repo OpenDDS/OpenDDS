@@ -22,6 +22,7 @@
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
+#include <iterator>
 
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -149,7 +150,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   pctWriter.set_property(0, "dds.perm.cert",get_file_contents(perm_file.c_str()).c_str(), true);
   clean_smime_content(perm_content);
 
-  std::cout <<"[" <<  perm_content << "]" << std::endl;
 
   // Set and store the permissions token
   ::DDS::Security::PermissionsToken permissions_token;
@@ -168,6 +168,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ::CORBA::Boolean perm_handle = generate_handle();
   local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
+
+  local_identity_map.insert(std::make_pair(identity,perm_handle));
 
 
   return perm_handle ;
@@ -198,8 +200,28 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
 
-  ::CORBA::Boolean perm_handle = generate_handle();
-  return perm_handle;
+  ACIdentityMap::iterator iter = local_identity_map.begin();
+  iter = local_identity_map.find(local_identity_handle);
+  if(iter == local_identity_map.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching local identity handle present");
+    return DDS::HANDLE_NIL;
+  }
+
+
+  // Extract Governance data for new permissions entry
+  ::DDS::Security::PermissionsHandle rph = iter->second;
+
+  ACPermsMap::iterator piter = local_ac_perms.begin();
+  piter = local_ac_perms.find(rph);
+  if(piter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return DDS::HANDLE_NIL;
+  }
+
+  ac_perms perm_set;
+
+  perm_set.gov_rules = piter->second.gov_rules;
+
   // local_access_control_data_.load(remote_credential_token.properties);
 
 
@@ -213,11 +235,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   local_ca.subject_name_to_str(ca_subject);
 
   //TODO: need to implement subject name check ( see Table 63 validate_local_permissions )
-
-
-
-
-  ac_perms perm_set;
 
 
   // permissions file
@@ -240,6 +257,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Try to locate the payload
 
+  std::string message(static_cast<unsigned char*>(perm_content), perm_content.size());
+
   clean_smime_content(perm_content);
 
 
@@ -258,11 +277,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   };
 
-//  ::CORBA::Boolean perm_handle = generate_handle();
-//  local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
-//
-//
-//  return perm_handle ;
+  ::CORBA::Long perm_handle = generate_handle();
+  local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
+
+
+  return perm_handle ;
 
 }
 
@@ -1231,6 +1250,7 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
 
     return false;
 }
+
 
 } // namespace Security
 } // namespace OpenDDS

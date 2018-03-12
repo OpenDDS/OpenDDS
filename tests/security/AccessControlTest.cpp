@@ -17,6 +17,9 @@ using DDS::PropertySeq;
 using DDS::DomainParticipantQos;
 using namespace testing;
 
+
+static const ::CORBA::Boolean CFALSE(false);
+static const ::CORBA::Boolean CTRUE(true);
 static const char* Expected_Permissions_Token_Class_Id ="DDS:Access:Permissions:1.0";
 static const char* Expected_Permissions_Cred_Token_Class_Id ="DDS:Access:PermissionsCredential";
 static const char* identity_ca_file = "certs/opendds_identity_ca_cert.pem";
@@ -30,8 +33,7 @@ class MockDataWriter : public DDS::DataWriter {
  public:
   typedef ACE_Strong_Bound_Ptr<MockDataWriter, ACE_Null_Mutex> SmartPtr;
 
-  MOCK_METHOD1(set_qos,
-      ::DDS::ReturnCode_t(const ::DDS::DataWriterQos & qos));
+  MOCK_METHOD1(set_qos, ::DDS::ReturnCode_t(const ::DDS::DataWriterQos & qos));
   MOCK_METHOD1(get_qos,
       ::DDS::ReturnCode_t(::DDS::DataWriterQos & qos));
   MOCK_METHOD2(set_listener,
@@ -294,16 +296,15 @@ public:
       seq[len] = p;
   }
 
-
-    std::string extract_file_name(const std::string& file_parm) {
-        std::string del = ":";
-        int pos = file_parm.find_last_of(del);
-        if ((pos > 0 ) && (pos != file_parm.length() - 1) ) {
-            return file_parm.substr(pos + 1);
-        } else {
-            return std::string("");
-        }
+std::string extract_file_name(const std::string& file_parm) {
+    std::string del = ":";
+    size_t pos = file_parm.find_last_of(del);
+    if ((pos > 0 ) && (pos != file_parm.length() - 1) ) {
+        return file_parm.substr(pos + 1);
+    } else {
+        return std::string("");
     }
+}
 
 std::string get_file_contents(const char *filename) {
     std::ifstream in(filename, std::ios::in | std::ios::binary);
@@ -403,21 +404,28 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
 
   std::string ca(get_file_contents(identity_ca_file));
   std::string pf(get_file_contents(perm_join_p7s_file));
-
+  std::cout << pf << std::endl;
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  // remote_apc_token.binary_properties[0].value = &ca;
+  remote_apc_token.binary_properties[0].value.length(ca.size());
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), ca.c_str(),ca.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
-  // remote_apc_token.binary_properties[0].value = &pf;
-  remote_apc_token.binary_properties[0].propagate = true;
+  remote_apc_token.binary_properties[1].value.length(pf.size());
+  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(),pf.c_str(), pf.size());
+  remote_apc_token.binary_properties[1].propagate = true;
 
 
-  ::DDS::Security::PermissionsHandle out_handle = get_inst().validate_remote_permissions(
+
+  ::DDS::Security::PermissionsHandle local_out_handle =
+          get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
+  ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
     auth_plugin.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
-  EXPECT_FALSE(DDS::HANDLE_NIL == out_handle);
+  EXPECT_FALSE(DDS::HANDLE_NIL == remote_out_handle);
+  std::cout << ex.message << std::endl;
 }
 
 TEST_F(AccessControlTest, check_create_participant_InvalidInput)
@@ -425,7 +433,7 @@ TEST_F(AccessControlTest, check_create_participant_InvalidInput)
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
 
-  EXPECT_EQ(false, get_inst().check_create_participant(
+  EXPECT_FALSE(get_inst().check_create_participant(
     DDS::HANDLE_NIL, 1, qos, ex));
 }
 
