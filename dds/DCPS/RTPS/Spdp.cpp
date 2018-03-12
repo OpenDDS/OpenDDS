@@ -717,15 +717,18 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       return;
     }
 
+    DCPS::RepoId reader = guid;
+    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+
     DDS::Security::ParticipantStatelessMessage msg;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     msg.destination_participant_guid = guid;
-    msg.destination_endpoint_guid = GUID_UNKNOWN;
+    msg.destination_endpoint_guid = reader;
     msg.source_endpoint_guid = GUID_UNKNOWN;
     msg.message_data.length(1);
     msg.message_data[0] = hs_mt;
 
-    if (sedp_.write_stateless_message(msg, guid) != DDS::RETCODE_OK) {
+    if (sedp_.write_stateless_message(msg, reader) != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
         ACE_TEXT("Unable to write stateless message.\n")));
       return;

@@ -66,9 +66,15 @@ module DDS {
     const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER = 1 << 26;
     const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_READER = 1 << 27;
 
+    // match RTPS spec for sequence number (differs from Security spec)
+    struct SequenceNumber_t {
+      long high;
+      unsigned long low;
+    };
+
     struct MessageIdentity {
       OpenDDS::DCPS::GUID_t source_guid;
-      long long sequence_number;
+      SequenceNumber_t sequence_number;
     };
 
     typedef string GenericMessageClassId;
