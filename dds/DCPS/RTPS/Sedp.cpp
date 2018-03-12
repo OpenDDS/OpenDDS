@@ -576,6 +576,34 @@ create_association_data_proto(DCPS::AssociationData& proto,
 }
 
 void
+Sedp::associate_preauth(const SPDPdiscoveredParticipantData& pdata)
+{
+  // First create a 'prototypical' instance of AssociationData.  It will
+  // be copied and modified for each of the (up to) four SEDP Endpoints.
+  DCPS::AssociationData proto;
+  create_association_data_proto(proto, pdata);
+
+  const BuiltinEndpointSet_t& avail =
+    pdata.participantProxy.availableBuiltinEndpoints;
+  /*
+   * Stateless messages are associated here because they are the first step in the
+   * security-enablement process and as such they are sent in the clear.
+   */
+
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    participant_stateless_message_reader_->assoc(peer);
+  }
+
+  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+    participant_stateless_message_writer_.assoc(peer);
+  }
+}
+
+void
 Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
 {
   // First create a 'prototypical' instance of AssociationData.  It will
@@ -601,17 +629,6 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     participant_message_reader_->assoc(peer);
-  }
-
-  /*
-   * Stateless messages are associated here because they are the first step in the
-   * security-enablement process and as such they are sent in the clear.
-   */
-
-  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
-    DCPS::AssociationData peer = proto;
-    peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-    participant_stateless_message_reader_->assoc(peer);
   }
 
   DCPS::unique_ptr<SPDPdiscoveredParticipantData> dpd(
@@ -735,17 +752,6 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     sedp_->participant_message_writer_.assoc(peer);
-  }
-
-  /*
-   * Stateless messages are associated here because they are the first step in the
-   * security-enablement process and as such they are sent in the clear.
-   */
-
-  if (avail & DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
-      DCPS::AssociationData peer = proto;
-      peer.remote_id_.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-      sedp_->participant_stateless_message_writer_.assoc(peer);
   }
 
   //FUTURE: if/when topic propagation is supported, add it here

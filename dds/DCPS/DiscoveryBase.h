@@ -317,7 +317,7 @@ namespace OpenDDS {
               // TODO: log error / throw exception??
           }
 
-          DDS::Security::DatawriterCryptoHandle handle = get_crypto_key_factory()->register_local_datawriter(crypto_handle_, qos.property.value, pb.security_attribs_, ex);
+          DDS::Security::DatawriterCryptoHandle handle = get_crypto_key_factory()->register_local_datawriter(crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
 
           if (handle == DDS::HANDLE_NIL) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -414,7 +414,7 @@ namespace OpenDDS {
               // TODO: log error / throw exception??
           }
 
-          DDS::Security::DatareaderCryptoHandle handle = get_crypto_key_factory()->register_local_datareader(crypto_handle_, qos.property.value, sb.security_attribs_, ex);
+          DDS::Security::DatareaderCryptoHandle handle = get_crypto_key_factory()->register_local_datareader(crypto_handle_, DDS::PropertySeq(), sb.security_attribs_, ex);
 
           if (handle == DDS::HANDLE_NIL) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
