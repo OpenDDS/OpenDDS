@@ -262,11 +262,9 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     }
   }
 
-  if (keys.length()) {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    keys_[h] = keys;
-    participant_to_entity_.insert(std::make_pair(participant_crypto, h));
-  }
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  keys_[h] = keys;
+  participant_to_entity_.insert(std::make_pair(participant_crypto, h));
 
   return h;
 }
@@ -339,11 +337,9 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
     }
   }
 
-  if (keys.length()) {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    keys_[h] = keys;
-    participant_to_entity_.insert(std::make_pair(participant_crypto, h));
-  }
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  keys_[h] = keys;
+  participant_to_entity_.insert(std::make_pair(participant_crypto, h));
 
   return h;
 }
