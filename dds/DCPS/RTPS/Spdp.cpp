@@ -389,10 +389,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DDS::Security::SecurityException se;
   Security::Authentication_var auth = security_config_->get_authentication();
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  RepoId src_participant = msg.message_identity.source_guid;
+  src_participant.entityId = DCPS::ENTITYID_PARTICIPANT;
 
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // If this message wasn't intended for us, or if discovery hasn't initialized / validated this participant yet, ignore handshake messages
-  if (msg.destination_participant_guid != guid_ || !msg.message_data.length() || participants_.find(msg.message_identity.source_guid) == participants_.end()) {
+  if (msg.destination_participant_guid != guid_ || !msg.message_data.length()
+      || participants_.find(src_participant) == participants_.end()) {
     return;
   }
 

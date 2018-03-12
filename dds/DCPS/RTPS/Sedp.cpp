@@ -1443,7 +1443,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
   if (should_drop_message(wdata.ddsPublicationData.topic_name)) {
-      return;
+    return;
   }
 
   if (!spdp_.has_discovered_participant (guid_participant)) {
@@ -1452,7 +1452,6 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
   process_discovered_writer_data(message_id, wdata, guid);
-
 }
 
 void
@@ -1699,7 +1698,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
   if (should_drop_message(rdata.ddsSubscriptionData.topic_name)) {
-      return;
+    return;
   }
 
   if (!spdp_.has_discovered_participant (guid_participant)) {
@@ -1708,7 +1707,6 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 
   process_discovered_reader_data(message_id, rdata, guid);
-
 }
 
 void
@@ -1845,7 +1843,7 @@ bool Sedp::should_drop_message(const DDS::Security::ParticipantGenericMessage& m
   using OpenDDS::DCPS::GUID_t;
   using OpenDDS::DCPS::GUID_UNKNOWN;
 
-  bool drop = false;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
 
   const GUID_t src_endpoint = msg.source_endpoint_guid;
   const GUID_t dst_endpoint = msg.destination_endpoint_guid;
@@ -1854,38 +1852,38 @@ bool Sedp::should_drop_message(const DDS::Security::ParticipantGenericMessage& m
   const GUID_t this_participant = participant_id_;
 
   if (ignoring(src_endpoint)) {
-    drop = true;
-
-  } else if((dst_participant != GUID_UNKNOWN) && (dst_participant != this_participant)) {
-      drop = true;
-
-  } else if((dst_endpoint != GUID_UNKNOWN) && (dst_endpoint != this_endpoint)) {
-      drop = true;
+    return true;
   }
 
-  return drop;
+  if (dst_participant != GUID_UNKNOWN && dst_participant != this_participant) {
+    return true;
+  }
+
+  if (dst_endpoint != GUID_UNKNOWN && dst_endpoint != this_endpoint) {
+    return true;
+  }
+
+  return false;
 }
 
 bool Sedp::should_drop_message(const char* unsecure_topic_name)
 {
-  bool result = false;
-
   if (is_security_enabled()) {
-      DDS::Security::TopicSecurityAttributes attribs;
-      DDS::Security::SecurityException ex;
+    DDS::Security::TopicSecurityAttributes attribs;
+    DDS::Security::SecurityException ex;
 
-      bool ok = get_access_control()->get_topic_sec_attributes(
-          get_permissions_handle(),
-          unsecure_topic_name,
-          attribs,
-          ex);
+    bool ok = get_access_control()->get_topic_sec_attributes(
+      get_permissions_handle(),
+      unsecure_topic_name,
+      attribs,
+      ex);
 
-      if (!ok || attribs.is_discovery_protected) {
-          result = true;
-      }
+    if (!ok || attribs.is_discovery_protected) {
+      return true;
+    }
   }
 
-  return result;
+  return false;
 }
 
 void
@@ -1901,21 +1899,22 @@ Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
                     const DDS::Security::ParticipantStatelessMessage& msg)
 {
   if (spdp_.shutting_down()) {
-      return;
+    return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   if (should_drop_message(msg)) {
-      return;
+    return;
   }
 
   /* TODO: Handle the rest of the message... See 7.4.3 in the security spec. */
 
   // Without thinking too much about 7.4.3 for the moment, we need to forward auth request and handshake messages up to Spdp
-  if (msg.message_class_id == DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST) {
+  if (0 == std::strcmp(msg.message_class_id,
+                       DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST)) {
     spdp_.handle_auth_request(msg);
-  } else if (msg.message_class_id == DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE) {
+
+  } else if (0 == std::strcmp(msg.message_class_id,
+                              DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE)) {
     spdp_.handle_handshake_message(msg);
   }
 
@@ -1934,13 +1933,11 @@ Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
                     const DDS::Security::ParticipantVolatileMessageSecure& data)
 {
   if (spdp_.shutting_down()) {
-      return;
+    return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   if (should_drop_message(data)) {
-      return;
+    return;
   }
 
   /* TODO: Handle the rest of the message... See 7.4.4 in the security spec. */

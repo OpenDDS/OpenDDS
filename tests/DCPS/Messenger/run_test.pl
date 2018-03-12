@@ -124,7 +124,7 @@ $test->report_unused_flags(!$flag_found);
 $pub_opts .= $thread_per_connection;
 
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                       "$repo_bit_opt");
+                       "$repo_bit_opt") unless $is_rtps_disc;
 
 $test->process("publisher", "publisher", $pub_opts);
 my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
