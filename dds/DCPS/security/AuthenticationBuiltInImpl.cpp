@@ -19,13 +19,24 @@
 #include <cstdio>
 
 #include "dds/DCPS/security/SSL/Utils.h"
+#include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
+  static void set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message);
+
   static bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2);
+
+  static void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t dst);
+
+  static bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
+                                       const std::vector<unsigned char>& subject_name_hash,
+                                       DDS::Security::SecurityException& ex);
 
 static const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
 static const std::string Auth_Plugin_Major_Version("1");
@@ -357,6 +368,65 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   return result;
 }
 
+void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t dst)
+{
+  dst = DCPS::GUID_UNKNOWN;
+
+  ACE_Message_Block buffer(reinterpret_cast<const char*>(cpdata.get_buffer()), cpdata.length());
+  OpenDDS::DCPS::Serializer serializer(&buffer, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
+  RTPS::ParameterList params;
+  serializer >> params;
+
+  for (size_t i = 0; i < params.length(); ++i) {
+    const RTPS::Parameter& p = params[i];
+
+    if (p._d() == RTPS::PID_PARTICIPANT_GUID) {
+      dst = p.guid();
+      break;
+    }
+  }
+}
+
+bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
+                                     const std::vector<unsigned char>& subject_name_hash,
+                                     DDS::Security::SecurityException& ex)
+{
+  if (cpdata.length() > 5u) { /* Enough to withstand the hash-comparison below */
+
+    DCPS::GUID_t remote_participant_guid;
+    extract_participant_guid_from_cpdata(cpdata, remote_participant_guid);
+
+    const DCPS::GuidPrefix_t& prefix = remote_participant_guid.guidPrefix;
+
+    /* Make sure first bit is set */
+
+    if ((prefix[0] & 0x80) != 0x80) {
+      set_security_error(ex, -1, 0, "Malformed participant_guid in 'c.pdata'; First bit must be set.");
+      return false;
+    }
+
+    /* Check the following 47 bits match the subject-hash */
+
+    /* First byte needs to remove the manually-set first-bit before comparison */
+    if ((prefix[0] & 0x7F) != SSL::offset_1bit(&subject_name_hash[0], 0)) {
+      set_security_error(ex, -1, 0, "First byte of participant_guid in 'c.pdata' does not match bits of subject-name hash in 'c.id'");
+      return false;
+    }
+    for (size_t i = 1; i <= 5u; ++i) { /* Compare remaining 5 bytes */
+      if (prefix[i] != SSL::offset_1bit(&subject_name_hash[0], i)) { /* Slide the hash to the right 1 so it aligns with the guid prefix */
+        set_security_error(ex, -1, 0, "Bits 2 - 48 of 'c.pdata' participant_guid does not match first 47 bits of subject-name hash in 'c.id'");
+        return false;
+      }
+    }
+
+  } else {
+    set_security_error(ex, -1, 0, "Data missing in 'c.pdata'");
+    return false;
+  }
+
+  return true;
+}
+
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::begin_handshake_reply(
   ::DDS::Security::HandshakeHandle & handshake_handle,
   ::DDS::Security::HandshakeMessageToken & handshake_message_out,
@@ -421,37 +491,20 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       return Failure;
     }
 
+    /* Validate participant_guid in c.pdata */
+
     const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
-    if (cpdata.length() > 5u) { /* Enough to withstand the hash-comparison below */
 
-      /* Make sure first bit is set */
-      if ((cpdata[0] & 0x80) != 0x80) {
-        set_security_error(ex, -1, 0, "Malformed ParticipantBuiltinTopicData in 'c.pdata'; First bit must be set.");
-        return Failure;
-      }
-
-      /* Check the following 47 bits match the subject-hash */
-      std::vector<unsigned char> hash;
-      if (0 != remote_cert->subject_name_digest(hash)) {
-        return Failure;
-      }
-
-      /* First byte needs to remove the manually-set first-bit before comparison */
-      if ((cpdata[0] & 0x7F) != SSL::offset_1bit(&hash[0], 0)) { /* Slide the hash to the right 1 so it aligns with cpdata */
-        set_security_error(ex, -1, 0, "First byte in 'c.pdata' does not match bits of subject-name hash in 'c.id'");
-        return Failure;
-      }
-      for (size_t i = 1; i <= 5u; ++i) { /* Compare remaining 5 bytes */
-        if (cpdata[i] != SSL::offset_1bit(&hash[0], i)) {
-          set_security_error(ex, -1, 0, "Bits 2 - 48 of 'c.pdata' does not match first 47 bits of subject-name hash in 'c.id'");
-          return Failure;
-        }
-      }
-
-    } else {
-      set_security_error(ex, -1, 0, "Empty ParticipantBuiltinTopicData in 'c.pdata'");
+    std::vector<unsigned char> hash;
+    if (0 != remote_cert->subject_name_digest(hash)) {
+      set_security_error(ex, -1, 0, "Failed to generate subject-name digest from remote certificate.");
       return Failure;
     }
+
+    if (! validate_topic_data_guid(cpdata, hash, ex)) {
+        return Failure;
+    }
+
   }
 
   /* TODO Add OCSP checks when "ocsp_status" property is given in message_in.
@@ -771,6 +824,20 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     }
   }
 
+  /* Validate participant_guid in c.pdata */
+
+  const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
+
+  std::vector<unsigned char> hash;
+  if (0 != remote_cert->subject_name_digest(hash)) {
+    set_security_error(ex, -1, 0, "Failed to generate subject-name digest from remote certificate.");
+    return Failure;
+  }
+
+  if (! validate_topic_data_guid(cpdata, hash, ex)) {
+      return Failure;
+  }
+
   /* Compute/Store the Diffie-Hellman shared-secret */
 
   const DDS::OctetSeq& dh2 = message_in.get_bin_property_value("dh2");
@@ -999,7 +1066,7 @@ bool AuthenticationBuiltInImpl::check_class_versions(const char* remote_class_id
   return class_matches;
 }
 
-void AuthenticationBuiltInImpl::set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message)
+void set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message)
 {
   ex.code = code;
   ex.minor_code = minor_code;
