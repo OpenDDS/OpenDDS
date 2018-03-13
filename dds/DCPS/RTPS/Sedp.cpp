@@ -3277,13 +3277,25 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
     return locators;
   }
 
-  //TODO: [DDS-Security] Exactly one of 'writer' or 'reader' belongs to the
-  // participant that's local to this instance.  Get crypto handles for the
-  // *discovered* participant (the one from non-local writer/reader) and for
-  // both the DataWriter and DataReader involved in the association.
-  const DDS::Security::ParticipantCryptoHandle part_handle = 0x12345678;
-  const DDS::Security::DatawriterCryptoHandle dw_handle = 0;
-  const DDS::Security::DatareaderCryptoHandle dr_handle = 0;
+  DDS::Security::ParticipantCryptoHandle part_handle = DDS::HANDLE_NIL;
+  DDS::Security::DatawriterCryptoHandle dw_handle = DDS::HANDLE_NIL;
+  DDS::Security::DatareaderCryptoHandle dr_handle = DDS::HANDLE_NIL;
+
+  if (local_reader_crypto_handles_.find(reader) != local_reader_crypto_handles_.end() &&
+      remote_writer_crypto_handles_.find(writer) != remote_writer_crypto_handles_.end()) {
+    dr_handle = local_reader_crypto_handles_[reader];
+    dw_handle = remote_writer_crypto_handles_[writer];
+    DCPS::RepoId part = writer;
+    part.entityId = ENTITYID_PARTICIPANT;
+    part_handle = spdp_.lookup_participant_crypto_handle(part);
+  } else if (local_writer_crypto_handles_.find(writer) != local_writer_crypto_handles_.end() &&
+             remote_reader_crypto_handles_.find(reader) != remote_reader_crypto_handles_.end()) {
+    dw_handle = local_writer_crypto_handles_[writer];
+    dr_handle = remote_reader_crypto_handles_[reader];
+    DCPS::RepoId part = reader;
+    part.entityId = ENTITYID_PARTICIPANT;
+    part_handle = spdp_.lookup_participant_crypto_handle(part);
+  }
 
   if (part_handle == DDS::HANDLE_NIL) {
     // security not enabled for this discovered participant
@@ -3365,6 +3377,24 @@ Sedp::defer_reader(const RepoId& reader,
     return true;
   }
   return false;
+}
+
+DDS::Security::DatawriterCryptoHandle
+Sedp::generate_remote_matched_writer_crypto_handle(const RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch)
+{
+  return spdp_.generate_remote_matched_writer_crypto_handle(writer_part, drch);
+}
+
+DDS::Security::DatareaderCryptoHandle
+Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only)
+{
+  return spdp_.generate_remote_matched_reader_crypto_handle(reader_part, dwch, relay_only);
+}
+
+DDS::Security::ParticipantCryptoHandle
+Sedp::lookup_participant_crypto_handle(const RepoId& id)
+{
+  return spdp_.lookup_participant_crypto_handle(id);
 }
 
 WaitForAcks::WaitForAcks()
