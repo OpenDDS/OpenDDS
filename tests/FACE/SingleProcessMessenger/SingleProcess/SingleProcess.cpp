@@ -30,24 +30,6 @@ void callback(FACE::TRANSACTION_ID_TYPE,
   return_code = FACE::RC_NO_ERROR;
 }
 
-void pub_once (FACE::CONNECTION_ID_TYPE& connId,
-              FACE::MESSAGE_SIZE_TYPE& size,
-              FACE::RETURN_CODE_TYPE status)
-{
-  ACE_OS::sleep(5); // connection established with Subscriber
-
-  Messenger::Message msg = {"Hello, world.", 0, 0};
-
-#ifdef ACE_HAS_CDR_FIXED
-  msg.deci = FACE::Fixed("987.654");
-#endif
-
-  FACE::TRANSACTION_ID_TYPE txn;
-  ACE_DEBUG((LM_INFO, "Publisher: about to Send_Message()\n"));
-  FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
-  if (status != FACE::RC_NO_ERROR) return;
-}
-
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   if (argc < 2) {
@@ -80,7 +62,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                               FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  pub_once(pub_connId, pub_max_msg_size, status);
+  ACE_OS::sleep(5); // connection established with Subscriber
+
+  Messenger::Message msg = {"Hello, world.", 0, 0};
+
+#ifdef ACE_HAS_CDR_FIXED
+  msg.deci = FACE::Fixed("987.654");
+#endif
+
+  FACE::TRANSACTION_ID_TYPE txn;
+  ACE_DEBUG((LM_INFO, "Publisher: about to Send_Message()\n"));
+  FACE::TS::Send_Message(pub_connId, FACE::INF_TIME_VALUE, txn, msg, pub_max_msg_size, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   bool testPassed = true;
@@ -128,6 +120,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   FACE::TS::Destroy_Connection(connId, status);
+  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+
+  FACE::TS::Destroy_Connection(pub_connId, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   return testPassed ? EXIT_SUCCESS : EXIT_FAILURE;
