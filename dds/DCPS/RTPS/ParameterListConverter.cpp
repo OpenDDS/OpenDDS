@@ -385,8 +385,14 @@ int to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
 }
 
 int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
+                  const DCPS::GUID_t& guid,
                   ParameterList& param_list)
 {
+  Parameter gp_param;
+  gp_param.guid(guid);
+  gp_param._d(PID_PARTICIPANT_GUID);
+  add_param(param_list, gp_param);
+
   to_param_list(pbtd.base, param_list);
 
   Parameter param_it;
@@ -438,18 +444,6 @@ int to_param_list(const DDS::Security::IdentityToken& identity_token,
   Parameter param_psi;
   param_psi.participant_security_info(security_info);
   add_param(param_list, param_psi);
-
-  return 0;
-}
-
-int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
-                  ParameterList& param_list)
-{
-  to_param_list(pbtds.base, param_list);
-
-  Parameter param_ist;
-  param_ist.identity_status_token(pbtds.identity_status_token);
-  add_param(param_list, param_ist);
 
   return 0;
 }
