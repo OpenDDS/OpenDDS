@@ -399,7 +399,16 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     return;
   }
 
-  DiscoveredParticipant& dp = participants_[msg.message_identity.source_guid];
+  DiscoveredParticipantIter iter = participants_.find(src_participant);
+
+  if (iter == participants_.end()) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) Spdp::handle_handshake_message() - ")
+      ACE_TEXT("received handshake for undiscovered participant. Ignoring.\n")));
+    return;
+  }
+
+  DiscoveredParticipant& dp = iter->second;
 
   if (dp.auth_state_ == AS_HANDSHAKE_REPLY) {
     DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
@@ -461,7 +470,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DDS::Security::ValidationResult_t vr = auth->begin_handshake_reply(dp.handshake_handle_, reply.message_data[0], dp.identity_handle_, identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
+        ACE_TEXT("Failed to reply to incoming handshake message. Security Exception[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
@@ -505,7 +514,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
+        ACE_TEXT("Failed to process incoming handshake message. Security Exception[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
