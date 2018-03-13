@@ -27,6 +27,7 @@ namespace ParameterListConverter {
 
   OpenDDS_Rtps_Export
   int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
+                    const DCPS::GUID_t& guid,
                     ParameterList& param_list);
 
   OpenDDS_Rtps_Export
@@ -34,10 +35,6 @@ namespace ParameterListConverter {
                     const DDS::Security::PermissionsToken& perm_token,
                     const DDS::PropertyQosPolicy& property_qos,
                     const DDS::Security::ParticipantSecurityInfo& security_info,
-                    ParameterList& param_list);
-
-  OpenDDS_Rtps_Export
-  int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
                     ParameterList& param_list);
 
   OpenDDS_Rtps_Export
