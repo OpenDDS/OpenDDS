@@ -1441,6 +1441,61 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
   }
 }
 
+DDS::Security::DatawriterCryptoHandle
+Spdp::generate_remote_matched_writer_crypto_handle(const RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch)
+{
+  DDS::Security::DatawriterCryptoHandle result = DDS::HANDLE_NIL;
+
+  Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  DiscoveredParticipantIter part = participants_.find(writer_part);
+  if (part != participants_.end()) {
+    DDS::Security::SecurityException se;
+    result = crypto->register_matched_remote_datawriter(drch, part->second.crypto_handle_, part->second.shared_secret_handle_, se);
+    if (result == DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_writer_crypto_handle() - ")
+        ACE_TEXT("Failure calling register_matched_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+    }
+  }
+  return result;
+}
+
+DDS::Security::DatareaderCryptoHandle
+Spdp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only)
+{
+  DDS::Security::DatareaderCryptoHandle result = DDS::HANDLE_NIL;
+
+  Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  DiscoveredParticipantIter part = participants_.find(reader_part);
+  if (part != participants_.end()) {
+    DDS::Security::SecurityException se;
+    result = crypto->register_matched_remote_datareader(dwch, part->second.crypto_handle_, part->second.shared_secret_handle_, relay_only, se);
+    if (result == DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_reader_crypto_handle() - ")
+        ACE_TEXT("Failure calling register_matched_remote_datareader(). Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+    }
+  }
+  return result;
+}
+
+DDS::Security::ParticipantCryptoHandle
+Spdp::lookup_participant_crypto_handle(const DCPS::RepoId& id)
+{
+  DDS::Security::ParticipantCryptoHandle result = DDS::HANDLE_NIL;
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  DiscoveredParticipantIter part = participants_.find(id);
+  if (part != participants_.end()) {
+    result = part->second.crypto_handle_;
+  }
+  return result;
+}
+
 }
 }
 

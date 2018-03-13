@@ -634,6 +634,24 @@ namespace OpenDDS {
         }
       }
 
+      virtual DDS::Security::DatawriterCryptoHandle
+      generate_remote_matched_writer_crypto_handle(const RepoId&, const DDS::Security::DatareaderCryptoHandle&)
+      {
+        return DDS::HANDLE_NIL;
+      }
+
+      virtual DDS::Security::DatareaderCryptoHandle
+      generate_remote_matched_reader_crypto_handle(const RepoId&, const DDS::Security::DatawriterCryptoHandle&, bool)
+      {
+        return DDS::HANDLE_NIL;
+      }
+
+      virtual DDS::Security::ParticipantCryptoHandle
+      lookup_participant_crypto_handle(const RepoId&)
+      {
+        return DDS::HANDLE_NIL;
+      }
+
       void
       match(const RepoId& writer, const RepoId& reader)
       {
@@ -810,6 +828,22 @@ namespace OpenDDS {
           if (!call_writer && !call_reader) {
             return; // nothing more to do
           }
+
+          if (is_security_enabled()) {
+            if (call_reader) {
+              RepoId writer_participant = writer;
+              writer_participant.entityId = ENTITYID_PARTICIPANT;
+              DDS::Security::DatareaderCryptoHandle drch = local_reader_crypto_handles_[reader];
+              remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+            }
+            if (call_writer) {
+              RepoId reader_participant = reader;
+              reader_participant.entityId = ENTITYID_PARTICIPANT;
+              DDS::Security::DatawriterCryptoHandle dwch = local_writer_crypto_handles_[writer];
+              remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, false); // TODO: determine correct use of relay_only
+            }
+          }
+
           // Copy reader and writer association data prior to releasing lock
 #ifdef __SUNPRO_CC
           DCPS::ReaderAssociation ra;
@@ -1051,6 +1085,9 @@ namespace OpenDDS {
 
       DatareaderCryptoHandleMap local_reader_crypto_handles_;
       DatawriterCryptoHandleMap local_writer_crypto_handles_;
+
+      DatareaderCryptoHandleMap remote_reader_crypto_handles_;
+      DatawriterCryptoHandleMap remote_writer_crypto_handles_;
     };
 
     template <typename EndpointManagerType>
@@ -1254,9 +1291,6 @@ namespace OpenDDS {
         DDS::Security::SharedSecretHandle_var shared_secret_handle_;
         DDS::Security::PermissionsHandle permissions_handle_;
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
-
-        DatareaderCryptoHandleMap reader_crypto_handles_;
-        DatawriterCryptoHandleMap writer_crypto_handles_;
       };
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
                               DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;

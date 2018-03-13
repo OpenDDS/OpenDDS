@@ -139,6 +139,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
   local_perm.get_content(perm_content);
+  clean_smime_content(perm_content);
 
   // Set and store the permissions credential token  while we have the raw content
 
@@ -148,7 +149,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId, 1, 0);
   pctWriter.set_property(0, "dds.perm.cert",get_file_contents(perm_file.c_str()).c_str(), true);
-  clean_smime_content(perm_content);
+
 
 
   // Set and store the permissions token
@@ -487,6 +488,43 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+
+  ACPermsMap::iterator iter = local_ac_perms.begin();
+  iter = local_ac_perms.find(permissions_handle);
+  if(iter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
+
+  // 1. Domain element
+
+  if ( iter->second.gov_rules[0].domain_list.find(domain_id) == iter->second.gov_rules[0].domain_list.end()){
+    std::cout << "Domain ID of " << domain_id << "not found" << std::endl;
+    return false;
+  }
+
+
+  //Check ParticipantSecurityAttributes for is_access_protected set to FALSE
+  if(iter->second.gov_rules[0].domain_attrs.is_access_protected == false) {
+    return true;
+  }
+
+  //TODO: Need to check the PluginClassName and MajorVersion of the local permmissions vs. remote  See Table 63 of spec
+
+  // Check permissions topic grants
+
+  PermissionGrantRules::iterator pgr_iter;
+
+
+  // Check topic rules for the given domain id.
+
+  for(pgr_iter = iter->second.perm_rules.begin(); pgr_iter != iter->second.perm_rules.end(); ++pgr_iter) {
+    // Cycle through topic rules to find an allow
+    std::list<permissions_topic_rule>::iterator tr_iter;
+    for (tr_iter = pgr_iter->PermissionTopicRules.begin(); tr_iter != pgr_iter->PermissionTopicRules.end(); ++tr_iter){
+
+    }
+  }
 
   return true;
 }
@@ -882,7 +920,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_content)
 {
-
+    std::cout<< "governance:["<<g_content<<"]"<<std::endl;
     //TODO: Need to return existing governance content if found.
 
   static const char* gMemBufId = "gov buffer id";
@@ -902,6 +940,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser();
     parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
     parser->setDoNamespaces(true);    // optional
+    parser->setCreateCommentNodes(false);
 
     xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
     parser->setErrorHandler(errHandler);
@@ -931,7 +970,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         return -1;
     }
     catch (...) {
-        std::cout << "Unexpected Exception \n" ;
+        std::cout << "Unexpected Governance XML Parser Exception \n" ;
         return -1;
     }
 
@@ -1065,7 +1104,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(ac_perms * ac_perms_holder, std::string p_content) {
 
   static const char* gMemBufId = "gov buffer id";
-
+  std::cout << p_content << std::endl;
 
   try
   {
@@ -1082,6 +1121,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser();
   parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
   parser->setDoNamespaces(true);    // optional
+  parser->setCreateCommentNodes(false);
 
   xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
   parser->setErrorHandler(errHandler);
@@ -1108,7 +1148,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return -1;
   }
   catch (...) {
-    std::cout << "Unexpected Parser Exception \n" ;
+    std::cout << "Unexpected Permissions XML Parser Exception \n" ;
     return -1;
   }
 
@@ -1236,13 +1276,15 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
 
 ::CORBA::Boolean AccessControlBuiltInImpl::clean_smime_content(std::string& content_) {
 
-  std::string start_str("<?xml") , end_str("dds>");
+  std::string start_str("Content-Type: text/plain") , end_str("dds>");
 
     size_t found_begin = content_.find(start_str);
     size_t found_end = content_.find(end_str);
     if((found_begin!=std::string::npos) && (found_end != std::string::npos)){
       std::string holder_;
-      holder_.assign(content_.substr(found_begin,(found_end -found_begin)+end_str.length()));
+      holder_.assign(content_.substr(found_begin + start_str.length(),(found_end -found_begin)+end_str.length()));
+      const char* t = " \t\n\r\f\v";
+      holder_.erase(0, holder_.find_first_not_of(t));
         content_.clear();
         content_.swap(holder_);
         return true;
