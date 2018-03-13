@@ -20,9 +20,6 @@
 
 #include "dds/DCPS/security/SSL/Utils.h"
 
-// Temporary include for get macaddress for unique guids
-#include <ace/OS_NS_netdb.h>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -30,7 +27,6 @@ namespace Security {
 
   static bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2);
 
-// Supported message versions and IDs - using these for stub version
 static const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
 static const std::string Auth_Plugin_Major_Version("1");
 static const std::string Auth_Plugin_Minor_Version("0");
@@ -41,9 +37,6 @@ static const std::string Auth_Request_Class_Ext("AuthReq");
 static const std::string Handshake_Request_Class_Ext("Req");
 static const std::string Handshake_Reply_Class_Ext("Reply");
 static const std::string Handshake_Final_Class_Ext("Final");
-
-// Until a real implementation is created, a stub sequence will be sent for data
-static const DDS::OctetSeq Empty_Seq;
 
 struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
@@ -194,11 +187,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
-    // This is not thread safe, but should not pose a problem in the stub implementation
-    // as this function should be called before this identity handle is used for any
-    // handshake actions
-    local_data->permissions_cred_token = permissions_credential;
-    local_data->permissions_token = permissions_token;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+      local_data->permissions_cred_token = permissions_credential;
+      local_data->permissions_token = permissions_token;
+    }
+
     status = true;
   } else {
     // TBD - Need definition on what to put into this
@@ -306,7 +300,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           local_credential_data_.get_participant_cert().serialize(tmp);
           handshake_wrapper.set_bin_property(prop_index++, "c.id", tmp, true);
 
-          handshake_wrapper.set_bin_property(prop_index++, "c.perm", Empty_Seq, true); /* TODO */
+          handshake_wrapper.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
           handshake_wrapper.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
           handshake_wrapper.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
           handshake_wrapper.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
@@ -474,7 +468,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   local_credential_data_.get_participant_cert().serialize(tmp);
   message_out.set_bin_property(prop_index++, "c.id", tmp, true);
 
-  message_out.set_bin_property(prop_index++, "c.perm", Empty_Seq, true); /* TODO */
+  message_out.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
   message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
   message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
 
@@ -524,6 +518,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
   newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
   newHandshakeData->remote_cert = DCPS::move(remote_cert);
+  /* Per the spec, no guarantee 'c.perm' will be set. Hence no checks before storing its value. */
+  newHandshakeData->access_permissions =  message_in.get_bin_property_value("c.perm");
 
   handshake_handle = get_next_handle();
   {
@@ -820,6 +816,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   handshakePtr->remote_cert = DCPS::move(remote_cert);
   handshakePtr->validation_state = FinalMessage;
+  /* Per the spec, no guarantee 'c.perm' will be set. Hence no checks before storing its value */
+  handshakePtr->access_permissions =  message_in.get_bin_property_value("c.perm");
 
   handshakePtr->secret_handle = new SharedSecret(challenge1,
                                                  challenge2,

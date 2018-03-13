@@ -170,6 +170,7 @@ private:
     DDS::Security::ValidationResult_t validation_state;
     OpenDDS::Security::SSL::DiffieHellman::unique_ptr diffie_hellman;
     OpenDDS::Security::SSL::Certificate::unique_ptr remote_cert;
+    DDS::OctetSeq access_permissions;
     bool local_initiator;
   };
   typedef DCPS::RcHandle<HandshakeData> HandshakeData_Ptr;

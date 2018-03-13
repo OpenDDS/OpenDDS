@@ -43,6 +43,11 @@ namespace OpenDDS {
         return *participant_pkey_;
       }
 
+      const DDS::OctetSeq& get_access_permissions()
+      {
+        return access_permissions_;
+      }
+
       bool validate()
       {
         return (X509_V_OK == participant_cert_->validate(*ca_cert_));
@@ -50,9 +55,12 @@ namespace OpenDDS {
 
     private:
 
+      void load_permissions_file(const std::string& path);
+
       SSL::Certificate::unique_ptr ca_cert_;
       SSL::Certificate::unique_ptr participant_cert_;
       SSL::PrivateKey::unique_ptr participant_pkey_;
+      DDS::OctetSeq access_permissions_;
     };
 
   }
