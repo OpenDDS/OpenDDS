@@ -235,7 +235,7 @@ private:
     // Governance Rule definitions
 
     typedef struct {
-        const char * topic_expression;
+        std::string topic_expression;
         ::DDS::Security::TopicSecurityAttributes topic_attrs;
     } TopicAccessRule;
 
@@ -310,6 +310,11 @@ private:
 
     ACPermsMap local_ac_perms;
 
+   typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
+
+   ACIdentityMap local_identity_map;
+
+
 
   ::CORBA::Long generate_handle();
   ::CORBA::Long load_governance_file(ac_perms *, std::string);
@@ -318,9 +323,12 @@ private:
   std::string extract_file_name(const std::string&);
   std::string get_file_contents(const char *);
   ::CORBA::Boolean clean_smime_content(std::string&);
+  ::CORBA::Boolean clean_smime_content(::DDS::OctetSeq&);
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;
+
+
 
   LocalAccessCredentialData local_access_control_data_;
 
