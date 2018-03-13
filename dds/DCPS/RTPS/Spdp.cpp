@@ -399,39 +399,45 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     return;
   }
 
-  DiscoveredParticipant& dp = participants_[msg.message_identity.source_guid];
+  DiscoveredParticipantIter iter = participants_.find(src_participant);
+
+  if (iter == participants_.end()) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("(%P|%t) Spdp::handle_handshake_message() - ")
+      ACE_TEXT("received handshake for undiscovered participant. Ignoring.\n")));
+    return;
+  }
+
+  DiscoveredParticipant& dp = iter->second;
 
   if (dp.auth_state_ == AS_HANDSHAKE_REPLY) {
-    DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-      { // DDS::Security::ParticipantBuiltinTopicData
-        { // ParticipantBuiltinTopicData
-          DDS::BuiltinTopicKey_t() /*ignored*/,
-          qos_.user_data
-        },
-        identity_token_,
-        permissions_token_,
-        qos_.property,
-        DDS::Security::ParticipantSecurityInfo()
+    DDS::Security::ParticipantBuiltinTopicData pbtd = {
+      {
+        DDS::BuiltinTopicKey_t() /*ignored*/,
+        qos_.user_data
       },
-      identity_status_token_
+      identity_token_,
+      permissions_token_,
+      qos_.property,
+      {0, 0}
     };
 
-    pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    pbtd.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+    pbtd.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
     if (participant_sec_attr_.is_rtps_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
     }
     if (participant_sec_attr_.is_discovery_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
     }
     if (participant_sec_attr_.is_liveliness_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
     }
 
     ParameterList plist;
-    if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
+    if (ParameterListConverter::to_param_list(pbtd, guid_, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
+        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
     }
 
@@ -461,7 +467,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DDS::Security::ValidationResult_t vr = auth->begin_handshake_reply(dp.handshake_handle_, reply.message_data[0], dp.identity_handle_, identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
+        ACE_TEXT("Failed to reply to incoming handshake message. Security Exception[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
@@ -505,7 +511,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to process handshake message. Security Exception[%d.%d]: %C\n"),
+        ACE_TEXT("Failed to process incoming handshake message. Security Exception[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
@@ -684,36 +690,33 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   }
 
   if (dp.auth_state_ == AS_HANDSHAKE_REQUEST) {
-    DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-      { // DDS::Security::ParticipantBuiltinTopicData
-        { // ParticipantBuiltinTopicData
-          DDS::BuiltinTopicKey_t() /*ignored*/,
-          qos_.user_data
-        },
-        identity_token_,
-        permissions_token_,
-        qos_.property,
-        DDS::Security::ParticipantSecurityInfo()
+    DDS::Security::ParticipantBuiltinTopicData pbtd = {
+      {
+        DDS::BuiltinTopicKey_t() /*ignored*/,
+        qos_.user_data
       },
-      identity_status_token_
+      identity_token_,
+      permissions_token_,
+      qos_.property,
+      {0, 0}
     };
 
-    pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    pbtd.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+    pbtd.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
     if (participant_sec_attr_.is_rtps_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
     }
     if (participant_sec_attr_.is_discovery_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
     }
     if (participant_sec_attr_.is_liveliness_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
     }
 
     ParameterList plist;
-    if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
+    if (ParameterListConverter::to_param_list(pbtd, guid_, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
+        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
     }
 
