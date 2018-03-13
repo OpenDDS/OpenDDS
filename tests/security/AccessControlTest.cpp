@@ -396,7 +396,6 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
   ::DDS::Security::SecurityException ex;
   MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
-
   remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
   remote_perm_token.properties.length(1);
   remote_perm_token.properties[0].name = "dds.perm.ca.sn";
@@ -404,7 +403,7 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
 
   std::string ca(get_file_contents(identity_ca_file));
   std::string pf(get_file_contents(perm_join_p7s_file));
-  std::cout << pf << std::endl;
+
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
@@ -419,8 +418,9 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
 
 
 
-  ::DDS::Security::PermissionsHandle local_out_handle =
-          get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
+
+  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
 
   ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
     auth_plugin.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
