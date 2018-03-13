@@ -459,6 +459,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.destination_participant_guid = msg.message_identity.source_guid;
+    reply.destination_participant_guid.entityId = DCPS::ENTITYID_PARTICIPANT;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
@@ -471,7 +472,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
           se.code, se.minor_code, se.message.in()));
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
-      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+      if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
           ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
         return;
@@ -504,6 +505,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.destination_participant_guid = msg.message_identity.source_guid;
+    reply.destination_participant_guid.entityId = DCPS::ENTITYID_PARTICIPANT;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);

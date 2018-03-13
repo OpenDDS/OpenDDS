@@ -32,7 +32,7 @@ namespace Security {
 
   static bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2);
 
-  static void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t dst);
+  static void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t& dst);
 
   static bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
                                        const std::vector<unsigned char>& subject_name_hash,
@@ -381,11 +381,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   return result;
 }
 
-void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t dst)
+void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t& dst)
 {
   dst = DCPS::GUID_UNKNOWN;
 
   ACE_Message_Block buffer(reinterpret_cast<const char*>(cpdata.get_buffer()), cpdata.length());
+  buffer.wr_ptr(cpdata.length());
   OpenDDS::DCPS::Serializer serializer(&buffer, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
   RTPS::ParameterList params;
   serializer >> params;
@@ -1162,5 +1163,3 @@ uint64_t AuthenticationBuiltInImpl::get_next_handle()
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-
