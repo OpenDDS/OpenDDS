@@ -411,36 +411,33 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DiscoveredParticipant& dp = iter->second;
 
   if (dp.auth_state_ == AS_HANDSHAKE_REPLY) {
-    DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-      { // DDS::Security::ParticipantBuiltinTopicData
-        { // ParticipantBuiltinTopicData
-          DDS::BuiltinTopicKey_t() /*ignored*/,
-          qos_.user_data
-        },
-        identity_token_,
-        permissions_token_,
-        qos_.property,
-        DDS::Security::ParticipantSecurityInfo()
+    DDS::Security::ParticipantBuiltinTopicData pbtd = {
+      {
+        DDS::BuiltinTopicKey_t() /*ignored*/,
+        qos_.user_data
       },
-      identity_status_token_
+      identity_token_,
+      permissions_token_,
+      qos_.property,
+      {0, 0}
     };
 
-    pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    pbtd.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+    pbtd.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
     if (participant_sec_attr_.is_rtps_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
     }
     if (participant_sec_attr_.is_discovery_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
     }
     if (participant_sec_attr_.is_liveliness_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
     }
 
     ParameterList plist;
-    if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
+    if (ParameterListConverter::to_param_list(pbtd, guid_, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
+        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
     }
 
@@ -693,36 +690,33 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   }
 
   if (dp.auth_state_ == AS_HANDSHAKE_REQUEST) {
-    DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
-      { // DDS::Security::ParticipantBuiltinTopicData
-        { // ParticipantBuiltinTopicData
-          DDS::BuiltinTopicKey_t() /*ignored*/,
-          qos_.user_data
-        },
-        identity_token_,
-        permissions_token_,
-        qos_.property,
-        DDS::Security::ParticipantSecurityInfo()
+    DDS::Security::ParticipantBuiltinTopicData pbtd = {
+      {
+        DDS::BuiltinTopicKey_t() /*ignored*/,
+        qos_.user_data
       },
-      identity_status_token_
+      identity_token_,
+      permissions_token_,
+      qos_.property,
+      {0, 0}
     };
 
-    pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    pbtd.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
+    pbtd.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
     if (participant_sec_attr_.is_rtps_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
     }
     if (participant_sec_attr_.is_discovery_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
     }
     if (participant_sec_attr_.is_liveliness_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
     }
 
     ParameterList plist;
-    if (ParameterListConverter::to_param_list(pbtds, plist) < 0) {
+    if (ParameterListConverter::to_param_list(pbtd, guid_, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicDataSecure to ParameterList\n")));
+        ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
       return;
     }
 
@@ -1445,6 +1439,61 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
   {
     results.insert(idx->first);
   }
+}
+
+DDS::Security::DatawriterCryptoHandle
+Spdp::generate_remote_matched_writer_crypto_handle(const RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch)
+{
+  DDS::Security::DatawriterCryptoHandle result = DDS::HANDLE_NIL;
+
+  Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  DiscoveredParticipantIter part = participants_.find(writer_part);
+  if (part != participants_.end()) {
+    DDS::Security::SecurityException se;
+    result = crypto->register_matched_remote_datawriter(drch, part->second.crypto_handle_, part->second.shared_secret_handle_, se);
+    if (result == DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_writer_crypto_handle() - ")
+        ACE_TEXT("Failure calling register_matched_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+    }
+  }
+  return result;
+}
+
+DDS::Security::DatareaderCryptoHandle
+Spdp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only)
+{
+  DDS::Security::DatareaderCryptoHandle result = DDS::HANDLE_NIL;
+
+  Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  DiscoveredParticipantIter part = participants_.find(reader_part);
+  if (part != participants_.end()) {
+    DDS::Security::SecurityException se;
+    result = crypto->register_matched_remote_datareader(dwch, part->second.crypto_handle_, part->second.shared_secret_handle_, relay_only, se);
+    if (result == DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_reader_crypto_handle() - ")
+        ACE_TEXT("Failure calling register_matched_remote_datareader(). Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+    }
+  }
+  return result;
+}
+
+DDS::Security::ParticipantCryptoHandle
+Spdp::lookup_participant_crypto_handle(const DCPS::RepoId& id)
+{
+  DDS::Security::ParticipantCryptoHandle result = DDS::HANDLE_NIL;
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  DiscoveredParticipantIter part = participants_.find(id);
+  if (part != participants_.end()) {
+    result = part->second.crypto_handle_;
+  }
+  return result;
 }
 
 }

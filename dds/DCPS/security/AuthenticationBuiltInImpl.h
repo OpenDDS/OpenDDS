@@ -195,8 +195,6 @@ private:
 
   bool check_class_versions(const char* remote_class_id);
 
-  void set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message);
-
   std::string build_class_id(const std::string& message_ext);
 
   std::string get_extension(const char* class_id);

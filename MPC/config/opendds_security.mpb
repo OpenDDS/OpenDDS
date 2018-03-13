@@ -1,4 +1,4 @@
-project: dcpslib, openssl, xerces {
+project: dcpslib, dcps_rtps, openssl, xerces {
   after += OpenDDS_Security
   libs  += OpenDDS_Security
 }
