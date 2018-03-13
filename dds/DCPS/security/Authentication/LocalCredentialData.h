@@ -11,11 +11,30 @@
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include "dds/DCPS/security/SSL/PrivateKey.h"
 #include "dds/DCPS/security/SSL/DiffieHellman.h"
+#include "dds/DCPS/security/SSL/Utils.h"
 
 #include "dds/DdsDcpsCoreC.h"
 
 namespace OpenDDS {
   namespace Security {
+
+    class CredentialHash
+    {
+    public:
+      CredentialHash(const SSL::Certificate& cid, const SSL::DiffieHellman& dh, const DDS::OctetSeq& cpdata, const DDS::OctetSeq& cperm) :
+        pubcert_(cid), dh_(dh), participant_topic_data_(cpdata), permissions_data_(cperm)
+      {
+
+      }
+
+      int operator()(DDS::OctetSeq& dst) const;
+
+    private:
+      const SSL::Certificate& pubcert_;
+      const SSL::DiffieHellman& dh_;
+      const DDS::OctetSeq& participant_topic_data_;
+      const DDS::OctetSeq& permissions_data_;
+    };
 
     class LocalAuthCredentialData
     {
@@ -53,6 +72,26 @@ namespace OpenDDS {
         return (X509_V_OK == participant_cert_->validate(*ca_cert_));
       }
 
+      const DDS::OctetSeq& get_hash_c1() const
+      {
+        return hash_c1;
+      }
+
+      void set_hash_c1(const DDS::OctetSeq& src)
+      {
+        hash_c1 = src;
+      }
+
+      const DDS::OctetSeq& get_hash_c2() const
+      {
+        return hash_c2;
+      }
+
+      void set_hash_c2(const DDS::OctetSeq& src)
+      {
+        hash_c2 = src;
+      }
+
     private:
 
       void load_permissions_file(const std::string& path);
@@ -61,6 +100,8 @@ namespace OpenDDS {
       SSL::Certificate::unique_ptr participant_cert_;
       SSL::PrivateKey::unique_ptr participant_pkey_;
       DDS::OctetSeq access_permissions_;
+      DDS::OctetSeq hash_c1;
+      DDS::OctetSeq hash_c2;
     };
 
   }

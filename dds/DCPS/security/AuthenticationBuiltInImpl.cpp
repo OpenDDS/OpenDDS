@@ -336,6 +336,19 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
           }
 
+          /* Compute hash_c1 and store for later */
+          {
+            DDS::OctetSeq tmp;
+            CredentialHash hash(local_credential_data_.get_participant_cert(),
+                                *diffie_hellman,
+                                serialized_local_participant_data,
+                                local_credential_data_.get_access_permissions());
+
+            int err = hash(tmp);
+            if (err) return DDS::Security::VALIDATION_FAILED;
+            local_credential_data_.set_hash_c1(tmp);
+          }
+
           HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
           newHandshakeData->local_identity_handle = initiator_identity_handle;
           newHandshakeData->remote_identity_handle = replier_identity_handle;
@@ -438,8 +451,10 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   using OpenDDS::Security::TokenWriter;
   using OpenDDS::Security::TokenReader;
 
-  DDS::OctetSeq challenge1, challenge2, dh2;
+  DDS::OctetSeq challenge1, challenge2, dh2, cperm;
+
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
+  SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman);
 
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED,
                                           Pending = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
@@ -505,6 +520,33 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
         return Failure;
     }
 
+    cperm = message_in.get_bin_property_value("c.perm");
+
+    /* Compute hash_c1 and store for later */
+
+    {
+      DDS::OctetSeq tmp;
+      CredentialHash hash(*remote_cert,
+                          *diffie_hellman,
+                          cpdata,
+                          cperm);
+      int err = hash(tmp);
+      if (err) return Failure;
+      local_credential_data_.set_hash_c1(tmp);
+    }
+
+    /* Compute hash_c2 and store for later */
+
+    {
+      DDS::OctetSeq tmp;
+      CredentialHash hash(local_credential_data_.get_participant_cert(),
+                          *diffie_hellman,
+                          serialized_local_participant_data,
+                          local_credential_data_.get_access_permissions());
+      int err = hash(tmp);
+      if (err) return Failure;
+      local_credential_data_.set_hash_c2(tmp);
+    }
   }
 
   /* TODO Add OCSP checks when "ocsp_status" property is given in message_in.
@@ -524,9 +566,6 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   message_out.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
   message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
   message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
-
-  /* TODO configure DH algorithm depending on the c.kagree_algo sent by begin_handshake_request */
-  SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman);
 
   message_out.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
 
@@ -553,13 +592,12 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
 
   std::vector<const DDS::OctetSeq*> sign_these;
   const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
-  const DDS::OctetSeq& hash_c1 = message_in.get_bin_property_value("hash_c1");
-  /* Skip 'hash_c2' because currently the value isn't required and it is determined by OpenDDS */
+  sign_these.push_back(&local_credential_data_.get_hash_c2());
   sign_these.push_back(&challenge2);
   sign_these.push_back(&dh2);
   sign_these.push_back(&challenge1);
   sign_these.push_back(&dh1);
-  sign_these.push_back(&hash_c1);
+  sign_these.push_back(&local_credential_data_.get_hash_c1());
 
   local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
   message_out.set_bin_property(prop_index++, "signature", tmp, true);
@@ -571,8 +609,7 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
   newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
   newHandshakeData->remote_cert = DCPS::move(remote_cert);
-  /* Per the spec, no guarantee 'c.perm' will be set. Hence no checks before storing its value. */
-  newHandshakeData->access_permissions =  message_in.get_bin_property_value("c.perm");
+  newHandshakeData->access_permissions =  cperm;
 
   handshake_handle = get_next_handle();
   {
@@ -846,18 +883,31 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     return Failure;
   }
 
+  const DDS::OctetSeq& cperm = message_in.get_bin_property_value("c.perm");
+
+  /* Compute hash_c2 and store for later (hash_c1 was already computed in request) */
+
+  {
+    DDS::OctetSeq tmp;
+    CredentialHash hash(*remote_cert,
+                        *handshakePtr->diffie_hellman,
+                        cpdata,
+                        cperm);
+    int err = hash(tmp);
+    if (err) return Failure;
+    local_credential_data_.set_hash_c2(tmp);
+  }
+
   /* Validate Signature field */
 
   std::vector<const DDS::OctetSeq*> verify_these;
-  const DDS::OctetSeq& hash_c2 = message_in.get_bin_property_value("hash_c2");
-  const DDS::OctetSeq& hash_c1 = message_in.get_bin_property_value("hash_c1");
   const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
-  verify_these.push_back(&hash_c2);
+  verify_these.push_back(&local_credential_data_.get_hash_c2());
   verify_these.push_back(&challenge2);
   verify_these.push_back(&dh2);
   verify_these.push_back(&challenge1);
   verify_these.push_back(&dh1);
-  verify_these.push_back(&hash_c1);
+  verify_these.push_back(&local_credential_data_.get_hash_c1());
 
   const DDS::OctetSeq& remote_signature = message_in.get_bin_property_value("signature");
   if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {
@@ -874,8 +924,12 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   final_msg.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
   std::vector<const DDS::OctetSeq*> sign_these;
+  sign_these.push_back(&local_credential_data_.get_hash_c1());
   sign_these.push_back(&challenge1);
+  sign_these.push_back(&dh1);
   sign_these.push_back(&challenge2);
+  sign_these.push_back(&dh2);
+  sign_these.push_back(&local_credential_data_.get_hash_c2());
 
   DDS::OctetSeq tmp;
   local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
@@ -960,18 +1014,17 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   /* Validate Signature field */
 
   const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
+  const SSL::DiffieHellman::unique_ptr& dh = handshakePtr->diffie_hellman;
 
   std::vector<const DDS::OctetSeq*> verify_these;
-  const DDS::OctetSeq& hash_c1 = handshake_reply_token.get_bin_property_value("hash_c1");
-  const DDS::OctetSeq& hash_c2 = handshake_reply_token.get_bin_property_value("hash_c1");
   const DDS::OctetSeq& dh1 = handshake_reply_token.get_bin_property_value("dh1");
   const DDS::OctetSeq& dh2 = handshake_reply_token.get_bin_property_value("dh2");
-  verify_these.push_back(&hash_c1);
+  verify_these.push_back(&local_credential_data_.get_hash_c1());
   verify_these.push_back(&challenge1_reply);
   verify_these.push_back(&dh1);
   verify_these.push_back(&challenge2_reply);
   verify_these.push_back(&dh2);
-  verify_these.push_back(&hash_c2);
+  verify_these.push_back(&local_credential_data_.get_hash_c2());
 
   const DDS::OctetSeq& remote_signature = handshake_final_token.get_bin_property_value("signature");
   if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {

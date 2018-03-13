@@ -55,11 +55,16 @@ namespace OpenDDS {
 
         int algorithm(std::string& dst) const;
 
-        int serialize(std::vector<unsigned char>& dst);
+        int serialize(std::vector<unsigned char>& dst) const;
 
-        int serialize(DDS::OctetSeq& dst);
+        int serialize(DDS::OctetSeq& dst) const;
 
         int deserialize(const DDS::OctetSeq& src);
+
+        const char* dsign_algo() const
+        {
+          return "RSASSA-PSS-SHA256";
+        }
 
       private:
 

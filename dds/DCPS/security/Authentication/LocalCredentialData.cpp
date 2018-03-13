@@ -12,6 +12,34 @@
 namespace OpenDDS {
   namespace Security {
 
+    int CredentialHash::operator()(DDS::OctetSeq& dst) const
+    {
+      const DDS::OctetSeq& cperm = permissions_data_;
+      const DDS::OctetSeq& cpdata = participant_topic_data_;
+
+      DDS::OctetSeq cid;
+      pubcert_.serialize(cid);
+
+      DDS::OctetSeq cdsign_algo;
+      std::string cdsign_algo_str = pubcert_.dsign_algo();
+      cdsign_algo.length(cdsign_algo_str.length());
+      std::memcpy(cdsign_algo.get_buffer(), cdsign_algo_str.c_str(), cdsign_algo.length());
+
+      DDS::OctetSeq ckagree_algo;
+      std::string ckagree_algo_str = dh_.kagree_algo();
+      ckagree_algo.length(ckagree_algo_str.length());
+      std::memcpy(ckagree_algo.get_buffer(), ckagree_algo_str.c_str(), ckagree_algo.length());
+
+      std::vector<const DDS::OctetSeq*> data;
+      data.push_back(&cid);
+      data.push_back(&cperm);
+      data.push_back(&cpdata);
+      data.push_back(&cdsign_algo);
+      data.push_back(&ckagree_algo);
+
+      return SSL::hash(data, dst);
+    }
+
     LocalAuthCredentialData::LocalAuthCredentialData(const DDS::PropertySeq& props)
     {
       load(props);

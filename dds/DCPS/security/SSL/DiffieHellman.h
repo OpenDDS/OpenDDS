@@ -127,7 +127,7 @@ namespace OpenDDS {
           return algo_->cmp_shared_secret(* other.algo_);
         }
 
-        const char* kagree_algo()
+        const char* kagree_algo() const
         {
           return algo_->kagree_algo();
         }

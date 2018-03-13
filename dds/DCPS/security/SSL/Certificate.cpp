@@ -317,7 +317,7 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::serialize(std::vector<unsigned char>& dst)
+      int Certificate::serialize(std::vector<unsigned char>& dst) const
       {
         int result = 1;
 
@@ -349,7 +349,7 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::serialize(DDS::OctetSeq& dst)
+      int Certificate::serialize(DDS::OctetSeq& dst) const
       {
         std::vector<unsigned char> tmp;
         int err = serialize(tmp);
