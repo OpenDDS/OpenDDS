@@ -646,12 +646,6 @@ namespace OpenDDS {
         return DDS::HANDLE_NIL;
       }
 
-      virtual DDS::Security::ParticipantCryptoHandle
-      lookup_participant_crypto_handle(const RepoId&)
-      {
-        return DDS::HANDLE_NIL;
-      }
-
       void
       match(const RepoId& writer, const RepoId& reader)
       {

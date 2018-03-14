@@ -576,7 +576,6 @@ private:
 protected:
   DDS::Security::DatawriterCryptoHandle generate_remote_matched_writer_crypto_handle(const DCPS::RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch);
   DDS::Security::DatareaderCryptoHandle generate_remote_matched_reader_crypto_handle(const DCPS::RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only);
-  DDS::Security::ParticipantCryptoHandle lookup_participant_crypto_handle(const DCPS::RepoId& id);
 };
 
 /// A class to wait on acknowledgments from other threads
