@@ -12,6 +12,35 @@ namespace OpenDDS {
   namespace Security {
     namespace SSL {
 
+      DHAlgorithm::~DHAlgorithm()
+      {
+        if (k_) EVP_PKEY_free(k_);
+      }
+
+      DHAlgorithm& DHAlgorithm::operator= (const DHAlgorithm& rhs)
+      {
+        if (this != &rhs) {
+          if (rhs.k_) {
+            k_ = rhs.k_;
+            EVP_PKEY_up_ref(k_);
+
+          } else {
+            k_ = NULL;
+          }
+        }
+        return *this;
+      }
+
+      bool DHAlgorithm::cmp_shared_secret(const DHAlgorithm& other) const
+      {
+        if (shared_secret_.length() != other.get_shared_secret().length()) {
+            return false;
+        }
+        return (0 == std::memcmp(shared_secret_.get_buffer(),
+                                 other.get_shared_secret().get_buffer(),
+                                 shared_secret_.length()));
+      }
+
       DH_2048_MODP_256_PRIME::DH_2048_MODP_256_PRIME()
       {
         init();
@@ -128,14 +157,84 @@ namespace OpenDDS {
         return 0;
       }
 
-      bool DH_2048_MODP_256_PRIME::cmp_shared_secret(const DHAlgorithm& other)
+      ECDH_PRIME_256_V1_CEUM::ECDH_PRIME_256_V1_CEUM()
       {
-        if (shared_secret_.length() != other.get_shared_secret().length()) {
-            return false;
+
+      }
+
+      ECDH_PRIME_256_V1_CEUM::~ECDH_PRIME_256_V1_CEUM()
+      {
+
+      }
+
+      int ECDH_PRIME_256_V1_CEUM::init()
+      {
+        if (! k_) return 1;
+
+        EVP_PKEY* params = NULL;
+        EVP_PKEY_CTX *paramgen_ctx, *keygen_ctx;
+        paramgen_ctx = keygen_ctx = NULL;
+
+        if (! (paramgen_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL))) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new_id");
+          goto error;
         }
-        return (0 == std::memcmp(shared_secret_.get_buffer(),
-                                 other.get_shared_secret().get_buffer(),
-                                 shared_secret_.length()));
+
+        if (! (params = EVP_PKEY_new())) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_new failed");
+          goto error;
+        }
+
+        if (1 != EVP_PKEY_paramgen_init(paramgen_ctx)) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_paramgen_init failed");
+          goto error;
+        }
+
+        if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(paramgen_ctx, NID_X9_62_prime256v1)) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_nid failed");
+          goto error;
+        }
+
+        if (! EVP_PKEY_paramgen(paramgen_ctx, &params)) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_paramgen failed");
+          goto error;
+        }
+
+        if (! (keygen_ctx = EVP_PKEY_CTX_new(params, NULL))) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new failed");
+          goto error;
+        }
+
+        if (1 != EVP_PKEY_keygen_init(keygen_ctx)) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen_init failed");
+          goto error;
+        }
+
+        if (1 != EVP_PKEY_keygen(keygen_ctx, &k_)) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_keygen failed");
+          goto error;
+        }
+
+        if (paramgen_ctx) EVP_PKEY_CTX_free(paramgen_ctx);
+        if (keygen_ctx) EVP_PKEY_CTX_free(keygen_ctx);
+        if (params) EVP_PKEY_free(params);
+        return 0;
+
+        error:
+          if (paramgen_ctx) EVP_PKEY_CTX_free(paramgen_ctx);
+          if (keygen_ctx) EVP_PKEY_CTX_free(keygen_ctx);
+          if (params) EVP_PKEY_free(params);
+          return 1;
+      }
+
+      int ECDH_PRIME_256_V1_CEUM::pub_key(DDS::OctetSeq& dst)
+      {
+        return 1;
+      }
+
+      int ECDH_PRIME_256_V1_CEUM::gen_shared_secret(const DDS::OctetSeq& pub_key)
+      {
+        return 1;
       }
 
     }
