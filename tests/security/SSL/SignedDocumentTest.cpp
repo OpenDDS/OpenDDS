@@ -7,6 +7,7 @@
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include <iostream>
+#include <fstream>
 
 using namespace OpenDDS::Security::SSL;
 
@@ -17,12 +18,10 @@ public:
     ca_("file:../certs/opendds_identity_ca_cert.pem"),
     doc_("file:../governance/Governance_SC1_ProtectedDomain1.p7s")
   {
-
   }
 
   ~SignedDocumentTest()
   {
-
   }
 
   Certificate ca_;
@@ -36,11 +35,16 @@ TEST_F(SignedDocumentTest, GetContent_Success)
   ASSERT_TRUE(0 < content.length());
 }
 
-TEST_F(SignedDocumentTest, SerializeDeserialize_Success)
+TEST(SignedDocumentTestNoFixture, LoadFromMemory)
 {
-  DDS::OctetSeq tmp;
-  doc_.serialize(tmp);
-
-  SignedDocument copy(tmp);
-  ASSERT_EQ(copy, doc_);
+  const char fname[] = "../governance/Governance_SC1_ProtectedDomain1.p7s";
+  std::ifstream file(fname);
+  std::ostringstream mem;
+  mem << file.rdbuf();
+  const std::string str = mem.str();
+  DDS::OctetSeq seq(str.size(), str.size(),
+                    reinterpret_cast<unsigned char*>(
+                      const_cast<char*>(str.c_str())));
+  SignedDocument doc(seq);
+  ASSERT_EQ(doc, SignedDocument(std::string("file:") + fname));
 }
