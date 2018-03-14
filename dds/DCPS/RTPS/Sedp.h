@@ -214,9 +214,14 @@ private:
       endpoint_crypto_handle_ = e;
     }
 
-    DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
+    DDS::Security::ParticipantCryptoHandle get_participant_crypto_handle() const
     {
       return participant_crypto_handle_;
+    }
+
+    DDS::Security::NativeCryptoHandle get_endpoint_crypto_handle() const
+    {
+      return endpoint_crypto_handle_;
     }
 
   protected:
