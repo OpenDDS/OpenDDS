@@ -72,6 +72,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
   std::string name, value, permca_file, gov_file, perm_file;
 
+
+  //TODO: These comparisons are only supporting the file: protocol type in the property value
   for (size_t i = 0; i < props.length(); ++i) {
     name = props[i].name;
     value = props[i].value;
@@ -166,6 +168,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   };
 
+  // Set the domain of the participant
+  perm_set.domain_id = domain_id;
+
   ::CORBA::Long perm_handle = generate_handle();
   local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
 
@@ -208,7 +213,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
 
-  // Extract Governance data for new permissions entry
+  // Extract Governance  and domai id data for new permissions entry
   ::DDS::Security::PermissionsHandle rph = iter->second;
 
   ACPermsMap::iterator piter = local_ac_perms.begin();
@@ -220,6 +225,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ac_perms perm_set;
 
+  perm_set.domain_id = piter->second.domain_id;
   perm_set.gov_rules = piter->second.gov_rules;
 
   //local_access_control_data_.load(remote_credential_token.properties);
@@ -278,6 +284,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
+
 
   ::CORBA::Long perm_handle = generate_handle();
   local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
@@ -810,12 +817,40 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  attributes.is_read_protected = false;
-  attributes.is_write_protected = false;
-  attributes.is_discovery_protected = false;
-  attributes.is_liveliness_protected = false;
+  // Extract Governance and the permissions data for the requested handle
 
-  return true;
+  ACPermsMap::iterator piter = local_ac_perms.begin();
+  piter = local_ac_perms.find(permissions_handle);
+  if(piter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
+
+  ::DDS::Security::DomainId_t domain_to_find = piter->second.domain_id;
+
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = piter->second.gov_rules.begin(); giter != piter->second.gov_rules.end(); ++giter) {
+    ::CORBA::ULong d = giter->domain_list.count(domain_to_find);
+
+    std::cout<<"domain to find: "<<d<<std::endl;
+    if(d){
+      TopicAccessRules::iterator tr_iter;
+
+      for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        std::cout<<"topic_expression:"<<tr_iter->topic_expression<<std::endl;
+        if(::ACE::wild_match(topic_name,tr_iter->topic_expression.c_str(),true,false)) {
+          attributes.is_read_protected = tr_iter->topic_attrs.is_read_protected;
+          attributes.is_write_protected = tr_iter->topic_attrs.is_write_protected;
+          attributes.is_discovery_protected = tr_iter->topic_attrs.is_discovery_protected;
+          attributes.is_liveliness_protected = tr_iter->topic_attrs.is_liveliness_protected;
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_datawriter_sec_attributes(

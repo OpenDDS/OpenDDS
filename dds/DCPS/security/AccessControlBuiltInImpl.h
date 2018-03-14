@@ -300,6 +300,7 @@ private:
 
 
     struct ac_perms {
+        ::DDS::Security::DomainId_t domain_id;
         GovernanceAccessRules gov_rules;
         PermissionGrantRules perm_rules;
         ::DDS::Security::PermissionsToken perm_token;
