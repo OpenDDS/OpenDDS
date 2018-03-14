@@ -89,6 +89,9 @@ module DDS {
 
     const string GMCLASSID_SECURITY_AUTH_REQUEST = "dds.sec.auth_request";
     const string GMCLASSID_SECURITY_AUTH_HANDSHAKE = "dds.sec.auth";
+    const string GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS = "dds.sec.participant_crypto_tokens";
+    const string GMCLASSID_SECURITY_DATAWRITER_CRYPTO_TOKENS = "dds.sec.datawriter_crypto_tokens";
+    const string GMCLASSID_SECURITY_DATAREADER_CRYPTO_TOKENS = "dds.sec.datareader_crypto_tokens";
 
     const ReturnCode_t RETCODE_NOT_ALLOWED_BY_SECURITY = 1000;
 

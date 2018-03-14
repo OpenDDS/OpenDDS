@@ -1914,9 +1914,6 @@ Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
     return;
   }
 
-  /* TODO: Handle the rest of the message... See 7.4.3 in the security spec. */
-
-  // Without thinking too much about 7.4.3 for the moment, we need to forward auth request and handshake messages up to Spdp
   if (0 == std::strcmp(msg.message_class_id,
                        DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST)) {
     spdp_.handle_auth_request(msg);
@@ -1925,7 +1922,7 @@ Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
                               DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE)) {
     spdp_.handle_handshake_message(msg);
   }
-
+  return;
 }
 
 void
@@ -1938,18 +1935,27 @@ Sedp::Task::svc_volatile_message_secure(DCPS::MessageId id,
 
 void
 Sedp::received_volatile_message_secure(DCPS::MessageId /* message_id */,
-                    const DDS::Security::ParticipantVolatileMessageSecure& data)
+                    const DDS::Security::ParticipantVolatileMessageSecure& msg)
 {
   if (spdp_.shutting_down()) {
     return;
   }
 
-  if (should_drop_message(data)) {
+  if (should_drop_message(msg)) {
     return;
   }
 
-  /* TODO: Handle the rest of the message... See 7.4.4 in the security spec. */
-
+  if (0 == std::strcmp(msg.message_class_id,
+                       DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS)) {
+    spdp_.handle_participant_crypto_tokens(msg);
+  } else if (0 == std::strcmp(msg.message_class_id,
+                              DDS::Security::GMCLASSID_SECURITY_DATAWRITER_CRYPTO_TOKENS)) {
+    // TODO Handle Datawriter tokens
+  } else if (0 == std::strcmp(msg.message_class_id,
+                              DDS::Security::GMCLASSID_SECURITY_DATAREADER_CRYPTO_TOKENS)) {
+    // TODO Handle Datareader tokens
+  }
+  return;
 }
 
 bool
@@ -2786,6 +2792,15 @@ Sedp::write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
   static DCPS::SequenceNumber sequence = 0;
   msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
   return participant_stateless_message_writer_.write_stateless_message(msg, reader, sequence);
+}
+
+DDS::ReturnCode_t
+Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
+                             const RepoId& reader)
+{
+  static DCPS::SequenceNumber sequence = 0;
+  msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
+  return participant_volatile_message_secure_writer_.write_volatile_message_secure(msg, reader, sequence);
 }
 
 DDS::ReturnCode_t

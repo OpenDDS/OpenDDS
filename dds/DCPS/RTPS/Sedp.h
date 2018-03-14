@@ -90,6 +90,9 @@ public:
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::RepoId& reader);
 
+  DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
+                                           const DCPS::RepoId& reader);
+
   // Topic
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
                         OPENDDS_STRING& name);
@@ -268,13 +271,13 @@ private:
                                                 const DCPS::RepoId& reader,
                                                 DCPS::SequenceNumber& sequence);
 
-  DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
-              const DCPS::RepoId& reader,
-              DCPS::SequenceNumber& sequence);
+    DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
+                                              const DCPS::RepoId& reader,
+                                              DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-						    const DCPS::RepoId& reader,
-						    DCPS::SequenceNumber& sequence);
+                                                    const DCPS::RepoId& reader,
+                                                    DCPS::SequenceNumber& sequence);
 
     DDS::ReturnCode_t write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& msg,
                                                     const DCPS::RepoId& reader,

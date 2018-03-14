@@ -86,6 +86,7 @@ public:
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
+  void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 
   bool is_opendds(const GUID_t& participant) const;
 
@@ -172,7 +173,7 @@ private:
   DDS::Security::IdentityStatusToken identity_status_token_;
   DDS::Security::PermissionsToken permissions_token_;
   DDS::Security::PermissionsCredentialToken permissions_credential_token_;
-  DDS::Security::ParticipantCryptoToken crypto_token_;
+  DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 };
