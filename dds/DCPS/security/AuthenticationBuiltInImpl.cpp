@@ -581,8 +581,8 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   message_out.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
   message_out.set_bin_property(prop_index++, "hash_c2", local_credential_data_.get_hash_c2(), true);
 
-  diffie_hellman->pub_key(tmp);
-  message_out.set_bin_property(prop_index++, "dh2", tmp, true);
+  diffie_hellman->pub_key(dh2);
+  message_out.set_bin_property(prop_index++, "dh2", dh2, true);
   message_out.set_bin_property(prop_index++, "hash_c1", local_credential_data_.get_hash_c1(), true);
   message_out.set_bin_property(prop_index++, "dh1", dh1, true);
   message_out.set_bin_property(prop_index++, "challenge1", challenge1, true);
@@ -798,7 +798,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   const unsigned int PropertyCount = 0;
   const unsigned int BinaryPropertyCount = 7;
 
-  DDS::OctetSeq challenge1, challenge2;
+  DDS::OctetSeq challenge1;
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
 
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
@@ -827,9 +827,10 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     return Failure;
   }
 
+  const DDS::OctetSeq& challenge2 = message_in.get_bin_property_value("challenge2");
+
   TokenReader auth_wrapper(remoteDataPtr->remote_auth_request);
   if (! auth_wrapper.is_nil()) {
-    challenge2 = message_in.get_bin_property_value("challenge2");
     const DDS::OctetSeq& future_challenge = auth_wrapper.get_bin_property_value("future_challenge");
 
     if (! challenges_match(challenge2, future_challenge)) {
@@ -864,15 +865,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     challenge1 = handshake_request_token.get_bin_property_value("challenge1");
     const DDS::OctetSeq& challenge1_reply =  message_in.get_bin_property_value("challenge1");
 
-    if ((challenge1.length()) < 1 || (challenge1_reply.length() < 1)) {
-      return Failure;
-    }
-    if (challenge1.length() != challenge1_reply.length()) {
-      return Failure;
-    }
-
-    if (0 != std::memcmp(challenge1.get_buffer(), challenge1_reply.get_buffer(), challenge1_reply.length())) {
-      return Failure;
+    if (! challenges_match(challenge1, challenge1_reply)) {
+        return Failure;
     }
   }
 

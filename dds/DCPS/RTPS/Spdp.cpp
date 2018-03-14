@@ -478,6 +478,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.auth_state_ = AS_HANDSHAKE_REPLY_SENT;
+      return;
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
       if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {

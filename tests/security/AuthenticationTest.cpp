@@ -379,7 +379,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
    * practical to check the lengths of the resultant parameters */
   const DDS::BinaryPropertySeq& bprops = mp1.handshake_message_token.binary_properties;
   const DDS::PropertySeq& props = mp1.handshake_message_token.properties;
-  ASSERT_EQ(7u, bprops.length());
+  ASSERT_EQ(8u, bprops.length());
   ASSERT_EQ(0u, props.length());
   ASSERT_EQ(256u, value_of("dh1", bprops).length());
   {
