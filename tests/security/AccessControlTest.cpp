@@ -276,7 +276,7 @@ public:
     perm_topic_p7s.propagate = false;
 
     add_property(permca);
-    add_property(gov_0_p7s);
+    add_property(gov_1_p7s);
     add_property(perm_join_p7s);
 
     ::DDS::OctetSeq Empty_Seq;
@@ -990,6 +990,7 @@ TEST_F(AccessControlTest, get_participant_sec_attributes_Success)
 TEST_F(AccessControlTest, get_topic_sec_attributes_InvalidInput)
 {
   ::DDS::Security::TopicSecurityAttributes attributes;
+
   ::DDS::Security::SecurityException ex;
 
   // Nil handle
@@ -1001,8 +1002,12 @@ TEST_F(AccessControlTest, get_topic_sec_attributes_InvalidInput)
 TEST_F(AccessControlTest, get_topic_sec_attributes_Success)
 {
   ::DDS::Security::TopicSecurityAttributes attributes;
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   ::DDS::Security::SecurityException ex;
-  EXPECT_TRUE(get_inst().get_topic_sec_attributes(1, "TopicName", attributes, ex));
+
+  get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+
+  EXPECT_TRUE(get_inst().get_topic_sec_attributes(1, "Square", attributes, ex));
   EXPECT_FALSE(attributes.is_read_protected);
   EXPECT_FALSE(attributes.is_write_protected);
   EXPECT_FALSE(attributes.is_discovery_protected);
