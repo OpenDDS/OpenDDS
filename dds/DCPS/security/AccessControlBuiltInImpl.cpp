@@ -126,13 +126,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     local_gov.get_content(gov_content);
     clean_smime_content(gov_content);
 
-
     ac_perms perm_set;
-
-  if( 0 != load_governance_file(&perm_set , gov_content)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
-    return DDS::HANDLE_NIL;
-  };
 
 
   // permissions file
@@ -140,6 +134,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
   local_perm.get_content(perm_content);
   clean_smime_content(perm_content);
+
+  if( 0 != load_governance_file(&perm_set , gov_content)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
+    return DDS::HANDLE_NIL;
+  };
 
   // Set and store the permissions credential token  while we have the raw content
 
@@ -167,7 +166,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   };
 
-  ::CORBA::Boolean perm_handle = generate_handle();
+  ::CORBA::Long perm_handle = generate_handle();
   local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
 
   local_identity_map.insert(std::make_pair(identity,perm_handle));
@@ -256,11 +255,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
+
   // Try to locate the payload
   if(!clean_smime_content(perm_content)){
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission content");
     return DDS::HANDLE_NIL;
-  };
+  }
 
   // Set and store the permissions credential token  while we have the raw content
 
@@ -920,7 +920,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_content)
 {
-    std::cout<< "governance:["<<g_content<<"]"<<std::endl;
     //TODO: Need to return existing governance content if found.
 
   static const char* gMemBufId = "gov buffer id";
@@ -1104,7 +1103,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(ac_perms * ac_perms_holder, std::string p_content) {
 
   static const char* gMemBufId = "gov buffer id";
-  std::cout << p_content << std::endl;
 
   try
   {
@@ -1279,18 +1277,24 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
   std::string start_str("Content-Type: text/plain") , end_str("dds>");
 
     size_t found_begin = content_.find(start_str);
-    size_t found_end = content_.find(end_str);
-    if((found_begin!=std::string::npos) && (found_end != std::string::npos)){
-      std::string holder_;
-      holder_.assign(content_.substr(found_begin + start_str.length(),(found_end -found_begin)+end_str.length()));
+
+    if (found_begin != std::string::npos) {
+      content_.erase(0, found_begin + start_str.length());
       const char* t = " \t\n\r\f\v";
-      holder_.erase(0, holder_.find_first_not_of(t));
-        content_.clear();
-        content_.swap(holder_);
-        return true;
+      content_.erase(0, content_.find_first_not_of(t));
+    } else {
+      return false;
     }
 
-    return false;
+    size_t found_end = content_.find(end_str);
+
+    if (found_end != std::string::npos) {
+      content_.erase(found_end + end_str.length());
+    } else {
+      return false;
+    }
+
+    return true;
 }
 
 
