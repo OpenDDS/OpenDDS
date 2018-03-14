@@ -292,6 +292,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::DDS::OctetSeq & serialized_local_participant_data,
   ::DDS::Security::SecurityException & ex)
 {
+  const unsigned int PropertyCount = 0;
+  const unsigned int BinaryPropertyCount = 8;
+
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   if (serialized_local_participant_data.length() != 0) {
@@ -302,41 +305,13 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
           SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman);
 
-          OpenDDS::Security::TokenWriter handshake_wrapper(handshake_message,
-                                                           build_class_id(Handshake_Request_Class_Ext),
-                                                           0, 7);
-          unsigned int prop_index = 0;
-          DDS::OctetSeq tmp;
-
-          local_credential_data_.get_participant_cert().serialize(tmp);
-          handshake_wrapper.set_bin_property(prop_index++, "c.id", tmp, true);
-
-          handshake_wrapper.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
-          handshake_wrapper.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
-          handshake_wrapper.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
-          handshake_wrapper.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
-
-          diffie_hellman->pub_key(tmp);
-          handshake_wrapper.set_bin_property(prop_index++, "dh1", tmp, true);
-
-          OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
-          if (auth_wrapper.is_nil()) {
-            DDS::OctetSeq nonce;
-            int err = SSL::make_nonce_256(nonce);
-            if (! err) {
-              handshake_wrapper.set_bin_property(prop_index++, "challenge1", nonce, true);
-
-            } else {
-              return DDS::Security::VALIDATION_FAILED;
-            }
-
-          } else {
-            const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
-            handshake_wrapper.set_bin_property(prop_index++, "challenge1", challenge_data, true);
-
-          }
+          OpenDDS::Security::TokenWriter message_out(handshake_message,
+                                                     build_class_id(Handshake_Request_Class_Ext),
+                                                     PropertyCount,
+                                                     BinaryPropertyCount);
 
           /* Compute hash_c1 and store for later */
+
           {
             DDS::OctetSeq tmp;
             CredentialHash hash(local_credential_data_.get_participant_cert(),
@@ -347,6 +322,37 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
             int err = hash(tmp);
             if (err) return DDS::Security::VALIDATION_FAILED;
             local_credential_data_.set_hash_c1(tmp);
+          }
+
+          unsigned int prop_index = 0;
+          DDS::OctetSeq tmp;
+
+          local_credential_data_.get_participant_cert().serialize(tmp);
+          message_out.set_bin_property(prop_index++, "c.id", tmp, true);
+          message_out.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
+          message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
+          message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
+          message_out.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
+          message_out.set_bin_property(prop_index++, "hash_c1", local_credential_data_.get_hash_c1(), true);
+
+          diffie_hellman->pub_key(tmp);
+          message_out.set_bin_property(prop_index++, "dh1", tmp, true);
+
+          OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
+          if (auth_wrapper.is_nil()) {
+            DDS::OctetSeq nonce;
+            int err = SSL::make_nonce_256(nonce);
+            if (! err) {
+              message_out.set_bin_property(prop_index++, "challenge1", nonce, true);
+
+            } else {
+              return DDS::Security::VALIDATION_FAILED;
+            }
+
+          } else {
+            const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
+            message_out.set_bin_property(prop_index++, "challenge1", challenge_data, true);
+
           }
 
           HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
@@ -452,6 +458,9 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   using OpenDDS::Security::TokenWriter;
   using OpenDDS::Security::TokenReader;
 
+  const unsigned int PropertyCount = 0;
+  const unsigned int BinaryPropertyCount = 12;
+
   DDS::OctetSeq challenge1, challenge2, dh2, cperm;
 
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
@@ -554,25 +563,28 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
    * Most of this logic would probably be placed in the Certificate directly
    * or an OCSP abstraction that the Certificate uses. */
 
+  const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
+
   int prop_index = 0;
   DDS::OctetSeq tmp;
 
   TokenWriter message_out(handshake_message_out,
                           build_class_id(Handshake_Reply_Class_Ext),
-                          0, 9);
+                          PropertyCount,
+                          BinaryPropertyCount);
 
   local_credential_data_.get_participant_cert().serialize(tmp);
   message_out.set_bin_property(prop_index++, "c.id", tmp, true);
-
   message_out.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
   message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
   message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
-
   message_out.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
+  message_out.set_bin_property(prop_index++, "hash_c2", local_credential_data_.get_hash_c2(), true);
 
   diffie_hellman->pub_key(tmp);
   message_out.set_bin_property(prop_index++, "dh2", tmp, true);
-
+  message_out.set_bin_property(prop_index++, "hash_c1", local_credential_data_.get_hash_c1(), true);
+  message_out.set_bin_property(prop_index++, "dh1", dh1, true);
   message_out.set_bin_property(prop_index++, "challenge1", challenge1, true);
 
   TokenReader initiator_local_auth_request(initiator_id_data->local_auth_request);
@@ -592,7 +604,6 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   }
 
   std::vector<const DDS::OctetSeq*> sign_these;
-  const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
   sign_these.push_back(&local_credential_data_.get_hash_c2());
   sign_these.push_back(&challenge2);
   sign_these.push_back(&dh2);
@@ -784,6 +795,9 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   DDS::Security::HandshakeHandle handshake_handle,
   DDS::Security::SecurityException & ex)
 {
+  const unsigned int PropertyCount = 0;
+  const unsigned int BinaryPropertyCount = 7;
+
   DDS::OctetSeq challenge1, challenge2;
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
 
@@ -919,8 +933,13 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   int prop_index = 0;
   OpenDDS::Security::TokenWriter final_msg(handshake_message_out,
                                            build_class_id(Handshake_Final_Class_Ext),
-                                           0, 3);
+                                           PropertyCount,
+                                           BinaryPropertyCount);
 
+  final_msg.set_bin_property(prop_index++, "hash_c1", local_credential_data_.get_hash_c1(), true);
+  final_msg.set_bin_property(prop_index++, "hash_c2", local_credential_data_.get_hash_c2(), true);
+  final_msg.set_bin_property(prop_index++, "dh1", dh1, true);
+  final_msg.set_bin_property(prop_index++, "dh2", dh2, true);
   final_msg.set_bin_property(prop_index++, "challenge1", challenge1, true);
   final_msg.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
@@ -938,7 +957,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   handshakePtr->remote_cert = DCPS::move(remote_cert);
   handshakePtr->validation_state = FinalMessage;
-  /* Per the spec, no guarantee 'c.perm' will be set. Hence no checks before storing its value */
   handshakePtr->access_permissions =  message_in.get_bin_property_value("c.perm");
 
   handshakePtr->secret_handle = new SharedSecret(challenge1,
