@@ -499,7 +499,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // 1. Domain element
 
   if ( iter->second.gov_rules[0].domain_list.find(domain_id) == iter->second.gov_rules[0].domain_list.end()){
-    std::cout << "Domain ID of " << domain_id << "not found" << std::endl;
+    std::cout << "Domain ID of " << domain_id << " not found" << std::endl;
     return false;
   }
 
@@ -519,14 +519,20 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Check topic rules for the given domain id.
 
   for(pgr_iter = iter->second.perm_rules.begin(); pgr_iter != iter->second.perm_rules.end(); ++pgr_iter) {
-    // Cycle through topic rules to find an allow
-    std::list<permissions_topic_rule>::iterator tr_iter;
-    for (tr_iter = pgr_iter->PermissionTopicRules.begin(); tr_iter != pgr_iter->PermissionTopicRules.end(); ++tr_iter){
 
+    std::cout<<"grant_name:"<<pgr_iter->grant_name<<std::endl;
+    // Cycle through topic rules to find an allow
+    std::list<permissions_topic_rule>::iterator ptr_iter;
+    for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
+      std::set< ::DDS::Security::DomainId_t >::iterator z = (ptr_iter->domain_list.find(domain_id));
+      if ((domain_id == *z) && (ptr_iter->ad_type == ALLOW)) {
+        std::cout << "ad_type: ALLOW domain_id: " << domain_id << " found" << std::endl;
+        return true;
+      }
     }
   }
 
-  return true;
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_remote_datawriter(

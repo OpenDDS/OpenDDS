@@ -650,13 +650,42 @@ TEST_F(AccessControlTest, check_remote_participant_InvalidInput)
 
 TEST_F(AccessControlTest, check_remote_participant_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
-  ::DDS::Security::DomainId_t domain_id = 1;
+
+  ::DDS::Security::DomainId_t domain_id = 0;
   ::DDS::Security::ParticipantBuiltinTopicDataSecure participant_data;
+  ::DDS::Security::PermissionsToken remote_perm_token;
+  ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::SecurityException ex;
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+
+  remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
+  remote_perm_token.properties.length(1);
+  remote_perm_token.properties[0].name = "dds.perm.ca.sn";
+  remote_perm_token.properties[0].value = remote_subject_name;
+
+  std::string ca(get_file_contents(identity_ca_file));
+  std::string pf(get_file_contents(perm_join_p7s_file));
+
+  remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
+  remote_apc_token.binary_properties.length(2);
+  remote_apc_token.binary_properties[0].name = "c.id";
+  remote_apc_token.binary_properties[0].value.length(ca.size());
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), ca.c_str(),ca.size());
+  remote_apc_token.binary_properties[0].propagate = true;
+
+  remote_apc_token.binary_properties[1].name = "c.perm";
+  remote_apc_token.binary_properties[1].value.length(pf.size());
+  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(),pf.c_str(), pf.size());
+  remote_apc_token.binary_properties[1].propagate = true;
+
+
+  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+
+  ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
+          auth_plugin.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
 
   EXPECT_TRUE(get_inst().check_remote_participant(
-    permissions_handle, domain_id, participant_data, ex));
+    remote_out_handle, domain_id, participant_data, ex));
 }
 
 TEST_F(AccessControlTest, check_remote_datawriter_InvalidInput)
