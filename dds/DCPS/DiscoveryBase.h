@@ -317,16 +317,16 @@ namespace OpenDDS {
               // TODO: log error / throw exception??
           }
 
-          DDS::Security::DatawriterCryptoHandle handle = get_crypto_key_factory()->register_local_datawriter(crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
-
-          if (handle == DDS::HANDLE_NIL) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-              ACE_TEXT("EndpointManager::add_publication() - ")
-              ACE_TEXT("unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
-                ex.code, ex.minor_code, ex.message.in()));
+          if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
+            DDS::Security::DatawriterCryptoHandle handle = get_crypto_key_factory()->register_local_datawriter(crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
+            if (handle == DDS::HANDLE_NIL) {
+              ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("EndpointManager::add_publication() - ")
+                ACE_TEXT("unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
+                  ex.code, ex.minor_code, ex.message.in()));
+            }
+            local_writer_crypto_handles_[rid] = handle;
           }
-
-          local_writer_crypto_handles_[rid] = handle;
         }
 
         TopicDetails& td = topics_[topic_names_[topicId]];
@@ -414,16 +414,16 @@ namespace OpenDDS {
               // TODO: log error / throw exception??
           }
 
-          DDS::Security::DatareaderCryptoHandle handle = get_crypto_key_factory()->register_local_datareader(crypto_handle_, DDS::PropertySeq(), sb.security_attribs_, ex);
-
-          if (handle == DDS::HANDLE_NIL) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-              ACE_TEXT("EndpointManager::add_subscription() - ")
-              ACE_TEXT("unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
-                ex.code, ex.minor_code, ex.message.in()));
+          if (sb.security_attribs_.is_submessage_protected || sb.security_attribs_.is_payload_protected) {
+            DDS::Security::DatareaderCryptoHandle handle = get_crypto_key_factory()->register_local_datareader(crypto_handle_, DDS::PropertySeq(), sb.security_attribs_, ex);
+            if (handle == DDS::HANDLE_NIL) {
+              ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("EndpointManager::add_subscription() - ")
+                ACE_TEXT("unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
+                  ex.code, ex.minor_code, ex.message.in()));
+            }
+            local_reader_crypto_handles_[rid] = handle;
           }
-
-          local_reader_crypto_handles_[rid] = handle;
         }
 
         TopicDetails& td = topics_[topic_names_[topicId]];
@@ -827,14 +827,20 @@ namespace OpenDDS {
             if (call_reader) {
               RepoId writer_participant = writer;
               writer_participant.entityId = ENTITYID_PARTICIPANT;
-              DDS::Security::DatareaderCryptoHandle drch = local_reader_crypto_handles_[reader];
-              remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+              DatareaderCryptoHandleMap::const_iterator iter = local_reader_crypto_handles_.find(reader);
+              if (iter != local_reader_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
+                DDS::Security::DatareaderCryptoHandle drch = iter->second;
+                remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+              }
             }
             if (call_writer) {
               RepoId reader_participant = reader;
               reader_participant.entityId = ENTITYID_PARTICIPANT;
-              DDS::Security::DatawriterCryptoHandle dwch = local_writer_crypto_handles_[writer];
-              remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, false); // TODO: determine correct use of relay_only
+              DatawriterCryptoHandleMap::const_iterator iter = local_writer_crypto_handles_.find(writer);
+              if (iter != local_writer_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
+                DDS::Security::DatawriterCryptoHandle dwch = iter->second;
+                remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, false); // TODO: determine correct use of relay_only
+              }
             }
           }
 
