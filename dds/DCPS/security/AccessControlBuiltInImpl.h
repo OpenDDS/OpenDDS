@@ -234,18 +234,18 @@ private:
 
     // Governance Rule definitions
 
-    typedef struct {
+    struct TopicAccessRule {
         std::string topic_expression;
         ::DDS::Security::TopicSecurityAttributes topic_attrs;
-    } TopicAccessRule;
+    };
 
     typedef std::vector<TopicAccessRule> TopicAccessRules;
 
-    typedef struct {
+    struct domain_rule {
         std::set< ::DDS::Security::DomainId_t > domain_list;
         ::DDS::Security::ParticipantSecurityAttributes domain_attrs;
         TopicAccessRules topic_rules;
-    } domain_rule;
+    };
 
 
     typedef std::vector<domain_rule> GovernanceAccessRules;
@@ -269,42 +269,42 @@ private:
         SUBSCRIBE
     };
 
-    typedef struct {
+    struct Validity_t {
         std::string not_before;
         std::string not_after;
-    } Validity_t;
+    };
 
-    typedef  struct {
+    struct permission_topic_ps_rule{
         PublishSubscribe_t  ps_type;
         std::set<std::string> topic_list;
 
-    } permission_topic_ps_rule;
+    };
 
-    typedef struct {
+    struct permissions_topic_rule {
         AllowDeny_t ad_type;
         std::set< ::DDS::Security::DomainId_t > domain_list;
         std::list<permission_topic_ps_rule> topic_ps_rules;
-    } permissions_topic_rule;
+    };
 
 
-    typedef struct {
+    struct permission_grant_rule {
         std::string grant_name;
         std::string subject;
         Validity_t validity;
         std::string default_permission;
         std::list<permissions_topic_rule> PermissionTopicRules;
-    } permission_grant_rule;
+    };
 
     typedef std::vector<permission_grant_rule> PermissionGrantRules;
 
 
 
-    typedef struct {
+    struct ac_perms {
         GovernanceAccessRules gov_rules;
         PermissionGrantRules perm_rules;
         ::DDS::Security::PermissionsToken perm_token;
         ::DDS::Security::PermissionsCredentialToken perm_cred_token;
-    } ac_perms;
+    };
 
     typedef std::map< ::DDS::Security::PermissionsHandle , ac_perms > ACPermsMap;
 
