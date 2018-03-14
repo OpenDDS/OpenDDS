@@ -395,16 +395,21 @@ void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUI
   buffer.wr_ptr(cpdata.length());
   OpenDDS::DCPS::Serializer serializer(&buffer, DCPS::Serializer::SWAP_BE, DCPS::Serializer::ALIGN_CDR);
   RTPS::ParameterList params;
-  serializer >> params;
 
-  for (size_t i = 0; i < params.length(); ++i) {
-    const RTPS::Parameter& p = params[i];
+  if (serializer >> params) {
+    for (size_t i = 0; i < params.length(); ++i) {
+      const RTPS::Parameter& p = params[i];
 
-    if (p._d() == RTPS::PID_PARTICIPANT_GUID) {
-      dst = p.guid();
-      break;
+      if (p._d() == RTPS::PID_PARTICIPANT_GUID) {
+        dst = p.guid();
+        break;
+      }
     }
+
+  } else {
+    fprintf(stderr, "extract_participant_guid_from_cpdata: Error, failed to deserialize guid from cpdata\n");
   }
+
 }
 
 bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
@@ -1027,7 +1032,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   /* Validate Signature field */
 
   const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
-  const SSL::DiffieHellman::unique_ptr& dh = handshakePtr->diffie_hellman;
 
   std::vector<const DDS::OctetSeq*> verify_these;
   const DDS::OctetSeq& dh1 = handshake_reply_token.get_bin_property_value("dh1");
