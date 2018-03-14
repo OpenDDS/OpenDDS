@@ -1285,6 +1285,7 @@ namespace OpenDDS {
         DDS::Security::SharedSecretHandle_var shared_secret_handle_;
         DDS::Security::PermissionsHandle permissions_handle_;
         DDS::Security::ParticipantCryptoHandle crypto_handle_;
+        DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
       };
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
                               DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;

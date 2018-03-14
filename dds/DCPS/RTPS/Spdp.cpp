@@ -389,21 +389,21 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DDS::Security::SecurityException se;
   Security::Authentication_var auth = security_config_->get_authentication();
 
+  // If this message wasn't intended for us, ignore handshake message
+  if (msg.destination_participant_guid != guid_ || !msg.message_data.length()) {
+    return;
+  }
+
   RepoId src_participant = msg.message_identity.source_guid;
   src_participant.entityId = DCPS::ENTITYID_PARTICIPANT;
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  // If this message wasn't intended for us, or if discovery hasn't initialized / validated this participant yet, ignore handshake messages
-  if (msg.destination_participant_guid != guid_ || !msg.message_data.length()
-      || participants_.find(src_participant) == participants_.end()) {
-    return;
-  }
 
+  // If discovery hasn't initialized / validated this participant yet, ignore handshake messages
   DiscoveredParticipantIter iter = participants_.find(src_participant);
-
   if (iter == participants_.end()) {
     ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("(%P|%t) Spdp::handle_handshake_message() - ")
+      ACE_TEXT("Spdp::handle_handshake_message() - ")
       ACE_TEXT("received handshake for undiscovered participant. Ignoring.\n")));
     return;
   }
@@ -540,6 +540,58 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   return;
 }
 
+DDS::Security::DataHolderSeq& assign(DDS::Security::DataHolderSeq& lhs, const DDS::Security::ParticipantCryptoTokenSeq& rhs) {
+  lhs.length(rhs.length());
+  for (size_t i = 0; i < rhs.length(); ++i) {
+    lhs[i] = rhs[i];
+  }
+  return lhs;
+}
+
+DDS::Security::ParticipantCryptoTokenSeq& assign(DDS::Security::ParticipantCryptoTokenSeq& lhs, const DDS::Security::DataHolderSeq& rhs) {
+  lhs.length(rhs.length());
+  for (size_t i = 0; i < rhs.length(); ++i) {
+    lhs[i] = rhs[i];
+  }
+  return lhs;
+}
+
+void
+Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg) {
+  DDS::Security::SecurityException se;
+  Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
+
+  // If this message wasn't intended for us, ignore volatile message
+  if (msg.destination_participant_guid != guid_ || !msg.message_data.length()) {
+    return;
+  }
+
+  RepoId src_participant = msg.message_identity.source_guid;
+  src_participant.entityId = DCPS::ENTITYID_PARTICIPANT;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  // If discovery hasn't initialized / validated this participant yet, ignore volatile message
+  DiscoveredParticipantIter iter = participants_.find(src_participant);
+  if (iter == participants_.end()) {
+    ACE_DEBUG((LM_WARNING,
+      ACE_TEXT("Spdp::handle_participant_crypto_tokens() - ")
+      ACE_TEXT("received tokens for undiscovered participant. Ignoring.\n")));
+    return;
+  }
+  DiscoveredParticipant& dp = iter->second;
+
+  assign(dp.crypto_tokens_, msg.message_data);
+
+  if (key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, dp.crypto_tokens_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::handle_participant_crypto_tokens() - ")
+      ACE_TEXT("Unable to set remote participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    return;
+  }
+}
+
 bool
 Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
@@ -547,7 +599,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 
   Security::Authentication_var auth = security_config_->get_authentication();
   Security::AccessControl_var access = security_config_->get_access_control();
-  Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+  Security::CryptoKeyFactory_var key_factory = security_config_->get_crypto_key_factory();
+  Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
 
   dp.shared_secret_handle_ = auth->get_shared_secret(dp.handshake_handle_, se);
   if (dp.shared_secret_handle_ == 0) {
@@ -611,11 +664,19 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
     }
   }
 
-  dp.crypto_handle_ = crypto->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
+  dp.crypto_handle_ = key_factory->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
   if (dp.crypto_handle_ == DDS::HANDLE_NIL) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to register remote participant with crypto plugin. Security Exception[%d.%d]: %C\n"),
+      ACE_TEXT("Unable to register remote participant with crypto key factory plugin. Security Exception[%d.%d]: %C\n"),
+        se.code, se.minor_code, se.message.in()));
+    return false;
+  }
+
+  if (key_exchange->create_local_participant_crypto_tokens(crypto_tokens_, crypto_handle_, dp.crypto_handle_, se) == false) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("Spdp::match_authenticated() - ")
+      ACE_TEXT("Unable to create local participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     return false;
   }
@@ -640,6 +701,28 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   sedp_.associate(dp.pdata_);
   sedp_.associate_secure_writers_to_readers(dp.pdata_);
   sedp_.associate_secure_readers_to_writers(dp.pdata_);
+
+
+  // Write volatile message with participant crypto tokens to newly discovered participant
+  DCPS::RepoId writer = guid_;
+  writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+
+  DCPS::RepoId reader = guid;
+  reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+
+  DDS::Security::ParticipantVolatileMessageSecure msg;
+  msg.message_identity.source_guid = writer;
+  msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
+  msg.destination_participant_guid = guid;
+  msg.destination_endpoint_guid = reader;
+  msg.source_endpoint_guid = GUID_UNKNOWN;
+  assign(msg.message_data, crypto_tokens_);
+
+  if (sedp_.write_stateless_message(msg, reader) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::match_authenticated() - ")
+      ACE_TEXT("Unable to write volatile message.\n")));
+    return false; // TODO A bit late to fall back now, but here we are. We'll need to clean up associations etc eventually.
+  }
 
   // Iterator is no longer valid
   DiscoveredParticipantIter iter = participants_.find(guid);
