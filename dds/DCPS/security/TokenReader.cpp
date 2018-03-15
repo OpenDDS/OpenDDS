@@ -44,12 +44,12 @@ const DDS::OctetSeq& TokenReader::get_bin_property_value(const std::string& prop
   for (prop_index = 0; prop_index < num_props; ++prop_index) {
     if (0 == property_name.compare(token_ref_.binary_properties[prop_index].name)) {
       break;
+    }
   }
-}
 
-if (prop_index >= num_props) {
-  return _empty_seq_;
-}
+  if (prop_index >= num_props) {
+    return _empty_seq_;
+  }
 
   return token_ref_.binary_properties[prop_index].value;
 }

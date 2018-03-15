@@ -125,7 +125,7 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
 ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
   ParticipantCryptoHandle local_participant_crypto_handle,
   IdentityHandle remote_participant_identity,
-  PermissionsHandle remote_participant_permissions,
+  PermissionsHandle /*remote_participant_permissions*/,
   SharedSecretHandle* shared_secret,
   SecurityException& ex)
 {
@@ -135,10 +135,6 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
   }
   if (DDS::HANDLE_NIL == remote_participant_identity) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote participant ID");
-    return DDS::HANDLE_NIL;
-  }
-  if (DDS::HANDLE_NIL == remote_participant_permissions) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote permissions ID");
     return DDS::HANDLE_NIL;
   }
   if (!shared_secret) {
