@@ -276,8 +276,8 @@ public:
     perm_topic_p7s.propagate = false;
 
     add_property(permca);
-    add_property(gov_0_p7s);
-    add_property(perm_join_p7s);
+    add_property(gov_2_p7s);
+    add_property(perm_topic_p7s);
 
     ::DDS::OctetSeq Empty_Seq;
 
@@ -532,13 +532,17 @@ TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
 
 TEST_F(AccessControlTest, check_create_datareader_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
-  ::DDS::Security::DomainId_t domain_id = 1;
-  const char * topic_name = "MyTopic";
+
+  ::DDS::Security::DomainId_t domain_id = 0;
+  const char * topic_name = "Square";
   ::DDS::DataReaderQos qos;
   ::DDS::PartitionQosPolicy  partition;
   ::DDS::Security::DataTags  data_tag;
   ::DDS::Security::SecurityException ex;
+
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+  ::DDS::Security::PermissionsHandle permissions_handle =
+          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
 
   EXPECT_TRUE(get_inst().check_create_datareader(
     permissions_handle,
@@ -1033,18 +1037,23 @@ TEST_F(AccessControlTest, get_datawriter_sec_attributes_InvalidInput)
 
 TEST_F(AccessControlTest, get_datawriter_sec_attributes_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
   ::DDS::PartitionQosPolicy partition;
   ::DDS::Security::DataTagQosPolicy data_tag;
   ::DDS::Security::EndpointSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
 
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+  ::DDS::Security::PermissionsHandle permissions_handle =
+          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+
+  attributes.plugin_endpoint_attributes = 0;
+
   EXPECT_TRUE(get_inst().get_datawriter_sec_attributes(
-    permissions_handle, "TestTopic", partition, data_tag, attributes, ex));
-  EXPECT_TRUE(attributes.is_submessage_protected);
-  EXPECT_TRUE(attributes.is_payload_protected);
-  EXPECT_TRUE(attributes.is_key_protected);
-  EXPECT_EQ(0xFFFFFFFF, attributes.plugin_endpoint_attributes);
+    permissions_handle, "Square", partition, data_tag, attributes, ex));
+  EXPECT_FALSE(attributes.is_submessage_protected);
+  EXPECT_FALSE(attributes.is_payload_protected);
+  EXPECT_FALSE(attributes.is_key_protected);
+  EXPECT_EQ(0x00000000, attributes.plugin_endpoint_attributes);
 }
 
 TEST_F(AccessControlTest, get_datareader_sec_attributes_InvalidInput)
