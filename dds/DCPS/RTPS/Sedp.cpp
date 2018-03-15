@@ -654,7 +654,7 @@ void Sedp::associate_secure_writers_to_readers(const SPDPdiscoveredParticipantDa
   create_association_data_proto(proto, pdata);
 
   DCPS::RepoId part = proto.remote_id_;
-  part.entityId = ENTITYID_PARTICIPANT; 
+  part.entityId = ENTITYID_PARTICIPANT;
 
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
 
@@ -699,7 +699,7 @@ void Sedp::associate_secure_readers_to_writers(const SPDPdiscoveredParticipantDa
   create_association_data_proto(proto, pdata);
 
   DCPS::RepoId part = proto.remote_id_;
-  part.entityId = ENTITYID_PARTICIPANT; 
+  part.entityId = ENTITYID_PARTICIPANT;
 
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
 
@@ -2159,10 +2159,11 @@ Sedp::Writer::control_dropped(const DCPS::Message_Block_Ptr& /* sample */, bool)
 void Sedp::Writer::send_sample(const ACE_Message_Block& data,
                                size_t size,
                                const RepoId& reader,
-                               DCPS::SequenceNumber& sequence)
+                               DCPS::SequenceNumber& sequence,
+                               bool historic)
 {
   DCPS::DataSampleElement* el = new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
-  set_header_fields(el->get_header(), size, reader, sequence);
+  set_header_fields(el->get_header(), size, reader, sequence, historic);
 
   DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));
   el->set_sample(DCPS::move(sample));
@@ -2205,10 +2206,10 @@ Sedp::Writer::write_parameter_list(const ParameterList& plist,
             (ser << plist);
 
   if (ok) {
-      send_sample(payload, size, reader, sequence);
+    send_sample(payload, size, reader, sequence, reader != GUID_UNKNOWN);
 
   } else {
-      result = DDS::RETCODE_ERROR;
+    result = DDS::RETCODE_ERROR;
   }
 
   delete payload.cont();
@@ -2440,6 +2441,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
                                 size_t size,
                                 const RepoId& reader,
                                 DCPS::SequenceNumber& sequence,
+                                bool historic_sample,
                                 DCPS::MessageId id)
 {
   dsh.message_id_ = id;
@@ -2452,7 +2454,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
     sequence = seq_++;
   }
 
-  if (reader != GUID_UNKNOWN) {
+  if (historic_sample && reader != GUID_UNKNOWN) {
     // retransmit with same seq# for durability
     dsh.historic_sample_ = true;
   }
@@ -3462,7 +3464,7 @@ Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, co
   DDS::Security::DatareaderCryptoHandle result = DDS::HANDLE_NIL;
 
   DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
-  
+
   Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(reader_part);
 
   if (info.first != DDS::HANDLE_NIL && info.second) {

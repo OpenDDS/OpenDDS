@@ -261,7 +261,8 @@ private:
     void send_sample(const ACE_Message_Block& data,
                      size_t size,
                      const DCPS::RepoId& reader,
-                     DCPS::SequenceNumber& sequence);
+                     DCPS::SequenceNumber& sequence,
+                     bool historic = false);
 
     DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
                                            const DCPS::RepoId& reader,
@@ -301,6 +302,7 @@ private:
                            size_t size,
                            const DCPS::RepoId& reader,
                            DCPS::SequenceNumber& sequence,
+                           bool historic_sample = false,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
     void _add_ref() {}
