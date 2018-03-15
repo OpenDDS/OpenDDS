@@ -25,24 +25,9 @@ namespace OpenDDS {
 
         }
 
-        virtual ~DHAlgorithm()
-        {
-          if (k_) EVP_PKEY_free(k_);
-        }
+        virtual ~DHAlgorithm();
 
-        virtual DHAlgorithm& operator= (const DHAlgorithm& rhs)
-        {
-          if (this != &rhs) {
-            if (rhs.k_) {
-              k_ = rhs.k_;
-              EVP_PKEY_up_ref(k_);
-
-            } else {
-              k_ = NULL;
-            }
-          }
-          return *this;
-        }
+        virtual DHAlgorithm& operator= (const DHAlgorithm& rhs);
 
         virtual int init() = 0;
         virtual int pub_key(DDS::OctetSeq& dst) = 0;
@@ -51,7 +36,7 @@ namespace OpenDDS {
         {
           return shared_secret_;
         }
-        virtual bool cmp_shared_secret(const DHAlgorithm& other) = 0;
+        virtual bool cmp_shared_secret(const DHAlgorithm& other) const;
         virtual const char* kagree_algo() = 0;
 
       protected:
@@ -71,14 +56,27 @@ namespace OpenDDS {
 
         int gen_shared_secret(const DDS::OctetSeq& pub_key);
 
-        bool cmp_shared_secret(const DHAlgorithm& other);
-
         const char* kagree_algo() {
           return "DH+MODP-2048-256";
         }
-
       };
 
+      class DdsSecurity_Export ECDH_PRIME_256_V1_CEUM : public DHAlgorithm
+      {
+      public:
+        ECDH_PRIME_256_V1_CEUM();
+        ~ECDH_PRIME_256_V1_CEUM();
+
+        int init();
+
+        int pub_key(DDS::OctetSeq& dst);
+
+        int gen_shared_secret(const DDS::OctetSeq& pub_key);
+
+        const char* kagree_algo() {
+          return "ECDH+prime256v1-CEUM";
+        }
+      };
 
       class DdsSecurity_Export DiffieHellman
       {

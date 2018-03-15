@@ -12,6 +12,10 @@
 #include <cstring>
 #include <algorithm>
 
+#include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+
 using OpenDDS::DCPS::GUID_t;
 using OpenDDS::Security::AuthenticationBuiltInImpl;
 using DDS::DomainParticipantQos;
@@ -180,24 +184,37 @@ struct AuthenticationTest : public ::testing::Test
     return EmptySequence;
   }
 
-  static void fake_topic_data_from_cert(const std::string& cert, DDS::OctetSeq& dst)
+  static void add_param(OpenDDS::RTPS::ParameterList& param_list, const OpenDDS::RTPS::Parameter& param) {
+    const CORBA::ULong length = param_list.length();
+    param_list.length(length + 1);
+    param_list[length] = param;
+  }
+
+  static void fake_topic_data_from_cert(const std::string& path, DDS::OctetSeq& dst)
   {
-    /* Fill this with data directly from the cert. This assumes that the data was previously
-     * populated by the participant who handled begin_handshake_request (in this case mp1) */
+    using namespace OpenDDS::DCPS;
+    /* Fill this with data directly from the cert */
 
-    /* Check the following 47 bits match the subject-hash */
-    OpenDDS::Security::SSL::Certificate tmp(cert);
+    OpenDDS::Security::SSL::Certificate cert(path);
 
-    std::vector<unsigned char> hash;
-    tmp.subject_name_digest(hash);
+    GUID_t guid = MockParticipantData::make_guid();
+    OpenDDS::Security::SSL::make_adjusted_guid(guid, guid, cert);
 
-    dst.length(hash.size());
+    ACE_Message_Block buffer(1024);
+    //buffer.wr_ptr(cpdata.length());
+    OpenDDS::DCPS::Serializer serializer(&buffer, OpenDDS::DCPS::Serializer::SWAP_BE, OpenDDS::DCPS::Serializer::ALIGN_CDR);
 
-    for (size_t i = 0; i < dst.length(); ++i) { /* Set remaining bits */
-      dst[i] = OpenDDS::Security::SSL::offset_1bit(&hash[0], i);
-    }
+    OpenDDS::RTPS::ParameterList params;
+    OpenDDS::RTPS::Parameter p;
+    p.guid(guid);
+    p._d(OpenDDS::RTPS::PID_PARTICIPANT_GUID);
+    add_param(params, p);
 
-    dst[0] = 0x80 | dst[0]; /* Set first bit */
+    ASSERT_TRUE(serializer << params);
+
+    dst.length(buffer.length());
+    buffer.copy(reinterpret_cast<char*>(dst.get_buffer()), dst.length());
+
   }
 
   static DDS::OctetSeq EmptySequence;
