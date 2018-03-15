@@ -104,9 +104,11 @@ namespace OpenDDS {
 
       FILE* fp = fopen(path.c_str(), "r");
       if (fp) {
-        size_t bytes = 0u;
-        while((bytes = fread(chunk, sizeof(chunk), 1, fp) > 0)) {
-          chunks.insert(chunks.end(), chunk, chunk + bytes);
+        size_t count = 0u;
+        while((count = fread(chunk, sizeof(chunk[0]), sizeof(chunk), fp))) {
+          chunks.insert(chunks.end(),
+                        chunk,
+                        chunk + count);
         }
 
         if (ferror(fp)) {
