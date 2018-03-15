@@ -18,7 +18,7 @@
 namespace OpenDDS {
   namespace Security {
 
-    class CredentialHash
+    class DdsSecurity_Export CredentialHash
     {
     public:
       CredentialHash(const SSL::Certificate& cid, const SSL::DiffieHellman& dh, const DDS::OctetSeq& cpdata, const DDS::OctetSeq& cperm) :
@@ -36,7 +36,7 @@ namespace OpenDDS {
       const DDS::OctetSeq& permissions_data_;
     };
 
-    class LocalAuthCredentialData
+    class DdsSecurity_Export LocalAuthCredentialData
     {
     public:
       LocalAuthCredentialData(const DDS::PropertySeq& props);
