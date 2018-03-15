@@ -142,7 +142,7 @@ private:
   friend class ::DDS_TEST;
   /// static member used by testing code to force inline qos
   static bool force_inline_qos_;
-  bool requires_inline_qos(const PublicationId& pub_id);
+  bool requires_inline_qos(const GUIDSeq_var & peers);
 
   typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
   void add_gap_submsg(RTPS::SubmessageSeq& msg,
