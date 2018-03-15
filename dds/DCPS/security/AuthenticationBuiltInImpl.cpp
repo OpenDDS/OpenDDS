@@ -627,7 +627,8 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
   newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
   newHandshakeData->remote_cert = DCPS::move(remote_cert);
-  newHandshakeData->access_permissions =  cperm;
+  newHandshakeData->access_permissions = cperm;
+  newHandshakeData->reply_token = handshake_message_out;
 
   handshake_handle = get_next_handle();
   {
