@@ -213,8 +213,7 @@ struct AuthenticationTest : public ::testing::Test
     ASSERT_TRUE(serializer << params);
 
     dst.length(buffer.length());
-    buffer.copy(reinterpret_cast<char*>(dst.get_buffer()), dst.length());
-
+    std::memcpy(dst.get_buffer(), buffer.rd_ptr(), dst.length());
   }
 
   static DDS::OctetSeq EmptySequence;
@@ -575,8 +574,9 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
   /* mp2 is the one performing the handhsake reply */
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
+  DDS::Security::HandshakeMessageToken request_token(mp1.handshake_message_token);
   r = auth.begin_handshake_reply(mp2.handshake_handle,
-                                 mp1.handshake_message_token, /* Token received from mp1 after it called begin_handhsake_request */
+                                 request_token,
                                  mp1.id_handle,
                                  mp2.id_handle,
                                  pretend_topic_data,
@@ -584,14 +584,25 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
+  DDS::Security::HandshakeMessageToken reply_token(request_token); /* Request was an in-out param */
+
   /* Process handshake on mp1 */
-  DDS::Security::HandshakeMessageToken mp1_process_handshake_token;
-  r = auth.process_handshake(mp1_process_handshake_token,
-                             mp2.handshake_message_token,
+  DDS::Security::HandshakeMessageToken final_token;
+  r = auth.process_handshake(final_token,
+                             reply_token,
                              mp1.handshake_handle,
                              ex);
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK_FINAL_MESSAGE);
+
+  /* Process handshake on mp2 */
+  DDS::Security::HandshakeMessageToken unused_token;
+  r = auth.process_handshake(unused_token,
+                             final_token,
+                             mp2.handshake_handle,
+                             ex);
+
+  ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
 
 
