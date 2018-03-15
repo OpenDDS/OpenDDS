@@ -276,7 +276,7 @@ private:
 
     struct permission_topic_ps_rule{
         PublishSubscribe_t  ps_type;
-        std::set<std::string> topic_list;
+        std::vector<std::string> topic_list;
 
     };
 
