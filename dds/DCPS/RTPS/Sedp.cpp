@@ -643,31 +643,34 @@ void Sedp::associate_secure_writers_to_readers(const SPDPdiscoveredParticipantDa
   DCPS::AssociationData proto;
   create_association_data_proto(proto, pdata);
 
+  DCPS::RepoId part = proto.remote_id_;
+  part.entityId = ENTITYID_PARTICIPANT; 
+
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
 
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
     publications_secure_reader_->assoc(peer);
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(proto.remote_id_, publications_secure_reader_->get_endpoint_crypto_handle());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, publications_secure_reader_->get_endpoint_crypto_handle());
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
     subscriptions_secure_reader_->assoc(peer);
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(proto.remote_id_, subscriptions_secure_reader_->get_endpoint_crypto_handle());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, subscriptions_secure_reader_->get_endpoint_crypto_handle());
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
     participant_message_secure_reader_->assoc(peer);
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(proto.remote_id_, participant_message_secure_reader_->get_endpoint_crypto_handle());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, participant_message_secure_reader_->get_endpoint_crypto_handle());
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
     participant_volatile_message_secure_reader_->assoc(peer);
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(proto.remote_id_, participant_volatile_message_secure_reader_->get_endpoint_crypto_handle());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, participant_volatile_message_secure_reader_->get_endpoint_crypto_handle());
   }
 }
 
@@ -678,31 +681,34 @@ void Sedp::associate_secure_readers_to_writers(const SPDPdiscoveredParticipantDa
   DCPS::AssociationData proto;
   create_association_data_proto(proto, pdata);
 
+  DCPS::RepoId part = proto.remote_id_;
+  part.entityId = ENTITYID_PARTICIPANT; 
+
   const BuiltinEndpointSet_t& avail = pdata.participantProxy.availableBuiltinEndpoints;
 
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     publications_secure_writer_.assoc(peer);
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(proto.remote_id_, publications_secure_writer_.get_endpoint_crypto_handle(), false);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, publications_secure_writer_.get_endpoint_crypto_handle(), false);
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     subscriptions_secure_writer_.assoc(peer);
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(proto.remote_id_, subscriptions_secure_writer_.get_endpoint_crypto_handle(), false);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, subscriptions_secure_writer_.get_endpoint_crypto_handle(), false);
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
     participant_message_secure_writer_.assoc(peer);
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(proto.remote_id_, participant_message_secure_writer_.get_endpoint_crypto_handle(), false);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, participant_message_secure_writer_.get_endpoint_crypto_handle(), false);
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
     participant_volatile_message_secure_writer_.assoc(peer);
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(proto.remote_id_, participant_volatile_message_secure_writer_.get_endpoint_crypto_handle(), false);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, participant_volatile_message_secure_writer_.get_endpoint_crypto_handle(), false);
   }
 
   /*
@@ -714,7 +720,7 @@ void Sedp::associate_secure_readers_to_writers(const SPDPdiscoveredParticipantDa
    * care about handling durable data?
    */
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
   if (spdp_.shutting_down()) {
       return;
   }
@@ -3415,12 +3421,12 @@ Sedp::generate_remote_matched_writer_crypto_handle(const RepoId& writer_part, co
     DDS::Security::SecurityException se;
     result = key_factory->register_matched_remote_datawriter(drch, info.first, info.second, se);
     if (result == DDS::HANDLE_NIL) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_writer_crypto_handle() - ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::generate_remote_matched_writer_crypto_handle() - ")
         ACE_TEXT("Failure calling register_matched_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
     }
   } else {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_writer_crypto_handle() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::generate_remote_matched_writer_crypto_handle() - ")
       ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
   }
   return result;
@@ -3439,12 +3445,12 @@ Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, co
     DDS::Security::SecurityException se;
     result = key_factory->register_matched_remote_datareader(dwch, info.first, info.second, relay_only, se);
     if (result == DDS::HANDLE_NIL) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_reader_crypto_handle() - ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::generate_remote_matched_reader_crypto_handle() - ")
         ACE_TEXT("Failure calling register_matched_remote_datareader(). Security Exception[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
     }
   } else {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_reader_crypto_handle() - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::generate_remote_matched_reader_crypto_handle() - ")
       ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
   }
   return result;

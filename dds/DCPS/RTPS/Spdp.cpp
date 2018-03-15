@@ -403,7 +403,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
     ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("Spdp::handle_handshake_message() - ")
+      ACE_TEXT("(%P|%t) Spdp::handle_handshake_message() - ")
       ACE_TEXT("received handshake for undiscovered participant. Ignoring.\n")));
     return;
   }
@@ -576,7 +576,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
     ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("Spdp::handle_participant_crypto_tokens() - ")
+      ACE_TEXT("(%P|%t) Spdp::handle_participant_crypto_tokens() - ")
       ACE_TEXT("received tokens for undiscovered participant. Ignoring.\n")));
     return;
   }
@@ -586,7 +586,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 
   if (key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, dp.crypto_tokens_, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("Spdp::handle_participant_crypto_tokens() - ")
+      ACE_TEXT("(%P|%t) ERROR: Spdp::handle_participant_crypto_tokens() - ")
       ACE_TEXT("Unable to set remote participant crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     return;
@@ -1532,7 +1532,7 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id)
 {
   ParticipantCryptoInfoPair result = ParticipantCryptoInfoPair(DDS::HANDLE_NIL, DDS::Security::SharedSecretHandle_var());
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
   DiscoveredParticipantIter part = participants_.find(id);
   if (part != participants_.end()) {
     result.first = part->second.crypto_handle_;
