@@ -393,33 +393,38 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   //pub_sub_maps_lock_
   this->release_reservations_i(remote_id, local_id);
 
-  GuardType guard(this->pub_sub_maps_lock_);
+  bool release_remote_required = false;
+  {
+    GuardType guard(this->pub_sub_maps_lock_);
 
-  ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
-  if (rls->size() == 1) {
-    assoc_by_remote_.erase(remote_id);
+    ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
+    if (rls->size() == 1) {
+      assoc_by_remote_.erase(remote_id);
+      release_remote_required = true;
+    } else {
+      rls->remove(local_id);
+    }
+    RepoIdSet& ris = assoc_by_local_[local_id];
+    if (ris.size() == 1) {
+      DataLinkSet_rch& links = released_locals[local_id];
+      if (links.is_nil())
+        links = make_rch<DataLinkSet>();
+      links->insert_link(rchandle_from(this));
+      assoc_by_local_.erase(local_id);
+    } else {
+      ris.erase(remote_id);
+    }
+
+    if (assoc_by_local_.empty()) {
+      VDBG_LVL((LM_DEBUG,
+                ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
+                ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
+
+      impl_.release_datalink(this);
+    }
+  }
+  if (release_remote_required)
     release_remote_i(remote_id);
-  } else {
-    rls->remove(local_id);
-  }
-  RepoIdSet& ris = assoc_by_local_[local_id];
-  if (ris.size() == 1) {
-    DataLinkSet_rch& links = released_locals[local_id];
-    if (links.is_nil())
-      links = make_rch<DataLinkSet>();
-    links->insert_link(rchandle_from(this));
-    assoc_by_local_.erase(local_id);
-  } else {
-    ris.erase(remote_id);
-  }
-
-  if (assoc_by_local_.empty()) {
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
-              ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
-
-    impl_.release_datalink(this);
-  }
 }
 
 void
