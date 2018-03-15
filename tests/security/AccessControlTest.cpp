@@ -276,8 +276,8 @@ public:
     perm_topic_p7s.propagate = false;
 
     add_property(permca);
-    add_property(gov_2_p7s);
-    add_property(perm_topic_p7s);
+    add_property(gov_0_p7s);
+    add_property(perm_join_p7s);
 
     ::DDS::OctetSeq Empty_Seq;
 
