@@ -313,9 +313,62 @@ namespace OpenDDS {
 
       }
 
+      class ECDH_SharedSecret
+      {
+      public:
+        ECDH_SharedSecret(EVP_PKEY* pkey) :
+          keypair(EVP_PKEY_get1_EC_KEY(pkey)), pubkey(NULL), bignum_ctx(NULL)
+        {
+
+        }
+
+        ~ECDH_SharedSecret()
+        {
+          if (bignum_ctx) BN_CTX_free(bignum_ctx);
+          if (pubkey) EC_KEY_free(pubkey);
+        }
+
+        int operator()(const DDS::OctetSeq& src, DDS::OctetSeq& dst)
+        {
+          if (! keypair) return 1;
+
+          if (NULL == (bignum_ctx = BN_CTX_new())) {
+            OPENDDS_SSL_LOG_ERR("BN_CTX_new failed");
+            return 1;
+          }
+
+          if (1 != EC_KEY_oct2key(pubkey, src.get_buffer(), src.length(), bignum_ctx)) {
+              OPENDDS_SSL_LOG_ERR("EC_KEY_new_by_curve_name failed");
+              return 1;
+          }
+
+          int numbits = EC_GROUP_get_degree(EC_KEY_get0_group(keypair));
+          dst.length((numbits + 7) / 8);
+
+          size_t len = ECDH_compute_key(dst.get_buffer(),
+                                        dst.length(),
+                                        EC_KEY_get0_public_key(pubkey),
+                                        keypair,
+                                        NULL);
+
+          if (0 == len) {
+              OPENDDS_SSL_LOG_ERR("ECDH_compute_key failed");
+              return 1;
+          }
+
+          return 0;
+        }
+
+      private:
+        EC_KEY* keypair;
+        EC_KEY* pubkey;
+        BN_CTX* bignum_ctx;
+      };
+
       int ECDH_PRIME_256_V1_CEUM::gen_shared_secret(const DDS::OctetSeq& pub_key)
       {
-        return 1;
+        ECDH_SharedSecret secret(k_);
+        return secret(pub_key, shared_secret_);
       }
 
     }
