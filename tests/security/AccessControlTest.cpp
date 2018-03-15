@@ -757,10 +757,15 @@ TEST_F(AccessControlTest, check_remote_topic_InvalidInput)
 
 TEST_F(AccessControlTest, check_remote_topic_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
-  ::DDS::Security::DomainId_t domain_id = 1;
+  ::DDS::Security::DomainId_t domain_id = 0;
   ::DDS::TopicBuiltinTopicData topic_data;
   ::DDS::Security::SecurityException ex;
+
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+  ::DDS::Security::PermissionsHandle permissions_handle =
+          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+
+  topic_data.name = "Square";
 
   EXPECT_TRUE(get_inst().check_remote_topic(
     permissions_handle, domain_id, topic_data, ex));
@@ -985,7 +990,7 @@ TEST_F(AccessControlTest, get_participant_sec_attributes_Success)
 
 
   MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
-  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+  get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
 
   EXPECT_TRUE(get_inst().get_participant_sec_attributes(1, attributes, ex));
   EXPECT_TRUE(attributes.allow_unauthenticated_participants);
