@@ -481,7 +481,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
-      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+      if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
           ACE_TEXT("Unable to write stateless message for final message.\n")));
         return;
@@ -519,13 +519,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve more than 3 messages
-      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+      if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
           ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
         return;
       }
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
-      if (sedp_.write_stateless_message(reply, msg.message_identity.source_guid) != DDS::RETCODE_OK) {
+      if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
           ACE_TEXT("Unable to write stateless message for final message.\n")));
         return;

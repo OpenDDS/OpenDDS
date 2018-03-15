@@ -330,32 +330,33 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // TODO: Optional checking of QoS is not completed ( see  8.4.2.9.3 )
 
 
-  ACPermsMap::iterator iter = local_ac_perms.begin();
-  iter = local_ac_perms.find(permissions_handle);
-  if(iter == local_ac_perms.end()) {
+  ACPermsMap::iterator piter = local_ac_perms.begin();
+  piter = local_ac_perms.find(permissions_handle);
+  if(piter == local_ac_perms.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
     return false;
   }
 
-  // 1. Domain element
+  ::DDS::Security::DomainId_t domain_to_find = piter->second.domain_id;
 
-  if ( iter->second.gov_rules[0].domain_list.find(domain_id) == iter->second.gov_rules[0].domain_list.end()){
-      std::cout << "Domain ID of " << domain_id << "not found" << std::endl;
-    return false;
-      //TODO: this checks the governance file, but do we also need to look at the permissions file?
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = piter->second.gov_rules.begin(); giter != piter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_to_find);
+
+    if(d > 0){
+      TopicAccessRules::iterator tr_iter;
+
+      for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if(tr_iter->topic_attrs.is_read_protected == false ||
+           tr_iter->topic_attrs.is_write_protected == false ) {
+          return true;
+        }
+      }
+
+      if(giter->domain_attrs.is_access_protected == false) return true;
+    }
   }
-
-  // Check topic rules for the given domain id.
-
-  for(int r = 0; r < iter->second.gov_rules[0].topic_rules.size(); r++) {
-    if(iter->second.gov_rules[0].topic_rules[r].topic_attrs.is_read_protected == false ||
-       iter->second.gov_rules[0].topic_rules[r].topic_attrs.is_write_protected == false)
-      return true;
-  }
-
-    // Check is_access_protected
-  if( iter->second.gov_rules[0].domain_attrs.is_access_protected == false)
-    return true;
 
   return false;
 }
@@ -369,12 +370,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const ::DDS::Security::DataTags & data_tag,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(domain_id);
   ACE_UNUSED_ARG(qos);
   ACE_UNUSED_ARG(partition);
   ACE_UNUSED_ARG(data_tag);
-  ACE_UNUSED_ARG(ex);
 
+
+  //TODO: Options of DataTag, QoS, and Partitions checks are not implemented (See description of Figure 23 )
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions handle");
     return false;
@@ -384,7 +385,63 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  return true;
+  ACPermsMap::iterator ac_iter = local_ac_perms.begin();
+  ac_iter = local_ac_perms.find(permissions_handle);
+  if(ac_iter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
+
+
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_id);
+
+    if(d > 0){
+      TopicAccessRules::iterator tr_iter;
+
+      for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
+          std::cout<< "Found topic"<< tr_iter->topic_expression << std::endl;
+          if(tr_iter->topic_attrs.is_write_protected == false ) {
+            return true;
+          }
+        }
+
+      }
+
+    }
+  }
+
+  // Check the Permissions file
+
+
+  PermissionGrantRules::iterator pm_iter;
+
+
+  for(pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+    std::cout<<"Checking Permissions ..." << std::endl;
+    //TODO Need to check the date/time range for validity here
+    std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
+    for(ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
+
+      size_t  d = ptr_iter->domain_list.count(domain_id);
+      if((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+        std::list<permission_topic_ps_rule>::iterator tpsr_iter;
+        for(tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if(tpsr_iter->ps_type == PUBLISH) {
+            std::vector<std::string>::iterator tl_iter; // topic list
+            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) return true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_create_datareader(
@@ -434,7 +491,63 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  return true;
+  ACPermsMap::iterator ac_iter = local_ac_perms.begin();
+  ac_iter = local_ac_perms.find(permissions_handle);
+  if(ac_iter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
+
+  // Check the Governance file for allowable topic attributes
+
+  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
+
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_to_find);
+
+    if (d) {
+      TopicAccessRules::iterator tr_iter;
+
+      for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if (::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true, false)) {
+          if (tr_iter->topic_attrs.is_read_protected == false ||
+              tr_iter->topic_attrs.is_write_protected == false) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+    // Check the Permissions file for grants
+
+  PermissionGrantRules::iterator pm_iter;
+
+
+  for(pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+    //TODO Need to check the date/time range for validity here
+    std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
+    for(ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
+
+      size_t  d = ptr_iter->domain_list.count(domain_to_find);
+      if((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+        std::list<permission_topic_ps_rule>::iterator tpsr_iter;
+        for(tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          std::vector<std::string>::iterator tl_iter; // topic list
+          for(tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+            if(::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) return true;
+          }
+        }
+      }
+    }
+  }
+
+  //TODO: QoS rules are not implemented
+
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_register_instance(
@@ -526,14 +639,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Check topic rules for the given domain id.
 
   for(pgr_iter = iter->second.perm_rules.begin(); pgr_iter != iter->second.perm_rules.end(); ++pgr_iter) {
-
-    std::cout<<"grant_name:"<<pgr_iter->grant_name<<std::endl;
     // Cycle through topic rules to find an allow
     std::list<permissions_topic_rule>::iterator ptr_iter;
     for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
-      std::set< ::DDS::Security::DomainId_t >::iterator z = (ptr_iter->domain_list.find(domain_id));
-      if ((domain_id == *z) && (ptr_iter->ad_type == ALLOW)) {
-        std::cout << "ad_type: ALLOW domain_id: " << domain_id << " found" << std::endl;
+      size_t z = (ptr_iter->domain_list.count(domain_id));
+      if ((z > 0) && (ptr_iter->ad_type == ALLOW)) {
         return true;
       }
     }
@@ -831,14 +941,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   GovernanceAccessRules::iterator giter;
 
   for(giter = piter->second.gov_rules.begin(); giter != piter->second.gov_rules.end(); ++giter) {
-    ::CORBA::ULong d = giter->domain_list.count(domain_to_find);
+    size_t d = giter->domain_list.count(domain_to_find);
 
-    std::cout<<"domain to find: "<<d<<std::endl;
-    if(d){
+    if(d > 0){
       TopicAccessRules::iterator tr_iter;
 
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
-        std::cout<<"topic_expression:"<<tr_iter->topic_expression<<std::endl;
         if(::ACE::wild_match(topic_name,tr_iter->topic_expression.c_str(),true,false)) {
           attributes.is_read_protected = tr_iter->topic_attrs.is_read_protected;
           attributes.is_write_protected = tr_iter->topic_attrs.is_write_protected;
@@ -1214,7 +1322,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     xercesc::DOMNamedNodeMap * rattrs = grantRules->item(r)->getAttributes();
     rule_holder_.grant_name = xercesc::XMLString::transcode(rattrs->item(0)->getTextContent());
 
-
     // Pull out subject name and validity
     xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
     for( XMLSize_t gn = 0; gn<grantNodes->getLength();gn++) {
@@ -1238,7 +1345,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           rule_holder_.default_permission = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
         }
     }
-
     // Pull out allow/deny rules
     xercesc::DOMNodeList * adGrantNodes = grantRules->item(r)->getChildNodes();
     for( XMLSize_t gn = 0; gn<adGrantNodes->getLength();gn++) {
@@ -1248,22 +1354,29 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         ptr_holder_.ad_type = (strcmp(g_tag,"allow_rule") ==  0 ? ALLOW : DENY);
         xercesc::DOMNodeList * adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
         for( XMLSize_t anc = 0; anc<adNodeChildren->getLength(); anc++) {
-          char *anc_tag = xercesc::XMLString::transcode(adGrantNodes->item(gn)->getNodeName());
+          char *anc_tag = xercesc::XMLString::transcode(adNodeChildren->item(anc)->getNodeName());
           if (strcmp(anc_tag, "domains") == 0) {   //domain list
             xercesc::DOMNodeList * domainIdNodes = adNodeChildren->item(anc)->getChildNodes();
             for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
               if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
                 ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+
               }
             }
 
           } else if (strcmp(anc_tag, "publish") == 0 || strcmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
             permission_topic_ps_rule anc_ps_rule_holder_;
             anc_ps_rule_holder_.ps_type = (strcmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
-            xercesc::DOMNodeList * topicNodes = adNodeChildren->item(anc)->getChildNodes();
-            for(XMLSize_t tid = 0; tid<topicNodes->getLength();tid++) {
-              if(strcmp("topic" , xercesc::XMLString::transcode(topicNodes->item(tid)->getNodeName())) == 0) {
-                anc_ps_rule_holder_.topic_list.insert(xercesc::XMLString::transcode(topicNodes->item(tid)->getTextContent()));
+            xercesc::DOMNodeList * topicListNodes = adNodeChildren->item(anc)->getChildNodes();
+            for(XMLSize_t tln = 0; tln<topicListNodes->getLength();tln++) {
+              if(strcmp("topics" , xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
+                xercesc::DOMNodeList * topicNodes = topicListNodes->item(tln)->getChildNodes();
+                for(XMLSize_t tn = 0; tn < topicNodes->getLength(); tn++) {
+                  if(strcmp("topic", xercesc::XMLString::transcode(topicNodes->item(tn)->getNodeName())) == 0) {
+                    anc_ps_rule_holder_.topic_list.push_back(xercesc::XMLString::transcode(topicNodes->item(tn)->getTextContent()));
+                  }
+                }
+
               }
             }
 

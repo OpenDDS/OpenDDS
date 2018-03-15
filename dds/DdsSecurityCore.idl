@@ -246,7 +246,7 @@ module DDS {
     local interface Authentication;
 
     enum AuthStatusKind {
-      RESERVED_AUTH_STAUTS_KIND_0,
+      RESERVED_AUTH_STATUS_KIND_0,
       //@value(1) IDENTITY_STATUS
       IDENTITY_STATUS
     };

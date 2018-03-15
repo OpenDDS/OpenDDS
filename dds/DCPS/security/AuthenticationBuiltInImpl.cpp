@@ -489,7 +489,8 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
     return Failure;
   }
 
-  TokenReader message_in(handshake_message_out);
+  DDS::Security::HandshakeMessageToken message_data_in(handshake_message_out);
+  TokenReader message_in(message_data_in);
   if (message_in.is_nil()) {
     set_security_error(ex, -1, 0, "Handshake_message_out is an inout param and must not be nil");
     return Failure;
@@ -601,7 +602,7 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   } else {
     int err = SSL::make_nonce_256(challenge2);
     if (! err) {
-        message_out.set_bin_property(prop_index++, "challenge2", challenge2, true);
+      message_out.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
     } else {
       return Failure;
@@ -626,7 +627,8 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
   newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
   newHandshakeData->remote_cert = DCPS::move(remote_cert);
-  newHandshakeData->access_permissions =  cperm;
+  newHandshakeData->access_permissions = cperm;
+  newHandshakeData->reply_token = handshake_message_out;
 
   handshake_handle = get_next_handle();
   {

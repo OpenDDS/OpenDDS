@@ -276,7 +276,7 @@ public:
     perm_topic_p7s.propagate = false;
 
     add_property(permca);
-    add_property(gov_1_p7s);
+    add_property(gov_0_p7s);
     add_property(perm_join_p7s);
 
     ::DDS::OctetSeq Empty_Seq;
@@ -443,7 +443,7 @@ TEST_F(AccessControlTest, check_create_participant_Success)
   ::DDS::Security::SecurityException ex;
     MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
     ::DDS::Security::PermissionsHandle out_handle =
-            get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+            get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
   EXPECT_FALSE(DDS::HANDLE_NIL == get_inst().check_create_participant(out_handle, 0, domain_participant_qos, ex));
 }
 
@@ -479,16 +479,19 @@ TEST_F(AccessControlTest, check_create_datawriter_InvalidInput)
 
 TEST_F(AccessControlTest, check_create_datawriter_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
-  ::DDS::Security::DomainId_t domain_id = 1;
-  const char * topic_name = "MyTopic";
+  ::DDS::Security::DomainId_t domain_id = 0;
+  const char * topic_name = "Square";
   ::DDS::DataWriterQos qos;
   ::DDS::PartitionQosPolicy  partition;
   ::DDS::Security::DataTags  data_tag;
   ::DDS::Security::SecurityException ex;
 
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
+  ::DDS::Security::PermissionsHandle out_handle =
+          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+
   EXPECT_TRUE(get_inst().check_create_datawriter(
-    permissions_handle,
+    out_handle,
     domain_id,
     topic_name,
     qos,
@@ -565,12 +568,14 @@ TEST_F(AccessControlTest, check_create_topic_InvalidInput)
 
 TEST_F(AccessControlTest, check_create_topic_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
-  ::DDS::Security::DomainId_t domain_id = 1;
-  const char * topic_name = "MyTopic";
+  ::DDS::Security::DomainId_t domain_id = 0;
+  const char * topic_name = "Square";
   ::DDS::TopicQos qos;
   ::DDS::Security::SecurityException ex;
+  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
+
+  ::DDS::Security::PermissionsHandle permissions_handle = get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
   EXPECT_TRUE(get_inst().check_create_topic(
     permissions_handle, domain_id, topic_name, qos, ex));
 }
