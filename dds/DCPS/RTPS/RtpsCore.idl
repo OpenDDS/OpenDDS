@@ -251,7 +251,8 @@ module OpenDDS {
     //   (the following constants are in the same order as Table 9.14)
     const ParameterId_t PID_CONTENT_FILTER_INFO = 0x0055;
     const ParameterId_t PID_COHERENT_SET = 0x0056;
-    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
+    // PID_DIRECTED_WRITE is not supported (RTPS 2.4 will deprecate it?)
+    //    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
     const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
 
     // ParameterId Bitmask values (Table 9.11)
@@ -376,8 +377,9 @@ module OpenDDS {
         BuiltinEndpointSet_t builtin_endpoints;
 
       case PID_PROPERTY_LIST:
-        // TODO : Implement backwards compatability
-        // PropertySeq properties;
+        // IDL compiler adds support for reading the RTPS version of this
+        // PID (which has one sequence in it), or the Security version which
+        // contains the optional second sequence for binary properties.
         DDS::PropertyQosPolicy property;
 
       case PID_TYPE_MAX_SIZE_SERIALIZED:
@@ -397,9 +399,6 @@ module OpenDDS {
 
       case PID_COHERENT_SET:
         SequenceNumber_t coherent_set;
-
-      case PID_DIRECTED_WRITE:
-        DCPS::GUIDSeq directed_write;
 
       case PID_ORIGINAL_WRITER_INFO:
         OriginalWriterInfo_t original_writer_info;
