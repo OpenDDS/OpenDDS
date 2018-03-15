@@ -237,12 +237,16 @@ TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
     secret_handle_,
     ex));
 
-  EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
-    local_handle,
-    remote_id_handle,
-    DDS::HANDLE_NIL,
-    secret_handle_,
-    ex));
+  // Not currently checking permissions handle since spec contradicts itself
+  // regarding how to treat the return value of validate_remote_permissions():
+  // Table 27 'is_access_protected' says it's fine for the handle to be NIL
+  // 8.5.1.7.2 says that the handle passed to Crypto Key Factory may not be NIL
+  // EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
+  //   local_handle,
+  //   remote_id_handle,
+  //   DDS::HANDLE_NIL,
+  //   secret_handle_,
+  //   ex));
 
   EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_matched_remote_participant(
     local_handle,

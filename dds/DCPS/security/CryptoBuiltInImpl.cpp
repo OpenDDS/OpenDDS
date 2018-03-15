@@ -523,11 +523,11 @@ bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
   SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == local_datareader_crypto) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid local writer handle");
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid local reader handle");
     return false;
   }
   if (DDS::HANDLE_NIL == remote_datawriter_crypto) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote reader handle");
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote writer handle");
     return false;
   }
 
