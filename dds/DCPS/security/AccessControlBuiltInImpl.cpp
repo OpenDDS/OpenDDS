@@ -9,6 +9,7 @@
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/config-macros.h"
+#include "ace/OS.h"
 #include "dds/DCPS/security/TokenWriter.h"
 
 #include "xercesc/parsers/XercesDOMParser.hpp"
@@ -1004,10 +1005,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if(::ACE::wild_match(topic_name,tr_iter->topic_expression.c_str(),true,false)) {
+          std::cout << "Topic passed in:" << topic_name << " topic found: " << tr_iter->topic_expression << std::endl;
           attributes.is_read_protected = tr_iter->topic_attrs.is_read_protected;
           attributes.is_write_protected = tr_iter->topic_attrs.is_write_protected;
           attributes.is_discovery_protected = tr_iter->topic_attrs.is_discovery_protected;
           attributes.is_liveliness_protected = tr_iter->topic_attrs.is_liveliness_protected;
+
+          std::cout << "Attributes:" << std::endl;
+          std::cout << "is_read_protected: " << attributes.is_read_protected << "  " << tr_iter->topic_attrs.is_read_protected << std::endl;
+          std::cout << "is_write_protected: " << attributes.is_write_protected << "  " << tr_iter->topic_attrs.is_write_protected << std::endl;
+          std::cout << "is_discover_protected: " << attributes.is_discovery_protected << "  " << tr_iter->topic_attrs.is_discovery_protected << std::endl;
+          std::cout << "is_liveliness_protected: " << attributes.is_liveliness_protected<< "  " << tr_iter->topic_attrs.is_liveliness_protected << std::endl;
+
           return true;
         }
       }
@@ -1112,7 +1121,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_datareader_sec_attributes(
   ::DDS::Security::PermissionsHandle permissions_handle,
-  const char * /*topic_name*/,
+  const char * topic_name,
   const ::DDS::PartitionQosPolicy & partition,
   const ::DDS::Security::DataTagQosPolicy & data_tag,
   ::DDS::Security::EndpointSecurityAttributes & attributes,
@@ -1121,25 +1130,73 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACE_UNUSED_ARG(partition);
   ACE_UNUSED_ARG(data_tag);
 
-  // The spec claims there is supposed to be a topic name parameter
-  // to this function which is not in the IDL at this time
-
-  if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions handle");
+  ACPermsMap::iterator ac_iter = local_ac_perms.begin();
+  ac_iter = local_ac_perms.find(permissions_handle);
+  if(ac_iter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
     return false;
   }
-  //if (0 == topic_name) {
-  //  CommonUtilities::set_security_error(ex, -1, 0, "Invalid topic name");
-  //  return false;
-  //}
 
-  // Set all permissions to true in the stub
-  attributes.is_submessage_protected = true;
-  attributes.is_payload_protected = true;
-  attributes.is_key_protected = true;
-  attributes.plugin_endpoint_attributes = 0xFFFFFFFF;
 
-  return true;
+  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
+
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_to_find);
+
+    if(d > 0){
+      TopicAccessRules::iterator tr_iter;
+
+      for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
+
+          // Process the TopicSecurityAttributes base
+          attributes.base.is_write_protected = tr_iter->topic_attrs.is_write_protected;
+          attributes.base.is_read_protected = tr_iter->topic_attrs.is_read_protected;
+          attributes.base.is_liveliness_protected = tr_iter->topic_attrs.is_liveliness_protected;
+          attributes.base.is_discovery_protected = tr_iter->topic_attrs.is_discovery_protected;
+
+          // Process metadata protection attributes
+          if (tr_iter->metadata_protection_kind == "NONE") {
+            attributes.is_submessage_protected = false;
+          } else {
+            attributes.is_submessage_protected = true;
+            if ( tr_iter->metadata_protection_kind == "ENCRYPT" ||
+                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
+            }
+
+            if ( tr_iter->metadata_protection_kind == "SIGN_WITH_ORIGIN_AUTHENTICATION" ||
+                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
+            }
+          }
+
+          // Process data protection attributes
+
+          if (tr_iter->data_protection_kind == "NONE") {
+            attributes.is_payload_protected = false;
+            attributes.is_key_protected = false;
+
+          } else if (tr_iter->data_protection_kind == "SIGN") {
+            attributes.is_payload_protected = true;
+            attributes.is_key_protected = false;
+          } else if ( tr_iter->data_protection_kind == "ENCRYPT") {
+            attributes.is_payload_protected = true;
+            attributes.is_key_protected = true;
+            attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED;
+          }
+
+          return true;
+        }
+
+      }
+
+    }
+  }
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::return_participant_sec_attributes(
@@ -1274,21 +1331,21 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      xercesc::DOMNodeList * allow_unauthenticated_participants_ =
               xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("allow_unauthenticated_participants"));
      char * attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
-     rule_holder_.domain_attrs.allow_unauthenticated_participants = (strcmp(attr_aup,"false") == 0 ? false : true);
+     rule_holder_.domain_attrs.allow_unauthenticated_participants = (ACE_OS::strcasecmp(attr_aup,"false") == 0 ? false : true);
 
 
      // Process enable_join_access_control
      xercesc::DOMNodeList * enable_join_access_control_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("enable_join_access_control"));
      char * attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
-     rule_holder_.domain_attrs.is_access_protected = strcmp(attr_ejac, "false") == 0 ? false : true;
+     rule_holder_.domain_attrs.is_access_protected = ACE_OS::strcasecmp(attr_ejac, "false") == 0 ? false : true;
 
 
      // Process discovery_protection_kind
      xercesc::DOMNodeList * discovery_protection_kind_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("discovery_protection_kind"));
      char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
-     if (strcmp(attr_dpk, "NONE") == 0) {
+     if (ACE_OS::strcasecmp(attr_dpk, "NONE") == 0) {
        rule_holder_.domain_attrs.is_discovery_protected = false;
      } else {
        rule_holder_.domain_attrs.is_discovery_protected = true;
@@ -1300,7 +1357,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      xercesc::DOMNodeList * liveliness_protection_kind_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("liveliness_protection_kind"));
      char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
-     if (strcmp(attr_lpk, "NONE") == 0) {
+     if (ACE_OS::strcasecmp(attr_lpk, "NONE") == 0) {
        rule_holder_.domain_attrs.is_liveliness_protected = false;
      } else {
        rule_holder_.domain_attrs.is_liveliness_protected = true;
@@ -1312,7 +1369,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      xercesc::DOMNodeList * rtps_protection_kind_ =
              xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("rtps_protection_kind"));
      char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
-     if (strcmp(attr_rpk, "NONE") == 0) {
+     if (ACE_OS::strcasecmp(attr_rpk, "NONE") == 0) {
        rule_holder_.domain_attrs.is_rtps_protected = false;
      } else {
        rule_holder_.domain_attrs.is_rtps_protected = true;
@@ -1336,13 +1393,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
              if (strcmp(tr_tag,"topic_expression") == 0){
                t_rules.topic_expression = tr_val;
              } else if(strcmp(tr_tag, "enable_discovery_protection") == 0) {
-               t_rules.topic_attrs.is_discovery_protected = ACE::wild_match(tr_val,"false",false,false) == 0 ? false : true;
+               t_rules.topic_attrs.is_discovery_protected = ACE_OS::strcasecmp(tr_val,"false") == 0 ? false : true;
              } else if(strcmp(tr_tag, "enable_liveliness_protection") == 0) {
-               t_rules.topic_attrs.is_liveliness_protected = ACE::wild_match(tr_val,"false",false,false) == 0 ? false : true;
+               t_rules.topic_attrs.is_liveliness_protected = ACE_OS::strcasecmp(tr_val,"false") == 0 ? false : true;
              } else if(strcmp(tr_tag, "enable_read_access_control") == 0) {
-               t_rules.topic_attrs.is_read_protected = ACE::wild_match(tr_val,"false",false,false) == 0 ? false : true;
+               t_rules.topic_attrs.is_read_protected = ACE_OS::strcasecmp(tr_val,"false") == 0 ? false : true;
              } else if(strcmp(tr_tag, "enable_write_access_control") == 0) {
-               t_rules.topic_attrs.is_write_protected = ACE::wild_match(tr_val,"false",false,false)== 0 ? false : true;
+               t_rules.topic_attrs.is_write_protected = ACE_OS::strcasecmp(tr_val,"false")== 0 ? false : true;
              } else if(strcmp(tr_tag, "metadata_protection_kind") == 0) {
                t_rules.metadata_protection_kind.assign(tr_val);
              } else if(strcmp(tr_tag, "data_protection_kind") == 0) {
@@ -1480,9 +1537,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
               }
             }
 
-          } else if (strcmp(anc_tag, "publish") == 0 || strcmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
+          } else if (ACE_OS::strcasecmp(anc_tag, "publish") == 0 || ACE_OS::strcasecmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
             permission_topic_ps_rule anc_ps_rule_holder_;
-            anc_ps_rule_holder_.ps_type = (strcmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
+            anc_ps_rule_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
             xercesc::DOMNodeList * topicListNodes = adNodeChildren->item(anc)->getChildNodes();
             for(XMLSize_t tln = 0; tln<topicListNodes->getLength();tln++) {
               if(strcmp("topics" , xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
