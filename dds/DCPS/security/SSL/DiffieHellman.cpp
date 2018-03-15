@@ -256,9 +256,61 @@ namespace OpenDDS {
         }
       }
 
+      class ECDH_Pubkey
+      {
+      public:
+        ECDH_Pubkey(EVP_PKEY* pkey) : keypair(pkey), keypair_ecdh(NULL), bignum_ctx(NULL), tmp(NULL)
+        {
+
+        }
+        ~ECDH_Pubkey()
+        {
+          if (bignum_ctx) BN_CTX_free(bignum_ctx);
+          if (tmp) OPENSSL_free(tmp);
+        }
+
+        int operator()(DDS::OctetSeq& dst)
+        {
+          if (! keypair) return 1;
+
+          if (NULL == (keypair_ecdh = EVP_PKEY_get1_EC_KEY(keypair))) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
+            return 1;
+          }
+
+          if (NULL == (bignum_ctx = BN_CTX_new())) {
+            OPENDDS_SSL_LOG_ERR("BN_CTX_new failed");
+            return 1;
+          }
+
+          size_t count = 0u;
+          if (0u == (count = EC_KEY_key2buf(keypair_ecdh,
+                                            EC_KEY_get_conv_form(keypair_ecdh),
+                                            &tmp,
+                                            bignum_ctx)))
+          {
+            OPENDDS_SSL_LOG_ERR("EC_KEY_key2buf failed");
+            return 1;
+          }
+
+          dst.length(count);
+          std::memcpy(tmp, dst.get_buffer(), count);
+
+          return 0;
+        }
+
+      private:
+        EVP_PKEY* keypair;
+        EC_KEY* keypair_ecdh;
+        BN_CTX* bignum_ctx;
+        unsigned char* tmp;
+      };
+
       int ECDH_PRIME_256_V1_CEUM::pub_key(DDS::OctetSeq& dst)
       {
-        return 1;
+        ECDH_Pubkey pubkey(k_);
+        return pubkey(dst);
+
       }
 
       int ECDH_PRIME_256_V1_CEUM::gen_shared_secret(const DDS::OctetSeq& pub_key)
