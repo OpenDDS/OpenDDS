@@ -453,7 +453,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const ::DDS::Security::DataTags & data_tag,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(domain_id);
+  ACE_UNUSED_ARG(domain_id);  ACE_UNUSED_ARG(domain_id);
   ACE_UNUSED_ARG(qos);
   ACE_UNUSED_ARG(partition);
   ACE_UNUSED_ARG(data_tag);
@@ -608,6 +608,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  //FIXME:  This needs to be made recursive before the demo!
 
   ACPermsMap::iterator iter = local_ac_perms.begin();
   iter = local_ac_perms.find(permissions_handle);
@@ -891,7 +892,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions handle");
     return false;
   }
-
+    // FIXME: This needs to be made recursive prior to the demo!
     // TODO: Need to add the ac_endpoints properties to the returned attributes
     // TODO: How do we handle multiple domain_rules within a PermissionHandle
 
@@ -963,7 +964,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_datawriter_sec_attributes(
   ::DDS::Security::PermissionsHandle permissions_handle,
-  const char * /*topic_name*/,
+  const char * topic_name,
   const ::DDS::PartitionQosPolicy & partition,
   const ::DDS::Security::DataTagQosPolicy & data_tag,
   ::DDS::Security::EndpointSecurityAttributes & attributes,
@@ -979,18 +980,79 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions handle");
     return false;
   }
-  //if (0 == topic_name) {
-  //  CommonUtilities::set_security_error(ex, -1, 0, "Invalid topic name");
-  //  return false;
-  //}
 
-  // Set all permissions to true in the stub
-  attributes.is_submessage_protected = true;
-  attributes.is_payload_protected = true;
-  attributes.is_key_protected = true;
-  attributes.plugin_endpoint_attributes = 0xFFFFFFFF;
+  if (0 == topic_name) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid topic name");
+    return false;
+  }
 
-  return true;
+  ACPermsMap::iterator ac_iter = local_ac_perms.begin();
+  ac_iter = local_ac_perms.find(permissions_handle);
+  if(ac_iter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
+
+
+  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
+
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_to_find);
+
+    if(d > 0){
+      TopicAccessRules::iterator tr_iter;
+
+      for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
+
+          // Process the TopicSecurityAttributes base
+          attributes.base.is_write_protected = tr_iter->topic_attrs.is_write_protected;
+          attributes.base.is_read_protected = tr_iter->topic_attrs.is_read_protected;
+          attributes.base.is_liveliness_protected = tr_iter->topic_attrs.is_liveliness_protected;
+          attributes.base.is_discovery_protected = tr_iter->topic_attrs.is_discovery_protected;
+
+          // Process metadata protection attributes
+          if (tr_iter->metadata_protection_kind == "NONE") {
+            attributes.is_submessage_protected = false;
+          } else {
+            attributes.is_submessage_protected = true;
+            if ( tr_iter->metadata_protection_kind == "ENCRYPT" ||
+                    tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
+            }
+
+            if ( tr_iter->metadata_protection_kind == "SIGN_WITH_ORIGIN_AUTHENTICATION" ||
+                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
+            }
+          }
+
+          // Process data protection attributes
+
+          if (tr_iter->data_protection_kind == "NONE") {
+            attributes.is_payload_protected = false;
+            attributes.is_key_protected = false;
+
+          } else if (tr_iter->data_protection_kind == "SIGN") {
+              attributes.is_payload_protected = true;
+              attributes.is_key_protected = false;
+            } else if ( tr_iter->data_protection_kind == "ENCRYPT") {
+                attributes.is_payload_protected = true;
+                attributes.is_key_protected = true;
+                attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED;
+              }
+
+            return true;
+        }
+
+      }
+
+    }
+  }
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_datareader_sec_attributes(
@@ -1175,8 +1237,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
        rule_holder_.domain_attrs.is_discovery_protected = false;
      } else {
        rule_holder_.domain_attrs.is_discovery_protected = true;
-       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
-       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
+         rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
+         rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
      }
 
      // Process liveliness_protection_kind
@@ -1219,19 +1281,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
              if (strcmp(tr_tag,"topic_expression") == 0){
                t_rules.topic_expression = tr_val;
              } else if(strcmp(tr_tag, "enable_discovery_protection") == 0) {
-               t_rules.topic_attrs.is_discovery_protected = strcmp(tr_val,"false") == 0 ? false : true;
+               t_rules.topic_attrs.is_discovery_protected = ACE::wild_match(tr_val,"false",false,false) == 0 ? false : true;
              } else if(strcmp(tr_tag, "enable_liveliness_protection") == 0) {
-               t_rules.topic_attrs.is_liveliness_protected = strcmp(tr_val,"false") == 0 ? false : true;
+               t_rules.topic_attrs.is_liveliness_protected = ACE::wild_match(tr_val,"false",false,false) == 0 ? false : true;
              } else if(strcmp(tr_tag, "enable_read_access_control") == 0) {
-               t_rules.topic_attrs.is_read_protected = strcmp(tr_val,"false") == 0 ? false : true;
+               t_rules.topic_attrs.is_read_protected = ACE::wild_match(tr_val,"false",false,false) == 0 ? false : true;
              } else if(strcmp(tr_tag, "enable_write_access_control") == 0) {
-               t_rules.topic_attrs.is_write_protected = strcmp(tr_val,"false") == 0 ? false : true;
+               t_rules.topic_attrs.is_write_protected = ACE::wild_match(tr_val,"false",false,false)== 0 ? false : true;
+             } else if(strcmp(tr_tag, "metadata_protection_kind") == 0) {
+               t_rules.metadata_protection_kind.assign(tr_val);
+             } else if(strcmp(tr_tag, "data_protection_kind") == 0) {
+               t_rules.data_protection_kind.assign(tr_val);
              }
-           /* The following two Topic Rules are not supported at this time
-                        <metadata_protection_kind>NONE</metadata_protection_kind>
-                        <data_protection_kind>NONE</data_protection_kind>
-           */
-
          }
          rule_holder_.topic_rules.push_back(t_rules);
        }

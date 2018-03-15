@@ -261,7 +261,8 @@ private:
     void send_sample(const ACE_Message_Block& data,
                      size_t size,
                      const DCPS::RepoId& reader,
-                     DCPS::SequenceNumber& sequence);
+                     DCPS::SequenceNumber& sequence,
+                     bool historic = false);
 
     DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
                                            const DCPS::RepoId& reader,
@@ -301,6 +302,7 @@ private:
                            size_t size,
                            const DCPS::RepoId& reader,
                            DCPS::SequenceNumber& sequence,
+                           bool historic_sample = false,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
     void _add_ref() {}
@@ -579,8 +581,10 @@ private:
 protected:
   DDS::Security::DatawriterCryptoHandle generate_remote_matched_writer_crypto_handle(const DCPS::RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch);
   DDS::Security::DatareaderCryptoHandle generate_remote_matched_reader_crypto_handle(const DCPS::RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only);
-  void create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle&, const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&);
-  void create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle&, const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&);
+  void create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& local_reader, const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& remote_writer);
+  void create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer, const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader);
+  void handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  void handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 };
 
 /// A class to wait on acknowledgments from other threads
