@@ -646,6 +646,18 @@ namespace OpenDDS {
         return DDS::HANDLE_NIL;
       }
 
+      virtual void
+      create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle&, const DDS::Security::DatawriterCryptoHandle&, const RepoId&)
+      {
+        return;
+      }
+
+      virtual void
+      create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle&, const DDS::Security::DatareaderCryptoHandle&, const RepoId&)
+      {
+        return;
+      }
+
       void
       match(const RepoId& writer, const RepoId& reader)
       {
@@ -831,6 +843,7 @@ namespace OpenDDS {
               if (iter != local_reader_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
                 DDS::Security::DatareaderCryptoHandle drch = iter->second;
                 remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+                create_and_send_datareader_crypto_tokens(drch, remote_writer_crypto_handles_[writer], writer);
               }
             }
             if (call_writer) {
@@ -840,6 +853,7 @@ namespace OpenDDS {
               if (iter != local_writer_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
                 DDS::Security::DatawriterCryptoHandle dwch = iter->second;
                 remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, false); // TODO: determine correct use of relay_only
+                create_and_send_datawriter_crypto_tokens(dwch, remote_reader_crypto_handles_[reader], reader);
               }
             }
           }

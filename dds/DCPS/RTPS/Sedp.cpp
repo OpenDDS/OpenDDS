@@ -3407,13 +3407,13 @@ Sedp::generate_remote_matched_writer_crypto_handle(const RepoId& writer_part, co
 {
   DDS::Security::DatawriterCryptoHandle result = DDS::HANDLE_NIL;
 
-  DDS::Security::CryptoKeyFactory_var crypto = spdp_.get_security_config()->get_crypto_key_factory();
+  DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
 
   Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(writer_part);
 
   if (info.first != DDS::HANDLE_NIL && info.second) {
     DDS::Security::SecurityException se;
-    result = crypto->register_matched_remote_datawriter(drch, info.first, info.second, se);
+    result = key_factory->register_matched_remote_datawriter(drch, info.first, info.second, se);
     if (result == DDS::HANDLE_NIL) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_writer_crypto_handle() - ")
         ACE_TEXT("Failure calling register_matched_remote_datawriter(). Security Exception[%d.%d]: %C\n"),
@@ -3431,13 +3431,13 @@ Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, co
 {
   DDS::Security::DatareaderCryptoHandle result = DDS::HANDLE_NIL;
 
-  DDS::Security::CryptoKeyFactory_var crypto = spdp_.get_security_config()->get_crypto_key_factory();
+  DDS::Security::CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
   
   Spdp::ParticipantCryptoInfoPair info = spdp_.lookup_participant_crypto_info(reader_part);
 
   if (info.first != DDS::HANDLE_NIL && info.second) {
     DDS::Security::SecurityException se;
-    result = crypto->register_matched_remote_datareader(dwch, info.first, info.second, relay_only, se);
+    result = key_factory->register_matched_remote_datareader(dwch, info.first, info.second, relay_only, se);
     if (result == DDS::HANDLE_NIL) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::generate_remote_matched_reader_crypto_handle() - ")
         ACE_TEXT("Failure calling register_matched_remote_datareader(). Security Exception[%d.%d]: %C\n"),
@@ -3448,6 +3448,22 @@ Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, co
       ACE_TEXT("Unable to lookup remote participant crypto info.\n")));
   }
   return result;
+}
+
+void
+Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle&, const DDS::Security::DatawriterCryptoHandle&, const RepoId&)
+{
+  //DDS::Security::SecurityException se;
+  //DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
+  return;
+}
+
+void
+Sedp::create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle&, const DDS::Security::DatareaderCryptoHandle&, const RepoId&)
+{
+  //DDS::Security::SecurityException se;
+  //DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
+  return;
 }
 
 WaitForAcks::WaitForAcks()
