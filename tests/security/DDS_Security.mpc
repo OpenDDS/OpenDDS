@@ -3,7 +3,7 @@ project(AuthenticationTest): dcpsexe, opendds_security, googletest {
   exename = OpenDDS_AuthenticationTest
 
   Source_Files {
-    AuthenticationTest.cpp
+    ./Authentication
   }
 }
 
