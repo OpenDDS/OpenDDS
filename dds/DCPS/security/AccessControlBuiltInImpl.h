@@ -237,6 +237,8 @@ private:
     struct TopicAccessRule {
         std::string topic_expression;
         ::DDS::Security::TopicSecurityAttributes topic_attrs;
+        std::string metadata_protection_kind;
+        std::string data_protection_kind;
     };
 
     typedef std::vector<TopicAccessRule> TopicAccessRules;

@@ -90,6 +90,10 @@ module DDS {
     const EndpointSecurityAttributesMask ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED = 1 << 6;
     const EndpointSecurityAttributesMask ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID = 1 << 31;
 
+    const PluginEndpointSecurityAttributesMask PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED = 1 << 0;
+    const PluginEndpointSecurityAttributesMask PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED = 1 << 1;
+    const PluginEndpointSecurityAttributesMask PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED = 1 << 2;
+
     //@extensibility(APPENDABLE)
     struct EndpointSecurityInfo {
       EndpointSecurityAttributesMask        endpoint_security_attributes;
