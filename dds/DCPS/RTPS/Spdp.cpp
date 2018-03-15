@@ -706,10 +706,10 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 
   // Write volatile message with participant crypto tokens to newly discovered participant
   DCPS::RepoId writer = guid_;
-  writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+  writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
 
   DCPS::RepoId reader = guid;
-  reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+  reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
   DDS::Security::ParticipantVolatileMessageSecure msg;
   msg.message_identity.source_guid = writer;
@@ -719,7 +719,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   msg.source_endpoint_guid = GUID_UNKNOWN;
   assign(msg.message_data, crypto_tokens_);
 
-  if (sedp_.write_stateless_message(msg, reader) != DDS::RETCODE_OK) {
+  if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::match_authenticated() - ")
       ACE_TEXT("Unable to write volatile message.\n")));
     return false; // TODO A bit late to fall back now, but here we are. We'll need to clean up associations etc eventually.

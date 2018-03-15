@@ -2279,7 +2279,7 @@ Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVola
   ACE_Message_Block payload(
       DCPS::DataSampleHeader::max_marshaled_size(),
       ACE_Message_Block::MB_DATA,
-      new ACE_Message_Block(size));
+      new ACE_Message_Block(size + padding));
 
   Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
