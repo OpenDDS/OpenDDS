@@ -541,6 +541,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   return;
 }
 
+namespace {
+
 DDS::Security::DataHolderSeq& assign(DDS::Security::DataHolderSeq& lhs, const DDS::Security::ParticipantCryptoTokenSeq& rhs) {
   lhs.length(rhs.length());
   for (size_t i = 0; i < rhs.length(); ++i) {
@@ -555,6 +557,8 @@ DDS::Security::ParticipantCryptoTokenSeq& assign(DDS::Security::ParticipantCrypt
     lhs[i] = rhs[i];
   }
   return lhs;
+}
+
 }
 
 void
@@ -715,7 +719,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   msg.message_identity.source_guid = writer;
   msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
   msg.destination_participant_guid = guid;
-  msg.destination_endpoint_guid = reader;
+  msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
   msg.source_endpoint_guid = GUID_UNKNOWN;
   assign(msg.message_data, crypto_tokens_);
 
