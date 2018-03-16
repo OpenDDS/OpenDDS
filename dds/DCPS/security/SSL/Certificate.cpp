@@ -69,6 +69,10 @@ namespace OpenDDS {
             fprintf(stderr, "Certificate::Certificate: Error, unsupported URI scheme in cert path '%s'\n", uri.c_str());
             break;
         }
+
+        if (x_) {
+            serialize(original_bytes_);
+        }
       }
 
       int Certificate::validate(Certificate& ca, unsigned long int flags) const
@@ -379,6 +383,7 @@ namespace OpenDDS {
                 x_ = PEM_read_bio_X509_AUX(buffer, NULL, NULL, NULL);
 
                 if (x_) {
+                    original_bytes_ = src;
                     result = 0;
 
                 } else {

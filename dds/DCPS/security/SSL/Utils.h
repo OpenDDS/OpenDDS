@@ -41,6 +41,8 @@ namespace OpenDDS {
       DdsSecurity_Export
       int hash(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst);
 
+      DdsSecurity_Export
+      int hash_serialized(const DDS::BinaryPropertySeq& src, DDS::OctetSeq& dst);
 
     }
   }

@@ -12,32 +12,53 @@
 namespace OpenDDS {
   namespace Security {
 
+    static void add_binary_property(DDS::BinaryProperty_t src, DDS::BinaryPropertySeq& dst)
+    {
+      size_t len = dst.length();
+      dst.length(len + 1);
+      dst[len] = src;
+    }
+
     int CredentialHash::operator()(DDS::OctetSeq& dst) const
     {
-      const DDS::OctetSeq& cperm = permissions_data_;
-      const DDS::OctetSeq& cpdata = participant_topic_data_;
+      const DDS::OctetSeq& perm_data = permissions_data_;
+      const DDS::OctetSeq& topic_data = participant_topic_data_;
 
-      DDS::OctetSeq cid;
-      pubcert_.serialize(cid);
+      DDS::BinaryPropertySeq hash_data;
 
-      DDS::OctetSeq cdsign_algo;
-      std::string cdsign_algo_str = pubcert_.dsign_algo();
-      cdsign_algo.length(cdsign_algo_str.length());
-      std::memcpy(cdsign_algo.get_buffer(), cdsign_algo_str.c_str(), cdsign_algo.length());
+      DDS::BinaryProperty_t cid, cperm, cpdata, cdsign_algo, ckagree_algo;
 
-      DDS::OctetSeq ckagree_algo;
-      std::string ckagree_algo_str = dh_.kagree_algo();
-      ckagree_algo.length(ckagree_algo_str.length());
-      std::memcpy(ckagree_algo.get_buffer(), ckagree_algo_str.c_str(), ckagree_algo.length());
+      cid.name = "c.id";
+      cid.value = pubcert_.original_bytes();
+      cid.propagate = true;
 
-      std::vector<const DDS::OctetSeq*> data;
-      data.push_back(&cid);
-      data.push_back(&cperm);
-      data.push_back(&cpdata);
-      data.push_back(&cdsign_algo);
-      data.push_back(&ckagree_algo);
+      cperm.name = "c.perm";
+      cperm.value = perm_data;
+      cperm.propagate = true;
 
-      return SSL::hash(data, dst);
+      cpdata.name = "c.pdata";
+      cpdata.value = topic_data;
+      cpdata.propagate = true;
+
+      cdsign_algo.name = "c.dsign_algo";
+      const char* cdsign_algo_str = pubcert_.dsign_algo();
+      cdsign_algo.value.length(std::strlen(cdsign_algo_str) + 1);
+      std::memcpy(cdsign_algo.value.get_buffer(), cdsign_algo_str, cdsign_algo.value.length());
+      cdsign_algo.propagate = true;
+
+      ckagree_algo.name = "c.kagree_algo";
+      const char* ckagree_algo_str = dh_.kagree_algo();
+      ckagree_algo.value.length(std::strlen(ckagree_algo_str) + 1);
+      std::memcpy(ckagree_algo.value.get_buffer(), ckagree_algo_str, ckagree_algo.value.length());
+      ckagree_algo.propagate = true;
+
+      add_binary_property(cid, hash_data);
+      add_binary_property(cperm, hash_data);
+      add_binary_property(cpdata, hash_data);
+      add_binary_property(cdsign_algo, hash_data);
+      add_binary_property(ckagree_algo, hash_data);
+
+      return SSL::hash_serialized(hash_data, dst);
     }
 
     LocalAuthCredentialData::LocalAuthCredentialData(const DDS::PropertySeq& props)
