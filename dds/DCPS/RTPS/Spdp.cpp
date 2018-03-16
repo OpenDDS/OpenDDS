@@ -452,14 +452,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DCPS::RepoId writer = guid_;
     writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
 
-    DCPS::RepoId reader = msg.message_identity.source_guid;
+    DCPS::RepoId reader = src_participant;
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-    reply.destination_participant_guid = msg.message_identity.source_guid;
-    reply.destination_participant_guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+    reply.destination_participant_guid = src_participant;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
@@ -487,11 +486,11 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     } else if (vr == DDS::Security::VALIDATION_OK) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     }
   }
 
@@ -499,14 +498,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DCPS::RepoId writer = guid_;
     writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
 
-    DCPS::RepoId reader = msg.message_identity.source_guid;
+    DCPS::RepoId reader = src_participant;
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-    reply.destination_participant_guid = msg.message_identity.source_guid;
-    reply.destination_participant_guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+    reply.destination_participant_guid = src_participant;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
@@ -531,10 +529,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     } else if (vr == DDS::Security::VALIDATION_OK) {
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     }
   }
 
@@ -707,7 +705,6 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   sedp_.associate_volatile(dp.pdata_);
   sedp_.associate_secure_writers_to_readers(dp.pdata_);
   sedp_.associate_secure_readers_to_writers(dp.pdata_);
-
 
   // Write volatile message with participant crypto tokens to newly discovered participant
   DCPS::RepoId writer = guid_;
