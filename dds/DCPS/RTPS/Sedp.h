@@ -83,6 +83,7 @@ public:
 
   void associate_preauth(const SPDPdiscoveredParticipantData& pdata);
   void associate(const SPDPdiscoveredParticipantData& pdata);
+  void associate_volatile(const SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const SPDPdiscoveredParticipantData& pdata);
   void associate_secure_readers_to_writers(const SPDPdiscoveredParticipantData& pdata);
   bool disassociate(const SPDPdiscoveredParticipantData& pdata);
@@ -472,7 +473,8 @@ private:
   void received_participant_message_data_secure(DCPS::MessageId message_id,
 						const ParticipantMessageData& data);
 
-  bool should_drop_message(const DDS::Security::ParticipantGenericMessage& msg);
+  bool should_drop_stateless_message(const DDS::Security::ParticipantGenericMessage& msg);
+  bool should_drop_volatile_message(const DDS::Security::ParticipantGenericMessage& msg);
   bool should_drop_message(const char* unsecure_topic_name);
 
   void received_stateless_message(DCPS::MessageId message_id,
