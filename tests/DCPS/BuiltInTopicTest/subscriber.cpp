@@ -244,6 +244,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         result = 1;
       }
 
+      // Detach DataReaderListener to prevent it being called during
+      // delete_contained_entities()
+      dr->set_listener(0, 0);
+
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
       }
