@@ -84,13 +84,10 @@ namespace OpenDDS {
 
         typedef DCPS::unique_ptr<DiffieHellman> unique_ptr;
 
-        DiffieHellman() : algo_(new DH_2048_MODP_256_PRIME())
-        {
+        static DiffieHellman* factory(const DDS::OctetSeq& kagree_algo);
 
-        }
-
-        template <typename Algorithm>
-        DiffieHellman() : algo_(new Algorithm)
+        DiffieHellman(DHAlgorithm* algorithm) :
+          algo_(algorithm)
         {
 
         }

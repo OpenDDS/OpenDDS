@@ -303,7 +303,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       if (replier_data) {
         if (replier_data->local_handle == initiator_identity_handle) {
 
-          SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman);
+          SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman(new SSL::ECDH_PRIME_256_V1_CEUM));
 
           OpenDDS::Security::TokenWriter message_out(handshake_message,
                                                      build_class_id(Handshake_Request_Class_Ext),
@@ -469,7 +469,7 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   DDS::OctetSeq challenge1, challenge2, dh2, cperm;
 
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
-  SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman);
+  SSL::DiffieHellman::unique_ptr diffie_hellman; //(new SSL::DiffieHellman);
 
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED,
                                           Pending = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
@@ -537,6 +537,10 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
     }
 
     cperm = message_in.get_bin_property_value("c.perm");
+
+    const DDS::OctetSeq& dh_algo = message_in.get_bin_property_value("c.kagree_algo");
+    SSL::DiffieHellman::unique_ptr tmp(SSL::DiffieHellman::factory(dh_algo));
+    diffie_hellman = DCPS::move(tmp);
 
     /* Compute hash_c1 and store for later */
 

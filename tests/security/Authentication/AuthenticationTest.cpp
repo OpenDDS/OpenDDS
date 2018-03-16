@@ -397,9 +397,9 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
   const DDS::PropertySeq& props = mp1.handshake_message_token.properties;
   ASSERT_EQ(8u, bprops.length());
   ASSERT_EQ(0u, props.length());
-  ASSERT_EQ(256u, value_of("dh1", bprops).length());
+  ASSERT_EQ(65u, value_of("dh1", bprops).length());
   {
-    std::string expected("DH+MODP-2048-256");
+    std::string expected("ECDH+prime256v1-CEUM");
     const DDS::OctetSeq& prop = value_of("c.kagree_algo", bprops);
     ASSERT_EQ(0, std::memcmp(expected.c_str(),
                               prop.get_buffer(),
