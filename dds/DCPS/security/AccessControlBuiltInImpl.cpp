@@ -121,13 +121,25 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   local_ca.subject_name_to_str(ca_subject);
 
+  std::cout << "Subject Name in certificate found:" << ca_subject << std::endl;
+
   //TODO: need to implement subject name check ( see Table 63 validate_local_permissions )
 
   // Read in governance file
 
   SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
+
+    // return of 0 = verified  1 = not verified
+    int gov_verified = local_gov.verify_signature(local_ca);
+    if(!gov_verified) {
+      std::cout << "Governance document verified:"<< gov_verified << std::endl;
+    } else {
+      std::cout << "Governance document NOT verified:"<< gov_verified<< std::endl;
+    }
+
     local_gov.get_content(gov_content);
     clean_smime_content(gov_content);
+
 
     ac_perms perm_set;
 
@@ -1302,7 +1314,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_content)
 {
-  
+
   static const char* gMemBufId = "gov buffer id";
 
   try
