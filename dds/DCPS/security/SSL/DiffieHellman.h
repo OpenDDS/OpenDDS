@@ -31,7 +31,11 @@ namespace OpenDDS {
 
         virtual int init() = 0;
         virtual int pub_key(DDS::OctetSeq& dst) = 0;
-        virtual int gen_shared_secret(const DDS::OctetSeq& pub_key) = 0;
+        virtual int gen_shared_secret(const DDS::OctetSeq& pub_key)
+        {
+          int err = compute_shared_secret(pub_key) || hash_shared_secret();
+          return err;
+        }
         virtual const DDS::OctetSeq& get_shared_secret() const
         {
           return shared_secret_;
@@ -40,6 +44,9 @@ namespace OpenDDS {
         virtual const char* kagree_algo() = 0;
 
       protected:
+        virtual int compute_shared_secret(const DDS::OctetSeq& pub_key) = 0;
+        int hash_shared_secret();
+
         EVP_PKEY* k_;
         DDS::OctetSeq shared_secret_;
       };
@@ -54,7 +61,7 @@ namespace OpenDDS {
 
         int pub_key(DDS::OctetSeq& dst);
 
-        int gen_shared_secret(const DDS::OctetSeq& pub_key);
+        int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
         const char* kagree_algo() {
           return "DH+MODP-2048-256";
@@ -71,7 +78,7 @@ namespace OpenDDS {
 
         int pub_key(DDS::OctetSeq& dst);
 
-        int gen_shared_secret(const DDS::OctetSeq& pub_key);
+        int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
         const char* kagree_algo() {
           return "ECDH+prime256v1-CEUM";
@@ -84,13 +91,10 @@ namespace OpenDDS {
 
         typedef DCPS::unique_ptr<DiffieHellman> unique_ptr;
 
-        DiffieHellman() : algo_(new DH_2048_MODP_256_PRIME())
-        {
+        static DiffieHellman* factory(const DDS::OctetSeq& kagree_algo);
 
-        }
-
-        template <typename Algorithm>
-        DiffieHellman() : algo_(new Algorithm)
+        DiffieHellman(DHAlgorithm* algorithm) :
+          algo_(algorithm)
         {
 
         }

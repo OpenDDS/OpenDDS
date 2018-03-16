@@ -704,6 +704,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   // Sedp may call has_discovered_participant.
   // This is what the participant must be added before this call to associate.
   sedp_.associate(dp.pdata_);
+  sedp_.associate_volatile(dp.pdata_);
   sedp_.associate_secure_writers_to_readers(dp.pdata_);
   sedp_.associate_secure_readers_to_writers(dp.pdata_);
 
