@@ -129,7 +129,7 @@ private:
     DDS::Security::SecurityException& ex);
 
   virtual bool create_local_datareader_crypto_tokens(
-    DDS::Security::DatareaderCryptoTokenSeq& local_datareader_cryto_tokens,
+    DDS::Security::DatareaderCryptoTokenSeq& local_datareader_crypto_tokens,
     DDS::Security::DatareaderCryptoHandle local_datareader_crypto,
     DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto,
     DDS::Security::SecurityException& ex);
