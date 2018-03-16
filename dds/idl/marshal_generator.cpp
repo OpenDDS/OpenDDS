@@ -73,6 +73,9 @@ namespace {
   bool isBinaryProperty_t(const string& cxx);
   bool genBinaryProperty_t(const string& cxx);
 
+  bool isPropertyQosPolicy(const string& cxx);
+  bool genPropertyQosPolicy(const string& cxx);
+
   const special_sequence special_sequences[] = {
     {
       isRtpsSpecialSequence,
@@ -96,7 +99,11 @@ namespace {
     {
       isBinaryProperty_t,
       genBinaryProperty_t,
-    }
+    },
+    {
+      isPropertyQosPolicy,
+      genPropertyQosPolicy,
+    },
   };
 
   const special_union special_unions[] = {
@@ -1187,6 +1194,49 @@ namespace {
       be_global->impl_ <<
 	"  stru.propagate = true;\n"
 	"  return (strm >> stru.name.out()) && (strm >> stru.value.out());\n";
+    }
+    return true;
+  }
+
+  bool isPropertyQosPolicy(const string& cxx)
+  {
+    return cxx == "DDS::PropertyQosPolicy";
+  }
+
+  bool genPropertyQosPolicy(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  gen_find_size(stru.value, size, padding);\n"
+        "  gen_find_size(stru.binary_value, size, padding);\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  return (strm << stru.value)\n"
+        "    && (strm << stru.binary_value);\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  if (!(strm >> stru.value)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  if (!strm.skip(0, 4) || !strm.length()) {\n"
+        "    return true; // optional member missing\n"
+        "  }\n"
+        "  return strm >> stru.binary_value;\n";
     }
     return true;
   }

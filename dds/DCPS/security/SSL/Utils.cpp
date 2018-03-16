@@ -42,28 +42,26 @@ namespace OpenDDS {
         return result;
       }
 
-      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t& dst, const Certificate& target)
+      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t& src,
+                             OpenDDS::DCPS::GUID_t& dst,
+                             const Certificate& target)
       {
-        int result = 1;
-
         dst = OpenDDS::DCPS::GUID_UNKNOWN;
         dst.entityId = src.entityId;
 
-        /* Grab hash to populate bits 1 through 47 of prefix */
-
         std::vector<unsigned char> hash;
-        result = target.subject_name_digest(hash);
+        int result = target.subject_name_digest(hash);
 
         if (result == 0 && hash.size() >= 6) {
           unsigned char* bytes = reinterpret_cast<unsigned char*>(&dst);
 
-          for (size_t i = 0; i < 6; ++i) { /* First 6 bytes of guid prefix */
+          for (size_t i = 0; i < 6; ++i) { // First 6 bytes of guid prefix
             bytes[i] = offset_1bit(&hash[0], i);
           }
 
-          bytes[0] = 0x80 | bytes[0]; /* Set first bit */
+          bytes[0] |= 0x80;
 
-          /* Now calculate hash from src guid for bits 48 through 95 */
+          // Last 6 bytes of guid prefix = hash of src guid (candidate guid)
 
           unsigned char hash2[EVP_MAX_MD_SIZE] = {0};
           unsigned int len = 0u;
@@ -74,15 +72,10 @@ namespace OpenDDS {
             EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
             EVP_DigestUpdate(hash_ctx, &src, sizeof(OpenDDS::DCPS::GUID_t));
             EVP_DigestFinal_ex(hash_ctx, hash2, &len);
-            if (len > 6) { /* Remaining 6 bytes of guid prefix */
-                bytes[6] = hash2[0];
-                bytes[7] = hash2[1];
-                bytes[8] = hash2[2];
-                bytes[9] = hash2[3];
-                bytes[10] = hash2[4];
-                bytes[11] = hash2[5];
-
-                result = 0;
+            if (len > 5) {
+              std::memcpy(bytes + 6, hash2, 6);
+            } else {
+              result = 1;
             }
 
             EVP_MD_CTX_free(hash_ctx);
@@ -141,7 +134,7 @@ namespace OpenDDS {
 
       unsigned char offset_1bit(const unsigned char array[], size_t i)
       {
-        return (array[i] & 0xFE) | ((array[i + 1] >> 7u) & 0x01);
+        return (array[i] >> 1) | (i == 0 ? 0 : ((array[i - 1] & 1) ? 0x80 : 0));
       }
 
       int hash(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst)

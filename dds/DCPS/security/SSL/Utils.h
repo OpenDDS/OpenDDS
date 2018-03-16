@@ -26,7 +26,7 @@ namespace OpenDDS {
       URI_SCHEME extract_uri_info(const std::string& uri, std::string& path);
 
       DdsSecurity_Export
-      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t src, OpenDDS::DCPS::GUID_t& dst, const Certificate& target);
+      int make_adjusted_guid(const OpenDDS::DCPS::GUID_t& src, OpenDDS::DCPS::GUID_t& dst, const Certificate& target);
 
       DdsSecurity_Export
       int make_nonce_256(std::vector<unsigned char>& nonce);
@@ -34,12 +34,12 @@ namespace OpenDDS {
       DdsSecurity_Export
       int make_nonce_256(DDS::OctetSeq& nonce);
 
-      /* Gets byte from array as though it were shifted to the right by one bit */
+      /// Gets byte from array as though it were shifted right one bit
       DdsSecurity_Export
       unsigned char offset_1bit(const unsigned char array[], size_t i);
 
       DdsSecurity_Export
-      int hash(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst);
+      int hash(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst);
 
 
     }

@@ -86,6 +86,9 @@ public:
   /// Examine the state of the stream abstraction.
   bool good_bit() const;
 
+  /// Number of bytes left to read in message block chain
+  size_t length() const;
+
   /// Read a narrow string.
   size_t read_string(ACE_CDR::Char*& dest,
     ACE_CDR::Char* str_alloc(ACE_CDR::ULong) = CORBA::string_alloc,
