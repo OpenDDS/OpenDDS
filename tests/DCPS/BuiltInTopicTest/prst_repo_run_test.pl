@@ -16,8 +16,8 @@ my $status = 0;
 my $debug;
 my $transportDebug;
 my $debugFile;
-# $debug = 10;
-# $transportDebug = 10;
+$debug = 10;
+$transportDebug = 10;
 # $debugFile = "debug.out";
 
 my $debugOpts = "";
