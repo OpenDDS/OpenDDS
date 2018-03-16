@@ -41,6 +41,14 @@ namespace OpenDDS {
                                  shared_secret_.length()));
       }
 
+      int DHAlgorithm::hash_shared_secret()
+      {
+        DDS::OctetSeq tmp = shared_secret_;
+        std::vector<const DDS::OctetSeq*> hash_data;
+        hash_data.push_back(&tmp);
+        return SSL::hash(hash_data, shared_secret_);
+      }
+
       DH_2048_MODP_256_PRIME::DH_2048_MODP_256_PRIME()
       {
         init();
@@ -180,7 +188,7 @@ namespace OpenDDS {
 	BIGNUM* pubkey;
       };
       
-      int DH_2048_MODP_256_PRIME::gen_shared_secret(const DDS::OctetSeq& pub_key)
+      int DH_2048_MODP_256_PRIME::compute_shared_secret(const DDS::OctetSeq& pub_key)
       {
 	DH_SharedSecret secret(k_);
 	return secret(pub_key, shared_secret_);
@@ -408,7 +416,7 @@ namespace OpenDDS {
         BN_CTX* bignum_ctx;
       };
 
-      int ECDH_PRIME_256_V1_CEUM::gen_shared_secret(const DDS::OctetSeq& pub_key)
+      int ECDH_PRIME_256_V1_CEUM::compute_shared_secret(const DDS::OctetSeq& pub_key)
       {
         ECDH_SharedSecret secret(k_);
         return secret(pub_key, shared_secret_);
