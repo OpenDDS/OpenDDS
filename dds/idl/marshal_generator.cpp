@@ -1233,7 +1233,7 @@ namespace {
         "  if (!(strm >> stru.value)) {\n"
         "    return false;\n"
         "  }\n"
-        "  if (!strm.skip(0, 4) || !strm.length()) {\n"
+        "  if (!strm.length() || !strm.skip(0, 4) || !strm.length()) {\n"
         "    return true; // optional member missing\n"
         "  }\n"
         "  return strm >> stru.binary_value;\n";

@@ -756,41 +756,39 @@ int from_param_list(const ParameterList& param_list,
   security_info.participant_security_attributes = 0;
   security_info.plugin_participant_security_attributes = 0;
 
-  unsigned char fieldmask = 0x00;
+  unsigned char fieldmask = 0;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
-      const Parameter& p = param_list[i];
+    const Parameter& p = param_list[i];
 
-      switch (p._d()) {
-        case DDS::Security::PID_IDENTITY_TOKEN:
-          id_token = p.identity_token();
-          fieldmask |= 0x01;
-          break;
+    switch (p._d()) {
+    case DDS::Security::PID_IDENTITY_TOKEN:
+      id_token = p.identity_token();
+      fieldmask |= 1;
+      break;
 
-        case DDS::Security::PID_PERMISSIONS_TOKEN:
-          perm_token = p.permissions_token();
-          fieldmask |= 0x02;
-          break;
+    case DDS::Security::PID_PERMISSIONS_TOKEN:
+      perm_token = p.permissions_token();
+      fieldmask |= 2;
+      break;
 
-        case OpenDDS::RTPS::PID_PROPERTY_LIST:
-          property_qos = p.property();
-          fieldmask |= 0x04;
-          break;
+    case OpenDDS::RTPS::PID_PROPERTY_LIST:
+      property_qos = p.property();
+      break;
 
-        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
-          security_info = p.participant_security_info();
-          fieldmask |= 0x08;
-          break;
+    case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+      security_info = p.participant_security_info();
+      break;
 
-        default:
-          if (p._d() & PIDMASK_INCOMPATIBLE) {
-              return -1;
-          }
+    default:
+      if (p._d() & PIDMASK_INCOMPATIBLE) {
+        return -1;
       }
+    }
   }
 
-  return (fieldmask == 0x0F || fieldmask == 0x0B) ? 0 : -1;
+  return ((fieldmask & 3) == 3) ? 0 : -1;
 }
 
 int from_param_list(const ParameterList& param_list,
