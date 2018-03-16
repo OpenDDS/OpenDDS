@@ -128,6 +128,7 @@ namespace OpenDDS {
         std::vector<const DDS::OctetSeq*>::const_iterator i, n;
         EVP_PKEY* pubkey = NULL;
         EVP_MD_CTX* verify_ctx = NULL;
+        const EVP_MD* mdtype = NULL;
 
         pubkey = X509_get_pubkey(x_);
         if (! pubkey) {
@@ -141,7 +142,8 @@ namespace OpenDDS {
           goto error;
         }
 
-        if (1 != EVP_DigestVerifyInit(verify_ctx, NULL, EVP_sha256(), NULL, pubkey)) {
+        mdtype = EVP_get_digestbynid(NID_sha256WithRSAEncryption);
+        if (1 != EVP_DigestVerifyInit(verify_ctx, NULL, mdtype, NULL, pubkey)) {
           OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyInit failed");
           goto error;
         }
