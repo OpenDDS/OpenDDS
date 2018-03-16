@@ -404,14 +404,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
-          std::cout<< "Found topic"<< tr_iter->topic_expression << std::endl;
           if(tr_iter->topic_attrs.is_write_protected == false ) {
             return true;
           }
         }
-
       }
-
     }
   }
 
@@ -664,38 +661,32 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  //FIXME:  This needs to be made recursive before the demo!
 
-  ACPermsMap::iterator iter = local_ac_perms.begin();
-  iter = local_ac_perms.find(permissions_handle);
-  if(iter == local_ac_perms.end()) {
+  ACPermsMap::iterator ac_iter = local_ac_perms.begin();
+  ac_iter = local_ac_perms.find(permissions_handle);
+  if(ac_iter == local_ac_perms.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
     return false;
   }
 
-  // 1. Domain element
+  GovernanceAccessRules::iterator giter;
 
-  if ( iter->second.gov_rules[0].domain_list.find(domain_id) == iter->second.gov_rules[0].domain_list.end()){
-    std::cout << "Domain ID of " << domain_id << " not found" << std::endl;
-    return false;
+  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_id);
+
+    if (d > 0) {
+      if (giter->domain_attrs.is_access_protected == false) return true;
+    }
   }
-
-
-  //Check ParticipantSecurityAttributes for is_access_protected set to FALSE
-  if(iter->second.gov_rules[0].domain_attrs.is_access_protected == false) {
-    return true;
-  }
-
   //TODO: Need to check the PluginClassName and MajorVersion of the local permmissions vs. remote  See Table 63 of spec
 
   // Check permissions topic grants
 
   PermissionGrantRules::iterator pgr_iter;
 
-
   // Check topic rules for the given domain id.
 
-  for(pgr_iter = iter->second.perm_rules.begin(); pgr_iter != iter->second.perm_rules.end(); ++pgr_iter) {
+  for(pgr_iter = ac_iter->second.perm_rules.begin(); pgr_iter != ac_iter->second.perm_rules.end(); ++pgr_iter) {
     // Cycle through topic rules to find an allow
     std::list<permissions_topic_rule>::iterator ptr_iter;
     for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
@@ -760,7 +751,65 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  return true;
+  ACPermsMap::iterator ac_iter = local_ac_perms.begin();
+  ac_iter = local_ac_perms.find(permissions_handle);
+  if(ac_iter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
+
+  // Check the Governance file for allowable topic attributes
+
+
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_id);
+
+    if (d) {
+      TopicAccessRules::iterator tr_iter;
+
+      for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if (::ACE::wild_match(topic_data.name, tr_iter->topic_expression.c_str(), true, false)) {
+          if (tr_iter->topic_attrs.is_read_protected == false ||
+              tr_iter->topic_attrs.is_write_protected == false) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  // Check the Permissions file for grants
+
+  PermissionGrantRules::iterator pm_iter;
+
+
+  for(pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+    std::cout<<"Checking Permissions ..." << std::endl;
+    //TODO Need to check the date/time range for validity here
+    std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
+    for(ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
+
+      size_t  d = ptr_iter->domain_list.count(domain_id);
+      if((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+        std::list<permission_topic_ps_rule>::iterator tpsr_iter;
+        for(tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if(tpsr_iter->ps_type == PUBLISH) {
+            std::vector<std::string>::iterator tl_iter; // topic list
+            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+              if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false)) return true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  //TODO: QoS rules are not implemented
+
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_match(
@@ -948,25 +997,35 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions handle");
     return false;
   }
-    // FIXME: This needs to be made recursive prior to the demo!
     // TODO: Need to add the ac_endpoints properties to the returned attributes
-    // TODO: How do we handle multiple domain_rules within a PermissionHandle
 
-   ACPermsMap::iterator iter = local_ac_perms.begin();
-   iter = local_ac_perms.find(permissions_handle);
-   if(iter != local_ac_perms.end()) {
-     attributes.allow_unauthenticated_participants = iter->second.gov_rules[0].domain_attrs.allow_unauthenticated_participants;
-     attributes.is_access_protected = iter->second.gov_rules[0].domain_attrs.is_access_protected;
-     attributes.is_rtps_protected = iter->second.gov_rules[0].domain_attrs.is_rtps_protected;
-     attributes.is_discovery_protected = iter->second.gov_rules[0].domain_attrs.is_discovery_protected;
-     attributes.is_liveliness_protected = iter->second.gov_rules[0].domain_attrs.is_liveliness_protected;
-     attributes.plugin_participant_attributes = iter->second.gov_rules[0].domain_attrs.plugin_participant_attributes;
-     return true;
-   } else {
-     return false;
-   }
+  ACPermsMap::iterator ac_iter = local_ac_perms.begin();
+  ac_iter = local_ac_perms.find(permissions_handle);
+  if(ac_iter == local_ac_perms.end()) {
+    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    return false;
+  }
 
-  return true;
+  // Check the Governance file for allowable topic attributes
+  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
+
+  GovernanceAccessRules::iterator giter;
+
+  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_to_find);
+
+    if (d > 0) {
+      attributes.allow_unauthenticated_participants = giter->domain_attrs.allow_unauthenticated_participants;
+      attributes.is_access_protected = giter->domain_attrs.is_access_protected;
+      attributes.is_rtps_protected = giter->domain_attrs.is_rtps_protected;
+      attributes.is_discovery_protected = giter->domain_attrs.is_discovery_protected;
+      attributes.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
+      attributes.plugin_participant_attributes = giter->domain_attrs.plugin_participant_attributes;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::get_topic_sec_attributes(
@@ -1005,17 +1064,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if(::ACE::wild_match(topic_name,tr_iter->topic_expression.c_str(),true,false)) {
-          std::cout << "Topic passed in:" << topic_name << " topic found: " << tr_iter->topic_expression << std::endl;
+//          std::cout << "Topic passed in:" << topic_name << " topic found: " << tr_iter->topic_expression << std::endl;
           attributes.is_read_protected = tr_iter->topic_attrs.is_read_protected;
           attributes.is_write_protected = tr_iter->topic_attrs.is_write_protected;
           attributes.is_discovery_protected = tr_iter->topic_attrs.is_discovery_protected;
           attributes.is_liveliness_protected = tr_iter->topic_attrs.is_liveliness_protected;
 
-          std::cout << "Attributes:" << std::endl;
-          std::cout << "is_read_protected: " << attributes.is_read_protected << "  " << tr_iter->topic_attrs.is_read_protected << std::endl;
-          std::cout << "is_write_protected: " << attributes.is_write_protected << "  " << tr_iter->topic_attrs.is_write_protected << std::endl;
-          std::cout << "is_discover_protected: " << attributes.is_discovery_protected << "  " << tr_iter->topic_attrs.is_discovery_protected << std::endl;
-          std::cout << "is_liveliness_protected: " << attributes.is_liveliness_protected<< "  " << tr_iter->topic_attrs.is_liveliness_protected << std::endl;
+//          std::cout << "Attributes:" << std::endl;
+//          std::cout << "is_read_protected: " << attributes.is_read_protected << "  " << tr_iter->topic_attrs.is_read_protected << std::endl;
+//          std::cout << "is_write_protected: " << attributes.is_write_protected << "  " << tr_iter->topic_attrs.is_write_protected << std::endl;
+//          std::cout << "is_discover_protected: " << attributes.is_discovery_protected << "  " << tr_iter->topic_attrs.is_discovery_protected << std::endl;
+//          std::cout << "is_liveliness_protected: " << attributes.is_liveliness_protected<< "  " << tr_iter->topic_attrs.is_liveliness_protected << std::endl;
 
           return true;
         }
@@ -1243,8 +1302,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_content)
 {
-    //TODO: Need to return existing governance content if found.
-
+  
   static const char* gMemBufId = "gov buffer id";
 
   try
