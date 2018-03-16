@@ -129,11 +129,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
 
+    // return of 0 = verified  1 = not verified
     int gov_verified = local_gov.verify_signature(local_ca);
     if(!gov_verified) {
-      std::cout << "Governance document NOT verified:"<< std::endl;
+      std::cout << "Governance document verified:"<< gov_verified << std::endl;
     } else {
-      std::cout << "Governance document verified"<< std::endl;
+      std::cout << "Governance document NOT verified:"<< gov_verified<< std::endl;
     }
 
     local_gov.get_content(gov_content);
