@@ -489,7 +489,7 @@ namespace OpenDDS {
       {
       public:
         ecdh_shared_secret_from_octets(EVP_PKEY* pkey) :
-          keypair(NULL), pubkey(NULL), group(NULL)
+          keypair(NULL), pubkey(NULL), group(NULL), bignum_ctx(NULL)
         {
           if (NULL == (keypair = EVP_PKEY_get1_EC_KEY(pkey))) {
             OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
@@ -499,11 +499,17 @@ namespace OpenDDS {
         ~ecdh_shared_secret_from_octets()
         {
           if (pubkey) EC_POINT_free(pubkey);
+          if (bignum_ctx) BN_CTX_free(bignum_ctx);
         }
 
         int operator()(const DDS::OctetSeq& src, DDS::OctetSeq& dst)
         {
           if (! keypair) return 1;
+
+          if (NULL == (bignum_ctx = BN_CTX_new())) {
+            OPENDDS_SSL_LOG_ERR("BN_CTX_new failed");
+            return 1;
+          }
 
           if (NULL == (group = EC_KEY_get0_group(keypair))) {
             OPENDDS_SSL_LOG_ERR("EC_KEY_get0_group failed");
@@ -514,7 +520,7 @@ namespace OpenDDS {
                                       pubkey,
                                       src.get_buffer(),
                                       src.length(),
-                                      NULL))
+                                      bignum_ctx))
           {
             OPENDDS_SSL_LOG_ERR("EC_POINT_point2oct failed");
             return 1;
@@ -541,6 +547,7 @@ namespace OpenDDS {
         EC_KEY* keypair;
         EC_POINT* pubkey;
         const EC_GROUP* group;
+        BN_CTX* bignum_ctx;
       };
 
       int ECDH_PRIME_256_V1_CEUM::compute_shared_secret(const DDS::OctetSeq& pub_key)
