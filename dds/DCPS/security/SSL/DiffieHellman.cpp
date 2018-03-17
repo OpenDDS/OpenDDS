@@ -291,16 +291,16 @@ namespace OpenDDS {
         }
       }
 
-      class ECDH_Pubkey
+      class ecdh_pubkey_as_bignum
       {
       public:
-        ECDH_Pubkey(EVP_PKEY* pkey) :
+        ecdh_pubkey_as_bignum(EVP_PKEY* pkey) :
           keypair(pkey), keypair_ecdh(NULL), pubkey(NULL), pubkey_bn(NULL), bignum_ctx(NULL)
         {
 
         }
 
-        ~ECDH_Pubkey()
+        ~ecdh_pubkey_as_bignum()
         {
           if (bignum_ctx) BN_CTX_free(bignum_ctx);
           if (pubkey_bn) BN_free(pubkey_bn);
@@ -352,17 +352,78 @@ namespace OpenDDS {
         BN_CTX* bignum_ctx;
       };
 
-      int ECDH_PRIME_256_V1_CEUM::pub_key(DDS::OctetSeq& dst)
-      {
-        ECDH_Pubkey pubkey(k_);
-        return pubkey(dst);
-
-      }
-
-      class ECDH_SharedSecret
+      class ecdh_pubkey_as_octets
       {
       public:
-        ECDH_SharedSecret(EVP_PKEY* pkey) :
+        ecdh_pubkey_as_octets(EVP_PKEY* pkey) :
+          keypair(pkey), keypair_ecdh(NULL), pubkey(NULL)
+        {
+
+        }
+
+        ~ecdh_pubkey_as_octets()
+        {
+
+        }
+
+        int operator()(DDS::OctetSeq& dst)
+        {
+          if (! keypair) return 1;
+
+          if (NULL == (keypair_ecdh = EVP_PKEY_get1_EC_KEY(keypair))) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
+            return 1;
+          }
+
+          if (NULL == (pubkey = EC_KEY_get0_public_key(keypair_ecdh))) {
+            OPENDDS_SSL_LOG_ERR("EC_KEY_get0_public_key failed");
+            return 1;
+          }
+
+          size_t len = 0u;
+          if (0 == (len = EC_POINT_point2oct(EC_KEY_get0_group(keypair_ecdh),
+                                             pubkey,
+                                             EC_KEY_get_conv_form(keypair_ecdh),
+                                             NULL,
+                                             0u,
+                                             NULL)))
+          {
+            OPENDDS_SSL_LOG_ERR("EC_POINT_point2oct failed");
+            return 1;
+          }
+
+          dst.length(len);
+
+          if (0 == (len = EC_POINT_point2oct(EC_KEY_get0_group(keypair_ecdh),
+                                             pubkey,
+                                             EC_KEY_get_conv_form(keypair_ecdh),
+                                             dst.get_buffer(),
+                                             len,
+                                             NULL)))
+          {
+            OPENDDS_SSL_LOG_ERR("EC_POINT_point2oct failed");
+            return 1;
+          }
+
+          return 0;
+        }
+
+      private:
+        EVP_PKEY* keypair;
+        EC_KEY* keypair_ecdh;
+        const EC_POINT* pubkey;
+      };
+
+      int ECDH_PRIME_256_V1_CEUM::pub_key(DDS::OctetSeq& dst)
+      {
+        ecdh_pubkey_as_octets pubkey(k_);
+        return pubkey(dst);
+      }
+
+      class ecdh_shared_secret_from_bignum
+      {
+      public:
+        ecdh_shared_secret_from_bignum(EVP_PKEY* pkey) :
           keypair(NULL), pubkey_bn(NULL), pubkey_point(NULL), bignum_ctx(NULL)
         {
 	  if (NULL == (keypair = EVP_PKEY_get1_EC_KEY(pkey))) {
@@ -370,7 +431,7 @@ namespace OpenDDS {
 	  }
         }
 
-        ~ECDH_SharedSecret()
+        ~ecdh_shared_secret_from_bignum()
         {
           if (bignum_ctx) BN_CTX_free(bignum_ctx);
           if (pubkey_bn) BN_free(pubkey_bn);
@@ -424,9 +485,67 @@ namespace OpenDDS {
         BN_CTX* bignum_ctx;
       };
 
+      class ecdh_shared_secret_from_octets
+      {
+      public:
+        ecdh_shared_secret_from_octets(EVP_PKEY* pkey) :
+          keypair(NULL), pubkey(NULL), group(NULL)
+        {
+          if (NULL == (keypair = EVP_PKEY_get1_EC_KEY(pkey))) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
+          }
+        }
+
+        ~ecdh_shared_secret_from_octets()
+        {
+          if (pubkey) EC_POINT_free(pubkey);
+        }
+
+        int operator()(const DDS::OctetSeq& src, DDS::OctetSeq& dst)
+        {
+          if (! keypair) return 1;
+
+          if (NULL == (group = EC_KEY_get0_group(keypair))) {
+            OPENDDS_SSL_LOG_ERR("EC_KEY_get0_group failed");
+            return 1;
+          }
+
+          if (1 != EC_POINT_oct2point(group,
+                                      pubkey,
+                                      src.get_buffer(),
+                                      src.length(),
+                                      NULL))
+          {
+            OPENDDS_SSL_LOG_ERR("EC_POINT_point2oct failed");
+            return 1;
+          }
+
+          int numbits = EC_GROUP_get_degree(group);
+          dst.length((numbits + 7) / 8);
+
+          int len = ECDH_compute_key(dst.get_buffer(),
+                                 dst.length(),
+                                 pubkey,
+                                 keypair,
+                                 NULL);
+
+          if (0 == len) {
+              OPENDDS_SSL_LOG_ERR("ECDH_compute_key failed");
+              return 1;
+          }
+
+          return 0;
+        }
+
+      private:
+        EC_KEY* keypair;
+        EC_POINT* pubkey;
+        const EC_GROUP* group;
+      };
+
       int ECDH_PRIME_256_V1_CEUM::compute_shared_secret(const DDS::OctetSeq& pub_key)
       {
-        ECDH_SharedSecret secret(k_);
+        ecdh_shared_secret_from_octets secret(k_);
         return secret(pub_key, shared_secret_);
       }
 
