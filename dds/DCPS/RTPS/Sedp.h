@@ -212,13 +212,13 @@ private:
     using DCPS::TransportClient::disassociate;
 
     void crypto_handles(DDS::Security::ParticipantCryptoHandle p,
-                        DDS::Security::NativeCryptoHandle e)
+                        DDS::Security::NativeCryptoHandle e = DDS::HANDLE_NIL)
     {
       participant_crypto_handle_ = p;
       endpoint_crypto_handle_ = e;
     }
 
-    DDS::Security::ParticipantCryptoHandle get_participant_crypto_handle() const
+    DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
     {
       return participant_crypto_handle_;
     }

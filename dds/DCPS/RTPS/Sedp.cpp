@@ -306,27 +306,37 @@ Sedp::init(const RepoId& guid,
   publications_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   publications_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
+  publications_secure_writer_.crypto_handles(spdp_.crypto_handle());
+  publications_secure_reader_->crypto_handles(spdp_.crypto_handle());
   publications_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   publications_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
   subscriptions_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   subscriptions_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
+  subscriptions_secure_writer_.crypto_handles(spdp_.crypto_handle());
+  subscriptions_secure_reader_->crypto_handles(spdp_.crypto_handle());
   subscriptions_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   subscriptions_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
   participant_message_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   participant_message_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
+  participant_message_secure_writer_.crypto_handles(spdp_.crypto_handle());
+  participant_message_secure_reader_->crypto_handles(spdp_.crypto_handle());
   participant_message_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   participant_message_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
   participant_stateless_message_writer_.enable_transport_using_config(besteffort, nondurable, transport_cfg);
   participant_stateless_message_reader_->enable_transport_using_config(besteffort, nondurable, transport_cfg);
 
+  participant_volatile_message_secure_writer_.crypto_handles(spdp_.crypto_handle());
+  participant_volatile_message_secure_reader_->crypto_handles(spdp_.crypto_handle());
   participant_volatile_message_secure_writer_.enable_transport_using_config(reliability, nondurable, transport_cfg);
   participant_volatile_message_secure_reader_->enable_transport_using_config(reliability, nondurable, transport_cfg);
 
+  dcps_participant_secure_writer_.crypto_handles(spdp_.crypto_handle());
+  dcps_participant_secure_reader_->crypto_handles(spdp_.crypto_handle());
   dcps_participant_secure_writer_.enable_transport_using_config(reliability, durability, transport_cfg);
   dcps_participant_secure_reader_->enable_transport_using_config(reliability, durability, transport_cfg);
 
@@ -669,7 +679,7 @@ void Sedp::associate_volatile(const SPDPdiscoveredParticipantData& pdata)
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
     remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, participant_volatile_message_secure_writer_.get_endpoint_crypto_handle(), false);
-    peer.remote_data_ = add_security_info(peer.remote_data_, peer.remote_id_, participant_volatile_message_secure_writer_.get_repo_id());
+    peer.remote_data_ = add_security_info(peer.remote_data_, participant_volatile_message_secure_writer_.get_repo_id(), peer.remote_id_);
     participant_volatile_message_secure_writer_.assoc(peer);
   }
 }

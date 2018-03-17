@@ -2530,6 +2530,8 @@ RtpsUdpDataLink::security_from_blob(const RepoId& local_id,
       RTPS::assign(remote_participant.guidPrefix, remote_id.guidPrefix);
       remote_participant.entityId = ENTITYID_PARTICIPANT;
       peer_crypto_handles_[remote_participant] = handle;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RPCH %C = %d\n",
+                 std::string(GuidConverter(remote_participant)).c_str(), handle));
     }
 
     else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DW_CRYPTO_HANDLE) == 0
@@ -2539,6 +2541,8 @@ RtpsUdpDataLink::security_from_blob(const RepoId& local_id,
         handle = handle << 8 | prop.value[i];
       }
       peer_crypto_handles_[writer_id] = handle;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DWCH %C = %d\n",
+                 std::string(GuidConverter(writer_id)).c_str(), handle));
     }
 
     else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DR_CRYPTO_HANDLE) == 0
@@ -2548,6 +2552,8 @@ RtpsUdpDataLink::security_from_blob(const RepoId& local_id,
         handle = handle << 8 | prop.value[i];
       }
       peer_crypto_handles_[reader_id] = handle;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DRCH %C = %d\n",
+                 std::string(GuidConverter(reader_id)).c_str(), handle));
     }
 
   }
