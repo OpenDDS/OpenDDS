@@ -43,6 +43,10 @@ namespace {
   const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
   const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
 
+  const ACE_Time_Value MAX_SPDP_TIMER_PERIOD(0, 10000);
+  const ACE_Time_Value MAX_AUTH_TIME(3, 0);
+  const ACE_Time_Value AUTH_RESEND_PERIOD(0, 25000);
+
   bool disposed(const ParameterList& inlineQos)
   {
     for (CORBA::ULong i = 0; i < inlineQos.length(); ++i) {
@@ -452,14 +456,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DCPS::RepoId writer = guid_;
     writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
 
-    DCPS::RepoId reader = msg.message_identity.source_guid;
+    DCPS::RepoId reader = src_participant;
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-    reply.destination_participant_guid = msg.message_identity.source_guid;
-    reply.destination_participant_guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+    reply.destination_participant_guid = src_participant;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
@@ -477,6 +480,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
           ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
         return;
       }
+      dp.has_last_stateless_msg_ = true;
+      dp.last_stateless_msg_ = reply;
       dp.auth_state_ = AS_HANDSHAKE_REPLY_SENT;
       return;
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
@@ -486,12 +491,14 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
           ACE_TEXT("Unable to write stateless message for final message.\n")));
         return;
       }
+      dp.has_last_stateless_msg_ = false;
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     } else if (vr == DDS::Security::VALIDATION_OK) {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
+      dp.has_last_stateless_msg_ = false;
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     }
   }
 
@@ -499,14 +506,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DCPS::RepoId writer = guid_;
     writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
 
-    DCPS::RepoId reader = msg.message_identity.source_guid;
+    DCPS::RepoId reader = src_participant;
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
-    reply.destination_participant_guid = msg.message_identity.source_guid;
-    reply.destination_participant_guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+    reply.destination_participant_guid = src_participant;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
     reply.message_data.length(1);
@@ -524,21 +530,64 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
           ACE_TEXT("Unable to write stateless message for handshake reply.\n")));
         return;
       }
+      dp.has_last_stateless_msg_ = true;
+      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
+      dp.last_stateless_msg_ = reply;
+      // cache the outbound message, but don't change state, since roles shouldn't have changed?
     } else if (vr == DDS::Security::VALIDATION_OK_FINAL_MESSAGE) {
       if (sedp_.write_stateless_message(reply, reader) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
           ACE_TEXT("Unable to write stateless message for final message.\n")));
         return;
       }
+      dp.has_last_stateless_msg_ = false;
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     } else if (vr == DDS::Security::VALIDATION_OK) {
+      dp.has_last_stateless_msg_ = false;
       dp.auth_state_ = AS_AUTHENTICATED;
-      match_authenticated(msg.message_identity.source_guid, dp);
+      match_authenticated(src_participant, dp);
     }
   }
 
   return;
+}
+
+void
+Spdp::check_auth_states(const ACE_Time_Value& tv) {
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) to_erase;
+  for (DiscoveredParticipantIter pi = participants_.begin(); pi != participants_.end(); ++pi) {
+    switch (pi->second.auth_state_) {
+      case AS_HANDSHAKE_REQUEST_SENT:
+      case AS_HANDSHAKE_REPLY_SENT:
+        if (tv > pi->second.auth_started_time_ + MAX_AUTH_TIME) {
+          // TODO sedp cleanup?
+          to_erase.insert(pi->first); 
+        }
+        if (pi->second.has_last_stateless_msg_ && (tv > pi->second.last_stateless_msg_time_ + AUTH_RESEND_PERIOD)) {
+          RepoId reader = pi->first;
+          reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+          pi->second.last_stateless_msg_time_ = tv;
+          if (sedp_.write_stateless_message(pi->second.last_stateless_msg_, reader) != DDS::RETCODE_OK) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states() - ")
+              ACE_TEXT("Unable to write stateless message retry.\n")));
+          }
+        }
+        break;
+      case AS_UNKNOWN:
+      case AS_VALIDATING_REMOTE:
+      case AS_HANDSHAKE_REQUEST:
+      case AS_HANDSHAKE_REPLY:
+      case AS_AUTHENTICATED:
+      case AS_UNAUTHENTICATED:
+      default:
+        break;
+    }
+  }
+  for (OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan)::const_iterator it = to_erase.begin(); it != to_erase.end(); ++it) {
+    participants_.erase(*it);
+  }
 }
 
 namespace {
@@ -708,28 +757,6 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   sedp_.associate_secure_writers_to_readers(dp.pdata_);
   sedp_.associate_secure_readers_to_writers(dp.pdata_);
 
-
-  // Write volatile message with participant crypto tokens to newly discovered participant
-  DCPS::RepoId writer = guid_;
-  writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
-
-  DCPS::RepoId reader = guid;
-  reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-
-  DDS::Security::ParticipantVolatileMessageSecure msg;
-  msg.message_identity.source_guid = writer;
-  msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
-  msg.destination_participant_guid = guid;
-  msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
-  msg.source_endpoint_guid = GUID_UNKNOWN;
-  assign(msg.message_data, crypto_tokens_);
-
-  if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to write volatile message.\n")));
-    return false; // TODO A bit late to fall back now, but here we are. We'll need to clean up associations etc eventually.
-  }
-
   // Iterator is no longer valid
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter != participants_.end()) {
@@ -745,6 +772,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
   DDS::Security::SecurityException se;
 
   if (dp.auth_state_ == AS_UNKNOWN) {
+    dp.auth_started_time_ = ACE_OS::gettimeofday();
     dp.auth_state_ = AS_VALIDATING_REMOTE;
   }
 
@@ -848,6 +876,8 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
         ACE_TEXT("Unable to write stateless message.\n")));
       return;
     }
+    dp.has_last_stateless_msg_ = true;
+    dp.last_stateless_msg_ = msg;
     dp.auth_state_ = AS_HANDSHAKE_REQUEST_SENT;
   }
 
@@ -1051,8 +1081,12 @@ Spdp::SpdpTransport::open()
     throw std::runtime_error("failed to register multicast input handler");
   }
 
-  const ACE_Time_Value per = outer_->disco_->resend_period();
-  if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), per)) {
+  disco_resend_period_ = outer_->disco_->resend_period();
+  last_disco_resend_ = 0;
+
+  ACE_Time_Value timer_period = disco_resend_period_ < MAX_SPDP_TIMER_PERIOD ? disco_resend_period_ : MAX_SPDP_TIMER_PERIOD;
+
+  if (-1 == reactor->schedule_timer(this, 0, ACE_Time_Value(0), timer_period)) {
     throw std::runtime_error("failed to schedule timer with reactor");
   }
 }
@@ -1278,10 +1312,14 @@ Spdp::SpdpTransport::write_i()
 }
 
 int
-Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value&, const void*)
+Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value& tv, const void*)
 {
-  write();
-  outer_->remove_expired_participants();
+  if (tv > last_disco_resend_ + disco_resend_period_) {
+    write();
+    outer_->remove_expired_participants();
+    last_disco_resend_ = tv;
+  }
+  outer_->check_auth_states(tv);
   return 0;
 }
 
@@ -1538,12 +1576,38 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id)
   ParticipantCryptoInfoPair result = ParticipantCryptoInfoPair(DDS::HANDLE_NIL, DDS::Security::SharedSecretHandle_var());
 
   ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
-  DiscoveredParticipantIter part = participants_.find(id);
-  if (part != participants_.end()) {
-    result.first = part->second.crypto_handle_;
-    result.second = part->second.shared_secret_handle_;
+  DiscoveredParticipantIter pi = participants_.find(id);
+  if (pi != participants_.end()) {
+    result.first = pi->second.crypto_handle_;
+    result.second = pi->second.shared_secret_handle_;
   }
   return result;
+}
+
+void
+Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
+{
+  if (crypto_tokens_.length() != 0) {
+    DCPS::RepoId writer = guid_;
+    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+
+    DCPS::RepoId reader = id;
+    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+
+    DDS::Security::ParticipantVolatileMessageSecure msg;
+    msg.message_identity.source_guid = writer;
+    msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
+    msg.destination_participant_guid = id;
+    msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
+    msg.source_endpoint_guid = GUID_UNKNOWN;
+    assign(msg.message_data, crypto_tokens_);
+
+    if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
+        ACE_TEXT("Unable to write volatile message.\n")));
+    }
+  }
+  return;
 }
 
 }

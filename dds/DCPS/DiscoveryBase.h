@@ -1282,16 +1282,22 @@ namespace OpenDDS {
 
       struct DiscoveredParticipant {
         DiscoveredParticipant()
-          : bit_ih_(0), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
+          : bit_ih_(0), has_last_stateless_msg_(false), last_stateless_msg_time_(0, 0), auth_started_time_(0, 0), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
         DiscoveredParticipant(const DiscoveredParticipantData& p,
                               const ACE_Time_Value& t)
-          : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
+          : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL), has_last_stateless_msg_(false), last_stateless_msg_time_(0, 0), auth_started_time_(0, 0), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
 
         DiscoveredParticipantData pdata_;
         ACE_Time_Value last_seen_;
         DDS::InstanceHandle_t bit_ih_;
 
+        bool has_last_stateless_msg_;
+        ACE_Time_Value last_stateless_msg_time_;
+        DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
+
+        ACE_Time_Value auth_started_time_;
         AuthState auth_state_;
+
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;
         DDS::Security::PropertyQosPolicy property_qos_;
