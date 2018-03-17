@@ -170,7 +170,7 @@ namespace OpenDDS {
 	int operator()(const DDS::OctetSeq& pub_key, DDS::OctetSeq& dst)
 	{
 	  if (! keypair) return 1;
-	  
+
 	  if (NULL == (pubkey = BN_bin2bn(pub_key.get_buffer(), pub_key.length(), NULL))) {
             OPENDDS_SSL_LOG_ERR("BN_bin2bn failed");
             return 1;
@@ -178,7 +178,7 @@ namespace OpenDDS {
 
 	  int len = DH_size(keypair);
 	  dst.length(len);
-	  
+
 	  len = DH_compute_key(dst.get_buffer(), pubkey, keypair);
 	  if (len < 0 ) {
             OPENDDS_SSL_LOG_ERR("DH_compute_key failed");
@@ -187,14 +187,14 @@ namespace OpenDDS {
 	  }
 
 	  dst.length(len);
-	  return 0;	  
+	  return 0;
 	}
-	
+
       private:
 	DH* keypair;
 	BIGNUM* pubkey;
       };
-      
+
       int DH_2048_MODP_256_PRIME::compute_shared_secret(const DDS::OctetSeq& pub_key)
       {
 	DH_SharedSecret secret(k_);
@@ -516,6 +516,7 @@ namespace OpenDDS {
             return 1;
           }
 
+          pubkey = EC_POINT_new(group);
           if (1 != EC_POINT_oct2point(group,
                                       pubkey,
                                       src.get_buffer(),
