@@ -78,6 +78,16 @@ elsif ($test->flag('rtps_disc')) {
     $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
 }
+elsif ($test->flag('rtps_disc_half_sec_pub')) {
+    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $is_rtps_disc = 1;
+}
+elsif ($test->flag('rtps_disc_half_sec_sub')) {
+    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $is_rtps_disc = 1;
+}
 elsif ($test->flag('rtps_disc_sec')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
