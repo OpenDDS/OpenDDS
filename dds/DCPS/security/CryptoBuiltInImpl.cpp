@@ -892,17 +892,17 @@ bool CryptoBuiltInImpl::decode_datareader_submessage(
 bool CryptoBuiltInImpl::decode_serialized_payload(
   DDS::OctetSeq& plain_buffer,
   const DDS::OctetSeq& encoded_buffer,
-  const DDS::OctetSeq& inline_qos,
-  DatareaderCryptoHandle receiving_datareader_crypto,
+  const DDS::OctetSeq& /*inline_qos*/,
+  DatareaderCryptoHandle /*receiving_datareader_crypto*/,
   DatawriterCryptoHandle sending_datawriter_crypto,
   SecurityException& ex)
 {
-  ACE_UNUSED_ARG(inline_qos);
-
-  if (DDS::HANDLE_NIL == receiving_datareader_crypto) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datareader handle");
-    return false;
-  }
+  // Not currently requring a reader handle here, origin authentication
+  // for data payloads is not supported.
+  // if (DDS::HANDLE_NIL == receiving_datareader_crypto) {
+  //   CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datareader handle");
+  //   return false;
+  // }
   if (DDS::HANDLE_NIL == sending_datawriter_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
     return false;
