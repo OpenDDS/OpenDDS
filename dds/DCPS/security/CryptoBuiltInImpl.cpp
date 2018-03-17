@@ -4,6 +4,8 @@
  */
 
 #include "CryptoBuiltInImpl.h"
+
+#include "CryptoBuiltInTypeSupportImpl.h"
 #include "CommonUtilities.h"
 #include "TokenWriter.h"
 
@@ -13,10 +15,12 @@
 #include "dds/DdsSecurityParamsC.h"
 
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Serializer.h"
 
 #include <openssl/evp.h>
 
 using namespace DDS::Security;
+using OpenDDS::DCPS::Serializer;
 
 namespace OpenDDS {
 namespace Security {
@@ -417,11 +421,63 @@ bool CryptoBuiltInImpl::unregister_datareader(
 
 // Key Exchange
 
-// Constants used during crypto operations
-namespace
-{
-  const std::string Crypto_Token_Class_Id("DDS:Crypto:AES_GCM_GMAC");
+namespace {
+  const char Crypto_Token_Class_Id[] = "DDS:Crypto:AES_GCM_GMAC";
+  const char Token_KeyMat_Name[] = "dds.cryp.keymat";
   const DDS::OctetSeq Empty_Seq;
+
+  const char* to_mb(const unsigned char* buffer)
+  {
+    return reinterpret_cast<const char*>(buffer);
+  }
+
+  ParticipantCryptoTokenSeq
+  keys_to_tokens(const KeyMaterial_AES_GCM_GMAC_Seq& keys)
+  {
+    ParticipantCryptoTokenSeq tokens;
+    for (unsigned int i = 0; i < keys.length(); ++i) {
+      CryptoToken t;
+      t.class_id = Crypto_Token_Class_Id;
+      t.binary_properties.length(1);
+      DDS::BinaryProperty_t& p = t.binary_properties[0];
+      p.name = Token_KeyMat_Name;
+      p.propagate = true;
+      size_t size = 0, padding = 0;
+      DCPS::gen_find_size(keys[i], size, padding);
+      p.value.length(size + padding);
+      ACE_Message_Block mb(to_mb(p.value.get_buffer()), size + padding);
+      Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+      if (ser << keys[i]) {
+        push_back(tokens, t);
+      }
+    }
+    return tokens;
+  }
+
+  KeyMaterial_AES_GCM_GMAC_Seq
+  tokens_to_keys(const ParticipantCryptoTokenSeq& tokens)
+  {
+    KeyMaterial_AES_GCM_GMAC_Seq keys;
+    for (unsigned int i = 0; i < tokens.length(); ++i) {
+      const CryptoToken& t = tokens[i];
+      if (0 == std::strcmp(t.class_id, Crypto_Token_Class_Id)) {
+        for (unsigned int j = 0; j < t.binary_properties.length(); ++j) {
+          const DDS::BinaryProperty_t& p = t.binary_properties[j];
+          if (0 == std::strcmp(p.name, Token_KeyMat_Name)) {
+            ACE_Message_Block mb(to_mb(p.value.get_buffer()), p.value.length());
+            mb.wr_ptr(p.value.length());
+            Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+            KeyMaterial_AES_GCM_GMAC key;
+            if (ser >> key) {
+              push_back(keys, key);
+            }
+            break;
+          }
+        }
+      }
+    }
+    return keys;
+  }
 }
 
 bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
@@ -431,26 +487,24 @@ bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
   SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == local_participant_crypto) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid local participant handle");
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid local participant handle");
     return false;
   }
   if (DDS::HANDLE_NIL == remote_participant_crypto) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote participant handle");
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid remote participant handle");
     return false;
   }
 
-  // The input is a sequence of tokens, but the spec appears to indicate
-  // that the plugin will only be returning a single token in the sequence.
-  // Any existing contents of the sequence will be destroyed
-  local_participant_crypto_tokens.length(1);
-  if (1 != local_participant_crypto_tokens.length()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Unable to allocate space for token");
-    return false;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (keys_.count(local_participant_crypto)) {
+    local_participant_crypto_tokens =
+      keys_to_tokens(keys_[local_participant_crypto]);
+  } else {
+    local_participant_crypto_tokens.length(0);
   }
 
-  // Stub implementation will just fill in data in the new token
-  TokenWriter crypto_token(local_participant_crypto_tokens[0], Crypto_Token_Class_Id, 0, 1);
-  crypto_token.set_bin_property(0, "dds.cryp.keymat", Empty_Seq, true);
   return true;
 }
 
@@ -460,14 +514,20 @@ bool CryptoBuiltInImpl::set_remote_participant_crypto_tokens(
   const ParticipantCryptoTokenSeq& remote_participant_tokens,
   SecurityException& ex)
 {
-  ACE_UNUSED_ARG(local_participant_crypto);
-  ACE_UNUSED_ARG(remote_participant_crypto);
-  ACE_UNUSED_ARG(remote_participant_tokens);
-  ACE_UNUSED_ARG(ex);
+  if (DDS::HANDLE_NIL == local_participant_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid local participant handle");
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_participant_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid remote participant handle");
+    return false;
+  }
 
-  // This stub method just pretends to work
-  bool results = true;
-  return results;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  keys_[remote_participant_crypto] = tokens_to_keys(remote_participant_tokens);
+  return true;
 }
 
 bool CryptoBuiltInImpl::create_local_datawriter_crypto_tokens(
@@ -485,18 +545,14 @@ bool CryptoBuiltInImpl::create_local_datawriter_crypto_tokens(
     return false;
   }
 
-  // The input is a sequence of tokens, but the spec appears to indicate
-  // that the plugin will only be returning a single token in the sequence.
-  // Any existing contents of the sequence will be destroyed
-  local_datawriter_crypto_tokens.length(1);
-  if (1 != local_datawriter_crypto_tokens.length()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Unable to allocate space for token");
-    return false;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (keys_.count(local_datawriter_crypto)) {
+    local_datawriter_crypto_tokens =
+      keys_to_tokens(keys_[local_datawriter_crypto]);
+  } else {
+    local_datawriter_crypto_tokens.length(0);
   }
 
-  // Stub implementation will just fill in data in the new token
-  TokenWriter crypto_token(local_datawriter_crypto_tokens[0], Crypto_Token_Class_Id, 0, 1);
-  crypto_token.set_bin_property(0, "dds.cryp.keymat", Empty_Seq, true);
   return true;
 }
 
@@ -506,18 +562,24 @@ bool CryptoBuiltInImpl::set_remote_datawriter_crypto_tokens(
   const DatawriterCryptoTokenSeq& remote_datawriter_tokens,
   SecurityException& ex)
 {
-  ACE_UNUSED_ARG(local_datareader_crypto);
-  ACE_UNUSED_ARG(remote_datawriter_crypto);
-  ACE_UNUSED_ARG(remote_datawriter_tokens);
-  ACE_UNUSED_ARG(ex);
+  if (DDS::HANDLE_NIL == local_datareader_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid local datareader handle");
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_datawriter_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid remote datawriter handle");
+    return false;
+  }
 
-  // The stub implementation will always succeed here
-  bool results = true;
-  return results;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  keys_[remote_datawriter_crypto] = tokens_to_keys(remote_datawriter_tokens);
+  return true;
 }
 
 bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
-  DatareaderCryptoTokenSeq& local_datareader_cryto_tokens,
+  DatareaderCryptoTokenSeq& local_datareader_crypto_tokens,
   DatareaderCryptoHandle local_datareader_crypto,
   DatawriterCryptoHandle remote_datawriter_crypto,
   SecurityException& ex)
@@ -531,18 +593,14 @@ bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
     return false;
   }
 
-  // The input is a sequence of tokens, but the spec appears to indicate
-  // that the plugin will only be returning a single token in the sequence.
-  // Any existing contents of the sequence will be destroyed
-  local_datareader_cryto_tokens.length(1);
-  if (1 != local_datareader_cryto_tokens.length()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Unable to allocate space for token");
-    return false;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (keys_.count(local_datareader_crypto)) {
+    local_datareader_crypto_tokens =
+      keys_to_tokens(keys_[local_datareader_crypto]);
+  } else {
+    local_datareader_crypto_tokens.length(0);
   }
 
-  // Stub implementation will just fill in data in the new token
-  TokenWriter crypto_token(local_datareader_cryto_tokens[0], Crypto_Token_Class_Id, 0, 1);
-  crypto_token.set_bin_property(0, "dds.cryp.keymat", Empty_Seq, true);
   return true;
 }
 
@@ -552,14 +610,20 @@ bool CryptoBuiltInImpl::set_remote_datareader_crypto_tokens(
   const DatareaderCryptoTokenSeq& remote_datareader_tokens,
   SecurityException& ex)
 {
-  ACE_UNUSED_ARG(local_datawriter_crypto);
-  ACE_UNUSED_ARG(remote_datareader_crypto);
-  ACE_UNUSED_ARG(remote_datareader_tokens);
-  ACE_UNUSED_ARG(ex);
+  if (DDS::HANDLE_NIL == local_datawriter_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid local datawriter handle");
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_datareader_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Invalid remote datareader handle");
+    return false;
+  }
 
-  // The stub implementation will always succeed here
-  bool results = true;
-  return results;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  keys_[remote_datareader_crypto] = tokens_to_keys(remote_datareader_tokens);
+  return true;
 }
 
 bool CryptoBuiltInImpl::return_crypto_tokens(
@@ -568,8 +632,6 @@ bool CryptoBuiltInImpl::return_crypto_tokens(
 {
   ACE_UNUSED_ARG(crypto_tokens);
   ACE_UNUSED_ARG(ex);
-
-  // Can't modify the input sequence at all because it's a const reference
 
   // The stub implementation will always succeed here
   bool results = true;
