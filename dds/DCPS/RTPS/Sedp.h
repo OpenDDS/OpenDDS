@@ -86,6 +86,7 @@ public:
   void associate_volatile(const SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const SPDPdiscoveredParticipantData& pdata);
   void associate_secure_readers_to_writers(const SPDPdiscoveredParticipantData& pdata);
+  void send_builtin_crypto_tokens(const SPDPdiscoveredParticipantData& pdata);
   bool disassociate(const SPDPdiscoveredParticipantData& pdata);
 
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,

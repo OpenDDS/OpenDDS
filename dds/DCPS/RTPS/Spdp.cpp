@@ -456,6 +456,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage reply;
+    memset(&reply, 0, sizeof(reply));
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.destination_participant_guid = src_participant;
@@ -502,6 +503,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage reply;
+    memset(&reply, 0, sizeof(reply));
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.destination_participant_guid = src_participant;
@@ -706,27 +708,6 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   sedp_.associate_secure_writers_to_readers(dp.pdata_);
   sedp_.associate_secure_readers_to_writers(dp.pdata_);
 
-  // Write volatile message with participant crypto tokens to newly discovered participant
-  DCPS::RepoId writer = guid_;
-  writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
-
-  DCPS::RepoId reader = guid;
-  reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-
-  DDS::Security::ParticipantVolatileMessageSecure msg;
-  msg.message_identity.source_guid = writer;
-  msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
-  msg.destination_participant_guid = guid;
-  msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
-  msg.source_endpoint_guid = GUID_UNKNOWN;
-  assign(msg.message_data, crypto_tokens_);
-
-  if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::match_authenticated() - ")
-      ACE_TEXT("Unable to write volatile message.\n")));
-    return false; // TODO A bit late to fall back now, but here we are. We'll need to clean up associations etc eventually.
-  }
-
   // Iterator is no longer valid
   DiscoveredParticipantIter iter = participants_.find(guid);
   if (iter != participants_.end()) {
@@ -832,6 +813,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage msg;
+    memset(&msg, 0, sizeof(msg));
     msg.message_identity.source_guid = writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     msg.destination_participant_guid = guid;
@@ -1541,6 +1523,36 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id)
     result.second = part->second.shared_secret_handle_;
   }
   return result;
+}
+
+void
+Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
+{
+  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  DiscoveredParticipantIter part = participants_.find(id);
+  if (part != participants_.end()) {
+
+    DCPS::RepoId writer = guid_;
+    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+
+    DCPS::RepoId reader = id;
+    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+
+    DDS::Security::ParticipantVolatileMessageSecure msg;
+    memset(&msg, 0, sizeof(msg));
+    msg.message_identity.source_guid = writer;
+    msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
+    msg.destination_participant_guid = id;
+    msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
+    msg.source_endpoint_guid = GUID_UNKNOWN;
+    assign(msg.message_data, crypto_tokens_);
+
+    if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
+        ACE_TEXT("Unable to write volatile message.\n")));
+    }
+  }
+  return;
 }
 
 }

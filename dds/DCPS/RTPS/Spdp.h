@@ -93,6 +93,7 @@ public:
 
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id);
+  void send_participant_crypto_tokens(const DCPS::RepoId& id);
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }
