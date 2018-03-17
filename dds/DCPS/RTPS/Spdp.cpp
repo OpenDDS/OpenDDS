@@ -1517,10 +1517,10 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id)
   ParticipantCryptoInfoPair result = ParticipantCryptoInfoPair(DDS::HANDLE_NIL, DDS::Security::SharedSecretHandle_var());
 
   ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
-  DiscoveredParticipantIter part = participants_.find(id);
-  if (part != participants_.end()) {
-    result.first = part->second.crypto_handle_;
-    result.second = part->second.shared_secret_handle_;
+  DiscoveredParticipantIter pi = participants_.find(id);
+  if (pi != participants_.end()) {
+    result.first = pi->second.crypto_handle_;
+    result.second = pi->second.shared_secret_handle_;
   }
   return result;
 }
@@ -1528,10 +1528,7 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id)
 void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
-  DiscoveredParticipantIter part = participants_.find(id);
-  if (part != participants_.end()) {
-
+  if (crypto_tokens_.length() != 0) {
     DCPS::RepoId writer = guid_;
     writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
 
