@@ -575,15 +575,13 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
 
   int prop_index = 0;
-  DDS::OctetSeq tmp;
 
   TokenWriter message_out(handshake_message_out,
                           build_class_id(Handshake_Reply_Class_Ext),
                           PropertyCount,
                           BinaryPropertyCount);
 
-  local_credential_data_.get_participant_cert().serialize(tmp);
-  message_out.set_bin_property(prop_index++, "c.id", tmp, true);
+  message_out.set_bin_property(prop_index++, "c.id", local_credential_data_.get_participant_cert().original_bytes(), true);
   message_out.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
   message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
   message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
@@ -620,6 +618,7 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   sign_these.push_back(&dh1);
   sign_these.push_back(&local_credential_data_.get_hash_c1());
 
+  DDS::OctetSeq tmp;
   local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
   message_out.set_bin_property(prop_index++, "signature", tmp, true);
 

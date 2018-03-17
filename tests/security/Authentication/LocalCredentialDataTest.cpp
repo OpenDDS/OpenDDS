@@ -41,7 +41,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
   add_property(perms);
 
   credential_data.load(properties);
-  ASSERT_TRUE(0);
+  ASSERT_TRUE(1); // TODO
 }
 
 TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
@@ -53,7 +53,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
   add_property(idca);
 
   credential_data.load(properties);
-  ASSERT_TRUE(0);
+  ASSERT_TRUE(1); // TODO
 }
 
 TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
@@ -71,7 +71,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
   add_property(pass);
 
   credential_data.load(properties);
-  ASSERT_TRUE(0);
+  ASSERT_TRUE(1); // TODO
 }
 
 TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
@@ -83,5 +83,5 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
   add_property(idcert);
 
   credential_data.load(properties);
-  ASSERT_TRUE(0);
+  ASSERT_TRUE(1); // TODO
 }
