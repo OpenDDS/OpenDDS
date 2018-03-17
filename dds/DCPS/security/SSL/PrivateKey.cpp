@@ -62,53 +62,90 @@ namespace OpenDDS {
         }
       }
 
-      int PrivateKey::sign(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst)
+      class sign_rsassa_pss_mgf1_sha256_impl
       {
-        EVP_MD_CTX* signature_ctx = NULL;
-        std::vector<const DDS::OctetSeq*>::const_iterator i, n;
-        size_t len = 0u;
-        const EVP_MD* mdtype = NULL;
+      public:
+        sign_rsassa_pss_mgf1_sha256_impl(EVP_PKEY* pkey) :
+          private_key(pkey), md_ctx(NULL), pkey_ctx(NULL)
+        {
 
-        signature_ctx = EVP_MD_CTX_new();
-        if (! signature_ctx) {
-          OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
-          goto error;
+        }
+        ~sign_rsassa_pss_mgf1_sha256_impl()
+        {
+          if (md_ctx) EVP_MD_CTX_free(md_ctx);
         }
 
-        mdtype = EVP_sha256();
-        if (1 != EVP_DigestSignInit(signature_ctx, NULL, mdtype, NULL, k_)) {
-          OPENDDS_SSL_LOG_ERR("EVP_DigestSignInit failed");
-          goto error;
-        }
+        int operator()(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst)
+        {
+          if (! private_key) return 1;
 
-        n = src.end();
-        for (i = src.begin(); i != n; ++i) {
-          if ((*i)->length() > 0) {
-            if (1 != EVP_DigestSignUpdate(signature_ctx, (*i)->get_buffer(), (*i)->length())) {
-              OPENDDS_SSL_LOG_ERR("EVP_DigestSignUpdate failed");
-              goto error;
+          std::vector<const DDS::OctetSeq*>::const_iterator i, n;
+          size_t len = 0u;
+
+          md_ctx = EVP_MD_CTX_new();
+          if (! md_ctx) {
+            OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
+            return 1;
+          }
+
+          pkey_ctx = EVP_PKEY_CTX_new(private_key, NULL);
+          if (! pkey_ctx) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new failed");
+            return 1;
+          }
+
+          EVP_MD_CTX_init(md_ctx);
+
+          if (1 != EVP_DigestSignInit(md_ctx, &pkey_ctx, EVP_sha256(), NULL, private_key)) {
+            OPENDDS_SSL_LOG_ERR("EVP_DigestSignInit failed");
+            return 1;
+          }
+
+          if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_padding failed");
+            return 1;
+          }
+
+          if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256())) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_mgf1_md failed");
+            return 1;
+          }
+
+          n = src.end();
+          for (i = src.begin(); i != n; ++i) {
+            if ((*i)->length() > 0) {
+              if (1 != EVP_DigestSignUpdate(md_ctx, (*i)->get_buffer(), (*i)->length())) {
+                OPENDDS_SSL_LOG_ERR("EVP_DigestSignUpdate failed");
+                return 1;
+              }
             }
           }
+
+          /* First call with NULL to extract size */
+          if (1 != EVP_DigestSignFinal(md_ctx, NULL, &len)) {
+            OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
+            return 1;
+          }
+
+          /* Second call to extract the data */
+          dst.length(static_cast<unsigned int>(len));
+          if (1 != EVP_DigestSignFinal(md_ctx, dst.get_buffer(), &len)) {
+            OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
+            return 1;
+          }
+
+          return 0;
         }
+      private:
+        EVP_PKEY* private_key;
+        EVP_MD_CTX* md_ctx;
+        EVP_PKEY_CTX* pkey_ctx;
+      };
 
-        /* First call with NULL to extract size */
-        if (1 != EVP_DigestSignFinal(signature_ctx, NULL, &len)) {
-          OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
-          goto error;
-        }
-
-        /* Second call to extract the data */
-        dst.length(static_cast<unsigned int>(len));
-        if (1 != EVP_DigestSignFinal(signature_ctx, dst.get_buffer(), &len)) {
-          OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
-          goto error;
-        }
-
-        return 0;
-
-        error:
-          if (signature_ctx) EVP_MD_CTX_free(signature_ctx);
-          return 1;
+      int PrivateKey::sign(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst) const
+      {
+        sign_rsassa_pss_mgf1_sha256_impl sign(k_);
+        return sign(src, dst);
       }
 
       EVP_PKEY* PrivateKey::EVP_PKEY_from_pem(const std::string& path, const std::string& password)

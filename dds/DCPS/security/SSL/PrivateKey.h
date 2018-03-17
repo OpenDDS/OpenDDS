@@ -33,7 +33,7 @@ namespace OpenDDS {
 
         void load(const std::string& uri, const std::string& password = "");
 
-        int sign(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst);
+        int sign(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst) const;
 
       private:
 

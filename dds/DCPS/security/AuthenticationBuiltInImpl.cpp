@@ -451,6 +451,132 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   return true;
 }
 
+
+static void add_binary_property(DDS::BinaryProperty_t src, DDS::BinaryPropertySeq& dst)
+{
+  size_t len = dst.length();
+  dst.length(len + 1);
+  dst[len] = src;
+}
+
+static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
+                                          const DDS::OctetSeq& challenge2,
+                                          const DDS::OctetSeq& dh2,
+                                          const DDS::OctetSeq& challenge1,
+                                          const DDS::OctetSeq& dh1,
+                                          const DDS::OctetSeq& hash_c1,
+                                          DDS::BinaryPropertySeq& dst)
+{
+  dst.length(0);
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "hash_c2";
+    p.value = hash_c2;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "challenge2";
+    p.value = challenge2;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "dh2";
+    p.value = dh2;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "challenge1";
+    p.value = challenge1;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "dh1";
+    p.value = dh1;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "hash_c1";
+    p.value = hash_c1;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+}
+
+static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
+                                          const DDS::OctetSeq& challenge1,
+                                          const DDS::OctetSeq& dh1,
+                                          const DDS::OctetSeq& challenge2,
+                                          const DDS::OctetSeq& dh2,
+                                          const DDS::OctetSeq& hash_c2,
+                                          DDS::BinaryPropertySeq& dst)
+{
+  dst.length(0);
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "hash_c1";
+    p.value = hash_c1;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "challenge1";
+    p.value = challenge1;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "dh1";
+    p.value = dh1;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "challenge2";
+    p.value = challenge2;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "dh2";
+    p.value = dh2;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+
+  {
+    DDS::BinaryProperty_t p;
+    p.name = "hash_c2";
+    p.value = hash_c2;
+    p.propagate = true;
+    add_binary_property(p, dst);
+  }
+}
+
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::begin_handshake_reply(
   ::DDS::Security::HandshakeHandle & handshake_handle,
   ::DDS::Security::HandshakeMessageToken & handshake_message_out,
@@ -610,16 +736,17 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
     }
   }
 
-  std::vector<const DDS::OctetSeq*> sign_these;
-  sign_these.push_back(&local_credential_data_.get_hash_c2());
-  sign_these.push_back(&challenge2);
-  sign_these.push_back(&dh2);
-  sign_these.push_back(&challenge1);
-  sign_these.push_back(&dh1);
-  sign_these.push_back(&local_credential_data_.get_hash_c1());
+  DDS::BinaryPropertySeq sign_these;
+  make_reply_signature_sequence(local_credential_data_.get_hash_c2(),
+                                challenge2,
+                                dh2,
+                                challenge1,
+                                dh1,
+                                local_credential_data_.get_hash_c1(),
+                                sign_these);
 
   DDS::OctetSeq tmp;
-  local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
+  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), tmp);
   message_out.set_bin_property(prop_index++, "signature", tmp, true);
 
   HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
@@ -917,18 +1044,21 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   }
 
   /* Validate Signature field */
-
-  std::vector<const DDS::OctetSeq*> verify_these;
   const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
-  verify_these.push_back(&local_credential_data_.get_hash_c2());
-  verify_these.push_back(&challenge2);
-  verify_these.push_back(&dh2);
-  verify_these.push_back(&challenge1);
-  verify_these.push_back(&dh1);
-  verify_these.push_back(&local_credential_data_.get_hash_c1());
+
+  DDS::BinaryPropertySeq verify_these;
+  make_reply_signature_sequence(local_credential_data_.get_hash_c2(),
+                                challenge2,
+                                dh2,
+                                challenge1,
+                                dh1,
+                                local_credential_data_.get_hash_c1(),
+                                verify_these);
 
   const DDS::OctetSeq& remote_signature = message_in.get_bin_property_value("signature");
-  if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {
+
+  int err = SSL::verify_serialized(verify_these, *remote_cert, remote_signature);
+  if (err) {
     set_security_error(ex, -1, 0, "Remote 'signature' field failed signature verification");
     return Failure;
   }
@@ -946,16 +1076,17 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   final_msg.set_bin_property(prop_index++, "challenge1", challenge1, true);
   final_msg.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
-  std::vector<const DDS::OctetSeq*> sign_these;
-  sign_these.push_back(&local_credential_data_.get_hash_c1());
-  sign_these.push_back(&challenge1);
-  sign_these.push_back(&dh1);
-  sign_these.push_back(&challenge2);
-  sign_these.push_back(&dh2);
-  sign_these.push_back(&local_credential_data_.get_hash_c2());
+  DDS::BinaryPropertySeq sign_these;
+  make_final_signature_sequence(local_credential_data_.get_hash_c1(),
+                                challenge1,
+                                dh1,
+                                challenge2,
+                                dh2,
+                                local_credential_data_.get_hash_c2(),
+                                sign_these);
 
   DDS::OctetSeq tmp;
-  local_credential_data_.get_participant_private_key().sign(sign_these, tmp);
+  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), tmp);
   final_msg.set_bin_property(prop_index++, "signature", tmp, true);
 
   handshakePtr->remote_cert = DCPS::move(remote_cert);
@@ -1037,18 +1168,22 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
   const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
 
-  std::vector<const DDS::OctetSeq*> verify_these;
   const DDS::OctetSeq& dh1 = handshake_reply_token.get_bin_property_value("dh1");
   const DDS::OctetSeq& dh2 = handshake_reply_token.get_bin_property_value("dh2");
-  verify_these.push_back(&local_credential_data_.get_hash_c1());
-  verify_these.push_back(&challenge1_reply);
-  verify_these.push_back(&dh1);
-  verify_these.push_back(&challenge2_reply);
-  verify_these.push_back(&dh2);
-  verify_these.push_back(&local_credential_data_.get_hash_c2());
+
+  DDS::BinaryPropertySeq verify_these;
+  make_final_signature_sequence(local_credential_data_.get_hash_c1(),
+                                challenge1_reply,
+                                dh1,
+                                challenge2_reply,
+                                dh2,
+                                local_credential_data_.get_hash_c2(),
+                                verify_these);
 
   const DDS::OctetSeq& remote_signature = handshake_final_token.get_bin_property_value("signature");
-  if (0 != remote_cert->verify_signature(remote_signature, verify_these)) {
+
+  int err = SSL::verify_serialized(verify_these, *remote_cert, remote_signature);
+  if (err) {
     set_security_error(ex, -1, 0, "Remote 'signature' field failed signature verification");
     return Failure;
   }

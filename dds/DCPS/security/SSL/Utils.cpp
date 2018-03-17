@@ -226,6 +226,58 @@ namespace OpenDDS {
         return hash(src, dst);
       }
 
+
+
+      int sign_serialized(const DDS::BinaryPropertySeq& src, const PrivateKey& key, DDS::OctetSeq& dst)
+      {
+        size_t size = 0u, padding = 0u;
+        DCPS::gen_find_size(src, size, padding);
+
+        DDS::OctetSeq tmp;
+        tmp.length(size + padding);
+        ACE_Message_Block buffer(reinterpret_cast<const char*>(tmp.get_buffer()), tmp.length());
+
+        OpenDDS::DCPS::Serializer serializer(&buffer,
+                                             OpenDDS::DCPS::Serializer::SWAP_BE,
+                                             OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
+        if (! (serializer << src)) {
+
+          fprintf(stderr, "sign_serialized: Error, failed to serialize binary-property-sequence\n");
+          return 1;
+
+        }
+
+        std::vector<const DDS::OctetSeq*> sign_these;
+        sign_these.push_back(&tmp);
+
+        return key.sign(sign_these, dst);
+      }
+
+      int verify_serialized(const DDS::BinaryPropertySeq& src, const Certificate& key, const DDS::OctetSeq& signed_data)
+      {
+        size_t size = 0u, padding = 0u;
+        DCPS::gen_find_size(src, size, padding);
+
+        DDS::OctetSeq tmp;
+        tmp.length(size + padding);
+        ACE_Message_Block buffer(reinterpret_cast<const char*>(tmp.get_buffer()), tmp.length());
+
+        OpenDDS::DCPS::Serializer serializer(&buffer,
+                                             OpenDDS::DCPS::Serializer::SWAP_BE,
+                                             OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
+        if (! (serializer << src)) {
+
+          fprintf(stderr, "verify_serialized: Error, failed to serialize binary-property-sequence\n");
+          return 1;
+
+        }
+
+        std::vector<const DDS::OctetSeq*> verify_these;
+        verify_these.push_back(&tmp);
+
+        return key.verify_signature(signed_data, verify_these);
+      }
+
     }
   }
 }

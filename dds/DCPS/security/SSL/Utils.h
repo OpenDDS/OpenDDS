@@ -7,6 +7,7 @@
 #define OPENDDS_SECURITY_SSL_UTILS_H
 
 #include "Certificate.h"
+#include "PrivateKey.h"
 #include "dds/DdsDcpsGuidC.h"
 #include "dds/DdsDcpsCoreC.h"
 #include <string>
@@ -43,6 +44,12 @@ namespace OpenDDS {
 
       DdsSecurity_Export
       int hash_serialized(const DDS::BinaryPropertySeq& src, DDS::OctetSeq& dst);
+
+      DdsSecurity_Export
+      int sign_serialized(const DDS::BinaryPropertySeq& src, const PrivateKey& key, DDS::OctetSeq& dst);
+
+      DdsSecurity_Export
+      int verify_serialized(const DDS::BinaryPropertySeq& src, const Certificate& key, const DDS::OctetSeq& signed_data);
 
     }
   }
