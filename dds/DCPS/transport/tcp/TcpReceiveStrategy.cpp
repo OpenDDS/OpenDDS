@@ -156,4 +156,11 @@ OpenDDS::DCPS::TcpReceiveStrategy::relink(bool do_suspend)
     connection->relink_from_recv(do_suspend);
 }
 
+
+OpenDDS::DCPS::TransportReactorTask_rch
+OpenDDS::DCPS::TcpReceiveStrategy::reactor_task()
+{
+  return reactor_task_;
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

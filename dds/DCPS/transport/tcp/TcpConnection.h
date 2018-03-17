@@ -73,8 +73,8 @@ public:
   // itself in as a void*.
   virtual int open(void* arg);
 
-  TcpSendStrategy* send_strategy();
-  TcpReceiveStrategy* receive_strategy();
+  TcpSendStrategy_rch send_strategy();
+  TcpReceiveStrategy_rch receive_strategy();
 
   /// We pass this "event" along to the receive_strategy.
   virtual int handle_input(ACE_HANDLE);
