@@ -13,10 +13,6 @@ static const ::DDS::Security::DatareaderCryptoHandle Local_Reader = 4;
 static const ::DDS::Security::DatawriterCryptoHandle Remote_Writer = 5;
 static const ::DDS::Security::DatareaderCryptoHandle Remote_Reader = 6;
 
-static const char* Expected_Class_Id = "DDS:Crypto:AES_GCM_GMAC";
-static const char* Expected_Property_Name = "dds.cryp.keymat";
-
-
 class CryptoKeyExchangeTest : public Test
 {
 public:
@@ -54,21 +50,6 @@ TEST_F(CryptoKeyExchangeTest, CreateLocalParticipantTokens)
   EXPECT_EQ(0U, tokens.length());
   EXPECT_FALSE(get_inst().create_local_participant_crypto_tokens(tokens, Local_Participant, DDS::HANDLE_NIL, ex));
   EXPECT_EQ(0U, tokens.length());
-
-  // Test with good handles and verify the output token.  The value
-  // field of the token's property isn't checked in this test because
-  // the stub doesn't do anything to it
-  EXPECT_TRUE(get_inst().create_local_participant_crypto_tokens(tokens, Local_Participant, Remote_Participant, ex));
-  EXPECT_STREQ(Expected_Class_Id, tokens[0].class_id);
-  ASSERT_EQ(1U, tokens.length());
-  ASSERT_EQ(1U, tokens[0].binary_properties.length());
-
-  const DDS::BinaryProperty_t& property = tokens[0].binary_properties[0];
-  EXPECT_STREQ(Expected_Property_Name, property.name);
-  EXPECT_TRUE(property.propagate);
-
-  // Free up the token resources
-  EXPECT_TRUE(get_inst().return_crypto_tokens(tokens, ex));
 }
 
 TEST_F(CryptoKeyExchangeTest, SetRemoteParticipantTokens)
@@ -95,16 +76,6 @@ TEST_F(CryptoKeyExchangeTest, CreateLocalDatawriterTokens)
   // field of the token's property isn't checked in this test because
   // the stub doesn't do anything to it
   EXPECT_TRUE(get_inst().create_local_datawriter_crypto_tokens(tokens, Local_Writer, Remote_Reader, ex));
-  EXPECT_STREQ(Expected_Class_Id, tokens[0].class_id);
-  ASSERT_EQ(1U, tokens.length());
-  ASSERT_EQ(1U, tokens[0].binary_properties.length());
-
-  const DDS::BinaryProperty_t& property = tokens[0].binary_properties[0];
-  EXPECT_STREQ(Expected_Property_Name, property.name);
-  EXPECT_TRUE(property.propagate);
-
-  // Free up the token resources
-  EXPECT_TRUE(get_inst().return_crypto_tokens(tokens, ex));
 }
 
 TEST_F(CryptoKeyExchangeTest, SetRemoteDataWriterTokens)
@@ -131,16 +102,6 @@ TEST_F(CryptoKeyExchangeTest, CreateLocalDataReaderTokens)
   // field of the token's property isn't checked in this test because
   // the stub doesn't do anything to it
   EXPECT_TRUE(get_inst().create_local_datareader_crypto_tokens(tokens, Local_Reader, Remote_Writer, ex));
-  EXPECT_STREQ(Expected_Class_Id, tokens[0].class_id);
-  ASSERT_EQ(1U, tokens.length());
-  ASSERT_EQ(1U, tokens[0].binary_properties.length());
-
-  const DDS::BinaryProperty_t& property = tokens[0].binary_properties[0];
-  EXPECT_STREQ(Expected_Property_Name, property.name);
-  EXPECT_TRUE(property.propagate);
-
-  // Free up the token resources
-  EXPECT_TRUE(get_inst().return_crypto_tokens(tokens, ex));
 }
 
 TEST_F(CryptoKeyExchangeTest, SetRemoteDataReaderTokens)
