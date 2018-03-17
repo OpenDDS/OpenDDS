@@ -123,56 +123,86 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::verify_signature(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*>& expected_contents) const
+      class verify_rsassa_pss_mgf1_sha256_impl
       {
-        int err = 0;
-        std::vector<const DDS::OctetSeq*>::const_iterator i, n;
-        EVP_PKEY* pubkey = NULL;
-        EVP_MD_CTX* verify_ctx = NULL;
-        const EVP_MD* mdtype = NULL;
+      public:
+        verify_rsassa_pss_mgf1_sha256_impl(EVP_PKEY* pkey) :
+          public_key(pkey), md_ctx(NULL), pkey_ctx(NULL)
+        {
 
-        pubkey = X509_get_pubkey(x_);
-        if (! pubkey) {
-          OPENDDS_SSL_LOG_ERR("X509_get_pubkey failed");
-          goto error;
+        }
+        ~verify_rsassa_pss_mgf1_sha256_impl()
+        {
+          if (md_ctx) EVP_MD_CTX_free(md_ctx);
         }
 
-        verify_ctx = EVP_MD_CTX_new();
-        if (! verify_ctx) {
-          OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
-          goto error;
-        }
+        int operator()(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*>& expected_contents)
+        {
+          if (! public_key) return 1;
 
-        mdtype = EVP_sha256();
-        if (1 != EVP_DigestVerifyInit(verify_ctx, NULL, mdtype, NULL, pubkey)) {
-          OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyInit failed");
-          goto error;
-        }
+          std::vector<const DDS::OctetSeq*>::const_iterator i, n;
+          size_t len = 0u;
 
-        n = expected_contents.end();
-        for (i = expected_contents.begin(); i != n; ++i) {
-          if ((*i)->length() > 0) {
-            if (1 != EVP_DigestVerifyUpdate(verify_ctx, (*i)->get_buffer(), (*i)->length())) {
-              OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyUpdate failed");
-              goto error;
+          md_ctx = EVP_MD_CTX_new();
+          if (! md_ctx) {
+            OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
+            return 1;
+          }
+
+          pkey_ctx = EVP_PKEY_CTX_new(public_key, NULL);
+          if (! pkey_ctx) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new failed");
+            return 1;
+          }
+
+          EVP_MD_CTX_init(md_ctx);
+
+          if (1 != EVP_DigestVerifyInit(md_ctx, &pkey_ctx, EVP_sha256(), NULL, public_key)) {
+            OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyInit failed");
+            return 1;
+          }
+
+          if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_padding failed");
+            return 1;
+          }
+
+          if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256())) {
+            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_mgf1_md failed");
+            return 1;
+          }
+
+          n = expected_contents.end();
+          for (i = expected_contents.begin(); i != n; ++i) {
+            if ((*i)->length() > 0) {
+              if (1 != EVP_DigestVerifyUpdate(md_ctx, (*i)->get_buffer(), (*i)->length())) {
+                OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyUpdate failed");
+                return 1;
+              }
             }
           }
+
+          int err = EVP_DigestVerifyFinal(md_ctx, src.get_buffer(), src.length());
+          if (0 == err) {
+            return 1; // Verification failed, but no error occurred
+
+          } else if (1 != err) {
+            OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyFinal failed");
+            return 1;
+          }
+
+          return 0;
         }
+      private:
+        EVP_PKEY* public_key;
+        EVP_MD_CTX* md_ctx;
+        EVP_PKEY_CTX* pkey_ctx;
+      };
 
-        err = EVP_DigestVerifyFinal(verify_ctx, src.get_buffer(), src.length());
-        if (0 == err) {
-          goto error; /* Verification failed, but no error occurred*/
-
-        } else if (1 != err) {
-          OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyFinal failed");
-          goto error;
-        }
-
-        return 0;
-
-        error:
-          if (pubkey) EVP_PKEY_free(pubkey);
-          return 1;
+      int Certificate::verify_signature(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*>& expected_contents) const
+      {
+        verify_rsassa_pss_mgf1_sha256_impl verify(X509_get_pubkey(x_));
+        return verify(src, expected_contents);
       }
 
       int Certificate::subject_name_to_str(std::string& dst, unsigned long flags) const
