@@ -75,7 +75,7 @@ namespace OpenDDS {
           goto error;
         }
 
-        mdtype = EVP_get_digestbynid(NID_sha256WithRSAEncryption);
+        mdtype = EVP_sha256();
         if (1 != EVP_DigestSignInit(signature_ctx, NULL, mdtype, NULL, k_)) {
           OPENDDS_SSL_LOG_ERR("EVP_DigestSignInit failed");
           goto error;

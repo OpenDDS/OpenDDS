@@ -142,6 +142,11 @@ namespace OpenDDS {
             std::memcpy(access_permissions_.get_buffer(), &chunks[0], access_permissions_.length());
         }
 
+        // To appease the other DDS security implementations which
+        // append a null byte at the end of the cert.
+        access_permissions_.length(access_permissions_.length() + 1);
+        access_permissions_[access_permissions_.length() - 1] = 0;
+
         fclose(fp);
       }
     }

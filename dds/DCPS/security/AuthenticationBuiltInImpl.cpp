@@ -327,8 +327,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           unsigned int prop_index = 0;
           DDS::OctetSeq tmp;
 
-          local_credential_data_.get_participant_cert().serialize(tmp);
-          message_out.set_bin_property(prop_index++, "c.id", tmp, true);
+          message_out.set_bin_property(prop_index++, "c.id", local_credential_data_.get_participant_cert().original_bytes(), true);
           message_out.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
           message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
           message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);

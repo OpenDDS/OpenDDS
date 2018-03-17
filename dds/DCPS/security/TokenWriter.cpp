@@ -56,7 +56,7 @@ void TokenWriter::set_bin_property(int prop_index, const char* prop_name, const 
   DDS::BinaryProperty_t& prop_ref = token_ref_.binary_properties[prop_index];
   prop_ref.name = prop_name;
   prop_ref.propagate = propagate;
-  prop_ref.value.length(prop_value.length());
+  prop_ref.value.length(prop_value.length() + 1 /* For null */);
   std::memcpy(prop_ref.value.get_buffer(),
               prop_value.c_str(),
               prop_ref.value.length());
