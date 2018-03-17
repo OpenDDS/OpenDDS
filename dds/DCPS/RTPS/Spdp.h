@@ -88,6 +88,7 @@ public:
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+  void check_auth_states(const ACE_Time_Value& tv);
 
   bool is_opendds(const GUID_t& participant) const;
 
@@ -149,7 +150,8 @@ private:
     ACE_SOCK_Dgram_Mcast multicast_socket_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-
+    ACE_Time_Value disco_resend_period_;
+    ACE_Time_Value last_disco_resend_;
   } *tport_;
 
   ACE_Event_Handler_var eh_; // manages our refcount on tport_

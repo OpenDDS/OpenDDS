@@ -3624,7 +3624,6 @@ Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCr
     remote_volatile_reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
     DDS::Security::ParticipantVolatileMessageSecure msg;
-    memset(&msg, 0, sizeof(msg));
     msg.message_identity.source_guid = local_volatile_writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_DATAREADER_CRYPTO_TOKENS;
     msg.destination_participant_guid = remote_part;
@@ -3668,7 +3667,6 @@ Sedp::create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCr
     remote_volatile_reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
     DDS::Security::ParticipantVolatileMessageSecure msg;
-    memset(&msg, 0, sizeof(msg));
     msg.message_identity.source_guid = local_volatile_writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_DATAWRITER_CRYPTO_TOKENS;
     msg.destination_participant_guid = remote_part;
