@@ -268,7 +268,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
 
 namespace {
   DDS::OctetSeq toSeq(Serializer& ser1, CORBA::Octet msgId, CORBA::Octet flags,
-                      CORBA::UShort octetsToNextHeader, CORBA::ULong u1,
+                      CORBA::UShort octetsToNextHeader, EntityId_t receiverId,
                       CORBA::ULong u2, EntityId_t senderId, size_t rem)
   {
     const bool shortMsg = (msgId == RTPS::PAD || msgId == RTPS::INFO_TS);
@@ -285,7 +285,7 @@ namespace {
       ser2 << u2;
     }
     if (msgId != RTPS::ACKNACK && msgId != RTPS::NACK_FRAG) {
-      ser2 << u1;
+      ser2 << receiverId;
     }
     ser2 << senderId;
     ser1.read_octet_array(reinterpret_cast<CORBA::Octet*>(mb.wr_ptr()),
@@ -318,7 +318,6 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
   }
 
   DatawriterCryptoHandleSeq emptyWriterHandles;
-  DatareaderCryptoHandleSeq emptyReaderHandles;
   ParticipantCryptoHandleSeq emptyParticipantHandles;
   DDS::Security::SecurityException ex = {"", 0, 0};
 
@@ -330,6 +329,8 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 
   RepoId sender = GUID_UNKNOWN;
   RTPS::assign(sender.guidPrefix, link_->local_prefix());
+
+  RepoId receiver = GUID_UNKNOWN;
 
   std::vector<Chunk> replacements;
 
@@ -353,9 +354,18 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 
     const size_t remaining = in->total_length();
     int read = 0;
-    CORBA::ULong u1, u2;
+    CORBA::ULong u2;
 
     switch (msgId) {
+    case RTPS::INFO_DST: {
+      GuidPrefix_t_forany guidPrefix(receiver.guidPrefix);
+      if (!(ser >> guidPrefix)) {
+        ok = false;
+        break;
+      }
+      read += 3;
+      break;
+    }
     case RTPS::DATA:
     case RTPS::DATA_FRAG:
       if (!(ser >> u2)) { // extraFlags|octetsToInlineQos
@@ -367,7 +377,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
     case RTPS::HEARTBEAT:
     case RTPS::GAP:
     case RTPS::HEARTBEAT_FRAG: {
-      if (!(ser >> u1)) { // readerId
+      if (!(ser >> receiver.entityId)) { // readerId
         ok = false;
         break;
       }
@@ -386,10 +396,19 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       replacements.resize(replacements.size() + 1);
       Chunk& c = replacements.back();
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader,
-                                u1, u2, sender.entityId, remaining));
+                                receiver.entityId, u2,
+                                sender.entityId, remaining));
+      DatareaderCryptoHandleSeq readerHandles;
+      if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
+        DatareaderCryptoHandle drch = link_->reader_crypto_handle(receiver);
+        if (drch != DDS::HANDLE_NIL) {
+          readerHandles.length(1);
+          readerHandles[0] = drch;
+        }
+      }
       CORBA::Long idx = 0;
       if (crypto->encode_datawriter_submessage(c.encoded_, plain, sender_dwch,
-                                               emptyReaderHandles, idx, ex)
+                                               readerHandles, idx, ex)
           && contentsDiffer(c.encoded_, plain)) {
         c.start_ = submessage_start;
         c.length_ = plain.length();
@@ -415,7 +434,8 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       replacements.resize(replacements.size() + 1);
       Chunk& c = replacements.back();
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader,
-                                0, 0, sender.entityId, remaining));
+                                ENTITYID_UNKNOWN, 0,
+                                sender.entityId, remaining));
       if (crypto->encode_datareader_submessage(c.encoded_, plain, sender_drch,
                                                emptyWriterHandles, ex)
           && contentsDiffer(c.encoded_, plain)) {

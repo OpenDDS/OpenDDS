@@ -61,6 +61,11 @@ namespace OpenDDS {
 
         int deserialize(const DDS::OctetSeq& src);
 
+        const DDS::OctetSeq& original_bytes() const
+        {
+          return original_bytes_;
+        }
+
         const char* dsign_algo() const
         {
           return "RSASSA-PSS-SHA256";
@@ -68,9 +73,13 @@ namespace OpenDDS {
 
       private:
 
+        void load_cert_bytes(const std::string& path);
+
         static X509* x509_from_pem(const std::string& path, const std::string& password = "");
+        static X509* x509_from_pem(const DDS::OctetSeq& bytes, const std::string& password = "");
 
         X509* x_;
+        DDS::OctetSeq original_bytes_;
       };
 
       DdsSecurity_Export

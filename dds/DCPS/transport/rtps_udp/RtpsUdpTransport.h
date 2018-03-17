@@ -89,6 +89,9 @@ private:
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
   {
     local_crypto_handle_ = pch;
+    if (link_) {
+      link_->local_crypto_handle(pch);
+    }
   }
 
   //protects access to link_ for duration of make_datalink

@@ -59,7 +59,8 @@ namespace OpenDDS {
 
         switch(s) {
           case URI_FILE:
-            x_ = x509_from_pem(path, password);
+            load_cert_bytes(path);
+            x_ = x509_from_pem(original_bytes_, password);
             break;
 
           case URI_DATA:
@@ -128,6 +129,7 @@ namespace OpenDDS {
         std::vector<const DDS::OctetSeq*>::const_iterator i, n;
         EVP_PKEY* pubkey = NULL;
         EVP_MD_CTX* verify_ctx = NULL;
+        const EVP_MD* mdtype = NULL;
 
         pubkey = X509_get_pubkey(x_);
         if (! pubkey) {
@@ -141,7 +143,8 @@ namespace OpenDDS {
           goto error;
         }
 
-        if (1 != EVP_DigestVerifyInit(verify_ctx, NULL, EVP_sha256(), NULL, pubkey)) {
+        mdtype = EVP_sha256();
+        if (1 != EVP_DigestVerifyInit(verify_ctx, NULL, mdtype, NULL, pubkey)) {
           OPENDDS_SSL_LOG_ERR("EVP_DigestVerifyInit failed");
           goto error;
         }
@@ -288,6 +291,39 @@ namespace OpenDDS {
         return result;
       }
 
+      void Certificate::load_cert_bytes(const std::string& path)
+      {
+        std::vector<unsigned char> chunks;
+        unsigned char chunk[32] = {0};
+
+        FILE* fp = fopen(path.c_str(), "r");
+        if (fp) {
+          size_t count = 0u;
+          while((count = fread(chunk, sizeof(chunk[0]), sizeof(chunk), fp))) {
+            chunks.insert(chunks.end(),
+                          chunk,
+                          chunk + count);
+          }
+
+          if (ferror(fp)) {
+              fprintf(stderr,
+                      "LocalAuthCredentialData::load_permissions_file: Error '%s' occured while reading file '%s'\n",
+                      std::strerror(errno),
+                      path.c_str());
+          } else {
+              original_bytes_.length(chunks.size());
+              std::memcpy(original_bytes_.get_buffer(), &chunks[0], original_bytes_.length());
+          }
+
+          // To appease the other DDS security implementations which
+          // append a null byte at the end of the cert.
+          original_bytes_.length(original_bytes_.length() + 1);
+          original_bytes_[original_bytes_.length() - 1] = 0;
+
+          fclose(fp);
+        }
+      }
+
       X509* Certificate::x509_from_pem(const std::string& path, const std::string& password)
       {
         X509* result = NULL;
@@ -313,6 +349,45 @@ namespace OpenDDS {
           std::stringstream errmsg; errmsg << "failed to read file '" << path << "' using BIO_new_file";
           OPENDDS_SSL_LOG_ERR(errmsg.str());
         }
+
+        return result;
+      }
+
+      X509* Certificate::x509_from_pem(const DDS::OctetSeq& bytes, const std::string& password)
+      {
+        X509* result = NULL;
+
+        BIO* filebuf = BIO_new(BIO_s_mem());
+        do {
+          if (filebuf) {
+            if (0 >= BIO_write(filebuf, bytes.get_buffer(), bytes.length())) {
+                OPENDDS_SSL_LOG_ERR("BIO_write failed");
+                break;
+            }
+            if (password != "") {
+              result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, (void*)password.c_str());
+              if (! result) {
+                  OPENDDS_SSL_LOG_ERR("PEM_read_bio_X509_AUX failed");
+                  break;
+              }
+
+            } else {
+              result = PEM_read_bio_X509_AUX(filebuf, NULL, NULL, NULL);
+              if (! result) {
+                  OPENDDS_SSL_LOG_ERR("PEM_read_bio_X509_AUX failed");
+                  break;
+              }
+            }
+
+          } else {
+            std::stringstream errmsg; errmsg << "BIO_new failed";
+            OPENDDS_SSL_LOG_ERR(errmsg.str());
+            break;
+          }
+
+        } while(0);
+
+        if (filebuf) BIO_free(filebuf);
 
         return result;
       }
@@ -377,6 +452,7 @@ namespace OpenDDS {
                 x_ = PEM_read_bio_X509_AUX(buffer, NULL, NULL, NULL);
 
                 if (x_) {
+                    original_bytes_ = src;
                     result = 0;
 
                 } else {

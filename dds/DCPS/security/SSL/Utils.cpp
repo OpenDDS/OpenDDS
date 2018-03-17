@@ -13,6 +13,9 @@
 #include <openssl/rand.h>
 #include <openssl/err.h>
 
+#include "dds/DCPS/Serializer.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
+
 namespace OpenDDS {
   namespace Security {
     namespace SSL {
@@ -164,6 +167,63 @@ namespace OpenDDS {
         EVP_MD_CTX_free(hash_ctx);
 
         return 0;
+      }
+
+      class hash_serialized_impl
+      {
+      public:
+        hash_serialized_impl() : hash_ctx(NULL)
+        {
+          hash_ctx = EVP_MD_CTX_new();
+          if (! hash_ctx) {
+            OPENDDS_SSL_LOG_ERR("EVP_MD_CTX_new failed");
+          }
+        }
+
+        ~hash_serialized_impl()
+        {
+          if (hash_ctx) EVP_MD_CTX_free(hash_ctx);
+        }
+
+        int operator()(const DDS::BinaryPropertySeq& src, DDS::OctetSeq& dst)
+        {
+          if (! hash_ctx) return 1;
+
+          EVP_DigestInit_ex(hash_ctx, EVP_sha256(), NULL);
+
+          size_t size = 0u, padding = 0u;
+          DCPS::gen_find_size(src, size, padding);
+          ACE_Message_Block buffer(size + padding);
+
+          OpenDDS::DCPS::Serializer serializer(&buffer,
+                                               OpenDDS::DCPS::Serializer::SWAP_BE,
+                                               OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
+          if (serializer << src) {
+
+            EVP_DigestUpdate(hash_ctx, buffer.rd_ptr(), buffer.length());
+
+            dst.length(EVP_MAX_MD_SIZE);
+
+            unsigned int newlen = 0u;
+            EVP_DigestFinal_ex(hash_ctx, dst.get_buffer(), &newlen);
+
+            dst.length(newlen);
+
+          } else {
+            fprintf(stderr, "hash_serialized_impl::operator(): Error, failed to serialize binary-property-sequence\n");
+            return 1;
+          }
+
+          return 0;
+        }
+      private:
+        EVP_MD_CTX* hash_ctx;
+      };
+
+      int hash_serialized(const DDS::BinaryPropertySeq& src, DDS::OctetSeq& dst)
+      {
+        hash_serialized_impl hash;
+        return hash(src, dst);
       }
 
     }

@@ -67,6 +67,7 @@ namespace OpenDDS {
         EVP_MD_CTX* signature_ctx = NULL;
         std::vector<const DDS::OctetSeq*>::const_iterator i, n;
         size_t len = 0u;
+        const EVP_MD* mdtype = NULL;
 
         signature_ctx = EVP_MD_CTX_new();
         if (! signature_ctx) {
@@ -74,7 +75,8 @@ namespace OpenDDS {
           goto error;
         }
 
-        if (1 != EVP_DigestSignInit(signature_ctx, NULL, EVP_sha256(), NULL, k_)) {
+        mdtype = EVP_sha256();
+        if (1 != EVP_DigestSignInit(signature_ctx, NULL, mdtype, NULL, k_)) {
           OPENDDS_SSL_LOG_ERR("EVP_DigestSignInit failed");
           goto error;
         }

@@ -62,11 +62,12 @@ namespace OpenDDS {
       class DH_Constructor
       {
       public:
-        DH_Constructor() : result(NULL), params(NULL), keygen_ctx(NULL) {}
+        DH_Constructor() : result(NULL), params(NULL), keygen_ctx(NULL), dh_2048_256(NULL) {}
         ~DH_Constructor()
         {
           if (params) EVP_PKEY_free(params);
           if (keygen_ctx) EVP_PKEY_CTX_free(keygen_ctx);
+          if (dh_2048_256) DH_free(dh_2048_256);
         }
 
         EVP_PKEY* operator()()
@@ -76,7 +77,12 @@ namespace OpenDDS {
             return NULL;
           }
 
-          if (1 != EVP_PKEY_set1_DH(params, DH_get_2048_256())) {
+          if (NULL == (dh_2048_256 = DH_get_2048_256())) {
+            OPENDDS_SSL_LOG_ERR("DH_get_2048_256 failed");
+            return NULL;
+          }
+
+          if (1 != EVP_PKEY_set1_DH(params, dh_2048_256)) {
             OPENDDS_SSL_LOG_ERR("EVP_PKEY_set1_DH failed");
             return NULL;
           }
@@ -103,6 +109,7 @@ namespace OpenDDS {
         EVP_PKEY* result;
         EVP_PKEY* params;
         EVP_PKEY_CTX* keygen_ctx;
+        DH* dh_2048_256;
       };
 
       int DH_2048_MODP_256_PRIME::init()
@@ -207,7 +214,7 @@ namespace OpenDDS {
       class ECDH_Constructor {
       public:
         ECDH_Constructor() :
-          result(NULL), params(NULL), paramgen_ctx(NULL), keygen_ctx(NULL) {}
+          params(NULL), paramgen_ctx(NULL), keygen_ctx(NULL) {}
 
         ~ECDH_Constructor()
         {
@@ -218,12 +225,14 @@ namespace OpenDDS {
 
         EVP_PKEY* operator()()
         {
-          if (! (paramgen_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL))) {
+          EVP_PKEY* result = NULL;
+
+          if (NULL == (paramgen_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL))) {
             OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new_id");
             return NULL;
           }
 
-          if (! (params = EVP_PKEY_new())) {
+          if (NULL == (params = EVP_PKEY_new())) {
             OPENDDS_SSL_LOG_ERR("EVP_PKEY_new failed");
             return NULL;
           }
@@ -238,12 +247,12 @@ namespace OpenDDS {
             return NULL;
           }
 
-          if (! EVP_PKEY_paramgen(paramgen_ctx, &params)) {
+          if (1 != EVP_PKEY_paramgen(paramgen_ctx, &params)) {
             OPENDDS_SSL_LOG_ERR("EVP_PKEY_paramgen failed");
             return NULL;
           }
 
-          if (! (keygen_ctx = EVP_PKEY_CTX_new(params, NULL))) {
+          if (NULL == (keygen_ctx = EVP_PKEY_CTX_new(params, NULL))) {
             OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new failed");
             return NULL;
           }
@@ -262,7 +271,6 @@ namespace OpenDDS {
         }
 
       private:
-        EVP_PKEY* result;
         EVP_PKEY* params;
         EVP_PKEY_CTX* paramgen_ctx;
         EVP_PKEY_CTX* keygen_ctx;
@@ -431,7 +439,7 @@ namespace OpenDDS {
             return new DiffieHellman(new ECDH_PRIME_256_V1_CEUM);
 
         } else {
-            fprintf(stderr, "DiffieHellman::factory: Error, unknown kagree_algo");
+            fprintf(stderr, "DiffieHellman::factory: Error, unknown kagree_algo\n");
             return NULL;
         }
       }

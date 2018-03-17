@@ -83,6 +83,7 @@ public:
   WaitForAcks& wait_for_acks();
 
   OpenDDS::Security::SecurityConfig_rch get_security_config() { return security_config_; }
+  DDS::Security::ParticipantCryptoHandle crypto_handle() { return crypto_handle_; }
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
