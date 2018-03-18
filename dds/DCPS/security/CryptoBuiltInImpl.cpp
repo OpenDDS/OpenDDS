@@ -18,6 +18,7 @@
 #include "dds/DCPS/Serializer.h"
 
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 
 using namespace DDS::Security;
 using OpenDDS::DCPS::Serializer;
@@ -65,6 +66,7 @@ NativeCryptoHandle CryptoBuiltInImpl::generate_handle()
 // Key Factory
 
 namespace {
+  const unsigned int KEY_LEN_BYTES = 32;
 
   KeyMaterial_AES_GCM_GMAC make_key(unsigned int key_id, bool encrypt)
   {
@@ -76,13 +78,15 @@ namespace {
       encrypt ? CRYPTO_TRANSFORMATION_KIND_AES256_GCM
       : CRYPTO_TRANSFORMATION_KIND_AES256_GMAC;
 
-    k.master_salt.length(0);
+    k.master_salt.length(KEY_LEN_BYTES);
+    RAND_bytes(k.master_salt.get_buffer(), KEY_LEN_BYTES);
 
     for (unsigned int i = 0; i < sizeof k.sender_key_id; ++i) {
       k.sender_key_id[i] = key_id >> (8 * i);
     }
 
-    k.master_sender_key.length(0);
+    k.master_sender_key.length(KEY_LEN_BYTES);
+    RAND_bytes(k.master_sender_key.get_buffer(), KEY_LEN_BYTES);
 
     for (unsigned int i = 0; i < sizeof k.receiver_specific_key_id; ++i) {
       k.receiver_specific_key_id[i] = 0;
