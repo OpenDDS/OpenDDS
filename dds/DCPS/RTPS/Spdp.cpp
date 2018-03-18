@@ -414,7 +414,13 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
   DiscoveredParticipant& dp = iter->second;
 
-  if (dp.auth_state_ == AS_HANDSHAKE_REPLY) {
+  DCPS::RepoId writer = guid_;
+  writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+
+  DCPS::RepoId reader = src_participant;
+  reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+
+  if (dp.auth_state_ == AS_HANDSHAKE_REPLY && msg.related_message_identity.source_guid == GUID_UNKNOWN) {
     DDS::Security::ParticipantBuiltinTopicData pbtd = {
       {
         DDS::BuiltinTopicKey_t() /*ignored*/,
@@ -453,15 +459,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
 
-    DCPS::RepoId writer = guid_;
-    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-
-    DCPS::RepoId reader = src_participant;
-    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
+    reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
@@ -502,16 +503,11 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     }
   }
 
-  if (dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT || dp.auth_state_ == AS_HANDSHAKE_REPLY_SENT) {
-    DCPS::RepoId writer = guid_;
-    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-
-    DCPS::RepoId reader = src_participant;
-    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-
+  if ((dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT || dp.auth_state_ == AS_HANDSHAKE_REPLY_SENT) && msg.related_message_identity.source_guid == writer) {
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = writer;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
+    reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
     reply.destination_endpoint_guid = reader;
     reply.source_endpoint_guid = GUID_UNKNOWN;
@@ -868,6 +864,8 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     msg.destination_participant_guid = guid;
     msg.destination_endpoint_guid = reader;
     msg.source_endpoint_guid = GUID_UNKNOWN;
+    msg.related_message_identity.source_guid = GUID_UNKNOWN;
+    msg.related_message_identity.sequence_number = 0;
     msg.message_data.length(1);
     msg.message_data[0] = hs_mt;
 
