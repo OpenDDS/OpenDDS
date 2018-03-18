@@ -228,8 +228,25 @@ private:
   typedef std::map<DDS::Security::NativeCryptoHandle, KeySeq> KeyTable_t;
   KeyTable_t keys_;
 
+  struct EntityInfo {
+    DDS::Security::SecureSubmessageCategory_t category_;
+    DDS::Security::NativeCryptoHandle handle_;
+    EntityInfo(DDS::Security::SecureSubmessageCategory_t c,
+               DDS::Security::NativeCryptoHandle h)
+      : category_(c), handle_(h) {}
+  };
   std::multimap<DDS::Security::ParticipantCryptoHandle,
-                DDS::Security::NativeCryptoHandle> participant_to_entity_;
+                EntityInfo> participant_to_entity_;
+
+  KeyOctetSeq get_session_key(const KeyMaterial& k, const CryptoHeader& header);
+
+  bool decrypt(const KeyMaterial& k, const char* ciphertext,
+               unsigned int n, const CryptoHeader& header,
+               DDS::OctetSeq& out);
+
+  bool verify(const KeyMaterial& k, const char* ciphertext,
+              unsigned int n, const CryptoHeader& header,
+              DDS::OctetSeq& out);
 };
 
 } // Security
