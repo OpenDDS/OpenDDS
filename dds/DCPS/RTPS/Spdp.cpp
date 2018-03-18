@@ -460,7 +460,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     }
 
     DDS::Security::ParticipantStatelessMessage reply;
-    reply.message_identity.source_guid = writer;
+    reply.message_identity.source_guid = guid_;
+    reply.message_identity.sequence_number = 0;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
@@ -503,9 +504,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     }
   }
 
-  if ((dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT || dp.auth_state_ == AS_HANDSHAKE_REPLY_SENT) && msg.related_message_identity.source_guid == writer) {
+  if ((dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT || dp.auth_state_ == AS_HANDSHAKE_REPLY_SENT) && msg.related_message_identity.source_guid == guid_) {
     DDS::Security::ParticipantStatelessMessage reply;
-    reply.message_identity.source_guid = writer;
+    reply.message_identity.source_guid = guid_;
+    reply.message_identity.sequence_number = 0;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
@@ -859,7 +861,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage msg;
-    msg.message_identity.source_guid = writer;
+    msg.message_identity.source_guid = guid_;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     msg.destination_participant_guid = guid;
     msg.destination_endpoint_guid = reader;
