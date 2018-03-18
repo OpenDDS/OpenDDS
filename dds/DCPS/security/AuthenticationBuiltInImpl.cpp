@@ -297,6 +297,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
+  DDS::OctetSeq hash_c1;
+
   if (serialized_local_participant_data.length() != 0) {
 
       IdentityData_Ptr replier_data = get_identity_data(replier_identity_handle);
@@ -313,29 +315,27 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           /* Compute hash_c1 and store for later */
 
           {
-            DDS::OctetSeq tmp;
             CredentialHash hash(local_credential_data_.get_participant_cert(),
                                 *diffie_hellman,
                                 serialized_local_participant_data,
                                 local_credential_data_.get_access_permissions());
 
-            int err = hash(tmp);
+            int err = hash(hash_c1);
             if (err) return DDS::Security::VALIDATION_FAILED;
-            local_credential_data_.set_hash_c1(tmp);
           }
 
           unsigned int prop_index = 0;
-          DDS::OctetSeq tmp;
 
           message_out.set_bin_property(prop_index++, "c.id", local_credential_data_.get_participant_cert().original_bytes(), true);
           message_out.set_bin_property(prop_index++, "c.perm", local_credential_data_.get_access_permissions(), true);
           message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
           message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
           message_out.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
-          message_out.set_bin_property(prop_index++, "hash_c1", local_credential_data_.get_hash_c1(), true);
+          message_out.set_bin_property(prop_index++, "hash_c1", hash_c1, true);
 
-          diffie_hellman->pub_key(tmp);
-          message_out.set_bin_property(prop_index++, "dh1", tmp, true);
+          DDS::OctetSeq dhpub;
+          diffie_hellman->pub_key(dhpub);
+          message_out.set_bin_property(prop_index++, "dh1", dhpub, true);
 
           OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
           if (auth_wrapper.is_nil()) {
@@ -362,6 +362,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           newHandshakeData->request_token = handshake_message;
           newHandshakeData->reply_token = DDS::Security::TokenNIL;
           newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
+          newHandshakeData->hash_c1 = hash_c1;
 
           handshake_handle = get_next_handle();
           {
@@ -594,7 +595,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   const unsigned int PropertyCount = 0;
   const unsigned int BinaryPropertyCount = 12;
 
-  DDS::OctetSeq challenge1, challenge2, dh2, cperm;
+  DDS::OctetSeq challenge1, challenge2, dh2, cperm, hash_c1, hash_c2;
 
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
   SSL::DiffieHellman::unique_ptr diffie_hellman; //(new SSL::DiffieHellman);
@@ -673,27 +674,23 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     /* Compute hash_c1 and store for later */
 
     {
-      DDS::OctetSeq tmp;
       CredentialHash hash(*remote_cert,
                           *diffie_hellman,
                           cpdata,
                           cperm);
-      int err = hash(tmp);
+      int err = hash(hash_c1);
       if (err) return Failure;
-      local_credential_data_.set_hash_c1(tmp);
     }
 
     /* Compute hash_c2 and store for later */
 
     {
-      DDS::OctetSeq tmp;
       CredentialHash hash(local_credential_data_.get_participant_cert(),
                           *diffie_hellman,
                           serialized_local_participant_data,
                           local_credential_data_.get_access_permissions());
-      int err = hash(tmp);
+      int err = hash(hash_c2);
       if (err) return Failure;
-      local_credential_data_.set_hash_c2(tmp);
     }
   }
 
@@ -715,11 +712,11 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   message_out.set_bin_property(prop_index++, "c.pdata", serialized_local_participant_data, true);
   message_out.set_bin_property(prop_index++, "c.dsign_algo", "RSASSA-PSS-SHA256", true);
   message_out.set_bin_property(prop_index++, "c.kagree_algo", diffie_hellman->kagree_algo(), true);
-  message_out.set_bin_property(prop_index++, "hash_c2", local_credential_data_.get_hash_c2(), true);
+  message_out.set_bin_property(prop_index++, "hash_c2", hash_c2, true);
 
   diffie_hellman->pub_key(dh2);
   message_out.set_bin_property(prop_index++, "dh2", dh2, true);
-  message_out.set_bin_property(prop_index++, "hash_c1", local_credential_data_.get_hash_c1(), true);
+  message_out.set_bin_property(prop_index++, "hash_c1", hash_c1, true);
   message_out.set_bin_property(prop_index++, "dh1", dh1, true);
   message_out.set_bin_property(prop_index++, "challenge1", challenge1, true);
 
@@ -740,12 +737,12 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   }
 
   DDS::BinaryPropertySeq sign_these;
-  make_reply_signature_sequence(local_credential_data_.get_hash_c2(),
+  make_reply_signature_sequence(hash_c2,
                                 challenge2,
                                 dh2,
                                 challenge1,
                                 dh1,
-                                local_credential_data_.get_hash_c1(),
+                                hash_c1,
                                 sign_these);
 
   DDS::OctetSeq tmp;
@@ -762,6 +759,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   newHandshakeData->access_permissions = cperm;
   newHandshakeData->reply_token = handshake_message_out;
   newHandshakeData->request_token = request_token;
+  newHandshakeData->hash_c1 = hash_c1;
+  newHandshakeData->hash_c2 = hash_c2;
 
   handshake_handle = get_next_handle();
   {
@@ -954,7 +953,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   const unsigned int PropertyCount = 0;
   const unsigned int BinaryPropertyCount = 7;
 
-  DDS::OctetSeq challenge1;
+  DDS::OctetSeq challenge1, hash_c2;
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
 
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
@@ -1053,26 +1052,24 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   /* Compute hash_c2 and store for later (hash_c1 was already computed in request) */
 
   {
-    DDS::OctetSeq tmp;
     CredentialHash hash(*remote_cert,
                         *handshakePtr->diffie_hellman,
                         cpdata,
                         cperm);
-    int err = hash(tmp);
+    int err = hash(hash_c2);
     if (err) return Failure;
-    local_credential_data_.set_hash_c2(tmp);
   }
 
   /* Validate Signature field */
   const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
 
   DDS::BinaryPropertySeq verify_these;
-  make_reply_signature_sequence(local_credential_data_.get_hash_c2(),
+  make_reply_signature_sequence(hash_c2,
                                 challenge2,
                                 dh2,
                                 challenge1,
                                 dh1,
-                                local_credential_data_.get_hash_c1(),
+                                handshakePtr->hash_c1,
                                 verify_these);
 
   const DDS::OctetSeq& remote_signature = message_in.get_bin_property_value("signature");
@@ -1089,20 +1086,20 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
                                            PropertyCount,
                                            BinaryPropertyCount);
 
-  final_msg.set_bin_property(prop_index++, "hash_c1", local_credential_data_.get_hash_c1(), true);
-  final_msg.set_bin_property(prop_index++, "hash_c2", local_credential_data_.get_hash_c2(), true);
+  final_msg.set_bin_property(prop_index++, "hash_c1", handshakePtr->hash_c1, true);
+  final_msg.set_bin_property(prop_index++, "hash_c2", hash_c2, true);
   final_msg.set_bin_property(prop_index++, "dh1", dh1, true);
   final_msg.set_bin_property(prop_index++, "dh2", dh2, true);
   final_msg.set_bin_property(prop_index++, "challenge1", challenge1, true);
   final_msg.set_bin_property(prop_index++, "challenge2", challenge2, true);
 
   DDS::BinaryPropertySeq sign_these;
-  make_final_signature_sequence(local_credential_data_.get_hash_c1(),
+  make_final_signature_sequence(handshakePtr->hash_c1,
                                 challenge1,
                                 dh1,
                                 challenge2,
                                 dh2,
-                                local_credential_data_.get_hash_c2(),
+                                hash_c2,
                                 sign_these);
 
   DDS::OctetSeq tmp;
@@ -1112,6 +1109,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   handshakePtr->remote_cert = DCPS::move(remote_cert);
   handshakePtr->validation_state = FinalMessage;
   handshakePtr->access_permissions =  message_in.get_bin_property_value("c.perm");
+  handshakePtr->hash_c2 = hash_c2;
 
   handshakePtr->secret_handle = new SharedSecret(challenge1,
                                                  challenge2,
@@ -1199,12 +1197,12 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
 
   DDS::BinaryPropertySeq verify_these;
-  make_final_signature_sequence(local_credential_data_.get_hash_c1(),
+  make_final_signature_sequence(handshakePtr->hash_c1,
                                 challenge1_reply,
                                 dh1,
                                 challenge2_reply,
                                 dh2,
-                                local_credential_data_.get_hash_c2(),
+                                handshakePtr->hash_c2,
                                 verify_these);
 
   const DDS::OctetSeq& remote_signature = handshake_final_token.get_bin_property_value("signature");
