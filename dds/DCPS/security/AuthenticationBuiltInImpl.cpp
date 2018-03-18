@@ -588,6 +588,9 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   using OpenDDS::Security::TokenWriter;
   using OpenDDS::Security::TokenReader;
 
+  /* Copy the in part of the inout param */
+  const DDS::Security::HandshakeMessageToken request_token = handshake_message_out;
+
   const unsigned int PropertyCount = 0;
   const unsigned int BinaryPropertyCount = 12;
 
@@ -614,7 +617,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     return Failure;
   }
 
-  DDS::Security::HandshakeMessageToken message_data_in(handshake_message_out);
+  DDS::Security::HandshakeMessageToken message_data_in(request_token);
   TokenReader message_in(message_data_in);
   if (message_in.is_nil()) {
     set_security_error(ex, -1, 0, "Handshake_message_out is an inout param and must not be nil");
@@ -758,6 +761,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   newHandshakeData->remote_cert = DCPS::move(remote_cert);
   newHandshakeData->access_permissions = cperm;
   newHandshakeData->reply_token = handshake_message_out;
+  newHandshakeData->request_token = request_token;
 
   handshake_handle = get_next_handle();
   {
@@ -1170,6 +1174,16 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
     return Failure;
   }
 
+  /* Per the spec, dh1 is optional in all _but_ the request token so it's grabbed from the request */
+  TokenReader handshake_request_token(handshakePtr->request_token);
+  if (handshake_reply_token.is_nil()) {
+    set_security_error(ex, -1, 0, "Handshake-reply-token is nil");
+    return Failure;
+  }
+
+  const DDS::OctetSeq& dh1 = handshake_request_token.get_bin_property_value("dh1");
+  const DDS::OctetSeq& dh2 = handshake_reply_token.get_bin_property_value("dh2");
+
   const DDS::OctetSeq& challenge1_reply = handshake_reply_token.get_bin_property_value("challenge1");
   const DDS::OctetSeq& challenge2_reply = handshake_reply_token.get_bin_property_value("challenge2");
 
@@ -1183,9 +1197,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   /* Validate Signature field */
 
   const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
-
-  const DDS::OctetSeq& dh1 = handshake_reply_token.get_bin_property_value("dh1");
-  const DDS::OctetSeq& dh2 = handshake_reply_token.get_bin_property_value("dh2");
 
   DDS::BinaryPropertySeq verify_these;
   make_final_signature_sequence(local_credential_data_.get_hash_c1(),
@@ -1206,8 +1217,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
   /* Compute/Store the Diffie-Hellman shared-secret */
 
-  const DDS::OctetSeq& dh_pub_key = handshake_final_token.get_bin_property_value("dh1");
-  if (0 != handshakePtr->diffie_hellman->gen_shared_secret(dh_pub_key)) {
+  if (0 != handshakePtr->diffie_hellman->gen_shared_secret(dh1)) {
     set_security_error(ex, -1, 0, "Failed to generate shared secret from dh2 and dh1");
     return Failure;
   }
