@@ -818,10 +818,22 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   if (handshakeData) {
     OpenDDS::Security::TokenWriter peer_token(peer_credential_token, Auth_Peer_Cred_Token_Class_Id, 2, 0);
 
-    const DDS::OctetSeq& cid = handshakeData->remote_cert->original_bytes();
-    const DDS::OctetSeq& cperm = handshakeData->access_permissions;
-    peer_token.set_property(0, "c.id", cid, true);
-    peer_token.set_property(1, "c.perm", cperm, true);
+    DDS::BinaryPropertySeq& props = peer_credential_token.binary_properties;
+    props.length(2);
+
+    DDS::BinaryProperty_t p1;
+    p1.name = "c.id";
+    p1.value = handshakeData->remote_cert->original_bytes();
+    p1.propagate = true;
+
+    DDS::BinaryProperty_t p2;
+    p2.name = "c.perm";
+    p2.value = handshakeData->access_permissions;
+    p2.propagate = true;
+
+    props[0] = p1;
+    props[1] = p2;
+
     result = true;
 
   } else {
