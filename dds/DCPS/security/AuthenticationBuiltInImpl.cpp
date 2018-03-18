@@ -817,9 +817,13 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
     OpenDDS::Security::TokenWriter peer_token(peer_credential_token, Auth_Peer_Cred_Token_Class_Id, 2, 0);
-    peer_token.set_property(0, "c.id", "CertificateContents", true);
-    peer_token.set_property(1, "c.perm", "PermissionsDocument", true);
+
+    const DDS::OctetSeq& cid = handshakeData->remote_cert->original_bytes();
+    const DDS::OctetSeq& cperm = handshakeData->access_permissions;
+    peer_token.set_property(0, "c.id", cid, true);
+    peer_token.set_property(1, "c.perm", cperm, true);
     result = true;
+
   } else {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
   }

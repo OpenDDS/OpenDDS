@@ -56,6 +56,7 @@ public:
   void set_bin_property_count(unsigned int num_properties);
 
   void set_property(int prop_index, const char* prop_name, const char* prop_value, bool propagate);
+  void set_property(int prop_index, const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
   void set_bin_property(int prop_index, const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
   void set_bin_property(int prop_index, const char* prop_name, const std::string& prop_value, bool propagate);
 

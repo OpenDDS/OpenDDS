@@ -6,7 +6,8 @@
 */
 #include "dds/DCPS/security/TokenWriter.h"
 #include <cstring>
-#
+#include <sstream>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -40,6 +41,17 @@ void TokenWriter::set_property(int prop_index, const char* prop_name, const char
   DDS::Property_t& prop_ref = token_ref_.properties[prop_index];
   prop_ref.name = prop_name;
   prop_ref.value = prop_value;
+  prop_ref.propagate = propagate;
+}
+
+void TokenWriter::set_property(int prop_index, const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate)
+{
+  std::ostringstream out;
+  out.write(reinterpret_cast<const char*>(prop_value.get_buffer()), prop_value.length());
+
+  DDS::Property_t& prop_ref = token_ref_.properties[prop_index];
+  prop_ref.name = prop_name;
+  prop_ref.value = out.str().c_str();
   prop_ref.propagate = propagate;
 }
 
