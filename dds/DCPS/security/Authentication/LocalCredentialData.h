@@ -72,26 +72,6 @@ namespace OpenDDS {
         return (X509_V_OK == participant_cert_->validate(*ca_cert_));
       }
 
-      const DDS::OctetSeq& get_hash_c1() const
-      {
-        return hash_c1;
-      }
-
-      void set_hash_c1(const DDS::OctetSeq& src)
-      {
-        hash_c1 = src;
-      }
-
-      const DDS::OctetSeq& get_hash_c2() const
-      {
-        return hash_c2;
-      }
-
-      void set_hash_c2(const DDS::OctetSeq& src)
-      {
-        hash_c2 = src;
-      }
-
     private:
 
       void load_permissions_file(const std::string& path);
@@ -100,8 +80,6 @@ namespace OpenDDS {
       SSL::Certificate::unique_ptr participant_cert_;
       SSL::PrivateKey::unique_ptr participant_pkey_;
       DDS::OctetSeq access_permissions_;
-      DDS::OctetSeq hash_c1;
-      DDS::OctetSeq hash_c2;
     };
 
   }
