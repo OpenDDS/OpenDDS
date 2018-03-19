@@ -86,6 +86,8 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
 OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
+  if (reconnect_thread_)
+      ACE_Thread_Manager::instance()->join(reconnect_thread_);
 }
 
 OpenDDS::DCPS::TcpSendStrategy_rch
@@ -885,6 +887,10 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
                ACE_TEXT(" should NOT be called by the connector side \n")));
   }
 
+  if (reconnect_thread_) {
+      ACE_Thread_Manager::instance()->join(reconnect_thread_);
+      reconnect_thread_ = 0;
+  }
   // connection->receive_strategy_ = this->receive_strategy_;
   // connection->send_strategy_ = this->send_strategy_;
   connection->remote_address_ = this->remote_address_;
@@ -1000,16 +1006,20 @@ void
 OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
 {
   DBG_ENTRY_LVL("TcpConnection","spawn_reconnect_thread",6);
-
+  GuardType guard(this->reconnect_lock_);
   if (!shutdown_) {
+
+    TransportImpl& transport_impl = this->link_->impl();
+    transport_impl._add_ref();
     // add the reference count to be picked up from the new thread
     this->_add_ref();
     if (ACE_Thread_Manager::instance()->spawn(&reconnect_thread_fun,
                                               this,
                                               THR_NEW_LWP|THR_JOINABLE|THR_INHERIT_SCHED,
                                               &reconnect_thread_) == -1){
-      // we nnned to decrement the reference count when thread creation fails.
+      // we need to decrement the reference count when thread creation fails.
       this->_remove_ref();
+      transport_impl._remove_ref();
     }
   }
 }
@@ -1019,8 +1029,6 @@ OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
 {
   DBG_ENTRY_LVL("TcpConnection","reconnect_thread_fun",6);
 
-  TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
-
   // Ignore all signals to avoid
   //     ERROR: <something descriptive> Interrupted system call
   // The main thread will handle signals.
@@ -1028,17 +1036,15 @@ OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
   ACE_OS::sigfillset(&set);
   ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
 
-  // This thread would access the reactor which is owned by  TransportReactorTask_.
-  // Thus the thread must increment the reference count for reactor_task
-  TransportReactorTask_rch reactor_task;
-  TcpReceiveStrategy_rch receive_strategy = connection->receive_strategy();
-  if (receive_strategy) {
-    reactor_task = receive_strategy->reactor_task();
+  // Make sure the associated transport_impl outlives the connection object.
+  TransportImpl_rch transport_impl;
+  TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
+  transport_impl = TransportImpl_rch(&connection->link_->impl(), keep_count());
 
-    if (connection->reconnect() == -1) {
-      connection->tear_link();
-    }
+  if (connection->reconnect() == -1) {
+    connection->tear_link();
   }
+
   return 0;
 }
 
