@@ -515,9 +515,16 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
     DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to process incoming handshake message. %C Security Exception[%d.%d]: %C\n"),
+      std::string expected = dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT ? "handshake reply" : "final message";
+      if (dp.auth_state_ == AS_HANDSHAKE_REQUEST_SENT) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Failed to process incoming handshake message when expecting reply from %C. Security Exception[%d.%d]: %C\n"),
           std::string(DCPS::GuidConverter(src_participant)).c_str(), se.code, se.minor_code, se.message.in()));
+      } else {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
+          ACE_TEXT("Failed to process incoming handshake message when expecting final message from %C. Security Exception[%d.%d]: %C\n"),
+          std::string(DCPS::GuidConverter(src_participant)).c_str(), se.code, se.minor_code, se.message.in()));
+      }
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve more than 3 messages
@@ -582,7 +589,11 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
     }
   }
   for (OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan)::const_iterator it = to_erase.begin(); it != to_erase.end(); ++it) {
-    participants_.erase(*it);
+    DiscoveredParticipantIter pit = participants_.find(*it);
+    if (pit != participants_.end()) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states()      - Removing discovered participant due to authentication timeout: %C\n"), std::string(DCPS::GuidConverter(*it)).c_str()));
+      remove_discovered_participant(pit);
+    }
   }
 }
 
@@ -782,10 +793,12 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       }
       case DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE: {
         dp.auth_state_ = AS_HANDSHAKE_REPLY;
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - Attempting authentication (expecting reply) for participant:   %C\n"), std::string(DCPS::GuidConverter(guid)).c_str()));
         return; // We'll need to wait for an inbound handshake request from the remote participant
       }
       case DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST: {
         dp.auth_state_ = AS_HANDSHAKE_REQUEST;
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::attempt_authentication() - Attempting authentication (sending request) for participant:   %C\n"), std::string(DCPS::GuidConverter(guid)).c_str()));
         break; // We've got more to do, move on to handshake request
       }
       case DDS::Security::VALIDATION_FAILED: {
