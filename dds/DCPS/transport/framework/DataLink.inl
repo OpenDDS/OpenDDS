@@ -107,11 +107,14 @@ DataLink::send(TransportQueueElement* element)
 
   element = this->customize_queue_element(element);
   if (!element) {
+    element->data_dropped(true);
     return;
   }
 
   if (this->thr_per_con_send_task_ != 0) {
-    this->thr_per_con_send_task_->add_request(SEND, element);
+    if (this->thr_per_con_send_task_->add_request(SEND, element) == -1) {
+      element->data_dropped(true);
+    }
 
   } else {
     this->send_i(element);
@@ -135,6 +138,8 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
 
   if (strategy) {
     strategy->send(element, relink);
+  } else {
+    element->data_dropped(true);
   }
 }
 
