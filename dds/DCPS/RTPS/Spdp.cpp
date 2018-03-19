@@ -281,13 +281,8 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     this->tport_->write_i();
 
     if (security_config_) {
-      bool has_security_data = false;
-      if (ParameterListConverter::from_param_list(plist, dp.identity_token_, dp.permissions_token_, dp.property_qos_, dp.security_info_) < 0) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
-          ACE_TEXT("failed to parse security data from ParameterList\n")));
-      } else {
-        has_security_data = true;
-      }
+      bool has_security_data =
+        ParameterListConverter::from_param_list(plist, dp.identity_token_, dp.permissions_token_, dp.property_qos_, dp.security_info_) < 0;
 
       if (has_security_data == false) {
         if (participant_sec_attr_.allow_unauthenticated_participants == false) {
@@ -408,7 +403,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   if (iter == participants_.end()) {
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) Spdp::handle_handshake_message() - ")
-      ACE_TEXT("received handshake for undiscovered participant. Ignoring.\n")));
+      ACE_TEXT("received handshake for undiscovered participant %C. Ignoring.\n"),
+               std::string(DCPS::GuidConverter(src_participant)).c_str()));
     return;
   }
 
@@ -518,8 +514,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::handle_handshake_message() - ")
-        ACE_TEXT("Failed to process incoming handshake message. Security Exception[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
+        ACE_TEXT("Failed to process incoming handshake message. %C Security Exception[%d.%d]: %C\n"),
+          std::string(DCPS::GuidConverter(src_participant)).c_str(), se.code, se.minor_code, se.message.in()));
       return;
     } else if (vr == DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
       // Theoretically, this shouldn't happen unless handshakes can involve more than 3 messages
@@ -628,7 +624,8 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   if (iter == participants_.end()) {
     ACE_DEBUG((LM_WARNING,
       ACE_TEXT("(%P|%t) Spdp::handle_participant_crypto_tokens() - ")
-      ACE_TEXT("received tokens for undiscovered participant. Ignoring.\n")));
+      ACE_TEXT("received tokens for undiscovered participant %C. Ignoring.\n"),
+               std::string(DCPS::GuidConverter(src_participant)).c_str()));
     return;
   }
   DiscoveredParticipant& dp = iter->second;

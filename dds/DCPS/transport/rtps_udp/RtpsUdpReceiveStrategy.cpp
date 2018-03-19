@@ -274,10 +274,10 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
                                                 dwch, drch, ex);
 
     } else {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy: "
-                 "preprocess_secure_submsg returned %d cat %d, [%d.%d]: %C\n",
-                 ok, static_cast<int>(category), ex.code, ex.minor_code,
-                 ex.message.in()));
+      //ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy: "
+      //           "preprocess_secure_submsg returned %d cat %d, [%d.%d]: %C\n",
+      //           ok, static_cast<int>(category), ex.code, ex.minor_code,
+      //           ex.message.in()));
       ok = false;
     }
 
