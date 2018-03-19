@@ -1065,7 +1065,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   }
 
   /* Validate Signature field */
-  const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
+  const DDS::OctetSeq& dh1 = handshake_request_token.get_bin_property_value("dh1");
 
   DDS::BinaryPropertySeq verify_these;
   make_reply_signature_sequence(hash_c2,
