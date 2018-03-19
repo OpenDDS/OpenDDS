@@ -840,6 +840,8 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
     return false;
   }
 
+  return false;
+#if 0
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   Serializer de_ser(&mb_in, false, Serializer::ALIGN_CDR);
@@ -880,6 +882,7 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
   }
   CommonUtilities::set_security_error(ex, -2, 1, "Crypto Key not registered");
   return false;
+#endif
 }
 
 namespace {
@@ -907,7 +910,7 @@ KeyOctetSeq CryptoBuiltInImpl::get_session_key(const KeyMaterial& k,
   EVP_DigestInit_ex(ctx, md, 0);
   EVP_DigestSignInit(ctx, 0, md, 0, pkey);
   static const char cookie[] = "SessionKey";
-  EVP_DigestSignUpdate(ctx, cookie, std::strlen(cookie)); // + 1 ???
+  EVP_DigestSignUpdate(ctx, cookie, std::strlen(cookie)); // confirmed, no nul
   EVP_DigestSignUpdate(ctx, k.master_salt.get_buffer(), k.master_salt.length());
   EVP_DigestSignUpdate(ctx, h.session_id, sizeof h.session_id);
   size_t req = 0;
