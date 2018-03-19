@@ -1025,11 +1025,12 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     }
   }
 
-// TODO Reinstate this check after the DDS demo.
-#if 0
   /* Validate participant_guid in c.pdata */
 
   const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
+
+// TODO Reinstate this check after the DDS demo.
+#if 0
 
   std::vector<unsigned char> hash;
   if (0 != remote_cert->subject_name_digest(hash)) {
