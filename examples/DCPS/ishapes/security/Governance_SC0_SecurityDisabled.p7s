@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----0BB13B944CA22CF9D9DF1B3258DCB4E6"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----0A9BE55DAC584B76B00CD5037EBCFE34"
 
 This is an S/MIME signed message
 
-------0BB13B944CA22CF9D9DF1B3258DCB4E6
+------0A9BE55DAC584B76B00CD5037EBCFE34
 Content-Type: text/plain
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -12,11 +12,8 @@ Content-Type: text/plain
     Illustrates DDS Security is an extension of DDS. It is still possible to
     run applications without any protection.
 -->
-
-<!--<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_governance.xsd">-->
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xsi:noNamespaceSchemaLocation="../schema/omg_shared_ca_governance.xsd">
+     xsi:noNamespaceSchemaLocation="https://www.omg.org/spec/DDS-SECURITY/20170901/omg_shared_ca_governance.xsd">
     <domain_access_rules>
         <!-- Domain 0 is an "open domain" -->
         <domain_rule>
@@ -44,7 +41,7 @@ Content-Type: text/plain
     </domain_access_rules>
 </dds>
 
-------0BB13B944CA22CF9D9DF1B3258DCB4E6
+------0A9BE55DAC584B76B00CD5037EBCFE34
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -74,16 +71,16 @@ MQswCQYDVQQIDAJNQTEPMA0GA1UEBwwGQm9zdG9uMSUwIwYDVQQKDBxPTUctRERT
 IFNJRyAoUGVybWlzc2lvbnMgQ0EpMRowGAYDVQQDDBFPTUctRERTIChQZXJtIENB
 KTEaMBgGCSqGSIb3DQEJARYLZGRzQG9tZy5vcmcCCQC/wQzInnMqEjANBglghkgB
 ZQMEAgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJ
-BTEPFw0xNzEyMDYwMTAyMTRaMC8GCSqGSIb3DQEJBDEiBCAfJxVdrKQ0CIuwyGK2
-aHQrV2ZRZOTCNFf5r6rCpqi4fTB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFlAwQB
+BTEPFw0xODAzMTQxNjQxMTBaMC8GCSqGSIb3DQEJBDEiBCAtNDpqjls/sLBn34Mw
+LQ8DeWGIKxZSxDS0zUmQh6xR+zB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFlAwQB
 KjALBglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqGSIb3
 DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIBKDAN
-BgkqhkiG9w0BAQEFAASCAQBWUJxKo3G0MHn1BPGvKf1egW5Mc1QVP5yKzsEZFp5n
-DubZyXjr58M6ir/h1ADYGUY+6XfEYo+JtumUdx3MYC+jp96vqr302Z0VayK63cGo
-61bDpsi2VX2lSLwuERWC54eZZdHEZ7knipFUXa3ItyaXTvDJ46APKWXieKUKq/K7
-Ky4ieJgvgRP5i5ZU5Q/COTW4uuCM+u9RS22BIsVebMEFeawDuwT+/eGYUEN3+7jg
-ruXkN0PMdqGun3L9mf11mrB9AEWQkQ6fFuhEiJqNjSq4/7bjaZHIVChWbs6FakmQ
-X1A5DxJNiwCCgyg92Y/br3EZjKAB3QzfH1UAy8ZutrxS
+BgkqhkiG9w0BAQEFAASCAQAPxhXluztqiRmaCY14RSqfO8C2Y6NA0AJ0So+oFHlr
+MAqkI886SftMoq6g1Ph2uALrp3WEdluSkf3MFCBIZ+bdErKSMRJC5Wzb48EAUCXT
+wnaxI2GBTUfiXN/kBEKBtPOTlhXMh2KatfB0zhS7movILdwWrbJlCWMbuQktxQiM
+v+PBAtfIJREIrg3vHbguYOR57d+EbMgkPl6fBReIabypareQNq6Qqt3C2m1JukCP
+aaNq7Rz5hafcm3nhHkkQLhixSTKYqcl8i5MqOljMyV2vtVX+32LzzwMHSUSrkfEk
+8Ut9sib/LbI7XRAWRkI/Dj32sPuo6vY59a5Z2Q9K31zp
 
-------0BB13B944CA22CF9D9DF1B3258DCB4E6--
+------0A9BE55DAC584B76B00CD5037EBCFE34--
 
