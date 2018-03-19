@@ -68,11 +68,6 @@ TransportImpl::shutdown()
 
   // Tell our subclass about the "shutdown event".
   this->shutdown_i();
-
-  // {
-  //   GuardType guard(this->lock_);
-  //   this->reactor_task_.reset();
-  // }
 }
 
 

@@ -31,7 +31,6 @@ public:
   int reset(TcpConnection* old_connection, TcpConnection* new_connection);
 
   ACE_Reactor* get_reactor();
-  TransportReactorTask_rch reactor_task();
 
   bool gracefully_disconnected();
 
