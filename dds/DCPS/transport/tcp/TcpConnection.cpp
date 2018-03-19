@@ -1008,9 +1008,9 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
   DBG_ENTRY_LVL("TcpConnection","spawn_reconnect_thread",6);
   GuardType guard(this->reconnect_lock_);
   if (!shutdown_) {
-
-    TransportImpl& transport_impl = this->link_->impl();
-    transport_impl._add_ref();
+    // Make sure the associated transport_config outlives the connection object.
+    TransportInst& transport_config = this->link_->impl().config();
+    transport_config._add_ref();
     // add the reference count to be picked up from the new thread
     this->_add_ref();
     if (ACE_Thread_Manager::instance()->spawn(&reconnect_thread_fun,
@@ -1019,7 +1019,7 @@ OpenDDS::DCPS::TcpConnection::spawn_reconnect_thread()
                                               &reconnect_thread_) == -1){
       // we need to decrement the reference count when thread creation fails.
       this->_remove_ref();
-      transport_impl._remove_ref();
+      transport_config._remove_ref();
     }
   }
 }
@@ -1036,10 +1036,10 @@ OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
   ACE_OS::sigfillset(&set);
   ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
 
-  // Make sure the associated transport_impl outlives the connection object.
-  TransportImpl_rch transport_impl;
+  // Make sure the associated transport_config outlives the connection object.
+  RcHandle<TransportInst> transport_config;
   TcpConnection_rch connection(static_cast<TcpConnection*>(arg), keep_count());
-  transport_impl = TransportImpl_rch(&connection->link_->impl(), keep_count());
+  transport_config = RcHandle<TransportInst>(&connection->link_->impl().config(), keep_count());
 
   if (connection->reconnect() == -1) {
     connection->tear_link();
