@@ -332,13 +332,13 @@ namespace dds
   stringSeq::element_const_iterator stringSeq::
   begin_element () const
   {
-    return element_.cbegin ();
+    return element_.begin ();
   }
 
   stringSeq::element_const_iterator stringSeq::
   end_element () const
   {
-    return element_.cend ();
+    return element_.end ();
   }
 
   void stringSeq::
@@ -4753,13 +4753,13 @@ namespace dds
   qosProfile::datareader_qos_const_iterator qosProfile::
   begin_datareader_qos () const
   {
-    return datareader_qos_.cbegin ();
+    return datareader_qos_.begin ();
   }
 
   qosProfile::datareader_qos_const_iterator qosProfile::
   end_datareader_qos () const
   {
-    return datareader_qos_.cend ();
+    return datareader_qos_.end ();
   }
 
   void qosProfile::
@@ -4790,13 +4790,13 @@ namespace dds
   qosProfile::datawriter_qos_const_iterator qosProfile::
   begin_datawriter_qos () const
   {
-    return datawriter_qos_.cbegin ();
+    return datawriter_qos_.begin ();
   }
 
   qosProfile::datawriter_qos_const_iterator qosProfile::
   end_datawriter_qos () const
   {
-    return datawriter_qos_.cend ();
+    return datawriter_qos_.end ();
   }
 
   void qosProfile::
@@ -4827,13 +4827,13 @@ namespace dds
   qosProfile::topic_qos_const_iterator qosProfile::
   begin_topic_qos () const
   {
-    return topic_qos_.cbegin ();
+    return topic_qos_.begin ();
   }
 
   qosProfile::topic_qos_const_iterator qosProfile::
   end_topic_qos () const
   {
-    return topic_qos_.cend ();
+    return topic_qos_.end ();
   }
 
   void qosProfile::
@@ -4864,13 +4864,13 @@ namespace dds
   qosProfile::domainparticipant_qos_const_iterator qosProfile::
   begin_domainparticipant_qos () const
   {
-    return domainparticipant_qos_.cbegin ();
+    return domainparticipant_qos_.begin ();
   }
 
   qosProfile::domainparticipant_qos_const_iterator qosProfile::
   end_domainparticipant_qos () const
   {
-    return domainparticipant_qos_.cend ();
+    return domainparticipant_qos_.end ();
   }
 
   void qosProfile::
@@ -4901,13 +4901,13 @@ namespace dds
   qosProfile::publisher_qos_const_iterator qosProfile::
   begin_publisher_qos () const
   {
-    return publisher_qos_.cbegin ();
+    return publisher_qos_.begin ();
   }
 
   qosProfile::publisher_qos_const_iterator qosProfile::
   end_publisher_qos () const
   {
-    return publisher_qos_.cend ();
+    return publisher_qos_.end ();
   }
 
   void qosProfile::
@@ -4938,13 +4938,13 @@ namespace dds
   qosProfile::subscriber_qos_const_iterator qosProfile::
   begin_subscriber_qos () const
   {
-    return subscriber_qos_.cbegin ();
+    return subscriber_qos_.begin ();
   }
 
   qosProfile::subscriber_qos_const_iterator qosProfile::
   end_subscriber_qos () const
   {
-    return subscriber_qos_.cend ();
+    return subscriber_qos_.end ();
   }
 
   void qosProfile::
@@ -5056,13 +5056,13 @@ namespace dds
   qosProfile_seq::qos_profile_const_iterator qosProfile_seq::
   begin_qos_profile () const
   {
-    return qos_profile_.cbegin ();
+    return qos_profile_.begin ();
   }
 
   qosProfile_seq::qos_profile_const_iterator qosProfile_seq::
   end_qos_profile () const
   {
-    return qos_profile_.cend ();
+    return qos_profile_.end ();
   }
 
   void qosProfile_seq::
