@@ -5,8 +5,8 @@
  * when the handlers are recompiled.
  *
  * If you find errors or feel that there are bugfixes to be made,
- * please contact the current XSC maintainer:
- *             Will Otte <wotte@dre.vanderbilt.edu>
+ * please report this to the XSC project at
+ * https://github.com/DOCGroup/XSC
  */
 #include "dds_qos.hpp"
 
@@ -332,13 +332,13 @@ namespace dds
   stringSeq::element_const_iterator stringSeq::
   begin_element () const
   {
-    return element_.begin ();
+    return element_.cbegin ();
   }
 
   stringSeq::element_const_iterator stringSeq::
   end_element () const
   {
-    return element_.end ();
+    return element_.cend ();
   }
 
   void stringSeq::
@@ -4753,13 +4753,13 @@ namespace dds
   qosProfile::datareader_qos_const_iterator qosProfile::
   begin_datareader_qos () const
   {
-    return datareader_qos_.begin ();
+    return datareader_qos_.cbegin ();
   }
 
   qosProfile::datareader_qos_const_iterator qosProfile::
   end_datareader_qos () const
   {
-    return datareader_qos_.end ();
+    return datareader_qos_.cend ();
   }
 
   void qosProfile::
@@ -4790,13 +4790,13 @@ namespace dds
   qosProfile::datawriter_qos_const_iterator qosProfile::
   begin_datawriter_qos () const
   {
-    return datawriter_qos_.begin ();
+    return datawriter_qos_.cbegin ();
   }
 
   qosProfile::datawriter_qos_const_iterator qosProfile::
   end_datawriter_qos () const
   {
-    return datawriter_qos_.end ();
+    return datawriter_qos_.cend ();
   }
 
   void qosProfile::
@@ -4827,13 +4827,13 @@ namespace dds
   qosProfile::topic_qos_const_iterator qosProfile::
   begin_topic_qos () const
   {
-    return topic_qos_.begin ();
+    return topic_qos_.cbegin ();
   }
 
   qosProfile::topic_qos_const_iterator qosProfile::
   end_topic_qos () const
   {
-    return topic_qos_.end ();
+    return topic_qos_.cend ();
   }
 
   void qosProfile::
@@ -4864,13 +4864,13 @@ namespace dds
   qosProfile::domainparticipant_qos_const_iterator qosProfile::
   begin_domainparticipant_qos () const
   {
-    return domainparticipant_qos_.begin ();
+    return domainparticipant_qos_.cbegin ();
   }
 
   qosProfile::domainparticipant_qos_const_iterator qosProfile::
   end_domainparticipant_qos () const
   {
-    return domainparticipant_qos_.end ();
+    return domainparticipant_qos_.cend ();
   }
 
   void qosProfile::
@@ -4901,13 +4901,13 @@ namespace dds
   qosProfile::publisher_qos_const_iterator qosProfile::
   begin_publisher_qos () const
   {
-    return publisher_qos_.begin ();
+    return publisher_qos_.cbegin ();
   }
 
   qosProfile::publisher_qos_const_iterator qosProfile::
   end_publisher_qos () const
   {
-    return publisher_qos_.end ();
+    return publisher_qos_.cend ();
   }
 
   void qosProfile::
@@ -4938,13 +4938,13 @@ namespace dds
   qosProfile::subscriber_qos_const_iterator qosProfile::
   begin_subscriber_qos () const
   {
-    return subscriber_qos_.begin ();
+    return subscriber_qos_.cbegin ();
   }
 
   qosProfile::subscriber_qos_const_iterator qosProfile::
   end_subscriber_qos () const
   {
-    return subscriber_qos_.end ();
+    return subscriber_qos_.cend ();
   }
 
   void qosProfile::
@@ -5056,13 +5056,13 @@ namespace dds
   qosProfile_seq::qos_profile_const_iterator qosProfile_seq::
   begin_qos_profile () const
   {
-    return qos_profile_.begin ();
+    return qos_profile_.cbegin ();
   }
 
   qosProfile_seq::qos_profile_const_iterator qosProfile_seq::
   end_qos_profile () const
   {
-    return qos_profile_.end ();
+    return qos_profile_.cend ();
   }
 
   void qosProfile_seq::
@@ -5357,7 +5357,7 @@ namespace dds
 
       if (n == ACE_TEXT("element"))
       {
-        ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex>  t (new ::XMLSchema::string<ACE_TCHAR> (e));
+        element_value_type t (new ::XMLSchema::string<ACE_TCHAR> (e));
         add_element (t);
       }
 
@@ -6609,37 +6609,37 @@ namespace dds
 
       if (n == ACE_TEXT("datareader_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex>  t (new ::dds::datareaderQos (e));
+        datareader_qos_value_type t (new ::dds::datareaderQos (e));
         add_datareader_qos (t);
       }
 
       else if (n == ACE_TEXT("datawriter_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex>  t (new ::dds::datawriterQos (e));
+        datawriter_qos_value_type t (new ::dds::datawriterQos (e));
         add_datawriter_qos (t);
       }
 
       else if (n == ACE_TEXT("topic_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex>  t (new ::dds::topicQos (e));
+        topic_qos_value_type t (new ::dds::topicQos (e));
         add_topic_qos (t);
       }
 
       else if (n == ACE_TEXT("domainparticipant_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex>  t (new ::dds::domainparticipantQos (e));
+        domainparticipant_qos_value_type t (new ::dds::domainparticipantQos (e));
         add_domainparticipant_qos (t);
       }
 
       else if (n == ACE_TEXT("publisher_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex>  t (new ::dds::publisherQos (e));
+        publisher_qos_value_type t (new ::dds::publisherQos (e));
         add_publisher_qos (t);
       }
 
       else if (n == ACE_TEXT("subscriber_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex>  t (new ::dds::subscriberQos (e));
+        subscriber_qos_value_type t (new ::dds::subscriberQos (e));
         add_subscriber_qos (t);
       }
 
@@ -6686,7 +6686,7 @@ namespace dds
 
       if (n == ACE_TEXT("qos_profile"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex>  t (new ::dds::qosProfile (e));
+        qos_profile_value_type t (new ::dds::qosProfile (e));
         add_qos_profile (t);
       }
 
@@ -13754,7 +13754,7 @@ namespace dds
       virtual ::dds::Writer::destinationOrderKind,
       virtual ::dds::Writer::historyQosPolicy,
       virtual ::dds::Writer::historyKind,
-      //virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::positiveInteger, ACE_TCHAR >,
+      virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::positiveInteger, ACE_TCHAR >,
       virtual ::dds::Writer::resourceLimitsQosPolicy,
       virtual ::dds::Writer::userDataQosPolicy,
       virtual ::dds::Writer::ownershipQosPolicy,
@@ -13779,10 +13779,10 @@ namespace dds
       virtual ::dds::Writer::partitionQosPolicy,
       virtual ::dds::Writer::stringSeq,
       virtual ::dds::Writer::groupDataQosPolicy,
-      virtual ::dds::Writer::subscriberQos
-      //virtual ::XSCRT::Writer<ACE_TCHAR>
+      virtual ::dds::Writer::subscriberQos,
+      virtual ::XSCRT::Writer<ACE_TCHAR>
       {
-        W (::XSCRT::XML::Element<ACE_TCHAR>& e)
+        explicit W (::XSCRT::XML::Element<ACE_TCHAR>& e)
         : ::XSCRT::Writer<ACE_TCHAR> (e)
         {
         }
