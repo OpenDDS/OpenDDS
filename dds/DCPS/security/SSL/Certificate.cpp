@@ -251,7 +251,7 @@ namespace OpenDDS {
       int Certificate::subject_name_digest(std::vector<unsigned char>& dst) const
       {
         int result = 1;
-        unsigned int len = 0;
+        int len = 0;
         unsigned char* buffer = NULL;
 
         dst.clear();
@@ -260,7 +260,7 @@ namespace OpenDDS {
 
           /* Do not free name! */
           X509_NAME* name = X509_get_subject_name(x_);
-          if (name && (len = i2d_X509_NAME(name, &buffer)) < 0) {
+          if (!name || (len = i2d_X509_NAME(name, &buffer)) < 0) {
             return -1;
           }
 
