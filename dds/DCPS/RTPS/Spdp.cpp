@@ -282,12 +282,13 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 
     if (security_config_) {
       bool has_security_data =
-        ParameterListConverter::from_param_list(plist, dp.identity_token_, dp.permissions_token_, dp.property_qos_, dp.security_info_) < 0;
+        ParameterListConverter::from_param_list(plist, dp.identity_token_, dp.permissions_token_, dp.property_qos_, dp.security_info_) == 0;
 
       if (has_security_data == false) {
         if (participant_sec_attr_.allow_unauthenticated_participants == false) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
-            ACE_TEXT("Incompatible security attributes in discovered participant\n")));
+            ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
+            std::string(DCPS::GuidConverter(guid)).c_str()));
             participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
           match_unauthenticated(guid, dp);
@@ -297,7 +298,8 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         if (dp.auth_state_ == AS_UNAUTHENTICATED) {
           if (participant_sec_attr_.allow_unauthenticated_participants == false) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::data_received - ")
-              ACE_TEXT("Incompatible security attributes in discovered participant\n")));
+              ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
+              std::string(DCPS::GuidConverter(guid)).c_str()));
             participants_.erase(guid);
           } else { // allow_unauthenticated_participants == true
             match_unauthenticated(guid, dp);
