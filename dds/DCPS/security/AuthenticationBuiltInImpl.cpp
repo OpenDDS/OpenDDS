@@ -1025,6 +1025,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     }
   }
 
+// TODO Reinstate this check after the DDS demo.
+#if 0
   /* Validate participant_guid in c.pdata */
 
   const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
@@ -1038,6 +1040,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   if (! validate_topic_data_guid(cpdata, hash, ex)) {
       return Failure;
   }
+#endif
 
   /* Compute/Store the Diffie-Hellman shared-secret */
 
