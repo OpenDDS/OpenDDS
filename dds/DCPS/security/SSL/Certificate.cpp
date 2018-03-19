@@ -260,17 +260,20 @@ namespace OpenDDS {
 
           /* Do not free name! */
           X509_NAME* name = X509_get_subject_name(x_);
-          if (name) {
-
-            buffer = new unsigned char[EVP_MAX_MD_SIZE];
-            if (X509_NAME_digest(name, EVP_sha256(), buffer, &len) == 1) {
-              dst.insert(dst.begin(), buffer, buffer + len);
-              result = 0;
-            }
+          if (name && (len = i2d_X509_NAME(name, &buffer)) < 0) {
+            return -1;
           }
-        }
 
-        if (buffer) delete[] buffer;
+          DDS::OctetSeq in(len, len, buffer);
+          std::vector<const DDS::OctetSeq*> src;
+          src.push_back(&in);
+          DDS::OctetSeq dstSeq;
+          SSL::hash(src, dstSeq);
+          OPENSSL_free(buffer);
+          dst.resize(dstSeq.length());
+          std::memcpy(&dst[0], dstSeq.get_buffer(), dstSeq.length());
+          return 0;
+        }
 
         return result;
       }
