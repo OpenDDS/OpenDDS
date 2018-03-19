@@ -336,6 +336,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
 
   encoded.length(mb.length());
   std::memcpy(encoded.get_buffer(), mb.rd_ptr(), mb.length());
+  secure_submessages_.resize(0);
 }
 
 bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
