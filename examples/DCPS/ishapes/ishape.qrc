@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
  <qresource>
      <file>images/logo.png</file>
+     <file>images/logo_secure_beta.png</file>
  </qresource>
  </RCC>
