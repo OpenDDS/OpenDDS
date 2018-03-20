@@ -57,8 +57,8 @@ public:
   void request_ack_received(const ReceivedDataSample& sample);
   void drop_pending_request_acks();
 
-  TcpSendStrategy* send_strategy();
-  TcpReceiveStrategy* receive_strategy();
+  TcpSendStrategy_rch send_strategy();
+  TcpReceiveStrategy_rch receive_strategy();
 
 protected:
 
