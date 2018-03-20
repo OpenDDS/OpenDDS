@@ -133,7 +133,7 @@ namespace OpenDDS {
         }
         ~verify_rsassa_pss_mgf1_sha256_impl()
         {
-          if (md_ctx) EVP_MD_CTX_free(md_ctx);
+          EVP_MD_CTX_free(md_ctx);
         }
 
         int operator()(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*>& expected_contents)
@@ -208,7 +208,6 @@ namespace OpenDDS {
       int Certificate::subject_name_to_str(std::string& dst, unsigned long flags) const
       {
         int result = 1, len = 0;
-        char* tmp = NULL;
 
         dst.clear();
 
@@ -224,10 +223,12 @@ namespace OpenDDS {
               len = X509_NAME_print_ex(buffer, name, 0, flags);
               if (len > 0) {
 
-                tmp = new char[len + 1]; /* Add 1 for null-terminator */
-                len = BIO_gets(buffer, tmp, len + 1 /* Writes up to len-1 and adds null-terminator */);
+                std::vector<char> tmp(len + 1); // BIO_gets will add null hence +1
+                len = BIO_gets(buffer, &tmp[0], len + 1);
                 if (len > 0) {
-                  dst = tmp;
+                  std::copy(tmp.begin(),
+                            tmp.end() - 1, // But... string inserts a null so it's not needed
+                            std::back_inserter(dst));
                   result = 0;
 
                 } else {
@@ -242,8 +243,6 @@ namespace OpenDDS {
             }
           }
         }
-
-        if (tmp) delete[] tmp;
 
         return result;
       }
@@ -322,8 +321,8 @@ namespace OpenDDS {
 
       void Certificate::load_cert_bytes(const std::string& path)
       {
-        std::vector<unsigned char> chunks;
-        unsigned char chunk[32] = {0};
+        std::vector<CORBA::Octet> chunks;
+        CORBA::Octet chunk[32] = {0};
 
         FILE* fp = fopen(path.c_str(), "r");
         if (fp) {
@@ -416,7 +415,7 @@ namespace OpenDDS {
 
         } while(0);
 
-        if (filebuf) BIO_free(filebuf);
+        BIO_free(filebuf);
 
         return result;
       }
