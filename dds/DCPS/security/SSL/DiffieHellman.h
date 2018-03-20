@@ -27,8 +27,6 @@ namespace OpenDDS {
 
         virtual ~DHAlgorithm();
 
-        virtual DHAlgorithm& operator= (const DHAlgorithm& rhs);
-
         virtual int init() = 0;
         virtual int pub_key(DDS::OctetSeq& dst) = 0;
         virtual int gen_shared_secret(const DDS::OctetSeq& pub_key)
