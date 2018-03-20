@@ -5,6 +5,9 @@
 
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/Authentication/LocalCredentialData.h"
+#include <iterator>
+#include <fstream>
+#include <cstring>
 
 using DDS::Property_t;
 using DDS::PropertySeq;
@@ -34,14 +37,25 @@ struct LocalAuthCredentialDataTest : public ::testing::Test
 
 TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
 {
+  std::string path("permissions/Permissions_JoinDomain_OCI.p7s");
+
   Property_t perms;
   perms.name = "dds.sec.access.permissions";
-  perms.value = "file:permissions/Permissions_JoinDomain_OCI.p7s";
+  perms.value = ("file:" + path).c_str();
   perms.propagate = false;
   add_property(perms);
 
   credential_data.load(properties);
-  ASSERT_TRUE(1); // TODO
+  std::ifstream expected_file(path);
+
+  std::vector<char> expected_bytes((std::istreambuf_iterator<char>(expected_file)),
+                                   std::istreambuf_iterator<char>());
+
+  const DDS::OctetSeq& access_bytes = credential_data.get_access_permissions();
+
+  ASSERT_EQ(0, std::memcmp(access_bytes.get_buffer(),
+                           reinterpret_cast<const CORBA::Octet*>(&expected_bytes[0]),
+                           access_bytes.length()));
 }
 
 TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)

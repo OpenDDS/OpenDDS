@@ -115,7 +115,9 @@ namespace OpenDDS {
         }
       }
 
-      participant_pkey_.reset(new SSL::PrivateKey(pkey_uri, password));
+      if (pkey_uri != "") {
+        participant_pkey_.reset(new SSL::PrivateKey(pkey_uri, password));
+      }
     }
 
     void LocalAuthCredentialData::load_permissions_file(const std::string& path)
