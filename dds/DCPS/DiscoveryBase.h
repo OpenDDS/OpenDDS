@@ -36,6 +36,7 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan) DatareaderCryptoHandleMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan) EndpointSecurityAttributesMap;
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoHandle, DCPS::GUID_tKeyLessThan) DatawriterCryptoHandleMap;
 
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
@@ -326,6 +327,7 @@ namespace OpenDDS {
                   ex.code, ex.minor_code, ex.message.in()));
             }
             local_writer_crypto_handles_[rid] = handle;
+            local_writer_security_attribs_[rid] = pb.security_attribs_;
           }
         }
 
@@ -423,6 +425,7 @@ namespace OpenDDS {
                   ex.code, ex.minor_code, ex.message.in()));
             }
             local_reader_crypto_handles_[rid] = handle;
+            local_reader_security_attribs_[rid] = sb.security_attribs_;
           }
         }
 
@@ -843,7 +846,10 @@ namespace OpenDDS {
               if (iter != local_reader_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
                 DDS::Security::DatareaderCryptoHandle drch = iter->second;
                 remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
-                create_and_send_datareader_crypto_tokens(drch, reader, remote_writer_crypto_handles_[writer], writer);
+                EndpointSecurityAttributesMap::const_iterator siter = local_reader_security_attribs_.find(reader);
+                if (siter != local_reader_security_attribs_.end() && siter->second.is_submessage_protected) { // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
+                  create_and_send_datareader_crypto_tokens(drch, reader, remote_writer_crypto_handles_[writer], writer);
+                }
               }
             }
             if (call_writer) {
@@ -853,7 +859,10 @@ namespace OpenDDS {
               if (iter != local_writer_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
                 DDS::Security::DatawriterCryptoHandle dwch = iter->second;
                 remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, false); // TODO: determine correct use of relay_only
-                create_and_send_datawriter_crypto_tokens(dwch, writer, remote_reader_crypto_handles_[reader], reader);
+                EndpointSecurityAttributesMap::const_iterator siter = local_writer_security_attribs_.find(writer);
+                if (siter != local_writer_security_attribs_.end() && (siter->second.is_submessage_protected || siter->second.is_payload_protected)) {
+                  create_and_send_datawriter_crypto_tokens(dwch, writer, remote_reader_crypto_handles_[reader], reader);
+                }
               }
             }
           }
@@ -1099,6 +1108,9 @@ namespace OpenDDS {
 
       DatareaderCryptoHandleMap local_reader_crypto_handles_;
       DatawriterCryptoHandleMap local_writer_crypto_handles_;
+
+      EndpointSecurityAttributesMap local_reader_security_attribs_;
+      EndpointSecurityAttributesMap local_writer_security_attribs_;
 
       DatareaderCryptoHandleMap remote_reader_crypto_handles_;
       DatawriterCryptoHandleMap remote_writer_crypto_handles_;
