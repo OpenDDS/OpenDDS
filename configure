@@ -23,7 +23,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.4.6';
+my $doc_tao_version = '6.4.7';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -1004,7 +1004,7 @@ if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
   if (!exists $opts{'glib'}) {
     die "ERROR: --glib is required for --wireshark and --wireshark_cmake\n";
   }
-  
+
   if (exists $opts{'wireshark_cmake'}) {
 
     if (exists $opts{'wireshark'}) {
