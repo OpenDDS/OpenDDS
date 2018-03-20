@@ -51,7 +51,7 @@ namespace OpenDDS {
 
         int subject_name_to_str(std::string& dst, unsigned long flags = XN_FLAG_ONELINE) const;
 
-        int subject_name_digest(std::vector<unsigned char>& dst) const;
+        int subject_name_digest(std::vector<CORBA::Octet>& dst) const;
 
         int algorithm(std::string& dst) const;
 

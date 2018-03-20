@@ -248,31 +248,30 @@ namespace OpenDDS {
         return result;
       }
 
-      int Certificate::subject_name_digest(std::vector<unsigned char>& dst) const
+      int Certificate::subject_name_digest(std::vector<CORBA::Octet>& dst) const
       {
-        int result = 1;
-        unsigned int len = 0;
-        unsigned char* buffer = NULL;
-
         dst.clear();
 
-        if (x_) {
+        if (! x_) return 1;
 
-          /* Do not free name! */
-          X509_NAME* name = X509_get_subject_name(x_);
-          if (name) {
-
-            buffer = new unsigned char[EVP_MAX_MD_SIZE];
-            if (X509_NAME_digest(name, EVP_sha256(), buffer, &len) == 1) {
-              dst.insert(dst.begin(), buffer, buffer + len);
-              result = 0;
-            }
-          }
+        /* Do not free name! */
+        X509_NAME* name = X509_get_subject_name(x_);
+        if (NULL == name) {
+          OPENDDS_SSL_LOG_ERR("X509_get_subject_name failed");
+          return 1;
         }
 
-        if (buffer) delete[] buffer;
+        std::vector<CORBA::Octet> tmp(EVP_MAX_MD_SIZE);
 
-        return result;
+        unsigned int len = 0;
+        if (1 != X509_NAME_digest(name, EVP_sha256(), &tmp[0], &len)) {
+          OPENDDS_SSL_LOG_ERR("X509_NAME_digest failed");
+          return 1;
+        }
+
+        dst.insert(dst.begin(), tmp.begin(), tmp.begin() + len);
+
+        return 0;
       }
 
       int Certificate::algorithm(std::string& dst) const
