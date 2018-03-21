@@ -310,7 +310,9 @@ RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 
 template<typename T>
 RcHandle<T> rchandle_from(T* pointer)
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   assert(pointer == 0 || pointer->ref_count() > 0);
+#endif
   return RcHandle<T>(pointer, inc_count());
 }
 

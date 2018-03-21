@@ -5,10 +5,15 @@
  * when the handlers are recompiled.
  *
  * If you find errors or feel that there are bugfixes to be made,
- * please contact the current XSC maintainer:
- *             Will Otte <wotte@dre.vanderbilt.edu>
+ * please report this to the XSC project at
+ * https://github.com/DOCGroup/XSC
  */
 #include "dds_qos.hpp"
+
+#include "ace/Null_Mutex.h"
+#include "ace/TSS_T.h"
+#include "ace/ace_wchar.h"
+#include "ace/Singleton.h"
 
 namespace dds
 {
@@ -5357,7 +5362,7 @@ namespace dds
 
       if (n == ACE_TEXT("element"))
       {
-        ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex>  t (new ::XMLSchema::string<ACE_TCHAR> (e));
+        element_value_type t (new ::XMLSchema::string<ACE_TCHAR> (e));
         add_element (t);
       }
 
@@ -6609,37 +6614,37 @@ namespace dds
 
       if (n == ACE_TEXT("datareader_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex>  t (new ::dds::datareaderQos (e));
+        datareader_qos_value_type t (new ::dds::datareaderQos (e));
         add_datareader_qos (t);
       }
 
       else if (n == ACE_TEXT("datawriter_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex>  t (new ::dds::datawriterQos (e));
+        datawriter_qos_value_type t (new ::dds::datawriterQos (e));
         add_datawriter_qos (t);
       }
 
       else if (n == ACE_TEXT("topic_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex>  t (new ::dds::topicQos (e));
+        topic_qos_value_type t (new ::dds::topicQos (e));
         add_topic_qos (t);
       }
 
       else if (n == ACE_TEXT("domainparticipant_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex>  t (new ::dds::domainparticipantQos (e));
+        domainparticipant_qos_value_type t (new ::dds::domainparticipantQos (e));
         add_domainparticipant_qos (t);
       }
 
       else if (n == ACE_TEXT("publisher_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex>  t (new ::dds::publisherQos (e));
+        publisher_qos_value_type t (new ::dds::publisherQos (e));
         add_publisher_qos (t);
       }
 
       else if (n == ACE_TEXT("subscriber_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex>  t (new ::dds::subscriberQos (e));
+        subscriber_qos_value_type t (new ::dds::subscriberQos (e));
         add_subscriber_qos (t);
       }
 
@@ -6686,7 +6691,7 @@ namespace dds
 
       if (n == ACE_TEXT("qos_profile"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex>  t (new ::dds::qosProfile (e));
+        qos_profile_value_type t (new ::dds::qosProfile (e));
         add_qos_profile (t);
       }
 
@@ -13754,7 +13759,7 @@ namespace dds
       virtual ::dds::Writer::destinationOrderKind,
       virtual ::dds::Writer::historyQosPolicy,
       virtual ::dds::Writer::historyKind,
-      //virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::positiveInteger, ACE_TCHAR >,
+      // virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::positiveInteger, ACE_TCHAR >,
       virtual ::dds::Writer::resourceLimitsQosPolicy,
       virtual ::dds::Writer::userDataQosPolicy,
       virtual ::dds::Writer::ownershipQosPolicy,
@@ -13782,7 +13787,7 @@ namespace dds
       virtual ::dds::Writer::subscriberQos
       //virtual ::XSCRT::Writer<ACE_TCHAR>
       {
-        W (::XSCRT::XML::Element<ACE_TCHAR>& e)
+        explicit W (::XSCRT::XML::Element<ACE_TCHAR>& e)
         : ::XSCRT::Writer<ACE_TCHAR> (e)
         {
         }

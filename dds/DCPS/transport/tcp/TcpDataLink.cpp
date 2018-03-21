@@ -66,11 +66,11 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 
   DataLink::pre_stop_i();
 
-  TcpReceiveStrategy * rs = this->receive_strategy();
+  TcpReceiveStrategy_rch rs = this->receive_strategy();
 
   TcpConnection_rch connection(this->connection_.lock());
 
-  if (rs != NULL) {
+  if (rs) {
     // If we received the GRACEFUL_DISCONNECT message from peer before we
     // initiate the disconnecting of the datalink, then we will not send
     // the GRACEFUL_DISCONNECT message to the peer.
@@ -436,16 +436,16 @@ OpenDDS::DCPS::TcpDataLink::drop_pending_request_acks()
   pending_request_acks_.clear();
 }
 
-OpenDDS::DCPS::TcpSendStrategy*
+OpenDDS::DCPS::TcpSendStrategy_rch
 OpenDDS::DCPS::TcpDataLink::send_strategy()
 {
-  return static_cast<OpenDDS::DCPS::TcpSendStrategy*>(send_strategy_.in());
+  return static_rchandle_cast<OpenDDS::DCPS::TcpSendStrategy>(send_strategy_);
 }
 
-OpenDDS::DCPS::TcpReceiveStrategy*
+OpenDDS::DCPS::TcpReceiveStrategy_rch
 OpenDDS::DCPS::TcpDataLink::receive_strategy()
 {
-  return static_cast<OpenDDS::DCPS::TcpReceiveStrategy*>(receive_strategy_.in());
+  return static_rchandle_cast<OpenDDS::DCPS::TcpReceiveStrategy>(receive_strategy_);
 }
 
 

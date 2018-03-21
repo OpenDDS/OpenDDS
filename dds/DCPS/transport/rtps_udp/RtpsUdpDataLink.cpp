@@ -683,8 +683,9 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   }
 
   const RepoId pub_id = element->publication_id();
-
+  GUIDSeq_var peers = peer_ids(pub_id);
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+  bool requires_inline_qos = this->requires_inline_qos(peers);
 
   RTPS::SubmessageSeq subm;
 
@@ -737,7 +738,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
       data.reset(msg->cont()->duplicate());
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
       RtpsSampleHeader::populate_data_control_submessages(
-                subm, *tsce, requires_inline_qos(pub_id));
+                subm, *tsce, requires_inline_qos);
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples(rw, tsce->header(), msg->cont());
       element->data_delivered();
@@ -757,7 +758,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, requires_inline_qos(pub_id));
+              subm, *dsle, requires_inline_qos);
     durable = dsle->get_header().historic_sample_;
 
   } else if (tce) {  // Customized data message
@@ -766,7 +767,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, requires_inline_qos(pub_id));
+              subm, *dsle, requires_inline_qos);
     durable = dsle->get_header().historic_sample_;
 
   } else {
@@ -850,14 +851,12 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
   }
 }
 
-bool
-RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
+bool RtpsUdpDataLink::requires_inline_qos(const GUIDSeq_var& peers)
 {
   if (force_inline_qos_) {
     // Force true for testing purposes
     return true;
   } else {
-    const GUIDSeq_var peers = peer_ids(pub_id);
     if (!peers.ptr()) {
       return false;
     }
