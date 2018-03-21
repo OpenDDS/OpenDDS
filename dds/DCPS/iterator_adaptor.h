@@ -3,8 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef DDS_DCPS_ITERATOR_ADAPTORS_H
-#define DDS_DCPS_ITERATOR_ADAPTORS_H
+#ifndef DDS_DCPS_ITERATOR_ADAPTOR_H
+#define DDS_DCPS_ITERATOR_ADAPTOR_H
 
 #include "tao/Unbounded_Value_Sequence_T.h"
 #include <iterator>
@@ -16,7 +16,7 @@ namespace OpenDDS {
     class ace_unbounded_value_sequence_iterator;
 
     template <typename T>
-    ace_unbounded_value_sequence_iterator<T> sequence_begin(TAO::unbounded_value_sequence<T>& sequence)
+    ace_unbounded_value_sequence_iterator<T> sequence_begin(T& sequence)
     {
       ace_unbounded_value_sequence_iterator<T> iter(sequence);
       iter.current_ = 0;
@@ -24,7 +24,7 @@ namespace OpenDDS {
     }
 
     template <typename T>
-    ace_unbounded_value_sequence_iterator<T> sequence_end(TAO::unbounded_value_sequence<T>& sequence)
+    ace_unbounded_value_sequence_iterator<T> sequence_end(T& sequence)
     {
       ace_unbounded_value_sequence_iterator<T> iter(sequence);
       iter.current_ = sequence.length();
@@ -36,17 +36,18 @@ namespace OpenDDS {
     {
     public:
       typedef ace_unbounded_value_sequence_iterator Iter_Type;
-      typedef TAO::unbounded_value_sequence<T> Ace_Sequence_Type;
-      typedef typename Ace_Sequence_Type::value_type Ace_Value_Type;
 
-      friend Iter_Type sequence_begin<>(Ace_Sequence_Type&);
-      friend Iter_Type sequence_end<>(Ace_Sequence_Type&);
+      template <typename U>
+      friend ace_unbounded_value_sequence_iterator<U> sequence_begin(U&);
+
+      template <typename U>
+      friend ace_unbounded_value_sequence_iterator<U> sequence_end(U&);
 
       typedef std::random_access_iterator_tag iterator_category;
-      typedef Ace_Value_Type value_type;
-      typedef CORBA::ULong difference_type;
-      typedef Ace_Value_Type* pointer;
-      typedef Ace_Value_Type& reference;
+      typedef typename T::value_type value_type;
+      typedef int difference_type;
+      typedef typename T::value_type* pointer;
+      typedef typename T::value_type& reference;
 
       typedef std::iterator_traits<Iter_Type> Traits_Type;
       typedef typename Traits_Type::iterator_category Category;
@@ -58,13 +59,19 @@ namespace OpenDDS {
       ace_unbounded_value_sequence_iterator() :
         seq_(), current_(0) { }
 
-      explicit
-      ace_unbounded_value_sequence_iterator(Ace_Sequence_Type& sequence) :
+      ace_unbounded_value_sequence_iterator(T& sequence) :
         seq_(sequence), current_(0) { }
 
-      explicit
       ace_unbounded_value_sequence_iterator(Iter_Type& from) :
         seq_(from.seq_), current_(from.current_) { }
+
+      ace_unbounded_value_sequence_iterator(const Iter_Type& from) :
+        seq_(from.seq_), current_(from.current_) { }
+
+      operator Difference_Type ()
+      {
+        return current_;
+      }
 
       // Forward iterator requirements
 
@@ -118,34 +125,60 @@ namespace OpenDDS {
 
       // Random-access iterator requirements
 
-      Reference operator[] (difference_type n) const
+      Reference operator[] (Difference_Type n) const
       {
         return seq_[n];
       }
 
-      Iter_Type& operator+= (difference_type n)
+      Iter_Type& operator+= (Difference_Type n)
       {
         current_ += n;
         return *this;
       }
 
-      Iter_Type operator+ (difference_type n)
+      Iter_Type operator+ (Difference_Type n)
       {
         Iter_Type iter(*this);
         iter.current_ += n;
         return iter;
       }
 
-      Iter_Type& operator-= (difference_type n)
+      Iter_Type& operator-= (Difference_Type n)
       {
         current_ -= n;
         return *this;
       }
 
-      Iter_Type operator- (difference_type n)
+      Iter_Type operator- (Difference_Type n)
       {
         Iter_Type iter(*this);
         iter.current_ -= n;
+        return iter;
+      }
+
+      Iter_Type& operator+= (const Iter_Type& rhs)
+      {
+        current_ += rhs.current_;
+        return *this;
+      }
+
+      Iter_Type operator+ (const Iter_Type& rhs) const
+      {
+        Iter_Type iter(*this);
+        iter.current_ += rhs.current_;
+        return iter;
+      }
+
+      Iter_Type& operator-= (const Iter_Type& rhs)
+      {
+        current_ -= rhs.current_;
+        return *this;
+      }
+
+      Iter_Type operator- (const Iter_Type& rhs)
+      {
+        Iter_Type iter(*this);
+        iter.current_ -= rhs.current_;
         return iter;
       }
 
@@ -170,8 +203,8 @@ namespace OpenDDS {
       }
 
     protected:
-      Ace_Sequence_Type& seq_;
-      difference_type current_;
+      T& seq_;
+      Difference_Type current_;
     };
 
   }

@@ -1,0 +1,5 @@
+project (*): dcpsexe, dcps_rtps, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+}
+
