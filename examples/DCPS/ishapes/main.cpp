@@ -89,7 +89,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     for (; curr < argc; ++curr) {
       if (ACE_OS::strcmp(ACE_TEXT("-u"), argv[curr]) == 0) {
         multicast = false;
-        std::cout << "SEDP unicast only" << std::endl;
+        rui->use_multicast_ = false;
+        std::cout << "SEDP / user topics on unicast only" << std::endl;
       } else if ((ACE_OS::strcmp(ACE_TEXT("-r"), argv[curr]) == 0) &&
         (curr + 1 < argc)) {
         resend = ACE_OS::atoi(argv[++curr]);
