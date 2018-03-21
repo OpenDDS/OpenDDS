@@ -224,7 +224,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
           || handles.length () == 0)
         {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant test failed.\n"));
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participants test failed.\n"));
           return 1;
         }
 
@@ -232,7 +232,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (len != num_parts - 1)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) ERROR: monitor: get_discovered_participant expected %d got %d.\n",
+            "(%P|%t) ERROR: monitor: get_discovered_participants expected %d got %d.\n",
             num_parts, len),
             1);
         }
