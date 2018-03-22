@@ -6,6 +6,7 @@ project (OpenDDS_XML_QOS_XSC_Generation) : install, xscdefaults {
   xscflags += --cxx-header-banner-file $(DDS_ROOT)/docs/schema/xsc-banner.h
   xscflags += --cxx-export-symbol XML_QOS_Handler_Export
   xscflags += --cxx-export-header XML_QOS_Handler_Export.h
+  xscflags += --cxx-char-type ACE_TCHAR
   xscflags += --search-path "$(DDS_ROOT)/docs/schema"
 
   custom_only = 1
