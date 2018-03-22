@@ -14,64 +14,67 @@ namespace OpenDDS {
 namespace Security {
 
 TokenWriter::TokenWriter(DDS::Security::Token& token_ref)
-: token_ref_(token_ref)
+: binary_property_inserter_(token_ref.binary_properties)
+, property_inserter_(token_ref.properties)
+, token_ref_(token_ref)
 , reader_(token_ref)
 {
+
 }
 
-TokenWriter::TokenWriter(
-  DDS::Security::Token& token_ref,
-  const std::string& class_id,
-  unsigned int num_properties,
-  unsigned int num_bin_properties)
-: token_ref_(token_ref)
+TokenWriter::TokenWriter(DDS::Security::Token& token_ref, const std::string& class_id)
+: binary_property_inserter_(token_ref.binary_properties)
+, property_inserter_(token_ref.properties)
+, token_ref_(token_ref)
 , reader_(token_ref)
 {
-  token_ref_.class_id = class_id.c_str();
-  token_ref_.properties.length(num_properties);
-  token_ref_.binary_properties.length(num_bin_properties);
+  token_ref.class_id = class_id.c_str();
 }
 
 TokenWriter::~TokenWriter()
 {
 }
 
-void TokenWriter::set_property(int prop_index, const char* prop_name, const char* prop_value, bool propagate)
+void TokenWriter::add_property(const char* prop_name, const char* prop_value, bool propagate)
 {
-  DDS::Property_t& prop_ref = token_ref_.properties[prop_index];
-  prop_ref.name = prop_name;
-  prop_ref.value = prop_value;
-  prop_ref.propagate = propagate;
+  DDS::Property_t p;
+  p.name = prop_name;
+  p.value = prop_value;
+  p.propagate = propagate;
+  property_inserter_.push_back(p);
 }
 
-void TokenWriter::set_property(int prop_index, const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate)
+void TokenWriter::add_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate)
 {
   std::ostringstream out;
   out.write(reinterpret_cast<const char*>(prop_value.get_buffer()), prop_value.length());
 
-  DDS::Property_t& prop_ref = token_ref_.properties[prop_index];
-  prop_ref.name = prop_name;
-  prop_ref.value = out.str().c_str();
-  prop_ref.propagate = propagate;
+  DDS::Property_t p;
+  p.name = prop_name;
+  p.value = out.str().c_str();
+  p.propagate = propagate;
+  property_inserter_.push_back(p);
 }
 
-void TokenWriter::set_bin_property(int prop_index, const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate)
+void TokenWriter::add_bin_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate)
 {
-  DDS::BinaryProperty_t& prop_ref = token_ref_.binary_properties[prop_index];
-  prop_ref.name = prop_name;
-  prop_ref.value = prop_value;
-  prop_ref.propagate = propagate;
+  DDS::BinaryProperty_t p;
+  p.name = prop_name;
+  p.value = prop_value;
+  p.propagate = propagate;
+  binary_property_inserter_.push_back(p);
 }
 
-void TokenWriter::set_bin_property(int prop_index, const char* prop_name, const std::string& prop_value, bool propagate)
+void TokenWriter::add_bin_property(const char* prop_name, const std::string& prop_value, bool propagate)
 {
-  DDS::BinaryProperty_t& prop_ref = token_ref_.binary_properties[prop_index];
-  prop_ref.name = prop_name;
-  prop_ref.propagate = propagate;
-  prop_ref.value.length(prop_value.length() + 1 /* For null */);
-  std::memcpy(prop_ref.value.get_buffer(),
+  DDS::BinaryProperty_t p;
+  p.name = prop_name;
+  p.propagate = propagate;
+  p.value.length(prop_value.length() + 1 /* For null */);
+  std::memcpy(p.value.get_buffer(),
               prop_value.c_str(),
-              prop_ref.value.length());
+              p.value.length());
+  binary_property_inserter_.push_back(p);
 }
 
 } // namespace Security

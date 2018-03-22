@@ -161,16 +161,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // The file will have to be pulled from the file system until that is fixed.
 
   ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
-  TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId, 1, 0);
-  pctWriter.set_property(0, "dds.perm.cert",get_file_contents(perm_file.c_str()).c_str(), true);
+  TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
+  pctWriter.add_property("dds.perm.cert",get_file_contents(perm_file.c_str()).c_str(), true);
 
 
 
   // Set and store the permissions token
   ::DDS::Security::PermissionsToken permissions_token;
-  TokenWriter writer(permissions_token, PermissionsTokenClassId, 2, 0);
-  writer.set_property(0, "dds.perm_ca.sn", "MyCA Name", true);
-  writer.set_property(1, "dds.perm_ca.algo", "RSA-2048", true);
+  TokenWriter writer(permissions_token, PermissionsTokenClassId);
+  writer.add_property("dds.perm_ca.sn", "MyCA Name", true);
+  writer.add_property("dds.perm_ca.algo", "RSA-2048", true);
 
   perm_set.perm_token = permissions_token;
 

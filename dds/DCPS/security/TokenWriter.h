@@ -12,6 +12,7 @@
 
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
+#include "dds/DCPS/iterator_adaptor.h"
 
 #include "TokenReader.h"
 
@@ -42,25 +43,22 @@ class  TokenWriter
 {
 public:
   TokenWriter(DDS::Security::Token& token_ref);
-  TokenWriter(DDS::Security::Token& token_ref,
-  const std::string& class_id,
-  unsigned int num_properties, 
-  unsigned int num_bin_properties);
+  TokenWriter(DDS::Security::Token& token_ref, const std::string& class_id);
 
   virtual ~TokenWriter();
 
   const TokenReader& get_reader();
 
   void set_class_id(const std::string& class_name);
-  void set_property_count(unsigned int num_properties);
-  void set_bin_property_count(unsigned int num_properties);
 
-  void set_property(int prop_index, const char* prop_name, const char* prop_value, bool propagate);
-  void set_property(int prop_index, const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
-  void set_bin_property(int prop_index, const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
-  void set_bin_property(int prop_index, const char* prop_name, const std::string& prop_value, bool propagate);
+  void add_property(const char* prop_name, const char* prop_value, bool propagate);
+  void add_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
+  void add_bin_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
+  void add_bin_property(const char* prop_name, const std::string& prop_value, bool propagate);
 
 private:
+  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> binary_property_inserter_;
+  DCPS::sequence_back_insert_iterator<DDS::PropertySeq> property_inserter_;
   DDS::Security::Token& token_ref_;
   OpenDDS::Security::TokenReader reader_;
 };
@@ -74,14 +72,7 @@ inline void TokenWriter::set_class_id(const std::string& class_id)
 {
   token_ref_.class_id = class_id.c_str();
 }
-inline void TokenWriter::set_property_count(unsigned int num_properties)
-{
-  token_ref_.properties.length(num_properties);
-}
-inline void TokenWriter::set_bin_property_count(unsigned int num_properties)
-{
-  token_ref_.properties.length(num_properties);
-}
+
 
 } // namespace Security
 } // namespace OpenDDS
