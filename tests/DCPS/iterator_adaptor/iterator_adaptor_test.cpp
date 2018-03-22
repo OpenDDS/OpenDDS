@@ -7,7 +7,7 @@
 
 using namespace OpenDDS;
 
-TEST(IteratorAdaptorTest, Std_Copy_Success)
+TEST(IteratorAdaptorTest, StdCopy_ToVector_Success)
 {
   DDS::OctetSeq expected;
   expected.length(4);
@@ -27,8 +27,24 @@ TEST(IteratorAdaptorTest, Std_Copy_Success)
   for (size_t i = 0; i < expected.length(); ++i) {
       ASSERT_EQ(expected[i], result[i]);
   }
+}
 
+TEST(IteratorAdaptorTest, StdCopy_FromVector_Success)
+{
+  std::vector<CORBA::Octet> expected;
+  for (size_t i = 0; i < 5; ++i) expected.push_back(i);
 
+  DDS::OctetSeq result;
+
+  std::copy(expected.begin(),
+            expected.end(),
+            DCPS::back_inserter(result));
+
+  ASSERT_EQ(result.length(), expected.size());
+
+  for (size_t i = 0; i < expected.size(); ++i) {
+      ASSERT_EQ(expected[i], result[i]);
+  }
 }
 
 
