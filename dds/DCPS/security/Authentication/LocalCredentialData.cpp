@@ -5,6 +5,7 @@
 
 #include "LocalCredentialData.h"
 #include "dds/DCPS/security/SSL/Utils.h"
+#include "dds/DCPS/iterator_adaptor.h"
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
@@ -12,19 +13,13 @@
 namespace OpenDDS {
   namespace Security {
 
-    static void add_binary_property(DDS::BinaryProperty_t src, DDS::BinaryPropertySeq& dst)
-    {
-      size_t len = dst.length();
-      dst.length(len + 1);
-      dst[len] = src;
-    }
-
     int CredentialHash::operator()(DDS::OctetSeq& dst) const
     {
       const DDS::OctetSeq& perm_data = permissions_data_;
       const DDS::OctetSeq& topic_data = participant_topic_data_;
 
       DDS::BinaryPropertySeq hash_data;
+      DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> inserter(hash_data);
 
       DDS::BinaryProperty_t cid, cperm, cpdata, cdsign_algo, ckagree_algo;
 
@@ -52,11 +47,11 @@ namespace OpenDDS {
       std::memcpy(ckagree_algo.value.get_buffer(), ckagree_algo_str, ckagree_algo.value.length());
       ckagree_algo.propagate = true;
 
-      add_binary_property(cid, hash_data);
-      add_binary_property(cperm, hash_data);
-      add_binary_property(cpdata, hash_data);
-      add_binary_property(cdsign_algo, hash_data);
-      add_binary_property(ckagree_algo, hash_data);
+      inserter.push_back(cid);
+      inserter.push_back(cperm);
+      inserter.push_back(cpdata);
+      inserter.push_back(cdsign_algo);
+      inserter.push_back(ckagree_algo);
 
       return SSL::hash_serialized(hash_data, dst);
     }

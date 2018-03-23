@@ -442,14 +442,6 @@ bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
   return true;
 }
 
-
-static void add_binary_property(DDS::BinaryProperty_t src, DDS::BinaryPropertySeq& dst)
-{
-  size_t len = dst.length();
-  dst.length(len + 1);
-  dst[len] = src;
-}
-
 static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
                                           const DDS::OctetSeq& challenge2,
                                           const DDS::OctetSeq& dh2,
@@ -458,14 +450,14 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
                                           const DDS::OctetSeq& hash_c1,
                                           DDS::BinaryPropertySeq& dst)
 {
-  dst.length(0);
+  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> inserter(dst);
 
   {
     DDS::BinaryProperty_t p;
     p.name = "hash_c2";
     p.value = hash_c2;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -473,7 +465,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "challenge2";
     p.value = challenge2;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -481,7 +473,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "dh2";
     p.value = dh2;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -489,7 +481,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "challenge1";
     p.value = challenge1;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -497,7 +489,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "dh1";
     p.value = dh1;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -505,7 +497,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "hash_c1";
     p.value = hash_c1;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 }
 
@@ -517,14 +509,14 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                                           const DDS::OctetSeq& hash_c2,
                                           DDS::BinaryPropertySeq& dst)
 {
-  dst.length(0);
+  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> inserter(dst);
 
   {
     DDS::BinaryProperty_t p;
     p.name = "hash_c1";
     p.value = hash_c1;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -532,7 +524,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "challenge1";
     p.value = challenge1;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -540,7 +532,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "dh1";
     p.value = dh1;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -548,7 +540,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "challenge2";
     p.value = challenge2;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -556,7 +548,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "dh2";
     p.value = dh2;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 
   {
@@ -564,7 +556,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "hash_c2";
     p.value = hash_c2;
     p.propagate = true;
-    add_binary_property(p, dst);
+    inserter.push_back(p);
   }
 }
 
