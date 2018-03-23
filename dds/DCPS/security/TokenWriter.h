@@ -51,10 +51,10 @@ public:
 
   void set_class_id(const std::string& class_name);
 
-  void add_property(const char* prop_name, const char* prop_value, bool propagate);
-  void add_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
-  void add_bin_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate);
-  void add_bin_property(const char* prop_name, const std::string& prop_value, bool propagate);
+  void add_property(const char* prop_name, const char* prop_value, bool propagate = true);
+  void add_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate = true);
+  void add_bin_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate = true);
+  void add_bin_property(const char* prop_name, const std::string& prop_value, bool propagate = true);
 
 private:
   DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> binary_property_inserter_;

@@ -72,18 +72,70 @@ namespace OpenDDS {
         dst = plaintext_;
       }
 
-      int SignedDocument::verify_signature(const Certificate& cert)
+      class verify_signature_impl
       {
-        int result = 1; /* 1 = failure, 0 = success */
+      public:
+        verify_signature_impl(PKCS7* doc, const std::string& content) :
+          doc_(doc),
+          content_(content),
+          store_(NULL),
+          store_ctx_(NULL),
+          reader_(NULL)
+        {
+          if (NULL == (store_ = X509_STORE_new())) {
+            OPENDDS_SSL_LOG_ERR("X509_STORE_new failed");
+          }
+          if (NULL == (store_ctx_ = X509_STORE_CTX_new())) {
+            OPENDDS_SSL_LOG_ERR("X509_STORE_CTX_new failed");
+          }
+          if (NULL == (reader_ = BIO_new(BIO_s_mem()))) {
+            OPENDDS_SSL_LOG_ERR("BIO_new failed");
+          }
+        }
 
-        /*
-         * TODO something similar to the implementation of Certificate.validate(...)
-         * using:
-         *
-         * int PKCS7_verify(PKCS7 *p7, STACK_OF(X509) *certs, X509_STORE *store, BIO *indata, BIO *out, int flags);
-         */
+        ~verify_signature_impl()
+        {
+          X509_STORE_CTX_free(store_ctx_);
+          X509_STORE_free(store_);
+          BIO_free(reader_);
+        }
 
-        return result;
+        int operator()(const Certificate& ca, unsigned long int flags = 0)
+        {
+          if (! doc_) return 1;
+          if (0 == content_.length()) return 1;
+
+          if (1 != X509_STORE_add_cert(store_, ca.x_)) {
+            OPENDDS_SSL_LOG_ERR("X509_STORE_add_cert failed");
+            return 1;
+          }
+
+          size_t len = BIO_write(reader_, content_.c_str(), content_.length());
+          if (len <= 0) {
+            OPENDDS_SSL_LOG_ERR("BIO_write failed");
+            return 1;
+          }
+
+          if (1 != PKCS7_verify(doc_, NULL, store_, reader_, NULL, flags)) {
+            OPENDDS_SSL_LOG_ERR("PKCS7_verify failed");
+            return 1;
+          }
+          return 0;
+        }
+
+      private:
+        PKCS7* doc_;
+        const std::string& content_;
+
+        X509_STORE* store_;
+        X509_STORE_CTX* store_ctx_;
+        BIO* reader_;
+      };
+
+      int SignedDocument::verify_signature(const Certificate& ca)
+      {
+        verify_signature_impl verify(doc_, plaintext_);
+        return verify(ca);
       }
 
       int SignedDocument::serialize(std::vector<unsigned char>& dst)
