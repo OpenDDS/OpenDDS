@@ -112,7 +112,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   local_access_control_data_.load(participant_qos.property.value);
 
 
-  std::string gov_content, perm_content;
+  std::string gov_content, perm_content, perm_sn;
 
   // Read in permissions_ca
 
@@ -140,8 +140,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     local_gov.get_content(gov_content);
     clean_smime_content(gov_content);
 
-
-    ac_perms perm_set;
+  ac_perms perm_set;
 
 
   // permissions file
@@ -149,6 +148,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
   local_perm.get_content(perm_content);
   clean_smime_content(perm_content);
+
+  //Extract and compare the subject name for validation
+
+  perm_sn.assign(perm_content);
+  if (extract_subject_name(perm_sn)) {
+    std::cout << "permission subject name:" << perm_sn << std::endl;
+  };
+
+
+  // If all checks are successful load the content into cache
 
   if( 0 != load_governance_file(&perm_set , gov_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
@@ -1311,6 +1320,31 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   return new_handle;
 }
 
+
+::CORBA::Boolean AccessControlBuiltInImpl::extract_subject_name(std::string& sn_) {
+
+  std::string start_str("<subject_name>") , end_str("</subject_name>");
+
+  size_t found_begin = sn_.find(start_str);
+
+  if (found_begin != std::string::npos) {
+    sn_.erase(0, found_begin + start_str.length());
+    const char* t = " \t\n\r\f\v";
+    sn_.erase(0, sn_.find_first_not_of(t));
+  } else {
+    return false;
+  }
+
+  size_t found_end = sn_.find(end_str);
+
+  if (found_end != std::string::npos) {
+    sn_.erase(found_end);
+  } else {
+    return false;
+  }
+
+  return true;
+}
 
 ::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_content)
 {

@@ -327,6 +327,7 @@ private:
   std::string get_file_contents(const char *);
   ::CORBA::Boolean clean_smime_content(std::string&);
   ::CORBA::Boolean clean_smime_content(::DDS::OctetSeq&);
+  ::CORBA::Boolean extract_subject_name(std::string&);
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;
