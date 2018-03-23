@@ -75,10 +75,12 @@ namespace OpenDDS {
       class verify_signature_impl
       {
       public:
-        verify_signature_impl(PKCS7* doc) :
+        verify_signature_impl(PKCS7* doc, const std::string& content) :
           doc_(doc),
+          content_(content),
           store_(NULL),
-          store_ctx_(NULL)
+          store_ctx_(NULL),
+          reader_(NULL)
         {
           if (NULL == (store_ = X509_STORE_new())) {
             OPENDDS_SSL_LOG_ERR("X509_STORE_new failed");
@@ -86,24 +88,35 @@ namespace OpenDDS {
           if (NULL == (store_ctx_ = X509_STORE_CTX_new())) {
             OPENDDS_SSL_LOG_ERR("X509_STORE_CTX_new failed");
           }
+          if (NULL == (reader_ = BIO_new(BIO_s_mem()))) {
+            OPENDDS_SSL_LOG_ERR("BIO_new failed");
+          }
         }
 
         ~verify_signature_impl()
         {
           X509_STORE_CTX_free(store_ctx_);
           X509_STORE_free(store_);
+          BIO_free(reader_);
         }
 
         int operator()(const Certificate& ca, unsigned long int flags = 0)
         {
           if (! doc_) return 1;
+          if (0 == content_.length()) return 1;
 
           if (1 != X509_STORE_add_cert(store_, ca.x_)) {
             OPENDDS_SSL_LOG_ERR("X509_STORE_add_cert failed");
             return 1;
           }
 
-          if (1 != PKCS7_verify(doc_, NULL, store_, NULL, NULL, flags)) {
+          size_t len = BIO_write(reader_, content_.c_str(), content_.length());
+          if (len <= 0) {
+            OPENDDS_SSL_LOG_ERR("BIO_write failed");
+            return 1;
+          }
+
+          if (1 != PKCS7_verify(doc_, NULL, store_, reader_, NULL, flags)) {
             OPENDDS_SSL_LOG_ERR("PKCS7_verify failed");
             return 1;
           }
@@ -112,14 +125,16 @@ namespace OpenDDS {
 
       private:
         PKCS7* doc_;
+        const std::string& content_;
 
         X509_STORE* store_;
         X509_STORE_CTX* store_ctx_;
+        BIO* reader_;
       };
 
       int SignedDocument::verify_signature(const Certificate& ca)
       {
-        verify_signature_impl verify(doc_);
+        verify_signature_impl verify(doc_, plaintext_);
         return verify(ca);
       }
 
