@@ -130,12 +130,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
 
     // return of 0 = verified  1 = not verified
-    int gov_verified = local_gov.verify_signature(local_ca);
-    if(!gov_verified) {
-      std::cout << "Governance document verified:"<< gov_verified << std::endl;
-    } else {
-      std::cout << "Governance document NOT verified:"<< gov_verified<< std::endl;
-    }
+  int gov_verified = local_gov.verify_signature(local_ca);
+  if (0 == gov_verified) {
+    std::cout << "Governance document verified:" << gov_verified << std::endl;
+  } else {
+    CommonUtilities::set_security_error(ex, -1, 0, "Governance signature not verified");
+    return DDS::HANDLE_NIL;
+  }
 
     local_gov.get_content(gov_content);
     clean_smime_content(gov_content);
@@ -148,6 +149,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
   local_perm.get_content(perm_content);
   clean_smime_content(perm_content);
+
+  // Verify signature of permissions file
+
+  // return of 0 = verified  1 = not verified
+  int perm_verified = local_perm.verify_signature(local_ca);
+  if (0 == perm_verified) {
+    std::cout << "Permissions document verified:" << perm_verified << std::endl;
+  } else {
+    CommonUtilities::set_security_error(ex, -1, 0, "Permissions signature not verified");
+    return DDS::HANDLE_NIL;
+  }
+
+
 
   //Extract and compare the subject name for validation
 
