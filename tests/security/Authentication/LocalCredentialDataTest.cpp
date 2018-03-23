@@ -46,7 +46,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
   add_property(perms);
 
   credential_data.load(properties);
-  std::ifstream expected_file(path);
+  std::ifstream expected_file(path.c_str());
 
   std::vector<char> expected_bytes((std::istreambuf_iterator<char>(expected_file)),
                                    std::istreambuf_iterator<char>());
