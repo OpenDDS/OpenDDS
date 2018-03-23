@@ -162,15 +162,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
-  pctWriter.add_property("dds.perm.cert",get_file_contents(perm_file.c_str()).c_str(), true);
+  pctWriter.add_property("dds.perm.cert",get_file_contents(perm_file.c_str()).c_str());
 
 
 
   // Set and store the permissions token
   ::DDS::Security::PermissionsToken permissions_token;
   TokenWriter writer(permissions_token, PermissionsTokenClassId);
-  writer.add_property("dds.perm_ca.sn", "MyCA Name", true);
-  writer.add_property("dds.perm_ca.algo", "RSA-2048", true);
+  writer.add_property("dds.perm_ca.sn", "MyCA Name");
+  writer.add_property("dds.perm_ca.algo", "RSA-2048");
 
   perm_set.perm_token = permissions_token;
 
