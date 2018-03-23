@@ -72,18 +72,55 @@ namespace OpenDDS {
         dst = plaintext_;
       }
 
-      int SignedDocument::verify_signature(const Certificate& cert)
+      class verify_signature_impl
       {
-        int result = 1; /* 1 = failure, 0 = success */
+      public:
+        verify_signature_impl(PKCS7* doc) :
+          doc_(doc),
+          store_(NULL),
+          store_ctx_(NULL)
+        {
+          if (NULL == (store_ = X509_STORE_new())) {
+            OPENDDS_SSL_LOG_ERR("X509_STORE_new failed");
+          }
+          if (NULL == (store_ctx_ = X509_STORE_CTX_new())) {
+            OPENDDS_SSL_LOG_ERR("X509_STORE_CTX_new failed");
+          }
+        }
 
-        /*
-         * TODO something similar to the implementation of Certificate.validate(...)
-         * using:
-         *
-         * int PKCS7_verify(PKCS7 *p7, STACK_OF(X509) *certs, X509_STORE *store, BIO *indata, BIO *out, int flags);
-         */
+        ~verify_signature_impl()
+        {
+          X509_STORE_CTX_free(store_ctx_);
+          X509_STORE_free(store_);
+        }
 
-        return result;
+        int operator()(const Certificate& ca, unsigned long int flags = 0)
+        {
+          if (! doc_) return 1;
+
+          if (1 != X509_STORE_add_cert(store_, ca.x_)) {
+            OPENDDS_SSL_LOG_ERR("X509_STORE_add_cert failed");
+            return 1;
+          }
+
+          if (1 != PKCS7_verify(doc_, NULL, store_, NULL, NULL, flags)) {
+            OPENDDS_SSL_LOG_ERR("PKCS7_verify failed");
+            return 1;
+          }
+          return 0;
+        }
+
+      private:
+        PKCS7* doc_;
+
+        X509_STORE* store_;
+        X509_STORE_CTX* store_ctx_;
+      };
+
+      int SignedDocument::verify_signature(const Certificate& ca)
+      {
+        verify_signature_impl verify(doc_);
+        return verify(ca);
       }
 
       int SignedDocument::serialize(std::vector<unsigned char>& dst)

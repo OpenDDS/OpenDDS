@@ -35,6 +35,11 @@ TEST_F(SignedDocumentTest, GetContent_Success)
   ASSERT_TRUE(0 < content.length());
 }
 
+TEST_F(SignedDocumentTest, VerifySignature_Success)
+{
+  ASSERT_EQ(0, doc_.verify_signature(ca_));
+}
+
 TEST(SignedDocumentTestNoFixture, LoadFromMemory)
 {
   const char fname[] = "../governance/Governance_SC1_ProtectedDomain1.p7s";

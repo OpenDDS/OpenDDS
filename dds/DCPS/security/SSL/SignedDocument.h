@@ -39,7 +39,7 @@ namespace OpenDDS {
 
         void get_content(std::string& dst);
 
-        int verify_signature(const Certificate& cert);
+        int verify_signature(const Certificate& ca);
 
         int serialize(std::vector<unsigned char>& dst);
 
