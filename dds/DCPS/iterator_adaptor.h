@@ -133,7 +133,7 @@ namespace OpenDDS {
       sequence_iterator(const Iter_Type& from) :
         seq_(from.seq_), current_(from.current_) { }
 
-      operator Difference_Type ()
+      operator Difference_Type () const
       {
         return current_;
       }
@@ -201,7 +201,7 @@ namespace OpenDDS {
         return *this;
       }
 
-      Iter_Type operator+ (Difference_Type n)
+      Iter_Type operator+ (Difference_Type n) const
       {
         Iter_Type iter(*this);
         iter.current_ += n;
@@ -214,7 +214,7 @@ namespace OpenDDS {
         return *this;
       }
 
-      Iter_Type operator- (Difference_Type n)
+      Iter_Type operator- (Difference_Type n) const
       {
         Iter_Type iter(*this);
         iter.current_ -= n;
@@ -240,29 +240,29 @@ namespace OpenDDS {
         return *this;
       }
 
-      Iter_Type operator- (const Iter_Type& rhs)
+      Iter_Type operator- (const Iter_Type& rhs) const
       {
         Iter_Type iter(*this);
         iter.current_ -= rhs.current_;
         return iter;
       }
 
-      bool operator< (const Iter_Type& rhs)
+      bool operator< (const Iter_Type& rhs) const
       {
         return current_ < rhs.current_;
       }
 
-      bool operator> (const Iter_Type& rhs)
+      bool operator> (const Iter_Type& rhs) const
       {
         return current_ > rhs.current_;
       }
 
-      bool operator<= (const Iter_Type& rhs)
+      bool operator<= (const Iter_Type& rhs) const
       {
         return current_ <= rhs.current_;
       }
 
-      bool operator>= (const Iter_Type& rhs)
+      bool operator>= (const Iter_Type& rhs) const
       {
         return current_ >= rhs.current_;
       }
