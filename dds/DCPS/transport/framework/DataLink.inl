@@ -105,8 +105,10 @@ DataLink::send(TransportQueueElement* element)
     return;
   }
 
-  element = this->customize_queue_element(element);
-  if (!element) {
+  TransportQueueElement* test_elm = this->customize_queue_element(element);
+  if (test_elm) {
+    element = test_elm;
+  } else {
     element->data_dropped(true);
     return;
   }
