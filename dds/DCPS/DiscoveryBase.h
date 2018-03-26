@@ -1293,11 +1293,26 @@ namespace OpenDDS {
       } AuthState;
 
       struct DiscoveredParticipant {
-        DiscoveredParticipant()
-          : bit_ih_(0), has_last_stateless_msg_(false), last_stateless_msg_time_(0, 0), auth_started_time_(0, 0), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
-        DiscoveredParticipant(const DiscoveredParticipantData& p,
-                              const ACE_Time_Value& t)
-          : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL), has_last_stateless_msg_(false), last_stateless_msg_time_(0, 0), auth_started_time_(0, 0), auth_state_(AS_UNKNOWN), remote_auth_request_token_(DDS::Security::TokenNIL) {}
+
+        DiscoveredParticipant() :
+          bit_ih_(0),
+          has_last_stateless_msg_(false),
+          last_stateless_msg_time_(0, 0),
+          auth_started_time_(0, 0),
+          auth_state_(AS_UNKNOWN),
+          local_auth_request_token_(DDS::Security::TokenNIL),
+          remote_auth_request_token_(DDS::Security::TokenNIL) {}
+
+        DiscoveredParticipant(const DiscoveredParticipantData& p, const ACE_Time_Value& t) :
+          pdata_(p),
+          last_seen_(t),
+          bit_ih_(DDS::HANDLE_NIL),
+          has_last_stateless_msg_(false),
+          last_stateless_msg_time_(0, 0),
+          auth_started_time_(0, 0),
+          auth_state_(AS_UNKNOWN),
+          local_auth_request_token_(DDS::Security::TokenNIL),
+          remote_auth_request_token_(DDS::Security::TokenNIL) {}
 
         DiscoveredParticipantData pdata_;
         ACE_Time_Value last_seen_;
@@ -1330,6 +1345,8 @@ namespace OpenDDS {
       typedef typename DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
       typedef typename DiscoveredParticipantMap::const_iterator
         DiscoveredParticipantConstIter;
+
+      typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::AuthRequestMessageToken, DCPS::GUID_tKeyLessThan) PendingRemoteAuthTokenMap;
 
       virtual EndpointManagerType& endpoint_manager() = 0;
 
@@ -1370,6 +1387,7 @@ namespace OpenDDS {
       DDS::Subscriber_var bit_subscriber_;
       DDS::DomainParticipantQos qos_;
       DiscoveredParticipantMap participants_;
+      PendingRemoteAuthTokenMap pending_remote_auth_tokens_;
     };
 
     template<typename Participant>

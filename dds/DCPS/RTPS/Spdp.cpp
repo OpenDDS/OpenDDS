@@ -56,6 +56,34 @@ namespace {
     }
     return false;
   }
+
+  bool operator==(const DDS::Security::Property_t& rhs, const DDS::Security::Property_t& lhs) {
+    return rhs.name == lhs.name && rhs.value == lhs.value && rhs.propagate == lhs.propagate;
+  }
+
+  bool operator==(const DDS::Security::BinaryProperty_t& rhs, const DDS::Security::BinaryProperty_t& lhs) {
+    return rhs.name == lhs.name && rhs.value == lhs.value && rhs.propagate == lhs.propagate;
+  }
+
+  bool operator==(const DDS::Security::PropertySeq& rhs, const DDS::Security::PropertySeq& lhs) {
+    bool result = (rhs.length() == lhs.length());
+    for (size_t i = 0; result && i < rhs.length(); ++i) {
+      result = (rhs[i] == lhs[i]);
+    }
+    return result;
+  }
+
+  bool operator==(const DDS::Security::BinaryPropertySeq& rhs, const DDS::Security::BinaryPropertySeq& lhs) {
+    bool result = (rhs.length() == lhs.length());
+    for (size_t i = 0; result && i < rhs.length(); ++i) {
+      result = (rhs[i] == lhs[i]);
+    }
+    return result;
+  }
+
+  bool operator==(const DDS::Security::DataHolder& rhs, const DDS::Security::DataHolder& lhs) {
+    return rhs.class_id == lhs.class_id && rhs.properties == lhs.properties && rhs.binary_properties == lhs.binary_properties;
+  }
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
@@ -98,6 +126,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
   , security_config_()
+  , security_enabled_(false)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -123,6 +152,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
   , security_config_(OpenDDS::Security::SecurityRegistry::instance()->default_config())
+  , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() && security_config_->get_crypto_key_factory() && security_config_->get_crypto_key_exchange())
   , identity_handle_(identity_handle)
   , permissions_handle_(perm_handle)
   , crypto_handle_(crypto_handle)
@@ -271,16 +301,24 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     participants_[guid] = DiscoveredParticipant(pdata, time);
     DiscoveredParticipant& dp = participants_[guid];
 
-    // notify Sedp of association
-    // Sedp may call has_discovered_participant.
-    // This is what the participant must be added before this call to associate.
-    sedp_.associate_preauth(dp.pdata_);
+    if (is_security_enabled()) {
+      // Assocaite the stateless reader / writer for handshakes & auth requests
+      sedp_.associate_preauth(dp.pdata_);
+
+      // If we've gotten auth requests for this (previously undiscovered) participant, pull in the tokens now
+      // How does this work if we've only just recently associated stateless reader / writer? GOOD QUESTION!
+      PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
+      if (token_iter != pending_remote_auth_tokens_.end()) {
+        dp.remote_auth_request_token_ = token_iter->second;
+        pending_remote_auth_tokens_.erase(token_iter);
+      }
+    }
 
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     this->tport_->write_i();
 
-    if (security_config_) {
+    if (is_security_enabled()) {
       bool has_security_data =
         ParameterListConverter::from_param_list(plist, dp.identity_token_, dp.permissions_token_, dp.property_qos_, dp.security_info_) == 0;
 
@@ -380,8 +418,35 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 }
 
 void
-Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& /*msg*/)
+Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 {
+  DDS::Security::SecurityException se;
+  Security::Authentication_var auth = security_config_->get_authentication();
+
+  // If this message wasn't intended for us, ignore handshake message
+  if (msg.destination_participant_guid != guid_ || !msg.message_data.length()) {
+    return;
+  }
+
+  const ACE_Time_Value time = ACE_OS::gettimeofday();
+
+  RepoId guid = msg.message_identity.source_guid;
+  guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (sedp_.ignoring(guid)) {
+    // Ignore, this is our domain participant or one that the user has
+    // asked us to ignore.
+    return;
+  }
+
+  DiscoveredParticipantMap::const_iterator iter = participants_.find(guid);
+
+  if (iter == participants_.end()) {
+    // We're simply caching this for later, since we can't actually do much without the SPDP announcement itself
+    pending_remote_auth_tokens_[guid] = msg.message_data[0];
+  }
 }
 
 void
@@ -786,6 +851,28 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   if (dp.auth_state_ == AS_VALIDATING_REMOTE) {
     DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
+
+    // Take care of any auth tokens that need to be sent before handling return value
+    if (!(dp.local_auth_request_token_ == DDS::Security::TokenNIL)) {
+      DDS::Security::ParticipantStatelessMessage msg;
+      msg.message_identity.source_guid = guid_;
+      msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST;
+      msg.destination_participant_guid = guid;
+      msg.destination_endpoint_guid = GUID_UNKNOWN;
+      msg.source_endpoint_guid = GUID_UNKNOWN;
+      msg.related_message_identity.source_guid = GUID_UNKNOWN;
+      msg.related_message_identity.sequence_number = 0;
+      msg.message_data.length(1);
+      msg.message_data[0] = dp.local_auth_request_token_;
+
+      DCPS::RepoId reader = guid;
+      reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+
+      if (sedp_.write_stateless_message(msg, reader) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
+          ACE_TEXT("Unable to write stateless message (auth request).\n")));
+      }
+    }
     switch (vr) {
       case DDS::Security::VALIDATION_OK: {
         dp.auth_state_ = AS_AUTHENTICATED;
@@ -885,7 +972,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
     if (sedp_.write_stateless_message(msg, reader) != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
-        ACE_TEXT("Unable to write stateless message.\n")));
+        ACE_TEXT("Unable to write stateless message (handshake).\n")));
       return;
     }
     dp.has_last_stateless_msg_ = true;
@@ -1204,7 +1291,7 @@ Spdp::SpdpTransport::write_i()
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
     ;
-  if (outer_->security_config_) {
+  if (outer_->is_security_enabled()) {
     availableBuiltinEndpoints |=
       DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
       DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
@@ -1273,7 +1360,7 @@ Spdp::SpdpTransport::write_i()
     return;
   }
 
-  if (outer_->security_config_) {
+  if (outer_->is_security_enabled()) {
 
     DDS::Security::ParticipantSecurityInfo info;
 

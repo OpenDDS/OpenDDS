@@ -91,6 +91,7 @@ public:
   void check_auth_states(const ACE_Time_Value& tv);
 
   bool is_opendds(const GUID_t& participant) const;
+  bool is_security_enabled() const { return security_enabled_; }
 
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id);
@@ -168,6 +169,7 @@ private:
   WaitForAcks wait_for_acks_;
 
   OpenDDS::Security::SecurityConfig_rch security_config_;
+  bool security_enabled_;
 
   DDS::Security::IdentityHandle identity_handle_;
   DDS::Security::PermissionsHandle permissions_handle_;
