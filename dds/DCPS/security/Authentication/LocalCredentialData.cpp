@@ -47,11 +47,11 @@ namespace OpenDDS {
       std::memcpy(ckagree_algo.value.get_buffer(), ckagree_algo_str, ckagree_algo.value.length());
       ckagree_algo.propagate = true;
 
-      inserter.push_back(cid);
-      inserter.push_back(cperm);
-      inserter.push_back(cpdata);
-      inserter.push_back(cdsign_algo);
-      inserter.push_back(ckagree_algo);
+      *inserter = cid;
+      *inserter = cperm;
+      *inserter = cpdata;
+      *inserter = cdsign_algo;
+      *inserter = ckagree_algo;
 
       return SSL::hash_serialized(hash_data, dst);
     }

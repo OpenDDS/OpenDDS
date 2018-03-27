@@ -41,7 +41,7 @@ void TokenWriter::add_property(const char* prop_name, const char* prop_value, bo
   p.name = prop_name;
   p.value = prop_value;
   p.propagate = propagate;
-  property_inserter_.push_back(p);
+  *property_inserter_ = p;
 }
 
 void TokenWriter::add_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate)
@@ -53,7 +53,7 @@ void TokenWriter::add_property(const char* prop_name, const DDS::OctetSeq& prop_
   p.name = prop_name;
   p.value = out.str().c_str();
   p.propagate = propagate;
-  property_inserter_.push_back(p);
+  *property_inserter_ = p;
 }
 
 void TokenWriter::add_bin_property(const char* prop_name, const DDS::OctetSeq& prop_value, bool propagate)
@@ -62,7 +62,7 @@ void TokenWriter::add_bin_property(const char* prop_name, const DDS::OctetSeq& p
   p.name = prop_name;
   p.value = prop_value;
   p.propagate = propagate;
-  binary_property_inserter_.push_back(p);
+  *binary_property_inserter_ = p;
 }
 
 void TokenWriter::add_bin_property(const char* prop_name, const std::string& prop_value, bool propagate)
@@ -74,7 +74,7 @@ void TokenWriter::add_bin_property(const char* prop_name, const std::string& pro
   std::memcpy(p.value.get_buffer(),
               prop_value.c_str(),
               p.value.length());
-  binary_property_inserter_.push_back(p);
+  *binary_property_inserter_ = p;
 }
 
 } // namespace Security

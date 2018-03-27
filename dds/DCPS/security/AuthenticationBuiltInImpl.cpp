@@ -457,7 +457,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "hash_c2";
     p.value = hash_c2;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -465,7 +465,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "challenge2";
     p.value = challenge2;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -473,7 +473,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "dh2";
     p.value = dh2;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -481,7 +481,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "challenge1";
     p.value = challenge1;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -489,7 +489,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "dh1";
     p.value = dh1;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -497,7 +497,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
     p.name = "hash_c1";
     p.value = hash_c1;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 }
 
@@ -516,7 +516,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "hash_c1";
     p.value = hash_c1;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -524,7 +524,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "challenge1";
     p.value = challenge1;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -532,7 +532,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "dh1";
     p.value = dh1;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -540,7 +540,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "challenge2";
     p.value = challenge2;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -548,7 +548,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "dh2";
     p.value = dh2;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 
   {
@@ -556,7 +556,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     p.name = "hash_c2";
     p.value = hash_c2;
     p.propagate = true;
-    inserter.push_back(p);
+    *inserter = p;
   }
 }
 
