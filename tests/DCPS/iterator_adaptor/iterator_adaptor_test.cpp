@@ -7,6 +7,23 @@
 
 using namespace OpenDDS;
 
+TEST(IteratorAdaptorTest, Iterator_Concept)
+{
+  DDS::OctetSeq s(1);
+  s.length(1);
+  s[0] = 1;
+
+  typedef DCPS::sequence_iterator<DDS::OctetSeq> iter_t;
+  iter_t i1 = DCPS::sequence_begin(s);
+  iter_t i2(i1);
+  i1 = i2;
+  using std::swap;
+  swap(i1, i2);
+  const CORBA::Octet o = *i1;
+  ACE_UNUSED_ARG(o);
+  ++i1;
+}
+
 TEST(IteratorAdaptorTest, StdCopy_ToVector_Success)
 {
   DDS::OctetSeq expected;
@@ -25,7 +42,7 @@ TEST(IteratorAdaptorTest, StdCopy_ToVector_Success)
   ASSERT_EQ(expected.length(), result.size());
 
   for (size_t i = 0; i < expected.length(); ++i) {
-      ASSERT_EQ(expected[i], result[i]);
+    ASSERT_EQ(expected[i], result[i]);
   }
 }
 
@@ -43,8 +60,6 @@ TEST(IteratorAdaptorTest, StdCopy_FromVector_Success)
   ASSERT_EQ(result.length(), expected.size());
 
   for (size_t i = 0; i < expected.size(); ++i) {
-      ASSERT_EQ(expected[i], result[i]);
+    ASSERT_EQ(expected[i], result[i]);
   }
 }
-
-

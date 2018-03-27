@@ -43,58 +43,52 @@ namespace OpenDDS {
       typedef typename T::value_type* pointer;
       typedef typename T::value_type& reference;
 
-      sequence_back_insert_iterator(T& sequence) :
-        seq_(sequence) { }
+      sequence_back_insert_iterator(T& sequence)
+        : seq_(&sequence)
+      {}
 
-      sequence_back_insert_iterator(const Iter_Type& other) :
-        seq_(other.seq_) { }
-
-      void push_back(const typename T::value_type& value)
+      Iter_Type& operator=(const typename T::value_type& value)
       {
         const size_t Default = 8;
 
-        size_t len = seq_.length();
+        size_t len = seq_->length();
 
-        if (len == seq_.maximum()) {
-          size_t newmax = (0 == len ? Default : len + len/2);
-          seq_.length(newmax);
+        if (len == seq_->maximum()) {
+          const size_t newmax = (0 == len ? Default : len + len / 2);
+          seq_->length(newmax);
         }
 
-        seq_.length(len + 1);
-        seq_[len] = value;
-      }
+        seq_->length(len + 1);
+        (*seq_)[len] = value;
 
-      Iter_Type& operator= (const typename T::value_type& value)
-      {
-        push_back(value);
         return *this;
       }
 
-      Iter_Type& operator* ()
+      Iter_Type& operator*()
       {
         return *this;
       }
 
-      Iter_Type& operator++ ()
+      Iter_Type& operator++()
       {
         return *this;
       }
 
-      Iter_Type operator++ (int)
+      Iter_Type operator++(int)
       {
-          return *this;
+        return *this;
       }
 
-    protected:
-      T& seq_;
+    private:
+      T* seq_;
     };
 
-    template<typename T>
-      inline sequence_back_insert_iterator<T>
-      back_inserter(T& sequence)
-      {
-        return sequence_back_insert_iterator<T>(sequence);
-      }
+    template <typename T>
+    inline sequence_back_insert_iterator<T>
+    back_inserter(T& sequence)
+    {
+      return sequence_back_insert_iterator<T>(sequence);
+    }
 
     template <typename T>
     class sequence_iterator
@@ -121,17 +115,13 @@ namespace OpenDDS {
       typedef typename Traits_Type::pointer Pointer;
       typedef typename Traits_Type::reference Reference;
 
-      sequence_iterator() :
-        seq_(), current_(0) { }
+      sequence_iterator()
+        : seq_(), current_(0)
+      {}
 
-      sequence_iterator(T& sequence) :
-        seq_(sequence), current_(0) { }
-
-      sequence_iterator(Iter_Type& from) :
-        seq_(from.seq_), current_(from.current_) { }
-
-      sequence_iterator(const Iter_Type& from) :
-        seq_(from.seq_), current_(from.current_) { }
+      sequence_iterator(T& sequence)
+        : seq_(&sequence), current_(0)
+      {}
 
       operator Difference_Type () const
       {
@@ -140,48 +130,48 @@ namespace OpenDDS {
 
       // Forward iterator requirements
 
-      Reference operator* () const
+      Reference operator*() const
       {
-        return seq_[current_];
+        return (*seq_)[current_];
       }
 
-      Pointer operator-> () const
+      Pointer operator->() const
       {
-        return &seq_[current_];
+        return &(*seq_)[current_];
       }
 
-      Iter_Type& operator++ ()
+      Iter_Type& operator++()
       {
         ++current_;
         return *this;
       }
 
-      Iter_Type operator++ (int)
+      Iter_Type operator++(int)
       {
         Iter_Type iter(*this);
         ++current_;
         return iter;
       }
 
-      bool operator== (const Iter_Type& rhs) const
+      bool operator==(const Iter_Type& rhs) const
       {
         return (seq_ == rhs.seq_) && (current_ == rhs.current_);
       }
 
-      bool operator!= (const Iter_Type& rhs) const
+      bool operator!=(const Iter_Type& rhs) const
       {
-        return (seq_ != rhs.seq_) && (current_ != rhs.current_);
+        return !(*this == rhs);
       }
 
       // Bidirectional iterator requirements
 
-      Iter_Type& operator-- ()
+      Iter_Type& operator--()
       {
         --current_;
         return *this;
       }
 
-      Iter_Type operator-- (int)
+      Iter_Type operator--(int)
       {
         Iter_Type iter(*this);
         --current_;
@@ -190,85 +180,85 @@ namespace OpenDDS {
 
       // Random-access iterator requirements
 
-      Reference operator[] (Difference_Type n) const
+      Reference operator[](Difference_Type n) const
       {
-        return seq_[n];
+        return (*seq_)[n];
       }
 
-      Iter_Type& operator+= (Difference_Type n)
+      Iter_Type& operator+=(Difference_Type n)
       {
         current_ += n;
         return *this;
       }
 
-      Iter_Type operator+ (Difference_Type n) const
+      Iter_Type operator+(Difference_Type n) const
       {
         Iter_Type iter(*this);
         iter.current_ += n;
         return iter;
       }
 
-      Iter_Type& operator-= (Difference_Type n)
+      Iter_Type& operator-=(Difference_Type n)
       {
         current_ -= n;
         return *this;
       }
 
-      Iter_Type operator- (Difference_Type n) const
+      Iter_Type operator-(Difference_Type n) const
       {
         Iter_Type iter(*this);
         iter.current_ -= n;
         return iter;
       }
 
-      Iter_Type& operator+= (const Iter_Type& rhs)
+      Iter_Type& operator+=(const Iter_Type& rhs)
       {
         current_ += rhs.current_;
         return *this;
       }
 
-      Iter_Type operator+ (const Iter_Type& rhs) const
+      Iter_Type operator+(const Iter_Type& rhs) const
       {
         Iter_Type iter(*this);
         iter.current_ += rhs.current_;
         return iter;
       }
 
-      Iter_Type& operator-= (const Iter_Type& rhs)
+      Iter_Type& operator-=(const Iter_Type& rhs)
       {
         current_ -= rhs.current_;
         return *this;
       }
 
-      Iter_Type operator- (const Iter_Type& rhs) const
+      Iter_Type operator-(const Iter_Type& rhs) const
       {
         Iter_Type iter(*this);
         iter.current_ -= rhs.current_;
         return iter;
       }
 
-      bool operator< (const Iter_Type& rhs) const
+      bool operator<(const Iter_Type& rhs) const
       {
         return current_ < rhs.current_;
       }
 
-      bool operator> (const Iter_Type& rhs) const
+      bool operator>(const Iter_Type& rhs) const
       {
         return current_ > rhs.current_;
       }
 
-      bool operator<= (const Iter_Type& rhs) const
+      bool operator<=(const Iter_Type& rhs) const
       {
         return current_ <= rhs.current_;
       }
 
-      bool operator>= (const Iter_Type& rhs) const
+      bool operator>=(const Iter_Type& rhs) const
       {
         return current_ >= rhs.current_;
       }
 
-    protected:
-      T& seq_;
+    private:
+      T* seq_;
       Difference_Type current_;
     };
 
