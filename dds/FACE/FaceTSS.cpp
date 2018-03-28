@@ -887,48 +887,84 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
         readers[connection_id]->total_msgs_recvd,
         readers[connection_id]->sum_recvd_msgs_latency/readers[connection_id]->total_msgs_recvd));
   }
-  ::DDS::Subscriber_var bit_subscriber
-   = part->get_builtin_subscriber () ;
 
-  ::DDS::DataReader_var reader
-   = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
-  ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader
-   = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (reader.in ());
-  if (CORBA::is_nil (pub_reader.in ())) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) populate_header_received: failed to get BUILT_IN_PUBLICATION_TOPIC datareader.\n"));
-    return_code = FACE::NOT_AVAILABLE;
-    return;
+  DDS::UserDataQosPolicy qos_user_data;
+  DDS::LifespanQosPolicy qos_lifespan;
+  const OpenDDS::DCPS::RepoId sub = dpi->get_id();
+
+  // Test if the reader and writer share a participant
+  if (memcmp(pub.guidPrefix, sub.guidPrefix, sizeof(sub.guidPrefix)) == 0) {
+
+    Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
+    Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
+
+    // Search domain writers for the sending instance
+    while (wtrIter != writers.end()) {
+      if (wtrIter->second.dw->get_instance_handle() == sinfo.publication_handle) {
+        break;
+      }
+      ++wtrIter;
+    }
+
+    if (wtrIter == writers.end()) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) populate_header_received: failed to find matching DataWriter instance.\n"));
+      return_code = FACE::NOT_AVAILABLE;
+      return;
+    }
+
+    DDS::DataWriterQos qos;
+    wtrIter->second.dw->get_qos(qos);
+    qos_lifespan = qos.lifespan;
+    qos_user_data = qos.user_data;
+
+  } else {
+    ::DDS::Subscriber_var bit_subscriber
+     = part->get_builtin_subscriber () ;
+
+    ::DDS::DataReader_var reader
+     = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
+    ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader
+     = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (reader.in ());
+    if (CORBA::is_nil (pub_reader.in ())) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) populate_header_received: failed to get BUILT_IN_PUBLICATION_TOPIC datareader.\n"));
+      return_code = FACE::NOT_AVAILABLE;
+      return;
+    }
+
+    ::DDS::ReturnCode_t ret;
+    ::DDS::SampleInfoSeq pubinfos(1);
+    ::DDS::PublicationBuiltinTopicDataSeq pubdata(1);
+
+    ret = pub_reader->read_instance(pubdata,
+                                    pubinfos,
+                                    1,
+                                    sinfo.publication_handle,
+                                    ::DDS::ANY_SAMPLE_STATE,
+                                    ::DDS::ANY_VIEW_STATE,
+                                    ::DDS::ALIVE_INSTANCE_STATE);
+
+
+    if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
+      ACE_ERROR((LM_ERROR,
+          "(%P|%t) populate_header_received:  failed to read BIT publication data.\n"));
+      return_code = FACE::NOT_AVAILABLE;
+      return;
+    }
+
+    const CORBA::ULong i = 0;
+    qos_lifespan = pubdata[i].lifespan;
+    qos_user_data = pubdata[i].user_data;
   }
-
-  ::DDS::ReturnCode_t ret;
-  ::DDS::SampleInfoSeq pubinfos(1);
-  ::DDS::PublicationBuiltinTopicDataSeq pubdata(1);
-  ret = pub_reader->read_instance(pubdata,
-                                  pubinfos,
-                                  1,
-                                  sinfo.publication_handle,
-                                  ::DDS::ANY_SAMPLE_STATE,
-                                  ::DDS::ANY_VIEW_STATE,
-                                  ::DDS::ALIVE_INSTANCE_STATE);
-
-  if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
-    ACE_ERROR((LM_ERROR,
-        "(%P|%t) populate_header_received:  failed to read BIT publication data.\n"));
-    return_code = FACE::NOT_AVAILABLE;
-    return;
-  }
-
-  const CORBA::ULong i = 0;
 
   header.message_source_guid =
-    (pubdata[i].user_data.value[0] << 0) |
-    (pubdata[i].user_data.value[1] << 8) |
-    (pubdata[i].user_data.value[2] << 16);
+    (qos_user_data.value[0] << 0) |
+    (qos_user_data.value[1] << 8) |
+    (qos_user_data.value[2] << 16);
 
 //  ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: DW lifespan qos value: sec: %d nanosec: %d\n",
 //                         pubdata[i].lifespan.duration.sec, pubdata[i].lifespan.duration.nanosec));
 
-  DDS::Duration_t lifespan = pubdata[i].lifespan.duration;
+  DDS::Duration_t lifespan = qos_lifespan.duration;
   if (lifespan.sec != DDS::DURATION_INFINITE_SEC &&
       lifespan.nanosec != DDS::DURATION_INFINITE_NSEC) {
     // Finite lifespan.  Check if data has expired.

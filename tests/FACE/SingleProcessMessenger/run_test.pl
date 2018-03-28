@@ -33,12 +33,7 @@ if($test->flag('callback')) {
 
 $test->enable_console_logging();
 
-$test->process('Subscriber', 'Subscriber/subscriber', "$config $callback");
-$test->start_process('Subscriber');
-
-sleep 5;
-
-$test->process('Publisher', 'Publisher/publisher', "$config");
-$test->start_process('Publisher');
+$test->process('SingleProcess', 'SingleProcess/singleprocess', "$config $callback");
+$test->start_process('SingleProcess');
 
 exit $test->finish(30);

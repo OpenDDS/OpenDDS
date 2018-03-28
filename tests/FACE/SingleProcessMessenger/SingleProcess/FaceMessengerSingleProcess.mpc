@@ -1,0 +1,10 @@
+project: dcps_rtps_udp, opendds_face {
+  exename = singleprocess
+  after += FaceMessengerSingleProcessIdl
+  libs  += FaceMessengerSingleProcessIdl
+  libpaths += ../Idl
+
+  Source_Files {
+    SingleProcess.cpp
+  }
+}
