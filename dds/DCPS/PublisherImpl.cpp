@@ -141,7 +141,7 @@ PublisherImpl::create_datawriter(
     return DDS::DataWriter::_nil();
   }
 
-  dw_servant->init(a_topic,
+  dw_servant->init(
       topic_servant,
       dw_qos,
       a_listener,

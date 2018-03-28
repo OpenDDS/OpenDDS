@@ -52,9 +52,9 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , shutdown_(false)
   , passive_setup_(false)
   , passive_setup_buffer_(sizeof(ACE_UINT32))
+  , transport_during_setup_(0)
   , id_(0)
   , reconnect_thread_(0)
-  , transport_during_setup_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
@@ -75,9 +75,9 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   , transport_priority_(priority)
   , shutdown_(false)
   , passive_setup_(false)
+  , transport_during_setup_(0)
   , id_(0)
   , reconnect_thread_(0)
-  , transport_during_setup_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
   this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
