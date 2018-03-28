@@ -1959,11 +1959,11 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     ACE_Time_Value relative;
 
     // compare the time now with the earliest(smallest) deadline we found
-    if (now < smallest)
+    if (now < smallest) {
       relative = smallest - now;
-
-    else
+    } else {
       relative = ACE_Time_Value(0,1); // ASAP
+    }
 
     liveliness_timer_id_ = this->reactor()->schedule_timer(this, 0, relative);
 
