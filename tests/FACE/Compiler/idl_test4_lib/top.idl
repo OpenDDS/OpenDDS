@@ -1,0 +1,15 @@
+#include "typedef_only.idl"
+#include "struct_only.idl"
+
+module M1 {
+
+  struct S1 {
+    M2::MyTypedef key;
+    M3::MyStruct s;
+  };
+
+#pragma DCPS_DATA_TYPE "M1::S1"
+#pragma DCPS_DATA_KEY "M1::S1 key"
+
+};
+
