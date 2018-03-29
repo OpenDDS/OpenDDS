@@ -29,10 +29,10 @@ ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
              0,     // priority
              false, // is_loopback,
              false) // is_active
-  , send_strategy_( make_rch<ShmemSendStrategy>(this))
-  , recv_strategy_( make_rch<ShmemReceiveStrategy>(this))
+  , config_(0)
+  , send_strategy_(make_rch<ShmemSendStrategy>(this))
+  , recv_strategy_(make_rch<ShmemReceiveStrategy>(this))
   , peer_alloc_(0)
-  , config_(NULL)
 {
 }
 

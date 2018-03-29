@@ -893,7 +893,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   const OpenDDS::DCPS::RepoId sub = dpi->get_id();
 
   // Test if the reader and writer share a participant
-  if (memcmp(pub.guidPrefix, sub.guidPrefix, sizeof(sub.guidPrefix)) == 0) {
+  if (std::memcmp(pub.guidPrefix, sub.guidPrefix, sizeof(sub.guidPrefix)) == 0) {
 
     Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
     Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();

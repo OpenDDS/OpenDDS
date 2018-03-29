@@ -201,7 +201,6 @@ public:
    * Initialize the data members.
    */
   void init(
-    DDS::Topic_ptr                        topic,
     TopicImpl*                            topic_servant,
     const DDS::DataWriterQos &            qos,
     DDS::DataWriterListener_ptr           a_listener,

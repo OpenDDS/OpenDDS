@@ -62,6 +62,7 @@ DataWriterImpl::DataWriterImpl()
     n_chunks_(TheServiceParticipant->n_chunks()),
     association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier()),
     qos_(TheServiceParticipant->initial_DataWriterQos()),
+    db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks())),
     topic_id_(GUID_UNKNOWN),
     topic_servant_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
@@ -81,7 +82,6 @@ DataWriterImpl::DataWriterImpl()
     max_suspended_transaction_id_(0),
     monitor_(0),
     periodic_monitor_(0),
-    db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks())),
     liveliness_asserted_(false),
     liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
 {
@@ -129,7 +129,6 @@ DataWriterImpl::cleanup()
 
 void
 DataWriterImpl::init(
-  DDS::Topic_ptr                       topic,
   TopicImpl *                          topic_servant,
   const DDS::DataWriterQos &           qos,
   DDS::DataWriterListener_ptr          a_listener,
@@ -346,21 +345,20 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
   , expression_params_(params)
   , expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
-{}
+{
+  RcHandle<DomainParticipantImpl> part = participant_.lock();
+  if (part && *filter) {
+    eval_ = part->get_filter_eval(filter);
+  }
+}
 #else
   : expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
 {
   ACE_UNUSED_ARG(filterClassName);
-  ACE_UNUSED_ARG(params);
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  RcHandle<DomainParticipantImpl> participant = participant_.lock();
-  if (participant && *filter)
-    eval_ = participant->get_filter_eval(filter);
-#else
   ACE_UNUSED_ARG(filter);
+  ACE_UNUSED_ARG(params);
   ACE_UNUSED_ARG(participant);
-#endif
 }
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
