@@ -105,18 +105,13 @@ DataLink::send(TransportQueueElement* element)
     return;
   }
 
-  TransportQueueElement* test_elm = this->customize_queue_element(element);
-  if (test_elm) {
-    element = test_elm;
-  } else {
-    element->data_dropped(true);
+  element = this->customize_queue_element(element);
+  if (!element) {
     return;
   }
 
   if (this->thr_per_con_send_task_ != 0) {
-    if (this->thr_per_con_send_task_->add_request(SEND, element) == -1) {
-      element->data_dropped(true);
-    }
+    this->thr_per_con_send_task_->add_request(SEND, element);
 
   } else {
     this->send_i(element);
@@ -140,8 +135,6 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
 
   if (strategy) {
     strategy->send(element, relink);
-  } else {
-    element->data_dropped(true);
   }
 }
 
