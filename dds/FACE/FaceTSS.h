@@ -192,6 +192,7 @@ void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
     ws->detach_condition(rc);
 
     if (ret == DDS::RETCODE_TIMEOUT) {
+      typedReader->delete_readcondition(rc);
       return_code = update_status(connection_id, ret);
       return;
     }
@@ -199,6 +200,7 @@ void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
     typename DCPS::DDSTraits<Msg>::MessageSequenceType seq;
     DDS::SampleInfoSeq sinfo;
     ret = typedReader->take_w_condition(seq, sinfo, 1 /*max*/, rc);
+    typedReader->delete_readcondition(rc);
     if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
       DDS::Subscriber_var subscriber = typedReader->get_subscriber();
       DDS::DomainParticipant_var participant = subscriber->get_participant();
