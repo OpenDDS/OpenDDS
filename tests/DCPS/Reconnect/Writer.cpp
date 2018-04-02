@@ -47,6 +47,9 @@ Writer::svc ()
 
   ::DDS::InstanceHandleSeq handles;
   try {
+
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+      "(%P|%t) Writer::svc wait for get_matched_subscriptions()\n")));
     while (1)
     {
       writer_->get_matched_subscriptions(handles);
@@ -55,6 +58,9 @@ Writer::svc ()
       else
         ACE_OS::sleep(ACE_Time_Value(0,200000));
     }
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Writer::svc get_matched_subscriptions() got %lu\n"),
+      handles.length()));
 
     Messenger::MessageDataWriter_var message_dw
       = Messenger::MessageDataWriter::_narrow(writer_.in());
