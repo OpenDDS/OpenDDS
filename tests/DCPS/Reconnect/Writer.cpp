@@ -59,7 +59,7 @@ Writer::svc ()
         ACE_OS::sleep(ACE_Time_Value(0,200000));
     }
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Writer::svc get_matched_subscriptions() got %lu\n"),
+      ACE_TEXT("(%P|%t) Writer::svc get_matched_subscriptions() got %u\n"),
       handles.length()));
 
     Messenger::MessageDataWriter_var message_dw

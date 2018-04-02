@@ -232,11 +232,23 @@ if ($num_writes_before_crash > 0) {
 
 if ($sub_init_crash) {
   # Make sure publisher has started
-  if (PerlACE::waitforfile_timed($publisher_ready, 10) == -1) {
-    print STDERR "ERROR: waiting for publisher to be ready\n";
-    $status = 1;
+  # Did not use PerlACE::waitforfile_timed because it tests for a
+  # nonemtpy file.
+  my $i = 0;
+  while (1) {
+    if (-e $publisher_ready) {
+      last;
+    }
+    if ($i >= 60) {
+      print STDERR "ERROR: timedout waiting for publisher to be ready\n";
+      $status = 1;
+      last;
+    }
+    $i++;
+    sleep (1);
   }
-  # Kill or else it will timeout waiting for subscribers
+  # Kill the publisher or else it will just wait for subscribers
+  # that will never come.
   $Publisher->Kill(0);
 
 } else {
