@@ -19,9 +19,9 @@
 /subscriber_ready.txt
 /publisher_finished.txt
 /publisher_ready.txt
-/test.log
 /publisher1.log
 /publisher2.log
 /subscriber1.log
 /subscriber2.log
-
+/repo.log
+/core*
