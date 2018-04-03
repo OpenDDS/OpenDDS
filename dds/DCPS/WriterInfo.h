@@ -101,13 +101,6 @@ public:
   /// update liveliness when remove_association is called.
   void removed();
 
-  /// Update the last observed sequence number.
-  void ack_sequence(SequenceNumber value);
-
-  /// Return the most recently observed contiguous sequence number.
-  SequenceNumber ack_sequence() const;
-
-
   ACE_Time_Value activity_wait_period() const;
 
   /// Checks to see if writer has registered activity in either
@@ -129,15 +122,6 @@ public:
 
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
   ACE_Time_Value last_liveliness_activity_time_;
-
-  /// Times after which we no longer need to respond to a REQUEST_ACK message.
-  typedef std::pair<SequenceNumber, ACE_Time_Value> SeqDeadlinePair;
-  typedef OPENDDS_LIST(SeqDeadlinePair) DeadlineList;
-  DeadlineList ack_deadlines_;
-
-  DisjointSequence ack_sequence_;
-
-  bool seen_data_;
 
   // Non-negative if this a durable writer which has a timer scheduled
   long historic_samples_timer_;
