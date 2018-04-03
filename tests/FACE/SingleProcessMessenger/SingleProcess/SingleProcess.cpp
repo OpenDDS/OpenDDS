@@ -11,8 +11,8 @@
 
 #include "tests/Utils/Safety.h"
 
-bool callbackHappened = false;
-int callback_count = 0;
+volatile bool callbackHappened = false;
+volatile int callback_count = 0;
 
 void callback(FACE::TRANSACTION_ID_TYPE,
               Messenger::Message& msg,
@@ -38,7 +38,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   const char* config = argv[1];
   const bool useCallback = argc > 2 && 0 == std::strcmp(argv[2], "callback");
-  const char* subname = useCallback ? "suba" : "subb";
+  bool testPassed = true;
 
   FACE::RETURN_CODE_TYPE status;
   FACE::TS::Initialize(config, status);
@@ -55,6 +55,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                               FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
+  const char* subname = "sub";
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
   FACE::MESSAGE_SIZE_TYPE max_msg_size;
@@ -66,31 +67,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Messenger::Message msg = {"Hello, world.", 0, 0};
 
-#ifdef ACE_HAS_CDR_FIXED
-  msg.deci = FACE::Fixed("987.654");
-#endif
+  if (useCallback) {
+    ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
+    FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
+    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+  }
 
   FACE::TRANSACTION_ID_TYPE txn;
   ACE_DEBUG((LM_INFO, "Publisher: about to Send_Message()\n"));
   FACE::TS::Send_Message(pub_connId, FACE::INF_TIME_VALUE, txn, msg, pub_max_msg_size, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  bool testPassed = true;
   if (useCallback) {
-    ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
-    FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
-    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
-    FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
-    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
-    ACE_OS::sleep(15);
-    if (!callbackHappened || callback_count != 2) {
+    ACE_OS::sleep(5);
+    if (!callbackHappened || callback_count != 1) {
       ACE_ERROR((LM_ERROR, "ERROR: number callbacks seen incorrect (seen: %d "
-        "expected: 2)\n", callback_count));
+        "expected: 1)\n", callback_count));
       testPassed = false;
     }
     FACE::TS::Unregister_Callback(connId, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
-
   } else {
     const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
     FACE::TRANSACTION_ID_TYPE txn;
@@ -99,13 +95,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     FACE::TS::Receive_Message(connId, timeout, txn, msg, max_msg_size, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_DEBUG((LM_INFO, "%C\t%d\n", msg.text.in(), msg.count));
-#ifdef ACE_HAS_CDR_FIXED
-    if (msg.deci != FACE::Fixed("987.654")) {
-      const FACE::String_var decimal = msg.deci.to_string();
-      ACE_ERROR((LM_ERROR, "ERROR: invalid fixed data %C\n", decimal.in()));
-      testPassed = false;
-    }
-#endif
   }
 
   FACE::CONNECTION_NAME_TYPE name = {};
