@@ -151,9 +151,10 @@ namespace OpenDDS
       return fc;
     }
 
+    // Sample_Base static members
     std::list<std::string> Sample_Base::ns_stack_;
     std::string Sample_Base::ns_;
-
+    
     int Sample_Base::get_hf() {
       if (!field_contexts_.count(ns_)) {
         return -1;
@@ -763,10 +764,12 @@ namespace OpenDDS
           add_protocol_field(FT_STRINGZ);
           break;
 
+        /*
         default:
           throw Sample_Dissector_Error(
             get_ns()  + " is not a valid Field Type."
           );
+        */
         }
       } else if (nested_ != NULL) {
         push_ns(label_);
@@ -1343,7 +1346,7 @@ namespace OpenDDS
         } else {
           throw Sample_Dissector_Error("Error Reading Fixed Type");
         }
-#else
+#else // ACE_HAS_CDR_FIXED
         // Place Dummy value and inform user
         const char * missing_fixed = "Fixed Type Support is missing from ACE";
         if (params.use_index) {

@@ -49,7 +49,7 @@ namespace OpenDDS
     /// Namespace for arrays and sequence elements
     const std::string element_namespace = "_e";
 
-    /*
+    /**
      * The Sample_Manager is a singleton which contains a map
      * of Sample_Dissectors keyed to type identifiers. This singleton is
      * used by the greater packet-opendds dissector to find type-specific
@@ -68,16 +68,16 @@ namespace OpenDDS
 
       /// Add sample field to register later.
       void add_protocol_field(
-        int * hf_index,
-        const std::string & full_name, const std::string & short_name,
+        int* hf_index,
+        const std::string& full_name, const std::string& short_name,
         enum ftenum ft, field_display_e fd = BASE_NONE
       );
 
       /// Add a premade hf_register_info struct to register later
       void add_protocol_field(hf_register_info field);
 
-      /// What is passed to wireshark
-      hf_register_info * fields_array();
+      /// Field information to be passed to wireshark
+      hf_register_info* fields_array();
       size_t number_of_fields();
 
     private:
@@ -87,10 +87,10 @@ namespace OpenDDS
       DissectorsType dissectors_;
 
       std::vector<hf_register_info> hf_vector_;
-      hf_register_info * hf_array_;
+      hf_register_info* hf_array_;
 
       /// Dynamic Field Names (Long and Short) to be deleted later
-      std::list<char *> field_names_;
+      std::list<char*> field_names_;
 
       void init_from_file (const ACE_TCHAR *filename);
     };

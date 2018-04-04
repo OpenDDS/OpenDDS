@@ -52,20 +52,19 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 {
   return tvb_get_string_enc(alloc, tvb, offset, length, ENC_ASCII);
 }
-#else
+#else // Before 2.2
 #define ws_tvb_get_string ::tvb_get_string
 #endif
 
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 2, 0)
 #define WS_DISSECTOR_RETURN_TYPE int
-#define WS_DISSECTOR_RETURN_VALUE return 0; //TODO
+#define WS_DISSECTOR_RETURN_INT
 #define ws_dissector_add_handle dissector_add_for_decode_as
 #define WS_CONV_IDX conv_index
 // create_dissector_handle wants the new dissector_t here
 #define WS_DISSECTOR_EXTRA_PARAM ,void*
-#else
+#else // Before 2.2
 #define WS_DISSECTOR_RETURN_TYPE void
-#define WS_DISSECTOR_RETURN_VALUE
 #define ws_dissector_add_handle dissector_add_handle
 #define WS_CONV_IDX index
 #define WS_DISSECTOR_EXTRA_PARAM
@@ -78,7 +77,7 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 #define WS_HEUR_DISSECTOR_EXTRA_ARGS1(ucase, lcase) \
   "OpenDDS over " #ucase, "opendds_" #lcase,
 #define WS_HEUR_DISSECTOR_EXTRA_ARGS2 , HEURISTIC_ENABLE
-#else
+#else // Before 2.0
 #define WS_1
 #define WS_DISSECTOR_EXTRA_ARG
 #define ws_tvb_length tvb_length
@@ -119,7 +118,7 @@ typedef int field_display_e; // Dummy type for code outside NO_ITL blocks
 #if (WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1,8,0) )
 #define WS_CONST const
 #define WS_HEUR_DISSECTOR_T_EXTRA_PARAM ,void*
-#else
+#else // Before 1.8
 #define WS_CONST
 #define WS_HEUR_DISSECTOR_T_EXTRA_PARAM
 #endif

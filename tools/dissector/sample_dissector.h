@@ -63,11 +63,22 @@ namespace OpenDDS
 
     };
 
-    /// Bundle of Parameters passed between the recursive dissection calls.
+    /**
+     * Bundle of Parameters passed between the recursive dissection calls
+     * that represents the state of the dissector at any point in the sample
+     * dissection.
+     */
     class Wireshark_Bundle {
     public:
       ACE_Message_Block block;
       Serializer serializer;
+
+      /**
+       * In order to use the DCPS Serializer, we must pass over the packet
+       * twice, once to just get the size from Serializer and ignore the data
+       * and again so we can pass the field size to Wireshark for trees before
+       * we fully dissect them.
+       */
       bool get_size_only;
 
       tvbuff_t* tvb;
@@ -75,14 +86,16 @@ namespace OpenDDS
       proto_tree* tree;
       size_t offset;
 #ifndef NO_EXPERT
-      expert_field * warning_ef;
+      expert_field* warning_ef;
 #endif
 
+      /// Defines if we are in a indexed structure (Array or Sequence)
       bool use_index;
+      /// Defines the index if use_index is true.
       guint32 index;
 
       Wireshark_Bundle(
-        char * data, size_t size, bool swap_bytes, Serializer::Alignment align
+        char* data, size_t size, bool swap_bytes, Serializer::Alignment align
       );
       Wireshark_Bundle(const Wireshark_Bundle & other);
 
@@ -128,15 +141,20 @@ namespace OpenDDS
 
       /// Traverse the Dissector Tree nodes to build the Sample Payload Tree.
       /// This is to be done after the ITL files have been parsed and before
-      /// Dissection.
+      /// dissection of any packets.
       virtual void init_ws_fields() = 0;
 
+      /// Get the full namespace including the "opendds.sample.payload..."
       static std::string get_ns();
+      /// Append a name to the end of the namespace
       static void push_ns(const std::string & name);
+      /// Remove the last name from the namepspace
       static std::string pop_ns();
+      /// Reset the nameps
       static void clear_ns();
+      /// Get the last name in the namespace
       static std::string get_label();
-
+      
     };
 
     class dissector_Export Sample_Dissector;
