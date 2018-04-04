@@ -223,10 +223,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1;
     }
 
-    TransportInst* inst = TheTransportRegistry->create_inst("my_rtps",
+    TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
                                                                "rtps_udp");
 
-    RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst);
+    RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
 #ifdef OPENDDS_SAFETY_PROFILE
     if (host == "localhost") {
       host = "127.0.0.1";

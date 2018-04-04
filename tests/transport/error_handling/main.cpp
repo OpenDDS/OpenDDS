@@ -33,13 +33,13 @@ bool testConnectionErrorHandling()
   acceptor.get_local_addr(addr);
   portNum = addr.get_port_number();
 
-  OpenDDS::DCPS::TransportInst* inst =
+  OpenDDS::DCPS::TransportInst_rch inst =
     TheTransportRegistry->create_inst("tcp1", "tcp");
-  OpenDDS::DCPS::TcpInst* tcp_inst =
-    dynamic_cast<OpenDDS::DCPS::TcpInst*>(inst);
+  OpenDDS::DCPS::TcpInst_rch tcp_inst =
+    OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
 
   DDS_TEST test;
-  acceptor.get_local_addr(test.local_address(tcp_inst));
+  acceptor.get_local_addr(test.local_address(tcp_inst.in()));
 
   OpenDDS::DCPS::TransportConfig_rch cfg =
     TheTransportRegistry->create_config("cfg");

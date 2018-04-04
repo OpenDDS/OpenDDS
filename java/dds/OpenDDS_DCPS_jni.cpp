@@ -36,6 +36,7 @@
 #include "dds/DCPS/transport/udp/UdpInst_rch.h"
 #include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h"
+#include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/EntityImpl.h"
@@ -179,7 +180,7 @@ CppClass* recoverCppObj(JNIEnv *jni, jobject jThis)
 }
 
 jobject constructTransportInst(JNIEnv *jni,
-                               OpenDDS::DCPS::TransportInst* inst)
+                               OpenDDS::DCPS::TransportInst_rch inst)
 {
     jclass instClazz = 0;
     if (inst->transport_type_ == "tcp") {
@@ -195,7 +196,7 @@ jobject constructTransportInst(JNIEnv *jni,
     }
     jmethodID ctor = jni->GetMethodID(instClazz, "<init>", "(J)V");
     return jni->NewObject(instClazz, ctor,
-                          reinterpret_cast<jlong>(inst));
+                          reinterpret_cast<jlong>(inst._retn()));
 }
 
 // TheTransportRegistry
@@ -208,7 +209,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_create_1inst
   JStringMgr jsm_tt(jni, transport_type);
 
   try {
-    OpenDDS::DCPS::TransportInst* inst =
+    OpenDDS::DCPS::TransportInst_rch inst =
       TheTransportRegistry->create_inst(jsm_name.c_str(), jsm_tt.c_str());
     return constructTransportInst(jni, inst);
   } catch (const CORBA::SystemException &se) {
@@ -228,7 +229,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_get_1inst
   JStringMgr jsm_name(jni, name);
 
   try {
-    OpenDDS::DCPS::TransportInst* inst =
+    OpenDDS::DCPS::TransportInst_rch inst =
       TheTransportRegistry->get_inst(jsm_name.c_str());
     return constructTransportInst(jni, inst);
   } catch (const CORBA::SystemException &se) {
@@ -238,6 +239,23 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_get_1inst
   } catch (const OpenDDS::DCPS::Transport::Exception &te) {
     throw_java_exception(jni, te);
     return 0;
+  }
+}
+
+// TheTransportRegistry::remove_inst
+void JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_remove_1inst
+(JNIEnv * jni, jclass, jobject jobj)
+{
+  try {
+    OpenDDS::DCPS::TransportInst_rch inst = rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, jobj));
+    if (inst != 0) {
+      TheTransportRegistry->remove_inst(inst);
+    }
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+
+  } catch (const OpenDDS::DCPS::Transport::Exception &te) {
+    throw_java_exception(jni, te);
   }
 }
 
@@ -420,7 +438,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_addLast
 (JNIEnv * jni, jobject jthis, jobject inst_jobj)
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
-  OpenDDS::DCPS::TransportInst* inst = recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, inst_jobj);
+  OpenDDS::DCPS::TransportInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportInst>(jni, inst_jobj));
   config->instances_.push_back(inst);
 }
 
@@ -438,7 +456,7 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getInstance
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
   if (index < static_cast<jlong>(config->instances_.size())) {
-    OpenDDS::DCPS::TransportInst* inst = config->instances_[static_cast<std::size_t>(index)];
+    OpenDDS::DCPS::TransportInst_rch inst = config->instances_[static_cast<std::size_t>(index)];
     return constructTransportInst(jni, inst);
   }
   return 0;

@@ -182,7 +182,7 @@ ManagerImpl::initialize()
 
   std::string inst_name = OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
     + std::string("FederationBITTCPTransportInst");
-  OpenDDS::DCPS::TransportInst* inst =
+  OpenDDS::DCPS::TransportInst_rch inst =
     OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
                                                               "tcp");
   config->instances_.push_back(inst);

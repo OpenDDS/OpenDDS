@@ -43,7 +43,7 @@ RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   // the user needs to explicitly configure it...
 #ifdef OPENDDS_SAFETY_PROFILE
   // ...except for Safety Profile where RTPS is the only option.
-  TransportInst* default_inst =
+  TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           OPENDDS_STRING("0600_RTPS_UDP"),
                           RTPS_UDP_NAME);

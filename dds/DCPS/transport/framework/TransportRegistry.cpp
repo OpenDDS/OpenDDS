@@ -30,8 +30,8 @@ namespace {
   const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
 
   /// Used for sorting
-  bool predicate(OpenDDS::DCPS::TransportInst* lhs,
-                 OpenDDS::DCPS::TransportInst* rhs)
+  bool predicate(const OpenDDS::DCPS::TransportInst_rch& lhs,
+                 const OpenDDS::DCPS::TransportInst_rch& rhs)
   {
     return lhs->name() < rhs->name();
   }
@@ -95,7 +95,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 
   // Record the transport instances created, so we can place them
   // in the implicit transport configuration for this file.
-  OPENDDS_LIST(TransportInst*) instances;
+  OPENDDS_LIST(TransportInst_rch) instances;
 
   ACE_TString sect_name;
 
@@ -153,7 +153,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             // Create the TransportInst object and load the transport
             // configuration in ACE_Configuration_Heap to the TransportInst
             // object.
-            TransportInst* inst = create_inst(transport_id, transport_type);
+            TransportInst_rch inst = create_inst(transport_id, transport_type);
             if (!inst) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -287,7 +287,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
     TransportConfig_rch config = configInfoVec[i].first;
     OPENDDS_VECTOR(OPENDDS_STRING)& insts = configInfoVec[i].second;
     for (unsigned int j = 0; j < insts.size(); ++j) {
-      TransportInst* inst = get_inst(insts[j]);
+      TransportInst_rch inst = get_inst(insts[j]);
       if (!inst) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -311,7 +311,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                        -1);
     }
     instances.sort(predicate);
-    for (OPENDDS_LIST(TransportInst*)::const_iterator it = instances.begin();
+    for (OPENDDS_LIST(TransportInst_rch)::const_iterator it = instances.begin();
          it != instances.end(); ++it) {
       config->instances_.push_back(*it);
     }
@@ -337,7 +337,7 @@ TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type)
 #endif
 }
 
-TransportInst*
+TransportInst_rch
 TransportRegistry::create_inst(const OPENDDS_STRING& name,
                                const OPENDDS_STRING& transport_type)
 {
@@ -358,7 +358,7 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
                  ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
                  ACE_TEXT("transport_type=%C is not registered.\n"),
                  transport_type.c_str()));
-      return 0;
+      return TransportInst_rch();
 #if !defined(ACE_AS_STATIC_LIBS)
     }
 #endif
@@ -369,23 +369,23 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
                ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
                ACE_TEXT("name=%C is already in use.\n"),
                name.c_str()));
-    return 0;
+    return TransportInst_rch();
   }
-  RcHandle<TransportInst> inst (type->new_inst(name));
+  TransportInst_rch inst (type->new_inst(name));
   inst_map_[name] = inst;
-  return inst.in();
+  return inst;
 }
 
 
-TransportInst*
+TransportInst_rch
 TransportRegistry::get_inst(const OPENDDS_STRING& name) const
 {
   GuardType guard(lock_);
   InstMap::const_iterator found = inst_map_.find(name);
   if (found != inst_map_.end()) {
-    return found->second.in();
+    return found->second;
   }
-  return 0;
+  return TransportInst_rch();
 }
 
 
@@ -497,6 +497,11 @@ TransportRegistry::release()
     iter->second->shutdown();
   }
 
+  type_map_.clear();
+  inst_map_.clear();
+  config_map_.clear();
+  domain_default_config_map_.clear();
+  global_config_.reset();
 }
 
 bool

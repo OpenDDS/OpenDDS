@@ -39,10 +39,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
     TransportConfig_rch config =
       TransportRegistry::instance()->create_config("rtps_interop_demo");
-    TransportInst* inst =
+    TransportInst_rch inst =
       TransportRegistry::instance()->create_inst("the_rtps_transport",
                                                  "rtps_udp");
-    RtpsUdpInst* rui = static_cast<RtpsUdpInst*>(inst);
+    RtpsUdpInst_rch rui = static_rchandle_cast<RtpsUdpInst>(inst);
     rui->handshake_timeout_ = 1;
 
     config->instances_.push_back(inst);

@@ -14,6 +14,7 @@
 #include "TransportReactorTask_rch.h"
 #include "TransportType.h"
 #include "TransportType_rch.h"
+#include "TransportInst_rch.h"
 #include "TransportConfig_rch.h"
 #include "TransportConfig.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -54,9 +55,10 @@ public:
   /// framework.
   void release();
 
-  TransportInst* create_inst(const OPENDDS_STRING& name,
-                             const OPENDDS_STRING& transport_type);
-  TransportInst* get_inst(const OPENDDS_STRING& name) const;
+  TransportInst_rch create_inst(const OPENDDS_STRING& name,
+                                const OPENDDS_STRING& transport_type);
+  TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
+  void remove_inst(const TransportInst_rch& inst);
 
   static const char DEFAULT_CONFIG_NAME[];
   static const char DEFAULT_INST_PREFIX[];

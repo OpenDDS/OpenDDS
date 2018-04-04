@@ -97,11 +97,11 @@
       <xsl:text>Inst</xsl:text>
     </xsl:variable>
     <xsl:value-of select="concat(
-        '  OpenDDS::DCPS::TransportInst*', $varname, ' = ', $newline,
+        '  OpenDDS::DCPS::TransportInst_rch ', $varname, ' = ', $newline,
         '      TheTransportRegistry->get_inst(&quot;', $transportinstname, '&quot;);',
         $newline)"/>
     <xsl:value-of select="concat(
-        '  if (!', $varname, ') {',
+        '  if (', $varname, '.is_nil()) {',
         $newline
     )"/>
     <xsl:value-of select="concat(
@@ -110,9 +110,9 @@
         '&quot;', $transport-type, '&quot;);', $newline
     )"/>
     <xsl:value-of select="concat(
-        '    ', $transport-class, '* child_inst =', $newline,
-        '        static_cast&lt;', $transport-class,
-        '*&gt;(', $varname, ');', $newline)"/>
+        '    ', $transport-class, '_rch child_inst =', $newline,
+        '        OpenDDS::DCPS::static_rchandle_cast&lt;', $transport-class,
+        '&gt;(', $varname, ');', $newline)"/>
     <xsl:apply-templates select="*"/>
     <xsl:text>  }
 

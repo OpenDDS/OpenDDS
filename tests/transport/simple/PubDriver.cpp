@@ -196,7 +196,7 @@ PubDriver::init()
 {
   DBG_ENTRY("PubDriver","init");
 
-  OpenDDS::DCPS::TransportInst* inst;
+  OpenDDS::DCPS::TransportInst_rch inst;
 
   if (shmem_) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   Create a new ShmemInst object.\n"));
@@ -208,8 +208,8 @@ PubDriver::init()
 
     inst = TheTransportRegistry->create_inst("tcp1", "tcp");
 
-    OpenDDS::DCPS::TcpInst* tcp_inst =
-      dynamic_cast<OpenDDS::DCPS::TcpInst*>(inst);
+    OpenDDS::DCPS::TcpInst_rch tcp_inst =
+      OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                "Set the inst->local_address_ to our (local) pub_addr_.\n"));

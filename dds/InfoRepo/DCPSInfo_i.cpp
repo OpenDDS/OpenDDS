@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"
+#include "dds/DCPS/transport/framework/TransportInst_rch.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
 #include "UpdateManager.h"
@@ -2199,13 +2200,13 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     std::string inst_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
       + std::string("InfoRepoBITTCPTransportInst");
-    OpenDDS::DCPS::TransportInst* inst =
+    OpenDDS::DCPS::TransportInst_rch inst =
       OpenDDS::DCPS::TransportRegistry::instance()->create_inst(inst_name,
                                                                "tcp");
     config->instances_.push_back(inst);
 
-    OpenDDS::DCPS::TcpInst* tcp_inst =
-      dynamic_cast<OpenDDS::DCPS::TcpInst*>(inst);
+    OpenDDS::DCPS::TcpInst_rch tcp_inst =
+      OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
     inst->datalink_release_delay_ = 0;
 
     tcp_inst->conn_retry_attempts_ = 0;

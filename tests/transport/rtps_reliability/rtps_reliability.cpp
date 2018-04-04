@@ -675,9 +675,9 @@ struct ReactorTask : ACE_Task_Base {
 
 void transport_setup()
 {
-  TransportInst* inst =
+  TransportInst_rch inst =
     TheTransportRegistry->create_inst("my_rtps", "rtps_udp");
-  RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst);
+  RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
   if (!rtps_inst) {
     std::cerr << "ERROR: Could not cast to RtpsUdpInst\n";
     return;
