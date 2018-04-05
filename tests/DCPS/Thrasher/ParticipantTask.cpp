@@ -69,8 +69,9 @@ ParticipantTask::svc()
         config_name));
       OpenDDS::DCPS::TransportConfig_rch config =
         TheTransportRegistry->create_config(config_name);
-      config->instances_.push_back(
-        TheTransportRegistry->create_inst(inst_name, "rtps_udp"));
+      OpenDDS::DCPS::TransportInst_rch inst =
+        TheTransportRegistry->create_inst(inst_name, "rtps_udp");
+      config->instances_.push_back(inst);
       TheTransportRegistry->bind_config(config_name, participant);
 #endif
 

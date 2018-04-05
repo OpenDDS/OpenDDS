@@ -133,7 +133,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   const size_t n = tc->instances_.size();
 
   for (size_t i = 0; i < n; ++i) {
-    TransportInst* inst = tc->instances_[i];
+    TransportInst_rch inst = tc->instances_[i];
 
     if (check_transport_qos(*inst)) {
       TransportImpl* impl = inst->impl();

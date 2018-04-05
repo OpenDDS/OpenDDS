@@ -56,10 +56,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(TheServiceParticipant->federation_backoff_multiplier() == 3);
     TEST_CHECK(TheServiceParticipant->federation_liveliness() == 70);
 
-    TransportInst* inst = TransportRegistry::instance()->get_inst("mytcp");
+    TransportInst_rch inst = TransportRegistry::instance()->get_inst("mytcp");
     TEST_CHECK(inst);
 
-    TcpInst* tcp_inst = dynamic_cast<TcpInst*>(inst);
+    TcpInst_rch tcp_inst = dynamic_rchandle_cast<TcpInst>(inst);
     TEST_CHECK(tcp_inst);
 
     // tcp_inst->dump(std::cout);
@@ -81,7 +81,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(tcp_inst->passive_reconnect_duration_ == 4000);
     TEST_CHECK(tcp_inst->max_output_pause_period_ == 1000);
 
-    TransportInst* inst2 = TransportRegistry::instance()->get_inst("anothertcp");
+    TransportInst_rch inst2 = TransportRegistry::instance()->get_inst("anothertcp");
     TEST_CHECK(inst2);
     TEST_CHECK(inst2->name() == "anothertcp");
 

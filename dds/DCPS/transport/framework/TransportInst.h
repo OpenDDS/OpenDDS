@@ -58,7 +58,7 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  void dump() const ;
+  void dump() const;
   virtual OPENDDS_STRING dump_to_str() const;
 
   /// Format name of transport configuration parameter for use in
