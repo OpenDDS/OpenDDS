@@ -86,8 +86,13 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
 OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
-  if (reconnect_thread_)
-      ACE_Thread_Manager::instance()->join(reconnect_thread_);
+  if (reconnect_thread_ &&
+    // This is for Windows, where join doesn't check if the thread is the same
+    // and the thread will hang itself if it tries to join itself.
+    !ACE_OS::thr_equal(ACE_OS::thr_self(), reconnect_thread_)
+  ) {
+    ACE_Thread_Manager::instance()->join(reconnect_thread_);
+  }
 }
 
 OpenDDS::DCPS::TcpSendStrategy_rch
