@@ -54,6 +54,9 @@ namespace OpenDDS {
             break;
 
           case URI_DATA:
+			  k_ = EVP_PKEY_from_pem_data(path, password);
+			  break;
+
           case URI_PKCS11:
           case URI_UNKNOWN:
           default:
@@ -176,6 +179,57 @@ namespace OpenDDS {
 
         return result;
       }
+
+	  EVP_PKEY* PrivateKey::EVP_PKEY_from_pem_data(const std::string& path, const std::string& password)
+	  {
+		  DDS::OctetSeq original_bytes;
+
+		  // The minus 1 is because path contains a comma in element 0 and that comma
+		  // is not included in the cert string
+		  original_bytes.length(path.size() - 1);
+		  std::memcpy(original_bytes.get_buffer(), &path[1], original_bytes.length());
+
+		  // To appease the other DDS security implementations which
+		  // append a null byte at the end of the cert.
+		  original_bytes.length(original_bytes.length() + 1);
+		  original_bytes[original_bytes.length() - 1] = 0;
+
+		  EVP_PKEY* result = NULL;
+		  BIO* filebuf = BIO_new(BIO_s_mem());
+
+		  if (filebuf)
+		  {
+			  if (0 >= BIO_write(filebuf, original_bytes.get_buffer(), original_bytes.length()))
+			  {
+				  OPENDDS_SSL_LOG_ERR("BIO_write failed");
+			  }
+
+			  if (password != "") {
+				  result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, (void*)password.c_str());
+
+				  if (!result) 
+				  {
+					  OPENDDS_SSL_LOG_ERR("PEM_read_bio_PrivateKey failed");
+				  }
+			  }
+			  else {
+				  result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, NULL);
+
+				  if (!result) {
+					  OPENDDS_SSL_LOG_ERR("PEM_read_bio_PrivateKey failed");
+				  }
+			  }
+
+			  BIO_free(filebuf);
+		  }
+		  else
+		  {
+			  std::stringstream errmsg; errmsg << "failed to create data '" << path << "' using BIO_new";
+			  OPENDDS_SSL_LOG_ERR(errmsg.str());
+		  }
+
+		  return result;
+	  }
 
     }
   }

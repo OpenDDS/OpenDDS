@@ -64,6 +64,10 @@ namespace OpenDDS {
             break;
 
           case URI_DATA:
+			  load_cert_data_bytes(path);
+			  x_ = x509_from_pem(original_bytes_, password);
+			  break;
+
           case URI_PKCS11:
           case URI_UNKNOWN:
           default:
@@ -351,6 +355,19 @@ namespace OpenDDS {
           fclose(fp);
         }
       }
+
+	  void Certificate::load_cert_data_bytes(const std::string& path)
+	  {
+		  // The minus 1 is because path contains a comma in element 0 and that comma
+		  // is not included in the cert string
+		  original_bytes_.length(path.size() - 1);
+		  std::memcpy(original_bytes_.get_buffer(), &path[1], original_bytes_.length());
+
+		  // To appease the other DDS security implementations which
+		  // append a null byte at the end of the cert.
+		  original_bytes_.length(original_bytes_.length() + 1);
+		  original_bytes_[original_bytes_.length() - 1] = 0;
+	  }
 
       X509* Certificate::x509_from_pem(const std::string& path, const std::string& password)
       {

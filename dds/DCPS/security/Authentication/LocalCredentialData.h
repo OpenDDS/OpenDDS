@@ -76,6 +76,8 @@ namespace OpenDDS {
 
       void load_permissions_file(const std::string& path);
 
+	  void load_permissions_data(const std::string & path);
+
       SSL::Certificate::unique_ptr ca_cert_;
       SSL::Certificate::unique_ptr participant_cert_;
       SSL::PrivateKey::unique_ptr participant_pkey_;

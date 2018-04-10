@@ -39,6 +39,8 @@ namespace OpenDDS {
 
         static EVP_PKEY* EVP_PKEY_from_pem(const std::string& path, const std::string& password = "");
 
+		EVP_PKEY* EVP_PKEY_from_pem_data(const std::string & path, const std::string & password);
+
         EVP_PKEY* k_;
       };
 

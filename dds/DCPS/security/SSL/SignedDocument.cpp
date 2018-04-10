@@ -59,6 +59,13 @@ namespace OpenDDS {
             break;
 
           case URI_DATA:
+			  doc_ = PKCS7_from_DATA(path);
+
+			  if (doc_)
+				  cache_plaintext();
+
+			  break;
+
           case URI_PKCS11:
           case URI_UNKNOWN:
           default:
@@ -274,6 +281,48 @@ namespace OpenDDS {
 
         return result;
       }
+
+	  PKCS7* SignedDocument::PKCS7_from_DATA(const std::string& path)
+	  {
+		  DDS::OctetSeq original_bytes;
+
+		  // The minus 1 is because path contains a comma in element 0 and that comma
+		  // is not included in the cert string
+		  original_bytes.length(path.size() - 1);
+		  std::memcpy(original_bytes.get_buffer(), &path[1], original_bytes.length());
+
+		  // To appease the other DDS security implementations which
+		  // append a null byte at the end of the cert.
+		  original_bytes.length(original_bytes.length() + 1);
+		  original_bytes[original_bytes.length() - 1] = 0;
+
+		  PKCS7* result = NULL;
+		  BIO* filebuf = BIO_new(BIO_s_mem());
+
+		  if (filebuf)
+		  {
+			  if (0 >= BIO_write(filebuf, original_bytes.get_buffer(), original_bytes.length())) 
+			  {
+				  OPENDDS_SSL_LOG_ERR("BIO_write failed");
+			  }
+
+			  result = SMIME_read_PKCS7(filebuf, &content_);
+
+			  if (!result) {
+				  OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
+				  content_ = NULL;
+			  }
+
+			  BIO_free(filebuf);
+		  }
+		  else
+		  {
+			  std::stringstream errmsg; errmsg << "failed to create data '" << path << "' using BIO_new";
+			  OPENDDS_SSL_LOG_ERR(errmsg.str());
+		  }
+
+		  return result;
+	  }
 
       bool operator==(const SignedDocument& lhs, const SignedDocument& rhs)
       {
