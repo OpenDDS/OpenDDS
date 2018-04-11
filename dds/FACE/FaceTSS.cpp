@@ -652,9 +652,7 @@ namespace {
         if (config.is_nil()) return INVALID_PARAM;
         try {
           TheTransportRegistry->bind_config(config, pub);
-        } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
-          return INVALID_PARAM;
-        } catch (const OpenDDS::DCPS::Transport::NotFound&) {
+        } catch (const OpenDDS::DCPS::Transport::Exception&) {
           return INVALID_PARAM;
         }
       }
@@ -687,7 +685,7 @@ namespace {
         if (config.is_nil()) return INVALID_PARAM;
         try {
           TheTransportRegistry->bind_config(config, sub);
-        } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
+        } catch (const OpenDDS::DCPS::Transport::Exception&) {
           return INVALID_PARAM;
         }
       }
