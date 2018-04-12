@@ -1331,21 +1331,6 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
       const SequenceNumber defaultSN;
       SequenceRange resetRange(defaultSN, header.sequence_);
 
-      if (writer->seen_data_ && !header.sequence_repair_) {
-        // Data samples should be acknowledged prior to any
-        // reader-side filtering to ensure discontinuities
-        // are not unintentionally introduced.
-        writer->ack_sequence(header.sequence_);
-
-      } else {
-        // In order to properly track out of order delivery,
-        // a baseline must be established based on the first
-        // data sample received.
-        writer->seen_data_ = true;
-        writer->ack_sequence_.reset();
-        writer->ack_sequence_.insert(resetRange);
-      }
-
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       if (header.coherent_change_) {
         if (writer->coherent_samples_ == 0) {
@@ -2212,7 +2197,6 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
 
   //update the state to DEAD.
   info.state_ = WriterInfo::DEAD;
-  info.seen_data_ = false;
 
   if (this->monitor_) {
     this->monitor_->report();
