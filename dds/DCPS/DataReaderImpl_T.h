@@ -1085,6 +1085,8 @@ protected:
         if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
             && !cft->filter(*data)) {
           filtered = true;
+          ACE_DES_FREE(data, data_allocator_->free, MessageType);
+          data = 0;
           return;
         }
       }
