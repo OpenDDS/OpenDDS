@@ -1,3 +1,11 @@
+Version 3.12.2 of OpenDDS
+
+##### Fixes:
+- Removed unused sequence number tracking in DataReaderImpl
+- Fixed a memory leak in content filtering on the subscriber side
+
+_______________________________________________________________________________
+
 Version 3.12.1 of OpenDDS
 
 ##### Fixes:
