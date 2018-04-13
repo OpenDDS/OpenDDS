@@ -290,7 +290,17 @@ namespace OpenDDS
       std::ifstream str(filename);
       itl::Dictionary d;
       bool no_dcps_data_types = true;
+
+      /*
+       * To reduce the number of fields we create in Wireshark, we just
+       * want to initialize fields off based on the primary data types as
+       * the bases. The TAO IDL compiler will mark them in ITL files after
+       * OpenDDS 3.12. ITL files created at and before 3.12 will work but
+       * will populate Wireshark with more fields in the auto complete than
+       * necessary.
+       */
       DissectorsType primary_dissectors;
+
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("Found Dissector ITL File: %C\n"),
         filename));

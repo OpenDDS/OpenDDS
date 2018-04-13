@@ -154,7 +154,7 @@ namespace OpenDDS
     // Sample_Base static members
     std::list<std::string> Sample_Base::ns_stack_;
     std::string Sample_Base::ns_;
-    
+
     int Sample_Base::get_hf() {
       if (!field_contexts_.count(ns_)) {
         return -1;

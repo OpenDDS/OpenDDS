@@ -43,8 +43,11 @@ namespace OpenDDS
   namespace DCPS
   {
 
-    /// Thrown when there is a inconsistency in the sample dissection.
-    /// Packet should be marked by wireshark.
+    /**
+     * Thrown when there is a inconsistency in the sample dissection or
+     * initialization of the fields.
+     * Packet will be marked by Wireshark, if thrown during dissection.
+     */
     class Sample_Dissector_Error : public std::exception {
     public:
       explicit Sample_Dissector_Error(const std::string & message)
@@ -65,8 +68,7 @@ namespace OpenDDS
 
     /**
      * Bundle of Parameters passed between the recursive dissection calls
-     * that represents the state of the dissector at any point in the sample
-     * dissection.
+     * that represents most of the state of the dissector.
      */
     class Wireshark_Bundle {
     public:
@@ -77,7 +79,7 @@ namespace OpenDDS
        * In order to use the DCPS Serializer, we must pass over the packet
        * twice, once to just get the size from Serializer and ignore the data
        * and again so we can pass the field size to Wireshark for trees before
-       * we fully dissect them.
+       * we pass the rest of the field data to Wireshark.
        */
       bool get_size_only;
 
@@ -150,11 +152,11 @@ namespace OpenDDS
       static void push_ns(const std::string & name);
       /// Remove the last name from the namepspace
       static std::string pop_ns();
-      /// Reset the nameps
+      /// Reset the namespace
       static void clear_ns();
       /// Get the last name in the namespace
       static std::string get_label();
-      
+
     };
 
     class dissector_Export Sample_Dissector;
@@ -242,7 +244,7 @@ namespace OpenDDS
       Sample_Field *next_;
     };
 
-    /*
+    /**
      * A Sample_Dissector is the base type dissector for samples. A sample base
      * instance is initialized with a list of fields that is used to walk
      * through a data buffer to compose a tree of named values.
@@ -283,10 +285,9 @@ namespace OpenDDS
       Sample_Field *add_field (Sample_Field::IDLTypeID, const std::string &l);
       Sample_Field *add_field (Sample_Dissector *n, const std::string &l);
 
-      /// Traverse the Dissector Tree nodes to build the Sample Payload Tree.
-      /// This is to be done after the ITL files have been parsed and before
-      /// Dissection.
+      /// Run init_ws_fields on the childern of the Sample_Dissector
       void init_ws_proto_tree();
+
       virtual void init_ws_fields();
 
       /// The actual dissector method. Since a sample can be composed of
@@ -395,7 +396,6 @@ namespace OpenDDS
      * determined by the discriminator.
      *
      */
-
     class dissector_Export Sample_Union : public Sample_Dissector
     {
     public:
