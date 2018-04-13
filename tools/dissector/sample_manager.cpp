@@ -370,9 +370,9 @@ namespace OpenDDS
         // Push namespace when we find a '/'
         name.push_back('/'); // For last namespace
         l = 0;
-        for (size_t i = 0; i != name.size(); i++) {
-            if (name[i] == '/') {
-                Sample_Base::push_ns(name.substr(i - l, l));
+        for (size_t index = 0; index != name.size(); index++) {
+            if (name[index] == '/') {
+                Sample_Base::push_ns(name.substr(index - l, l));
                 l = 0;
             } else {
                 l++;
