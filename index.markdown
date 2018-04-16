@@ -30,8 +30,5 @@ OpenDDS is an open source C++ implementation of the Object Management Group (OMG
 {% if site.github.releases.size > 6 %}
 - [See all releases on GitHub]({{site.github.releases_url}})
 {% endif %}
-<p>
-  <b>*** The NEWS link does not seem to be working? ***</b>
-</p>
-The [NEWS](http://raw.githubusercontent.com/objectcomputing/OpenDDS/{{latest_rel.tag_name}}/NEWS) file contains release notes for all previous releases.
+The [NEWS](http://raw.githubusercontent.com/objectcomputing/OpenDDS/{{latest_rel.tag_name}}/NEWS.md) file contains release notes for all previous releases.
 {% endif %}
