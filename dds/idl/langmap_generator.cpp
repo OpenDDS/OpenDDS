@@ -388,16 +388,16 @@ public:
     const Classification cls = classify(actual_field_type);
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       ss <<
-        "      this->_u." << name << " = other._u." << name << ";\n";
+        "    this->_u." << name << " = other._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "      this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
+        "  this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       ss <<
-        "      this->_u." << name << " = (other._u." << name << ") ? new " << map_type(field_type) << "(*other._u." << name << ") : 0;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? new " << map_type(field_type) << "(*other._u." << name << ") : 0;\n";
     } else {
       std::cerr << "Unsupported type for union element\n";
     }
@@ -415,17 +415,17 @@ public:
     const Classification cls = classify(actual_field_type);
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       ss <<
-        "      return this->_u." << name << " == rhs._u." << name << ";\n";
+        "    return this->_u." << name << " == rhs._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "      return std::strcmp (this->_u." << name << ", rhs._u." << name << ") == 0 ;\n";
+        "    return std::strcmp (this->_u." << name << ", rhs._u." << name << ") == 0 ;\n";
     } else if (cls & CL_ARRAY) {
       // TODO
       ss <<
-        "      return false;\n";
+        "    return false;\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       ss <<
-        "      return *this->_u." << name << " == *rhs._u." << name << ";\n";
+        "    return *this->_u." << name << " == *rhs._u." << name << ";\n";
     } else {
       std::cerr << "Unsupported type for union element\n";
     }
@@ -445,16 +445,16 @@ public:
       // Do nothing.
     } else if (cls & CL_STRING) {
       ss <<
-        "      ::CORBA::string_free(this->_u." << name << ");\n"
-        "      this->_u." << name << " = 0;\n";
+        "    ::CORBA::string_free(this->_u." << name << ");\n"
+        "    this->_u." << name << " = 0;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
-        "      " << map_type(field_type) << "_free(this->_u." << name << ");\n"
-        "      this->_u." << name << " = 0;\n";
+        "    " << map_type(field_type) << "_free(this->_u." << name << ");\n"
+        "    this->_u." << name << " = 0;\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       ss <<
-        "      delete this->_u." << name << ";\n"
-        "      this->_u." << name << " = 0;\n";
+        "    delete this->_u." << name << ";\n"
+        "    this->_u." << name << " = 0;\n";
     } else {
       std::cerr << "Unsupported type for union element\n";
     }
@@ -525,20 +525,23 @@ public:
         nm << "::" << nm << "() { std::memset (this, 0, sizeof (" << nm << ")); }\n\n";
 
       be_global->impl_ <<
-        nm << "::" << nm << "(const " << nm << "& other) {\n" <<
+        nm << "::" << nm << "(const " << nm << "& other)\n"
+        "{\n"
         "  this->_discriminator = other._discriminator;\n";
       generateSwitchForUnion("this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "}\n\n";
 
       be_global->impl_ <<
-        nm << "& " << nm << "::operator=(const " << nm << "& other) {\n" <<
-        "  if (this != &other) {\n" <<
-        "    _reset();\n" <<
-        "    this->_discriminator = other._discriminator;\n";
+        nm << "& " << nm << "::operator=(const " << nm << "& other)\n"
+        "{\n" <<
+        "  if (this == &other) {\n"
+        "    return *this;\n"
+        "  }\n\n"
+        "  _reset();\n"
+        "  this->_discriminator = other._discriminator;\n";
       generateSwitchForUnion("this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
-        "  }\n"
         "  return *this;\n"
         "}\n\n";
 
@@ -546,22 +549,24 @@ public:
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n"
         "  if (this->_discriminator != rhs._discriminator) return false;\n";
-      generateSwitchForUnion("this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false);
+      if (generateSwitchForUnion("this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
+        be_global->impl_ <<
+          "  return false;\n";
+      }
       be_global->impl_ <<
-        "    return false;\n"
-        "  }\n";
+        "}\n\n";
 
       be_global->impl_ <<
         "void " << nm << "::_reset()\n"
         "{\n";
       generateSwitchForUnion("this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
-        "  }\n";
+        "}\n\n";
 
       be_global->impl_ <<
-        "ACE_CDR::Boolean operator<< (ACE_OutputCDR &, const " << nm << "&) { return true; }\n\n";
+        "ACE_CDR::Boolean operator<<(ACE_OutputCDR&, const " << nm << "&) { return true; }\n\n";
       be_global->impl_ <<
-        "ACE_CDR::Boolean operator>> (ACE_InputCDR &, " << nm << "&) { return true; }\n\n";
+        "ACE_CDR::Boolean operator>>(ACE_InputCDR&, " << nm << "&) { return true; }\n\n";
     }
 
     gen_typecode(name);

@@ -44,7 +44,7 @@ module Xyz {
   };
 
   // +4
-  enum ColorX { redx, greenx, bluex };
+  enum ColorX { redx, greenx, bluex, yellowx };
 
   const ColorX c15 = greenx;
 
@@ -69,10 +69,9 @@ module Xyz {
 
   union AUnion switch (ColorX) {
     case redx:
-      //long rlv;
+    case yellowx:
       string rsv;
     case greenx:
-      //short gsv;
       AStruct gsv;
     default:
       unsigned short usv;
