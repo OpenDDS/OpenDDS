@@ -876,7 +876,7 @@ namespace OpenDDS {
     get_subscriber_servant()->data_received(this);
 
     DDS::InstanceHandle_t inst = lookup_instance(sample);
-    bool filtered;
+    bool filtered = false;
     SubscriptionInstance_rch instance;
 
     // Call store_instance_data() once or twice, depending on if we need to
@@ -886,7 +886,8 @@ namespace OpenDDS {
       if (i == 0 && inst != DDS::HANDLE_NIL) continue;
 
       DataSampleHeader header;
-      header.message_id_ = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
+      const int msg = i ? SAMPLE_DATA : INSTANCE_REGISTRATION;
+      header.message_id_ = static_cast<char>(msg);
       bool just_registered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
       store_instance_data(move(data), header, instance, just_registered, filtered);
@@ -911,8 +912,9 @@ namespace OpenDDS {
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
       DataSampleHeader header;
-      header.message_id_ = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
+      const int msg = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
         ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
+      header.message_id_ = static_cast<char>(msg);
       bool just_registered, filtered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
       get_key_value(*data, instance);
