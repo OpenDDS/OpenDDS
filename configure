@@ -613,8 +613,7 @@ if (!$ace_src || !$tao_src) {
       else {
         $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
       }
-    }
-    if ($err) {
+    } elsif ($err) {
       # Try Archive::Zip
       print "Archive::Extract isn't installed, trying Archive::Zip\n" if $opts{'verbose'};
       eval {require Archive::Zip};
