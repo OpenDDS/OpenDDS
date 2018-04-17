@@ -1537,6 +1537,10 @@ if ($cross_compile) {
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
+
+    if ($opts{'ssl'}) {
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+    }
   }
 
   configure_build(\%targetEnv);
@@ -1557,6 +1561,10 @@ else { # not cross-compiling:
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
+
+    if ($opts{'ssl'}) {
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+    }
   }
 
   configure_build(\%targetEnv);
