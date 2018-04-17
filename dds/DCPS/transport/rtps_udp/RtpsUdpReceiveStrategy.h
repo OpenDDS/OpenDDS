@@ -83,7 +83,7 @@ private:
   virtual bool reassemble(ReceivedDataSample& data);
 
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,
-                            const RTPS::Submessage& submessage);
+                            const RTPS::Submessage& postfix);
 
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);

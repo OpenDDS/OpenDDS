@@ -274,10 +274,10 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
                                                 dwch, drch, ex);
 
     } else {
-      //ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy: "
-      //           "preprocess_secure_submsg returned %d cat %d, [%d.%d]: %C\n",
-      //           ok, static_cast<int>(category), ex.code, ex.minor_code,
-      //           ex.message.in()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy: "
+                "preprocess_secure_submsg returned %d cat %d, [%d.%d]: %C\n",
+                ok, static_cast<int>(category), ex.code, ex.minor_code,
+                ex.message.in()));
       ok = false;
     }
 
@@ -304,9 +304,11 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
 void
 RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
-                                             const RTPS::Submessage& submessage)
+                                             const RTPS::Submessage& postfix)
 {
   size_t size = 0, padding = 0;
+  gen_find_size(secure_prefix_, size, padding);
+
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
     gen_find_size(secure_submessages_[i], size, padding);
     const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
@@ -317,10 +319,12 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
       padding += 4 - ((size + padding) % 4);
     }
   }
-  gen_find_size(submessage, size, padding);
+  gen_find_size(postfix, size, padding);
 
   ACE_Message_Block mb(size + padding);
   Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
+  ser << secure_prefix_;
+  ser.skip(0, 4);
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
     ser << secure_submessages_[i];
@@ -332,7 +336,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
     }
     ser.skip(0, 4);
   }
-  ser << submessage;
+  ser << postfix;
 
   encoded.length(mb.length());
   std::memcpy(encoded.get_buffer(), mb.rd_ptr(), mb.length());

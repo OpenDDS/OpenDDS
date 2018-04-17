@@ -15,6 +15,7 @@
 #include "dds/DdsSecurityParamsC.h"
 
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
 
 #include <openssl/err.h>
@@ -23,6 +24,7 @@
 
 using namespace DDS::Security;
 using OpenDDS::DCPS::Serializer;
+using OpenDDS::DCPS::Message_Block_Ptr;
 
 namespace OpenDDS {
 namespace Security {
@@ -840,10 +842,9 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
     return false;
   }
 
-  return false;
-#if 0
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
+  mb_in.wr_ptr(encoded_rtps_submessage.length());
   Serializer de_ser(&mb_in, false, Serializer::ALIGN_CDR);
   ACE_CDR::Octet type, flags;
   de_ser >> ACE_InputCDR::to_octet(type);
@@ -852,6 +853,7 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
   CryptoHeader ch;
+  de_ser.swap_bytes(Serializer::SWAP_BE);
   de_ser >> ch;
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -882,7 +884,6 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
   }
   CommonUtilities::set_security_error(ex, -2, 1, "Crypto Key not registered");
   return false;
-#endif
 }
 
 namespace {
@@ -925,9 +926,9 @@ KeyOctetSeq CryptoBuiltInImpl::get_session_key(const KeyMaterial& k,
 
 bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
                                 unsigned int n, const CryptoHeader& header,
-                                DDS::OctetSeq& out)
+                                const CryptoFooter& footer, DDS::OctetSeq& out)
 {
-  KeyOctetSeq sess_key = get_session_key(k, header);
+  const KeyOctetSeq sess_key = get_session_key(k, header);
   CipherContext ctx;
   if (k.transformation_kind[TransformKindIndex] !=
       CRYPTO_TRANSFORMATION_KIND_AES256_GCM) {
@@ -945,8 +946,6 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
     return false;
   }
 
-  //EVP_DecryptUpdate (AAD, 0 or more) ctx, 0, &len, aad, aad_len
-
   out.length(n + KEY_LEN_BYTES);
   int len;
   if (EVP_DecryptUpdate(ctx, out.get_buffer(), &len,
@@ -956,9 +955,14 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
                "EVP_DecryptUpdate %Ld\n", ERR_peek_last_error()));
     return false;
   }
-  /* TODO: expected tag...
-  EVP_CIPHER_CTX_ctrl (expected T) ctx, EVP_CTRL_GCM_SET_TAG, 16, tag
-  */
+
+  void* tag = const_cast<void*>(static_cast<const void*>(footer.common_mac));
+  if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
+               "EVP_CIPHER_CTX_ctrl %Ld\n", ERR_peek_last_error()));
+    return false;
+  }
+
   int len2;
   if (EVP_DecryptFinal_ex(ctx, out.get_buffer() + len, &len2) == 1) {
     out.length(len + len2);
@@ -971,7 +975,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
 
 bool CryptoBuiltInImpl::verify(const KeyMaterial&, const char* ciphertext,
                                unsigned int n, const CryptoHeader& /*header*/,
-                               DDS::OctetSeq& out)
+                               const CryptoFooter&, DDS::OctetSeq& out)
 {
   //TODO: verification of authenticated but unencrypted message
   out.length(n);
@@ -982,7 +986,7 @@ bool CryptoBuiltInImpl::verify(const KeyMaterial&, const char* ciphertext,
 bool CryptoBuiltInImpl::decode_datawriter_submessage(
   DDS::OctetSeq& plain_rtps_submessage,
   const DDS::OctetSeq& encoded_rtps_submessage,
-  DatareaderCryptoHandle receiving_datareader_crypto,
+  DatareaderCryptoHandle /*receiving_datareader_crypto*/,
   DatawriterCryptoHandle sending_datawriter_crypto,
   const SecurityException& ex)
 {
@@ -1001,14 +1005,17 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
 
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
+  mb_in.wr_ptr(encoded_rtps_submessage.length());
   Serializer de_ser(&mb_in, false, Serializer::ALIGN_CDR);
   ACE_CDR::Octet type, flags;
+  // SEC_PREFIX
   de_ser >> ACE_InputCDR::to_octet(type);
   de_ser >> ACE_InputCDR::to_octet(flags);
   de_ser.swap_bytes((flags & 1) != ACE_CDR_BYTE_ORDER);
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
   CryptoHeader ch;
+  de_ser.swap_bytes(Serializer::SWAP_BE);
   de_ser >> ch;
   de_ser.skip(octetsToNext - 20);
   // Next submessage, SEC_BODY if encrypted
@@ -1016,6 +1023,17 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
   de_ser >> ACE_InputCDR::to_octet(flags);
   de_ser.swap_bytes((flags & 1) != ACE_CDR_BYTE_ORDER);
   de_ser >> octetsToNext;
+  Message_Block_Ptr mb_footer(mb_in.duplicate());
+  mb_footer->rd_ptr(octetsToNext);
+  // SEC_POSTFIX
+  Serializer post_ser(mb_footer.get(), false, Serializer::ALIGN_CDR);
+  post_ser >> ACE_InputCDR::to_octet(type);
+  post_ser >> ACE_InputCDR::to_octet(flags);
+  post_ser.swap_bytes((flags & 1) != ACE_CDR_BYTE_ORDER);
+  post_ser >> octetsToNext;
+  CryptoFooter cf;
+  post_ser.swap_bytes(Serializer::SWAP_BE);
+  post_ser >> cf;
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   KeySeq& keys = keys_[sending_datawriter_crypto];
@@ -1025,10 +1043,11 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
         de_ser.swap_bytes(Serializer::SWAP_BE);
         ACE_CDR::ULong n;
         de_ser >> n;
-        return decrypt(keys[i], mb_in.rd_ptr(), n, ch, plain_rtps_submessage);
+        return decrypt(keys[i], mb_in.rd_ptr(), n, ch, cf,
+                       plain_rtps_submessage);
       } else {
         return verify(keys[i], mb_in.rd_ptr() - 4, 4 + octetsToNext,
-                      ch, plain_rtps_submessage);
+                      ch, cf, plain_rtps_submessage);
       }
     }
   }
@@ -1040,7 +1059,7 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
 bool CryptoBuiltInImpl::decode_datareader_submessage(
   DDS::OctetSeq& plain_rtps_message,
   const DDS::OctetSeq& encoded_rtps_message,
-  DatawriterCryptoHandle receiving_datawriter_crypto,
+  DatawriterCryptoHandle /*receiving_datawriter_crypto*/,
   DatareaderCryptoHandle sending_datareader_crypto,
   SecurityException& ex)
 {

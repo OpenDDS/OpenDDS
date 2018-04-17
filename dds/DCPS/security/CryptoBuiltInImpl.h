@@ -242,11 +242,11 @@ private:
 
   bool decrypt(const KeyMaterial& k, const char* ciphertext,
                unsigned int n, const CryptoHeader& header,
-               DDS::OctetSeq& out);
+               const CryptoFooter& footer, DDS::OctetSeq& out);
 
   bool verify(const KeyMaterial& k, const char* ciphertext,
               unsigned int n, const CryptoHeader& header,
-              DDS::OctetSeq& out);
+              const CryptoFooter& footer, DDS::OctetSeq& out);
 };
 
 } // Security
