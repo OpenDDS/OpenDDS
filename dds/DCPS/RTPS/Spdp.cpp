@@ -306,7 +306,6 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
       sedp_.associate_preauth(dp.pdata_);
 
       // If we've gotten auth requests for this (previously undiscovered) participant, pull in the tokens now
-      // How does this work if we've only just recently associated stateless reader / writer? GOOD QUESTION!
       PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
       if (token_iter != pending_remote_auth_tokens_.end()) {
         dp.remote_auth_request_token_ = token_iter->second;
@@ -441,11 +440,13 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  DiscoveredParticipantMap::const_iterator iter = participants_.find(guid);
+  DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter == participants_.end()) {
     // We're simply caching this for later, since we can't actually do much without the SPDP announcement itself
     pending_remote_auth_tokens_[guid] = msg.message_data[0];
+  } else {
+    iter->second.remote_auth_request_token_ = msg.message_data[0];
   }
 }
 
