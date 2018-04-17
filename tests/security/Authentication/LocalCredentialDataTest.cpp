@@ -46,13 +46,19 @@ TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
   add_property(perms);
 
   credential_data.load(properties);
-  std::ifstream expected_file(path.c_str());
+  std::ifstream expected_file(path.c_str(), std::ios::binary);
 
   std::vector<char> expected_bytes((std::istreambuf_iterator<char>(expected_file)),
                                    std::istreambuf_iterator<char>());
 
+  // To appease the other DDS security implementations which
+  // append a null byte at the end of the cert.
+  // see LocalAuthCredentialData::load_permissions_file()
+  expected_bytes.push_back(0);
+
   const DDS::OctetSeq& access_bytes = credential_data.get_access_permissions();
 
+  ASSERT_EQ(access_bytes.length(), expected_bytes.size());
   ASSERT_EQ(0, std::memcmp(access_bytes.get_buffer(),
                            reinterpret_cast<const CORBA::Octet*>(&expected_bytes[0]),
                            access_bytes.length()));
