@@ -21,6 +21,9 @@ project: aceexe, dds_macros, crosscompile, install {
     idl_stubs: all
   }
 
+  Documentation_Files {
+  }
+
   InstallData_Files {
     gendir = dds/idl
     *Template.txt
