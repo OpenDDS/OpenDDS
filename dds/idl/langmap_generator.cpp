@@ -394,7 +394,7 @@ public:
         "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
-        "  this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? new " << map_type(field_type) << "(*other._u." << name << ") : 0;\n";
