@@ -189,7 +189,7 @@ namespace {
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      if (!ser.skip(len)) {\n"
+          "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
           "        throw std::runtime_error(\"String '" << fieldName <<
           "' contents could not be skipped\");\n"
           "      }\n";
@@ -200,7 +200,7 @@ namespace {
           "        throw std::runtime_error(\"WChar '" << fieldName <<
           "' length could not be deserialized\");\n"
           "      }\n"
-          "      if (!ser.skip(len)) {\n"
+          "      if (!ser.skip(static_cast<ACE_UINT16>(len))) {\n"
           "        throw std::runtime_error(\"WChar '" << fieldName <<
           "' contents could not be skipped\");\n"
           "      }\n";
@@ -375,7 +375,7 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  typedef " << clazz << " T;\n\n"
     "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
     "  void* allocate() const { return new T; }\n\n"
-    "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n"
+    "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
     "  size_t numDcpsKeys() const { return " << nKeys << "; }\n"
     "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
     "  Value getValue(const void* stru, const char* field) const\n"
@@ -513,7 +513,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
     int sz = 1;
     to_cxx_type(elem, sz);
     be_global->impl_ <<
-      "  return ser.skip(" << len << ", " << sz << ");\n";
+      "  return ser.skip(static_cast<ACE_UINT16>(" << len << "), " << sz << ");\n";
   } else {
     be_global->impl_ <<
       "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
@@ -526,7 +526,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
         "    if (!(ser >> strlength)) return false;\n"
-        "    if (!ser.skip(strlength)) return false;\n";
+        "    if (!ser.skip(static_cast<ACE_UINT16>(strlength))) return false;\n";
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
       be_global->impl_ <<
         "    if (!gen_skip_over(ser, static_cast<" << cxx_elem <<
@@ -551,25 +551,27 @@ static std::string func(const std::string&,
   const Classification br_cls = classify(br_type);
   if (br_cls & CL_STRING) {
     ss <<
-      "      ACE_CDR::ULong len;\n"
-      "      if (!(ser >> len)) return false;\n"
-      "      if (!ser.skip(len)) return false;\n";
+      "    ACE_CDR::ULong len;\n"
+      "    if (!(ser >> len)) return false;\n"
+      "    if (!ser.skip(static_cast<ACE_UINT16>(len))) return false;\n";
   } else if (br_cls & CL_WIDE) {
     ss <<
-      "      ACE_CDR::Octet len;\n"
-      "      if (!(ser >> ACE_InputCDR::to_octet(len))) return false;\n"
-      "      if (!ser.skip(len)) return false;\n";
+      "    ACE_CDR::Octet len;\n"
+      "    if (!(ser >> ACE_InputCDR::to_octet(len))) return false;\n"
+      "    if (!ser.skip(len)) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     int sz = 1;
     to_cxx_type(br_type, sz);
     ss <<
-      "      if (!ser.skip(1, " << sz << ")) return false;\n";
+      "    if (!ser.skip(1, " << sz << ")) return false;\n";
   } else {
     ss <<
-      "      if (!gen_skip_over(ser, static_cast<" << scoped(br_type->name()) <<
+      "    if (!gen_skip_over(ser, static_cast<" << scoped(br_type->name()) <<
       ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) return false;\n";
   }
 
+  ss <<
+    "    return true;\n";
   return ss.str();
 }
 
@@ -590,8 +592,10 @@ metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
     "    return false;\n"
     "  }\n";
-  generateSwitchForUnion("disc", func, branches, discriminator, "");
-  be_global->impl_ <<
-    "  return true;\n";
+  if (generateSwitchForUnion("disc", func, branches, discriminator, "", "", "",
+                             false, true, false)) {
+    be_global->impl_ <<
+      "  return true;\n";
+  }
   return true;
 }

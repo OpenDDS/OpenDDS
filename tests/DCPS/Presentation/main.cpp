@@ -223,8 +223,9 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
       {
-        Foo foo;
-        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
+        Foo foo = {static_cast<CORBA::Long>(i), 0, 0, 0};
+        const DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
+        if (writer_i->write(foo, handle) != DDS::RETCODE_OK)
         {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("%N:%l main()")
@@ -270,14 +271,14 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l main()")
-                            ACE_TEXT(" ERROR: Unexpected number of samples taken!\n")), -1);
+                            ACE_TEXT(" ERROR: take failed %d\n"), error), -1);
         }
 
         if (foo.length() != SAMPLES_PER_TEST)
         {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l main()")
-                            ACE_TEXT(" ERROR: Unexpected number of samples taken!\n")), -1);
+                            ACE_TEXT(" ERROR: Unexpected number of samples taken: %d\n"), foo.length()), -1);
         }
       }
     }

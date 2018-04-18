@@ -338,26 +338,25 @@ inline
 std::string wrapPrefix(AST_Type* type, WrapDirection wd)
 {
   switch (type->node_type()) {
-  case AST_Decl::NT_pre_defined:
-    {
-      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
-      switch (p->pt()) {
-      case AST_PredefinedType::PT_char:
-        return (wd == WD_OUTPUT)
-          ? "ACE_OutputCDR::from_char(" : "ACE_InputCDR::to_char(";
-      case AST_PredefinedType::PT_wchar:
-        return (wd == WD_OUTPUT)
-          ? "ACE_OutputCDR::from_wchar(" : "ACE_InputCDR::to_wchar(";
-      case AST_PredefinedType::PT_octet:
-        return (wd == WD_OUTPUT)
-          ? "ACE_OutputCDR::from_octet(" : "ACE_InputCDR::to_octet(";
-      case AST_PredefinedType::PT_boolean:
-        return (wd == WD_OUTPUT)
-          ? "ACE_OutputCDR::from_boolean(" : "ACE_InputCDR::to_boolean(";
-      default:
-        return "";
-      }
+  case AST_Decl::NT_pre_defined: {
+    AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+    switch (p->pt()) {
+    case AST_PredefinedType::PT_char:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_char(" : "ACE_InputCDR::to_char(";
+    case AST_PredefinedType::PT_wchar:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_wchar(" : "ACE_InputCDR::to_wchar(";
+    case AST_PredefinedType::PT_octet:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_octet(" : "ACE_InputCDR::to_octet(";
+    case AST_PredefinedType::PT_boolean:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_boolean(" : "ACE_InputCDR::to_boolean(";
+    default:
+      return "";
     }
+  }
   case AST_Decl::NT_string:
     return (wd == WD_OUTPUT)
       ? "ACE_OutputCDR::from_string(" : "ACE_InputCDR::to_string(";
@@ -423,12 +422,11 @@ std::ostream& operator<<(std::ostream& o,
   case AST_Expression::EV_string:
     return o << '"' << ev.u.strval->get_string() << '"';
 #ifdef ACE_HAS_CDR_FIXED
-  case AST_Expression::EV_fixed:
-    {
-      char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
-      ev.u.fixedval.to_string(buf, sizeof buf);
-      return o << "\"" << buf << "\"";
-    }
+  case AST_Expression::EV_fixed: {
+    char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
+    ev.u.fixedval.to_string(buf, sizeof buf);
+    return o << "\"" << buf << "\"";
+  }
 #endif
   default:
     return o;
@@ -443,14 +441,15 @@ void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
     ++n_labels;
     AST_UnionLabel* label = branch->label(j);
     if (label->label_kind() == AST_UnionLabel::UL_default) {
-      be_global->impl_ << "  default:\n";
+      be_global->impl_ << "  default:";
       has_default = true;
     } else if (discriminator->node_type() == AST_Decl::NT_enum) {
       be_global->impl_ << "  case "
-        << getEnumLabel(label->label_val(), discriminator) << ":\n";
+        << getEnumLabel(label->label_val(), discriminator) << ':';
     } else {
-      be_global->impl_ << "  case " << *label->label_val()->ev() << ":\n";
+      be_global->impl_ << "  case " << *label->label_val()->ev() << ':';
     }
+    be_global->impl_<< ((j == branch->label_list_length() - 1) ? " {\n" : "\n");
   }
 }
 
@@ -481,13 +480,10 @@ typedef std::string (*CommonFn)(const std::string& name, AST_Type* type,
                                 const std::string& prefix, std::string& intro,
                                 const std::string&);
 
-inline void generateCaseBody(CommonFn commonFn,
-                             AST_UnionBranch* branch,
-                             const char* statementPrefix,
-                             const char* namePrefix,
-                             const std::string& uni,
-                             bool generateBreaks,
-                             bool parens)
+inline
+void generateCaseBody(CommonFn commonFn, AST_UnionBranch* branch,
+                      const char* statementPrefix, const char* namePrefix,
+                      const char* uni, bool generateBreaks, bool parens)
 {
   using namespace AstTypeClassification;
   std::string intro, name = branch->local_name()->get_string();
@@ -510,47 +506,43 @@ inline void generateCaseBody(CommonFn commonFn,
       }
       rhs = "tmp.out()";
     } else if (br_cls & CL_ARRAY) {
-      forany = "      " + brType + "_forany fa = tmp;\n";
+      forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);
     } else {
       rhs = getWrapper("tmp", br, WD_INPUT);
     }
     be_global->impl_ <<
-      "    {\n"
-      "      " << brType << " tmp;\n" << forany <<
-      "      if (strm >> " << rhs << ") {\n"
-      "        uni." << name << "(tmp);\n"
-      "        uni._d(disc);\n"
-      "        return true;\n"
-      "      }\n"
-      "      return false;\n"
-      "    }\n";
+      "    " << brType << " tmp;\n" << forany <<
+      "    if (strm >> " << rhs << ") {\n"
+      "      uni." << name << "(tmp);\n"
+      "      uni._d(disc);\n"
+      "      return true;\n"
+      "    }\n"
+      "    return false;\n";
   } else {
-    const char* breakString = (generateBreaks) ? "      break;\n" : "";
+    const char* breakString = generateBreaks ? "    break;\n" : "";
 
     std::string expr = commonFn(name + (parens ? "()" : ""), branch->field_type(),
                                 std::string(namePrefix) + "uni", intro, uni);
     be_global->impl_ <<
-      "    {\n" <<
-      (intro.length() ? "    " : "") << intro;
+      (intro.empty() ? "" : "  ") << intro;
     if (*statementPrefix) {
       be_global->impl_ <<
-        "      " << statementPrefix << " " << expr << ";\n" <<
+        "    " << statementPrefix << " " << expr << ";\n" <<
         (statementPrefix == std::string("return") ? "" : breakString);
     } else {
       be_global->impl_ << expr << breakString;
     }
-    be_global->impl_<<
-      "    }\n";
   }
 }
 
-inline void generateSwitchBodyForUnion(CommonFn commonFn,
-                                       const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-                                       const char* statementPrefix, const char* namePrefix = "",
-                                       const std::string& uni = "",
-                                       bool forceDisableDefault = false,
-                                       bool parens = true)
+inline
+bool generateSwitchBody(CommonFn commonFn,
+                        const std::vector<AST_UnionBranch*>& branches,
+                        AST_Type* discriminator, const char* statementPrefix,
+                        const char* namePrefix = "", const char* uni = "",
+                        bool forceDisableDefault = false, bool parens = true,
+                        bool breaks = true)
 {
   size_t n_labels = 0;
   bool has_default = false;
@@ -569,20 +561,28 @@ inline void generateSwitchBodyForUnion(CommonFn commonFn,
       }
     }
     generateBranchLabels(branch, discriminator, n_labels, has_default);
-    generateCaseBody(commonFn, branch, statementPrefix, namePrefix, uni, true, parens);
+    generateCaseBody(commonFn, branch, statementPrefix, namePrefix, uni, breaks, parens);
+    be_global->impl_ <<
+      "  }\n";
   }
   if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
     be_global->impl_ <<
       "  default:\n" <<
       ((namePrefix == std::string(">> ")) ? "    uni._d(disc);\n" : "") <<
       "    break;\n";
+    return true;
   }
+  return false;
 }
 
-inline void generateSwitchForUnion(const std::string& switchExpr, CommonFn commonFn,
-                                   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-                                   const char* statementPrefix, const char* namePrefix = "",
-                                   const std::string& uni = "", bool forceDisableDefault = false, bool parens = true)
+/// returns true if a default: branch was generated (no default: label in IDL)
+inline
+bool generateSwitchForUnion(const char* switchExpr, CommonFn commonFn,
+                            const std::vector<AST_UnionBranch*>& branches,
+                            AST_Type* discriminator, const char* statementPrefix,
+                            const char* namePrefix = "", const char* uni = "",
+                            bool forceDisableDefault = false, bool parens = true,
+                            bool breaks = true)
 {
   using namespace AstTypeClassification;
   AST_Type* dt = resolveActualType(discriminator);
@@ -591,45 +591,55 @@ inline void generateSwitchForUnion(const std::string& switchExpr, CommonFn commo
     AST_UnionBranch* true_branch = 0;
     AST_UnionBranch* false_branch = 0;
     AST_UnionBranch* default_branch = 0;
-    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(), limit = branches.end();
-         pos != limit;
-         ++pos) {
+    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(),
+         limit = branches.end(); pos != limit; ++pos) {
       AST_UnionBranch* branch = *pos;
       for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
         AST_UnionLabel* label = branch->label(j);
         if (label->label_kind() == AST_UnionLabel::UL_default) {
           default_branch = branch;
-        }
-        else if (label->label_val()->ev()->u.bval) {
+        } else if (label->label_val()->ev()->u.bval) {
           true_branch = branch;
-        }
-        else if (!label->label_val()->ev()->u.bval) {
+        } else if (!label->label_val()->ev()->u.bval) {
           false_branch = branch;
         }
       }
     }
 
-    be_global->impl_ <<
-      "  if (" << switchExpr << ") \n";
-    if (true_branch || default_branch) {
-      generateCaseBody(commonFn, true_branch ? true_branch : default_branch, statementPrefix, namePrefix, uni, false, parens);
+    if (true_branch || false_branch) {
+      be_global->impl_ <<
+        "  if (" << switchExpr << ") {\n";
     } else {
       be_global->impl_ <<
-        "    ;\n";
+        "  {\n";
     }
 
-    if (false_branch || default_branch) {
-      be_global->impl_ <<
-        "  else \n";
-      generateCaseBody(commonFn, false_branch ? false_branch : default_branch, statementPrefix, namePrefix, uni, false, parens);
+    if (true_branch || default_branch) {
+      generateCaseBody(commonFn, true_branch ? true_branch : default_branch,
+                       statementPrefix, namePrefix, uni, false, parens);
     }
-  }
-  else {
-    be_global->impl_ <<
-      "  switch (" << switchExpr << ") {\n";
-    generateSwitchBodyForUnion(commonFn, branches, discriminator, statementPrefix, namePrefix, uni, forceDisableDefault, parens);
+
+    if (false_branch || (default_branch && true_branch)) {
+      be_global->impl_ <<
+        "  } else {\n";
+      generateCaseBody(commonFn, false_branch ? false_branch : default_branch,
+                       statementPrefix, namePrefix, uni, false, parens);
+    }
+
     be_global->impl_ <<
       "  }\n";
+
+    return !default_branch && bool(true_branch) != bool(false_branch);
+
+  } else {
+    be_global->impl_ <<
+      "  switch (" << switchExpr << ") {\n";
+    bool b(generateSwitchBody(commonFn, branches, discriminator,
+                              statementPrefix, namePrefix, uni,
+                              forceDisableDefault, parens, breaks));
+    be_global->impl_ <<
+      "  }\n";
+    return b;
   }
 }
 
