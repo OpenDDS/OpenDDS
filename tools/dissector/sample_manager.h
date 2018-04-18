@@ -66,18 +66,13 @@ namespace OpenDDS
       void init ();
       Sample_Dissector *find (const char *repo_id);
 
-      /// Add sample field to register later.
-      void add_protocol_field(
-        int* hf_index,
-        const std::string& full_name, const std::string& short_name,
-        enum ftenum ft, field_display_e fd = BASE_NONE
-      );
-
-      /// Add a premade hf_register_info struct to register later
-      void add_protocol_field(hf_register_info field);
+      /// Add a hf_register_info struct to register later
+      void add_protocol_field(const hf_register_info& field);
 
       /// Field information to be passed to wireshark
       hf_register_info* fields_array();
+
+      /// Number of fields in the fields_array_
       size_t number_of_fields();
 
     private:
@@ -88,9 +83,6 @@ namespace OpenDDS
 
       std::vector<hf_register_info> hf_vector_;
       hf_register_info* hf_array_;
-
-      /// Dynamic Field Names (Long and Short) to be deleted later
-      std::list<char*> field_names_;
 
       void init_from_file (const ACE_TCHAR *filename);
     };

@@ -136,7 +136,9 @@ namespace OpenDDS
         i != field_contexts_.end();
         ++i
       ) {
-        delete i->second;
+        if (i->second) {
+          delete i->second;
+        }
       }
     }
 
@@ -144,11 +146,7 @@ namespace OpenDDS
       if (field_contexts_.count(ns_)) {
         return field_contexts_[ns_];
       }
-      Field_Context * fc = new Field_Context;
-      fc->hf_ = -1;
-      field_contexts_[ns_] = fc;
-      fc->label_ = ns_stack_.back();
-      return fc;
+      return (Field_Context*) 0;
     }
 
     // Sample_Base static members
@@ -197,11 +195,67 @@ namespace OpenDDS
       return ns_stack_.back();
     }
 
-    void Sample_Base::add_protocol_field(enum ftenum ft, field_display_e fd) {
-      Field_Context * fc = get_context();
-      Sample_Manager::instance().add_protocol_field(
-        &fc->hf_, get_ns(), fc->label_, ft, fd
-      );
+    void Sample_Base::push_idl_name(std::string name) {
+      Sample_Base::clear_ns();
+
+      // If name begins with "IDL:", remove it
+      const std::string idl_prefix("IDL:");
+      if (name.substr(0, idl_prefix.size()) == idl_prefix) {
+          name.erase(0, idl_prefix.size());
+      }
+
+      // If name contains ':', remove everything after the last ':'
+      size_t l = name.rfind(":");
+      if (l != std::string::npos) {
+          name.erase(l, name.size() - l);
+      }
+
+      // Push namespace when we find a '/'
+      name.push_back('/'); // For last namespace
+      l = 0;
+      for (size_t index = 0; index != name.size(); index++) {
+          if (name[index] == '/') {
+              Sample_Base::push_ns(name.substr(index - l, l));
+              l = 0;
+          } else {
+              l++;
+          }
+      }
+    }
+
+    void Sample_Base::add_protocol_field() {
+      Field_Context* fc = get_context();
+      if (fc) {
+        printf("Field: %s\n", get_ns().c_str());
+        Sample_Manager::instance().add_protocol_field(fc->hf_info_);
+      }
+    }
+
+    Field_Context* Sample_Base::create_context(ftenum ft, field_display_e fd) {
+      if (field_contexts_.count(get_ns())) {
+        throw Sample_Dissector_Error(
+          std::string("Could not create context becuase it already exists for: ") +
+          get_ns()
+        );
+      }
+
+      Field_Context* fc = new Field_Context;
+      fc->long_name_ = get_ns();
+      fc->short_name_ = get_label();
+      fc->hf_ = -1;
+      fc->hf_info_ = { &fc->hf_, {
+      // Note: Wireshark calls this second struct member "abbrev" (What we
+      // call long_name_) is the string used for filtering.
+      // In our case (and probably most cases for any WS dissector) "abbrev"
+      // will be longer than the first member "name".
+      // This confused was confusing to me, so just wanted to make a note of
+      // this.
+        fc->short_name_.c_str(), fc->long_name_.c_str(),
+        ft, fd, NULL, 0, NULL, HFILL
+      }};
+      field_contexts_[ns_] = fc;
+
+      return fc;
     }
 
     Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)
@@ -222,8 +276,12 @@ namespace OpenDDS
 
     Sample_Field::~Sample_Field ()
     {
-      delete nested_;
-      delete next_;
+      if (nested_) {
+        delete nested_;
+      }
+      if (next_) {
+        delete next_;
+      }
     }
 
     Sample_Field *
@@ -697,87 +755,88 @@ namespace OpenDDS
       return len;
     }
 
-    void Sample_Field::init_ws_fields() {
-      if (label_.empty()) {
+    void Sample_Field::init_ws_fields(bool first_pass) {
+      if (!first_pass) {
+        add_protocol_field();
+      }
+      if (label_.empty() && first_pass) {
 
         switch (type_id_) {
 
         case Sample_Field::Boolean:
-          add_protocol_field(FT_BOOLEAN);
+          create_context(FT_BOOLEAN);
           break;
 
         case Sample_Field::Char:
-          add_protocol_field(FT_STRING);
+          create_context(FT_STRING);
           break;
 
         case Sample_Field::Octet:
-          add_protocol_field(FT_UINT8, BASE_HEX);
+          create_context(FT_UINT8, BASE_HEX);
           break;
 
         case Sample_Field::WChar:
-          add_protocol_field(FT_STRING);
+          create_context(FT_STRING);
           break;
 
         case Sample_Field::Short:
-          add_protocol_field(FT_INT16, BASE_DEC);
+          create_context(FT_INT16, BASE_DEC);
           break;
 
         case Sample_Field::Long:
-          add_protocol_field(FT_INT32, BASE_DEC);
+          create_context(FT_INT32, BASE_DEC);
           break;
 
         case Sample_Field::LongLong:
-          add_protocol_field(FT_INT64, BASE_DEC);
+          create_context(FT_INT64, BASE_DEC);
           break;
 
         case Sample_Field::UShort:
-          add_protocol_field(FT_UINT16, BASE_DEC);
+          create_context(FT_UINT16, BASE_DEC);
           break;
 
         case Sample_Field::ULong:
-          add_protocol_field(FT_UINT32, BASE_DEC);
+          create_context(FT_UINT32, BASE_DEC);
           break;
 
         case Sample_Field::ULongLong:
-          add_protocol_field(FT_UINT64, BASE_DEC);
+          create_context(FT_UINT64, BASE_DEC);
           break;
 
         case Sample_Field::Float:
-          add_protocol_field(FT_FLOAT);
+          create_context(FT_FLOAT);
           break;
 
         case Sample_Field::Double:
-          add_protocol_field(FT_DOUBLE);
+          create_context(FT_DOUBLE);
           break;
 
         case Sample_Field::LongDouble:
           // Long Doubles will be cast to doubles, resulting in possible
           // data loss if long doubles are larger than doubles.
-          add_protocol_field(FT_DOUBLE);
+          create_context(FT_DOUBLE);
           break;
 
         case Sample_Field::String:
-          add_protocol_field(FT_STRINGZ);
+          create_context(FT_STRINGZ);
           break;
 
         case Sample_Field::WString:
-          add_protocol_field(FT_STRINGZ);
+          create_context(FT_STRINGZ);
           break;
 
-        /*
         default:
           throw Sample_Dissector_Error(
             get_ns()  + " is not a valid Field Type."
           );
-        */
         }
       } else if (nested_ != NULL) {
         push_ns(label_);
-        nested_->init_ws_fields();
+        nested_->init_ws_fields(first_pass);
         pop_ns();
       }
       if (next_ != NULL) {
-        next_->init_ws_fields();
+        next_->init_ws_fields(first_pass);
       }
     }
 
@@ -803,7 +862,9 @@ namespace OpenDDS
 
     Sample_Dissector::~Sample_Dissector ()
     {
-      delete field_;
+      if (field_) {
+        delete field_;
+      }
     }
 
     void
@@ -927,19 +988,23 @@ namespace OpenDDS
       return outstream.str();
     }
 
-    void Sample_Dissector::init_ws_proto_tree() {
+    void Sample_Dissector::init_ws_proto_tree(bool first_pass) {
       if (field_) {
-        field_->init_ws_fields();
+        field_->init_ws_fields(first_pass);
       }
     }
 
-    void Sample_Dissector::init_ws_fields() {
-      if (is_struct()) {
-        add_protocol_field(FT_NONE);
-        init("struct");
+    void Sample_Dissector::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        if (is_struct()) {
+          create_context(FT_NONE);
+          init("struct");
+        }
+      } else {
+        add_protocol_field();
       }
       if (field_) {
-        field_->init_ws_fields();
+        field_->init_ws_fields(first_pass);
       }
     }
 
@@ -1047,10 +1112,14 @@ namespace OpenDDS
       return len;
     }
 
-    void Sample_Sequence::init_ws_fields() {
-      add_protocol_field(FT_UINT32, BASE_DEC);
+    void Sample_Sequence::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_UINT32, BASE_DEC);
+      } else {
+        add_protocol_field();
+      }
       push_ns(element_namespace);
-      element_->init_ws_fields();
+      element_->init_ws_fields(first_pass);
       pop_ns();
     }
 
@@ -1179,10 +1248,15 @@ namespace OpenDDS
       return outstream.str();
     }
 
-    void Sample_Enum::init_ws_fields() {
-      add_protocol_field(FT_STRING);
-      if (value_ != NULL)
-        value_->init_ws_fields();
+    void Sample_Enum::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_STRING);
+      } else {
+        add_protocol_field();
+      }
+      if (value_ != NULL) {
+        value_->init_ws_fields(first_pass);
+      }
     }
 
     //----------------------------------------------------------------------
@@ -1263,13 +1337,17 @@ namespace OpenDDS
       return len;
     }
 
-    void Sample_Union::init_ws_fields() {
-      add_protocol_field(FT_STRING);
+    void Sample_Union::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_STRING);
+      } else {
+        add_protocol_field();
+      }
       if (field_ != NULL) {
-        field_->init_ws_fields();
+        field_->init_ws_fields(first_pass);
       }
       if (default_ != NULL) {
-        default_->init_ws_fields();
+        default_->init_ws_fields(first_pass);
       }
     }
 
@@ -1287,8 +1365,8 @@ namespace OpenDDS
       return base_->dissect_i (p);
     }
 
-    void Sample_Alias::init_ws_fields() {
-      base_->init_ws_fields();
+    void Sample_Alias::init_ws_fields(bool first_pass) {
+      base_->init_ws_fields(first_pass);
     }
 
     //-----------------------------------------------------------------------
@@ -1301,8 +1379,12 @@ namespace OpenDDS
     {
     }
 
-    void Sample_Fixed::init_ws_fields() {
-      add_protocol_field(FT_DOUBLE);
+    void Sample_Fixed::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_DOUBLE);
+      } else {
+        add_protocol_field();
+      }
     }
 
     size_t Sample_Fixed::dissect_i(Wireshark_Bundle &params) {
