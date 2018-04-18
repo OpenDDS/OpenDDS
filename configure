@@ -613,7 +613,25 @@ if (!$ace_src || !$tao_src) {
       else {
         $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
       }
+    } else {
+      # Try Archive::Zip
+      print "Archive::Extract isn't installed, trying Archive::Zip\n" if $opts{'verbose'};
+      eval {require Archive::Zip};
+      if ($@) {
+        print "Neither Archive::Extract or Archive::Zip are installed\n" if $opts{'verbose'};
+      } else {
+        if ($opts{'dry-run'}) {
+          print "Dry-run: would Archive::Zip $file\n";
+        } else {
+          my $zip = Archive::Zip->new();
+          if ($zip->read( $file ) == Archive::Zip::AZ_OK() &&
+            $zip->extractTree() == Archive::Zip::AZ_OK()) {
+            $err = 0;
+          }
+        }
+      }
     }
+
     if ($err) {
       die "ERROR: Can't extract $file, extract it to " . Cwd::abs_path('.') .
         "\nand run this script again.\nStopped";
