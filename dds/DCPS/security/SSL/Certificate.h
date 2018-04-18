@@ -75,7 +75,7 @@ namespace OpenDDS {
 
         void load_cert_bytes(const std::string& path);
 
-		void load_cert_data_bytes(const std::string & path);
+		void load_cert_data_bytes(const std::string & data);
 
         static X509* x509_from_pem(const std::string& path, const std::string& password = "");
         static X509* x509_from_pem(const DDS::OctetSeq& bytes, const std::string& password = "");

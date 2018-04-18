@@ -127,15 +127,15 @@ namespace OpenDDS {
         return result;
       }
 
-      class verify_rsassa_pss_mgf1_sha256_impl
+      class verify_implementation
       {
       public:
-        verify_rsassa_pss_mgf1_sha256_impl(EVP_PKEY* pkey) :
-          public_key(pkey), md_ctx(NULL), pkey_ctx(NULL)
+          verify_implementation(EVP_PKEY* pkey) :
+             public_key(pkey), md_ctx(NULL), pkey_ctx(NULL)
         {
 
         }
-        ~verify_rsassa_pss_mgf1_sha256_impl()
+        ~verify_implementation()
         {
           EVP_MD_CTX_free(md_ctx);
         }
@@ -144,6 +144,7 @@ namespace OpenDDS {
         {
           if (! public_key) return 1;
 
+          int pk_id = 0;
           std::vector<const DDS::OctetSeq*>::const_iterator i, n;
           size_t len = 0u;
 
@@ -166,14 +167,35 @@ namespace OpenDDS {
             return 1;
           }
 
-          if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
-            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_padding failed");
-            return 1;
-          }
+          // Determine which signature type is being verified
+          pk_id = EVP_PKEY_id(public_key);
 
-          if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256())) {
-            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_mgf1_md failed");
-            return 1;
+          if (pk_id == EVP_PKEY_RSA)
+          {
+              if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) 
+              {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_padding failed");
+                  return 1;
+              }
+
+              if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256())) 
+              {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_mgf1_md failed");
+                  return 1;
+              }
+          }
+          else if (pk_id == EVP_PKEY_EC)
+          {
+              if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pkey_ctx, NID_X9_62_prime256v1))
+              {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_nid failed");
+                  return 1;
+              }
+          }
+          else
+          {
+              OPENDDS_SSL_LOG_ERR("Unsupported public key type");
+              return 1;
           }
 
           n = expected_contents.end();
@@ -205,8 +227,8 @@ namespace OpenDDS {
 
       int Certificate::verify_signature(const DDS::OctetSeq& src, const std::vector<const DDS::OctetSeq*>& expected_contents) const
       {
-        verify_rsassa_pss_mgf1_sha256_impl verify(X509_get_pubkey(x_));
-        return verify(src, expected_contents);
+          verify_implementation verify(X509_get_pubkey(x_));
+          return verify(src, expected_contents);
       }
 
       int Certificate::subject_name_to_str(std::string& dst, unsigned long flags) const
@@ -308,9 +330,19 @@ namespace OpenDDS {
 
             } else {
 
-              /* TODO add support for "EC-prime256v1" */
+                EC_KEY* eckey = EVP_PKEY_get1_EC_KEY(pkey);
 
-              fprintf(stderr, "Certificate::algorithm: Error, only RSA-2048 is currently supported\n");
+                if (eckey)
+                {
+                    dst = "EC-prime256v1";
+                    result = 0;
+                }
+                else
+                {
+                    fprintf(stderr, "Certificate::algorithm: Error, only RSA-2048 or EC-prime256v1 are currently supported\n");
+                }
+
+                EC_KEY_free(eckey);
             }
 
           } else {
@@ -356,12 +388,12 @@ namespace OpenDDS {
         }
       }
 
-	  void Certificate::load_cert_data_bytes(const std::string& path)
+	  void Certificate::load_cert_data_bytes(const std::string& data)
 	  {
 		  // The minus 1 is because path contains a comma in element 0 and that comma
 		  // is not included in the cert string
-		  original_bytes_.length(path.size() - 1);
-		  std::memcpy(original_bytes_.get_buffer(), &path[1], original_bytes_.length());
+		  original_bytes_.length(data.size() - 1);
+		  std::memcpy(original_bytes_.get_buffer(), &data[1], original_bytes_.length());
 
 		  // To appease the other DDS security implementations which
 		  // append a null byte at the end of the cert.

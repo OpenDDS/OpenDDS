@@ -65,15 +65,16 @@ namespace OpenDDS {
         }
       }
 
-      class sign_rsassa_pss_mgf1_sha256_impl
+//      class sign_rsassa_pss_mgf1_sha256_impl
+      class sign_implementation
       {
       public:
-        sign_rsassa_pss_mgf1_sha256_impl(EVP_PKEY* pkey) :
+        sign_implementation(EVP_PKEY* pkey) :
           private_key(pkey), md_ctx(NULL), pkey_ctx(NULL)
         {
 
         }
-        ~sign_rsassa_pss_mgf1_sha256_impl()
+        ~sign_implementation()
         {
           if (md_ctx) EVP_MD_CTX_free(md_ctx);
         }
@@ -104,14 +105,33 @@ namespace OpenDDS {
             return 1;
           }
 
-          if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
-            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_padding failed");
-            return 1;
-          }
+          // Determine which signature type is being signed
+          int pk_id = EVP_PKEY_id(private_key);
 
-          if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256())) {
-            OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_mgf1_md failed");
-            return 1;
+          if (pk_id == EVP_PKEY_RSA)
+          {
+              if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_padding failed");
+                  return 1;
+              }
+
+              if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256())) {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_mgf1_md failed");
+                  return 1;
+              }
+          }
+          else if (pk_id == EVP_PKEY_EC)
+          {
+              if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pkey_ctx, NID_X9_62_prime256v1))
+              {
+                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_nid failed");
+                  return 1;
+              }
+          }
+          else
+          {
+              OPENDDS_SSL_LOG_ERR("Unsupported private key type");
+              return 1;
           }
 
           n = src.end();
@@ -147,7 +167,7 @@ namespace OpenDDS {
 
       int PrivateKey::sign(const std::vector<const DDS::OctetSeq*> & src, DDS::OctetSeq& dst) const
       {
-        sign_rsassa_pss_mgf1_sha256_impl sign(k_);
+        sign_implementation sign(k_);
         return sign(src, dst);
       }
 
@@ -180,14 +200,14 @@ namespace OpenDDS {
         return result;
       }
 
-	  EVP_PKEY* PrivateKey::EVP_PKEY_from_pem_data(const std::string& path, const std::string& password)
+	  EVP_PKEY* PrivateKey::EVP_PKEY_from_pem_data(const std::string& data, const std::string& password)
 	  {
 		  DDS::OctetSeq original_bytes;
 
 		  // The minus 1 is because path contains a comma in element 0 and that comma
 		  // is not included in the cert string
-		  original_bytes.length(path.size() - 1);
-		  std::memcpy(original_bytes.get_buffer(), &path[1], original_bytes.length());
+		  original_bytes.length(data.size() - 1);
+		  std::memcpy(original_bytes.get_buffer(), &data[1], original_bytes.length());
 
 		  // To appease the other DDS security implementations which
 		  // append a null byte at the end of the cert.
@@ -224,7 +244,7 @@ namespace OpenDDS {
 		  }
 		  else
 		  {
-			  std::stringstream errmsg; errmsg << "failed to create data '" << path << "' using BIO_new";
+			  std::stringstream errmsg; errmsg << "failed to create data '" << data << "' using BIO_new";
 			  OPENDDS_SSL_LOG_ERR(errmsg.str());
 		  }
 
