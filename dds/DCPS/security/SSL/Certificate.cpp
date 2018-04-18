@@ -145,7 +145,6 @@ namespace OpenDDS {
           if (! public_key) return 1;
 
           std::vector<const DDS::OctetSeq*>::const_iterator i, n;
-          size_t len = 0u;
 
           md_ctx = EVP_MD_CTX_new();
           if (! md_ctx) {

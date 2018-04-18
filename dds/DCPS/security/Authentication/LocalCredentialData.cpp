@@ -101,8 +101,8 @@ namespace OpenDDS {
               break;
 
             case SSL::URI_DATA:
-			  load_permissions_data(path);
-			  break;
+              load_permissions_data(path);
+              break;
 
             case SSL::URI_PKCS11:
             case SSL::URI_UNKNOWN:
@@ -123,7 +123,7 @@ namespace OpenDDS {
       std::vector<unsigned char> chunks;
       unsigned char chunk[32] = {0};
 
-      FILE* fp = fopen(path.c_str(), "r");
+      FILE* fp = fopen(path.c_str(), "rb");
       if (fp) {
         size_t count = 0u;
         while((count = fread(chunk, sizeof(chunk[0]), sizeof(chunk), fp))) {
@@ -151,18 +151,18 @@ namespace OpenDDS {
       }
     }
 
-	void LocalAuthCredentialData::load_permissions_data(const std::string& path)
-	{
-		// The minus 1 is because path contains a comma in element 0 and that comma
-		// is not included in the cert string
-		access_permissions_.length(path.size() - 1);
-		std::memcpy(access_permissions_.get_buffer(), &path[1], access_permissions_.length());
+    void LocalAuthCredentialData::load_permissions_data(const std::string& path)
+    {
+      // The minus 1 is because path contains a comma in element 0 and that comma
+      // is not included in the cert string
+      access_permissions_.length(path.size() - 1);
+      std::memcpy(access_permissions_.get_buffer(), &path[1], access_permissions_.length());
 
-		// To appease the other DDS security implementations which
-		// append a null byte at the end of the cert.
-		access_permissions_.length(access_permissions_.length() + 1);
-		access_permissions_[access_permissions_.length() - 1] = 0;
-	}
+      // To appease the other DDS security implementations which
+      // append a null byte at the end of the cert.
+      access_permissions_.length(access_permissions_.length() + 1);
+      access_permissions_[access_permissions_.length() - 1] = 0;
+    }
 
   }
 }
