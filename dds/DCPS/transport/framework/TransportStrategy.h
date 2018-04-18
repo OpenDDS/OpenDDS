@@ -22,7 +22,7 @@ namespace DCPS {
  * TransportReceiveStrategy.
  */
 class OpenDDS_Dcps_Export TransportStrategy
-  : public RcObject {
+  : public virtual RcObject {
 public:
 
   virtual ~TransportStrategy();
