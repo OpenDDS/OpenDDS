@@ -18,9 +18,6 @@ namespace DCPS {
 MulticastReceiveStrategy::MulticastReceiveStrategy(MulticastDataLink* link)
   : link_(link)
 {
-#if WIN32
-	this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-#endif
 }
 
 ACE_HANDLE
