@@ -893,54 +893,100 @@ namespace {
     operator EVP_CIPHER_CTX*() { return ctx_; }
     ~CipherContext() { EVP_CIPHER_CTX_free(ctx_); }
   };
+
+  struct DigestContext {
+    EVP_MD_CTX* ctx_;
+    DigestContext() : ctx_(EVP_MD_CTX_new()) {}
+    operator EVP_MD_CTX*() { return ctx_; }
+    ~DigestContext() { EVP_MD_CTX_free(ctx_); }
+  };
+
+  struct PrivateKey {
+    EVP_PKEY* pkey_;
+    explicit PrivateKey(const KeyOctetSeq& key)
+      : pkey_(EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, 0, key.get_buffer(),
+                                   key.length())) {}
+    operator EVP_PKEY*() { return pkey_; }
+    ~PrivateKey() { EVP_PKEY_free(pkey_); }
+  };
 }
 
-KeyOctetSeq CryptoBuiltInImpl::get_session_key(const KeyMaterial& k,
-                                               const CryptoHeader& h)
+KeyOctetSeq
+CryptoBuiltInImpl::Session::get_key(const KeyMaterial& master,
+                                    const CryptoHeader& header)
 {
-/*
-  SessionKey = HMAC256(MasterKey, "SessionKey" | MasterSalt | SessionId) NUL?
-  where HMAC256(Key, Data) = hash-based MAC on Data using Key and SHA256
-  TODO: caching
-*/
-  const KeyOctetSeq& mkey = k.master_sender_key;
-  EVP_PKEY* pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, 0, mkey.get_buffer(),
-                                        mkey.length());
-  EVP_MD_CTX* ctx = EVP_MD_CTX_create();
+  if (key_.length() && 0 == std::memcmp(&id_, &header.session_id, sizeof id_)) {
+    return key_;
+  }
+  std::memcpy(&id_, &header.session_id, sizeof id_);
+
+  PrivateKey pkey(master.master_sender_key);
+  DigestContext ctx;
   const EVP_MD* md = EVP_get_digestbyname("SHA256");
-  EVP_DigestInit_ex(ctx, md, 0);
-  EVP_DigestSignInit(ctx, 0, md, 0, pkey);
-  static const char cookie[] = "SessionKey";
-  EVP_DigestSignUpdate(ctx, cookie, std::strlen(cookie)); // confirmed, no nul
-  EVP_DigestSignUpdate(ctx, k.master_salt.get_buffer(), k.master_salt.length());
-  EVP_DigestSignUpdate(ctx, h.session_id, sizeof h.session_id);
+
+  if (EVP_DigestInit_ex(ctx, md, 0) < 1) {
+    return KeyOctetSeq();
+  }
+
+  if (EVP_DigestSignInit(ctx, 0, md, 0, pkey) < 1) {
+    return KeyOctetSeq();
+  }
+
+  static const char cookie[] = "SessionKey"; // DDSSEC12-53
+  if (EVP_DigestSignUpdate(ctx, cookie, std::strlen(cookie)) < 1) {
+    return KeyOctetSeq();
+  }
+
+  const KeyOctetSeq& salt = master.master_salt;
+  if (EVP_DigestSignUpdate(ctx, salt.get_buffer(), salt.length()) < 1) {
+    return KeyOctetSeq();
+  }
+
+  if (EVP_DigestSignUpdate(ctx, id_, sizeof id_) < 1) {
+    return KeyOctetSeq();
+  }
+
   size_t req = 0;
-  EVP_DigestSignFinal(ctx, 0, &req);
-  KeyOctetSeq skey;
-  skey.length(static_cast<unsigned int>(req));
-  EVP_DigestSignFinal(ctx, skey.get_buffer(), &req);
-  EVP_MD_CTX_destroy(ctx);
-  EVP_PKEY_free(pkey);
-  return skey;
+  if (EVP_DigestSignFinal(ctx, 0, &req) < 1) {
+    return KeyOctetSeq();
+  }
+
+  key_.length(static_cast<unsigned int>(req));
+  if (EVP_DigestSignFinal(ctx, key_.get_buffer(), &req) < 1) {
+    return KeyOctetSeq();
+  }
+
+  return key_;
 }
 
-bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
-                                unsigned int n, const CryptoHeader& header,
-                                const CryptoFooter& footer, DDS::OctetSeq& out)
+bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
+                                const char* ciphertext, unsigned int n,
+                                const CryptoHeader& header,
+                                const CryptoFooter& footer, DDS::OctetSeq& out,
+                                SecurityException& ex)
+
 {
-  const KeyOctetSeq sess_key = get_session_key(k, header);
+  const KeyOctetSeq sess_key = sess.get_key(master, header);
+  if (!sess_key.length()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "no session key");
+    return false;
+  }
+
   CipherContext ctx;
-  if (k.transformation_kind[TransformKindIndex] !=
+  if (master.transformation_kind[TransformKindIndex] !=
       CRYPTO_TRANSFORMATION_KIND_AES256_GCM) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "unsupported transformation kind");
     ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
                "unsupported transformation kind %d\n",
-               k.transformation_kind[TransformKindIndex]));
+               master.transformation_kind[TransformKindIndex]));
     return false;
   }
 
   // session_id is start of IV contiguous bytes
   if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), 0, sess_key.get_buffer(),
                          header.session_id) != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptInit_ex");
     ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
                "EVP_DecryptInit_ex %Ld\n", ERR_peek_last_error()));
     return false;
@@ -951,6 +997,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
   if (EVP_DecryptUpdate(ctx, out.get_buffer(), &len,
                         reinterpret_cast<const unsigned char*>(ciphertext), n)
       != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptUpdate");
     ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
                "EVP_DecryptUpdate %Ld\n", ERR_peek_last_error()));
     return false;
@@ -958,6 +1005,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
 
   void* tag = const_cast<void*>(static_cast<const void*>(footer.common_mac));
   if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
     ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
                "EVP_CIPHER_CTX_ctrl %Ld\n", ERR_peek_last_error()));
     return false;
@@ -968,6 +1016,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
     out.length(len + len2);
     return true;
   }
+  CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptFinal_ex");
   ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::decrypt - ERROR "
              "EVP_DecryptFinal_ex %Ld\n", ERR_peek_last_error()));
   return false;
@@ -975,7 +1024,9 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& k, const char* ciphertext,
 
 bool CryptoBuiltInImpl::verify(const KeyMaterial&, const char* ciphertext,
                                unsigned int n, const CryptoHeader& /*header*/,
-                               const CryptoFooter&, DDS::OctetSeq& out)
+                               const CryptoFooter&, DDS::OctetSeq& out,
+                               SecurityException& /*ex*/)
+
 {
   //TODO: verification of authenticated but unencrypted message
   out.length(n);
@@ -983,26 +1034,12 @@ bool CryptoBuiltInImpl::verify(const KeyMaterial&, const char* ciphertext,
   return true;
 }
 
-bool CryptoBuiltInImpl::decode_datawriter_submessage(
+bool CryptoBuiltInImpl::decode_submessage(
   DDS::OctetSeq& plain_rtps_submessage,
   const DDS::OctetSeq& encoded_rtps_submessage,
-  DatareaderCryptoHandle /*receiving_datareader_crypto*/,
-  DatawriterCryptoHandle sending_datawriter_crypto,
-  const SecurityException& ex)
+  NativeCryptoHandle sender_handle,
+  SecurityException& ex)
 {
-  // Error ex is marked as const in this function call
-  ACE_UNUSED_ARG(ex);
-
-  // Allowing Nil Handle for receiver since origin auth is not implemented:
-//  if (DDS::HANDLE_NIL == receiving_datareader_crypto) {
-    //CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datareader handle");
-//    return false;
-//  }
-  if (DDS::HANDLE_NIL == sending_datawriter_crypto) {
-    //CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
-    return false;
-  }
-
   ACE_Message_Block mb_in(to_mb(encoded_rtps_submessage.get_buffer()),
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
@@ -1036,29 +1073,51 @@ bool CryptoBuiltInImpl::decode_datawriter_submessage(
   post_ser >> cf;
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  KeySeq& keys = keys_[sending_datawriter_crypto];
+  KeySeq& keys = keys_[sender_handle];
   for (unsigned int i = 0; i < keys.length(); ++i) {
     if (matches(keys[i], ch)) {
       if (encrypts(keys[i])) {
         de_ser.swap_bytes(Serializer::SWAP_BE);
         ACE_CDR::ULong n;
         de_ser >> n;
-        return decrypt(keys[i], mb_in.rd_ptr(), n, ch, cf,
-                       plain_rtps_submessage);
+        const KeyId_t sKey = std::make_pair(sender_handle, i);
+        return decrypt(keys[i], sessions_[sKey], mb_in.rd_ptr(), n, ch, cf,
+                       plain_rtps_submessage, ex);
       } else {
         return verify(keys[i], mb_in.rd_ptr() - 4, 4 + octetsToNext,
-                      ch, cf, plain_rtps_submessage);
+                      ch, cf, plain_rtps_submessage, ex);
       }
     }
   }
 
-  //CommonUtilities::set_security_error(ex, -2, 1, "Crypto Key not found");
+  CommonUtilities::set_security_error(ex, -2, 1, "Crypto Key not found");
   return false;
 }
 
+bool CryptoBuiltInImpl::decode_datawriter_submessage(
+  DDS::OctetSeq& plain_rtps_submessage,
+  const DDS::OctetSeq& encoded_rtps_submessage,
+  DatareaderCryptoHandle /*receiving_datareader_crypto*/,
+  DatawriterCryptoHandle sending_datawriter_crypto,
+  SecurityException& ex)
+{
+  // Allowing Nil Handle for receiver since origin auth is not implemented:
+  //  if (DDS::HANDLE_NIL == receiving_datareader_crypto) {
+  //CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datareader handle");
+  //    return false;
+  //  }
+  if (DDS::HANDLE_NIL == sending_datawriter_crypto) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
+    return false;
+  }
+
+  return decode_submessage(plain_rtps_submessage, encoded_rtps_submessage,
+                           sending_datawriter_crypto, ex);
+}
+
 bool CryptoBuiltInImpl::decode_datareader_submessage(
-  DDS::OctetSeq& plain_rtps_message,
-  const DDS::OctetSeq& encoded_rtps_message,
+  DDS::OctetSeq& plain_rtps_submessage,
+  const DDS::OctetSeq& encoded_rtps_submessage,
   DatawriterCryptoHandle /*receiving_datawriter_crypto*/,
   DatareaderCryptoHandle sending_datareader_crypto,
   SecurityException& ex)
@@ -1068,16 +1127,13 @@ bool CryptoBuiltInImpl::decode_datareader_submessage(
     return false;
   }
   // Allowing Nil Handle for receiver since origin auth is not implemented:
-//  if (DDS::HANDLE_NIL == receiving_datawriter_crypto) {
-//    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
-//    return false;
-//  }
+  //  if (DDS::HANDLE_NIL == receiving_datawriter_crypto) {
+  //CommonUtilities::set_security_error(ex, -1, 0, "Invalid Datawriter handle");
+  //    return false;
+  //  }
 
-  // For the stub, just supply the input as the output
-  DDS::OctetSeq transformed_buffer(encoded_rtps_message);
-  plain_rtps_message.swap(transformed_buffer);
-
-  return true;
+  return decode_submessage(plain_rtps_submessage, encoded_rtps_submessage,
+                           sending_datareader_crypto, ex);
 }
 
 bool CryptoBuiltInImpl::decode_serialized_payload(
