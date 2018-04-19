@@ -12,6 +12,7 @@
 #include "TcpDataLink_rch.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/RcEventHandler.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -20,7 +21,10 @@ namespace DCPS {
 
 class TcpConnection;
 
-class TcpReceiveStrategy : public TransportReceiveStrategy<> {
+class TcpReceiveStrategy
+  : public TransportReceiveStrategy<>,
+    public RcEventHandler
+{
 public:
 
   TcpReceiveStrategy(TcpDataLink& link,

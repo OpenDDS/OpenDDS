@@ -10,8 +10,7 @@
 
 #include "Multicast_Export.h"
 
-#include "ace/Event_Handler.h"
-
+#include "dds/DCPS/RcEventHandler.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -23,7 +22,8 @@ class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastReceiveStrategy
   : public TransportReceiveStrategy<>,
-    public ACE_Event_Handler {
+    public RcEventHandler
+{
 public:
   explicit MulticastReceiveStrategy(MulticastDataLink* link);
 
