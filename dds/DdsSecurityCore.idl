@@ -798,7 +798,7 @@ module DDS {
       preprocess_secure_submsg(
         inout DatawriterCryptoHandle         datawriter_crypto,
         inout DatareaderCryptoHandle         datareader_crypto,
-        inout SecureSubmessageCategory_t      secure_submessage_category,
+        inout SecureSubmessageCategory_t     secure_submessage_category,
         in    OctetSeq                       encoded_rtps_submessage,
         in    ParticipantCryptoHandle        receiving_participant_crypto,
         in    ParticipantCryptoHandle        sending_participant_crypto,
@@ -810,15 +810,15 @@ module DDS {
         in    OctetSeq                encoded_rtps_submessage,
         in    DatareaderCryptoHandle  receiving_datareader_crypto,
         in    DatawriterCryptoHandle  sending_datawriter_crypto,
-        in    SecurityException       ex);
+        inout SecurityException       ex); // DDSSEC12-21
 
       boolean
       decode_datareader_submessage(
-        inout OctetSeq                plain_rtps_message,
-        in    OctetSeq                encoded_rtps_message,
+        inout OctetSeq                plain_rtps_submessage,
+        in    OctetSeq                encoded_rtps_submessage,
         in    DatawriterCryptoHandle  receiving_datawriter_crypto,
         in    DatareaderCryptoHandle  sending_datareader_crypto,
-        inout SecurityException       ex );
+        inout SecurityException       ex);
 
       boolean
       decode_serialized_payload(

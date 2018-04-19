@@ -198,11 +198,11 @@ private:
     const DDS::OctetSeq& encoded_rtps_submessage,
     DDS::Security::DatareaderCryptoHandle receiving_datareader_crypto,
     DDS::Security::DatawriterCryptoHandle sending_datawriter_crypto,
-    const DDS::Security::SecurityException& ex);
+    DDS::Security::SecurityException& ex);
 
   virtual bool decode_datareader_submessage(
-    DDS::OctetSeq& plain_rtps_message,
-    const DDS::OctetSeq& encoded_rtps_message,
+    DDS::OctetSeq& plain_rtps_submessage,
+    const DDS::OctetSeq& encoded_rtps_submessage,
     DDS::Security::DatawriterCryptoHandle receiving_datawriter_crypto,
     DDS::Security::DatareaderCryptoHandle sending_datareader_crypto,
     DDS::Security::SecurityException& ex);
@@ -238,15 +238,33 @@ private:
   std::multimap<DDS::Security::ParticipantCryptoHandle,
                 EntityInfo> participant_to_entity_;
 
+  struct Session {
+    SessionIdType id_;
+    KeyOctetSeq key_;
+    ACE_UINT64 counter_;
+
+    KeyOctetSeq get_key(const KeyMaterial& master, const CryptoHeader& header);
+  };
+  typedef std::pair<DDS::Security::NativeCryptoHandle, unsigned int> KeyId_t;
+  typedef std::map<KeyId_t, Session> SessionTable_t;
+  SessionTable_t sessions_;
+
   KeyOctetSeq get_session_key(const KeyMaterial& k, const CryptoHeader& header);
 
-  bool decrypt(const KeyMaterial& k, const char* ciphertext,
+  bool decode_submessage(DDS::OctetSeq& plain_rtps_submessage,
+                         const DDS::OctetSeq& encoded_rtps_submessage,
+                         DDS::Security::NativeCryptoHandle sender_handle,
+                         DDS::Security::SecurityException& ex);
+
+  bool decrypt(const KeyMaterial& master, Session& sess, const char* ciphertext,
                unsigned int n, const CryptoHeader& header,
-               const CryptoFooter& footer, DDS::OctetSeq& out);
+               const CryptoFooter& footer, DDS::OctetSeq& out,
+               DDS::Security::SecurityException& ex);
 
   bool verify(const KeyMaterial& k, const char* ciphertext,
               unsigned int n, const CryptoHeader& header,
-              const CryptoFooter& footer, DDS::OctetSeq& out);
+              const CryptoFooter& footer, DDS::OctetSeq& out,
+              DDS::Security::SecurityException& ex);
 };
 
 } // Security
