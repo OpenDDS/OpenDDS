@@ -240,16 +240,34 @@ private:
 
   struct Session {
     SessionIdType id_;
+    IV_SuffixType iv_suffix_;
     KeyOctetSeq key_;
     ACE_UINT64 counter_;
 
     KeyOctetSeq get_key(const KeyMaterial& master, const CryptoHeader& header);
+    void create_key(const KeyMaterial& master);
+    void derive_key(const KeyMaterial& master);
+    void next_id(const KeyMaterial& master);
+    void inc_iv();
   };
   typedef std::pair<DDS::Security::NativeCryptoHandle, unsigned int> KeyId_t;
   typedef std::map<KeyId_t, Session> SessionTable_t;
   SessionTable_t sessions_;
 
-  KeyOctetSeq get_session_key(const KeyMaterial& k, const CryptoHeader& header);
+  bool encode_submessage(DDS::OctetSeq& encoded_rtps_submessage,
+                         const DDS::OctetSeq& plain_rtps_submessage,
+                         DDS::Security::NativeCryptoHandle sender_handle,
+                         DDS::Security::SecurityException& ex);
+
+  bool encrypt(const KeyMaterial& master, Session& sess,
+               const DDS::OctetSeq& plain,
+               CryptoHeader& header, CryptoFooter& footer,
+               DDS::OctetSeq& out, DDS::Security::SecurityException& ex);
+
+  bool authtag(const KeyMaterial& master, Session& sess,
+               const DDS::OctetSeq& plain,
+               CryptoHeader& header, CryptoFooter& footer,
+               DDS::Security::SecurityException& ex);
 
   bool decode_submessage(DDS::OctetSeq& plain_rtps_submessage,
                          const DDS::OctetSeq& encoded_rtps_submessage,

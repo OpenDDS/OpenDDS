@@ -268,12 +268,12 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
 
 namespace {
   DDS::OctetSeq toSeq(Serializer& ser1, CORBA::Octet msgId, CORBA::Octet flags,
-                      CORBA::UShort octetsToNextHeader, EntityId_t receiverId,
-                      CORBA::ULong u2, EntityId_t senderId, size_t rem)
+                      CORBA::UShort octetsToNextHeader, CORBA::ULong dataWord2,
+                      EntityId_t readerId, EntityId_t writerId, size_t remain)
   {
     const bool shortMsg = (msgId == RTPS::PAD || msgId == RTPS::INFO_TS);
     CORBA::ULong size = 4 +
-      ((octetsToNextHeader == 0 && !shortMsg) ? rem : octetsToNextHeader);
+      ((octetsToNextHeader == 0 && !shortMsg) ? remain : octetsToNextHeader);
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
@@ -282,12 +282,10 @@ namespace {
     ser2 << ACE_OutputCDR::from_octet(flags);
     ser2 << octetsToNextHeader;
     if (msgId == RTPS::DATA || msgId == RTPS::DATA_FRAG) {
-      ser2 << u2;
+      ser2 << dataWord2;
     }
-    if (msgId != RTPS::ACKNACK && msgId != RTPS::NACK_FRAG) {
-      ser2 << receiverId;
-    }
-    ser2 << senderId;
+    ser2 << readerId;
+    ser2 << writerId;
     ser1.read_octet_array(reinterpret_cast<CORBA::Octet*>(mb.wr_ptr()),
                           mb.space());
     return out;
@@ -298,6 +296,18 @@ namespace {
     unsigned int length_;
     DDS::OctetSeq encoded_;
   };
+
+  void log_encode_error(CORBA::Octet msgId,
+                        DDS::Security::NativeCryptoHandle sender,
+                        const DDS::Security::Exception& ex)
+  {
+    if (Transport_debug_level) {
+      ACE_ERROR((LM_ERROR, "RtpsUdpSendStrategy::pre_send_packet - ERROR "
+                 "plugin failed to encode submessage 0x%x from handle %d "
+                 "[%d.%d]: %C\n", msgId, sender, ex.code, ex.minor_code,
+                 ex.message.in()));
+    }
+  }
 }
 
 ACE_Message_Block*
@@ -317,8 +327,6 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
     return 0;
   }
 
-  DatawriterCryptoHandleSeq emptyWriterHandles;
-  ParticipantCryptoHandleSeq emptyParticipantHandles;
   DDS::Security::SecurityException ex = {"", 0, 0};
 
   Message_Block_Ptr in(plain->duplicate());
@@ -413,6 +421,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         c.start_ = submessage_start;
         c.length_ = plain.length();
       } else {
+        log_encode_error(msgId, sender_dwch, ex);
         replacements.pop_back();
         ok = false;
       }
@@ -421,6 +430,11 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
     case RTPS::ACKNACK:
     case RTPS::NACK_FRAG: {
       if (!(ser >> sender.entityId)) { // readerId
+        ok = false;
+        break;
+      }
+      ++read;
+      if (!(ser >> receiver.entityId)) { // writerId
         ok = false;
         break;
       }
@@ -434,14 +448,23 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       replacements.resize(replacements.size() + 1);
       Chunk& c = replacements.back();
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader,
-                                ENTITYID_UNKNOWN, 0,
+                                receiver.entityId, 0,
                                 sender.entityId, remaining));
+      DatawriterCryptoHandleSeq writerHandles;
+      if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
+        DatawriterCryptoHandle dwch = link_->writer_crypto_handle(receiver);
+        if (dwch != DDS::HANDLE_NIL) {
+          writerHandles.length(1);
+          writerHandles[0] = dwch;
+        }
+      }
       if (crypto->encode_datareader_submessage(c.encoded_, plain, sender_drch,
-                                               emptyWriterHandles, ex)
+                                               writerHandles, ex)
           && contentsDiffer(c.encoded_, plain)) {
         c.start_ = submessage_start;
         c.length_ = plain.length();
       } else {
+        log_encode_error(msgId, sender_drch, ex);
         replacements.pop_back();
         ok = false;
       }

@@ -142,18 +142,6 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_NullSendingHandle)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_datawriter_submessage_NoReaders)
-{
-  DDS::OctetSeq output;
-  DDS::Security::SecurityException ex;
-  DDS::Security::DatawriterCryptoHandle handle = 1;
-  CORBA::Long index = 0;
-
-  EXPECT_FALSE(get_inst().encode_datawriter_submessage(
-    output, get_buffer(), handle, get_readers(), index, ex));
-  EXPECT_EQ(0U, output.length());
-}
-
 TEST_F(CryptoTransformTest, encode_datawriter_submessage_NegativeIndex)
 {
   DDS::OctetSeq output;
@@ -217,7 +205,7 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_MultiPass)
       EXPECT_TRUE(get_inst().encode_datawriter_submessage(
         output, get_buffer(), handle, get_readers(), index, ex));
       EXPECT_EQ(get_buffer(), output);
-      EXPECT_EQ((n + 1), index);
+      EXPECT_LT(n, index);
     } else {
       // Out of bounds test
       EXPECT_FALSE(get_inst().encode_datawriter_submessage(
@@ -235,17 +223,6 @@ TEST_F(CryptoTransformTest, encode_datareader_submessage_NullHandle)
 
   // Provide a valid list of reader handles
   init_writers(1);
-
-  EXPECT_FALSE(get_inst().encode_datareader_submessage(
-    output, get_buffer(), handle, get_writers(), ex));
-  EXPECT_EQ(0U, output.length());
-}
-
-TEST_F(CryptoTransformTest, encode_datareader_submessage_NoWriters)
-{
-  DDS::OctetSeq output;
-  DDS::Security::SecurityException ex;
-  DDS::Security::DatareaderCryptoHandle handle = 1;
 
   EXPECT_FALSE(get_inst().encode_datareader_submessage(
     output, get_buffer(), handle, get_writers(), ex));
