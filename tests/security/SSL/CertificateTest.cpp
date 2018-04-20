@@ -61,6 +61,7 @@ public:
 		  "BhJtym57Sl6WN / CtSxBcC3it3ZGjNeeOadQdHV3mDn6xRJzvbP7kxM10L8rUeAPL\n"
 		  "WAzIXoHQIBML4w ==\n"
 		  "-----END CERTIFICATE-----"),
+      signed_ec_("file:../certs/ecdsa/opendds_participant_cert.pem"),
 	  not_signed_("file:../certs/opendds_not_signed.pem")
   {
 
@@ -75,6 +76,7 @@ public:
   Certificate ca_data_;
   Certificate signed_;
   Certificate signed_data_;
+  Certificate signed_ec_;
   Certificate not_signed_;
 };
 
@@ -121,6 +123,13 @@ TEST_F(CertificateTest, Algorithm_RSA_2048_Success)
   ASSERT_EQ(std::string("RSA-2048"), algo);
 }
 
+TEST_F(CertificateTest, Algorithm_EC_Prime_Success)
+{
+    std::string algo;
+    ASSERT_EQ(signed_ec_.algorithm(algo), 0 /* success! */);
+    ASSERT_EQ(std::string("EC-prime256v1"), algo);
+}
+
 TEST_F(CertificateTest, SubjectNameToString_Success)
 {
   /* From this cmd:  openssl x509 -noout -subject -in ../certs/opendds_participant_cert.pem */
@@ -138,6 +147,3 @@ TEST_F(CertificateTest, SerializeDeserialize_Success)
   Certificate copy(tmp);
   ASSERT_EQ(copy, signed_);
 }
-
-
-

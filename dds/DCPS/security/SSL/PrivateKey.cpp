@@ -120,19 +120,6 @@ namespace OpenDDS {
                   return 1;
               }
           }
-          else if (pk_id == EVP_PKEY_EC)
-          {
-              if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pkey_ctx, NID_X9_62_prime256v1))
-              {
-                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_nid failed");
-                  return 1;
-              }
-          }
-          else
-          {
-              OPENDDS_SSL_LOG_ERR("Unsupported private key type");
-              return 1;
-          }
 
           n = src.end();
           for (i = src.begin(); i != n; ++i) {
@@ -157,8 +144,13 @@ namespace OpenDDS {
             return 1;
           }
 
+          // The last call to EVP_DigestSignFinal can change the value of len so
+          // reassign the value to len to dst.length.  This happens when using EC
+          dst.length(static_cast<unsigned int>(len));
+
           return 0;
         }
+
       private:
         EVP_PKEY* private_key;
         EVP_MD_CTX* md_ctx;

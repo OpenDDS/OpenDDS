@@ -1,2 +1,3 @@
 V	280220154320Z		01	unknown	/C=US/ST=MO/O=Object Computing (Test Identity CA)/CN=Object Computing (Test Identity CA)/emailAddress=info@objectcomputing.com
 V	280228151053Z		02	unknown	/C=US/ST=California/O=Bob's Magical Widget Factory/CN=www.example.com/emailAddress=bob@example.com
+V	280416174749Z		03	unknown	/C=AU/ST=Missouri/O=OCI/OU=opendds/CN=fred/emailAddress=lewisdo@objectcomputing.com

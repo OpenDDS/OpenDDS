@@ -184,19 +184,6 @@ namespace OpenDDS {
                   return 1;
               }
           }
-          else if (pk_id == EVP_PKEY_EC)
-          {
-              if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pkey_ctx, NID_X9_62_prime256v1))
-              {
-                  OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_nid failed");
-                  return 1;
-              }
-          }
-          else
-          {
-              OPENDDS_SSL_LOG_ERR("Unsupported public key type");
-              return 1;
-          }
 
           n = expected_contents.end();
           for (i = expected_contents.begin(); i != n; ++i) {
@@ -219,6 +206,7 @@ namespace OpenDDS {
 
           return 0;
         }
+
       private:
         EVP_PKEY* public_key;
         EVP_MD_CTX* md_ctx;

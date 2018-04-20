@@ -62,6 +62,7 @@ public:
 		"BhJtym57Sl6WN / CtSxBcC3it3ZGjNeeOadQdHV3mDn6xRJzvbP7kxM10L8rUeAPL\n"
 		"WAzIXoHQIBML4w ==\n"
 		"-----END CERTIFICATE----- "),
+    pubkey_ec_("file:../certs/ecdsa/opendds_participant_cert.pem"),
     privkey_("file:../certs/mock_participant_1/opendds_participant_private_key.pem"),
 	privkey_data_("data:,-----BEGIN RSA PRIVATE KEY-----\n"
 		"MIIEpAIBAAKCAQEAxSDtEZPm + 8FwxIT7Xn / w6ypoGKQ0DmU / 1EGyCaOKF6afeV0w\n"
@@ -90,6 +91,7 @@ public:
 		"9j1LwufwEDDgdY5M34PUeMjA980b8OiESXE2IfoaLiZEqANI6vQ6dRl / KMfGWUY6\n"
 		"EMUPFMlvTkIa38Nyutkth / P / rZZiaBapEkb / mtclm1ra4nDP0o1TqA == \n"
 		"-----END RSA PRIVATE KEY----- "),
+    privkey_ec_("file:../certs/ecdsa/private_key.pem"),
     hello_(),
     world_(),
     empty_()
@@ -110,10 +112,13 @@ public:
 
   Certificate ca_;
   Certificate ca_data_;
+  Certificate pubkey_ec_;
   Certificate pubkey_;
   Certificate pubkey_data_;
   PrivateKey privkey_;
   PrivateKey privkey_data_;
+  PrivateKey privkey_ec_;
+//  PrivateKey pubkey_ec_;
 
   DDS::OctetSeq hello_;
   DDS::OctetSeq world_;
@@ -132,6 +137,38 @@ TEST_F(PrivateKeyTest, SignAndVerify_Success)
   int verify_result = pubkey_.verify_signature(tmp, sign_these);
 
   ASSERT_EQ(0, verify_result);
+}
+
+TEST_F(PrivateKeyTest, SignAndVerify_Data_Success)
+{
+    std::vector<const DDS::OctetSeq*> sign_these;
+    sign_these.push_back(&hello_);
+    sign_these.push_back(&world_);
+
+    DDS::OctetSeq tmp;
+    int sign_result = privkey_data_.sign(sign_these, tmp);
+
+    ASSERT_EQ(0, sign_result);
+
+    int verify_result = pubkey_data_.verify_signature(tmp, sign_these);
+
+    ASSERT_EQ(0, verify_result);
+}
+
+TEST_F(PrivateKeyTest, SignAndVerify_EC_Success)
+{
+    std::vector<const DDS::OctetSeq*> sign_these;
+    sign_these.push_back(&hello_);
+    sign_these.push_back(&world_);
+
+    DDS::OctetSeq tmp;
+    int sign_result = privkey_ec_.sign(sign_these, tmp);
+
+    ASSERT_EQ(0, sign_result);
+
+    int verify_result = pubkey_ec_.verify_signature(tmp, sign_these);
+
+    ASSERT_EQ(0, verify_result);
 }
 
 TEST_F(PrivateKeyTest, SignAndVerify_WrongData_Failure)
