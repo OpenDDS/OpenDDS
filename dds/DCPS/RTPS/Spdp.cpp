@@ -306,7 +306,6 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
       sedp_.associate_preauth(dp.pdata_);
 
       // If we've gotten auth requests for this (previously undiscovered) participant, pull in the tokens now
-      // How does this work if we've only just recently associated stateless reader / writer? GOOD QUESTION!
       PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
       if (token_iter != pending_remote_auth_tokens_.end()) {
         dp.remote_auth_request_token_ = token_iter->second;
@@ -441,11 +440,13 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  DiscoveredParticipantMap::const_iterator iter = participants_.find(guid);
+  DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter == participants_.end()) {
     // We're simply caching this for later, since we can't actually do much without the SPDP announcement itself
     pending_remote_auth_tokens_[guid] = msg.message_data[0];
+  } else {
+    iter->second.remote_auth_request_token_ = msg.message_data[0];
   }
 }
 
@@ -630,7 +631,6 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
       case AS_HANDSHAKE_REQUEST_SENT:
       case AS_HANDSHAKE_REPLY_SENT:
         if (tv > pi->second.auth_started_time_ + MAX_AUTH_TIME) {
-          // TODO sedp cleanup?
           to_erase.insert(pi->first); 
         }
         if (pi->second.has_last_stateless_msg_ && (tv > pi->second.last_stateless_msg_time_ + AUTH_RESEND_PERIOD)) {
@@ -657,7 +657,12 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
     DiscoveredParticipantIter pit = participants_.find(*it);
     if (pit != participants_.end()) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states()      - Removing discovered participant due to authentication timeout: %C\n"), std::string(DCPS::GuidConverter(*it)).c_str()));
-      remove_discovered_participant(pit);
+      if (participant_sec_attr_.allow_unauthenticated_participants == false) {
+        remove_discovered_participant(pit);
+      } else {
+        pit->second.auth_state_ = AS_UNAUTHENTICATED;
+        match_unauthenticated(*it, pit->second);
+      }
     }
   }
 }

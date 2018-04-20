@@ -76,6 +76,9 @@ namespace {
   bool isPropertyQosPolicy(const string& cxx);
   bool genPropertyQosPolicy(const string& cxx);
 
+  bool isSecuritySubmessage(const string& cxx);
+  bool genSecuritySubmessage(const string& cxx);
+
   const special_sequence special_sequences[] = {
     {
       isRtpsSpecialSequence,
@@ -103,6 +106,10 @@ namespace {
     {
       isPropertyQosPolicy,
       genPropertyQosPolicy,
+    },
+    {
+      isSecuritySubmessage,
+      genSecuritySubmessage,
     },
   };
 
@@ -1237,6 +1244,44 @@ namespace {
         "    return true; // optional member missing\n"
         "  }\n"
         "  return strm >> stru.binary_value;\n";
+    }
+    return true;
+  }
+
+  bool isSecuritySubmessage(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::SecuritySubmessage";
+  }
+
+  bool genSecuritySubmessage(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  gen_find_size(stru.smHeader, size, padding);\n"
+        "  size += stru.content.length() * max_marshaled_size_octet();\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  return (strm << stru.smHeader)\n"
+        "    && strm.write_octet_array(stru.content.get_buffer(), "
+        "stru.content.length());\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  return false;\n";
     }
     return true;
   }

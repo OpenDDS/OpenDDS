@@ -2526,7 +2526,7 @@ Sedp::Writer::write_control_msg(DCPS::Message_Block_Ptr payload,
                                 DCPS::SequenceNumber seq)
 {
   DCPS::DataSampleHeader header;
-  set_header_fields(header, size, GUID_UNKNOWN, seq, id);
+  set_header_fields(header, size, GUID_UNKNOWN, seq, false, id);
   // no need to serialize header since rtps_udp transport ignores it
   send_control(header, DCPS::move(payload));
 }

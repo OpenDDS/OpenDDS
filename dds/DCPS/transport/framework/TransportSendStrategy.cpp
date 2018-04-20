@@ -1744,6 +1744,10 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);
 
+  if (alternate && num_bytes_sent > 0) {
+    return packet->total_length();
+  }
+
   return num_bytes_sent;
 }
 

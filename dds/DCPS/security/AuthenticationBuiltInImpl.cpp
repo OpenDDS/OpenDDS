@@ -573,6 +573,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   /* Copy the in part of the inout param */
   const DDS::Security::HandshakeMessageToken request_token = handshake_message_out;
+  handshake_message_out = DDS::Security::HandshakeMessageToken();
 
   DDS::OctetSeq challenge1, challenge2, dh2, cperm, hash_c1, hash_c2;
 

@@ -165,6 +165,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling (optional)',
+    'ssl:s', 'OpenSSL for cryptography (optional)',
    ],
    ['Minimizing OpenDDS:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -841,6 +842,7 @@ my %optdep =
    'qt' =>        ['QTDIR',         '',                            'qt4'],
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
+   'ssl' =>       ['SSL_ROOT',      'include/openssl/ssl.h',       'ssl'],
   );
 
 my @ace_features = ('xerces3');
@@ -1535,6 +1537,10 @@ if ($cross_compile) {
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
+
+    if ($opts{'ssl'}) {
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+    }
   }
 
   configure_build(\%targetEnv);
@@ -1555,6 +1561,10 @@ else { # not cross-compiling:
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
+
+    if ($opts{'ssl'}) {
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+    }
   }
 
   configure_build(\%targetEnv);
