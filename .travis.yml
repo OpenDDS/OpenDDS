@@ -6,9 +6,9 @@ compiler:
 
 env:
   matrix:
-    - FUZZ=1 NO_INLINE=1
+    - FUZZ=1 STATIC=1 XERCES3=1 NO_TESTS=1
     - NO_INLINE=1 NO_BIT=1
-    - STATIC=1 XERCES3=1 NO_TESTS=1
+    - NO_INLINE=1
     - NO_DEBUG=1 NO_TESTS=1
     - SAFETY_PROFILE=1
     - NO_INLINE=1 USES_WCHAR=1
