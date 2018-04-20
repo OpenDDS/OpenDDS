@@ -172,10 +172,12 @@ if ($MonitorResult != 0) {
   $status = 1;
 }
 
+my $pub2_started = 0;
 if (!$status) {
   print "Spawning second publisher.\n";
   print $Publisher2->CommandLine() . "\n";
   $Publisher2->Spawn ();
+  $pub2_started = 1;
 
   sleep (5);
 }
@@ -192,10 +194,12 @@ if ($PublisherResult != 0) {
   $status = 1;
 }
 
-my $Publisher2Result = $Publisher2->TerminateWaitKill (10);
-if ($Publisher2Result != 0) {
-  print STDERR "ERROR: publisher 2 returned $Publisher2Result \n";
-  $status = 1;
+if ($pub2_started) {
+  my $Publisher2Result = $Publisher2->TerminateWaitKill (10);
+  if ($Publisher2Result != 0) {
+    print STDERR "ERROR: publisher 2 returned $Publisher2Result \n";
+    $status = 1;
+  }
 }
 
 $ir = $Repo2->TerminateWaitKill(10);
