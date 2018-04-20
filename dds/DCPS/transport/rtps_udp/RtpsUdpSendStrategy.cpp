@@ -299,7 +299,7 @@ namespace {
 
   void log_encode_error(CORBA::Octet msgId,
                         DDS::Security::NativeCryptoHandle sender,
-                        const DDS::Security::Exception& ex)
+                        const DDS::Security::SecurityException& ex)
   {
     if (Transport_debug_level) {
       ACE_ERROR((LM_ERROR, "RtpsUdpSendStrategy::pre_send_packet - ERROR "
@@ -403,9 +403,8 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 
       replacements.resize(replacements.size() + 1);
       Chunk& c = replacements.back();
-      DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader,
-                                receiver.entityId, u2,
-                                sender.entityId, remaining));
+      DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, u2,
+                                receiver.entityId, sender.entityId, remaining));
       DatareaderCryptoHandleSeq readerHandles;
       if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
         DatareaderCryptoHandle drch = link_->reader_crypto_handle(receiver);
@@ -447,9 +446,8 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 
       replacements.resize(replacements.size() + 1);
       Chunk& c = replacements.back();
-      DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader,
-                                receiver.entityId, 0,
-                                sender.entityId, remaining));
+      DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, 0,
+                                receiver.entityId, sender.entityId, remaining));
       DatawriterCryptoHandleSeq writerHandles;
       if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
         DatawriterCryptoHandle dwch = link_->writer_crypto_handle(receiver);
