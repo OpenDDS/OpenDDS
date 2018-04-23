@@ -69,7 +69,8 @@ my $orb_address = $force_local ? $localhost : "";
 my $repo_args = "$common_args"
   . " -o $dcpsrepo_ior"
   . " -ORBSvcConf mySvc.conf"
-  . " -orbendpoint iiop://$SRV_PORT";
+  . " -orbendpoint iiop://$orb_address:$SRV_PORT"
+;
 
 my $repo1_log = 'repo1.log';
 my $repo2_log = 'repo2.log';
@@ -105,25 +106,25 @@ cleanup();
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
 my $Repo1 = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-  "$repo_args" . $print_to_screen ? "" : " -ORBLogFile $repo1_log"
+  "$repo_args" . ($print_to_screen ? "" : " -ORBLogFile $repo1_log")
 );
 my $Repo2 = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-  "$repo_args" . $print_to_screen ? "" : " -ORBLogFile $repo2_log"
+  "$repo_args" . ($print_to_screen ? "" : " -ORBLogFile $repo2_log")
 );
 my $Subscriber1 = PerlDDS::create_process("subscriber",
-  "$sub_opts" . $print_to_screen ? "" : " -ORBLogFile $sub_log"
+  "$sub_opts" . ($print_to_screen ? "" : " -ORBLogFile $sub_log")
 );
 my $Publisher1 = PerlDDS::create_process("publisher",
-  "$pub_opts" . $print_to_screen ? "" : " -ORBLogFile $pub1_log"
+  "$pub_opts" . ($print_to_screen ? "" : " -ORBLogFile $pub1_log")
 );
 my $Monitor1 = PerlDDS::create_process("monitor",
-  "$common_args -l 5" . $print_to_screen ? "" : " -ORBLogFile $mon1_log"
+  "$common_args -l 5" . ($print_to_screen ? "" : " -ORBLogFile $mon1_log")
 );
 my $Monitor2 = PerlDDS::create_process("monitor",
-  "$common_args -u" . $print_to_screen ? "" : " -ORBLogFile $mon2_log"
+  "$common_args -u" . ($print_to_screen ? "" : " -ORBLogFile $mon2_log")
 );
 my $Publisher2 = PerlDDS::create_process("publisher",
-  "$pub_opts" . $print_to_screen ? "" : " -ORBLogFile $pub2_log"
+  "$pub_opts" . ($print_to_screen ? "" : " -ORBLogFile $pub2_log")
 );
 
 sub print_logs() {
