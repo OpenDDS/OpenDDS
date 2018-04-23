@@ -1832,6 +1832,20 @@ DomainParticipantImpl::create_new_topic(
   }
   */
 
+  if (TheServiceParticipant->get_security()) {
+    Security::AccessControl_var access = security_config_->get_access_control();
+
+    DDS::Security::SecurityException se;
+    if (!access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipant::create_new_topic, ")
+        ACE_TEXT("Unable to create new topic. SecurityException[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return DDS::Topic::_nil();
+    }
+  }
+
   TopicImpl* topic_servant = 0;
 
   ACE_NEW_RETURN(topic_servant,
@@ -1857,7 +1871,7 @@ DomainParticipantImpl::create_new_topic(
 
   if (OpenDDS::DCPS::bind(topics_, topic_name, refCounted_topic) == -1) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
+               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_new_topic, ")
                ACE_TEXT("%p \n"),
                ACE_TEXT("bind")));
     return DDS::Topic::_nil();
