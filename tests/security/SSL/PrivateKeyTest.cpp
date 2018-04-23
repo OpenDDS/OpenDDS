@@ -112,13 +112,12 @@ public:
 
   Certificate ca_;
   Certificate ca_data_;
-  Certificate pubkey_ec_;
   Certificate pubkey_;
   Certificate pubkey_data_;
+  Certificate pubkey_ec_;
   PrivateKey privkey_;
   PrivateKey privkey_data_;
   PrivateKey privkey_ec_;
-//  PrivateKey pubkey_ec_;
 
   DDS::OctetSeq hello_;
   DDS::OctetSeq world_;
