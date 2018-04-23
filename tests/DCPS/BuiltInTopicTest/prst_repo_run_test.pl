@@ -10,16 +10,50 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
+use Getopt::Long;
 
 my $status = 0;
 
+my $force_local;
 my $dcps_dbl = 2;
 my $transport_dbl = 0;
+my $print_to_screen;
+my $help;
 
-my $common_args = "";
-$common_args .= "-DCPSDebugLevel $dcps_dbl" if $dcps_dbl;
-$common_args .= " " if $dcps_dbl && $transport_dbl;
-$common_args .= "-TransportDebugLevel $transport_dbl" if $transport_dbl;
+my $localhost = "127.0.0.1";
+
+my $help_message = "prst_repo_run_test.pl options:\n"
+  . "  --force_local\n"
+  . "    Force DCPS to use the localhost address: $localhost\n"
+  . "  --DCPSDebugLevel LEVEL\n"
+  . "    Enable DCPS Debugging, where LEVEL is 0 up to 10. Default is $dcps_dbl.\n"
+  . "  --TransportDebugLevel LEVEL\n"
+  . "    Enable DCPS Debugging, where LEVEL is 0 up to 6. Default is $transport_dbl.\n"
+  . "  --print_to_sceen\n"
+  . "    Disable logging to file and log to screen instead.\n"
+  . "  --help|-h\n"
+  . "    Print this message.\n"
+;
+
+GetOptions(
+  "force_local" => \$force_local,
+  "DCPSDebugLevel=i"=> \$dcps_dbl,
+  "TransportDebugLevel=i"=> \$transport_dbl,
+  "print_to_screen" => \$print_to_screen,
+  "help|h" => \$help
+) or die("Invalid Command Line Argument(s)\n$help_message");
+
+if ($help) {
+  print $help_message;
+  exit 0;
+}
+
+my @common_array = ();
+push @common_array, "-DCPSDefaultAddress $localhost" if $force_local;
+push @common_array, "-DCPSDebugLevel $dcps_dbl" if $dcps_dbl;
+push @common_array, "-TransportDebugLevel $transport_dbl" if $transport_dbl;
+my $common_args = join(" ", @common_array);
+
 my $client_args = "$common_args";
 
 my $dcpsrepo_ior = "repo.ior";
@@ -31,10 +65,11 @@ my $sub_opts = "$client_args -n $num_messages";
 my $SRV_PORT = PerlACE::random_port();
 my $synch_file = "monitor1_done";
 
+my $orb_address = $force_local ? $localhost : "";
 my $repo_args = "$common_args"
   . " -o $dcpsrepo_ior"
   . " -ORBSvcConf mySvc.conf"
-  . " -orbendpoint iiop://:$SRV_PORT";
+  . " -orbendpoint iiop://$SRV_PORT";
 
 my $repo1_log = 'repo1.log';
 my $repo2_log = 'repo2.log';
@@ -70,25 +105,25 @@ cleanup();
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
 my $Repo1 = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-  "$repo_args -ORBLogFile $repo1_log"
+  "$repo_args" . $print_to_screen ? "" : " -ORBLogFile $repo1_log"
 );
 my $Repo2 = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-  "$repo_args -ORBLogFile $repo2_log"
+  "$repo_args" . $print_to_screen ? "" : " -ORBLogFile $repo2_log"
 );
 my $Subscriber1 = PerlDDS::create_process("subscriber",
-  "$sub_opts -ORBLogFile $sub_log"
+  "$sub_opts" . $print_to_screen ? "" : " -ORBLogFile $sub_log"
 );
 my $Publisher1 = PerlDDS::create_process("publisher",
-  "$pub_opts -ORBLogFile $pub1_log"
+  "$pub_opts" . $print_to_screen ? "" : " -ORBLogFile $pub1_log"
 );
 my $Monitor1 = PerlDDS::create_process("monitor",
-  "$common_args -l 5 -ORBLogFile $mon1_log"
+  "$common_args -l 5" . $print_to_screen ? "" : " -ORBLogFile $mon1_log"
 );
 my $Monitor2 = PerlDDS::create_process("monitor",
-  "$common_args -u -ORBLogFile $mon2_log"
+  "$common_args -u" . $print_to_screen ? "" : " -ORBLogFile $mon2_log"
 );
 my $Publisher2 = PerlDDS::create_process("publisher",
-  "$pub_opts -ORBLogFile $pub2_log"
+  "$pub_opts" . $print_to_screen ? "" : " -ORBLogFile $pub2_log"
 );
 
 sub print_logs() {
