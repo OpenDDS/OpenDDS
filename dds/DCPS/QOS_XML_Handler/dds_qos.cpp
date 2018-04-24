@@ -10,7 +10,6 @@
  */
 #include "dds_qos.hpp"
 
-#include "ace/ace_wchar.h"
 #include "ace/Null_Mutex.h"
 #include "ace/TSS_T.h"
 #include "ace/Singleton.h"
@@ -208,8 +207,8 @@ namespace dds
 
   duration::duration (duration const& s) :
   ::XSCRT::Type (s)
-  , sec_ (s.sec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.sec_) : 0)
-  , nanosec_ (s.nanosec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.nanosec_) : 0)
+  , sec_ (s.sec_.get () ? new ::XMLSchema::string<char> (*s.sec_) : 0)
+  , nanosec_ (s.nanosec_.get () ? new ::XMLSchema::string<char> (*s.nanosec_) : 0)
   {
     if (sec_.get ()) sec_->container (this);
     if (nanosec_.get ()) nanosec_->container (this);
@@ -242,14 +241,14 @@ namespace dds
     return sec_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& duration::
+  ::XMLSchema::string<char> const& duration::
   sec () const
   {
     return *sec_;
   }
 
   void duration::
-  sec (::XMLSchema::string<ACE_TCHAR> const& e)
+  sec (::XMLSchema::string<char> const& e)
   {
     if (sec_.get ())
     {
@@ -258,7 +257,7 @@ namespace dds
 
     else
     {
-      sec_ = duration::sec_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      sec_ = duration::sec_auto_ptr_type (new ::XMLSchema::string<char> (e));
       sec_->container (this);
     }
   }
@@ -270,14 +269,14 @@ namespace dds
     return nanosec_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& duration::
+  ::XMLSchema::string<char> const& duration::
   nanosec () const
   {
     return *nanosec_;
   }
 
   void duration::
-  nanosec (::XMLSchema::string<ACE_TCHAR> const& e)
+  nanosec (::XMLSchema::string<char> const& e)
   {
     if (nanosec_.get ())
     {
@@ -286,7 +285,7 @@ namespace dds
 
     else
     {
-      nanosec_ = duration::nanosec_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      nanosec_ = duration::nanosec_auto_ptr_type (new ::XMLSchema::string<char> (e));
       nanosec_->container (this);
     }
   }
@@ -541,9 +540,9 @@ namespace dds
   , service_cleanup_delay_ (s.service_cleanup_delay_.get () ? new ::dds::duration (*s.service_cleanup_delay_) : 0)
   , history_kind_ (s.history_kind_.get () ? new ::dds::historyKind (*s.history_kind_) : 0)
   , history_depth_ (s.history_depth_.get () ? new ::XMLSchema::positiveInteger (*s.history_depth_) : 0)
-  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
-  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
-  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
+  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<char> (*s.max_samples_) : 0)
+  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<char> (*s.max_instances_) : 0)
+  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<char> (*s.max_samples_per_instance_) : 0)
   {
     if (service_cleanup_delay_.get ()) service_cleanup_delay_->container (this);
     if (history_kind_.get ()) history_kind_->container (this);
@@ -684,14 +683,14 @@ namespace dds
     return max_samples_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& durabilityServiceQosPolicy::
+  ::XMLSchema::string<char> const& durabilityServiceQosPolicy::
   max_samples () const
   {
     return *max_samples_;
   }
 
   void durabilityServiceQosPolicy::
-  max_samples (::XMLSchema::string<ACE_TCHAR> const& e)
+  max_samples (::XMLSchema::string<char> const& e)
   {
     if (max_samples_.get ())
     {
@@ -700,7 +699,7 @@ namespace dds
 
     else
     {
-      max_samples_ = durabilityServiceQosPolicy::max_samples_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_ = durabilityServiceQosPolicy::max_samples_auto_ptr_type (new ::XMLSchema::string<char> (e));
       max_samples_->container (this);
     }
   }
@@ -712,14 +711,14 @@ namespace dds
     return max_instances_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& durabilityServiceQosPolicy::
+  ::XMLSchema::string<char> const& durabilityServiceQosPolicy::
   max_instances () const
   {
     return *max_instances_;
   }
 
   void durabilityServiceQosPolicy::
-  max_instances (::XMLSchema::string<ACE_TCHAR> const& e)
+  max_instances (::XMLSchema::string<char> const& e)
   {
     if (max_instances_.get ())
     {
@@ -728,7 +727,7 @@ namespace dds
 
     else
     {
-      max_instances_ = durabilityServiceQosPolicy::max_instances_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_instances_ = durabilityServiceQosPolicy::max_instances_auto_ptr_type (new ::XMLSchema::string<char> (e));
       max_instances_->container (this);
     }
   }
@@ -740,14 +739,14 @@ namespace dds
     return max_samples_per_instance_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& durabilityServiceQosPolicy::
+  ::XMLSchema::string<char> const& durabilityServiceQosPolicy::
   max_samples_per_instance () const
   {
     return *max_samples_per_instance_;
   }
 
   void durabilityServiceQosPolicy::
-  max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& e)
+  max_samples_per_instance (::XMLSchema::string<char> const& e)
   {
     if (max_samples_per_instance_.get ())
     {
@@ -756,7 +755,7 @@ namespace dds
 
     else
     {
-      max_samples_per_instance_ = durabilityServiceQosPolicy::max_samples_per_instance_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_per_instance_ = durabilityServiceQosPolicy::max_samples_per_instance_auto_ptr_type (new ::XMLSchema::string<char> (e));
       max_samples_per_instance_->container (this);
     }
   }
@@ -829,7 +828,7 @@ namespace dds
 
   groupDataQosPolicy::groupDataQosPolicy (groupDataQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<char> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -856,14 +855,14 @@ namespace dds
     return value_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& groupDataQosPolicy::
+  ::XMLSchema::string<char> const& groupDataQosPolicy::
   value () const
   {
     return *value_;
   }
 
   void groupDataQosPolicy::
-  value (::XMLSchema::string<ACE_TCHAR> const& e)
+  value (::XMLSchema::string<char> const& e)
   {
     if (value_.get ())
     {
@@ -872,7 +871,7 @@ namespace dds
 
     else
     {
-      value_ = groupDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      value_ = groupDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<char> (e));
       value_->container (this);
     }
   }
@@ -1677,9 +1676,9 @@ namespace dds
 
   resourceLimitsQosPolicy::resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
-  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
-  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
+  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<char> (*s.max_samples_) : 0)
+  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<char> (*s.max_instances_) : 0)
+  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<char> (*s.max_samples_per_instance_) : 0)
   , initial_samples_ (s.initial_samples_.get () ? new ::XMLSchema::positiveInteger (*s.initial_samples_) : 0)
   , initial_instances_ (s.initial_instances_.get () ? new ::XMLSchema::positiveInteger (*s.initial_instances_) : 0)
   {
@@ -1732,14 +1731,14 @@ namespace dds
     return max_samples_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& resourceLimitsQosPolicy::
+  ::XMLSchema::string<char> const& resourceLimitsQosPolicy::
   max_samples () const
   {
     return *max_samples_;
   }
 
   void resourceLimitsQosPolicy::
-  max_samples (::XMLSchema::string<ACE_TCHAR> const& e)
+  max_samples (::XMLSchema::string<char> const& e)
   {
     if (max_samples_.get ())
     {
@@ -1748,7 +1747,7 @@ namespace dds
 
     else
     {
-      max_samples_ = resourceLimitsQosPolicy::max_samples_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_ = resourceLimitsQosPolicy::max_samples_auto_ptr_type (new ::XMLSchema::string<char> (e));
       max_samples_->container (this);
     }
   }
@@ -1760,14 +1759,14 @@ namespace dds
     return max_instances_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& resourceLimitsQosPolicy::
+  ::XMLSchema::string<char> const& resourceLimitsQosPolicy::
   max_instances () const
   {
     return *max_instances_;
   }
 
   void resourceLimitsQosPolicy::
-  max_instances (::XMLSchema::string<ACE_TCHAR> const& e)
+  max_instances (::XMLSchema::string<char> const& e)
   {
     if (max_instances_.get ())
     {
@@ -1776,7 +1775,7 @@ namespace dds
 
     else
     {
-      max_instances_ = resourceLimitsQosPolicy::max_instances_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_instances_ = resourceLimitsQosPolicy::max_instances_auto_ptr_type (new ::XMLSchema::string<char> (e));
       max_instances_->container (this);
     }
   }
@@ -1788,14 +1787,14 @@ namespace dds
     return max_samples_per_instance_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& resourceLimitsQosPolicy::
+  ::XMLSchema::string<char> const& resourceLimitsQosPolicy::
   max_samples_per_instance () const
   {
     return *max_samples_per_instance_;
   }
 
   void resourceLimitsQosPolicy::
-  max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& e)
+  max_samples_per_instance (::XMLSchema::string<char> const& e)
   {
     if (max_samples_per_instance_.get ())
     {
@@ -1804,7 +1803,7 @@ namespace dds
 
     else
     {
-      max_samples_per_instance_ = resourceLimitsQosPolicy::max_samples_per_instance_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      max_samples_per_instance_ = resourceLimitsQosPolicy::max_samples_per_instance_auto_ptr_type (new ::XMLSchema::string<char> (e));
       max_samples_per_instance_->container (this);
     }
   }
@@ -1933,7 +1932,7 @@ namespace dds
 
   topicDataQosPolicy::topicDataQosPolicy (topicDataQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<char> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -1960,14 +1959,14 @@ namespace dds
     return value_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& topicDataQosPolicy::
+  ::XMLSchema::string<char> const& topicDataQosPolicy::
   value () const
   {
     return *value_;
   }
 
   void topicDataQosPolicy::
-  value (::XMLSchema::string<ACE_TCHAR> const& e)
+  value (::XMLSchema::string<char> const& e)
   {
     if (value_.get ())
     {
@@ -1976,7 +1975,7 @@ namespace dds
 
     else
     {
-      value_ = topicDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      value_ = topicDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<char> (e));
       value_->container (this);
     }
   }
@@ -2049,7 +2048,7 @@ namespace dds
 
   userDataQosPolicy::userDataQosPolicy (userDataQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<char> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -2076,14 +2075,14 @@ namespace dds
     return value_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& userDataQosPolicy::
+  ::XMLSchema::string<char> const& userDataQosPolicy::
   value () const
   {
     return *value_;
   }
 
   void userDataQosPolicy::
-  value (::XMLSchema::string<ACE_TCHAR> const& e)
+  value (::XMLSchema::string<char> const& e)
   {
     if (value_.get ())
     {
@@ -2092,7 +2091,7 @@ namespace dds
 
     else
     {
-      value_ = userDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      value_ = userDataQosPolicy::value_auto_ptr_type (new ::XMLSchema::string<char> (e));
       value_->container (this);
     }
   }
@@ -2167,8 +2166,8 @@ namespace dds
   ::XSCRT::Type (s)
   , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
   , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<char> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<char> (*s.base_name_) : 0)
   {
     if (user_data_.get ()) user_data_->container (this);
     if (entity_factory_.get ()) entity_factory_->container (this);
@@ -2265,20 +2264,20 @@ namespace dds
     return name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& domainparticipantQos::
+  ::XMLSchema::string<char> const& domainparticipantQos::
   name () const
   {
     return *name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& domainparticipantQos::
+  ::XMLSchema::string<char>& domainparticipantQos::
   name ()
   {
     return *name_;
   }
 
   void domainparticipantQos::
-  name (::XMLSchema::string<ACE_TCHAR> const& e)
+  name (::XMLSchema::string<char> const& e)
   {
     if (name_.get ())
     {
@@ -2287,7 +2286,7 @@ namespace dds
 
     else
     {
-      name_ = domainparticipantQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = domainparticipantQos::name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       name_->container (this);
     }
   }
@@ -2299,20 +2298,20 @@ namespace dds
     return base_name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& domainparticipantQos::
+  ::XMLSchema::string<char> const& domainparticipantQos::
   base_name () const
   {
     return *base_name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& domainparticipantQos::
+  ::XMLSchema::string<char>& domainparticipantQos::
   base_name ()
   {
     return *base_name_;
   }
 
   void domainparticipantQos::
-  base_name (::XMLSchema::string<ACE_TCHAR> const& e)
+  base_name (::XMLSchema::string<char> const& e)
   {
     if (base_name_.get ())
     {
@@ -2321,7 +2320,7 @@ namespace dds
 
     else
     {
-      base_name_ = domainparticipantQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = domainparticipantQos::base_name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       base_name_->container (this);
     }
   }
@@ -2340,8 +2339,8 @@ namespace dds
   , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
   , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
   , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<char> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<char> (*s.base_name_) : 0)
   {
     if (presentation_.get ()) presentation_->container (this);
     if (partition_.get ()) partition_->container (this);
@@ -2506,20 +2505,20 @@ namespace dds
     return name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& publisherQos::
+  ::XMLSchema::string<char> const& publisherQos::
   name () const
   {
     return *name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& publisherQos::
+  ::XMLSchema::string<char>& publisherQos::
   name ()
   {
     return *name_;
   }
 
   void publisherQos::
-  name (::XMLSchema::string<ACE_TCHAR> const& e)
+  name (::XMLSchema::string<char> const& e)
   {
     if (name_.get ())
     {
@@ -2528,7 +2527,7 @@ namespace dds
 
     else
     {
-      name_ = publisherQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = publisherQos::name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       name_->container (this);
     }
   }
@@ -2540,20 +2539,20 @@ namespace dds
     return base_name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& publisherQos::
+  ::XMLSchema::string<char> const& publisherQos::
   base_name () const
   {
     return *base_name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& publisherQos::
+  ::XMLSchema::string<char>& publisherQos::
   base_name ()
   {
     return *base_name_;
   }
 
   void publisherQos::
-  base_name (::XMLSchema::string<ACE_TCHAR> const& e)
+  base_name (::XMLSchema::string<char> const& e)
   {
     if (base_name_.get ())
     {
@@ -2562,7 +2561,7 @@ namespace dds
 
     else
     {
-      base_name_ = publisherQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = publisherQos::base_name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       base_name_->container (this);
     }
   }
@@ -2581,8 +2580,8 @@ namespace dds
   , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
   , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
   , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<char> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<char> (*s.base_name_) : 0)
   {
     if (presentation_.get ()) presentation_->container (this);
     if (partition_.get ()) partition_->container (this);
@@ -2747,20 +2746,20 @@ namespace dds
     return name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& subscriberQos::
+  ::XMLSchema::string<char> const& subscriberQos::
   name () const
   {
     return *name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& subscriberQos::
+  ::XMLSchema::string<char>& subscriberQos::
   name ()
   {
     return *name_;
   }
 
   void subscriberQos::
-  name (::XMLSchema::string<ACE_TCHAR> const& e)
+  name (::XMLSchema::string<char> const& e)
   {
     if (name_.get ())
     {
@@ -2769,7 +2768,7 @@ namespace dds
 
     else
     {
-      name_ = subscriberQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = subscriberQos::name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       name_->container (this);
     }
   }
@@ -2781,20 +2780,20 @@ namespace dds
     return base_name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& subscriberQos::
+  ::XMLSchema::string<char> const& subscriberQos::
   base_name () const
   {
     return *base_name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& subscriberQos::
+  ::XMLSchema::string<char>& subscriberQos::
   base_name ()
   {
     return *base_name_;
   }
 
   void subscriberQos::
-  base_name (::XMLSchema::string<ACE_TCHAR> const& e)
+  base_name (::XMLSchema::string<char> const& e)
   {
     if (base_name_.get ())
     {
@@ -2803,7 +2802,7 @@ namespace dds
 
     else
     {
-      base_name_ = subscriberQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = subscriberQos::base_name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       base_name_->container (this);
     }
   }
@@ -2831,9 +2830,9 @@ namespace dds
   , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
   , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
   , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
-  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<char> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<char> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<char> (*s.topic_filter_) : 0)
   {
     if (topic_data_.get ()) topic_data_->container (this);
     if (durability_.get ()) durability_->container (this);
@@ -3308,20 +3307,20 @@ namespace dds
     return name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& topicQos::
+  ::XMLSchema::string<char> const& topicQos::
   name () const
   {
     return *name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& topicQos::
+  ::XMLSchema::string<char>& topicQos::
   name ()
   {
     return *name_;
   }
 
   void topicQos::
-  name (::XMLSchema::string<ACE_TCHAR> const& e)
+  name (::XMLSchema::string<char> const& e)
   {
     if (name_.get ())
     {
@@ -3330,7 +3329,7 @@ namespace dds
 
     else
     {
-      name_ = topicQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = topicQos::name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       name_->container (this);
     }
   }
@@ -3342,20 +3341,20 @@ namespace dds
     return base_name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& topicQos::
+  ::XMLSchema::string<char> const& topicQos::
   base_name () const
   {
     return *base_name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& topicQos::
+  ::XMLSchema::string<char>& topicQos::
   base_name ()
   {
     return *base_name_;
   }
 
   void topicQos::
-  base_name (::XMLSchema::string<ACE_TCHAR> const& e)
+  base_name (::XMLSchema::string<char> const& e)
   {
     if (base_name_.get ())
     {
@@ -3364,7 +3363,7 @@ namespace dds
 
     else
     {
-      base_name_ = topicQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = topicQos::base_name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       base_name_->container (this);
     }
   }
@@ -3376,20 +3375,20 @@ namespace dds
     return topic_filter_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& topicQos::
+  ::XMLSchema::string<char> const& topicQos::
   topic_filter () const
   {
     return *topic_filter_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& topicQos::
+  ::XMLSchema::string<char>& topicQos::
   topic_filter ()
   {
     return *topic_filter_;
   }
 
   void topicQos::
-  topic_filter (::XMLSchema::string<ACE_TCHAR> const& e)
+  topic_filter (::XMLSchema::string<char> const& e)
   {
     if (topic_filter_.get ())
     {
@@ -3398,7 +3397,7 @@ namespace dds
 
     else
     {
-      topic_filter_ = topicQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      topic_filter_ = topicQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<char> (e));
       topic_filter_->container (this);
     }
   }
@@ -3425,9 +3424,9 @@ namespace dds
   , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
   , time_based_filter_ (s.time_based_filter_.get () ? new ::dds::timeBasedFilterQosPolicy (*s.time_based_filter_) : 0)
   , reader_data_lifecycle_ (s.reader_data_lifecycle_.get () ? new ::dds::readerDataLifecycleQosPolicy (*s.reader_data_lifecycle_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
-  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<char> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<char> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<char> (*s.topic_filter_) : 0)
   {
     if (durability_.get ()) durability_->container (this);
     if (deadline_.get ()) deadline_->container (this);
@@ -3868,20 +3867,20 @@ namespace dds
     return name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& datareaderQos::
+  ::XMLSchema::string<char> const& datareaderQos::
   name () const
   {
     return *name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& datareaderQos::
+  ::XMLSchema::string<char>& datareaderQos::
   name ()
   {
     return *name_;
   }
 
   void datareaderQos::
-  name (::XMLSchema::string<ACE_TCHAR> const& e)
+  name (::XMLSchema::string<char> const& e)
   {
     if (name_.get ())
     {
@@ -3890,7 +3889,7 @@ namespace dds
 
     else
     {
-      name_ = datareaderQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = datareaderQos::name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       name_->container (this);
     }
   }
@@ -3902,20 +3901,20 @@ namespace dds
     return base_name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& datareaderQos::
+  ::XMLSchema::string<char> const& datareaderQos::
   base_name () const
   {
     return *base_name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& datareaderQos::
+  ::XMLSchema::string<char>& datareaderQos::
   base_name ()
   {
     return *base_name_;
   }
 
   void datareaderQos::
-  base_name (::XMLSchema::string<ACE_TCHAR> const& e)
+  base_name (::XMLSchema::string<char> const& e)
   {
     if (base_name_.get ())
     {
@@ -3924,7 +3923,7 @@ namespace dds
 
     else
     {
-      base_name_ = datareaderQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = datareaderQos::base_name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       base_name_->container (this);
     }
   }
@@ -3936,20 +3935,20 @@ namespace dds
     return topic_filter_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& datareaderQos::
+  ::XMLSchema::string<char> const& datareaderQos::
   topic_filter () const
   {
     return *topic_filter_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& datareaderQos::
+  ::XMLSchema::string<char>& datareaderQos::
   topic_filter ()
   {
     return *topic_filter_;
   }
 
   void datareaderQos::
-  topic_filter (::XMLSchema::string<ACE_TCHAR> const& e)
+  topic_filter (::XMLSchema::string<char> const& e)
   {
     if (topic_filter_.get ())
     {
@@ -3958,7 +3957,7 @@ namespace dds
 
     else
     {
-      topic_filter_ = datareaderQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      topic_filter_ = datareaderQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<char> (e));
       topic_filter_->container (this);
     }
   }
@@ -3988,9 +3987,9 @@ namespace dds
   , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
   , ownership_strength_ (s.ownership_strength_.get () ? new ::dds::ownershipStrengthQosPolicy (*s.ownership_strength_) : 0)
   , writer_data_lifecycle_ (s.writer_data_lifecycle_.get () ? new ::dds::writerDataLifecycleQosPolicy (*s.writer_data_lifecycle_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
-  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<char> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<char> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<char> (*s.topic_filter_) : 0)
   {
     if (durability_.get ()) durability_->container (this);
     if (durability_service_.get ()) durability_service_->container (this);
@@ -4533,20 +4532,20 @@ namespace dds
     return name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& datawriterQos::
+  ::XMLSchema::string<char> const& datawriterQos::
   name () const
   {
     return *name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& datawriterQos::
+  ::XMLSchema::string<char>& datawriterQos::
   name ()
   {
     return *name_;
   }
 
   void datawriterQos::
-  name (::XMLSchema::string<ACE_TCHAR> const& e)
+  name (::XMLSchema::string<char> const& e)
   {
     if (name_.get ())
     {
@@ -4555,7 +4554,7 @@ namespace dds
 
     else
     {
-      name_ = datawriterQos::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      name_ = datawriterQos::name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       name_->container (this);
     }
   }
@@ -4567,20 +4566,20 @@ namespace dds
     return base_name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& datawriterQos::
+  ::XMLSchema::string<char> const& datawriterQos::
   base_name () const
   {
     return *base_name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& datawriterQos::
+  ::XMLSchema::string<char>& datawriterQos::
   base_name ()
   {
     return *base_name_;
   }
 
   void datawriterQos::
-  base_name (::XMLSchema::string<ACE_TCHAR> const& e)
+  base_name (::XMLSchema::string<char> const& e)
   {
     if (base_name_.get ())
     {
@@ -4589,7 +4588,7 @@ namespace dds
 
     else
     {
-      base_name_ = datawriterQos::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = datawriterQos::base_name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       base_name_->container (this);
     }
   }
@@ -4601,20 +4600,20 @@ namespace dds
     return topic_filter_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& datawriterQos::
+  ::XMLSchema::string<char> const& datawriterQos::
   topic_filter () const
   {
     return *topic_filter_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& datawriterQos::
+  ::XMLSchema::string<char>& datawriterQos::
   topic_filter ()
   {
     return *topic_filter_;
   }
 
   void datawriterQos::
-  topic_filter (::XMLSchema::string<ACE_TCHAR> const& e)
+  topic_filter (::XMLSchema::string<char> const& e)
   {
     if (topic_filter_.get ())
     {
@@ -4623,7 +4622,7 @@ namespace dds
 
     else
     {
-      topic_filter_ = datawriterQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      topic_filter_ = datawriterQos::topic_filter_auto_ptr_type (new ::XMLSchema::string<char> (e));
       topic_filter_->container (this);
     }
   }
@@ -4631,9 +4630,9 @@ namespace dds
 
   // qosProfile
 
-  qosProfile::qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__)
+  qosProfile::qosProfile (::XMLSchema::string<char> const& name__)
   : ::XSCRT::Type ()
-  , name_ (new ::XMLSchema::string<ACE_TCHAR> (name__))
+  , name_ (new ::XMLSchema::string<char> (name__))
   {
     name_->container (this);
   }
@@ -4646,8 +4645,8 @@ namespace dds
   , domainparticipant_qos_ (s.domainparticipant_qos_)
   , publisher_qos_ (s.publisher_qos_)
   , subscriber_qos_ (s.subscriber_qos_)
-  , name_ (new ::XMLSchema::string<ACE_TCHAR> (*s.name_))
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , name_ (new ::XMLSchema::string<char> (*s.name_))
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<char> (*s.base_name_) : 0)
   {
     name_->container (this);
     if (base_name_.get ()) base_name_->container (this);
@@ -4903,20 +4902,20 @@ namespace dds
   }
 
   // qosProfile
-  ::XMLSchema::string<ACE_TCHAR> const& qosProfile::
+  ::XMLSchema::string<char> const& qosProfile::
   name () const
   {
     return *name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& qosProfile::
+  ::XMLSchema::string<char>& qosProfile::
   name ()
   {
     return *name_;
   }
 
   void qosProfile::
-  name (::XMLSchema::string<ACE_TCHAR> const& e)
+  name (::XMLSchema::string<char> const& e)
   {
     *name_ = e;
   }
@@ -4928,20 +4927,20 @@ namespace dds
     return base_name_.get () != 0;
   }
 
-  ::XMLSchema::string<ACE_TCHAR> const& qosProfile::
+  ::XMLSchema::string<char> const& qosProfile::
   base_name () const
   {
     return *base_name_;
   }
 
-  ::XMLSchema::string<ACE_TCHAR>& qosProfile::
+  ::XMLSchema::string<char>& qosProfile::
   base_name ()
   {
     return *base_name_;
   }
 
   void qosProfile::
-  base_name (::XMLSchema::string<ACE_TCHAR> const& e)
+  base_name (::XMLSchema::string<char> const& e)
   {
     if (base_name_.get ())
     {
@@ -4950,7 +4949,7 @@ namespace dds
 
     else
     {
-      base_name_ = qosProfile::base_name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (e));
+      base_name_ = qosProfile::base_name_auto_ptr_type (new ::XMLSchema::string<char> (e));
       base_name_->container (this);
     }
   }
@@ -5024,26 +5023,26 @@ namespace dds
   // destinationOrderKind
 
   destinationOrderKind::
-  destinationOrderKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  destinationOrderKind (::XSCRT::XML::Element<char> const& e)
   : ::XSCRT::Type (e)
   {
-    std::basic_string<ACE_TCHAR> v (e.value ());
+    std::string v (e.value ());
 
-    if (v == ACE_TEXT ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
-    else if (v == ACE_TEXT ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
+    if (v ==  ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
+    else if (v ==  ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
     else
     {
     }
   }
 
   destinationOrderKind::
-  destinationOrderKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  destinationOrderKind (::XSCRT::XML::Attribute<char> const& a)
   : ::XSCRT::Type (a)
   {
-    std::basic_string<ACE_TCHAR> v (a.value ());
+    std::string v (a.value ());
 
-    if (v == ACE_TEXT ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
-    else if (v == ACE_TEXT ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
+    if (v ==  ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
+    else if (v ==  ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
     else
     {
     }
@@ -5055,30 +5054,30 @@ namespace dds
   // durabilityKind
 
   durabilityKind::
-  durabilityKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  durabilityKind (::XSCRT::XML::Element<char> const& e)
   : ::XSCRT::Type (e)
   {
-    std::basic_string<ACE_TCHAR> v (e.value ());
+    std::string v (e.value ());
 
-    if (v == ACE_TEXT ("VOLATILE_DURABILITY_QOS")) v_ = VOLATILE_DURABILITY_QOS_l;
-    else if (v == ACE_TEXT ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
-    else if (v == ACE_TEXT ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
-    else if (v == ACE_TEXT ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
+    if (v ==  ("VOLATILE_DURABILITY_QOS")) v_ = VOLATILE_DURABILITY_QOS_l;
+    else if (v ==  ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
+    else if (v ==  ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
+    else if (v ==  ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
     else
     {
     }
   }
 
   durabilityKind::
-  durabilityKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  durabilityKind (::XSCRT::XML::Attribute<char> const& a)
   : ::XSCRT::Type (a)
   {
-    std::basic_string<ACE_TCHAR> v (a.value ());
+    std::string v (a.value ());
 
-    if (v == ACE_TEXT ("VOLATILE_DURABILITY_QOS")) v_ = VOLATILE_DURABILITY_QOS_l;
-    else if (v == ACE_TEXT ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
-    else if (v == ACE_TEXT ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
-    else if (v == ACE_TEXT ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
+    if (v ==  ("VOLATILE_DURABILITY_QOS")) v_ = VOLATILE_DURABILITY_QOS_l;
+    else if (v ==  ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
+    else if (v ==  ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
+    else if (v ==  ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
     else
     {
     }
@@ -5092,26 +5091,26 @@ namespace dds
   // historyKind
 
   historyKind::
-  historyKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  historyKind (::XSCRT::XML::Element<char> const& e)
   : ::XSCRT::Type (e)
   {
-    std::basic_string<ACE_TCHAR> v (e.value ());
+    std::string v (e.value ());
 
-    if (v == ACE_TEXT ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
-    else if (v == ACE_TEXT ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
+    if (v ==  ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
+    else if (v ==  ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
     else
     {
     }
   }
 
   historyKind::
-  historyKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  historyKind (::XSCRT::XML::Attribute<char> const& a)
   : ::XSCRT::Type (a)
   {
-    std::basic_string<ACE_TCHAR> v (a.value ());
+    std::string v (a.value ());
 
-    if (v == ACE_TEXT ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
-    else if (v == ACE_TEXT ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
+    if (v ==  ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
+    else if (v ==  ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
     else
     {
     }
@@ -5123,28 +5122,28 @@ namespace dds
   // livelinessKind
 
   livelinessKind::
-  livelinessKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  livelinessKind (::XSCRT::XML::Element<char> const& e)
   : ::XSCRT::Type (e)
   {
-    std::basic_string<ACE_TCHAR> v (e.value ());
+    std::string v (e.value ());
 
-    if (v == ACE_TEXT ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
-    else if (v == ACE_TEXT ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
-    else if (v == ACE_TEXT ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
+    if (v ==  ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
+    else if (v ==  ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
+    else if (v ==  ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
     else
     {
     }
   }
 
   livelinessKind::
-  livelinessKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  livelinessKind (::XSCRT::XML::Attribute<char> const& a)
   : ::XSCRT::Type (a)
   {
-    std::basic_string<ACE_TCHAR> v (a.value ());
+    std::string v (a.value ());
 
-    if (v == ACE_TEXT ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
-    else if (v == ACE_TEXT ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
-    else if (v == ACE_TEXT ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
+    if (v ==  ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
+    else if (v ==  ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
+    else if (v ==  ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
     else
     {
     }
@@ -5157,28 +5156,28 @@ namespace dds
   // presentationAccessScopeKind
 
   presentationAccessScopeKind::
-  presentationAccessScopeKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  presentationAccessScopeKind (::XSCRT::XML::Element<char> const& e)
   : ::XSCRT::Type (e)
   {
-    std::basic_string<ACE_TCHAR> v (e.value ());
+    std::string v (e.value ());
 
-    if (v == ACE_TEXT ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
-    else if (v == ACE_TEXT ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
-    else if (v == ACE_TEXT ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
+    if (v ==  ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
+    else if (v ==  ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
+    else if (v ==  ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
     else
     {
     }
   }
 
   presentationAccessScopeKind::
-  presentationAccessScopeKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  presentationAccessScopeKind (::XSCRT::XML::Attribute<char> const& a)
   : ::XSCRT::Type (a)
   {
-    std::basic_string<ACE_TCHAR> v (a.value ());
+    std::string v (a.value ());
 
-    if (v == ACE_TEXT ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
-    else if (v == ACE_TEXT ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
-    else if (v == ACE_TEXT ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
+    if (v ==  ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
+    else if (v ==  ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
+    else if (v ==  ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
     else
     {
     }
@@ -5191,26 +5190,26 @@ namespace dds
   // reliabilityKind
 
   reliabilityKind::
-  reliabilityKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  reliabilityKind (::XSCRT::XML::Element<char> const& e)
   : ::XSCRT::Type (e)
   {
-    std::basic_string<ACE_TCHAR> v (e.value ());
+    std::string v (e.value ());
 
-    if (v == ACE_TEXT ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
-    else if (v == ACE_TEXT ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
+    if (v ==  ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
+    else if (v ==  ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
     else
     {
     }
   }
 
   reliabilityKind::
-  reliabilityKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  reliabilityKind (::XSCRT::XML::Attribute<char> const& a)
   : ::XSCRT::Type (a)
   {
-    std::basic_string<ACE_TCHAR> v (a.value ());
+    std::string v (a.value ());
 
-    if (v == ACE_TEXT ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
-    else if (v == ACE_TEXT ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
+    if (v ==  ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
+    else if (v ==  ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
     else
     {
     }
@@ -5222,26 +5221,26 @@ namespace dds
   // ownershipKind
 
   ownershipKind::
-  ownershipKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  ownershipKind (::XSCRT::XML::Element<char> const& e)
   : ::XSCRT::Type (e)
   {
-    std::basic_string<ACE_TCHAR> v (e.value ());
+    std::string v (e.value ());
 
-    if (v == ACE_TEXT ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
-    else if (v == ACE_TEXT ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
+    if (v ==  ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
+    else if (v ==  ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
     else
     {
     }
   }
 
   ownershipKind::
-  ownershipKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  ownershipKind (::XSCRT::XML::Attribute<char> const& a)
   : ::XSCRT::Type (a)
   {
-    std::basic_string<ACE_TCHAR> v (a.value ());
+    std::string v (a.value ());
 
-    if (v == ACE_TEXT ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
-    else if (v == ACE_TEXT ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
+    if (v ==  ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
+    else if (v ==  ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
     else
     {
     }
@@ -5253,26 +5252,26 @@ namespace dds
   // duration
 
   duration::
-  duration (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  duration (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("sec"))
+      if (n == "sec")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         sec (t);
       }
 
-      else if (n == ACE_TEXT("nanosec"))
+      else if (n == "nanosec")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         nanosec (t);
       }
 
@@ -5285,20 +5284,20 @@ namespace dds
   // stringSeq
 
   stringSeq::
-  stringSeq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  stringSeq (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("element"))
+      if (n == "element")
       {
-        element_value_type t (new ::XMLSchema::string<ACE_TCHAR> (e));
+        element_value_type t (new ::XMLSchema::string<char> (e));
         add_element (t);
       }
 
@@ -5311,18 +5310,18 @@ namespace dds
   // deadlineQosPolicy
 
   deadlineQosPolicy::
-  deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  deadlineQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("period"))
+      if (n == "period")
       {
         ::dds::duration t (e);
         period (t);
@@ -5337,18 +5336,18 @@ namespace dds
   // destinationOrderQosPolicy
 
   destinationOrderQosPolicy::
-  destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  destinationOrderQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("kind"))
+      if (n == "kind")
       {
         ::dds::destinationOrderKind t (e);
         kind (t);
@@ -5363,18 +5362,18 @@ namespace dds
   // durabilityQosPolicy
 
   durabilityQosPolicy::
-  durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  durabilityQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("kind"))
+      if (n == "kind")
       {
         ::dds::durabilityKind t (e);
         kind (t);
@@ -5389,50 +5388,50 @@ namespace dds
   // durabilityServiceQosPolicy
 
   durabilityServiceQosPolicy::
-  durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  durabilityServiceQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("service_cleanup_delay"))
+      if (n == "service_cleanup_delay")
       {
         ::dds::duration t (e);
         service_cleanup_delay (t);
       }
 
-      else if (n == ACE_TEXT("history_kind"))
+      else if (n == "history_kind")
       {
         ::dds::historyKind t (e);
         history_kind (t);
       }
 
-      else if (n == ACE_TEXT("history_depth"))
+      else if (n == "history_depth")
       {
         ::XMLSchema::positiveInteger t (e);
         history_depth (t);
       }
 
-      else if (n == ACE_TEXT("max_samples"))
+      else if (n == "max_samples")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         max_samples (t);
       }
 
-      else if (n == ACE_TEXT("max_instances"))
+      else if (n == "max_instances")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         max_instances (t);
       }
 
-      else if (n == ACE_TEXT("max_samples_per_instance"))
+      else if (n == "max_samples_per_instance")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         max_samples_per_instance (t);
       }
 
@@ -5445,18 +5444,18 @@ namespace dds
   // entityFactoryQosPolicy
 
   entityFactoryQosPolicy::
-  entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  entityFactoryQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("autoenable_created_entities"))
+      if (n == "autoenable_created_entities")
       {
         ::XMLSchema::boolean t (e);
         autoenable_created_entities (t);
@@ -5471,20 +5470,20 @@ namespace dds
   // groupDataQosPolicy
 
   groupDataQosPolicy::
-  groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  groupDataQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("value"))
+      if (n == "value")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         value (t);
       }
 
@@ -5497,24 +5496,24 @@ namespace dds
   // historyQosPolicy
 
   historyQosPolicy::
-  historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  historyQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("kind"))
+      if (n == "kind")
       {
         ::dds::historyKind t (e);
         kind (t);
       }
 
-      else if (n == ACE_TEXT("depth"))
+      else if (n == "depth")
       {
         ::XMLSchema::positiveInteger t (e);
         depth (t);
@@ -5529,18 +5528,18 @@ namespace dds
   // latencyBudgetQosPolicy
 
   latencyBudgetQosPolicy::
-  latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  latencyBudgetQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("duration"))
+      if (n == "duration")
       {
         ::dds::duration t (e);
         duration (t);
@@ -5555,18 +5554,18 @@ namespace dds
   // lifespanQosPolicy
 
   lifespanQosPolicy::
-  lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  lifespanQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("duration"))
+      if (n == "duration")
       {
         ::dds::duration t (e);
         duration (t);
@@ -5581,24 +5580,24 @@ namespace dds
   // livelinessQosPolicy
 
   livelinessQosPolicy::
-  livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  livelinessQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("kind"))
+      if (n == "kind")
       {
         ::dds::livelinessKind t (e);
         kind (t);
       }
 
-      else if (n == ACE_TEXT("lease_duration"))
+      else if (n == "lease_duration")
       {
         ::dds::duration t (e);
         lease_duration (t);
@@ -5613,18 +5612,18 @@ namespace dds
   // ownershipQosPolicy
 
   ownershipQosPolicy::
-  ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  ownershipQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("kind"))
+      if (n == "kind")
       {
         ::dds::ownershipKind t (e);
         kind (t);
@@ -5639,18 +5638,18 @@ namespace dds
   // ownershipStrengthQosPolicy
 
   ownershipStrengthQosPolicy::
-  ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  ownershipStrengthQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("value"))
+      if (n == "value")
       {
         ::XMLSchema::nonNegativeInteger t (e);
         value (t);
@@ -5665,18 +5664,18 @@ namespace dds
   // partitionQosPolicy
 
   partitionQosPolicy::
-  partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  partitionQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("name"))
+      if (n == "name")
       {
         ::dds::stringSeq t (e);
         name (t);
@@ -5691,30 +5690,30 @@ namespace dds
   // presentationQosPolicy
 
   presentationQosPolicy::
-  presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  presentationQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("access_scope"))
+      if (n == "access_scope")
       {
         ::dds::presentationAccessScopeKind t (e);
         access_scope (t);
       }
 
-      else if (n == ACE_TEXT("coherent_access"))
+      else if (n == "coherent_access")
       {
         ::XMLSchema::boolean t (e);
         coherent_access (t);
       }
 
-      else if (n == ACE_TEXT("ordered_access"))
+      else if (n == "ordered_access")
       {
         ::XMLSchema::boolean t (e);
         ordered_access (t);
@@ -5729,24 +5728,24 @@ namespace dds
   // readerDataLifecycleQosPolicy
 
   readerDataLifecycleQosPolicy::
-  readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  readerDataLifecycleQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("autopurge_nowriter_samples_delay"))
+      if (n == "autopurge_nowriter_samples_delay")
       {
         ::dds::duration t (e);
         autopurge_nowriter_samples_delay (t);
       }
 
-      else if (n == ACE_TEXT("autopurge_disposed_samples_delay"))
+      else if (n == "autopurge_disposed_samples_delay")
       {
         ::dds::duration t (e);
         autopurge_disposed_samples_delay (t);
@@ -5761,24 +5760,24 @@ namespace dds
   // reliabilityQosPolicy
 
   reliabilityQosPolicy::
-  reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  reliabilityQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("kind"))
+      if (n == "kind")
       {
         ::dds::reliabilityKind t (e);
         kind (t);
       }
 
-      else if (n == ACE_TEXT("max_blocking_time"))
+      else if (n == "max_blocking_time")
       {
         ::dds::duration t (e);
         max_blocking_time (t);
@@ -5793,42 +5792,42 @@ namespace dds
   // resourceLimitsQosPolicy
 
   resourceLimitsQosPolicy::
-  resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  resourceLimitsQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("max_samples"))
+      if (n == "max_samples")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         max_samples (t);
       }
 
-      else if (n == ACE_TEXT("max_instances"))
+      else if (n == "max_instances")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         max_instances (t);
       }
 
-      else if (n == ACE_TEXT("max_samples_per_instance"))
+      else if (n == "max_samples_per_instance")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         max_samples_per_instance (t);
       }
 
-      else if (n == ACE_TEXT("initial_samples"))
+      else if (n == "initial_samples")
       {
         ::XMLSchema::positiveInteger t (e);
         initial_samples (t);
       }
 
-      else if (n == ACE_TEXT("initial_instances"))
+      else if (n == "initial_instances")
       {
         ::XMLSchema::positiveInteger t (e);
         initial_instances (t);
@@ -5843,18 +5842,18 @@ namespace dds
   // timeBasedFilterQosPolicy
 
   timeBasedFilterQosPolicy::
-  timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  timeBasedFilterQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("minimum_separation"))
+      if (n == "minimum_separation")
       {
         ::dds::duration t (e);
         minimum_separation (t);
@@ -5869,20 +5868,20 @@ namespace dds
   // topicDataQosPolicy
 
   topicDataQosPolicy::
-  topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  topicDataQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("value"))
+      if (n == "value")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         value (t);
       }
 
@@ -5895,18 +5894,18 @@ namespace dds
   // transportPriorityQosPolicy
 
   transportPriorityQosPolicy::
-  transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  transportPriorityQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("value"))
+      if (n == "value")
       {
         ::XMLSchema::nonNegativeInteger t (e);
         value (t);
@@ -5921,20 +5920,20 @@ namespace dds
   // userDataQosPolicy
 
   userDataQosPolicy::
-  userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  userDataQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("value"))
+      if (n == "value")
       {
-        ::XMLSchema::string<ACE_TCHAR> t (e);
+        ::XMLSchema::string<char> t (e);
         value (t);
       }
 
@@ -5947,18 +5946,18 @@ namespace dds
   // writerDataLifecycleQosPolicy
 
   writerDataLifecycleQosPolicy::
-  writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  writerDataLifecycleQosPolicy (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("autodispose_unregistered_instances"))
+      if (n == "autodispose_unregistered_instances")
       {
         ::XMLSchema::boolean t (e);
         autodispose_unregistered_instances (t);
@@ -5973,24 +5972,24 @@ namespace dds
   // domainparticipantQos
 
   domainparticipantQos::
-  domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  domainparticipantQos (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("user_data"))
+      if (n == "user_data")
       {
         ::dds::userDataQosPolicy t (e);
         user_data (t);
       }
 
-      else if (n == ACE_TEXT("entity_factory"))
+      else if (n == "entity_factory")
       {
         ::dds::entityFactoryQosPolicy t (e);
         entity_factory (t);
@@ -6003,17 +6002,17 @@ namespace dds
 
     while (p.more_attributes ())
     {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (p.next_attribute ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
-      if (n == ACE_TEXT ("name"))
+      ::XSCRT::XML::Attribute<char> a (p.next_attribute ());
+      std::string n (::XSCRT::XML::uq_name (a.name ()));
+      if (n ==  ("name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         name (t);
       }
 
-      else if (n == ACE_TEXT ("base_name"))
+      else if (n ==  ("base_name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         base_name (t);
       }
 
@@ -6026,36 +6025,36 @@ namespace dds
   // publisherQos
 
   publisherQos::
-  publisherQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  publisherQos (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("presentation"))
+      if (n == "presentation")
       {
         ::dds::presentationQosPolicy t (e);
         presentation (t);
       }
 
-      else if (n == ACE_TEXT("partition"))
+      else if (n == "partition")
       {
         ::dds::partitionQosPolicy t (e);
         partition (t);
       }
 
-      else if (n == ACE_TEXT("group_data"))
+      else if (n == "group_data")
       {
         ::dds::groupDataQosPolicy t (e);
         group_data (t);
       }
 
-      else if (n == ACE_TEXT("entity_factory"))
+      else if (n == "entity_factory")
       {
         ::dds::entityFactoryQosPolicy t (e);
         entity_factory (t);
@@ -6068,17 +6067,17 @@ namespace dds
 
     while (p.more_attributes ())
     {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (p.next_attribute ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
-      if (n == ACE_TEXT ("name"))
+      ::XSCRT::XML::Attribute<char> a (p.next_attribute ());
+      std::string n (::XSCRT::XML::uq_name (a.name ()));
+      if (n ==  ("name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         name (t);
       }
 
-      else if (n == ACE_TEXT ("base_name"))
+      else if (n ==  ("base_name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         base_name (t);
       }
 
@@ -6091,36 +6090,36 @@ namespace dds
   // subscriberQos
 
   subscriberQos::
-  subscriberQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  subscriberQos (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("presentation"))
+      if (n == "presentation")
       {
         ::dds::presentationQosPolicy t (e);
         presentation (t);
       }
 
-      else if (n == ACE_TEXT("partition"))
+      else if (n == "partition")
       {
         ::dds::partitionQosPolicy t (e);
         partition (t);
       }
 
-      else if (n == ACE_TEXT("group_data"))
+      else if (n == "group_data")
       {
         ::dds::groupDataQosPolicy t (e);
         group_data (t);
       }
 
-      else if (n == ACE_TEXT("entity_factory"))
+      else if (n == "entity_factory")
       {
         ::dds::entityFactoryQosPolicy t (e);
         entity_factory (t);
@@ -6133,17 +6132,17 @@ namespace dds
 
     while (p.more_attributes ())
     {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (p.next_attribute ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
-      if (n == ACE_TEXT ("name"))
+      ::XSCRT::XML::Attribute<char> a (p.next_attribute ());
+      std::string n (::XSCRT::XML::uq_name (a.name ()));
+      if (n ==  ("name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         name (t);
       }
 
-      else if (n == ACE_TEXT ("base_name"))
+      else if (n ==  ("base_name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         base_name (t);
       }
 
@@ -6156,90 +6155,90 @@ namespace dds
   // topicQos
 
   topicQos::
-  topicQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  topicQos (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("topic_data"))
+      if (n == "topic_data")
       {
         ::dds::topicDataQosPolicy t (e);
         topic_data (t);
       }
 
-      else if (n == ACE_TEXT("durability"))
+      else if (n == "durability")
       {
         ::dds::durabilityQosPolicy t (e);
         durability (t);
       }
 
-      else if (n == ACE_TEXT("durability_service"))
+      else if (n == "durability_service")
       {
         ::dds::durabilityServiceQosPolicy t (e);
         durability_service (t);
       }
 
-      else if (n == ACE_TEXT("deadline"))
+      else if (n == "deadline")
       {
         ::dds::deadlineQosPolicy t (e);
         deadline (t);
       }
 
-      else if (n == ACE_TEXT("latency_budget"))
+      else if (n == "latency_budget")
       {
         ::dds::latencyBudgetQosPolicy t (e);
         latency_budget (t);
       }
 
-      else if (n == ACE_TEXT("liveliness"))
+      else if (n == "liveliness")
       {
         ::dds::livelinessQosPolicy t (e);
         liveliness (t);
       }
 
-      else if (n == ACE_TEXT("reliability"))
+      else if (n == "reliability")
       {
         ::dds::reliabilityQosPolicy t (e);
         reliability (t);
       }
 
-      else if (n == ACE_TEXT("destination_order"))
+      else if (n == "destination_order")
       {
         ::dds::destinationOrderQosPolicy t (e);
         destination_order (t);
       }
 
-      else if (n == ACE_TEXT("history"))
+      else if (n == "history")
       {
         ::dds::historyQosPolicy t (e);
         history (t);
       }
 
-      else if (n == ACE_TEXT("resource_limits"))
+      else if (n == "resource_limits")
       {
         ::dds::resourceLimitsQosPolicy t (e);
         resource_limits (t);
       }
 
-      else if (n == ACE_TEXT("transport_priority"))
+      else if (n == "transport_priority")
       {
         ::dds::transportPriorityQosPolicy t (e);
         transport_priority (t);
       }
 
-      else if (n == ACE_TEXT("lifespan"))
+      else if (n == "lifespan")
       {
         ::dds::lifespanQosPolicy t (e);
         lifespan (t);
       }
 
-      else if (n == ACE_TEXT("ownership"))
+      else if (n == "ownership")
       {
         ::dds::ownershipQosPolicy t (e);
         ownership (t);
@@ -6252,23 +6251,23 @@ namespace dds
 
     while (p.more_attributes ())
     {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (p.next_attribute ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
-      if (n == ACE_TEXT ("name"))
+      ::XSCRT::XML::Attribute<char> a (p.next_attribute ());
+      std::string n (::XSCRT::XML::uq_name (a.name ()));
+      if (n ==  ("name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         name (t);
       }
 
-      else if (n == ACE_TEXT ("base_name"))
+      else if (n ==  ("base_name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         base_name (t);
       }
 
-      else if (n == ACE_TEXT ("topic_filter"))
+      else if (n ==  ("topic_filter"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         topic_filter (t);
       }
 
@@ -6281,84 +6280,84 @@ namespace dds
   // datareaderQos
 
   datareaderQos::
-  datareaderQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  datareaderQos (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("durability"))
+      if (n == "durability")
       {
         ::dds::durabilityQosPolicy t (e);
         durability (t);
       }
 
-      else if (n == ACE_TEXT("deadline"))
+      else if (n == "deadline")
       {
         ::dds::deadlineQosPolicy t (e);
         deadline (t);
       }
 
-      else if (n == ACE_TEXT("latency_budget"))
+      else if (n == "latency_budget")
       {
         ::dds::latencyBudgetQosPolicy t (e);
         latency_budget (t);
       }
 
-      else if (n == ACE_TEXT("liveliness"))
+      else if (n == "liveliness")
       {
         ::dds::livelinessQosPolicy t (e);
         liveliness (t);
       }
 
-      else if (n == ACE_TEXT("reliability"))
+      else if (n == "reliability")
       {
         ::dds::reliabilityQosPolicy t (e);
         reliability (t);
       }
 
-      else if (n == ACE_TEXT("destination_order"))
+      else if (n == "destination_order")
       {
         ::dds::destinationOrderQosPolicy t (e);
         destination_order (t);
       }
 
-      else if (n == ACE_TEXT("history"))
+      else if (n == "history")
       {
         ::dds::historyQosPolicy t (e);
         history (t);
       }
 
-      else if (n == ACE_TEXT("resource_limits"))
+      else if (n == "resource_limits")
       {
         ::dds::resourceLimitsQosPolicy t (e);
         resource_limits (t);
       }
 
-      else if (n == ACE_TEXT("user_data"))
+      else if (n == "user_data")
       {
         ::dds::userDataQosPolicy t (e);
         user_data (t);
       }
 
-      else if (n == ACE_TEXT("ownership"))
+      else if (n == "ownership")
       {
         ::dds::ownershipQosPolicy t (e);
         ownership (t);
       }
 
-      else if (n == ACE_TEXT("time_based_filter"))
+      else if (n == "time_based_filter")
       {
         ::dds::timeBasedFilterQosPolicy t (e);
         time_based_filter (t);
       }
 
-      else if (n == ACE_TEXT("reader_data_lifecycle"))
+      else if (n == "reader_data_lifecycle")
       {
         ::dds::readerDataLifecycleQosPolicy t (e);
         reader_data_lifecycle (t);
@@ -6371,23 +6370,23 @@ namespace dds
 
     while (p.more_attributes ())
     {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (p.next_attribute ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
-      if (n == ACE_TEXT ("name"))
+      ::XSCRT::XML::Attribute<char> a (p.next_attribute ());
+      std::string n (::XSCRT::XML::uq_name (a.name ()));
+      if (n ==  ("name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         name (t);
       }
 
-      else if (n == ACE_TEXT ("base_name"))
+      else if (n ==  ("base_name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         base_name (t);
       }
 
-      else if (n == ACE_TEXT ("topic_filter"))
+      else if (n ==  ("topic_filter"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         topic_filter (t);
       }
 
@@ -6400,102 +6399,102 @@ namespace dds
   // datawriterQos
 
   datawriterQos::
-  datawriterQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  datawriterQos (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("durability"))
+      if (n == "durability")
       {
         ::dds::durabilityQosPolicy t (e);
         durability (t);
       }
 
-      else if (n == ACE_TEXT("durability_service"))
+      else if (n == "durability_service")
       {
         ::dds::durabilityServiceQosPolicy t (e);
         durability_service (t);
       }
 
-      else if (n == ACE_TEXT("deadline"))
+      else if (n == "deadline")
       {
         ::dds::deadlineQosPolicy t (e);
         deadline (t);
       }
 
-      else if (n == ACE_TEXT("latency_budget"))
+      else if (n == "latency_budget")
       {
         ::dds::latencyBudgetQosPolicy t (e);
         latency_budget (t);
       }
 
-      else if (n == ACE_TEXT("liveliness"))
+      else if (n == "liveliness")
       {
         ::dds::livelinessQosPolicy t (e);
         liveliness (t);
       }
 
-      else if (n == ACE_TEXT("reliability"))
+      else if (n == "reliability")
       {
         ::dds::reliabilityQosPolicy t (e);
         reliability (t);
       }
 
-      else if (n == ACE_TEXT("destination_order"))
+      else if (n == "destination_order")
       {
         ::dds::destinationOrderQosPolicy t (e);
         destination_order (t);
       }
 
-      else if (n == ACE_TEXT("history"))
+      else if (n == "history")
       {
         ::dds::historyQosPolicy t (e);
         history (t);
       }
 
-      else if (n == ACE_TEXT("resource_limits"))
+      else if (n == "resource_limits")
       {
         ::dds::resourceLimitsQosPolicy t (e);
         resource_limits (t);
       }
 
-      else if (n == ACE_TEXT("transport_priority"))
+      else if (n == "transport_priority")
       {
         ::dds::transportPriorityQosPolicy t (e);
         transport_priority (t);
       }
 
-      else if (n == ACE_TEXT("lifespan"))
+      else if (n == "lifespan")
       {
         ::dds::lifespanQosPolicy t (e);
         lifespan (t);
       }
 
-      else if (n == ACE_TEXT("user_data"))
+      else if (n == "user_data")
       {
         ::dds::userDataQosPolicy t (e);
         user_data (t);
       }
 
-      else if (n == ACE_TEXT("ownership"))
+      else if (n == "ownership")
       {
         ::dds::ownershipQosPolicy t (e);
         ownership (t);
       }
 
-      else if (n == ACE_TEXT("ownership_strength"))
+      else if (n == "ownership_strength")
       {
         ::dds::ownershipStrengthQosPolicy t (e);
         ownership_strength (t);
       }
 
-      else if (n == ACE_TEXT("writer_data_lifecycle"))
+      else if (n == "writer_data_lifecycle")
       {
         ::dds::writerDataLifecycleQosPolicy t (e);
         writer_data_lifecycle (t);
@@ -6508,23 +6507,23 @@ namespace dds
 
     while (p.more_attributes ())
     {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (p.next_attribute ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
-      if (n == ACE_TEXT ("name"))
+      ::XSCRT::XML::Attribute<char> a (p.next_attribute ());
+      std::string n (::XSCRT::XML::uq_name (a.name ()));
+      if (n ==  ("name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         name (t);
       }
 
-      else if (n == ACE_TEXT ("base_name"))
+      else if (n ==  ("base_name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         base_name (t);
       }
 
-      else if (n == ACE_TEXT ("topic_filter"))
+      else if (n ==  ("topic_filter"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         topic_filter (t);
       }
 
@@ -6537,48 +6536,48 @@ namespace dds
   // qosProfile
 
   qosProfile::
-  qosProfile (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  qosProfile (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("datareader_qos"))
+      if (n == "datareader_qos")
       {
         datareader_qos_value_type t (new ::dds::datareaderQos (e));
         add_datareader_qos (t);
       }
 
-      else if (n == ACE_TEXT("datawriter_qos"))
+      else if (n == "datawriter_qos")
       {
         datawriter_qos_value_type t (new ::dds::datawriterQos (e));
         add_datawriter_qos (t);
       }
 
-      else if (n == ACE_TEXT("topic_qos"))
+      else if (n == "topic_qos")
       {
         topic_qos_value_type t (new ::dds::topicQos (e));
         add_topic_qos (t);
       }
 
-      else if (n == ACE_TEXT("domainparticipant_qos"))
+      else if (n == "domainparticipant_qos")
       {
         domainparticipant_qos_value_type t (new ::dds::domainparticipantQos (e));
         add_domainparticipant_qos (t);
       }
 
-      else if (n == ACE_TEXT("publisher_qos"))
+      else if (n == "publisher_qos")
       {
         publisher_qos_value_type t (new ::dds::publisherQos (e));
         add_publisher_qos (t);
       }
 
-      else if (n == ACE_TEXT("subscriber_qos"))
+      else if (n == "subscriber_qos")
       {
         subscriber_qos_value_type t (new ::dds::subscriberQos (e));
         add_subscriber_qos (t);
@@ -6591,17 +6590,17 @@ namespace dds
 
     while (p.more_attributes ())
     {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (p.next_attribute ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
-      if (n == ACE_TEXT ("name"))
+      ::XSCRT::XML::Attribute<char> a (p.next_attribute ());
+      std::string n (::XSCRT::XML::uq_name (a.name ()));
+      if (n ==  ("name"))
       {
-        name_ = qosProfile::name_auto_ptr_type (new ::XMLSchema::string<ACE_TCHAR> (a));
+        name_ = qosProfile::name_auto_ptr_type (new ::XMLSchema::string<char> (a));
         name_->container (this);
       }
 
-      else if (n == ACE_TEXT ("base_name"))
+      else if (n ==  ("base_name"))
       {
-        ::XMLSchema::string<ACE_TCHAR> t (a);
+        ::XMLSchema::string<char> t (a);
         base_name (t);
       }
 
@@ -6614,18 +6613,18 @@ namespace dds
   // qosProfile_seq
 
   qosProfile_seq::
-  qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  qosProfile_seq (::XSCRT::XML::Element<char> const& e)
   :Base (e)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<char> p (e);
 
     while (p.more_elements ())
     {
-      ::XSCRT::XML::Element<ACE_TCHAR> e (p.next_element ());
-      std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (e.name ()));
+      ::XSCRT::XML::Element<char> e (p.next_element ());
+      std::string n (::XSCRT::XML::uq_name (e.name ()));
 
-      if (n == ACE_TEXT("qos_profile"))
+      if (n == "qos_profile")
       {
         qos_profile_value_type t (new ::dds::qosProfile (e));
         add_qos_profile (t);
@@ -6654,8 +6653,8 @@ namespace dds
         throw 1;
       }
 
-      ::XSCRT::XML::Element<ACE_TCHAR> e (dom_element);
-      if (e.name () == ACE_TEXT("dds"))
+      ::XSCRT::XML::Element<char> e (dom_element);
+      if (e.name () == "dds")
       {
         ::dds::qosProfile_seq r (e);
 
