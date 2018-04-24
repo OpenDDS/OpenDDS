@@ -223,9 +223,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
       for (size_t i = 0; i < SAMPLES_PER_TEST; ++i)
       {
-        Foo foo = {static_cast<CORBA::Long>(i), 0, 0, 0};
-        const DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
-        if (writer_i->write(foo, handle) != DDS::RETCODE_OK)
+        const Foo foo = {0, 0, 0, 0};
+        if (writer_i->write(foo, DDS::HANDLE_NIL) != DDS::RETCODE_OK)
         {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("%N:%l main()")
