@@ -547,6 +547,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
         return;
       }
       dp.has_last_stateless_msg_ = true;
+      dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
       dp.last_stateless_msg_ = reply;
       dp.auth_state_ = AS_HANDSHAKE_REPLY_SENT;
       return;
@@ -632,8 +633,7 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
       case AS_HANDSHAKE_REPLY_SENT:
         if (tv > pi->second.auth_started_time_ + MAX_AUTH_TIME) {
           to_erase.insert(pi->first); 
-        }
-        if (pi->second.has_last_stateless_msg_ && (tv > pi->second.last_stateless_msg_time_ + AUTH_RESEND_PERIOD)) {
+        } else if (pi->second.has_last_stateless_msg_ && (tv > (pi->second.last_stateless_msg_time_ + AUTH_RESEND_PERIOD))) {
           RepoId reader = pi->first;
           reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
           pi->second.last_stateless_msg_time_ = tv;
@@ -981,6 +981,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       return;
     }
     dp.has_last_stateless_msg_ = true;
+    dp.last_stateless_msg_time_ = ACE_OS::gettimeofday();
     dp.last_stateless_msg_ = msg;
     dp.auth_state_ = AS_HANDSHAKE_REQUEST_SENT;
   }
