@@ -567,9 +567,9 @@ namespace OpenDDS
           payload_item, ett_sample_payload);
 
       // Try to Dissect Payload
-      Sample_Dissector *data_dissector =
-        Sample_Manager::instance().find (data_name);
-      if (data_dissector == 0) {
+      Sample_Dissector_rch data_dissector =
+        Sample_Manager::instance().find(data_name);
+      if (!data_dissector) {
         ACE_DEBUG ((LM_DEBUG,
                     "DDS_Dissector::dissect_sample_payload: "
                     "couldn't dissect payload: "

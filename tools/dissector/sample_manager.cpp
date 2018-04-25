@@ -34,20 +34,26 @@ namespace OpenDDS
 {
   namespace DCPS
   {
+    Sample_Dissector_rch make_sdrch() {
+      return Sample_Dissector_rch(new Sample_Dissector(), keep_count());
+    }
+
+    Sample_Dissector_rch make_sdrch(Sample_Dissector * sd) {
+      return Sample_Dissector_rch(sd, keep_count());
+    }
 
 #ifndef NO_ITL
-    Sample_Dissector* get_dissector(
-        std::map<itl::Type*, Sample_Dissector*>& map,
+    Sample_Dissector_rch get_dissector(
+        std::map<itl::Type*, Sample_Dissector_rch>& map,
         itl::Type* type
     );
 
     struct visitor : public itl::TypeVisitor {
-      Sample_Dissector* dissector;
-      std::map<itl::Type*, Sample_Dissector*>& map;
+      Sample_Dissector_rch dissector;
+      std::map<itl::Type*, Sample_Dissector_rch>& map;
 
-      explicit visitor(std::map<itl::Type*, Sample_Dissector*>& m)
-        : dissector(NULL)
-        , map(m)
+      explicit visitor(std::map<itl::Type*, Sample_Dissector_rch>& m)
+        : map(m)
       { }
 
       void visit (itl::Alias& a) {
@@ -77,11 +83,11 @@ namespace OpenDDS
               }
             }
           }
-          dissector = sample;
+          dissector = make_sdrch(static_cast<Sample_Dissector*>(sample));
           return;
         }
 
-        dissector = new Sample_Dissector();
+        dissector = make_sdrch();
         switch (i.bits()) {
         case 0:
           dissector->add_field(new Sample_Field(Sample_Field::WChar, ""));
@@ -136,7 +142,7 @@ namespace OpenDDS
       }
 
       void visit (itl::Float& f) {
-        dissector = new Sample_Dissector();
+        dissector = make_sdrch();
         switch (f.model()) {
         case itl::Float::Binary32:
           dissector->add_field(new Sample_Field(Sample_Field::Float, ""));
@@ -160,14 +166,17 @@ namespace OpenDDS
           "A Fixed type has been specified but ACE is missing Fixed.\n"
         )));
 #endif
-        dissector = new Sample_Fixed(fixed.digits(), fixed.scale());
+        dissector = make_sdrch(static_cast<Sample_Dissector*>(
+          new Sample_Fixed(fixed.digits(), fixed.scale())
+        ));
       }
 
-      Sample_Dissector* do_array(std::vector<unsigned int>::const_iterator pos,
+      Sample_Dissector_rch do_array(std::vector<unsigned int>::const_iterator pos,
                                  std::vector<unsigned int>::const_iterator limit,
                                  itl::Type* element_type) {
         if (pos != limit) {
-          return new Sample_Array(*pos, do_array(pos + 1, limit, element_type));
+          return make_sdrch(static_cast<Sample_Dissector*>(new Sample_Array(
+            *pos, Sample_Dissector_wrch(do_array(pos + 1, limit, element_type)))));
         }
         else {
           return get_dissector(map, element_type);
@@ -177,7 +186,8 @@ namespace OpenDDS
       void visit (itl::Sequence& s) {
         std::vector<unsigned int> size = s.size();
         if (size.empty()) {
-          dissector = new Sample_Sequence(get_dissector(map, s.element_type()));
+          dissector = make_sdrch(static_cast<Sample_Dissector*>(new Sample_Sequence(
+            Sample_Dissector_wrch(get_dissector(map, s.element_type())))));
         }
         else {
           dissector = do_array(size.begin(), size.end(), s.element_type());
@@ -185,7 +195,7 @@ namespace OpenDDS
       }
 
       void visit (itl::String& s) {
-        dissector = new Sample_Dissector();
+        dissector = make_sdrch();
         const rapidjson::Value* note = s.note();
         if (note && note->IsObject() && note->HasMember("idl")) {
           const rapidjson::Value& idl = (*note)["idl"];
@@ -201,7 +211,7 @@ namespace OpenDDS
       }
 
       void visit (itl::Record& r) {
-        dissector = new Sample_Dissector();
+        dissector = make_sdrch();
         for (itl::Record::const_iterator pos = r.begin(), limit = r.end();
              pos != limit;
              ++pos) {
@@ -211,8 +221,10 @@ namespace OpenDDS
       }
 
       void visit (itl::Union& u) {
-        Sample_Union *s_union = new Sample_Union ();
-        s_union->discriminator(get_dissector(map, u.discriminator()));
+        Sample_Union* s_union = new Sample_Union();
+        s_union->discriminator(Sample_Dissector_wrch(
+          get_dissector(map, u.discriminator())
+        ));
         for (itl::Union::const_iterator pos = u.begin(), limit = u.end();
              pos != limit;
              ++pos) {
@@ -228,7 +240,7 @@ namespace OpenDDS
              ++pos) {
           if (!pos->labels.empty()) {
             Sample_Field* field = s_union->add_field(
-              get_dissector(map, pos->type), pos->name);
+              Sample_Dissector_wrch(get_dissector(map, pos->type)), pos->name);
             for (itl::Union::Field::const_iterator label_pos = pos->begin(),
                    label_limit = pos->end();
                  label_pos != label_limit;
@@ -238,7 +250,7 @@ namespace OpenDDS
           }
         }
 
-        dissector = s_union;
+        dissector = make_sdrch(static_cast<Sample_Dissector*>(s_union));
       }
 
       void visit (itl::TypeRef& tr) {
@@ -246,7 +258,7 @@ namespace OpenDDS
       }
     };
 
-    Sample_Dissector* get_dissector(std::map<itl::Type*, Sample_Dissector*>& map, itl::Type* type)
+    Sample_Dissector_rch get_dissector(std::map<itl::Type*, Sample_Dissector_rch>& map, itl::Type* type)
     {
       if (map.find(type) != map.end()) {
         return map[type];
@@ -269,17 +281,14 @@ namespace OpenDDS
       }
     }
 
-    Sample_Manager
-    Sample_Manager::instance_;
+    Sample_Manager Sample_Manager::instance_;
 
-    Sample_Manager &
-    Sample_Manager::instance ()
+    Sample_Manager& Sample_Manager::instance()
     {
       return instance_;
     }
 
-    void
-    Sample_Manager::init_from_file (const ACE_TCHAR *filename)
+    void Sample_Manager::init_from_file(const ACE_TCHAR* filename)
     {
 #ifdef NO_ITL
       ACE_UNUSED_ARG(filename);
@@ -298,17 +307,19 @@ namespace OpenDDS
        */
       DissectorsType primary_dissectors;
 
+      DissectorsType dissectors_to_add;
+
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("Found Dissector ITL File: %C\n"),
         filename));
       try {
         d.fromJson(str);
-        std::map<itl::Type*, Sample_Dissector*> map;
+        std::map<itl::Type*, Sample_Dissector_rch> map;
         for (itl::Dictionary::const_iterator pos = d.begin(), limit = d.end();
              pos != limit;
              ++pos) {
           itl::Alias* a = pos->second;
-          Sample_Dissector * sd = get_dissector(map, a->type());
+          Sample_Dissector_rch sd = get_dissector(map, a->type());
           // Check if the dissector is for a primary data type
           const rapidjson::Value * note = a->note();
           if (
@@ -325,7 +336,7 @@ namespace OpenDDS
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("    Data Type: %C\n"),
             a->name().c_str()));
-          dissectors_[a->name()] = sd;
+          dissectors_to_add[a->name()] = sd;
         }
       }
       catch(std::runtime_error & e) {
@@ -339,7 +350,7 @@ namespace OpenDDS
                    ACE_TEXT(
                      "%C has no types defined as a primary DCPS data types.\n"),
                    filename));
-        primary_dissectors = dissectors_; // Evaluate All Dissectors
+        primary_dissectors = dissectors_to_add; // Evaluate All Dissectors
       }
 
       // Build WS Namespace and Fields
@@ -374,21 +385,31 @@ namespace OpenDDS
         }
 
       } catch (const Sample_Dissector_Error & e) {
+        // Remove dissectors that came from this file
         ACE_DEBUG((LM_ERROR,
           ACE_TEXT("Error during dissector initization of %C: %C\n"),
           filename, e.what()
         ));
+        return;
+      }
+
+      // Add to pool of dissectors
+      for (
+        DissectorsType::iterator i = primary_dissectors.begin();
+        i != primary_dissectors.end();
+        i++
+      ) {
+        dissectors_[i->first] = i->second;
       }
 
 #endif
     }
 
-    void
-    Sample_Manager::init ()
+    void Sample_Manager::init()
     {
-#ifndef NO_ITL
       hf_array_ = NULL;
 
+#ifndef NO_ITL
       // - from env get directory for config files use "." by default
       // - use dirent to iterate over all *.ini files in config dir
       // - for each file load the configuration and iterate over sections
@@ -423,8 +444,7 @@ namespace OpenDDS
 #endif // NO_ITL
     }
 
-    Sample_Dissector *
-    Sample_Manager::find (const char *repo_id)
+    Sample_Dissector_rch Sample_Manager::find(const char *repo_id)
     {
       std::string key(repo_id);
       const std::string typesupport("TypeSupport");
@@ -445,9 +465,8 @@ namespace OpenDDS
       DissectorsType::const_iterator dpos = dissectors_.find(key);
       if (dpos != dissectors_.end()) {
         return dpos->second;
-      }
-      else {
-        return 0;
+      } else {
+        return Sample_Dissector_rch();
       }
     }
 

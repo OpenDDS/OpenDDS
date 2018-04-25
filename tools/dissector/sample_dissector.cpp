@@ -46,7 +46,7 @@ namespace OpenDDS
      * result to the reason it failed.
      */
     bool utf16_to_utf8(
-       std::string &result, const ACE_CDR::WChar* from, const size_t length = 1
+       std::string& result, const ACE_CDR::WChar* from, const size_t length = 1
     ) {
 
       const gchar* from_;
@@ -65,9 +65,9 @@ namespace OpenDDS
       from_ = reinterpret_cast<gchar*>(const_cast<ACE_CDR::WChar*>(from));
 #endif
 
-      GError * error = NULL;
-      char * utf8 = g_convert(
-        from_, length * sizeof(ACE_CDR::WChar),
+      GError* error = NULL;
+      char* utf8 = g_convert(
+        from_, length* sizeof(ACE_CDR::WChar),
         "UTF-8", "UTF-16LE", NULL, NULL, &error
       );
 
@@ -76,7 +76,7 @@ namespace OpenDDS
         g_free(utf8);
         return false;
       } else {
-        const char * error_msg = "UTF-16 to UTF-8 conversion failed: ";
+        const char* error_msg = "UTF-16 to UTF-8 conversion failed: ";
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C%C\n"),
           error_msg,
           error->message
@@ -89,7 +89,7 @@ namespace OpenDDS
     }
 
     Wireshark_Bundle::Wireshark_Bundle(
-      char * data, size_t size, bool swap_bytes, Serializer::Alignment align
+      char* data, size_t size, bool swap_bytes, Serializer::Alignment align
     ) :
       block(data, size),
       serializer(&block, swap_bytes, align)
@@ -98,7 +98,7 @@ namespace OpenDDS
       get_size_only = false;
     }
 
-    Wireshark_Bundle::Wireshark_Bundle(const Wireshark_Bundle & other) :
+    Wireshark_Bundle::Wireshark_Bundle(const Wireshark_Bundle& other) :
       block(other.block.rd_ptr(), other.block.size()),
       serializer(
         &block,
@@ -123,11 +123,11 @@ namespace OpenDDS
       return reinterpret_cast<size_t>(block.rd_ptr());
     }
 
-    guint8 *
+    guint8*
     Wireshark_Bundle::get_remainder()
     {
       gint remainder = ws_tvb_length(tvb) - offset;
-      return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
+      return reinterpret_cast<guint8*>(ws_ep_tvb_memdup(tvb, offset, remainder));
     }
 
     Sample_Base::~Sample_Base() {
@@ -140,7 +140,7 @@ namespace OpenDDS
       }
     }
 
-    Field_Context * Sample_Base::get_context() {
+    Field_Context* Sample_Base::get_context() {
       if (field_contexts_.count(ns_)) {
         return field_contexts_[ns_];
       }
@@ -172,7 +172,7 @@ namespace OpenDDS
       return payload_namespace + ns_;
     }
 
-    void Sample_Base::push_ns(const std::string & name) {
+    void Sample_Base::push_ns(const std::string& name) {
       ns_stack_.push_back(name);
       rebuild_ns();
     }
@@ -245,8 +245,7 @@ namespace OpenDDS
       // call long_name_) is the string used for filtering.
       // In our case (and probably most cases for any WS dissector) "abbrev"
       // will be longer than the first member "name".
-      // This confused was confusing to me, so just wanted to make a note of
-      // this.
+      // This was confusing to me, so just wanted to make a note of this.
         fc->short_name_.c_str(), fc->long_name_.c_str(),
         ft, fd, NULL, 0, NULL, HFILL
       }};
@@ -255,30 +254,27 @@ namespace OpenDDS
       return fc;
     }
 
-    Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)
-      : label_ (label),
-        type_id_ (id),
-        nested_ (0),
-        next_(0)
-    {
-    }
-
-    Sample_Field::Sample_Field (Sample_Dissector *n, const std::string &label)
+    Sample_Field::Sample_Field(IDLTypeID id, const std::string &label)
       : label_(label),
-        type_id_ (Undefined),
-        nested_ (n),
+        type_id_(id),
         next_(0)
     {
     }
 
-    Sample_Field::~Sample_Field ()
+    Sample_Field::Sample_Field(Sample_Dissector_wrch n, const std::string &label)
+      : label_(label),
+        type_id_(Undefined),
+        nested_(n),
+        next_(0)
     {
-      delete nested_;
+    }
+
+    Sample_Field::~Sample_Field()
+    {
       delete next_;
     }
 
-    Sample_Field *
-    Sample_Field::chain (Sample_Field *f)
+    Sample_Field* Sample_Field::chain(Sample_Field* f)
     {
       if (next_ != 0)
         next_->chain (f);
@@ -287,20 +283,17 @@ namespace OpenDDS
       return f;
     }
 
-    Sample_Field *
-    Sample_Field::chain (IDLTypeID ti, const std::string &l)
+    Sample_Field* Sample_Field::chain(IDLTypeID ti, const std::string& l)
     {
       return chain (new Sample_Field (ti, l));
     }
 
-    Sample_Field *
-    Sample_Field::chain (Sample_Dissector *n, const std::string &l)
+    Sample_Field* Sample_Field::chain(Sample_Dissector_wrch n, const std::string& l)
     {
       return chain (new Sample_Field (n, l));
     }
 
-    Sample_Field *
-    Sample_Field::get_link (size_t index)
+    Sample_Field* Sample_Field::get_link(size_t index)
     {
       if (index == 0)
         return this;
@@ -308,7 +301,7 @@ namespace OpenDDS
       return (next_ == 0) ? 0 : next_->get_link (index - 1);
     }
 
-    void Sample_Field::to_stream(std::stringstream &s, Wireshark_Bundle & p) {
+    void Sample_Field::to_stream(std::stringstream& s, Wireshark_Bundle& p) {
       size_t location = p.buffer_pos();
 
       TAO::String_Manager string_value;
@@ -422,12 +415,12 @@ namespace OpenDDS
     }
 
 #define ADD_FIELD_PARAMS params.tree, hf, params.tvb, params.offset, (gint) len
-    size_t
-    Sample_Field::dissect_i (Wireshark_Bundle &params, bool recur) {
+    size_t Sample_Field::dissect_i(Wireshark_Bundle& params, bool recur)
+    {
 
       size_t len = 0;
 
-      if (!this->nested_) {
+      if (!nested_) {
 
         int hf = -1;
         if (!params.get_size_only) {
@@ -742,7 +735,13 @@ namespace OpenDDS
         }
       } else {
         push_ns(this->label_);
-        len = this->nested_->dissect_i(params);
+        Sample_Dissector_rch sd = nested_.lock();
+        if (!sd) {
+            throw Sample_Dissector_Error(
+              get_ns()  + " nested dissector is missing!"
+            );
+        }
+        len = sd->dissect_i(params);
         pop_ns();
       }
 
@@ -827,9 +826,15 @@ namespace OpenDDS
             get_ns()  + " is not a valid Field Type."
           );
         }
-      } else if (nested_ != NULL) {
+      } else if (nested_) {
         push_ns(label_);
-        nested_->init_ws_fields(first_pass);
+        Sample_Dissector_rch sd = nested_.lock();
+        if (!sd) {
+            throw Sample_Dissector_Error(
+              get_ns()  + " nested dissector is missing!"
+            );
+        }
+        sd->init_ws_fields(first_pass);
         pop_ns();
       }
       if (next_ != NULL) {
@@ -846,15 +851,16 @@ namespace OpenDDS
 
     //------------------------------------------------------------------------
 
-    Sample_Dissector::Sample_Dissector (const std::string &subtree)
+    Sample_Dissector::Sample_Dissector(const std::string& subtree)
       : field_(0),
         ett_(-1),
         subtree_label_(),
         is_struct_(false),
         is_root_(false)
     {
-      if (!subtree.empty())
+      if (!subtree.empty()) {
         this->init (subtree);
+      }
     }
 
     Sample_Dissector::~Sample_Dissector ()
@@ -899,14 +905,14 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field(Sample_Dissector *n,
+    Sample_Dissector::add_field(Sample_Dissector_wrch n,
                                 const std::string &label)
     {
       return add_field(new Sample_Field(n, label));
     }
 
     size_t
-    Sample_Dissector::dissect_i (Wireshark_Bundle &params)
+    Sample_Dissector::dissect_i(Wireshark_Bundle& params)
     {
       size_t len = 0;
       if (!params.get_size_only) {
@@ -952,15 +958,14 @@ namespace OpenDDS
       return len;
     }
 
-    size_t
-    Sample_Dissector::compute_length(const Wireshark_Bundle & p) {
+    size_t Sample_Dissector::compute_length(const Wireshark_Bundle& p)
+    {
       Wireshark_Bundle size_params(p);
       size_params.get_size_only = true;
       return dissect_i(size_params);
     }
 
-    gint
-    Sample_Dissector::dissect (Wireshark_Bundle &params)
+    gint Sample_Dissector::dissect (Wireshark_Bundle& params)
     {
       params.use_index = false;
       is_root_ = true;
@@ -975,7 +980,7 @@ namespace OpenDDS
       return field_->type_id_;
     }
 
-    std::string Sample_Dissector::stringify(Wireshark_Bundle & p) {
+    std::string Sample_Dissector::stringify(Wireshark_Bundle& p) {
       std::stringstream outstream;
       if (field_) {
         field_->to_stream(outstream, p);
@@ -1012,14 +1017,13 @@ namespace OpenDDS
     }
 
     //----------------------------------------------------------------------
-    Sample_Sequence::Sample_Sequence (Sample_Dissector *sub)
+    Sample_Sequence::Sample_Sequence (Sample_Dissector_wrch sub)
       : element_ (sub)
     {
       this->init ("sequence");
     }
 
-    Sample_Dissector *
-    Sample_Sequence::element ()
+    Sample_Dissector_wrch Sample_Sequence::element()
     {
       return element_;
     }
@@ -1063,12 +1067,19 @@ namespace OpenDDS
       push_ns(element_namespace);
 
       // Dissect Elements
+
       bool prev_use_index = params.use_index;
       size_t all_elements_size = 0;
+      Sample_Dissector_rch sd = element_.lock();
+      if (!sd) {
+          throw Sample_Dissector_Error(
+            get_ns()  + " element dissector is missing!"
+          );
+      }
       for (guint32 ndx = 0; ndx < count; ndx++) {
         params.index = ndx;
         params.use_index = true;
-        size_t element_size = element_->dissect_i(params);
+        size_t element_size = sd->dissect_i(params);
         all_elements_size += element_size;
       }
       if (params.get_size_only) {
@@ -1114,14 +1125,19 @@ namespace OpenDDS
         add_protocol_field();
       }
       push_ns(element_namespace);
-      element_->init_ws_fields(first_pass);
+      Sample_Dissector_rch sd = element_.lock();
+      if (!sd) {
+          throw Sample_Dissector_Error(
+            get_ns()  + " element dissector is missing!"
+          );
+      }
+      sd->init_ws_fields(first_pass);
       pop_ns();
     }
 
     //----------------------------------------------------------------------
 
-    Sample_Array::Sample_Array (size_t count,
-                                Sample_Dissector *sub)
+    Sample_Array::Sample_Array(size_t count, Sample_Dissector_wrch sub)
       : Sample_Sequence (sub),
         count_ (count)
     {
@@ -1257,8 +1273,7 @@ namespace OpenDDS
     //----------------------------------------------------------------------
 
     Sample_Union::Sample_Union ()
-      :discriminator_ (0),
-       default_ (0)
+      : default_ (0)
     {
       this->init ("union");
     }
@@ -1268,8 +1283,7 @@ namespace OpenDDS
       delete default_;
     }
 
-    void
-    Sample_Union::discriminator (Sample_Dissector *d)
+    void Sample_Union::discriminator(Sample_Dissector_wrch d)
     {
       this->discriminator_ = d;
     }
@@ -1288,9 +1302,15 @@ namespace OpenDDS
 
     size_t Sample_Union::dissect_i (Wireshark_Bundle &params) {
       // Get Type
-      size_t len = discriminator_->compute_length(params);
+      Sample_Dissector_rch sd = discriminator_.lock();
+      if (!sd) {
+          throw Sample_Dissector_Error(
+            get_ns()  + " discriminator dissector is missing!"
+          );
+      }
+      size_t len = sd->compute_length(params);
       Sample_Field* value = this->default_;
-      std::string _d = discriminator_->stringify(params);
+      std::string _d = sd->stringify(params);
       MapType::const_iterator pos = map_.find(_d);
       if (pos != map_.end()) {
         value = pos->second;
@@ -1348,7 +1368,7 @@ namespace OpenDDS
 
     //-----------------------------------------------------------------------
 
-    Sample_Alias::Sample_Alias (Sample_Dissector *base)
+    Sample_Alias::Sample_Alias(Sample_Dissector_wrch base)
       :base_(base)
     {
       this->init ("alias");
@@ -1357,11 +1377,23 @@ namespace OpenDDS
     size_t
     Sample_Alias::dissect_i (Wireshark_Bundle &p)
     {
-      return base_->dissect_i (p);
+      Sample_Dissector_rch sd = base_.lock();
+      if (!sd) {
+          throw Sample_Dissector_Error(
+            get_ns()  + " alias dissector is missing!"
+          );
+      }
+      return sd->dissect_i (p);
     }
 
     void Sample_Alias::init_ws_fields(bool first_pass) {
-      base_->init_ws_fields(first_pass);
+      Sample_Dissector_rch sd = base_.lock();
+      if (!sd) {
+          throw Sample_Dissector_Error(
+            get_ns()  + " alias dissector is missing!"
+          );
+      }
+      sd->init_ws_fields(first_pass);
     }
 
     //-----------------------------------------------------------------------
