@@ -283,7 +283,12 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
 
-  if (iter == participants_.end()) {
+  if (data.inlineQos.length() && disposed(data.inlineQos)) {
+    if (iter != participants_.end()) {
+      remove_discovered_participant(iter);
+    }
+
+  } else if (iter == participants_.end()) {
     // copy guid prefix (octet[12]) into BIT key (long[3])
     std::memcpy(pdata.ddsParticipantData.key.value,
                 pdata.participantProxy.guidPrefix,
@@ -351,9 +356,6 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     } else {
       match_unauthenticated(guid, dp);
     }
-  } else if (data.inlineQos.length() && disposed(data.inlineQos)) {
-    remove_discovered_participant(iter);
-
   } else {
 
     // Must unlock when calling into part_bit() as it may call back into us
