@@ -55,6 +55,25 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
 ssize_t
 RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
+  ssize_t result = send_bytes_i_helper(iov, n);
+
+  if (result == -1 && (errno == EPERM || errno == EACCES || errno == EINTR || errno == ENOBUFS || errno == ENOMEM)) {
+    // Make the framework think this was a successful send to avoid
+    // putting the send strategy in suspended mode. If reliability
+    // is enabled, the data may be resent later.
+    ssize_t b = 0;
+    for (int i = 0; i < n; ++i) {
+      b += iov[i].iov_len;
+    }
+    result = b;
+  }
+
+  return result;
+}
+
+ssize_t
+RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
+{
   if (override_single_dest_) {
     return send_single_i(iov, n, *override_single_dest_);
   }
@@ -194,7 +213,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     int err = errno;
     addr.addr_to_string(addr_buff, 256, 0);
     errno = err;
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+    ACE_ERROR((LM_WARNING, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
       "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
   }
   return result;
