@@ -136,9 +136,7 @@ namespace OpenDDS
         i != field_contexts_.end();
         ++i
       ) {
-        if (i->second) {
-          delete i->second;
-        }
+        delete i->second;
       }
     }
 
@@ -146,7 +144,7 @@ namespace OpenDDS
       if (field_contexts_.count(ns_)) {
         return field_contexts_[ns_];
       }
-      return (Field_Context*) 0;
+      return 0;
     }
 
     // Sample_Base static members
@@ -226,7 +224,6 @@ namespace OpenDDS
     void Sample_Base::add_protocol_field() {
       Field_Context* fc = get_context();
       if (fc) {
-        printf("Field: %s\n", get_ns().c_str());
         Sample_Manager::instance().add_protocol_field(fc->hf_info_);
       }
     }
@@ -276,12 +273,8 @@ namespace OpenDDS
 
     Sample_Field::~Sample_Field ()
     {
-      if (nested_) {
-        delete nested_;
-      }
-      if (next_) {
-        delete next_;
-      }
+      delete nested_;
+      delete next_;
     }
 
     Sample_Field *
@@ -862,9 +855,7 @@ namespace OpenDDS
 
     Sample_Dissector::~Sample_Dissector ()
     {
-      if (field_) {
-        delete field_;
-      }
+      delete field_;
     }
 
     void

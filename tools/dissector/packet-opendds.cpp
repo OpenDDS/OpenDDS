@@ -649,7 +649,7 @@ namespace OpenDDS
 
         try {
           offset = data_dissector->dissect(params); // Dissect Sample Payload
-        } catch (Sample_Dissector_Error& e) {
+        } catch (const Sample_Dissector_Error& e) {
 #ifndef NO_EXPERT
           proto_tree_add_expert_format(
             contents_tree, pinfo_, &ei_sample_payload_error,

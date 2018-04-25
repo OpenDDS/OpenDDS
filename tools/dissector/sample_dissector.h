@@ -114,7 +114,7 @@ namespace OpenDDS
       guint8* get_remainder();
     };
 
-    /// Holds Wireshark field infomation in relationship to a namespace
+    /// Holds Wireshark field information in relationship to a namespace
     struct Field_Context {
       /// Field's Display/Short Name
       std::string short_name_;
@@ -127,14 +127,14 @@ namespace OpenDDS
     };
     typedef std::map<std::string, Field_Context*> Field_Contexts;
 
-    /// Base for Sample_Dissector and Sample_Field. Helps build the wireshark
+    /// Base for Sample_Dissector and Sample_Field. Helps build the Wireshark
     /// protocol tree.
     class Sample_Base {
     private:
       /// Associated Wireshark Header Field Contexts
       Field_Contexts field_contexts_;
 
-      /// Keep track of the wireshark namespace to use
+      /// Keep track of the Wireshark namespace to use
       static std::list<std::string> ns_stack_;
       static std::string ns_;
 
@@ -154,7 +154,7 @@ namespace OpenDDS
        */
       Field_Context* get_context();
 
-      /// Get hf for wireshark, returns -1 if there is no such context
+      /// Get hf for Wireshark, returns -1 if there is no such context
       int get_hf();
 
       /// Have the current context's field info registered later
@@ -164,11 +164,11 @@ namespace OpenDDS
       virtual ~Sample_Base();
 
       /**
-       * Traverse the Dissector Tree nodes to create the protocol infomation
+       * Traverse the Dissector Tree nodes to create the protocol information
        * to be passed to Wireshark.
        * This occurs in two passes:
        *   - The first pass creates the field information and evaluates
-       *     if the infomation is valid. If not a Sample_Dissector_Error
+       *     if the information is valid. If not a Sample_Dissector_Error
        *     will be thrown. The whole Sample_Dissector will be removed.
        *   - The second pass will collect the hf_register_info structs
        *     from the Dissectors and Fields.
@@ -197,7 +197,7 @@ namespace OpenDDS
 
     class dissector_Export Sample_Dissector;
 
-    /// Sample_Field decribes a single element of the sample. This can be
+    /// Sample_Field describes a single element of the sample. This can be
     /// a fixed length field, such as a short, long, etc. or variable length
     /// such as a string, enum, union, sequence, or another struct.
     ///
@@ -302,7 +302,7 @@ namespace OpenDDS
       virtual void init (const std::string &subtree_label = "");
 
       /// Dissect is the hook function called from an owning dissector.
-      /// The signature matches that required by wireshark. The offset
+      /// The signature matches that required by Wireshark. The offset
       /// is incremented as a side-effect of calling dissect. The real
       /// work of dissecting a sample is delegated to dissect_i.
       gint dissect (Wireshark_Bundle &params);
@@ -317,7 +317,7 @@ namespace OpenDDS
       Sample_Field *add_field (Sample_Field::IDLTypeID, const std::string &l);
       Sample_Field *add_field (Sample_Dissector *n, const std::string &l);
 
-      /// Run init_ws_fields on the childern of the Sample_Dissector
+      /// Run init_ws_fields on the children of the Sample_Dissector
       void init_ws_proto_tree(bool first_pass);
 
       virtual void init_ws_fields(bool first_pass);
@@ -343,7 +343,7 @@ namespace OpenDDS
       /// The list of fields defining the sample.
       Sample_Field *field_;
 
-      /// Values used by the wireshark framework for rendering a sub-tree.
+      /// Values used by the Wireshark framework for rendering a sub-tree.
       /// These get set in init(), a subtree is defined only if label_ is not
       /// empty.
       gint ett_;

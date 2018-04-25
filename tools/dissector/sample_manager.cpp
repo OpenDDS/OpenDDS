@@ -373,7 +373,7 @@ namespace OpenDDS
 
       } catch (const Sample_Dissector_Error & e) {
         ACE_DEBUG((LM_ERROR,
-          ACE_TEXT("Error during dissector initization of %s: %s\n"),
+          ACE_TEXT("Error during dissector initization of %C: %C\n"),
           filename, e.what()
         ));
       }
