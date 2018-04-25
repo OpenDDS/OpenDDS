@@ -60,7 +60,7 @@ struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
   {}
 
   DDS::OctetSeq* challenge1() { return new DDS::OctetSeq(challenge1_); }
-  DDS::OctetSeq* challenge2() { return new DDS::OctetSeq(challenge1_); }
+  DDS::OctetSeq* challenge2() { return new DDS::OctetSeq(challenge2_); }
   DDS::OctetSeq* sharedSecret() { return new DDS::OctetSeq(shared_secret_); }
 
   DDS::OctetSeq challenge1_, challenge2_, shared_secret_;

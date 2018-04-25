@@ -893,7 +893,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size + padding - 4);
 
   if (pOut != &plain_rtps_submessage) {
-    size += 4; // body submessage header
+    size += 8; // body submessage header + seq len
   }
 
   size += pOut->length(); // submessage inside wrapper
@@ -914,8 +914,9 @@ bool CryptoBuiltInImpl::encode_submessage(
   ser << header;
   if (pOut != &plain_rtps_submessage) {
     smHdr.submessageId = RTPS::SEC_BODY;
-    smHdr.submessageLength = static_cast<ACE_UINT16>(pOut->length());
+    smHdr.submessageLength = static_cast<ACE_UINT16>(4 + pOut->length());
     ser << smHdr;
+    ser << pOut->length();
   }
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
   smHdr.submessageId = RTPS::SEC_POSTFIX;

@@ -273,25 +273,37 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       ok = crypto->decode_datareader_submessage(plain_submsg, encoded_submsg,
                                                 dwch, drch, ex);
 
+    } else if (ok && category == DDS::Security::INFO_SUBMESSAGE) {
+      break;
+
     } else {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy: "
-                "preprocess_secure_submsg returned %d cat %d, [%d.%d]: %C\n",
-                ok, static_cast<int>(category), ex.code, ex.minor_code,
-                ex.message.in()));
-      ok = false;
+      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+                 "preprocess_secure_submsg failed cat %d, [%d.%d]: %C\n",
+                 static_cast<int>(category), ex.code, ex.minor_code,
+                 ex.message.in()));
+      break;
     }
 
-    if (ok) {
-      const char* buffer =
-        reinterpret_cast<const char*>(plain_submsg.get_buffer());
-      ACE_Message_Block mb(buffer, plain_submsg.length());
-      mb.wr_ptr(plain_submsg.length());
-      RtpsSampleHeader rsh(mb);
-      if (check_header(rsh)) {
-        ReceivedDataSample plain_sample(mb.duplicate());
-        if (rsh.into_received_data_sample(plain_sample)) {
-          deliver_sample_i(plain_sample, rsh.submessage_);
-        }
+    if (!ok) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+                 "decode_datawriter/reader_submessage failed [%d.%d]: %C\n",
+                 ex.code, ex.minor_code, ex.message.in()));
+      break;
+    }
+
+    const char* buff = reinterpret_cast<const char*>(plain_submsg.get_buffer());
+    ACE_Message_Block mb(buff, plain_submsg.length());
+    mb.wr_ptr(plain_submsg.length());
+    //TODO: conditional logging
+    ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
+                  category == DDS::Security::DATAWRITER_SUBMESSAGE ?
+                  "RtpsUdpReceiveStrategy: decoded writer submessage" :
+                  "RtpsUdpReceiveStrategy: decoded reader submessage"));
+    RtpsSampleHeader rsh(mb);
+    if (check_header(rsh)) {
+      ReceivedDataSample plain_sample(mb.duplicate());
+      if (rsh.into_received_data_sample(plain_sample)) {
+        deliver_sample_i(plain_sample, rsh.submessage_);
       }
     }
 
