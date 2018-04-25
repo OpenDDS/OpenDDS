@@ -488,7 +488,9 @@ namespace OpenDDS
             if (!params.get_size_only) {
               std::string s;
               bool utf_fail = utf16_to_utf8(s, &wchar_value);
-#ifndef NO_EXPERT
+#ifdef NO_EXPERT
+              ACE_UNUSED_ARG(utf_fail);
+#else
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,
@@ -704,7 +706,9 @@ namespace OpenDDS
               // Get UTF8 Version of the String
               std::string s;
               bool utf_fail = utf16_to_utf8(s, wstring_value, wstring_length);
-#ifndef NO_EXPERT
+#ifdef NO_EXPERT
+              ACE_UNUSED_ARG(utf_fail);
+#else
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,

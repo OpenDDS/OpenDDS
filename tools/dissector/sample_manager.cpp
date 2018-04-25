@@ -281,7 +281,9 @@ namespace OpenDDS
     void
     Sample_Manager::init_from_file (const ACE_TCHAR *filename)
     {
-#ifndef NO_ITL
+#ifdef NO_ITL
+      ACE_UNUSED_ARG(filename);
+#else
       std::ifstream str(filename);
       itl::Dictionary d;
       bool no_dcps_data_types = true;
