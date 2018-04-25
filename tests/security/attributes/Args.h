@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "ACE_wrappers/ace/ace_wchar.h"
+#include "ace/ace_wchar.h"
 
 namespace SecurityAttributes
 {
