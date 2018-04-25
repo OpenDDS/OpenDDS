@@ -632,7 +632,7 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
       case AS_HANDSHAKE_REQUEST_SENT:
       case AS_HANDSHAKE_REPLY_SENT:
         if (tv > pi->second.auth_started_time_ + MAX_AUTH_TIME) {
-          to_erase.insert(pi->first); 
+          to_erase.insert(pi->first);
         } else if (pi->second.has_last_stateless_msg_ && (tv > (pi->second.last_stateless_msg_time_ + AUTH_RESEND_PERIOD))) {
           RepoId reader = pi->first;
           reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
@@ -794,6 +794,12 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
           se.code, se.minor_code, se.message.in()));
       return false;
     }
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::match_authenticated - ")
+               ACE_TEXT("auth and access control complete for peer %C\n"),
+               std::string(DCPS::GuidConverter(guid)).c_str()));
   }
 
   dp.crypto_handle_ = key_factory->register_matched_remote_participant(crypto_handle_, dp.identity_handle_, dp.permissions_handle_, dp.shared_secret_handle_, se);
