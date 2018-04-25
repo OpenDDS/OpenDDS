@@ -56,6 +56,7 @@ public:
 
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
+  ssize_t send_bytes_i_helper(const iovec iov[], int n);
 
   virtual size_t max_message_size() const
   {
