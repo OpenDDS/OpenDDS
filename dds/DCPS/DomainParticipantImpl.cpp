@@ -1815,12 +1815,7 @@ is_bit(const char* topic_name) {
   bool result = strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
              || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
              || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
-             || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0
-             || strcmp(topic_name, "DCPSPublicationsSecure") == 0
-             || strcmp(topic_name, "DCPSSubscriptionsSecure") == 0
-             || strcmp(topic_name, "DCPSParticipantMessageSecure") == 0
-             || strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0
-             || strcmp(topic_name, "DCPSParticipantStatelessMessage") == 0;
+             || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
   return result;
 }
 
@@ -1858,8 +1853,8 @@ DomainParticipantImpl::create_new_topic(
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("DomainParticipant::create_new_topic, ")
-        ACE_TEXT("Unable to create new topic. SecurityException[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
+        ACE_TEXT("Unable to create new topic '%C'. SecurityException[%d.%d]: %C\n"),
+          topic_name, se.code, se.minor_code, se.message.in()));
       return DDS::Topic::_nil();
     }
   }
