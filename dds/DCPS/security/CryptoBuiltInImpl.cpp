@@ -946,7 +946,9 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
   }
 
   const int len = static_cast<int>(receiving_datareader_crypto_list.length());
-  if (receiving_datareader_crypto_list_index >= len) {
+  // NOTE: as an extension to the spec, this plugin allows an empty list in the
+  // case where the writer is sending to all associated readers.
+  if (len && receiving_datareader_crypto_list_index >= len) {
     CommonUtilities::set_security_error(ex, -1, 0, "List index too large");
     return false;
   }
