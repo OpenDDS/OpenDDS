@@ -96,8 +96,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (CORBA::is_nil(participant.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_participant failed!\n")),
+                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                          ACE_TEXT("main() - create_participant() failed!\n")),
                          -11);
       }
 
@@ -107,8 +107,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: register_type failed!\n")),
+                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                          ACE_TEXT("main() - register_type() failed!\n")),
                          -12);
       }
 
@@ -123,8 +123,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (CORBA::is_nil(topic.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_topic failed!\n")),
+                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                          ACE_TEXT("main - create_topic failed!\n")),
                          -13);
       }
 
@@ -136,8 +136,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (CORBA::is_nil(pub.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_publisher failed!\n")),
+                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                          ACE_TEXT("main - create_publisher failed!\n")),
                          -14);
       }
 
@@ -158,8 +158,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (CORBA::is_nil(dw.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_datawriter failed!\n")),
+                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                          ACE_TEXT("main - create_datawriter failed!\n")),
                          -15);
       }
 

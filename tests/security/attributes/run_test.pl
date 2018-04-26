@@ -13,6 +13,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+use Time::Piece;
+use Time::Seconds;
 use Getopt::Long;
 
 my @gov_files;
@@ -47,6 +49,11 @@ if (scalar @topic_names == 0) {
 }
 
 open my $status_file, '>', "expected_status_results.txt";
+
+my $total_test_count = (scalar @gov_files) * (scalar @pub_perm_files) * (scalar @sub_perm_files) * (scalar @topic_names);
+my $current_test_num = 0;
+
+my $test_start_time = localtime;
 
 foreach my $gov_file (@gov_files) {
   foreach my $pub_perm_file (@pub_perm_files) {
@@ -102,7 +109,15 @@ foreach my $gov_file (@gov_files) {
         my $status = $test->finish(10);
 
         #if ($status != 0) {
-          print "\n$gov_file $pub_perm_file $sub_perm_file $topic_name $status $test->{combined_return_codes}\n\n-----------\n\n";
+          $current_test_num++;
+
+          my $total_test_percent = (100.0 * $current_test_num) / $total_test_count;
+          my $current_time = localtime;
+          my $elapsed_time = $current_time - $test_start_time;
+          my $estimate = $elapsed_time->seconds * ($total_test_count - $current_test_num) / ($current_test_num);
+
+          print "\ntest #$current_test_num of $total_test_count. Estimating $estimate seconds remaining.\n";
+          print "$gov_file $pub_perm_file $sub_perm_file $topic_name $status $test->{combined_return_codes}\n\n-----------\n\n";
           print $status_file "$gov_file $pub_perm_file $sub_perm_file $topic_name $status $test->{combined_return_codes}\n";
           #exit $status;
         #}

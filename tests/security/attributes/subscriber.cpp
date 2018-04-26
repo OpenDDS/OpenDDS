@@ -85,8 +85,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(participant.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant() failed!\n")), -21);
+                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                        ACE_TEXT("main() - create_participant() failed!\n")), -21);
     }
 
     // Register Type (SecurityAttributes::Message)
@@ -95,8 +95,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")), -22);
+                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                        ACE_TEXT("main() - register_type() failed!\n")), -22);
     }
 
     // Create Topic (Movie Discussion List)
@@ -110,8 +110,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(topic.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")), -23);
+                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                        ACE_TEXT("main() - create_topic() failed!\n")), -23);
     }
 
     // Create Subscriber
@@ -122,8 +122,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(sub.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")), -24);
+                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                        ACE_TEXT("main() - create_subscriber() failed!\n")), -24);
     }
 
     // Create DataReader
@@ -145,8 +145,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CORBA::is_nil(reader.in())) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")), -25);
+                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                        ACE_TEXT("main() - create_datareader() failed!\n")), -25);
     }
 
     // Block until Publisher completes
@@ -165,16 +165,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     while (true) {
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -26);
+                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                          ACE_TEXT("main() - get_subscription_matched_status() failed!\n")), -26);
       }
       if (matches.current_count == 0 && matches.total_count > 0) {
         break;
       }
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")), -27);
+                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+                          ACE_TEXT("main() - wait() failed!\n")), -27);
       }
     }
 
