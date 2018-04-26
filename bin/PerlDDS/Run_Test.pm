@@ -742,7 +742,7 @@ sub stop_processes {
 
   $self->_info("TestFramework::stop_processes\n");
 
-  my $subsequent_wait = $timed_wait + $self->{wait_after_first_proc};
+  my $subsequent_wait = $self->{wait_after_first_proc};
 
   while (scalar(@{$self->{processes}->{order}}) > 0) {
     if (!defined($name)) {
