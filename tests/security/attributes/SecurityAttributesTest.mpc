@@ -2,7 +2,7 @@ project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=SecurityAttributes_export.h \
                    -Wb,stub_export_macro=SecurityAttributes_Export -SS
   dcps_ts_flags += -Wb,export_macro=SecurityAttributes_Export
-  dynamicflags  += SECURITY_ATTRIBUTES_BUILD_DLL
+  dynamicflags  += SECURITYATTRIBUTES_BUILD_DLL
 
   TypeSupport_Files {
     SecurityAttributesMessage.idl
