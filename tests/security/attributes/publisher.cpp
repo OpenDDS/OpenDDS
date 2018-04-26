@@ -31,6 +31,8 @@
 #include "Writer.h"
 #include "Args.h"
 
+#include <iostream>
+
 const char DDSSEC_PROP_IDENTITY_CA[] = "dds.sec.auth.identity_ca";
 const char DDSSEC_PROP_IDENTITY_CERT[] = "dds.sec.auth.identity_certificate";
 const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
@@ -60,12 +62,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   try {
 
-    std::cout << "Starting publisher" << std::endl;
+    std::cerr << "Starting publisher" << std::endl;
     {
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-      std::cout << "Starting publisher with " << argc << " args" << std::endl;
+      std::cerr << "Starting publisher with " << argc << " args" << std::endl;
 
       Args my_args;
       int error;
@@ -142,7 +144,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataWriterQos qos;
       pub->get_default_datawriter_qos(qos);
       if (dw_reliable()) {
-        std::cout << "Reliable DataWriter" << std::endl;
+        std::cerr << "Reliable DataWriter" << std::endl;
         qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
         qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       }
@@ -162,9 +164,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Start writing threads
-      std::cout << "Creating Writer" << std::endl;
+      std::cerr << "Creating Writer" << std::endl;
       Writer* writer = new Writer(dw.in(), my_args);
-      std::cout << "Starting Writer" << std::endl;
+      std::cerr << "Starting Writer" << std::endl;
       writer->start();
 
       while (!writer->is_finished()) {
@@ -172,18 +174,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep(small_time);
       }
 
-      std::cout << "Writer finished " << std::endl;
+      std::cerr << "Writer finished " << std::endl;
       writer->end();
 
       if (my_args.wait_for_acks_) {
-        std::cout << "Writer wait for ACKS" << std::endl;
+        std::cerr << "Writer wait for ACKS" << std::endl;
 
         DDS::Duration_t timeout =
           { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
         dw->wait_for_acknowledgments(timeout);
       } else {
         // let any missed multicast/rtps messages get re-delivered
-        std::cout << "Writer wait small time" << std::endl;
+        std::cerr << "Writer wait small time" << std::endl;
         ACE_Time_Value small_time(0, 250000);
         ACE_OS::sleep(small_time);
       }
