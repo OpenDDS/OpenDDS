@@ -221,7 +221,8 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     int err = errno;
     addr.addr_to_string(addr_buff, 256, 0);
     errno = err;
-    ACE_ERROR((LM_WARNING, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
       "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
   }
   return result;
