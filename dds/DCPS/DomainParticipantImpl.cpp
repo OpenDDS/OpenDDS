@@ -1808,6 +1808,24 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
   return result;
 }
 
+namespace {
+
+bool
+is_bit(const char* topic_name) {
+  bool result = strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
+             || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
+             || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
+             || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0
+             || strcmp(topic_name, "DCPSPublicationsSecure") == 0
+             || strcmp(topic_name, "DCPSSubscriptionsSecure") == 0
+             || strcmp(topic_name, "DCPSParticipantMessageSecure") == 0
+             || strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0
+             || strcmp(topic_name, "DCPSParticipantStatelessMessage") == 0;
+  return result;
+}
+
+}
+
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
   const RepoId topic_id,
@@ -1832,7 +1850,7 @@ DomainParticipantImpl::create_new_topic(
   }
   */
 
-  if (TheServiceParticipant->get_security()) {
+  if (TheServiceParticipant->get_security() && !is_bit(topic_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 
     DDS::Security::SecurityException se;
