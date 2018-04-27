@@ -1152,7 +1152,9 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
       }
     }
   }
-  CommonUtilities::set_security_error(ex, -2, 1, "Crypto Key not registered");
+  CommonUtilities::set_security_error(ex, -2, 1, "Crypto Key not registered",
+                                      ch.transform_identifier.transformation_kind,
+                                      ch.transform_identifier.transformation_key_id);
   return false;
 }
 

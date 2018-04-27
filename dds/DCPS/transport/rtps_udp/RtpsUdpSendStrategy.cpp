@@ -443,10 +443,13 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       }
       CORBA::Long idx = 0;
       if (crypto->encode_datawriter_submessage(c.encoded_, plain, sender_dwch,
-                                               readerHandles, idx, ex)
-          && contentsDiffer(c.encoded_, plain)) {
-        c.start_ = submessage_start;
-        c.length_ = plain.length();
+                                               readerHandles, idx, ex)) {
+        if (contentsDiffer(c.encoded_, plain)) {
+          c.start_ = submessage_start;
+          c.length_ = plain.length();
+        } else {
+          replacements.pop_back();
+        }
       } else {
         log_encode_error(msgId, sender_dwch, ex);
         replacements.pop_back();
@@ -485,10 +488,13 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         }
       }
       if (crypto->encode_datareader_submessage(c.encoded_, plain, sender_drch,
-                                               writerHandles, ex)
-          && contentsDiffer(c.encoded_, plain)) {
-        c.start_ = submessage_start;
-        c.length_ = plain.length();
+                                               writerHandles, ex)) {
+        if (contentsDiffer(c.encoded_, plain)) {
+          c.start_ = submessage_start;
+          c.length_ = plain.length();
+        } else {
+          replacements.pop_back();
+        }
       } else {
         log_encode_error(msgId, sender_drch, ex);
         replacements.pop_back();

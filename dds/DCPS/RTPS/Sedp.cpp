@@ -2118,29 +2118,29 @@ void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
   DDS::Security::TopicSecurityAttributes attribs;
 
   if (is_security_enabled()) {
-      // TODO: Pending issue DDSSEC12-28 Topic security attributes
-      // may get changed to a different set of security attributes.
-      bool ok = get_access_control()->get_topic_sec_attributes(
-          get_permissions_handle(),
-          "DCPSParticipantMessageSecure",
-          attribs,
-          ex);
+    // TODO: Pending issue DDSSEC12-28 Topic security attributes
+    // may get changed to a different set of security attributes.
+    bool ok = get_access_control()->get_topic_sec_attributes(
+      get_permissions_handle(),
+      "DCPSParticipantMessageSecure",
+      attribs,
+      ex);
 
-      if (ok) {
+    if (ok) {
 
-          if (attribs.is_liveliness_protected) {
-              signal_liveliness_secure(kind);
-
-          } else {
-              signal_liveliness_unsecure(kind);
-          }
+      if (attribs.is_liveliness_protected) {
+        signal_liveliness_secure(kind);
 
       } else {
-          // TODO: log error
+        signal_liveliness_unsecure(kind);
       }
 
+    } else {
+      // TODO: log error
+    }
+
   } else {
-      signal_liveliness_unsecure(kind);
+    signal_liveliness_unsecure(kind);
   }
 }
 
@@ -2437,15 +2437,15 @@ Sedp::Writer::write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscove
   bool err = ParameterListConverter::to_param_list(msg, plist);
 
   if (err) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
-                 ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData_SecurityWrapper ")
-                 ACE_TEXT(" to ParameterList\n")));
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+               ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData_SecurityWrapper ")
+               ACE_TEXT(" to ParameterList\n")));
 
-      result = DDS::RETCODE_ERROR;
+    result = DDS::RETCODE_ERROR;
 
   } else {
-      result = write_parameter_list(plist, reader, sequence);
+    result = write_parameter_list(plist, reader, sequence);
   }
 
   return result;
@@ -2643,24 +2643,23 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
-        ParameterList data;
-        if (!decode_parameter_list(sample, ser, encap, data)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                     ACE_TEXT("failed to deserialize data\n")));
-          return;
-        }
+      ParameterList data;
+      if (!decode_parameter_list(sample, ser, encap, data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
 
-        DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wdata_secure(
-            new OpenDDS::Security::DiscoveredWriterData_SecurityWrapper);
+      DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wdata_secure(new OpenDDS::Security::DiscoveredWriterData_SecurityWrapper);
 
-        if (ParameterListConverter::from_param_list(data, *wdata_secure) < 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                     ACE_TEXT("failed to convert from ParameterList ")
-                     ACE_TEXT("to DiscoveredWriterData_SecurityWrapper\n")));
-          return;
-        }
-        sedp_.task_.enqueue(id, move(wdata_secure));
+      if (ParameterListConverter::from_param_list(data, *wdata_secure) < 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to convert from ParameterList ")
+                   ACE_TEXT("to DiscoveredWriterData_SecurityWrapper\n")));
+        return;
+      }
+      sedp_.task_.enqueue(id, move(wdata_secure));
 
 
     } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
@@ -2686,29 +2685,28 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
-        ParameterList data;
-        if (!decode_parameter_list(sample, ser, encap, data)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                     ACE_TEXT("failed to deserialize data\n")));
-          return;
-        }
+      ParameterList data;
+      if (!decode_parameter_list(sample, ser, encap, data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
 
-        DCPS::unique_ptr<OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> rdata(
-            new OpenDDS::Security::DiscoveredReaderData_SecurityWrapper);
+      DCPS::unique_ptr<OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> rdata(new OpenDDS::Security::DiscoveredReaderData_SecurityWrapper);
 
-        if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
-                     ACE_TEXT("failed to convert from ParameterList ")
-                     ACE_TEXT("to DiscoveredReaderData_SecurityWrapper\n")));
-          return;
-        }
-        if ((rdata->data).readerProxy.expectsInlineQos) {
-          set_inline_qos((rdata->data).readerProxy.allLocators);
-        }
-        sedp_.task_.enqueue(id, move(rdata));
+      if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to convert from ParameterList ")
+                   ACE_TEXT("to DiscoveredReaderData_SecurityWrapper\n")));
+        return;
+      }
+      if ((rdata->data).readerProxy.expectsInlineQos) {
+        set_inline_qos((rdata->data).readerProxy.allLocators);
+      }
+      sedp_.task_.enqueue(id, move(rdata));
 
-      } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
+    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER
                && !sample.header_.key_fields_only_) {
       DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
       if (!(ser >> *data)) {
@@ -2720,62 +2718,61 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER
-		&& !sample.header_.key_fields_only_) {
+               && !sample.header_.key_fields_only_) {
 
-	DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
+      DCPS::unique_ptr<ParticipantMessageData> data(new ParticipantMessageData);
 
-	if (!(ser >> *data)) {
-	    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-            ACE_TEXT("failed to deserialize data\n")));
-	    return;
-	}
-	sedp_.task_.enqueue_participant_message_secure(id, move(data));
+      if (!(ser >> *data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
+      sedp_.task_.enqueue_participant_message_secure(id, move(data));
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER) {
 
-	DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data(new DDS::Security::ParticipantStatelessMessage);
-        ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
-	if (!(ser >> *data)) {
-	  ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-		     ACE_TEXT("failed to deserialize data\n")));
-	  return;
-	}
-	sedp_.task_.enqueue_stateless_message(id, move(data));
+      DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data(new DDS::Security::ParticipantStatelessMessage);
+      ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
+      if (!(ser >> *data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
+      sedp_.task_.enqueue_stateless_message(id, move(data));
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER) {
 
-	DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data(new DDS::Security::ParticipantVolatileMessageSecure);
-        ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
-	if (!(ser >> *data)) {
-	  ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-		     ACE_TEXT("failed to deserialize data\n")));
-	  return;
-	}
-	sedp_.task_.enqueue_volatile_message_secure(id, move(data));
+      DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data(new DDS::Security::ParticipantVolatileMessageSecure);
+      ser.reset_alignment(); // https://issues.omg.org/browse/DDSIRTP23-63
+      if (!(ser >> *data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
+      sedp_.task_.enqueue_volatile_message_secure(id, move(data));
 
     } else if (sample.header_.publication_id_.entityId == DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {
 
-        ParameterList data;
-        if (!decode_parameter_list(sample, ser, encap, data)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                     ACE_TEXT("failed to deserialize data\n")));
-          return;
-        }
+      ParameterList data;
+      if (!decode_parameter_list(sample, ser, encap, data)) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
 
-        DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper> wrapper(
-            new OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper);
+      DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper> wrapper(new OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper);
 
-        if (ParameterListConverter::from_param_list(data, *wrapper) < 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
-                     ACE_TEXT("failed to convert from ParameterList ")
-                     ACE_TEXT("to SPDPdiscoveredParticipantData_SecurityWrapper\n")));
-          return;
-        }
-        sedp_.task_.enqueue(id, move(wrapper));
+      if (ParameterListConverter::from_param_list(data, *wrapper) < 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to convert from ParameterList ")
+                   ACE_TEXT("to SPDPdiscoveredParticipantData_SecurityWrapper\n")));
+        return;
+      }
+      sedp_.task_.enqueue(id, move(wrapper));
     }
-  }
     break;
+  }
 
   default:
     break;
@@ -2854,8 +2851,7 @@ Sedp::populate_discovered_reader_msg(
   for (DCPS::RepoIdSet::const_iterator writer =
         sub.remote_opendds_associations_.begin();
        writer != sub.remote_opendds_associations_.end();
-       ++writer)
-  {
+       ++writer) {
     CORBA::ULong len = drd.readerProxy.associatedWriters.length();
     drd.readerProxy.associatedWriters.length(len + 1);
     drd.readerProxy.associatedWriters[len] = *writer;
@@ -2939,10 +2935,10 @@ Sedp::write_publication_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   if (lp.security_attribs_.base.is_discovery_protected) {
-      result = write_publication_data_secure(rid, lp, reader);
+    result = write_publication_data_secure(rid, lp, reader);
 
   } else {
-      result = write_publication_data_unsecure(rid, lp, reader);
+    result = write_publication_data_unsecure(rid, lp, reader);
   }
 
   return result;
@@ -3023,10 +3019,10 @@ Sedp::write_subscription_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   if (ls.security_attribs_.base.is_discovery_protected) {
-      result = write_subscription_data_secure(rid, ls, reader);
+    result = write_subscription_data_secure(rid, ls, reader);
 
   } else {
-      result = write_subscription_data_unsecure(rid, ls, reader);
+    result = write_subscription_data_unsecure(rid, ls, reader);
   }
 
   return result;
@@ -3700,14 +3696,14 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
 
   if (w_iter == remote_writer_crypto_handles_.end()) {
     ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("(%P|%t) Sedp::handle_datareader_crypto_tokens() - ")
+      ACE_TEXT("(%P|%t) Sedp::handle_datawriter_crypto_tokens() - ")
       ACE_TEXT("received tokens for unknown remote writer. Ignoring.\n")));
     return;
   }
 
   if (r_iter == local_reader_crypto_handles_.end()) {
     ACE_DEBUG((LM_WARNING,
-      ACE_TEXT("(%P|%t) Sedp::handle_datareader_crypto_tokens() - ")
+      ACE_TEXT("(%P|%t) Sedp::handle_datawriter_crypto_tokens() - ")
       ACE_TEXT("received tokens for unknown local reader. Ignoring.\n")));
     return;
   }
@@ -3715,9 +3711,9 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DDS::Security::DatawriterCryptoTokenSeq dwcts;
   assign(dwcts, msg.message_data);
 
-  if (key_exchange->set_remote_datawriter_crypto_tokens(w_iter->second, r_iter->second, dwcts, se) == false) {
+  if (key_exchange->set_remote_datawriter_crypto_tokens(r_iter->second, w_iter->second, dwcts, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("(%P|%t) ERROR: Sedp::handle_datareader_crypto_tokens() - ")
+      ACE_TEXT("(%P|%t) ERROR: Sedp::handle_datawriter_crypto_tokens() - ")
       ACE_TEXT("Unable to set remote datawriter crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     return;
@@ -3756,7 +3752,7 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DDS::Security::DatareaderCryptoTokenSeq drcts;
   assign(drcts, msg.message_data);
 
-  if (key_exchange->set_remote_datareader_crypto_tokens(r_iter->second, w_iter->second, drcts, se) == false) {
+  if (key_exchange->set_remote_datareader_crypto_tokens(w_iter->second, r_iter->second, drcts, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("(%P|%t) ERROR: Sedp::handle_datareader_crypto_tokens() - ")
       ACE_TEXT("Unable to set remote datareader crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),

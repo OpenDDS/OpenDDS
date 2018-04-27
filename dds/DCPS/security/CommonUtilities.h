@@ -14,23 +14,22 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
+namespace CommonUtilities {
 
-/**
-* @class CommonUtilities
-*
-* @brief Provides several simple utility functions common to the Security plugins
-*
-*/
-class CommonUtilities 
-{
-public:
-  static void set_security_error(::DDS::Security::SecurityException& ex, 
-                                 int code, 
-                                 int minor_code, 
-                                 const char* message);
-};
+void set_security_error(DDS::Security::SecurityException& ex,
+                        int code,
+                        int minor_code,
+                        const char* message);
 
-} // Security
-} // OpenDDS
+void set_security_error(DDS::Security::SecurityException& ex,
+                        int code,
+                        int minor_code,
+                        const char* message,
+                        const unsigned char (&a1)[4],
+                        const unsigned char (&a2)[4]);
+
+}
+}
+}
 
 #endif

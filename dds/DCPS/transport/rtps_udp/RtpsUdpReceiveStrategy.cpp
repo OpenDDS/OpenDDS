@@ -278,9 +278,8 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
     } else {
       ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-                 "preprocess_secure_submsg failed cat %d, [%d.%d]: %C\n",
-                 static_cast<int>(category), ex.code, ex.minor_code,
-                 ex.message.in()));
+                 "preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n",
+                 peer_pch, ex.code, ex.minor_code, ex.message.in()));
       break;
     }
 
