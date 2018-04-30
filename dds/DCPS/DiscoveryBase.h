@@ -36,8 +36,10 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan) DatareaderCryptoHandleMap;
-    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan) EndpointSecurityAttributesMap;
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoHandle, DCPS::GUID_tKeyLessThan) DatawriterCryptoHandleMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatareaderCryptoTokenSeqMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatawriterCryptoTokenSeqMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan) EndpointSecurityAttributesMap;
 
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
     {
@@ -846,8 +848,19 @@ namespace OpenDDS {
               if (iter != local_reader_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
                 DDS::Security::DatareaderCryptoHandle drch = iter->second;
                 remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
-                EndpointSecurityAttributesMap::const_iterator siter = local_reader_security_attribs_.find(reader);
-                if (siter != local_reader_security_attribs_.end() && siter->second.is_submessage_protected) { // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
+                DatawriterCryptoTokenSeqMap::iterator t_iter = pending_remote_writer_crypto_tokens_.find(writer);
+                if (t_iter != pending_remote_writer_crypto_tokens_.end()) {
+                  DDS::Security::SecurityException se;
+                  if (get_crypto_key_exchange()->set_remote_datawriter_crypto_tokens(iter->second, remote_writer_crypto_handles_[writer], t_iter->second, se) == false) {
+                    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
+                      ACE_TEXT("Unable to set pending remote datawriter crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                        se.code, se.minor_code, se.message.in()));
+                  }
+                  pending_remote_writer_crypto_tokens_.erase(t_iter);
+                }
+                EndpointSecurityAttributesMap::const_iterator s_iter = local_reader_security_attribs_.find(reader);
+                if (s_iter != local_reader_security_attribs_.end() && s_iter->second.is_submessage_protected) { // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
                   create_and_send_datareader_crypto_tokens(drch, reader, remote_writer_crypto_handles_[writer], writer);
                 }
               }
@@ -859,8 +872,19 @@ namespace OpenDDS {
               if (iter != local_writer_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
                 DDS::Security::DatawriterCryptoHandle dwch = iter->second;
                 remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, false); // TODO: determine correct use of relay_only
-                EndpointSecurityAttributesMap::const_iterator siter = local_writer_security_attribs_.find(writer);
-                if (siter != local_writer_security_attribs_.end() && (siter->second.is_submessage_protected || siter->second.is_payload_protected)) {
+                DatareaderCryptoTokenSeqMap::iterator t_iter = pending_remote_reader_crypto_tokens_.find(reader);
+                if (t_iter != pending_remote_reader_crypto_tokens_.end()) {
+                  DDS::Security::SecurityException se;
+                  if (get_crypto_key_exchange()->set_remote_datareader_crypto_tokens(iter->second, remote_reader_crypto_handles_[reader], t_iter->second, se) == false) {
+                    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
+                      ACE_TEXT("Unable to set pending remote datareader crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                        se.code, se.minor_code, se.message.in()));
+                  }
+                  pending_remote_reader_crypto_tokens_.erase(t_iter);
+                }
+                EndpointSecurityAttributesMap::const_iterator s_iter = local_writer_security_attribs_.find(writer);
+                if (s_iter != local_writer_security_attribs_.end() && (s_iter->second.is_submessage_protected || s_iter->second.is_payload_protected)) {
                   create_and_send_datawriter_crypto_tokens(dwch, writer, remote_reader_crypto_handles_[reader], reader);
                 }
               }
@@ -1086,6 +1110,16 @@ namespace OpenDDS {
         return crypto_key_factory_;
       }
 
+      inline void set_crypto_key_exchange(DDS::Security::CryptoKeyExchange_var ckf)
+      {
+        crypto_key_exchange_ = ckf;
+      }
+
+      inline DDS::Security::CryptoKeyExchange_var get_crypto_key_exchange() const
+      {
+        return crypto_key_exchange_;
+      }
+
       ACE_Thread_Mutex& lock_;
       DCPS::RepoId participant_id_;
       BitKeyMap pub_key_to_id_, sub_key_to_id_;
@@ -1102,6 +1136,7 @@ namespace OpenDDS {
 
       DDS::Security::AccessControl_var access_control_;
       DDS::Security::CryptoKeyFactory_var crypto_key_factory_;
+      DDS::Security::CryptoKeyExchange_var crypto_key_exchange_;
 
       DDS::Security::PermissionsHandle permissions_handle_;
       DDS::Security::ParticipantCryptoHandle crypto_handle_;
@@ -1114,6 +1149,9 @@ namespace OpenDDS {
 
       DatareaderCryptoHandleMap remote_reader_crypto_handles_;
       DatawriterCryptoHandleMap remote_writer_crypto_handles_;
+
+      DatareaderCryptoTokenSeqMap pending_remote_reader_crypto_tokens_;
+      DatawriterCryptoTokenSeqMap pending_remote_writer_crypto_tokens_;
     };
 
     template <typename EndpointManagerType>

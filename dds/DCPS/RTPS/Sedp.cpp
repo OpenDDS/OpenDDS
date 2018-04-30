@@ -353,12 +353,14 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
   CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
+  CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
   AccessControl_var acl = spdp_.get_security_config()->get_access_control();
   Authentication_var auth = spdp_.get_security_config()->get_authentication();
 
   set_permissions_handle(perm_handle);
   set_access_control(acl);
   set_crypto_key_factory(key_factory);
+  set_crypto_key_exchange(key_exchange);
   crypto_handle_ = crypto_handle;
 
   // TODO: Handle all exceptions below once error-codes have been defined, etc.
@@ -3694,10 +3696,15 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DCPS::DatawriterCryptoHandleMap::const_iterator w_iter = remote_writer_crypto_handles_.find(msg.source_endpoint_guid);
   DCPS::DatareaderCryptoHandleMap::const_iterator r_iter = local_reader_crypto_handles_.find(msg.destination_endpoint_guid);
 
+  DDS::Security::DatawriterCryptoTokenSeq dwcts;
+  assign(dwcts, msg.message_data);
+
   if (w_iter == remote_writer_crypto_handles_.end()) {
-    ACE_DEBUG((LM_WARNING,
+    ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Sedp::handle_datawriter_crypto_tokens() - ")
-      ACE_TEXT("received tokens for unknown remote writer. Ignoring.\n")));
+      ACE_TEXT("received tokens for unknown remote writer. Caching.\n")));
+
+    pending_remote_writer_crypto_tokens_[msg.source_endpoint_guid] = dwcts;
     return;
   }
 
@@ -3707,9 +3714,6 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
       ACE_TEXT("received tokens for unknown local reader. Ignoring.\n")));
     return;
   }
-
-  DDS::Security::DatawriterCryptoTokenSeq dwcts;
-  assign(dwcts, msg.message_data);
 
   if (key_exchange->set_remote_datawriter_crypto_tokens(r_iter->second, w_iter->second, dwcts, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -3735,10 +3739,15 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DCPS::DatareaderCryptoHandleMap::const_iterator r_iter = remote_reader_crypto_handles_.find(msg.source_endpoint_guid);
   DCPS::DatawriterCryptoHandleMap::const_iterator w_iter = local_writer_crypto_handles_.find(msg.destination_endpoint_guid);
 
+  DDS::Security::DatareaderCryptoTokenSeq drcts;
+  assign(drcts, msg.message_data);
+
   if (r_iter == remote_reader_crypto_handles_.end()) {
-    ACE_DEBUG((LM_WARNING,
+    ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Sedp::handle_datareader_crypto_tokens() - ")
-      ACE_TEXT("received tokens for unknown remote reader. Ignoring.\n")));
+      ACE_TEXT("received tokens for unknown remote reader. Caching.\n")));
+
+    pending_remote_reader_crypto_tokens_[msg.source_endpoint_guid] = drcts;
     return;
   }
 
@@ -3748,9 +3757,6 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
       ACE_TEXT("received tokens for unknown local writer. Ignoring.\n")));
     return;
   }
-
-  DDS::Security::DatareaderCryptoTokenSeq drcts;
-  assign(drcts, msg.message_data);
 
   if (key_exchange->set_remote_datareader_crypto_tokens(w_iter->second, r_iter->second, drcts, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
