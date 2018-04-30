@@ -206,6 +206,9 @@ private:
   /// Small unique identifying value.
   std::size_t id_;
   ACE_thread_t reconnect_thread_;
+
+  /// Get name of the current reconnect state as a C string.
+  const char* reconnect_state_string();
 };
 
 } // namespace DCPS
