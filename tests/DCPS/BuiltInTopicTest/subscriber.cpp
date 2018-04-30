@@ -209,7 +209,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ++i;
         fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
       }
-      ACE_OS::fclose (fp);
+      if (fp) {
+        ACE_OS::fclose (fp);
+      }
 
       // Now change the changeable qos. The second monitor should get the updated qos from BIT.
       part_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_PART_USER_DATA));
