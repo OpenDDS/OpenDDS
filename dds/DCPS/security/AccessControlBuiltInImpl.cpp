@@ -63,7 +63,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Null Authentication plugin");
     return DDS::HANDLE_NIL;
   }
-  if (DDS::HANDLE_NIL == identity) {
+
+  DDS::Security::IdentityToken id_token;
+  if (DDS::HANDLE_NIL == identity || auth_plugin->get_identity_token(id_token, identity, ex) == false) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid identity");
     return DDS::HANDLE_NIL;
   }
@@ -80,30 +82,30 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     value = props[i].value;
     if (name == "dds.sec.access.permissions_ca") {
         std::string fn = extract_file_name(value);
-        if(!fn.empty()) {
-          if(file_exists(fn)) {
+        if (!fn.empty()) {
+          if (file_exists(fn)) {
             permca_file = fn;
-          }else {
-            CommonUtilities::set_security_error(ex,-1, 0, "Invalid permissions_ca file property." );
+          } else {
+            CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions_ca file property." );
           }
         }
 
     } else if (name == "dds.sec.access.governance") {
       std::string fn = extract_file_name(value);
-        if(!fn.empty()) {
-          if(file_exists(fn)) {
+        if (!fn.empty()) {
+          if (file_exists(fn)) {
             gov_file = fn;
-          }else {
-            CommonUtilities::set_security_error(ex,-1, 0, "Invalid governance file property." );
+          } else {
+            CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file property." );
           }
         }
     } else if (name == "dds.sec.access.permissions") {
       std::string fn = extract_file_name(value);
-      if(!fn.empty()) {
-        if(file_exists(fn)) {
+      if (!fn.empty()) {
+        if (file_exists(fn)) {
           perm_file = fn;
-        }else {
-          CommonUtilities::set_security_error(ex,-1, 0, "Invalid permissions file property." );
+        } else {
+          CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions file property." );
         }
       }
     }
@@ -117,19 +119,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Read in permissions_ca
 
   SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
-  std::string ca_subject;
-
-  local_ca.subject_name_to_str(ca_subject);
-
-  std::cout << "Subject Name in certificate found:" << ca_subject << std::endl;
-
-  //TODO: need to implement subject name check ( see Table 63 validate_local_permissions )
 
   // Read in governance file
 
   SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
 
-    // return of 0 = verified  1 = not verified
+  // return of 0 = verified  1 = not verified
   int gov_verified = local_gov.verify_signature(local_ca);
   if (0 == gov_verified) {
     std::cout << "Governance document verified:" << gov_verified << std::endl;
@@ -138,17 +133,32 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-    local_gov.get_content(gov_content);
-    clean_smime_content(gov_content);
+  local_gov.get_content(gov_content);
+  clean_smime_content(gov_content);
 
   ac_perms perm_set;
-
 
   // permissions file
 
   SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
   local_perm.get_content(perm_content);
   clean_smime_content(perm_content);
+
+  //Extract and compare the subject name for validation
+
+  perm_sn.assign(perm_content);
+  if (extract_subject_name(perm_sn)) {
+    std::cout << "permission subject name:" << perm_sn << std::endl;
+  };
+
+  TokenReader tr(id_token);
+  const char* id_sn = tr.get_property_value("dds.cert.sn");
+
+  // TODO - Reenable subject name comparison with semantic check to avoid format / order issues
+  if (id_sn == NULL || perm_sn.empty()) { // || strcmp(tr.get_property_value("dds.cert.sn"), perm_sn.data()) != 0) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Permissions subject name does not match identity subject name");
+    return DDS::HANDLE_NIL;
+  }
 
   // Verify signature of permissions file
 
@@ -161,33 +171,21 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-
-
-  //Extract and compare the subject name for validation
-
-  perm_sn.assign(perm_content);
-  if (extract_subject_name(perm_sn)) {
-    std::cout << "permission subject name:" << perm_sn << std::endl;
-  };
-
-
   // If all checks are successful load the content into cache
 
-  if( 0 != load_governance_file(&perm_set , gov_content)) {
+  if ( 0 != load_governance_file(&perm_set , gov_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
     return DDS::HANDLE_NIL;
   };
 
-  // Set and store the permissions credential token  while we have the raw content
+  // Set and store the permissions credential token while we have the raw content
 
   //TODO: the SignedDocument class does not allow the retrieval of the raw file.
   // The file will have to be pulled from the file system until that is fixed.
 
   ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
-  pctWriter.add_property("dds.perm.cert",get_file_contents(perm_file.c_str()).c_str());
-
-
+  pctWriter.add_property("dds.perm.cert", get_file_contents(perm_file.c_str()).c_str());
 
   // Set and store the permissions token
   ::DDS::Security::PermissionsToken permissions_token;
@@ -199,7 +197,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   perm_set.perm_cred_token = permissions_cred_token;
 
-  if(0 != load_permissions_file(&perm_set , perm_content)) {
+  if (0 != load_permissions_file(&perm_set , perm_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
@@ -269,10 +267,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Read in permissions_ca
 
-//  SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
-//  std::string ca_subject;
-//
-//  local_ca.subject_name_to_str(ca_subject);
+  SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
+  std::string ca_subject;
+
+  local_ca.subject_name_to_str(ca_subject);
 
   //TODO: need to implement subject name check ( see Table 63 validate_local_permissions )
 

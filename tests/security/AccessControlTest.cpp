@@ -186,8 +186,10 @@ class AccessControlTest : public Test
 {
 public:
   AccessControlTest()
-  : test_class_()
+  : auth_plugin_(new MockAuthentication())
+  , test_class_()
   {
+
     Property_t permca, permca_p7s;
     Property_t  gov_0, gov_1, gov_2, gov_3, gov_4, gov_5, gov_6;
     Property_t  gov_0_p7s, gov_1_p7s, gov_2_p7s, gov_3_p7s,gov_4_p7s, gov_5_p7s, gov_6_p7s;
@@ -281,13 +283,19 @@ public:
 
     ::DDS::OctetSeq Empty_Seq;
 
+    ON_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), A<DDS::Security::IdentityHandle>(), A<DDS::Security::SecurityException&>())).WillByDefault(Return(false));
+
+    DDS::Security::IdentityToken id_token;
+    OpenDDS::Security::TokenWriter tw(id_token);
+    tw.add_property("dds.cert.sn", "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com");
+
+    EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(id_token), Return(true)));
+
   }
 
   ~AccessControlTest()
   {
   }
-
-
 
   void add_property(Property_t p) {
       PropertySeq& seq = domain_participant_qos.property.value;
@@ -296,7 +304,7 @@ public:
       seq[len] = p;
   }
 
-std::string extract_file_name(const std::string& file_parm) {
+  std::string extract_file_name(const std::string& file_parm) {
     std::string del = ":";
     size_t pos = file_parm.find_last_of(del);
     if ((pos > 0 ) && (pos != file_parm.length() - 1) ) {
@@ -304,9 +312,9 @@ std::string extract_file_name(const std::string& file_parm) {
     } else {
         return std::string("");
     }
-}
+  }
 
-std::string get_file_contents(const char *filename) {
+  std::string get_file_contents(const char *filename) {
     std::ifstream in(filename, std::ios::in | std::ios::binary);
     if (in)
     {
@@ -316,22 +324,20 @@ std::string get_file_contents(const char *filename) {
         return(contents.str());
     }
     throw(errno);
-}
-
+  }
 
   ::CORBA::Boolean clean_smime_content(std::string& content_) {
+    std::string search_str("<?xml");
 
-        std::string search_str("<?xml");
+    size_t found = content_.find(search_str);
+    if (found!=std::string::npos){
+        std::string holder_(content_.substr(found));
+        content_.clear();
+        content_.assign(holder_);
+        return true;
+    }
 
-        size_t found = content_.find(search_str);
-        if(found!=std::string::npos){
-            std::string holder_(content_.substr(found));
-            content_.clear();
-            content_.assign(holder_);
-            return true;
-        }
-
-        return false;
+    return false;
   }
 
   DDS::Security::AccessControl& get_inst()
@@ -340,8 +346,7 @@ std::string get_file_contents(const char *filename) {
   }
 
   DomainParticipantQos domain_participant_qos;
-
-
+  MockAuthentication::SmartPtr auth_plugin_;
 
 private:
 
@@ -355,18 +360,16 @@ TEST_F(AccessControlTest, validate_local_permissions_InvalidInput)
   EXPECT_EQ(DDS::HANDLE_NIL,
     get_inst().validate_local_permissions(0, 1, 1, qos, ex));
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   EXPECT_EQ(DDS::HANDLE_NIL,
-    get_inst().validate_local_permissions(auth_plugin.get(), DDS::HANDLE_NIL, 1, qos, ex));
+    get_inst().validate_local_permissions(auth_plugin_.get(), DDS::HANDLE_NIL, 1, qos, ex));
 }
 
 TEST_F(AccessControlTest, validate_local_permissions_Success)
 {
   ::DDS::Security::SecurityException ex;
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
   ::DDS::Security::PermissionsHandle out_handle =
-    get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+    get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
   EXPECT_FALSE(DDS::HANDLE_NIL == out_handle);
 }
 
@@ -380,13 +383,12 @@ TEST_F(AccessControlTest, validate_remote_permissions_InvalidInput)
   EXPECT_EQ(DDS::HANDLE_NIL, get_inst().validate_remote_permissions(
     0, 1, 2, remote_perm, remote_cred, ex));
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   // Invalid local handle
   EXPECT_EQ(DDS::HANDLE_NIL, get_inst().validate_remote_permissions(
-    auth_plugin.get(), DDS::HANDLE_NIL, 2, remote_perm, remote_cred, ex));
+    auth_plugin_.get(), DDS::HANDLE_NIL, 2, remote_perm, remote_cred, ex));
   // Invalid remote handle
   EXPECT_EQ(DDS::HANDLE_NIL, get_inst().validate_remote_permissions(
-    auth_plugin.get(), 1, DDS::HANDLE_NIL, remote_perm, remote_cred, ex));
+    auth_plugin_.get(), 1, DDS::HANDLE_NIL, remote_perm, remote_cred, ex));
 }
 
 TEST_F(AccessControlTest, validate_remote_permissions_Success)
@@ -394,7 +396,6 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
   ::DDS::Security::PermissionsToken remote_perm_token;
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::SecurityException ex;
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
   remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
   remote_perm_token.properties.length(1);
@@ -416,14 +417,10 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(),pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
-
-
-
-
-  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
   ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
-    auth_plugin.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
+    auth_plugin_.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
   EXPECT_FALSE(DDS::HANDLE_NIL == remote_out_handle);
   std::cout << ex.message << std::endl;
 }
@@ -441,9 +438,8 @@ TEST_F(AccessControlTest, check_create_participant_Success)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
-    MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
     ::DDS::Security::PermissionsHandle out_handle =
-            get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+            get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
   EXPECT_FALSE(DDS::HANDLE_NIL == get_inst().check_create_participant(out_handle, 0, domain_participant_qos, ex));
 }
 
@@ -486,9 +482,8 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
   ::DDS::Security::DataTags  data_tag;
   ::DDS::Security::SecurityException ex;
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   ::DDS::Security::PermissionsHandle out_handle =
-          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+          get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
   EXPECT_TRUE(get_inst().check_create_datawriter(
     out_handle,
@@ -540,9 +535,8 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
   ::DDS::Security::DataTags  data_tag;
   ::DDS::Security::SecurityException ex;
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   ::DDS::Security::PermissionsHandle permissions_handle =
-          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+          get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
   EXPECT_TRUE(get_inst().check_create_datareader(
     permissions_handle,
@@ -576,10 +570,9 @@ TEST_F(AccessControlTest, check_create_topic_Success)
   const char * topic_name = "Square";
   ::DDS::TopicQos qos;
   ::DDS::Security::SecurityException ex;
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
 
-  ::DDS::Security::PermissionsHandle permissions_handle = get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+  ::DDS::Security::PermissionsHandle permissions_handle = get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
   EXPECT_TRUE(get_inst().check_create_topic(
     permissions_handle, domain_id, topic_name, qos, ex));
 }
@@ -665,7 +658,6 @@ TEST_F(AccessControlTest, check_remote_participant_Success)
   ::DDS::Security::PermissionsToken remote_perm_token;
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::SecurityException ex;
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
   remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
   remote_perm_token.properties.length(1);
@@ -688,10 +680,10 @@ TEST_F(AccessControlTest, check_remote_participant_Success)
   remote_apc_token.binary_properties[1].propagate = true;
 
 
-  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
   ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
-          auth_plugin.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
+          auth_plugin_.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
 
   EXPECT_TRUE(get_inst().check_remote_participant(
     remote_out_handle, domain_id, participant_data, ex));
@@ -761,9 +753,8 @@ TEST_F(AccessControlTest, check_remote_topic_Success)
   ::DDS::TopicBuiltinTopicData topic_data;
   ::DDS::Security::SecurityException ex;
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   ::DDS::Security::PermissionsHandle permissions_handle =
-          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+          get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
   topic_data.name = "Square";
 
@@ -902,9 +893,8 @@ TEST_F(AccessControlTest, get_permissions_token_Success)
 
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
 
-  get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::Security::PermissionsToken token;
@@ -938,18 +928,17 @@ TEST_F(AccessControlTest, get_permissions_credential_token_Success)
   ::DDS::Security::SecurityException ex;
 
   ::DDS::DomainParticipantQos qos;
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
-            get_inst().validate_local_permissions(auth_plugin.get(), 1, 1, domain_participant_qos, ex);
+            get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
 
   std::string f(domain_participant_qos.property.value[2].value);
   std::string comp_file_ = get_file_contents(extract_file_name(f).c_str());
+
   EXPECT_TRUE(get_inst().get_permissions_credential_token(token, perm_handle, ex));
   EXPECT_STREQ(Expected_Permissions_Cred_Token_Class_Id, token.class_id);
   ASSERT_EQ(1U, token.properties.length());
   EXPECT_STREQ("dds.perm.cert", token.properties[0].name);
   EXPECT_STREQ(comp_file_.c_str(), token.properties[0].value);
-
 }
 
 TEST_F(AccessControlTest, set_listener)
@@ -989,8 +978,7 @@ TEST_F(AccessControlTest, get_participant_sec_attributes_Success)
   ::DDS::Security::SecurityException ex;
 
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
-  get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
   EXPECT_TRUE(get_inst().get_participant_sec_attributes(1, attributes, ex));
   EXPECT_TRUE(attributes.allow_unauthenticated_participants);
@@ -1016,10 +1004,9 @@ TEST_F(AccessControlTest, get_topic_sec_attributes_InvalidInput)
 TEST_F(AccessControlTest, get_topic_sec_attributes_Success)
 {
   ::DDS::Security::TopicSecurityAttributes attributes;
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   ::DDS::Security::SecurityException ex;
 
-  get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
   EXPECT_TRUE(get_inst().get_topic_sec_attributes(1, "Square", attributes, ex));
   EXPECT_FALSE(attributes.is_read_protected);
@@ -1047,9 +1034,8 @@ TEST_F(AccessControlTest, get_datawriter_sec_attributes_Success)
   ::DDS::Security::EndpointSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   ::DDS::Security::PermissionsHandle permissions_handle =
-          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+          get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
   attributes.plugin_endpoint_attributes = 0;
 
@@ -1080,9 +1066,8 @@ TEST_F(AccessControlTest, get_datareader_sec_attributes_Success)
   ::DDS::Security::EndpointSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
 
-  MockAuthentication::SmartPtr auth_plugin(new MockAuthentication());
   ::DDS::Security::PermissionsHandle permissions_handle =
-          get_inst().validate_local_permissions(auth_plugin.get(), 1, 0, domain_participant_qos, ex);
+          get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
   attributes.plugin_endpoint_attributes = 0;
 
