@@ -62,6 +62,8 @@ public:
 
   bool into_received_data_sample(ReceivedDataSample& rds);
 
+  static bool payload_byte_order(const ReceivedDataSample& rds);
+
   bool more_fragments() const;
 
   RTPS::Submessage submessage_;

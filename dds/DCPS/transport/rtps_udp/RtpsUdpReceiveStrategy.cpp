@@ -391,10 +391,23 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                                     DDS::HANDLE_NIL,
                                                     writer_crypto_handle, ex);
   if (ok) {
-    Message_Block_Ptr plain_mb(new ACE_Message_Block(plain.length()));
+    const unsigned int n = plain.length();
+    if (encoded.length() == n &&
+        0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
+      return true;
+    }
+    Message_Block_Ptr plain_mb(new ACE_Message_Block(n));
     const char* buffer_raw = reinterpret_cast<const char*>(plain.get_buffer());
-    plain_mb->copy(buffer_raw, plain.length());
+    plain_mb->copy(buffer_raw, n);
     sample.sample_.swap(plain_mb);
+    if (n > 1) {
+      sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
+    }
+
+  } else {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+               "decode_serialized_payload failed [%d.%d]: %C\n",
+               ex.code, ex.minor_code, ex.message.in()));
   }
 
   return ok;

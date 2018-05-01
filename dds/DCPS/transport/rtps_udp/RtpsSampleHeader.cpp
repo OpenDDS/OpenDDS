@@ -291,7 +291,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
     if (rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
       // Peek at the byte order from the encapsulation containing the payload.
-      opendds.byte_order_ = rds.sample_->rd_ptr()[1] & FLAG_E;
+      opendds.byte_order_ = payload_byte_order(rds);
     }
 
     break;
@@ -320,6 +320,11 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   }
 
   return true;
+}
+
+bool RtpsSampleHeader::payload_byte_order(const ReceivedDataSample& rds)
+{
+  return rds.sample_->rd_ptr()[1] & FLAG_E;
 }
 
 namespace {

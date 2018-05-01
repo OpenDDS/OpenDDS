@@ -310,6 +310,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
   keys_[h] = keys;
   EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(participant_crypto, e));
+  writer_options_[h] = security_attributes;
 
   return h;
 }
@@ -393,6 +394,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   keys_[h] = keys;
   EntityInfo e(DATAREADER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(participant_crypto, e));
+  writer_options_[h] = security_attributes;
 
   return h;
 }
@@ -442,6 +444,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
 
   EntityInfo e(DATAWRITER_SUBMESSAGE, h);
   participant_to_entity_.insert(std::make_pair(remote_participant_crypto, e));
+  writer_options_[h] = writer_options_[local_datareader_crypto_handle];
   return h;
 }
 
@@ -730,22 +733,73 @@ namespace {
 
 bool CryptoBuiltInImpl::encode_serialized_payload(
   DDS::OctetSeq& encoded_buffer,
-  DDS::OctetSeq& extra_inline_qos,
+  DDS::OctetSeq& /*extra_inline_qos*/,
   const DDS::OctetSeq& plain_buffer,
   DatawriterCryptoHandle sending_datawriter_crypto,
   SecurityException& ex)
 {
-  ACE_UNUSED_ARG(extra_inline_qos);
-
   if (DDS::HANDLE_NIL == sending_datawriter_crypto) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid datawriter handle");
     return false;
   }
 
-  // Simple implementation wraps the plain_buffer back into the output
-  // and adds no extra_inline_qos
-  DDS::OctetSeq transformed_buffer(plain_buffer);
-  encoded_buffer.swap(transformed_buffer);
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!keys_.count(sending_datawriter_crypto)
+      || !writer_options_[sending_datawriter_crypto].payload_) {
+    encoded_buffer = plain_buffer;
+    return true;
+  }
+
+  const KeySeq& keyseq = keys_[sending_datawriter_crypto];
+  if (!keyseq.length()) {
+    encoded_buffer = plain_buffer;
+    return true;
+  }
+
+  bool ok;
+  CryptoHeader header;
+  CryptoFooter footer;
+  DDS::OctetSeq out;
+  const DDS::OctetSeq* pOut = &plain_buffer;
+  // see register_local_datawriter for the assignment of key indexes in the seq
+  const unsigned int key_idx = keyseq.length() >= 2 ? 1 : 0;
+  const KeyId_t sKey = std::make_pair(sending_datawriter_crypto, key_idx);
+
+  if (encrypts(keyseq[key_idx])) {
+    ok = encrypt(keyseq[key_idx], sessions_[sKey], plain_buffer,
+                 header, footer, out, ex);
+    pOut = &out;
+  } else {
+    ok = authtag(keyseq[key_idx], sessions_[sKey], plain_buffer,
+                 header, footer, ex);
+  }
+
+  if (!ok) {
+    return false;
+  }
+
+  size_t size = 0, padding = 0;
+  using DCPS::gen_find_size;
+  gen_find_size(header, size, padding);
+
+  if (pOut != &plain_buffer) {
+    size += 4;
+  }
+
+  size += pOut->length();
+  gen_find_size(footer, size, padding);
+
+  encoded_buffer.length(size + padding);
+  ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size + padding);
+  Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  ser << header;
+
+  if (pOut != &plain_buffer) {
+    ser << pOut->length();
+  }
+  ser.write_octet_array(pOut->get_buffer(), pOut->length());
+
+  ser << footer;
   return true;
 }
 
@@ -870,7 +924,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   CryptoFooter footer;
   DDS::OctetSeq out;
   const DDS::OctetSeq* pOut = &plain_rtps_submessage;
-  static const int SUBMSG_KEY_IDX = 0;
+  static const unsigned int SUBMSG_KEY_IDX = 0;
   const KeyId_t sKey = std::make_pair(sender_handle, SUBMSG_KEY_IDX);
 
   if (encrypts(keyseq[SUBMSG_KEY_IDX])) {
@@ -968,8 +1022,14 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
   }
 
   NativeCryptoHandle encode_handle = sending_datawriter_crypto;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!writer_options_[encode_handle].submessage_) {
+    encoded_rtps_submessage = plain_rtps_submessage;
+    receiving_datareader_crypto_list_index = len;
+    return true;
+  }
+
   if (receiving_datareader_crypto_list.length() == 1) {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     if (keys_.count(encode_handle)) {
       const KeySeq& dw_keys = keys_[encode_handle];
       if (dw_keys.length() == 1 && is_volatile_placeholder(dw_keys[0])) {
@@ -977,6 +1037,8 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
       }
     }
   }
+
+  guard.release();
 
   const bool ok = encode_submessage(encoded_rtps_submessage,
                                     plain_rtps_submessage, encode_handle, ex);
@@ -1412,11 +1474,40 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
     return false;
   }
 
-  // For the stub, just supply the input as the output
-  DDS::OctetSeq transformed_buffer(encoded_buffer);
-  plain_buffer.swap(transformed_buffer);
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!writer_options_[sending_datawriter_crypto].payload_) {
+    plain_buffer = encoded_buffer;
+    return true;
+  }
 
-  return true;
+  ACE_Message_Block mb_in(to_mb(encoded_buffer.get_buffer()),
+                          encoded_buffer.length());
+  mb_in.wr_ptr(encoded_buffer.length());
+  Serializer de_ser(&mb_in, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
+  CryptoHeader ch;
+  de_ser >> ch;
+
+  const KeySeq& keyseq = keys_[sending_datawriter_crypto];
+  for (unsigned int i = 0; i < keyseq.length(); ++i) {
+    if (matches(keyseq[i], ch)) {
+      if (encrypts(keyseq[i])) {
+        ACE_CDR::ULong n;
+        de_ser >> n;
+        const char* ciphertext = mb_in.rd_ptr();
+        de_ser.skip(n);
+        CryptoFooter cf;
+        de_ser >> cf;
+        const KeyId_t sKey = std::make_pair(sending_datawriter_crypto, i);
+        return decrypt(keyseq[i], sessions_[sKey], ciphertext, n, ch, cf,
+                       plain_buffer, ex);
+      } else {
+        // verify (or unsupported)
+      }
+    }
+  }
+
+  CommonUtilities::set_security_error(ex, -3, 1, "Crypto Key not found");
+  return false;
 }
 
 }
