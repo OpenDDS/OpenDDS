@@ -48,16 +48,13 @@ void append(DDS::PropertySeq& props, const char* name, const char* value)
 
 using SecurityAttributes::Args;
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
-{
+int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
   int status = 0;
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    Args my_args;
     int error;
     if ((error = Args::parse_args(argc, argv, my_args)) != 0) {
       return error;
@@ -178,7 +175,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    status = listener_servant->is_valid() ? 0 : -1;
+    status = listener_servant->is_valid() ? 0 : -28;
 
     ws->detach_condition(condition);
 
@@ -193,4 +190,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   return status;
+}
+
+int
+ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
+  Args my_args;
+
+  int result = run_test(argc, argv, my_args);
+  if (result == my_args.expected_result_) {
+    return 0;
+  } else {
+    return result;
+  }
+
 }

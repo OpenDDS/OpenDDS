@@ -27,6 +27,7 @@ Args::Args()
  , reliable_(false)
  , wait_for_acks_(false)
  , num_messages_(DEFAULT_NUM_MESSAGES)
+ , expected_result_(0)
 {
 }
 
@@ -61,6 +62,9 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Topic"))) != 0) {
       args.topic_name_ = currentArg;
+      arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Expected"))) != 0) {
+      args.expected_result_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();
@@ -117,12 +121,12 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
     if (config.in() == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("no default config\n"), argv[0]),
-                       -1);
+                       -2);
     }
     else if (config->instances_.size() < 1) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("no instances on default config\n"), argv[0]),
-                       -1);
+                       -3);
     }
     else if (config->instances_.size() > 1) {
       ACE_ERROR((LM_ERROR,

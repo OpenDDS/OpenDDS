@@ -55,25 +55,24 @@ void append(DDS::PropertySeq& props, const char* name, const char* value)
 
 using SecurityAttributes::Args;
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 {
-  DDS::DomainParticipantFactory_var dpf;
-  DDS::DomainParticipant_var participant;
-
   try {
 
     std::cerr << "Starting publisher" << std::endl;
+
+    DDS::DomainParticipantFactory_var dpf;
+    DDS::DomainParticipant_var participant;
     {
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-      std::cerr << "Starting publisher with " << argc << " args" << std::endl;
-
-      Args my_args;
-      int error;
-      if ((error = Args::parse_args(argc, argv, my_args)) != 0) {
+      int error = Args::parse_args(argc, argv, my_args);
+      if (error < 0) {
         return error;
       }
+
+      std::cerr << "Starting publisher with " << argc << " args" << std::endl;
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
@@ -124,7 +123,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil(topic.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main - create_topic failed!\n")),
+                          ACE_TEXT("main() - create_topic failed!\n")),
                          -13);
       }
 
@@ -137,7 +136,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil(pub.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main - create_publisher failed!\n")),
+                          ACE_TEXT("main() - create_publisher failed!\n")),
                          -14);
       }
 
@@ -159,7 +158,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (CORBA::is_nil(dw.in())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main - create_datawriter failed!\n")),
+                          ACE_TEXT("main() - create_datawriter failed!\n")),
                          -15);
       }
 
@@ -203,8 +202,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-19);
+    return -19;
   }
 
   return 0;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
+  Args my_args;
+
+  int result = run_test(argc, argv, my_args);
+  if (result == my_args.expected_result_) {
+    return 0;
+  } else {
+    return result;
+  }
 }

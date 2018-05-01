@@ -29,8 +29,15 @@ if (scalar @gov_files == 0) {
   closedir($gov_dh);
 }
 
-# Filter out encrypted governance settings
-@gov_files = grep(!/_ED_EL_/, @gov_files);
+# Filter out allow unauth + protected disc and prohibit unauth + unprotected discovery
+@gov_files = grep(!/_AU_PA/, @gov_files);
+@gov_files = grep(!/_PU_UA/, @gov_files);
+
+@gov_files = grep(!/_E.*_E./, @gov_files); # eliminate more than one encryption attribute
+
+@gov_files = grep(!/_S/, @gov_files); # eliminate signed stuff
+@gov_files = grep(!/_SO/, @gov_files); # eliminate origin authenticated signed stuff
+@gov_files = grep(!/_EO/, @gov_files); # eliminate origin authenticated encrypted stuff
 
 if (scalar @perm_files == 0) {
   opendir(my $perm_dh, "permissions");
@@ -38,15 +45,21 @@ if (scalar @perm_files == 0) {
   closedir($perm_dh);
 }
 
-# Filter out reads for publishers and writes for subscribers
-my @pub_perm_files = grep(!/_read_/, @perm_files);
-my @sub_perm_files = grep(!/_write_/, @perm_files);
+my @pub_perm_files = @perm_files;
+@pub_perm_files = grep(/_test_participant_01/, @pub_perm_files);
+@pub_perm_files = grep(/_readwrite/, @pub_perm_files);
+
+my @sub_perm_files = @perm_files;
+@sub_perm_files = grep(/_test_participant_02/, @sub_perm_files);
+@sub_perm_files = grep(/_readwrite/, @sub_perm_files);
 
 if (scalar @topic_names == 0) {
   open my $topic_names_file, '<', "topic_names.txt";
   chomp(@topic_names = <$topic_names_file>);
   close $topic_names_file;
 }
+
+@topic_names = grep(!/_S/, @topic_names);
 
 open my $status_file, '>', "expected_status_results.txt";
 

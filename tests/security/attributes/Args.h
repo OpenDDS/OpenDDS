@@ -35,6 +35,8 @@ struct Args {
 
   int num_messages_;
 
+  int expected_result_;
+
   Args();
 
   static int parse_args(int argc, ACE_TCHAR *argv[], Args& args);
