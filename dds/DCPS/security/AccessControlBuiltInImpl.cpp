@@ -11,6 +11,7 @@
 #include "ace/config-macros.h"
 #include "ace/OS.h"
 #include "dds/DCPS/security/TokenWriter.h"
+#include "SSL/SubjectName.h"
 
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
@@ -154,8 +155,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   TokenReader tr(id_token);
   const char* id_sn = tr.get_property_value("dds.cert.sn");
 
-  // TODO - Reenable subject name comparison with semantic check to avoid format / order issues
-  if (id_sn == NULL || perm_sn.empty()) { // || strcmp(tr.get_property_value("dds.cert.sn"), perm_sn.data()) != 0) {
+  OpenDDS::Security::SSL::SubjectName sn_id;
+  OpenDDS::Security::SSL::SubjectName sn_perm;
+
+  if (id_sn == NULL || perm_sn.empty() || sn_id.parse(id_sn) != 0 || sn_perm.parse(perm_sn, true) != 0 || sn_id != sn_perm) {
     CommonUtilities::set_security_error(ex, -1, 0, "Permissions subject name does not match identity subject name");
     return DDS::HANDLE_NIL;
   }
