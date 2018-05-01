@@ -335,7 +335,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
   ACE_Message_Block mb(size + padding);
   Serializer ser(&mb, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   ser << secure_prefix_;
-  ser.skip(0, 4);
+  ser.align_r(4);
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
     ser << secure_submessages_[i];
@@ -345,7 +345,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
         reinterpret_cast<const CORBA::Octet*>(secure_sample_.sample_->rd_ptr());
       ser.write_octet_array(sample_bytes, secure_sample_.sample_->length());
     }
-    ser.skip(0, 4);
+    ser.align_r(4);
   }
   ser << postfix;
 

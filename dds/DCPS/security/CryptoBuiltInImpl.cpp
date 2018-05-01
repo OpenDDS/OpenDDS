@@ -912,13 +912,19 @@ bool CryptoBuiltInImpl::encode_submessage(
   RTPS::SubmessageHeader smHdr = {RTPS::SEC_PREFIX, 0, hdrLen};
   ser << smHdr;
   ser << header;
+
   if (pOut != &plain_rtps_submessage) {
     smHdr.submessageId = RTPS::SEC_BODY;
     smHdr.submessageLength = static_cast<ACE_UINT16>(4 + pOut->length());
+    if (pOut->length() % 4) {
+      smHdr.submessageLength += 4 - pOut->length() % 4;
+    }
     ser << smHdr;
     ser << pOut->length();
   }
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
+  ser.align_w(4);
+
   smHdr.submessageId = RTPS::SEC_POSTFIX;
   smHdr.submessageLength = static_cast<ACE_UINT16>(size + padding - preFooter);
   ser << smHdr;
