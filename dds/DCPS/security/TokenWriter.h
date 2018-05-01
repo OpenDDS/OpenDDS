@@ -10,6 +10,8 @@
 #ifndef DDS_DCPS_TOKEN_WRITER_IMPL_H
 #define DDS_DCPS_TOKEN_WRITER_IMPL_H
 
+#include "dds/DCPS/security/DdsSecurity_Export.h"
+
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/iterator_adaptor.h"
@@ -27,7 +29,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-
 /**
 * @class TokenWriter
 *
@@ -39,7 +40,7 @@ namespace Security {
 *
 */
 
-class  TokenWriter
+class DdsSecurity_Export TokenWriter
 {
 public:
   TokenWriter(DDS::Security::Token& token_ref);

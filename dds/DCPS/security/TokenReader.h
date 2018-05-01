@@ -10,6 +10,8 @@
 #ifndef DDS_DCPS_TOKEN_WRAPPER_IMPL_H
 #define DDS_DCPS_TOKEN_READER_IMPL_H
 
+#include "dds/DCPS/security/DdsSecurity_Export.h"
+
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 
@@ -24,7 +26,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-
 /**
 * @class TokenReader
 *
@@ -36,7 +37,7 @@ namespace Security {
 *
 */
 
-class TokenReader
+class DdsSecurity_Export TokenReader
 {
 public:
 
