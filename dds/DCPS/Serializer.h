@@ -249,6 +249,15 @@ public:
   // Any of the other public methods (which know the type) are preferred.
   void buffer_read(char* dest, size_t size, bool swap);
 
+  /// Align for reading: moves current_->rd_ptr() past the alignment padding.
+  /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
+  int align_r(size_t alignment);
+
+  /// Align for writing: moves current_->wr_ptr() past the padding, possibly
+  /// zero-filling the pad bytes (based on the alignment_ setting).
+  /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
+  int align_w(size_t alignment);
+
 private:
   /// Read an array of values from the chain.
   /// NOTE: This assumes that the buffer contains elements that are
@@ -269,15 +278,6 @@ private:
   ///       when swapping, resulting in corrupted data.
   void write_array(const char* x, size_t size, ACE_CDR::ULong length);
   void write_array(const char* x, size_t size, ACE_CDR::ULong length, bool swap);
-
-  /// Align for reading: moves current_->rd_ptr() past the alignment padding.
-  /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
-  int align_r(size_t alignment);
-
-  /// Align for writing: moves current_->wr_ptr() past the padding, possibly
-  /// zero-filling the pad bytes (based on the alignment_ setting).
-  /// Alignments of 2, 4, or 8 are supported by CDR and this implementation.
-  int align_w(size_t alignment);
 
   /// Efficient straight copy for quad words and shorter.  This is
   /// an instance method to match the swapcpy semantics.
