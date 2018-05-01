@@ -1004,9 +1004,7 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
       participant_message_reader_->disassociate(id);
     }
 
-    /*
-     * Security-Related associations.
-     */
+    //FUTURE: if/when topic propagation is supported, add it here
 
     using namespace DDS::Security;
 
@@ -1046,12 +1044,12 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
     if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
       RepoId id = part;
       id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-      participant_message_writer_.disassociate(id);
+      participant_stateless_message_writer_.disassociate(id);
     }
     if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
       RepoId id = part;
       id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-      participant_message_reader_->disassociate(id);
+      participant_stateless_message_reader_->disassociate(id);
     }
 
     if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
@@ -1065,7 +1063,17 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
       participant_volatile_message_secure_reader_->disassociate(id);
     }
 
-    //FUTURE: if/when topic propagation is supported, add it here
+    if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
+      RepoId id = part;
+      id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+      dcps_participant_secure_writer_.disassociate(id);
+    }
+    if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
+      RepoId id = part;
+      id.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
+      dcps_participant_secure_reader_->disassociate(id);
+    }
+
   }
   if (spdp_.has_discovered_participant(part)) {
     remove_entities_belonging_to(discovered_publications_, part);
