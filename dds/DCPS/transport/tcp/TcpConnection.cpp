@@ -1070,9 +1070,10 @@ OpenDDS::DCPS::TcpConnection::reconnect_state_string()
   case PASSIVE_TIMEOUT_CALLED_STATE:
     return "PASSIVE_TIMEOUT_CALLED_STATE";
   default:
-    ACE_ERROR((LM_ERROR,
+    ACE_ERROR((LM_ERROR, ACE_TEXT(
       "OpenDDS::DCPS::TcpConnection::reconnect_state_string(): "
-      "%d is either completely invalid or not defined in this function."
+      "%d is either completely invalid or not defined in this function.\n"),
+      reconnect_state_
     ));
     return "<State not defined in reconnect_state_string()>";
   }
