@@ -283,14 +283,21 @@ public:
 
     ::DDS::OctetSeq Empty_Seq;
 
+    // Set up correct returns from get_identity_token for our Google Mock version of the Authentication Builtin Plugin
+
     ON_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), A<DDS::Security::IdentityHandle>(), A<DDS::Security::SecurityException&>())).WillByDefault(Return(false));
 
-    DDS::Security::IdentityToken id_token;
-    OpenDDS::Security::TokenWriter tw(id_token);
-    tw.add_property("dds.cert.sn", "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com");
+    DDS::Security::IdentityToken local_id_token;
+    OpenDDS::Security::TokenWriter local_tw(local_id_token);
+    local_tw.add_property("dds.cert.sn", "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com");
 
-    EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(id_token), Return(true)));
+    EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(local_id_token), Return(true)));
 
+    DDS::Security::IdentityToken remote_id_token;
+    OpenDDS::Security::TokenWriter remote_tw(remote_id_token);
+    remote_tw.add_property("dds.cert.sn", "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com");
+
+    EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 2, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(remote_id_token), Return(true)));
   }
 
   ~AccessControlTest()

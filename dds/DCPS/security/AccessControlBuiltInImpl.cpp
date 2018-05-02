@@ -9,7 +9,7 @@
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "ace/config-macros.h"
-#include "ace/OS.h"
+#include "ace/OS_NS_strings.h"
 #include "dds/DCPS/security/TokenWriter.h"
 #include "SSL/SubjectName.h"
 
@@ -158,7 +158,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   OpenDDS::Security::SSL::SubjectName sn_id;
   OpenDDS::Security::SSL::SubjectName sn_perm;
 
-  if (id_sn == NULL || perm_sn.empty() || sn_id.parse(id_sn) != 0 || sn_perm.parse(perm_sn, true) != 0 || sn_id != sn_perm) {
+  if (id_sn == NULL || perm_sn.empty() ||
+      sn_id.parse(id_sn) != 0 ||
+      sn_perm.parse(perm_sn, true) != 0 ||
+      sn_id != sn_perm) {
     CommonUtilities::set_security_error(ex, -1, 0, "Permissions subject name does not match identity subject name");
     return DDS::HANDLE_NIL;
   }
@@ -176,7 +179,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // If all checks are successful load the content into cache
 
-  if ( 0 != load_governance_file(&perm_set , gov_content)) {
+  if (0 != load_governance_file(&perm_set, gov_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid governance file");
     return DDS::HANDLE_NIL;
   };
@@ -200,7 +203,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   perm_set.perm_cred_token = permissions_cred_token;
 
-  if (0 != load_permissions_file(&perm_set , perm_content)) {
+  if (0 != load_permissions_file(&perm_set, perm_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
@@ -236,7 +239,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local Identity");
     return DDS::HANDLE_NIL;
   }
-  if (DDS::HANDLE_NIL == remote_identity_handle) {
+  DDS::Security::IdentityToken remote_identity_token;
+  if (DDS::HANDLE_NIL == remote_identity_handle || auth_plugin->get_identity_token(remote_identity_token, remote_identity_handle, ex) == false) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote Identity");
     return DDS::HANDLE_NIL;
   }
@@ -244,18 +248,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ACIdentityMap::iterator iter = local_identity_map.begin();
   iter = local_identity_map.find(local_identity_handle);
-  if(iter == local_identity_map.end()) {
+  if (iter == local_identity_map.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching local identity handle present");
     return DDS::HANDLE_NIL;
   }
 
 
-  // Extract Governance  and domai id data for new permissions entry
+  // Extract Governance and domain id data for new permissions entry
   ::DDS::Security::PermissionsHandle rph = iter->second;
 
   ACPermsMap::iterator piter = local_ac_perms.begin();
   piter = local_ac_perms.find(rph);
-  if(piter == local_ac_perms.end()) {
+  if (piter == local_ac_perms.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
     return DDS::HANDLE_NIL;
   }
@@ -275,9 +279,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   local_ca.subject_name_to_str(ca_subject);
 
-  //TODO: need to implement subject name check ( see Table 63 validate_local_permissions )
-
-
   // permissions file
 
   // SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
@@ -288,36 +289,53 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // c.perm parm of the AuthenticatedCredentialToken properties until SignedDocument is implemented
 
 
-  std::string perm_content;
+  std::string remote_perm_content;
   OpenDDS::Security::TokenReader remote_perm_wrapper(remote_credential_token);
   if (remote_credential_token.binary_properties.length() > 0) {
-     perm_content.assign(reinterpret_cast<const char*>(remote_perm_wrapper.get_bin_property_value("c.perm").get_buffer()),
-                             remote_perm_wrapper.get_bin_property_value("c.perm").length());
+    const DDS::OctetSeq& raw = remote_perm_wrapper.get_bin_property_value("c.perm");
+    remote_perm_content.assign(reinterpret_cast<const char*>(raw.get_buffer()), raw.length());
   } else {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   }
 
-
   // Try to locate the payload
-  if(!clean_smime_content(perm_content)){
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission content");
+  if (!clean_smime_content(remote_perm_content)){
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote permission content");
     return DDS::HANDLE_NIL;
   }
 
-  // Set and store the permissions credential token  while we have the raw content
+  //Extract and compare the remote subject name for validation
+
+  std::string remote_perm_sn(remote_perm_content);
+  if (extract_subject_name(remote_perm_sn)) {
+    std::cout << "Remote permission subject name:" << remote_perm_sn << std::endl;
+  };
+
+  TokenReader remote_identity_tr(remote_identity_token);
+  const char* remote_identity_sn = remote_identity_tr.get_property_value("dds.cert.sn");
+
+  OpenDDS::Security::SSL::SubjectName sn_id_remote;
+  OpenDDS::Security::SSL::SubjectName sn_perm_remote;
+
+  if (remote_identity_sn == NULL || remote_perm_sn.empty() ||
+      sn_id_remote.parse(remote_identity_sn) != 0 ||
+      sn_perm_remote.parse(remote_perm_sn, true) != 0 ||
+      sn_id_remote != sn_perm_remote) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Remote permissions subject name does not match remote identity subject name");
+    return DDS::HANDLE_NIL;
+  }
+
+  // Set and store the permissions credential token while we have the raw content
 
   //TODO: the SignedDocument class does not allow the retrieval of the raw file.
   // The file will have to be pulled from the file system until that is fixed.
-
 
   perm_set.perm_token = remote_permissions_token;
 
   perm_set.perm_cred_token = remote_credential_token;
 
-
-
-  if(0 != load_permissions_file(&perm_set , perm_content)) {
+  if (0 != load_permissions_file(&perm_set, remote_perm_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
   };
