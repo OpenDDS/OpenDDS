@@ -51,7 +51,7 @@ if ($help) {
 my @common_array = ();
 push @common_array, "-DCPSDefaultAddress $localhost" if $force_local;
 push @common_array, "-DCPSDebugLevel $dcps_dbl" if $dcps_dbl;
-push @common_array, "-TransportDebugLevel $transport_dbl" if $transport_dbl;
+push @common_array, "-DCPSTransportDebugLevel $transport_dbl" if $transport_dbl;
 my $common_args = join(" ", @common_array);
 
 my $client_args = "$common_args";

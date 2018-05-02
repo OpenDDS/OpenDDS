@@ -56,6 +56,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
         "-n <num of messages> "
+        "-T <Where to look for monitor1_done>"
         "\n",
         argv [0]),
         -1);

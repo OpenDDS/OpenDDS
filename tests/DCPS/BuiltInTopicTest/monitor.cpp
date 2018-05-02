@@ -102,6 +102,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
         "-s <num of subs> "
         "-p <num of pubs> "
         "-u "
+        "-T <Where to put monitor1_done>"
         "\n",
         argv [0]),
         -1);
