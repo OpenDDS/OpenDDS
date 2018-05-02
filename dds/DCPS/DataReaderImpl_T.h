@@ -1339,8 +1339,10 @@ int ignored)
   OpenDDS::DCPS::SubscriptionInstance_rch inst = get_handle_instance(a_handle);
   if (!inst) return DDS::RETCODE_BAD_PARAMETER;
 
-  if ((inst->instance_state_.view_state() & view_states) &&
-      (inst->instance_state_.instance_state() & instance_states))
+  InstanceState& state_obj = inst->instance_state_;
+  bool valid_view_state = state_obj.view_state() & view_states;
+  bool valid_instance_state = state_obj.instance_state() & instance_states;
+  if (valid_view_state && valid_instance_state)
     {
       size_t i(0);
       for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
@@ -1355,7 +1357,29 @@ int ignored)
               results.insert_sample(item, inst, ++i);
             }
         }
-    }
+      }
+    else
+      {
+        if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+          if (!valid_view_state) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+              "(%P|%t) DataReaderImpl_T::read_instance_i: "
+              "will return no data because view state is not valid\n."
+            )));
+          }
+          if (!valid_instance_state) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT(
+                "(%P|%t) DataReaderImpl_T::read_instance_i: "
+                "will return no data because instance state is %C "
+                "and validity mask is %C.\n"
+              ),
+              state_obj.instance_state_string().c_str(),
+              InstanceState::instance_state_string(instance_states).c_str()
+            ));
+          }
+        }
+      }
 
   results.copy_to_user();
 

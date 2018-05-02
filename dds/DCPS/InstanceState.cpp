@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <sstream>
+
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ace/Event_Handler.h"
 #include "ace/Reactor.h"
@@ -301,6 +303,34 @@ OpenDDS::DCPS::InstanceState::reset_ownership (::DDS::InstanceHandle_t instance)
   this->registered_ = false;
 
   this->reader_->reset_ownership(instance);
+}
+
+std::string
+OpenDDS::DCPS::InstanceState::instance_state_string(DDS::InstanceStateKind value)
+{
+  std::stringstream ss;
+  switch (value) {
+  case DDS::ALIVE_INSTANCE_STATE:
+    return std::string("ALIVE_INSTANCE_STATE");
+  case DDS::NOT_ALIVE_INSTANCE_STATE:
+    return std::string("NOT_ALIVE_INSTANCE_STATE");
+  case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
+    return std::string("NOT_ALIVE_DISPOSED_INSTANCE_STATE");
+  case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
+    return std::string("NOT_ALIVE_NO_WRITERS_INSTANCE_STATE");
+  case DDS::ANY_INSTANCE_STATE:
+    return std::string("ANY_INSTANCE_STATE");
+  default:
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT(
+        "(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): "
+        "%d is either completely invalid or not defined in this function.\n"
+      ),
+      value
+    ));
+    ss << "Unknown Instance State " << value;
+    return ss.str();
+  }
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
