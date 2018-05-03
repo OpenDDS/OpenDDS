@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 namespace SSL {
@@ -63,15 +65,13 @@ SubjectName::simple_avp_seq_parse(const char* in, const char* s_del, const char*
   size_t st_begin = 0;
   size_t st_end = input.find_first_of(s_del);
 
-//std::cout << __FILE__ << ":" << __LINE__ << " - input = " << input << std::endl;
+  //std::cout << __FILE__ << ":" << __LINE__ << " - input = " << input << std::endl;
 
   // Loop over all the sequence tokens
   while (st_begin != std::string::npos) {
-//std::cout << __FILE__ << ":" << __LINE__ << " - st_begin = " << st_begin << " = '" << input[st_begin] << "'" << std::endl;    
-//std::cout << __FILE__ << ":" << __LINE__ << " - st_end = " << st_end << " = '" << input[st_end] << "'" << std::endl;    
 
     std::string st = input.substr(st_begin, (st_end == std::string::npos ? input_end + 1 : st_end) - st_begin);
-//std::cout << __FILE__ << ":" << __LINE__ << " - st = " << st << std::endl;
+    //std::cout << __FILE__ << ":" << __LINE__ << " - st = " << st << std::endl;
 
     // Use once we've found a sequnce token, trim the beginning and end to get a clean token
     size_t st_begin_clean = st.find_first_not_of(s_trim);
@@ -79,11 +79,9 @@ SubjectName::simple_avp_seq_parse(const char* in, const char* s_del, const char*
 
     // If we've found a clean sequence token
     if (st_begin_clean != std::string::npos && st_end_clean != std::string::npos) {
-//std::cout << __FILE__ << ":" << __LINE__ << " - st_begin_clean = " << st_begin_clean << " = '" << st[st_begin_clean] << "'" << std::endl;
-//std::cout << __FILE__ << ":" << __LINE__ << " - st_end_clean = " << st_end_clean << " = '" << st[st_end_clean] << "'" << std::endl;    
 
       std::string st_clean = st.substr(st_begin_clean, st_end_clean - st_begin_clean + 1);
-//std::cout << __FILE__ << ":" << __LINE__ << " - st_clean = " << st_clean << std::endl;
+      //std::cout << __FILE__ << ":" << __LINE__ << " - st_clean = " << st_clean << std::endl;
 
       // We'll use "nt" to mark positions for name tokens
       size_t nt_begin = 0;
@@ -93,45 +91,36 @@ SubjectName::simple_avp_seq_parse(const char* in, const char* s_del, const char*
       if (nt_end != std::string::npos) {
         --nt_end;
 
-//std::cout << __FILE__ << ":" << __LINE__ << " - nt_begin = " << st_clean[nt_begin] << std::endl;
-//std::cout << __FILE__ << ":" << __LINE__ << " - nt_end = " << st_clean[nt_end] << std::endl;    
-
     std::string nt = st_clean.substr(nt_begin, nt_end - nt_begin + 1);
-//std::cout << __FILE__ << ":" << __LINE__ << " - nt = " << nt << std::endl;
+    //std::cout << __FILE__ << ":" << __LINE__ << " - nt = " << nt << std::endl;
 
         size_t nt_begin_clean = nt.find_first_not_of(a_trim);
         size_t nt_end_clean = nt.find_last_not_of(a_trim);
 
         // If we found a clean name token
         if (nt_begin_clean != std::string::npos && nt_end_clean != std::string::npos) {
-//std::cout << __FILE__ << ":" << __LINE__ << " - nt_begin_clean = " << nt[nt_begin_clean] << std::endl;
-//std::cout << __FILE__ << ":" << __LINE__ << " - nt_end_clean = " << nt[nt_end_clean] << std::endl;    
 
       std::string nt_clean = nt.substr(nt_begin_clean, nt_end_clean - nt_begin_clean + 1);
-//std::cout << __FILE__ << ":" << __LINE__ << " - nt_clean = " << nt_clean << std::endl;
+      //std::cout << __FILE__ << ":" << __LINE__ << " - nt_clean = " << nt_clean << std::endl;
 
           // We'll use "vt" to mark positions for value tokens
           size_t vt_begin = nt_end + 2; // Skip over the (single) delimiter
           size_t vt_end = st_clean.size() - 1;
 
           std::string vt = st_clean.substr(vt_begin, vt_end - vt_begin + 1);
-//std::cout << __FILE__ << ":" << __LINE__ << " - vt = " << vt << std::endl;
-
-//std::cout << __FILE__ << ":" << __LINE__ << " - vt_begin = " << st_clean[vt_begin] << std::endl;    
-//std::cout << __FILE__ << ":" << __LINE__ << " - vt_end = " << st_clean[vt_end] << std::endl;    
+          //std::cout << __FILE__ << ":" << __LINE__ << " - vt = " << vt << std::endl;
 
           size_t vt_begin_clean = vt.find_first_not_of(a_trim);
           size_t vt_end_clean = vt.find_last_not_of(a_trim);
 
           // If we found a clean value token
           if (vt_begin_clean != std::string::npos && vt_end_clean != std::string::npos) {
-//std::cout << __FILE__ << ":" << __LINE__ << " - vt_begin_clean = " << vt[vt_begin_clean] << std::endl;
-//std::cout << __FILE__ << ":" << __LINE__ << " - vt_end_clean = " << vt[vt_end_clean] << std::endl;    
 
             std::string vt_clean = vt.substr(vt_begin_clean, vt_end_clean - vt_begin_clean + 1);
-//std::cout << __FILE__ << ":" << __LINE__ << " - vt_clean = " << vt_clean << std::endl;
+            //std::cout << __FILE__ << ":" << __LINE__ << " - vt_clean = " << vt_clean << std::endl;
 
-//std::cout << "Found attribute pair in subject name :: name = '" << nt_clean << "', value = '" << vt_clean << "'" << std::endl;
+            //std::cout << "Found attribute pair in subject name :: name = '" << nt_clean << "', value = '" << vt_clean << "'" << std::endl;
+
             // Push our clean pair into the map
             map_[nt_clean] = vt_clean;
           }
@@ -190,4 +179,6 @@ SubjectName::operator!=(const SubjectName& rhs) const
 } // SSL
 } // Security
 } // OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

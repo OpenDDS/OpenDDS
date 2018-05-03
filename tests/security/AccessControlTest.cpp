@@ -22,8 +22,9 @@ static const ::CORBA::Boolean CFALSE(false);
 static const ::CORBA::Boolean CTRUE(true);
 static const char* Expected_Permissions_Token_Class_Id ="DDS:Access:Permissions:1.0";
 static const char* Expected_Permissions_Cred_Token_Class_Id ="DDS:Access:PermissionsCredential";
-static const char* identity_ca_file = "certs/opendds_identity_ca_cert.pem";
-static const char* perm_join_p7s_file = "permissions/Permissions_JoinDomain_OCI.p7s";
+//static const char* identity_ca_file = "certs/opendds_identity_ca_cert.pem";
+static const char* mock_1_cert_file = "certs/mock_participant_1/opendds_participant_cert.pem";
+static const char* perm_mock_1_join_p7s_file = "permissions/Permissions_Mock_1_JoinDomain_OCI_signed.p7s";
 static const char* remote_subject_name = "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com";
 
 
@@ -292,12 +293,6 @@ public:
     local_tw.add_property("dds.cert.sn", "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com");
 
     EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 1, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(local_id_token), Return(true)));
-
-    DDS::Security::IdentityToken remote_id_token;
-    OpenDDS::Security::TokenWriter remote_tw(remote_id_token);
-    remote_tw.add_property("dds.cert.sn", "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com");
-
-    EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 2, A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(remote_id_token), Return(true)));
   }
 
   ~AccessControlTest()
@@ -409,19 +404,19 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
   remote_perm_token.properties[0].name = "dds.perm.ca.sn";
   remote_perm_token.properties[0].value = remote_subject_name;
 
-  std::string ca(get_file_contents(identity_ca_file));
-  std::string pf(get_file_contents(perm_join_p7s_file));
+  std::string id(get_file_contents(mock_1_cert_file));
+  std::string pf(get_file_contents(perm_mock_1_join_p7s_file));
 
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(ca.size());
-  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), ca.c_str(),ca.size());
+  remote_apc_token.binary_properties[0].value.length(id.size());
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";
   remote_apc_token.binary_properties[1].value.length(pf.size());
-  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(),pf.c_str(), pf.size());
+  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
   get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
@@ -671,14 +666,14 @@ TEST_F(AccessControlTest, check_remote_participant_Success)
   remote_perm_token.properties[0].name = "dds.perm.ca.sn";
   remote_perm_token.properties[0].value = remote_subject_name;
 
-  std::string ca(get_file_contents(identity_ca_file));
-  std::string pf(get_file_contents(perm_join_p7s_file));
+  std::string id(get_file_contents(mock_1_cert_file));
+  std::string pf(get_file_contents(perm_mock_1_join_p7s_file));
 
   remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
   remote_apc_token.binary_properties.length(2);
   remote_apc_token.binary_properties[0].name = "c.id";
-  remote_apc_token.binary_properties[0].value.length(ca.size());
-  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), ca.c_str(),ca.size());
+  remote_apc_token.binary_properties[0].value.length(id.size());
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
   remote_apc_token.binary_properties[0].propagate = true;
 
   remote_apc_token.binary_properties[1].name = "c.perm";

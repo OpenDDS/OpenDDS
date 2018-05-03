@@ -6,10 +6,13 @@
 #ifndef OPENDDS_SECURITY_SUBJECT_NAME_H
 #define OPENDDS_SECURITY_SUBJECT_NAME_H
 
+#include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 
 #include <string>
 #include <map>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
@@ -40,8 +43,10 @@ protected:
   AttrMap map_;
 };
 
-}
-}
-}
+} // SSL
+} // Security
+} // OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

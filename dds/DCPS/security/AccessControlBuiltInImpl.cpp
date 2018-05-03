@@ -239,8 +239,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local Identity");
     return DDS::HANDLE_NIL;
   }
-  DDS::Security::IdentityToken remote_identity_token;
-  if (DDS::HANDLE_NIL == remote_identity_handle || auth_plugin->get_identity_token(remote_identity_token, remote_identity_handle, ex) == false) {
+  if (DDS::HANDLE_NIL == remote_identity_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Remote Identity");
     return DDS::HANDLE_NIL;
   }
@@ -312,13 +311,23 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     std::cout << "Remote permission subject name:" << remote_perm_sn << std::endl;
   };
 
-  TokenReader remote_identity_tr(remote_identity_token);
-  const char* remote_identity_sn = remote_identity_tr.get_property_value("dds.cert.sn");
+  TokenReader remote_credential_tr(remote_credential_token);
+  const DDS::OctetSeq& cid = remote_credential_tr.get_bin_property_value("c.id");
+  if (cid.length() == 0) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote credential identity");
+    return DDS::HANDLE_NIL;
+  }
+
+  SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
+  remote_cert->deserialize(cid);
+
+  std::string remote_identity_sn;
+  remote_cert->subject_name_to_str(remote_identity_sn);
 
   OpenDDS::Security::SSL::SubjectName sn_id_remote;
   OpenDDS::Security::SSL::SubjectName sn_perm_remote;
 
-  if (remote_identity_sn == NULL || remote_perm_sn.empty() ||
+  if (remote_identity_sn.empty() || remote_perm_sn.empty() ||
       sn_id_remote.parse(remote_identity_sn) != 0 ||
       sn_perm_remote.parse(remote_perm_sn, true) != 0 ||
       sn_id_remote != sn_perm_remote) {
