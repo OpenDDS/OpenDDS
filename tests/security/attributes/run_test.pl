@@ -27,17 +27,17 @@ if (scalar @gov_files == 0) {
   opendir(my $gov_dh, "governance");
   @gov_files = map {"governance/" . $_} (sort grep(/\.p7s$/,readdir($gov_dh)));
   closedir($gov_dh);
+
+  # Filter out allow unauth + protected disc and prohibit unauth + unprotected discovery
+  @gov_files = grep(!/_AU_PA/, @gov_files);
+  @gov_files = grep(!/_PU_UA/, @gov_files);
+
+  @gov_files = grep(!/_E.*_E./, @gov_files); # eliminate more than one encryption attribute
+
+  @gov_files = grep(!/_S/, @gov_files); # eliminate signed stuff
+  @gov_files = grep(!/_SO/, @gov_files); # eliminate origin authenticated signed stuff
+  @gov_files = grep(!/_EO/, @gov_files); # eliminate origin authenticated encrypted stuff
 }
-
-# Filter out allow unauth + protected disc and prohibit unauth + unprotected discovery
-@gov_files = grep(!/_AU_PA/, @gov_files);
-@gov_files = grep(!/_PU_UA/, @gov_files);
-
-@gov_files = grep(!/_E.*_E./, @gov_files); # eliminate more than one encryption attribute
-
-@gov_files = grep(!/_S/, @gov_files); # eliminate signed stuff
-@gov_files = grep(!/_SO/, @gov_files); # eliminate origin authenticated signed stuff
-@gov_files = grep(!/_EO/, @gov_files); # eliminate origin authenticated encrypted stuff
 
 if (scalar @perm_files == 0) {
   opendir(my $perm_dh, "permissions");
