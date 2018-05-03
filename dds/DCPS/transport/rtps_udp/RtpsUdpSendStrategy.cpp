@@ -153,9 +153,11 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const ACE_INET_Addr& addr)
 {
   rtps_header_mb_.cont(&submessages);
+  Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
+  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
 
   iovec iov[MAX_SEND_BLOCKS];
-  const int num_blocks = mb_to_iov(rtps_header_mb_, iov);
+  const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
   if (result < 0) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
@@ -171,9 +173,11 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
   rtps_header_mb_.cont(&submessages);
+  Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
+  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
 
   iovec iov[MAX_SEND_BLOCKS];
-  const int num_blocks = mb_to_iov(rtps_header_mb_, iov);
+  const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
   if (result < 0) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
@@ -399,7 +403,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         ok = false;
         break;
       }
-      read += 3;
+      read += 12;
       break;
     }
     case RTPS::DATA:
@@ -408,7 +412,6 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         ok = false;
         break;
       }
-      ++read;
       // fall-through
     case RTPS::HEARTBEAT:
     case RTPS::GAP:
@@ -417,12 +420,10 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         ok = false;
         break;
       }
-      ++read;
       if (!(ser >> sender.entityId)) { // writerId
         ok = false;
         break;
       }
-      ++read;
       DatawriterCryptoHandle sender_dwch = link_->writer_crypto_handle(sender);
       if (sender_dwch == DDS::HANDLE_NIL) {
         ok = false;
@@ -433,6 +434,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       Chunk& c = replacements.back();
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, u2,
                                 receiver.entityId, sender.entityId, remaining));
+      read = octetsToNextHeader;
       DatareaderCryptoHandleSeq readerHandles;
       if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
         DatareaderCryptoHandle drch = link_->reader_crypto_handle(receiver);
@@ -463,12 +465,10 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
         ok = false;
         break;
       }
-      ++read;
       if (!(ser >> receiver.entityId)) { // writerId
         ok = false;
         break;
       }
-      ++read;
       DatareaderCryptoHandle sender_drch = link_->reader_crypto_handle(sender);
       if (sender_drch == DDS::HANDLE_NIL) {
         ok = false;
@@ -479,6 +479,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       Chunk& c = replacements.back();
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, 0,
                                 receiver.entityId, sender.entityId, remaining));
+      read = octetsToNextHeader;
       DatawriterCryptoHandleSeq writerHandles;
       if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
         DatawriterCryptoHandle dwch = link_->writer_crypto_handle(receiver);
@@ -511,8 +512,8 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       break;
     }
 
-    if (octetsToNextHeader > read * 4) {
-      if (!ser.skip(octetsToNextHeader - read * 4)) {
+    if (octetsToNextHeader > read) {
+      if (!ser.skip(octetsToNextHeader - read)) {
         ok = false;
       }
     }
@@ -545,8 +546,8 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 
     out->copy(reinterpret_cast<const char*>(c.encoded_.get_buffer()),
               c.encoded_.length());
-    for (size_t n = c.encoded_.length(); n; cur = cur->cont()) {
-      if (cur->length() < n) {
+    for (size_t n = c.length_; n; cur = cur->cont()) {
+      if (cur->length() > n) {
         cur->rd_ptr(n);
         break;
       } else {

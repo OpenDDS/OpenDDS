@@ -24,6 +24,7 @@
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "dds/DdsSecurityEntities.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
@@ -2364,6 +2365,8 @@ RtpsUdpDataLink::send_heartbeats()
       subm.push_back(hb);
     }
 
+    send_directed_heartbeats(subm);
+
     if (!subm.empty()) {
       ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * subm.size()); //FUTURE: allocators?
       // byte swapping is handled in the operator<<() implementation
@@ -2392,6 +2395,52 @@ RtpsUdpDataLink::send_heartbeats()
   for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
     pendingCallbacks[i]->data_dropped();
   }
+}
+
+void
+RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs)
+{
+  const EntityId_t& volatile_writer =
+    DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+  RTPS::InfoDestinationSubmessage idst;
+  idst.smHeader.submessageId = RTPS::INFO_DST;
+  idst.smHeader.flags = 1 /*FLAG_E*/;
+  idst.smHeader.submessageLength = RTPS::INFO_DST_SZ;
+  const size_t block_size = RTPS::INFO_DST_SZ + RTPS::HEARTBEAT_SZ
+    + 2 * RTPS::SMHDR_SZ;
+  Message_Block_Ptr mb;
+
+  typedef OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)::iterator iter_t;
+  iter_t it = hbs.begin(), last = hbs.end();
+  while (it != last) {
+    if (0 == std::memcmp(&it->writerId, &volatile_writer, sizeof(EntityId_t))) {
+      RepoId local;
+      RTPS::assign(local.guidPrefix, local_prefix_);
+      local.entityId = it->writerId;
+      RtpsWriterMap::const_iterator rw = writers_.find(local);
+      if (rw != writers_.end()) {
+        const ReaderInfoMap& rinfo = rw->second.remote_readers_;
+        for (ReaderInfoMap::const_iterator ri = rinfo.begin();
+             ri != rinfo.end(); ++ri) {
+          RTPS::assign(idst.guidPrefix, ri->first.guidPrefix);
+          it->readerId = ri->first.entityId;
+          if (mb) {
+            mb->reset();
+          } else {
+            mb.reset(new ACE_Message_Block(block_size));
+          }
+          Serializer ser(mb.get(), false, Serializer::ALIGN_CDR);
+          ser << idst;
+          ser << *it;
+          send_strategy_->send_rtps_control(*mb, locators_[ri->first].addr_);
+        }
+      }
+      std::iter_swap(it, --last);
+    } else {
+      ++it;
+    }
+  }
+  hbs.erase(last, hbs.end());
 }
 
 void
