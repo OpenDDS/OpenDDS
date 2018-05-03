@@ -8,9 +8,12 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/Watchdog.h"
 #include "dcps_export.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #include "ace/Bound_Ptr.h"
 #include "ace/Time_Value.h"
+
+#include <sstream>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -1361,23 +1364,30 @@ int ignored)
     else
       {
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+          std::stringstream error;
           if (!valid_view_state) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-              "(%P|%t) DataReaderImpl_T::read_instance_i: "
-              "will return no data because view state is not valid\n."
-            )));
+            error << "view state is not valid";
+          }
+          if (!valid_view_state && !valid_instance_state) {
+            error << " and ";
           }
           if (!valid_instance_state) {
-            ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT(
-                "(%P|%t) DataReaderImpl_T::read_instance_i: "
-                "will return no data because instance state is %C "
-                "and validity mask is %C.\n"
-              ),
-              state_obj.instance_state_string().c_str(),
-              InstanceState::instance_state_string(instance_states).c_str()
-            ));
+            error
+              << "instance state is "
+              << state_obj.instance_state_string()
+              << " while the validity mask is "
+              << InstanceState::instance_state_string(instance_states)
+            ;
           }
+          GuidConverter conv(get_subscription_id());
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT(
+              "(%P|%t) DataReaderImpl_T::read_instance_i: "
+              "will return no data reading sub %C because:\n  %C\n"
+            ),
+            OPENDDS_STRING(conv).c_str(),
+            error.str().c_str()
+          ));
         }
       }
 
