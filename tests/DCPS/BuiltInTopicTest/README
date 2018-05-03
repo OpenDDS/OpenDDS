@@ -1,9 +1,5 @@
-A test for Built-In-Topic (BIT) implementation.
-
-The purpose of this test is to verify that newer and older participants
-receive the same BIT data. prst_repo_run_test.pl does the same with
-persistence enabled on the InfoRepos, shutting down the first InfoRepo,
-starting a new one, and testing the BIT data with a new monitor.
+A test for Built-In-Topic (BIT) implementation. The purpose of this test is
+to verify that newer and older participants receive the same BIT data.
 
 Test steps:
 
@@ -21,4 +17,9 @@ The monitor1 and monitor2 should both get following bit info.
  2 topics,
  1 datareader
  1 datawriter
+
+prst_repo_run_test.pl does something similar with InfoRepo persistence
+enabled. The InfoRepo is shutdown in the middle of the test and new Repo
+is started. The new Repo should read the persistence data and the test
+will verify the BIT data with the second monitor.
 
