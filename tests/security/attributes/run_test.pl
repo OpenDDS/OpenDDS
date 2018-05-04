@@ -16,7 +16,6 @@ use strict;
 use Time::Piece;
 use Time::Seconds;
 use Getopt::Long;
-use Data::Dump qw(dump);
 
 my $scenario;
 my @gov_files;
