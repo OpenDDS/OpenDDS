@@ -90,6 +90,15 @@ DomainParticipantFactoryImpl::create_participant(
     this, domainId, value.id, par_qos, a_listener, mask, value.federated
   );
 
+  if (DCPS_debug_level > 0) {
+    GuidConverter converter(value.id);
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+        "(%P|%t) DomainParticipantFactoryImpl::create_participant: "
+        "created participant %C\n"
+      ),
+      OPENDDS_STRING(converter).c_str()
+    ));
+  }
 
   if (qos_.entity_factory.autoenable_created_entities) {
     dp->enable();
