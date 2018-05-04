@@ -25,6 +25,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <iterator>
+#include <cstring>
 
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -1187,9 +1188,66 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
-    if(d > 0){
-      TopicAccessRules::iterator tr_iter;
+    if (d > 0) {
 
+      if (std::strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = false;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = true;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+        return true;
+      }
+      if (std::strcmp(topic_name, "DCPSParticipantStatelessMessage") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = false;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = false;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+        return true;
+      }
+      if (std::strcmp(topic_name, "DCPSParticipantMessageSecure") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = true;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
+        }
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
+        }
+
+        return true;
+      }
+      if (std::strcmp(topic_name, "DCPSParticipantSecure") == 0 || std::strcmp(topic_name, "DCPSPublicationsSecure") == 0 || std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = giter->domain_attrs.is_discovery_protected;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = true;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
+        }
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
+        }
+
+        return true;
+      }
+
+      TopicAccessRules::iterator tr_iter;
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
 
@@ -1205,12 +1263,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           } else {
             attributes.is_submessage_protected = true;
             if ( tr_iter->metadata_protection_kind == "ENCRYPT" ||
-                    tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
             }
 
             if ( tr_iter->metadata_protection_kind == "SIGN_WITH_ORIGIN_AUTHENTICATION" ||
-                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
             }
           }
@@ -1222,15 +1280,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             attributes.is_key_protected = false;
 
           } else if (tr_iter->data_protection_kind == "SIGN") {
-              attributes.is_payload_protected = true;
-              attributes.is_key_protected = false;
-            } else if ( tr_iter->data_protection_kind == "ENCRYPT") {
-                attributes.is_payload_protected = true;
-                attributes.is_key_protected = true;
-                attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED;
-              }
+            attributes.is_payload_protected = true;
+            attributes.is_key_protected = false;
+          } else if ( tr_iter->data_protection_kind == "ENCRYPT") {
+            attributes.is_payload_protected = true;
+            attributes.is_key_protected = true;
+            attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED;
+          }
 
-            return true;
+          return true;
         }
 
       }
@@ -1238,6 +1296,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
+  CommonUtilities::set_security_error(ex, -1, 0, "Invalid topic name");
   return false;
 }
 
@@ -1267,9 +1326,66 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
-    if(d > 0){
-      TopicAccessRules::iterator tr_iter;
+    if (d > 0) {
 
+      if (std::strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = false;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = true;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+        return true;
+      }
+      if (std::strcmp(topic_name, "DCPSParticipantStatelessMessage") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = false;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = false;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+        return true;
+      }
+      if (std::strcmp(topic_name, "DCPSParticipantMessageSecure") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = true;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
+        }
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
+        }
+
+        return true;
+      }
+      if (std::strcmp(topic_name, "DCPSParticipantSecure") == 0 || std::strcmp(topic_name, "DCPSPublicationsSecure") == 0 || std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
+        attributes.base.is_write_protected = false;
+        attributes.base.is_read_protected = false;
+        attributes.base.is_liveliness_protected = giter->domain_attrs.is_discovery_protected;
+        attributes.base.is_discovery_protected = false;
+        attributes.is_submessage_protected = true;
+        attributes.is_payload_protected = false;
+        attributes.is_key_protected = false;
+
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
+        }
+        if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED) {
+          attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
+        }
+
+        return true;
+      }
+
+      TopicAccessRules::iterator tr_iter;
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
 
@@ -1285,12 +1401,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           } else {
             attributes.is_submessage_protected = true;
             if ( tr_iter->metadata_protection_kind == "ENCRYPT" ||
-                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
             }
 
             if ( tr_iter->metadata_protection_kind == "SIGN_WITH_ORIGIN_AUTHENTICATION" ||
-                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
             }
           }
@@ -1318,6 +1434,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
+  CommonUtilities::set_security_error(ex, -1, 0, "Invalid topic name");
   return false;
 }
 
@@ -1493,10 +1610,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
      if (ACE_OS::strcasecmp(attr_dpk, "NONE") == 0) {
        rule_holder_.domain_attrs.is_discovery_protected = false;
-     } else {
+     } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
        rule_holder_.domain_attrs.is_discovery_protected = true;
-         rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
-         rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
+       rule_holder_.domain_attrs.is_discovery_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+       rule_holder_.domain_attrs.is_discovery_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
+       rule_holder_.domain_attrs.is_discovery_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
      }
 
      // Process liveliness_protection_kind
@@ -1505,7 +1630,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
      if (ACE_OS::strcasecmp(attr_lpk, "NONE") == 0) {
        rule_holder_.domain_attrs.is_liveliness_protected = false;
-     } else {
+     } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
+       rule_holder_.domain_attrs.is_liveliness_protected = true;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
+       rule_holder_.domain_attrs.is_liveliness_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+       rule_holder_.domain_attrs.is_liveliness_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
        rule_holder_.domain_attrs.is_liveliness_protected = true;
        rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
        rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
@@ -1517,7 +1650,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
      char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
      if (ACE_OS::strcasecmp(attr_rpk, "NONE") == 0) {
        rule_holder_.domain_attrs.is_rtps_protected = false;
-     } else {
+     } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
+       rule_holder_.domain_attrs.is_rtps_protected = true;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
+       rule_holder_.domain_attrs.is_rtps_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+       rule_holder_.domain_attrs.is_rtps_protected = true;
+       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
+     } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
        rule_holder_.domain_attrs.is_rtps_protected = true;
        rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
        rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;

@@ -395,9 +395,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       reader_props[0].name = "dds.sec.builtin_endpoint_name";
       reader_props[0].value = "BuiltinParticipantVolatileMessageSecureReader";
 
-      //EndpointSecurityAttributes attribs(proto);
-      //attribs.is_submessage_protected = true;
-
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
       ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
@@ -430,9 +427,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     // DCPS-Participant-Message-Secure
     {
       PropertySeq reader_props, writer_props;
-
-      //EndpointSecurityAttributes attribs(proto);
-      //attribs.is_submessage_protected = participant_sec_attr.is_liveliness_protected;
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
       ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantMessageSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
@@ -467,9 +461,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      //EndpointSecurityAttributes attribs(proto);
-      //attribs.is_submessage_protected = participant_sec_attr.is_discovery_protected;
-
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
       ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSPublicationsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
@@ -502,9 +493,6 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     // DCPS-Subscriptions-Secure
     {
       PropertySeq reader_props, writer_props;
-
-      //EndpointSecurityAttributes attribs(proto);
-      //attribs.is_submessage_protected = participant_sec_attr.is_discovery_protected;
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
       ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSSubscriptionsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
@@ -539,14 +527,11 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      //EndpointSecurityAttributes attribs(proto);
-      //attribs.is_submessage_protected = participant_sec_attr.is_discovery_protected;
-
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
-      ok = acl->get_datawriter_sec_attributes(perm_handle, "SPDPbuiltinParticipantsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'SPDPbuiltinParticipantsSecure'. Security Exception[%d.%d]: %C\n"),
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantSecure'. Security Exception[%d.%d]: %C\n"),
             ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
@@ -557,10 +542,10 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       local_writer_crypto_handles_[dcps_participant_secure_writer_.get_repo_id()] = h;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
-      ok = acl->get_datareader_sec_attributes(perm_handle, "SPDPbuiltinParticipantsSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'SPDPbuiltinParticipantsSecure'. Security Exception[%d.%d]: %C\n"),
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantSecure'. Security Exception[%d.%d]: %C\n"),
             ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
