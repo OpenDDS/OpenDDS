@@ -1,5 +1,11 @@
 tests/security/IDL_Serialization/run_test.pl
-tests/security/SSL/run_test.pl
+
+# uncomment once error handling is cleaned up
+# currently expected (passing) results write Error to stdout which is flagged
+# by the scoreboard scripts
+#
+# tests/security/SSL/run_test.pl
+
 tests/security/run_test.pl OpenDDS_AccessControlTest
 tests/security/run_test.pl OpenDDS_AuthenticationTest
 tests/security/run_test.pl OpenDDS_CryptoKeyFactoryTest
