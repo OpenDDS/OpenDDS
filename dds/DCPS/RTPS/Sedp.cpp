@@ -366,20 +366,23 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   // TODO: Handle all exceptions below once error-codes have been defined, etc.
   SecurityException ex;
 
-  ParticipantSecurityAttributes participant_attribs;
-  bool ok = acl->get_participant_sec_attributes(perm_handle, participant_attribs, ex);
+  ParticipantSecurityAttributes participant_sec_attr;
+  bool ok = acl->get_participant_sec_attributes(perm_handle, participant_sec_attr, ex);
   if (ok) {
 
-    EndpointSecurityAttributes proto;
-    proto.base.is_read_protected = false;
-    proto.base.is_write_protected = false;
-    proto.base.is_discovery_protected = false;
-    proto.base.is_liveliness_protected = false;
-    proto.is_submessage_protected = false;
-    proto.is_payload_protected = false;
-    proto.is_key_protected = false;
+    EndpointSecurityAttributes default_sec_attr;
+    default_sec_attr.base.is_read_protected = false;
+    default_sec_attr.base.is_write_protected = false;
+    default_sec_attr.base.is_discovery_protected = false;
+    default_sec_attr.base.is_liveliness_protected = false;
+    default_sec_attr.is_submessage_protected = false;
+    default_sec_attr.is_payload_protected = false;
+    default_sec_attr.is_key_protected = false;
 
     NativeCryptoHandle h = DDS::HANDLE_NIL;
+
+    const DDS::PartitionQosPolicy& default_part_qos = TheServiceParticipant->initial_PartitionQosPolicy();
+    const DDS::Security::DataTagQosPolicy default_data_tag_qos; // default is empty sequence
 
     // Volatile-Message-Secure
     {
@@ -392,30 +395,70 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       reader_props[0].name = "dds.sec.builtin_endpoint_name";
       reader_props[0].value = "BuiltinParticipantVolatileMessageSecureReader";
 
-      EndpointSecurityAttributes attribs(proto);
-      attribs.is_submessage_protected = true;
+      //EndpointSecurityAttributes attribs(proto);
+      //attribs.is_submessage_protected = true;
 
-      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantVolatileMessageSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dw_sec_attr.is_submessage_protected = true;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       participant_volatile_message_secure_writer_.crypto_handles(crypto_handle, h);
       local_writer_crypto_handles_[participant_volatile_message_secure_writer_.get_repo_id()] = h;
 
-      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantVolatileMessageSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dr_sec_attr.is_submessage_protected = true;
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       participant_volatile_message_secure_reader_->crypto_handles(crypto_handle, h);
       local_reader_crypto_handles_[participant_volatile_message_secure_reader_->get_repo_id()] = h;
     }
 
-    // Participant-Message-Secure
+    // DCPS-Participant-Message-Secure
     {
       PropertySeq reader_props, writer_props;
 
-      EndpointSecurityAttributes attribs(proto);
-      attribs.is_submessage_protected = participant_attribs.is_liveliness_protected;
+      //EndpointSecurityAttributes attribs(proto);
+      //attribs.is_submessage_protected = participant_sec_attr.is_liveliness_protected;
 
-      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantMessageSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantMessageSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dw_sec_attr.is_submessage_protected = participant_sec_attr.is_liveliness_protected;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       participant_message_secure_writer_.crypto_handles(crypto_handle, h);
       local_writer_crypto_handles_[participant_message_secure_writer_.get_repo_id()] = h;
 
-      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantMessageSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantMessageSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dr_sec_attr.is_submessage_protected = participant_sec_attr.is_liveliness_protected;
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       participant_message_secure_reader_->crypto_handles(crypto_handle, h);
       local_reader_crypto_handles_[participant_message_secure_reader_->get_repo_id()] = h;
     }
@@ -424,14 +467,34 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      EndpointSecurityAttributes attribs(proto);
-      attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
+      //EndpointSecurityAttributes attribs(proto);
+      //attribs.is_submessage_protected = participant_sec_attr.is_discovery_protected;
 
-      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSPublicationsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSPublicationsSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dw_sec_attr.is_submessage_protected = participant_sec_attr.is_discovery_protected;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       publications_secure_writer_.crypto_handles(crypto_handle, h);
       local_writer_crypto_handles_[publications_secure_writer_.get_repo_id()] = h;
 
-      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSPublicationsSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSPublicationsSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dr_sec_attr.is_submessage_protected = participant_sec_attr.is_discovery_protected;
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       publications_secure_reader_->crypto_handles(crypto_handle, h);
       local_reader_crypto_handles_[publications_secure_reader_->get_repo_id()] = h;
     }
@@ -440,14 +503,34 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      EndpointSecurityAttributes attribs(proto);
-      attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
+      //EndpointSecurityAttributes attribs(proto);
+      //attribs.is_submessage_protected = participant_sec_attr.is_discovery_protected;
 
-      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSSubscriptionsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSSubscriptionsSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dw_sec_attr.is_submessage_protected = participant_sec_attr.is_discovery_protected;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       subscriptions_secure_writer_.crypto_handles(crypto_handle, h);
       local_writer_crypto_handles_[subscriptions_secure_writer_.get_repo_id()] = h;
 
-      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSSubscriptionsSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSSubscriptionsSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dr_sec_attr.is_submessage_protected = participant_sec_attr.is_discovery_protected;
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       subscriptions_secure_reader_->crypto_handles(crypto_handle, h);
       local_reader_crypto_handles_[subscriptions_secure_reader_->get_repo_id()] = h;
     }
@@ -456,21 +539,43 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     {
       PropertySeq reader_props, writer_props;
 
-      EndpointSecurityAttributes attribs(proto);
-      attribs.is_submessage_protected = participant_attribs.is_discovery_protected;
+      //EndpointSecurityAttributes attribs(proto);
+      //attribs.is_submessage_protected = participant_sec_attr.is_discovery_protected;
 
-      h = key_factory->register_local_datawriter(crypto_handle, writer_props, attribs, ex);
+      EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "SPDPbuiltinParticipantsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'SPDPbuiltinParticipantsSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dw_sec_attr.is_submessage_protected = participant_sec_attr.is_discovery_protected;
+
+      h = key_factory->register_local_datawriter(crypto_handle, writer_props, dw_sec_attr, ex);
       dcps_participant_secure_writer_.crypto_handles(crypto_handle, h);
       local_writer_crypto_handles_[dcps_participant_secure_writer_.get_repo_id()] = h;
 
-      h = key_factory->register_local_datareader(crypto_handle, reader_props, attribs, ex);
+      EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "SPDPbuiltinParticipantsSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      if (!ok) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'SPDPbuiltinParticipantsSecure'. Security Exception[%d.%d]: %C\n"),
+            ex.code, ex.minor_code, ex.message.in()));
+        result = DDS::RETCODE_ERROR;
+      }
+      dr_sec_attr.is_submessage_protected = participant_sec_attr.is_discovery_protected;
+
+      h = key_factory->register_local_datareader(crypto_handle, reader_props, dr_sec_attr, ex);
       dcps_participant_secure_reader_->crypto_handles(crypto_handle, h);
       local_reader_crypto_handles_[dcps_participant_secure_reader_->get_repo_id()] = h;
     }
 
   } else {
-      result = DDS::RETCODE_ERROR;
-      // TODO: log error
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::init_security() - ")
+      ACE_TEXT("Failure calling get_participant_sec_attributes. Security Exception[%d.%d]: %C\n"),
+        ex.code, ex.minor_code, ex.message.in()));
+    result = DDS::RETCODE_ERROR;
   }
   return result;
 }
