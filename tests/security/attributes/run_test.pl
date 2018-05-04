@@ -16,14 +16,60 @@ use strict;
 use Time::Piece;
 use Time::Seconds;
 use Getopt::Long;
+use Data::Dump qw(dump);
 
+my @scenarios;
 my @gov_files;
-my @perm_files;
+my @pub_perm_files;
+my @sub_perm_files;
 my @topic_names;
 
-GetOptions ( 'gov=s' => \@gov_files, 'perm=s' => \@perm_files, 'topic=s' => \@topic_names);
+GetOptions ( 'scenario=s' => \@scenarios, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names );
 
+# Handle scenarios first, since they are a special case
+if (scalar @scenarios != 0) {
+  my $result = 0;
+  foreach my $scenario (@scenarios) {
+    my @args;
+    if ($scenario eq "SC0") {
+      @args = ("--gov", "governance/governance_AU_UA_ND_NL_NR_signed.p7s", "--pub_perm", "permissions/permissions_test_participant_01_allowall_signed.p7s", "--sub_perm", "permissions/permissions_test_participant_02_allowall_signed.p7s", "--topic", "OD_OA_OM_OD");
+    } elsif ($scenario eq "SC1") {
+      @args = ("--gov", "governance/governance_PU_PA_ED_EL_NR_signed.p7s", "--pub_perm", "permissions/permissions_test_participant_01_readwrite_signed.p7s", "--sub_perm", "permissions/permissions_test_participant_02_readwrite_signed.p7s", "--topic", "OD_OA_OM_ED");
+    } else {
+      print "\nUnrecognized scenario '$scenario'. Skipping.\n";
+      continue;
+    }
+
+    my @cmd = ("./run_test.pl", @args);
+    my $cmd_string = join (" ", @cmd);
+
+    print "$cmd_string\n";
+    print `$cmd_string`;
+
+    if ($? == 0) {
+      print "test PASSED.\n";
+    } elsif ($? == -1) {
+      print "test FAILED.\n";
+      print "Failure when running scenario '$scenario': $!\n";
+      $result = -1;
+    } elsif ($? & 127) {
+      print "test FAILED.\n";
+      printf "child died with signal %d, %s coredump\n", ($? & 127),  ($? & 128) ? 'with' : 'without';
+      $result = -1;
+    } elsif ($? == 0) {
+      print "test FAILED.\n";
+      printf "child exited with value %d.", $? >> 8;
+      $result = -1;
+    }
+    
+  } 
+  print "Ran scenarios, exiting.\n";
+  exit $result;
+}
+
+# Figure out what governance files to use
 if (scalar @gov_files == 0) {
+  print "Using governance files from governance directory.\n";
   opendir(my $gov_dh, "governance");
   @gov_files = map {"governance/" . $_} (sort grep(/\.p7s$/,readdir($gov_dh)));
   closedir($gov_dh);
@@ -37,29 +83,57 @@ if (scalar @gov_files == 0) {
   @gov_files = grep(!/_S/, @gov_files); # eliminate signed stuff
   @gov_files = grep(!/_SO/, @gov_files); # eliminate origin authenticated signed stuff
   @gov_files = grep(!/_EO/, @gov_files); # eliminate origin authenticated encrypted stuff
+} else {
+  print "Using governance " . (((scalar @gov_files) eq 1) ? "file" : "files") . ": '" . join ("', '", @gov_files) . "'.\n";
 }
 
-if (scalar @perm_files == 0) {
+# Figure out which permissions files to use
+if (scalar @pub_perm_files == 0 || scalar @sub_perm_files == 0) {
   opendir(my $perm_dh, "permissions");
-  @perm_files = map {"permissions/" . $_} (sort grep(/\.p7s$/,readdir($perm_dh)));
+  my @perm_files = map {"permissions/" . $_} (sort grep(/\.p7s$/,readdir($perm_dh)));
   closedir($perm_dh);
+
+  if (scalar @pub_perm_files == 0) {
+    print "Using publisher permissions files from permissions directory.\n";
+    @pub_perm_files = @perm_files;
+
+    #Filter permissions files to 1st participant and full read/write
+    @pub_perm_files = grep(/_test_participant_01/, @pub_perm_files);
+    @pub_perm_files = grep(/_readwrite/, @pub_perm_files);
+
+  } else {
+    print "Using publisher permissions " . (((scalar @pub_perm_files) eq 1) ? "file" : "files") . ": '" . join ("', '", @pub_perm_files) . "'.\n";
+  }
+
+  if (scalar @sub_perm_files == 0) {
+    print "Using subscriber permissions files from permissions directory.\n";
+    @sub_perm_files = @perm_files;
+
+    #Filter permissions files to 2nd participant and full read/write
+    @sub_perm_files = grep(/_test_participant_02/, @sub_perm_files);
+    @sub_perm_files = grep(/_readwrite/, @sub_perm_files);
+
+  } else {
+    print "Using subscriber permissions " . (((scalar @sub_perm_files) eq 1) ? "file" : "files") . ": '" . join ("', '", @sub_perm_files) . "'.\n";
+  }
+} else {
+  print "Using publisher permissions " . (((scalar @pub_perm_files) eq 1) ? "file" : "files") . ": '" . join ("', '", @pub_perm_files) . "'.\n";
+  print "Using subscriber permissions " . (((scalar @sub_perm_files) eq 1) ? "file" : "files") . ": '" . join ("', '", @sub_perm_files) . "'.\n";
 }
 
-my @pub_perm_files = @perm_files;
-@pub_perm_files = grep(/_test_participant_01/, @pub_perm_files);
-@pub_perm_files = grep(/_readwrite/, @pub_perm_files);
-
-my @sub_perm_files = @perm_files;
-@sub_perm_files = grep(/_test_participant_02/, @sub_perm_files);
-@sub_perm_files = grep(/_readwrite/, @sub_perm_files);
-
+#Figure out which topics to use
 if (scalar @topic_names == 0) {
+  print "Using topic names from topic_names.txt.\n";
   open my $topic_names_file, '<', "topic_names.txt";
   chomp(@topic_names = <$topic_names_file>);
   close $topic_names_file;
-}
 
-@topic_names = grep(!/_S/, @topic_names);
+  #Filter out topics using signed values
+  @topic_names = grep(!/_S/, @topic_names);
+
+} else {
+  print "Using " . (((scalar @topic_names) eq 1) ? "topic" : "topics") . ": '" . join ("', '", @topic_names) . "'.\n";
+}
 
 open my $status_file, '>', "expected_status_results.txt";
 

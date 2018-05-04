@@ -1,7 +1,9 @@
+tests/security/IDL_Serialization/run_test.pl
+tests/security/SSL/run_test.pl
 tests/security/run_test.pl OpenDDS_AccessControlTest
 tests/security/run_test.pl OpenDDS_AuthenticationTest
 tests/security/run_test.pl OpenDDS_CryptoKeyFactoryTest
 tests/security/run_test.pl OpenDDS_CryptoKeyExchangeTest
 tests/security/run_test.pl OpenDDS_CryptoTransformTest
-tests/security/IDL_Serialization/run_test.pl
-tests/security/attributes/run_test.pl --gov governance/governance_PU_PA_ED_EL_NR_signed.p7s --perm permissions/permissions_test_participant_01_readwrite_signed.p7s --perm permissions/permissions_test_participant_02_readwrite_signed.p7s --topic OD_OA_EM_OD
+tests/security/attributes/run_test.pl --scenario SC0
+tests/security/attributes/run_test.pl --scenario SC1
