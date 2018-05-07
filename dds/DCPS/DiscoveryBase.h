@@ -288,7 +288,8 @@ namespace OpenDDS {
       virtual bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
                                     OPENDDS_STRING& name) = 0;
 
-      DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
+      DCPS::RepoId add_publication(DDS::DomainId_t domainId,
+                                   const DCPS::RepoId& topicId,
                                    DCPS::DataWriterCallbacks* publication,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
@@ -308,16 +309,22 @@ namespace OpenDDS {
         if (is_security_enabled()) {
           DDS::Security::SecurityException ex;
 
-          bool ok = get_access_control()->get_datawriter_sec_attributes(
-              get_permissions_handle(),
-              topic_names_[topicId].c_str(),
-              publisherQos.partition,
-              DDS::Security::DataTagQosPolicy(),
-              pb.security_attribs_,
-              ex);
+          if (!get_access_control()->check_create_datawriter(get_permissions_handle(), domainId, topic_names_[topicId].c_str(), qos,
+                                                             publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_publication() - ")
+              ACE_TEXT("Permissions check failed for local datawriter on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_names_[topicId].c_str(),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
 
-          if (!ok) {
-              // TODO: log error / throw exception??
+          if (!get_access_control()->get_datawriter_sec_attributes(get_permissions_handle(), topic_names_[topicId].c_str(),
+                                                                   publisherQos.partition, DDS::Security::DataTagQosPolicy(), pb.security_attribs_, ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_publication() - ")
+              ACE_TEXT("Unable to get security attributes for local datawriter. Security Exception[%d.%d]: %C\n"),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
           }
 
           if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
@@ -325,9 +332,10 @@ namespace OpenDDS {
             if (handle == DDS::HANDLE_NIL) {
               ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                 ACE_TEXT("EndpointManager::add_publication() - ")
-                ACE_TEXT("unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
+                ACE_TEXT("Unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
                   ex.code, ex.minor_code, ex.message.in()));
             }
+
             local_writer_crypto_handles_[rid] = handle;
             local_writer_security_attribs_[rid] = pb.security_attribs_;
           }
@@ -380,7 +388,8 @@ namespace OpenDDS {
                                           const DDS::DataWriterQos& qos,
                                           const DDS::PublisherQos& publisherQos) = 0;
 
-      DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
+      DCPS::RepoId add_subscription(DDS::DomainId_t domainId,
+                                    const DCPS::RepoId& topicId,
                                     DCPS::DataReaderCallbacks* subscription,
                                     const DDS::DataReaderQos& qos,
                                     const DCPS::TransportLocatorSeq& transInfo,
@@ -406,16 +415,22 @@ namespace OpenDDS {
         if (is_security_enabled()) {
           DDS::Security::SecurityException ex;
 
-          bool ok = get_access_control()->get_datareader_sec_attributes(
-              get_permissions_handle(),
-              topic_names_[topicId].c_str(),
-              subscriberQos.partition,
-              DDS::Security::DataTagQosPolicy(),
-              sb.security_attribs_,
-              ex);
+          if (!get_access_control()->check_create_datareader(get_permissions_handle(), domainId, topic_names_[topicId].c_str(), qos,
+                                                             subscriberQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_subscription() - ")
+              ACE_TEXT("Permissions check failed for local datareader on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_names_[topicId].c_str(),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
 
-          if (!ok) {
-              // TODO: log error / throw exception??
+          if (!get_access_control()->get_datareader_sec_attributes(get_permissions_handle(), topic_names_[topicId].c_str(),
+                                                                   subscriberQos.partition, DDS::Security::DataTagQosPolicy(), sb.security_attribs_, ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_subscription() - ")
+              ACE_TEXT("Unable to get security attributes for local datareader. Security Exception[%d.%d]: %C\n"),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
           }
 
           if (sb.security_attribs_.is_submessage_protected || sb.security_attribs_.is_payload_protected) {
@@ -426,6 +441,7 @@ namespace OpenDDS {
                 ACE_TEXT("unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
                   ex.code, ex.minor_code, ex.message.in()));
             }
+
             local_reader_crypto_handles_[rid] = handle;
             local_reader_security_attribs_[rid] = sb.security_attribs_;
           }
@@ -1236,13 +1252,14 @@ namespace OpenDDS {
       }
 
       RepoId
-      add_publication(const RepoId& topicId,
+      add_publication(DDS::DomainId_t domainId,
+                      const RepoId& topicId,
                       DCPS::DataWriterCallbacks* publication,
                       const DDS::DataWriterQos& qos,
                       const DCPS::TransportLocatorSeq& transInfo,
                       const DDS::PublisherQos& publisherQos)
       {
-        return endpoint_manager().add_publication(topicId, publication, qos,
+        return endpoint_manager().add_publication(domainId, topicId, publication, qos,
                                                   transInfo, publisherQos);
       }
 
@@ -1268,7 +1285,8 @@ namespace OpenDDS {
       }
 
       RepoId
-      add_subscription(const RepoId& topicId,
+      add_subscription(DDS::DomainId_t domainId,
+                       const RepoId& topicId,
                        DCPS::DataReaderCallbacks* subscription,
                        const DDS::DataReaderQos& qos,
                        const DCPS::TransportLocatorSeq& transInfo,
@@ -1277,7 +1295,7 @@ namespace OpenDDS {
                        const char* filterExpr,
                        const DDS::StringSeq& params)
       {
-        return endpoint_manager().add_subscription(topicId, subscription, qos, transInfo,
+        return endpoint_manager().add_subscription(domainId, topicId, subscription, qos, transInfo,
                                                    subscriberQos, filterClassName, filterExpr, params);
       }
 
@@ -1671,8 +1689,7 @@ namespace OpenDDS {
                                                     const DCPS::TransportLocatorSeq& transInfo,
                                                     const DDS::PublisherQos& publisherQos)
       {
-        return get_part(domainId, participantId)->add_publication(
-                                                                  topicId, publication, qos, transInfo, publisherQos);
+        return get_part(domainId, participantId)->add_publication(domainId, topicId, publication, qos, transInfo, publisherQos);
       }
 
       virtual bool remove_publication(DDS::DomainId_t domainId,
@@ -1712,7 +1729,7 @@ namespace OpenDDS {
                                                      const char* filterExpr,
                                                      const DDS::StringSeq& params)
       {
-        return get_part(domainId, participantId)->add_subscription(topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params);
+        return get_part(domainId, participantId)->add_subscription(domainId, topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params);
       }
 
       virtual bool remove_subscription(DDS::DomainId_t domainId,
