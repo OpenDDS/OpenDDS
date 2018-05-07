@@ -32,7 +32,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
       ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "DataReaderListener: read: _narrow failed.\n")));
+        "(%P|%t) DataReaderListener: read: _narrow failed.\n")));
       exit(1);
     }
 
@@ -49,27 +49,27 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
             && si.publication_handle != this->post_restart_publication_handle_))
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT(
-            "DataReaderListener: ERROR: publication_handle validate failed.\n")));
+            "(%P|%t) DataReaderListener: ERROR: publication_handle validate failed.\n")));
           exit(1);
         }
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-          "DataReaderListener: Message count = %i\n"), message.count));
+          "(%P|%t) DataReaderListener: Message count = %i\n"), message.count));
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("instance is disposed\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is disposed\n")));
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("instance is unregistered\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is unregistered\n")));
       }
     } else if (status == DDS::RETCODE_NO_DATA) {
       ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!\n")));
+        "(%P|%t) DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!\n")));
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "DataReaderListener: ERROR: read Message: Error: %i\n"), status));
+        "(%P|%t) DataReaderListener: ERROR: read Message: Error: %i\n"), status));
     }
   } catch (CORBA::Exception& e) {
     e._tao_print_exception(
@@ -83,7 +83,7 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
     const DDS::RequestedDeadlineMissedStatus &)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT(
-    "DataReaderListenerImpl::on_requested_deadline_missed\n")));
+    "(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed\n")));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos (
@@ -91,7 +91,7 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
     const DDS::RequestedIncompatibleQosStatus &)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT(
-    "DataReaderListenerImpl::on_requested_incompatible_qos\n")));
+    "(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos\n")));
 }
 
 void DataReaderListenerImpl::on_liveliness_changed (
@@ -99,7 +99,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
     const DDS::LivelinessChangedStatus &)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-    "DataReaderListenerImpl::on_liveliness_changed\n")));
+    "(%P|%t) DataReaderListenerImpl::on_liveliness_changed\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_matched (
@@ -109,13 +109,13 @@ void DataReaderListenerImpl::on_subscription_matched (
   if (this->publication_handle_ == ::DDS::HANDLE_NIL) {
     this->publication_handle_ = status.last_publication_handle;
     ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-      "DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
+      "(%P|%t) DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
       publication_handle_));
   }
   else {
     this->post_restart_publication_handle_ = status.last_publication_handle;
     ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-      "DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
+      "(%P|%t) DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
       post_restart_publication_handle_));
   }
 
@@ -130,22 +130,23 @@ void DataReaderListenerImpl::on_subscription_matched (
                                                DDS::NOT_READ_SAMPLE_STATE,
                                                DDS::ANY_VIEW_STATE,
                                                DDS::ALIVE_INSTANCE_STATE);
+
     switch (ret) {
     case DDS::RETCODE_OK:
       ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "read bit instance returned ok\n")));
+        "(%P|%t) read bit instance returned ok\n")));
       return;
     case DDS::RETCODE_NO_DATA:
       ACE_ERROR((LM_WARNING, ACE_TEXT(
-        "read bit instance returned no data\n")));
+        "(%P|%t) read bit instance returned no data\n")));
       break;
     case DDS::RETCODE_BAD_PARAMETER:
       ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "read bit instance returned bad parameter\n")));
+        "(%P|%t) read bit instance returned bad parameter\n")));
       break;
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "ERROR read bit instance returned %i\n"), ret));
+        "(%P|%t) ERROR read bit instance returned %i\n"), ret));
       builtin_read_error_ = true;
       return;
     }
@@ -153,7 +154,7 @@ void DataReaderListenerImpl::on_subscription_matched (
   }
 
   ACE_ERROR((LM_ERROR, ACE_TEXT(
-    "ERROR read bit instance: giving up after retries\n")));
+    "(%P|%t) ERROR read bit instance: giving up after retries\n")));
   builtin_read_error_ = true;
 }
 
@@ -162,7 +163,7 @@ void DataReaderListenerImpl::on_sample_rejected(
     const DDS::SampleRejectedStatus&)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT(
-    "DataReaderListenerImpl::on_sample_rejected\n")));
+    "(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
 }
 
 void DataReaderListenerImpl::on_sample_lost(
@@ -170,7 +171,7 @@ void DataReaderListenerImpl::on_sample_lost(
   const DDS::SampleLostStatus&)
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT(
-    "DataReaderListenerImpl::on_sample_lost\n")));
+    "(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_disconnected (
@@ -178,7 +179,7 @@ void DataReaderListenerImpl::on_subscription_disconnected (
   const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus &)
 {
   ACE_ERROR((LM_WARNING, ACE_TEXT(
-    "DataReaderListenerImpl::on_subscription_disconnected\n")));
+    "(%P|%t) DataReaderListenerImpl::on_subscription_disconnected\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_reconnected (
@@ -186,7 +187,7 @@ void DataReaderListenerImpl::on_subscription_reconnected (
   const ::OpenDDS::DCPS::SubscriptionReconnectedStatus &)
 {
   ACE_ERROR((LM_WARNING, ACE_TEXT(
-    "DataReaderListenerImpl::on_subscription_reconnected\n")));
+    "(%P|%t) DataReaderListenerImpl::on_subscription_reconnected\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_lost (
@@ -194,7 +195,7 @@ void DataReaderListenerImpl::on_subscription_lost (
   const ::OpenDDS::DCPS::SubscriptionLostStatus &)
 {
   ACE_ERROR((LM_WARNING, ACE_TEXT(
-    "DataReaderListenerImpl::on_subscription_lost\n")));
+    "(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
 }
 
 void DataReaderListenerImpl::set_builtin_datareader (

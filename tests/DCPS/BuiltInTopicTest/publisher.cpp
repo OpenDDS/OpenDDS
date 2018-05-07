@@ -96,7 +96,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "publisher: create_participant failed.")));
+          "(%P|%t) publisher: create_participant failed.")));
         return 1;
       }
 
@@ -104,7 +104,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
       if (DDS::RETCODE_OK != ts->register_type(participant.in (), "Messenger")) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "publisher: register_type failed.\n")));
+          "(%P|%t) publisher: register_type failed.\n")));
         exit(1);
       }
 
@@ -124,7 +124,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "publisher: create_topic failed.\n")));
+          "(%P|%t) publisher: create_topic failed.\n")));
         exit(1);
       }
 
@@ -142,7 +142,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (pub.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "publisher: create_publisher failed.\n")));
+          "(%P|%t) publisher: create_publisher failed.\n")));
         exit(1);
       }
 
@@ -168,7 +168,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "publisher: create_datawriter failed.\n")));
+          "(%P|%t) publisher: create_datawriter failed.\n")));
         exit(1);
       }
 
@@ -178,7 +178,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       while (fp == 0 &&  i < 15)
       {
         ACE_DEBUG ((LM_DEBUG,
-          ACE_TEXT("waiting monitor1 done ...\n")));
+          ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
         ACE_OS::sleep (1);
         ++ i;
         fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));

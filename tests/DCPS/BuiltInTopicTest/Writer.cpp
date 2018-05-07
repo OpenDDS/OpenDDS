@@ -26,7 +26,8 @@ Writer::start ()
   // Each thread writes one instance which uses the thread id as the
   // key value.
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1) {
-    cerr << "Writer::start(): activate failed" << endl;
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) Writer::start: activate failed.\n")));
     exit(1);
   }
 }
@@ -61,7 +62,8 @@ Writer::svc ()
     ::Messenger::MessageDataWriter_var message_dw
       = ::Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
-      cerr << "Writer: Data Writer could not be narrowed"<< endl;
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) Writer::svc: Data Writer could not be narrowed.\n")));
       exit(1);
     }
 
@@ -93,8 +95,8 @@ Writer::svc ()
       ACE_OS::sleep(1);
     }
   } catch (CORBA::Exception& e) {
-    cerr << "Writer: Exception caught in svc:" << endl
-         << e << endl;
+    e._tao_print_exception("publisher: Writer: Exception caught in svc:");
+    exit(1);
   }
 
   // wait for datareader finish.

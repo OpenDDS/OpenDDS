@@ -100,7 +100,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "subscriber: create_participant failed.\n")));
+          "(%P|%t) subscriber: create_participant failed.\n")));
         return 1 ;
       }
 
@@ -108,7 +108,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (DDS::RETCODE_OK != mts->register_type(participant.in (), "Messenger")) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "subscriber: Failed to register the MessageTypeTypeSupport.\n")));
+          "(%P|%t) subscriber: Failed to register the MessageTypeTypeSupport.\n")));
         exit(1);
       }
 
@@ -127,7 +127,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "subscriber: Failed to create_topic.\n")));
+          "(%P|%t) subscriber: Failed to create_topic.\n")));
         exit(1);
       }
 
@@ -147,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "subscriber: Failed to create_subscriber.\n")));
+          "(%P|%t) subscriber: Failed to create_subscriber.\n")));
         exit(1);
       }
 
@@ -158,7 +158,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (!listener_servant)
       {
         ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("(%P|%t) %N:%l main()")
           ACE_TEXT(" ERROR: failed to obtain DataReaderListenerImpl!\n")), -1);
       }
 
@@ -169,12 +169,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (CORBA::is_nil (listener.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "subscriber: listener is nil.\n")));
+          "(%P|%t) subscriber: listener is nil.\n")));
         exit(1);
       }
       if (!listener_servant) {
         ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("(%P|%t) %N:%l main()")
           ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
       }
 
@@ -195,7 +195,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dr.in ())) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "subscriber: create_datareader failed.\n")));
+          "(%P|%t) subscriber: create_datareader failed.\n")));
         exit(1);
       }
 
@@ -249,7 +249,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (listener_servant->builtin_read_errors()) {
         ACE_ERROR((LM_ERROR, ACE_TEXT(
-          "subscriber: Built in topic read failure.\n")));
+          "(%P|%t) subscriber: Built in topic read failure.\n")));
         result = 1;
       }
 
