@@ -347,7 +347,7 @@ OpenDDS::DCPS::InstanceState::instance_state_string(DDS::InstanceStateKind value
       value
     ));
 
-    return std::string("(Unknown Instance State ") + to_dds_string(value) + ")";
+    return OPENDDS_STRING("(Unknown Instance State: ") + to_dds_string(value) + ")";
   }
 }
 
