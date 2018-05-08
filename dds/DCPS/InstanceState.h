@@ -132,10 +132,13 @@ public:
   DDS::InstanceHandle_t instance_handle() const { return handle_; }
 
   /// Return string of the name of the current instance state
-  std::string instance_state_string() { return instance_state_string(instance_state_); }
+  OPENDDS_STRING instance_state_string() const
+  {
+    return instance_state_string(instance_state_);
+  }
 
   /// Return string of the name of the instance state kind or mask passed
-  static std::string instance_state_string(DDS::InstanceStateKind value);
+  static OPENDDS_STRING instance_state_string(DDS::InstanceStateKind value);
 
 private:
   ACE_Recursive_Thread_Mutex& lock_;

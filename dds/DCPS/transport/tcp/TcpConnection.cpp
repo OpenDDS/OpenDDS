@@ -264,7 +264,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
             "%@ %C:%d->%C:%d, priority==%d, reconnect_state = %C\n", this,
             remote_address_.get_host_addr(), remote_address_.get_port_number(),
             local_address_.get_host_addr(), local_address_.get_port_number(),
-            transport_priority_, reconnect_state_string()));
+            transport_priority_, reconnect_state_string().c_str()));
 
       // remove from reactor, normal recv strategy setup will add us back
       if (reactor()->remove_handler(this, READ_MASK | DONT_CALL) == -1) {
@@ -677,13 +677,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
         "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %C\n",
         this->remote_address_.get_host_addr(), this->remote_address_.get_port_number(),
         this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
-        this->reconnect_state_string()));
+        this->reconnect_state_string().c_str()));
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
           "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %C\n",
           this->remote_address_.get_host_addr(), this->remote_address_.get_port_number(),
           this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
-          this->reconnect_state_string()));
+          this->reconnect_state_string().c_str()));
   }
   // We need reset the state to INIT_STATE if we are previously reconnected.
   // This would allow re-establishing connection after the re-established
@@ -823,8 +823,8 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
   default :
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::handle_timeout, ")
-               ACE_TEXT(" unknown state or it should not be in state=%C \n"),
-               this->reconnect_state_string()));
+               ACE_TEXT(" unknown state or it should not be in state=%d \n"),
+               reconnect_state_));
     break;
   }
 
@@ -882,8 +882,8 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
   default :
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::transfer, ")
-               ACE_TEXT(" unknown state or it should not be in state=%C \n"),
-               this->reconnect_state_string()));
+               ACE_TEXT(" unknown state or it should not be in state=%i \n"),
+               reconnect_state_));
     break;
   }
 
@@ -1055,8 +1055,8 @@ OpenDDS::DCPS::TcpConnection::reconnect_thread_fun(void* arg)
   return 0;
 }
 
-const char*
-OpenDDS::DCPS::TcpConnection::reconnect_state_string()
+OPENDDS_STRING
+OpenDDS::DCPS::TcpConnection::reconnect_state_string() const
 {
   switch (reconnect_state_) {
   case INIT_STATE:
@@ -1072,10 +1072,11 @@ OpenDDS::DCPS::TcpConnection::reconnect_state_string()
   default:
     ACE_ERROR((LM_ERROR, ACE_TEXT(
       "OpenDDS::DCPS::TcpConnection::reconnect_state_string(): "
-      "%d is either completely invalid or not defined in this function.\n"),
+      "%d is either completely invalid or at least not defined in this function.\n"),
       reconnect_state_
     ));
-    return "<State not defined in reconnect_state_string()>";
+    return OPENDDS_STRING("(Unknown Reconnect State: ")
+      + to_dds_string(reconnect_state_) + ")";
   }
 }
 

@@ -13,8 +13,6 @@
 #include "ace/Bound_Ptr.h"
 #include "ace/Time_Value.h"
 
-#include <sstream>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -1363,21 +1361,20 @@ int ignored)
       }
     else
       {
-        if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-          std::stringstream error;
+        if (OpenDDS::DCPS::DCPS_debug_level >= 8) {
+          OPENDDS_STRING msg;
           if (!valid_view_state) {
-            error << "view state is not valid";
-          }
-          if (!valid_view_state && !valid_instance_state) {
-            error << " and ";
+            msg += "view state is not valid";
+            if (!valid_instance_state) {
+              msg += " and ";
+            }
           }
           if (!valid_instance_state) {
-            error
-              << "instance state is "
-              << state_obj.instance_state_string()
-              << " while the validity mask is "
-              << InstanceState::instance_state_string(instance_states)
-            ;
+            msg = msg
+              + "instance state is "
+              + state_obj.instance_state_string()
+              + " while the validity mask is "
+              + InstanceState::instance_state_string(instance_states);
           }
           GuidConverter conv(get_subscription_id());
           ACE_DEBUG((LM_DEBUG,
@@ -1385,8 +1382,7 @@ int ignored)
               "(%P|%t) DataReaderImpl_T::read_instance_i: "
               "will return no data reading sub %C because:\n  %C\n"
             ),
-            OPENDDS_STRING(conv).c_str(),
-            error.str().c_str()
+            OPENDDS_STRING(conv).c_str(), msg.c_str()
           ));
         }
       }

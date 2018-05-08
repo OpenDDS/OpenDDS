@@ -20,6 +20,7 @@
 #include "TcpTransport_rch.h"
 
 #include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 
 #include "ace/SOCK_Stream.h"
@@ -207,8 +208,8 @@ private:
   std::size_t id_;
   ACE_thread_t reconnect_thread_;
 
-  /// Get name of the current reconnect state as a C string.
-  const char* reconnect_state_string();
+  /// Get name of the current reconnect state as a string.
+  OPENDDS_STRING reconnect_state_string() const;
 };
 
 } // namespace DCPS

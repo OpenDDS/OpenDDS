@@ -90,7 +90,7 @@ DomainParticipantFactoryImpl::create_participant(
     this, domainId, value.id, par_qos, a_listener, mask, value.federated
   );
 
-  if (DCPS_debug_level > 0) {
+  if (DCPS_debug_level >= 2) {
     GuidConverter converter(value.id);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT(
         "(%P|%t) DomainParticipantFactoryImpl::create_participant: "

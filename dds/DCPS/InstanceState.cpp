@@ -5,8 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <sstream>
-
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ace/Event_Handler.h"
 #include "ace/Reactor.h"
@@ -140,7 +138,7 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
 bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
-  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if (OpenDDS::DCPS::DCPS_debug_level > 1) {
     GuidConverter conv(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT(
@@ -178,7 +176,7 @@ OpenDDS::DCPS::InstanceState::writer_became_dead(
   int                   /*num_alive_writers*/,
   const ACE_Time_Value& /* when */)
 {
-  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+  if (OpenDDS::DCPS::DCPS_debug_level > 1) {
     GuidConverter conv(writer_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT(
@@ -326,31 +324,30 @@ OpenDDS::DCPS::InstanceState::reset_ownership (::DDS::InstanceHandle_t instance)
   this->reader_->reset_ownership(instance);
 }
 
-std::string
+OPENDDS_STRING
 OpenDDS::DCPS::InstanceState::instance_state_string(DDS::InstanceStateKind value)
 {
-  std::stringstream ss;
   switch (value) {
   case DDS::ALIVE_INSTANCE_STATE:
-    return std::string("ALIVE_INSTANCE_STATE");
+    return OPENDDS_STRING("ALIVE_INSTANCE_STATE");
   case DDS::NOT_ALIVE_INSTANCE_STATE:
-    return std::string("NOT_ALIVE_INSTANCE_STATE");
+    return OPENDDS_STRING("NOT_ALIVE_INSTANCE_STATE");
   case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
-    return std::string("NOT_ALIVE_DISPOSED_INSTANCE_STATE");
+    return OPENDDS_STRING("NOT_ALIVE_DISPOSED_INSTANCE_STATE");
   case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-    return std::string("NOT_ALIVE_NO_WRITERS_INSTANCE_STATE");
+    return OPENDDS_STRING("NOT_ALIVE_NO_WRITERS_INSTANCE_STATE");
   case DDS::ANY_INSTANCE_STATE:
-    return std::string("ANY_INSTANCE_STATE");
+    return OPENDDS_STRING("ANY_INSTANCE_STATE");
   default:
     ACE_ERROR((LM_ERROR,
       ACE_TEXT(
         "(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): "
-        "%d is either completely invalid or not defined in this function.\n"
+        "%d is either completely invalid or at least not defined in this function.\n"
       ),
       value
     ));
-    ss << "Unknown Instance State " << value;
-    return ss.str();
+
+    return std::string("(Unknown Instance State ") + to_dds_string(value) + ")";
   }
 }
 
