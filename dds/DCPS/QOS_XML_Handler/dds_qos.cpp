@@ -10,9 +10,9 @@
  */
 #include "dds_qos.hpp"
 
+#include "ace/ace_wchar.h"
 #include "ace/Null_Mutex.h"
 #include "ace/TSS_T.h"
-#include "ace/ace_wchar.h"
 #include "ace/Singleton.h"
 
 namespace dds
@@ -201,17 +201,15 @@ namespace dds
 
   // duration
 
-  duration::duration () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  duration::duration ()
+  : ::XSCRT::Type ()
   {
   }
 
   duration::duration (duration const& s) :
-  ::XSCRT::Type (s),
-  sec_ (s.sec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.sec_) : 0),
-  nanosec_ (s.nanosec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.nanosec_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , sec_ (s.sec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.sec_) : 0)
+  , nanosec_ (s.nanosec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.nanosec_) : 0)
   {
     if (sec_.get ()) sec_->container (this);
     if (nanosec_.get ()) nanosec_->container (this);
@@ -296,16 +294,14 @@ namespace dds
 
   // stringSeq
 
-  stringSeq::stringSeq () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  stringSeq::stringSeq ()
+  : ::XSCRT::Type ()
   {
   }
 
   stringSeq::stringSeq (stringSeq const& s) :
-  ::XSCRT::Type (s),
-  element_ (s.element_),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , element_ (s.element_)
   {
   }
 
@@ -361,16 +357,14 @@ namespace dds
 
   // deadlineQosPolicy
 
-  deadlineQosPolicy::deadlineQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  deadlineQosPolicy::deadlineQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   deadlineQosPolicy::deadlineQosPolicy (deadlineQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  period_ (s.period_.get () ? new ::dds::duration (*s.period_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , period_ (s.period_.get () ? new ::dds::duration (*s.period_) : 0)
   {
     if (period_.get ()) period_->container (this);
   }
@@ -421,16 +415,14 @@ namespace dds
 
   // destinationOrderQosPolicy
 
-  destinationOrderQosPolicy::destinationOrderQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  destinationOrderQosPolicy::destinationOrderQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   destinationOrderQosPolicy::destinationOrderQosPolicy (destinationOrderQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::destinationOrderKind (*s.kind_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::destinationOrderKind (*s.kind_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
   }
@@ -481,16 +473,14 @@ namespace dds
 
   // durabilityQosPolicy
 
-  durabilityQosPolicy::durabilityQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  durabilityQosPolicy::durabilityQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   durabilityQosPolicy::durabilityQosPolicy (durabilityQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::durabilityKind (*s.kind_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::durabilityKind (*s.kind_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
   }
@@ -541,21 +531,19 @@ namespace dds
 
   // durabilityServiceQosPolicy
 
-  durabilityServiceQosPolicy::durabilityServiceQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  durabilityServiceQosPolicy::durabilityServiceQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   durabilityServiceQosPolicy::durabilityServiceQosPolicy (durabilityServiceQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  service_cleanup_delay_ (s.service_cleanup_delay_.get () ? new ::dds::duration (*s.service_cleanup_delay_) : 0),
-  history_kind_ (s.history_kind_.get () ? new ::dds::historyKind (*s.history_kind_) : 0),
-  history_depth_ (s.history_depth_.get () ? new ::XMLSchema::positiveInteger (*s.history_depth_) : 0),
-  max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0),
-  max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0),
-  max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , service_cleanup_delay_ (s.service_cleanup_delay_.get () ? new ::dds::duration (*s.service_cleanup_delay_) : 0)
+  , history_kind_ (s.history_kind_.get () ? new ::dds::historyKind (*s.history_kind_) : 0)
+  , history_depth_ (s.history_depth_.get () ? new ::XMLSchema::positiveInteger (*s.history_depth_) : 0)
+  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
+  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
+  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
   {
     if (service_cleanup_delay_.get ()) service_cleanup_delay_->container (this);
     if (history_kind_.get ()) history_kind_->container (this);
@@ -776,16 +764,14 @@ namespace dds
 
   // entityFactoryQosPolicy
 
-  entityFactoryQosPolicy::entityFactoryQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  entityFactoryQosPolicy::entityFactoryQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   entityFactoryQosPolicy::entityFactoryQosPolicy (entityFactoryQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  autoenable_created_entities_ (s.autoenable_created_entities_.get () ? new ::XMLSchema::boolean (*s.autoenable_created_entities_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , autoenable_created_entities_ (s.autoenable_created_entities_.get () ? new ::XMLSchema::boolean (*s.autoenable_created_entities_) : 0)
   {
     if (autoenable_created_entities_.get ()) autoenable_created_entities_->container (this);
   }
@@ -836,16 +822,14 @@ namespace dds
 
   // groupDataQosPolicy
 
-  groupDataQosPolicy::groupDataQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  groupDataQosPolicy::groupDataQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   groupDataQosPolicy::groupDataQosPolicy (groupDataQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -896,17 +880,15 @@ namespace dds
 
   // historyQosPolicy
 
-  historyQosPolicy::historyQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  historyQosPolicy::historyQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   historyQosPolicy::historyQosPolicy (historyQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::historyKind (*s.kind_) : 0),
-  depth_ (s.depth_.get () ? new ::XMLSchema::positiveInteger (*s.depth_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::historyKind (*s.kind_) : 0)
+  , depth_ (s.depth_.get () ? new ::XMLSchema::positiveInteger (*s.depth_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
     if (depth_.get ()) depth_->container (this);
@@ -991,16 +973,14 @@ namespace dds
 
   // latencyBudgetQosPolicy
 
-  latencyBudgetQosPolicy::latencyBudgetQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  latencyBudgetQosPolicy::latencyBudgetQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   latencyBudgetQosPolicy::latencyBudgetQosPolicy (latencyBudgetQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0)
   {
     if (duration_.get ()) duration_->container (this);
   }
@@ -1051,16 +1031,14 @@ namespace dds
 
   // lifespanQosPolicy
 
-  lifespanQosPolicy::lifespanQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  lifespanQosPolicy::lifespanQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   lifespanQosPolicy::lifespanQosPolicy (lifespanQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0)
   {
     if (duration_.get ()) duration_->container (this);
   }
@@ -1111,17 +1089,15 @@ namespace dds
 
   // livelinessQosPolicy
 
-  livelinessQosPolicy::livelinessQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  livelinessQosPolicy::livelinessQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   livelinessQosPolicy::livelinessQosPolicy (livelinessQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::livelinessKind (*s.kind_) : 0),
-  lease_duration_ (s.lease_duration_.get () ? new ::dds::duration (*s.lease_duration_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::livelinessKind (*s.kind_) : 0)
+  , lease_duration_ (s.lease_duration_.get () ? new ::dds::duration (*s.lease_duration_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
     if (lease_duration_.get ()) lease_duration_->container (this);
@@ -1206,16 +1182,14 @@ namespace dds
 
   // ownershipQosPolicy
 
-  ownershipQosPolicy::ownershipQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  ownershipQosPolicy::ownershipQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   ownershipQosPolicy::ownershipQosPolicy (ownershipQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::ownershipKind (*s.kind_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::ownershipKind (*s.kind_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
   }
@@ -1266,16 +1240,14 @@ namespace dds
 
   // ownershipStrengthQosPolicy
 
-  ownershipStrengthQosPolicy::ownershipStrengthQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  ownershipStrengthQosPolicy::ownershipStrengthQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   ownershipStrengthQosPolicy::ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -1326,16 +1298,14 @@ namespace dds
 
   // partitionQosPolicy
 
-  partitionQosPolicy::partitionQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  partitionQosPolicy::partitionQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   partitionQosPolicy::partitionQosPolicy (partitionQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  name_ (s.name_.get () ? new ::dds::stringSeq (*s.name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , name_ (s.name_.get () ? new ::dds::stringSeq (*s.name_) : 0)
   {
     if (name_.get ()) name_->container (this);
   }
@@ -1386,18 +1356,16 @@ namespace dds
 
   // presentationQosPolicy
 
-  presentationQosPolicy::presentationQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  presentationQosPolicy::presentationQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   presentationQosPolicy::presentationQosPolicy (presentationQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  access_scope_ (s.access_scope_.get () ? new ::dds::presentationAccessScopeKind (*s.access_scope_) : 0),
-  coherent_access_ (s.coherent_access_.get () ? new ::XMLSchema::boolean (*s.coherent_access_) : 0),
-  ordered_access_ (s.ordered_access_.get () ? new ::XMLSchema::boolean (*s.ordered_access_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , access_scope_ (s.access_scope_.get () ? new ::dds::presentationAccessScopeKind (*s.access_scope_) : 0)
+  , coherent_access_ (s.coherent_access_.get () ? new ::XMLSchema::boolean (*s.coherent_access_) : 0)
+  , ordered_access_ (s.ordered_access_.get () ? new ::XMLSchema::boolean (*s.ordered_access_) : 0)
   {
     if (access_scope_.get ()) access_scope_->container (this);
     if (coherent_access_.get ()) coherent_access_->container (this);
@@ -1516,17 +1484,15 @@ namespace dds
 
   // readerDataLifecycleQosPolicy
 
-  readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  autopurge_nowriter_samples_delay_ (s.autopurge_nowriter_samples_delay_.get () ? new ::dds::duration (*s.autopurge_nowriter_samples_delay_) : 0),
-  autopurge_disposed_samples_delay_ (s.autopurge_disposed_samples_delay_.get () ? new ::dds::duration (*s.autopurge_disposed_samples_delay_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , autopurge_nowriter_samples_delay_ (s.autopurge_nowriter_samples_delay_.get () ? new ::dds::duration (*s.autopurge_nowriter_samples_delay_) : 0)
+  , autopurge_disposed_samples_delay_ (s.autopurge_disposed_samples_delay_.get () ? new ::dds::duration (*s.autopurge_disposed_samples_delay_) : 0)
   {
     if (autopurge_nowriter_samples_delay_.get ()) autopurge_nowriter_samples_delay_->container (this);
     if (autopurge_disposed_samples_delay_.get ()) autopurge_disposed_samples_delay_->container (this);
@@ -1611,17 +1577,15 @@ namespace dds
 
   // reliabilityQosPolicy
 
-  reliabilityQosPolicy::reliabilityQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  reliabilityQosPolicy::reliabilityQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   reliabilityQosPolicy::reliabilityQosPolicy (reliabilityQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::reliabilityKind (*s.kind_) : 0),
-  max_blocking_time_ (s.max_blocking_time_.get () ? new ::dds::duration (*s.max_blocking_time_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::reliabilityKind (*s.kind_) : 0)
+  , max_blocking_time_ (s.max_blocking_time_.get () ? new ::dds::duration (*s.max_blocking_time_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
     if (max_blocking_time_.get ()) max_blocking_time_->container (this);
@@ -1706,20 +1670,18 @@ namespace dds
 
   // resourceLimitsQosPolicy
 
-  resourceLimitsQosPolicy::resourceLimitsQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  resourceLimitsQosPolicy::resourceLimitsQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   resourceLimitsQosPolicy::resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0),
-  max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0),
-  max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0),
-  initial_samples_ (s.initial_samples_.get () ? new ::XMLSchema::positiveInteger (*s.initial_samples_) : 0),
-  initial_instances_ (s.initial_instances_.get () ? new ::XMLSchema::positiveInteger (*s.initial_instances_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
+  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
+  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
+  , initial_samples_ (s.initial_samples_.get () ? new ::XMLSchema::positiveInteger (*s.initial_samples_) : 0)
+  , initial_instances_ (s.initial_instances_.get () ? new ::XMLSchema::positiveInteger (*s.initial_instances_) : 0)
   {
     if (max_samples_.get ()) max_samples_->container (this);
     if (max_instances_.get ()) max_instances_->container (this);
@@ -1906,16 +1868,14 @@ namespace dds
 
   // timeBasedFilterQosPolicy
 
-  timeBasedFilterQosPolicy::timeBasedFilterQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  timeBasedFilterQosPolicy::timeBasedFilterQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   timeBasedFilterQosPolicy::timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  minimum_separation_ (s.minimum_separation_.get () ? new ::dds::duration (*s.minimum_separation_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , minimum_separation_ (s.minimum_separation_.get () ? new ::dds::duration (*s.minimum_separation_) : 0)
   {
     if (minimum_separation_.get ()) minimum_separation_->container (this);
   }
@@ -1966,16 +1926,14 @@ namespace dds
 
   // topicDataQosPolicy
 
-  topicDataQosPolicy::topicDataQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  topicDataQosPolicy::topicDataQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   topicDataQosPolicy::topicDataQosPolicy (topicDataQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -2026,16 +1984,14 @@ namespace dds
 
   // transportPriorityQosPolicy
 
-  transportPriorityQosPolicy::transportPriorityQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  transportPriorityQosPolicy::transportPriorityQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   transportPriorityQosPolicy::transportPriorityQosPolicy (transportPriorityQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -2086,16 +2042,14 @@ namespace dds
 
   // userDataQosPolicy
 
-  userDataQosPolicy::userDataQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  userDataQosPolicy::userDataQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   userDataQosPolicy::userDataQosPolicy (userDataQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -2146,16 +2100,14 @@ namespace dds
 
   // writerDataLifecycleQosPolicy
 
-  writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  autodispose_unregistered_instances_ (s.autodispose_unregistered_instances_.get () ? new ::XMLSchema::boolean (*s.autodispose_unregistered_instances_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , autodispose_unregistered_instances_ (s.autodispose_unregistered_instances_.get () ? new ::XMLSchema::boolean (*s.autodispose_unregistered_instances_) : 0)
   {
     if (autodispose_unregistered_instances_.get ()) autodispose_unregistered_instances_->container (this);
   }
@@ -2206,19 +2158,17 @@ namespace dds
 
   // domainparticipantQos
 
-  domainparticipantQos::domainparticipantQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  domainparticipantQos::domainparticipantQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   domainparticipantQos::domainparticipantQos (domainparticipantQos const& s) :
-  ::XSCRT::Type (s),
-  user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0),
-  entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
+  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     if (user_data_.get ()) user_data_->container (this);
     if (entity_factory_.get ()) entity_factory_->container (this);
@@ -2379,21 +2329,19 @@ namespace dds
 
   // publisherQos
 
-  publisherQos::publisherQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  publisherQos::publisherQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   publisherQos::publisherQos (publisherQos const& s) :
-  ::XSCRT::Type (s),
-  presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0),
-  partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0),
-  group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0),
-  entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0)
+  , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
+  , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
+  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     if (presentation_.get ()) presentation_->container (this);
     if (partition_.get ()) partition_->container (this);
@@ -2622,21 +2570,19 @@ namespace dds
 
   // subscriberQos
 
-  subscriberQos::subscriberQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  subscriberQos::subscriberQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   subscriberQos::subscriberQos (subscriberQos const& s) :
-  ::XSCRT::Type (s),
-  presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0),
-  partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0),
-  group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0),
-  entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0)
+  , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
+  , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
+  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     if (presentation_.get ()) presentation_->container (this);
     if (partition_.get ()) partition_->container (this);
@@ -2865,31 +2811,29 @@ namespace dds
 
   // topicQos
 
-  topicQos::topicQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  topicQos::topicQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   topicQos::topicQos (topicQos const& s) :
-  ::XSCRT::Type (s),
-  topic_data_ (s.topic_data_.get () ? new ::dds::topicDataQosPolicy (*s.topic_data_) : 0),
-  durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0),
-  durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0),
-  deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0),
-  latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0),
-  liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0),
-  reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0),
-  destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0),
-  history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0),
-  resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0),
-  transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0),
-  lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0),
-  ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , topic_data_ (s.topic_data_.get () ? new ::dds::topicDataQosPolicy (*s.topic_data_) : 0)
+  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
+  , durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0)
+  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
+  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
+  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
+  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
+  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
+  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
+  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
+  , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
+  , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
+  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
   {
     if (topic_data_.get ()) topic_data_->container (this);
     if (durability_.get ()) durability_->container (this);
@@ -3462,30 +3406,28 @@ namespace dds
 
   // datareaderQos
 
-  datareaderQos::datareaderQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  datareaderQos::datareaderQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   datareaderQos::datareaderQos (datareaderQos const& s) :
-  ::XSCRT::Type (s),
-  durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0),
-  deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0),
-  latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0),
-  liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0),
-  reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0),
-  destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0),
-  history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0),
-  resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0),
-  user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0),
-  ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0),
-  time_based_filter_ (s.time_based_filter_.get () ? new ::dds::timeBasedFilterQosPolicy (*s.time_based_filter_) : 0),
-  reader_data_lifecycle_ (s.reader_data_lifecycle_.get () ? new ::dds::readerDataLifecycleQosPolicy (*s.reader_data_lifecycle_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
+  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
+  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
+  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
+  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
+  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
+  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
+  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
+  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
+  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , time_based_filter_ (s.time_based_filter_.get () ? new ::dds::timeBasedFilterQosPolicy (*s.time_based_filter_) : 0)
+  , reader_data_lifecycle_ (s.reader_data_lifecycle_.get () ? new ::dds::readerDataLifecycleQosPolicy (*s.reader_data_lifecycle_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
   {
     if (durability_.get ()) durability_->container (this);
     if (deadline_.get ()) deadline_->container (this);
@@ -4024,33 +3966,31 @@ namespace dds
 
   // datawriterQos
 
-  datawriterQos::datawriterQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  datawriterQos::datawriterQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   datawriterQos::datawriterQos (datawriterQos const& s) :
-  ::XSCRT::Type (s),
-  durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0),
-  durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0),
-  deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0),
-  latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0),
-  liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0),
-  reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0),
-  destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0),
-  history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0),
-  resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0),
-  transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0),
-  lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0),
-  user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0),
-  ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0),
-  ownership_strength_ (s.ownership_strength_.get () ? new ::dds::ownershipStrengthQosPolicy (*s.ownership_strength_) : 0),
-  writer_data_lifecycle_ (s.writer_data_lifecycle_.get () ? new ::dds::writerDataLifecycleQosPolicy (*s.writer_data_lifecycle_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
+  , durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0)
+  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
+  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
+  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
+  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
+  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
+  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
+  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
+  , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
+  , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
+  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
+  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , ownership_strength_ (s.ownership_strength_.get () ? new ::dds::ownershipStrengthQosPolicy (*s.ownership_strength_) : 0)
+  , writer_data_lifecycle_ (s.writer_data_lifecycle_.get () ? new ::dds::writerDataLifecycleQosPolicy (*s.writer_data_lifecycle_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
   {
     if (durability_.get ()) durability_->container (this);
     if (durability_service_.get ()) durability_service_->container (this);
@@ -4691,25 +4631,23 @@ namespace dds
 
   // qosProfile
 
-  qosProfile::qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__) :
-  ::XSCRT::Type (),
-  name_ (new ::XMLSchema::string<ACE_TCHAR> (name__)),
-  regulator__ ()
+  qosProfile::qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__)
+  : ::XSCRT::Type ()
+  , name_ (new ::XMLSchema::string<ACE_TCHAR> (name__))
   {
     name_->container (this);
   }
 
   qosProfile::qosProfile (qosProfile const& s) :
-  ::XSCRT::Type (s),
-  datareader_qos_ (s.datareader_qos_),
-  datawriter_qos_ (s.datawriter_qos_),
-  topic_qos_ (s.topic_qos_),
-  domainparticipant_qos_ (s.domainparticipant_qos_),
-  publisher_qos_ (s.publisher_qos_),
-  subscriber_qos_ (s.subscriber_qos_),
-  name_ (new ::XMLSchema::string<ACE_TCHAR> (*s.name_)),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , datareader_qos_ (s.datareader_qos_)
+  , datawriter_qos_ (s.datawriter_qos_)
+  , topic_qos_ (s.topic_qos_)
+  , domainparticipant_qos_ (s.domainparticipant_qos_)
+  , publisher_qos_ (s.publisher_qos_)
+  , subscriber_qos_ (s.subscriber_qos_)
+  , name_ (new ::XMLSchema::string<ACE_TCHAR> (*s.name_))
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     name_->container (this);
     if (base_name_.get ()) base_name_->container (this);
@@ -5020,16 +4958,14 @@ namespace dds
 
   // qosProfile_seq
 
-  qosProfile_seq::qosProfile_seq () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  qosProfile_seq::qosProfile_seq ()
+  : ::XSCRT::Type ()
   {
   }
 
   qosProfile_seq::qosProfile_seq (qosProfile_seq const& s) :
-  ::XSCRT::Type (s),
-  qos_profile_ (s.qos_profile_),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , qos_profile_ (s.qos_profile_)
   {
   }
 
@@ -5318,7 +5254,7 @@ namespace dds
 
   duration::
   duration (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5350,7 +5286,7 @@ namespace dds
 
   stringSeq::
   stringSeq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5376,7 +5312,7 @@ namespace dds
 
   deadlineQosPolicy::
   deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5402,7 +5338,7 @@ namespace dds
 
   destinationOrderQosPolicy::
   destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5428,7 +5364,7 @@ namespace dds
 
   durabilityQosPolicy::
   durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5454,7 +5390,7 @@ namespace dds
 
   durabilityServiceQosPolicy::
   durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5510,7 +5446,7 @@ namespace dds
 
   entityFactoryQosPolicy::
   entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5536,7 +5472,7 @@ namespace dds
 
   groupDataQosPolicy::
   groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5562,7 +5498,7 @@ namespace dds
 
   historyQosPolicy::
   historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5594,7 +5530,7 @@ namespace dds
 
   latencyBudgetQosPolicy::
   latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5620,7 +5556,7 @@ namespace dds
 
   lifespanQosPolicy::
   lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5646,7 +5582,7 @@ namespace dds
 
   livelinessQosPolicy::
   livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5678,7 +5614,7 @@ namespace dds
 
   ownershipQosPolicy::
   ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5704,7 +5640,7 @@ namespace dds
 
   ownershipStrengthQosPolicy::
   ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5730,7 +5666,7 @@ namespace dds
 
   partitionQosPolicy::
   partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5756,7 +5692,7 @@ namespace dds
 
   presentationQosPolicy::
   presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5794,7 +5730,7 @@ namespace dds
 
   readerDataLifecycleQosPolicy::
   readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5826,7 +5762,7 @@ namespace dds
 
   reliabilityQosPolicy::
   reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5858,7 +5794,7 @@ namespace dds
 
   resourceLimitsQosPolicy::
   resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5908,7 +5844,7 @@ namespace dds
 
   timeBasedFilterQosPolicy::
   timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5934,7 +5870,7 @@ namespace dds
 
   topicDataQosPolicy::
   topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5960,7 +5896,7 @@ namespace dds
 
   transportPriorityQosPolicy::
   transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5986,7 +5922,7 @@ namespace dds
 
   userDataQosPolicy::
   userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6012,7 +5948,7 @@ namespace dds
 
   writerDataLifecycleQosPolicy::
   writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6038,7 +5974,7 @@ namespace dds
 
   domainparticipantQos::
   domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6091,7 +6027,7 @@ namespace dds
 
   publisherQos::
   publisherQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6156,7 +6092,7 @@ namespace dds
 
   subscriberQos::
   subscriberQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6221,7 +6157,7 @@ namespace dds
 
   topicQos::
   topicQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6346,7 +6282,7 @@ namespace dds
 
   datareaderQos::
   datareaderQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6465,7 +6401,7 @@ namespace dds
 
   datawriterQos::
   datawriterQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6602,7 +6538,7 @@ namespace dds
 
   qosProfile::
   qosProfile (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6679,7 +6615,7 @@ namespace dds
 
   qosProfile_seq::
   qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);

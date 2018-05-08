@@ -349,9 +349,6 @@ namespace dds
     explicit duration (::XSCRT::XML::Element<ACE_TCHAR> const&);
     duration (duration const& s);
     duration& operator= (duration const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -384,9 +381,6 @@ namespace dds
     explicit stringSeq (::XSCRT::XML::Element<ACE_TCHAR> const&);
     stringSeq (stringSeq const& s);
     stringSeq& operator= (stringSeq const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -413,9 +407,6 @@ namespace dds
     explicit deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     deadlineQosPolicy (deadlineQosPolicy const& s);
     deadlineQosPolicy& operator= (deadlineQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -442,9 +433,6 @@ namespace dds
     explicit destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     destinationOrderQosPolicy (destinationOrderQosPolicy const& s);
     destinationOrderQosPolicy& operator= (destinationOrderQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -471,9 +459,6 @@ namespace dds
     explicit durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     durabilityQosPolicy (durabilityQosPolicy const& s);
     durabilityQosPolicy& operator= (durabilityQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -550,9 +535,6 @@ namespace dds
     explicit durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     durabilityServiceQosPolicy (durabilityServiceQosPolicy const& s);
     durabilityServiceQosPolicy& operator= (durabilityServiceQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -579,9 +561,6 @@ namespace dds
     explicit entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     entityFactoryQosPolicy (entityFactoryQosPolicy const& s);
     entityFactoryQosPolicy& operator= (entityFactoryQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -608,9 +587,6 @@ namespace dds
     explicit groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     groupDataQosPolicy (groupDataQosPolicy const& s);
     groupDataQosPolicy& operator= (groupDataQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -647,9 +623,6 @@ namespace dds
     explicit historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     historyQosPolicy (historyQosPolicy const& s);
     historyQosPolicy& operator= (historyQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -676,9 +649,6 @@ namespace dds
     explicit latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     latencyBudgetQosPolicy (latencyBudgetQosPolicy const& s);
     latencyBudgetQosPolicy& operator= (latencyBudgetQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -705,9 +675,6 @@ namespace dds
     explicit lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     lifespanQosPolicy (lifespanQosPolicy const& s);
     lifespanQosPolicy& operator= (lifespanQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -744,9 +711,6 @@ namespace dds
     explicit livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     livelinessQosPolicy (livelinessQosPolicy const& s);
     livelinessQosPolicy& operator= (livelinessQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -773,9 +737,6 @@ namespace dds
     explicit ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     ownershipQosPolicy (ownershipQosPolicy const& s);
     ownershipQosPolicy& operator= (ownershipQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -802,9 +763,6 @@ namespace dds
     explicit ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const& s);
     ownershipStrengthQosPolicy& operator= (ownershipStrengthQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -831,9 +789,6 @@ namespace dds
     explicit partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     partitionQosPolicy (partitionQosPolicy const& s);
     partitionQosPolicy& operator= (partitionQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -880,9 +835,6 @@ namespace dds
     explicit presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     presentationQosPolicy (presentationQosPolicy const& s);
     presentationQosPolicy& operator= (presentationQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -919,9 +871,6 @@ namespace dds
     explicit readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const& s);
     readerDataLifecycleQosPolicy& operator= (readerDataLifecycleQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -958,9 +907,6 @@ namespace dds
     explicit reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     reliabilityQosPolicy (reliabilityQosPolicy const& s);
     reliabilityQosPolicy& operator= (reliabilityQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1027,9 +973,6 @@ namespace dds
     explicit resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s);
     resourceLimitsQosPolicy& operator= (resourceLimitsQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1056,9 +999,6 @@ namespace dds
     explicit timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const& s);
     timeBasedFilterQosPolicy& operator= (timeBasedFilterQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1085,9 +1025,6 @@ namespace dds
     explicit topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     topicDataQosPolicy (topicDataQosPolicy const& s);
     topicDataQosPolicy& operator= (topicDataQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1114,9 +1051,6 @@ namespace dds
     explicit transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     transportPriorityQosPolicy (transportPriorityQosPolicy const& s);
     transportPriorityQosPolicy& operator= (transportPriorityQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1143,9 +1077,6 @@ namespace dds
     explicit userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     userDataQosPolicy (userDataQosPolicy const& s);
     userDataQosPolicy& operator= (userDataQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1172,9 +1103,6 @@ namespace dds
     explicit writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const&);
     writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const& s);
     writerDataLifecycleQosPolicy& operator= (writerDataLifecycleQosPolicy const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1233,9 +1161,6 @@ namespace dds
     explicit domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR> const&);
     domainparticipantQos (domainparticipantQos const& s);
     domainparticipantQos& operator= (domainparticipantQos const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1314,9 +1239,6 @@ namespace dds
     explicit publisherQos (::XSCRT::XML::Element<ACE_TCHAR> const&);
     publisherQos (publisherQos const& s);
     publisherQos& operator= (publisherQos const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1395,9 +1317,6 @@ namespace dds
     explicit subscriberQos (::XSCRT::XML::Element<ACE_TCHAR> const&);
     subscriberQos (subscriberQos const& s);
     subscriberQos& operator= (subscriberQos const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1577,9 +1496,6 @@ namespace dds
     explicit topicQos (::XSCRT::XML::Element<ACE_TCHAR> const&);
     topicQos (topicQos const& s);
     topicQos& operator= (topicQos const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1749,9 +1665,6 @@ namespace dds
     explicit datareaderQos (::XSCRT::XML::Element<ACE_TCHAR> const&);
     datareaderQos (datareaderQos const& s);
     datareaderQos& operator= (datareaderQos const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -1951,9 +1864,6 @@ namespace dds
     explicit datawriterQos (::XSCRT::XML::Element<ACE_TCHAR> const&);
     datawriterQos (datawriterQos const& s);
     datawriterQos& operator= (datawriterQos const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -2087,9 +1997,6 @@ namespace dds
     explicit qosProfile (::XSCRT::XML::Element<ACE_TCHAR> const&);
     qosProfile (qosProfile const& s);
     qosProfile& operator= (qosProfile const& s);
-
-    private:
-    char regulator__;
   };
 
 
@@ -2122,9 +2029,6 @@ namespace dds
     explicit qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR> const&);
     qosProfile_seq (qosProfile_seq const& s);
     qosProfile_seq& operator= (qosProfile_seq const& s);
-
-    private:
-    char regulator__;
   };
 }
 

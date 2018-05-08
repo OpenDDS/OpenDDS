@@ -51,8 +51,33 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
   writer << rtps_header_;
 }
 
+namespace {
+  bool shouldWarn(int code) {
+    return code == EPERM || code == EACCES || code == EINTR || code == ENOBUFS || code == ENOMEM;
+  }
+}
+
 ssize_t
 RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
+{
+  ssize_t result = send_bytes_i_helper(iov, n);
+
+  if (result == -1 && shouldWarn(errno)) {
+    // Make the framework think this was a successful send to avoid
+    // putting the send strategy in suspended mode. If reliability
+    // is enabled, the data may be resent later.
+    ssize_t b = 0;
+    for (int i = 0; i < n; ++i) {
+      b += iov[i].iov_len;
+    }
+    result = b;
+  }
+
+  return result;
+}
+
+ssize_t
+RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
 {
   if (override_single_dest_) {
     return send_single_i(iov, n, *override_single_dest_);
@@ -129,7 +154,8 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
   const int num_blocks = mb_to_iov(rtps_header_mb_, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
   if (result < 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
+    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
 
@@ -146,7 +172,8 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
   const int num_blocks = mb_to_iov(rtps_header_mb_, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
   if (result < 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
+    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
   }
 
@@ -193,7 +220,8 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     int err = errno;
     addr.addr_to_string(addr_buff, 256, 0);
     errno = err;
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+    ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
       "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
   }
   return result;
