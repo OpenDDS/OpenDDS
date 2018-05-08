@@ -15,6 +15,7 @@
 
 #include <string>
 #include <iostream>
+#include <cstring>
 
 namespace { // Anonymous namespace for file scope.
 
