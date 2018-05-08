@@ -46,6 +46,8 @@ usage_and_exit(int value = 0)
             << " Where <target> and <peer> are endpoint specifications" << std::endl
             << " which can include a hostname and port.  If no hostname is specified," << std::endl
             << " the default 'localhost' will be used." << std::endl
+            << " If an endpoint specification contains :// it will be treated as a full IOR" << std::endl
+            << " and not changed to the constructed IOR described below." << std::endl
             << std::endl
             << " A connection will be attempted by constructing an IOR as:" << std::endl
             << std::endl
@@ -222,6 +224,15 @@ Options::Options(int argc, ACE_TCHAR** argv)
   }
 }
 
+std::string ior(const char* target, const char* key)
+{
+  if (std::strstr(target, "://")) {
+    return target;
+  }
+  std::string iorString("corbaloc:iiop:");
+  return iorString + target + '/' + key;
+}
+
 } // End of anonymous namespace.
 
 int ACE_TMAIN(int argc, ACE_TCHAR** argv)
@@ -242,11 +253,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
     OpenDDS::Federator::Manager_var peer;
 
     if (options.command() == Options::KILL) {
-      // Resolve the ir reference.
-      std::string iorString("corbaloc:iiop:");
-      iorString += options.target();
-      iorString += "/";
-      iorString += OpenDDS::Federator::REPOSITORY_IORTABLE_KEY;
+      std::string iorString = ior(options.target().c_str(),
+                                  OpenDDS::Federator::REPOSITORY_IORTABLE_KEY);
 
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
@@ -270,10 +278,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     } else {
       // Resolve the target reference.
-      std::string iorString("corbaloc:iiop:");
-      iorString += options.target();
-      iorString += "/";
-      iorString += OpenDDS::Federator::FEDERATOR_IORTABLE_KEY;
+      std::string iorString = ior(options.target().c_str(),
+                                  OpenDDS::Federator::FEDERATOR_IORTABLE_KEY);
 
       if (options.verbose()) {
         ACE_DEBUG((LM_INFO,
