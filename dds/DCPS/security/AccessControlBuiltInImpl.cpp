@@ -452,7 +452,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
-  if(ac_iter == local_ac_perms.end()) {
+
+  if (ac_iter == local_ac_perms.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
     return false;
   }
@@ -466,9 +467,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     if(d > 0){
       TopicAccessRules::iterator tr_iter;
 
-      for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
-        if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
-          if(tr_iter->topic_attrs.is_write_protected == false ) {
+      for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
+          if (tr_iter->topic_attrs.is_write_protected == false ) {
             return true;
           }
         }
@@ -478,28 +479,39 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
 
-
   PermissionGrantRules::iterator pm_iter;
 
-
-  for(pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
     //TODO Need to check the date/time range for validity here
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
-    for(ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
+    for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_id);
-      if((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+
+      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
         std::list<permission_topic_ps_rule>::iterator tpsr_iter;
-        for(tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if(tpsr_iter->ps_type == PUBLISH) {
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if (tpsr_iter->ps_type == PUBLISH) {
             std::vector<std::string>::iterator tl_iter; // topic list
+
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) return true;
+              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) 
+                  return true;
             }
           }
         }
       }
+    }
+
+    // If this point in the code is reached it means that either there are no PermissionTopicRules 
+    // or the topic_name does not exist in the topic_list so return the value of default_permission
+    if (pm_iter->default_permission.c_str() == "ALLOW") {
+        return true;
+    }
+    else {
+        return false;
     }
   }
 
@@ -560,28 +572,38 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
 
-
   PermissionGrantRules::iterator pm_iter;
 
-
-  for(pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
     //TODO Need to check the date/time range for validity here
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
-    for(ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
+    for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_id);
-      if((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+
+      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
         std::list<permission_topic_ps_rule>::iterator tpsr_iter;
-        for(tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if(tpsr_iter->ps_type == SUBSCRIBE) {
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if (tpsr_iter->ps_type == SUBSCRIBE) {
             std::vector<std::string>::iterator tl_iter; // topic list
+
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) return true;
+              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) 
+                return true;
             }
           }
         }
       }
+    }
+
+    // No matching topic rule was found of topic_name so return the value in default_permission
+    if (pm_iter->default_permission.c_str() == "ALLOW") {
+        return true;
+    }
+    else {
+        return false;
     }
   }
 
@@ -642,22 +664,33 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   PermissionGrantRules::iterator pm_iter;
 
-
-  for(pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     //TODO Need to check the date/time range for validity here
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
-    for(ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
+    for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_to_find);
-      if((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+
+      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
         std::list<permission_topic_ps_rule>::iterator tpsr_iter;
-        for(tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
           std::vector<std::string>::iterator tl_iter; // topic list
-          for(tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-            if(::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) return true;
+
+          for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+            if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) 
+                return true;
           }
         }
       }
+    }
+
+    // There is no matching rule for topic_name so use the value in default_permission
+    if (pm_iter->default_permission.c_str() == "ALLOW") {
+        return true;
+    }
+    else {
+        return false;
     }
   }
 
@@ -849,24 +882,36 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   PermissionGrantRules::iterator pm_iter;
 
 
-  for(pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
     //TODO Need to check the date/time range for validity here
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
-    for(ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
 
+    for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_id);
-      if((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+
+      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
         std::list<permission_topic_ps_rule>::iterator tpsr_iter;
-        for(tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
           if(tpsr_iter->ps_type == PUBLISH) {
             std::vector<std::string>::iterator tl_iter; // topic list
+
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-              if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false)) return true;
+              if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false)) 
+                  return true;
             }
           }
         }
       }
+    }
+
+    // There is no matching rule for topic_name so use the value in default_permission
+    if (pm_iter->default_permission.c_str() == "ALLOW") {
+        return true;
+    }
+    else {
+        return false;
     }
   }
 
@@ -1007,7 +1052,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     ACPermsMap::iterator iter = local_ac_perms.begin();
     iter = local_ac_perms.find(handle);
-    if(iter != local_ac_perms.end()) {
+
+    if (iter != local_ac_perms.end()) {
         permissions_credential_token = iter->second.perm_cred_token;
         return true;
     } else {
@@ -1188,8 +1234,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
-    if (d > 0) {
-
+    if(d > 0){
       if (std::strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
@@ -1218,14 +1263,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         attributes.is_submessage_protected = true;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
-
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
         }
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
         }
-
         return true;
       }
       if (std::strcmp(topic_name, "DCPSParticipantSecure") == 0 || std::strcmp(topic_name, "DCPSPublicationsSecure") == 0 || std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
@@ -1236,18 +1279,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         attributes.is_submessage_protected = true;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
-
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
         }
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
         }
-
         return true;
       }
-
       TopicAccessRules::iterator tr_iter;
+
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
 
@@ -1263,12 +1304,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           } else {
             attributes.is_submessage_protected = true;
             if ( tr_iter->metadata_protection_kind == "ENCRYPT" ||
-              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+                    tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
             }
 
             if ( tr_iter->metadata_protection_kind == "SIGN_WITH_ORIGIN_AUTHENTICATION" ||
-              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
             }
           }
@@ -1280,15 +1321,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             attributes.is_key_protected = false;
 
           } else if (tr_iter->data_protection_kind == "SIGN") {
-            attributes.is_payload_protected = true;
-            attributes.is_key_protected = false;
-          } else if ( tr_iter->data_protection_kind == "ENCRYPT") {
-            attributes.is_payload_protected = true;
-            attributes.is_key_protected = true;
-            attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED;
-          }
+              attributes.is_payload_protected = true;
+              attributes.is_key_protected = false;
+            } else if ( tr_iter->data_protection_kind == "ENCRYPT") {
+                attributes.is_payload_protected = true;
+                attributes.is_key_protected = true;
+                attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED;
+              }
 
-          return true;
+            return true;
         }
 
       }
@@ -1326,8 +1367,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
-    if (d > 0) {
-
+    if(d > 0){
       if (std::strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
@@ -1356,14 +1396,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         attributes.is_submessage_protected = true;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
-
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
         }
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
         }
-
         return true;
       }
       if (std::strcmp(topic_name, "DCPSParticipantSecure") == 0 || std::strcmp(topic_name, "DCPSPublicationsSecure") == 0 || std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
@@ -1374,18 +1412,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         attributes.is_submessage_protected = true;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
-
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
         }
         if (giter->domain_attrs.plugin_participant_attributes & ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED) {
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
         }
-
         return true;
       }
-
       TopicAccessRules::iterator tr_iter;
+
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
 
@@ -1401,12 +1437,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           } else {
             attributes.is_submessage_protected = true;
             if ( tr_iter->metadata_protection_kind == "ENCRYPT" ||
-              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED;
             }
 
             if ( tr_iter->metadata_protection_kind == "SIGN_WITH_ORIGIN_AUTHENTICATION" ||
-              tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
+                 tr_iter->metadata_protection_kind == "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") {
               attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
             }
           }
@@ -1620,8 +1656,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
        rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
      } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
        rule_holder_.domain_attrs.is_discovery_protected = true;
-       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
-       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
+         rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
+         rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
      }
 
      // Process liveliness_protection_kind
@@ -1775,24 +1811,28 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     PermissionGrantRules grant_rules_list_holder_;
 
-  for(XMLSize_t r=0;r<grantRules->getLength();r++) {
+  for (XMLSize_t r = 0; r < grantRules->getLength(); r++) {
     permission_grant_rule rule_holder_;
 
     // Pull out the grant name for this grant
     xercesc::DOMNamedNodeMap * rattrs = grantRules->item(r)->getAttributes();
     rule_holder_.grant_name = xercesc::XMLString::transcode(rattrs->item(0)->getTextContent());
 
-    // Pull out subject name and validity
+    // Pull out subject name, validity, and default
     xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
-    for( XMLSize_t gn = 0; gn<grantNodes->getLength();gn++) {
+
+    for ( XMLSize_t gn = 0; gn < grantNodes->getLength(); gn++) {
         char *g_tag = xercesc::XMLString::transcode(grantNodes->item(gn)->getNodeName());
+
         if (strcmp(g_tag, "subject_name") == 0) {
             rule_holder_.subject = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
         } else if (strcmp(g_tag, "validity") == 0) {
             Validity_t gn_validity;
             xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
+
             for (XMLSize_t vn = 0; vn < validityNodes->getLength(); vn++) {
                 char *v_tag = xercesc::XMLString::transcode((validityNodes->item(vn)->getNodeName()));
+
                 if (strcmp(v_tag, "not_before") == 0) {
                     rule_holder_.validity.not_before = xercesc::XMLString::transcode(
                             (validityNodes->item(vn)->getTextContent()));
@@ -1807,20 +1847,24 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
     // Pull out allow/deny rules
     xercesc::DOMNodeList * adGrantNodes = grantRules->item(r)->getChildNodes();
-    for( XMLSize_t gn = 0; gn<adGrantNodes->getLength();gn++) {
+
+    for (XMLSize_t gn = 0; gn < adGrantNodes->getLength(); gn++) {
       char *g_tag = xercesc::XMLString::transcode(adGrantNodes->item(gn)->getNodeName());
+
       if (strcmp(g_tag, "allow_rule") == 0 || strcmp(g_tag, "deny_rule") == 0) {
         permissions_topic_rule ptr_holder_;
         ptr_holder_.ad_type = (strcmp(g_tag,"allow_rule") ==  0 ? ALLOW : DENY);
         xercesc::DOMNodeList * adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
-        for( XMLSize_t anc = 0; anc<adNodeChildren->getLength(); anc++) {
+
+        for (XMLSize_t anc = 0; anc < adNodeChildren->getLength(); anc++) {
           char *anc_tag = xercesc::XMLString::transcode(adNodeChildren->item(anc)->getNodeName());
+
           if (strcmp(anc_tag, "domains") == 0) {   //domain list
             xercesc::DOMNodeList * domainIdNodes = adNodeChildren->item(anc)->getChildNodes();
-            for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
-              if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
-                ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
 
+            for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
+              if (strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+                ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
               }
             }
 
@@ -1828,11 +1872,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             permission_topic_ps_rule anc_ps_rule_holder_;
             anc_ps_rule_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
             xercesc::DOMNodeList * topicListNodes = adNodeChildren->item(anc)->getChildNodes();
-            for(XMLSize_t tln = 0; tln<topicListNodes->getLength();tln++) {
-              if(strcmp("topics" , xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
+
+            for (XMLSize_t tln = 0; tln < topicListNodes->getLength(); tln++) {
+              if (strcmp("topics" , xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
                 xercesc::DOMNodeList * topicNodes = topicListNodes->item(tln)->getChildNodes();
-                for(XMLSize_t tn = 0; tn < topicNodes->getLength(); tn++) {
-                  if(strcmp("topic", xercesc::XMLString::transcode(topicNodes->item(tn)->getNodeName())) == 0) {
+
+                for (XMLSize_t tn = 0; tn < topicNodes->getLength(); tn++) {
+                  if (strcmp("topic", xercesc::XMLString::transcode(topicNodes->item(tn)->getNodeName())) == 0) {
                     anc_ps_rule_holder_.topic_list.push_back(xercesc::XMLString::transcode(topicNodes->item(tn)->getTextContent()));
                   }
                 }
@@ -1841,18 +1887,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             }
 
             ptr_holder_.topic_ps_rules.push_back(anc_ps_rule_holder_);
-
           }
         }
+
         rule_holder_.PermissionTopicRules.push_back(ptr_holder_);
       }
     }
 
     ac_perms_holder->perm_rules.push_back(rule_holder_);
-
   } // grant_rules
-
-
 
   delete parser;
   delete errHandler;

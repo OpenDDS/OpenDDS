@@ -194,8 +194,8 @@ public:
     Property_t permca, permca_p7s;
     Property_t  gov_0, gov_1, gov_2, gov_3, gov_4, gov_5, gov_6;
     Property_t  gov_0_p7s, gov_1_p7s, gov_2_p7s, gov_3_p7s,gov_4_p7s, gov_5_p7s, gov_6_p7s;
-    Property_t perm_join, perm_topic;
-    Property_t perm_join_p7s, perm_topic_p7s;
+    Property_t perm_join, perm_topic_0, perm_topic_1;
+    Property_t perm_join_p7s, perm_topic_p7s, perm_topic2_p7s;
 
     permca.name = "dds.sec.access.permissions_ca";
     permca.value = "file:certs/opendds_identity_ca_cert.pem";
@@ -270,17 +270,25 @@ public:
     perm_join_p7s.value = "file:permissions/Permissions_JoinDomain_OCI.p7s";
     perm_join_p7s.propagate = false;
 
-    perm_topic.name = "dds.sec.access.permissions";
-    perm_topic.value = "file:permissions/Permissions_TopicLevel_OCI.xml";
-    perm_topic.propagate = false;
+    perm_topic_0.name = "dds.sec.access.permissions";
+    perm_topic_0.value = "file:permissions/Permissions_TopicLevel_OCI.xml";
+    perm_topic_0.propagate = false;
+
+    perm_topic_1.name = "dds.sec.access.permissions";
+    perm_topic_1.value = "file:permissions/Permissions_TopicLevel_OCI1.xml";
+    perm_topic_1.propagate = false;
 
     perm_topic_p7s.name = "dds.sec.access.permissions";
     perm_topic_p7s.value = "file:permissions/Permissions_TopicLevel_OCI.p7s";
     perm_topic_p7s.propagate = false;
 
+    perm_topic2_p7s.name = "dds.sec.access.permissions";
+    perm_topic2_p7s.value = "file:permissions/Permissions_TopicLevel_OCI2.p7s";
+    perm_topic2_p7s.propagate = false;
+
     add_property(permca);
     add_property(gov_0_p7s);
-    add_property(perm_join_p7s);
+    add_property(perm_topic2_p7s); // perm_join_p7s);
 
     ::DDS::OctetSeq Empty_Seq;
 
@@ -497,6 +505,28 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
     ex));
 }
 
+TEST_F(AccessControlTest, check_create_datawriter_default_Success)
+{
+    ::DDS::Security::DomainId_t domain_id = 0;
+    const char * topic_name = "Rectangle";
+    ::DDS::DataWriterQos qos;
+    ::DDS::PartitionQosPolicy  partition;
+    ::DDS::Security::DataTags  data_tag;
+    ::DDS::Security::SecurityException ex;
+
+    ::DDS::Security::PermissionsHandle out_handle =
+        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+
+    EXPECT_TRUE(get_inst().check_create_datawriter(
+        out_handle,
+        domain_id,
+        topic_name,
+        qos,
+        partition,
+        data_tag,
+        ex));
+}
+
 TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
@@ -550,6 +580,29 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
     ex));
 }
 
+TEST_F(AccessControlTest, check_create_datareader_default_Success)
+{
+
+    ::DDS::Security::DomainId_t domain_id = 0;
+    const char * topic_name = "Oval";
+    ::DDS::DataReaderQos qos;
+    ::DDS::PartitionQosPolicy  partition;
+    ::DDS::Security::DataTags  data_tag;
+    ::DDS::Security::SecurityException ex;
+
+    ::DDS::Security::PermissionsHandle permissions_handle =
+        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+
+    EXPECT_TRUE(get_inst().check_create_datareader(
+        permissions_handle,
+        domain_id,
+        topic_name,
+        qos,
+        partition,
+        data_tag,
+        ex));
+}
+
 TEST_F(AccessControlTest, check_create_topic_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
@@ -577,6 +630,19 @@ TEST_F(AccessControlTest, check_create_topic_Success)
   ::DDS::Security::PermissionsHandle permissions_handle = get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
   EXPECT_TRUE(get_inst().check_create_topic(
     permissions_handle, domain_id, topic_name, qos, ex));
+}
+
+TEST_F(AccessControlTest, check_create_topic_default_Success)
+{
+    ::DDS::Security::DomainId_t domain_id = 0;
+    const char * topic_name = "Polygon";
+    ::DDS::TopicQos qos;
+    ::DDS::Security::SecurityException ex;
+
+
+    ::DDS::Security::PermissionsHandle permissions_handle = get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+    EXPECT_TRUE(get_inst().check_create_topic(
+        permissions_handle, domain_id, topic_name, qos, ex));
 }
 
 TEST_F(AccessControlTest, check_local_datawriter_register_instance_InvalidInput)
