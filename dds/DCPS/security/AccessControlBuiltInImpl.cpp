@@ -507,7 +507,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // If this point in the code is reached it means that either there are no PermissionTopicRules 
     // or the topic_name does not exist in the topic_list so return the value of default_permission
-    if (pm_iter->default_permission.c_str() == "ALLOW") {
+    if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0)
+    {
         return true;
     }
     else {
@@ -599,7 +600,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
 
     // No matching topic rule was found of topic_name so return the value in default_permission
-    if (pm_iter->default_permission.c_str() == "ALLOW") {
+    if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0) {
         return true;
     }
     else {
@@ -686,7 +687,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
 
     // There is no matching rule for topic_name so use the value in default_permission
-    if (pm_iter->default_permission.c_str() == "ALLOW") {
+    if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0) {
         return true;
     }
     else {
@@ -907,7 +908,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
 
     // There is no matching rule for topic_name so use the value in default_permission
-    if (pm_iter->default_permission.c_str() == "ALLOW") {
+    if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0) {
         return true;
     }
     else {
