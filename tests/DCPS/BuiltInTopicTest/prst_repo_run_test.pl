@@ -121,11 +121,6 @@ sub shutdown_repo {
   my $repoctl_result = $RepoShutdown->Spawn();
   if ($repoctl_result) {
     print STDERR "ERROR: repoctl couldn't be started.\n";
-  } elsif (!$repoctl_result) {
-    $repoctl_result = $RepoShutdown->WaitKill(10);
-    if ($repoctl_result > 0) {
-      print STDERR "ERROR: Could not shutdown repo, repoctl returned $repoctl_result.\n";
-    }
   }
 
   # Make sure repo is killed. This also updates RUNNING even if everything
@@ -134,6 +129,13 @@ sub shutdown_repo {
   my $repo_result = $repo->WaitKill(10);
   if ($repo_result > 0) {
     print STDERR "ERROR: repo returned $repo_result\n";
+  }
+
+  if (!$repoctl_result) {
+    $repoctl_result = $RepoShutdown->WaitKill(10);
+    if ($repoctl_result > 0) {
+      print STDERR "ERROR: Could not shutdown repo, repoctl returned $repoctl_result.\n";
+    }
   }
 
   return $repoctl_result || $repo_result;
@@ -233,14 +235,14 @@ $Monitor2->Spawn ();
 my $MonitorResult = $Monitor1->WaitKill (20);
 if ($MonitorResult > 0) {
   print STDERR "ERROR: Monitor1 returned $MonitorResult \n";
-  $status = 1;
 }
+$status = 1 if $MonitorResult;
 
 $MonitorResult = $Monitor2->WaitKill (300);
 if ($MonitorResult > 0) {
   print STDERR "ERROR: Monitor2 returned $MonitorResult \n";
-  $status = 1;
 }
+$status = 1 if $MonitorResult;
 
 my $pub2_started = 0;
 if (!$status) {
@@ -255,21 +257,21 @@ if (!$status) {
 my $SubscriberResult = $Subscriber1->WaitKill (60);
 if ($SubscriberResult > 0) {
   print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-  $status = 1;
 }
+$status = 1 if $SubscriberResult;
 
 my $PublisherResult = $Publisher1->TerminateWaitKill (10);
 if ($PublisherResult > 0) {
   print STDERR "ERROR: publisher returned $PublisherResult \n";
-  $status = 1;
 }
+$status = 1 if $PublisherResult;
 
 if ($pub2_started) {
   my $Publisher2Result = $Publisher2->TerminateWaitKill (10);
   if ($Publisher2Result > 0) {
     print STDERR "ERROR: publisher 2 returned $Publisher2Result \n";
-    $status = 1;
   }
+  $status = 1 if $Publisher2Result;
 }
 
 $status = 1 if shutdown_repo($Repo2);
