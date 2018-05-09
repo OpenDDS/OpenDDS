@@ -1849,6 +1849,19 @@ DomainParticipantImpl::create_new_topic(
     Security::AccessControl_var access = security_config_->get_access_control();
 
     DDS::Security::SecurityException se;
+
+    DDS::Security::TopicSecurityAttributes sec_attr;
+    if (!access->get_topic_sec_attributes(perm_handle_, topic_name, sec_attr, se)) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipant::create_new_topic, ")
+        ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
+          topic_name, se.code, se.minor_code, se.message.in()));
+      return DDS::Topic::_nil();
+    }
+
+    // TODO Need to actually check / use / handle topic security attributes (see 8.4.2.6)
+
     if (!access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")

@@ -97,6 +97,8 @@ public:
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id);
   void send_participant_crypto_tokens(const DCPS::RepoId& id);
 
+  DDS::DomainId_t get_domain_id() const { return domain_; }
+
 protected:
   Sedp& endpoint_manager() { return sedp_; }
 

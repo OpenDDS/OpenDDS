@@ -308,16 +308,22 @@ namespace OpenDDS {
         if (is_security_enabled()) {
           DDS::Security::SecurityException ex;
 
-          bool ok = get_access_control()->get_datawriter_sec_attributes(
-              get_permissions_handle(),
-              topic_names_[topicId].c_str(),
-              publisherQos.partition,
-              DDS::Security::DataTagQosPolicy(),
-              pb.security_attribs_,
-              ex);
+          if (!get_access_control()->check_create_datawriter(get_permissions_handle(), get_domain_id(), topic_names_[topicId].c_str(), qos,
+                                                             publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_publication() - ")
+              ACE_TEXT("Permissions check failed for local datawriter on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_names_[topicId].c_str(),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
 
-          if (!ok) {
-              // TODO: log error / throw exception??
+          if (!get_access_control()->get_datawriter_sec_attributes(get_permissions_handle(), topic_names_[topicId].c_str(),
+                                                                   publisherQos.partition, DDS::Security::DataTagQosPolicy(), pb.security_attribs_, ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_publication() - ")
+              ACE_TEXT("Unable to get security attributes for local datawriter. Security Exception[%d.%d]: %C\n"),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
           }
 
           if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
@@ -325,9 +331,10 @@ namespace OpenDDS {
             if (handle == DDS::HANDLE_NIL) {
               ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                 ACE_TEXT("EndpointManager::add_publication() - ")
-                ACE_TEXT("unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
+                ACE_TEXT("Unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
                   ex.code, ex.minor_code, ex.message.in()));
             }
+
             local_writer_crypto_handles_[rid] = handle;
             local_writer_security_attribs_[rid] = pb.security_attribs_;
           }
@@ -406,16 +413,22 @@ namespace OpenDDS {
         if (is_security_enabled()) {
           DDS::Security::SecurityException ex;
 
-          bool ok = get_access_control()->get_datareader_sec_attributes(
-              get_permissions_handle(),
-              topic_names_[topicId].c_str(),
-              subscriberQos.partition,
-              DDS::Security::DataTagQosPolicy(),
-              sb.security_attribs_,
-              ex);
+          if (!get_access_control()->check_create_datareader(get_permissions_handle(), get_domain_id(), topic_names_[topicId].c_str(), qos,
+                                                             subscriberQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_subscription() - ")
+              ACE_TEXT("Permissions check failed for local datareader on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_names_[topicId].c_str(),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
 
-          if (!ok) {
-              // TODO: log error / throw exception??
+          if (!get_access_control()->get_datareader_sec_attributes(get_permissions_handle(), topic_names_[topicId].c_str(),
+                                                                   subscriberQos.partition, DDS::Security::DataTagQosPolicy(), sb.security_attribs_, ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("EndpointManager::add_subscription() - ")
+              ACE_TEXT("Unable to get security attributes for local datareader. Security Exception[%d.%d]: %C\n"),
+                ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
           }
 
           if (sb.security_attribs_.is_submessage_protected || sb.security_attribs_.is_payload_protected) {
@@ -423,9 +436,10 @@ namespace OpenDDS {
             if (handle == DDS::HANDLE_NIL) {
               ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                 ACE_TEXT("EndpointManager::add_subscription() - ")
-                ACE_TEXT("unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
+                ACE_TEXT("Unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
                   ex.code, ex.minor_code, ex.message.in()));
             }
+
             local_reader_crypto_handles_[rid] = handle;
             local_reader_security_attribs_[rid] = sb.security_attribs_;
           }
@@ -661,6 +675,12 @@ namespace OpenDDS {
       create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&, const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&)
       {
         return;
+      }
+
+      virtual DDS::DomainId_t
+      get_domain_id() const
+      {
+        return -1;
       }
 
       void
@@ -1671,8 +1691,7 @@ namespace OpenDDS {
                                                     const DCPS::TransportLocatorSeq& transInfo,
                                                     const DDS::PublisherQos& publisherQos)
       {
-        return get_part(domainId, participantId)->add_publication(
-                                                                  topicId, publication, qos, transInfo, publisherQos);
+        return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos);
       }
 
       virtual bool remove_publication(DDS::DomainId_t domainId,

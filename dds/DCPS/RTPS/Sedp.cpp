@@ -3865,6 +3865,10 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   }
 }
 
+DDS::DomainId_t Sedp::get_domain_id() const {
+  return spdp_.get_domain_id();
+}
+
 WaitForAcks::WaitForAcks()
 : cond_(lock_)
 , acks_(0)
