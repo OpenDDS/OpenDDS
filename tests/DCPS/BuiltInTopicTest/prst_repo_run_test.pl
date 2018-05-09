@@ -103,6 +103,42 @@ sub cleanup() {
 
 cleanup();
 
+# This is a workaround for TerminateWaitKill method, using the repoctl tool.
+#
+# On Windows PerlACE uses the Win32::Process Perl module, which, when killing
+# a process always does an equivalent of kill -9 (SIGKILL) on processes
+# instead of Ctrl-C (SIGINT) that would happen when using TerminateWaitKill on
+# Linux. The difference is that the repo will shutdown properly with SIGINT
+# and using SIGKILL kills it immediately. At the time of writing this causes
+# the test to pass on Windows and fail on Linux.
+sub shutdown_repo {
+  my $repo = shift;
+  my $RepoShutdown = PerlDDS::create_process(
+    "$ENV{DDS_ROOT}/bin/repoctl", "kill file://$dcpsrepo_ior"
+  );
+  print $RepoShutdown->CommandLine() . "\n";
+
+  my $repoctl_result = $RepoShutdown->Spawn();
+  if ($repoctl_result) {
+    print STDERR "ERROR: repoctl couldn't be started.\n";
+  } elsif (!$repoctl_result) {
+    $repoctl_result = $RepoShutdown->WaitKill(10);
+    if ($repoctl_result > 0) {
+      print STDERR "ERROR: Could not shutdown repo, repoctl returned $repoctl_result.\n";
+    }
+  }
+
+  # Make sure repo is killed. This also updates RUNNING even if everything
+  # went ok, else it will complain that it is still running when the test
+  # ends.
+  my $repo_result = $repo->WaitKill(10);
+  if ($repo_result > 0) {
+    print STDERR "ERROR: repo returned $repo_result\n";
+  }
+
+  return $repoctl_result || $repo_result;
+}
+
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
 my $Repo1 = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
@@ -166,9 +202,7 @@ sleep (15);
 
 print "Killing first DCPSInfoRepo.\n";
 
-my $ir = $Repo1->TerminateWaitKill(10);
-if ($ir != 0) {
-  print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
+if (shutdown_repo($Repo1)) {
   $Subscriber1->Kill();
   $Publisher1->Kill();
   $Monitor1->Kill();
@@ -197,13 +231,13 @@ print $Monitor2->CommandLine() . "\n";
 $Monitor2->Spawn ();
 
 my $MonitorResult = $Monitor1->WaitKill (20);
-if ($MonitorResult != 0) {
+if ($MonitorResult > 0) {
   print STDERR "ERROR: Monitor1 returned $MonitorResult \n";
   $status = 1;
 }
 
 $MonitorResult = $Monitor2->WaitKill (300);
-if ($MonitorResult != 0) {
+if ($MonitorResult > 0) {
   print STDERR "ERROR: Monitor2 returned $MonitorResult \n";
   $status = 1;
 }
@@ -219,30 +253,26 @@ if (!$status) {
 }
 
 my $SubscriberResult = $Subscriber1->WaitKill (60);
-if ($SubscriberResult != 0) {
+if ($SubscriberResult > 0) {
   print STDERR "ERROR: subscriber returned $SubscriberResult \n";
   $status = 1;
 }
 
 my $PublisherResult = $Publisher1->TerminateWaitKill (10);
-if ($PublisherResult != 0) {
+if ($PublisherResult > 0) {
   print STDERR "ERROR: publisher returned $PublisherResult \n";
   $status = 1;
 }
 
 if ($pub2_started) {
   my $Publisher2Result = $Publisher2->TerminateWaitKill (10);
-  if ($Publisher2Result != 0) {
+  if ($Publisher2Result > 0) {
     print STDERR "ERROR: publisher 2 returned $Publisher2Result \n";
     $status = 1;
   }
 }
 
-$ir = $Repo2->TerminateWaitKill(10);
-if ($ir != 0) {
-  print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-  $status = 1;
-}
+$status = 1 if shutdown_repo($Repo2);
 
 cleanup();
 
