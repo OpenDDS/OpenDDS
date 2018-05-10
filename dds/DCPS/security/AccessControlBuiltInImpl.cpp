@@ -19,6 +19,7 @@
 #include "xercesc/framework/MemBufInputSource.hpp"
 #include "AccessControlBuiltInImpl.h"
 
+#include <time.h>
 
 #include <fstream>
 #include <sstream>
@@ -483,7 +484,85 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
-    //TODO Need to check the date/time range for validity here
+
+    // Check the date/time range for validity 
+    struct tm not_before_date_time,
+              not_after_date_time;
+
+    time_t current_date_time_t = time(0);
+
+    std::string temp_str;
+    
+    // Year
+    temp_str = pm_iter->validity.not_before.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_before.substr(5, 2);
+    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_before.substr(8, 2);
+    not_before_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_before.substr(11, 2);
+    not_before_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_before.substr(14, 2);
+    not_before_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_before.substr(17, 2);
+    not_before_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t before_time = mktime(&not_before_date_time);
+    
+    if (current_date_time_t < before_time) {
+        return false;
+    }
+
+    // Year
+    temp_str = pm_iter->validity.not_after.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_after.substr(5, 2);
+    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_after.substr(8, 2);
+    not_after_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_after.substr(11, 2);
+    not_after_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_after.substr(14, 2);
+    not_after_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_after.substr(17, 2);
+    not_after_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t after_time = mktime(&not_after_date_time);
+
+    if (current_date_time_t > after_time) {
+        return false;
+    }
+
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
 
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
@@ -577,7 +656,85 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
-    //TODO Need to check the date/time range for validity here
+
+    // Check the date/time range for validity 
+    struct tm not_before_date_time,
+        not_after_date_time;
+
+    time_t current_date_time_t = time(0);
+
+    std::string temp_str;
+
+    // Year
+    temp_str = pm_iter->validity.not_before.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_before.substr(5, 2);
+    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_before.substr(8, 2);
+    not_before_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_before.substr(11, 2);
+    not_before_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_before.substr(14, 2);
+    not_before_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_before.substr(17, 2);
+    not_before_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t before_time = mktime(&not_before_date_time);
+
+    if (current_date_time_t < before_time) {
+        return false;
+    }
+
+    // Year
+    temp_str = pm_iter->validity.not_after.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_after.substr(5, 2);
+    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_after.substr(8, 2);
+    not_after_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_after.substr(11, 2);
+    not_after_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_after.substr(14, 2);
+    not_after_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_after.substr(17, 2);
+    not_after_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t after_time = mktime(&not_after_date_time);
+
+    if (current_date_time_t > after_time) {
+        return false;
+    }
+
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
 
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
@@ -666,7 +823,84 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   PermissionGrantRules::iterator pm_iter;
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
-    //TODO Need to check the date/time range for validity here
+    // Check the date/time range for validity 
+    struct tm not_before_date_time,
+        not_after_date_time;
+
+    time_t current_date_time_t = time(0);
+
+    std::string temp_str;
+
+    // Year
+    temp_str = pm_iter->validity.not_before.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_before.substr(5, 2);
+    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_before.substr(8, 2);
+    not_before_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_before.substr(11, 2);
+    not_before_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_before.substr(14, 2);
+    not_before_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_before.substr(17, 2);
+    not_before_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t before_time = mktime(&not_before_date_time);
+
+    if (current_date_time_t < before_time) {
+        return false;
+    }
+
+    // Year
+    temp_str = pm_iter->validity.not_after.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_after.substr(5, 2);
+    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_after.substr(8, 2);
+    not_after_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_after.substr(11, 2);
+    not_after_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_after.substr(14, 2);
+    not_after_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_after.substr(17, 2);
+    not_after_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t after_time = mktime(&not_after_date_time);
+
+    if (current_date_time_t > after_time) {
+        return false;
+    }
+
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
 
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
@@ -885,7 +1119,85 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
-    //TODO Need to check the date/time range for validity here
+
+    // Check the date/time range for validity 
+    struct tm not_before_date_time,
+              not_after_date_time;
+
+    time_t current_date_time_t = time(0);
+
+    std::string temp_str;
+
+    // Year
+    temp_str = pm_iter->validity.not_before.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_before.substr(5, 2);
+    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_before.substr(8, 2);
+    not_before_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_before.substr(11, 2);
+    not_before_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_before.substr(14, 2);
+    not_before_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_before.substr(17, 2);
+    not_before_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t before_time = mktime(&not_before_date_time);
+
+    if (current_date_time_t < before_time) {
+        return false;
+    }
+
+    // Year
+    temp_str = pm_iter->validity.not_after.substr(0, 4);
+#ifdef _WIN32
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
+#else
+    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
+#endif
+    temp_str.clear();
+    // Month
+    temp_str = pm_iter->validity.not_after.substr(5, 2);
+    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = pm_iter->validity.not_after.substr(8, 2);
+    not_after_date_time.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = pm_iter->validity.not_after.substr(11, 2);
+    not_after_date_time.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = pm_iter->validity.not_after.substr(14, 2);
+    not_after_date_time.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = pm_iter->validity.not_after.substr(17, 2);
+    not_after_date_time.tm_sec = atoi(temp_str.c_str());
+    temp_str.clear();
+
+    time_t after_time = mktime(&not_after_date_time);
+
+    if (current_date_time_t > after_time) {
+        return false;
+    }
+
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
 
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
