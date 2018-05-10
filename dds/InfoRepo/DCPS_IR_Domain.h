@@ -128,10 +128,10 @@ public:
 
   DDS::DomainId_t get_id();
 
-  // Next Entity Id value in sequence.
+  /// Next Entity Id value in sequence.
   OpenDDS::DCPS::RepoId get_next_participant_id();
 
-  // Ensure no conflicts with sequence values from persistent storage.
+  /// Ensure no conflicts with sequence values from persistent storage.
   void last_participant_key(long key);
 
   /// Initialize the Built-In Topic structures
@@ -148,16 +148,22 @@ public:
   /// Returns 0 (zero) if successful
   int reassociate_built_in_topic_pubs();
 
-  /// Publish the Built-In Topic information
+  /// Publish Participant in the Participant Built-In Topic
   void publish_participant_bit(DCPS_IR_Participant* participant);
+  /// Publish Topic in the Topic Built-In Topic
   void publish_topic_bit(DCPS_IR_Topic* topic);
+  /// Publish Subscription in the Subscription Built-In Topic
   void publish_subscription_bit(DCPS_IR_Subscription* subscription);
+  /// Publish Publication in the Publication Built-In Topic
   void publish_publication_bit(DCPS_IR_Publication* publication);
 
-  /// Remove the Built-In Topic information
+  /// Dispose Participant in the Participant Built-In Topic
   void dispose_participant_bit(DCPS_IR_Participant* participant);
+  /// Dispose Topic in the Topic Built-In Topic
   void dispose_topic_bit(DCPS_IR_Topic* topic);
+  /// Dispose Subscription in the Subscription Built-In Topic
   void dispose_subscription_bit(DCPS_IR_Subscription* subscription);
+  /// Dispose Publication in the Publication Built-In Topic
   void dispose_publication_bit(DCPS_IR_Publication* publication);
 
   /// Expose a readable reference to the participant map.
@@ -189,20 +195,20 @@ private:
                              const char* dataTypeName,
                              DCPS_IR_Topic_Description*& desc);
 
-  // Returns 0 if successful
+  /// Returns 0 if successful
   int remove_topic_description(DCPS_IR_Topic_Description* desc);
 
-  /// work of initializing the built in topics is
-  /// done in these private methods.  They were
-  /// broken up for readability.
+  // work of initializing the built in topics is
+  // done in these private methods.  They were
+  // broken up for readability.
   int init_built_in_topics_topics();
   int init_built_in_topics_datawriters(bool federated);
   int init_built_in_topics_transport();
 
   DDS::DomainId_t id_;
 
-  // Participant GUID Id generator.  The remaining Entities have their
-  // values generated within the containing Participant.
+  /// Participant GUID Id generator.  The remaining Entities have their
+  /// values generated within the containing Participant.
   OpenDDS::DCPS::RepoIdGenerator& participantIdGenerator_;
 
   /// all the participants
@@ -226,7 +232,7 @@ private:
   /// indicates if the BuiltIn Topics are enabled
   bool useBIT_;
 
-  /// Built-in Topic variables
+  // Built-in Topic variables
   DDS::DomainParticipantFactory_var                bitParticipantFactory_;
   DDS::DomainParticipant_var                       bitParticipant_;
   DDS::DomainParticipantListener_var               bitParticipantListener_;
