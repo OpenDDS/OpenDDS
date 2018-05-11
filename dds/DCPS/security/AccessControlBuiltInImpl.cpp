@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <cstring>
+#include <iomanip>
 
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -486,84 +487,21 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     std::cout<<"Checking Permissions ..." << std::endl;
 
     // Check the date/time range for validity 
-    struct tm not_before_date_time,
-              not_after_date_time;
+    time_t after_time,
+           before_time;
 
-    memset(&not_before_date_time, 0, sizeof(tm));
-    memset(&not_after_date_time, 0, sizeof(tm));
+    before_time = convert_permissions_time(pm_iter->validity.not_before);
 
-    time_t current_date_time_t = time(0);
+    time_t current_date_time = time(0);
 
-    std::string temp_str;
-    
-    // Year
-    temp_str = pm_iter->validity.not_before.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_before.substr(5, 2);
-    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_before.substr(8, 2);
-    not_before_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_before.substr(11, 2);
-    not_before_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_before.substr(14, 2);
-    not_before_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_before.substr(17, 2);
-    not_before_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
-
-    time_t before_time = mktime(&not_before_date_time);
-    
-    if (current_date_time_t < before_time) {
+    if (current_date_time < before_time) {
       CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
       return false;
     }
 
-    // Year
-    temp_str = pm_iter->validity.not_after.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_after.substr(5, 2);
-    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_after.substr(8, 2);
-    not_after_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_after.substr(11, 2);
-    not_after_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_after.substr(14, 2);
-    not_after_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_after.substr(17, 2);
-    not_after_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
+    after_time = convert_permissions_time(pm_iter->validity.not_after);
 
-    time_t after_time = mktime(&not_after_date_time);
-
-    if (current_date_time_t > after_time) {
+    if (current_date_time > after_time) {
       CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
       return false;
     }
@@ -663,86 +601,23 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     std::cout<<"Checking Permissions ..." << std::endl;
 
     // Check the date/time range for validity 
-    struct tm not_before_date_time,
-        not_after_date_time;
+    time_t after_time,
+           before_time;
 
-    memset(&not_before_date_time, 0, sizeof(tm));
-    memset(&not_after_date_time, 0, sizeof(tm));
+    before_time = convert_permissions_time(pm_iter->validity.not_before);
 
-    time_t current_date_time_t = time(0);
+    time_t current_date_time = time(0);
 
-    std::string temp_str;
-
-    // Year
-    temp_str = pm_iter->validity.not_before.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_before.substr(5, 2);
-    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_before.substr(8, 2);
-    not_before_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_before.substr(11, 2);
-    not_before_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_before.substr(14, 2);
-    not_before_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_before.substr(17, 2);
-    not_before_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
-
-    time_t before_time = mktime(&not_before_date_time);
-
-    if (current_date_time_t < before_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
-      return false;
+    if (current_date_time < before_time) {
+        CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
+        return false;
     }
 
-    // Year
-    temp_str = pm_iter->validity.not_after.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_after.substr(5, 2);
-    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_after.substr(8, 2);
-    not_after_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_after.substr(11, 2);
-    not_after_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_after.substr(14, 2);
-    not_after_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_after.substr(17, 2);
-    not_after_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
+    after_time = convert_permissions_time(pm_iter->validity.not_after);
 
-    time_t after_time = mktime(&not_after_date_time);
-
-    if (current_date_time_t > after_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
-      return false;
+    if (current_date_time > after_time) {
+        CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
+        return false;
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -835,86 +710,23 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     // Check the date/time range for validity 
-    struct tm not_before_date_time,
-        not_after_date_time;
+    time_t after_time,
+            before_time;
 
-    memset(&not_before_date_time, 0, sizeof(tm));
-    memset(&not_after_date_time, 0, sizeof(tm));
+    before_time = convert_permissions_time(pm_iter->validity.not_before);
 
-    time_t current_date_time_t = time(0);
+    time_t current_date_time = time(0);
 
-    std::string temp_str;
-
-    // Year
-    temp_str = pm_iter->validity.not_before.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_before.substr(5, 2);
-    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_before.substr(8, 2);
-    not_before_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_before.substr(11, 2);
-    not_before_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_before.substr(14, 2);
-    not_before_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_before.substr(17, 2);
-    not_before_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
-
-    time_t before_time = mktime(&not_before_date_time);
-
-    if (current_date_time_t < before_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
-      return false;
+    if (current_date_time < before_time) {
+        CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
+        return false;
     }
 
-    // Year
-    temp_str = pm_iter->validity.not_after.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_after.substr(5, 2);
-    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_after.substr(8, 2);
-    not_after_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_after.substr(11, 2);
-    not_after_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_after.substr(14, 2);
-    not_after_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_after.substr(17, 2);
-    not_after_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
+    after_time = convert_permissions_time(pm_iter->validity.not_after);
 
-    time_t after_time = mktime(&not_after_date_time);
-
-    if (current_date_time_t > after_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
-      return false;
+    if (current_date_time > after_time) {
+        CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
+        return false;
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -1138,86 +950,23 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     std::cout<<"Checking Permissions ..." << std::endl;
 
     // Check the date/time range for validity 
-    struct tm not_before_date_time,
-              not_after_date_time;
+    time_t after_time,
+           before_time;
 
-    memset(&not_before_date_time, 0, sizeof(tm));
-    memset(&not_after_date_time, 0, sizeof(tm));
+    before_time = convert_permissions_time(pm_iter->validity.not_before);
 
-    time_t current_date_time_t = time(0);
+    time_t current_date_time = time(0);
 
-    std::string temp_str;
-
-    // Year
-    temp_str = pm_iter->validity.not_before.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_before.substr(5, 2);
-    not_before_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_before.substr(8, 2);
-    not_before_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_before.substr(11, 2);
-    not_before_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_before.substr(14, 2);
-    not_before_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_before.substr(17, 2);
-    not_before_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
-
-    time_t before_time = mktime(&not_before_date_time);
-
-    if (current_date_time_t < before_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
-      return false;
+    if (current_date_time < before_time) {
+        CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
+        return false;
     }
 
-    // Year
-    temp_str = pm_iter->validity.not_after.substr(0, 4);
-#ifdef _WIN32
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1900);
-#else
-    not_before_date_time.tm_year = (atoi(temp_str.c_str()) - 1970);
-#endif
-    temp_str.clear();
-    // Month
-    temp_str = pm_iter->validity.not_after.substr(5, 2);
-    not_after_date_time.tm_mon = (atoi(temp_str.c_str()) - 1);
-    temp_str.clear();
-    // Day
-    temp_str = pm_iter->validity.not_after.substr(8, 2);
-    not_after_date_time.tm_mday = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Hour
-    temp_str = pm_iter->validity.not_after.substr(11, 2);
-    not_after_date_time.tm_hour = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Minutes
-    temp_str = pm_iter->validity.not_after.substr(14, 2);
-    not_after_date_time.tm_min = atoi(temp_str.c_str());
-    temp_str.clear();
-    // Seconds
-    temp_str = pm_iter->validity.not_after.substr(17, 2);
-    not_after_date_time.tm_sec = atoi(temp_str.c_str());
-    temp_str.clear();
+    after_time = convert_permissions_time(pm_iter->validity.not_after);
 
-    time_t after_time = mktime(&not_after_date_time);
-
-    if (current_date_time_t > after_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
-      return false;
+    if (current_date_time > after_time) {
+        CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
+        return false;
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -1876,6 +1625,58 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   return true;
 }
+
+time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString)
+{
+    tm permission_tm;
+    std::string temp_str;
+
+    memset(&permission_tm, 0, sizeof(tm));
+    temp_str.clear();
+
+    // Year
+    temp_str = timeString.substr(0, 4);
+    permission_tm.tm_year = (atoi(temp_str.c_str()) - 1900);
+    temp_str.clear();
+    // Month
+    temp_str = timeString.substr(5, 2);
+    permission_tm.tm_mon = (atoi(temp_str.c_str()) - 1);
+    temp_str.clear();
+    // Day
+    temp_str = timeString.substr(8, 2);
+    permission_tm.tm_mday = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Hour
+    temp_str = timeString.substr(11, 2);
+    permission_tm.tm_hour = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Minutes
+    temp_str = timeString.substr(14, 2);
+    permission_tm.tm_min = atoi(temp_str.c_str());
+    temp_str.clear();
+    // Seconds
+    temp_str = timeString.substr(17, 2);
+    permission_tm.tm_sec = atoi(temp_str.c_str());
+
+    return mktime(&permission_tm);
+}
+
+//char * AccessControlBuiltInImpl::strptime(const char * s, const char * f, tm * tm)
+//{
+//    // Isn't the C++ standard lib nice? std::get_time is defined such that its
+//    // format parameters are the exact same as strptime. Of course, we have to
+//    // create a string stream first, and imbue it with the current C locale, and
+//    // we also have to make sure we return the right things if it fails, or
+//    // if it succeeds, but this is still far simpler an implementation than any
+//    // of the versions in any of the C standard libraries.
+//    std::istringstream input(s);
+//    input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
+//    input >> std::get_time(tm, f);
+//    if (input.fail()) {
+//        return nullptr;
+//    }
+//    return (char*)(s + input.tellg());
+//}
 
 ::CORBA::Long AccessControlBuiltInImpl::load_governance_file(ac_perms * ac_perms_holder , std::string g_content)
 {

@@ -288,7 +288,6 @@ private:
         std::list<permission_topic_ps_rule> topic_ps_rules;
     };
 
-
     struct permission_grant_rule {
         std::string grant_name;
         std::string subject;
@@ -332,7 +331,7 @@ private:
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;
 
-
+  time_t convert_permissions_time(std::string timeString);
 
   LocalAccessCredentialData local_access_control_data_;
 
