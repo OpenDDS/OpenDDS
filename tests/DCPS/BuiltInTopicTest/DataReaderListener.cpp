@@ -106,17 +106,14 @@ void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus & status)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
+    status.last_publication_handle));
+
   if (this->publication_handle_ == ::DDS::HANDLE_NIL) {
     this->publication_handle_ = status.last_publication_handle;
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-      "(%P|%t) DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
-      publication_handle_));
-  }
-  else {
+  } else {
     this->post_restart_publication_handle_ = status.last_publication_handle;
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-      "(%P|%t) DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
-      post_restart_publication_handle_));
   }
 
   DDS::PublicationBuiltinTopicDataDataReader_var rdr =
