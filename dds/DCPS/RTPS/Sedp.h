@@ -122,6 +122,7 @@ public:
   static const bool host_is_bigendian_;
 private:
   Spdp& spdp_;
+  DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
   struct Msg : public OpenDDS::DCPS::PoolAllocationBase {
     enum MsgType {
