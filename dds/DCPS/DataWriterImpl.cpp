@@ -1442,8 +1442,8 @@ DataWriterImpl::enable()
                            pub_qos);
 
   if (this->publication_id_ == GUID_UNKNOWN) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
                ACE_TEXT("add_publication returned invalid id. \n")));
     return DDS::RETCODE_ERROR;
   }

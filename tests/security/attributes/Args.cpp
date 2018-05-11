@@ -64,7 +64,11 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
       args.topic_name_ = currentArg;
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Expected"))) != 0) {
-      args.expected_result_ = ACE_OS::atoi(currentArg);
+      if (currentArg != NULL && *currentArg == '~') {
+        args.expected_result_ = -1 * ACE_OS::atoi(++currentArg);
+      } else {
+        args.expected_result_ = ACE_OS::atoi(currentArg);
+      }
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();

@@ -40,6 +40,18 @@ const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
 const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
 const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
 
+#define CLEAN_ERROR_RETURN(stuff, val) \
+do { \
+  ACE_ERROR(stuff); \
+  std::cerr << "deleting contained entities" << std::endl; \
+  participant->delete_contained_entities(); \
+  std::cerr << "deleting participant" << std::endl; \
+  dpf->delete_participant(participant.in()); \
+  std::cerr << "shutdown" << std::endl; \
+  TheServiceParticipant->shutdown(); \
+  return val; \
+} while (0);
+
 bool dw_reliable() {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
   return !(gc->instances_[0]->transport_type_ == "udp");
@@ -94,10 +106,10 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil(participant.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+        ACE_ERROR_RETURN((LM_WARNING,
+                          ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
                           ACE_TEXT("main() - create_participant() failed!\n")),
-                         -11);
+                          -11);
       }
 
       // Register TypeSupport (SecurityAttributes::Message)
@@ -105,10 +117,10 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
         new SecurityAttributes::MessageTypeSupportImpl();
 
       if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main() - register_type() failed!\n")),
-                         -12);
+        CLEAN_ERROR_RETURN((LM_WARNING,
+                            ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                            ACE_TEXT("main() - register_type() failed!\n")),
+                            -12);
       }
 
       // Create Topic
@@ -121,10 +133,10 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil(topic.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main() - create_topic failed!\n")),
-                         -13);
+        CLEAN_ERROR_RETURN((LM_WARNING,
+                            ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                            ACE_TEXT("main() - create_topic failed!\n")),
+                            -13);
       }
 
       // Create Publisher
@@ -134,10 +146,10 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil(pub.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main() - create_publisher failed!\n")),
-                         -14);
+        CLEAN_ERROR_RETURN((LM_WARNING,
+                            ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                            ACE_TEXT("main() - create_publisher failed!\n")),
+                            -14);
       }
 
       DDS::DataWriterQos qos;
@@ -156,10 +168,10 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil(dw.in())) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main() - create_datawriter failed!\n")),
-                         -15);
+        CLEAN_ERROR_RETURN((LM_WARNING,
+                            ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                            ACE_TEXT("main() - create_datawriter failed!\n")),
+                            -15);
       }
 
       // Start writing threads
@@ -216,6 +228,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (result == my_args.expected_result_) {
     return 0;
   } else {
+    std::cerr << "Publisher exiting with unexpected result: " << result << std::endl;
     return result;
   }
 }

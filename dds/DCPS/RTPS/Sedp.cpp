@@ -1506,7 +1506,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
   OPENDDS_STRING topic_name;
 
-  // Find the publication  - iterator valid only as long as we hold the lock
+  // Find the publication - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
 
   if (message_id == DCPS::SAMPLE_DATA) {
@@ -1517,10 +1517,44 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
       { // Reduce scope of pub and td
-        DiscoveredPublication& pub =
-            discovered_publications_[guid] = DiscoveredPublication(wdata);
+        DiscoveredPublication prepub(wdata);
 
-        topic_name = get_topic_name(pub);
+        topic_name = get_topic_name(prepub);
+
+        if (is_security_enabled()) {
+
+          DDS::Security::SecurityException ex;
+
+          RepoId part = guid;
+          part.entityId = ENTITYID_PARTICIPANT;
+
+          DDS::TopicBuiltinTopicData data;
+          data.key = wdata.ddsPublicationData.key;
+          data.name = wdata.ddsPublicationData.topic_name;
+          data.type_name = wdata.ddsPublicationData.type_name;
+          data.durability = wdata.ddsPublicationData.durability;
+          data.durability_service = wdata.ddsPublicationData.durability_service;
+          data.deadline = wdata.ddsPublicationData.deadline;
+          data.latency_budget = wdata.ddsPublicationData.latency_budget;
+          data.liveliness = wdata.ddsPublicationData.liveliness;
+          data.reliability = wdata.ddsPublicationData.reliability;
+          data.lifespan = wdata.ddsPublicationData.lifespan;
+          data.destination_order = wdata.ddsPublicationData.destination_order;
+          data.ownership = wdata.ddsPublicationData.ownership;
+          data.topic_data = wdata.ddsPublicationData.topic_data;
+
+          if (!get_access_control()->check_remote_topic(spdp_.lookup_participant_permissions(part), spdp_.get_domain_id(), data, ex)) {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("Sedp::data_received(dwd) - ")
+              ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+            return;
+          }
+        }
+
+        DiscoveredPublication& pub = discovered_publications_[guid] = prepub;
+
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
         if (top_it == topics_.end()) {
@@ -1715,7 +1749,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
   OPENDDS_STRING topic_name;
 
-  // Find the publication  - iterator valid only as long as we hold the lock
+  // Find the subscripion - iterator valid only as long as we hold the lock
   DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
   // Must unlock when calling into sub_bit() as it may call back into us
@@ -1726,10 +1760,42 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
     if (iter == discovered_subscriptions_.end()) { // add new
       { // Reduce scope of sub and td
-        DiscoveredSubscription& sub =
-          discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
+        DiscoveredSubscription presub(rdata);
 
-        topic_name = get_topic_name(sub);
+        topic_name = get_topic_name(presub);
+
+        if (is_security_enabled()) {
+
+          DDS::Security::SecurityException ex;
+
+          RepoId part = guid;
+          part.entityId = ENTITYID_PARTICIPANT;
+
+          DDS::TopicBuiltinTopicData data;
+          data.key = rdata.ddsSubscriptionData.key;
+          data.name = rdata.ddsSubscriptionData.topic_name;
+          data.type_name = rdata.ddsSubscriptionData.type_name;
+          data.durability = rdata.ddsSubscriptionData.durability;
+          data.deadline = rdata.ddsSubscriptionData.deadline;
+          data.latency_budget = rdata.ddsSubscriptionData.latency_budget;
+          data.liveliness = rdata.ddsSubscriptionData.liveliness;
+          data.reliability = rdata.ddsSubscriptionData.reliability;
+          data.destination_order = rdata.ddsSubscriptionData.destination_order;
+          data.ownership = rdata.ddsSubscriptionData.ownership;
+          data.topic_data = rdata.ddsSubscriptionData.topic_data;
+
+          if (!get_access_control()->check_remote_topic(spdp_.lookup_participant_permissions(part), spdp_.get_domain_id(), data, ex)) {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("Sedp::data_received(drd) - ")
+              ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+            return;
+          }
+        }
+
+        DiscoveredSubscription& sub = discovered_subscriptions_[guid] = presub;
+
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
           topics_.find(topic_name);
         if (top_it == topics_.end()) {

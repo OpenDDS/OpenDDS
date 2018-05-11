@@ -22,8 +22,12 @@ my @gov_files;
 my @pub_perm_files;
 my @sub_perm_files;
 my @topic_names;
+my $pub_expect = "0";
+my $sub_expect = "0";
+my $pub_log_param = "";
+my $sub_log_param = "";
 
-GetOptions ( 'scenario=s' => \$scenario, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names );
+GetOptions ( 'scenario=s' => \$scenario, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names, 'pub_expect=i' => \$pub_expect, 'sub_expect=i' => \$sub_expect );
 
 # Handle scenarios first, since they are a special case
 if (!($scenario eq "")) {
@@ -37,6 +41,20 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OA_OM_ED");
+  } elsif ($scenario eq "TEST_8_8_5_SUCCESS") {
+    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_write_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_read_signed.p7s");
+    @topic_names = ("OD_RWA_OM_OD");
+  } elsif ($scenario eq "TEST_8_8_5_FAILURE") {
+    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_read_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_write_signed.p7s");
+    @topic_names = ("OD_RWA_OM_OD");
+    #$pub_log_param =" -ORBLogFile /dev/null";
+    #$sub_log_param =" -ORBLogFile /dev/null";
+    $pub_expect = "~13";
+    $sub_expect = "~23";
   } else {
     print "\nUnrecognized scenario '$scenario'. Skipping.\n";
     exit -1;
@@ -162,6 +180,22 @@ foreach my $gov_file (@gov_files) {
         $pub_opts .= " -Topic $topic_name";
         $sub_opts .= " -Topic $topic_name";
 
+        if (!($pub_expect eq "0")) {
+          $pub_opts .= " -Expected $pub_expect";
+        }
+
+        if (!($sub_expect eq "0")) {
+          $sub_opts .= " -Expected $sub_expect";
+        }
+
+        if (!($pub_log_param eq "")) {
+          $pub_opts .= $pub_log_param;
+        }
+
+        if (!($sub_log_param eq "")) {
+          $sub_opts .= $sub_log_param;
+        }
+
         #print "$gov_file $pub_perm_file $sub_perm_file\n";
 
         $test->process("publisher", "publisher", $pub_opts);
@@ -182,9 +216,13 @@ foreach my $gov_file (@gov_files) {
           my $elapsed_time = $current_time - $test_start_time;
           my $estimate = $elapsed_time->seconds * ($total_test_count - $current_test_num) / ($current_test_num);
 
-          print "\ntest #$current_test_num of $total_test_count. Estimating $estimate seconds remaining.\n";
-          print "$gov_file $pub_perm_file $sub_perm_file $topic_name $status $test->{combined_return_codes}\n\n-----------\n\n";
-          print $status_file "$gov_file $pub_perm_file $sub_perm_file $topic_name $status $test->{combined_return_codes}\n";
+          if ($total_test_count != 1) {
+            print "\ntest #$current_test_num of $total_test_count. Estimating $estimate seconds remaining.\n";
+          }
+
+          #print "$gov_file $pub_perm_file $sub_perm_file $topic_name $status\n\n-----------\n\n";
+          #print $status_file "$gov_file $pub_perm_file $sub_perm_file $topic_name $status\n";
+
           #exit $status;
         #}
 

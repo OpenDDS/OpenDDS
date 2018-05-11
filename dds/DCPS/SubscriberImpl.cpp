@@ -225,8 +225,8 @@ SubscriberImpl::create_datareader(
     const DDS::ReturnCode_t ret = dr_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("SubscriberImpl::create_datareader, ")
                  ACE_TEXT("enable failed.\n")));
       return DDS::DataReader::_nil();

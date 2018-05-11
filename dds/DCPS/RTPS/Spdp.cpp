@@ -1684,12 +1684,12 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
 }
 
 Spdp::ParticipantCryptoInfoPair
-Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id)
+Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
 {
   ParticipantCryptoInfoPair result = ParticipantCryptoInfoPair(DDS::HANDLE_NIL, DDS::Security::SharedSecretHandle_var());
 
   ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
-  DiscoveredParticipantIter pi = participants_.find(id);
+  DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
     result.first = pi->second.crypto_handle_;
     result.second = pi->second.shared_secret_handle_;
@@ -1722,6 +1722,20 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
   }
   return;
 }
+
+DDS::Security::PermissionsHandle
+Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const
+{
+  DDS::Security::PermissionsHandle result = DDS::HANDLE_NIL;
+
+  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  DiscoveredParticipantConstIter pi = participants_.find(id);
+  if (pi != participants_.end()) {
+    result = pi->second.permissions_handle_;
+  }
+  return result;
+}
+
 
 }
 }

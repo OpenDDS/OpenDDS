@@ -1,0 +1,13 @@
+Naming for Governance files:
+AU / PU                  : Allow Unauthenticated / Prohibit Unauthenticated
+UA / PA                  : Unprotected Access / Protected Access
+ND / SD / ED / SOD / EOD : Not protected / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication Discovery
+NL / SL / EL / SOL / EOL : Not protected / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication Liveliness
+NR / SR / ER / SOR / EOR : Not protected / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication RTPS
+
+Naming for Topics:
+OD / PD            : Open / Protected Discovery
+OA / RA / WA / RWA : Open / Read / Write / ReadWrite Access
+OM / SM / EM       : Open / Signed / Encrypted Meta-data
+OD / SD / ED       : Open / Signed / Encrypted Data
+

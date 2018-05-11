@@ -471,12 +471,12 @@ DomainParticipantImpl::create_topic_i(
 
     if (status == CREATED || status == FOUND || status == TOPIC_DISABLED) {
       DDS::Topic_ptr new_topic = create_new_topic(topic_id,
-                                                topic_name,
-                                                type_name,
-                                                topic_qos,
-                                                a_listener,
-                                                mask,
-                                                type_support);
+                                                  topic_name,
+                                                  type_name,
+                                                  topic_qos,
+                                                  a_listener,
+                                                  mask,
+                                                  type_support);
       if (this->monitor_) {
         this->monitor_->report();
       }
@@ -1852,21 +1852,20 @@ DomainParticipantImpl::create_new_topic(
 
     DDS::Security::TopicSecurityAttributes sec_attr;
     if (!access->get_topic_sec_attributes(perm_handle_, topic_name, sec_attr, se)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: ")
         ACE_TEXT("DomainParticipant::create_new_topic, ")
         ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
           topic_name, se.code, se.minor_code, se.message.in()));
       return DDS::Topic::_nil();
     }
 
-    // TODO Need to actually check / use / handle topic security attributes (see 8.4.2.6)
-
-    if (!access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
+    if ((sec_attr.is_write_protected || sec_attr.is_read_protected) &&
+        !access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: ")
         ACE_TEXT("DomainParticipant::create_new_topic, ")
-        ACE_TEXT("Unable to create new topic '%C'. SecurityException[%d.%d]: %C\n"),
+        ACE_TEXT("Permissions check failed to create new topic '%C'. SecurityException[%d.%d]: %C\n"),
           topic_name, se.code, se.minor_code, se.message.in()));
       return DDS::Topic::_nil();
     }

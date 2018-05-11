@@ -38,6 +38,31 @@ const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
 const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
 const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
 
+#define CLEAN_ERROR_RETURN(stuff, val) \
+do { \
+  ACE_ERROR(stuff); \
+  std::cerr << "deleting contained entities" << std::endl; \
+  participant->delete_contained_entities(); \
+  std::cerr << "deleting participant" << std::endl; \
+  dpf->delete_participant(participant.in()); \
+  std::cerr << "shutdown" << std::endl; \
+  TheServiceParticipant->shutdown(); \
+  return val; \
+} while (0);
+
+#define CLEAN2_ERROR_RETURN(stuff, val) \
+do { \
+  ACE_ERROR(stuff); \
+  ws->detach_condition(condition); \
+  std::cerr << "deleting contained entities" << std::endl; \
+  participant->delete_contained_entities(); \
+  std::cerr << "deleting participant" << std::endl; \
+  dpf->delete_participant(participant.in()); \
+  std::cerr << "shutdown" << std::endl; \
+  TheServiceParticipant->shutdown(); \
+  return val; \
+} while (0);
+
 void append(DDS::PropertySeq& props, const char* name, const char* value)
 {
   const DDS::Property_t prop = {name, value, false /*propagate*/};
@@ -81,8 +106,8 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(participant.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
+      ACE_ERROR_RETURN((LM_WARNING,
+                        ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
                         ACE_TEXT("main() - create_participant() failed!\n")), -21);
     }
 
@@ -91,9 +116,9 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
       new SecurityAttributes::MessageTypeSupportImpl();
 
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                        ACE_TEXT("main() - register_type() failed!\n")), -22);
+      CLEAN_ERROR_RETURN((LM_WARNING,
+                          ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                          ACE_TEXT("main() - register_type() failed!\n")), -22);
     }
 
     // Create Topic (Movie Discussion List)
@@ -106,9 +131,9 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(topic.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                        ACE_TEXT("main() - create_topic() failed!\n")), -23);
+      CLEAN_ERROR_RETURN((LM_WARNING,
+                          ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                          ACE_TEXT("main() - create_topic() failed!\n")), -23);
     }
 
     // Create Subscriber
@@ -118,9 +143,9 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(sub.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                        ACE_TEXT("main() - create_subscriber() failed!\n")), -24);
+      CLEAN_ERROR_RETURN((LM_WARNING,
+                          ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                          ACE_TEXT("main() - create_subscriber() failed!\n")), -24);
     }
 
     // Create DataReader
@@ -141,9 +166,9 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(reader.in())) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                        ACE_TEXT("main() - create_datareader() failed!\n")), -25);
+      CLEAN_ERROR_RETURN((LM_WARNING,
+                          ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                          ACE_TEXT("main() - create_datareader() failed!\n")), -25);
     }
 
     // Block until Publisher completes
@@ -161,17 +186,17 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
 
     while (true) {
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main() - get_subscription_matched_status() failed!\n")), -26);
+        CLEAN2_ERROR_RETURN((LM_WARNING,
+                             ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                             ACE_TEXT("main() - get_subscription_matched_status() failed!\n")), -26);
       }
       if (matches.current_count == 0 && matches.total_count > 0) {
         break;
       }
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) %N:%l - ERROR: ")
-                          ACE_TEXT("main() - wait() failed!\n")), -27);
+        CLEAN2_ERROR_RETURN((LM_WARNING,
+                             ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                             ACE_TEXT("main() - wait() failed!\n")), -27);
       }
     }
 
@@ -180,8 +205,11 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
     ws->detach_condition(condition);
 
     // Clean-up!
+    std::cerr << "deleting contained entities" << std::endl;
     participant->delete_contained_entities();
+    std::cerr << "deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
+    std::cerr << "shutdown" << std::endl;
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {
@@ -201,7 +229,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (result == my_args.expected_result_) {
     return 0;
   } else {
+    std::cerr << "Subscriber exiting with unexpected result: " << result << std::endl;
     return result;
   }
-
 }

@@ -1340,8 +1340,8 @@ DataReaderImpl::enable()
             exprParams);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
-      ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
+      ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::enable, ")
           ACE_TEXT("add_subscription returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }

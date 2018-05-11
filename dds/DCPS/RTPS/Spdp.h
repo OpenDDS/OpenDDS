@@ -83,7 +83,7 @@ public:
   WaitForAcks& wait_for_acks();
 
   OpenDDS::Security::SecurityConfig_rch get_security_config() { return security_config_; }
-  DDS::Security::ParticipantCryptoHandle crypto_handle() { return crypto_handle_; }
+  DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
@@ -94,10 +94,11 @@ public:
   bool is_security_enabled() const { return security_enabled_; }
 
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;
-  ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id);
+  ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id) const;
   void send_participant_crypto_tokens(const DCPS::RepoId& id);
 
   DDS::DomainId_t get_domain_id() const { return domain_; }
+  DDS::Security::PermissionsHandle lookup_participant_permissions(const GUID_t& participant) const;
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }
