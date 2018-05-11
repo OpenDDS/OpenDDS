@@ -1544,8 +1544,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
           DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
           if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
-            ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_ERROR((LM_WARNING,
+              ACE_TEXT("(%P|%t) WARNING: ")
               ACE_TEXT("Sedp::data_received(dwd) - ")
               ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
@@ -1786,8 +1786,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
           DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
           if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
-            ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_ERROR((LM_WARNING,
+              ACE_TEXT("(%P|%t) WARNING: ")
               ACE_TEXT("Sedp::data_received(drd) - ")
               ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
