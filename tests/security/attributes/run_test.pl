@@ -24,8 +24,6 @@ my @sub_perm_files;
 my @topic_names;
 my $pub_expect = "0";
 my $sub_expect = "0";
-my $pub_log_param = "";
-my $sub_log_param = "";
 
 GetOptions ( 'scenario=s' => \$scenario, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names, 'pub_expect=i' => \$pub_expect, 'sub_expect=i' => \$sub_expect );
 
@@ -51,8 +49,6 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_read_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_write_signed.p7s");
     @topic_names = ("OD_RWA_OM_OD");
-    #$pub_log_param =" -ORBLogFile /dev/null";
-    #$sub_log_param =" -ORBLogFile /dev/null";
     $pub_expect = "~13";
     $sub_expect = "~23";
   } else {
@@ -130,7 +126,7 @@ if (!($scenario eq "")) {
   }
 }
 
-open my $status_file, '>', "expected_status_results.txt";
+#open my $status_file, '>', "expected_status_results.txt";
 
 my $total_test_count = (scalar @gov_files) * (scalar @pub_perm_files) * (scalar @sub_perm_files) * (scalar @topic_names);
 my $current_test_num = 0;
@@ -186,14 +182,6 @@ foreach my $gov_file (@gov_files) {
 
         if (!($sub_expect eq "0")) {
           $sub_opts .= " -Expected $sub_expect";
-        }
-
-        if (!($pub_log_param eq "")) {
-          $pub_opts .= $pub_log_param;
-        }
-
-        if (!($sub_log_param eq "")) {
-          $sub_opts .= $sub_log_param;
         }
 
         #print "$gov_file $pub_perm_file $sub_perm_file\n";

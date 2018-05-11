@@ -13,3 +13,4 @@ tests/security/run_test.pl OpenDDS_CryptoKeyExchangeTest
 tests/security/run_test.pl OpenDDS_CryptoTransformTest
 tests/security/attributes/run_test.pl --scenario SC0
 tests/security/attributes/run_test.pl --scenario SC1
+tests/security/attributes/run_test.pl --scenario TEST_8_8_5_FAILURE
