@@ -591,12 +591,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // If this point in the code is reached it means that either there are no PermissionTopicRules 
     // or the topic_name does not exist in the topic_list so return the value of default_permission
-    if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0)
-    {
-        return true;
+    if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0) {
+      return true;
     }
     else {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "No matching rule for topic, default permission is DENY.");
+      return false;
     }
   }
 
@@ -768,10 +768,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // No matching topic rule was found of topic_name so return the value in default_permission
     if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0) {
-        return true;
+      return true;
     }
     else {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "No matching rule for topic, default permission is DENY.");
+      return false;
     }
   }
 
@@ -1228,7 +1229,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         std::list<permission_topic_ps_rule>::iterator tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if(tpsr_iter->ps_type == PUBLISH) {
+          if (tpsr_iter->ps_type == PUBLISH) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -1242,10 +1243,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // There is no matching rule for topic_name so use the value in default_permission
     if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0) {
-        return true;
+      return true;
     }
     else {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "No matching rule for topic, default permission is DENY.");
+      return false;
     }
   }
 
