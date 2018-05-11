@@ -455,7 +455,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ac_iter = local_ac_perms.find(permissions_handle);
 
   if (ac_iter == local_ac_perms.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    CommonUtilities::set_security_error(ex, -1, 0, "No matching permissions handle present");
     return false;
   }
 
@@ -488,6 +488,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     // Check the date/time range for validity 
     struct tm not_before_date_time,
               not_after_date_time;
+
+    memset(&not_before_date_time, 0, sizeof(tm));
+    memset(&not_after_date_time, 0, sizeof(tm));
 
     time_t current_date_time_t = time(0);
 
@@ -525,7 +528,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t before_time = mktime(&not_before_date_time);
     
     if (current_date_time_t < before_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
+      return false;
     }
 
     // Year
@@ -560,7 +564,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t after_time = mktime(&not_after_date_time);
 
     if (current_date_time_t > after_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
+      return false;
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -624,7 +629,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
   if(ac_iter == local_ac_perms.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    CommonUtilities::set_security_error(ex, -1, 0, "No matching permissions handle present");
     return false;
   }
 
@@ -639,7 +644,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
       for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
-          std::cout<< "Found topic"<< tr_iter->topic_expression << std::endl;
+          std::cout << "Found topic '"<< tr_iter->topic_expression << "'" << std::endl;
           if(tr_iter->topic_attrs.is_read_protected == false ) {
             return true;
           }
@@ -660,6 +665,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     // Check the date/time range for validity 
     struct tm not_before_date_time,
         not_after_date_time;
+
+    memset(&not_before_date_time, 0, sizeof(tm));
+    memset(&not_after_date_time, 0, sizeof(tm));
 
     time_t current_date_time_t = time(0);
 
@@ -697,7 +705,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t before_time = mktime(&not_before_date_time);
 
     if (current_date_time_t < before_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
+      return false;
     }
 
     // Year
@@ -732,7 +741,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t after_time = mktime(&not_after_date_time);
 
     if (current_date_time_t > after_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
+      return false;
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -791,7 +801,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
   if(ac_iter == local_ac_perms.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
+    CommonUtilities::set_security_error(ex, -1, 0, "No matching permissions handle present");
     return false;
   }
 
@@ -826,6 +836,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     // Check the date/time range for validity 
     struct tm not_before_date_time,
         not_after_date_time;
+
+    memset(&not_before_date_time, 0, sizeof(tm));
+    memset(&not_after_date_time, 0, sizeof(tm));
 
     time_t current_date_time_t = time(0);
 
@@ -863,7 +876,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t before_time = mktime(&not_before_date_time);
 
     if (current_date_time_t < before_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
+      return false;
     }
 
     // Year
@@ -898,7 +912,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t after_time = mktime(&not_after_date_time);
 
     if (current_date_time_t > after_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
+      return false;
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -922,10 +937,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // There is no matching rule for topic_name so use the value in default_permission
     if (strcmp(pm_iter->default_permission.c_str(), "ALLOW") == 0) {
-        return true;
+      return true;
     }
     else {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "No matching rule for topic, default permission is DENY.");
+      return false;
     }
   }
 
@@ -1124,6 +1140,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     struct tm not_before_date_time,
               not_after_date_time;
 
+    memset(&not_before_date_time, 0, sizeof(tm));
+    memset(&not_after_date_time, 0, sizeof(tm));
+
     time_t current_date_time_t = time(0);
 
     std::string temp_str;
@@ -1160,7 +1179,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t before_time = mktime(&not_before_date_time);
 
     if (current_date_time_t < before_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
+      return false;
     }
 
     // Year
@@ -1195,7 +1215,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     time_t after_time = mktime(&not_after_date_time);
 
     if (current_date_time_t > after_time) {
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
+      return false;
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
