@@ -1,7 +1,10 @@
 #!/bin/bash
+set -e
+
 if [ $# -eq 0 ]
   then
     echo "Expecing document name / prefix as argument"
+    exit 1
 fi
 
 PREFIX=`echo ${1} | cut -d '.' -f -1`
