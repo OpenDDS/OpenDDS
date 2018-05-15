@@ -293,11 +293,12 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     const char* buff = reinterpret_cast<const char*>(plain_submsg.get_buffer());
     ACE_Message_Block mb(buff, plain_submsg.length());
     mb.wr_ptr(plain_submsg.length());
-    //TODO: conditional logging
-    ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
-                  category == DDS::Security::DATAWRITER_SUBMESSAGE ?
-                  "RtpsUdpReceiveStrategy: decoded writer submessage" :
-                  "RtpsUdpReceiveStrategy: decoded reader submessage"));
+    if (Transport_debug_level > 5) {
+      ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
+                    category == DDS::Security::DATAWRITER_SUBMESSAGE ?
+                    "RtpsUdpReceiveStrategy: decoded writer submessage" :
+                    "RtpsUdpReceiveStrategy: decoded reader submessage"));
+    }
     RtpsSampleHeader rsh(mb);
     if (check_header(rsh)) {
       ReceivedDataSample plain_sample(mb.duplicate());
