@@ -203,7 +203,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   writer.add_property("dds.perm_ca.algo", "RSA-2048");
 
   perm_set.perm_token = permissions_token;
-
   perm_set.perm_cred_token = permissions_cred_token;
 
   if (0 != load_permissions_file(&perm_set, perm_content)) {
@@ -231,8 +230,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const ::DDS::Security::AuthenticatedPeerCredentialToken & remote_credential_token,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(remote_permissions_token);
-  ACE_UNUSED_ARG(remote_credential_token);
+  //ACE_UNUSED_ARG(remote_permissions_token);
+  //ACE_UNUSED_ARG(remote_credential_token);
 
   if (0 == auth_plugin) {
     CommonUtilities::set_security_error(ex, -1, 0, "Null Authentication plugin");
@@ -247,20 +246,20 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-
   ACIdentityMap::iterator iter = local_identity_map.begin();
   iter = local_identity_map.find(local_identity_handle);
+
   if (iter == local_identity_map.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching local identity handle present");
     return DDS::HANDLE_NIL;
   }
-
 
   // Extract Governance and domain id data for new permissions entry
   ::DDS::Security::PermissionsHandle rph = iter->second;
 
   ACPermsMap::iterator piter = local_ac_perms.begin();
   piter = local_ac_perms.find(rph);
+
   if (piter == local_ac_perms.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "No matching permissions handle present");
     return DDS::HANDLE_NIL;
@@ -275,7 +274,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 
   // Read in permissions_ca
-
   SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
   std::string ca_subject;
 
@@ -290,15 +288,36 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Instead of pulling the content from a SignedDocument yet, we can strip it from the
   // c.perm parm of the AuthenticatedCredentialToken properties until SignedDocument is implemented
 
-
   std::string remote_perm_content;
   OpenDDS::Security::TokenReader remote_perm_wrapper(remote_credential_token);
+
   if (remote_credential_token.binary_properties.length() > 0) {
     const DDS::OctetSeq& raw = remote_perm_wrapper.get_bin_property_value("c.perm");
     remote_perm_content.assign(reinterpret_cast<const char*>(raw.get_buffer()), raw.length());
   } else {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permission file");
     return DDS::HANDLE_NIL;
+  }
+
+  // Validate the signature of the remote permissions
+  std::string remote_uri_content;
+  
+  remote_uri_content.assign("data:");
+  remote_uri_content.append(remote_perm_content);
+
+  SSL::SignedDocument remote_signed;
+
+  remote_signed.load(remote_uri_content);
+
+  int sign_verified = remote_signed.verify_signature(local_ca);
+
+  if (sign_verified == 0) {
+      // The remote permissions signature is verified
+      std::cout << "Remote permissions document verified:" << sign_verified << std::endl;
+  }
+  else {
+      CommonUtilities::set_security_error(ex, -1, 0, "Remote permissions signature not verified");
+      return DDS::HANDLE_NIL;
   }
 
   // Try to locate the payload
@@ -316,6 +335,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   TokenReader remote_credential_tr(remote_credential_token);
   const DDS::OctetSeq& cid = remote_credential_tr.get_bin_property_value("c.id");
+
   if (cid.length() == 0) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote credential identity");
     return DDS::HANDLE_NIL;
@@ -344,7 +364,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // The file will have to be pulled from the file system until that is fixed.
 
   perm_set.perm_token = remote_permissions_token;
-
   perm_set.perm_cred_token = remote_credential_token;
 
   if (0 != load_permissions_file(&perm_set, remote_perm_content)) {
@@ -352,13 +371,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   };
 
-
   ::CORBA::Long perm_handle = generate_handle();
   local_ac_perms.insert(std::make_pair(perm_handle, perm_set));
 
-
-  return perm_handle ;
-
+  return perm_handle;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_create_participant(
@@ -451,6 +467,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Topic Name");
     return false;
   }
+  //if (partition.name.length() == 0) {
+  //    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Partition");
+  //  return false;
+  //}
 
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
@@ -519,8 +539,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) 
-                  return true;
+                if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
+                    return true;
+                }
             }
           }
         }
@@ -1990,7 +2011,11 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
 
       if (strcmp(g_tag, "allow_rule") == 0 || strcmp(g_tag, "deny_rule") == 0) {
         permissions_topic_rule ptr_holder_;
+        permissions_partition pp_holder_;
+
         ptr_holder_.ad_type = (strcmp(g_tag,"allow_rule") ==  0 ? ALLOW : DENY);
+        pp_holder_.ad_type = (strcmp(g_tag, "allow_rule") == 0 ? ALLOW : DENY);
+
         xercesc::DOMNodeList * adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
 
         for (XMLSize_t anc = 0; anc < adNodeChildren->getLength(); anc++) {
@@ -2002,12 +2027,16 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
             for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
               if (strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
                 ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+                pp_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
               }
             }
 
           } else if (ACE_OS::strcasecmp(anc_tag, "publish") == 0 || ACE_OS::strcasecmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
             permission_topic_ps_rule anc_ps_rule_holder_;
+            permission_partition_ps anc_ps_partition_holder_;
+
             anc_ps_rule_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
+            anc_ps_partition_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag, "publish") == 0 ? PUBLISH : SUBSCRIBE);
             xercesc::DOMNodeList * topicListNodes = adNodeChildren->item(anc)->getChildNodes();
 
             for (XMLSize_t tln = 0; tln < topicListNodes->getLength(); tln++) {
@@ -2021,13 +2050,24 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
                 }
 
               }
+              else if (strcmp("partitions", xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
+                  xercesc::DOMNodeList * partitionNodes = topicListNodes->item(tln)->getChildNodes();
+
+                  for (XMLSize_t pn = 0; pn < partitionNodes->getLength(); pn++) {
+                      if (strcmp("partition", xercesc::XMLString::transcode(partitionNodes->item(pn)->getNodeName())) == 0) {
+                          anc_ps_partition_holder_.partition_list.push_back(xercesc::XMLString::transcode(partitionNodes->item(pn)->getTextContent()));
+                      }
+                  }
+              }
             }
 
             ptr_holder_.topic_ps_rules.push_back(anc_ps_rule_holder_);
+            pp_holder_.partition_ps.push_back(anc_ps_partition_holder_);
           }
         }
 
         rule_holder_.PermissionTopicRules.push_back(ptr_holder_);
+        rule_holder_.PermissionPartitions.push_back(pp_holder_);
       }
     }
 
