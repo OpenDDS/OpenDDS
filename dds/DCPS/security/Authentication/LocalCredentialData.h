@@ -71,14 +71,14 @@ namespace OpenDDS {
       {
         if (!participant_cert_) {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) CredentialHash::validate(): participant_cert_ is null,")
+            ACE_TEXT("(%P|%t) CredentialHash::validate(): ERROR: participant_cert_ is null,")
             ACE_TEXT(" some of the security properties might be missing!\n")
           ));
           return false;
         }
         if (!ca_cert_) {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) CredentialHash::validate(): ca_cert_ is null,")
+            ACE_TEXT("(%P|%t) CredentialHash::validate(): ERROR: ca_cert_ is null,")
             ACE_TEXT(" some of the security properties might be missing!\n")
           ));
           return false;
