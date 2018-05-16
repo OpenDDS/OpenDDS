@@ -451,7 +451,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   ACE_UNUSED_ARG(qos);
-//  ACE_UNUSED_ARG(partition);
+  ACE_UNUSED_ARG(partition);
   ACE_UNUSED_ARG(data_tag);
 
 
@@ -464,10 +464,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Topic Name");
     return false;
   }
-  if (partition.name.length() == 0) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Invalid Partition");
-    return false;
-  }
+  //if (partition.name.length() == 0) {
+  //    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Partition");
+  //  return false;
+  //}
 
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
@@ -537,6 +537,19 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
                 if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
+            //        // Topic matches now check that the partitions match
+            //        std::list<permissions_partition>::iterator tpp_iter;
+
+            //        // Loop thru the partitions for this Grant
+            //        for (tpp_iter = pm_iter->PermissionPartitions.begin(); tpp_iter != pm_iter->PermissionPartitions.end(); ++tpp_iter) {
+            //            
+            //            for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
+            //                //if (strcmp(partition.name[i], tpp_iter->partition_ps.)) {
+
+            //                //}
+            //            }
+            //        }
+
                     return true;
                 }
             }
@@ -2008,10 +2021,10 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
 
       if (strcmp(g_tag, "allow_rule") == 0 || strcmp(g_tag, "deny_rule") == 0) {
         permissions_topic_rule ptr_holder_;
-//        permissions_partition pp_holder_;
+        permissions_partition pp_holder_;
 
         ptr_holder_.ad_type = (strcmp(g_tag,"allow_rule") ==  0 ? ALLOW : DENY);
-//        pp_holder_.ad_type = (strcmp(g_tag, "allow_rule") == 0 ? ALLOW : DENY);
+        pp_holder_.ad_type = (strcmp(g_tag, "allow_rule") == 0 ? ALLOW : DENY);
 
         xercesc::DOMNodeList * adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
 
@@ -2024,16 +2037,16 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
             for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
               if (strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
                 ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
-//                pp_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+                pp_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
               }
             }
 
           } else if (ACE_OS::strcasecmp(anc_tag, "publish") == 0 || ACE_OS::strcasecmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
             permission_topic_ps_rule anc_ps_rule_holder_;
-//            permission_partition_ps anc_ps_partition_holder_;
+            permission_partition_ps anc_ps_partition_holder_;
 
             anc_ps_rule_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
-//            anc_ps_partition_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag, "publish") == 0 ? PUBLISH : SUBSCRIBE);
+            anc_ps_partition_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag, "publish") == 0 ? PUBLISH : SUBSCRIBE);
             xercesc::DOMNodeList * topicListNodes = adNodeChildren->item(anc)->getChildNodes();
 
             for (XMLSize_t tln = 0; tln < topicListNodes->getLength(); tln++) {
@@ -2047,24 +2060,24 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
                 }
 
               }
-              //else if (strcmp("partitions", xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
-              //    xercesc::DOMNodeList * partitionNodes = topicListNodes->item(tln)->getChildNodes();
+              else if (strcmp("partitions", xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
+                  xercesc::DOMNodeList * partitionNodes = topicListNodes->item(tln)->getChildNodes();
 
-              //    for (XMLSize_t pn = 0; pn < partitionNodes->getLength(); pn++) {
-              //        if (strcmp("partition", xercesc::XMLString::transcode(partitionNodes->item(pn)->getNodeName())) == 0) {
-              //            anc_ps_partition_holder_.partition_list.push_back(xercesc::XMLString::transcode(partitionNodes->item(pn)->getTextContent()));
-              //        }
-              //    }
-              //}
+                  for (XMLSize_t pn = 0; pn < partitionNodes->getLength(); pn++) {
+                      if (strcmp("partition", xercesc::XMLString::transcode(partitionNodes->item(pn)->getNodeName())) == 0) {
+                          anc_ps_partition_holder_.partition_list.push_back(xercesc::XMLString::transcode(partitionNodes->item(pn)->getTextContent()));
+                      }
+                  }
+              }
             }
 
             ptr_holder_.topic_ps_rules.push_back(anc_ps_rule_holder_);
-//            pp_holder_.partition_ps.push_back(anc_ps_partition_holder_);
+            pp_holder_.partition_ps.push_back(anc_ps_partition_holder_);
           }
         }
 
         rule_holder_.PermissionTopicRules.push_back(ptr_holder_);
-//        rule_holder_.PermissionPartitions.push_back(pp_holder_);
+        rule_holder_.PermissionPartitions.push_back(pp_holder_);
       }
     }
 

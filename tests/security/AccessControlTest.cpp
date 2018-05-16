@@ -196,6 +196,8 @@ public:
     Property_t  gov_0_p7s, gov_1_p7s, gov_2_p7s, gov_3_p7s,gov_4_p7s, gov_5_p7s, gov_6_p7s;
     Property_t perm_join, perm_topic_0, perm_topic_1;
     Property_t perm_join_p7s, perm_topic_p7s, perm_topic2_p7s;
+    Property_t perm_date_p7s;
+    Property_t perm_parts_p7s;
 
     permca.name = "dds.sec.access.permissions_ca";
     permca.value = "file:certs/opendds_identity_ca_cert.pem";
@@ -270,12 +272,13 @@ public:
     perm_join_p7s.value = "file:permissions/Permissions_JoinDomain_OCI.p7s";
     perm_join_p7s.propagate = false;
 
+
     perm_topic_0.name = "dds.sec.access.permissions";
     perm_topic_0.value = "file:permissions/Permissions_TopicLevel_OCI.xml";
     perm_topic_0.propagate = false;
 
     perm_topic_1.name = "dds.sec.access.permissions";
-    perm_topic_1.value = "file:permissions/Permissions_TopicLevel_OCI1.xml";
+    perm_topic_1.value = "file:permissions/Permissions_TopicLevel_OCI2.xml";
     perm_topic_1.propagate = false;
 
     perm_topic_p7s.name = "dds.sec.access.permissions";
@@ -286,9 +289,18 @@ public:
     perm_topic2_p7s.value = "file:permissions/Permissions_TopicLevel_OCI2.p7s";
     perm_topic2_p7s.propagate = false;
 
+
+    perm_date_p7s.name = "dds.sec.access.permissions";
+    perm_date_p7s.value = "file:permissions/Permissions_NotBefore_OCI.p7s";
+    perm_date_p7s.propagate = false;
+
+    perm_parts_p7s.name = "dds.sec.access.permissions";
+    perm_parts_p7s.value = "file:permissions/Permissions_TopicLevel_Partitions_Default_OCI.p7s";
+    perm_parts_p7s.propagate = false;
+
     add_property(permca);
-    add_property(gov_0_p7s);
-    add_property(perm_topic2_p7s); // perm_join_p7s);
+    add_property(gov_0_p7s); // gov_6_p7s);
+    add_property(perm_join_p7s);
 
     ::DDS::OctetSeq Empty_Seq;
 
@@ -505,28 +517,50 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
     ex));
 }
 
-TEST_F(AccessControlTest, check_create_datawriter_default_Success)
-{
-    ::DDS::Security::DomainId_t domain_id = 0;
-    const char * topic_name = "Rectangle";
-    ::DDS::DataWriterQos qos;
-    ::DDS::PartitionQosPolicy  partition;
-    ::DDS::Security::DataTags  data_tag;
-    ::DDS::Security::SecurityException ex;
-
-    ::DDS::Security::PermissionsHandle out_handle =
-        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
-
-    EXPECT_TRUE(get_inst().check_create_datawriter(
-        out_handle,
-        domain_id,
-        topic_name,
-        qos,
-        partition,
-        data_tag,
-        ex));
-}
-
+//TEST_F(AccessControlTest, check_create_datawriter_default_Success)
+//{
+//    ::DDS::Security::DomainId_t domain_id = 0;
+//    const char * topic_name = "Rectangle";
+//    ::DDS::DataWriterQos qos;
+//    ::DDS::PartitionQosPolicy  partition;
+//    ::DDS::Security::DataTags  data_tag;
+//    ::DDS::Security::SecurityException ex;
+//
+//    ::DDS::Security::PermissionsHandle out_handle =
+//        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+//
+//    EXPECT_TRUE(get_inst().check_create_datawriter(
+//        out_handle,
+//        domain_id,
+//        topic_name,
+//        qos,
+//        partition,
+//        data_tag,
+//        ex));
+//}
+//
+//TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
+//{
+//    ::DDS::Security::DomainId_t domain_id = 0;
+//    const char * topic_name = "Square";
+//    ::DDS::DataWriterQos qos;
+//    ::DDS::PartitionQosPolicy  partition;
+//    ::DDS::Security::DataTags  data_tag;
+//    ::DDS::Security::SecurityException ex;
+//
+//    ::DDS::Security::PermissionsHandle out_handle =
+//        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+//
+//    EXPECT_FALSE(get_inst().check_create_datawriter(
+//        out_handle,
+//        domain_id,
+//        topic_name,
+//        qos,
+//        partition,
+//        data_tag,
+//        ex));
+//}
+//
 TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
