@@ -6,6 +6,7 @@
 #include "LocalCredentialData.h"
 #include "dds/DCPS/security/SSL/Utils.h"
 #include "dds/DCPS/iterator_adaptor.h"
+#include "dds/DCPS/debug.h"
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
@@ -74,9 +75,20 @@ namespace OpenDDS {
     void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
     {
       std::string name, value, pkey_uri, password;
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+          "(%P|%t) LocalAuthCredentialData::load: Number of Properties: %i\n"
+        ), props.length()));
+      }
       for (size_t i = 0; i < props.length(); ++i) {
         name = props[i].name;
         value = props[i].value;
+
+        if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+            "(%P|%t) LocalAuthCredentialData::load: property %i: %C: %C\n"
+          ), i, name.c_str(), value.c_str()));
+        }
 
         if (name == "dds.sec.auth.identity_ca") {
             ca_cert_.reset(new SSL::Certificate(value));
