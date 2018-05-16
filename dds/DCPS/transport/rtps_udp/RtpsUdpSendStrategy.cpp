@@ -394,7 +394,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 
     const size_t remaining = in->total_length();
     int read = 0;
-    CORBA::ULong u2;
+    CORBA::ULong u2 = 0;
 
     switch (msgId) {
     case RTPS::INFO_DST: {
