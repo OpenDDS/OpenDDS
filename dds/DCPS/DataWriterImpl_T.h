@@ -31,8 +31,8 @@ namespace OpenDDS {
     typedef DDSTraits<MessageType> TraitsType;
     typedef MarshalTraits<MessageType> MarshalTraitsType;
 
-    typedef OPENDDS_MAP_CMP(MessageType, DDS::InstanceHandle_t,
-                            typename TraitsType::LessThanType) InstanceMap;
+    typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
+                              typename TraitsType::LessThanType) InstanceMap;
     typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>  DataAllocator;
 
     enum {
