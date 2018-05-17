@@ -279,7 +279,11 @@ private:
     struct permission_topic_ps_rule{
         PublishSubscribe_t  ps_type;
         std::vector<std::string> topic_list;
+    };
 
+    struct permission_partition_ps {
+        PublishSubscribe_t ps_type;
+        std::vector<std::string> partition_list;
     };
 
     struct permissions_topic_rule {
@@ -288,12 +292,19 @@ private:
         std::list<permission_topic_ps_rule> topic_ps_rules;
     };
 
+    struct permissions_partition {
+        AllowDeny_t ad_type;
+        std::set<::DDS::Security::DomainId_t> domain_list;
+        std::list<permission_partition_ps> partition_ps;
+    };
+
     struct permission_grant_rule {
         std::string grant_name;
         std::string subject;
         Validity_t validity;
         std::string default_permission;
         std::list<permissions_topic_rule> PermissionTopicRules;
+        std::list<permissions_partition> PermissionPartitions;
     };
 
     typedef std::vector<permission_grant_rule> PermissionGrantRules;
