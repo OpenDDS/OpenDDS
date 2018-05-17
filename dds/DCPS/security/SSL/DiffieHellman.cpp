@@ -7,6 +7,7 @@
 #include "Utils.h"
 #include "Err.h"
 #include <openssl/dh.h>
+#include "../OpenSSL_legacy.h" // Must come after all other OpenSSL includes
 
 namespace OpenDDS {
   namespace Security {

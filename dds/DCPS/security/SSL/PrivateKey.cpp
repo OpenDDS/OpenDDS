@@ -7,6 +7,7 @@
 #include "Utils.h"
 #include "Err.h"
 #include <openssl/pem.h>
+#include "../OpenSSL_legacy.h" // Must come after all other OpenSSL includes
 
 namespace OpenDDS {
   namespace Security {
@@ -32,7 +33,9 @@ namespace OpenDDS {
         if (this != &rhs) {
             if (rhs.k_) {
                 k_ = rhs.k_;
+#ifndef OPENSSL_LEGACY
                 EVP_PKEY_up_ref(k_);
+#endif
 
             } else {
                 k_ = NULL;

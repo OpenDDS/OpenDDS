@@ -23,6 +23,7 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#include "OpenSSL_legacy.h" // Must come after all other OpenSSL includes
 
 using namespace DDS::Security;
 using OpenDDS::DCPS::Serializer;
