@@ -463,10 +463,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid Topic Name");
     return false;
   }
-  if (partition.name.length() == 0) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Invalid Partition");
-    return false;
-  }
 
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
@@ -544,31 +540,35 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
                 if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
                     // Topic matches now check that the partitions match
+                    if (partition.name.length() > 0) {
+                        // First look for the ad_type & ps_type in the partitions
+                        for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
+                            size_t pd = pp_iter->domain_list.count(domain_id);
 
-                    // First look for the ad_type & ps_type in the partitions
-                    for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
-                        size_t pd = pp_iter->domain_list.count(domain_id);
+                            if ((pd > 0) && (pp_iter->ad_type == ALLOW)) {
+                                std::list<permission_partition_ps>::iterator pps_iter;
 
-                        if ((pd > 0) && (pp_iter->ad_type == ALLOW)) {
-                            std::list<permission_partition_ps>::iterator pps_iter;
+                                for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
+                                    if (pps_iter->ps_type == PUBLISH) {
+                                        std::vector<std::string>::iterator pl_iter; // partition list
+                                        num_param_partitions = pps_iter->partition_list.size();
 
-                            for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                                if (pps_iter->ps_type == PUBLISH) {
-                                    std::vector<std::string>::iterator pl_iter; // partition list
-                                    num_param_partitions = pps_iter->partition_list.size();
-
-                                    for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
-                                        // Check the pl_iter value against the list of partitions in the partition parameter
-                                        for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
-                                            if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
-                                                matched_allow_partitions++;
-                                                break;
+                                        for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
+                                            // Check the pl_iter value against the list of partitions in the partition parameter
+                                            for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
+                                                if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
+                                                    matched_allow_partitions++;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                    else { // No partitions to match
+                        return true;
                     }
 
                 }
@@ -586,30 +586,34 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                   for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
                       if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
                           // Topic matches now check that the partitions match
+                          if (partition.name.length() > 0) {
+                              // First look for the ad_type & ps_type in the partitions
+                              for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
+                                  size_t pd = pp_iter->domain_list.count(domain_id);
 
-                          // First look for the ad_type & ps_type in the partitions
-                          for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
-                              size_t pd = pp_iter->domain_list.count(domain_id);
+                                  if ((pd > 0) && (pp_iter->ad_type == DENY)) {
+                                      std::list<permission_partition_ps>::iterator pps_iter;
 
-                              if ((pd > 0) && (pp_iter->ad_type == DENY)) {
-                                  std::list<permission_partition_ps>::iterator pps_iter;
+                                      for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
+                                          if (pps_iter->ps_type == PUBLISH) {
+                                              std::vector<std::string>::iterator pl_iter; // partition list
 
-                                  for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                                      if (pps_iter->ps_type == PUBLISH) {
-                                          std::vector<std::string>::iterator pl_iter; // partition list
-
-                                          for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
-                                              // Check the pl_iter value against the list of partitions in the partition parameter
-                                              for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
-                                                  if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
-                                                      matched_deny_partitions++;
-                                                      break;
+                                              for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
+                                                  // Check the pl_iter value against the list of partitions in the partition parameter
+                                                  for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
+                                                      if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
+                                                          matched_deny_partitions++;
+                                                          break;
+                                                      }
                                                   }
                                               }
                                           }
                                       }
                                   }
                               }
+                          }
+                          else {
+                              return false;
                           }
 
                       }
@@ -677,11 +681,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (partition.name.length() == 0) {
-      CommonUtilities::set_security_error(ex, -1, 0, "Invalid Partition");
-      return false;
-  }
-
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
   if(ac_iter == local_ac_perms.end()) {
@@ -741,6 +740,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         return false;
     }
 
+    // Start timer here.  If the function is exited with a false value, cancel the timer before executing the return.
+
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
     std::list<permissions_partition>::iterator pp_iter;
     int matched_allow_partitions = 0;
@@ -759,33 +760,36 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
                     for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
                         if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
+                            // Topic matches now check that the partitions
+                            if (partition.name.length() > 0) {
+                                // First look for the ad_type & ps_type in the partitions
+                                for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
+                                    size_t pd = pp_iter->domain_list.count(domain_id);
 
-                            // Topic matches now check that the partitions match
+                                    if ((pd > 0) && (pp_iter->ad_type == ALLOW)) {
+                                        std::list<permission_partition_ps>::iterator pps_iter;
 
-                            // First look for the ad_type & ps_type in the partitions
-                            for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
-                                size_t pd = pp_iter->domain_list.count(domain_id);
+                                        for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
+                                            if (pps_iter->ps_type == SUBSCRIBE) {
+                                                std::vector<std::string>::iterator pl_iter; // partition list
+                                                num_param_partitions = pps_iter->partition_list.size();
 
-                                if ((pd > 0) && (pp_iter->ad_type == ALLOW)) {
-                                    std::list<permission_partition_ps>::iterator pps_iter;
-
-                                    for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                                        if (pps_iter->ps_type == SUBSCRIBE) {
-                                            std::vector<std::string>::iterator pl_iter; // partition list
-                                            num_param_partitions = pps_iter->partition_list.size();
-
-                                            for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
-                                                // Check the pl_iter value against the list of partitions in the partition parameter
-                                                for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
-                                                    if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
-                                                        matched_allow_partitions++;
-                                                        break;
+                                                for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
+                                                    // Check the pl_iter value against the list of partitions in the partition parameter
+                                                    for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
+                                                        if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
+                                                            matched_allow_partitions++;
+                                                            break;
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            }
+                            else { // There are no partitions to match
+                                return true;
                             }
 
                         }
@@ -803,29 +807,34 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                     for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
                         if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
                             // Topic matches now check that the partitions match
-                            // First look for the ad_type & ps_type in the partitions
-                            for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
-                                size_t pd = pp_iter->domain_list.count(domain_id);
+                            if (partition.name.length() > 0) {
+                                // First look for the ad_type & ps_type in the partitions
+                                for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
+                                    size_t pd = pp_iter->domain_list.count(domain_id);
 
-                                if ((pd > 0) && (pp_iter->ad_type == DENY)) {
-                                    std::list<permission_partition_ps>::iterator pps_iter;
+                                    if ((pd > 0) && (pp_iter->ad_type == DENY)) {
+                                        std::list<permission_partition_ps>::iterator pps_iter;
 
-                                    for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                                        if (pps_iter->ps_type == SUBSCRIBE) {
-                                            std::vector<std::string>::iterator pl_iter; // partition list
+                                        for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
+                                            if (pps_iter->ps_type == SUBSCRIBE) {
+                                                std::vector<std::string>::iterator pl_iter; // partition list
 
-                                            for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
-                                                // Check the pl_iter value against the list of partitions in the partition parameter
-                                                for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
-                                                    if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
-                                                        matched_deny_partitions++;
-                                                        break;
+                                                for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
+                                                    // Check the pl_iter value against the list of partitions in the partition parameter
+                                                    for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
+                                                        if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
+                                                            matched_deny_partitions++;
+                                                            break;
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            }
+                            else { // No partitions to match
+                                return false;
                             }
 
                         }
