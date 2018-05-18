@@ -10,6 +10,7 @@
 #include <cstring>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
+#include "../OpenSSL_legacy.h" // Must come after all other OpenSSL includes
 
 
 namespace OpenDDS {
@@ -41,7 +42,9 @@ namespace OpenDDS {
         if (this != &rhs) {
             if (rhs.x_) {
                 x_ = rhs.x_;
+#ifndef OPENSSL_LEGACY
                 X509_up_ref(x_);
+#endif
 
             } else {
                 x_ = NULL;

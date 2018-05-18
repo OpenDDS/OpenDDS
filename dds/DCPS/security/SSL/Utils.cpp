@@ -12,6 +12,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
+#include "../OpenSSL_legacy.h" // Must come after all other OpenSSL includes
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
