@@ -451,7 +451,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   ACE_UNUSED_ARG(qos);
-  //ACE_UNUSED_ARG(partition);
   ACE_UNUSED_ARG(data_tag);
 
 
@@ -545,7 +544,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
                 if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
                     // Topic matches now check that the partitions match
-                    //CORBA::ULong num_param_partitions = 0;
 
                     // First look for the ad_type & ps_type in the partitions
                     for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
@@ -573,21 +571,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                         }
                     }
 
-                    //// return a value showing that topic and partitions matched
-                    //if (matched_partitions == 0) {
-                    //    CommonUtilities::set_security_error(ex, -1, 0, "No matching partitions.");
-                    //    return false;
-                    //}
-                    //else {
-                    //    if (num_param_partitions > partition.name.length()) {
-                    //        CommonUtilities::set_security_error(ex, -1, 0, "Requested more partitions than available in permissions file.");
-                    //        return false;
-                    //    }
-                    //    else {
-                    //        return true;
-                    //    }
-
-                    //}
                 }
             }
           }
@@ -614,7 +597,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                                   for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
                                       if (pps_iter->ps_type == PUBLISH) {
                                           std::vector<std::string>::iterator pl_iter; // partition list
-                                          //num_param_partitions = pps_iter->partition_list.size();
 
                                           for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
                                               // Check the pl_iter value against the list of partitions in the partition parameter
@@ -1977,19 +1959,47 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
    xercesc::DOMNodeList * domainRules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("domain_rule"));
 
 
-   for(XMLSize_t r=0;r<domainRules->getLength();r++) {
+   for (XMLSize_t r=0; r < domainRules->getLength(); r++) {
      domain_rule rule_holder_;
      rule_holder_.domain_attrs.plugin_participant_attributes = 0;
+     int min_value = 0;
+     int max_value = 0;
 
        // Pull out domain ids used in the rule. We are NOT supporting ranges at this time
        xercesc::DOMNodeList * ruleNodes = domainRules->item(r)->getChildNodes();
-       for( XMLSize_t rn = 0; rn<ruleNodes->getLength();rn++) {
+
+       for (XMLSize_t rn = 0; rn < ruleNodes->getLength(); rn++) {
            char * dn_tag = xercesc::XMLString::transcode(ruleNodes->item(rn)->getNodeName());
+
            if ( strcmp("domains", dn_tag) == 0 ) {
-             xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
-               for(XMLSize_t did = 0; did<domainIdNodes->getLength();did++) {
-                 if(strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+               xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
+
+               for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
+                 if (strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
                    rule_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+                 }
+                 else if (strcmp("id_range", xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+                     int min_value = 0;
+                     int max_value = 0;
+                     xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
+
+                     for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
+                         if (strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
+                             min_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
+                         }
+                         else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
+                             max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
+
+                             if ((min_value == 0) || (min_value > max_value)) {
+                                 std::cout << "Governance XML Domain Range invalid! \n";
+                                 return -1;
+                             }
+
+                             for (int i = min_value; i <= max_value; i++) {
+                                 rule_holder_.domain_list.insert(i);
+                             }
+                         }
+                     }
                  }
                }
 
@@ -2240,6 +2250,30 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
               if (strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
                 ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
                 pp_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+              }
+              else if (strcmp("id_range", xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+                  int min_value = 0;
+                  int max_value = 0;
+                  xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
+
+                  for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
+                      if (strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
+                           min_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
+                      }
+                      else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
+                          max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
+
+                          if ((min_value == 0) || (min_value > max_value)) {
+                              std::cout << "Permission XML Domain Range invalid! \n";
+                              return -1;
+                          }
+
+                          for (int i = min_value; i <= max_value; i++) {
+                              ptr_holder_.domain_list.insert(i);
+                              pp_holder_.domain_list.insert(i);
+                          }
+                      }
+                  }
               }
             }
 

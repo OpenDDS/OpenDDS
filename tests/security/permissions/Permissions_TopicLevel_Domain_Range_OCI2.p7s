@@ -1,0 +1,96 @@
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----95DFFF5382F8E176F2734859B9518F7E"
+
+This is an S/MIME signed message
+
+------95DFFF5382F8E176F2734859B9518F7E
+Content-Type: text/plain
+
+<?xml version="1.0" encoding="utf-8"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+    <permissions>
+        <grant name="ShapesPermissionTOC">
+            <subject_name>/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com</subject_name>
+            <validity>
+                <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
+                <not_before>2015-09-15T01:00:00</not_before>
+                <not_after>2025-09-15T01:00:00</not_after>
+            </validity>
+            <allow_rule>
+                <domains>
+                    <id>0</id>
+                    <id_range>
+                        <min>5</min>
+                        <max>10</max>
+                    </id_range>
+                    <id_range>
+                        <min>15</min>
+                        <max>21</max>
+                    </id_range>
+                    <id>26</id>
+                </domains>
+                <publish>
+                    <topics>
+                        <topic>Triangle</topic>
+                    </topics>
+                </publish>
+                <subscribe>
+                    <topics>
+                        <topic>Square</topic>
+                        <topic>Circle</topic>
+                    </topics>
+                </subscribe>
+            </allow_rule>
+            <default>ALLOW</default>
+        </grant>
+
+    </permissions>
+</dds>
+
+------95DFFF5382F8E176F2734859B9518F7E
+Content-Type: application/x-pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+
+MIIG8gYJKoZIhvcNAQcCoIIG4zCCBt8CAQExDzANBglghkgBZQMEAgEFADALBgkq
+hkiG9w0BBwGgggPkMIID4DCCAsgCCQC6Fm9aR8tq2zANBgkqhkiG9w0BAQsFADCB
+sTELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3Vp
+czEsMCoGA1UECgwjT2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVudGl0eSBDQSkx
+KDAmBgNVBAMMH09iamVjdCBDb21wdXRpbmcgKFRlc3QgSWRlbiBDQSkxJzAlBgkq
+hkiG9w0BCQEWGGluZm9Ab2JqZWN0Y29tcHV0aW5nLmNvbTAeFw0xODAyMjIxNDU3
+NThaFw0yODAyMjAxNDU3NThaMIGxMQswCQYDVQQGEwJVUzELMAkGA1UECAwCTU8x
+FDASBgNVBAcMC1NhaW50IExvdWlzMSwwKgYDVQQKDCNPYmplY3QgQ29tcHV0aW5n
+IChUZXN0IElkZW50aXR5IENBKTEoMCYGA1UEAwwfT2JqZWN0IENvbXB1dGluZyAo
+VGVzdCBJZGVuIENBKTEnMCUGCSqGSIb3DQEJARYYaW5mb0BvYmplY3Rjb21wdXRp
+bmcuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA13849bph3Hd8
+93P2JADbJ/a+ITlL9RiCteEVJapvfZMTiPc7sSebLFCo3/3RuwszDQi72w6D0ksC
+JDc4HgNav5bvXCdW6mZx6F08qxUsGTLmnSxCaq/jJloF3BQm39skg1E8P6KwB904
+sXj/MPARunk1bfqg0ZMRs+uRyUcNpKK1vWaHxo0TLXxgcK8KdLsFZBCoNNEJ51WT
+juV+35dBQhax53z+W3mkEuxpiG+Gu5ONIszl8/nMcaq6TeJj8R+LPxaLZhrTlCXY
+aeal1dnpWivHC4kq1Vj8JdMwmmA0uNF0m9mgtru9cNYdFHaGoMSrFW3boyb6M7W8
+e5GnKtVsFQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQC1L+sl+bQnkCq7/dn4oJLa
+jCPxuwbFslv48yyXrF/BPH5Ntef/25fWqWaehY2Y5UVr37TeSntGMqOzJmfQ10mm
+X3eHcCsdlK3yediDw1Uzocao6sPnaCyHVvlsGxaI42F3b+6VFB7gyUBfYYDUZx/+
+y8tFTeqcISXmu9/0MW8Q7crfHG/VHx7V8NRcqor3z21p3popBSVoUoWAFYITsumY
+nds19Z1DqGpsKxtFKEC4MDmHz1OdXYJFB1cJlU1J00p5FtfH33crq/JLXoQyfNUt
+IX57a35OT1v9NqjVzTgZIlsjwL4wEVprsRXQFs7u7hDLlnSXslddgnp51bXKmQpp
+MYIC0jCCAs4CAQEwgb8wgbExCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJNTzEUMBIG
+A1UEBwwLU2FpbnQgTG91aXMxLDAqBgNVBAoMI09iamVjdCBDb21wdXRpbmcgKFRl
+c3QgSWRlbnRpdHkgQ0EpMSgwJgYDVQQDDB9PYmplY3QgQ29tcHV0aW5nIChUZXN0
+IElkZW4gQ0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5j
+b20CCQC6Fm9aR8tq2zANBglghkgBZQMEAgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJ
+KoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xODA1MTgxNDM0MzRaMC8GCSqGSIb3
+DQEJBDEiBCDaSsv23k58HcSAWnd39lFNjKIYfZEQAjGqaDrWDV91NjB5BgkqhkiG
+9w0BCQ8xbDBqMAsGCWCGSAFlAwQBKjALBglghkgBZQMEARYwCwYJYIZIAWUDBAEC
+MAoGCCqGSIb3DQMHMA4GCCqGSIb3DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUr
+DgMCBzANBggqhkiG9w0DAgIBKDANBgkqhkiG9w0BAQEFAASCAQB1RBkA/SKCRrhH
+pKNF5Zy87oRdbs+AjDYg6N8J9piKEW1+P0DySpdV2fPdBjDwKIaan46Asbp9M9k/
+8Ixqnq+Ng4roTiqUlQycnrBA5pc+u5LV17OKastiNsZ0dyyhpk4Rfosam8xWBFaD
+ilE2OBB52oWZjGKMKRJ1Grcg3Sl2Wj/zScOaw8wpUp4ftC2Rxjcn6HwohoSFBnb8
+cB/J4jpiUJ3UBtik8g1A2bwIpf+2RIdzaDqwhuowfkdnqxb3TUYv4pqscvrDu4zI
+8Sp5zEtpPZAsQRDVpGQAdi35MCbK1mnRHwHUMvb4zx8kjJsnKtcaTXY6WiFp+Cv/
+ajuXwyt8
+
+------95DFFF5382F8E176F2734859B9518F7E--
+
