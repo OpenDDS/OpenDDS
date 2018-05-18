@@ -1962,8 +1962,6 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
    for (XMLSize_t r=0; r < domainRules->getLength(); r++) {
      domain_rule rule_holder_;
      rule_holder_.domain_attrs.plugin_participant_attributes = 0;
-     int min_value = 0;
-     int max_value = 0;
 
        // Pull out domain ids used in the rule. We are NOT supporting ranges at this time
        xercesc::DOMNodeList * ruleNodes = domainRules->item(r)->getChildNodes();
@@ -2207,7 +2205,7 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
         if (strcmp(g_tag, "subject_name") == 0) {
             rule_holder_.subject = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
         } else if (strcmp(g_tag, "validity") == 0) {
-            Validity_t gn_validity;
+            //Validity_t gn_validity;
             xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
 
             for (XMLSize_t vn = 0; vn < validityNodes->getLength(); vn++) {
