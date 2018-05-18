@@ -42,7 +42,7 @@ matrix:
           packages:
             - libxerces-c-dev
             - clang++-5.0
-      env: COMPILER=clang++-5.0
+      env: COMPILER=clang++-5.0 NO_INLINE=1
     - compiler: clang
       addons:
         apt:
@@ -52,7 +52,7 @@ matrix:
           packages:
             - libxerces-c-dev
             - clang++-6.0
-      env: COMPILER=clang++-6.0
+      env: COMPILER=clang++-6.0 NO_INLINE=1
     - compiler: gcc
       addons:
         apt:
@@ -61,7 +61,7 @@ matrix:
           packages:
             - libxerces-c-dev
             - g++-6
-      env: COMPILER=g++-6
+      env: COMPILER=g++-6 NO_INLINE=1
     - compiler: gcc
       addons:
         apt:
@@ -70,7 +70,7 @@ matrix:
           packages:
             - libxerces-c-dev
             - g++-7
-      env: COMPILER=g++-7
+      env: COMPILER=g++-7 NO_INLINE=1
     - os: osx
       osx_image: xcode9.1
       compiler: clang
