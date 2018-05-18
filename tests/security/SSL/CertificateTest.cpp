@@ -69,7 +69,6 @@ public:
 
   ~CertificateTest()
   {
-
   }
 
   Certificate ca_;

@@ -23,6 +23,8 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+
+#include "OpenSSL_init.h"
 #include "OpenSSL_legacy.h" // Must come after all other OpenSSL includes
 
 using namespace DDS::Security;
@@ -36,16 +38,12 @@ CryptoBuiltInImpl::CryptoBuiltInImpl()
   : mutex_()
   , next_handle_(1)
 {
-#ifdef OPENSSL_V_1_0
-  OpenSSL_add_all_algorithms();
-#endif
+  openssl_init();
 }
 
 CryptoBuiltInImpl::~CryptoBuiltInImpl()
 {
-#ifdef OPENSSL_V_1_0
-  EVP_cleanup();
-#endif
+  openssl_cleanup();
 }
 
 bool CryptoBuiltInImpl::_is_a(const char* id)
