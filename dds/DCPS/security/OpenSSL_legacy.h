@@ -12,15 +12,19 @@
 #define OPENSSL_LEGACY_H
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-#define OPENSSL_LEGACY
+
+#define OPENSSL_V_1_0
 
 #define EVP_MD_CTX_new EVP_MD_CTX_create
 #define EVP_MD_CTX_free EVP_MD_CTX_destroy
-#define EVP_CTRL_AEAD_GET_TAG EVP_CTRL_CCM_GET_TAG 
+#define EVP_CTRL_AEAD_GET_TAG EVP_CTRL_CCM_GET_TAG
 
-#define RSA_bits(r) BN_num_bits(r->n)
+inline int RSA_bits(const RSA* r)
+{
+  return BN_num_bits(r->n);
+}
 
-inline void DH_get0_key(const DH *dh, const BIGNUM **pub_key, const BIGNUM **priv_key)
+inline void DH_get0_key(const DH* dh, const BIGNUM** pub_key, const BIGNUM** priv_key)
 {
   if (pub_key) {
     *pub_key = dh->pub_key;

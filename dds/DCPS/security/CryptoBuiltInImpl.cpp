@@ -35,10 +35,18 @@ namespace Security {
 CryptoBuiltInImpl::CryptoBuiltInImpl()
   : mutex_()
   , next_handle_(1)
-{}
+{
+#ifdef OPENSSL_V_1_0
+  OpenSSL_add_all_algorithms();
+#endif
+}
 
 CryptoBuiltInImpl::~CryptoBuiltInImpl()
-{}
+{
+#ifdef OPENSSL_V_1_0
+  EVP_cleanup();
+#endif
+}
 
 bool CryptoBuiltInImpl::_is_a(const char* id)
 {

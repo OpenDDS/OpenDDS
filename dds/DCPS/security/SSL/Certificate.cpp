@@ -42,7 +42,7 @@ namespace OpenDDS {
         if (this != &rhs) {
             if (rhs.x_) {
                 x_ = rhs.x_;
-#ifndef OPENSSL_LEGACY
+#ifndef OPENSSL_V_1_0
                 X509_up_ref(x_);
 #endif
 

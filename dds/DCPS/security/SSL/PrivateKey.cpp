@@ -33,7 +33,7 @@ namespace OpenDDS {
         if (this != &rhs) {
             if (rhs.k_) {
                 k_ = rhs.k_;
-#ifndef OPENSSL_LEGACY
+#ifndef OPENSSL_V_1_0
                 EVP_PKEY_up_ref(k_);
 #endif
 
