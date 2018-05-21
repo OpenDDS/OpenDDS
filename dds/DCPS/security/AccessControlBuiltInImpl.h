@@ -294,7 +294,7 @@ private:
 
     struct permissions_partition {
         AllowDeny_t ad_type;
-        std::set<::DDS::Security::DomainId_t> domain_list;
+        std::set< ::DDS::Security::DomainId_t > domain_list;
         std::list<permission_partition_ps> partition_ps;
     };
 
