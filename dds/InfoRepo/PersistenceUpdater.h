@@ -54,9 +54,13 @@ public:
   typedef ACE_Allocator_Adapter <ACE_Malloc <ACE_MMAP_MEMORY_POOL
   , TAO_SYNCH_MUTEX> > ALLOCATOR;
 
-  /// Persisted entity data structures
+  /// Persisted topic data structure
   typedef struct TopicStrt <QosSeq, ACE_CString> Topic;
+
+  /// Persisted participant data structure
   typedef struct ParticipantStrt <QosSeq> Participant;
+
+  /// Persisted actor data structure
   typedef struct ActorStrt <QosSeq, QosSeq, ACE_CString,
                             BinSeq, ContentSubscriptionBin> RWActor;
 
@@ -71,8 +75,10 @@ public:
   /// Service object initialization
   virtual int init(int argc, ACE_TCHAR *argv[]);
 
-  /// pure ACE_Task_Base methods
+  /// ACE_Task_Base finish method
   virtual int fini();
+
+  /// ACE_Task_Base start method
   virtual int svc();
 
   /// Request an image refresh to be sent upstream.
@@ -80,20 +86,40 @@ public:
   /// TBD: Move to an asynchronous model
   virtual void requestImage();
 
-  /// Add entities to be persisted.
+  /// Add topic to be persisted.
   virtual void create(const UTopic& topic);
+
+  /// Add participant to be persisted.
   virtual void create(const UParticipant& participant);
+
+  /// Add DataReader to be persisted.
   virtual void create(const URActor& actor);
+
+  /// Add DataWriter to be persisted.
   virtual void create(const UWActor& actor);
+
+  /// Add ownership data to be persisted.
   virtual void create(const OwnershipData& data);
 
-  /// Persist updated Qos parameters for an entity.
+  /// Persist updated Qos parameters for a Participant.
   virtual void update(const IdPath& id, const DDS::DomainParticipantQos& qos);
+
+  /// Persist updated Qos parameters for a Topic.
   virtual void update(const IdPath& id, const DDS::TopicQos&             qos);
+
+  /// Persist updated Qos parameters for a DataWriter.
   virtual void update(const IdPath& id, const DDS::DataWriterQos&        qos);
+
+  /// Persist updated Qos parameters for a Publisher.
   virtual void update(const IdPath& id, const DDS::PublisherQos&         qos);
+
+  /// Persist updated Qos parameters for a DataReader.
   virtual void update(const IdPath& id, const DDS::DataReaderQos&        qos);
+
+  /// Persist updated Qos parameters for a Subscriber.
   virtual void update(const IdPath& id, const DDS::SubscriberQos&        qos);
+
+  /// Persist updated Qos parameters for subscription exprParams.
   virtual void update(const IdPath& id, const DDS::StringSeq&     exprParams);
 
   /// Remove an entity (but not children) from persistence.
