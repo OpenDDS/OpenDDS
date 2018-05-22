@@ -946,11 +946,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     // Check the date/time range for validity 
     time_t after_time,
-            before_time;
+           before_time;
 
     before_time = convert_permissions_time(pm_iter->validity.not_before);
 
     time_t current_date_time = time(0);
+
+    // Adjust the current time to UTC/GMT
+    tm *current_time_tm = gmtime(&current_date_time);
+    current_date_time = mktime(current_time_tm);
 
     if (current_date_time < before_time) {
         CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
@@ -1191,6 +1195,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     before_time = convert_permissions_time(pm_iter->validity.not_before);
 
     time_t current_date_time = time(0);
+
+    // Adjust the current time to UTC/GMT
+    tm *current_time_tm = gmtime(&current_date_time);
+    current_date_time = mktime(current_time_tm);
 
     if (current_date_time < before_time) {
         CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
