@@ -509,6 +509,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     time_t current_date_time = time(0);
 
+    // Adjust the current time to UTC/GMT
+    tm *current_time_tm = gmtime(&current_date_time);
+    current_date_time = mktime(current_time_tm);
+
     if (current_date_time < before_time) {
       CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
       return false;
@@ -722,11 +726,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // Check the date/time range for validity 
     time_t after_time,
-           before_time;
+           before_time,
+           timer_length;
 
     before_time = convert_permissions_time(pm_iter->validity.not_before);
 
     time_t current_date_time = time(0);
+    struct tm *cdt_tm;
+
+    // Convert to GMT
+    cdt_tm = gmtime(&current_date_time);
+    current_date_time = mktime(cdt_tm);
 
     if (current_date_time < before_time) {
         CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
@@ -740,7 +750,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         return false;
     }
 
-    // Start timer here.  If the function is exited with a false value, cancel the timer before executing the return.
+    // Start timer here.  NOTE: If the function is exited with a false value, cancel the timer before executing the return.
+    timer_length = after_time - current_date_time;
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
     std::list<permissions_partition>::iterator pp_iter;
@@ -1382,6 +1393,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  //listener_ptr_ = listener;
   return true;
 }
 
@@ -1850,14 +1862,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   return true;
 }
 
+// NOTE: This function will return the time value as GMT
 time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString)
 {
+    time_t permission_time_t;
     tm permission_tm;
     std::string temp_str;
 
     memset(&permission_tm, 0, sizeof(tm));
     temp_str.clear();
-
+    // Format from DDS Security spec 1.1 is:
+    //   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
     // Year
     temp_str = timeString.substr(0, 4);
     permission_tm.tm_year = (atoi(temp_str.c_str()) - 1900);
@@ -1882,7 +1897,44 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
     temp_str = timeString.substr(17, 2);
     permission_tm.tm_sec = atoi(temp_str.c_str());
 
-    return mktime(&permission_tm);
+    permission_time_t = mktime(&permission_tm);
+
+    // Check if there is time zone information in the string
+    if (timeString.length() >= 20) {
+        temp_str.clear();
+        temp_str = timeString.substr(19, 1);
+
+        // The only adjustments that need to be made are if the character
+        // is a '+' or '-'
+        if (strcmp(temp_str.c_str(), "Z") != 0) {
+            int hours_adj = 0;
+            int mins_adj = 0;
+
+            if (strcmp(temp_str.c_str(), "+") == 0) {
+                temp_str.clear();
+                temp_str = timeString.substr(20, 2);
+                hours_adj = (atoi(temp_str.c_str())) * 360; // convert to seconds
+                temp_str.clear();
+                temp_str = timeString.substr(23, 2);
+                mins_adj = (atoi(temp_str.c_str())) * 60; // convert to seconds
+                permission_time_t -= (hours_adj + mins_adj);
+            }
+            else if (strcmp(temp_str.c_str(), "-") == 0) {
+                temp_str.clear();
+                temp_str = timeString.substr(20, 2);
+                hours_adj = atoi(temp_str.c_str());
+                hours_adj = hours_adj * 360; // convert to seconds
+                temp_str.clear();
+                temp_str = timeString.substr(23, 2);
+                mins_adj = atoi(temp_str.c_str());
+                mins_adj = mins_adj * 60; // convert to seconds
+                permission_time_t += (hours_adj + mins_adj);
+            }
+        }
+
+    }
+
+    return permission_time_t;
 }
 
 //char * AccessControlBuiltInImpl::strptime(const char * s, const char * f, tm * tm)
