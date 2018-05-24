@@ -42,6 +42,11 @@ public:
 
   // Propagate that an entity has been destroyed.
   virtual void destroy(const IdPath& id, ItemType type, ActorType actor) = 0;
+
+  /// Update Last Participant Id for the repo
+  virtual void updateLastPartId(PartIdType partId) {
+    ACE_UNUSED_ARG(partId);
+  };
 };
 
 inline

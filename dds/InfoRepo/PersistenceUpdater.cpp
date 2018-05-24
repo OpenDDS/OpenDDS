@@ -13,6 +13,7 @@
 
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/debug.h"
 
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
@@ -217,7 +218,7 @@ PersistenceUpdater::PersistenceUpdater()
   , topic_index_(0)
   , participant_index_(0)
   , actor_index_(0)
-
+  , last_part_id_(0)
 {}
 
 PersistenceUpdater::~PersistenceUpdater()
@@ -237,14 +238,17 @@ void* createIndex(const std::string& tag
     return index;
 
   } else {
-    exists = false;
-
     ACE_ALLOCATOR_RETURN(index, allocator.malloc(size), 0);
 
     if (allocator.bind(tag.c_str(), index) == -1) {
       allocator.free(index);
       index = 0;
     }
+  }
+
+  if (!index) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PersistenceUpdater::init "
+      "Initial allocation/Bind failed for %C.\n"), tag.c_str()));
   }
 
   return index;
@@ -260,7 +264,8 @@ index_cleanup(I* index
     iter++;
 
     if (index->unbind((*current_iter).ext_id_, allocator) != 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("Index unbind failed.\n")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PersistenceUpdater::init:"
+        "Index unbind failed.\n")));
     }
   }
 }
@@ -269,11 +274,10 @@ int
 PersistenceUpdater::init(int argc, ACE_TCHAR *argv[])
 {
   // discover the UpdateManager
-  um_ = ACE_Dynamic_Service<Update::Manager>::instance
-        ("UpdateManagerSvc");
+  um_ = ACE_Dynamic_Service<Update::Manager>::instance("UpdateManagerSvc");
 
   if (um_ == 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("PersistenceUpdater initialization failed. ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PersistenceUpdater::init ")
                ACE_TEXT("No UpdateManager discovered.\n")));
     return -1;
   }
@@ -295,61 +299,50 @@ PersistenceUpdater::init(int argc, ACE_TCHAR *argv[])
                            &options),
                  -1);
   allocator_.reset(allocator);
-  std::string topic_tag("TopicIndex");
-  std::string participant_tag("ParticipantIndex");
-  std::string actor_tag("ActorIndex");
-  bool exists = false, ex = false;
 
-  char* topic_index = (char*)createIndex(topic_tag, *allocator_
-                                         , sizeof(TopicIndex), ex);
+  bool exists = false;
 
-  if (topic_index == 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Initial allocation/Bind failed 1.\n")));
+  char* topic_index = (char*)createIndex("TopicIndex", *allocator_
+                                         , sizeof(TopicIndex), exists);
+  if (!topic_index) {
     return -1;
   }
 
-  exists = exists || ex;
-
-  char* participant_index = (char*)createIndex(participant_tag, *allocator_
-                                               , sizeof(ParticipantIndex), ex);
-
-  if (participant_index == 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Initial allocation/Bind failed 2.\n")));
+  char* participant_index = (char*)createIndex("ParticipantIndex", *allocator_
+                                               , sizeof(ParticipantIndex), exists);
+  if (!participant_index) {
     return -1;
   }
 
-  exists = exists || ex;
-
-  char* actor_index = (char*)createIndex(actor_tag, *allocator_
-                                         , sizeof(ActorIndex), ex);
-
-  if (actor_index == 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Initial allocation/Bind failed 2.\n")));
+  char* actor_index = (char*)createIndex("ActorIndex", *allocator_
+                                         , sizeof(ActorIndex), exists);
+  if (!actor_index) {
     return -1;
   }
 
-  exists = exists || ex;
+  void* last_part_id = createIndex(
+    "LastParticipantId", *allocator_, sizeof(PartIdType), exists);
+  if (!last_part_id) {
+    return -1;
+  }
+  last_part_id_ = reinterpret_cast<PartIdType*>(last_part_id);
 
   if (exists) {
     topic_index_ = reinterpret_cast<TopicIndex*>(topic_index);
     participant_index_ = reinterpret_cast<ParticipantIndex*>(participant_index);
     actor_index_ = reinterpret_cast<ActorIndex*>(actor_index);
-
-    if (!(topic_index_ && participant_index_ && actor_index_)) {
-      ACE_ERROR((LM_DEBUG, ACE_TEXT("Unable to narrow persistent indexes.\n")));
-      return -1;
-    }
-
   } else {
     topic_index_ = new(topic_index) TopicIndex(allocator_.get());
     participant_index_ = new(participant_index) ParticipantIndex(allocator_.get());
     actor_index_ = new(actor_index) ActorIndex(allocator_.get());
+    *last_part_id_ = 0;
   }
 
   if (reset_) {
     index_cleanup(topic_index_, allocator_.get());
     index_cleanup(participant_index_, allocator_.get());
     index_cleanup(actor_index_, allocator_.get());
+    *last_part_id_ = 0;
   }
 
   // lastly register the callback
@@ -381,7 +374,7 @@ PersistenceUpdater::parse(int argc, ACE_TCHAR *argv[])
       }
 
     } else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Unknown option %s\n")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) PersistenceUpdater::parse: Unknown option %s\n")
                  , argv[count]));
       return -1;
     }
@@ -426,7 +419,7 @@ PersistenceUpdater::requestImage()
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("PersistenceUpdater::requestImage(): allocation failed.\n")));
+                 ACE_TEXT("(%P|%t) PersistenceUpdater::requestImage(): allocation failed.\n")));
       return;
     }
 
@@ -439,6 +432,12 @@ PersistenceUpdater::requestImage()
                               , participant->participantId
                               , qos);
     image.participants.push_back(dparticipant);
+    if (OpenDDS::DCPS::DCPS_debug_level >= 2)  {
+      OpenDDS::DCPS::RepoIdConverter conv(participant->participantId);
+      ACE_DEBUG((LM_DEBUG,
+        "(%P|%t) PersistenceUpdater::requestImage(): loaded participant %C\n",
+        OPENDDS_STRING(conv).c_str()));
+    }
   }
 
   for (TopicIndex::ITERATOR iter = topic_index_->begin();
@@ -452,7 +451,7 @@ PersistenceUpdater::requestImage()
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("PersistenceUpdater::requestImage(): allocation failed.\n")));
+                 ACE_TEXT("(%P|%t) PersistenceUpdater::requestImage(): allocation failed.\n")));
       return;
     }
 
@@ -477,7 +476,7 @@ PersistenceUpdater::requestImage()
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("PersistenceUpdater::requestImage(): allocation failed.\n")));
+                 ACE_TEXT("(%P|%t) PersistenceUpdater::requestImage(): allocation failed.\n")));
       return;
     }
 
@@ -492,7 +491,7 @@ PersistenceUpdater::requestImage()
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("PersistenceUpdater::requestImage(): allocation failed.\n")));
+                 ACE_TEXT("(%P|%t) PersistenceUpdater::requestImage(): allocation failed.\n")));
       return;
     }
 
@@ -507,7 +506,7 @@ PersistenceUpdater::requestImage()
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("PersistenceUpdater::requestImage(): allocation failed.\n")));
+                 ACE_TEXT("(%P|%t) PersistenceUpdater::requestImage(): allocation failed.\n")));
       return;
     }
 
@@ -523,7 +522,7 @@ PersistenceUpdater::requestImage()
       ACE_NEW_NORETURN(params.second, char[params.first]);
       if (params.second == 0) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("PersistenceUpdater::requestImage(): allocation ")
+                   ACE_TEXT("(%P|%t) PersistenceUpdater::requestImage(): allocation ")
                    ACE_TEXT("failed.\n")));
         return;
       }
@@ -538,6 +537,8 @@ PersistenceUpdater::requestImage()
                   , pubsub_qos, drdw_qos, in_transport_seq, in_csp_bin);
     image.actors.push_back(dActor);
   }
+
+  image.lastPartId = *last_part_id_;
 
   um_->pushImage(image);
 }
@@ -558,7 +559,7 @@ PersistenceUpdater::create(const UTopic& topic)
 
   if (buf == 0) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("PersistenceUpdater::create( UTopic): allocation failed.\n")));
+               ACE_TEXT("(%P|%t) PersistenceUpdater::create( UTopic): allocation failed.\n")));
     return;
   }
 
@@ -604,7 +605,7 @@ PersistenceUpdater::create(const UParticipant& participant)
 
   if (buf == 0) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("PersistenceUpdater::create( UParticipant): allocation failed.\n")));
+               ACE_TEXT("(%P|%t) PersistenceUpdater::create( UParticipant): allocation failed.\n")));
     return;
   }
 
@@ -647,7 +648,7 @@ PersistenceUpdater::create(const URActor& actor)
   char *buf = new (std::nothrow) char[len];
 
   if (buf == 0) {
-    ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( subscription): allocation failed.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( subscription): allocation failed.\n"));
     return;
   }
 
@@ -667,7 +668,7 @@ PersistenceUpdater::create(const URActor& actor)
   char *buf2 = new (std::nothrow) char[len];
 
   if (buf2 == 0) {
-    ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( subscription): allocation failed.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( subscription): allocation failed.\n"));
     return;
   }
 
@@ -687,7 +688,7 @@ PersistenceUpdater::create(const URActor& actor)
   char *buf3 = new (std::nothrow) char[len];
 
   if (buf3 == 0) {
-    ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( subscription) allocation failed.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( subscription) allocation failed.\n"));
     return;
   }
 
@@ -703,7 +704,7 @@ PersistenceUpdater::create(const URActor& actor)
   len = dst4.length();
   char* buf4 = new (std::nothrow) char[len];
   if (buf4 == 0) {
-    ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( subscription) allocation failed.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( subscription) allocation failed.\n"));
     return;
   }
   ArrDelAdapter<char> guard4(buf4);
@@ -750,7 +751,7 @@ PersistenceUpdater::create(const UWActor& actor)
   char *buf = new (std::nothrow) char[len];
 
   if (buf == 0) {
-    ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( publication): allocation failed.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( publication): allocation failed.\n"));
     return;
   }
 
@@ -770,7 +771,7 @@ PersistenceUpdater::create(const UWActor& actor)
   char *buf2 = new (std::nothrow) char[len];
 
   if (buf2 == 0) {
-    ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( publication): allocation failed.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( publication): allocation failed.\n"));
     return;
   }
 
@@ -790,7 +791,7 @@ PersistenceUpdater::create(const UWActor& actor)
   char *buf3 = new (std::nothrow) char[len];
 
   if (buf3 == 0) {
-    ACE_ERROR((LM_ERROR, "PersistenceUpdater::create( publication): allocation failed.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) PersistenceUpdater::create( publication): allocation failed.\n"));
     return;
   }
 
@@ -1026,7 +1027,7 @@ PersistenceUpdater::destroy(const IdPath& id, ItemType type, ActorType)
   default: {
     OpenDDS::DCPS::RepoIdConverter converter(id.id);
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P | %t) PersistenceUpdater::destroy: ")
+               ACE_TEXT("(%P|%t) PersistenceUpdater::destroy: ")
                ACE_TEXT("unknown entity - %C.\n"),
                std::string(converter).c_str()));
   }
@@ -1044,6 +1045,11 @@ PersistenceUpdater::storeUpdate(const ACE_Message_Block& data, BinSeq& storage)
 
   storage.first  = len;
   storage.second = static_cast<char*>(buffer);
+}
+
+void PersistenceUpdater::updateLastPartId(PartIdType partId)
+{
+  *last_part_id_ = partId;
 }
 
 } // namespace Update

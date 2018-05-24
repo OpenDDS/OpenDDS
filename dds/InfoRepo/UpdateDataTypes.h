@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -30,10 +31,11 @@ enum SpecificQos {
   SubscriberQos
 };
 
-typedef long                            DomainIdType;
+typedef DDS::DomainId_t DomainIdType;
 typedef OpenDDS::DCPS::RepoId           IdType; // Federation scope identifier type.
 typedef std::pair <size_t, char*>       BinSeq;
 typedef std::pair <SpecificQos, BinSeq> QosSeq;
+typedef long PartIdType;
 
 struct IdPath {
   DomainIdType domain;
@@ -183,6 +185,9 @@ struct ImageData {
   ParticipantSeq participants;
   ReaderSeq      actors;
   WriterSeq      wActors;
+
+  /// What the last participant id is/was
+  PartIdType lastPartId;
 };
 typedef struct ImageData<UTopic*, UParticipant*, URActor*, UWActor*> UImage;
 typedef struct ImageData<DTopic,  DParticipant,  DActor,   DActor>   DImage;

@@ -76,6 +76,9 @@ public:
   void add(const DParticipant& participant);
   void add(const DActor& actor);
 
+  /// Update Last Participant Id for the repo
+  virtual void updateLastPartId(PartIdType partId);
+
 private:
   typedef std::set <Updater*> Updaters;
 

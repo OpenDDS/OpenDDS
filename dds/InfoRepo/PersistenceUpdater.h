@@ -125,6 +125,9 @@ public:
   /// Remove an entity (but not children) from persistence.
   virtual void destroy(const IdPath& id, ItemType type, ActorType actor);
 
+  /// Update Last Participant Id for repo
+  virtual void updateLastPartId(PartIdType partId);
+
 private:
   int parse(int argc, ACE_TCHAR *argv[]);
   void storeUpdate(const ACE_Message_Block& data, BinSeq& storage);
@@ -139,6 +142,9 @@ private:
   TopicIndex *topic_index_;
   ParticipantIndex *participant_index_;
   ActorIndex *actor_index_;
+
+  /// What the last participant id is/was
+  PartIdType* last_part_id_;
 };
 
 } // End of namespace Update

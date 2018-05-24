@@ -1033,23 +1033,28 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
     // pariticipant Id number.
     participantId = OpenDDS::DCPS::GUID_UNKNOWN;
 
-  } else if (this->um_ && (participant->isBitPublisher() == false)) {
-    // Push this participant to interested observers.
-    Update::UParticipant updateParticipant(
-      domain,
-      participant->owner(),
-      participantId,
-      const_cast<DDS::DomainParticipantQos &>(qos));
-    this->um_->create(updateParticipant);
+  } else if (this->um_) {
+    OpenDDS::DCPS::RepoIdConverter converter(participantId);
+    if (participant->isBitPublisher() == false) {
+      // Push this participant to interested observers.
+      Update::UParticipant updateParticipant(
+        domain,
+        participant->owner(),
+        participantId,
+        const_cast<DDS::DomainParticipantQos &>(qos));
+      this->um_->create(updateParticipant);
 
-    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      OpenDDS::DCPS::RepoIdConverter converter(participantId);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-                 ACE_TEXT("pushing creation of participant %C in domain %d.\n"),
-                 std::string(converter).c_str(),
-                 domain));
+      if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+                   ACE_TEXT("pushing creation of participant %C in domain %d.\n"),
+                   std::string(converter).c_str(),
+                   domain));
+      }
     }
+
+    // Update what the last participant id was
+    um_->updateLastPartId(converter.participantId());
   }
 
   if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -2234,15 +2239,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
   }
 
   // Ensure that new BIT participants do not reuse an id
-  for (Update::UImage::ParticipantSeq::const_iterator
-       iter = image.participants.begin();
-       iter != image.participants.end(); iter++) {
-    const Update::UParticipant* part = *iter;
-    OpenDDS::DCPS::RepoIdConverter converter(part->participantId);
-    if (converter.federationId() == this->federation_.id()) {
-      participantIdGenerator_.last(converter.participantId());
-    }
-  }
+  participantIdGenerator_.last(image.lastPartId);
 
   for (Update::UImage::ParticipantSeq::const_iterator
        iter = image.participants.begin();
