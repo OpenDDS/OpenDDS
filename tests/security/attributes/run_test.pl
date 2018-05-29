@@ -49,8 +49,8 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_read_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_write_signed.p7s");
     @topic_names = ("OD_RWA_OM_OD");
-    $pub_expect = "~13";
-    $sub_expect = "~23";
+    $pub_expect = "~15";
+    $sub_expect = "~25";
   } else {
     print "\nUnrecognized scenario '$scenario'. Skipping.\n";
     exit -1;
