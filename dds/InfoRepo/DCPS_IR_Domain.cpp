@@ -452,12 +452,12 @@ DCPS_IR_Domain::find_topic_description(
 }
 
 #if defined (DDS_HAS_MINIMUM_BIT)
-int DCPS_IR_Domain::init_built_in_topics(bool /* federated */)
+int DCPS_IR_Domain::init_built_in_topics(bool /* federated */, bool /*persistent*/)
 {
   return 1;
 }
 #else
-int DCPS_IR_Domain::init_built_in_topics(bool federated)
+int DCPS_IR_Domain::init_built_in_topics(bool federated, bool persistent)
 {
   // Indicates that BIT subscriber and datareaders should not be created.
   TheTransientKludge->enable();
@@ -489,7 +489,7 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
     }
 
 
-    int transportResult = init_built_in_topics_transport();
+    int transportResult = init_built_in_topics_transport(persistent);
 
     if (0 != transportResult) {
       return transportResult;
@@ -795,7 +795,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
 }
 #endif // defined (DDS_HAS_MINIMUM_BIT)
 
-int DCPS_IR_Domain::init_built_in_topics_transport()
+int DCPS_IR_Domain::init_built_in_topics_transport(bool persistent)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -818,6 +818,14 @@ int DCPS_IR_Domain::init_built_in_topics_transport()
                         ACE_TEXT("Nil Publisher from ")
                         ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
                        1);
+    }
+
+    // If persistence is active, do not have remote readers autodispose data
+    if (persistent) {
+      DDS::DataWriterQos qos;
+      bitPublisher_->get_default_datawriter_qos(qos);
+      qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
+      bitPublisher_->set_default_datawriter_qos(qos);
     }
 
     // Attach the Publisher with the TransportImpl.

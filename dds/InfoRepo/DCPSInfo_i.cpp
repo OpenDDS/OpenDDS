@@ -2151,7 +2151,8 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
 
     if (TheServiceParticipant->get_BIT()) {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-      bit_status = domainPtr->init_built_in_topics(this->federation_.overridden());
+      bit_status = domainPtr->init_built_in_topics(
+        this->federation_.overridden(), reincarnate_);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
