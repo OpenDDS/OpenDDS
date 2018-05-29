@@ -62,6 +62,17 @@ inline conversation_t *ws_find_or_create_conversation(packet_info *pinfo) {
  */
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1, 12, 0)
 
+// Emulate tvb_get_string for ws_tvb_get_ephemeral_string below
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 2, 0)
+inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
+                                 gint offset, gint length)
+{
+  return tvb_get_string_enc(alloc, tvb, offset, length, ENC_ASCII);
+}
+#else
+#define ws_tvb_get_string ::tvb_get_string
+#endif
+
 inline guint8 *ws_tvb_get_ephemeral_string(tvbuff_t *tvb, const gint offset, const gint length) {
   return ws_tvb_get_string(wmem_packet_scope(), tvb, offset, length);
 }
@@ -121,17 +132,10 @@ typedef int field_display_e; // Dummy type for code outside NO_ITL blocks
 
 #endif
 
-
 /*
  * Version 2.2
  */
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 2, 0)
-
-inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
-                                 gint offset, gint length)
-{
-  return tvb_get_string_enc(alloc, tvb, offset, length, ENC_ASCII);
-}
 
 #define WS_DISSECTOR_RETURN_TYPE int
 #define WS_DISSECTOR_RETURN_INT
@@ -146,7 +150,6 @@ inline guint8* ws_tvb_get_string(wmem_allocator_t* alloc, tvbuff_t *tvb,
 #define ws_dissector_add_handle dissector_add_handle
 #define WS_CONV_IDX index
 #define WS_DISSECTOR_EXTRA_PARAM
-#define ws_tvb_get_string ::tvb_get_string
 
 #endif
 
