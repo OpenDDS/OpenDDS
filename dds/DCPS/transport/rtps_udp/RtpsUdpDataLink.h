@@ -361,9 +361,12 @@ private:
     }
   }
 
-
-  // Timers for reliability:
   void send_nack_replies();
+  void send_directed_nack_replies(const RepoId& writerId, RtpsWriter& writer,
+                                  const RepoId& readerId, ReaderInfo& reader);
+  void process_requested_changes(DisjointSequence& requests,
+                                 const RtpsWriter& writer,
+                                 const ReaderInfo& reader);
   void process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const RepoId& pub_id);
   void send_heartbeats();
   void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);

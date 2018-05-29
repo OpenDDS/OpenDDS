@@ -89,6 +89,8 @@ public:
 
   // caller must already have the send strategy lock
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0);
+  bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
+                const RepoId& destination);
 
   void resend_fragments_i(const SequenceNumber& sequence,
                           const DisjointSequence& fragments);
@@ -127,6 +129,9 @@ private:
 
   typedef OPENDDS_MAP(SequenceNumber, BufferMap) FragmentMap;
   FragmentMap fragments_;
+
+  typedef OPENDDS_MAP(SequenceNumber, RepoId) DestinationMap;
+  DestinationMap destinations_;
 };
 
 } // namespace DCPS

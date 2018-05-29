@@ -1899,6 +1899,11 @@ RtpsUdpDataLink::send_nack_replies()
     //track if any messages have been fully acked by all readers
     SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
 
+    const EntityId_t& pvs_writer =
+      DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    const bool is_pvs_writer =
+      0 == std::memcmp(&pvs_writer, &rw->first.entityId, sizeof pvs_writer);
+
     typedef ReaderInfoMap::iterator ri_iter;
     const ri_iter end = writer.remote_readers_.end();
     for (ri_iter ri = writer.remote_readers_.begin(); ri != end; ++ri) {
@@ -1907,24 +1912,14 @@ RtpsUdpDataLink::send_nack_replies()
         all_readers_ack = ri->second.cur_cumulative_ack_;
       }
 
-      for (size_t i = 0; i < ri->second.requested_changes_.size(); ++i) {
-        const SequenceNumberSet& sn_state = ri->second.requested_changes_[i];
-        SequenceNumber base;
-        base.setValue(sn_state.bitmapBase.high, sn_state.bitmapBase.low);
-        if (sn_state.numBits == 1 && !(sn_state.bitmap[0] & 1)
-            && base == writer.heartbeat_high(ri->second)) {
-          // Since there is an entry in requested_changes_, the DR must have
-          // sent a non-final AckNack.  If the base value is the high end of
-          // the heartbeat range, treat it as a request for that seq#.
-          if (!writer.send_buff_.is_nil() && writer.send_buff_->contains(base)) {
-            requests.insert(base);
-          }
-        } else {
-          requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
-        }
+      if (is_pvs_writer && !ri->second.requested_changes_.empty()) {
+        send_directed_nack_replies(rw->first, writer, ri->first, ri->second);
+        continue;
       }
 
-      if (ri->second.requested_changes_.size()) {
+      process_requested_changes(requests, writer, ri->second);
+
+      if (!ri->second.requested_changes_.empty()) {
         if (locators_.count(ri->first)) {
           recipients.insert(locators_[ri->first].addr_);
           if (Transport_debug_level > 5) {
@@ -2030,6 +2025,81 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
       const SequenceNumber& seq = sn_iter->first;
       writer.send_buff_->resend_fragments_i(seq, sn_iter->second);
     }
+  }
+}
+
+void
+RtpsUdpDataLink::process_requested_changes(DisjointSequence& requests,
+                                           const RtpsWriter& writer,
+                                           const ReaderInfo& reader)
+{
+  for (size_t i = 0; i < reader.requested_changes_.size(); ++i) {
+    const RTPS::SequenceNumberSet& sn_state = reader.requested_changes_[i];
+    SequenceNumber base;
+    base.setValue(sn_state.bitmapBase.high, sn_state.bitmapBase.low);
+    if (sn_state.numBits == 1 && !(sn_state.bitmap[0] & 1)
+        && base == writer.heartbeat_high(reader)) {
+      // Since there is an entry in requested_changes_, the DR must have
+      // sent a non-final AckNack.  If the base value is the high end of
+      // the heartbeat range, treat it as a request for that seq#.
+      if (!writer.send_buff_.is_nil() && writer.send_buff_->contains(base)) {
+        requests.insert(base);
+      }
+    } else {
+      requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
+    }
+  }
+}
+
+void
+RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
+                                            RtpsWriter& writer,
+                                            const RepoId& readerId,
+                                            ReaderInfo& reader)
+{
+  if (!locators_.count(readerId)) {
+    return;
+  }
+
+  DisjointSequence requests;
+  process_requested_changes(requests, writer, reader);
+  reader.requested_changes_.clear();
+
+  DisjointSequence gaps;
+  ACE_INET_Addr addr = locators_[readerId].addr_;
+
+  if (!requests.empty()) {
+    if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
+      gaps = requests;
+    } else {
+      OPENDDS_VECTOR(SequenceRange) ranges = requests.present_sequence_ranges();
+      SingleSendBuffer& sb = *writer.send_buff_;
+      ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
+      const RtpsUdpSendStrategy::OverrideToken ot =
+        send_strategy_->override_destinations(addr);
+      for (size_t i = 0; i < ranges.size(); ++i) {
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_directed_nack_replies "
+                     "resend data %d-%d\n", int(ranges[i].first.getValue()),
+                     int(ranges[i].second.getValue())));
+        }
+        sb.resend_i(ranges[i], &gaps, readerId);
+      }
+    }
+  }
+
+  if (gaps.empty()) {
+    return;
+  }
+  if (Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_directed_nack_replies GAPs: "));
+    gaps.dump();
+  }
+  ACE_Message_Block* mb_gap =
+    marshal_gaps(writerId, readerId, gaps, writer.durable_);
+  if (mb_gap) {
+    send_strategy_->send_rtps_control(*mb_gap, addr);
+    mb_gap->release();
   }
 }
 
