@@ -1423,8 +1423,8 @@ DataWriterImpl::enable()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
                ACE_TEXT("Transport Exception.\n")));
+    data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
-
   }
 
   const TransportLocatorSeq& trans_conf_info = connection_info();
@@ -1445,6 +1445,7 @@ DataWriterImpl::enable()
     ACE_ERROR((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
                ACE_TEXT("add_publication returned invalid id. \n")));
+    data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
   }
 
