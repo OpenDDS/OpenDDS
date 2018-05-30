@@ -248,11 +248,16 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     secure_prefix_.smHeader.submessageId = 0;
     secure_sample_ = ReceivedDataSample(0);
 
-    if (local_pch == DDS::HANDLE_NIL || peer_pch == DDS::HANDLE_NIL
-        || !crypto) {
+    if (local_pch == DDS::HANDLE_NIL || !crypto) {
       ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
-                 "precondition unmet %d %d %@\n", local_pch, peer_pch,
-                 crypto.in()));
+                 "precondition unmet %d %@\n", local_pch, crypto.in()));
+      break;
+    }
+
+    if (peer_pch == DDS::HANDLE_NIL) {
+      VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy SEC_POSTFIX "
+                "no crypto handle for %C\n",
+                OPENDDS_STRING(GuidConverter(peer)).c_str()), 2);
       break;
     }
 
