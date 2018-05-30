@@ -297,8 +297,8 @@ SingleSendBuffer::check_capacity()
       ));
     }
 
-    release(it);
     destinations_.erase(it->first);
+    release(it);
   }
 }
 
