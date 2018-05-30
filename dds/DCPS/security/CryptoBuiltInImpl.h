@@ -280,6 +280,9 @@ private:
                CryptoHeader& header, CryptoFooter& footer,
                DDS::Security::SecurityException& ex);
 
+  void encauth_setup(const KeyMaterial& master, Session& sess,
+                     const DDS::OctetSeq& plain, CryptoHeader& header);
+
   bool decode_submessage(DDS::OctetSeq& plain_rtps_submessage,
                          const DDS::OctetSeq& encoded_rtps_submessage,
                          DDS::Security::NativeCryptoHandle sender_handle,
@@ -290,7 +293,7 @@ private:
                const CryptoFooter& footer, DDS::OctetSeq& out,
                DDS::Security::SecurityException& ex);
 
-  bool verify(const KeyMaterial& k, const char* ciphertext,
+  bool verify(const KeyMaterial& master, Session& sess, const char* in,
               unsigned int n, const CryptoHeader& header,
               const CryptoFooter& footer, DDS::OctetSeq& out,
               DDS::Security::SecurityException& ex);

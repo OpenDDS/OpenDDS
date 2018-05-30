@@ -38,7 +38,22 @@ if (!($scenario eq "")) {
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("OD_OA_OM_OD");
+  } elsif ($scenario eq "SC2") {
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("OD_OA_EM_OD");
+  } elsif ($scenario eq "SC3") {
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OA_OM_ED");
+  } elsif ($scenario eq "SC4") {
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("OD_OA_SM_OD");
   } elsif ($scenario eq "TEST_8_8_5_SUCCESS") {
     @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_write_signed.p7s");

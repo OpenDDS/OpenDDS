@@ -718,6 +718,14 @@ namespace {
           kind[TransformKindIndex] == CRYPTO_TRANSFORMATION_KIND_AES256_GCM);
   }
 
+  bool authenticates(const KeyMaterial_AES_GCM_GMAC& k)
+  {
+    const CryptoTransformKind& kind = k.transformation_kind;
+    return kind[0] == 0 && kind[1] == 0 && kind[2] == 0
+      && (kind[TransformKindIndex] == CRYPTO_TRANSFORMATION_KIND_AES128_GMAC ||
+          kind[TransformKindIndex] == CRYPTO_TRANSFORMATION_KIND_AES256_GMAC);
+  }
+
   struct CipherContext {
     EVP_CIPHER_CTX* ctx_;
     CipherContext() : ctx_(EVP_CIPHER_CTX_new()) {}
@@ -776,9 +784,13 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
     ok = encrypt(keyseq[key_idx], sessions_[sKey], plain_buffer,
                  header, footer, out, ex);
     pOut = &out;
-  } else {
+  } else if (authenticates(keyseq[key_idx])) {
     ok = authtag(keyseq[key_idx], sessions_[sKey], plain_buffer,
                  header, footer, ex);
+  } else {
+    ok = false;
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Key transform kind unrecognized");
   }
 
   if (!ok) {
@@ -834,10 +846,9 @@ void CryptoBuiltInImpl::Session::inc_iv()
   }
 }
 
-bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
-                                const DDS::OctetSeq& plain,
-                                CryptoHeader& header, CryptoFooter& footer,
-                                DDS::OctetSeq& out, SecurityException& ex)
+void CryptoBuiltInImpl::encauth_setup(const KeyMaterial& master, Session& sess,
+                                      const DDS::OctetSeq& plain,
+                                      CryptoHeader& header)
 {
   const unsigned int blocks =
     (plain.length() + BLOCK_LEN_BYTES - 1) / BLOCK_LEN_BYTES;
@@ -853,11 +864,6 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
     sess.counter_ += blocks;
   }
 
-  static const int IV_LEN = 12, IV_SUFFIX_IDX = 4;
-  unsigned char iv[IV_LEN];
-  std::memcpy(iv, &sess.id_, sizeof sess.id_);
-  std::memcpy(iv + IV_SUFFIX_IDX, &sess.iv_suffix_, sizeof sess.iv_suffix_);
-
   std::memcpy(&header.transform_identifier.transformation_kind,
               &master.transformation_kind, sizeof master.transformation_kind);
   std::memcpy(&header.transform_identifier.transformation_key_id,
@@ -865,6 +871,18 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
   std::memcpy(&header.session_id, &sess.id_, sizeof sess.id_);
   std::memcpy(&header.initialization_vector_suffix, &sess.iv_suffix_,
               sizeof sess.iv_suffix_);
+}
+
+bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
+                                const DDS::OctetSeq& plain,
+                                CryptoHeader& header, CryptoFooter& footer,
+                                DDS::OctetSeq& out, SecurityException& ex)
+{
+  encauth_setup(master, sess, plain, header);
+  static const int IV_LEN = 12, IV_SUFFIX_IDX = 4;
+  unsigned char iv[IV_LEN];
+  std::memcpy(iv, &sess.id_, sizeof sess.id_);
+  std::memcpy(iv + IV_SUFFIX_IDX, &sess.iv_suffix_, sizeof sess.iv_suffix_);
 
   CipherContext ctx;
   const unsigned char* key = sess.key_.get_buffer();
@@ -898,14 +916,38 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
   return true;
 }
 
-bool CryptoBuiltInImpl::authtag(const KeyMaterial& /*master*/, Session&/*sess*/,
-                                const DDS::OctetSeq& /*plain*/,
-                                CryptoHeader& /*header*/,
-                                CryptoFooter& /*footer*/,
-                                SecurityException& /*ex*/)
+bool CryptoBuiltInImpl::authtag(const KeyMaterial& master, Session& sess,
+                                const DDS::OctetSeq& plain,
+                                CryptoHeader& header,
+                                CryptoFooter& footer,
+                                SecurityException& ex)
 {
-  // not yet implemented
-  return false;
+  encauth_setup(master, sess, plain, header);
+  static const int IV_LEN = 12, IV_SUFFIX_IDX = 4;
+  unsigned char iv[IV_LEN];
+  std::memcpy(iv, &sess.id_, sizeof sess.id_);
+  std::memcpy(iv + IV_SUFFIX_IDX, &sess.iv_suffix_, sizeof sess.iv_suffix_);
+
+  CipherContext ctx;
+  const unsigned char* key = sess.key_.get_buffer();
+  if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), 0, key, iv) != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptInit_ex");
+    return false;
+  }
+
+  int n;
+  if (EVP_EncryptUpdate(ctx, 0, &n, plain.get_buffer(), plain.length()) != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptUpdate");
+    return false;
+  }
+
+  if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, sizeof footer.common_mac,
+                          &footer.common_mac) != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
+    return false;
+  }
+
+  return true;
 }
 
 bool CryptoBuiltInImpl::encode_submessage(
@@ -938,9 +980,13 @@ bool CryptoBuiltInImpl::encode_submessage(
     ok = encrypt(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], plain_rtps_submessage,
                  header, footer, out, ex);
     pOut = &out;
-  } else {
+  } else if (authenticates(keyseq[SUBMSG_KEY_IDX])) {
     ok = authtag(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], plain_rtps_submessage,
                  header, footer, ex);
+  } else {
+    ok = false;
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "Key transform kind unrecognized");
   }
 
   if (!ok) {
@@ -1348,16 +1394,66 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
   return false;
 }
 
-bool CryptoBuiltInImpl::verify(const KeyMaterial&, const char* ciphertext,
-                               unsigned int n, const CryptoHeader& /*header*/,
-                               const CryptoFooter&, DDS::OctetSeq& out,
-                               SecurityException& /*ex*/)
+bool CryptoBuiltInImpl::verify(const KeyMaterial& master, Session& sess,
+                               const char* in, unsigned int n,
+                               const CryptoHeader& header,
+                               const CryptoFooter& footer, DDS::OctetSeq& out,
+                               SecurityException& ex)
 
 {
-  //TODO: verification of authenticated but unencrypted message
-  out.length(n);
-  std::memcpy(out.get_buffer(), ciphertext, n);
-  return true;
+  const KeyOctetSeq sess_key = sess.get_key(master, header);
+  if (!sess_key.length()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "no session key");
+    return false;
+  }
+
+  if (master.transformation_kind[TransformKindIndex] !=
+      CRYPTO_TRANSFORMATION_KIND_AES256_GMAC) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+                                        "unsupported transformation kind");
+    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
+               "unsupported transformation kind %d\n",
+               master.transformation_kind[TransformKindIndex]));
+    return false;
+  }
+
+  CipherContext ctx;
+  // session_id is start of IV contiguous bytes
+  if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), 0, sess_key.get_buffer(),
+                         header.session_id) != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptInit_ex");
+    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
+               "EVP_DecryptInit_ex %Ld\n", ERR_peek_last_error()));
+    return false;
+  }
+
+  int len;
+  if (EVP_DecryptUpdate(ctx, 0, &len,
+                        reinterpret_cast<const unsigned char*>(in), n) != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptUpdate");
+    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
+               "EVP_DecryptUpdate %Ld\n", ERR_peek_last_error()));
+    return false;
+  }
+
+  void* tag = const_cast<void*>(static_cast<const void*>(footer.common_mac));
+  if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, 16, tag)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
+    ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
+               "EVP_CIPHER_CTX_ctrl %Ld\n", ERR_peek_last_error()));
+    return false;
+  }
+
+  int len2;
+  if (EVP_DecryptFinal_ex(ctx, 0, &len2) == 1) {
+    out.length(n);
+    std::memcpy(out.get_buffer(), in, n);
+    return true;
+  }
+  CommonUtilities::set_security_error(ex, -1, 0, "EVP_DecryptFinal_ex");
+  ACE_ERROR((LM_ERROR, "(%P|%t) CryptoBuiltInImpl::verify - ERROR "
+             "EVP_DecryptFinal_ex %Ld\n", ERR_peek_last_error()));
+  return false;
 }
 
 bool CryptoBuiltInImpl::decode_submessage(
@@ -1393,7 +1489,8 @@ bool CryptoBuiltInImpl::decode_submessage(
   post_ser >> ACE_InputCDR::to_octet(type);
   post_ser >> ACE_InputCDR::to_octet(flags);
   post_ser.swap_bytes((flags & 1) != ACE_CDR_BYTE_ORDER);
-  post_ser >> octetsToNext;
+  ACE_CDR::UShort postfixOctetsToNext;
+  post_ser >> postfixOctetsToNext;
   CryptoFooter cf;
   post_ser.swap_bytes(Serializer::SWAP_BE);
   post_ser >> cf;
@@ -1402,16 +1499,20 @@ bool CryptoBuiltInImpl::decode_submessage(
   const KeySeq& keyseq = keys_[sender_handle];
   for (unsigned int i = 0; i < keyseq.length(); ++i) {
     if (matches(keyseq[i], ch)) {
+      const KeyId_t sKey = std::make_pair(sender_handle, i);
       if (encrypts(keyseq[i])) {
         de_ser.swap_bytes(Serializer::SWAP_BE);
         ACE_CDR::ULong n;
         de_ser >> n;
-        const KeyId_t sKey = std::make_pair(sender_handle, i);
         return decrypt(keyseq[i], sessions_[sKey], mb_in.rd_ptr(), n, ch, cf,
                        plain_rtps_submessage, ex);
+      } else if (authenticates(keyseq[i])) {
+        return verify(keyseq[i], sessions_[sKey], mb_in.rd_ptr() - 4,
+                      4 + octetsToNext, ch, cf, plain_rtps_submessage, ex);
       } else {
-        return verify(keyseq[i], mb_in.rd_ptr() - 4, 4 + octetsToNext,
-                      ch, cf, plain_rtps_submessage, ex);
+        CommonUtilities::set_security_error(ex, -2, 2, "Key transform "
+                                            "kind unrecognized");
+        return false;
       }
     }
   }
@@ -1497,6 +1598,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
   const KeySeq& keyseq = keys_[sending_datawriter_crypto];
   for (unsigned int i = 0; i < keyseq.length(); ++i) {
     if (matches(keyseq[i], ch)) {
+      const KeyId_t sKey = std::make_pair(sending_datawriter_crypto, i);
       if (encrypts(keyseq[i])) {
         ACE_CDR::ULong n;
         de_ser >> n;
@@ -1504,11 +1606,17 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
         de_ser.skip(n);
         CryptoFooter cf;
         de_ser >> cf;
-        const KeyId_t sKey = std::make_pair(sending_datawriter_crypto, i);
         return decrypt(keyseq[i], sessions_[sKey], ciphertext, n, ch, cf,
                        plain_buffer, ex);
+      } else if (authenticates(keyseq[i])) {
+        CommonUtilities::set_security_error(ex, -3, 3, "Auth-only payload "
+                                            "transformation not supported "
+                                            "(DDSSEC12-59)");
+        return false;
       } else {
-        // verify (or unsupported)
+        CommonUtilities::set_security_error(ex, -3, 2,
+                                            "Key transform kind unrecognized");
+        return false;
       }
     }
   }
