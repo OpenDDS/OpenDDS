@@ -1221,7 +1221,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         std::list<permission_topic_ps_rule>::iterator tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == PUBLISH) {
+          if (tpsr_iter->ps_type == PUBLISH || tpsr_iter->ps_type == SUBSCRIBE) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
