@@ -130,7 +130,7 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : public OpenDDS::DCPS::RcEventHandler, public OpenDDS::DCPS::PoolAllocationBase {
-    explicit SpdpTransport(Spdp* outer);
+    SpdpTransport(Spdp* outer, bool securityGuids);
     ~SpdpTransport();
 
     virtual int handle_timeout(const ACE_Time_Value&, const void*);

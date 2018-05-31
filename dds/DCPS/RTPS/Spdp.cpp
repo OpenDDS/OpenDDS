@@ -119,7 +119,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , disco_(disco)
   , domain_(domain)
   , guid_(guid)
-  , tport_(new SpdpTransport(this))
+  , tport_(new SpdpTransport(this, false))
   , eh_(tport_)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -145,7 +145,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , disco_(disco)
   , domain_(domain)
   , guid_(guid)
-  , tport_(new SpdpTransport(this))
+  , tport_(new SpdpTransport(this, true))
   , eh_(tport_)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -1084,7 +1084,7 @@ Spdp::is_opendds(const GUID_t& participant) const
                           DCPS::VENDORID_OCI, sizeof(VendorId_t));
 }
 
-Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
+Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
@@ -1111,7 +1111,9 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
                               (outer_->disco_->dg() * outer_->domain_),
     mc_port = port_common + outer_->disco_->d0();
 
-  u_short participantId = (hdr_.guidPrefix[10] << 8) | hdr_.guidPrefix[11];
+  // with security enabled the meaning of the bytes in guidPrefix changes
+  u_short participantId = securityGuids ? 0
+    : (hdr_.guidPrefix[10] << 8) | hdr_.guidPrefix[11];
 
 #ifdef OPENDDS_SAFETY_PROFILE
   const u_short startingParticipantId = participantId;
