@@ -46,7 +46,7 @@ TEST_F(SerializeBinaryPropertyTest, Round_Trip)
   out.name = "none";
   out.value.length(outlen);
   std::memcpy(out.value.get_buffer(), &outdata, outlen);
-  out.propagate = false;  
+  out.propagate = false;
 
   ASSERT_FALSE(std::strcmp(out.name.in(), in.name.in()) == 0);
   ASSERT_FALSE(std::memcmp(out.value.get_buffer(), in.value.get_buffer(), outlen) == 0);

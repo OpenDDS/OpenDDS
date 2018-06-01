@@ -298,7 +298,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Validate the signature of the remote permissions
   std::string remote_uri_content;
-  
+
   remote_uri_content.assign("data:");
   remote_uri_content.append(remote_perm_content);
 
@@ -501,7 +501,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     default_value = pm_iter->default_permission;
 
-    // Check the date/time range for validity 
+    // Check the date/time range for validity
     time_t after_time,
            before_time;
 
@@ -652,7 +652,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   }
 
-  // If this point in the code is reached it means that either there are no PermissionTopicRules 
+  // If this point in the code is reached it means that either there are no PermissionTopicRules
   // or the topic_name does not exist in the topic_list so return the value of default_permission
   if (strcmp(default_value.c_str(), "ALLOW") == 0) {
       return true;
@@ -724,7 +724,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     default_value = pm_iter->default_permission;
 
-    // Check the date/time range for validity 
+    // Check the date/time range for validity
     time_t after_time,
            before_time,
            timer_length;
@@ -944,7 +944,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   PermissionGrantRules::iterator pm_iter;
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
-    // Check the date/time range for validity 
+    // Check the date/time range for validity
     time_t after_time,
            before_time;
 
@@ -980,7 +980,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           std::vector<std::string>::iterator tl_iter; // topic list
 
           for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-            if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) 
+            if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false))
                 return true;
           }
         }
@@ -1188,7 +1188,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
 
-    // Check the date/time range for validity 
+    // Check the date/time range for validity
     time_t after_time,
            before_time;
 
@@ -1225,7 +1225,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
-              if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false)) 
+              if (::ACE::wild_match(topic_data.name, (*tl_iter).c_str(), true, false))
                   return true;
             }
           }
