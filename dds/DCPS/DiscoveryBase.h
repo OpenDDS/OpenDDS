@@ -41,6 +41,17 @@ namespace OpenDDS {
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatawriterCryptoTokenSeqMap;
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan) EndpointSecurityAttributesMap;
 
+    typedef enum {
+      AS_UNKNOWN,
+      AS_VALIDATING_REMOTE,
+      AS_HANDSHAKE_REQUEST,
+      AS_HANDSHAKE_REQUEST_SENT,
+      AS_HANDSHAKE_REPLY,
+      AS_HANDSHAKE_REPLY_SENT,
+      AS_AUTHENTICATED,
+      AS_UNAUTHENTICATED
+    } AuthState;
+
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
     {
       lhs[0] = static_cast<CORBA::Octet>(rhs);
@@ -1367,17 +1378,6 @@ namespace OpenDDS {
       DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
 
     protected:
-
-      typedef enum {
-        AS_UNKNOWN,
-        AS_VALIDATING_REMOTE,
-        AS_HANDSHAKE_REQUEST,
-        AS_HANDSHAKE_REQUEST_SENT,
-        AS_HANDSHAKE_REPLY,
-        AS_HANDSHAKE_REPLY_SENT,
-        AS_AUTHENTICATED,
-        AS_UNAUTHENTICATED
-      } AuthState;
 
       struct DiscoveredParticipant {
 
