@@ -919,7 +919,7 @@ namespace OpenDDS {
               DatawriterCryptoHandleMap::const_iterator iter = local_writer_crypto_handles_.find(writer);
               if (iter != local_writer_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
                 DDS::Security::DatawriterCryptoHandle dwch = iter->second;
-                remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, false); // TODO: determine correct use of relay_only
+                remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, (relay_only_readers_.count(reader) != 0));
                 DatareaderCryptoTokenSeqMap::iterator t_iter = pending_remote_reader_crypto_tokens_.find(reader);
                 if (t_iter != pending_remote_reader_crypto_tokens_.end()) {
                   DDS::Security::SecurityException se;
@@ -1180,6 +1180,7 @@ namespace OpenDDS {
       OPENDDS_MAP(OPENDDS_STRING, TopicDetails) topics_;
       TopicNameMap topic_names_;
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
+      OPENDDS_SET_CMP(DCPS::RepoId, DCPS::GUID_tKeyLessThan) relay_only_readers_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
 
       DDS::Security::AccessControl_var access_control_;
