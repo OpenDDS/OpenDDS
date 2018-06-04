@@ -12,6 +12,8 @@
 #include "ace/OS_NS_strings.h"
 #include "dds/DCPS/security/TokenWriter.h"
 #include "SSL/SubjectName.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "ace/Reactor.h"
 
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
@@ -48,12 +50,15 @@ AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   : handle_mutex_()
   , next_handle_(1)
   , local_access_control_data_()
+//  , reactor_()
+  , rp_timer_(*this)
 {
+//    reactor_ = TheServiceParticipant->timer();
 }
 
 AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
-  // - Clean up resources used by this implementation
+    // - Clean up resources used by this implementation
 }
 
 ::DDS::Security::PermissionsHandle AccessControlBuiltInImpl::validate_local_permissions(
@@ -495,6 +500,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   PermissionGrantRules::iterator pm_iter;
   std::string default_value;
+  //long timer_handle;
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
@@ -523,6 +529,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     if (current_date_time > after_time) {
       CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
       return false;
+    }
+
+    // Start timer
+    ACE_Time_Value timer_length(after_time - current_date_time);
+
+    if (!rp_timer_.is_scheduled()) {
+        if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+            CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+            return false;
+        }
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -631,12 +647,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     // If a topic and partition match were found, return the appropriate value.
     if ((matched_allow_partitions > 0) && (matched_deny_partitions > 0)) {
         CommonUtilities::set_security_error(ex, -1, 0, "Topic is in both allow and deny.");
+        //reactor_->cancel_timer(timer_handle);
         return false;
     }
     else {
         if (matched_allow_partitions > 0) {
             if (num_param_partitions > partition.name.length()) {
                 CommonUtilities::set_security_error(ex, -1, 0, "Requested more partitions than available in permissions file.");
+                //reactor_->cancel_timer(timer_handle);
                 return false;
             }
             else {
@@ -645,6 +663,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
             }
         }
         else if (matched_deny_partitions > 0) {
+            //reactor_->cancel_timer(timer_handle);
             return false;
         }
 
@@ -659,6 +678,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
   else {
       CommonUtilities::set_security_error(ex, -1, 0, "No matching rule for topic, default permission is DENY.");
+      rp_timer_.cancel_timer(permissions_handle);
       return false;
   }
 }
@@ -726,8 +746,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // Check the date/time range for validity 
     time_t after_time,
-           before_time,
-           timer_length;
+           before_time;
 
     before_time = convert_permissions_time(pm_iter->validity.not_before);
 
@@ -751,7 +770,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
 
     // Start timer here.  NOTE: If the function is exited with a false value, cancel the timer before executing the return.
-    timer_length = after_time - current_date_time;
+    ACE_Time_Value timer_length(after_time - current_date_time);
+
+    if (!rp_timer_.is_scheduled()) {
+        if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+            CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+            return false;
+        }
+    }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
     std::list<permissions_partition>::iterator pp_iter;
@@ -2444,6 +2470,62 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
     return true;
 }
 
+
+AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessControlBuiltInImpl& impl)
+    : impl_(impl)
+{ 
+    scheduled_ = false;
+    timer_id_ = 0;
+}
+
+AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
+{
+}
+
+bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle)
+{
+    ACE_GUARD_RETURN(ACE_Thread_Mutex,
+        guard,
+        this->lock_,
+        false);
+
+    ::DDS::Security::PermissionsHandle *eh_params_ptr;
+
+    eh_params_ptr = &pm_handle;
+    timer_id_ = reactor_.schedule_timer(this, eh_params_ptr, length);
+
+    if (timer_id_ == -1) {
+        return false;
+    }
+
+    scheduled_ = true;
+    return true;
+}
+
+int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_Time_Value & tv, const void * arg)
+{
+    ACE_UNUSED_ARG(tv);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex,
+        guard,
+        this->lock_,
+        0);
+
+    ::DDS::Security::PermissionsHandle *pm_handle = (::DDS::Security::PermissionsHandle *)arg;
+
+    ACPermsMap::iterator iter = impl_.local_ac_perms.find(*pm_handle);
+    if (iter == impl_.local_ac_perms.end()) {
+        return -1;
+    }
+
+    impl_.local_ac_perms.erase(iter);
+    scheduled_ = false;
+    return 0;
+}
+
+void AccessControlBuiltInImpl::RevokePermissionsTimer::cancel_timer(::DDS::Security::PermissionsHandle pm_handle)
+{
+    reactor_.cancel_timer(timer_id_);
+}
 
 } // namespace Security
 } // namespace OpenDDS
