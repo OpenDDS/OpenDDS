@@ -249,7 +249,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     secure_sample_ = ReceivedDataSample(0);
 
     if (local_pch == DDS::HANDLE_NIL || !crypto) {
-      ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
                  "precondition unmet %d %@\n", local_pch, crypto.in()));
       break;
     }

@@ -222,7 +222,7 @@ namespace OpenDDS {
 			  if (password != "") {
 				  result = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, (void*)password.c_str());
 
-				  if (!result) 
+				  if (!result)
 				  {
 					  OPENDDS_SSL_LOG_ERR("PEM_read_bio_PrivateKey failed");
 				  }

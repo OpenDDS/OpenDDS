@@ -21,7 +21,7 @@ namespace OpenDDS {
 
             bool ECAlgorithm::cmp_shared_secret(const ECAlgorithm & other) const
             {
-                if (shared_secret_.length() != other.get_shared_secret().length()) 
+                if (shared_secret_.length() != other.get_shared_secret().length())
                 {
                     return false;
                 }
@@ -275,11 +275,11 @@ namespace OpenDDS {
 
             EllipticCurve * EllipticCurve::factory(const DDS::OctetSeq & kagree_algo)
             {
-                if (0 == std::memcmp(kagree_algo.get_buffer(), "ECDH+prime256v1-CEUM", kagree_algo.length())) 
+                if (0 == std::memcmp(kagree_algo.get_buffer(), "ECDH+prime256v1-CEUM", kagree_algo.length()))
                 {
                     return new EllipticCurve(new EC_PRIME_256_V1_CEUM);
                 }
-                else 
+                else
                 {
                     fprintf(stderr, "EllipticCurve::factory: Error, unknown kagree_algo\n");
                     return NULL;

@@ -174,13 +174,13 @@ namespace OpenDDS {
 
           if (pk_id == EVP_PKEY_RSA)
           {
-              if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING)) 
+              if (1 != EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING))
               {
                   OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_padding failed");
                   return 1;
               }
 
-              if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256())) 
+              if (1 != EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256()))
               {
                   OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_rsa_mgf1_md failed");
                   return 1;

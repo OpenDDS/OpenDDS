@@ -451,7 +451,8 @@ private:
 
   void process_discovered_writer_data(DCPS::MessageId message_id,
                                       const OpenDDS::DCPS::DiscoveredWriterData& wdata,
-                                      const DCPS::RepoId& guid);
+                                      const DCPS::RepoId& guid,
+                                      const DDS::Security::EndpointSecurityInfo* security_info = NULL);
 
   void data_received(DCPS::MessageId message_id,
                      const OpenDDS::DCPS::DiscoveredWriterData& wdata);
@@ -461,7 +462,8 @@ private:
 
   void process_discovered_reader_data(DCPS::MessageId message_id,
                                       const OpenDDS::DCPS::DiscoveredReaderData& rdata,
-                                      const DCPS::RepoId& guid);
+                                      const DCPS::RepoId& guid,
+                                      const DDS::Security::EndpointSecurityInfo* security_info = NULL);
 
   void data_received(DCPS::MessageId message_id,
                      const OpenDDS::DCPS::DiscoveredReaderData& rdata);

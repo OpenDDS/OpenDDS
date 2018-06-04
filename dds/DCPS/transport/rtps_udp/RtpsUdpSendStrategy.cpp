@@ -478,7 +478,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       replacements.resize(replacements.size() + 1);
       Chunk& c = replacements.back();
       DDS::OctetSeq plain(toSeq(ser, msgId, flags, octetsToNextHeader, 0,
-                                receiver.entityId, sender.entityId, remaining));
+                                sender.entityId, receiver.entityId, remaining));
       read = octetsToNextHeader;
       DatawriterCryptoHandleSeq writerHandles;
       if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {

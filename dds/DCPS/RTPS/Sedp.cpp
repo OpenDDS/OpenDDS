@@ -1500,7 +1500,8 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                           const OpenDDS::DCPS::DiscoveredWriterData& wdata,
-                                          const RepoId& guid)
+                                          const RepoId& guid,
+                                          const DDS::Security::EndpointSecurityInfo* security_info)
 {
 
   OPENDDS_STRING topic_name;
@@ -1542,14 +1543,53 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           data.ownership = wdata.ddsPublicationData.ownership;
           data.topic_data = wdata.ddsPublicationData.topic_data;
 
-          DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
-          if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
+          OpenDDS::DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(part);
+          if (auth_state == OpenDDS::DCPS::AS_AUTHENTICATED) {
+
+            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
+
+            if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
+              ACE_ERROR((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("Sedp::data_received(dwd) - ")
+                        ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
+            }
+
+            DDS::Security::TopicSecurityAttributes topic_sec_attr;
+            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex)) {
+              ACE_ERROR((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("Sedp::data_received(dwd) - ")
+                        ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
+            }
+
+            DDS::Security::PublicationBuiltinTopicDataSecure pub_data_sec;
+            pub_data_sec.base.base = wdata.ddsPublicationData;
+
+            if (security_info != NULL) {
+              pub_data_sec.base.security_info.endpoint_security_attributes = security_info->endpoint_security_attributes;
+              pub_data_sec.base.security_info.plugin_endpoint_security_attributes = security_info->plugin_endpoint_security_attributes;
+            }
+
+            if (topic_sec_attr.is_write_protected && !get_access_control()->check_remote_datawriter(remote_permissions, spdp_.get_domain_id(), pub_data_sec, ex)) {
+              ACE_ERROR((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("Sedp::data_received(dwd) - ")
+                        ACE_TEXT("Unable to check remote datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
+            }
+          } else if (auth_state != OpenDDS::DCPS::AS_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
-              ACE_TEXT("(%P|%t) WARNING: ")
-              ACE_TEXT("Sedp::data_received(dwd) - ")
-              ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-            return;
+                      ACE_TEXT("(%P|%t) WARNING: ")
+                      ACE_TEXT("Sedp::data_received(dwd) - ")
+                      ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+                      topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
           }
         }
 
@@ -1744,7 +1784,8 @@ void Sedp::data_received(DCPS::MessageId message_id,
 
 void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                     const OpenDDS::DCPS::DiscoveredReaderData& rdata,
-                                    const RepoId& guid)
+                                    const RepoId& guid,
+                                    const DDS::Security::EndpointSecurityInfo* security_info)
 {
 
   OPENDDS_STRING topic_name;
@@ -1784,14 +1825,60 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           data.ownership = rdata.ddsSubscriptionData.ownership;
           data.topic_data = rdata.ddsSubscriptionData.topic_data;
 
-          DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
-          if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
+          OpenDDS::DCPS::AuthState auth_state = spdp_.lookup_participant_auth_state(part);
+          if (auth_state == OpenDDS::DCPS::AS_AUTHENTICATED) {
+
+            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
+
+            if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
+              ACE_ERROR((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("Sedp::data_received(drd) - ")
+                        ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
+            }
+
+            DDS::Security::TopicSecurityAttributes topic_sec_attr;
+            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex)) {
+              ACE_ERROR((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("Sedp::data_received(drd) - ")
+                        ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
+            }
+
+            DDS::Security::SubscriptionBuiltinTopicDataSecure sub_data_sec;
+            sub_data_sec.base.base = rdata.ddsSubscriptionData;
+
+            if (security_info != NULL) {
+              sub_data_sec.base.security_info.endpoint_security_attributes = security_info->endpoint_security_attributes;
+              sub_data_sec.base.security_info.plugin_endpoint_security_attributes = security_info->plugin_endpoint_security_attributes;
+            }
+
+            bool relay_only = false;
+            if (topic_sec_attr.is_read_protected && !get_access_control()->check_remote_datareader(remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex)) {
+              ACE_ERROR((LM_WARNING,
+                        ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("Sedp::data_received(drd) - ")
+                        ACE_TEXT("Unable to check remote datareader '%C'. SecurityException[%d.%d]: %C\n"),
+                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
+            }
+
+            if (relay_only) {
+              relay_only_readers_.insert(guid);
+            } else {
+              relay_only_readers_.erase(guid);
+            }
+          } else if (auth_state != OpenDDS::DCPS::AS_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
-              ACE_TEXT("(%P|%t) WARNING: ")
-              ACE_TEXT("Sedp::data_received(drd) - ")
-              ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-            return;
+                      ACE_TEXT("(%P|%t) WARNING: ")
+                      ACE_TEXT("Sedp::data_received(dwd) - ")
+                      ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+                      topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
           }
         }
 
@@ -2020,15 +2107,11 @@ void Sedp::data_received(DCPS::MessageId message_id,
   //    return;
   //  }
 
-  process_discovered_reader_data(message_id, wrapper.data, guid);
+  process_discovered_reader_data(message_id, wrapper.data, guid, &wrapper.security_info);
 
   DiscoveredSubscription& sub = discovered_subscriptions_[guid];
   security_bitmask_to_attribs(wrapper.security_info.endpoint_security_attributes,
                               sub.security_attribs_);
-
-  // TODO
-  // Handle wrapper.security_info.plugin_endpoint_security_attributes
-
 }
 
 void

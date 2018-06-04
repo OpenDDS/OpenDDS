@@ -49,6 +49,8 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task());
 
+  link->local_crypto_handle(local_crypto_handle_);
+
   if (!link->open(unicast_socket_)) {
     ACE_ERROR((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -60,8 +62,6 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   // RtpsUdpDataLink now owns the socket
   unicast_socket_.set_handle(ACE_INVALID_HANDLE);
-
-  link->local_crypto_handle(local_crypto_handle_);
 
   return link;
 }

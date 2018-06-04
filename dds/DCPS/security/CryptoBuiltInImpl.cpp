@@ -941,6 +941,11 @@ bool CryptoBuiltInImpl::authtag(const KeyMaterial& master, Session& sess,
     return false;
   }
 
+  if (EVP_EncryptFinal_ex(ctx, 0, &n) != 1) {
+    CommonUtilities::set_security_error(ex, -1, 0, "EVP_EncryptFinal_ex");
+    return false;
+  }
+
   if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, sizeof footer.common_mac,
                           &footer.common_mac) != 1) {
     CommonUtilities::set_security_error(ex, -1, 0, "EVP_CIPHER_CTX_ctrl");
@@ -975,14 +980,33 @@ bool CryptoBuiltInImpl::encode_submessage(
   const DDS::OctetSeq* pOut = &plain_rtps_submessage;
   static const unsigned int SUBMSG_KEY_IDX = 0;
   const KeyId_t sKey = std::make_pair(sender_handle, SUBMSG_KEY_IDX);
+  bool authOnly = false;
 
   if (encrypts(keyseq[SUBMSG_KEY_IDX])) {
     ok = encrypt(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], plain_rtps_submessage,
                  header, footer, out, ex);
     pOut = &out;
   } else if (authenticates(keyseq[SUBMSG_KEY_IDX])) {
-    ok = authtag(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], plain_rtps_submessage,
+    // the original submessage may have octetsToNextHeader = 0 which isn't
+    // legal when appending SEC_POSTFIX, patch in the actual submsg length
+    ACE_Message_Block mb_in(to_mb(pOut->get_buffer()), pOut->length());
+    mb_in.wr_ptr(pOut->length());
+    Serializer ser_in(&mb_in);
+    RTPS::SubmessageHeader smHdr_in;
+    ser_in >> ACE_InputCDR::to_octet(smHdr_in.submessageId);
+    ser_in >> ACE_InputCDR::to_octet(smHdr_in.flags);
+    ser_in.swap_bytes(ACE_CDR_BYTE_ORDER != (smHdr_in.flags & 1));
+    ser_in >> smHdr_in.submessageLength;
+    if (!smHdr_in.submessageLength) {
+      out = *pOut;
+      unsigned int len = pOut->length() - 4;
+      out[2 + !(smHdr_in.flags & 1)] = len & 0xff;
+      out[2 + (smHdr_in.flags & 1)] = (len >> 8) & 0xff;
+      pOut = &out;
+    }
+    ok = authtag(keyseq[SUBMSG_KEY_IDX], sessions_[sKey], *pOut,
                  header, footer, ex);
+    authOnly = true;
   } else {
     ok = false;
     CommonUtilities::set_security_error(ex, -1, 0,
@@ -999,7 +1023,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   gen_find_size(header, size, padding);
   const ACE_UINT16 hdrLen = static_cast<ACE_UINT16>(size + padding - 4);
 
-  if (pOut != &plain_rtps_submessage) {
+  if (!authOnly) {
     size += 8; // body submessage header + seq len
   }
 
@@ -1020,7 +1044,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   ser << smHdr;
   ser << header;
 
-  if (pOut != &plain_rtps_submessage) {
+  if (!authOnly) {
     smHdr.submessageId = RTPS::SEC_BODY;
     smHdr.submessageLength = static_cast<ACE_UINT16>(4 + pOut->length());
     if (pOut->length() % 4) {
@@ -1029,6 +1053,7 @@ bool CryptoBuiltInImpl::encode_submessage(
     ser << smHdr;
     ser << pOut->length();
   }
+
   ser.write_octet_array(pOut->get_buffer(), pOut->length());
   ser.align_w(4);
 
