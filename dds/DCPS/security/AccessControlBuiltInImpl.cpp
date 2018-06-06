@@ -47,9 +47,9 @@ static const std::string PermissionsCredentialTokenClassId("DDS:Access:Permissio
 
 
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
-  : handle_mutex_()
+  : rp_timer_(*this)
+  , handle_mutex_()
   , next_handle_(1)
-  , rp_timer_(*this)
   , local_access_control_data_()
 {  }
 
@@ -2554,11 +2554,15 @@ int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_T
 
     ACPermsMap::iterator iter = impl_.local_ac_perms.find(*pm_handle);
     if (iter == impl_.local_ac_perms.end()) {
+        std::cout << "handle_timeout: pm_handle not found! " << pm_handle << std::endl;
         return -1;
     }
 
     impl_.local_ac_perms.erase(iter);
     scheduled_ = false;
+
+    // TESTING ONLY
+    std::cout << "handle_timeout completed..." << std::endl;
 
     return 0;
 }
