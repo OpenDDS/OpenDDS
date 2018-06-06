@@ -458,6 +458,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACE_UNUSED_ARG(qos);
   ACE_UNUSED_ARG(data_tag);
 
+  // Check the date/time range for validity
+  time_t after_time,
+         before_time;
+  time_t current_date_time = time(0);
+
 
   //TODO: Options of DataTag, QoS, and Partitions checks are not implemented (See description of Figure 23 )
   if (DDS::HANDLE_NIL == permissions_handle) {
@@ -506,14 +511,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     std::cout<<"Checking Permissions ..." << std::endl;
 
     default_value = pm_iter->default_permission;
-
-    // Check the date/time range for validity
-    time_t after_time,
-           before_time;
-
     before_time = convert_permissions_time(pm_iter->validity.not_before);
-
-    time_t current_date_time = time(0);
 
     // Adjust the current time to UTC/GMT
     tm *current_time_tm = gmtime(&current_date_time);
@@ -529,16 +527,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     if (current_date_time > after_time) {
       CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
       return false;
-    }
-
-    // Start timer
-    ACE_Time_Value timer_length(after_time - current_date_time);
-
-    if (!rp_timer_.is_scheduled()) {
-        if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
-            CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
-            return false;
-        }
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -588,6 +576,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                         }
                     }
                     else { // No partitions to match
+                           // Start timer
+                        if (!rp_timer_.is_scheduled()) {
+                            ACE_Time_Value timer_length(after_time - current_date_time);
+
+                            if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+                                CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+                                return false;
+                            }
+                        }
+
                         return true;
                     }
 
@@ -654,16 +652,24 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         if (matched_allow_partitions > 0) {
             if (num_param_partitions > partition.name.length()) {
                 CommonUtilities::set_security_error(ex, -1, 0, "Requested more partitions than available in permissions file.");
-                //reactor_->cancel_timer(timer_handle);
                 return false;
             }
             else {
-                CommonUtilities::set_security_error(ex, -1, 0, "Matching rule for topic in deny_rule.");
+//                CommonUtilities::set_security_error(ex, -1, 0, "Matching rule for topic in deny_rule.");
+                // Start timer
+                if (!rp_timer_.is_scheduled()) {
+                    ACE_Time_Value timer_length(after_time - current_date_time);
+
+                    if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+                        CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+                        return false;
+                    }
+                }
+
                 return true;
             }
         }
         else if (matched_deny_partitions > 0) {
-            //reactor_->cancel_timer(timer_handle);
             return false;
         }
 
@@ -674,6 +680,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // If this point in the code is reached it means that either there are no PermissionTopicRules
   // or the topic_name does not exist in the topic_list so return the value of default_permission
   if (strcmp(default_value.c_str(), "ALLOW") == 0) {
+
+      if (!rp_timer_.is_scheduled()) {
+          // Start timer
+          ACE_Time_Value timer_length(after_time - current_date_time);
+
+          if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+              CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+              return false;
+          }
+      }
+
       return true;
   }
   else {
@@ -694,6 +711,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
   ACE_UNUSED_ARG(qos);
   ACE_UNUSED_ARG(data_tag);
+
+  time_t after_time,
+         before_time,
+         cur_utc_time;
+  time_t current_date_time = time(0);
 
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid permissions handle");
@@ -745,38 +767,24 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     default_value = pm_iter->default_permission;
 
     // Check the date/time range for validity
-    time_t after_time,
-           before_time;
-
     before_time = convert_permissions_time(pm_iter->validity.not_before);
 
-    time_t current_date_time = time(0);
     struct tm *cdt_tm;
 
-    // Convert to GMT
+    // Convert to UTC
     cdt_tm = gmtime(&current_date_time);
-    current_date_time = mktime(cdt_tm);
+    cur_utc_time = mktime(cdt_tm);
 
-    if (current_date_time < before_time) {
+    if (cur_utc_time < before_time) {
         CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
         return false;
     }
 
     after_time = convert_permissions_time(pm_iter->validity.not_after);
 
-    if (current_date_time > after_time) {
+    if (cur_utc_time > after_time) {
         CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
         return false;
-    }
-
-    // Start timer here.  NOTE: If the function is exited with a false value, cancel the timer before executing the return.
-    ACE_Time_Value timer_length(after_time - current_date_time);
-
-    if (!rp_timer_.is_scheduled()) {
-        if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
-            CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
-            return false;
-        }
     }
 
     std::list<permissions_topic_rule>::iterator ptr_iter; // allow/deny rules
@@ -826,6 +834,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                                 }
                             }
                             else { // There are no partitions to match
+                                // Start timer here.  
+                                if (!rp_timer_.is_scheduled()) {
+                                    ACE_Time_Value timer_length(after_time - current_date_time);
+
+                                    if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+                                        CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+                                        return false;
+                                    }
+                                }
+
                                 return true;
                             }
 
@@ -894,7 +912,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                 return false;
             }
             else {
-                CommonUtilities::set_security_error(ex, -1, 0, "Matching rule for topic in deny_rule.");
+//                CommonUtilities::set_security_error(ex, -1, 0, "Matching rule for topic in deny_rule.");
+                // Start timer here.  
+                if (!rp_timer_.is_scheduled()) {
+                    ACE_Time_Value timer_length(after_time - current_date_time);
+
+                    if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+                        CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+                        return false;
+                    }
+                }
+
                 return true;
             }
         }
@@ -907,6 +935,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // No matching topic rule was found of topic_name so return the value in default_permission
   if (strcmp(default_value.c_str(), "ALLOW") == 0) {
+      // Start timer here.  
+      if (!rp_timer_.is_scheduled()) {
+          ACE_Time_Value timer_length(after_time - current_date_time);
+
+          if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+              CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
+              return false;
+          }
+      }
+
       return true;
   }
   else {
@@ -1896,10 +1934,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   return true;
 }
 
-// NOTE: This function will return the time value as GMT
+// NOTE: This function will return the time value as UTC
 time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString)
 {
-    time_t permission_time_t;
+    //time_t permission_time_t;
     tm permission_tm;
     std::string temp_str;
 
@@ -1931,44 +1969,52 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
     temp_str = timeString.substr(17, 2);
     permission_tm.tm_sec = atoi(temp_str.c_str());
 
-    permission_time_t = mktime(&permission_tm);
+//    permission_time_t = mktime(&permission_tm);
 
     // Check if there is time zone information in the string
-    if (timeString.length() >= 20) {
+    if (timeString.length() > 20) {
         temp_str.clear();
         temp_str = timeString.substr(19, 1);
 
         // The only adjustments that need to be made are if the character
         // is a '+' or '-'
-        if (strcmp(temp_str.c_str(), "Z") != 0) {
-            int hours_adj = 0;
-            int mins_adj = 0;
+        if (strcmp(temp_str.c_str(), "Z") == 0) {
+            //int hours_adj = 0;
+            //int mins_adj = 0;
+
+            temp_str.clear();
+            temp_str = timeString.substr(20, 1);
 
             if (strcmp(temp_str.c_str(), "+") == 0) {
                 temp_str.clear();
-                temp_str = timeString.substr(20, 2);
-                hours_adj = (atoi(temp_str.c_str())) * 360; // convert to seconds
+                temp_str = timeString.substr(21, 2);
+                //hours_adj = atoi(temp_str.c_str());
+                permission_tm.tm_hour -= atoi(temp_str.c_str());
                 temp_str.clear();
-                temp_str = timeString.substr(23, 2);
-                mins_adj = (atoi(temp_str.c_str())) * 60; // convert to seconds
-                permission_time_t -= (hours_adj + mins_adj);
+                temp_str = timeString.substr(24, 2);
+                //mins_adj = atoi(temp_str.c_str()); 
+                permission_tm.tm_min -= atoi(temp_str.c_str());
+                //permission_time_t -= (hours_adj + mins_adj);
             }
             else if (strcmp(temp_str.c_str(), "-") == 0) {
                 temp_str.clear();
-                temp_str = timeString.substr(20, 2);
-                hours_adj = atoi(temp_str.c_str());
-                hours_adj = hours_adj * 360; // convert to seconds
+                temp_str = timeString.substr(21, 2);
+                //hours_adj = atoi(temp_str.c_str()); 
+                permission_tm.tm_hour += atoi(temp_str.c_str());
                 temp_str.clear();
-                temp_str = timeString.substr(23, 2);
-                mins_adj = atoi(temp_str.c_str());
-                mins_adj = mins_adj * 60; // convert to seconds
-                permission_time_t += (hours_adj + mins_adj);
+                temp_str = timeString.substr(24, 2);
+                //mins_adj = atoi(temp_str.c_str());
+                permission_tm.tm_min += atoi(temp_str.c_str());
+                //permission_time_t += (hours_adj + mins_adj);
             }
         }
 
     }
 
-    return permission_time_t;
+    permission_tm.tm_isdst = -1;
+
+    //return permission_time_t;
+    return mktime(&permission_tm);
 }
 
 //char * AccessControlBuiltInImpl::strptime(const char * s, const char * f, tm * tm)
@@ -2519,6 +2565,7 @@ int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_T
 
     impl_.local_ac_perms.erase(iter);
     scheduled_ = false;
+
     return 0;
 }
 

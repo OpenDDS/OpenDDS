@@ -15,6 +15,7 @@
 #include "dds/Versioned_Namespace.h"
 
 #include "ace/Thread_Mutex.h"
+#include "ace/Reactor.h"
 #include <map>
 #include <set>
 #include <list>
@@ -323,11 +324,33 @@ private:
 
     ACPermsMap local_ac_perms;
 
-   typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
+    typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
 
-   ACIdentityMap local_identity_map;
+    ACIdentityMap local_identity_map;
 
+    class RevokePermissionsTimer : public ACE_Event_Handler {
+    public:
+        RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
+        virtual ~RevokePermissionsTimer();
+        bool start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle);
+        int handle_timeout(const ACE_Time_Value &tv, const void * arg);
+        void cancel_timer(::DDS::Security::PermissionsHandle pm_handle);
+        bool is_scheduled() { return scheduled_; }
 
+    protected:
+        AccessControlBuiltInImpl & impl_;
+
+        ACE_Time_Value interval() const { return interval_; }
+
+    private:
+        ACE_Time_Value interval_;
+        bool recalculate_interval_;
+        bool scheduled_;
+        long timer_id_;
+        ACE_Thread_Mutex lock_;
+        ACE_Reactor reactor_;
+    };
+    RevokePermissionsTimer rp_timer_;
 
   ::CORBA::Long generate_handle();
   ::CORBA::Long load_governance_file(ac_perms *, std::string);
@@ -343,7 +366,7 @@ private:
   ::CORBA::Long next_handle_;
 
   time_t convert_permissions_time(std::string timeString);
-
+  
   LocalAccessCredentialData local_access_control_data_;
 
 };
