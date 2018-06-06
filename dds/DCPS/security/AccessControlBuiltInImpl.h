@@ -334,7 +334,6 @@ private:
         virtual ~RevokePermissionsTimer();
         bool start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle);
         int handle_timeout(const ACE_Time_Value &tv, const void * arg);
-        void cancel_timer(::DDS::Security::PermissionsHandle pm_handle);
         bool is_scheduled() { return scheduled_; }
 
     protected:

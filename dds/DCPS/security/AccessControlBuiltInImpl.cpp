@@ -49,12 +49,9 @@ static const std::string PermissionsCredentialTokenClassId("DDS:Access:Permissio
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   : handle_mutex_()
   , next_handle_(1)
-  , local_access_control_data_()
-//  , reactor_()
   , rp_timer_(*this)
-{
-//    reactor_ = TheServiceParticipant->timer();
-}
+  , local_access_control_data_()
+{  }
 
 AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
@@ -485,10 +482,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   GovernanceAccessRules::iterator giter;
 
-  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
     size_t d = giter->domain_list.count(domain_id);
 
-    if(d > 0){
+    if (d > 0) {
       TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -505,7 +502,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   PermissionGrantRules::iterator pm_iter;
   std::string default_value;
-  //long timer_handle;
 
   for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
     std::cout<<"Checking Permissions ..." << std::endl;
@@ -645,7 +641,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     // If a topic and partition match were found, return the appropriate value.
     if ((matched_allow_partitions > 0) && (matched_deny_partitions > 0)) {
         CommonUtilities::set_security_error(ex, -1, 0, "Topic is in both allow and deny.");
-        //reactor_->cancel_timer(timer_handle);
         return false;
     }
     else {
@@ -695,7 +690,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
   else {
       CommonUtilities::set_security_error(ex, -1, 0, "No matching rule for topic, default permission is DENY.");
-      rp_timer_.cancel_timer(permissions_handle);
       return false;
   }
 }
@@ -737,16 +731,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   GovernanceAccessRules::iterator giter;
 
-  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
     size_t d = giter->domain_list.count(domain_id);
 
-    if(d > 0){
+    if (d > 0) {
       TopicAccessRules::iterator tr_iter;
 
-      for(tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
-        if( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
+      for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
           std::cout << "Found topic '"<< tr_iter->topic_expression << "'" << std::endl;
-          if(tr_iter->topic_attrs.is_read_protected == false ) {
+          if (tr_iter->topic_attrs.is_read_protected == false ) {
             return true;
           }
         }
@@ -2567,11 +2561,6 @@ int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_T
     scheduled_ = false;
 
     return 0;
-}
-
-void AccessControlBuiltInImpl::RevokePermissionsTimer::cancel_timer(::DDS::Security::PermissionsHandle pm_handle)
-{
-    reactor_.cancel_timer(timer_id_);
 }
 
 } // namespace Security
