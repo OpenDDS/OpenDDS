@@ -138,7 +138,7 @@ Subscription::enable(
     TheTransportRegistry->get_config(this->profile_->transportConfig);
   if (transport.is_nil() || transport->instances_.empty()) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) Subscription::enable() - publication %C: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("failed to get_config() OR got empty config with name %C.\n"),
       this->name_.c_str(),
       this->profile_->transportConfig.c_str()
@@ -158,7 +158,7 @@ Subscription::enable(
     }
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscription::enable() - publication %C: ")
+      ACE_TEXT("(%P|%t) Subscription::enable() - subscription %C: ")
       ACE_TEXT("%C %C transport with config %C.\n"),
       this->name_.c_str(),
       (!isMcast? "obtained":
@@ -267,8 +267,8 @@ Subscription::associations() const
   if (this->reader_->get_subscription_matched_status(subscriptionMatches) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("Test::Publication::associations, ")
-               ACE_TEXT("Could not get publication matched status.\n")));
+               ACE_TEXT("Test::Subscription::associations, ")
+               ACE_TEXT("Could not get subscription matched status.\n")));
   }
   return subscriptionMatches.current_count;
 }
