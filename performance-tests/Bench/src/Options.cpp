@@ -2790,7 +2790,7 @@ Options::loadSubscription(
     profile->transportConfig = ACE_TEXT_ALWAYS_CHAR(valueString.c_str());
     if (this->verbose()) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Options::loadPublication() - ")
+        ACE_TEXT("(%P|%t) Options::loadSubscription() - ")
         ACE_TEXT("  [subscription/%s] %s == %C.\n"),
         sectionName.c_str(),
         TRANSPORTCONFIG_KEYNAME,
