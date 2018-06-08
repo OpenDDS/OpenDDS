@@ -178,13 +178,19 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    DDS::Duration_t timeout;
+    if (my_args.timeout_ == 0) { 
+      timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    } else {
+      timeout = { my_args.timeout_, 0 };
+    }
+    ACE_Time_Value deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout, ACE_OS::gettimeofday());
 
     DDS::ConditionSeq conditions;
     DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
 
-    while (true) {
+    ACE_Time_Value current_time = ACE_OS::gettimeofday();
+    while (current_time < deadline) {
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         CLEAN2_ERROR_RETURN((LM_WARNING,
                              ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
@@ -193,14 +199,21 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
       if (matches.current_count == 0 && matches.total_count > 0) {
         break;
       }
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+      
+      DDS::ReturnCode_t rc = ws->wait(conditions, timeout);
+      if (rc == DDS::RETCODE_TIMEOUT) {
         CLEAN2_ERROR_RETURN((LM_WARNING,
                              ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
-                             ACE_TEXT("main() - wait() failed!\n")), -27);
+                             ACE_TEXT("main() - wait() timed out!\n")), -27);
+      } else if (rc != DDS::RETCODE_OK) {
+        CLEAN2_ERROR_RETURN((LM_WARNING,
+                             ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                             ACE_TEXT("main() - wait() failed!\n")), -28);
       }
+      current_time = ACE_OS::gettimeofday();
     }
 
-    status = listener_servant->is_valid() ? 0 : -28;
+    status = listener_servant->is_valid() ? 0 : -29;
 
     ws->detach_condition(condition);
 
@@ -214,7 +227,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    status = -29;
+    status = -30;
   }
 
   return status;
@@ -230,6 +243,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return 0;
   } else {
     std::cerr << "Subscriber exiting with unexpected result: " << result << std::endl;
-    return result;
+    return result == 0 ? -1 : result; // If unexpected result is zero (we expected a failure, but got a success), return -1 to signal error
   }
 }

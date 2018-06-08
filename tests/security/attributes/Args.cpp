@@ -28,6 +28,7 @@ Args::Args()
  , wait_for_acks_(false)
  , num_messages_(DEFAULT_NUM_MESSAGES)
  , expected_result_(0)
+ , timeout_(0)
 {
 }
 
@@ -68,6 +69,13 @@ int Args::parse_args(int argc, ACE_TCHAR *argv[], Args& args)
         args.expected_result_ = -1 * ACE_OS::atoi(++currentArg);
       } else {
         args.expected_result_ = ACE_OS::atoi(currentArg);
+      }
+      arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Timeout"))) != 0) {
+      if (currentArg != NULL && *currentArg == '~') {
+        args.timeout_ = -1 * ACE_OS::atoi(++currentArg);
+      } else {
+        args.timeout_ = ACE_OS::atoi(currentArg);
       }
       arg_shifter.consume_arg();
     } else {

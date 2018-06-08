@@ -13,6 +13,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Time_Helper.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
@@ -177,12 +178,30 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       // Start writing threads
       std::cerr << "Creating Writer" << std::endl;
       Writer* writer = new Writer(dw.in(), my_args);
+
+      DDS::Duration_t timeout;
+      if (my_args.timeout_ == 0) { 
+        timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+      } else {
+        timeout = { my_args.timeout_, 0 };
+      }
+      ACE_Time_Value deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout, ACE_OS::gettimeofday());
+
       std::cerr << "Starting Writer" << std::endl;
       writer->start();
 
-      while (!writer->is_finished()) {
+      ACE_Time_Value current_time = ACE_OS::gettimeofday();
+      while (current_time < deadline && !writer->is_finished()) {
         ACE_Time_Value small_time(0, 250000);
         ACE_OS::sleep(small_time);
+        current_time = ACE_OS::gettimeofday();
+      }
+
+      if (!(current_time < deadline)) {
+        CLEAN_ERROR_RETURN((LM_WARNING,
+                            ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                            ACE_TEXT("main() - timeout exceeded!\n")),
+                            -16);
       }
 
       std::cerr << "Writer finished " << std::endl;
@@ -190,10 +209,9 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 
       if (my_args.wait_for_acks_) {
         std::cerr << "Writer wait for ACKS" << std::endl;
-
-        DDS::Duration_t timeout =
-          { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-        dw->wait_for_acknowledgments(timeout);
+        ACE_Time_Value difference = deadline - ACE_OS::gettimeofday();
+        DDS::Duration_t ack_timeout = {static_cast<CORBA::Long>(difference.sec()), static_cast<CORBA::ULong>(difference.usec() * 1000)};
+        dw->wait_for_acknowledgments(ack_timeout);
       } else {
         // let any missed multicast/rtps messages get re-delivered
         std::cerr << "Writer wait small time" << std::endl;
@@ -229,6 +247,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return 0;
   } else {
     std::cerr << "Publisher exiting with unexpected result: " << result << std::endl;
-    return result;
+    return result == 0 ? -1 : result; // If unexpected result is zero (we expected a failure, but got a success), return -1 to signal error
   }
 }

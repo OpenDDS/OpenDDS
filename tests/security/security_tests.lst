@@ -11,8 +11,15 @@ tests/security/run_test.pl OpenDDS_AuthenticationTest
 tests/security/run_test.pl OpenDDS_CryptoKeyFactoryTest
 tests/security/run_test.pl OpenDDS_CryptoKeyExchangeTest
 tests/security/run_test.pl OpenDDS_CryptoTransformTest
-tests/security/attributes/run_test.pl --scenario SC0
-tests/security/attributes/run_test.pl --scenario SC1
+tests/security/attributes/run_test.pl --scenario SC0_sec_off
+tests/security/attributes/run_test.pl --scenario SC0_sec_sub
+tests/security/attributes/run_test.pl --scenario SC0_sec_pub
+tests/security/attributes/run_test.pl --scenario SC0_sec_on
+#tests/security/attributes/run_test.pl --scenario SC1_sec_off_failure
+tests/security/attributes/run_test.pl --scenario SC1_sec_on_bad_cert_failure
+tests/security/attributes/run_test.pl --scenario SC1_sec_on_bad_perm_1_failure
+#tests/security/attributes/run_test.pl --scenario SC1_sec_on_bad_perm_2_failure
+tests/security/attributes/run_test.pl --scenario SC1_sec_on_success
 tests/security/attributes/run_test.pl --scenario SC2
 tests/security/attributes/run_test.pl --scenario SC3
 tests/security/attributes/run_test.pl --scenario SC4

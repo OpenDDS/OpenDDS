@@ -19,22 +19,81 @@ use Getopt::Long;
 
 my $scenario;
 my @gov_files;
+my $pub_cfg_file = "sec_base.ini";
+my $sub_cfg_file = "sec_base.ini";
+my $pub_cert_file = "certs/identity/test_participant_01_cert.pem";
+my $sub_cert_file = "certs/identity/test_participant_02_cert.pem";
+my $pub_key_file = "certs/identity/test_participant_01_private_key.pem";
+my $sub_key_file = "certs/identity/test_participant_02_private_key.pem";
 my @pub_perm_files;
 my @sub_perm_files;
 my @topic_names;
 my $pub_expect = "0";
 my $sub_expect = "0";
+my $pub_timeout = "10";
+my $sub_timeout = "10";
 
-GetOptions ( 'scenario=s' => \$scenario, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names, 'pub_expect=i' => \$pub_expect, 'sub_expect=i' => \$sub_expect );
+GetOptions ( 'scenario=s' => \$scenario, 'pub_cfg=s' => \$pub_cfg_file, 'sub_cfg=s' => \$sub_cfg_file, 'pub_cert=s' => \$pub_cert_file, 'sub_cert=s' => \$sub_cert_file, 'pub_key=s' => \$pub_key_file, 'sub_key=s' => \$sub_key_file, 'gov=s' => \@gov_files, 'pub_perm=s' => \@pub_perm_files, 'sub_perm=s' => \@sub_perm_files, 'topic=s' => \@topic_names, 'pub_expect=i' => \$pub_expect, 'sub_expect=i' => \$sub_expect, 'pub_timeout=i' => \$pub_timeout, 'sub_timeout=i' => \$sub_timeout );
 
 # Handle scenarios first, since they are a special case
 if (!($scenario eq "")) {
-  if ($scenario eq "SC0") {
+  if ($scenario eq "SC0_sec_off") { #SC0 (open domain interop w/ unsecure) : unsecure -> unsecure
+    $pub_cfg_file = "unsec_base.ini";
+    $sub_cfg_file = "unsec_base.ini";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OA_OM_OD");
-  } elsif ($scenario eq "SC1") {
+  } elsif ($scenario eq "SC0_sec_sub") { #SC0 (open domain interop w/ unsecure) : unsecure -> secure
+    $sub_cfg_file = "unsec_base.ini";
+    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
+    @topic_names = ("OD_OA_OM_OD");
+  } elsif ($scenario eq "SC0_sec_pub") { #SC0 (open domain interop w/ unsecure) : secure -> unsecure
+    $pub_cfg_file = "unsec_base.ini";
+    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
+    @topic_names = ("OD_OA_OM_OD");
+  } elsif ($scenario eq "SC0_sec_on") { #SC0 (open domain interop w/ unsecure) : secure -> secure
+    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
+    @topic_names = ("OD_OA_OM_OD");
+  } elsif ($scenario eq "SC1_sec_off_failure") { #SC1 (join controlled domain) : unsecure participants fail to authenticate
+    $pub_cfg_file = "unsec_base.ini"; # won't attempt authentication
+    $sub_cfg_file = "unsec_base.ini"; # won't attempt authentication
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("OD_OA_OM_OD");
+    $pub_expect = "~16";
+    $sub_expect = "~27";
+  } elsif ($scenario eq "SC1_sec_on_bad_cert_failure") { #SC1 (join controlled domain) : secure participants with wrong credentials fail to authenticate
+    $pub_key_file = "certs/identity/test_participant_02_private_key.pem"; # This won't match cert (01)
+    $sub_key_file = "certs/identity/test_participant_01_private_key.pem"; # This won't match cert (02)
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("OD_OA_OM_OD");
+    $pub_expect = "~16";
+    $sub_expect = "~27";
+  } elsif ($scenario eq "SC1_sec_on_bad_perm_1_failure") { #SC1 (join controlled domain) : secure participants with wrong permissions fail to validate
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_join_wrong_signed.p7s"); # permissions domain doesn't match governance
+    @sub_perm_files = ("permissions/permissions_test_participant_02_join_wrong_signed.p7s"); # permissions domain doesn't match governance
+    @topic_names = ("OD_OA_OM_OD");
+    $pub_expect = "~16";
+    $sub_expect = "~27";
+  } elsif ($scenario eq "SC1_sec_on_bad_perm_2_failure") { #SC1 (join controlled domain) : secure participants with insufficient permissions fail to pass access control checks
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_join_signed.p7s"); # doesn't have permission to write
+    @sub_perm_files = ("permissions/permissions_test_participant_02_join_signed.p7s"); # doesn't have permission to read
+    @topic_names = ("OD_OA_OM_OD");
+    $pub_expect = "~16";
+    $sub_expect = "~27";
+  } elsif ($scenario eq "SC1_sec_on_success") { #SC1 (join controlled domain) : valid participants join and send
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
@@ -167,17 +226,17 @@ foreach my $gov_file (@gov_files) {
         my $pub_opts = "$dbg_lvl";
         my $sub_opts = "$dbg_lvl";
 
-        $pub_opts .= " -DCPSConfigFile sec_base.ini";
-        $sub_opts .= " -DCPSConfigFile sec_base.ini";
+        $pub_opts .= " -DCPSConfigFile $pub_cfg_file";
+        $sub_opts .= " -DCPSConfigFile $sub_cfg_file";
 
         $pub_opts .= " -IdentityCA certs/identity/identity_ca_cert.pem";
         $sub_opts .= " -IdentityCA certs/identity/identity_ca_cert.pem";
 
-        $pub_opts .= " -Identity certs/identity/test_participant_01_cert.pem";
-        $sub_opts .= " -Identity certs/identity/test_participant_02_cert.pem";
+        $pub_opts .= " -Identity $pub_cert_file";
+        $sub_opts .= " -Identity $sub_cert_file";
 
-        $pub_opts .= " -PrivateKey certs/identity/test_participant_01_private_key.pem";
-        $sub_opts .= " -PrivateKey certs/identity/test_participant_02_private_key.pem";
+        $pub_opts .= " -PrivateKey $pub_key_file";
+        $sub_opts .= " -PrivateKey $sub_key_file";
 
         $pub_opts .= " -PermissionsCA certs/permissions/permissions_ca_cert.pem";
         $sub_opts .= " -PermissionsCA certs/permissions/permissions_ca_cert.pem";
@@ -199,6 +258,14 @@ foreach my $gov_file (@gov_files) {
           $sub_opts .= " -Expected $sub_expect";
         }
 
+        if (!($pub_timeout eq "0")) {
+          $pub_opts .= " -Timeout $pub_timeout";
+        }
+
+        if (!($sub_timeout eq "0")) {
+          $sub_opts .= " -Timeout $sub_timeout";
+        }
+
         #print "$gov_file $pub_perm_file $sub_perm_file\n";
 
         $test->process("publisher", "publisher", $pub_opts);
@@ -209,7 +276,7 @@ foreach my $gov_file (@gov_files) {
 
         # start killing processes in 10 seconds
         $test->{wait_after_first_proc} = 10;
-        my $status = $test->finish(10);
+        my $status = $test->finish(15);
 
         #if ($status != 0) {
           $current_test_num++;

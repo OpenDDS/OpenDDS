@@ -36,6 +36,7 @@ struct Args {
   int num_messages_;
 
   int expected_result_;
+  int timeout_;
 
   Args();
 
