@@ -462,7 +462,7 @@ namespace OpenDDS {
           }
 
           if (!get_access_control()->get_datareader_sec_attributes(get_permissions_handle(), topic_name.data(),
-                subscriberQos.partition, DDS::Security::DataTagQosPolicy(), sb.security_attribs_, ex)) {
+              subscriberQos.partition, DDS::Security::DataTagQosPolicy(), sb.security_attribs_, ex)) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                        ACE_TEXT("EndpointManager::add_subscription() - ")
                        ACE_TEXT("Unable to get security attributes for local datareader. Security Exception[%d.%d]: %C\n"),
