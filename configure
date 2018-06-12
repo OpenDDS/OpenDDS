@@ -23,7 +23,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.4.8';
+my $doc_tao_version = '6.5.0';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -52,7 +52,9 @@ my %platforminfo =
                 'libpath' => 'DYLD_LIBRARY_PATH',
                 'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
                                8 => 'mountainlion', 9 => 'mavericks',
-                               10 => 'yosemite', 11 => 'elcapitan'},
+                               10 => 'yosemite', 11 => 'elcapitan',
+                               12 => 'sierra', 13 => 'highsierra',
+                               14 => 'mojave'},
                },
    'solaris' => {
                  'compilers' => ['CC', 'g++'],
