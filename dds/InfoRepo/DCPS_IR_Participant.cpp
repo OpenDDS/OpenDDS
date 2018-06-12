@@ -27,29 +27,29 @@ DCPS_IR_Participant::DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federat
                                          OpenDDS::DCPS::RepoId id,
                                          DCPS_IR_Domain* domain,
                                          DDS::DomainParticipantQos qos,
-                                         Update::Manager* um)
+                                         Update::Manager* um,
+                                         bool isBit)
   : id_(id),
     domain_(domain),
     qos_(qos),
     aliveStatus_(1),
     handle_(0),
-    isBIT_(0),
     federationId_(federationId),
     owner_(federationId.overridden() ? OWNER_NONE : federationId.id()),
     topicIdGenerator_(
       federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
-      OpenDDS::DCPS::KIND_TOPIC),
+      isBit ? OpenDDS::DCPS::KIND_BUILTIN_TOPIC : OpenDDS::DCPS::KIND_TOPIC),
     publicationIdGenerator_(
       federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
-      OpenDDS::DCPS::KIND_WRITER),
+      isBit ? OpenDDS::DCPS::KIND_BUILTIN_WRITER : OpenDDS::DCPS::KIND_WRITER),
     subscriptionIdGenerator_(
       federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
-      OpenDDS::DCPS::KIND_READER),
+      isBit ? OpenDDS::DCPS::KIND_BUILTIN_READER : OpenDDS::DCPS::KIND_READER),
     um_(um),
-    isBitPublisher_(false)
+    isBitPublisher_(isBit)
 {
 }
 
@@ -835,16 +835,6 @@ bool DCPS_IR_Participant::set_qos(const DDS::DomainParticipantQos & qos)
   return true;
 }
 
-CORBA::Boolean DCPS_IR_Participant::is_bit()
-{
-  return isBIT_;
-}
-
-void DCPS_IR_Participant::set_bit_status(CORBA::Boolean isBIT)
-{
-  isBIT_ = isBIT;
-}
-
 DCPS_IR_Domain* DCPS_IR_Participant::get_domain_reference() const
 {
   return domain_;
@@ -899,7 +889,7 @@ DCPS_IR_Participant::dump_to_string(const std::string& prefix, int depth) const
   str += "DCPS_IR_Participant[";
   str += std::string(local_converter);
   str += "]";
-  if (isBIT_)
+  if (isBitPublisher_)
     str += " (BIT)";
   std::ostringstream os;
   os << "federation id[" << federationId_.id();

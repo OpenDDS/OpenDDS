@@ -998,19 +998,21 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
   // Obtain a shiny new GUID value.
   OpenDDS::DCPS::RepoId participantId = domainPtr->get_next_participant_id();
 
+  // Determine if this is the 'special' repository internal participant
+  // that publishes the built-in topics for a domain.
+  bool isBitPart = domainPtr->participants().empty() && TheServiceParticipant->get_BIT();
+
   DCPS_IR_Participant_rch participant =
     OpenDDS::DCPS::make_rch<DCPS_IR_Participant>(
                    this->federation_,
                    participantId,
                    domainPtr,
-                   qos, um_);
+                   qos, um_, isBitPart);
 
   // We created the participant, now we can return the Id value (eventually).
   value.id = participantId;
 
-  // Determine if this is the 'special' repository internal participant
-  // that publishes the built-in topics for a domain.
-  if (domainPtr->participants().empty() && TheServiceParticipant->get_BIT()) {
+  if (isBitPart) {
     participant->isBitPublisher() = true;
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -1023,14 +1025,14 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
     }
   }
 
-  // Assume responsibilty for writing back to the participant.
+  // Assume responsibility for writing back to the participant.
   participant->takeOwnership();
 
   int status = domainPtr->add_participant(participant);
 
   if (0 != status) {
     // Adding the participant failed return the invalid
-    // pariticipant Id number.
+    // participant Id number.
     participantId = OpenDDS::DCPS::GUID_UNKNOWN;
 
   } else if (this->um_) {
@@ -1093,9 +1095,12 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
   // Prepare to manipulate the participant's Id value.
   OpenDDS::DCPS::RepoIdConverter converter(participantId);
 
+  // Determine if this is the 'special' repository internal participant
+  // that publishes the built-in topics for a domain.
+  bool isBitPart = domainPtr->participants().empty() && TheServiceParticipant->get_BIT();
+
   // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = domainPtr->participant(participantId);
+  DCPS_IR_Participant* partPtr = domainPtr->participant(participantId);
 
   if (0 != partPtr) {
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -1112,7 +1117,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
     OpenDDS::DCPS::make_rch<DCPS_IR_Participant>(this->federation_,
                                      participantId,
                                      domainPtr,
-                                     qos, um_);
+                                     qos, um_, isBitPart);
 
   switch (domainPtr->add_participant(participant)) {
   case -1: {

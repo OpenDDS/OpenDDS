@@ -155,14 +155,13 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
 {
   topicId = OpenDDS::DCPS::GUID_UNKNOWN;
 
-  OpenDDS::DCPS::RepoId topic_id = participantPtr->get_next_topic_id();
-  OpenDDS::DCPS::TopicStatus status = add_topic_i(topic_id, topicName
+  OpenDDS::DCPS::RepoId new_topic_id = participantPtr->get_next_topic_id();
+  OpenDDS::DCPS::TopicStatus status = add_topic_i(new_topic_id, topicName
                                                   , dataTypeName
                                                   , qos, participantPtr);
 
   if (status == OpenDDS::DCPS::CREATED) {
-
-    topicId = topic_id;
+    topicId = new_topic_id;
   }
 
   return status;
@@ -1007,38 +1006,31 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_) {
-    if (!participant->is_bit()) {
-      try {
-        const DDS::DomainParticipantQos* participantQos = participant->get_qos();
+  if (useBIT_ && !participant->isBitPublisher()) {
+    try {
+      const DDS::DomainParticipantQos* participantQos = participant->get_qos();
 
-        DDS::ParticipantBuiltinTopicData data;
-        get_BuiltinTopicKey(data.key, participant->get_id());
-        data.user_data = participantQos->user_data;
+      DDS::ParticipantBuiltinTopicData data;
+      get_BuiltinTopicKey(data.key, participant->get_id());
+      data.user_data = participantQos->user_data;
 
-        DDS::InstanceHandle_t handle
-        = bitParticipantDataWriter_->register_instance(data);
+      DDS::InstanceHandle_t handle
+      = bitParticipantDataWriter_->register_instance(data);
 
-        participant->set_handle(handle);
+      participant->set_handle(handle);
 
-        if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DCPS_IR_Domain::publish_participant_bit: [ %d, 0x%x, 0x%x], handle %d.\n",
-                     data.key.value[0], data.key.value[1], data.key.value[2], handle));
-        }
-
-        bitParticipantDataWriter_->write(data,
-                                         handle);
-
-      } catch (const CORBA::Exception& ex) {
-        ex._tao_print_exception(
-          "(%P|%t) ERROR: Exception caught in DCPS_IR_Domain::publish_participant_bit:");
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) DCPS_IR_Domain::publish_participant_bit: [ %d, 0x%x, 0x%x], handle %d.\n",
+                   data.key.value[0], data.key.value[1], data.key.value[2], handle));
       }
 
-    } else {
-      participant->set_bit_status(1);
-    }
+      bitParticipantDataWriter_->write(data, handle);
 
+    } catch (const CORBA::Exception& ex) {
+      ex._tao_print_exception(
+        "(%P|%t) ERROR: Exception caught in DCPS_IR_Domain::publish_participant_bit:");
+    }
   }
 
 #else

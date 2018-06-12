@@ -70,7 +70,8 @@ public:
                       OpenDDS::DCPS::RepoId id,
                       DCPS_IR_Domain* domain,
                       DDS::DomainParticipantQos qos,
-                      Update::Manager* um);
+                      Update::Manager* um,
+                      bool isBit);
 
   virtual ~DCPS_IR_Participant();
 
@@ -86,9 +87,11 @@ public:
   /// Indication of whether the current repository is the owner of this participant.
   bool isOwner() const;
 
+  ///@{
   /// Flag to discriminate the built-in topic publishing participant within a domain.
   bool& isBitPublisher();
   bool  isBitPublisher() const;
+  ///@}
 
   /// Add a publication
   /// This takes ownership of the memory pointed to by pub
@@ -170,28 +173,32 @@ public:
   /// do not affect.
   bool set_qos(const DDS::DomainParticipantQos & qos);
 
+  ///@{
+  /// Test if an entity is ignored by this participant.
   CORBA::Boolean is_participant_ignored(OpenDDS::DCPS::RepoId id);
   CORBA::Boolean is_topic_ignored(OpenDDS::DCPS::RepoId id);
   CORBA::Boolean is_publication_ignored(OpenDDS::DCPS::RepoId id);
   CORBA::Boolean is_subscription_ignored(OpenDDS::DCPS::RepoId id);
+  ///@}
 
   DDS::InstanceHandle_t get_handle();
   void set_handle(DDS::InstanceHandle_t handle);
 
-  CORBA::Boolean is_bit();
-  void set_bit_status(CORBA::Boolean isBIT);
-
   DCPS_IR_Domain* get_domain_reference() const;
 
-  // Next Entity Id value in sequence.
+  ///@{
+  /// Next Entity Id value in sequence.
   OpenDDS::DCPS::RepoId get_next_topic_id();
   OpenDDS::DCPS::RepoId get_next_publication_id();
   OpenDDS::DCPS::RepoId get_next_subscription_id();
+  ///@}
 
-  // Ensure no conflicts with sequence values from persistent storage.
+  ///@{
+  /// Ensure no conflicts with sequence values from persistent storage.
   void last_topic_key(long key);
   void last_publication_key(long key);
   void last_subscription_key(long key);
+  ///@}
 
   /// Expose a readable reference to the publication map.
   const DCPS_IR_Publication_Map& publications() const;
@@ -210,7 +217,6 @@ private:
   DDS::DomainParticipantQos qos_;
   CORBA::Boolean aliveStatus_;
   DDS::InstanceHandle_t handle_;
-  CORBA::Boolean isBIT_;
 
   const TAO_DDS_DCPSFederationId& federationId_;
   long owner_;
@@ -218,26 +224,35 @@ private:
   /// Lock portions ownership processing.
   ACE_SYNCH_MUTEX ownerLock_;
 
-  // Entity GUID Id generators.
+  ///@{
+  /// Entity GUID Id generators.
   OpenDDS::DCPS::RepoIdGenerator topicIdGenerator_;
   OpenDDS::DCPS::RepoIdGenerator publicationIdGenerator_;
   OpenDDS::DCPS::RepoIdGenerator subscriptionIdGenerator_;
+  ///@}
 
+  ///@{
+  /// Entities in the Participant
   DCPS_IR_Subscription_Map subscriptions_;
   DCPS_IR_Publication_Map publications_;
   DCPS_IR_Topic_Map topicRefs_;
+  ///@}
 
-  // list of ignored entity ids
+  ///@{
+  /// Lists of Ignored Entities
   TAO_DDS_RepoId_Set ignoredParticipants_;
   TAO_DDS_RepoId_Set ignoredTopics_;
   TAO_DDS_RepoId_Set ignoredPublications_;
   TAO_DDS_RepoId_Set ignoredSubscriptions_;
+  ///@}
 
-  // The participant is the only entity that has and deals with
-  //  dependencies (topics, actors). In handling dependencies it
-  //  encompasses a bigger role. Therefore it needs to update
-  //  other entities (specifically the Update::Manager) the
-  //  changes it makes.
+  /**
+   * The participant is the only entity that has and deals with
+   * dependencies (topics, actors). In handling dependencies it
+   * encompasses a bigger role. Therefore it needs to update
+   * other entities (specifically the Update::Manager) the
+   * changes it makes.
+   */
   Update::Manager* um_;
 
   /// Flag indicating this participant publishes built-in topics.
