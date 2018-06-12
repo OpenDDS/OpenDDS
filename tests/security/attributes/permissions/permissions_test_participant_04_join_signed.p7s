@@ -1,0 +1,77 @@
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----7A6CA123BB36CC4C008F1868E2F4FF9E"
+
+This is an S/MIME signed message
+
+------7A6CA123BB36CC4C008F1868E2F4FF9E
+Content-Type: text/plain
+
+<?xml version="1.0"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+  <permissions>
+    <grant name="widgets_grant_join_domain_0">
+      <!-- only allow joining domain 0. No explicit permission to read or write any topic -->
+      <subject_name>/emailAddress=fuppy@mail.fuphouse.ca/CN=Fuppy Fuppington III/OU=The Upper Room/O=House of Fuppy/ST=Nunavut/C=CA</subject_name>
+      <validity>
+        <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
+        <not_before>2015-09-15T01:00:00</not_before>
+        <not_after>2025-09-15T01:00:00</not_after>
+      </validity>
+      <allow_rule>
+        <domains>
+          <id>0</id>
+        </domains>
+      </allow_rule>
+      <default>DENY</default>
+    </grant>
+  </permissions>
+</dds>
+
+------7A6CA123BB36CC4C008F1868E2F4FF9E
+Content-Type: application/x-pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+
+MIIHagYJKoZIhvcNAQcCoIIHWzCCB1cCAQExDzANBglghkgBZQMEAgEFADALBgkq
+hkiG9w0BBwGgggQ0MIIEMDCCAxgCCQD5E50Z6JHaWDANBgkqhkiG9w0BAQsFADCB
+2TELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3Vp
+czE+MDwGA1UECgw1T2JqZWN0IENvbXB1dGluZyAoU2VjdXJpdHkgQXR0cmlidXRl
+cyBQZXJtaXNzaW9ucyBDQSkxPjA8BgNVBAMMNU9iamVjdCBDb21wdXRpbmcgKFNl
+Y3VyaXR5IEF0dHJpYnV0ZXMgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZIhvcNAQkB
+FhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wHhcNMTgwNDI1MTkxMDUzWhcNMjgw
+NDIyMTkxMDUzWjCB2TELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQH
+DAtTYWludCBMb3VpczE+MDwGA1UECgw1T2JqZWN0IENvbXB1dGluZyAoU2VjdXJp
+dHkgQXR0cmlidXRlcyBQZXJtaXNzaW9ucyBDQSkxPjA8BgNVBAMMNU9iamVjdCBD
+b21wdXRpbmcgKFNlY3VyaXR5IEF0dHJpYnV0ZXMgUGVybWlzc2lvbnMgQ0EpMScw
+JQYJKoZIhvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDi9HUv0R4cmAIDMF9LBUMfcwarOS4N+O2k
+2QvGOmFPjAwZTnv7aQ1y6jdhUN/QRdUGoMiqDFfYWQFbhGNl7aSKpmx8w1+sBBjv
+pZoUyGgAWb1LyRAGCbjxS/suKM1jZ8ss6Ei65JzDmZZnQizlpHHnmByQwlsxGuy1
+aj5I1LopwleqAkwO6mVFABgmeEX2Bi1J8fSgPHE52rIYWrBy0FvZnlgpXQMnDMrD
+vG2pq3Lb/FvWb3dJWO9QObKKHkUjifo8ZOpHLY+SLH7hpGz4MYupAWP/BB+N/2gW
+q8k+2gjhAWGgenjxYqiHSN/V0KCQh528WXGf9/rNBkfovREAigrLAgMBAAEwDQYJ
+KoZIhvcNAQELBQADggEBAKqR3OT9RsX5/IlDRmXZ9lo6Gvk5nEGRF4OuQb6WwArO
+MjjHTwjE16eaJ6V22voNrrK+llk3+8y+FWJ20FALndpaTWgZ7LajqcLW0t2a2Y7H
+qFcmnMfOS6e+/nmwjuS5wVJHI6EY/du2O6bjXTddov0JwAh2UWw3qLneLjMWDp0H
+0GXpyORLtwoyhE1nXuj5p2fW+9YSKkU6yaEvCnwW1yLQnR5WtOAbyf9eVsRioN7L
+oU2cgKQdch5x1K5e2c3nJT1/Wq56AzlCKFN9MZc1vJGGlWRueBNSFqLeUFkpvOgL
+GlY4ln/VJbGsJqPI7bmpnnYf1bzOT9ghLfp1sEqUTysxggL6MIIC9gIBATCB5zCB
+2TELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3Vp
+czE+MDwGA1UECgw1T2JqZWN0IENvbXB1dGluZyAoU2VjdXJpdHkgQXR0cmlidXRl
+cyBQZXJtaXNzaW9ucyBDQSkxPjA8BgNVBAMMNU9iamVjdCBDb21wdXRpbmcgKFNl
+Y3VyaXR5IEF0dHJpYnV0ZXMgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZIhvcNAQkB
+FhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20CCQD5E50Z6JHaWDANBglghkgBZQME
+AgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEP
+Fw0xODA2MTIxNTA4MjlaMC8GCSqGSIb3DQEJBDEiBCBRN14IJum+3XJJQueJoB2b
+6dx56IRR+p2GIGzEti25nDB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFlAwQBKjAL
+BglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqGSIb3DQMC
+AgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIBKDANBgkq
+hkiG9w0BAQEFAASCAQA4Hx0UeRdjchq1f3y+klrQ1MBvopjfdugvo0+StDEOs3s1
+ebZjNIn/1l1uwUF7En7TV7lo5Zgy1xfyCnAyKS6eXYWbphx81IVYOBT+c1BSH5wb
+WM8h8L9Vy1ckZw2YkLEK0SClPneaxTO9kjjZEYkoNUNIF6YYgXbcX0ej2ZfC0/oh
+mRoEGo9eMqHt43l8eZi3EzRVDQruByQWsO+TOsxNnPlmZODfbHoDxTX/Z9zyyb0q
+xLmjZYsvc8KyHC13w95NGJv+adZxjxuURO2z1f4AAh8KLVJ6EqVVD/knYLESNAih
+Z5r8R/bFbp/d0IbmX7ny1DvRFnLhLdDm7E4WY3DE
+
+------7A6CA123BB36CC4C008F1868E2F4FF9E--
+

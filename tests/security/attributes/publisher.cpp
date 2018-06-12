@@ -181,9 +181,11 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 
       DDS::Duration_t timeout;
       if (my_args.timeout_ == 0) { 
-        timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+        timeout.sec = DDS::DURATION_INFINITE_SEC;
+        timeout.nanosec = DDS::DURATION_INFINITE_NSEC;
       } else {
-        timeout = { my_args.timeout_, 0 };
+        timeout.sec = my_args.timeout_;
+        timeout.nanosec = 0;
       }
       ACE_Time_Value deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout, ACE_OS::gettimeofday());
 
