@@ -1,0 +1,77 @@
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----4F70AC556B1667F6AADEC045DF2872CE"
+
+This is an S/MIME signed message
+
+------4F70AC556B1667F6AADEC045DF2872CE
+Content-Type: text/plain
+
+<?xml version="1.0"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+  <permissions>
+    <grant name="widgets_grant_join_domain_0">
+      <!-- only allow joining domain 0. No explicit permission to read or write any topic -->
+      <subject_name>/C=GB/ST=JQ/O=Bob's Magical Widget Factory/CN=Roberto Gonzales/emailAddress=bob@magicalwidgets.com</subject_name>
+      <validity>
+        <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
+        <not_before>2015-09-15T01:00:00</not_before>
+        <not_after>2025-09-15T01:00:00</not_after>
+      </validity>
+      <allow_rule>
+        <domains>
+          <id>0</id>
+        </domains>
+      </allow_rule>
+      <default>DENY</default>
+    </grant>
+  </permissions>
+</dds>
+
+------4F70AC556B1667F6AADEC045DF2872CE
+Content-Type: application/x-pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+
+MIIHagYJKoZIhvcNAQcCoIIHWzCCB1cCAQExDzANBglghkgBZQMEAgEFADALBgkq
+hkiG9w0BBwGgggQ0MIIEMDCCAxgCCQD5E50Z6JHaWDANBgkqhkiG9w0BAQsFADCB
+2TELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3Vp
+czE+MDwGA1UECgw1T2JqZWN0IENvbXB1dGluZyAoU2VjdXJpdHkgQXR0cmlidXRl
+cyBQZXJtaXNzaW9ucyBDQSkxPjA8BgNVBAMMNU9iamVjdCBDb21wdXRpbmcgKFNl
+Y3VyaXR5IEF0dHJpYnV0ZXMgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZIhvcNAQkB
+FhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wHhcNMTgwNDI1MTkxMDUzWhcNMjgw
+NDIyMTkxMDUzWjCB2TELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQH
+DAtTYWludCBMb3VpczE+MDwGA1UECgw1T2JqZWN0IENvbXB1dGluZyAoU2VjdXJp
+dHkgQXR0cmlidXRlcyBQZXJtaXNzaW9ucyBDQSkxPjA8BgNVBAMMNU9iamVjdCBD
+b21wdXRpbmcgKFNlY3VyaXR5IEF0dHJpYnV0ZXMgUGVybWlzc2lvbnMgQ0EpMScw
+JQYJKoZIhvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wggEiMA0GCSqG
+SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDi9HUv0R4cmAIDMF9LBUMfcwarOS4N+O2k
+2QvGOmFPjAwZTnv7aQ1y6jdhUN/QRdUGoMiqDFfYWQFbhGNl7aSKpmx8w1+sBBjv
+pZoUyGgAWb1LyRAGCbjxS/suKM1jZ8ss6Ei65JzDmZZnQizlpHHnmByQwlsxGuy1
+aj5I1LopwleqAkwO6mVFABgmeEX2Bi1J8fSgPHE52rIYWrBy0FvZnlgpXQMnDMrD
+vG2pq3Lb/FvWb3dJWO9QObKKHkUjifo8ZOpHLY+SLH7hpGz4MYupAWP/BB+N/2gW
+q8k+2gjhAWGgenjxYqiHSN/V0KCQh528WXGf9/rNBkfovREAigrLAgMBAAEwDQYJ
+KoZIhvcNAQELBQADggEBAKqR3OT9RsX5/IlDRmXZ9lo6Gvk5nEGRF4OuQb6WwArO
+MjjHTwjE16eaJ6V22voNrrK+llk3+8y+FWJ20FALndpaTWgZ7LajqcLW0t2a2Y7H
+qFcmnMfOS6e+/nmwjuS5wVJHI6EY/du2O6bjXTddov0JwAh2UWw3qLneLjMWDp0H
+0GXpyORLtwoyhE1nXuj5p2fW+9YSKkU6yaEvCnwW1yLQnR5WtOAbyf9eVsRioN7L
+oU2cgKQdch5x1K5e2c3nJT1/Wq56AzlCKFN9MZc1vJGGlWRueBNSFqLeUFkpvOgL
+GlY4ln/VJbGsJqPI7bmpnnYf1bzOT9ghLfp1sEqUTysxggL6MIIC9gIBATCB5zCB
+2TELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3Vp
+czE+MDwGA1UECgw1T2JqZWN0IENvbXB1dGluZyAoU2VjdXJpdHkgQXR0cmlidXRl
+cyBQZXJtaXNzaW9ucyBDQSkxPjA8BgNVBAMMNU9iamVjdCBDb21wdXRpbmcgKFNl
+Y3VyaXR5IEF0dHJpYnV0ZXMgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZIhvcNAQkB
+FhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20CCQD5E50Z6JHaWDANBglghkgBZQME
+AgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEP
+Fw0xODA2MTEyMjA2MjNaMC8GCSqGSIb3DQEJBDEiBCBUeZ8pZxYfUg0H30caAYh3
+toYD90o2jz1B3SIZa/GKEDB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFlAwQBKjAL
+BglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqGSIb3DQMC
+AgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIBKDANBgkq
+hkiG9w0BAQEFAASCAQBXbSi+9SxsHN6m4JMJpbeCf/h0IghN2Ccy9LtNePUUGK3O
+7oU6axmqyxVcsWmEiYPcnrx03rlN34Z+U+KfFdEGiFlW9qbZ75c1p6EB25oNapT5
+0Xyu1lyZLtiMOtATHWF+SBwDaHU31J/7KZMv1IFrN7zUcFKGbsKnLc5tkLzjwb1U
+vUoQv4E0w34e1I3N5vKOJEU8A/vZSTgSkcqOhHF3/l79nU4Wx+SWwsRipbbuuasX
+9dJ9v2fBe4tcJCzUdeIsNp8KXYotnMjMwzJ3m8Uj6NPoGNmkVrhCDYduDgsy/Sh8
+WqLsf5dxzuYes99OJD7wf0FLBJlC7VSWAhPgs/YZ
+
+------4F70AC556B1667F6AADEC045DF2872CE--
+
