@@ -11,6 +11,8 @@
 #include <dds/DCPS/security/TokenWriter.h>
 #include <dds/DdsSecurityEntities.h>
 
+#include <dds/DCPS/Service_Participant.h>
+
 using namespace OpenDDS::Security;
 using DDS::Property_t;
 using DDS::PropertySeq;
@@ -196,7 +198,7 @@ public:
     Property_t  gov_0_p7s, gov_1_p7s, gov_2_p7s, gov_3_p7s,gov_4_p7s, gov_5_p7s, gov_6_p7s;
     Property_t perm_join, perm_topic_0, perm_topic_1;
     Property_t perm_join_p7s, perm_topic_p7s, perm_topic2_p7s;
-    Property_t perm_date_p7s;
+    Property_t perm_date_p7s, perm_dateoffset_p7s;
     Property_t perm_parts_p7s;
 
     permca.name = "dds.sec.access.permissions_ca";
@@ -294,12 +296,16 @@ public:
     perm_date_p7s.value = "file:permissions/Permissions_NotBefore_OCI.p7s";
     perm_date_p7s.propagate = false;
 
+    perm_dateoffset_p7s.name = "dds.sec.access.permissions";
+    perm_dateoffset_p7s.value = "file:permissions/Permissions_NotBeforeOffset_OCI.p7s";
+    perm_dateoffset_p7s.propagate = false;
+
     perm_parts_p7s.name = "dds.sec.access.permissions";
     perm_parts_p7s.value = "file:permissions/Permissions_TopicLevel_Partitions_Default_OCI.p7s";
     perm_parts_p7s.propagate = false;
 
     add_property(permca);
-    add_property(gov_0_p7s); // gov_6_p7s);
+    add_property(gov_6_p7s); // gov_0_p7s);
     add_property(perm_join_p7s);
 
     ::DDS::OctetSeq Empty_Seq;
@@ -373,6 +379,215 @@ public:
 private:
 
   AccessControlBuiltInImpl test_class_;
+};
+
+class AccessControlTestWithParticipant : public Test
+{
+public:
+    AccessControlTestWithParticipant()
+        : auth_plugin_(new MockAuthentication())
+        , test_class_()
+    {
+        Property_t permca, permca_p7s;
+        Property_t  gov_0, gov_1, gov_2, gov_3, gov_4, gov_5, gov_6;
+        Property_t  gov_0_p7s, gov_1_p7s, gov_2_p7s, gov_3_p7s, gov_4_p7s, gov_5_p7s, gov_6_p7s;
+        Property_t perm_join, perm_topic_0, perm_topic_1;
+        Property_t perm_join_p7s, perm_topic_p7s, perm_topic2_p7s;
+        Property_t perm_date_p7s, perm_dateoffset_p7s;
+        Property_t perm_parts_p7s;
+
+        permca.name = "dds.sec.access.permissions_ca";
+        permca.value = "file:certs/opendds_identity_ca_cert.pem";
+        permca.propagate = false;
+
+        permca_p7s.name = "dds.sec.access.permissions_ca";
+        permca_p7s.value = "file:certs/opendds_identity_ca_cert.pem";
+        permca_p7s.propagate = false;
+
+        gov_0.name = "dds.sec.access.governance";
+        gov_0.value = "file:governance/Governance_SC0_SecurityDisabled.xml";
+        gov_0.propagate = false;
+
+        gov_1.name = "dds.sec.access.governance";
+        gov_1.value = "file:governance/Governance_SC1_ProtectedDomain1.xml";
+        gov_1.propagate = false;
+
+        gov_2.name = "dds.sec.access.governance";
+        gov_2.value = "file:governance/Governance_SC2_ProtectedDomain2.xml";
+        gov_2.propagate = false;
+
+        gov_3.name = "dds.sec.access.governance";
+        gov_3.value = "file:governance/Governance_SC3_ProtectedDomain3.xml";
+        gov_3.propagate = false;
+
+        gov_4.name = "dds.sec.access.governance";
+        gov_4.value = "file:governance/Governance_SC4_ProtectedDomain4.xml";
+        gov_4.propagate = false;
+
+        gov_5.name = "dds.sec.access.governance";
+        gov_5.value = "file:governance/Governance_SC5_ProtectedDomain5.xml";
+        gov_5.propagate = false;
+
+        gov_6.name = "dds.sec.access.governance";
+        gov_6.value = "file:governance/Governance_SC6_ProtectedDomain6.xml";
+        gov_6.propagate = false;
+
+        gov_0_p7s.name = "dds.sec.access.governance";
+        gov_0_p7s.value = "file:governance/Governance_SC0_SecurityDisabled.p7s";
+        gov_0_p7s.propagate = false;
+
+        gov_1_p7s.name = "dds.sec.access.governance";
+        gov_1_p7s.value = "file:governance/Governance_SC1_ProtectedDomain1.p7s";
+        gov_1_p7s.propagate = false;
+
+        gov_2_p7s.name = "dds.sec.access.governance";
+        gov_2_p7s.value = "file:governance/Governance_SC2_ProtectedDomain2.p7s";
+        gov_2_p7s.propagate = false;
+
+        gov_3_p7s.name = "dds.sec.access.governance";
+        gov_3_p7s.value = "file:governance/Governance_SC3_ProtectedDomain3.p7s";
+        gov_3_p7s.propagate = false;
+
+        gov_4_p7s.name = "dds.sec.access.governance";
+        gov_4_p7s.value = "file:governance/Governance_SC4_ProtectedDomain4.p7s";
+        gov_4_p7s.propagate = false;
+
+        gov_5_p7s.name = "dds.sec.access.governance";
+        gov_5_p7s.value = "file:governance/Governance_SC5_ProtectedDomain5.p7s";
+        gov_5_p7s.propagate = false;
+
+        gov_6_p7s.name = "dds.sec.access.governance";
+        gov_6_p7s.value = "file:governance/Governance_SC6_ProtectedDomain6.p7s";
+        gov_6_p7s.propagate = false;
+
+
+        perm_join.name = "dds.sec.access.permissions";
+        perm_join.value = "file:permissions/Permissions_JoinDomain_OCI.xml";
+        perm_join.propagate = false;
+
+        perm_join_p7s.name = "dds.sec.access.permissions";
+        perm_join_p7s.value = "file:permissions/Permissions_JoinDomain_OCI.p7s";
+        perm_join_p7s.propagate = false;
+
+
+        perm_topic_0.name = "dds.sec.access.permissions";
+        perm_topic_0.value = "file:permissions/Permissions_TopicLevel_OCI.xml";
+        perm_topic_0.propagate = false;
+
+        perm_topic_1.name = "dds.sec.access.permissions";
+        perm_topic_1.value = "file:permissions/Permissions_TopicLevel_OCI2.xml";
+        perm_topic_1.propagate = false;
+
+        perm_topic_p7s.name = "dds.sec.access.permissions";
+        perm_topic_p7s.value = "file:permissions/Permissions_TopicLevel_OCI.p7s";
+        perm_topic_p7s.propagate = false;
+
+        perm_topic2_p7s.name = "dds.sec.access.permissions";
+        perm_topic2_p7s.value = "file:permissions/Permissions_TopicLevel_OCI2.p7s";
+        perm_topic2_p7s.propagate = false;
+
+
+        perm_date_p7s.name = "dds.sec.access.permissions";
+        perm_date_p7s.value = "file:permissions/Permissions_NotBefore_OCI.p7s";
+        perm_date_p7s.propagate = false;
+
+        perm_dateoffset_p7s.name = "dds.sec.access.permissions";
+        perm_dateoffset_p7s.value = "file:permissions/Permissions_NotBeforeOffset_OCI.p7s";
+        perm_dateoffset_p7s.propagate = false;
+
+        perm_parts_p7s.name = "dds.sec.access.permissions";
+        perm_parts_p7s.value = "file:permissions/Permissions_TopicLevel_Partitions_Default_OCI.p7s";
+        perm_parts_p7s.propagate = false;
+
+        add_property(permca);
+        add_property(gov_0_p7s); // gov_6_p7s);
+        add_property(perm_join_p7s);
+
+        ::DDS::OctetSeq Empty_Seq;
+
+        // Set up correct returns from get_identity_token for our Google Mock version of the Authentication Builtin Plugin
+
+        ON_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 
+                                                                                           A<DDS::Security::IdentityHandle>(), 
+                                                                                           A<DDS::Security::SecurityException&>())).WillByDefault(Return(false));
+
+        DDS::Security::IdentityToken local_id_token;
+        OpenDDS::Security::TokenWriter local_tw(local_id_token);
+        local_tw.add_property("dds.cert.sn", "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com");
+
+        EXPECT_CALL(*dynamic_cast<MockAuthentication*>(auth_plugin_.get()), get_identity_token(A<DDS::Security::IdentityToken&>(), 
+                                                                                               1, 
+                                                                                               A<DDS::Security::SecurityException&>())).WillRepeatedly(DoAll(SetArgReferee<0>(local_id_token), Return(true)));
+
+        // Create a participant
+        int arg_count = 3;
+        char *params[3] = { "OpenDDS_AccessControlTest", " -ORBDebugLevel 1", " -DCPSConfigFile sec_base.ini" };
+
+        DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(arg_count, params);
+        DDS::DomainParticipantQos part_qos;
+        dpf->get_default_participant_qos(part_qos);
+
+    }
+
+    ~AccessControlTestWithParticipant()
+    {
+    }
+
+    void add_property(Property_t p) {
+        PropertySeq& seq = domain_participant_qos.property.value;
+        size_t len = seq.length();
+        seq.length(len + 1);
+        seq[len] = p;
+    }
+
+    std::string extract_file_name(const std::string& file_parm) {
+        std::string del = ":";
+        size_t pos = file_parm.find_last_of(del);
+        if ((pos > 0) && (pos != file_parm.length() - 1)) {
+            return file_parm.substr(pos + 1);
+        }
+        else {
+            return std::string("");
+        }
+    }
+
+    std::string get_file_contents(const char *filename) {
+        std::ifstream in(filename, std::ios::in | std::ios::binary);
+        if (in)
+        {
+            std::ostringstream contents;
+            contents << in.rdbuf();
+            in.close();
+            return(contents.str());
+        }
+        throw(errno);
+    }
+
+    ::CORBA::Boolean clean_smime_content(std::string& content_) {
+        std::string search_str("<?xml");
+
+        size_t found = content_.find(search_str);
+        if (found != std::string::npos) {
+            std::string holder_(content_.substr(found));
+            content_.clear();
+            content_.assign(holder_);
+            return true;
+        }
+
+        return false;
+    }
+
+    DDS::Security::AccessControl& get_inst()
+    {
+        return test_class_;
+    }
+
+    DomainParticipantQos domain_participant_qos;
+    MockAuthentication::SmartPtr auth_plugin_;
+
+private:
+
+    AccessControlBuiltInImpl test_class_;
 };
 
 TEST_F(AccessControlTest, validate_local_permissions_InvalidInput)
@@ -594,7 +809,8 @@ TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
     ex));
 }
 
-TEST_F(AccessControlTest, check_create_datareader_Success)
+//TEST_F(AccessControlTest, check_create_datareader_Success)
+TEST_F(AccessControlTestWithParticipant, check_create_datareader_Success)
 {
 
   ::DDS::Security::DomainId_t domain_id = 0;
@@ -607,8 +823,7 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
   ::DDS::Security::PermissionsHandle permissions_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
-  partition.name.length(1);
-  partition.name[0] = "";
+  partition.name.length(0);
 
   EXPECT_TRUE(get_inst().check_create_datareader(
     permissions_handle,
@@ -620,7 +835,55 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
     ex));
 }
 
-TEST_F(AccessControlTest, check_create_datareader_default_Success)
+//TEST_F(AccessControlTestWithParticipant, check_permissions_timer_Success)
+//{
+//
+//    ::DDS::Security::DomainId_t domain_id = 0;
+//    const char * topic_name = "Square";
+//    ::DDS::DataReaderQos qos;
+//    ::DDS::TopicQos tqos;
+//    ::DDS::PartitionQosPolicy  partition;
+//    ::DDS::Security::DataTags  data_tag;
+//    ::DDS::Security::SecurityException ex;
+//
+//    ::DDS::Security::PermissionsHandle permissions_handle =
+//        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+//
+//    partition.name.length(0);
+//
+//    EXPECT_TRUE(get_inst().check_create_datareader(
+//        permissions_handle,
+//        domain_id,
+//        topic_name,
+//        qos,
+//        partition,
+//        data_tag,
+//        ex));
+//
+//    // Delay here...
+//    int milliseconds = 1000 * 20;
+//    clock_t start_time = clock();
+//    
+//    while (clock() < start_time + milliseconds)
+//        ;
+//
+//    EXPECT_TRUE(get_inst().check_create_topic(
+//        permissions_handle, domain_id, topic_name, tqos, ex));
+//
+//    // Delay a little more...
+//    milliseconds = 1000 * 25;
+//    start_time = clock();
+//
+//    while (clock() < start_time + milliseconds)
+//        ;
+//
+//    EXPECT_FALSE(get_inst().check_create_topic(
+//        permissions_handle, domain_id, topic_name, tqos, ex));
+//
+//
+//}
+
+TEST_F(AccessControlTestWithParticipant, check_create_datareader_default_Success)
 {
 
     ::DDS::Security::DomainId_t domain_id = 0;
@@ -633,8 +896,7 @@ TEST_F(AccessControlTest, check_create_datareader_default_Success)
     ::DDS::Security::PermissionsHandle permissions_handle =
         get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
 
-    partition.name.length(1);
-    partition.name[0] = "";
+    partition.name.length(0);
 
     EXPECT_TRUE(get_inst().check_create_datareader(
         permissions_handle,

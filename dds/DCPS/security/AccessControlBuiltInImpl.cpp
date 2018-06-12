@@ -50,6 +50,7 @@ AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   : rp_timer_(*this)
   , handle_mutex_()
   , next_handle_(1)
+  , listener_ptr_(NULL)
   , local_access_control_data_()
 {  }
 
@@ -457,7 +458,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the date/time range for validity
   time_t after_time,
-         before_time;
+         before_time,
+         cur_utc_time;
   time_t current_date_time = time(0);
 
 
@@ -511,16 +513,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     // Adjust the current time to UTC/GMT
     tm *current_time_tm = gmtime(&current_date_time);
-    current_date_time = mktime(current_time_tm);
+    cur_utc_time = mktime(current_time_tm);
 
-    if (current_date_time < before_time) {
+    if (cur_utc_time < before_time) {
       CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant hasn't started yet.");
       return false;
     }
 
     after_time = convert_permissions_time(pm_iter->validity.not_after);
 
-    if (current_date_time > after_time) {
+    if (cur_utc_time > after_time) {
       CommonUtilities::set_security_error(ex, -1, 0, "Permissions grant has expired.");
       return false;
     }
@@ -574,7 +576,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                     else { // No partitions to match
                            // Start timer
                         if (!rp_timer_.is_scheduled()) {
-                            ACE_Time_Value timer_length(after_time - current_date_time);
+                            ACE_Time_Value timer_length(after_time - cur_utc_time);
 
                             if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
                                 CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -653,7 +655,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 //                CommonUtilities::set_security_error(ex, -1, 0, "Matching rule for topic in deny_rule.");
                 // Start timer
                 if (!rp_timer_.is_scheduled()) {
-                    ACE_Time_Value timer_length(after_time - current_date_time);
+                    ACE_Time_Value timer_length(after_time - cur_utc_time);
 
                     if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
                         CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -678,7 +680,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
       if (!rp_timer_.is_scheduled()) {
           // Start timer
-          ACE_Time_Value timer_length(after_time - current_date_time);
+          ACE_Time_Value timer_length(after_time - cur_utc_time);
 
           if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
               CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -830,7 +832,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                             else { // There are no partitions to match
                                 // Start timer here.  
                                 if (!rp_timer_.is_scheduled()) {
-                                    ACE_Time_Value timer_length(after_time - current_date_time);
+                                    ACE_Time_Value timer_length(after_time - cur_utc_time);
 
                                     if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
                                         CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -909,7 +911,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 //                CommonUtilities::set_security_error(ex, -1, 0, "Matching rule for topic in deny_rule.");
                 // Start timer here.  
                 if (!rp_timer_.is_scheduled()) {
-                    ACE_Time_Value timer_length(after_time - current_date_time);
+                    //ACE_Time_Value timer_length(after_time - cur_utc_time);
+                    ACE_Time_Value timer_length(35);
 
                     if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
                         CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -931,7 +934,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (strcmp(default_value.c_str(), "ALLOW") == 0) {
       // Start timer here.  
       if (!rp_timer_.is_scheduled()) {
-          ACE_Time_Value timer_length(after_time - current_date_time);
+          //ACE_Time_Value timer_length(after_time - cur_utc_time);
+          ACE_Time_Value timer_length(35);
 
           if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
               CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -969,7 +973,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ACPermsMap::iterator ac_iter = local_ac_perms.begin();
   ac_iter = local_ac_perms.find(permissions_handle);
-  if(ac_iter == local_ac_perms.end()) {
+  if (ac_iter == local_ac_perms.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "No matching permissions handle present");
     return false;
   }
@@ -980,7 +984,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   GovernanceAccessRules::iterator giter;
 
-  for(giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d) {
@@ -1459,7 +1463,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  //listener_ptr_ = listener;
   return true;
 }
 
@@ -2513,13 +2516,16 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessControlBuiltInImpl& impl)
     : impl_(impl)
-{ 
-    scheduled_ = false;
-    timer_id_ = 0;
-}
+    , scheduled_(false)
+    , timer_id_(0)
+    , reactor_(0)
+{ }
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::~RevokePermissionsTimer()
 {
+    if (scheduled_) {
+        reactor_->cancel_timer(this);
+    }
 }
 
 bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle)
@@ -2529,17 +2535,23 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Tim
         this->lock_,
         false);
 
-    ::DDS::Security::PermissionsHandle *eh_params_ptr;
+    ::DDS::Security::PermissionsHandle *eh_params_ptr = 
+        new ::DDS::Security::PermissionsHandle(pm_handle);
 
-    eh_params_ptr = &pm_handle;
-    timer_id_ = reactor_.schedule_timer(this, eh_params_ptr, length);
+    reactor_ = TheServiceParticipant->timer();
 
-    if (timer_id_ == -1) {
-        return false;
+    if (reactor_ != NULL) {
+        timer_id_ = reactor_->schedule_timer(this, eh_params_ptr, length);
+
+        if (timer_id_ == -1) {
+            return false;
+        }
+
+        scheduled_ = true;
+        return true;
     }
 
-    scheduled_ = true;
-    return true;
+    return false;
 }
 
 int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_Time_Value & tv, const void * arg)
@@ -2552,14 +2564,24 @@ int AccessControlBuiltInImpl::RevokePermissionsTimer::handle_timeout(const ACE_T
 
     ::DDS::Security::PermissionsHandle *pm_handle = (::DDS::Security::PermissionsHandle *)arg;
 
+    scheduled_ = false;
+
     ACPermsMap::iterator iter = impl_.local_ac_perms.find(*pm_handle);
+
     if (iter == impl_.local_ac_perms.end()) {
-        std::cout << "handle_timeout: pm_handle not found! " << pm_handle << std::endl;
+        std::cout << "handle_timeout: pm_handle not found! " << *pm_handle << std::endl;
         return -1;
     }
 
     impl_.local_ac_perms.erase(iter);
-    scheduled_ = false;
+
+    // If a listener exists, call on_revoke_permissions
+    if (impl_.listener_ptr_ != NULL) {
+        if (!impl_.listener_ptr_->on_revoke_permissions(&impl_, *pm_handle)) {
+            std::cout << "handle_timeout: on_revoke_permissions failed! " << pm_handle << std::endl;
+            return -1;
+        }
+    }
 
     // TESTING ONLY
     std::cout << "handle_timeout completed..." << std::endl;

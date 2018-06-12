@@ -13,6 +13,7 @@
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Reactor.h"
@@ -343,11 +344,11 @@ private:
 
     private:
         ACE_Time_Value interval_;
-        bool recalculate_interval_;
         bool scheduled_;
         long timer_id_;
         ACE_Thread_Mutex lock_;
-        ACE_Reactor reactor_;
+        ACE_Reactor_Timer_Interface* reactor_;
+
     };
     RevokePermissionsTimer rp_timer_;
 
@@ -363,6 +364,8 @@ private:
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;
+
+  ::DDS::Security::AccessControlListener_ptr listener_ptr_;
 
   time_t convert_permissions_time(std::string timeString);
   
