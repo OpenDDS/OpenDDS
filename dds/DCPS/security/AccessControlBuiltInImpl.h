@@ -234,123 +234,121 @@ private:
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl& right);
   AccessControlBuiltInImpl& operator-=(const AccessControlBuiltInImpl& right);
 
-    // Governance Rule definitions
+  // Governance Rule definitions
 
-    struct TopicAccessRule {
-        std::string topic_expression;
-        ::DDS::Security::TopicSecurityAttributes topic_attrs;
-        std::string metadata_protection_kind;
-        std::string data_protection_kind;
-    };
+  struct TopicAccessRule {
+    std::string topic_expression;
+    ::DDS::Security::TopicSecurityAttributes topic_attrs;
+    std::string metadata_protection_kind;
+    std::string data_protection_kind;
+  };
 
-    typedef std::vector<TopicAccessRule> TopicAccessRules;
+  typedef std::vector<TopicAccessRule> TopicAccessRules;
 
-    struct domain_rule {
-        std::set< ::DDS::Security::DomainId_t > domain_list;
-        ::DDS::Security::ParticipantSecurityAttributes domain_attrs;
-        TopicAccessRules topic_rules;
-    };
-
-
-    typedef std::vector<domain_rule> GovernanceAccessRules;
+  struct domain_rule {
+    std::set< ::DDS::Security::DomainId_t > domain_list;
+    ::DDS::Security::ParticipantSecurityAttributes domain_attrs;
+    TopicAccessRules topic_rules;
+  };
 
 
-    // TODO: the ParticipantGovMapType needs to support multiple domain_rule(s). See domain_access_rules above
+  typedef std::vector<domain_rule> GovernanceAccessRules;
 
 
-
-    // Permission Rule definitions
-
-    enum AllowDeny_t
-    {
-        ALLOW,
-        DENY
-    };
-
-    enum PublishSubscribe_t
-    {
-        PUBLISH,
-        SUBSCRIBE
-    };
-
-    struct Validity_t {
-        std::string not_before;
-        std::string not_after;
-    };
-
-    struct permission_topic_ps_rule{
-        PublishSubscribe_t  ps_type;
-        std::vector<std::string> topic_list;
-    };
-
-    struct permission_partition_ps {
-        PublishSubscribe_t ps_type;
-        std::vector<std::string> partition_list;
-    };
-
-    struct permissions_topic_rule {
-        AllowDeny_t ad_type;
-        std::set< ::DDS::Security::DomainId_t > domain_list;
-        std::list<permission_topic_ps_rule> topic_ps_rules;
-    };
-
-    struct permissions_partition {
-        AllowDeny_t ad_type;
-        std::set< ::DDS::Security::DomainId_t > domain_list;
-        std::list<permission_partition_ps> partition_ps;
-    };
-
-    struct permission_grant_rule {
-        std::string grant_name;
-        std::string subject;
-        Validity_t validity;
-        std::string default_permission;
-        std::list<permissions_topic_rule> PermissionTopicRules;
-        std::list<permissions_partition> PermissionPartitions;
-    };
-
-    typedef std::vector<permission_grant_rule> PermissionGrantRules;
+  // TODO: the ParticipantGovMapType needs to support multiple domain_rule(s). See domain_access_rules above
 
 
 
-    struct ac_perms {
-        ::DDS::Security::DomainId_t domain_id;
-        GovernanceAccessRules gov_rules;
-        PermissionGrantRules perm_rules;
-        ::DDS::Security::PermissionsToken perm_token;
-        ::DDS::Security::PermissionsCredentialToken perm_cred_token;
-    };
+  // Permission Rule definitions
 
-    typedef std::map< ::DDS::Security::PermissionsHandle , ac_perms > ACPermsMap;
+  enum AllowDeny_t
+  {
+    ALLOW,
+    DENY
+  };
 
-    ACPermsMap local_ac_perms;
+  enum PublishSubscribe_t
+  {
+    PUBLISH,
+    SUBSCRIBE
+  };
 
-    typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
+  struct Validity_t {
+    std::string not_before;
+    std::string not_after;
+  };
 
-    ACIdentityMap local_identity_map;
+  struct permission_topic_ps_rule{
+    PublishSubscribe_t  ps_type;
+    std::vector<std::string> topic_list;
+  };
 
-    class RevokePermissionsTimer : public ACE_Event_Handler {
-    public:
-        RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
-        virtual ~RevokePermissionsTimer();
-        bool start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle);
-        int handle_timeout(const ACE_Time_Value &tv, const void * arg);
-        bool is_scheduled() { return scheduled_; }
+  struct permission_partition_ps {
+    PublishSubscribe_t ps_type;
+    std::vector<std::string> partition_list;
+  };
 
-    protected:
-        AccessControlBuiltInImpl & impl_;
+  struct permissions_topic_rule {
+    AllowDeny_t ad_type;
+    std::set< ::DDS::Security::DomainId_t > domain_list;
+    std::list<permission_topic_ps_rule> topic_ps_rules;
+  };
 
-        ACE_Time_Value interval() const { return interval_; }
+  struct permissions_partition {
+    AllowDeny_t ad_type;
+    std::set< ::DDS::Security::DomainId_t > domain_list;
+    std::list<permission_partition_ps> partition_ps;
+  };
 
-    private:
-        ACE_Time_Value interval_;
-        bool scheduled_;
-        long timer_id_;
-        ACE_Thread_Mutex lock_;
-        ACE_Reactor_Timer_Interface* reactor_;
+  struct permission_grant_rule {
+    std::string grant_name;
+    std::string subject;
+    Validity_t validity;
+    std::string default_permission;
+    std::list<permissions_topic_rule> PermissionTopicRules;
+    std::list<permissions_partition> PermissionPartitions;
+  };
 
-    };
-    RevokePermissionsTimer rp_timer_;
+  typedef std::vector<permission_grant_rule> PermissionGrantRules;
+
+  struct ac_perms {
+    ::DDS::Security::DomainId_t domain_id;
+    GovernanceAccessRules gov_rules;
+    PermissionGrantRules perm_rules;
+    ::DDS::Security::PermissionsToken perm_token;
+    ::DDS::Security::PermissionsCredentialToken perm_cred_token;
+  };
+
+  typedef std::map< ::DDS::Security::PermissionsHandle , ac_perms > ACPermsMap;
+
+  ACPermsMap local_ac_perms;
+
+  typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
+
+  ACIdentityMap local_identity_map;
+
+  class RevokePermissionsTimer : public ACE_Event_Handler {
+  public:
+    RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
+    virtual ~RevokePermissionsTimer();
+    bool start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle);
+    int handle_timeout(const ACE_Time_Value &tv, const void * arg);
+    bool is_scheduled() { return scheduled_; }
+
+  protected:
+    AccessControlBuiltInImpl & impl_;
+
+    ACE_Time_Value interval() const { return interval_; }
+
+  private:
+    ACE_Time_Value interval_;
+    bool scheduled_;
+    long timer_id_;
+    ACE_Thread_Mutex lock_;
+    ACE_Reactor_Timer_Interface* reactor_;
+
+  };
+  RevokePermissionsTimer rp_timer_;
 
   ::CORBA::Long generate_handle();
   ::CORBA::Long load_governance_file(ac_perms *, std::string);

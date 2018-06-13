@@ -485,50 +485,60 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
   ASSERT_STREQ("", ex.message);
 }
 
-//TEST_F(AccessControlTest, check_create_datawriter_default_Success)
-//{
-//    ::DDS::Security::DomainId_t domain_id = 0;
-//    const char * topic_name = "Rectangle";
-//    ::DDS::DataWriterQos qos;
-//    ::DDS::PartitionQosPolicy  partition;
-//    ::DDS::Security::DataTags  data_tag;
-//    ::DDS::Security::SecurityException ex;
-//
-//    ::DDS::Security::PermissionsHandle out_handle =
-//        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
-//
-//    EXPECT_TRUE(get_inst().check_create_datawriter(
-//        out_handle,
-//        domain_id,
-//        topic_name,
-//        qos,
-//        partition,
-//        data_tag,
-//        ex));
-//}
-//
-//TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
-//{
-//    ::DDS::Security::DomainId_t domain_id = 0;
-//    const char * topic_name = "Square";
-//    ::DDS::DataWriterQos qos;
-//    ::DDS::PartitionQosPolicy  partition;
-//    ::DDS::Security::DataTags  data_tag;
-//    ::DDS::Security::SecurityException ex;
-//
-//    ::DDS::Security::PermissionsHandle out_handle =
-//        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
-//
-//    EXPECT_FALSE(get_inst().check_create_datawriter(
-//        out_handle,
-//        domain_id,
-//        topic_name,
-//        qos,
-//        partition,
-//        data_tag,
-//        ex));
-//}
-//
+TEST_F(AccessControlTest, check_create_datawriter_default_Success)
+{
+  ::DDS::Security::DomainId_t domain_id = 0;
+  const char * topic_name = "Rectangle";
+  ::DDS::DataWriterQos qos;
+  ::DDS::PartitionQosPolicy  partition;
+  ::DDS::Security::DataTags  data_tag;
+  ::DDS::Security::SecurityException ex;
+
+  set_up_service_participant();
+  add_property(AccessControlTest::gov_6_p7s_);
+
+  ::DDS::Security::PermissionsHandle out_handle =
+      get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+
+  EXPECT_TRUE(get_inst().check_create_datawriter(
+      out_handle,
+      domain_id,
+      topic_name,
+      qos,
+      partition,
+      data_tag,
+      ex));
+  ASSERT_STREQ("", ex.message);
+}
+
+TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
+{
+    ::DDS::Security::DomainId_t domain_id = 0;
+    const char * topic_name = "Square";
+    ::DDS::DataWriterQos qos;
+    ::DDS::PartitionQosPolicy  partition;
+    ::DDS::Security::DataTags  data_tag;
+    ::DDS::Security::SecurityException ex;
+
+    set_up_service_participant();
+    add_property(AccessControlTest::gov_6_p7s_);
+    add_property(AccessControlTest::perm_date_p7s_);
+
+    ::DDS::Security::PermissionsHandle out_handle =
+        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos, ex);
+
+    partition.name.length(0);
+
+    EXPECT_FALSE(get_inst().check_create_datawriter(
+        out_handle,
+        domain_id,
+        topic_name,
+        qos,
+        partition,
+        data_tag,
+        ex));
+}
+
 TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
@@ -559,7 +569,6 @@ TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
     ex));
 }
 
-//TEST_F(AccessControlTest, check_create_datareader_Success)
 TEST_F(AccessControlTest, check_create_datareader_Success)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
@@ -635,8 +644,6 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
 //
 //    EXPECT_FALSE(get_inst().check_create_topic(
 //        permissions_handle, domain_id, topic_name, tqos, ex));
-//
-//
 //}
 
 TEST_F(AccessControlTest, check_create_datareader_default_Success)

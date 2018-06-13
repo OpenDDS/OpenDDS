@@ -911,8 +911,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 //                CommonUtilities::set_security_error(ex, -1, 0, "Matching rule for topic in deny_rule.");
                 // Start timer here.  
                 if (!rp_timer_.is_scheduled()) {
-                    //ACE_Time_Value timer_length(after_time - cur_utc_time);
-                    ACE_Time_Value timer_length(35);
+                    ACE_Time_Value timer_length(after_time - cur_utc_time);
 
                     if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
                         CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -934,8 +933,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (strcmp(default_value.c_str(), "ALLOW") == 0) {
       // Start timer here.  
       if (!rp_timer_.is_scheduled()) {
-          //ACE_Time_Value timer_length(after_time - cur_utc_time);
-          ACE_Time_Value timer_length(35);
+          ACE_Time_Value timer_length(after_time - cur_utc_time);
 
           if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
               CommonUtilities::set_security_error(ex, -1, 0, "Permissions timer could not be created.");
@@ -1463,6 +1461,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  listener_ptr_ = listener;
   return true;
 }
 
