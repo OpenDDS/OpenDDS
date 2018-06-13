@@ -121,11 +121,11 @@ struct AuthenticationTest : public ::testing::Test
     Property_t idca, pkey, pass, idcert;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:certs/opendds_identity_ca_cert.pem";
+    idca.value = "file:certs/identity/identity_ca_cert.pem";
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:certs/mock_participant_1/opendds_participant_private_key.pem";
+    pkey.value = "file:certs/identity/test_participant_01_private_key.pem";
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -133,7 +133,7 @@ struct AuthenticationTest : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:certs/mock_participant_1/opendds_participant_cert.pem";
+    idcert.value = "file:certs/identity/test_participant_01_cert.pem";
     idcert.propagate = false;
 
     mp1.add_property(idca);
@@ -147,11 +147,11 @@ struct AuthenticationTest : public ::testing::Test
     Property_t idca, pkey, pass, idcert;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:certs/opendds_identity_ca_cert.pem";
+    idca.value = "file:certs/identity/identity_ca_cert.pem";
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:certs/mock_participant_2/opendds_participant_private_key.pem";
+    pkey.value = "file:certs/identity/test_participant_02_private_key.pem";
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -159,7 +159,7 @@ struct AuthenticationTest : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:certs/mock_participant_2/opendds_participant_cert.pem";
+    idcert.value = "file:certs/identity/test_participant_02_cert.pem";
     idcert.propagate = false;
 
     mp2.add_property(idca);
@@ -242,10 +242,10 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
 TEST_F(AuthenticationTest, GetIdentityToken_Success)
 {
   /* From this cmd:  openssl x509 -noout -subject -in certs/opendds_participant_cert.pem */
-  std::string cert_sn("C = US, ST = MO, O = Object Computing (Test Identity CA), CN = Object Computing (Test Identity CA), emailAddress = info@objectcomputing.com");
+  std::string cert_sn("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
 
-  /* Same thing but with certs/opendds_identity_ca_cert.pem */
-  std::string ca_sn("C = US, ST = MO, L = Saint Louis, O = Object Computing (Test Identity CA), CN = Object Computing (Test Iden CA), emailAddress = info@objectcomputing.com");
+  /* Same thing but with certs/identity/identity_ca_cert.pem */
+  std::string ca_sn("C = US, ST = MO, L = Saint Louis, O = Object Computing (Test Identity CA), CN = Object Computing (Test Identity CA), emailAddress = info@objectcomputing.com");
 
   AuthenticationBuiltInImpl auth;
 
@@ -458,8 +458,8 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
 
   DDS::OctetSeq pretend_topic_data1;
   DDS::OctetSeq pretend_topic_data2;
-  fake_topic_data_from_cert("file:certs/mock_participant_1/opendds_participant_cert.pem", pretend_topic_data1);
-  fake_topic_data_from_cert("file:certs/mock_participant_2/opendds_participant_cert.pem", pretend_topic_data2);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_01_cert.pem", pretend_topic_data1);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_02_cert.pem", pretend_topic_data2);
 
   /* Local participant: notice how it is mp2 this time */
   ValidationResult_t r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
@@ -534,8 +534,8 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
 
   DDS::OctetSeq pretend_topic_data1;
   DDS::OctetSeq pretend_topic_data2;
-  fake_topic_data_from_cert("file:certs/mock_participant_1/opendds_participant_cert.pem", pretend_topic_data1);
-  fake_topic_data_from_cert("file:certs/mock_participant_2/opendds_participant_cert.pem", pretend_topic_data2);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_01_cert.pem", pretend_topic_data1);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_02_cert.pem", pretend_topic_data2);
 
   /* Local participant: notice how it is mp2 this time */
   ValidationResult_t r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
@@ -630,8 +630,8 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
 
   DDS::OctetSeq pretend_topic_data1;
   DDS::OctetSeq pretend_topic_data2;
-  fake_topic_data_from_cert("file:certs/mock_participant_1/opendds_participant_cert.pem", pretend_topic_data1);
-  fake_topic_data_from_cert("file:certs/mock_participant_2/opendds_participant_cert.pem", pretend_topic_data2);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_01_cert.pem", pretend_topic_data1);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_02_cert.pem", pretend_topic_data2);
 
   /* Local participant: notice how it is mp2 this time */
   ValidationResult_t r = auth2.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
@@ -735,8 +735,8 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
 
   DDS::OctetSeq pretend_topic_data1;
   DDS::OctetSeq pretend_topic_data2;
-  fake_topic_data_from_cert("file:certs/mock_participant_1/opendds_participant_cert.pem", pretend_topic_data1);
-  fake_topic_data_from_cert("file:certs/mock_participant_2/opendds_participant_cert.pem", pretend_topic_data2);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_01_cert.pem", pretend_topic_data1);
+  fake_topic_data_from_cert("file:certs/identity/test_participant_02_cert.pem", pretend_topic_data2);
 
   /* Local participant: notice how it is mp2 this time */
   ValidationResult_t r = auth2.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);

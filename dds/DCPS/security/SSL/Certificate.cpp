@@ -74,7 +74,7 @@ namespace OpenDDS {
           case URI_PKCS11:
           case URI_UNKNOWN:
           default:
-            fprintf(stderr, "Certificate::Certificate: Error, unsupported URI scheme in cert path '%s'\n", uri.c_str());
+            fprintf(stderr, "Certificate::Certificate: Warning, unsupported URI scheme in cert path '%s'\n", uri.c_str());
             break;
         }
       }
@@ -103,7 +103,7 @@ namespace OpenDDS {
                             depth = X509_STORE_CTX_get_error_depth(validation_ctx);
 
                         fprintf(stderr,
-                                "Certificate::verify: Error '%s' occurred using cert at depth '%d', validation failed.\n",
+                                "Certificate::verify: Warning '%s' occurred using cert at depth '%d', validation failed.\n",
                                 X509_verify_cert_error_string(err),
                                 depth);
 
@@ -120,11 +120,11 @@ namespace OpenDDS {
             }
 
           } else {
-              fprintf(stderr, "Certificate::verify: Error, passed-in CA has not loaded a certificate\n");
+              fprintf(stderr, "Certificate::verify: Warning, passed-in CA has not loaded a certificate\n");
           }
 
         } else {
-            fprintf(stderr, "Certificate::verify: Error, a certificate must be loaded before it can be verified\n");
+            fprintf(stderr, "Certificate::verify: Warning, a certificate must be loaded before it can be verified\n");
         }
 
         return result;
@@ -311,7 +311,7 @@ namespace OpenDDS {
 
               } else {
                 fprintf(stderr,
-                        "Certificate::algorithm: Error, currently RSA-2048 is the only supported algorithm; "
+                        "Certificate::algorithm: Warning, currently RSA-2048 is the only supported algorithm; "
                         "received RSA cert with '%d' bits\n",
                         keylen);
               }
@@ -329,14 +329,14 @@ namespace OpenDDS {
                 }
                 else
                 {
-                    fprintf(stderr, "Certificate::algorithm: Error, only RSA-2048 or EC-prime256v1 are currently supported\n");
+                    fprintf(stderr, "Certificate::algorithm: Warning, only RSA-2048 or EC-prime256v1 are currently supported\n");
                 }
 
                 EC_KEY_free(eckey);
             }
 
           } else {
-              fprintf(stderr, "Certificate::algorithm: Error, failed to get pubkey from X509 cert\n");
+              fprintf(stderr, "Certificate::algorithm: Warning, failed to get pubkey from X509 cert\n");
           }
 
           EVP_PKEY_free(pkey);
@@ -361,7 +361,7 @@ namespace OpenDDS {
 
           if (ferror(fp)) {
               fprintf(stderr,
-                      "LocalAuthCredentialData::load_permissions_file: Error '%s' occured while reading file '%s'\n",
+                      "LocalAuthCredentialData::load_permissions_file: Warning '%s' occured while reading file '%s'\n",
                       std::strerror(errno),
                       path.c_str());
           } else {
@@ -537,11 +537,11 @@ namespace OpenDDS {
             }
 
           } else {
-            fprintf(stderr, "Certificate::deserialize: Error, source OctetSeq contains no data\n");
+            fprintf(stderr, "Certificate::deserialize: Warning, source OctetSeq contains no data\n");
           }
 
         } else {
-          fprintf(stderr, "Certificate::deserialize: Error, an X509 certificate has already been loaded\n");
+          fprintf(stderr, "Certificate::deserialize: Warning, an X509 certificate has already been loaded\n");
         }
 
         return result;

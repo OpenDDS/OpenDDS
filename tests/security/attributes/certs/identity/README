@@ -1,7 +1,0 @@
-# Instructions used to initialize CA :
-
-openssl genrsa -out identity_ca_private_key.pem 2048
-openssl req -config identity_ca_openssl.cnf -new -key identity_ca_private_key.pem -out identity_ca.csr
-openssl x509 -req -days 3650 -in identity_ca.csr -signkey identity_ca_private_key.pem -out identity_ca_cert.pem
-touch index.txt; echo "01" > serial
-

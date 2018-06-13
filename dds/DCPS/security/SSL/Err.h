@@ -15,7 +15,7 @@
 
 
 #define OPENDDS_SSL_LOG_ERR(MSG) do {\
-  std::cerr << "Error '" << ERR_reason_error_string(ERR_get_error()) << "' " << (MSG) << " in file '" << __FILE__ << "' line '" << __LINE__ << "'\n";\
+  std::cerr << "Warning '" << ERR_reason_error_string(ERR_get_error()) << "' " << (MSG) << " in file '" << __FILE__ << "' line '" << __LINE__ << "'\n";\
 } while(0)
 
 

@@ -21,10 +21,10 @@ my $scenario;
 my @gov_files;
 my $pub_cfg_file = "sec_base.ini";
 my $sub_cfg_file = "sec_base.ini";
-my $pub_cert_file = "certs/identity/test_participant_01_cert.pem";
-my $sub_cert_file = "certs/identity/test_participant_02_cert.pem";
-my $pub_key_file = "certs/identity/test_participant_01_private_key.pem";
-my $sub_key_file = "certs/identity/test_participant_02_private_key.pem";
+my $pub_cert_file = "../certs/identity/test_participant_01_cert.pem";
+my $sub_cert_file = "../certs/identity/test_participant_02_cert.pem";
+my $pub_key_file = "../certs/identity/test_participant_01_private_key.pem";
+my $sub_key_file = "../certs/identity/test_participant_02_private_key.pem";
 my @pub_perm_files;
 my @sub_perm_files;
 my @topic_names;
@@ -62,24 +62,24 @@ if (!($scenario eq "")) {
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_on_ec_pub") { #SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve cert for pub)
-    $pub_cert_file = "certs/identity/test_participant_03_cert.pem";
-    $pub_key_file = "certs/identity/test_participant_03_private_key.pem";
+    $pub_cert_file = "../certs/identity/test_participant_03_cert.pem";
+    $pub_key_file = "../certs/identity/test_participant_03_private_key.pem";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_03_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_on_ec_sub") { #SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve certs for sub)
-    $sub_cert_file = "certs/identity/test_participant_04_cert.pem";
-    $sub_key_file = "certs/identity/test_participant_04_private_key.pem";
+    $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
+    $sub_key_file = "../certs/identity/test_participant_04_private_key.pem";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_04_allowall_signed.p7s");
     @topic_names = ("OD_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_on_ec_both") { #SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve certs for both)
-    $pub_cert_file = "certs/identity/test_participant_03_cert.pem";
-    $sub_cert_file = "certs/identity/test_participant_04_cert.pem";
-    $pub_key_file = "certs/identity/test_participant_03_private_key.pem";
-    $sub_key_file = "certs/identity/test_participant_04_private_key.pem";
+    $pub_cert_file = "../certs/identity/test_participant_03_cert.pem";
+    $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
+    $pub_key_file = "../certs/identity/test_participant_03_private_key.pem";
+    $sub_key_file = "../certs/identity/test_participant_04_private_key.pem";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_03_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_04_allowall_signed.p7s");
@@ -108,8 +108,8 @@ if (!($scenario eq "")) {
     $pub_expect = "~16";
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_bad_cert_failure") { #SC1 (join controlled domain) : secure participants with wrong credentials fail to authenticate
-    $pub_key_file = "certs/identity/test_participant_02_private_key.pem"; # This won't match cert (01)
-    $sub_key_file = "certs/identity/test_participant_01_private_key.pem"; # This won't match cert (02)
+    $pub_key_file = "../certs/identity/test_participant_02_private_key.pem"; # This won't match cert (01)
+    $sub_key_file = "../certs/identity/test_participant_01_private_key.pem"; # This won't match cert (02)
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
@@ -266,8 +266,8 @@ foreach my $gov_file (@gov_files) {
         $pub_opts .= " -DCPSConfigFile $pub_cfg_file";
         $sub_opts .= " -DCPSConfigFile $sub_cfg_file";
 
-        $pub_opts .= " -IdentityCA certs/identity/identity_ca_cert.pem";
-        $sub_opts .= " -IdentityCA certs/identity/identity_ca_cert.pem";
+        $pub_opts .= " -IdentityCA ../certs/identity/identity_ca_cert.pem";
+        $sub_opts .= " -IdentityCA ../certs/identity/identity_ca_cert.pem";
 
         $pub_opts .= " -Identity $pub_cert_file";
         $sub_opts .= " -Identity $sub_cert_file";
@@ -275,8 +275,8 @@ foreach my $gov_file (@gov_files) {
         $pub_opts .= " -PrivateKey $pub_key_file";
         $sub_opts .= " -PrivateKey $sub_key_file";
 
-        $pub_opts .= " -PermissionsCA certs/permissions/permissions_ca_cert.pem";
-        $sub_opts .= " -PermissionsCA certs/permissions/permissions_ca_cert.pem";
+        $pub_opts .= " -PermissionsCA ../certs/permissions/permissions_ca_cert.pem";
+        $sub_opts .= " -PermissionsCA ../certs/permissions/permissions_ca_cert.pem";
 
         $pub_opts .= " -Permissions $pub_perm_file";
         $sub_opts .= " -Permissions $sub_perm_file";

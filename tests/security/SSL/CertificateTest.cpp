@@ -13,56 +13,54 @@ class CertificateTest : public ::testing::Test
 {
 public:
   CertificateTest() :
-    ca_("file:../certs/opendds_identity_ca_cert.pem"),
-	ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
-		"MIID4DCCAsgCCQC6Fm9aR8tq2zANBgkqhkiG9w0BAQsFADCBsTELMAkGA1UEBhMC\n"
-		"VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEsMCoGA1UECgwj\n"
-		"T2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVudGl0eSBDQSkxKDAmBgNVBAMMH09i\n"
-		"amVjdCBDb21wdXRpbmcgKFRlc3QgSWRlbiBDQSkxJzAlBgkqhkiG9w0BCQEWGGlu\n"
-		"Zm9Ab2JqZWN0Y29tcHV0aW5nLmNvbTAeFw0xODAyMjIxNDU3NThaFw0yODAyMjAx\n"
-		"NDU3NThaMIGxMQswCQYDVQQGEwJVUzELMAkGA1UECAwCTU8xFDASBgNVBAcMC1Nh\n"
-		"aW50IExvdWlzMSwwKgYDVQQKDCNPYmplY3QgQ29tcHV0aW5nIChUZXN0IElkZW50\n"
-		"aXR5IENBKTEoMCYGA1UEAwwfT2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVuIENB\n"
-		"KTEnMCUGCSqGSIb3DQEJARYYaW5mb0BvYmplY3Rjb21wdXRpbmcuY29tMIIBIjAN\n"
-		"BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA13849bph3Hd893P2JADbJ / a + ITlL\n"
-		"9RiCteEVJapvfZMTiPc7sSebLFCo3 / 3RuwszDQi72w6D0ksCJDc4HgNav5bvXCdW\n"
-		"6mZx6F08qxUsGTLmnSxCaq / jJloF3BQm39skg1E8P6KwB904sXj / MPARunk1bfqg\n"
-		"0ZMRs + uRyUcNpKK1vWaHxo0TLXxgcK8KdLsFZBCoNNEJ51WTjuV + 35dBQhax53z +\n"
-		"W3mkEuxpiG + Gu5ONIszl8 / nMcaq6TeJj8R + LPxaLZhrTlCXYaeal1dnpWivHC4kq\n"
-		"1Vj8JdMwmmA0uNF0m9mgtru9cNYdFHaGoMSrFW3boyb6M7W8e5GnKtVsFQIDAQAB\n"
-		"MA0GCSqGSIb3DQEBCwUAA4IBAQC1L + sl + bQnkCq7 / dn4oJLajCPxuwbFslv48yyX\n"
-		"rF / BPH5Ntef / 25fWqWaehY2Y5UVr37TeSntGMqOzJmfQ10mmX3eHcCsdlK3yediD\n"
-		"w1Uzocao6sPnaCyHVvlsGxaI42F3b + 6VFB7gyUBfYYDUZx / +y8tFTeqcISXmu9 / 0\n"
-		"MW8Q7crfHG / VHx7V8NRcqor3z21p3popBSVoUoWAFYITsumYnds19Z1DqGpsKxtF\n"
-		"KEC4MDmHz1OdXYJFB1cJlU1J00p5FtfH33crq / JLXoQyfNUtIX57a35OT1v9NqjV\n"
-		"zTgZIlsjwL4wEVprsRXQFs7u7hDLlnSXslddgnp51bXKmQpp\n"
-		"-----END CERTIFICATE-----"),
-	  signed_("file:../certs/mock_participant_1/opendds_participant_cert.pem"),
-	  signed_data_("data:,-----BEGIN CERTIFICATE-----\n"
-		  "MIIDxjCCAq4CAQEwDQYJKoZIhvcNAQELBQAwgbExCzAJBgNVBAYTAlVTMQswCQYD\n"
-		  "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxLDAqBgNVBAoMI09iamVjdCBD\n"
-		  "b21wdXRpbmcgKFRlc3QgSWRlbnRpdHkgQ0EpMSgwJgYDVQQDDB9PYmplY3QgQ29t\n"
-		  "cHV0aW5nIChUZXN0IElkZW4gQ0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVj\n"
-		  "dGNvbXB1dGluZy5jb20wHhcNMTgwMjIyMTU0MzIwWhcNMjgwMjIwMTU0MzIwWjCB\n"
-		  "nzELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMSwwKgYDVQQKDCNPYmplY3QgQ29t\n"
-		  "cHV0aW5nIChUZXN0IElkZW50aXR5IENBKTEsMCoGA1UEAwwjT2JqZWN0IENvbXB1\n"
-		  "dGluZyAoVGVzdCBJZGVudGl0eSBDQSkxJzAlBgkqhkiG9w0BCQEWGGluZm9Ab2Jq\n"
-		  "ZWN0Y29tcHV0aW5nLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n"
-		  "AMUg7RGT5vvBcMSE + 15 / 8OsqaBikNA5lP9RBsgmjihemn3ldMPON1Rr8kn8ezhxk\n"
-		  "vw / L1RwpDzLldRixuO8dY44HhSyi5cIi3MsfS4yug6dy62Nh00ZblOBNZU7ipcvz\n"
-		  "0sOYhdnlzQQ0qAuziq54pe6uArTaOgS08ab6TFzggxTpFa0FT0tpX6KLjdPwDjMF\n"
-		  "+ T2y2M8ZUJnCofpmWfrusM4qNh39ArcSNsD6WqaYyA07sul5gBzkXspeY41Gr7Gl\n"
-		  "LFUquaTtERH9EVify + pvdnXYIcBc9G6ez21g2tgN2SGFJ6kTgcc5t4gLINPr9p3x\n"
-		  "GOTjHR9CDj1fsGqCWuiiq2cCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAxT6JWPBo\n"
-		  "mKALWJgyfo / uGwq3d4MOZpgIRF96094lHs6HJhtu8tSL4gOLyJAXdSUbAyDrEFLt\n"
-		  "grDXVEJs1uUIA0Kw8dZp3dE / fLZUO3bsLZK1zJG9I / 5BSGJNdgm6ThLfHZ6Lh7y3\n"
-		  "IFmglZI5H8iE3sa9w9FVlS0oxgJVdPIgMLNakjdnGeIOHKT4I / EJh00sbAOH + ao +\n"
-		  "bKBM + XU2zeDBex2sFEHLIcqpF07DSQw / twzT4TvV / mOcSX8NcLkxMu / 5fEvh6n3l\n"
-		  "BhJtym57Sl6WN / CtSxBcC3it3ZGjNeeOadQdHV3mDn6xRJzvbP7kxM10L8rUeAPL\n"
-		  "WAzIXoHQIBML4w ==\n"
-		  "-----END CERTIFICATE-----"),
-      signed_ec_("file:../certs/ecdsa/opendds_participant_cert.pem"),
-	  not_signed_("file:../certs/opendds_not_signed.pem")
+    ca_("file:../certs/identity/identity_ca_cert.pem"),
+    ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
+      "MIID6DCCAtACCQCSMMZ5KQ7ffTANBgkqhkiG9w0BAQsFADCBtTELMAkGA1UEBhMC\n"
+      "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEsMCoGA1UECgwj\n"
+      "T2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVudGl0eSBDQSkxLDAqBgNVBAMMI09i\n"
+      "amVjdCBDb21wdXRpbmcgKFRlc3QgSWRlbnRpdHkgQ0EpMScwJQYJKoZIhvcNAQkB\n"
+      "FhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wHhcNMTgwNjEzMDQxMTAzWhcNMjgw\n"
+      "NjEwMDQxMTAzWjCBtTELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQH\n"
+      "DAtTYWludCBMb3VpczEsMCoGA1UECgwjT2JqZWN0IENvbXB1dGluZyAoVGVzdCBJ\n"
+      "ZGVudGl0eSBDQSkxLDAqBgNVBAMMI09iamVjdCBDb21wdXRpbmcgKFRlc3QgSWRl\n"
+      "bnRpdHkgQ0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5j\n"
+      "b20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDR3CBzI5ch2hTdvpFD\n"
+      "U3bsa90po9VqyHdT3GTvk0njWD6WUcA2YUptG+i1MX9vwEtjsxHlwxpMp41J/TNn\n"
+      "8kWe770zBW8lhnKfzJfAENnqWso3j01v/CUPERqxms6NYHJQucGZW11Y4vthGURd\n"
+      "XGDxeiRyDVrk87G+cv5rFmPDtLEqkgSoOpJkLMOUXfWFzO/v/ZP66vhNtNu7iwc8\n"
+      "kyTQPHoWS8P7+gUu3dwr0sHUrpRffssBaPrSKxPxlXrtll1x4vPoMHDTddHweJWy\n"
+      "1tq5MMTve7slG44YoMbQcAYSE5m6YMHx0Ht81jWF+v/OMW7iZY2Pvv9n9A4wS3p9\n"
+      "kkFZAgMBAAEwDQYJKoZIhvcNAQELBQADggEBADM5PKagItR5cStb99lqukz8uOx2\n"
+      "3rexro5FITdLSEgANu4uaB4rosdL2/L8Mft6TD2HVh5Wl5uwhDxjnLTGeVGQd1HN\n"
+      "bvEzWyFjAfwzoRptTZiqsZhuQgSbtEcdUotdx7GbIc/xWNMAQ6t+ruRbzFDDdq4f\n"
+      "7Ob7iAVWXUV0Sm4R7bgVCIiIKztSiYoQOwiLjV4DmNGcCFs4jbLXFPQWrqzTpAPB\n"
+      "cPsocF+pCa71fQnlW8L9cyn2E/6zJkzj4aYZWwc2KVJm5JBuaIIcu1oeI5IdZ5sl\n"
+      "w5GeIeP0nXVHuhQf4mWrMi+KvQhorQEGftxnDhS0TWWEFVOUigRao7blBXY=\n"
+      "-----END CERTIFICATE-----"),
+    signed_("file:../certs/identity/test_participant_01_cert.pem"),
+    signed_data_("data:,-----BEGIN CERTIFICATE-----\n"
+      "MIIDhjCCAm4CAQEwDQYJKoZIhvcNAQELBQAwgbUxCzAJBgNVBAYTAlVTMQswCQYD\n"
+      "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxLDAqBgNVBAoMI09iamVjdCBD\n"
+      "b21wdXRpbmcgKFRlc3QgSWRlbnRpdHkgQ0EpMSwwKgYDVQQDDCNPYmplY3QgQ29t\n"
+      "cHV0aW5nIChUZXN0IElkZW50aXR5IENBKTEnMCUGCSqGSIb3DQEJARYYaW5mb0Bv\n"
+      "YmplY3Rjb21wdXRpbmcuY29tMB4XDTE4MDYxMzA0MTMxNloXDTI4MDYxMDA0MTMx\n"
+      "NlowXDELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM\n"
+      "GEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZDEVMBMGA1UEAwwMT3p6aWUgT3ptYW5u\n"
+      "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsnrguqg0qT/phhwsT7I0\n"
+      "QfqK3GdYtgdjzk1y2qkMvsAACSwUxqEDxwQq3onpZ2wOSKfCK2dnAtj4l39zA7Pk\n"
+      "Jg3syE98/cFxWLDznjvti73xXoHJOZ7q/V2d6/jRFixYWHLa2+nUJ6gCcvC9Z+Kk\n"
+      "fxfv5QHw4/y6WKzG+f8+wvThT2x/+80n62MvTpyGtOV1TP2bhEqhgrxQHJkv3N4K\n"
+      "rnC+niiy4ShHXytwnM8tell3IBFmuGIrmGn1OI9RiljjSt2nKc8vAbxcvnifjk15\n"
+      "PIwRlVXk1jVNu1FmWlTxAMd5VumyfjmZzk/1t0n8xDAerDfvmr33ycDmo9h7OBnW\n"
+      "bQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBH9Cdn8L93xmre0hTkDAeq08NEBIll\n"
+      "Cf7BpreOg7tDoT59AqomBNEP5X9yl/WFI0ywcTsPqKAIIyQVmFRf4fM5PxLwn3Ii\n"
+      "YeJVBhmZ7+6Ul5h0Oxtjbnrtl9gb2Pu4EFDh1ulCUow9p/H5ceNk2jGtogEcodzJ\n"
+      "9U1WpJDneVqLw9GPlSiOaG22kQ8z+3Bhxgx5zJXa9gxzVwPQ1DfTYF2004UYeOk+\n"
+      "1Duu88crRp00ghesoFKx5OURjTrImIo5cQEazVQ7sX3BAki3egwpaKXNiWQ7VIuZ\n"
+      "NFqBYfNRpivWQhcdG7g0MTK/AF6ddad6GdaknYlmBhlYpSd/K9DYIkMx\n"
+      "-----END CERTIFICATE-----"),
+    signed_ec_("file:../certs/identity/test_participant_03_cert.pem"),
+    not_signed_("file:../certs/identity/not_signed.pem")
   {
 
   }
@@ -86,12 +84,12 @@ TEST_F(CertificateTest, Validate_Success)
 
 TEST_F(CertificateTest, Validate_Data_Success)
 {
-	ASSERT_EQ(signed_.validate(ca_data_), X509_V_OK);
+  ASSERT_EQ(signed_.validate(ca_data_), X509_V_OK);
 }
 
 TEST_F(CertificateTest, Validate_Failure_LoadingWrongKeyType)
 {
-  Certificate wrong_key_type("file:../certs/mock_participant_1/opendds_participant_private_key.pem");
+  Certificate wrong_key_type("file:../certs/identity/test_participant_01_private_key.pem");
   ASSERT_NE(wrong_key_type.validate(ca_), X509_V_OK);
 }
 
@@ -132,7 +130,7 @@ TEST_F(CertificateTest, Algorithm_EC_Prime_Success)
 TEST_F(CertificateTest, SubjectNameToString_Success)
 {
   /* From this cmd:  openssl x509 -noout -subject -in ../certs/opendds_participant_cert.pem */
-  std::string expected("C = US, ST = MO, O = Object Computing (Test Identity CA), CN = Object Computing (Test Identity CA), emailAddress = info@objectcomputing.com");
+  std::string expected("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
   std::string name;
   ASSERT_EQ(signed_.subject_name_to_str(name), 0 /* success! */);
   ASSERT_EQ(name, expected);

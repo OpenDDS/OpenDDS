@@ -14,84 +14,85 @@ class PrivateKeyTest : public ::testing::Test
 {
 public:
   PrivateKeyTest() :
-    ca_("file:../certs/opendds_identity_ca_cert.pem"),
-	ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
-		  "MIID4DCCAsgCCQC6Fm9aR8tq2zANBgkqhkiG9w0BAQsFADCBsTELMAkGA1UEBhMC\n"
-		  "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEsMCoGA1UECgwj\n"
-		  "T2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVudGl0eSBDQSkxKDAmBgNVBAMMH09i\n"
-		  "amVjdCBDb21wdXRpbmcgKFRlc3QgSWRlbiBDQSkxJzAlBgkqhkiG9w0BCQEWGGlu\n"
-		  "Zm9Ab2JqZWN0Y29tcHV0aW5nLmNvbTAeFw0xODAyMjIxNDU3NThaFw0yODAyMjAx\n"
-		  "NDU3NThaMIGxMQswCQYDVQQGEwJVUzELMAkGA1UECAwCTU8xFDASBgNVBAcMC1Nh\n"
-		  "aW50IExvdWlzMSwwKgYDVQQKDCNPYmplY3QgQ29tcHV0aW5nIChUZXN0IElkZW50\n"
-		  "aXR5IENBKTEoMCYGA1UEAwwfT2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVuIENB\n"
-		  "KTEnMCUGCSqGSIb3DQEJARYYaW5mb0BvYmplY3Rjb21wdXRpbmcuY29tMIIBIjAN\n"
-		  "BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA13849bph3Hd893P2JADbJ / a + ITlL\n"
-		  "9RiCteEVJapvfZMTiPc7sSebLFCo3 / 3RuwszDQi72w6D0ksCJDc4HgNav5bvXCdW\n"
-		  "6mZx6F08qxUsGTLmnSxCaq / jJloF3BQm39skg1E8P6KwB904sXj / MPARunk1bfqg\n"
-		  "0ZMRs + uRyUcNpKK1vWaHxo0TLXxgcK8KdLsFZBCoNNEJ51WTjuV + 35dBQhax53z +\n"
-		  "W3mkEuxpiG + Gu5ONIszl8 / nMcaq6TeJj8R + LPxaLZhrTlCXYaeal1dnpWivHC4kq\n"
-		  "1Vj8JdMwmmA0uNF0m9mgtru9cNYdFHaGoMSrFW3boyb6M7W8e5GnKtVsFQIDAQAB\n"
-		  "MA0GCSqGSIb3DQEBCwUAA4IBAQC1L + sl + bQnkCq7 / dn4oJLajCPxuwbFslv48yyX\n"
-		  "rF / BPH5Ntef / 25fWqWaehY2Y5UVr37TeSntGMqOzJmfQ10mmX3eHcCsdlK3yediD\n"
-		  "w1Uzocao6sPnaCyHVvlsGxaI42F3b + 6VFB7gyUBfYYDUZx / +y8tFTeqcISXmu9 / 0\n"
-		  "MW8Q7crfHG / VHx7V8NRcqor3z21p3popBSVoUoWAFYITsumYnds19Z1DqGpsKxtF\n"
-		  "KEC4MDmHz1OdXYJFB1cJlU1J00p5FtfH33crq / JLXoQyfNUtIX57a35OT1v9NqjV\n"
-		  "zTgZIlsjwL4wEVprsRXQFs7u7hDLlnSXslddgnp51bXKmQpp\n"
-		  "-----END CERTIFICATE-----"),
-	pubkey_("file:../certs/mock_participant_1/opendds_participant_cert.pem"),
-	pubkey_data_("data:,-----BEGIN CERTIFICATE-----\n"
-		"MIIDxjCCAq4CAQEwDQYJKoZIhvcNAQELBQAwgbExCzAJBgNVBAYTAlVTMQswCQYD\n"
-		"VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxLDAqBgNVBAoMI09iamVjdCBD\n"
-		"b21wdXRpbmcgKFRlc3QgSWRlbnRpdHkgQ0EpMSgwJgYDVQQDDB9PYmplY3QgQ29t\n"
-		"cHV0aW5nIChUZXN0IElkZW4gQ0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVj\n"
-		"dGNvbXB1dGluZy5jb20wHhcNMTgwMjIyMTU0MzIwWhcNMjgwMjIwMTU0MzIwWjCB\n"
-		"nzELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMSwwKgYDVQQKDCNPYmplY3QgQ29t\n"
-		"cHV0aW5nIChUZXN0IElkZW50aXR5IENBKTEsMCoGA1UEAwwjT2JqZWN0IENvbXB1\n"
-		"dGluZyAoVGVzdCBJZGVudGl0eSBDQSkxJzAlBgkqhkiG9w0BCQEWGGluZm9Ab2Jq\n"
-		"ZWN0Y29tcHV0aW5nLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n"
-		"AMUg7RGT5vvBcMSE + 15 / 8OsqaBikNA5lP9RBsgmjihemn3ldMPON1Rr8kn8ezhxk\n"
-		"vw / L1RwpDzLldRixuO8dY44HhSyi5cIi3MsfS4yug6dy62Nh00ZblOBNZU7ipcvz\n"
-		"0sOYhdnlzQQ0qAuziq54pe6uArTaOgS08ab6TFzggxTpFa0FT0tpX6KLjdPwDjMF\n"
-		"+ T2y2M8ZUJnCofpmWfrusM4qNh39ArcSNsD6WqaYyA07sul5gBzkXspeY41Gr7Gl\n"
-		"LFUquaTtERH9EVify + pvdnXYIcBc9G6ez21g2tgN2SGFJ6kTgcc5t4gLINPr9p3x\n"
-		"GOTjHR9CDj1fsGqCWuiiq2cCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAxT6JWPBo\n"
-		"mKALWJgyfo / uGwq3d4MOZpgIRF96094lHs6HJhtu8tSL4gOLyJAXdSUbAyDrEFLt\n"
-		"grDXVEJs1uUIA0Kw8dZp3dE / fLZUO3bsLZK1zJG9I / 5BSGJNdgm6ThLfHZ6Lh7y3\n"
-		"IFmglZI5H8iE3sa9w9FVlS0oxgJVdPIgMLNakjdnGeIOHKT4I / EJh00sbAOH + ao +\n"
-		"bKBM + XU2zeDBex2sFEHLIcqpF07DSQw / twzT4TvV / mOcSX8NcLkxMu / 5fEvh6n3l\n"
-		"BhJtym57Sl6WN / CtSxBcC3it3ZGjNeeOadQdHV3mDn6xRJzvbP7kxM10L8rUeAPL\n"
-		"WAzIXoHQIBML4w ==\n"
-		"-----END CERTIFICATE----- "),
-    pubkey_ec_("file:../certs/ecdsa/opendds_participant_cert.pem"),
-    privkey_("file:../certs/mock_participant_1/opendds_participant_private_key.pem"),
-	privkey_data_("data:,-----BEGIN RSA PRIVATE KEY-----\n"
-		"MIIEpAIBAAKCAQEAxSDtEZPm + 8FwxIT7Xn / w6ypoGKQ0DmU / 1EGyCaOKF6afeV0w\n"
-		"843VGvySfx7OHGS / D8vVHCkPMuV1GLG47x1jjgeFLKLlwiLcyx9LjK6Dp3LrY2HT\n"
-		"RluU4E1lTuKly / PSw5iF2eXNBDSoC7OKrnil7q4CtNo6BLTxpvpMXOCDFOkVrQVP\n"
-		"S2lfoouN0 / AOMwX5PbLYzxlQmcKh + mZZ + u6wzio2Hf0CtxI2wPpappjIDTuy6XmA\n"
-		"HOReyl5jjUavsaUsVSq5pO0REf0RWJ / L6m92ddghwFz0bp7PbWDa2A3ZIYUnqROB\n"
-		"xzm3iAsg0 + v2nfEY5OMdH0IOPV + waoJa6KKrZwIDAQABAoIBAEF5ESRAcnx1oEW1\n"
-		"QWP + rH7 / A7oDd8K8QDn4Y / Ctn6UBU4BUwnhySDCBaQrNqXlmwMq3UZ3byU + HRKAi\n"
-		"DyFkKne26bWMmTEksR7J0ybzo4iPM707dZetvUHOkvJjdtvJrNwIIZTgrXpTHulc\n"
-		"BZizO7GNnBqDTLfZfVWPVqOWchMUTW19GKdpIesYEbbmbcJQqV9QdUKOJ041j / Lz\n"
-		"F9jagbL7AXxE + y670BPHBicsH / s9PYKv1XcgfX + G + KyAVNNPgqr5AgLaabbYcb6o\n"
-		"Z + 6q3j0HIxTIkA / Z3HZ / HEyjjdjBPn47BSRlA6RTXyHQXwBOx2v4I2cs / HjEtmQQ\n"
-		"xlklK7ECgYEA + b5aUs872qiA / aqqSuXI + LbvwQrVzs3qgI / 4jdH8ObMmsTeNyAc4\n"
-		"pEEPQOPrS5u + Bk9UgmtRAuJBF1dS / F952dmqIysv / B9xCa61Qm3hSF / Bp7jXmMoa\n"
-		"HQBJcyA0JEtMrdNXP / gog3u42jmH + uuv01tC269vdgdEbF84aXMOapkCgYEAyhEl\n"
-		"EB6uVTyJpGPvLti6ye64B + OmE7Kwb4CS / +ufG + 3a80LqubJL1PQmfn2OM0M4iOKT\n"
-		"cqIKOyb + nHAuIvu++xfVERKyOEYzWHvMwF + 4Twqm2jwSqtL2kAJsxLDyz2yzVuA4\n"
-		"V5jS8MiOBxSFlhj0NJrWX//vuAEG/POxyYsthf8CgYEAolNUWAC0kbH2bWpRV281\n"
-		"ils1SI7nW4zBwCBT2LJEs6g7HPLT59Cxwyk6Zd3 + oN0wzN8hOcfRFwPCdQ5gNQNF\n"
-		"qxBsIoG + paw2B6oTzIKo7Ca5M2 / USk4KXRFDrF2hJnn + 8 / iq / Dwq8RMomkbMmI46\n"
-		"cTEfKrVDyD5 + / cWCYB / VnfkCgYBqqkA5USjPn8Q8vfANd6SqYdRNfdM2RLY0Ndfj\n"
-		"NlroIFfa37EOU1sKT9NeJCMDVnGqeIhDE9x4uy3eIK2KFAANhdgYShk / 8Xa7N6au\n"
-		"yhh9yO6o9tsXx4MWI + GMtqeF7SiCLJwxSV / YcNXgUOnvgL6wYifVx0GgjRJGRtHL\n"
-		"xSdDuwKBgQCqYKLAsI5nDKUoyUunoaCi51RZFlhrWO4fLA / tCGugmx4 / et06x1s4\n"
-		"9j1LwufwEDDgdY5M34PUeMjA980b8OiESXE2IfoaLiZEqANI6vQ6dRl / KMfGWUY6\n"
-		"EMUPFMlvTkIa38Nyutkth / P / rZZiaBapEkb / mtclm1ra4nDP0o1TqA == \n"
-		"-----END RSA PRIVATE KEY----- "),
-    privkey_ec_("file:../certs/ecdsa/private_key.pem"),
+    ca_("file:../certs/identity/identity_ca_cert.pem"),
+    ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
+      "MIIEJDCCAwwCCQDpnuwIVmSK5jANBgkqhkiG9w0BAQsFADCB0zELMAkGA1UEBhMC\n"
+      "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczE7MDkGA1UECgwy\n"
+      "T2JqZWN0IENvbXB1dGluZyAoU2VjdXJpdHkgQXR0cmlidXRlcyBJZGVudGl0eSBD\n"
+      "QSkxOzA5BgNVBAMMMk9iamVjdCBDb21wdXRpbmcgKFNlY3VyaXR5IEF0dHJpYnV0\n"
+      "ZXMgSWRlbnRpdHkgQ0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1\n"
+      "dGluZy5jb20wHhcNMTgwNDI1MTkwODIwWhcNMjgwNDIyMTkwODIwWjCB0zELMAkG\n"
+      "A1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczE7MDkG\n"
+      "A1UECgwyT2JqZWN0IENvbXB1dGluZyAoU2VjdXJpdHkgQXR0cmlidXRlcyBJZGVu\n"
+      "dGl0eSBDQSkxOzA5BgNVBAMMMk9iamVjdCBDb21wdXRpbmcgKFNlY3VyaXR5IEF0\n"
+      "dHJpYnV0ZXMgSWRlbnRpdHkgQ0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVj\n"
+      "dGNvbXB1dGluZy5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCg\n"
+      "Nxm9DYJoHz9cmiZX8+4opxXX84aSWTRk2/bjKi7BjXlgf8yPiA8HnabTn2SiiA84\n"
+      "SN68BUXuVhZKn2H7oKa68qMvcdEIDVXZiRVOSn8YTDYVS7xFP5PWfhQb0Z8FLy26\n"
+      "K4GdMYB3Ou9ba1c9DG5AA4VcdPG41k/8rnAIWdXVlaxR+NKTCivFRxoDAoO+IB3v\n"
+      "ONpZgkf35jh9Wlc79WcjWgOSbpk6kVDnaMKxEdlDAFyGqYTdzF+DlE5UNpK4wjWv\n"
+      "34CYHJBYPDIe1ctDizQ3ydzfViO0IyV++obJwV5FcduByygXb5CFnNRhUyppbQkh\n"
+      "CkKDQMu8W93i9KecD7WJAgMBAAEwDQYJKoZIhvcNAQELBQADggEBACyu2mOP4DKN\n"
+      "g43ZbDwPjMufHYGa8lZ8AT87oMGhoYH68ELqN2tIF3XoS9G02EJnCpGNi3RSM/yu\n"
+      "Ov4UE6katTrmiSzmD43I55lvzslPxajKOL9OWiEoTcRMUyw3EW5tEQQHNQHb+Ac4\n"
+      "j+HCqBeawHOmEx07OXfoT7TvI5jcaUzs2iRBCDliO5EuwqFJj578sYRDI5FbM+xw\n"
+      "AT++K8uwXx1wRiSxZMMAPnwGFLhplLKh+jvO/l1hmhDR3DVdzqJ4cfjX1j8A0Xat\n"
+      "LULdD3nLP7M1yNJ0HE7/eXCTWgw5dBLik6Ig4d7QjWVa4osvPz3m4frCB8d2lkRr\n"
+      "a2FBDC7mCEo=\n"
+      "-----END CERTIFICATE-----"),
+    pubkey_("file:../certs/identity/test_participant_01_cert.pem"),
+    pubkey_data_("data:,-----BEGIN CERTIFICATE-----\n"
+      "MIIDpDCCAowCAQEwDQYJKoZIhvcNAQELBQAwgdMxCzAJBgNVBAYTAlVTMQswCQYD\n"
+      "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxOzA5BgNVBAoMMk9iamVjdCBD\n"
+      "b21wdXRpbmcgKFNlY3VyaXR5IEF0dHJpYnV0ZXMgSWRlbnRpdHkgQ0EpMTswOQYD\n"
+      "VQQDDDJPYmplY3QgQ29tcHV0aW5nIChTZWN1cml0eSBBdHRyaWJ1dGVzIElkZW50\n"
+      "aXR5IENBKTEnMCUGCSqGSIb3DQEJARYYaW5mb0BvYmplY3Rjb21wdXRpbmcuY29t\n"
+      "MB4XDTE4MDQyNTE5MDkwNVoXDTI4MDQyMjE5MDkwNVowXDELMAkGA1UEBhMCQVUx\n"
+      "EzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoMGEludGVybmV0IFdpZGdpdHMg\n"
+      "UHR5IEx0ZDEVMBMGA1UEAwwMT3p6aWUgT3ptYW5uMIIBIjANBgkqhkiG9w0BAQEF\n"
+      "AAOCAQ8AMIIBCgKCAQEAxo3qIy0JSC9DmlenQVMXdcstrwfVmidkjPH6LNdMlxL3\n"
+      "ICHRBKGrIYh/Z67o0OEMQe4hnCoh4YH8I/yY9SAVztRUUvj9n5+41rPw7a4S18eI\n"
+      "qdGH8QMSiuGIPCXm/QrzWaltp/guHylPIruqp60knHC3L3b58MN1Di8efySEoa0z\n"
+      "FXbAc1GBhqncJ66M5qvZxGZfI+IJboJ3kp6TExP91SjXAbw5oIX11HOSKo8GghL8\n"
+      "6rleP5Uk0aPjGqaPUsGb0XYBu6OtcrF3AtTtuRNX45AyTc+ccK671H7n3I1+zpNd\n"
+      "Fd1lnN0LayE6ZIr+XmMCV5kr5anl8qi7GbWXZ/HkFwIDAQABMA0GCSqGSIb3DQEB\n"
+      "CwUAA4IBAQAGJow4WQl7MiJjeEI8Q9G6MKNmYCqBwP/C1J+qwLoLaogtLSa+3+58\n"
+      "czw+6S+yepXbsHqh7BKeew4fd6kR8JqliI1PC3y9DZE2dK8/fmzMZKK7sDosRP+p\n"
+      "G9ZNz9S0Ih5Un1OA37o2iIU70usR5f+qza7PiNwV1FDRBCDPjUR4V8JML+Nlgg8u\n"
+      "MMT1u51S23eps00HOskkjyUkDsTHyGpKwZsbFHZ1nYr8/O3caXpK94d8UiV+yPYH\n"
+      "9AdjUsAs4dBaNa1tK0vdJ0vqf7kRoHqPw511+1K4XTpca9cTwCVfeh0h4nNOpeRg\n"
+      "xEKmvR/EewryBDJPaU31JQdVyqlEMtgm\n"
+      "-----END CERTIFICATE-----"),
+    pubkey_ec_("file:../certs/identity/test_participant_03_cert.pem"),
+    privkey_("file:../certs/identity/test_participant_01_private_key.pem"),
+    privkey_data_("data:,-----BEGIN RSA PRIVATE KEY-----\n"
+      "MIIEpQIBAAKCAQEAxo3qIy0JSC9DmlenQVMXdcstrwfVmidkjPH6LNdMlxL3ICHR\n"
+      "BKGrIYh/Z67o0OEMQe4hnCoh4YH8I/yY9SAVztRUUvj9n5+41rPw7a4S18eIqdGH\n"
+      "8QMSiuGIPCXm/QrzWaltp/guHylPIruqp60knHC3L3b58MN1Di8efySEoa0zFXbA\n"
+      "c1GBhqncJ66M5qvZxGZfI+IJboJ3kp6TExP91SjXAbw5oIX11HOSKo8GghL86rle\n"
+      "P5Uk0aPjGqaPUsGb0XYBu6OtcrF3AtTtuRNX45AyTc+ccK671H7n3I1+zpNdFd1l\n"
+      "nN0LayE6ZIr+XmMCV5kr5anl8qi7GbWXZ/HkFwIDAQABAoIBAQCwfIJKpARlGkXf\n"
+      "0dvEL+RheqjvtGoD7NHuikOSSgk1G9F3yTcuA7nGQ7rjYVBmIjOwAsfzNGwLM2v4\n"
+      "XNVkxRE9V/RgEBv4H5O/nBAiZCExlZV/RNStwMphkhhzRklsUKh/4R6sN+hfIGvL\n"
+      "9r247yjkuTfKw9lkTYglhHJ6Fu6heW4fOMY2jFOHwhgw1YfuSZYPWc2WgC20XM3n\n"
+      "Tye7LAOqwBq5lyYNXLGj39GLRHrX3k1a+Zy4uQe28yTgR+/9GmnkGDKkbk0ccV2v\n"
+      "jAGF9Eer9y8rYD+6EqsMh4MycYDvHHSUn9wVHXP4T96s2i0+2aue9rGUKlmvZDXE\n"
+      "z3BNEFmBAoGBAOpHjBbawp9ZTLfqT4TO0fnG/9nJsOIUSvqYWEHv6Iwit7M8f7kO\n"
+      "PV/EZZ50ZZngjleMziQUiWocJQWScYf0Y6oM4regpnmtnQ0PNXZ07+3Jk38qEi5O\n"
+      "dPdCPjW7ATpGGrDrjck3gy3W+2pBGPX/1Z1sdvPVMHP0R7s3cVw7Q29BAoGBANj2\n"
+      "dR85s8Rpe+L2WdaUahZfo3PfoaIZxHHPdkVZfQWxAGOhTDOOy5pjkEJw3OZ4Z+L1\n"
+      "8BSJF4OHuMdJ/AeCUm9WbZkS9Lj9VU3n0f/VaqqHrpNxcIB61kymYuwfaLfK5hdZ\n"
+      "i/6MyBmTO/0Fn8oBT9zu0KKEFGVeegI2gZNA9tVXAoGBAN4W6z9zLBKBRhAHKFC+\n"
+      "+yCsvDgKUgtPr3B14RzIwAuwkbJxBKc6T4YsmSSoNPS1glqOmZBsg4O6oIHyvHtk\n"
+      "euJmiroGqiopIfuSUl00J4qkj5V6HXgWWh1Xh7/JwjUq5fyXoHaCkHFxHi8w/Oef\n"
+      "GjK88trdW6xgg2t/+I+1gozBAoGBAI6kIkaAOkckjrWd/1yLQOAqypyw52RaioPE\n"
+      "wN5BQmgOgdH+xsmS1RtQ4BQ+fYzslmhqBwiJRTNNdNdZNeB99tKKQQ4Fn21L6NyK\n"
+      "T89iMXmiMM1xJGTj3aaRMbJJyCAlvnaVgeu+BQSDf0oPe4lkqWv4eqSOL5ahsZdo\n"
+      "3HHCoUWLAoGAWol4/g+aV35C6dyCaI/qPnrxxKA7L/+QcTJ4bkXXL+3C57G0m11m\n"
+      "gXSdff/CEvcyC7AP3NhNHQDqUWuI9UedCaGHY/kf3blu1/D0xL1OfGE1ZeBuoG9B\n"
+      "Zvsf1uTb+JGPR5x+2BTXo4VZXzknBqM3S8XZDHSyQtKKxFekMYfNkkQ=\n"
+      "-----END RSA PRIVATE KEY-----\n"),
+    privkey_ec_("file:../certs/identity/test_participant_03_private_key.pem"),
     hello_(),
     world_(),
     empty_()
@@ -140,34 +141,34 @@ TEST_F(PrivateKeyTest, SignAndVerify_Success)
 
 TEST_F(PrivateKeyTest, SignAndVerify_Data_Success)
 {
-    std::vector<const DDS::OctetSeq*> sign_these;
-    sign_these.push_back(&hello_);
-    sign_these.push_back(&world_);
+  std::vector<const DDS::OctetSeq*> sign_these;
+  sign_these.push_back(&hello_);
+  sign_these.push_back(&world_);
 
-    DDS::OctetSeq tmp;
-    int sign_result = privkey_data_.sign(sign_these, tmp);
+  DDS::OctetSeq tmp;
+  int sign_result = privkey_data_.sign(sign_these, tmp);
 
-    ASSERT_EQ(0, sign_result);
+  ASSERT_EQ(0, sign_result);
 
-    int verify_result = pubkey_data_.verify_signature(tmp, sign_these);
+  int verify_result = pubkey_data_.verify_signature(tmp, sign_these);
 
-    ASSERT_EQ(0, verify_result);
+  ASSERT_EQ(0, verify_result);
 }
 
 TEST_F(PrivateKeyTest, SignAndVerify_EC_Success)
 {
-    std::vector<const DDS::OctetSeq*> sign_these;
-    sign_these.push_back(&hello_);
-    sign_these.push_back(&world_);
+  std::vector<const DDS::OctetSeq*> sign_these;
+  sign_these.push_back(&hello_);
+  sign_these.push_back(&world_);
 
-    DDS::OctetSeq tmp;
-    int sign_result = privkey_ec_.sign(sign_these, tmp);
+  DDS::OctetSeq tmp;
+  int sign_result = privkey_ec_.sign(sign_these, tmp);
 
-    ASSERT_EQ(0, sign_result);
+  ASSERT_EQ(0, sign_result);
 
-    int verify_result = pubkey_ec_.verify_signature(tmp, sign_these);
+  int verify_result = pubkey_ec_.verify_signature(tmp, sign_these);
 
-    ASSERT_EQ(0, verify_result);
+  ASSERT_EQ(0, verify_result);
 }
 
 TEST_F(PrivateKeyTest, SignAndVerify_WrongData_Failure)

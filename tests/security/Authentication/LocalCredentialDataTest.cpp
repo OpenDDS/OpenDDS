@@ -37,7 +37,7 @@ struct LocalAuthCredentialDataTest : public ::testing::Test
 
 TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
 {
-  std::string path("permissions/Permissions_JoinDomain_OCI.p7s");
+  std::string path("permissions/permissions_test_participant_01_JoinDomain_signed.p7s");
 
   Property_t perms;
   perms.name = "dds.sec.access.permissions";
@@ -68,7 +68,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
 {
   Property_t idca;
   idca.name = "dds.sec.auth.identity_ca";
-  idca.value = "file:certs/opendds_identity_ca_cert.pem";
+  idca.value = "file:certs/identity/identity_ca_cert.pem";
   idca.propagate = false;
   add_property(idca);
 
@@ -80,7 +80,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
 {
   Property_t pkey;
   pkey.name = "dds.sec.auth.private_key";
-  pkey.value = "file:certs/mock_participant_1/opendds_participant_private_key.pem";
+  pkey.value = "file:certs/identity/test_participant_01_private_key.pem";
   pkey.propagate = false;
   add_property(pkey);
 
@@ -98,7 +98,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
 {
   Property_t idcert;
   idcert.name = "dds.sec.auth.identity_certificate";
-  idcert.value = "file:certs/mock_participant_1/opendds_participant_cert.pem";
+  idcert.value = "file:certs/identity/test_participant_01_cert.pem";
   idcert.propagate = false;
   add_property(idcert);
 

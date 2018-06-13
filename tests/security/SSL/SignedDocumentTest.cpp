@@ -15,31 +15,32 @@ class SignedDocumentTest : public ::testing::Test
 {
 public:
   SignedDocumentTest() :
-    ca_("file:../certs/opendds_identity_ca_cert.pem"),
-	ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
-		  "MIID4DCCAsgCCQC6Fm9aR8tq2zANBgkqhkiG9w0BAQsFADCBsTELMAkGA1UEBhMC\n"
-		  "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEsMCoGA1UECgwj\n"
-		  "T2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVudGl0eSBDQSkxKDAmBgNVBAMMH09i\n"
-		  "amVjdCBDb21wdXRpbmcgKFRlc3QgSWRlbiBDQSkxJzAlBgkqhkiG9w0BCQEWGGlu\n"
-		  "Zm9Ab2JqZWN0Y29tcHV0aW5nLmNvbTAeFw0xODAyMjIxNDU3NThaFw0yODAyMjAx\n"
-		  "NDU3NThaMIGxMQswCQYDVQQGEwJVUzELMAkGA1UECAwCTU8xFDASBgNVBAcMC1Nh\n"
-		  "aW50IExvdWlzMSwwKgYDVQQKDCNPYmplY3QgQ29tcHV0aW5nIChUZXN0IElkZW50\n"
-		  "aXR5IENBKTEoMCYGA1UEAwwfT2JqZWN0IENvbXB1dGluZyAoVGVzdCBJZGVuIENB\n"
-		  "KTEnMCUGCSqGSIb3DQEJARYYaW5mb0BvYmplY3Rjb21wdXRpbmcuY29tMIIBIjAN\n"
-		  "BgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA13849bph3Hd893P2JADbJ / a + ITlL\n"
-		  "9RiCteEVJapvfZMTiPc7sSebLFCo3 / 3RuwszDQi72w6D0ksCJDc4HgNav5bvXCdW\n"
-		  "6mZx6F08qxUsGTLmnSxCaq / jJloF3BQm39skg1E8P6KwB904sXj / MPARunk1bfqg\n"
-		  "0ZMRs + uRyUcNpKK1vWaHxo0TLXxgcK8KdLsFZBCoNNEJ51WTjuV + 35dBQhax53z +\n"
-		  "W3mkEuxpiG + Gu5ONIszl8 / nMcaq6TeJj8R + LPxaLZhrTlCXYaeal1dnpWivHC4kq\n"
-		  "1Vj8JdMwmmA0uNF0m9mgtru9cNYdFHaGoMSrFW3boyb6M7W8e5GnKtVsFQIDAQAB\n"
-		  "MA0GCSqGSIb3DQEBCwUAA4IBAQC1L + sl + bQnkCq7 / dn4oJLajCPxuwbFslv48yyX\n"
-		  "rF / BPH5Ntef / 25fWqWaehY2Y5UVr37TeSntGMqOzJmfQ10mmX3eHcCsdlK3yediD\n"
-		  "w1Uzocao6sPnaCyHVvlsGxaI42F3b + 6VFB7gyUBfYYDUZx / +y8tFTeqcISXmu9 / 0\n"
-		  "MW8Q7crfHG / VHx7V8NRcqor3z21p3popBSVoUoWAFYITsumYnds19Z1DqGpsKxtF\n"
-		  "KEC4MDmHz1OdXYJFB1cJlU1J00p5FtfH33crq / JLXoQyfNUtIX57a35OT1v9NqjV\n"
-		  "zTgZIlsjwL4wEVprsRXQFs7u7hDLlnSXslddgnp51bXKmQpp\n"
-		  "-----END CERTIFICATE-----"),
-	doc_("file:../governance/Governance_SC1_ProtectedDomain1.p7s")
+    ca_("file:../certs/permissions/permissions_ca_cert.pem"),
+    ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
+      "MIID9DCCAtwCCQCkjopvwK438jANBgkqhkiG9w0BAQsFADCBuzELMAkGA1UEBhMC\n"
+      "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEvMC0GA1UECgwm\n"
+      "T2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMM\n"
+      "Jk9iamVjdCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZI\n"
+      "hvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wHhcNMTgwNjEzMDQyMDEz\n"
+      "WhcNMjgwNjEwMDQyMDEzWjCBuzELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQw\n"
+      "EgYDVQQHDAtTYWludCBMb3VpczEvMC0GA1UECgwmT2JqZWN0IENvbXB1dGluZyAo\n"
+      "VGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMMJk9iamVjdCBDb21wdXRpbmcg\n"
+      "KFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVj\n"
+      "dGNvbXB1dGluZy5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCd\n"
+      "3osCHskwiWPkgQ+FiUJEPj9lGAV6gqnG9XcTHPzOsv+hrWcklq4WcTcu5ERxjvwz\n"
+      "rfB9MV2Jj1mhnAQfp0sIuTJe4QoXigyf0IyezsSA1oeofkJuBlA6cR+5ATzfNEcJ\n"
+      "JG3sVaEaa0L92CXb147LczMMY+6I/jD9H/Kamoph1hCgdh2lGnYN97ETMxX5qINt\n"
+      "hO17/qZ55R+H5nE2Op1f4Y0LhjKu3WztEjIZeAJDgAksoYRynVhfDsshdZWUMSO0\n"
+      "jHJGPwEvxwhTsAknWdthuE/xgZQqDP3aXj3MFJcZkydS+8xvnX0cuHsr/7MqVK0o\n"
+      "OmjWS7pi7cMBY9DtB3KVAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAE9QWa1xNjxL\n"
+      "WIw88eVrQxOBCIlqCkAiTx2pAurEdiDtz8ZQdDMQQmoAuppT6LWVVtOWc1bP3a+I\n"
+      "HBolNAimXOm+B9fMSvQnqRbriJZ8Hc5+Y5TXlJ3iyqJDEyPiWhUFLfQfnjE8hRL5\n"
+      "oKPkhk2gRC6K5x+10cZMclgEmZONANtAuSJurMhwgqLxwgGw51aIpL6LTxtdZ33L\n"
+      "IPM8AN51Tgj5t2VM/49iNq9HdqAl7VQuyHEc/eCAIp7p69nqcpS9VBJAJoHN8lmD\n"
+      "DHYxM+pYtQAgmBKLBxTyDrgJZ+3j3FVOp0orRxarE3XjJ+0bIVnO6yhjunPOpgsy\n"
+      "EcxH9/7Enm8=\n"
+      "-----END CERTIFICATE-----"),
+    doc_("file:../governance/governance_SC1_ProtectedDomain1_signed.p7s")
   {
   }
 
@@ -66,12 +67,12 @@ TEST_F(SignedDocumentTest, VerifySignature_Success)
 
 TEST_F(SignedDocumentTest, VerifySignature_Data_Success)
 {
-	ASSERT_EQ(0, doc_.verify_signature(ca_data_));
+  ASSERT_EQ(0, doc_.verify_signature(ca_data_));
 }
 
 TEST(SignedDocumentTestNoFixture, LoadFromMemory)
 {
-  const char fname[] = "../governance/Governance_SC1_ProtectedDomain1.p7s";
+  const char fname[] = "../governance/governance_SC1_ProtectedDomain1_signed.p7s";
   std::ifstream file(fname);
   std::ostringstream mem;
   mem << file.rdbuf();
