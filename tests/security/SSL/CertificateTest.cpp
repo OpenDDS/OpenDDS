@@ -129,7 +129,7 @@ TEST_F(CertificateTest, Algorithm_EC_Prime_Success)
 
 TEST_F(CertificateTest, SubjectNameToString_Success)
 {
-  /* From this cmd:  openssl x509 -noout -subject -in ../certs/opendds_participant_cert.pem */
+  /* From this cmd: openssl x509 -noout -subject -in ../certs/identity/test_participant_01_cert.pem */
   std::string expected("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
   std::string name;
   ASSERT_EQ(signed_.subject_name_to_str(name), 0 /* success! */);

@@ -241,7 +241,7 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
 
 TEST_F(AuthenticationTest, GetIdentityToken_Success)
 {
-  /* From this cmd:  openssl x509 -noout -subject -in certs/opendds_participant_cert.pem */
+  /* From this cmd:  openssl x509 -noout -subject -in certs/identity/test_participant_01_cert.pem */
   std::string cert_sn("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
 
   /* Same thing but with certs/identity/identity_ca_cert.pem */
