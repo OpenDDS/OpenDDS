@@ -81,7 +81,7 @@ bool check_bits(const Publisher_var& pub)
 {
 #ifdef DDS_HAS_MINIMUM_BIT
   ACE_UNUSED_ARG(pub);
-  return true
+  return true;
 #else
   DomainParticipant_var pub_dp = pub->get_participant();
   Subscriber_var bit_sub = pub_dp->get_builtin_subscriber();
