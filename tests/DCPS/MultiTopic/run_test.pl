@@ -15,11 +15,14 @@ if ($ARGV[0] eq 'rtps_disc') {
 }
 
 my $DCPSREPO;
-if (!$is_rtps_disc) {
+my $args;
+if ($is_rtps_disc) {
+  $args = '-DCPSConfigFile rtps_disc.ini';
+} else {
   my $dcpsrepo_ior = 'repo.ior';
   unlink $dcpsrepo_ior;
   $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                      "-NOBITS -o $dcpsrepo_ior");
+                                      "-o $dcpsrepo_ior");
   $DCPSREPO->Spawn();
   if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for Info Repo IOR file\n";
@@ -28,10 +31,7 @@ if (!$is_rtps_disc) {
   }
 }
 
-my $TEST = PerlDDS::create_process('MultiTopicTest',
-                                   $is_rtps_disc
-                                   ? '-DCPSConfigFile rtps_disc.ini'
-                                   : '-DCPSBit 0');
+my $TEST = PerlDDS::create_process('MultiTopicTest', $args);
 
 my $result = $TEST->SpawnWaitKill(60);
 if ($result != 0) {

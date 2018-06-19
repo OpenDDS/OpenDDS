@@ -1,6 +1,7 @@
 #include <ace/OS_main.h>
 #include <ace/OS_NS_string.h>
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -61,8 +62,13 @@ struct Writer {
     CORBA::String_var type_name = ts_->get_type_name();
     Topic_var topic = dp->create_topic(topic_name, type_name,
       TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+
+    TopicQos topic_qos;
+    other_participant->get_default_topic_qos(topic_qos);
+    topic_qos.latency_budget.duration.sec = 1;
     Topic_var topic2 = other_participant->create_topic(topic_name, type_name,
-      TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+      topic_qos, 0, DEFAULT_STATUS_MASK);
+
     dw_ = pub->create_datawriter(topic,
       DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   }
@@ -70,6 +76,39 @@ struct Writer {
   typename OpenDDS::DCPS::DDSTraits<MessageType>::TypeSupportType::_var_type ts_;
   DataWriter_var dw_;
 };
+
+bool check_bits(const Publisher_var& pub)
+{
+#ifdef DDS_HAS_MINIMUM_BIT
+  ACE_UNUSED_ARG(pub);
+  return true
+#else
+  DomainParticipant_var pub_dp = pub->get_participant();
+  Subscriber_var bit_sub = pub_dp->get_builtin_subscriber();
+  DataReader_var bit_dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
+  SubscriptionBuiltinTopicDataDataReader_var dr =
+    SubscriptionBuiltinTopicDataDataReader::_narrow(bit_dr);
+  SubscriptionBuiltinTopicDataSeq data;
+  SampleInfoSeq info;
+  ReturnCode_t ret = dr->read(data, info, LENGTH_UNLIMITED, ANY_SAMPLE_STATE,
+                              ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  if (ret != DDS::RETCODE_OK) {
+    std::cout << "ERROR from Built-In DataReader read() " << ret << '\n';
+    return false;
+  }
+  for (unsigned int i = 0; i < data.length(); ++i) {
+    if (std::strcmp(data[i].topic_name, "Location") == 0) {
+      if (data[i].latency_budget.duration.sec != 1) {
+        std::cout << "ERROR: Built-In DataReader Location topic unexpected QoS\n";
+        return false;
+      }
+      return true;
+    }
+  }
+  std::cout << "ERROR: Built-In DataReader Location topic not found\n";
+  return false;
+#endif
+}
 
 bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 {
@@ -201,6 +240,10 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);
     dr->delete_readcondition(rc);
     if (ret != RETCODE_NO_DATA) return false;
+
+    if (!check_bits(pub)) {
+      return false;
+    }
 
     // Reader cleanup
     if (i != N_ITERATIONS - 1) {
