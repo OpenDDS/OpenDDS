@@ -50,9 +50,6 @@ my %platforminfo =
    'macosx' => {
                 'compilers' => ['clang++'],
                 'libpath' => 'DYLD_LIBRARY_PATH',
-                'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
-                               8 => 'mountainlion', 9 => 'mavericks',
-                               10 => 'yosemite', 11 => 'elcapitan'},
                },
    'solaris' => {
                  'compilers' => ['CC', 'g++'],
@@ -1433,7 +1430,7 @@ sub write_environment {
   }
 }
 
-sub get_mac_version {
+sub check_mac_version {
   my $buildEnvRef = shift;
   if (-r "$buildEnvRef->{ACE_ROOT}/ace/config-macosx.h") {
     my $cfg = new FileHandle("$buildEnvRef->{ACE_ROOT}/ace/config-macosx.h");
@@ -1444,13 +1441,8 @@ sub get_mac_version {
     }
   }
 
-  my $vers = `sw_vers -productVersion`;
-  $vers =~ /10\.(\d+)\.?/;
-  if (!exists $platforminfo{'macosx'}->{'versions'}->{$1}) {
-    die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
-  }
-  $opts{'host_version'} = $platforminfo{'macosx'}->{'versions'}->{$1};
-  print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
+  die "ERROR: This version of ACE doesn't contain the required configuration " .
+    "files for Apple macOS.  Stopped";
 }
 
 sub configure_build {
@@ -1459,7 +1451,7 @@ sub configure_build {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   }
   else {
-    get_mac_version($buildEnvRef) if $opts{'host'} eq 'macosx';
+    check_mac_version($buildEnvRef) if $opts{'host'} eq 'macosx';
 
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);
