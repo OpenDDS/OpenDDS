@@ -1254,6 +1254,10 @@ EOT
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
         while (my $row = <$fh>) {
           chomp $row;
+          $row =~ s/\/\/.*//;
+          $row =~ s/^\s+//;
+          $row =~ s/\s+$//;
+          next if $row eq '';
           my ($key, $value) = split(/=/, $row);
           $existing_features{$key} = $value;
         }
