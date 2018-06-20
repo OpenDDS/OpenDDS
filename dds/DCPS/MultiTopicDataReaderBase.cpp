@@ -9,8 +9,10 @@
 #ifndef OPENDDS_NO_MULTI_TOPIC
 
 #include "MultiTopicDataReaderBase.h"
-#include "SubscriberImpl.h"
+
 #include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "SubscriberImpl.h"
 #include "TypeSupportImpl.h"
 
 #include <stdexcept>
@@ -141,7 +143,8 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 
 
     DDS::DataReader_var incoming =
-      parent->create_datareader(t, dr_qos, listener_.get(), ALL_STATUS_MASK);
+      parent->create_datareader(t, DATAREADER_QOS_USE_TOPIC_QOS,
+                                listener_.get(), ALL_STATUS_MASK);
     if (!incoming.in()) {
       throw runtime_error("Could not create incoming DataReader "
         + selection[i]);
