@@ -782,6 +782,7 @@ sub write_platform_macros {
     my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
+    my $macro_cross_compile = 0;
     if ($buildEnv{'build'} eq 'target') {
       for my $line (@{$opts{'macros'}}) {
         print $PMG "$line\n";
@@ -801,6 +802,7 @@ sub write_platform_macros {
         if ($opts{'target-compiler'}) {
           my $tcomp = $opts{'target-compiler'};
           if ($tcomp =~ s/-g([c+])\1$/-/) {
+            $macro_cross_compile = 1;
             print $PMG 'CROSS_COMPILE = ', $tcomp, "\n";
           }
           else {
@@ -829,7 +831,7 @@ sub write_platform_macros {
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
-    if ($opts{'nonstdcompiler'}) {
+    if ($opts{'nonstdcompiler'} && !$macro_cross_compile) {
       for my $var ('CC', 'CXX', 'LD') {
         print $PMG "$var = $opts{'compiler'}\n";
       }
