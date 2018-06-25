@@ -119,7 +119,11 @@ namespace OpenDDS {
             case SSL::URI_PKCS11:
             case SSL::URI_UNKNOWN:
             default:
-              fprintf(stderr, "LocalAuthCredentialData::load: Error, unsupported URI scheme in path '%s'\n", value.c_str());
+              ACE_ERROR((LM_ERROR,
+                         ACE_TEXT("(%P|%t) LocalAuthCredentialData::load: ")
+                         ACE_TEXT("ERROR: unsupported URI scheme in path '%C'\n"),
+                         value.c_str()));
+
               break;
           }
         }
@@ -145,10 +149,12 @@ namespace OpenDDS {
         }
 
         if (ferror(fp)) {
-            fprintf(stderr,
-                    "LocalAuthCredentialData::load_permissions_file: Error '%s' occured while reading file '%s'\n",
-                    std::strerror(errno),
-                    path.c_str());
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) LocalAuthCredentialData::load_permissions_file: ")
+                       ACE_TEXT("ERROR: '%C' occured while reading file '%C'\n"),
+                       std::strerror(errno),
+                       path.c_str()));
+
         } else {
             access_permissions_.length(chunks.size());
             std::memcpy(access_permissions_.get_buffer(), &chunks[0], access_permissions_.length());
