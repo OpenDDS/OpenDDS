@@ -84,6 +84,21 @@ namespace {
   bool operator==(const DDS::Security::DataHolder& rhs, const DDS::Security::DataHolder& lhs) {
     return rhs.class_id == lhs.class_id && rhs.properties == lhs.properties && rhs.binary_properties == lhs.binary_properties;
   }
+
+  DDS::Security::ParticipantSecurityAttributesMask create_participant_security_attributes_mask(const DDS::Security::ParticipantSecurityAttributes& sec_attr) {
+    DDS::Security::ParticipantSecurityAttributesMask result = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    if (sec_attr.is_rtps_protected) {
+      result |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
+    }
+    if (sec_attr.is_discovery_protected) {
+      result |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
+    }
+    if (sec_attr.is_liveliness_protected) {
+      result |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
+    }
+    return result;
+  }
+
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
@@ -164,7 +179,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::AccessControl_var access = security_config_->get_access_control();
 
-  DDS::Security::SecurityException se;
+  DDS::Security::SecurityException se = {"", 0, 0};
 
   if (auth->get_identity_token(identity_token_, identity_handle_, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -307,7 +322,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     DiscoveredParticipant& dp = participants_[guid];
 
     if (is_security_enabled()) {
-      // Assocaite the stateless reader / writer for handshakes & auth requests
+      // Associate the stateless reader / writer for handshakes & auth requests
       sedp_.associate_preauth(dp.pdata_);
 
       // If we've gotten auth requests for this (previously undiscovered) participant, pull in the tokens now
@@ -424,11 +439,8 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 void
 Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 {
-  DDS::Security::SecurityException se;
-  Security::Authentication_var auth = security_config_->get_authentication();
-
   // If this message wasn't intended for us, ignore handshake message
-  if (msg.destination_participant_guid != guid_ || !msg.message_data.length()) {
+  if (msg.destination_participant_guid != guid_ || msg.message_data.length() == 0) {
     return;
   }
 
@@ -458,7 +470,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 void
 Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg)
 {
-  DDS::Security::SecurityException se;
+  DDS::Security::SecurityException se = {"", 0, 0};
   Security::Authentication_var auth = security_config_->get_authentication();
 
   // If this message wasn't intended for us, ignore handshake message
@@ -502,16 +514,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     };
 
     pbtd.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtd.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
-    if (participant_sec_attr_.is_rtps_protected) {
-      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
-    }
-    if (participant_sec_attr_.is_discovery_protected) {
-      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-    }
-    if (participant_sec_attr_.is_liveliness_protected) {
-      pbtd.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
-    }
+    pbtd.security_info.participant_security_attributes = create_participant_security_attributes_mask(participant_sec_attr_);
 
     ParameterList plist;
     if (ParameterListConverter::to_param_list(pbtd, guid_, plist) < 0) {
@@ -672,29 +675,9 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
   }
 }
 
-namespace {
-
-DDS::Security::DataHolderSeq& assign(DDS::Security::DataHolderSeq& lhs, const DDS::Security::ParticipantCryptoTokenSeq& rhs) {
-  lhs.length(rhs.length());
-  for (size_t i = 0; i < rhs.length(); ++i) {
-    lhs[i] = rhs[i];
-  }
-  return lhs;
-}
-
-DDS::Security::ParticipantCryptoTokenSeq& assign(DDS::Security::ParticipantCryptoTokenSeq& lhs, const DDS::Security::DataHolderSeq& rhs) {
-  lhs.length(rhs.length());
-  for (size_t i = 0; i < rhs.length(); ++i) {
-    lhs[i] = rhs[i];
-  }
-  return lhs;
-}
-
-}
-
 void
 Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg) {
-  DDS::Security::SecurityException se;
+  DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
 
   // If this message wasn't intended for us, ignore volatile message
@@ -718,7 +701,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
   DiscoveredParticipant& dp = iter->second;
 
-  assign(dp.crypto_tokens_, msg.message_data);
+  dp.crypto_tokens_ = reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
 
   if (key_exchange->set_remote_participant_crypto_tokens(crypto_handle_, dp.crypto_handle_, dp.crypto_tokens_, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -732,7 +715,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 bool
 Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
-  DDS::Security::SecurityException se;
+  DDS::Security::SecurityException se = {"", 0, 0};
 
   Security::Authentication_var auth = security_config_->get_authentication();
   Security::AccessControl_var access = security_config_->get_access_control();
@@ -781,16 +764,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
     };
 
     pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtds.base.security_info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
-    if (participant_sec_attr_.is_rtps_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
-    }
-    if (participant_sec_attr_.is_discovery_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-    }
-    if (participant_sec_attr_.is_liveliness_protected) {
-      pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
-    }
+    pbtds.base.security_info.participant_security_attributes = create_participant_security_attributes_mask(participant_sec_attr_);
 
     if (access->check_remote_participant(dp.permissions_handle_, domain_, pbtds, se) == false) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
@@ -858,7 +832,7 @@ void
 Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
-  DDS::Security::SecurityException se;
+  DDS::Security::SecurityException se = {"", 0, 0};
 
   if (dp.auth_state_ == OpenDDS::DCPS::AS_UNKNOWN) {
     dp.auth_started_time_ = ACE_OS::gettimeofday();
@@ -1384,16 +1358,7 @@ Spdp::SpdpTransport::write_i()
     DDS::Security::ParticipantSecurityInfo info;
 
     info.plugin_participant_security_attributes = outer_->participant_sec_attr_.plugin_participant_attributes;
-    info.participant_security_attributes = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
-    if (outer_->participant_sec_attr_.is_rtps_protected) {
-      info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
-    }
-    if (outer_->participant_sec_attr_.is_discovery_protected) {
-      info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-    }
-    if (outer_->participant_sec_attr_.is_liveliness_protected) {
-      info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
-    }
+    info.participant_security_attributes = create_participant_security_attributes_mask(outer_->participant_sec_attr_);
 
     if (ParameterListConverter::to_param_list(outer_->identity_token_, outer_->permissions_token_, outer_->qos_.property, info, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -1718,7 +1683,7 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
     msg.destination_participant_guid = id;
     msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
     msg.source_endpoint_guid = GUID_UNKNOWN;
-    assign(msg.message_data, crypto_tokens_);
+    msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(crypto_tokens_);
 
     if (sedp_.write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")

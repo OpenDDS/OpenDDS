@@ -194,8 +194,8 @@ private:
     Endpoint(const DCPS::RepoId& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
       , sedp_(sedp)
-      , participant_crypto_handle_(0)
-      , endpoint_crypto_handle_(0)
+      , participant_crypto_handle_(DDS::HANDLE_NIL)
+      , endpoint_crypto_handle_(DDS::HANDLE_NIL)
     {}
 
     virtual ~Endpoint();
