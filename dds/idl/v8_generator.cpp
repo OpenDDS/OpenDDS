@@ -85,10 +85,13 @@ namespace {
         postNew = ".ToLocalChecked()";
 
       } else if (cls & CL_STRING) {
+        if (!std::strstr(src, "()")) {
+          suffix = ".in()";
+        }
         if (cls & CL_WIDE) {
           strm <<
             "  {\n"
-            "    const size_t len = ACE_OS::strlen(" << src << ".in());\n"
+            "    const size_t len = ACE_OS::strlen(" << src << suffix << ");\n"
             "    uint16_t* const str = new uint16_t[len + 1];\n"
             "    for (size_t i = 0; i <= len; ++i) {\n"
             "      str[i] = " << src << "[i];\n"
@@ -98,7 +101,6 @@ namespace {
             "  }\n";
           return;
         }
-        suffix = ".in()";
         postNew = ".ToLocalChecked()";
 
       } else if (pt == AST_PredefinedType::PT_char) {
