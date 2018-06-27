@@ -13,6 +13,7 @@
 #include "RtpsDiscovery.h"
 
 #include "dds/DdsDcpsGuidC.h"
+#include "dds/DdsSecurityHelpers.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -83,20 +84,6 @@ namespace {
 
   bool operator==(const DDS::Security::DataHolder& rhs, const DDS::Security::DataHolder& lhs) {
     return rhs.class_id == lhs.class_id && rhs.properties == lhs.properties && rhs.binary_properties == lhs.binary_properties;
-  }
-
-  DDS::Security::ParticipantSecurityAttributesMask create_participant_security_attributes_mask(const DDS::Security::ParticipantSecurityAttributes& sec_attr) {
-    DDS::Security::ParticipantSecurityAttributesMask result = DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
-    if (sec_attr.is_rtps_protected) {
-      result |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED;
-    }
-    if (sec_attr.is_discovery_protected) {
-      result |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
-    }
-    if (sec_attr.is_liveliness_protected) {
-      result |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
-    }
-    return result;
   }
 
 }
@@ -514,7 +501,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     };
 
     pbtd.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtd.security_info.participant_security_attributes = create_participant_security_attributes_mask(participant_sec_attr_);
+    pbtd.security_info.participant_security_attributes = DDS::Security::security_attributes_to_bitmask(participant_sec_attr_);
 
     ParameterList plist;
     if (ParameterListConverter::to_param_list(pbtd, guid_, plist) < 0) {
@@ -764,7 +751,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
     };
 
     pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtds.base.security_info.participant_security_attributes = create_participant_security_attributes_mask(participant_sec_attr_);
+    pbtds.base.security_info.participant_security_attributes = DDS::Security::security_attributes_to_bitmask(participant_sec_attr_);
 
     if (access->check_remote_participant(dp.permissions_handle_, domain_, pbtds, se) == false) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
@@ -1358,7 +1345,7 @@ Spdp::SpdpTransport::write_i()
     DDS::Security::ParticipantSecurityInfo info;
 
     info.plugin_participant_security_attributes = outer_->participant_sec_attr_.plugin_participant_attributes;
-    info.participant_security_attributes = create_participant_security_attributes_mask(outer_->participant_sec_attr_);
+    info.participant_security_attributes = DDS::Security::security_attributes_to_bitmask(outer_->participant_sec_attr_);
 
     if (ParameterListConverter::to_param_list(outer_->identity_token_, outer_->permissions_token_, outer_->qos_.property, info, plist) < 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")

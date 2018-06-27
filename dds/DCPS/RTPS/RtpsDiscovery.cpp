@@ -331,7 +331,8 @@ RtpsDiscovery::add_domain_participant_secure(DDS::DomainId_t domain,
     const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ads.id, qos, this, id, perm, part_crypto));
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsDiscovery::add_domain_participant_secure() - "
+    ads.id = GUID_UNKNOWN;
+    ACE_ERROR((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant_secure() - "
       "failed to initialize RTPS Simple Participant Discovery Protocol: %C\n",
       e.what()));
   }

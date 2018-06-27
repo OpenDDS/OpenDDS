@@ -213,8 +213,8 @@ private:
     using DCPS::TransportClient::enable_transport_using_config;
     using DCPS::TransportClient::disassociate;
 
-    void crypto_handles(DDS::Security::ParticipantCryptoHandle p,
-                        DDS::Security::NativeCryptoHandle e = DDS::HANDLE_NIL)
+    void set_crypto_handles(DDS::Security::ParticipantCryptoHandle p,
+                            DDS::Security::NativeCryptoHandle e = DDS::HANDLE_NIL)
     {
       participant_crypto_handle_ = p;
       endpoint_crypto_handle_ = e;
@@ -548,9 +548,9 @@ private:
 
   void write_durable_participant_message_data(const DCPS::RepoId& reader);
 
-  inline DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid,
-                                                  LocalPublication& pub,
-                                                  const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+  DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid,
+                                           LocalPublication& pub,
+                                           const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_publication_data_secure(const DCPS::RepoId& rid,
                                                   LocalPublication& pub,
@@ -560,9 +560,9 @@ private:
                                                     LocalPublication& pub,
                                                     const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-  inline DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
-                                                   LocalSubscription& pub,
-                                                   const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+  DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
+                                            LocalSubscription& pub,
+                                            const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::RepoId& rid,
                                                    LocalSubscription& pub,
