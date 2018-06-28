@@ -930,7 +930,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     results = true;
 
   } else {
-    set_security_error(ex, -1, 0, "Handshake handle not recognized");
+    set_security_error(ex, -1, 0, "Identity handle not recognized");
   }
   return results;
 }
