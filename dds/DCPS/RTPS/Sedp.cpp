@@ -1676,8 +1676,8 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  if (!spdp_.has_discovered_participant (guid_participant)) {
-    deferred_publications_[guid] = std::make_pair (message_id, wdata);
+  if (!spdp_.has_discovered_participant(guid_participant)) {
+    deferred_publications_[guid] = std::make_pair(message_id, wdata);
     return;
   }
 
@@ -2002,8 +2002,8 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  if (!spdp_.has_discovered_participant (guid_participant)) {
-    deferred_subscriptions_[guid] = std::make_pair (message_id, rdata);
+  if (!spdp_.has_discovered_participant(guid_participant)) {
+    deferred_subscriptions_[guid] = std::make_pair(message_id, rdata);
     return;
   }
 
@@ -2071,7 +2071,7 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
     return;
   }
 
-  if (!spdp_.has_discovered_participant (guid_participant)) {
+  if (!spdp_.has_discovered_participant(guid_participant)) {
     return;
   }
 
@@ -2115,7 +2115,7 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
     return;
   }
 
-  if (!spdp_.has_discovered_participant (guid_participant)) {
+  if (!spdp_.has_discovered_participant(guid_participant)) {
     return;
   }
 

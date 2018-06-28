@@ -412,8 +412,7 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   // notify Sedp of association
-  // Sedp may call has_discovered_participant.
-  // This is what the participant must be added before this call to associate.
+  // Sedp may call has_discovered_participant, which is why the participant must be added before this call to associate.
   sedp_.associate(dp.pdata_);
 
   // Iterator is no longer valid
@@ -800,8 +799,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   // notify Sedp of association
-  // Sedp may call has_discovered_participant.
-  // This is what the participant must be added before this call to associate.
+  // Sedp may call has_discovered_participant, which is the participant must be added before these calls to associate.
   sedp_.associate(dp.pdata_);
   sedp_.associate_volatile(dp.pdata_);
   sedp_.associate_secure_writers_to_readers(dp.pdata_);
