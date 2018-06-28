@@ -756,7 +756,16 @@ int from_param_list(const ParameterList& param_list,
   security_info.participant_security_attributes = 0;
   security_info.plugin_participant_security_attributes = 0;
 
-  unsigned char fieldmask = 0;
+  unsigned char fieldmask = 0x00;
+
+  enum FieldMaskNames {
+    ID_TOKEN_FIELD = 0x01,
+    PERM_TOKEN_FIELD = 0x02,
+    PROPERTY_LIST_FIELD = 0x04,
+    PARTICIPANT_SECURITY_INFO_FIELD = 0x08
+  };
+
+  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD & PERM_TOKEN_FIELD;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
@@ -765,20 +774,22 @@ int from_param_list(const ParameterList& param_list,
     switch (p._d()) {
     case DDS::Security::PID_IDENTITY_TOKEN:
       id_token = p.identity_token();
-      fieldmask |= 1;
+      fieldmask |= ID_TOKEN_FIELD;
       break;
 
     case DDS::Security::PID_PERMISSIONS_TOKEN:
       perm_token = p.permissions_token();
-      fieldmask |= 2;
+      fieldmask |= PERM_TOKEN_FIELD;
       break;
 
     case OpenDDS::RTPS::PID_PROPERTY_LIST:
       property_qos = p.property();
+      fieldmask |= PROPERTY_LIST_FIELD;
       break;
 
     case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
       security_info = p.participant_security_info();
+      fieldmask |= PARTICIPANT_SECURITY_INFO_FIELD;
       break;
 
     default:
@@ -788,7 +799,7 @@ int from_param_list(const ParameterList& param_list,
     }
   }
 
-  return ((fieldmask & 3) == 3) ? 0 : -1;
+  return ((fieldmask & REQUIRED_FIELDS) == REQUIRED_FIELDS) ? 0 : -1;
 }
 
 int from_param_list(const ParameterList& param_list,
@@ -818,6 +829,16 @@ int from_param_list(const ParameterList& param_list,
   id_status_token.binary_properties.length(0);
 
   unsigned char fieldmask = 0x00;
+
+  enum FieldMaskNames {
+    ID_TOKEN_FIELD = 0x01,
+    PERM_TOKEN_FIELD = 0x02,
+    PROPERTY_LIST_FIELD = 0x04,
+    PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
+    IDENTITY_STATUS_TOKEN_FIELD = 0x10
+  };
+
+  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD & PERM_TOKEN_FIELD & PARTICIPANT_SECURITY_INFO_FIELD;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
@@ -856,7 +877,7 @@ int from_param_list(const ParameterList& param_list,
       }
   }
 
-  return ((fieldmask & 0xb) == 0xb) ? 0 : -1;
+  return ((fieldmask & REQUIRED_FIELDS) == REQUIRED_FIELDS) ? 0 : -1;
 }
 
 int to_param_list(const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper,

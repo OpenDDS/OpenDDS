@@ -272,7 +272,7 @@ SecurityRegistry::bind_config(const SecurityConfig_rch& config,
   DCPS::DomainParticipantImpl* const dpi =
     dynamic_cast<DCPS::DomainParticipantImpl*>(domain_participant);
   if (dpi) {
-    dpi->security_config(config);
+    dpi->set_security_config(config);
   }
 }
 

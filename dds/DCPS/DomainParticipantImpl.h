@@ -370,7 +370,7 @@ private:
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
-  void security_config(const Security::SecurityConfig_rch& config);
+  void set_security_config(const Security::SecurityConfig_rch& config);
 
   DDS::Security::ParticipantCryptoHandle crypto_handle() const
   {
