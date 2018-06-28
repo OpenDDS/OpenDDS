@@ -30,19 +30,19 @@ namespace SSL {
 
     SignedDocument();
 
-    ~SignedDocument();
+    virtual ~SignedDocument();
 
     SignedDocument& operator=(const SignedDocument& rhs);
 
     void load(const std::string& uri);
 
-    void get_content(std::string& dst);
+    void get_content(std::string& dst) const;
 
-    int verify_signature(const Certificate& ca);
+    int verify_signature(const Certificate& ca) const;
 
-    int serialize(std::vector<unsigned char>& dst);
+    int serialize(std::vector<unsigned char>& dst) const;
 
-    int serialize(DDS::OctetSeq& dst);
+    int serialize(DDS::OctetSeq& dst) const;
 
     int deserialize(const DDS::OctetSeq& src);
 

@@ -74,7 +74,7 @@ namespace SSL {
     }
   }
 
-  void SignedDocument::get_content(std::string& dst) { dst = plaintext_; }
+  void SignedDocument::get_content(std::string& dst) const { dst = plaintext_; }
 
   class verify_signature_impl
   {
@@ -136,13 +136,13 @@ namespace SSL {
     BIO* reader_;
   };
 
-  int SignedDocument::verify_signature(const Certificate& ca)
+  int SignedDocument::verify_signature(const Certificate& ca) const
   {
     verify_signature_impl verify(doc_, plaintext_);
     return verify(ca);
   }
 
-  int SignedDocument::serialize(std::vector<unsigned char>& dst)
+  int SignedDocument::serialize(std::vector<unsigned char>& dst) const
   {
     int result = 1;
 
@@ -171,7 +171,7 @@ namespace SSL {
     return result;
   }
 
-  int SignedDocument::serialize(DDS::OctetSeq& dst)
+  int SignedDocument::serialize(DDS::OctetSeq& dst) const
   {
     std::vector<unsigned char> tmp;
     int err = serialize(tmp);
