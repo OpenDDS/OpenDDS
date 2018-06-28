@@ -765,7 +765,7 @@ int from_param_list(const ParameterList& param_list,
     PARTICIPANT_SECURITY_INFO_FIELD = 0x08
   };
 
-  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD & PERM_TOKEN_FIELD;
+  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD | PERM_TOKEN_FIELD;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
@@ -838,7 +838,7 @@ int from_param_list(const ParameterList& param_list,
     IDENTITY_STATUS_TOKEN_FIELD = 0x10
   };
 
-  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD & PERM_TOKEN_FIELD & PARTICIPANT_SECURITY_INFO_FIELD;
+  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD | PERM_TOKEN_FIELD | PARTICIPANT_SECURITY_INFO_FIELD;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
