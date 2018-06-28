@@ -63,16 +63,11 @@ namespace SSL {
     size_t st_begin = 0;
     size_t st_end = input.find_first_of(s_del);
 
-    // std::cout << __FILE__ << ":" << __LINE__ << " - input = " << input <<
-    // std::endl;
-
     // Loop over all the sequence tokens
     while (st_begin != std::string::npos) {
       std::string st = input.substr(
         st_begin,
         (st_end == std::string::npos ? input_end + 1 : st_end) - st_begin);
-      // std::cout << __FILE__ << ":" << __LINE__ << " - st = " << st <<
-      // std::endl;
 
       // Use once we've found a sequnce token, trim the beginning and end to
       // get a clean token
@@ -84,8 +79,6 @@ namespace SSL {
           st_end_clean != std::string::npos) {
         std::string st_clean =
           st.substr(st_begin_clean, st_end_clean - st_begin_clean + 1);
-        // std::cout << __FILE__ << ":" << __LINE__ << " - st_clean = " <<
-        // st_clean << std::endl;
 
         // We'll use "nt" to mark positions for name tokens
         size_t nt_begin = 0;
@@ -96,8 +89,6 @@ namespace SSL {
           --nt_end;
 
           std::string nt = st_clean.substr(nt_begin, nt_end - nt_begin + 1);
-          // std::cout << __FILE__ << ":" << __LINE__ << " - nt = " << nt <<
-          // std::endl;
 
           size_t nt_begin_clean = nt.find_first_not_of(a_trim);
           size_t nt_end_clean = nt.find_last_not_of(a_trim);
@@ -107,16 +98,12 @@ namespace SSL {
               nt_end_clean != std::string::npos) {
             std::string nt_clean =
               nt.substr(nt_begin_clean, nt_end_clean - nt_begin_clean + 1);
-            // std::cout << __FILE__ << ":" << __LINE__ << " - nt_clean = " <<
-            // nt_clean << std::endl;
 
             // We'll use "vt" to mark positions for value tokens
             size_t vt_begin = nt_end + 2;  // Skip over the (single) delimiter
             size_t vt_end = st_clean.size() - 1;
 
             std::string vt = st_clean.substr(vt_begin, vt_end - vt_begin + 1);
-            // std::cout << __FILE__ << ":" << __LINE__ << " - vt = " << vt <<
-            // std::endl;
 
             size_t vt_begin_clean = vt.find_first_not_of(a_trim);
             size_t vt_end_clean = vt.find_last_not_of(a_trim);
@@ -126,12 +113,6 @@ namespace SSL {
                 vt_end_clean != std::string::npos) {
               std::string vt_clean =
                 vt.substr(vt_begin_clean, vt_end_clean - vt_begin_clean + 1);
-              // std::cout << __FILE__ << ":" << __LINE__ << " - vt_clean = "
-              // << vt_clean << std::endl;
-
-              // std::cout << "Found attribute pair in subject name :: name =
-              // '" << nt_clean << "', value = '" << vt_clean << "'" <<
-              // std::endl;
 
               // Push our clean pair into the map
               map_[nt_clean] = vt_clean;
