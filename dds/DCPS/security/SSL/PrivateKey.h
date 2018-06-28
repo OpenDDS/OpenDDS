@@ -14,39 +14,39 @@
 #include <openssl/evp.h>
 
 namespace OpenDDS {
-  namespace Security {
-    namespace SSL {
+namespace Security {
+namespace SSL {
 
-      class DdsSecurity_Export PrivateKey
-      {
-      public:
+  class DdsSecurity_Export PrivateKey
+  {
+   public:
+    typedef DCPS::unique_ptr<PrivateKey> unique_ptr;
 
-        typedef DCPS::unique_ptr<PrivateKey> unique_ptr;
+    PrivateKey(const std::string& uri, const std::string password = "");
 
-        PrivateKey(const std::string& uri, const std::string password = "");
+    PrivateKey();
 
-        PrivateKey();
+    ~PrivateKey();
 
-        ~PrivateKey();
+    PrivateKey& operator=(const PrivateKey& rhs);
 
-        PrivateKey& operator=(const PrivateKey& rhs);
+    void load(const std::string& uri, const std::string& password = "");
 
-        void load(const std::string& uri, const std::string& password = "");
+    int sign(const std::vector<const DDS::OctetSeq*>& src,
+             DDS::OctetSeq& dst) const;
 
-        int sign(const std::vector<const DDS::OctetSeq*>& src, DDS::OctetSeq& dst) const;
+   private:
+    static EVP_PKEY* EVP_PKEY_from_pem(const std::string& path,
+                                       const std::string& password = "");
 
-      private:
+    EVP_PKEY* EVP_PKEY_from_pem_data(const std::string& data,
+                                     const std::string& password);
 
-        static EVP_PKEY* EVP_PKEY_from_pem(const std::string& path, const std::string& password = "");
+    EVP_PKEY* k_;
+  };
 
-		EVP_PKEY* EVP_PKEY_from_pem_data(const std::string & data, const std::string & password);
-
-        EVP_PKEY* k_;
-
-      };
-
-    }
-  }
-}
+}  // namespace SSL
+}  // namespace Security
+}  // namespace OpenDDS
 
 #endif
