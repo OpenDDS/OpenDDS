@@ -19,6 +19,18 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  const size_t BYTES_IN_VENDOR = 2u;
+  const size_t HEX_DIGITS_IN_VENDOR = 2u * BYTES_IN_VENDOR;
+  const size_t BYTES_IN_DOMAIN = 4u;
+  const size_t HEX_DIGITS_IN_DOMAIN = 2u * BYTES_IN_DOMAIN;
+  const size_t BYTES_IN_PARTICIPANT = 6u;
+  const size_t HEX_DIGITS_IN_PARTICIPANT = 2u * BYTES_IN_PARTICIPANT;
+  const size_t BYTES_IN_ENTITY = 3u;
+  const size_t HEX_DIGITS_IN_ENTITY = 2u * BYTES_IN_ENTITY;
+  const size_t TYPE_NAME_MAX = 128u;
+}
+
 void EndpointRegistry::match()
 {
   for (WriterMapType::iterator wp = writer_map.begin(), wp_limit = writer_map.end();
@@ -173,7 +185,7 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
                                                    const RepoId& /*topicId*/,
                                                    const DDS::DataWriterQos& qos)
 {
-  if (qos.user_data.value.length() != 3) {
+  if (qos.user_data.value.length() != BYTES_IN_ENTITY) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_publication_key: no user data to identify writer\n")));
     return;
   }
@@ -209,7 +221,7 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
                                                     const RepoId& /*topicId*/,
                                                     const DDS::DataReaderQos& qos)
 {
-  if (qos.user_data.value.length() != 3) {
+  if (qos.user_data.value.length() != BYTES_IN_ENTITY) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: no user data to identify reader\n")));
     return;
   }
@@ -670,7 +682,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
 {
   AddDomainStatus ads = {RepoId(), false /*federated*/};
 
-  if (qos.user_data.value.length() != 6) {
+  if (qos.user_data.value.length() != BYTES_IN_PARTICIPANT) {
     ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::add_domain_participant ")
                 ACE_TEXT("No userdata to identify participant\n")));
@@ -843,8 +855,8 @@ StaticDiscovery::parse_topics(ACE_Configuration_Heap& cf)
     pullValues(cf, it->second, values);
 
     EndpointRegistry::Topic topic;
-    bool name_Specified = false,
-      type_name_Specified = false;
+    bool name_specified = false,
+      type_name_specified = false;
 
     for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
       OPENDDS_STRING name = it->first;
@@ -852,9 +864,9 @@ StaticDiscovery::parse_topics(ACE_Configuration_Heap& cf)
 
       if (name == "name") {
         topic.name = value;
-        name_Specified = true;
+        name_specified = true;
       } else if (name == "type_name") {
-        if (value.size() >= 128) {
+        if (value.size() >= TYPE_NAME_MAX) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
                             ACE_TEXT("type_name (%C) must be less than 128 characters in [topic/%C] section.\n"),
@@ -862,17 +874,17 @@ StaticDiscovery::parse_topics(ACE_Configuration_Heap& cf)
                             -1);
         }
         topic.type_name = value;
-        type_name_Specified = true;
+        type_name_specified = true;
       } else {
         // Typos are ignored to avoid parsing FACE-specific keys.
       }
     }
 
-    if (!name_Specified) {
+    if (!name_specified) {
       topic.name = topic_name;
     }
 
-    if (!type_name_Specified) {
+    if (!type_name_specified) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
                         ACE_TEXT("No type_name specified for [topic/%C] section.\n"),
@@ -1540,12 +1552,12 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
     TransportLocatorSeq trans_info;
     OPENDDS_STRING config_name;
 
-    bool domainSpecified = false,
-      participantSpecified = false,
-      entitySpecified = false,
-      typeSpecified = false,
-      topic_name_Specified = false,
-      config_name_Specified = false;
+    bool domain_specified = false,
+      participant_specified = false,
+      entity_specified = false,
+      type_specified = false,
+      topic_name_specified = false,
+      config_name_specified = false;
 
     for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
       OPENDDS_STRING name = it->first;
@@ -1553,7 +1565,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 
       if (name == "domain") {
         if (convertToInteger(value, domain)) {
-          domainSpecified = true;
+          domain_specified = true;
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1565,10 +1577,10 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0;
         std::count_if(value.begin(), value.end(), isxdigit, count);
-        if (value.size() != 12 || count != 12) {
+        if (value.size() != HEX_DIGITS_IN_PARTICIPANT || count != HEX_DIGITS_IN_PARTICIPANT) {
 #else
-        if (value.size() != 12 ||
-            std::count_if(value.begin(), value.end(), isxdigit) != 12) {
+        if (value.size() != HEX_DIGITS_IN_PARTICIPANT ||
+            std::count_if(value.begin(), value.end(), isxdigit) != HEX_DIGITS_IN_PARTICIPANT) {
 #endif
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1577,18 +1589,18 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                             -1);
         }
 
-        for (size_t idx = 0; idx != 6; ++idx) {
+        for (size_t idx = 0; idx != BYTES_IN_PARTICIPANT; ++idx) {
           participant[idx] = fromhex(value, idx);
         }
-        participantSpecified = true;
+        participant_specified = true;
       } else if (name == "entity") {
 #ifdef __SUNPRO_CC
         int count = 0;
         std::count_if(value.begin(), value.end(), isxdigit, count);
-        if (value.size() != 6 || count != 6) {
+        if (value.size() != HEX_DIGITS_IN_ENTITY || count != HEX_DIGITS_IN_ENTITY) {
 #else
-        if (value.size() != 6 ||
-            std::count_if(value.begin(), value.end(), isxdigit) != 6) {
+        if (value.size() != HEX_DIGITS_IN_ENTITY ||
+            std::count_if(value.begin(), value.end(), isxdigit) != HEX_DIGITS_IN_ENTITY) {
 #endif
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1597,17 +1609,17 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                             -1);
         }
 
-        for (size_t idx = 0; idx != 3; ++idx) {
+        for (size_t idx = 0; idx != BYTES_IN_ENTITY; ++idx) {
           entity[idx] = fromhex(value, idx);
         }
-        entitySpecified = true;
+        entity_specified = true;
       } else if (name == "type") {
         if (value == "reader") {
           type = Reader;
-          typeSpecified = true;
+          type_specified = true;
         } else if (value == "writer") {
           type = Writer;
-          typeSpecified = true;
+          type_specified = true;
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1619,7 +1631,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         EndpointRegistry::TopicMapType::const_iterator pos = this->registry.topic_map.find(value);
         if (pos != this->registry.topic_map.end()) {
           topic_name = pos->second.name;
-          topic_name_Specified = true;
+          topic_name_specified = true;
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1673,7 +1685,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         }
       } else if (name == "config") {
         config_name = value;
-        config_name_Specified = true;
+        config_name_specified = true;
       } else {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1683,7 +1695,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       }
     }
 
-    if (!domainSpecified) {
+    if (!domain_specified) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                         ACE_TEXT("No domain specified for [endpoint/%C] section.\n"),
@@ -1691,7 +1703,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                         -1);
     }
 
-    if (!participantSpecified) {
+    if (!participant_specified) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                         ACE_TEXT("No participant specified for [endpoint/%C] section.\n"),
@@ -1699,7 +1711,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                         -1);
     }
 
-    if (!entitySpecified) {
+    if (!entity_specified) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                         ACE_TEXT("No entity specified for [endpoint/%C] section.\n"),
@@ -1707,7 +1719,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                         -1);
     }
 
-    if (!typeSpecified) {
+    if (!type_specified) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR:StaticDiscovery::parse_endpoints ")
                         ACE_TEXT("No type specified for [endpoint/%C] section.\n"),
@@ -1715,7 +1727,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                         -1);
     }
 
-    if (!topic_name_Specified) {
+    if (!topic_name_specified) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                         ACE_TEXT("No topic specified for [endpoint/%C] section.\n"),
@@ -1725,7 +1737,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 
     TransportConfig_rch config;
 
-    if (config_name_Specified) {
+    if (config_name_specified) {
       config = TheTransportRegistry->get_config(config_name);
       if (config.is_nil()) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -1736,7 +1748,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       }
     }
 
-    if (config.is_nil() && domainSpecified) {
+    if (config.is_nil() && domain_specified) {
       config = TheTransportRegistry->domain_default_config(domain);
     }
 

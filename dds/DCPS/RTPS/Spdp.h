@@ -82,7 +82,7 @@ public:
 
   WaitForAcks& wait_for_acks();
 
-  OpenDDS::Security::SecurityConfig_rch get_security_config() { return security_config_; }
+  OpenDDS::Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
@@ -131,7 +131,7 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : public OpenDDS::DCPS::RcEventHandler, public OpenDDS::DCPS::PoolAllocationBase {
-    SpdpTransport(Spdp* outer, bool securityGuids);
+    explicit SpdpTransport(Spdp* outer, bool securityGuids);
     ~SpdpTransport();
 
     virtual int handle_timeout(const ACE_Time_Value&, const void*);
