@@ -14,43 +14,43 @@
 #include "dds/DdsDcpsCoreC.h"
 
 namespace OpenDDS {
-  namespace Security {
+namespace Security {
 
-    class LocalAccessCredentialData
+  class LocalAccessCredentialData
+  {
+  public:
+    LocalAccessCredentialData(const DDS::PropertySeq& props);
+
+    LocalAccessCredentialData();
+
+    ~LocalAccessCredentialData();
+
+    void load(const DDS::PropertySeq& props);
+
+    SSL::Certificate& get_ca_cert()
     {
-    public:
-      LocalAccessCredentialData(const DDS::PropertySeq& props);
+      return *ca_cert_;
+    }
 
-      LocalAccessCredentialData();
+    SSL::SignedDocument& get_governance_doc()
+    {
+      return *governance_doc_;
+    }
 
-      ~LocalAccessCredentialData();
+    SSL::SignedDocument& get_permissions_doc()
+    {
+      return *permissions_doc_;
+    }
 
-      void load(const DDS::PropertySeq& props);
+  private:
 
-      SSL::Certificate& get_ca_cert()
-      {
-        return *ca_cert_;
-      }
+    SSL::Certificate::unique_ptr ca_cert_;
+    SSL::SignedDocument::unique_ptr governance_doc_;
+    SSL::SignedDocument::unique_ptr permissions_doc_;
 
-      SSL::SignedDocument& get_governance_doc()
-      {
-        return *governance_doc_;
-      }
+  };
 
-      SSL::SignedDocument& get_permissions_doc()
-      {
-        return *permissions_doc_;
-      }
-
-    private:
-
-      SSL::Certificate::unique_ptr ca_cert_;
-      SSL::SignedDocument::unique_ptr governance_doc_;
-      SSL::SignedDocument::unique_ptr permissions_doc_;
-
-    };
-
-  }
+}
 }
 
 #endif

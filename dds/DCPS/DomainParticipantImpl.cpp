@@ -41,22 +41,44 @@
 
 namespace Util {
 
-template <typename Key>
-int find(
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap& c,
-  const Key& key,
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value)
-{
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
-    c.find(key);
+  template <typename Key>
+  int find(
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap& c,
+    const Key& key,
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value)
+  {
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
+      c.find(key);
 
-  if (iter == c.end()) {
-    return -1;
+    if (iter == c.end()) {
+      return -1;
+    }
+
+    value = &iter->second;
+    return 0;
   }
 
-  value = &iter->second;
-  return 0;
-}
+  DDS::PropertySeq filter_properties(const DDS::PropertySeq& properties, const std::string& prefix)
+  {
+    // Find matches
+    std::set<size_t> indices;
+    for (size_t i = 0, len = properties.length(); i < len; ++i) {
+      if (std::string(properties[i].name.in()).find(prefix) == 0) {
+        indices.insert(i);
+      }
+    }
+
+    // Built result
+    DDS::PropertySeq result(indices.size());
+    result.length(indices.size());
+    size_t j = 0;
+    for (std::set<size_t>::const_iterator it = indices.begin(); it != indices.end(); ++it)
+    {
+      result[j] = properties[*it];
+    }
+
+    return result;
+  }
 
 } // namespace Util
 
@@ -1628,6 +1650,7 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
+  AddDomainStatus value = {GUID_UNKNOWN, false};
   if (TheServiceParticipant->get_security()) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
@@ -1682,8 +1705,8 @@ DomainParticipantImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-    // TODO - Check if we really need to filter qos properites for "dds.sec.crypto.*" names before passing in here
-    part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_, qos_.property.value, part_sec_attr, se);
+    part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
+      Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
     if (part_crypto_handle_ == DDS::HANDLE_NIL) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
@@ -1693,8 +1716,7 @@ DomainParticipantImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-    const AddDomainStatus value =
-      disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
+    value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
@@ -1704,11 +1726,8 @@ DomainParticipantImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-    dp_id_ = value.id;
-    federated_ = value.federated;
   } else {
-    const AddDomainStatus value =
-      disco->add_domain_participant(domain_id_, qos_);
+    value = disco->add_domain_participant(domain_id_, qos_);
 
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
@@ -1717,10 +1736,10 @@ DomainParticipantImpl::enable()
                  ACE_TEXT("add_domain_participant returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
-
-    dp_id_ = value.id;
-    federated_ = value.federated;
   }
+
+  dp_id_ = value.id;
+  federated_ = value.federated;
 
   DDS::ReturnCode_t ret = this->set_enabled();
 
@@ -1810,14 +1829,14 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
 
 namespace {
 
-bool
-is_bit(const char* topic_name) {
-  bool result = strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
-             || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
-             || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
-             || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
-  return result;
-}
+  bool
+  is_bit(const char* topic_name) {
+    bool result = strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
+               || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
+               || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
+               || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
+    return result;
+  }
 
 }
 
@@ -1835,15 +1854,6 @@ DomainParticipantImpl::create_new_topic(
                    tao_mon,
                    this->topics_protector_,
                    DDS::Topic::_nil());
-
-  /*
-  TopicMap::mapped_type* entry = 0;
-
-  if (Util::find(topics_, topic_name, entry) == 0) {
-    ++entry->client_refs_;
-    return DDS::Topic::_duplicate(entry->pair_.obj_.in());
-  }
-  */
 
   if (TheServiceParticipant->get_security() && !is_bit(topic_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
@@ -2330,7 +2340,7 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
 }
 
 void
-DomainParticipantImpl::security_config(const Security::SecurityConfig_rch& cfg)
+DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& cfg)
 {
   security_config_ = cfg;
 }

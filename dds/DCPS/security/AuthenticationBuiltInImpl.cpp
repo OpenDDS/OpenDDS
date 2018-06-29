@@ -91,7 +91,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(participant_qos);
   ACE_UNUSED_ARG(ex);
 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
@@ -120,10 +119,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         result = DDS::Security::VALIDATION_OK;
       }
     } else {
-        fprintf(stderr,
-                "AuthenticationBuiltInImpl::validate_local_identity: "
-                "Error, GUID_UNKNOWN passed in for candidate_participant_guid\n");
+        set_security_error(ex, -1, 0, "GUID_UNKNOWN passed in for candidate_participant_guid");
+
     }
+
+  } else {
+      set_security_error(ex, -1, 0, "local-credential-data failed validation");
   }
 
   return result;
@@ -238,6 +239,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           auth_req_wrapper.add_bin_property("future_challenge", nonce);
 
         } else {
+          set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for future_challenge property");
+
           result = DDS::Security::VALIDATION_FAILED;
         }
 
@@ -313,7 +316,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
                                 local_credential_data_.get_access_permissions());
 
             int err = hash(hash_c1);
-            if (err) return DDS::Security::VALIDATION_FAILED;
+            if (err) {
+                set_security_error(ex, -1, 0, "Failed to generate credential-hash 'hash_c1'");
+                return DDS::Security::VALIDATION_FAILED;
+            }
           }
 
           message_out.add_bin_property("c.id", local_credential_data_.get_participant_cert().original_bytes());
@@ -335,6 +341,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
               message_out.add_bin_property("challenge1", nonce);
 
             } else {
+              set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for challenge1 property");
               return DDS::Security::VALIDATION_FAILED;
             }
 
@@ -397,7 +404,9 @@ void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUI
     }
 
   } else {
-    fprintf(stderr, "extract_participant_guid_from_cpdata: Error, failed to deserialize guid from cpdata\n");
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: extract_participant_guid_from_cpdata, ")
+               ACE_TEXT("failed to deserialize guid from cpdata.\n")));
   }
 
 }
@@ -774,15 +783,26 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   ::DDS::Security::HandshakeHandle handshake_handle,
   ::DDS::Security::SecurityException & ex)
 {
-  // Return a non-zero value if the handshake handle is valid
+  using namespace DDS::Security;
+
+  SharedSecretHandle* result = 0;
+
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
-    DDS::Security::SharedSecretHandle_var handle = handshakeData->secret_handle;
-    return handle._retn();
+    ValidationResult_t state = handshakeData->validation_state;
+    if (state == VALIDATION_OK || state == VALIDATION_OK_FINAL_MESSAGE) {
+      SharedSecretHandle_var handle = handshakeData->secret_handle;
+      result = handle._retn();
+
+    } else {
+      set_security_error(ex, -1, 0, "Validation state must be either VALIDATION_OK or VALIDATION_OK_FINAL_MESSAGE");
+    }
+
   } else {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
-    return 0;
   }
+
+  return result;
 }
 
 ::CORBA::Boolean AuthenticationBuiltInImpl::get_authenticated_peer_credential_token(
@@ -790,29 +810,36 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   ::DDS::Security::HandshakeHandle handshake_handle,
   ::DDS::Security::SecurityException & ex)
 {
+  using namespace DDS::Security;
   ::CORBA::Boolean result = false;
 
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
-    OpenDDS::Security::TokenWriter peer_token(peer_credential_token, Auth_Peer_Cred_Token_Class_Id);
+    ValidationResult_t state = handshakeData->validation_state;
+    if (state == VALIDATION_OK || state == VALIDATION_OK_FINAL_MESSAGE) {
+      OpenDDS::Security::TokenWriter peer_token(peer_credential_token, Auth_Peer_Cred_Token_Class_Id);
 
-    DDS::BinaryPropertySeq& props = peer_credential_token.binary_properties;
-    props.length(2);
+      DDS::BinaryPropertySeq& props = peer_credential_token.binary_properties;
+      props.length(2);
 
-    DDS::BinaryProperty_t p1;
-    p1.name = "c.id";
-    p1.value = handshakeData->remote_cert->original_bytes();
-    p1.propagate = true;
+      DDS::BinaryProperty_t p1;
+      p1.name = "c.id";
+      p1.value = handshakeData->remote_cert->original_bytes();
+      p1.propagate = true;
 
-    DDS::BinaryProperty_t p2;
-    p2.name = "c.perm";
-    p2.value = handshakeData->access_permissions;
-    p2.propagate = true;
+      DDS::BinaryProperty_t p2;
+      p2.name = "c.perm";
+      p2.value = handshakeData->access_permissions;
+      p2.propagate = true;
 
-    props[0] = p1;
-    props[1] = p2;
+      props[0] = p1;
+      props[1] = p2;
 
-    result = true;
+      result = true;
+
+    } else {
+      set_security_error(ex, -1, 0, "Validation state must be either VALIDATION_OK or VALIDATION_OK_FINAL_MESSAGE");
+    }
 
   } else {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
@@ -903,7 +930,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     results = true;
 
   } else {
-    set_security_error(ex, -1, 0, "Handshake handle not recognized");
+    set_security_error(ex, -1, 0, "Identity handle not recognized");
   }
   return results;
 }
