@@ -9,9 +9,8 @@
 #include <ace/Log_Msg.h>
 #include <openssl/err.h>
 
-#define OPENDDS_SSL_LOG_ERR(MSG)                                            \
-  ACE_ERROR((LM_ERROR,                                                      \
-             ACE_TEXT("(%P|%t) ERROR: '%C' ") ACE_TEXT(MSG) ACE_TEXT("\n"), \
-             ERR_reason_error_string(ERR_get_error())))
+#define OPENDDS_SSL_LOG_ERR(MSG)                              \
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: '%C' %C \n"), \
+             ERR_reason_error_string(ERR_get_error()), (MSG)))
 
 #endif

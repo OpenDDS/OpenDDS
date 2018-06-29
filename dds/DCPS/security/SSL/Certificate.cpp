@@ -11,6 +11,7 @@
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
+#include <sstream>
 
 namespace OpenDDS {
 namespace Security {
@@ -422,7 +423,7 @@ namespace SSL {
     } else {
       std::stringstream errmsg;
       errmsg << "failed to read file '" << path << "' using BIO_new_file";
-      OPENDDS_SSL_LOG_ERR(errmsg.str());
+      OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
     }
 
     return result;
@@ -459,7 +460,7 @@ namespace SSL {
       } else {
         std::stringstream errmsg;
         errmsg << "BIO_new failed";
-        OPENDDS_SSL_LOG_ERR(errmsg.str());
+        OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
         break;
       }
 

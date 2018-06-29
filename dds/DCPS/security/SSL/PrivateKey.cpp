@@ -8,6 +8,8 @@
 #include "Err.h"
 #include <openssl/pem.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
+#include <cstring>
+#include <sstream>
 
 namespace OpenDDS {
 namespace Security {
@@ -196,7 +198,7 @@ namespace SSL {
     } else {
       std::stringstream errmsg;
       errmsg << "failed to read file '" << path << "' using BIO_new_file";
-      OPENDDS_SSL_LOG_ERR(errmsg.str());
+      OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
     }
 
     return result;
@@ -246,7 +248,7 @@ namespace SSL {
     } else {
       std::stringstream errmsg;
       errmsg << "failed to create data '" << data << "' using BIO_new";
-      OPENDDS_SSL_LOG_ERR(errmsg.str());
+      OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
     }
 
     return result;
