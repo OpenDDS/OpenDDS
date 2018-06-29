@@ -6,18 +6,12 @@
 #ifndef OPENDDS_SECURITY_SSL_ERR_H
 #define OPENDDS_SECURITY_SSL_ERR_H
 
+#include <ace/Log_Msg.h>
 #include <openssl/err.h>
-#include <iostream>
-#include <sstream>
-#include <cstdio>
-#include <cerrno>
-#include <cstring>
 
-#define OPENDDS_SSL_LOG_ERR(MSG)                                         \
-  do {                                                                   \
-    std::cerr << "Warning '" << ERR_reason_error_string(ERR_get_error()) \
-              << "' " << (MSG) << " in file '" << __FILE__ << "' line '" \
-              << __LINE__ << "'\n";                                      \
-  } while (0)
+#define OPENDDS_SSL_LOG_ERR(MSG)                                            \
+  ACE_ERROR((LM_ERROR,                                                      \
+             ACE_TEXT("(%P|%t) ERROR: '%C' ") ACE_TEXT(MSG) ACE_TEXT("\n"), \
+             ERR_reason_error_string(ERR_get_error())))
 
 #endif
