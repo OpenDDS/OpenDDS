@@ -63,10 +63,10 @@ namespace SSL {
       case URI_PKCS11:
       case URI_UNKNOWN:
       default:
-        fprintf(
-          stderr,
-          "PrivateKey::load: Unsupported URI scheme in cert path '%s'\n",
-          uri.c_str());
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::PrivateKey::load: WARNING: Unsupported URI scheme in cert path '%C'\n"),
+                   uri.c_str()));
+
         break;
     }
   }

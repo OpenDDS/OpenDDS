@@ -70,8 +70,9 @@ namespace SSL {
       case URI_PKCS11:
       case URI_UNKNOWN:
       default:
-        fprintf(stderr, "SignedDocument::load: Unsupported URI scheme '%s'\n",
-                uri.c_str());
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::SignedDocument::load: WARNING: Unsupported URI scheme '%C'\n"),
+                   uri.c_str()));
         break;
     }
   }
@@ -217,15 +218,13 @@ namespace SSL {
         }
 
       } else {
-        fprintf(stderr,
-                "Certificate::deserialize: Error, source OctetSeq contains "
-                "no data\n");
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, source OctetSeq contains no data\n")));
       }
 
     } else {
-      fprintf(stderr,
-              "Certificate::deserialize: Error, an X509 certificate has "
-              "already been loaded\n");
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n")));
     }
 
     return result;

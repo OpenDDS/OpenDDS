@@ -72,11 +72,10 @@ namespace SSL {
       case URI_PKCS11:
       case URI_UNKNOWN:
       default:
-        fprintf(
-          stderr,
-          "Certificate::Certificate: Warning, unsupported URI scheme in "
-          "cert path '%s'\n",
-          uri.c_str());
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::Certificate::Certificate: WARNING, unsupported URI scheme in "
+                            "cert path '%C'\n"), uri.c_str()));
+
         break;
     }
   }
@@ -103,11 +102,11 @@ namespace SSL {
               int err = X509_STORE_CTX_get_error(validation_ctx),
                   depth = X509_STORE_CTX_get_error_depth(validation_ctx);
 
-              fprintf(
-                stderr,
-                "Certificate::verify: Warning '%s' occurred using cert at "
-                "depth '%d', validation failed.\n",
-                X509_verify_cert_error_string(err), depth);
+              ACE_ERROR((LM_WARNING,
+                         ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING '%C' occurred using cert at "
+                                  "depth '%i', validation failed.\n"),
+                         X509_verify_cert_error_string(err),
+                         depth));
 
               result = err;
             }
@@ -122,16 +121,15 @@ namespace SSL {
         }
 
       } else {
-        fprintf(stderr,
-                "Certificate::verify: Warning, passed-in CA has not loaded a "
-                "certificate\n");
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, passed-in CA has not loaded a "
+                            "certificate\n")));
       }
 
     } else {
-      fprintf(
-        stderr,
-        "Certificate::verify: Warning, a certificate must be loaded before "
-        "it can be verified\n");
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, a certificate must be loaded before "
+                          "it can be verified\n")));
     }
 
     return result;
@@ -312,12 +310,11 @@ namespace SSL {
             result = 0;
 
           } else {
-            fprintf(
-              stderr,
-              "Certificate::algorithm: Warning, currently RSA-2048 is the "
-              "only supported algorithm; "
-              "received RSA cert with '%d' bits\n",
-              keylen);
+            ACE_ERROR((LM_WARNING,
+                       ACE_TEXT("(%P|%t) SSL::Certificate::algorithm: WARNING, currently RSA-2048 is the "
+                                "only supported algorithm; "
+                                "received RSA cert with '%i' bits\n"), keylen));
+
           }
 
           RSA_free(rsa);
@@ -329,19 +326,18 @@ namespace SSL {
             dst = "EC-prime256v1";
             result = 0;
           } else {
-            fprintf(stderr,
-                    "Certificate::algorithm: Warning, only RSA-2048 or "
-                    "EC-prime256v1 are currently supported\n");
+            ACE_ERROR((LM_WARNING,
+                       ACE_TEXT("(%P|%t) SSL::Certificate::algorithm: WARNING, only RSA-2048 or "
+                                "EC-prime256v1 are currently supported\n")));
           }
 
           EC_KEY_free(eckey);
         }
 
       } else {
-        fprintf(
-          stderr,
-          "Certificate::algorithm: Warning, failed to get pubkey from X509 "
-          "cert\n");
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::Certificate::algorithm: WARNING, failed to get pubkey from X509 cert\n")));
+
       }
 
       EVP_PKEY_free(pkey);
@@ -363,11 +359,12 @@ namespace SSL {
       }
 
       if (ferror(fp)) {
-        fprintf(
-          stderr,
-          "LocalAuthCredentialData::load_permissions_file: Warning '%s' "
-          "occured while reading file '%s'\n",
-          std::strerror(errno), path.c_str());
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::LocalAuthCredentialData::load_permissions_file: WARNING '%C' "
+                            "occured while reading file '%C'\n"),
+                   std::strerror(errno),
+                   path.c_str()));
+
       } else {
         original_bytes_.length(chunks.size());
         std::memcpy(original_bytes_.get_buffer(), &chunks[0],
@@ -544,16 +541,13 @@ namespace SSL {
         }
 
       } else {
-        fprintf(
-          stderr,
-          "Certificate::deserialize: Warning, source OctetSeq contains no "
-          "data\n");
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, source OctetSeq contains no data")));
       }
 
     } else {
-      fprintf(stderr,
-              "Certificate::deserialize: Warning, an X509 certificate has "
-              "already been loaded\n");
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n")));
     }
 
     return result;
