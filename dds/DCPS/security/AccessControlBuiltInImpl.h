@@ -41,7 +41,7 @@ namespace Security {
 /**
 * @class AccessControlBuiltInImpl
 *
-* @brief Implements the DDS built-in version of the Access Contro
+* @brief Implements the DDS built-in version of the Access Control
 * plugin for the DDS Security Specification
 *
 * See the DDS security specification, OMG formal/17-09-20, for a description of
@@ -232,7 +232,7 @@ public:
 private:
 
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl& right);
-  AccessControlBuiltInImpl& operator-=(const AccessControlBuiltInImpl& right);
+  AccessControlBuiltInImpl& operator=(const AccessControlBuiltInImpl& right);
 
   // Governance Rule definitions
 
@@ -245,14 +245,14 @@ private:
 
   typedef std::vector<TopicAccessRule> TopicAccessRules;
 
-  struct domain_rule {
+  struct DomainRule {
     std::set< ::DDS::Security::DomainId_t > domain_list;
     ::DDS::Security::ParticipantSecurityAttributes domain_attrs;
     TopicAccessRules topic_rules;
   };
 
 
-  typedef std::vector<domain_rule> GovernanceAccessRules;
+  typedef std::vector<DomainRule> GovernanceAccessRules;
 
 
   // TODO: the ParticipantGovMapType needs to support multiple domain_rule(s). See domain_access_rules above
@@ -278,40 +278,40 @@ private:
     std::string not_after;
   };
 
-  struct permission_topic_ps_rule{
+  struct PermissionTopicPsRule {
     PublishSubscribe_t  ps_type;
     std::vector<std::string> topic_list;
   };
 
-  struct permission_partition_ps {
+  struct PermissionPartitionPs {
     PublishSubscribe_t ps_type;
     std::vector<std::string> partition_list;
   };
 
-  struct permissions_topic_rule {
+  struct PermissionTopicRule {
     AllowDeny_t ad_type;
     std::set< ::DDS::Security::DomainId_t > domain_list;
-    std::list<permission_topic_ps_rule> topic_ps_rules;
+    std::list<PermissionTopicPsRule> topic_ps_rules;
   };
 
-  struct permissions_partition {
+  struct PermissionsPartition {
     AllowDeny_t ad_type;
     std::set< ::DDS::Security::DomainId_t > domain_list;
-    std::list<permission_partition_ps> partition_ps;
+    std::list<PermissionPartitionPs> partition_ps;
   };
 
-  struct permission_grant_rule {
+  struct PermissionGrantRule {
     std::string grant_name;
     std::string subject;
     Validity_t validity;
     std::string default_permission;
-    std::list<permissions_topic_rule> PermissionTopicRules;
-    std::list<permissions_partition> PermissionPartitions;
+    std::list<PermissionTopicRule> PermissionTopicRules;
+    std::list<PermissionsPartition> PermissionPartitions;
   };
 
-  typedef std::vector<permission_grant_rule> PermissionGrantRules;
+  typedef std::vector<PermissionGrantRule> PermissionGrantRules;
 
-  struct ac_perms {
+  struct AcPerms {
     ::DDS::Security::DomainId_t domain_id;
     GovernanceAccessRules gov_rules;
     PermissionGrantRules perm_rules;
@@ -319,9 +319,9 @@ private:
     ::DDS::Security::PermissionsCredentialToken perm_cred_token;
   };
 
-  typedef std::map< ::DDS::Security::PermissionsHandle , ac_perms > ACPermsMap;
+  typedef std::map< ::DDS::Security::PermissionsHandle , AcPerms > ACPermsMap;
 
-  ACPermsMap local_ac_perms;
+  ACPermsMap local_ac_perms_;
 
   typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
 
@@ -332,7 +332,7 @@ private:
     RevokePermissionsTimer(AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTimer();
     bool start_timer(const ACE_Time_Value length, ::DDS::Security::PermissionsHandle pm_handle);
-    int handle_timeout(const ACE_Time_Value &tv, const void * arg);
+    virtual int handle_timeout(const ACE_Time_Value &tv, const void * arg);
     bool is_scheduled() { return scheduled_; }
 
   protected:
@@ -351,8 +351,8 @@ private:
   RevokePermissionsTimer rp_timer_;
 
   ::CORBA::Long generate_handle();
-  ::CORBA::Long load_governance_file(ac_perms *, std::string);
-  ::CORBA::Long load_permissions_file(ac_perms *, std::string);
+  ::CORBA::Long load_governance_file(AcPerms *, std::string);
+  ::CORBA::Long load_permissions_file(AcPerms *, std::string);
   ::CORBA::Boolean file_exists(const std::string&);
   std::string extract_file_name(const std::string&);
   std::string get_file_contents(const char *);
@@ -369,6 +369,11 @@ private:
   
   LocalAccessCredentialData local_access_control_data_;
 
+  int get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
+                         const char * topic_name,
+                         const ::DDS::PartitionQosPolicy & partition,
+                         const ::DDS::Security::DataTagQosPolicy & data_tag,
+                         ::DDS::Security::EndpointSecurityAttributes & attributes);
 };
 
 } // namespace Security

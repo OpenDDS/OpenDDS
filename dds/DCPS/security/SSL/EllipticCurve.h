@@ -17,10 +17,14 @@ namespace SSL {
 
   class DdsSecurity_Export ECAlgorithm
   {
-   public:
+  public:
     typedef DCPS::unique_ptr<ECAlgorithm> unique_ptr;
 
-    ECAlgorithm() : k_(NULL) {}
+    ECAlgorithm() : 
+      k_(NULL)
+    {
+
+    }
 
     virtual ~ECAlgorithm();
 
@@ -38,7 +42,7 @@ namespace SSL {
     virtual bool cmp_shared_secret(const ECAlgorithm& other) const;
     virtual const char* kagree_algo() = 0;
 
-   protected:
+  protected:
     virtual int compute_shared_secret(const DDS::OctetSeq& pub_key) = 0;
     int hash_shared_secret();
 
@@ -48,7 +52,7 @@ namespace SSL {
 
   class DdsSecurity_Export EC_PRIME_256_V1_CEUM : public ECAlgorithm
   {
-   public:
+  public:
     EC_PRIME_256_V1_CEUM();
     ~EC_PRIME_256_V1_CEUM();
 
@@ -58,49 +62,59 @@ namespace SSL {
 
     int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
-    const char* kagree_algo() { return "EC+prime256v1-CEUM"; }
+    const char* kagree_algo() {
+      return "EC+prime256v1-CEUM";
+    }
   };
 
   class DdsSecurity_Export EllipticCurve
   {
-   public:
+  public:
     typedef DCPS::unique_ptr<EllipticCurve> unique_ptr;
 
     static EllipticCurve* factory(const DDS::OctetSeq& kagree_algo);
 
-    EllipticCurve(ECAlgorithm* algorithm) : algo_(algorithm) {}
-
-    ~EllipticCurve() {}
-
-    void load()
+    EllipticCurve(ECAlgorithm* algorithm) :
+      algo_(algorithm)
     {
+
+    }
+
+    ~EllipticCurve()
+    {
+
+    }
+
+    void load() {
       if (algo_) algo_->init();
     }
 
-    int pub_key(DDS::OctetSeq& dst) { return algo_->pub_key(dst); }
+    int pub_key(DDS::OctetSeq& dst) {
+      return algo_->pub_key(dst);
+    }
 
-    int gen_shared_secret(const DDS::OctetSeq& pub_key)
-    {
+    int gen_shared_secret(const DDS::OctetSeq& pub_key) {
       return algo_->gen_shared_secret(pub_key);
     }
 
-    const DDS::OctetSeq& get_shared_secret()
-    {
+    const DDS::OctetSeq& get_shared_secret() {
       return algo_->get_shared_secret();
     }
 
-    bool cmp_shared_secret(const EllipticCurve& other)
-    {
+    bool cmp_shared_secret(const EllipticCurve& other) {
       return algo_->cmp_shared_secret(*other.algo_);
     }
 
-    const char* kagree_algo() const { return algo_->kagree_algo(); }
+    const char* kagree_algo() const {
+      return algo_->kagree_algo();
+    }
 
-   private:
+  private:
+
     ECAlgorithm::unique_ptr algo_;
   };
-}  // namespace SSL
-}  // namespace Security
-}  // namespace OpenDDS
+}
+}
+}
 
 #endif

@@ -765,7 +765,7 @@ int from_param_list(const ParameterList& param_list,
     PARTICIPANT_SECURITY_INFO_FIELD = 0x08
   };
 
-  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD & PERM_TOKEN_FIELD;
+  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD | PERM_TOKEN_FIELD;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
@@ -838,7 +838,7 @@ int from_param_list(const ParameterList& param_list,
     IDENTITY_STATUS_TOKEN_FIELD = 0x10
   };
 
-  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD & PERM_TOKEN_FIELD & PARTICIPANT_SECURITY_INFO_FIELD;
+  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD | PERM_TOKEN_FIELD | PARTICIPANT_SECURITY_INFO_FIELD;
 
   size_t len = param_list.length();
   for (size_t i = 0; i < len; ++i) {
@@ -847,27 +847,27 @@ int from_param_list(const ParameterList& param_list,
       switch (p._d()) {
         case DDS::Security::PID_IDENTITY_TOKEN:
           id_token = p.identity_token();
-          fieldmask |= 0x01;
+          fieldmask |= ID_TOKEN_FIELD;
           break;
 
         case DDS::Security::PID_PERMISSIONS_TOKEN:
           perm_token = p.permissions_token();
-          fieldmask |= 0x02;
+          fieldmask |= PERM_TOKEN_FIELD;
           break;
 
         case OpenDDS::RTPS::PID_PROPERTY_LIST:
           property_qos = p.property();
-          fieldmask |= 0x04;
+          fieldmask |= PROPERTY_LIST_FIELD;
           break;
 
         case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
           security_info = p.participant_security_info();
-          fieldmask |= 0x08;
+          fieldmask |= PARTICIPANT_SECURITY_INFO_FIELD;
           break;
 
         case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
           id_status_token = p.identity_status_token();
-          fieldmask |= 0x10;
+          fieldmask |= IDENTITY_STATUS_TOKEN_FIELD;
           break;
 
         default:

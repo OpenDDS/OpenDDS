@@ -41,44 +41,44 @@
 
 namespace Util {
 
-template <typename Key>
-int find(
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap& c,
-  const Key& key,
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value)
-{
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
-    c.find(key);
-
-  if (iter == c.end()) {
-    return -1;
-  }
-
-  value = &iter->second;
-  return 0;
-}
-
-DDS::PropertySeq filter_properties(const DDS::PropertySeq& properties, const std::string& prefix)
-{
-  // Find matches
-  std::set<size_t> indices;
-  for (size_t i = 0, len = properties.length(); i < len; ++i) {
-    if (std::string(properties[i].name.in()).find(prefix) == 0) {
-      indices.insert(i);
-    }
-  }
-
-  // Built result
-  DDS::PropertySeq result(indices.size());
-  result.length(indices.size());
-  size_t j = 0;
-  for (std::set<size_t>::const_iterator it = indices.begin(); it != indices.end(); ++it)
+  template <typename Key>
+  int find(
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap& c,
+    const Key& key,
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value)
   {
-    result[j] = properties[*it];
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
+      c.find(key);
+
+    if (iter == c.end()) {
+      return -1;
+    }
+
+    value = &iter->second;
+    return 0;
   }
 
-  return result;
-}
+  DDS::PropertySeq filter_properties(const DDS::PropertySeq& properties, const std::string& prefix)
+  {
+    // Find matches
+    std::set<size_t> indices;
+    for (size_t i = 0, len = properties.length(); i < len; ++i) {
+      if (std::string(properties[i].name.in()).find(prefix) == 0) {
+        indices.insert(i);
+      }
+    }
+
+    // Built result
+    DDS::PropertySeq result(indices.size());
+    result.length(indices.size());
+    size_t j = 0;
+    for (std::set<size_t>::const_iterator it = indices.begin(); it != indices.end(); ++it)
+    {
+      result[j] = properties[*it];
+    }
+
+    return result;
+  }
 
 } // namespace Util
 
@@ -1716,8 +1716,7 @@ DomainParticipantImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-    AddDomainStatus value = disco->add_domain_participant_secure(domain_id_, qos_,
-      dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
+    value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
