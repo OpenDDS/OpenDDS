@@ -51,17 +51,17 @@ namespace SSL {
   {
     if (doc_) return;
 
-    std::string path;
-    URI_SCHEME s = extract_uri_info(uri, path);
+    std::string uri_info;
+    URI_SCHEME s = extract_uri_info(uri, uri_info);
 
     switch (s) {
       case URI_FILE:
-        doc_ = PKCS7_from_SMIME(path);
+        doc_ = PKCS7_from_SMIME_file(uri_info);
         if (doc_) cache_plaintext();
         break;
 
       case URI_DATA:
-        doc_ = PKCS7_from_DATA(path);
+        doc_ = PKCS7_from_data(uri_info);
         if (doc_) cache_plaintext();
         break;
 
@@ -253,7 +253,7 @@ namespace SSL {
     return result;
   }
 
-  PKCS7* SignedDocument::PKCS7_from_SMIME(const std::string& path)
+  PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
   {
     PKCS7* result = NULL;
 
@@ -276,14 +276,14 @@ namespace SSL {
     return result;
   }
 
-  PKCS7* SignedDocument::PKCS7_from_DATA(const std::string& path)
+  PKCS7* SignedDocument::PKCS7_from_data(const std::string& s_mime_data)
   {
     DDS::OctetSeq original_bytes;
 
     // The minus 1 is because path contains a comma in element 0 and that
     // comma is not included in the cert string
-    original_bytes.length(path.size() - 1);
-    std::memcpy(original_bytes.get_buffer(), &path[1],
+    original_bytes.length(s_mime_data.size() - 1);
+    std::memcpy(original_bytes.get_buffer(), &s_mime_data[1],
                 original_bytes.length());
 
     // To appease the other DDS security implementations which
@@ -310,7 +310,7 @@ namespace SSL {
       BIO_free(filebuf);
     } else {
       std::stringstream errmsg;
-      errmsg << "failed to create data '" << path << "' using BIO_new";
+      errmsg << "failed to create data '" << s_mime_data << "' using BIO_new";
       OPENDDS_SSL_LOG_ERR(errmsg.str());
     }
 

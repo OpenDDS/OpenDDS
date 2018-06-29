@@ -49,9 +49,9 @@ namespace SSL {
    private:
     int cache_plaintext();
 
-    PKCS7* PKCS7_from_SMIME(const std::string& path);
+    PKCS7* PKCS7_from_SMIME_file(const std::string& path);
 
-    PKCS7* PKCS7_from_DATA(const std::string& path);
+    PKCS7* PKCS7_from_data(const std::string& s_mime_data);
 
     PKCS7* doc_;
     BIO* content_;
