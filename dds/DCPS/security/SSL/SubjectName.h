@@ -25,15 +25,33 @@ namespace SSL {
     SubjectName(const char*, bool permissive = false);
     SubjectName(const std::string&, bool permissive = false);
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int parse(const char*, bool permissive = false);
+
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int parse(const std::string&, bool permissive = false);
 
     bool operator==(const SubjectName&) const;
     bool operator!=(const SubjectName&) const;
 
    protected:
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int parse_permissive(const char*);
+
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int parse_dce(const char*);
+
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int parse_ldap_v3(const char*);
 
     int simple_avp_seq_parse(const char* in, const char* s_del,

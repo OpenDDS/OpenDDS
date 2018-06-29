@@ -130,7 +130,7 @@ namespace SSL {
       }
     }
 
-    return map_.empty() ? -1 : 0;
+    return map_.empty() ? 1 : 0;
   }
 
   int SubjectName::parse_permissive(const char* in)
