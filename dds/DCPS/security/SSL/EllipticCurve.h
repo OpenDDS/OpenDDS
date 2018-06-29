@@ -1,7 +1,7 @@
 /*
-* Distributed under the DDS License.
-* See: http://www.DDS.org/license.html
-*/
+ * Distributed under the DDS License.
+ * See: http://www.DDS.org/license.html
+ */
 
 #ifndef OPENDDS_SECURITY_SSL_ELLIPTIC_CURVE_H
 #define OPENDDS_SECURITY_SSL_ELLIPTIC_CURVE_H

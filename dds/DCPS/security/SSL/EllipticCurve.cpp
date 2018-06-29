@@ -1,7 +1,7 @@
 /*
-* Distributed under the DDS License.
-* See: http://www.DDS.org/license.html
-*/
+ * Distributed under the DDS License.
+ * See: http://www.DDS.org/license.html
+ */
 
 #include "EllipticCurve.h"
 #include "Err.h"
