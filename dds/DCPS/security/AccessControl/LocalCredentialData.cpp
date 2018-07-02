@@ -45,18 +45,18 @@ namespace OpenDDS {
         }
       }
 
-      // If props did not have all 3 properties in it, set the missing properties to a NULL string
+      // If props did not have all 3 properties in it, set the missing properties to an empty string
       if (props.length() != 3) {
         if (!permission) {
-          permissions_doc_.reset(new SSL::SignedDocument("/0"));
+          permissions_doc_.reset(new SSL::SignedDocument(""));
         }
 
         if (!governance) {
-          governance_doc_.reset(new SSL::SignedDocument("/0"));
+          governance_doc_.reset(new SSL::SignedDocument(""));
         }
 
         if (!ca) {
-          ca_cert_.reset(new SSL::Certificate("/0"));
+          ca_cert_.reset(new SSL::Certificate(""));
         }
       }
     }
