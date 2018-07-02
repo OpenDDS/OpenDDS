@@ -18,14 +18,14 @@ DataSampleElement*
 DataSampleElement::get_next_send_sample() const
 {
   return next_send_sample_;
-};
+}
 
 ACE_INLINE
 void
 DataSampleElement::set_next_send_sample(DataSampleElement* next_send_sample)
 {
   this->next_send_sample_ = next_send_sample;
-};
+}
 
 ACE_INLINE
 const DataSampleHeader&
