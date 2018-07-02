@@ -30,8 +30,8 @@ namespace OpenDDS {
            ca = false;
 
       for (size_t i = 0; i < props.length(); ++i) {
-        const std::string name = props[i].name;
-        const std::string value = props[i].value;
+        const std::string name = props[i].name.in();
+        const std::string value = props[i].value.in();
 
         if (name == "dds.sec.access.permissions_ca") {
           ca_cert_.reset(new SSL::Certificate(value));

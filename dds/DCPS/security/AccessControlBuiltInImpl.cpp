@@ -14,7 +14,7 @@
 #include "SSL/SubjectName.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "ace/Reactor.h"
-#include "TAO/debug.h"
+#include "tao/debug.h"
 
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
@@ -88,8 +88,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   //TODO: These comparisons are only supporting the file: protocol type in the property value
   for (size_t i = 0; i < props.length(); ++i) {
-    const std::string name = props[i].name;
-    const std::string value = props[i].value;
+    const std::string name = props[i].name.in();
+    const std::string value = props[i].value.in();
 
     if (name == "dds.sec.access.permissions_ca") {
       std::string fn = extract_file_name(value);

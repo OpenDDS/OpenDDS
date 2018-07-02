@@ -8,6 +8,8 @@
 #include "Err.h"
 #include <openssl/pem.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
+#include <cstring>
+#include <sstream>
 
 namespace OpenDDS {
 namespace Security {
@@ -61,10 +63,10 @@ namespace SSL {
       case URI_PKCS11:
       case URI_UNKNOWN:
       default:
-        fprintf(
-          stderr,
-          "PrivateKey::load: Unsupported URI scheme in cert path '%s'\n",
-          uri.c_str());
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) SSL::PrivateKey::load: WARNING: Unsupported URI scheme in cert path '%C'\n"),
+                   uri.c_str()));
+
         break;
     }
   }
@@ -196,7 +198,7 @@ namespace SSL {
     } else {
       std::stringstream errmsg;
       errmsg << "failed to read file '" << path << "' using BIO_new_file";
-      OPENDDS_SSL_LOG_ERR(errmsg.str());
+      OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
     }
 
     return result;
@@ -246,7 +248,7 @@ namespace SSL {
     } else {
       std::stringstream errmsg;
       errmsg << "failed to create data '" << data << "' using BIO_new";
-      OPENDDS_SSL_LOG_ERR(errmsg.str());
+      OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
     }
 
     return result;

@@ -8,6 +8,7 @@
 #include "Err.h"
 #include <openssl/dh.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
+#include <cstring>
 
 namespace OpenDDS {
 namespace Security {
@@ -400,7 +401,7 @@ namespace SSL {
       return new DiffieHellman(new ECDH_PRIME_256_V1_CEUM);
 
     } else {
-      fprintf(stderr, "DiffieHellman::factory: Error, unknown kagree_algo\n");
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SSL::DiffieHellman::factory: ERROR, unknown kagree_algo\n")));
       return NULL;
     }
   }

@@ -9,6 +9,7 @@
 #include <openssl/evp.h>
 #include <openssl/ec.h>
 #include <vector>
+#include <cstring>
 
 namespace OpenDDS {
 namespace Security {

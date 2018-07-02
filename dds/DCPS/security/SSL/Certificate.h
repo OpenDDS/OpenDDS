@@ -39,29 +39,53 @@ namespace SSL {
 
     Certificate();
 
-    ~Certificate();
+    virtual ~Certificate();
 
     Certificate& operator=(const Certificate& rhs);
 
     void load(const std::string& uri, const std::string& password = "");
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int validate(Certificate& ca, unsigned long int flags = 0u) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int verify_signature(
       const DDS::OctetSeq& src,
       const std::vector<const DDS::OctetSeq*>& expected_contents) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int subject_name_to_str(std::string& dst,
                             unsigned long flags = XN_FLAG_ONELINE) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int subject_name_digest(std::vector<CORBA::Octet>& dst) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int algorithm(std::string& dst) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int serialize(std::vector<unsigned char>& dst) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int serialize(DDS::OctetSeq& dst) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int deserialize(const DDS::OctetSeq& src);
 
     const DDS::OctetSeq& original_bytes() const { return original_bytes_; }

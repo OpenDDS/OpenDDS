@@ -38,20 +38,35 @@ namespace SSL {
 
     void get_content(std::string& dst) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int verify_signature(const Certificate& ca) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int serialize(std::vector<unsigned char>& dst) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int serialize(DDS::OctetSeq& dst) const;
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int deserialize(const DDS::OctetSeq& src);
 
    private:
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int cache_plaintext();
 
-    PKCS7* PKCS7_from_SMIME(const std::string& path);
+    PKCS7* PKCS7_from_SMIME_file(const std::string& path);
 
-    PKCS7* PKCS7_from_DATA(const std::string& path);
+    PKCS7* PKCS7_from_data(const std::string& s_mime_data);
 
     PKCS7* doc_;
     BIO* content_;

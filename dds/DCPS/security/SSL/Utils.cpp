@@ -108,9 +108,9 @@ namespace SSL {
       char msg[256] = { 0 };
       ERR_error_string_n(err, msg, sizeof(msg));
 
-      fprintf(stderr,
-              "SSL::make_nonce: Error '%s' returned by RAND_bytes(...)\n",
-              msg);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) SSL::make_nonce: ERROR '%C' returned by RAND_bytes(...)\n"),
+                 msg));
     }
 
     return 1;
@@ -208,9 +208,10 @@ namespace SSL {
         dst.length(newlen);
 
       } else {
-        fprintf(stderr,
-                "hash_serialized_impl::operator(): Error, failed to "
-                "serialize binary-property-sequence\n");
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) SSL::hash_serialized_impl::operator(): ERROR, failed to "
+                            "serialize binary-property-sequence\n")));
+
         return 1;
       }
 
@@ -242,9 +243,10 @@ namespace SSL {
       &buffer, OpenDDS::DCPS::Serializer::SWAP_BE,
       OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
     if (!(serializer << src)) {
-      fprintf(stderr,
-              "sign_serialized: Error, failed to serialize "
-              "binary-property-sequence\n");
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) SSL::sign_serialized: ERROR, failed to serialize "
+                          "binary-property-sequence\n")));
+
       return 1;
     }
 
@@ -270,9 +272,9 @@ namespace SSL {
       &buffer, OpenDDS::DCPS::Serializer::SWAP_BE,
       OpenDDS::DCPS::Serializer::ALIGN_INITIALIZE);
     if (!(serializer << src)) {
-      fprintf(stderr,
-              "verify_serialized: Error, failed to serialize "
-              "binary-property-sequence\n");
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) SSL::verify_serialized: ERROR, failed to serialize binary-property-sequence\n")));
+
       return 1;
     }
 
