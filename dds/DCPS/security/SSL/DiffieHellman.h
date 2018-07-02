@@ -52,10 +52,19 @@ namespace SSL {
     DH_2048_MODP_256_PRIME();
     ~DH_2048_MODP_256_PRIME();
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int init();
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int pub_key(DDS::OctetSeq& dst);
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
     const char* kagree_algo() { return "DH+MODP-2048-256"; }
@@ -67,10 +76,19 @@ namespace SSL {
     ECDH_PRIME_256_V1_CEUM();
     ~ECDH_PRIME_256_V1_CEUM();
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int init();
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int pub_key(DDS::OctetSeq& dst);
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
     const char* kagree_algo() { return "ECDH+prime256v1-CEUM"; }
@@ -92,8 +110,14 @@ namespace SSL {
       if (algo_) algo_->init();
     }
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int pub_key(DDS::OctetSeq& dst) { return algo_->pub_key(dst); }
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
     int gen_shared_secret(const DDS::OctetSeq& pub_key)
     {
       return algo_->gen_shared_secret(pub_key);
