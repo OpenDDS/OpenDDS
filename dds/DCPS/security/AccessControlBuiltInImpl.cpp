@@ -350,7 +350,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (extract_subject_name(remote_perm_sn)) {
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions subject name %C.\n"), remote_perm_sn));
+        "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions subject name %s.\n"), remote_perm_sn));
     }
   }
   else {
@@ -766,7 +766,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
           if (OpenDDS::DCPS::DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-              "(%P|%t) AccessControlBuiltInImpl::check_create_datareader: Found topic %C.\n"), tr_iter->topic_expression));
+              "(%P|%t) AccessControlBuiltInImpl::check_create_datareader: Found topic %s.\n"), tr_iter->topic_expression));
           }
 
           if (tr_iter->topic_attrs.is_read_protected == false ) {
