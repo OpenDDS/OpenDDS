@@ -20,15 +20,15 @@ namespace OpenDDS {
 namespace DCPS {
 
 namespace {
-  const int BYTES_IN_VENDOR = 2;
-  const int HEX_DIGITS_IN_VENDOR = 2 * BYTES_IN_VENDOR;
-  const int BYTES_IN_DOMAIN = 4;
-  const int HEX_DIGITS_IN_DOMAIN = 2 * BYTES_IN_DOMAIN;
-  const int BYTES_IN_PARTICIPANT = 6;
-  const int HEX_DIGITS_IN_PARTICIPANT = 2 * BYTES_IN_PARTICIPANT;
-  const int BYTES_IN_ENTITY = 3;
-  const int HEX_DIGITS_IN_ENTITY = 2 * BYTES_IN_ENTITY;
-  const int TYPE_NAME_MAX = 128;
+  const size_t BYTES_IN_VENDOR = 2;
+  const size_t HEX_DIGITS_IN_VENDOR = 2 * BYTES_IN_VENDOR;
+  const size_t BYTES_IN_DOMAIN = 4;
+  const size_t HEX_DIGITS_IN_DOMAIN = 2 * BYTES_IN_DOMAIN;
+  const size_t BYTES_IN_PARTICIPANT = 6;
+  const size_t HEX_DIGITS_IN_PARTICIPANT = 2 * BYTES_IN_PARTICIPANT;
+  const size_t BYTES_IN_ENTITY = 3;
+  const size_t HEX_DIGITS_IN_ENTITY = 2 * BYTES_IN_ENTITY;
+  const size_t TYPE_NAME_MAX = 128;
 }
 
 void EndpointRegistry::match()
