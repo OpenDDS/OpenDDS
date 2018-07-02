@@ -347,13 +347,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   //Extract and compare the remote subject name for validation
 
   std::string remote_perm_sn(remote_perm_content);
-  if (extract_subject_name(remote_perm_sn)) {
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions subject name %s.\n"), remote_perm_sn));
-    }
-  }
-  else {
+  if (!extract_subject_name(remote_perm_sn)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Extract remote subject name failed");
     return DDS::HANDLE_NIL;
   }
@@ -763,12 +757,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
-        if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true,false)) {
-          if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-              "(%P|%t) AccessControlBuiltInImpl::check_create_datareader: Found topic %s.\n"), tr_iter->topic_expression));
-          }
-
+        if ( ::ACE::wild_match(topic_name, tr_iter->topic_expression.c_str(), true, false)) {
           if (tr_iter->topic_attrs.is_read_protected == false ) {
             return true;
           }
