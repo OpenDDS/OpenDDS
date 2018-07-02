@@ -26,7 +26,7 @@ namespace SSL {
 
     PrivateKey();
 
-    ~PrivateKey();
+    virtual ~PrivateKey();
 
     PrivateKey& operator=(const PrivateKey& rhs);
 
