@@ -97,6 +97,9 @@ public:
   /// Returns true if the GUID represents a reader entity.
   bool isReader() const;
 
+  /// Returns true if the GUID represents a topic entity.
+  bool isTopic() const;
+
   /// Convert to diagnostic string.
   operator OPENDDS_STRING() const;
 #ifdef DDS_HAS_WCHAR

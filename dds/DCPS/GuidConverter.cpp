@@ -143,6 +143,12 @@ bool GuidConverter::isReader() const
   return kind == KIND_READER || kind == KIND_BUILTIN_READER;
 }
 
+bool GuidConverter::isTopic() const
+{
+  EntityKind kind = entityKind();
+  return kind == KIND_TOPIC || kind == KIND_BUILTIN_TOPIC;
+}
+
 GuidConverter::operator OPENDDS_STRING() const
 {
   OPENDDS_STRING ret(to_string(guid_));

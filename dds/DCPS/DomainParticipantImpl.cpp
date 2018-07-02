@@ -1508,7 +1508,7 @@ DomainParticipantImpl::get_discovered_topics(
        iter != itEnd; ++iter) {
     GuidConverter converter(iter->first);
 
-    if (converter.entityKind() == KIND_TOPIC) {
+    if (converter.isTopic()) {
 
       // skip the ignored topic
       if (this->ignored_topics_.find(iter->first)
@@ -1541,8 +1541,7 @@ DomainParticipantImpl::get_discovered_topic_data(
          iter != itEnd; ++iter) {
       GuidConverter converter(iter->first);
 
-      if (topic_handle == iter->second
-          && converter.entityKind() == KIND_TOPIC) {
+      if (topic_handle == iter->second && converter.isTopic()) {
         found = true;
         break;
       }
