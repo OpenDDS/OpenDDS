@@ -339,7 +339,7 @@ RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
     }
     return ri->second.handshake_done_;
 
-  } else if (conv.isWriter()) {
+  } else if (conv.isReader()) {
     return true; // no handshaking for local reader
   }
   return false;
