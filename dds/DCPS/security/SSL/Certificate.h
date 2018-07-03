@@ -48,7 +48,7 @@ namespace SSL {
     /**
      * @return int 0 on success; 1 on failure.
      */
-    int validate(Certificate& ca, unsigned long int flags = 0u) const;
+    int validate(const Certificate& ca, unsigned long int flags = 0u) const;
 
     /**
      * @return int 0 on success; 1 on failure.

@@ -28,15 +28,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-  static void set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message);
+static void set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message);
 
-  static bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2);
+static bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2);
 
-  static void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t& dst);
+static void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t& dst);
 
-  static bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
-                                       const std::vector<unsigned char>& subject_name_hash,
-                                       DDS::Security::SecurityException& ex);
+static bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
+                                     const std::vector<unsigned char>& subject_name_hash,
+                                     DDS::Security::SecurityException& ex);
 
 static const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
 static const std::string Auth_Plugin_Major_Version("1");
