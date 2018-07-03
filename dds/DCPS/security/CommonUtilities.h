@@ -32,4 +32,6 @@ void set_security_error(DDS::Security::SecurityException& ex,
 }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
 #endif
