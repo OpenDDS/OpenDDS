@@ -64,7 +64,7 @@ namespace OpenDDS
       static Sample_Manager& instance();
 
       void init();
-      Sample_Dissector_rch find(const char* repo_id);
+      Sample_Dissector* find(const char* repo_id);
 
       /// Add a hf_register_info struct to register later
       void add_protocol_field(const hf_register_info& field);
@@ -78,8 +78,7 @@ namespace OpenDDS
     private:
       static Sample_Manager instance_;
 
-      typedef std::map<std::string, Sample_Dissector_rch> DissectorsType;
-      DissectorsType dissectors_;
+      Dissector_Map dissectors_;
 
       std::vector<hf_register_info> hf_vector_;
       hf_register_info* hf_array_;

@@ -567,7 +567,7 @@ namespace OpenDDS
           payload_item, ett_sample_payload);
 
       // Try to Dissect Payload
-      Sample_Dissector_rch data_dissector =
+      Sample_Dissector* data_dissector =
         Sample_Manager::instance().find(data_name);
       if (!data_dissector) {
         ACE_DEBUG ((LM_DEBUG,
@@ -653,7 +653,7 @@ namespace OpenDDS
 #ifndef NO_EXPERT
           proto_tree_add_expert_format(
             contents_tree, pinfo_, &ei_sample_payload_error,
-            tvb_, offset, -1, e.what()
+            tvb_, offset, -1, "%s", e.what()
           );
 #endif
           ACE_DEBUG ((LM_DEBUG,

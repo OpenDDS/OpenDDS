@@ -257,11 +257,12 @@ namespace OpenDDS
     Sample_Field::Sample_Field(IDLTypeID id, const std::string &label)
       : label_(label),
         type_id_(id),
+        nested_(0),
         next_(0)
     {
     }
 
-    Sample_Field::Sample_Field(Sample_Dissector_wrch n, const std::string &label)
+    Sample_Field::Sample_Field(Sample_Dissector* n, const std::string &label)
       : label_(label),
         type_id_(Undefined),
         nested_(n),
@@ -271,6 +272,11 @@ namespace OpenDDS
 
     Sample_Field::~Sample_Field()
     {
+      /* This doesn't work since a Dissector can be referenced by multiple
+       * fields
+       */
+      // delete nested_;
+
       delete next_;
     }
 
@@ -288,7 +294,7 @@ namespace OpenDDS
       return chain (new Sample_Field (ti, l));
     }
 
-    Sample_Field* Sample_Field::chain(Sample_Dissector_wrch n, const std::string& l)
+    Sample_Field* Sample_Field::chain(Sample_Dissector* n, const std::string& l)
     {
       return chain (new Sample_Field (n, l));
     }
@@ -487,7 +493,7 @@ namespace OpenDDS
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,
-                    params.offset, len, s.c_str()
+                    params.offset, len, "%s", s.c_str()
                 );
               }
 #endif
@@ -499,7 +505,7 @@ namespace OpenDDS
               } else {
                 proto_tree_add_string_format_value(
                   ADD_FIELD_PARAMS, s.c_str(),
-                  s.c_str()
+                  "%s", s.c_str()
                 );
               }
             }
@@ -676,14 +682,11 @@ namespace OpenDDS
             if (!params.get_size_only) {
               if (params.use_index) {
                 proto_tree_add_string_format(
-                  ADD_FIELD_PARAMS,
-                  string_value,
+                  ADD_FIELD_PARAMS, string_value,
                   "[%u]: %s", params.index, string_value.in()
                 );
               } else {
-                proto_tree_add_string(
-                  ADD_FIELD_PARAMS, string_value
-                );
+                proto_tree_add_string(ADD_FIELD_PARAMS, string_value);
               }
             }
 
@@ -705,7 +708,7 @@ namespace OpenDDS
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,
-                    params.offset, len, s.c_str()
+                    params.offset, len, "%s", s.c_str()
                 );
               }
 #endif
@@ -718,7 +721,7 @@ namespace OpenDDS
               } else {
                 proto_tree_add_string_format_value(
                   ADD_FIELD_PARAMS, s.c_str(),
-                  s.c_str()
+                  "%s", s.c_str()
                 );
               }
             }
@@ -735,13 +738,7 @@ namespace OpenDDS
         }
       } else {
         push_ns(this->label_);
-        Sample_Dissector_rch sd = nested_.lock();
-        if (!sd) {
-            throw Sample_Dissector_Error(
-              get_ns()  + " nested dissector is missing!"
-            );
-        }
-        len = sd->dissect_i(params);
+        len = nested_->dissect_i(params);
         pop_ns();
       }
 
@@ -828,13 +825,7 @@ namespace OpenDDS
         }
       } else if (nested_) {
         push_ns(label_);
-        Sample_Dissector_rch sd = nested_.lock();
-        if (!sd) {
-            throw Sample_Dissector_Error(
-              get_ns()  + " nested dissector is missing!"
-            );
-        }
-        sd->init_ws_fields(first_pass);
+        nested_->init_ws_fields(first_pass);
         pop_ns();
       }
       if (next_ != NULL) {
@@ -905,7 +896,7 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field(Sample_Dissector_wrch n,
+    Sample_Dissector::add_field(Sample_Dissector* n,
                                 const std::string &label)
     {
       return add_field(new Sample_Field(n, label));
@@ -939,8 +930,7 @@ namespace OpenDDS
             );
           } else {
             proto_item* item = proto_tree_add_none_format(
-              ADD_FIELD_PARAMS,
-              outstream.str().c_str()
+              ADD_FIELD_PARAMS, "%s", outstream.str().c_str()
             );
             params.tree = proto_item_add_subtree(item, ett_);
           }
@@ -1017,13 +1007,13 @@ namespace OpenDDS
     }
 
     //----------------------------------------------------------------------
-    Sample_Sequence::Sample_Sequence (Sample_Dissector_wrch sub)
+    Sample_Sequence::Sample_Sequence (Sample_Dissector* sub)
       : element_ (sub)
     {
       this->init ("sequence");
     }
 
-    Sample_Dissector_wrch Sample_Sequence::element()
+    Sample_Dissector* Sample_Sequence::element()
     {
       return element_;
     }
@@ -1051,7 +1041,7 @@ namespace OpenDDS
           outstream << " (length = " << count << ")";
           item = proto_tree_add_uint_format(
             ADD_FIELD_PARAMS,
-            count, outstream.str().c_str()
+            count, "%s", outstream.str().c_str()
           );
         }
       }
@@ -1070,16 +1060,10 @@ namespace OpenDDS
 
       bool prev_use_index = params.use_index;
       size_t all_elements_size = 0;
-      Sample_Dissector_rch sd = element_.lock();
-      if (!sd) {
-          throw Sample_Dissector_Error(
-            get_ns()  + " element dissector is missing!"
-          );
-      }
       for (guint32 ndx = 0; ndx < count; ndx++) {
         params.index = ndx;
         params.use_index = true;
-        size_t element_size = sd->dissect_i(params);
+        size_t element_size = element_->dissect_i(params);
         all_elements_size += element_size;
       }
       if (params.get_size_only) {
@@ -1125,19 +1109,13 @@ namespace OpenDDS
         add_protocol_field();
       }
       push_ns(element_namespace);
-      Sample_Dissector_rch sd = element_.lock();
-      if (!sd) {
-          throw Sample_Dissector_Error(
-            get_ns()  + " element dissector is missing!"
-          );
-      }
-      sd->init_ws_fields(first_pass);
+      element_->init_ws_fields(first_pass);
       pop_ns();
     }
 
     //----------------------------------------------------------------------
 
-    Sample_Array::Sample_Array(size_t count, Sample_Dissector_wrch sub)
+    Sample_Array::Sample_Array(size_t count, Sample_Dissector* sub)
       : Sample_Sequence (sub),
         count_ (count)
     {
@@ -1218,8 +1196,9 @@ namespace OpenDDS
           get_ns()  + " is not a registered wireshark field."
         );
       } else {
-        proto_tree_add_string_format(ADD_FIELD_PARAMS, enum_label.c_str(),
-          outstream.str().c_str()
+        proto_tree_add_string_format(
+          ADD_FIELD_PARAMS, enum_label.c_str(),
+          "%s", outstream.str().c_str()
         );
       }
 
@@ -1272,8 +1251,9 @@ namespace OpenDDS
 
     //----------------------------------------------------------------------
 
-    Sample_Union::Sample_Union ()
-      : default_ (0)
+    Sample_Union::Sample_Union () :
+      discriminator_(0),
+      default_(0)
     {
       this->init ("union");
     }
@@ -1283,7 +1263,7 @@ namespace OpenDDS
       delete default_;
     }
 
-    void Sample_Union::discriminator(Sample_Dissector_wrch d)
+    void Sample_Union::discriminator(Sample_Dissector* d)
     {
       this->discriminator_ = d;
     }
@@ -1302,15 +1282,9 @@ namespace OpenDDS
 
     size_t Sample_Union::dissect_i (Wireshark_Bundle &params) {
       // Get Type
-      Sample_Dissector_rch sd = discriminator_.lock();
-      if (!sd) {
-          throw Sample_Dissector_Error(
-            get_ns()  + " discriminator dissector is missing!"
-          );
-      }
-      size_t len = sd->compute_length(params);
+      size_t len = discriminator_->compute_length(params);
       Sample_Field* value = this->default_;
-      std::string _d = sd->stringify(params);
+      std::string _d = discriminator_->stringify(params);
       MapType::const_iterator pos = map_.find(_d);
       if (pos != map_.end()) {
         value = pos->second;
@@ -1335,7 +1309,7 @@ namespace OpenDDS
         } else {
           proto_item* item = proto_tree_add_string_format(
             ADD_FIELD_PARAMS,
-            _d.c_str(), outstream.str().c_str()
+            _d.c_str(), "%s", outstream.str().c_str()
           );
           params.tree = proto_item_add_subtree(item, ett_);
         }
@@ -1368,7 +1342,7 @@ namespace OpenDDS
 
     //-----------------------------------------------------------------------
 
-    Sample_Alias::Sample_Alias(Sample_Dissector_wrch base)
+    Sample_Alias::Sample_Alias(Sample_Dissector* base)
       :base_(base)
     {
       this->init ("alias");
@@ -1377,23 +1351,11 @@ namespace OpenDDS
     size_t
     Sample_Alias::dissect_i (Wireshark_Bundle &p)
     {
-      Sample_Dissector_rch sd = base_.lock();
-      if (!sd) {
-          throw Sample_Dissector_Error(
-            get_ns()  + " alias dissector is missing!"
-          );
-      }
-      return sd->dissect_i (p);
+      return base_->dissect_i(p);
     }
 
     void Sample_Alias::init_ws_fields(bool first_pass) {
-      Sample_Dissector_rch sd = base_.lock();
-      if (!sd) {
-          throw Sample_Dissector_Error(
-            get_ns()  + " alias dissector is missing!"
-          );
-      }
-      sd->init_ws_fields(first_pass);
+      base_->init_ws_fields(first_pass);
     }
 
     //-----------------------------------------------------------------------

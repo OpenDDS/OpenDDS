@@ -35,8 +35,6 @@ extern "C" {
 #include "FACE/Fixed.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/RcHandle_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -129,8 +127,41 @@ namespace OpenDDS
     };
     typedef std::map<std::string, Field_Context*> Field_Contexts;
 
-    /// Base for Sample_Dissector and Sample_Field. Helps build the Wireshark
-    /// protocol tree.
+    /**
+     * Base Class for Sample_Dissector, Sample_Field, and all the other
+     * elements that make up the dissector tree. Contains global namespace
+     * tracking and any infomation to be passed to Wireshark about the
+     * field.
+     *
+     * Simplified Example of the Dissector Tree Structure:
+     *
+     * Sample_Manager.dissectors_["opendds.sample.payload.Messenger.Message"]
+     *             |
+     *             V
+     * +----------------+
+     * |Sample_Dissector|
+     * +----------------+  +--------------------+
+     * |field_ ----------->|Sample_Field        |
+     * |is_root_ = true |  +--------------------+
+     * |is_struct = true|  |type_id_ = Undefined|
+     * +----------------+  |label_ = "from"     |  +------------------+
+     *                     |nested_ -------------->|Sample_Dissector  |
+     *                     |next_ ----+         |  +------------------+
+     *                     +----------|---------+  |is_root_ = false  |
+     *                                |            |is_struct_ = false|
+     *                                V            |field_ ---+       |
+     *                     +--------------------+  +----------|-------+
+     *                     |Sample_Field        |             |
+     *                     +--------------------+             V
+     *                     |type_id_ = Undefined|  +------------------+
+     *                     |label_ = "subject"  |  |Sample_Field      |
+     *                     |        ...         |  +------------------+
+     *                                             |type_id_ = String |
+     *                                             |label_ = ""       |
+     *                                             |nested_ = 0       |
+     *                                             |next_ = 0         |
+     *                                             +------------------+
+     */
     class Sample_Base {
     private:
       /// Associated Wireshark Header Field Contexts
@@ -197,10 +228,9 @@ namespace OpenDDS
 
     };
 
+
     class dissector_Export Sample_Dissector;
-    typedef RcHandle<Sample_Dissector> Sample_Dissector_rch;
-    typedef WeakRcHandle<Sample_Dissector> Sample_Dissector_wrch;
-    typedef std::map<std::string, Sample_Dissector_rch> Dissector_Map;
+    typedef std::map<std::string, Sample_Dissector*> Dissector_Map;
 
     /// Sample_Field describes a single element of the sample. This can be
     /// a fixed length field, such as a short, long, etc. or variable length
@@ -236,10 +266,7 @@ namespace OpenDDS
 
       /// @ctor for complex fields, supply a nested Sample_Dissector to handle
       /// the dissection.
-      Sample_Field(Sample_Dissector_wrch n, const std::string &label);
-      Sample_Field(Sample_Dissector_rch n, const std::string &label) :
-        Sample_Field(Sample_Dissector_wrch(n), label)
-      {}
+      Sample_Field(Sample_Dissector* n, const std::string &label);
 
       virtual ~Sample_Field();
 
@@ -248,7 +275,7 @@ namespace OpenDDS
       /// of chains
       Sample_Field* chain(Sample_Field* n);
       Sample_Field* chain(IDLTypeID ti, const std::string& l);
-      Sample_Field* chain(Sample_Dissector_wrch n, const std::string& l);
+      Sample_Field* chain(Sample_Dissector* n, const std::string& l);
 
       /// Iterate over the list to return the n'th link returns null if n
       /// exceeds the number of links in the chain
@@ -275,7 +302,7 @@ namespace OpenDDS
       /// Variable length fields use a nested sample base value to do their
       /// dissection. This can be another configured sample_dissector instance,
       /// or it can be a string, enum, union, or sequence dissector.
-      Sample_Dissector_wrch nested_;
+      Sample_Dissector* nested_;
 
       /// A simple linked-list is used to chain fields together. When the
       /// top-level field is deleted, it will iterate over this list deleting
@@ -294,8 +321,7 @@ namespace OpenDDS
      * would require reference counting, which currently isn't done.
      */
     class dissector_Export Sample_Dissector :
-      public Sample_Base,
-      public RcObject
+      public Sample_Base
     {
     public:
       Sample_Dissector(const std::string& subtree_label = "");
@@ -321,9 +347,9 @@ namespace OpenDDS
       /// takes ownership of this field instance. As a pass-thru to
       /// Sample_Field::chain(), it returns the supplied field pointer
       /// to facilitate simple chain construction.
-      Sample_Field* add_field(Sample_Field*field);
+      Sample_Field* add_field(Sample_Field* field);
       Sample_Field* add_field(Sample_Field::IDLTypeID, const std::string& l);
-      Sample_Field* add_field(Sample_Dissector_wrch n, const std::string& l);
+      Sample_Field* add_field(Sample_Dissector* n, const std::string& l);
 
       /// Run init_ws_fields on the children of the Sample_Dissector
       void init_ws_proto_tree(bool first_pass);
@@ -369,9 +395,9 @@ namespace OpenDDS
     public:
       /// @ctor. Creates an empty base element to be initialized after this
       /// sample sequence holder is created
-      Sample_Sequence(Sample_Dissector_wrch sub);
+      Sample_Sequence(Sample_Dissector* sub);
 
-      Sample_Dissector_wrch element();
+      Sample_Dissector* element();
 
       virtual void init_ws_fields(bool first_pass);
 
@@ -383,7 +409,7 @@ namespace OpenDDS
 
       virtual size_t dissect_i(Wireshark_Bundle &params);
 
-      Sample_Dissector_wrch element_;
+      Sample_Dissector* element_;
     };
 
     /**
@@ -396,7 +422,7 @@ namespace OpenDDS
     class dissector_Export Sample_Array : public Sample_Sequence
     {
     public:
-      Sample_Array (size_t count, Sample_Dissector_wrch sub);
+      Sample_Array (size_t count, Sample_Dissector* sub);
 
     protected:
       virtual size_t dissect_i(Wireshark_Bundle& params);
@@ -440,7 +466,7 @@ namespace OpenDDS
       Sample_Union ();
       virtual ~Sample_Union ();
 
-      void discriminator(Sample_Dissector_wrch d);
+      void discriminator(Sample_Dissector* d);
       void add_label(const std::string& label, Sample_Field* field);
       void add_default(Sample_Field* value);
       virtual void init_ws_fields(bool first_pass);
@@ -448,7 +474,7 @@ namespace OpenDDS
     protected:
       virtual size_t dissect_i(Wireshark_Bundle& p);
 
-      Sample_Dissector_wrch discriminator_;
+      Sample_Dissector* discriminator_;
       typedef std::map<std::string, Sample_Field*> MapType;
       MapType map_;
       Sample_Field* default_;
@@ -460,14 +486,14 @@ namespace OpenDDS
     class dissector_Export Sample_Alias : public Sample_Dissector
     {
     public:
-      Sample_Alias(Sample_Dissector_wrch base);
+      Sample_Alias(Sample_Dissector* base);
 
       virtual void init_ws_fields(bool first_pass);
 
     protected:
       virtual size_t dissect_i(Wireshark_Bundle& p);
 
-      Sample_Dissector_wrch base_;
+      Sample_Dissector* base_;
     };
 
     /**
