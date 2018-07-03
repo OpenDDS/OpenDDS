@@ -13,6 +13,7 @@
 
 int LEASE_DURATION_SEC = 1; // seconds
 
-int test_duration = 40;
+ACE_Time_Value TEST_DURATION_SEC(40, 0);
+
 unsigned int threshold_liveliness_lost = 1000;
 
