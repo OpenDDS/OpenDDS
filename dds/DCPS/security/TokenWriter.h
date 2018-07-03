@@ -1,8 +1,8 @@
 /*
 *
 *
-* Distributed under the DDS License.
-* See: http://www.DDS.org/license.html
+* Distributed under the OpenDDS License.
+* See: http://www.OpenDDS.org/license.html
 */
 
 

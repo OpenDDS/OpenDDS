@@ -1,7 +1,7 @@
 /*
 *
 *
-* Distributed under the DDS License.
+* Distributed under the OpenDDS License.
 * See: http://www.opendds.org/license.html
 */
 
