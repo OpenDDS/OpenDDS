@@ -207,7 +207,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   if (access->get_participant_sec_attributes(permissions_handle_, participant_sec_attr_, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("Spdp::SpdpTransport::write() - ")
+      ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("failed to retrieve participant security attributes. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     throw std::runtime_error("unable to retrieve participant security attributes");
