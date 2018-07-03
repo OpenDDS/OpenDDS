@@ -55,17 +55,17 @@ namespace SSL {
   {
     if (x_) return;
 
-    std::string path;
-    URI_SCHEME s = extract_uri_info(uri, path);
+    std::string uri_info;
+    URI_SCHEME s = extract_uri_info(uri, uri_info);
 
     switch (s) {
       case URI_FILE:
-        load_cert_bytes(path);
+        load_cert_bytes(uri_info);
         x_ = x509_from_pem(original_bytes_, password);
         break;
 
       case URI_DATA:
-        load_cert_data_bytes(path);
+        load_cert_data_bytes(uri_info);
         x_ = x509_from_pem(original_bytes_, password);
         break;
 
