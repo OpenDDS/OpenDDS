@@ -158,11 +158,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           return 1 ;
         }
 
-
-//      Writer writer(dw.in ());
-
-//      ACE_Time_Value duration(10);
-//      writer.run_test(duration);
       ACE_OS::sleep(TEST_DURATION_SEC);
 
       // Clean up publisher objects
@@ -182,16 +177,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         if (!dwl_servant) {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. TEST_DURATION_SEC=%d\n"),
-            TEST_DURATION_SEC));
+            ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. TEST_DURATION_SEC=%.1f\n"),
+            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e5f)));
           return 1;
         }
 
-        if(!dwl_servant->valid()) {
+        if (!dwl_servant->valid()) {
           ACE_ERROR ((LM_ERROR,
-                     ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. TEST_DURATION_SEC=%d\n"),
-                     TEST_DURATION_SEC));
-          return 1 ;
+            ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. TEST_DURATION_SEC=%.1f\n"),
+            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e6f)));
+          return 1;
         }
       }
     }
