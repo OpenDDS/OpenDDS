@@ -1154,7 +1154,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
-  if(ac_iter == local_ac_perms_.end()) {
+  if (ac_iter == local_ac_perms_.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_remote_participant: No matching permissions handle present");
     return false;
   }
@@ -1197,12 +1197,39 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const ::DDS::Security::PublicationBuiltinTopicDataSecure & publication_data,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(publication_data);
-
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Invalid permissions handle");
     return false;
+  }
+
+  if (publication_data.base.base.topic_name == "") {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Invalid topic name");
+    return false;
+  }
+
+  ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
+
+  if (ac_iter == local_ac_perms_.end()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: No matching permissions handle present");
+    return false;
+  }
+
+  GovernanceAccessRules::iterator gariter;
+
+  for (gariter = ac_iter->second.gov_rules.begin(); gariter != ac_iter->second.gov_rules.end(); ++gariter) {
+    size_t d = gariter->domain_list.count(domain_id);
+
+    if (d > 0) {
+      TopicAccessRules::iterator tr_iter;
+
+      for (tr_iter = gariter->topic_rules.begin(); tr_iter != gariter->topic_rules.end(); ++tr_iter) {
+        if (::ACE::wild_match(publication_data.base.base.topic_name, tr_iter->topic_expression.c_str(), true, false)) {
+          if (tr_iter->topic_attrs.is_write_protected == false) {
+            return true;
+          }
+        }
+      }
+    }
   }
 
   return true;
@@ -1976,6 +2003,97 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
   }
 
   return 2;
+}
+
+int AccessControlBuiltInImpl::search_remote_permissions(
+  const::DDS::Security::PermissionsHandle permissions_handle, 
+  const char * topic_name, 
+  const::DDS::Security::DomainId_t domain_id,
+  ACPermsMap::iterator ac_iter)
+{
+  PermissionGrantRules::iterator pm_iter;
+  std::string default_value;
+
+  // Check the date/time range for validity
+  time_t after_time,
+         before_time,
+         cur_utc_time;
+  time_t current_date_time = time(0);
+
+  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+    default_value = pm_iter->default_permission;
+    before_time = convert_permissions_time(pm_iter->validity.not_before);
+
+    if (before_time == 0) {
+      return 1;
+    }
+
+    // Adjust the current time to UTC/GMT
+    tm *current_time_tm = gmtime(&current_date_time);
+    cur_utc_time = mktime(current_time_tm);
+
+    if (cur_utc_time < before_time) {
+      return 2;
+    }
+
+    after_time = convert_permissions_time(pm_iter->validity.not_after);
+
+    if (after_time == 0) {
+      return 3;
+    }
+
+    if (cur_utc_time > after_time) {
+      return 4;
+    }
+
+    std::list<PermissionTopicRule>::iterator ptr_iter; // allow/deny rules
+
+    for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
+      size_t  d = ptr_iter->domain_list.count(domain_id);
+
+      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
+        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if (tpsr_iter->ps_type == PUBLISH) {
+            std::vector<std::string>::iterator tl_iter; // topic list
+
+            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
+                return 0;
+              }
+            }
+          }  // end if (PUBLISH)
+        } // end for
+      }
+      else if ((d > 0) && (ptr_iter->ad_type == DENY)) {
+        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if (tpsr_iter->ps_type == PUBLISH) {
+            std::vector<std::string>::iterator tl_iter; // topic list
+
+            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
+                return 5;
+              }
+            }
+          }
+        }
+
+      } // end of DENY
+    }
+
+  }
+
+  // If this point in the code is reached it means that either there are no PermissionTopicRules
+  // or the topic_name does not exist in the topic_list so return the value of default_permission
+  if (strcmp(default_value.c_str(), "ALLOW") == 0) {
+    return 0;
+  }
+  else {
+    return 6;
+  }
 }
 
 //char * AccessControlBuiltInImpl::strptime(const char * s, const char * f, tm * tm)

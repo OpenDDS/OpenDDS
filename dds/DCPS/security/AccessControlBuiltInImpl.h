@@ -374,6 +374,13 @@ private:
                          const ::DDS::PartitionQosPolicy & partition,
                          const ::DDS::Security::DataTagQosPolicy & data_tag,
                          ::DDS::Security::EndpointSecurityAttributes & attributes);
+
+  // Returns a 0 if the search is successful.
+  int search_remote_permissions(const ::DDS::Security::PermissionsHandle permissions_handle,
+                                const char * topic_name,
+                                const ::DDS::Security::DomainId_t domain_id,
+                                ACPermsMap::iterator ac_iter);
+
 };
 
 } // namespace Security
