@@ -1,6 +1,6 @@
 /*
- * Distributed under the DDS License.
- * See: http://www.DDS.org/license.html
+ * Distributed under the OpenDDS License.
+ * See: http://www.OpenDDS.org/license.html
  */
 
 #ifndef OPENDDS_SECURITY_SSL_PRIVATEKEY_H
@@ -26,7 +26,7 @@ namespace SSL {
 
     PrivateKey();
 
-    ~PrivateKey();
+    virtual ~PrivateKey();
 
     PrivateKey& operator=(const PrivateKey& rhs);
 
@@ -39,8 +39,8 @@ namespace SSL {
     static EVP_PKEY* EVP_PKEY_from_pem(const std::string& path,
                                        const std::string& password = "");
 
-    EVP_PKEY* EVP_PKEY_from_pem_data(const std::string& data,
-                                     const std::string& password);
+    static EVP_PKEY* EVP_PKEY_from_pem_data(const std::string& data,
+                                            const std::string& password);
 
     EVP_PKEY* k_;
   };

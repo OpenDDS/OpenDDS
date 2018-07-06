@@ -29,6 +29,7 @@
 #include "ace/Reactor.h"
 
 #include "common.h"
+#include <cmath>
 
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
@@ -40,7 +41,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -l lease duration     defaults to 10
+    //  -l lease duration           defaults to 10
     //  -x test duration in sec     defaults to 40
     //  -z                          verbose transport debug
 
@@ -48,13 +49,15 @@ int parse_args(int argc, ACE_TCHAR *argv[])
 
     if  ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
     {
-      LEASE_DURATION_SEC = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
+      LEASE_DURATION_SEC = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
     {
-      test_duration = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
+      float temp = ACE_OS::atof(currentArg);
+      TEST_DURATION_SEC.sec(std::floor(temp));
+      TEST_DURATION_SEC.usec((temp - static_cast<float>(TEST_DURATION_SEC.sec())) * 1e6);
+      arg_shifter.consume_arg();
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
@@ -155,12 +158,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           return 1 ;
         }
 
-
-//      Writer writer(dw.in ());
-
-//      ACE_Time_Value duration(10);
-//      writer.run_test(duration);
-      ACE_OS::sleep(test_duration);
+      ACE_OS::sleep(TEST_DURATION_SEC);
 
       // Clean up publisher objects
       pub->delete_contained_entities() ;
@@ -179,16 +177,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         if (!dwl_servant) {
           ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. test_duration=%d\n"),
-            test_duration));
+            ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. TEST_DURATION_SEC=%.1f\n"),
+            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e6f)));
           return 1;
         }
 
-        if(!dwl_servant->valid()) {
+        if (!dwl_servant->valid()) {
           ACE_ERROR ((LM_ERROR,
-                     ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. test_duration=%d\n"),
-                     test_duration));
-          return 1 ;
+            ACE_TEXT("(%P|%t) publisher didn't connect with subscriber. TEST_DURATION_SEC=%.1f\n"),
+            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e6f)));
+          return 1;
         }
       }
     }

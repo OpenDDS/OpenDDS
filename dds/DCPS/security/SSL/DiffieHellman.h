@@ -1,6 +1,6 @@
 /*
- * Distributed under the DDS License.
- * See: http://www.DDS.org/license.html
+ * Distributed under the OpenDDS License.
+ * See: http://www.OpenDDS.org/license.html
  */
 
 #ifndef OPENDDS_SECURITY_SSL_DIFFIE_HELLMAN_H
@@ -36,7 +36,7 @@ namespace SSL {
       return shared_secret_;
     }
     virtual bool cmp_shared_secret(const DHAlgorithm& other) const;
-    virtual const char* kagree_algo() = 0;
+    virtual const char* kagree_algo() const = 0;
 
    protected:
     virtual int compute_shared_secret(const DDS::OctetSeq& pub_key) = 0;
@@ -67,7 +67,7 @@ namespace SSL {
      */
     int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
-    const char* kagree_algo() { return "DH+MODP-2048-256"; }
+    const char* kagree_algo() const { return "DH+MODP-2048-256"; }
   };
 
   class DdsSecurity_Export ECDH_PRIME_256_V1_CEUM : public DHAlgorithm
@@ -91,7 +91,7 @@ namespace SSL {
      */
     int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
-    const char* kagree_algo() { return "ECDH+prime256v1-CEUM"; }
+    const char* kagree_algo() const { return "ECDH+prime256v1-CEUM"; }
   };
 
   class DdsSecurity_Export DiffieHellman

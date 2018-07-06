@@ -1,6 +1,6 @@
 /*
- * Distributed under the DDS License.
- * See: http://www.DDS.org/license.html
+ * Distributed under the OpenDDS License.
+ * See: http://www.OpenDDS.org/license.html
  */
 
 #include "PrivateKey.h"
@@ -48,16 +48,16 @@ namespace SSL {
   {
     if (k_) return;
 
-    std::string path;
-    URI_SCHEME s = extract_uri_info(uri, path);
+    std::string uri_info;
+    URI_SCHEME s = extract_uri_info(uri, uri_info);
 
     switch (s) {
       case URI_FILE:
-        k_ = EVP_PKEY_from_pem(path, password);
+        k_ = EVP_PKEY_from_pem(uri_info, password);
         break;
 
       case URI_DATA:
-        k_ = EVP_PKEY_from_pem_data(path, password);
+        k_ = EVP_PKEY_from_pem_data(uri_info, password);
         break;
 
       case URI_PKCS11:

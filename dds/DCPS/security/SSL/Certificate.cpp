@@ -1,6 +1,6 @@
 /*
- * Distributed under the DDS License.
- * See: http://www.DDS.org/license.html
+ * Distributed under the OpenDDS License.
+ * See: http://www.OpenDDS.org/license.html
  */
 
 #include "Certificate.h"
@@ -55,17 +55,17 @@ namespace SSL {
   {
     if (x_) return;
 
-    std::string path;
-    URI_SCHEME s = extract_uri_info(uri, path);
+    std::string uri_info;
+    URI_SCHEME s = extract_uri_info(uri, uri_info);
 
     switch (s) {
       case URI_FILE:
-        load_cert_bytes(path);
+        load_cert_bytes(uri_info);
         x_ = x509_from_pem(original_bytes_, password);
         break;
 
       case URI_DATA:
-        load_cert_data_bytes(path);
+        load_cert_data_bytes(uri_info);
         x_ = x509_from_pem(original_bytes_, password);
         break;
 
@@ -80,7 +80,7 @@ namespace SSL {
     }
   }
 
-  int Certificate::validate(Certificate& ca, unsigned long int flags) const
+  int Certificate::validate(const Certificate& ca, unsigned long int flags) const
   {
     int result = X509_V_ERR_UNSPECIFIED;
 

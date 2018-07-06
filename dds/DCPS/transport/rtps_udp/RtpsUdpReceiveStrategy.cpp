@@ -264,7 +264,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     DDS::Security::DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
     DDS::Security::DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
     DDS::Security::SecureSubmessageCategory_t category =
-      DDS::Security::INFO_SUBMESSAGE;
+    DDS::Security::INFO_SUBMESSAGE;
     DDS::Security::SecurityException ex = {"", 0, 0};
     bool ok =
       crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,

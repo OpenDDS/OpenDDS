@@ -1,6 +1,6 @@
 /*
- * Distributed under the DDS License.
- * See: http://www.DDS.org/license.html
+ * Distributed under the OpenDDS License.
+ * See: http://www.OpenDDS.org/license.html
  */
 
 #ifndef OPENDDS_SECURITY_SSL_CERTIFICATE_H
@@ -48,7 +48,7 @@ namespace SSL {
     /**
      * @return int 0 on success; 1 on failure.
      */
-    int validate(Certificate& ca, unsigned long int flags = 0u) const;
+    int validate(const Certificate& ca, unsigned long int flags = 0u) const;
 
     /**
      * @return int 0 on success; 1 on failure.
