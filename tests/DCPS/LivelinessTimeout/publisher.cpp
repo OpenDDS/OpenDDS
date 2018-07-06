@@ -178,7 +178,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         if (!dwl_servant) {
           ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) publisher didn't obtain DataWriterListenerImpl. TEST_DURATION_SEC=%.1f\n"),
-            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e5f)));
+            static_cast<float>(TEST_DURATION_SEC.sec()) + (static_cast<float>(TEST_DURATION_SEC.usec()) / 1e6f)));
           return 1;
         }
 
