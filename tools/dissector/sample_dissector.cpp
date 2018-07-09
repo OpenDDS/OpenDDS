@@ -130,6 +130,25 @@ namespace OpenDDS
       return reinterpret_cast<guint8*>(ws_ep_tvb_memdup(tvb, offset, remainder));
     }
 
+    const hf_register_info Field_Context::default_hf_register_info =
+      {0, {0, 0, FT_NONE, 0, NULL, 0, NULL, HFILL}};
+
+    Field_Context::Field_Context(
+      const std::string& short_name, const std::string& long_name,
+      ftenum ft, field_display_e fd
+    ) :
+      short_name_(short_name),
+      long_name_(long_name),
+      hf_(-1),
+      hf_info_(default_hf_register_info)
+    {
+      hf_info_.p_id = &hf_;
+      hf_info_.hfinfo.name = short_name_.c_str();
+      hf_info_.hfinfo.abbrev = long_name_.c_str();
+      hf_info_.hfinfo.type = ft;
+      hf_info_.hfinfo.display = fd;
+    }
+
     Sample_Base::~Sample_Base() {
       for (
         Field_Contexts::iterator i = field_contexts_.begin();
@@ -198,7 +217,7 @@ namespace OpenDDS
 
       // If name begins with "IDL:", remove it
       const std::string idl_prefix("IDL:");
-      if (name.substr(0, idl_prefix.size()) == idl_prefix) {
+      if (name.find(idl_prefix) == 0) {
           name.erase(0, idl_prefix.size());
       }
 
@@ -213,7 +232,7 @@ namespace OpenDDS
       l = 0;
       for (size_t index = 0; index != name.size(); index++) {
           if (name[index] == '/') {
-              Sample_Base::push_ns(name.substr(index - l, l));
+              push_ns(name.substr(index - l, l));
               l = 0;
           } else {
               l++;
@@ -236,19 +255,7 @@ namespace OpenDDS
         );
       }
 
-      Field_Context* fc = new Field_Context;
-      fc->long_name_ = get_ns();
-      fc->short_name_ = get_label();
-      fc->hf_ = -1;
-      fc->hf_info_ = { &fc->hf_, {
-      // Note: Wireshark calls this second struct member "abbrev" (What we
-      // call long_name_) is the string used for filtering.
-      // In our case (and probably most cases for any WS dissector) "abbrev"
-      // will be longer than the first member "name".
-      // This was confusing to me, so just wanted to make a note of this.
-        fc->short_name_.c_str(), fc->long_name_.c_str(),
-        ft, fd, NULL, 0, NULL, HFILL
-      }};
+      Field_Context* fc = new Field_Context(get_label(), get_ns(), ft, fd);
       field_contexts_[ns_] = fc;
 
       return fc;

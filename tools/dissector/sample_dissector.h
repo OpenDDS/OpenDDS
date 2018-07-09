@@ -116,10 +116,19 @@ namespace OpenDDS
 
     /// Holds Wireshark field information in relationship to a namespace
     struct Field_Context {
+    public:
+      Field_Context(
+        const std::string& short_name, const std::string& long_name,
+        ftenum ft, field_display_e fd
+      );
+
+      /// Default Wireshark Field Registration Values
+      static const hf_register_info default_hf_register_info;
+
       /// Field's Display/Short Name
-      std::string short_name_;
+      const std::string short_name_;
       /// Field's Namespace/Long Name
-      std::string long_name_;
+      const std::string long_name_;
       /// Wireshark API Field Index
       int hf_;
       /// Wireshark API Field Structure
@@ -130,8 +139,12 @@ namespace OpenDDS
     /**
      * Base Class for Sample_Dissector, Sample_Field, and all the other
      * elements that make up the dissector tree. Contains global namespace
-     * tracking and any infomation to be passed to Wireshark about the
+     * tracking and any information to be passed to Wireshark about the
      * field.
+     *
+     * The dissector tree represents all the possible valid formats the
+     * sample payload dissector can dissect. Its structure and contents are
+     * defined by the ITL files read when the plugin is loaded.
      *
      * Simplified Example of the Dissector Tree Structure:
      *
@@ -202,7 +215,7 @@ namespace OpenDDS
        * This occurs in two passes:
        *   - The first pass creates the field information and evaluates
        *     if the information is valid. If not a Sample_Dissector_Error
-       *     will be thrown. The whole Sample_Dissector will be removed.
+       *     will be thrown.
        *   - The second pass will collect the hf_register_info structs
        *     from the Dissectors and Fields.
        */
