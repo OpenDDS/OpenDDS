@@ -37,8 +37,8 @@ namespace OpenDDS {
     typedef DDSTraits<MessageType> TraitsType;
     typedef typename TraitsType::MessageSequenceType MessageSequenceType;
 
-    typedef OPENDDS_MAP_CMP(MessageType, DDS::InstanceHandle_t,
-                            typename TraitsType::LessThanType) InstanceMap;
+    typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
+                              typename TraitsType::LessThanType) InstanceMap;
 
     class SharedInstanceMap
       : public RcObject

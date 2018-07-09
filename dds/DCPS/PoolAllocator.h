@@ -94,6 +94,9 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
   return false;
 }
 
+template <typename T>
+struct add_const { typedef const T type; };
+
 }}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
@@ -101,13 +104,21 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #define OPENDDS_STRING std::basic_string<char, std::char_traits<char>, \
           OpenDDS::DCPS::PoolAllocator<char> >
 #define OPENDDS_MAP(K, V) std::map<K, V, std::less<K >, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V > > >
+          OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, V > > >
 #define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V > > >
+          OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, V > > >
 #define OPENDDS_MULTIMAP(K, T) std::multimap<K, T, std::less<K >, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, T > > >
+          OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, T > > >
 #define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, T > > >
+          OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, T > > >
+#define OPENDDS_MAP_T(K, V) std::map<K, V, std::less<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<typename OpenDDS::DCPS::add_const<K >::type, V > > >
+#define OPENDDS_MAP_CMP_T(K, V, C) std::map<K, V, C, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<typename OpenDDS::DCPS::add_const<K >::type, V > > >
+#define OPENDDS_MULTIMAP_T(K, T) std::multimap<K, T, std::less<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<typename OpenDDS::DCPS::add_const<K >::type, T > > >
+#define OPENDDS_MULTIMAP_CMP_T(K, T, C) std::multimap<K, T, C, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<typename OpenDDS::DCPS::add_const<K >::type, T > > >
 #define OPENDDS_SET(K) std::set<K, std::less<K >, \
           OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C, \
@@ -129,6 +140,10 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C >
 #define OPENDDS_MULTIMAP(K, T) std::multimap<K, T >
 #define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C >
+#define OPENDDS_MAP_T OPENDDS_MAP
+#define OPENDDS_MAP_CMP_T OPENDDS_MAP_CMP
+#define OPENDDS_MULTIMAP_T OPENDDS_MULTIMAP
+#define OPENDDS_MULTIMAP_CMP_T OPENDDS_MULTIMAP_CMP
 #define OPENDDS_SET(K) std::set<K >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C >
 #define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C >
