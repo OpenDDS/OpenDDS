@@ -33,21 +33,11 @@ module DDS {
     typedef MessageToken AuthRequestMessageToken;
     typedef MessageToken HandshakeMessageToken;
 
-    /*
-      typedef sequence<HandshakeMessageToken> HandshakeMessageTokenSeq;
-    */
     typedef Token  AuthenticatedPeerCredentialToken;
-
     typedef Token  PermissionsCredentialToken;
-
     typedef Token  CryptoToken;
-    typedef sequence<CryptoToken>  CryptoTokenSeq;
 
-    /*
-      typedef Token  ParticipantCryptoToken;
-      typedef Token  DatawriterCryptoToken;
-      typedef Token  DatareaderCryptoToken;
-    */
+    typedef sequence<CryptoToken>  CryptoTokenSeq;
     typedef CryptoTokenSeq  ParticipantCryptoTokenSeq;
     typedef CryptoTokenSeq  DatawriterCryptoTokenSeq;
     typedef CryptoTokenSeq  DatareaderCryptoTokenSeq;
@@ -97,7 +87,7 @@ module DDS {
 
     typedef DataTags DataTagQosPolicy;
 
-    /*
+    /* TODO: PENDING DATA TAGS IMPLEMENTATION
         // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
         @extensibility(MUTABLE)
         struct DataWriterQos  :  DDS::DataWriterQos {
@@ -113,19 +103,16 @@ module DDS {
         };
 
     */
+
     // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
     //@extensibility(MUTABLE)
     struct ParticipantBuiltinTopicData { //  :  DDS::ParticipantBuiltinTopicData {
-      // TODO
+      // TODO: PENDING IDL V4 INHERITANCE
       // Once structure inheritance from IDL v4 is implemented this field
       // can be replaced by the commented-out inheritance.
       // See the OMG reference implementation dds_security_plugins_spis.idl.
       DDS::ParticipantBuiltinTopicData base;
 
-      //@id(0x1001)  IdentityToken     identity_token;
-      //@id(0x1002)  PermissionsToken  permissions_token;
-      //@id(0x0059)  PropertyQosPolicy property;
-      //@id(0x1005)  ParticipantSecurityInfo  security_info;
       IdentityToken     identity_token;
       PermissionsToken  permissions_token;
       PropertyQosPolicy property;
@@ -134,64 +121,56 @@ module DDS {
 
     //@extensibility(MUTABLE)
     struct ParticipantBuiltinTopicDataSecure { // :  ParticipantBuiltinTopicData {
-      // TODO
+      // TODO: PENDING IDL V4 INHERITANCE
       // Once structure inheritance from IDL v4 is implemented this field
       // can be replaced by the commented-out inheritance.
       // See the OMG reference implementation dds_security_plugins_spis.idl.
       ParticipantBuiltinTopicData base;
 
-      //@id(0x1006) @optional IdentityStatusToken identity_status_token;
       IdentityStatusToken identity_status_token;
     };
 
     //@extensibility(MUTABLE)
     struct PublicationBuiltinTopicData { //: DDS::PublicationBuiltinTopicData {
-      // TODO
+      // TODO: PENDING IDL V4 INHERITANCE
       // Once structure inheritance from IDL v4 is implemented this field
       // can be replaced by the commented-out inheritance.
       // See the OMG reference implementation dds_security_plugins_spis.idl.
       DDS::PublicationBuiltinTopicData base;
 
-      //@id(0x1004) EndpointSecurityInfo  security_info;
       EndpointSecurityInfo  security_info;
     };
 
     //@extensibility(MUTABLE)
     struct SubscriptionBuiltinTopicData { //: DDS::SubscriptionBuiltinTopicData {
-      // TODO
+      // TODO: PENDING IDL V4 INHERITANCE
       // Once structure inheritance from IDL v4 is implemented this field
       // can be replaced by the commented-out inheritance.
       // See the OMG reference implementation dds_security_plugins_spis.idl.
       DDS::SubscriptionBuiltinTopicData base;
 
-      //@id(0x1004) EndpointSecurityInfo  security_info;
       EndpointSecurityInfo  security_info;
     };
 
-    // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
     //@extensibility(MUTABLE)
     struct PublicationBuiltinTopicDataSecure {// :  PublicationBuiltinTopicData {
-      // TODO
+      // TODO: PENDING IDL V4 INHERITANCE
       // Once structure inheritance from IDL v4 is implemented this field
       // can be replaced by the commented-out inheritance.
       // See the OMG reference implementation dds_security_plugins_spis.idl.
       PublicationBuiltinTopicData base;
 
-      //@id(0x1003)  DataTags data_tags;
       DataTags data_tags;
     };
 
-    //TODO: implement this
-    // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
     //@extensibility(MUTABLE)
     struct SubscriptionBuiltinTopicDataSecure { //  :  SubscriptionBuiltinTopicData {
-      // TODO
+      // TODO: PENDING IDL V4 INHERITANCE
       // Once structure inheritance from IDL v4 is implemented this field
       // can be replaced by the commented-out inheritance.
       // See the OMG reference implementation dds_security_plugins_spis.idl.
       SubscriptionBuiltinTopicData base;
 
-      //@id(0x1003)  DataTags data_tags;
       DataTags data_tags;
     };
 
@@ -398,26 +377,19 @@ module DDS {
     };
 
     struct EndpointSecurityAttributes { //: TopicSecurityAttributes {
-      // TODO
+      // TODO: PENDING IDL V4 INHERITANCE
       // Once structure inheritance from IDL v4 is implemented this field
       // can be replaced by the commented-out inheritance from base-struct
       // TopicSecurityAttributes. See the OMG reference implementation
       // (dds_security_plugins_spis.idl).
       TopicSecurityAttributes base;
+
       boolean     is_submessage_protected;
       boolean     is_payload_protected;
       boolean     is_key_protected;
       PluginEndpointSecurityAttributesMask  plugin_endpoint_attributes;
       PropertySeq ac_endpoint_properties;
     };
-
-    /*
-    struct PluginEndpointSecurityAttributes {
-      boolean     is_submessage_encrypted;
-      boolean     is_payload_encrypted;
-      boolean     is_submessage_origin_authenticated;
-    };
-    */
 
     local interface AccessControl;
 
@@ -830,69 +802,6 @@ module DDS {
         inout SecurityException       ex);
     };
 
-    /*
-    enum LoggingLevel {
-      EMERGENCY_LEVEL, // System is unusable. Should not continue use.
-      ALERT_LEVEL,     // Should be corrected immediately
-      CRITICAL_LEVEL,  // A failure in primary application.
-      ERROR_LEVEL,     // General error conditions
-      WARNING_LEVEL,   // May indicate future error if action not taken.
-      NOTICE_LEVEL,    // Unusual, but nor erroneous event or condition.
-      INFORMATIONAL_LEVEL, // Normal operational. Requires no action.
-      DEBUG_LEVEL
-    };
-
-    @extensibility(FINAL)
-    struct NameValuePair {
-      string name;
-      string value;
-    };
-
-    typedef sequence<NameValuePair> NameValuePairSeq;
-
-    @extensibility(FINAL)
-    struct BuiltinLoggingType {
-      octet  facility;  // Set to 0x10. Indicates sec/auth msgs
-      LoggingLevel severity;
-      DDS::Time_t timestamp; // Since epoch 1970-01-01 00:00:00 +0000 (UTC)
-      string hostname;  // IP host name of originator
-      string hostip;    // IP address of originator
-      string appname;   // Identify the device or application
-      string procid;    // Process name/ID for syslog system
-      string msgid;     // Identify the type of message
-      string message;   // Free-form message
-
-      // Note that certain string keys (SD-IDs) are reserved by IANA
-      map<string, NameValuePairSeq>  structured_data;
-    };
-
-    struct LogOptions {
-      LoggingLevel logging_level;
-      string       log_file;
-      boolean      distribute;
-    };
-
-    local interface LoggerListener {
-      boolean on_log_message(in BuiltinLoggingType msg);
-    };
-
-    local interface Logging {
-      boolean set_log_options(
-        in    LogOptions options,
-        inout SecurityException ex);
-
-      boolean log(
-        in    BuiltinLoggingType msg,
-        inout SecurityException ex);
-
-      boolean enable_logging(
-        inout SecurityException ex);
-
-      boolean set_listener(
-        in LoggerListener listener,
-        inout SecurityException ex);
-    };
-    */
   };
 };
 
