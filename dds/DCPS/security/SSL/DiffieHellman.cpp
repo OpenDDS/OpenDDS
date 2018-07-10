@@ -122,7 +122,7 @@ namespace SSL {
         pubkey = privkey = NULL;
         DH_get0_key(dh, &pubkey, &privkey);
         if (pubkey) {
-          dst.length(BN_num_bytes(pubkey));
+          dst.length(DH_size(dh));
           if (0 < BN_bn2bin(pubkey, dst.get_buffer())) {
             result = 0;
 
