@@ -1577,10 +1577,10 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0;
         std::count_if(value.begin(), value.end(), isxdigit, count);
-        if (value.size() != HEX_DIGITS_IN_PARTICIPANT || count != HEX_DIGITS_IN_PARTICIPANT) {
+        if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
 #else
         if (value.size() != HEX_DIGITS_IN_PARTICIPANT ||
-            std::count_if(value.begin(), value.end(), isxdigit) != HEX_DIGITS_IN_PARTICIPANT) {
+            static_cast<size_t>(std::count_if(value.begin(), value.end(), isxdigit)) != HEX_DIGITS_IN_PARTICIPANT) {
 #endif
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1597,10 +1597,10 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 #ifdef __SUNPRO_CC
         int count = 0;
         std::count_if(value.begin(), value.end(), isxdigit, count);
-        if (value.size() != HEX_DIGITS_IN_ENTITY || count != HEX_DIGITS_IN_ENTITY) {
+        if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
 #else
         if (value.size() != HEX_DIGITS_IN_ENTITY ||
-            std::count_if(value.begin(), value.end(), isxdigit) != HEX_DIGITS_IN_ENTITY) {
+            static_cast<size_t>(std::count_if(value.begin(), value.end(), isxdigit)) != HEX_DIGITS_IN_ENTITY) {
 #endif
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
