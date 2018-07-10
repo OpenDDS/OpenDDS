@@ -31,7 +31,7 @@ public:
 ACE_STATIC_SVC_DECLARE_EXPORT(DdsSecurity, BuiltInPluginLoader)
 ACE_FACTORY_DECLARE(DdsSecurity, BuiltInPluginLoader)
 
-} // namespace DCPS
+} // namespace Security
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
