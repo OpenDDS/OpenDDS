@@ -507,7 +507,7 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated, bool persistent)
     }
 
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception("ERROR: Exception caught in main.cpp:");
+    ex._tao_print_exception("ERROR: Exception caught in DCPS_IR_Domain::init_built_in-topics()");
     return 1;
   }
 

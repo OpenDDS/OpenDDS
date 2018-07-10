@@ -16,22 +16,30 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace Update {
 
+/**
+ * Base class for use by the UpdateManager class.
+ */
 class Updater {
 public:
   virtual ~Updater();
 
-  // Request an image refresh to be sent to
-  //  the specified callback (asynchronously).
+  /**
+   * Request an image refresh to be sent to the specified
+   * callback (asynchronously).
+   */
   virtual void requestImage() = 0;
 
-  // Propagate that an entity has been created.
+  ///@{
+  /// Propagate an entity has been created.
   virtual void create(const UTopic&              topic) = 0;
   virtual void create(const UParticipant&  participant) = 0;
   virtual void create(const URActor&             actor) = 0;
   virtual void create(const UWActor&             actor) = 0;
   virtual void create(const OwnershipData&        data) = 0;
+  ///@}
 
-  // Propagate updated Qos parameters for an entity.
+  ///@{
+  /// Propagate updated Qos parameters for an entity.
   virtual void update(const IdPath& id, const DDS::DomainParticipantQos& qos) = 0;
   virtual void update(const IdPath& id, const DDS::TopicQos&             qos) = 0;
   virtual void update(const IdPath& id, const DDS::DataWriterQos&        qos) = 0;
@@ -39,8 +47,9 @@ public:
   virtual void update(const IdPath& id, const DDS::DataReaderQos&        qos) = 0;
   virtual void update(const IdPath& id, const DDS::SubscriberQos&        qos) = 0;
   virtual void update(const IdPath& id, const DDS::StringSeq&     exprParams) = 0;
+  ///@}
 
-  // Propagate that an entity has been destroyed.
+  /// Propagate that an entity has been destroyed.
   virtual void destroy(const IdPath& id, ItemType type, ActorType actor) = 0;
 
   /// Update Last Participant Id for the repo

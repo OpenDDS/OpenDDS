@@ -84,6 +84,7 @@ public:
   /// Find the participant with the id.
   DCPS_IR_Participant* participant(const OpenDDS::DCPS::RepoId& id) const;
 
+  ///@{
   /// Add a topic to the domain
   /// Returns OpenDDS::DCPS::CREATED if successfull
   OpenDDS::DCPS::TopicStatus add_topic(OpenDDS::DCPS::RepoId_out topicId,
@@ -97,6 +98,7 @@ public:
                                              const char* dataTypeName,
                                              const DDS::TopicQos & qos,
                                              DCPS_IR_Participant* participantPtr);
+  ///@}
 
   /// Find the topic with the topic name
   /// Does NOT take ownership of any initial memory pointed to by topic
@@ -198,12 +200,16 @@ private:
   /// Returns 0 if successful
   int remove_topic_description(DCPS_IR_Topic_Description* desc);
 
-  // work of initializing the built in topics is
-  // done in these private methods.  They were
-  // broken up for readability.
+  ///@{
+  /**
+   * work of initializing the built in topics is
+   * done in these private methods.  They were
+   * broken up for readability.
+   */
   int init_built_in_topics_topics();
   int init_built_in_topics_datawriters(bool federated);
   int init_built_in_topics_transport(bool persistent);
+  ///@}
 
   DDS::DomainId_t id_;
 
@@ -232,7 +238,8 @@ private:
   /// indicates if the BuiltIn Topics are enabled
   bool useBIT_;
 
-  // Built-in Topic variables
+  ///@{
+  /// Built-in Topic variables
   DDS::DomainParticipantFactory_var                bitParticipantFactory_;
   DDS::DomainParticipant_var                       bitParticipant_;
   DDS::DomainParticipantListener_var               bitParticipantListener_;
@@ -253,6 +260,8 @@ private:
   DDS::Topic_var                                   bitPublicationTopic_;
   DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+  ///@}
+
   // MSVC 2017 has trouble to compile std::map<key, std::unique_ptr<Foo> > when it is enclosed
   // by a DLL exported class whose copy constructor is not explicitly deleted
   DCPS_IR_Domain(const DCPS_IR_Domain&);

@@ -119,7 +119,7 @@ public:
   /// Persist updated Qos parameters for a Subscriber.
   virtual void update(const IdPath& id, const DDS::SubscriberQos&        qos);
 
-  /// Persist updated Qos parameters for subscription exprParams.
+  /// Persist updated subscription exprParams.
   virtual void update(const IdPath& id, const DDS::StringSeq&     exprParams);
 
   /// Remove an entity (but not children) from persistence.
@@ -139,8 +139,13 @@ private:
 
   OpenDDS::DCPS::unique_ptr<ALLOCATOR> allocator_;
 
+  /// Persisted Topics
   TopicIndex *topic_index_;
+
+  /// Persisted Participants
   ParticipantIndex *participant_index_;
+
+  /// Persisted Readers and Writers
   ActorIndex *actor_index_;
 
   /// What the last participant id is/was
