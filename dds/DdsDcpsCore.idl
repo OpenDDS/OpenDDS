@@ -279,7 +279,7 @@ module DDS {
     struct DomainParticipantQos {
                 UserDataQosPolicy user_data;
                 EntityFactoryQosPolicy entity_factory;
-                // TODO
+                // TODO: PENDING IDL V4 INHERITANCE
                 // Once structure inheritance from IDL v4 is implemented this can be
                 // moved into the IDL struct DDS::Security::DomainParticipantQos
                 // located within dds/DCPS/security/DdsSecurityCore.idl. See the

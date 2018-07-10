@@ -32,8 +32,6 @@ module DDS {
 
     struct DataHolder {
       string             class_id;
-      //@optional  PropertySeq        properties;
-      //@optional  BinaryPropertySeq  binary_properties;
       PropertySeq        properties;
       BinaryPropertySeq  binary_properties;
     };

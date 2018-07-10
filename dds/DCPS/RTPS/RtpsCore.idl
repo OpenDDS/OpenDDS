@@ -32,7 +32,7 @@ module OpenDDS {
       FilterSignatureSeq filterSignatures;
     };
 
-    // TODO
+    // TODO: PENDING IDL V4 INHERITANCE
     // Remove these typedefs and force dependencies to use the
     // DDS::Property_t version directly. These had to be moved
     // into DdsDcpsCore.idl since IDL v4 inheritance support isn't
