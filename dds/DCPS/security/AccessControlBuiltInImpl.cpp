@@ -131,10 +131,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   local_access_control_data_.load(participant_qos.property.value);
 
   // Read in permissions_ca
-  SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
+  const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
 
   // Read in governance file
-  SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
+  const SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
 
   // return of 0 = verified  1 = not verified
   int gov_verified = local_gov.verify_signature(local_ca);
@@ -150,7 +150,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // permissions file
 
-  SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
+  const SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
   local_perm.get_content(perm_content);
   clean_smime_content(perm_content);
 
@@ -319,7 +319,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   remote_signed.load(remote_uri_content);
 
   // Read in permissions_ca
-  SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
+  const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
   std::string ca_subject;
 
   local_ca.subject_name_to_str(ca_subject);

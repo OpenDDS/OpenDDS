@@ -27,17 +27,17 @@ namespace Security {
 
     void load(const DDS::PropertySeq& props);
 
-    SSL::Certificate& get_ca_cert()
+    const SSL::Certificate& get_ca_cert()
     {
       return *ca_cert_;
     }
 
-    SSL::SignedDocument& get_governance_doc()
+    const SSL::SignedDocument& get_governance_doc()
     {
       return *governance_doc_;
     }
 
-    SSL::SignedDocument& get_permissions_doc()
+    const SSL::SignedDocument& get_permissions_doc()
     {
       return *permissions_doc_;
     }
