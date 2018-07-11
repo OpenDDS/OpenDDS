@@ -57,4 +57,4 @@ const DDS::OctetSeq& TokenReader::get_bin_property_value(const std::string& prop
 } // namespace Security
 } // namespace OpenDDS
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -78,6 +78,6 @@ inline void TokenWriter::set_class_id(const std::string& class_id)
 } // namespace Security
 } // namespace OpenDDS
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
