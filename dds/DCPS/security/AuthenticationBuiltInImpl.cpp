@@ -800,6 +800,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   SharedSecretHandle* result = 0;
 
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
+
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
     ValidationResult_t state = handshakeData->validation_state;
@@ -825,6 +827,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 {
   using namespace DDS::Security;
   ::CORBA::Boolean result = false;
+
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
@@ -966,6 +970,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   DDS::Security::SecurityException & ex)
 {
 
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   DDS::OctetSeq challenge1, hash_c2;
@@ -1156,6 +1161,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
   const DDS::Security::ValidationResult_t ValidationOkay = DDS::Security::VALIDATION_OK;
 
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   HandshakeData_Ptr handshakePtr = get_handshake_data(handshake_handle);
@@ -1248,9 +1254,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
 AuthenticationBuiltInImpl::HandshakeData_Ptr AuthenticationBuiltInImpl::get_handshake_data(DDS::Security::HandshakeHandle handle)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
-
-  // Mutex controls adding/removing handshakes, but not the contents of the handshakes
   HandshakeData_Ptr dataPtr;
   Handshake_Handle_Data::iterator iData = handshake_data_.find(handle);
   if (iData != handshake_data_.end()) {
