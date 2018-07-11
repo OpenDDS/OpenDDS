@@ -700,9 +700,11 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     }
   }
 
-  /* TODO Add OCSP checks when "ocsp_status" property is given in message_in.
-   * Most of this logic would probably be placed in the Certificate directly
-   * or an OCSP abstraction that the Certificate uses. */
+  // TODO: Currently support for OCSP is optional in the security spec and
+  // so it has been deferred to a post-beta release.
+  // Add OCSP checks when "ocsp_status" property is given in message_in.
+  // Most of this logic would probably be placed in the Certificate directly
+  // or an OCSP abstraction that the Certificate uses.
 
   const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
 
