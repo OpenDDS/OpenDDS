@@ -98,20 +98,17 @@ TEST_F(CertificateTest, Validate_Failure_SelfSigned)
   ASSERT_NE(not_signed_.validate(ca_), X509_V_OK);
 }
 
-#if 0 /* TODO */
 TEST_F(CertificateTest, SubjectNameDigest)
 {
   typedef std::vector<unsigned char> hash_vec;
 
-  hash_vec hash;
-  not_signed_.subject_name_digest(hash);
+  hash_vec hash1, hash2;
+  signed_.subject_name_digest(hash1);
+  signed_data_.subject_name_digest(hash2);
 
-  hash_vec::const_iterator i;
-  for (i = hash.cbegin(); i != hash.cend(); ++i) {
-    /* Do something with the bytes... */
-  }
+  ASSERT_EQ(32u, hash1.size());
+  ASSERT_EQ(hash1, hash2);
 }
-#endif
 
 TEST_F(CertificateTest, Algorithm_RSA_2048_Success)
 {

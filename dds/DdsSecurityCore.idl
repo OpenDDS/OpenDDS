@@ -25,7 +25,9 @@ module DDS {
     typedef DDS::BinaryPropertySeq BinaryPropertySeq;
     typedef DDS::PropertyQosPolicy PropertyQosPolicy;
 
-    //native DynamicData;
+    // Since DynamicData is a feature of the XTypes spec (which isn't yet supported) the
+    // native type is replaced with an empty interface to satisfy the access-control methods
+    // which use the type.
     local interface DynamicData {
     };
 

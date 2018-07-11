@@ -1575,13 +1575,11 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         }
       } else if (name == "participant") {
 #ifdef __SUNPRO_CC
-        int count = 0;
-        std::count_if(value.begin(), value.end(), isxdigit, count);
-        if (value.size() != HEX_DIGITS_IN_PARTICIPANT || count != HEX_DIGITS_IN_PARTICIPANT) {
+        int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        if (value.size() != HEX_DIGITS_IN_PARTICIPANT ||
-            std::count_if(value.begin(), value.end(), isxdigit) != HEX_DIGITS_IN_PARTICIPANT) {
+        int count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
+        if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                             ACE_TEXT("participant (%C) must be 12 hexadecimal digits in [endpoint/%C] section.\n"),
@@ -1595,13 +1593,11 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         participant_specified = true;
       } else if (name == "entity") {
 #ifdef __SUNPRO_CC
-        int count = 0;
-        std::count_if(value.begin(), value.end(), isxdigit, count);
-        if (value.size() != HEX_DIGITS_IN_ENTITY || count != HEX_DIGITS_IN_ENTITY) {
+        int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
 #else
-        if (value.size() != HEX_DIGITS_IN_ENTITY ||
-            std::count_if(value.begin(), value.end(), isxdigit) != HEX_DIGITS_IN_ENTITY) {
+        int count = std::count_if(value.begin(), value.end(), isxdigit);
 #endif
+        if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                             ACE_TEXT("entity (%C) must be 6 hexadecimal digits in [endpoint/%C] section.\n"),
