@@ -97,7 +97,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   bool credential_valid = false;
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(local_credential_data_mutex_);
+    ACE_Guard<ACE_Thread_Mutex> g1(local_credential_data_mutex_);
     local_credential_data_.load(participant_qos.property.value);
     credential_valid = local_credential_data_.validate();
   }
@@ -115,7 +115,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         local_identity->participant_guid = adjusted_participant_guid;
 
         {
-          ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+          ACE_Guard<ACE_Thread_Mutex> g2(identity_mutex_);
           identity_data_[local_identity_handle] = local_identity;
         }
 
