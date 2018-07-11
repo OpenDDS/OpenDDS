@@ -600,7 +600,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   DDS::OctetSeq challenge1, challenge2, dh2, cperm, hash_c1, hash_c2;
 
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
-  SSL::DiffieHellman::unique_ptr diffie_hellman; //(new SSL::DiffieHellman);
+  SSL::DiffieHellman::unique_ptr diffie_hellman;
 
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED,
                                           Pending = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
@@ -626,74 +626,73 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     set_security_error(ex, -1, 0, "Handshake_message_out is an inout param and must not be nil");
     return Failure;
 
+  }
+  challenge1 = message_in.get_bin_property_value("challenge1");
+
+  TokenReader initiator_remote_auth_request(initiator_id_data->remote_auth_request);
+  if (! initiator_remote_auth_request.is_nil()) {
+    const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
+
+    if (! challenges_match(challenge1, future_challenge)) {
+        return Failure;
+    }
+  }
+
+  const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
+  if (cid.length() > 0) {
+
+    remote_cert->deserialize(cid);
+    if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
+    {
+      set_security_error(ex, -1, 0, "Certificate validation failed");
+      return Failure;
+    }
+
   } else {
-    challenge1 = message_in.get_bin_property_value("challenge1");
+    set_security_error(ex, -1, 0, "Certificate validation failed due to empty 'c.id' property supplied");
+    return Failure;
+  }
 
-    TokenReader initiator_remote_auth_request(initiator_id_data->remote_auth_request);
-    if (! initiator_remote_auth_request.is_nil()) {
-      const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
+  /* Validate participant_guid in c.pdata */
 
-      if (! challenges_match(challenge1, future_challenge)) {
-          return Failure;
-      }
-    }
+  const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
 
-    const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
-    if (cid.length() > 0) {
+  std::vector<unsigned char> hash;
+  if (0 != remote_cert->subject_name_digest(hash)) {
+    set_security_error(ex, -1, 0, "Failed to generate subject-name digest from remote certificate.");
+    return Failure;
+  }
 
-      remote_cert->deserialize(cid);
-      if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
-      {
-        set_security_error(ex, -1, 0, "Certificate validation failed");
-        return Failure;
-      }
-
-    } else {
-      set_security_error(ex, -1, 0, "Certificate validation failed due to empty 'c.id' property supplied");
+  if (! validate_topic_data_guid(cpdata, hash, ex)) {
       return Failure;
-    }
+  }
 
-    /* Validate participant_guid in c.pdata */
+  cperm = message_in.get_bin_property_value("c.perm");
 
-    const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
+  const DDS::OctetSeq& dh_algo = message_in.get_bin_property_value("c.kagree_algo");
+  SSL::DiffieHellman::unique_ptr tmp(SSL::DiffieHellman::factory(dh_algo));
+  diffie_hellman = DCPS::move(tmp);
 
-    std::vector<unsigned char> hash;
-    if (0 != remote_cert->subject_name_digest(hash)) {
-      set_security_error(ex, -1, 0, "Failed to generate subject-name digest from remote certificate.");
-      return Failure;
-    }
+  /* Compute hash_c1 and store for later */
 
-    if (! validate_topic_data_guid(cpdata, hash, ex)) {
-        return Failure;
-    }
+  {
+    CredentialHash hash(*remote_cert,
+                        *diffie_hellman,
+                        cpdata,
+                        cperm);
+    int err = hash(hash_c1);
+    if (err) return Failure;
+  }
 
-    cperm = message_in.get_bin_property_value("c.perm");
+  /* Compute hash_c2 and store for later */
 
-    const DDS::OctetSeq& dh_algo = message_in.get_bin_property_value("c.kagree_algo");
-    SSL::DiffieHellman::unique_ptr tmp(SSL::DiffieHellman::factory(dh_algo));
-    diffie_hellman = DCPS::move(tmp);
-
-    /* Compute hash_c1 and store for later */
-
-    {
-      CredentialHash hash(*remote_cert,
-                          *diffie_hellman,
-                          cpdata,
-                          cperm);
-      int err = hash(hash_c1);
-      if (err) return Failure;
-    }
-
-    /* Compute hash_c2 and store for later */
-
-    {
-      CredentialHash hash(local_credential_data_.get_participant_cert(),
-                          *diffie_hellman,
-                          serialized_local_participant_data,
-                          local_credential_data_.get_access_permissions());
-      int err = hash(hash_c2);
-      if (err) return Failure;
-    }
+  {
+    CredentialHash hash(local_credential_data_.get_participant_cert(),
+                        *diffie_hellman,
+                        serialized_local_participant_data,
+                        local_credential_data_.get_access_permissions());
+    int err = hash(hash_c2);
+    if (err) return Failure;
   }
 
   /* TODO Add OCSP checks when "ocsp_status" property is given in message_in.
@@ -742,9 +741,9 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                                 hash_c1,
                                 sign_these);
 
-  DDS::OctetSeq tmp;
-  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), tmp);
-  message_out.add_bin_property("signature", tmp);
+  DDS::OctetSeq signature;
+  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), signature);
+  message_out.add_bin_property("signature", signature);
 
   HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
   newHandshakeData->local_identity_handle = replier_identity_handle;
