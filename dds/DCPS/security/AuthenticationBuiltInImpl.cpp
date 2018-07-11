@@ -117,10 +117,13 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         }
 
         result = DDS::Security::VALIDATION_OK;
+
+      } else {
+	set_security_error(ex, -1, 0, "SSL::make_adjusted_guid failed");
       }
+
     } else {
         set_security_error(ex, -1, 0, "GUID_UNKNOWN passed in for candidate_participant_guid");
-
     }
 
   } else {
