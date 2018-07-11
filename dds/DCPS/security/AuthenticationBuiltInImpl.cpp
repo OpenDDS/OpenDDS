@@ -670,8 +670,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   cperm = message_in.get_bin_property_value("c.perm");
 
   const DDS::OctetSeq& dh_algo = message_in.get_bin_property_value("c.kagree_algo");
-  SSL::DiffieHellman::unique_ptr tmp(SSL::DiffieHellman::factory(dh_algo));
-  diffie_hellman = DCPS::move(tmp);
+  diffie_hellman.reset(SSL::DiffieHellman::factory(dh_algo));
 
   /* Compute hash_c1 and store for later */
 
