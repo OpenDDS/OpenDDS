@@ -68,7 +68,7 @@ struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
 AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 : listener_ptr_()
-, local_auth_data_mutex_()
+, local_credential_data_mutex_()
 , identity_mutex_()
 , handshake_mutex_()
 , handle_mutex_()
@@ -95,11 +95,14 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
-  ACE_Guard<ACE_Thread_Mutex> guard(local_auth_data_mutex_);
+  bool credential_valid = false;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(local_credential_data_mutex_);
+    local_credential_data_.load(participant_qos.property.value);
+    credential_valid = local_credential_data_.validate();
+  }
 
-  local_credential_data_.load(participant_qos.property.value);
-
-  if (local_credential_data_.validate()) {
+  if (credential_valid) {
     if (candidate_participant_guid != DCPS::GUID_UNKNOWN) {
 
       int err = SSL::make_adjusted_guid(candidate_participant_guid,
@@ -119,7 +122,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         result = DDS::Security::VALIDATION_OK;
 
       } else {
-	set_security_error(ex, -1, 0, "SSL::make_adjusted_guid failed");
+        set_security_error(ex, -1, 0, "SSL::make_adjusted_guid failed");
       }
 
     } else {
