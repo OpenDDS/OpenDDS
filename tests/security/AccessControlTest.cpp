@@ -817,7 +817,6 @@ TEST_F(AccessControlTest, check_remote_participant_Success)
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(),pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
-
   get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
   ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
@@ -840,13 +839,40 @@ TEST_F(AccessControlTest, check_remote_datawriter_InvalidInput)
 
 TEST_F(AccessControlTest, check_remote_datawriter_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
-  ::DDS::Security::DomainId_t domain_id = 1;
+  ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
+  ::DDS::Security::DomainId_t domain_id = 0;
+  ::DDS::Security::PermissionsToken remote_perm_token;
   ::DDS::Security::PublicationBuiltinTopicDataSecure publication_data;
   ::DDS::Security::SecurityException ex;
 
+  remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
+  remote_perm_token.properties.length(1);
+  remote_perm_token.properties[0].name = "dds.perm.ca.sn";
+  remote_perm_token.properties[0].value = remote_subject_name;
+
+  std::string id(get_file_contents(mock_1_cert_file));
+  std::string pf(get_file_contents(perm_mock_1_join_p7s_file));
+
+  remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
+  remote_apc_token.binary_properties.length(2);
+  remote_apc_token.binary_properties[0].name = "c.id";
+  remote_apc_token.binary_properties[0].value.length(id.size());
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
+  remote_apc_token.binary_properties[0].propagate = true;
+  remote_apc_token.binary_properties[1].name = "c.perm";
+  remote_apc_token.binary_properties[1].value.length(pf.size());
+  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
+  remote_apc_token.binary_properties[1].propagate = true;
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
+
+  ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
+    auth_plugin_.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
+
+  // In permissions file topic is '*'
+  publication_data.base.base.topic_name = "Square";
+
   EXPECT_TRUE(get_inst().check_remote_datawriter(
-    permissions_handle, domain_id, publication_data, ex));
+    remote_out_handle, domain_id, publication_data, ex));
 }
 
 TEST_F(AccessControlTest, check_remote_datareader_InvalidInput)
@@ -863,14 +889,41 @@ TEST_F(AccessControlTest, check_remote_datareader_InvalidInput)
 
 TEST_F(AccessControlTest, check_remote_datareader_Success)
 {
-  ::DDS::Security::PermissionsHandle permissions_handle = 1;
-  ::DDS::Security::DomainId_t domain_id = 1;
+  ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
+  ::DDS::Security::DomainId_t domain_id = 0;
+  ::DDS::Security::PermissionsToken remote_perm_token;
   ::DDS::Security::SubscriptionBuiltinTopicDataSecure subscription_data;
   ::DDS::Security::SecurityException ex;
   bool relay_only = true;
 
+  remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
+  remote_perm_token.properties.length(1);
+  remote_perm_token.properties[0].name = "dds.perm.ca.sn";
+  remote_perm_token.properties[0].value = remote_subject_name;
+
+  std::string id(get_file_contents(mock_1_cert_file));
+  std::string pf(get_file_contents(perm_mock_1_join_p7s_file));
+
+  remote_apc_token.class_id = Expected_Permissions_Cred_Token_Class_Id;
+  remote_apc_token.binary_properties.length(2);
+  remote_apc_token.binary_properties[0].name = "c.id";
+  remote_apc_token.binary_properties[0].value.length(id.size());
+  memcpy(remote_apc_token.binary_properties[0].value.get_buffer(), id.c_str(), id.size());
+  remote_apc_token.binary_properties[0].propagate = true;
+  remote_apc_token.binary_properties[1].name = "c.perm";
+  remote_apc_token.binary_properties[1].value.length(pf.size());
+  memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
+  remote_apc_token.binary_properties[1].propagate = true;
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
+
+  ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(
+    auth_plugin_.get(), 1, 2, remote_perm_token, remote_apc_token, ex);
+
+  // In permissions file topic is '*'
+  subscription_data.base.base.topic_name = "Square";
+
   EXPECT_TRUE(get_inst().check_remote_datareader(
-    permissions_handle, domain_id, subscription_data, relay_only, ex));
+    remote_out_handle, domain_id, subscription_data, relay_only, ex));
   EXPECT_FALSE(relay_only);
 }
 
