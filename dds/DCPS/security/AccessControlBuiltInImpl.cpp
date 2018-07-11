@@ -1232,6 +1232,37 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
+  PublishSubscribe_t publish = PUBLISH;
+
+  int ret_value = search_remote_permissions(permissions_handle, publication_data.base.base.topic_name, domain_id, ac_iter, publish);
+
+  if (ret_value > 0) {
+    switch (ret_value) {
+    case 1:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions not_before time is invalid");
+      break;
+    case 2:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant time has not started");
+      break;
+    case 3:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions not_after time is invalid");
+      break;
+    case 4:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant time has expired");
+      break;
+    case 5:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions is DENY");
+      break;
+    case 6:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Topic not in Permissions, default is DENY");
+      break;
+    default:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: An error occurred in the Permissions");
+    }
+
+    return false;
+  }
+
   return true;
 }
 
@@ -1242,16 +1273,71 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::CORBA::Boolean & relay_only,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(subscription_data);
-
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Invalid permissions handle");
     return false;
   }
 
+  ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
+
+  if (ac_iter == local_ac_perms_.end()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: No matching permissions handle present");
+    return false;
+  }
+
   // Default this to false for now
   relay_only = false;
+
+  GovernanceAccessRules::iterator giter;
+
+  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+    size_t d = giter->domain_list.count(domain_id);
+
+    if (d > 0) {
+      TopicAccessRules::iterator tr_iter;
+
+      for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
+        if (::ACE::wild_match(subscription_data.base.base.topic_name, tr_iter->topic_expression.c_str(), true, false)) {
+          if (tr_iter->topic_attrs.is_read_protected == false) {
+            return true;
+          }
+        }
+      }
+
+    }
+  }
+
+  PublishSubscribe_t subscribe = SUBSCRIBE;
+
+  int ret_value = search_remote_permissions(permissions_handle, subscription_data.base.base.topic_name, domain_id, ac_iter, subscribe);
+
+  if (ret_value > 0) {
+    switch (ret_value) {
+    case 1:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions not_before time is invalid");
+      break;
+    case 2:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant time has not started");
+      break;
+    case 3:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions not_after time is invalid");
+      break;
+    case 4:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant time has expired");
+      break;
+    case 5:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions is DENY");
+      break;
+    case 6:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Topic not in Permissions, default is DENY");
+      break;
+    default:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: An error occurred in the Permissions");
+    }
+
+    return false;
+  }
+
   return true;
 }
 
@@ -2009,7 +2095,8 @@ int AccessControlBuiltInImpl::search_remote_permissions(
   const::DDS::Security::PermissionsHandle permissions_handle, 
   const char * topic_name, 
   const::DDS::Security::DomainId_t domain_id,
-  ACPermsMap::iterator ac_iter)
+  ACPermsMap::iterator ac_iter,
+  const PublishSubscribe_t pub_or_sub)
 {
   PermissionGrantRules::iterator pm_iter;
   std::string default_value;
@@ -2055,7 +2142,7 @@ int AccessControlBuiltInImpl::search_remote_permissions(
         std::list<PermissionTopicPsRule>::iterator tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == PUBLISH) {
+          if (tpsr_iter->ps_type == pub_or_sub) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -2070,7 +2157,7 @@ int AccessControlBuiltInImpl::search_remote_permissions(
         std::list<PermissionTopicPsRule>::iterator tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == PUBLISH) {
+          if (tpsr_iter->ps_type == pub_or_sub) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {

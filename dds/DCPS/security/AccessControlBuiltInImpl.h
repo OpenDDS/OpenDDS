@@ -379,7 +379,8 @@ private:
   int search_remote_permissions(const ::DDS::Security::PermissionsHandle permissions_handle,
                                 const char * topic_name,
                                 const ::DDS::Security::DomainId_t domain_id,
-                                ACPermsMap::iterator ac_iter);
+                                ACPermsMap::iterator ac_iter,
+                                const PublishSubscribe_t pub_or_sub);
 
 };
 
