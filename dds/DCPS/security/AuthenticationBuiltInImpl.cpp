@@ -680,7 +680,10 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                         cpdata,
                         cperm);
     int err = hash(hash_c1);
-    if (err) return Failure;
+    if (err) {
+      set_security_error(ex, -1, 0, "Failed to compute hash_c1.");
+      return Failure;
+    }
   }
 
   /* Compute hash_c2 and store for later */
@@ -691,7 +694,10 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                         serialized_local_participant_data,
                         local_credential_data_.get_access_permissions());
     int err = hash(hash_c2);
-    if (err) return Failure;
+    if (err) {
+      set_security_error(ex, -1, 0, "Failed to compute hash_c2.");
+      return Failure;
+    }
   }
 
   /* TODO Add OCSP checks when "ocsp_status" property is given in message_in.
@@ -727,6 +733,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
       message_out.add_bin_property("challenge2", challenge2);
 
     } else {
+      set_security_error(ex, -1, 0, "SSL::make_nonce_256 failed.");
       return Failure;
     }
   }
