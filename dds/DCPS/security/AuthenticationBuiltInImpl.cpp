@@ -143,6 +143,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   ::CORBA::Boolean status = false;
 
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
     const SSL::Certificate& pcert = local_credential_data_.get_participant_cert();
@@ -180,6 +182,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   ::CORBA::Boolean status = false;
 
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   // Populate a simple version of an IdentityStatusToken as long as the handle is known
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
@@ -203,10 +207,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   ::CORBA::Boolean status = false;
 
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
     {
-      ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
       local_data->permissions_cred_token = permissions_credential;
       local_data->permissions_token = permissions_token;
     }
@@ -229,6 +234,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
+
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   IdentityData_Ptr local_data = get_identity_data(local_identity_handle);
   if (local_data) {
@@ -264,10 +271,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         newIdentityData->remote_auth_request = remote_auth_request_token;
 
         remote_identity_handle = get_next_handle();
-        {
-          ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-          identity_data_[remote_identity_handle] = newIdentityData;
-        }
+        identity_data_[remote_identity_handle] = newIdentityData;
 
         if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
           result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
@@ -298,12 +302,13 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::DDS::OctetSeq & serialized_local_participant_data,
   ::DDS::Security::SecurityException & ex)
 {
-
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   DDS::OctetSeq hash_c1;
 
   if (serialized_local_participant_data.length() != 0) {
+
+      ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
       IdentityData_Ptr replier_data = get_identity_data(replier_identity_handle);
       if (replier_data) {
@@ -585,6 +590,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 {
   using OpenDDS::Security::TokenWriter;
   using OpenDDS::Security::TokenReader;
+
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   /* Copy the in part of the inout param */
   const DDS::Security::HandshakeMessageToken request_token = handshake_message_out;
@@ -958,6 +965,9 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   DDS::Security::HandshakeHandle handshake_handle,
   DDS::Security::SecurityException & ex)
 {
+
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   DDS::OctetSeq challenge1, hash_c2;
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
 
@@ -1146,6 +1156,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
   const DDS::Security::ValidationResult_t ValidationOkay = DDS::Security::VALIDATION_OK;
 
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   HandshakeData_Ptr handshakePtr = get_handshake_data(handshake_handle);
   if (!handshakePtr) {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
@@ -1250,9 +1262,6 @@ AuthenticationBuiltInImpl::HandshakeData_Ptr AuthenticationBuiltInImpl::get_hand
 
 AuthenticationBuiltInImpl::IdentityData_Ptr AuthenticationBuiltInImpl::get_identity_data(DDS::Security::IdentityHandle handle)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-
-  // Mutex controls adding/removing identitiy data, but not the contents of the data
   IdentityData_Ptr dataPtr;
   Identity_Handle_Data::iterator iData = identity_data_.find(handle);
   if (iData != identity_data_.end()) {
