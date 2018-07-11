@@ -1016,7 +1016,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     const DDS::OctetSeq& future_challenge = auth_wrapper.get_bin_property_value("future_challenge");
 
     if (! challenges_match(challenge2, future_challenge)) {
-        return Failure;
+      set_security_error(ex, -1, 0, "challenge2 does not match future_challenge");
+      return Failure;
     }
   }
 
@@ -1048,7 +1049,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     const DDS::OctetSeq& challenge1_reply =  message_in.get_bin_property_value("challenge1");
 
     if (! challenges_match(challenge1, challenge1_reply)) {
-        return Failure;
+      set_security_error(ex, -1, 0, "handshake-request challenge1 value does not match local challenge1");
+      return Failure;
     }
   }
 
@@ -1088,7 +1090,10 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
                         cpdata,
                         cperm);
     int err = hash(hash_c2);
-    if (err) return Failure;
+    if (err) {
+      set_security_error(ex, -1, 0, "Computing hash_c2 failed");
+      return Failure;
+    }
   }
 
   /* Validate Signature field */
