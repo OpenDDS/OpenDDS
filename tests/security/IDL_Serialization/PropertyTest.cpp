@@ -13,10 +13,11 @@ class SerializePropertyTest : public ::testing::Test
 {
 public:
 
-  SerializePropertyTest() : buffer(1024),
-			    serializer(&buffer,
-				       false,
-				       Serializer::ALIGN_CDR){}
+  SerializePropertyTest()
+    : buffer(1024)
+    , serializer(&buffer, false, Serializer::ALIGN_CDR)
+  {}
+
   virtual ~SerializePropertyTest(){}
 
   Property_t in;
@@ -32,16 +33,16 @@ TEST_F(SerializePropertyTest, PropertySeq_OnePropagateFalse_TwoPropagateTrue)
   inseq.length(3);
   for (size_t i = 0; i < inseq.length(); ++i) {
 
-      std::stringstream name, value;
-      name << "name " << i;
-      value << "value " << i;
+    std::stringstream name, value;
+    name << "name " << i;
+    value << "value " << i;
 
-      Property_t p;
-      p.name = name.str().c_str();
-      p.value = name.str().c_str();
-      p.propagate = true;
+    Property_t p;
+    p.name = name.str().c_str();
+    p.value = name.str().c_str();
+    p.propagate = true;
 
-      inseq[i] = p;
+    inseq[i] = p;
   }
 
   inseq[0].propagate = false;
@@ -91,4 +92,3 @@ TEST_F(SerializePropertyTest, Property_When_Propagate_False)
   ASSERT_TRUE(std::strcmp(in.value.in(), "com.objectcomputing.value") == 0);
   ASSERT_FALSE(in.propagate);
 }
-

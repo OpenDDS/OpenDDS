@@ -366,7 +366,7 @@ private:
   ::DDS::Security::AccessControlListener_ptr listener_ptr_;
 
   time_t convert_permissions_time(std::string timeString);
-  
+
   LocalAccessCredentialData local_access_control_data_;
 
   int get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
@@ -374,11 +374,19 @@ private:
                          const ::DDS::PartitionQosPolicy & partition,
                          const ::DDS::Security::DataTagQosPolicy & data_tag,
                          ::DDS::Security::EndpointSecurityAttributes & attributes);
+
+  // Returns a 0 if the search is successful.
+  int search_remote_permissions(const ::DDS::Security::PermissionsHandle permissions_handle,
+                                const char * topic_name,
+                                const ::DDS::Security::DomainId_t domain_id,
+                                ACPermsMap::iterator ac_iter,
+                                const PublishSubscribe_t pub_or_sub);
+
 };
 
 } // namespace Security
 } // namespace OpenDDS
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

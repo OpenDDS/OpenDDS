@@ -217,6 +217,6 @@ private:
 } // namespace Security
 } // namespace OpenDDS
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

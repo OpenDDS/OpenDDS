@@ -11,11 +11,9 @@ class SerializeBinaryPropertyTest : public ::testing::Test
 {
 public:
 
-  SerializeBinaryPropertyTest() :
-    buffer(1024),
-    serializer(&buffer,
-	       false,
-	       Serializer::ALIGN_CDR)
+  SerializeBinaryPropertyTest()
+    : buffer(1024)
+    , serializer(&buffer, false, Serializer::ALIGN_CDR)
   {
   }
 
@@ -89,4 +87,3 @@ TEST_F(SerializeBinaryPropertyTest, When_Propagate_False)
 
   ASSERT_FALSE(in.propagate);
 }
-

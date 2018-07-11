@@ -80,4 +80,4 @@ void TokenWriter::add_bin_property(const char* prop_name, const std::string& pro
 } // namespace Security
 } // namespace OpenDDS
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
