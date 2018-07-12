@@ -61,23 +61,15 @@ namespace Util {
 
   DDS::PropertySeq filter_properties(const DDS::PropertySeq& properties, const std::string& prefix)
   {
-    // Find matches
-    std::set<size_t> indices;
+    DDS::PropertySeq result(properties.length());
+    result.length(properties.length());
+    size_t count = 0;
     for (size_t i = 0, len = properties.length(); i < len; ++i) {
       if (std::string(properties[i].name.in()).find(prefix) == 0) {
-        indices.insert(i);
+        result[count++] = properties[i];
       }
     }
-
-    // Built result
-    DDS::PropertySeq result(indices.size());
-    result.length(indices.size());
-    size_t j = 0;
-    for (std::set<size_t>::const_iterator it = indices.begin(); it != indices.end(); ++it)
-    {
-      result[j] = properties[*it];
-    }
-
+    result.length(count);
     return result;
   }
 
@@ -1692,8 +1684,6 @@ DomainParticipantImpl::enable()
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
     }
 
-    Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
-
     DDS::Security::ParticipantSecurityAttributes part_sec_attr;
     bool check_part_sec_attr = access->get_participant_sec_attributes(perm_handle_, part_sec_attr, se);
 
@@ -1705,6 +1695,8 @@ DomainParticipantImpl::enable()
           se.code, se.minor_code, se.message.in()));
       return DDS::RETCODE_ERROR;
     }
+
+    Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
 
     part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
       Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
@@ -1832,11 +1824,10 @@ namespace {
 
   bool
   is_bit(const char* topic_name) {
-    bool result = strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
-               || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
-               || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
-               || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
-    return result;
+    return strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
+      || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
+      || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
+      || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
   }
 
 }
