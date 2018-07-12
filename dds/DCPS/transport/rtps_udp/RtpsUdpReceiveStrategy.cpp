@@ -191,7 +191,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   case HEARTBEAT:
     link_->received(submessage.heartbeat_sm(),
                     receiver_.source_guid_prefix_);
-    if (submessage.heartbeat_sm().smHeader.flags & 4 /*FLAG_L*/) {
+    if (submessage.heartbeat_sm().smHeader.flags & FLAG_L) {
       // Liveliness has been asserted.  Create a DATAWRITER_LIVELINESS message.
       sample.header_.message_id_ = DATAWRITER_LIVELINESS;
       receiver_.fill_header(sample.header_);
@@ -543,13 +543,13 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
     // In particular we will need the SequenceNumber, but ignore the iQoS.
 
     // Peek at the byte order from the encapsulation containing the payload.
-    data.header_.byte_order_ = data.sample_->rd_ptr()[1] & 1 /*FLAG_E*/;
+    data.header_.byte_order_ = data.sample_->rd_ptr()[1] & FLAG_E;
 
     RtpsSampleHeader& rsh = received_sample_header();
     const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();
 
-    const CORBA::Octet data_flags = (data.header_.byte_order_ ? 1 : 0) // FLAG_E
-      | (data.header_.key_fields_only_ ? 8 : 4); // FLAG_K : FLAG_D
+    const CORBA::Octet data_flags = (data.header_.byte_order_ ? FLAG_E : 0)
+      | (data.header_.key_fields_only_ ? FLAG_K_IN_DATA : FLAG_D);
     const DataSubmessage dsm = {
       {DATA, data_flags, 0}, 0, DATA_OCTETS_TO_IQOS,
       dfsm.readerId, dfsm.writerId, dfsm.writerSN, ParameterList()};

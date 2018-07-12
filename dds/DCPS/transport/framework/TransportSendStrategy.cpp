@@ -1722,14 +1722,16 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   }
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
-  Message_Block_Ptr alternate(pre_send_packet(packet));
+  // pre_send_packet may provide different data that takes the place of the
+  // original "packet" (used for security encryption/authentication)
+  Message_Block_Ptr substitute(pre_send_packet(packet));
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Populate the iovec array using the packet.\n"), 5);
 
   iovec iov[MAX_SEND_BLOCKS];
 
-  const int num_blocks = mb_to_iov(alternate ? *alternate : *packet, iov);
+  const int num_blocks = mb_to_iov(substitute ? *substitute : *packet, iov);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "There are [%d] number of entries in the iovec array.\n",
@@ -1744,10 +1746,10 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);
 
-  if (alternate && num_bytes_sent > 0) {
-    // Although the "alternate" data took the place of "packet", the rest
+  if (substitute && num_bytes_sent > 0) {
+    // Although the "substitute" data took the place of "packet", the rest
     // of the framework needs to account for the bytes in "packet" being taken
-    // care of as if they were actually sent.
+    // care of, as if they were actually sent.
     // Since this is done with datagram sockets, partial sends aren't possible.
     return packet->total_length();
   }

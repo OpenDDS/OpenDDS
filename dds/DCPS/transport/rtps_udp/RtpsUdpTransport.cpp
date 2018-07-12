@@ -157,9 +157,9 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
   link_->add_locator(remote_id, addr, requires_inline_qos);
 
   if (remote_data.length() > blob_bytes_read) {
-    link_->security_from_blob(local_id, remote_id,
-                              remote_data.get_buffer() + blob_bytes_read,
-                              remote_data.length() - blob_bytes_read);
+    link_->populate_security_handles(local_id, remote_id,
+                                     remote_data.get_buffer() + blob_bytes_read,
+                                     remote_data.length() - blob_bytes_read);
   }
 
   link_->associated(local_id, remote_id, local_reliable, remote_reliable,

@@ -139,9 +139,9 @@ public:
   DDS::Security::DatawriterCryptoHandle writer_crypto_handle(const RepoId& writer) const;
   DDS::Security::DatareaderCryptoHandle reader_crypto_handle(const RepoId& reader) const;
 
-  void security_from_blob(const RepoId& local_id, const RepoId& remote_id,
-                          const unsigned char* buffer,
-                          unsigned int buffer_size);
+  void populate_security_handles(const RepoId& local_id, const RepoId& remote_id,
+                                 const unsigned char* buffer,
+                                 unsigned int buffer_size);
 
 private:
   virtual void stop_i();

@@ -926,7 +926,7 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
     bitmap[0] = 0;
 
     GapSubmessage gap = {
-      {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
+      {GAP, FLAG_E, 0 /*length determined below*/},
       ENTITYID_UNKNOWN, // readerId: applies to all matched readers
       pub.entityId,
       gapStart,
@@ -944,7 +944,7 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
       msg[i].gap_sm(gap);
     } else {
       InfoDestinationSubmessage idst = {
-        {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+        {INFO_DST, FLAG_E, INFO_DST_SZ},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
       };
       CORBA::ULong ml = msg.length();
@@ -1215,8 +1215,8 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
 
   info.initial_hb_ = false;
 
-  const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
-    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
+  const bool final = heartbeat.smHeader.flags & RTPS::FLAG_F,
+    liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
 
   if (!final || (!liveliness && (info.should_nack() ||
       rr.second.nack_durable(info) ||
@@ -1364,7 +1364,7 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag)
 
       AckNackSubmessage acknack = {
         {ACKNACK,
-         CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
+         CORBA::Octet(FLAG_E | (final ? FLAG_F : 0)),
          0 /*length*/},
         rr->first.entityId,
         wi->first.entityId,
@@ -1380,7 +1380,7 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag)
       acknack.smHeader.submessageLength =
         static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
       InfoDestinationSubmessage info_dst = {
-        {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+        {INFO_DST, FLAG_E, INFO_DST_SZ},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
       };
       gen_find_size(info_dst, size, padding);
@@ -1435,7 +1435,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
     AckNackSubmessage acknack = {
       {ACKNACK,
-       CORBA::Octet(1 /*FLAG_E*/ | 2 /*FLAG_F*/),
+       CORBA::Octet(FLAG_E | FLAG_F),
        0 /*length*/},
       pos->readerid.entityId,
       pos->writerid.entityId,
@@ -1451,7 +1451,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
     acknack.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
     InfoDestinationSubmessage info_dst = {
-      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+      {INFO_DST, FLAG_E, INFO_DST_SZ},
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
     gen_find_size(info_dst, size, padding);
@@ -1537,7 +1537,7 @@ RtpsUdpDataLink::generate_nack_frags(OPENDDS_VECTOR(RTPS::NackFragSubmessage)& n
   }
 
   const RTPS::NackFragSubmessage nackfrag_prototype = {
-    {RTPS::NACK_FRAG, 1 /*FLAG_E*/, 0 /* length set below */},
+    {RTPS::NACK_FRAG, RTPS::FLAG_E, 0 /* length set below */},
     ENTITYID_UNKNOWN, // readerId will be filled-in by send_heartbeat_replies()
     ENTITYID_UNKNOWN, // writerId will be filled-in by send_heartbeat_replies()
     {0, 0}, // writerSN set below
@@ -1701,7 +1701,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
-  const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
+  const bool final = acknack.smHeader.flags & RTPS::FLAG_F;
 
   if (!ri->second.durable_data_.empty()) {
     if (Transport_debug_level > 5) {
@@ -2200,7 +2200,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
   }
 
   GapSubmessage gap = {
-    {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
+    {GAP, FLAG_E, 0 /*length determined below*/},
     reader.entityId,
     writer.entityId,
     gapStart,
@@ -2263,7 +2263,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     ser << gap;
   } else {
     InfoDestinationSubmessage idst = {
-      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+      {INFO_DST, FLAG_E, INFO_DST_SZ},
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
     for (size_t i = 0; i < readers.size(); ++i) {
@@ -2292,7 +2292,7 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
   ACE_Message_Block mb(RTPS::INFO_DST_SZ + RTPS::SMHDR_SZ);
   Serializer ser(&mb, false, Serializer::ALIGN_CDR);
   RTPS::InfoDestinationSubmessage info_dst = {
-    {RTPS::INFO_DST, 1 /*FLAG_E*/, RTPS::INFO_DST_SZ},
+    {RTPS::INFO_DST, RTPS::FLAG_E, RTPS::INFO_DST_SZ},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
   std::memcpy(info_dst.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
@@ -2406,7 +2406,7 @@ RtpsUdpDataLink::send_heartbeats()
 
       const HeartBeatSubmessage hb = {
         {HEARTBEAT,
-         CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
+         CORBA::Octet(FLAG_E | (final ? FLAG_F : 0)),
          HEARTBEAT_SZ},
         ENTITYID_UNKNOWN, // any matched reader may be interested in this
         rw->first.entityId,
@@ -2424,7 +2424,7 @@ RtpsUdpDataLink::send_heartbeats()
       const SequenceNumber SN = 1;
       const HeartBeatSubmessage hb = {
         {HEARTBEAT,
-         CORBA::Octet(1 /*FLAG_E*/),
+         FLAG_E,
          HEARTBEAT_SZ},
         ENTITYID_UNKNOWN, // any matched reader may be interested in this
         pos->entityId,
@@ -2474,7 +2474,7 @@ RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessa
     DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
   RTPS::InfoDestinationSubmessage idst;
   idst.smHeader.submessageId = RTPS::INFO_DST;
-  idst.smHeader.flags = 1 /*FLAG_E*/;
+  idst.smHeader.flags = RTPS::FLAG_E;
   idst.smHeader.submessageLength = RTPS::INFO_DST_SZ;
   const size_t block_size = RTPS::INFO_DST_SZ + RTPS::HEARTBEAT_SZ
     + 2 * RTPS::SMHDR_SZ;
@@ -2588,7 +2588,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
 
   const HeartBeatSubmessage hb = {
     {HEARTBEAT,
-     CORBA::Octet(1 /*FLAG_E*/ | 2 /*FLAG_F*/ | 4 /*FLAG_L*/),
+     CORBA::Octet(FLAG_E | FLAG_F | FLAG_L),
      HEARTBEAT_SZ},
     ENTITYID_UNKNOWN, // any matched reader may be interested in this
     pub_id.entityId,
@@ -2610,10 +2610,10 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
 }
 
 void
-RtpsUdpDataLink::security_from_blob(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const unsigned char* buffer,
-                                    unsigned int buffer_size)
+RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
+                                           const RepoId& remote_id,
+                                           const unsigned char* buffer,
+                                           unsigned int buffer_size)
 {
   using DDS::Security::ParticipantCryptoHandle;
   using DDS::Security::DatawriterCryptoHandle;
@@ -2633,8 +2633,8 @@ RtpsUdpDataLink::security_from_blob(const RepoId& local_id,
   while (mb.length()) {
     DDS::BinaryProperty_t prop;
     if (!(ser >> prop)) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::security_from_blob() - "
-                 "failed to deserialize BinaryProperty_t\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::populate_security_handles()"
+                 " - failed to deserialize BinaryProperty_t\n"));
       return;
     }
 
