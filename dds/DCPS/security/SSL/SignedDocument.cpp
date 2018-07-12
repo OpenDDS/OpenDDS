@@ -4,7 +4,7 @@
  */
 
 #include "SignedDocument.h"
-#include "Utils.h"
+#include "dds/DCPS/security/CommonUtilities.h"
 #include "Err.h"
 #include <openssl/pem.h>
 #include <cstring>
@@ -51,24 +51,25 @@ namespace SSL {
 
   void SignedDocument::load(const std::string& uri)
   {
+    using namespace CommonUtilities;
+
     if (doc_) return;
 
-    std::string uri_info;
-    URI_SCHEME s = extract_uri_info(uri, uri_info);
+    URI uri_info(uri);
 
-    switch (s) {
-      case URI_FILE:
-        doc_ = PKCS7_from_SMIME_file(uri_info);
+    switch (uri_info.scheme) {
+      case URI::URI_FILE:
+        doc_ = PKCS7_from_SMIME_file(uri_info.everything_else);
         if (doc_) cache_plaintext();
         break;
 
-      case URI_DATA:
-        doc_ = PKCS7_from_data(uri_info);
+      case URI::URI_DATA:
+        doc_ = PKCS7_from_data(uri_info.everything_else);
         if (doc_) cache_plaintext();
         break;
 
-      case URI_PKCS11:
-      case URI_UNKNOWN:
+      case URI::URI_PKCS11:
+      case URI::URI_UNKNOWN:
       default:
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) SSL::SignedDocument::load: WARNING: Unsupported URI scheme '%C'\n"),

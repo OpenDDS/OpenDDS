@@ -45,9 +45,7 @@ namespace {
                               bool map /*map IPV4 to IPV6 addr*/) {
     // Convert the tls blob to an RTPS locator seq
     OpenDDS::DCPS::LocatorSeq locators;
-    bool ignore_requires_inline_qos;
-    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators,
-                                                ignore_requires_inline_qos);
+    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
     if (result == DDS::RETCODE_OK) {
       const CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {

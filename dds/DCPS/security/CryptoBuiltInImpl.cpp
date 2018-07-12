@@ -176,15 +176,23 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
 }
 
 namespace {
+
+  bool operator==(const TAO::String_Manager& lhs, const char* rhs)
+  {
+    return 0 == std::strcmp(lhs, rhs);
+  }
+
+  bool operator==(const char* lhs, const TAO::String_Manager& rhs)
+  {
+    return 0 == std::strcmp(lhs, rhs);
+  }
+
   bool is_builtin_volatile(const DDS::PropertySeq& props)
   {
     for (unsigned int i = 0; i < props.length(); ++i) {
-      if (0 == std::strcmp(props[i].name.in(),
-                           "dds.sec.builtin_endpoint_name")) {
-        return 0 == std::strcmp(props[i].value.in(),
-                                "BuiltinParticipantVolatileMessageSecureWriter")
-          || 0 == std::strcmp(props[i].value.in(),
-                              "BuiltinParticipantVolatileMessageSecureReader");
+      if (props[i].name == "dds.sec.builtin_endpoint_name") {
+        return props[i].value == "BuiltinParticipantVolatileMessageSecureWriter"
+          || props[i].value == "BuiltinParticipantVolatileMessageSecureReader";
       }
     }
     return false;
@@ -307,6 +315,8 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     push_back(keys, make_volatile_placeholder());
 
   } else {
+    // See Table 70 "register_local_datawriter" for the use of the key sequence
+    // (requirements for which key appears first, etc.)
     bool used_h = false;
     if (security_attributes.is_submessage_protected) {
       push_back(keys,
@@ -536,10 +546,10 @@ namespace {
     KeyMaterial_AES_GCM_GMAC_Seq keys;
     for (unsigned int i = 0; i < tokens.length(); ++i) {
       const CryptoToken& t = tokens[i];
-      if (0 == std::strcmp(t.class_id, Crypto_Token_Class_Id)) {
+      if (Crypto_Token_Class_Id == t.class_id) {
         for (unsigned int j = 0; j < t.binary_properties.length(); ++j) {
           const DDS::BinaryProperty_t& p = t.binary_properties[j];
-          if (0 == std::strcmp(p.name, Token_KeyMat_Name)) {
+          if (Token_KeyMat_Name == p.name) {
             ACE_Message_Block mb(to_mb(p.value.get_buffer()), p.value.length());
             mb.wr_ptr(p.value.length());
             Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);

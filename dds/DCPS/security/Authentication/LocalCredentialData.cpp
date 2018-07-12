@@ -4,7 +4,7 @@
  */
 
 #include "LocalCredentialData.h"
-#include "dds/DCPS/security/SSL/Utils.h"
+#include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DCPS/iterator_adaptor.h"
 #include "dds/DCPS/debug.h"
 #include <cstdio>
@@ -74,6 +74,8 @@ LocalAuthCredentialData::~LocalAuthCredentialData()
 
 void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
 {
+  using namespace CommonUtilities;
+
   std::string name, value, pkey_uri, password;
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT(
@@ -104,20 +106,19 @@ void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
 
     } else if (name == "dds.sec.access.permissions") {
 
-      std::string path;
-      SSL::URI_SCHEME s = SSL::extract_uri_info(value, path);
+      URI uri_info(value);
 
-      switch(s) {
-        case SSL::URI_FILE:
-          load_permissions_file(path);
+      switch(uri_info.scheme) {
+        case URI::URI_FILE:
+          load_permissions_file(uri_info.everything_else);
           break;
 
-        case SSL::URI_DATA:
-          load_permissions_data(path);
+        case URI::URI_DATA:
+          load_permissions_data(uri_info.everything_else);
           break;
 
-        case SSL::URI_PKCS11:
-        case SSL::URI_UNKNOWN:
+        case URI::URI_PKCS11:
+        case URI::URI_UNKNOWN:
         default:
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) LocalAuthCredentialData::load: ")

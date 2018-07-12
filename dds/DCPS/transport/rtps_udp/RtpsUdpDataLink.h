@@ -531,8 +531,13 @@ private:
 
   Security::SecurityConfig_rch security_config_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
-  OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
-                  GUID_tKeyLessThan) peer_crypto_handles_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
+                          GUID_tKeyLessThan) PeerHandlesMap;
+  PeerHandlesMap peer_crypto_handles_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
+                          GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
 };
 
 } // namespace DCPS

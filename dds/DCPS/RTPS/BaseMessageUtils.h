@@ -138,7 +138,7 @@ int locator_to_address(ACE_INET_Addr& dest,
 OpenDDS_Rtps_Export
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                                    DCPS::LocatorSeq& locators,
-                                   bool& requires_inline_qos,
+                                   bool* requires_inline_qos = 0,
                                    unsigned int* pBytesRead = 0);
 
 OpenDDS_Rtps_Export

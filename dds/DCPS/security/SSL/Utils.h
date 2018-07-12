@@ -16,16 +16,6 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
-  enum URI_SCHEME
-  {
-    URI_UNKNOWN,
-    URI_FILE,
-    URI_DATA,
-    URI_PKCS11,
-  };
-
-  URI_SCHEME extract_uri_info(const std::string& uri, std::string& path);
-
   DdsSecurity_Export int make_adjusted_guid(const OpenDDS::DCPS::GUID_t& src,
                                             OpenDDS::DCPS::GUID_t& dst,
                                             const Certificate& target);
