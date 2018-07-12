@@ -213,12 +213,15 @@ template <typename T>
 ACE_INLINE
 bool operator==(const TAO::unbounded_value_sequence<T>& seq1, const TAO::unbounded_value_sequence<T>& seq2)
 {
-  bool result = seq1.length() == seq2.length();
-  for (size_t i = 0; result == true && i < seq1.length(); ++i)
+  if (seq1.length() != seq2.length())
+    return false;
+
+  for (size_t i = 0; i < seq1.length(); ++i)
   {
-    result = (seq1[i].name == seq2[i].name && seq1[i].value == seq2[i].value && seq1[i].propagate == seq2[i].propagate);
+    if (seq1[i].name != seq2[i].name || seq1[i].value != seq2[i].value || seq1[i].propagate != seq2[i].propagate)
+      return false;
   }
-  return result;
+  return true;
 }
 
 ACE_INLINE

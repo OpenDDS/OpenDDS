@@ -68,7 +68,7 @@ struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
 AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 : listener_ptr_()
-, local_auth_data_mutex_()
+, local_credential_data_mutex_()
 , identity_mutex_()
 , handshake_mutex_()
 , handle_mutex_()
@@ -95,11 +95,14 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
-  ACE_Guard<ACE_Thread_Mutex> guard(local_auth_data_mutex_);
+  bool credential_valid = false;
+  {
+    ACE_Guard<ACE_Thread_Mutex> local_credential_data_guard(local_credential_data_mutex_);
+    local_credential_data_.load(participant_qos.property.value);
+    credential_valid = local_credential_data_.validate();
+  }
 
-  local_credential_data_.load(participant_qos.property.value);
-
-  if (local_credential_data_.validate()) {
+  if (credential_valid) {
     if (candidate_participant_guid != DCPS::GUID_UNKNOWN) {
 
       int err = SSL::make_adjusted_guid(candidate_participant_guid,
@@ -112,15 +115,18 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         local_identity->participant_guid = adjusted_participant_guid;
 
         {
-          ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+          ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
           identity_data_[local_identity_handle] = local_identity;
         }
 
         result = DDS::Security::VALIDATION_OK;
+
+      } else {
+        set_security_error(ex, -1, 0, "SSL::make_adjusted_guid failed");
       }
+
     } else {
         set_security_error(ex, -1, 0, "GUID_UNKNOWN passed in for candidate_participant_guid");
-
     }
 
   } else {
@@ -136,6 +142,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   ::CORBA::Boolean status = false;
+
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
@@ -174,6 +182,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   ::CORBA::Boolean status = false;
 
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   // Populate a simple version of an IdentityStatusToken as long as the handle is known
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
@@ -197,10 +207,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   ::CORBA::Boolean status = false;
 
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
     {
-      ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
       local_data->permissions_cred_token = permissions_credential;
       local_data->permissions_token = permissions_token;
     }
@@ -223,6 +234,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   ::DDS::Security::SecurityException & ex)
 {
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
+
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   IdentityData_Ptr local_data = get_identity_data(local_identity_handle);
   if (local_data) {
@@ -258,10 +271,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         newIdentityData->remote_auth_request = remote_auth_request_token;
 
         remote_identity_handle = get_next_handle();
-        {
-          ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-          identity_data_[remote_identity_handle] = newIdentityData;
-        }
+        identity_data_[remote_identity_handle] = newIdentityData;
 
         if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
           result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
@@ -292,12 +302,13 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::DDS::OctetSeq & serialized_local_participant_data,
   ::DDS::Security::SecurityException & ex)
 {
-
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   DDS::OctetSeq hash_c1;
 
   if (serialized_local_participant_data.length() != 0) {
+
+      ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
       IdentityData_Ptr replier_data = get_identity_data(replier_identity_handle);
       if (replier_data) {
@@ -580,6 +591,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   using OpenDDS::Security::TokenWriter;
   using OpenDDS::Security::TokenReader;
 
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   /* Copy the in part of the inout param */
   const DDS::Security::HandshakeMessageToken request_token = handshake_message_out;
   handshake_message_out = DDS::Security::HandshakeMessageToken();
@@ -587,7 +600,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   DDS::OctetSeq challenge1, challenge2, dh2, cperm, hash_c1, hash_c2;
 
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
-  SSL::DiffieHellman::unique_ptr diffie_hellman; //(new SSL::DiffieHellman);
+  SSL::DiffieHellman::unique_ptr diffie_hellman;
 
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED,
                                           Pending = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
@@ -613,79 +626,85 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     set_security_error(ex, -1, 0, "Handshake_message_out is an inout param and must not be nil");
     return Failure;
 
-  } else {
-    challenge1 = message_in.get_bin_property_value("challenge1");
+  }
+  challenge1 = message_in.get_bin_property_value("challenge1");
 
-    TokenReader initiator_remote_auth_request(initiator_id_data->remote_auth_request);
-    if (! initiator_remote_auth_request.is_nil()) {
-      const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
+  TokenReader initiator_remote_auth_request(initiator_id_data->remote_auth_request);
+  if (! initiator_remote_auth_request.is_nil()) {
+    const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
 
-      if (! challenges_match(challenge1, future_challenge)) {
-          return Failure;
-      }
-    }
-
-    const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
-    if (cid.length() > 0) {
-
-      remote_cert->deserialize(cid);
-      if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
-      {
-        set_security_error(ex, -1, 0, "Certificate validation failed");
+    if (! challenges_match(challenge1, future_challenge)) {
         return Failure;
-      }
-
-    } else {
-      set_security_error(ex, -1, 0, "Certificate validation failed due to empty 'c.id' property supplied");
-      return Failure;
-    }
-
-    /* Validate participant_guid in c.pdata */
-
-    const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
-
-    std::vector<unsigned char> hash;
-    if (0 != remote_cert->subject_name_digest(hash)) {
-      set_security_error(ex, -1, 0, "Failed to generate subject-name digest from remote certificate.");
-      return Failure;
-    }
-
-    if (! validate_topic_data_guid(cpdata, hash, ex)) {
-        return Failure;
-    }
-
-    cperm = message_in.get_bin_property_value("c.perm");
-
-    const DDS::OctetSeq& dh_algo = message_in.get_bin_property_value("c.kagree_algo");
-    SSL::DiffieHellman::unique_ptr tmp(SSL::DiffieHellman::factory(dh_algo));
-    diffie_hellman = DCPS::move(tmp);
-
-    /* Compute hash_c1 and store for later */
-
-    {
-      CredentialHash hash(*remote_cert,
-                          *diffie_hellman,
-                          cpdata,
-                          cperm);
-      int err = hash(hash_c1);
-      if (err) return Failure;
-    }
-
-    /* Compute hash_c2 and store for later */
-
-    {
-      CredentialHash hash(local_credential_data_.get_participant_cert(),
-                          *diffie_hellman,
-                          serialized_local_participant_data,
-                          local_credential_data_.get_access_permissions());
-      int err = hash(hash_c2);
-      if (err) return Failure;
     }
   }
 
-  /* TODO Add OCSP checks when "ocsp_status" property is given in message_in.
-   * Most of this logic would probably be placed in the Certificate directly
-   * or an OCSP abstraction that the Certificate uses. */
+  const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
+  if (cid.length() > 0) {
+
+    remote_cert->deserialize(cid);
+    if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
+    {
+      set_security_error(ex, -1, 0, "Certificate validation failed");
+      return Failure;
+    }
+
+  } else {
+    set_security_error(ex, -1, 0, "Certificate validation failed due to empty 'c.id' property supplied");
+    return Failure;
+  }
+
+  /* Validate participant_guid in c.pdata */
+
+  const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
+
+  std::vector<unsigned char> hash;
+  if (0 != remote_cert->subject_name_digest(hash)) {
+    set_security_error(ex, -1, 0, "Failed to generate subject-name digest from remote certificate.");
+    return Failure;
+  }
+
+  if (! validate_topic_data_guid(cpdata, hash, ex)) {
+      return Failure;
+  }
+
+  cperm = message_in.get_bin_property_value("c.perm");
+
+  const DDS::OctetSeq& dh_algo = message_in.get_bin_property_value("c.kagree_algo");
+  diffie_hellman.reset(SSL::DiffieHellman::factory(dh_algo));
+
+  /* Compute hash_c1 and store for later */
+
+  {
+    CredentialHash hash(*remote_cert,
+                        *diffie_hellman,
+                        cpdata,
+                        cperm);
+    int err = hash(hash_c1);
+    if (err) {
+      set_security_error(ex, -1, 0, "Failed to compute hash_c1.");
+      return Failure;
+    }
+  }
+
+  /* Compute hash_c2 and store for later */
+
+  {
+    CredentialHash hash(local_credential_data_.get_participant_cert(),
+                        *diffie_hellman,
+                        serialized_local_participant_data,
+                        local_credential_data_.get_access_permissions());
+    int err = hash(hash_c2);
+    if (err) {
+      set_security_error(ex, -1, 0, "Failed to compute hash_c2.");
+      return Failure;
+    }
+  }
+
+  // TODO: Currently support for OCSP is optional in the security spec and
+  // so it has been deferred to a post-beta release.
+  // Add OCSP checks when "ocsp_status" property is given in message_in.
+  // Most of this logic would probably be placed in the Certificate directly
+  // or an OCSP abstraction that the Certificate uses.
 
   const DDS::OctetSeq& dh1 = message_in.get_bin_property_value("dh1");
 
@@ -716,6 +735,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
       message_out.add_bin_property("challenge2", challenge2);
 
     } else {
+      set_security_error(ex, -1, 0, "SSL::make_nonce_256 failed.");
       return Failure;
     }
   }
@@ -729,9 +749,9 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                                 hash_c1,
                                 sign_these);
 
-  DDS::OctetSeq tmp;
-  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), tmp);
-  message_out.add_bin_property("signature", tmp);
+  DDS::OctetSeq signature;
+  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), signature);
+  message_out.add_bin_property("signature", signature);
 
   HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
   newHandshakeData->local_identity_handle = replier_identity_handle;
@@ -787,6 +807,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   SharedSecretHandle* result = 0;
 
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
+
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
     ValidationResult_t state = handshakeData->validation_state;
@@ -812,6 +834,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 {
   using namespace DDS::Security;
   ::CORBA::Boolean result = false;
+
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
   HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
   if (handshakeData) {
@@ -952,6 +976,10 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   DDS::Security::HandshakeHandle handshake_handle,
   DDS::Security::SecurityException & ex)
 {
+
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
   DDS::OctetSeq challenge1, hash_c2;
   SSL::Certificate::unique_ptr remote_cert(new SSL::Certificate);
 
@@ -988,7 +1016,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     const DDS::OctetSeq& future_challenge = auth_wrapper.get_bin_property_value("future_challenge");
 
     if (! challenges_match(challenge2, future_challenge)) {
-        return Failure;
+      set_security_error(ex, -1, 0, "challenge2 does not match future_challenge");
+      return Failure;
     }
   }
 
@@ -1020,7 +1049,8 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     const DDS::OctetSeq& challenge1_reply =  message_in.get_bin_property_value("challenge1");
 
     if (! challenges_match(challenge1, challenge1_reply)) {
-        return Failure;
+      set_security_error(ex, -1, 0, "handshake-request challenge1 value does not match local challenge1");
+      return Failure;
     }
   }
 
@@ -1060,7 +1090,10 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
                         cpdata,
                         cperm);
     int err = hash(hash_c2);
-    if (err) return Failure;
+    if (err) {
+      set_security_error(ex, -1, 0, "Computing hash_c2 failed");
+      return Failure;
+    }
   }
 
   /* Validate Signature field */
@@ -1139,6 +1172,9 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 {
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
   const DDS::Security::ValidationResult_t ValidationOkay = DDS::Security::VALIDATION_OK;
+
+  ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   HandshakeData_Ptr handshakePtr = get_handshake_data(handshake_handle);
   if (!handshakePtr) {
@@ -1230,9 +1266,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
 AuthenticationBuiltInImpl::HandshakeData_Ptr AuthenticationBuiltInImpl::get_handshake_data(DDS::Security::HandshakeHandle handle)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
-
-  // Mutex controls adding/removing handshakes, but not the contents of the handshakes
   HandshakeData_Ptr dataPtr;
   Handshake_Handle_Data::iterator iData = handshake_data_.find(handle);
   if (iData != handshake_data_.end()) {
@@ -1244,9 +1277,6 @@ AuthenticationBuiltInImpl::HandshakeData_Ptr AuthenticationBuiltInImpl::get_hand
 
 AuthenticationBuiltInImpl::IdentityData_Ptr AuthenticationBuiltInImpl::get_identity_data(DDS::Security::IdentityHandle handle)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-
-  // Mutex controls adding/removing identitiy data, but not the contents of the data
   IdentityData_Ptr dataPtr;
   Identity_Handle_Data::iterator iData = identity_data_.find(handle);
   if (iData != identity_data_.end()) {
