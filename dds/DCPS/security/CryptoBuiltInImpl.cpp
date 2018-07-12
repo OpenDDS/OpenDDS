@@ -18,6 +18,7 @@
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
 
+#include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 #include <openssl/err.h>
@@ -26,6 +27,8 @@
 
 #include "OpenSSL_init.h"
 #include "OpenSSL_legacy.h" // Must come after all other OpenSSL includes
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 using namespace DDS::Security;
 using OpenDDS::DCPS::Serializer;
@@ -148,7 +151,7 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
 ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
   ParticipantCryptoHandle local_participant_crypto_handle,
   IdentityHandle remote_participant_identity,
-  PermissionsHandle /*remote_participant_permissions*/,
+  PermissionsHandle remote_participant_permissions,
   SharedSecretHandle* shared_secret,
   SecurityException& ex)
 {
@@ -158,6 +161,10 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_matched_remote_participant(
   }
   if (DDS::HANDLE_NIL == remote_participant_identity) {
     CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote participant ID");
+    return DDS::HANDLE_NIL;
+  }
+  if (DDS::HANDLE_NIL == remote_participant_permissions) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid remote participant permissions");
     return DDS::HANDLE_NIL;
   }
   if (!shared_secret) {
@@ -413,7 +420,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
   SecurityException& ex)
 {
   if (DDS::HANDLE_NIL == local_datareader_crypto_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataWriter Crypto Handle");
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Local DataReader Crypto Handle");
     return DDS::HANDLE_NIL;
   }
   if (DDS::HANDLE_NIL == remote_participant_crypto) {
@@ -571,6 +578,7 @@ bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
     local_participant_crypto_tokens =
       keys_to_tokens(keys_[local_participant_crypto]);
   } else {
+    // There may not be any keys_ for this participant (depends on config)
     local_participant_crypto_tokens.length(0);
   }
 
@@ -709,6 +717,7 @@ bool CryptoBuiltInImpl::return_crypto_tokens(
 
 
 // Transform
+
 namespace {
   bool encrypts(const KeyMaterial_AES_GCM_GMAC& k)
   {
@@ -744,6 +753,9 @@ namespace {
     std::fill(a, a + 4, 0);
     return true;
   }
+
+  const size_t CRYPTO_CONTENT_ADDED_LENGTH = 4;
+  const size_t CRYPTO_HEADER_LENGTH = 20;
 }
 
 bool CryptoBuiltInImpl::encode_serialized_payload(
@@ -802,7 +814,7 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   gen_find_size(header, size, padding);
 
   if (pOut != &plain_buffer) {
-    size += 4;
+    size += CRYPTO_CONTENT_ADDED_LENGTH;
   }
 
   size += pOut->length();
@@ -1331,8 +1343,8 @@ void CryptoBuiltInImpl::Session::derive_key(const KeyMaterial& master)
     return;
   }
 
-  static const char cookie[] = "SessionKey"; // DDSSEC12-53
-  if (EVP_DigestSignUpdate(ctx, cookie, std::strlen(cookie)) < 1) {
+  static const char cookie[] = "SessionKey"; // DDSSEC12-53: NUL excluded
+  if (EVP_DigestSignUpdate(ctx, cookie, (sizeof cookie) - 1) < 1) {
     return;
   }
 
@@ -1501,7 +1513,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   CryptoHeader ch;
   de_ser.swap_bytes(Serializer::SWAP_BE);
   de_ser >> ch;
-  de_ser.skip(octetsToNext - 20);
+  de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH);
   // Next submessage, SEC_BODY if encrypted
   de_ser >> ACE_InputCDR::to_octet(type);
   de_ser >> ACE_InputCDR::to_octet(flags);
@@ -1532,8 +1544,8 @@ bool CryptoBuiltInImpl::decode_submessage(
         return decrypt(keyseq[i], sessions_[sKey], mb_in.rd_ptr(), n, ch, cf,
                        plain_rtps_submessage, ex);
       } else if (authenticates(keyseq[i])) {
-        return verify(keyseq[i], sessions_[sKey], mb_in.rd_ptr() - 4,
-                      4 + octetsToNext, ch, cf, plain_rtps_submessage, ex);
+        return verify(keyseq[i], sessions_[sKey], mb_in.rd_ptr() - RTPS::SMHDR_SZ,
+                      RTPS::SMHDR_SZ + octetsToNext, ch, cf, plain_rtps_submessage, ex);
       } else {
         CommonUtilities::set_security_error(ex, -2, 2, "Key transform "
                                             "kind unrecognized");
@@ -1652,3 +1664,5 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

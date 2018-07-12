@@ -205,7 +205,7 @@ private:
 
   DDS::Security::AuthenticationListener_ptr listener_ptr_;
 
-  ACE_Thread_Mutex local_auth_data_mutex_;
+  ACE_Thread_Mutex local_credential_data_mutex_;
   ACE_Thread_Mutex identity_mutex_;
   ACE_Thread_Mutex handshake_mutex_;
   ACE_Thread_Mutex handle_mutex_;
@@ -217,6 +217,6 @@ private:
 } // namespace Security
 } // namespace OpenDDS
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

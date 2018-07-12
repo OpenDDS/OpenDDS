@@ -366,7 +366,7 @@ private:
   ::DDS::Security::AccessControlListener_ptr listener_ptr_;
 
   time_t convert_permissions_time(std::string timeString);
-  
+
   LocalAccessCredentialData local_access_control_data_;
 
   int get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
@@ -391,6 +391,6 @@ private:
 } // namespace Security
 } // namespace OpenDDS
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

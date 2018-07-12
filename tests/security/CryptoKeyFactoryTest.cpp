@@ -142,7 +142,6 @@ TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
     ex));
 
   // Test will Null permissions handle, should return a NIL handle
-  part_id_handle = 1;
   EXPECT_TRUE(DDS::HANDLE_NIL == test_class->register_local_participant(
     part_id_handle,
     DDS::HANDLE_NIL,

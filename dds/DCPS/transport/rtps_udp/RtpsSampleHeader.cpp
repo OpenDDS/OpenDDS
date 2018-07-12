@@ -120,15 +120,11 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   case SRTPS_PREFIX:
   case SRTPS_POSTFIX: {
     SecuritySubmessage submessage;
-    if (ser >> submessage.smHeader) {
+    if (ser >> submessage) {
       octetsToNextHeader = submessage.smHeader.submessageLength;
-      submessage.content.length(octetsToNextHeader);
-      if (ser.read_octet_array(submessage.content.get_buffer(),
-                               octetsToNextHeader)) {
-        submessage_.security_sm(submessage);
-        submessage_._d(kind);
-        valid_ = true;
-      }
+      submessage_.security_sm(submessage);
+      submessage_._d(kind);
+      valid_ = true;
     }
     break;
   }

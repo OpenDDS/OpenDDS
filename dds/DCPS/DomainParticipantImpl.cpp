@@ -26,6 +26,7 @@
 #include "MultiTopicImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "dds/DCPS/security/framework/SecurityRegistry.h"
 
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
