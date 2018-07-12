@@ -152,8 +152,8 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
-  ACE_INET_Addr addr = get_connection_addr(remote_data, requires_inline_qos,
-                                           blob_bytes_read);
+  ACE_INET_Addr addr = get_connection_addr(remote_data, &requires_inline_qos,
+                                           &blob_bytes_read);
   link_->add_locator(remote_id, addr, requires_inline_qos);
 
   if (remote_data.length() > blob_bytes_read) {
@@ -168,13 +168,13 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 
 ACE_INET_Addr
 RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
-                                      bool& requires_inline_qos,
-                                      unsigned int& blob_bytes_read) const
+                                      bool* requires_inline_qos,
+                                      unsigned int* blob_bytes_read) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
   DDS::ReturnCode_t result =
-    blob_to_locators(remote, locators, requires_inline_qos, &blob_bytes_read);
+    blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
     return ACE_INET_Addr();
   }
@@ -209,15 +209,15 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
   const TransportBLOB* blob = this->config()->get_blob(locators);
-  if (!blob)
+  if (!blob) {
     return;
+  }
+
   if (!link_) {
     link_ = make_datalink(participant.guidPrefix);
   }
-  bool requires_inline_qos;
-  unsigned int b; // bytes read (ignored)
-  link_->register_for_reader(writerid, readerid,
-                             get_connection_addr(*blob, requires_inline_qos, b),
+
+  link_->register_for_reader(writerid, readerid, get_connection_addr(*blob),
                              listener);
 }
 
@@ -239,15 +239,15 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       DiscoveryListener* listener)
 {
   const TransportBLOB* blob = this->config()->get_blob(locators);
-  if (!blob)
+  if (!blob) {
     return;
+  }
+
   if (!link_) {
     link_ = make_datalink(participant.guidPrefix);
   }
-  bool requires_inline_qos;
-  unsigned int b; // bytes read (ignored)
-  link_->register_for_writer(readerid, writerid,
-                             get_connection_addr(*blob, requires_inline_qos, b),
+
+  link_->register_for_writer(readerid, writerid, get_connection_addr(*blob),
                              listener);
 }
 
