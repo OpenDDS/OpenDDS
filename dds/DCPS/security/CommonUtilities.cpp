@@ -8,12 +8,10 @@ namespace OpenDDS {
 namespace Security {
 namespace CommonUtilities {
 
-URI_SCHEME extract_uri_info(const std::string& uri, std::string& path)
+URI::URI(const std::string& src)
+  : scheme(URI_UNKNOWN), everything_else("") //authority(), path(""), query(""), fragment("")
 {
-  typedef std::vector<std::pair<std::string, URI_SCHEME> > uri_pattern_t;
-
-  URI_SCHEME result = URI_UNKNOWN;
-  path = "";
+  typedef std::vector<std::pair<std::string, Scheme> > uri_pattern_t;
 
   uri_pattern_t uri_patterns;
   uri_patterns.push_back(std::make_pair("file:", URI_FILE));
@@ -25,13 +23,12 @@ URI_SCHEME extract_uri_info(const std::string& uri, std::string& path)
     const std::string& pfx = i->first;
     size_t pfx_end = pfx.length();
 
-    if (uri.substr(0, pfx_end) == pfx) {
-      path = uri.substr(pfx_end, std::string::npos);
-      result = i->second;
+    if (src.substr(0, pfx_end) == pfx) {
+      everything_else = src.substr(pfx_end, std::string::npos);
+      scheme = i->second;
       break;
     }
   }
-  return result;
 }
 
 void set_security_error(DDS::Security::SecurityException& ex,

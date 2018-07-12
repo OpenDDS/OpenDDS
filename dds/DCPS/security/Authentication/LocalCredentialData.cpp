@@ -106,20 +106,19 @@ void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
 
     } else if (name == "dds.sec.access.permissions") {
 
-      std::string path;
-      URI_SCHEME s = extract_uri_info(value, path);
+      URI uri_info(value);
 
-      switch(s) {
-        case URI_FILE:
-          load_permissions_file(path);
+      switch(uri_info.scheme) {
+        case URI::URI_FILE:
+          load_permissions_file(uri_info.everything_else);
           break;
 
-        case URI_DATA:
-          load_permissions_data(path);
+        case URI::URI_DATA:
+          load_permissions_data(uri_info.everything_else);
           break;
 
-        case URI_PKCS11:
-        case URI_UNKNOWN:
+        case URI::URI_PKCS11:
+        case URI::URI_UNKNOWN:
         default:
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) LocalAuthCredentialData::load: ")

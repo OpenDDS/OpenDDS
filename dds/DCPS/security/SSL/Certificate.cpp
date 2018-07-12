@@ -57,22 +57,21 @@ namespace SSL {
 
     if (x_) return;
 
-    std::string uri_info;
-    URI_SCHEME s = extract_uri_info(uri, uri_info);
+    URI uri_info(uri);
 
-    switch (s) {
-      case URI_FILE:
-        load_cert_bytes(uri_info);
+    switch (uri_info.scheme) {
+      case URI::URI_FILE:
+        load_cert_bytes(uri_info.everything_else);
         x_ = x509_from_pem(original_bytes_, password);
         break;
 
-      case URI_DATA:
-        load_cert_data_bytes(uri_info);
+      case URI::URI_DATA:
+        load_cert_data_bytes(uri_info.everything_else);
         x_ = x509_from_pem(original_bytes_, password);
         break;
 
-      case URI_PKCS11:
-      case URI_UNKNOWN:
+      case URI::URI_PKCS11:
+      case URI::URI_UNKNOWN:
       default:
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) SSL::Certificate::Certificate: WARNING, unsupported URI scheme in "

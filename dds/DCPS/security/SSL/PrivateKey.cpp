@@ -50,20 +50,19 @@ namespace SSL {
 
     if (k_) return;
 
-    std::string uri_info;
-    URI_SCHEME s = extract_uri_info(uri, uri_info);
+    URI uri_info(uri);
 
-    switch (s) {
-      case URI_FILE:
-        k_ = EVP_PKEY_from_pem(uri_info, password);
+    switch (uri_info.scheme) {
+      case URI::URI_FILE:
+        k_ = EVP_PKEY_from_pem(uri_info.everything_else, password);
         break;
 
-      case URI_DATA:
-        k_ = EVP_PKEY_from_pem_data(uri_info, password);
+      case URI::URI_DATA:
+        k_ = EVP_PKEY_from_pem_data(uri_info.everything_else, password);
         break;
 
-      case URI_PKCS11:
-      case URI_UNKNOWN:
+      case URI::URI_PKCS11:
+      case URI::URI_UNKNOWN:
       default:
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) SSL::PrivateKey::load: WARNING: Unsupported URI scheme in cert path '%C'\n"),
