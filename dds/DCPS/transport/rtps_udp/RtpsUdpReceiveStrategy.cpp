@@ -264,7 +264,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     DDS::Security::DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
     DDS::Security::DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
     DDS::Security::SecureSubmessageCategory_t category =
-    DDS::Security::INFO_SUBMESSAGE;
+      DDS::Security::INFO_SUBMESSAGE;
     DDS::Security::SecurityException ex = {"", 0, 0};
     bool ok =
       crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
@@ -402,10 +402,13 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
         0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
       return true;
     }
-    Message_Block_Ptr plain_mb(new ACE_Message_Block(n));
+
+    // The sample.sample_ message block uses the transport's data block so it
+    // can't be modified in-place, instead replace it with a new block.
+    sample.sample_.reset(new ACE_Message_Block(n));
     const char* buffer_raw = reinterpret_cast<const char*>(plain.get_buffer());
-    plain_mb->copy(buffer_raw, n);
-    sample.sample_.swap(plain_mb);
+    sample.sample_->copy(buffer_raw, n);
+
     if (n > 1) {
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
     }

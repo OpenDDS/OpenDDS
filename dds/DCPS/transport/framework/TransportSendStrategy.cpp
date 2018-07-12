@@ -1745,6 +1745,10 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
             num_bytes_sent), 5);
 
   if (alternate && num_bytes_sent > 0) {
+    // Although the "alternate" data took the place of "packet", the rest
+    // of the framework needs to account for the bytes in "packet" being taken
+    // care of as if they were actually sent.
+    // Since this is done with datagram sockets, partial sends aren't possible.
     return packet->total_length();
   }
 

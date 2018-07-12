@@ -70,8 +70,8 @@ private:
 
   virtual bool connection_info_i(TransportLocator& info) const;
   ACE_INET_Addr get_connection_addr(const TransportBLOB& data,
-                                    bool& requires_inline_qos,
-                                    unsigned int& blob_bytes_read) const;
+                                    bool* requires_inline_qos = 0,
+                                    unsigned int* blob_bytes_read = 0) const;
 
   virtual void release_datalink(DataLink* link);
   void pre_detach(const TransportClient_rch& client);

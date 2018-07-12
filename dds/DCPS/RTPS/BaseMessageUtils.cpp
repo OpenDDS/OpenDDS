@@ -49,7 +49,7 @@ int locator_to_address(ACE_INET_Addr& dest,
 
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                                    DCPS::LocatorSeq& locators,
-                                   bool& requires_inline_qos,
+                                   bool* requires_inline_qos,
                                    unsigned int* pBytesRead)
 {
   ACE_Data_Block db(blob.length(), ACE_Message_Block::MB_DATA,
@@ -65,11 +65,21 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                       ACE_TEXT("Failed to deserialize blob's locators\n")),
                       DDS::RETCODE_ERROR);
   }
-  if (!(ser >> ACE_InputCDR::to_boolean(requires_inline_qos))) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) blob_to_locators: ")
-                      ACE_TEXT("Failed to deserialize blob inline QoS flag\n")),
-                      DDS::RETCODE_ERROR);
+
+  if (requires_inline_qos) {
+    if (!(ser >> ACE_InputCDR::to_boolean(*requires_inline_qos))) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) blob_to_locators: ")
+                        ACE_TEXT("Failed to deserialize blob inline QoS flag\n")),
+                       DDS::RETCODE_ERROR);
+    }
+  } else {
+    if (!ser.skip(1)) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) blob_to_locators: ")
+                        ACE_TEXT("Failed to skip blob inline QoS flag\n")),
+                       DDS::RETCODE_ERROR);
+    }
   }
 
   if (pBytesRead) {
