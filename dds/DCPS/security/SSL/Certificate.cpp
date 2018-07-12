@@ -4,7 +4,7 @@
  */
 
 #include "Certificate.h"
-#include "Utils.h"
+#include "dds/DCPS/security/CommonUtilities.h"
 #include "Err.h"
 #include <algorithm>
 #include <cstring>
@@ -53,6 +53,8 @@ namespace SSL {
 
   void Certificate::load(const std::string& uri, const std::string& password)
   {
+    using namespace CommonUtilities;
+
     if (x_) return;
 
     std::string uri_info;

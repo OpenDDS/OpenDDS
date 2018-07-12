@@ -16,6 +16,21 @@ namespace OpenDDS {
 namespace Security {
 namespace CommonUtilities {
 
+enum URI_SCHEME
+{
+  URI_UNKNOWN,
+  URI_FILE,
+  URI_DATA,
+  URI_PKCS11,
+};
+
+/// @brief This URI-extraction routine is naive and only separates the URI scheme
+/// on the LHS from the "rest" of the URI on the RHS. As such this may only handle
+/// the URI_FILE and URI_DATA cases properly. Further investigate into URI_PKCS11
+/// is required.
+/// TODO: Update this routine to extract the remaining pieces of the URI.
+URI_SCHEME extract_uri_info(const std::string& uri, std::string& path);
+
 void set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,

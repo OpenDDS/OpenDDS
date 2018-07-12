@@ -4,7 +4,7 @@
  */
 
 #include "SignedDocument.h"
-#include "Utils.h"
+#include "dds/DCPS/security/CommonUtilities.h"
 #include "Err.h"
 #include <openssl/pem.h>
 #include <cstring>
@@ -51,6 +51,8 @@ namespace SSL {
 
   void SignedDocument::load(const std::string& uri)
   {
+    using namespace CommonUtilities;
+
     if (doc_) return;
 
     std::string uri_info;

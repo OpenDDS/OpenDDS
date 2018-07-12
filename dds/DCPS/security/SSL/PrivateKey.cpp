@@ -4,7 +4,7 @@
  */
 
 #include "PrivateKey.h"
-#include "Utils.h"
+#include "dds/DCPS/security/CommonUtilities.h"
 #include "Err.h"
 #include <openssl/pem.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
@@ -46,6 +46,8 @@ namespace SSL {
 
   void PrivateKey::load(const std::string& uri, const std::string& password)
   {
+    using namespace CommonUtilities;
+
     if (k_) return;
 
     std::string uri_info;
