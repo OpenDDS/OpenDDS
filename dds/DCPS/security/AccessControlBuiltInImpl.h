@@ -325,7 +325,7 @@ private:
 
   typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
 
-  ACIdentityMap local_identity_map;
+  ACIdentityMap local_identity_map_;
 
   class RevokePermissionsTimer : public ACE_Event_Handler {
   public:
@@ -376,11 +376,15 @@ private:
                          ::DDS::Security::EndpointSecurityAttributes & attributes);
 
   // Returns a 0 if the search is successful.
-  int search_remote_permissions(const ::DDS::Security::PermissionsHandle permissions_handle,
-                                const char * topic_name,
+  int search_remote_permissions(const char * topic_name,
                                 const ::DDS::Security::DomainId_t domain_id,
                                 ACPermsMap::iterator ac_iter,
                                 const PublishSubscribe_t pub_or_sub);
+
+  void parse_class_id(const std::string class_id,
+                      std::string& plugin_class_name,
+                      int& major_version,
+                      int& minor_version);
 
 };
 
