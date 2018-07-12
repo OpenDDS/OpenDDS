@@ -35,7 +35,6 @@
 #include "Replayer.h"
 
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
-#include "dds/DCPS/security/framework/SecurityRegistry.h"
 
 #include "ace/Null_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"
