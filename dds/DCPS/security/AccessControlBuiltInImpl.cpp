@@ -1170,7 +1170,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the PluginClassName and MajorVersion of the local permmissions vs. remote  See Table 63 of spec
-  const std::string remote_class_id (participant_data.base.permissions_token.class_id); 
+  const std::string remote_class_id = participant_data.base.permissions_token.class_id.in();
 
   std::string local_plugin_class_name,
               remote_plugin_class_name;
@@ -1412,8 +1412,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Compare the PluginClassName and MajorVersion of the local permissions_token
   // with those in the remote_permissions_token. 
-//  const std::string remote_class_id = ac_iter->second.perm_token.class_id;
-  const std::string remote_class_id (ac_iter->second.perm_token.class_id);
+  const std::string remote_class_id = ac_iter->second.perm_token.class_id.in();
 
   std::string local_plugin_class_name,
               remote_plugin_class_name;
