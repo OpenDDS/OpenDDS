@@ -46,7 +46,7 @@ namespace OpenDDS
      * result to the reason it failed.
      */
     bool utf16_to_utf8(
-       std::string &result, const ACE_CDR::WChar* from, const size_t length = 1
+       std::string& result, const ACE_CDR::WChar* from, const size_t length = 1
     ) {
 
       const gchar* from_;
@@ -65,9 +65,9 @@ namespace OpenDDS
       from_ = reinterpret_cast<gchar*>(const_cast<ACE_CDR::WChar*>(from));
 #endif
 
-      GError * error = NULL;
-      char * utf8 = g_convert(
-        from_, length * sizeof(ACE_CDR::WChar),
+      GError* error = NULL;
+      char* utf8 = g_convert(
+        from_, length* sizeof(ACE_CDR::WChar),
         "UTF-8", "UTF-16LE", NULL, NULL, &error
       );
 
@@ -76,7 +76,7 @@ namespace OpenDDS
         g_free(utf8);
         return false;
       } else {
-        const char * error_msg = "UTF-16 to UTF-8 conversion failed: ";
+        const char* error_msg = "UTF-16 to UTF-8 conversion failed: ";
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%C%C\n"),
           error_msg,
           error->message
@@ -89,7 +89,7 @@ namespace OpenDDS
     }
 
     Wireshark_Bundle::Wireshark_Bundle(
-      char * data, size_t size, bool swap_bytes, Serializer::Alignment align
+      char* data, size_t size, bool swap_bytes, Serializer::Alignment align
     ) :
       block(data, size),
       serializer(&block, swap_bytes, align)
@@ -98,7 +98,7 @@ namespace OpenDDS
       get_size_only = false;
     }
 
-    Wireshark_Bundle::Wireshark_Bundle(const Wireshark_Bundle & other) :
+    Wireshark_Bundle::Wireshark_Bundle(const Wireshark_Bundle& other) :
       block(other.block.rd_ptr(), other.block.size()),
       serializer(
         &block,
@@ -123,11 +123,30 @@ namespace OpenDDS
       return reinterpret_cast<size_t>(block.rd_ptr());
     }
 
-    guint8 *
+    guint8*
     Wireshark_Bundle::get_remainder()
     {
       gint remainder = ws_tvb_length(tvb) - offset;
-      return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
+      return reinterpret_cast<guint8*>(ws_ep_tvb_memdup(tvb, offset, remainder));
+    }
+
+    const hf_register_info Field_Context::default_hf_register_info =
+      {0, {0, 0, FT_NONE, 0, NULL, 0, NULL, HFILL}};
+
+    Field_Context::Field_Context(
+      const std::string& short_name, const std::string& long_name,
+      ftenum ft, field_display_e fd
+    ) :
+      short_name_(short_name),
+      long_name_(long_name),
+      hf_(-1),
+      hf_info_(default_hf_register_info)
+    {
+      hf_info_.p_id = &hf_;
+      hf_info_.hfinfo.name = short_name_.c_str();
+      hf_info_.hfinfo.abbrev = long_name_.c_str();
+      hf_info_.hfinfo.type = ft;
+      hf_info_.hfinfo.display = fd;
     }
 
     Sample_Base::~Sample_Base() {
@@ -140,17 +159,14 @@ namespace OpenDDS
       }
     }
 
-    Field_Context * Sample_Base::get_context() {
+    Field_Context* Sample_Base::get_context() {
       if (field_contexts_.count(ns_)) {
         return field_contexts_[ns_];
       }
-      Field_Context * fc = new Field_Context;
-      fc->hf_ = -1;
-      field_contexts_[ns_] = fc;
-      fc->label_ = ns_stack_.back();
-      return fc;
+      return 0;
     }
 
+    // Sample_Base static members
     std::list<std::string> Sample_Base::ns_stack_;
     std::string Sample_Base::ns_;
 
@@ -175,7 +191,7 @@ namespace OpenDDS
       return payload_namespace + ns_;
     }
 
-    void Sample_Base::push_ns(const std::string & name) {
+    void Sample_Base::push_ns(const std::string& name) {
       ns_stack_.push_back(name);
       rebuild_ns();
     }
@@ -196,37 +212,82 @@ namespace OpenDDS
       return ns_stack_.back();
     }
 
-    void Sample_Base::add_protocol_field(enum ftenum ft, field_display_e fd) {
-      Field_Context * fc = get_context();
-      Sample_Manager::instance().add_protocol_field(
-        &fc->hf_, get_ns(), fc->label_, ft, fd
-      );
+    void Sample_Base::push_idl_name(std::string name) {
+      Sample_Base::clear_ns();
+
+      // If name begins with "IDL:", remove it
+      const std::string idl_prefix("IDL:");
+      if (name.find(idl_prefix) == 0) {
+          name.erase(0, idl_prefix.size());
+      }
+
+      // If name contains ':', remove everything after the last ':'
+      size_t l = name.rfind(":");
+      if (l != std::string::npos) {
+          name.erase(l, name.size() - l);
+      }
+
+      // Push namespace when we find a '/'
+      name.push_back('/'); // For last namespace
+      l = 0;
+      for (size_t index = 0; index != name.size(); index++) {
+          if (name[index] == '/') {
+              push_ns(name.substr(index - l, l));
+              l = 0;
+          } else {
+              l++;
+          }
+      }
     }
 
-    Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)
-      : label_ (label),
-        type_id_ (id),
-        nested_ (0),
-        next_(0)
-    {
+    void Sample_Base::add_protocol_field() {
+      Field_Context* fc = get_context();
+      if (fc) {
+        Sample_Manager::instance().add_protocol_field(fc->hf_info_);
+      }
     }
 
-    Sample_Field::Sample_Field (Sample_Dissector *n, const std::string &label)
+    Field_Context* Sample_Base::create_context(ftenum ft, field_display_e fd) {
+      if (field_contexts_.count(get_ns())) {
+        throw Sample_Dissector_Error(
+          std::string("Could not create context becuase it already exists for: ") +
+          get_ns()
+        );
+      }
+
+      Field_Context* fc = new Field_Context(get_label(), get_ns(), ft, fd);
+      field_contexts_[ns_] = fc;
+
+      return fc;
+    }
+
+    Sample_Field::Sample_Field(IDLTypeID id, const std::string &label)
       : label_(label),
-        type_id_ (Undefined),
-        nested_ (n),
+        type_id_(id),
+        nested_(0),
         next_(0)
     {
     }
 
-    Sample_Field::~Sample_Field ()
+    Sample_Field::Sample_Field(Sample_Dissector* n, const std::string &label)
+      : label_(label),
+        type_id_(Undefined),
+        nested_(n),
+        next_(0)
     {
-      delete nested_;
+    }
+
+    Sample_Field::~Sample_Field()
+    {
+      /* This doesn't work since a Dissector can be referenced by multiple
+       * fields
+       */
+      // delete nested_;
+
       delete next_;
     }
 
-    Sample_Field *
-    Sample_Field::chain (Sample_Field *f)
+    Sample_Field* Sample_Field::chain(Sample_Field* f)
     {
       if (next_ != 0)
         next_->chain (f);
@@ -235,20 +296,17 @@ namespace OpenDDS
       return f;
     }
 
-    Sample_Field *
-    Sample_Field::chain (IDLTypeID ti, const std::string &l)
+    Sample_Field* Sample_Field::chain(IDLTypeID ti, const std::string& l)
     {
       return chain (new Sample_Field (ti, l));
     }
 
-    Sample_Field *
-    Sample_Field::chain (Sample_Dissector *n, const std::string &l)
+    Sample_Field* Sample_Field::chain(Sample_Dissector* n, const std::string& l)
     {
       return chain (new Sample_Field (n, l));
     }
 
-    Sample_Field *
-    Sample_Field::get_link (size_t index)
+    Sample_Field* Sample_Field::get_link(size_t index)
     {
       if (index == 0)
         return this;
@@ -256,7 +314,7 @@ namespace OpenDDS
       return (next_ == 0) ? 0 : next_->get_link (index - 1);
     }
 
-    void Sample_Field::to_stream(std::stringstream &s, Wireshark_Bundle & p) {
+    void Sample_Field::to_stream(std::stringstream& s, Wireshark_Bundle& p) {
       size_t location = p.buffer_pos();
 
       TAO::String_Manager string_value;
@@ -370,12 +428,12 @@ namespace OpenDDS
     }
 
 #define ADD_FIELD_PARAMS params.tree, hf, params.tvb, params.offset, (gint) len
-    size_t
-    Sample_Field::dissect_i (Wireshark_Bundle &params, bool recur) {
+    size_t Sample_Field::dissect_i(Wireshark_Bundle& params, bool recur)
+    {
 
       size_t len = 0;
 
-      if (!this->nested_) {
+      if (!nested_) {
 
         int hf = -1;
         if (!params.get_size_only) {
@@ -436,11 +494,13 @@ namespace OpenDDS
             if (!params.get_size_only) {
               std::string s;
               bool utf_fail = utf16_to_utf8(s, &wchar_value);
-#ifndef NO_EXPERT
+#ifdef NO_EXPERT
+              ACE_UNUSED_ARG(utf_fail);
+#else
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,
-                    params.offset, len, s.c_str()
+                    params.offset, len, "%s", s.c_str()
                 );
               }
 #endif
@@ -452,7 +512,7 @@ namespace OpenDDS
               } else {
                 proto_tree_add_string_format_value(
                   ADD_FIELD_PARAMS, s.c_str(),
-                  s.c_str()
+                  "%s", s.c_str()
                 );
               }
             }
@@ -629,14 +689,11 @@ namespace OpenDDS
             if (!params.get_size_only) {
               if (params.use_index) {
                 proto_tree_add_string_format(
-                  ADD_FIELD_PARAMS,
-                  string_value,
+                  ADD_FIELD_PARAMS, string_value,
                   "[%u]: %s", params.index, string_value.in()
                 );
               } else {
-                proto_tree_add_string(
-                  ADD_FIELD_PARAMS, string_value
-                );
+                proto_tree_add_string(ADD_FIELD_PARAMS, string_value);
               }
             }
 
@@ -652,11 +709,13 @@ namespace OpenDDS
               // Get UTF8 Version of the String
               std::string s;
               bool utf_fail = utf16_to_utf8(s, wstring_value, wstring_length);
-#ifndef NO_EXPERT
+#ifdef NO_EXPERT
+              ACE_UNUSED_ARG(utf_fail);
+#else
               if (utf_fail) {
                 proto_tree_add_expert_format(
                     params.tree, params.info, params.warning_ef, params.tvb,
-                    params.offset, len, s.c_str()
+                    params.offset, len, "%s", s.c_str()
                 );
               }
 #endif
@@ -669,7 +728,7 @@ namespace OpenDDS
               } else {
                 proto_tree_add_string_format_value(
                   ADD_FIELD_PARAMS, s.c_str(),
-                  s.c_str()
+                  "%s", s.c_str()
                 );
               }
             }
@@ -686,7 +745,7 @@ namespace OpenDDS
         }
       } else {
         push_ns(this->label_);
-        len = this->nested_->dissect_i(params);
+        len = nested_->dissect_i(params);
         pop_ns();
       }
 
@@ -696,71 +755,74 @@ namespace OpenDDS
       return len;
     }
 
-    void Sample_Field::init_ws_fields() {
-      if (label_.empty()) {
+    void Sample_Field::init_ws_fields(bool first_pass) {
+      if (!first_pass) {
+        add_protocol_field();
+      }
+      if (label_.empty() && first_pass) {
 
         switch (type_id_) {
 
         case Sample_Field::Boolean:
-          add_protocol_field(FT_BOOLEAN);
+          create_context(FT_BOOLEAN);
           break;
 
         case Sample_Field::Char:
-          add_protocol_field(FT_STRING);
+          create_context(FT_STRING);
           break;
 
         case Sample_Field::Octet:
-          add_protocol_field(FT_UINT8, BASE_HEX);
+          create_context(FT_UINT8, BASE_HEX);
           break;
 
         case Sample_Field::WChar:
-          add_protocol_field(FT_STRING);
+          create_context(FT_STRING);
           break;
 
         case Sample_Field::Short:
-          add_protocol_field(FT_INT16, BASE_DEC);
+          create_context(FT_INT16, BASE_DEC);
           break;
 
         case Sample_Field::Long:
-          add_protocol_field(FT_INT32, BASE_DEC);
+          create_context(FT_INT32, BASE_DEC);
           break;
 
         case Sample_Field::LongLong:
-          add_protocol_field(FT_INT64, BASE_DEC);
+          create_context(FT_INT64, BASE_DEC);
           break;
 
         case Sample_Field::UShort:
-          add_protocol_field(FT_UINT16, BASE_DEC);
+          create_context(FT_UINT16, BASE_DEC);
           break;
 
         case Sample_Field::ULong:
-          add_protocol_field(FT_UINT32, BASE_DEC);
+          create_context(FT_UINT32, BASE_DEC);
           break;
 
         case Sample_Field::ULongLong:
-          add_protocol_field(FT_UINT64, BASE_DEC);
+          create_context(FT_UINT64, BASE_DEC);
           break;
 
         case Sample_Field::Float:
-          add_protocol_field(FT_FLOAT);
+          create_context(FT_FLOAT);
           break;
 
         case Sample_Field::Double:
-          add_protocol_field(FT_DOUBLE);
+          create_context(FT_DOUBLE);
           break;
 
         case Sample_Field::LongDouble:
           // Long Doubles will be cast to doubles, resulting in possible
           // data loss if long doubles are larger than doubles.
-          add_protocol_field(FT_DOUBLE);
+          create_context(FT_DOUBLE);
           break;
 
         case Sample_Field::String:
-          add_protocol_field(FT_STRINGZ);
+          create_context(FT_STRINGZ);
           break;
 
         case Sample_Field::WString:
-          add_protocol_field(FT_STRINGZ);
+          create_context(FT_STRINGZ);
           break;
 
         default:
@@ -768,13 +830,13 @@ namespace OpenDDS
             get_ns()  + " is not a valid Field Type."
           );
         }
-      } else if (nested_ != NULL) {
+      } else if (nested_) {
         push_ns(label_);
-        nested_->init_ws_fields();
+        nested_->init_ws_fields(first_pass);
         pop_ns();
       }
       if (next_ != NULL) {
-        next_->init_ws_fields();
+        next_->init_ws_fields(first_pass);
       }
     }
 
@@ -787,15 +849,16 @@ namespace OpenDDS
 
     //------------------------------------------------------------------------
 
-    Sample_Dissector::Sample_Dissector (const std::string &subtree)
+    Sample_Dissector::Sample_Dissector(const std::string& subtree)
       : field_(0),
         ett_(-1),
         subtree_label_(),
         is_struct_(false),
         is_root_(false)
     {
-      if (!subtree.empty())
+      if (!subtree.empty()) {
         this->init (subtree);
+      }
     }
 
     Sample_Dissector::~Sample_Dissector ()
@@ -840,14 +903,14 @@ namespace OpenDDS
     }
 
     Sample_Field *
-    Sample_Dissector::add_field(Sample_Dissector *n,
+    Sample_Dissector::add_field(Sample_Dissector* n,
                                 const std::string &label)
     {
       return add_field(new Sample_Field(n, label));
     }
 
     size_t
-    Sample_Dissector::dissect_i (Wireshark_Bundle &params)
+    Sample_Dissector::dissect_i(Wireshark_Bundle& params)
     {
       size_t len = 0;
       if (!params.get_size_only) {
@@ -874,8 +937,7 @@ namespace OpenDDS
             );
           } else {
             proto_item* item = proto_tree_add_none_format(
-              ADD_FIELD_PARAMS,
-              outstream.str().c_str()
+              ADD_FIELD_PARAMS, "%s", outstream.str().c_str()
             );
             params.tree = proto_item_add_subtree(item, ett_);
           }
@@ -893,15 +955,14 @@ namespace OpenDDS
       return len;
     }
 
-    size_t
-    Sample_Dissector::compute_length(const Wireshark_Bundle & p) {
+    size_t Sample_Dissector::compute_length(const Wireshark_Bundle& p)
+    {
       Wireshark_Bundle size_params(p);
       size_params.get_size_only = true;
       return dissect_i(size_params);
     }
 
-    gint
-    Sample_Dissector::dissect (Wireshark_Bundle &params)
+    gint Sample_Dissector::dissect (Wireshark_Bundle& params)
     {
       params.use_index = false;
       is_root_ = true;
@@ -916,7 +977,7 @@ namespace OpenDDS
       return field_->type_id_;
     }
 
-    std::string Sample_Dissector::stringify(Wireshark_Bundle & p) {
+    std::string Sample_Dissector::stringify(Wireshark_Bundle& p) {
       std::stringstream outstream;
       if (field_) {
         field_->to_stream(outstream, p);
@@ -924,19 +985,23 @@ namespace OpenDDS
       return outstream.str();
     }
 
-    void Sample_Dissector::init_ws_proto_tree() {
+    void Sample_Dissector::init_ws_proto_tree(bool first_pass) {
       if (field_) {
-        field_->init_ws_fields();
+        field_->init_ws_fields(first_pass);
       }
     }
 
-    void Sample_Dissector::init_ws_fields() {
-      if (is_struct()) {
-        add_protocol_field(FT_NONE);
-        init("struct");
+    void Sample_Dissector::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        if (is_struct()) {
+          create_context(FT_NONE);
+          init("struct");
+        }
+      } else {
+        add_protocol_field();
       }
       if (field_) {
-        field_->init_ws_fields();
+        field_->init_ws_fields(first_pass);
       }
     }
 
@@ -949,14 +1014,13 @@ namespace OpenDDS
     }
 
     //----------------------------------------------------------------------
-    Sample_Sequence::Sample_Sequence (Sample_Dissector *sub)
+    Sample_Sequence::Sample_Sequence (Sample_Dissector* sub)
       : element_ (sub)
     {
       this->init ("sequence");
     }
 
-    Sample_Dissector *
-    Sample_Sequence::element ()
+    Sample_Dissector* Sample_Sequence::element()
     {
       return element_;
     }
@@ -984,7 +1048,7 @@ namespace OpenDDS
           outstream << " (length = " << count << ")";
           item = proto_tree_add_uint_format(
             ADD_FIELD_PARAMS,
-            count, outstream.str().c_str()
+            count, "%s", outstream.str().c_str()
           );
         }
       }
@@ -1000,6 +1064,7 @@ namespace OpenDDS
       push_ns(element_namespace);
 
       // Dissect Elements
+
       bool prev_use_index = params.use_index;
       size_t all_elements_size = 0;
       for (guint32 ndx = 0; ndx < count; ndx++) {
@@ -1044,17 +1109,20 @@ namespace OpenDDS
       return len;
     }
 
-    void Sample_Sequence::init_ws_fields() {
-      add_protocol_field(FT_UINT32, BASE_DEC);
+    void Sample_Sequence::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_UINT32, BASE_DEC);
+      } else {
+        add_protocol_field();
+      }
       push_ns(element_namespace);
-      element_->init_ws_fields();
+      element_->init_ws_fields(first_pass);
       pop_ns();
     }
 
     //----------------------------------------------------------------------
 
-    Sample_Array::Sample_Array (size_t count,
-                                Sample_Dissector *sub)
+    Sample_Array::Sample_Array(size_t count, Sample_Dissector* sub)
       : Sample_Sequence (sub),
         count_ (count)
     {
@@ -1135,8 +1203,9 @@ namespace OpenDDS
           get_ns()  + " is not a registered wireshark field."
         );
       } else {
-        proto_tree_add_string_format(ADD_FIELD_PARAMS, enum_label.c_str(),
-          outstream.str().c_str()
+        proto_tree_add_string_format(
+          ADD_FIELD_PARAMS, enum_label.c_str(),
+          "%s", outstream.str().c_str()
         );
       }
 
@@ -1176,17 +1245,22 @@ namespace OpenDDS
       return outstream.str();
     }
 
-    void Sample_Enum::init_ws_fields() {
-      add_protocol_field(FT_STRING);
-      if (value_ != NULL)
-        value_->init_ws_fields();
+    void Sample_Enum::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_STRING);
+      } else {
+        add_protocol_field();
+      }
+      if (value_ != NULL) {
+        value_->init_ws_fields(first_pass);
+      }
     }
 
     //----------------------------------------------------------------------
 
-    Sample_Union::Sample_Union ()
-      :discriminator_ (0),
-       default_ (0)
+    Sample_Union::Sample_Union () :
+      discriminator_(0),
+      default_(0)
     {
       this->init ("union");
     }
@@ -1196,8 +1270,7 @@ namespace OpenDDS
       delete default_;
     }
 
-    void
-    Sample_Union::discriminator (Sample_Dissector *d)
+    void Sample_Union::discriminator(Sample_Dissector* d)
     {
       this->discriminator_ = d;
     }
@@ -1243,7 +1316,7 @@ namespace OpenDDS
         } else {
           proto_item* item = proto_tree_add_string_format(
             ADD_FIELD_PARAMS,
-            _d.c_str(), outstream.str().c_str()
+            _d.c_str(), "%s", outstream.str().c_str()
           );
           params.tree = proto_item_add_subtree(item, ett_);
         }
@@ -1260,19 +1333,23 @@ namespace OpenDDS
       return len;
     }
 
-    void Sample_Union::init_ws_fields() {
-      add_protocol_field(FT_STRING);
+    void Sample_Union::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_STRING);
+      } else {
+        add_protocol_field();
+      }
       if (field_ != NULL) {
-        field_->init_ws_fields();
+        field_->init_ws_fields(first_pass);
       }
       if (default_ != NULL) {
-        default_->init_ws_fields();
+        default_->init_ws_fields(first_pass);
       }
     }
 
     //-----------------------------------------------------------------------
 
-    Sample_Alias::Sample_Alias (Sample_Dissector *base)
+    Sample_Alias::Sample_Alias(Sample_Dissector* base)
       :base_(base)
     {
       this->init ("alias");
@@ -1281,11 +1358,11 @@ namespace OpenDDS
     size_t
     Sample_Alias::dissect_i (Wireshark_Bundle &p)
     {
-      return base_->dissect_i (p);
+      return base_->dissect_i(p);
     }
 
-    void Sample_Alias::init_ws_fields() {
-      base_->init_ws_fields();
+    void Sample_Alias::init_ws_fields(bool first_pass) {
+      base_->init_ws_fields(first_pass);
     }
 
     //-----------------------------------------------------------------------
@@ -1298,8 +1375,12 @@ namespace OpenDDS
     {
     }
 
-    void Sample_Fixed::init_ws_fields() {
-      add_protocol_field(FT_DOUBLE);
+    void Sample_Fixed::init_ws_fields(bool first_pass) {
+      if (first_pass) {
+        create_context(FT_DOUBLE);
+      } else {
+        add_protocol_field();
+      }
     }
 
     size_t Sample_Fixed::dissect_i(Wireshark_Bundle &params) {
@@ -1343,7 +1424,7 @@ namespace OpenDDS
         } else {
           throw Sample_Dissector_Error("Error Reading Fixed Type");
         }
-#else
+#else // ACE_HAS_CDR_FIXED
         // Place Dummy value and inform user
         const char * missing_fixed = "Fixed Type Support is missing from ACE";
         if (params.use_index) {

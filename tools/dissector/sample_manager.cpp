@@ -36,18 +36,17 @@ namespace OpenDDS
   {
 
 #ifndef NO_ITL
-    Sample_Dissector* get_dissector(
-        std::map<itl::Type*, Sample_Dissector*>& map,
-        itl::Type* type
-    );
+    typedef std::map<itl::Type*, Sample_Dissector*> ITL_Map;
+
+    Sample_Dissector* get_dissector(ITL_Map& map, itl::Type* type);
 
     struct visitor : public itl::TypeVisitor {
+      ITL_Map& map;
       Sample_Dissector* dissector;
-      std::map<itl::Type*, Sample_Dissector*>& map;
 
-      explicit visitor(std::map<itl::Type*, Sample_Dissector*>& m)
-        : dissector(NULL)
-        , map(m)
+      explicit visitor(ITL_Map& m) :
+        map(m),
+        dissector(0)
       { }
 
       void visit (itl::Alias& a) {
@@ -211,7 +210,7 @@ namespace OpenDDS
       }
 
       void visit (itl::Union& u) {
-        Sample_Union *s_union = new Sample_Union ();
+        Sample_Union* s_union = new Sample_Union();
         s_union->discriminator(get_dissector(map, u.discriminator()));
         for (itl::Union::const_iterator pos = u.begin(), limit = u.end();
              pos != limit;
@@ -246,7 +245,7 @@ namespace OpenDDS
       }
     };
 
-    Sample_Dissector* get_dissector(std::map<itl::Type*, Sample_Dissector*>& map, itl::Type* type)
+    Sample_Dissector* get_dissector(ITL_Map& map, itl::Type* type)
     {
       if (map.find(type) != map.end()) {
         return map[type];
@@ -258,7 +257,7 @@ namespace OpenDDS
       map[type] = v.dissector;
       return v.dissector;
     }
-#endif
+#endif // NO_ITL
 
     //--------------------------------------------------------------------
 
@@ -267,43 +266,49 @@ namespace OpenDDS
       if (hf_array_ != NULL) {
         delete [] hf_array_;
       }
-      // Free Dynamically Generated Field Names
-      while (!field_names_.empty()) {
-        ACE_OS::free(field_names_.front());
-        field_names_.pop_front();
-      }
     }
 
-    Sample_Manager
-    Sample_Manager::instance_;
+    Sample_Manager Sample_Manager::instance_;
 
-    Sample_Manager &
-    Sample_Manager::instance ()
+    Sample_Manager& Sample_Manager::instance()
     {
       return instance_;
     }
 
-    void
-    Sample_Manager::init_from_file (const ACE_TCHAR *filename)
+    void Sample_Manager::init_from_file(const ACE_TCHAR* filename)
     {
-#ifndef NO_ITL
+#ifdef NO_ITL
+      ACE_UNUSED_ARG(filename);
+#else
       std::ifstream str(filename);
       itl::Dictionary d;
       bool no_dcps_data_types = true;
-      DissectorsType primary_dissectors;
+
+      /*
+       * To reduce the number of fields we create in Wireshark, we just
+       * want to initialize fields off based on the primary data types as
+       * the bases. The TAO IDL compiler will mark them in ITL files after
+       * OpenDDS 3.12. ITL files created at and before 3.12 will work but
+       * will populate Wireshark with more fields in the auto complete than
+       * necessary.
+       */
+      Dissector_Map primary_dissectors;
+
+      Dissector_Map dissectors_to_add;
+
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("Found Dissector ITL File: %C\n"),
         filename));
       try {
         d.fromJson(str);
-        std::map<itl::Type*, Sample_Dissector*> map;
+        ITL_Map map;
         for (itl::Dictionary::const_iterator pos = d.begin(), limit = d.end();
              pos != limit;
              ++pos) {
           itl::Alias* a = pos->second;
-          Sample_Dissector * sd = get_dissector(map, a->type());
+          Sample_Dissector* sd = get_dissector(map, a->type());
           // Check if the dissector is for a primary data type
-          const rapidjson::Value * note = a->note();
+          const rapidjson::Value* note = a->note();
           if (
             note != NULL &&
             note->HasMember("is_dcps_data_type") &&
@@ -318,7 +323,7 @@ namespace OpenDDS
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("    Data Type: %C\n"),
             a->name().c_str()));
-          dissectors_[a->name()] = sd;
+          dissectors_to_add[a->name()] = sd;
         }
       }
       catch(std::runtime_error & e) {
@@ -328,61 +333,72 @@ namespace OpenDDS
       }
 
       if (no_dcps_data_types) {
-        ACE_DEBUG((LM_DEBUG,
+        ACE_DEBUG((LM_WARNING,
                    ACE_TEXT(
                      "%C has no types defined as a primary DCPS data types.\n"),
                    filename));
-        primary_dissectors = dissectors_; // Evaluate All Dissectors
+        primary_dissectors = dissectors_to_add; // Evaluate All Dissectors
       }
 
       // Build WS Namespace and Fields
+      try {
+        // First Pass
+        for (
+          Dissector_Map::iterator i = primary_dissectors.begin();
+          i != primary_dissectors.end();
+          i++
+        ) {
+          // Get Namespace from name
+          Sample_Base::push_idl_name(i->first);
+
+          // Create WS Fields off this namespace location
+          Sample_Dissector & dissector = *i->second;
+          dissector.init_ws_proto_tree(true); // first pass, evaluate tree
+          Sample_Base::clear_ns();
+        }
+
+        // Second Pass
+        for (
+          Dissector_Map::iterator i = primary_dissectors.begin();
+          i != primary_dissectors.end();
+          i++
+        ) {
+          // Get Namespace from name
+          Sample_Base::push_idl_name(i->first);
+
+          // second pass, collect fields to pass to Wireshark
+          i->second->init_ws_proto_tree(false);
+          Sample_Base::clear_ns();
+        }
+
+      } catch (const Sample_Dissector_Error & e) {
+        ACE_DEBUG((LM_ERROR,
+          ACE_TEXT("Error during dissector initialization of %C: %C\n"),
+          filename, e.what()
+        ));
+
+        // Any cleanup work would be done here
+
+        return;
+      }
+
+      // Add to pool of dissectors
       for (
-        DissectorsType::iterator i = primary_dissectors.begin();
+        Dissector_Map::iterator i = primary_dissectors.begin();
         i != primary_dissectors.end();
         i++
       ) {
-        // Get Namespaces from name
-        Sample_Base::clear_ns();
-        std::string name(i->first);
-
-        // If name begins with "IDL:", remove it
-        const std::string idl_prefix("IDL:");
-        if (name.substr(0, idl_prefix.size()) == idl_prefix) {
-            name.erase(0, idl_prefix.size());
-        }
-
-        // If name contains ':', remove everything after the last ':'
-        size_t l = name.rfind(":");
-        if (l != std::string::npos) {
-            name.erase(l, name.size() - l);
-        }
-
-        // Push namespace when we find a '/'
-        name.push_back('/'); // For last namespace
-        l = 0;
-        for (size_t i = 0; i != name.size(); i++) {
-            if (name[i] == '/') {
-                Sample_Base::push_ns(name.substr(i - l, l));
-                l = 0;
-            } else {
-                l++;
-            }
-        }
-
-        // Create WS Fields off this namespace location
-        Sample_Dissector & dissector = *i->second;
-        dissector.init_ws_proto_tree();
-        Sample_Base::clear_ns();
+        dissectors_[i->first] = i->second;
       }
 
 #endif
     }
 
-    void
-    Sample_Manager::init ()
+    void Sample_Manager::init()
     {
       hf_array_ = NULL;
 
+#ifndef NO_ITL
       // - from env get directory for config files use "." by default
       // - use dirent to iterate over all *.ini files in config dir
       // - for each file load the configuration and iterate over sections
@@ -414,10 +430,10 @@ namespace OpenDDS
           path += ACE_TEXT_ALWAYS_CHAR (name);
           this->init_from_file (ACE_TEXT_CHAR_TO_TCHAR (path.c_str()));
         }
+#endif // NO_ITL
     }
 
-    Sample_Dissector *
-    Sample_Manager::find (const char *repo_id)
+    Sample_Dissector* Sample_Manager::find(const char *repo_id)
     {
       std::string key(repo_id);
       const std::string typesupport("TypeSupport");
@@ -435,49 +451,23 @@ namespace OpenDDS
         key = prefix + key + ":1.0";
       }
 
-      DissectorsType::const_iterator dpos = dissectors_.find(key);
+      Dissector_Map::const_iterator dpos = dissectors_.find(key);
       if (dpos != dissectors_.end()) {
         return dpos->second;
-      }
-      else {
+      } else {
         return 0;
       }
     }
 
-    void
-    Sample_Manager::add_protocol_field(
-      int * hf_index,
-      const std::string & full_name, const std::string & short_name,
-      enum ftenum ft, field_display_e fd
-    ) {
-      // Get copies of the names
-      char * full_name_copy = ACE_OS::strdup(full_name.c_str());
-      char * short_name_copy = ACE_OS::strdup(short_name.c_str());
-
-      // Delete strings later
-      field_names_.push_front(full_name_copy);
-      field_names_.push_front(short_name_copy);
-
-      // Push hf_info struct to hf_vector_
-      hf_register_info hfri = { hf_index,
-        { short_name_copy, full_name_copy, ft, fd, NULL, 0, NULL, HFILL }
-      };
-      hf_vector_.push_back(hfri);
-    }
-
-    void
-    Sample_Manager::add_protocol_field(hf_register_info field)
-    {
+    void Sample_Manager::add_protocol_field(const hf_register_info& field) {
       hf_vector_.push_back(field);
     }
 
-    size_t Sample_Manager::number_of_fields()
-    {
+    size_t Sample_Manager::number_of_fields() {
       return hf_vector_.size();
     }
 
-    hf_register_info * Sample_Manager::fields_array()
-    {
+    hf_register_info* Sample_Manager::fields_array() {
       if (hf_array_ == NULL) {
         hf_array_ = new hf_register_info[number_of_fields()];
         std::copy(hf_vector_.begin(), hf_vector_.end(), &hf_array_[0]);

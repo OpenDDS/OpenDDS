@@ -536,9 +536,8 @@ namespace OpenDDS
       if (data_name == 0) {
         ACE_DEBUG ((LM_DEBUG,
                     "DDS_Dissector::dissect_sample_payload: "
-                    "no topic for %C\n",
+                    "couldn't dissect payload: no topic for %C\n",
                     std::string(converter).c_str()));
-        offset += header.message_length_; // skip marshaled data
 
         // Mark Packet
 #ifndef NO_EXPERT
@@ -549,10 +548,12 @@ namespace OpenDDS
           tvb_,
           offset,
           (gint) header.message_length_,
-          "No Topic Found for %s \n",
+          "Couldn't Dissect Payload: No Topic Found for %s \n",
           std::string(converter).c_str()
         );
 #endif
+
+        offset += header.message_length_; // skip marshaled data
 
         return;
       }
@@ -566,11 +567,12 @@ namespace OpenDDS
           payload_item, ett_sample_payload);
 
       // Try to Dissect Payload
-      Sample_Dissector *data_dissector =
-        Sample_Manager::instance().find (data_name);
-      if (data_dissector == 0) {
+      Sample_Dissector* data_dissector =
+        Sample_Manager::instance().find(data_name);
+      if (!data_dissector) {
         ACE_DEBUG ((LM_DEBUG,
                     "DDS_Dissector::dissect_sample_payload: "
+                    "couldn't dissect payload: "
                     "no dissector found for %C \n",
                     data_name));
 
@@ -583,6 +585,7 @@ namespace OpenDDS
           tvb_,
           offset,
           (gint) header.message_length_,
+          "Couldn't Dissect Payload: "
           "No Dissector Found for %s \n",
           data_name
         );
@@ -592,6 +595,7 @@ namespace OpenDDS
       } else {
         // Push DCPS Primary Data Type Namespace
         // Convert, for example, "1::2::3" to "1.2.3"
+        Sample_Base::clear_ns();
         std::string ns;
         char c = 'a';
         bool delimiter = false;
@@ -643,7 +647,20 @@ namespace OpenDDS
         ACE_Sig_Action sig_act(sample_dissect_handle_sigsegv);
         if (handle) sig_act.register_action(SIGSEGV); // Handle Segfaults
 
-        offset = data_dissector->dissect(params); // Dissect Sample Payload
+        try {
+          offset = data_dissector->dissect(params); // Dissect Sample Payload
+        } catch (const Sample_Dissector_Error& e) {
+#ifndef NO_EXPERT
+          proto_tree_add_expert_format(
+            contents_tree, pinfo_, &ei_sample_payload_error,
+            tvb_, offset, -1, "%s", e.what()
+          );
+#endif
+          ACE_DEBUG ((LM_DEBUG,
+            "DDS_Dissector::dissect_sample_payload: %C\n", e.what()
+          ));
+          offset = params.offset + header.message_length_;
+        }
 
         // Clean Up
         if (handle) sig_act.handler(SIG_DFL); // Restore default segfault behavior
@@ -701,21 +718,7 @@ namespace OpenDDS
             this->dissect_sample_header (sample_tree, sample, offset);
 
             sample_tree = proto_item_add_subtree (item, ett_sample_header);
-            try {
-              this->dissect_sample_payload (sample_tree, sample, offset);
-            } catch (Sample_Dissector_Error & e) {
-#ifndef NO_EXPERT
-              proto_tree_add_expert_format(
-                trans_tree, pinfo_, &ei_sample_payload_error,
-                tvb_, offset, -1, e.what()
-              );
-#endif
-              Sample_Base::clear_ns();
-              ACE_DEBUG ((LM_DEBUG,
-                "DDS_Dissector::dissect_sample_payload: %C\n", e.what()
-              ));
-            }
-
+            this->dissect_sample_payload (sample_tree, sample, offset);
           }
       }
       return offset;
@@ -780,7 +783,10 @@ namespace OpenDDS
                        get_pdu_len,
                        dissect_common
                        WS_TCP_DISSECT_PDUS_EXTRA_ARG);
-      WS_DISSECTOR_RETURN_VALUE
+
+#ifdef WS_DISSECTOR_RETURN_INT
+      return tvb_captured_length(tvb);
+#endif
     }
 
     extern "C"
