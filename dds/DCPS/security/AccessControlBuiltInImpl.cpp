@@ -1190,7 +1190,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
     if (local_iter->second.domain_id == domain_id) {
       if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm_token.class_id;
+        std::string local_class_id = local_iter->second.perm_token.class_id.in();
 
         if (local_class_id.length() > 0) {
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
@@ -1432,7 +1432,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
     if (local_iter->second.domain_id == domain_id) {
       if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm_token.class_id;
+        std::string local_class_id = local_iter->second.perm_token.class_id.in();
 
         if (local_class_id.length() > 0) {
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);

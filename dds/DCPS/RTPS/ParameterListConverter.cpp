@@ -790,7 +790,7 @@ int from_param_list(const ParameterList& param_list,
       break;
 
     default:
-      :if (p._d() & PIDMASK_INCOMPATIBLE) {
+      if (p._d() & PIDMASK_INCOMPATIBLE) {
         return -1;
       }
     }
