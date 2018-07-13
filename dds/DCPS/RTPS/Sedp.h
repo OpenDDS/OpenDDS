@@ -48,8 +48,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4 };
-
 class RtpsDiscovery;
 class Spdp;
 

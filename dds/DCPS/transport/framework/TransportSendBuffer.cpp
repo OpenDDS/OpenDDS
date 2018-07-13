@@ -321,19 +321,19 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
 {
   //Special case, nak to make sure it has all history
   const SequenceNumber lowForAllResent = range.first == SequenceNumber() ? low() : range.first;
-  const bool specific = destination != GUID_UNKNOWN;
+  const bool has_dest = destination != GUID_UNKNOWN;
 
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
     // Re-send requested sample if still buffered; missing samples
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(buffers_.find(sequence));
-    DestinationMap::iterator dit;
-    if (specific) {
-      dit = destinations_.find(sequence);
+    DestinationMap::iterator dest_data;
+    if (has_dest) {
+      dest_data = destinations_.find(sequence);
     }
-    if (it == buffers_.end() || (specific && (dit == destinations_.end() ||
-                                              dit->second != destination))) {
+    if (it == buffers_.end() || (has_dest && (dest_data == destinations_.end() ||
+                                              dest_data->second != destination))) {
       if (gaps) {
         gaps->insert(sequence);
       }

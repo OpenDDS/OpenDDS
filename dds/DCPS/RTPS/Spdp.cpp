@@ -1059,7 +1059,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   hdr_.vendorId = VENDORID_OPENDDS;
   std::memcpy(hdr_.guidPrefix, outer_->guid_.guidPrefix, sizeof(GuidPrefix_t));
   data_.smHeader.submessageId = DATA;
-  data_.smHeader.flags = 1 /*FLAG_E*/ | 4 /*FLAG_D*/;
+  data_.smHeader.flags = FLAG_E | FLAG_D;
   data_.smHeader.submessageLength = 0; // last submessage in the Message
   data_.extraFlags = 0;
   data_.octetsToInlineQos = DATA_OCTETS_TO_IQOS;
@@ -1200,7 +1200,7 @@ Spdp::SpdpTransport::dispose_unregister()
   // Send the dispose/unregister SPDP sample
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
-  data_.smHeader.flags = 1 /*FLAG_E*/ | 2 /*FLAG_Q*/ | 8 /*FLAG_K*/;
+  data_.smHeader.flags = FLAG_E | FLAG_Q | FLAG_K_IN_DATA;
   data_.inlineQos.length(1);
   static const StatusInfo_t dispose_unregister = { {0, 0, 0, 3} };
   data_.inlineQos[0].status_info(dispose_unregister);
@@ -1430,7 +1430,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
   while (buff_.length() > 3) {
     const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
-    ser.swap_bytes((flags & 1 /*FLAG_E*/) != ACE_CDR_BYTE_ORDER);
+    ser.swap_bytes((flags & FLAG_E) != ACE_CDR_BYTE_ORDER);
     const size_t start = buff_.length();
     CORBA::UShort submessageLength = 0;
     switch (subm) {
@@ -1452,7 +1452,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       }
 
       ParameterList plist;
-      if (data.smHeader.flags & (4 /*FLAG_D*/ | 8 /*FLAG_K*/)) {
+      if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
         ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
         CORBA::UShort encap, options;
         if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
