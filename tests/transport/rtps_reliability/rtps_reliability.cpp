@@ -170,8 +170,6 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
 };
 
 
-enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4 };
-
 struct TestParticipant: ACE_Event_Handler {
   TestParticipant(ACE_SOCK_Dgram& sock,
                   const OpenDDS::DCPS::GuidPrefix_t& prefix,
