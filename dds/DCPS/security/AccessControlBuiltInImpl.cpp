@@ -239,17 +239,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 }
 
 ::DDS::Security::PermissionsHandle AccessControlBuiltInImpl::validate_remote_permissions(
-  ::DDS::Security::Authentication_ptr /*auth_plugin*/,
+  ::DDS::Security::Authentication_ptr auth_plugin,
   ::DDS::Security::IdentityHandle local_identity_handle,
   ::DDS::Security::IdentityHandle /*remote_identity_handle*/,
   const ::DDS::Security::PermissionsToken & remote_permissions_token,
   const ::DDS::Security::AuthenticatedPeerCredentialToken & remote_credential_token,
   ::DDS::Security::SecurityException & ex)
 {
-  //if (0 == auth_plugin) {
-  //  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Null Authentication plugin");
-  //  return DDS::HANDLE_NIL;
-  //}
+  if (0 == auth_plugin) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Null Authentication plugin");
+    return DDS::HANDLE_NIL;
+  }
 
   //if (DDS::HANDLE_NIL == remote_identity_handle) {
   //  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid Remote Identity");
@@ -1170,7 +1170,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the PluginClassName and MajorVersion of the local permmissions vs. remote  See Table 63 of spec
-  const std::string remote_class_id = participant_data.base.permissions_token.class_id; 
+  const std::string remote_class_id (participant_data.base.permissions_token.class_id); 
 
   std::string local_plugin_class_name,
               remote_plugin_class_name;
@@ -1412,7 +1412,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Compare the PluginClassName and MajorVersion of the local permissions_token
   // with those in the remote_permissions_token. 
-  std::string remote_class_id = ac_iter->second.perm_token.class_id;
+//  const std::string remote_class_id = ac_iter->second.perm_token.class_id;
+  const std::string remote_class_id (ac_iter->second.perm_token.class_id);
 
   std::string local_plugin_class_name,
               remote_plugin_class_name;
@@ -1752,12 +1753,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d > 0) {
-      attributes.allow_unauthenticated_participants = giter->domain_attrs.allow_unauthenticated_participants;
-      attributes.is_access_protected = giter->domain_attrs.is_access_protected;
-      attributes.is_rtps_protected = giter->domain_attrs.is_rtps_protected;
-      attributes.is_discovery_protected = giter->domain_attrs.is_discovery_protected;
-      attributes.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
-      attributes.plugin_participant_attributes = giter->domain_attrs.plugin_participant_attributes;
+      attributes = giter->domain_attrs;
+      //attributes.allow_unauthenticated_participants = giter->domain_attrs.allow_unauthenticated_participants;
+      //attributes.is_access_protected = giter->domain_attrs.is_access_protected;
+      //attributes.is_rtps_protected = giter->domain_attrs.is_rtps_protected;
+      //attributes.is_discovery_protected = giter->domain_attrs.is_discovery_protected;
+      //attributes.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
+      //attributes.plugin_participant_attributes = giter->domain_attrs.plugin_participant_attributes;
       return true;
     }
   }
@@ -1979,7 +1981,6 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
   std::string temp_str;
 
   memset(&permission_tm, 0, sizeof(tm));
-  temp_str.clear();
   // Year
   temp_str = timeString.substr(0, 4);
   permission_tm.tm_year = (atoi(temp_str.c_str()) - 1900);
