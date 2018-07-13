@@ -64,8 +64,7 @@ namespace SSL {
         break;
 
       case URI::URI_DATA:
-        doc_ = PKCS7_from_data(uri_info.everything_else);
-        if (doc_) cache_plaintext();
+        deserialize(uri_info.everything_else);
         break;
 
       case URI::URI_PKCS11:
@@ -229,6 +228,23 @@ namespace SSL {
     }
 
     return result;
+  }
+
+  int SignedDocument::deserialize(const std::string& src)
+  {
+    if (doc_) {
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n")));
+      return 1;
+    }
+
+    doc_ = PKCS7_from_data(src);
+    if (doc_) {
+      return cache_plaintext();
+
+    } else {
+      return 1;
+    }
   }
 
   int SignedDocument::cache_plaintext()

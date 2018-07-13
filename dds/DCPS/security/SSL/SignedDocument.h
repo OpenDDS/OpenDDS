@@ -58,6 +58,11 @@ namespace SSL {
      */
     int deserialize(const DDS::OctetSeq& src);
 
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
+    int deserialize(const std::string& src);
+
    private:
     /**
      * @return int 0 on success; 1 on failure.
