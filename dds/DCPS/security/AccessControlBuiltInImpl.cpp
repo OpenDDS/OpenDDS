@@ -233,7 +233,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     0);
 
   local_ac_perms_.insert(std::make_pair(perm_handle, perm_set));
-  local_identity_map.insert(std::make_pair(identity, perm_handle));
+  local_identity_map_.insert(std::make_pair(identity, perm_handle));
 
   return perm_handle ;
 }
@@ -241,7 +241,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::DDS::Security::PermissionsHandle AccessControlBuiltInImpl::validate_remote_permissions(
   ::DDS::Security::Authentication_ptr auth_plugin,
   ::DDS::Security::IdentityHandle local_identity_handle,
-  ::DDS::Security::IdentityHandle remote_identity_handle,
+  ::DDS::Security::IdentityHandle /*remote_identity_handle*/,
   const ::DDS::Security::PermissionsToken & remote_permissions_token,
   const ::DDS::Security::AuthenticatedPeerCredentialToken & remote_credential_token,
   ::DDS::Security::SecurityException & ex)
@@ -250,29 +250,31 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Null Authentication plugin");
     return DDS::HANDLE_NIL;
   }
+
+  //if (DDS::HANDLE_NIL == remote_identity_handle) {
+  //  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid Remote Identity");
+  //  return DDS::HANDLE_NIL;
+  //}
+
   if (DDS::HANDLE_NIL == local_identity_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid Local Identity");
     return DDS::HANDLE_NIL;
   }
-  if (DDS::HANDLE_NIL == remote_identity_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid Remote Identity");
-    return DDS::HANDLE_NIL;
-  }
 
-  ACIdentityMap::iterator iter = local_identity_map.find(local_identity_handle);
+  ACIdentityMap::iterator iter = local_identity_map_.find(local_identity_handle);
 
-  if (iter == local_identity_map.end()) {
+  if (iter == local_identity_map_.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: No matching local identity handle present");
     return DDS::HANDLE_NIL;
   }
 
   // Extract Governance and domain id data for new permissions entry
-  ::DDS::Security::PermissionsHandle rph = iter->second;
+  ::DDS::Security::PermissionsHandle local_ph = iter->second;
 
-  ACPermsMap::iterator piter = local_ac_perms_.find(rph);
+  ACPermsMap::iterator piter = local_ac_perms_.find(local_ph);
 
   if (piter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: No matching permissions handle present");
+    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: No matching local permissions handle present");
     return DDS::HANDLE_NIL;
   }
 
@@ -407,7 +409,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACE_UNUSED_ARG(qos);
 
   if (DDS::HANDLE_NIL == permissions_handle) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permissions handle");
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_participant: Invalid permissions handle");
     return false;
   }
 
@@ -434,7 +436,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ACPermsMap::iterator piter = local_ac_perms_.find(permissions_handle);
   if(piter == local_ac_perms_.end()) {
-    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: No matching permissions handle present");
+    CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_create_participant: No matching permissions handle present");
     return false;
   }
 
@@ -1146,8 +1148,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const ::DDS::Security::ParticipantBuiltinTopicDataSecure & participant_data,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(participant_data);
-
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid permissions handle");
     return false;
@@ -1168,7 +1168,53 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       if (giter->domain_attrs.is_access_protected == false) return true;
     }
   }
-  //TODO: Need to check the PluginClassName and MajorVersion of the local permmissions vs. remote  See Table 63 of spec
+
+  // Check the PluginClassName and MajorVersion of the local permmissions vs. remote  See Table 63 of spec
+  const std::string remote_class_id = participant_data.base.permissions_token.class_id.in();
+
+  std::string local_plugin_class_name,
+              remote_plugin_class_name;
+  int local_major_ver,
+      local_minor_ver,
+      remote_major_ver,
+      remote_minor_ver;
+
+  if (remote_class_id.length() > 0) {
+    parse_class_id(remote_class_id, remote_plugin_class_name, remote_major_ver, remote_minor_ver);
+  }
+  else {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid remote class ID");
+    return false;
+  }
+
+  for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
+    if (local_iter->second.domain_id == domain_id) {
+      if (local_iter->first != permissions_handle) {
+        std::string local_class_id = local_iter->second.perm_token.class_id;
+
+        if (local_class_id.length() > 0) {
+          parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
+        }
+        else {
+          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Invalid local class ID");
+          return false;
+        }
+
+        break;
+      }
+    }
+  }
+
+  if (strcmp(local_plugin_class_name.c_str(), remote_plugin_class_name.c_str()) == 0) {
+    if (local_major_ver != remote_major_ver) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID major versions do not match");
+      return false;
+    }
+  }
+  else {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_participant: Class ID plugin class name do not match");
+    return false;
+  }
 
   // Check permissions topic grants
 
@@ -1234,7 +1280,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   PublishSubscribe_t publish = PUBLISH;
 
-  int ret_value = search_remote_permissions(permissions_handle, publication_data.base.base.topic_name, domain_id, ac_iter, publish);
+  int ret_value = search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, publish);
 
   if (ret_value > 0) {
     switch (ret_value) {
@@ -1309,7 +1355,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   PublishSubscribe_t subscribe = SUBSCRIBE;
 
-  int ret_value = search_remote_permissions(permissions_handle, subscription_data.base.base.topic_name, domain_id, ac_iter, subscribe);
+  int ret_value = search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, subscribe);
 
   if (ret_value > 0) {
     switch (ret_value) {
@@ -1347,14 +1393,68 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const ::DDS::TopicBuiltinTopicData & topic_data,
   ::DDS::Security::SecurityException & ex)
 {
+  // NOTE: permissions_handle is for the remote DomainParticipant.
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid permissions handle");
+    return false;
+  }
+
+  if (topic_data.name == "") {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid topic data");
     return false;
   }
 
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
   if (ac_iter == local_ac_perms_.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_remote_topic: No matching permissions handle present");
+    return false;
+  }
+
+  // Compare the PluginClassName and MajorVersion of the local permissions_token
+  // with those in the remote_permissions_token. 
+  const std::string remote_class_id = ac_iter->second.perm_token.class_id.in();
+
+  std::string local_plugin_class_name,
+              remote_plugin_class_name;
+  int local_major_ver,
+      local_minor_ver,
+      remote_major_ver,
+      remote_minor_ver;
+
+  if (remote_class_id.length() > 0) {
+    parse_class_id(remote_class_id, remote_plugin_class_name, remote_major_ver, remote_minor_ver);
+  }
+  else {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid remote class ID");
+    return false;
+  }
+
+  for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
+    if (local_iter->second.domain_id == domain_id) {
+      if (local_iter->first != permissions_handle) {
+        std::string local_class_id = local_iter->second.perm_token.class_id;
+
+        if (local_class_id.length() > 0) {
+          parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
+        }
+        else {
+          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid local class ID");
+          return false;
+        }
+
+        break;
+      }
+    }
+  }
+
+  if (strcmp(local_plugin_class_name.c_str(), remote_plugin_class_name.c_str()) == 0) {
+    if (local_major_ver != remote_major_ver) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID major versions do not match");
+      return false;
+    }
+  }
+  else {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Class ID plugin class name do not match");
     return false;
   }
 
@@ -1402,8 +1502,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     current_date_time = mktime(current_time_tm);
 
     if (current_date_time < before_time) {
-        CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Permissions grant hasn't started yet.");
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Permissions grant hasn't started yet.");
+      return false;
     }
 
     after_time = convert_permissions_time(pm_iter->validity.not_after);
@@ -1414,8 +1514,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
 
     if (current_date_time > after_time) {
-        CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Permissions grant has expired.");
-        return false;
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Permissions grant has expired.");
+      return false;
     }
 
     std::list<PermissionTopicRule>::iterator ptr_iter; // allow/deny rules
@@ -1450,7 +1550,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   //TODO: QoS rules are not implemented
-
 
   return false;
 }
@@ -1653,12 +1752,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d > 0) {
-      attributes.allow_unauthenticated_participants = giter->domain_attrs.allow_unauthenticated_participants;
-      attributes.is_access_protected = giter->domain_attrs.is_access_protected;
-      attributes.is_rtps_protected = giter->domain_attrs.is_rtps_protected;
-      attributes.is_discovery_protected = giter->domain_attrs.is_discovery_protected;
-      attributes.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
-      attributes.plugin_participant_attributes = giter->domain_attrs.plugin_participant_attributes;
+      attributes = giter->domain_attrs;
+      //attributes.allow_unauthenticated_participants = giter->domain_attrs.allow_unauthenticated_participants;
+      //attributes.is_access_protected = giter->domain_attrs.is_access_protected;
+      //attributes.is_rtps_protected = giter->domain_attrs.is_rtps_protected;
+      //attributes.is_discovery_protected = giter->domain_attrs.is_discovery_protected;
+      //attributes.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
+      //attributes.plugin_participant_attributes = giter->domain_attrs.plugin_participant_attributes;
       return true;
     }
   }
@@ -1880,7 +1980,6 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
   std::string temp_str;
 
   memset(&permission_tm, 0, sizeof(tm));
-  temp_str.clear();
   // Year
   temp_str = timeString.substr(0, 4);
   permission_tm.tm_year = (atoi(temp_str.c_str()) - 1900);
@@ -2092,7 +2191,6 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
 }
 
 int AccessControlBuiltInImpl::search_remote_permissions(
-  const::DDS::Security::PermissionsHandle permissions_handle, 
   const char * topic_name, 
   const::DDS::Security::DomainId_t domain_id,
   ACPermsMap::iterator ac_iter,
@@ -2181,6 +2279,43 @@ int AccessControlBuiltInImpl::search_remote_permissions(
   else {
     return 6;
   }
+}
+
+void AccessControlBuiltInImpl::parse_class_id(
+  const std::string class_id, 
+  std::string & plugin_class_name, 
+  int & major_version, 
+  int & minor_version)
+{
+  const std::string delimiter = ":";
+
+  major_version = 1;
+  minor_version = 0;
+
+  size_t pos = class_id.find_last_of(delimiter);
+
+  if ((pos > 0UL) && (pos != class_id.length() - 1)) {
+    plugin_class_name = class_id.substr(0, (pos - 1));
+
+    const std::string period = ".";
+
+    size_t period_pos = class_id.find_last_of(period);
+
+    if (period_pos > 0UL) {
+      std::string mv_string = class_id.substr((pos + 1), (period_pos - 1));
+
+      major_version = atoi(mv_string.c_str());
+
+      if (period_pos != class_id.length() - 1) {
+        mv_string = class_id.substr((period_pos + 1), (class_id.length() - 1));
+        minor_version = atoi(mv_string.c_str());
+      }
+    }
+  }
+  else {
+    plugin_class_name.clear();
+  }
+
 }
 
 //char * AccessControlBuiltInImpl::strptime(const char * s, const char * f, tm * tm)

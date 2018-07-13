@@ -16,6 +16,45 @@ namespace OpenDDS {
 namespace Security {
 namespace CommonUtilities {
 
+
+/// @brief This URI abstraction is currently naive and only separates the URI scheme
+/// on the LHS from the "everything-else" of the URI on the RHS. As such this may only handle
+/// the URI_FILE and URI_DATA cases properly. Further investigate into URI_PKCS11
+/// should be completed.
+///
+
+struct URI {
+  enum Scheme
+  {
+    URI_UNKNOWN,
+    URI_FILE,
+    URI_DATA,
+    URI_PKCS11,
+  };
+
+  URI(const std::string& src);
+
+  Scheme scheme;
+  std::string everything_else;
+
+// TODO: Add complete URI parsing support.
+//
+// scheme:[//authority]path[?query][#fragment]
+// Where authority = [userinfo@]host[:port]
+//
+//  struct {
+//    std::string user;
+//    std::string host;
+//    std::string port;
+//
+//  } authority;
+//
+//  std::string path;
+//
+//  std::string query;
+//  std::string fragment;
+};
+
 void set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,

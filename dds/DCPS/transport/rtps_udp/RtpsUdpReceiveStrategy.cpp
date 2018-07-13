@@ -191,7 +191,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   case HEARTBEAT:
     link_->received(submessage.heartbeat_sm(),
                     receiver_.source_guid_prefix_);
-    if (submessage.heartbeat_sm().smHeader.flags & 4 /*FLAG_L*/) {
+    if (submessage.heartbeat_sm().smHeader.flags & FLAG_L) {
       // Liveliness has been asserted.  Create a DATAWRITER_LIVELINESS message.
       sample.header_.message_id_ = DATAWRITER_LIVELINESS;
       receiver_.fill_header(sample.header_);
@@ -264,7 +264,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     DDS::Security::DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
     DDS::Security::DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
     DDS::Security::SecureSubmessageCategory_t category =
-    DDS::Security::INFO_SUBMESSAGE;
+      DDS::Security::INFO_SUBMESSAGE;
     DDS::Security::SecurityException ex = {"", 0, 0};
     bool ok =
       crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
@@ -402,10 +402,13 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
         0 == std::memcmp(plain.get_buffer(), encoded.get_buffer(), n)) {
       return true;
     }
-    Message_Block_Ptr plain_mb(new ACE_Message_Block(n));
+
+    // The sample.sample_ message block uses the transport's data block so it
+    // can't be modified in-place, instead replace it with a new block.
+    sample.sample_.reset(new ACE_Message_Block(n));
     const char* buffer_raw = reinterpret_cast<const char*>(plain.get_buffer());
-    plain_mb->copy(buffer_raw, n);
-    sample.sample_.swap(plain_mb);
+    sample.sample_->copy(buffer_raw, n);
+
     if (n > 1) {
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
     }
@@ -540,13 +543,13 @@ RtpsUdpReceiveStrategy::reassemble(ReceivedDataSample& data)
     // In particular we will need the SequenceNumber, but ignore the iQoS.
 
     // Peek at the byte order from the encapsulation containing the payload.
-    data.header_.byte_order_ = data.sample_->rd_ptr()[1] & 1 /*FLAG_E*/;
+    data.header_.byte_order_ = data.sample_->rd_ptr()[1] & FLAG_E;
 
     RtpsSampleHeader& rsh = received_sample_header();
     const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();
 
-    const CORBA::Octet data_flags = (data.header_.byte_order_ ? 1 : 0) // FLAG_E
-      | (data.header_.key_fields_only_ ? 8 : 4); // FLAG_K : FLAG_D
+    const CORBA::Octet data_flags = (data.header_.byte_order_ ? FLAG_E : 0)
+      | (data.header_.key_fields_only_ ? FLAG_K_IN_DATA : FLAG_D);
     const DataSubmessage dsm = {
       {DATA, data_flags, 0}, 0, DATA_OCTETS_TO_IQOS,
       dfsm.readerId, dfsm.writerId, dfsm.writerSN, ParameterList()};

@@ -2,10 +2,34 @@
 
 #include <string>
 #include <cstdio>
+#include <vector>
 
 namespace OpenDDS {
 namespace Security {
 namespace CommonUtilities {
+
+URI::URI(const std::string& src)
+  : scheme(URI_UNKNOWN), everything_else("") //authority(), path(""), query(""), fragment("")
+{
+  typedef std::vector<std::pair<std::string, Scheme> > uri_pattern_t;
+
+  uri_pattern_t uri_patterns;
+  uri_patterns.push_back(std::make_pair("file:", URI_FILE));
+  uri_patterns.push_back(std::make_pair("data:", URI_DATA));
+  uri_patterns.push_back(std::make_pair("pkcs11:", URI_PKCS11));
+
+  for (uri_pattern_t::iterator i = uri_patterns.begin();
+       i != uri_patterns.end(); ++i) {
+    const std::string& pfx = i->first;
+    size_t pfx_end = pfx.length();
+
+    if (src.substr(0, pfx_end) == pfx) {
+      everything_else = src.substr(pfx_end, std::string::npos);
+      scheme = i->second;
+      break;
+    }
+  }
+}
 
 void set_security_error(DDS::Security::SecurityException& ex,
                         int code,

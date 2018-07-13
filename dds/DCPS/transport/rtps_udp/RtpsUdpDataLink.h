@@ -139,9 +139,9 @@ public:
   DDS::Security::DatawriterCryptoHandle writer_crypto_handle(const RepoId& writer) const;
   DDS::Security::DatareaderCryptoHandle reader_crypto_handle(const RepoId& reader) const;
 
-  void security_from_blob(const RepoId& local_id, const RepoId& remote_id,
-                          const unsigned char* buffer,
-                          unsigned int buffer_size);
+  void populate_security_handles(const RepoId& local_id, const RepoId& remote_id,
+                                 const unsigned char* buffer,
+                                 unsigned int buffer_size);
 
 private:
   virtual void stop_i();
@@ -531,8 +531,13 @@ private:
 
   Security::SecurityConfig_rch security_config_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
-  OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
-                  GUID_tKeyLessThan) peer_crypto_handles_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
+                          GUID_tKeyLessThan) PeerHandlesMap;
+  PeerHandlesMap peer_crypto_handles_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
+                          GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
 };
 
 } // namespace DCPS

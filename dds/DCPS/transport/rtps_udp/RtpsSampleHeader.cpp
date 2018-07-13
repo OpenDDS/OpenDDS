@@ -29,13 +29,10 @@
 #endif
 
 namespace {
-  enum { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4,
-         FLAG_K_IN_DATA = 8, FLAG_K_IN_FRAG = 4 };
-
   const OpenDDS::RTPS::StatusInfo_t STATUS_INFO_REGISTER = { { 0, 0, 0, 0 } },
-          STATUS_INFO_DISPOSE = { { 0, 0, 0, 1 } },
-          STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } },
-          STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
+    STATUS_INFO_DISPOSE = { { 0, 0, 0, 1 } },
+    STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } },
+    STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -114,6 +111,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   CASE_SMKIND(DATA, DataSubmessage, data)
   CASE_SMKIND(DATA_FRAG, DataFragSubmessage, data_frag)
 
+    // Each submessage type introduced by the Security spec is treated
+    // as an opaque octet sequence at this layer.
   case SEC_BODY:
   case SEC_PREFIX:
   case SEC_POSTFIX:
@@ -320,7 +319,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
 bool RtpsSampleHeader::payload_byte_order(const ReceivedDataSample& rds)
 {
-  return rds.sample_->rd_ptr()[1] & FLAG_E;
+  return rds.sample_->rd_ptr()[1] & RTPS::FLAG_E;
 }
 
 namespace {

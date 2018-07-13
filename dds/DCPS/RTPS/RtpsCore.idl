@@ -430,6 +430,16 @@ module OpenDDS {
         DDS::OctetSeq unknown_data;
     };
 
+    const octet FLAG_E = 1; // All Submessages: little Endian
+    const octet FLAG_Q = 2; // Data, DataFrag: inline Qos present
+    const octet FLAG_F = 2; // AckNack, Heartbeat: Final
+    const octet FLAG_I = 2; // InfoTimestamp: Invalidate
+    const octet FLAG_M = 2; // InfoReplyIp4: Multicast present
+    const octet FLAG_D = 4; // Data: sample Data present
+    const octet FLAG_L = 4; // Heartbeat: Liveliness
+    const octet FLAG_K_IN_FRAG = 4; // DataFrag: Key present
+    const octet FLAG_K_IN_DATA = 8; // Data: Key present
+
     /* all Submessages are composed of a leading SubmessageHeader */
     struct SubmessageHeader {
       octet submessageId;
@@ -562,7 +572,7 @@ module OpenDDS {
       DCPS::EntityId_t writerId;
       SequenceNumber_t writerSN;
       ParameterList inlineQos; // if Q
-      // SerializedPayload payload; // if D||K
+      // SerializedPayload payload; // if D|K
       //   These Submessages correspond to the OpenDDS::DCPS::DataSampleHeader,
       //   so they do not contain any payload data.
     };

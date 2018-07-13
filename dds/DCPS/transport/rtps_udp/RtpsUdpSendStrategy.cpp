@@ -385,7 +385,7 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
       break;
     }
 
-    ser.swap_bytes(ACE_CDR_BYTE_ORDER != (flags & 1 /*FLAG_E*/));
+    ser.swap_bytes(ACE_CDR_BYTE_ORDER != (flags & RTPS::FLAG_E));
     CORBA::UShort octetsToNextHeader;
     if (!(ser >> octetsToNextHeader)) {
       ok = false;
