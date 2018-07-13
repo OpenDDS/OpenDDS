@@ -10,6 +10,7 @@
 
 #include "Rtps_Udp_Export.h"
 
+#include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #include "dds/DCPS/RTPS/MessageTypes.h"
@@ -52,8 +53,6 @@ public:
   void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
                       RTPS::SubmessageSeq& submessages);
 
-  ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
-
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t send_bytes_i_helper(const iovec iov[], int n);
@@ -74,11 +73,36 @@ private:
   ssize_t send_single_i(const iovec iov[], int n,
                         const ACE_INET_Addr& addr);
 
+  ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
+
+  struct Chunk {
+    char* start_;
+    unsigned int length_;
+    DDS::OctetSeq encoded_;
+  };
+
+  bool encode_writer_submessage(const RepoId& receiver,
+                                OPENDDS_VECTOR(Chunk)& replacements,
+                                DDS::Security::CryptoTransform* crypto,
+                                const DDS::OctetSeq& plain,
+                                DDS::Security::DatawriterCryptoHandle sender_dwch,
+                                char* submessage_start, CORBA::Octet msgId);
+
+  bool encode_reader_submessage(const RepoId& receiver,
+                                OPENDDS_VECTOR(Chunk)& replacements,
+                                DDS::Security::CryptoTransform* crypto,
+                                const DDS::OctetSeq& plain,
+                                DDS::Security::DatareaderCryptoHandle sender_drch,
+                                char* submessage_start, CORBA::Octet msgId);
+
+  ACE_Message_Block* replace_chunks(const ACE_Message_Block* plain,
+                                    const OPENDDS_VECTOR(Chunk)& replacements);
+
   RtpsUdpDataLink* link_;
   const OPENDDS_SET(ACE_INET_Addr)* override_dest_;
   const ACE_INET_Addr* override_single_dest_;
 
-  OpenDDS::RTPS::Header rtps_header_;
+  RTPS::Header rtps_header_;
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;

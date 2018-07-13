@@ -28,7 +28,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , receiver_(local_prefix)
   , secure_sample_(0)
 {
-  secure_prefix_.smHeader.submessageId = 0;
+  secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 }
 
 int
@@ -87,7 +87,8 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     // secure envelope in progress, defer processing
     secure_submessages_.push_back(rsh.submessage_);
     if (kind == DATA) {
-      // FUTURE: support >1 data payload in SRTPS authenticated+unencrypted
+      // SRTPS: once full-message protection is supported, this technique will
+      // need to be extended to support > 1 data payload (auth. only)
       secure_sample_ = sample;
     }
     return;
@@ -225,97 +226,101 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     break;
 
   case SRTPS_POSTFIX:
-    secure_prefix_.smHeader.submessageId = 0;
+    secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
     secure_sample_ = ReceivedDataSample(0);
     ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy SRTPS unsupported.\n"));
     break;
 
-  case SEC_POSTFIX: {
-    const DDS::Security::ParticipantCryptoHandle local_pch =
-      link_->local_crypto_handle();
-
-    RepoId peer;
-    RTPS::assign(peer.guidPrefix, receiver_.source_guid_prefix_);
-    peer.entityId = ENTITYID_PARTICIPANT;
-    const DDS::Security::ParticipantCryptoHandle peer_pch =
-      link_->peer_crypto_handle(peer);
-
-    DDS::Security::CryptoTransform_var crypto =
-      link_->security_config()->get_crypto_transform();
-
-    DDS::OctetSeq encoded_submsg, plain_submsg;
-    sec_submsg_to_octets(encoded_submsg, submessage);
-    secure_prefix_.smHeader.submessageId = 0;
-    secure_sample_ = ReceivedDataSample(0);
-
-    if (local_pch == DDS::HANDLE_NIL || !crypto) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
-                 "precondition unmet %d %@\n", local_pch, crypto.in()));
-      break;
-    }
-
-    if (peer_pch == DDS::HANDLE_NIL) {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy SEC_POSTFIX "
-                "no crypto handle for %C\n",
-                OPENDDS_STRING(GuidConverter(peer)).c_str()), 2);
-      break;
-    }
-
-    DDS::Security::DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
-    DDS::Security::DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
-    DDS::Security::SecureSubmessageCategory_t category =
-      DDS::Security::INFO_SUBMESSAGE;
-    DDS::Security::SecurityException ex = {"", 0, 0};
-    bool ok =
-      crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
-                                       local_pch, peer_pch, ex);
-
-    if (ok && category == DDS::Security::DATAWRITER_SUBMESSAGE) {
-      ok = crypto->decode_datawriter_submessage(plain_submsg, encoded_submsg,
-                                                drch, dwch, ex);
-
-    } else if (ok && category == DDS::Security::DATAREADER_SUBMESSAGE) {
-      ok = crypto->decode_datareader_submessage(plain_submsg, encoded_submsg,
-                                                dwch, drch, ex);
-
-    } else if (ok && category == DDS::Security::INFO_SUBMESSAGE) {
-      break;
-
-    } else {
-      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-                 "preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n",
-                 peer_pch, ex.code, ex.minor_code, ex.message.in()));
-      break;
-    }
-
-    if (!ok) {
-      ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
-                 "decode_datawriter/reader_submessage failed [%d.%d]: %C\n",
-                 ex.code, ex.minor_code, ex.message.in()));
-      break;
-    }
-
-    const char* buff = reinterpret_cast<const char*>(plain_submsg.get_buffer());
-    ACE_Message_Block mb(buff, plain_submsg.length());
-    mb.wr_ptr(plain_submsg.length());
-    if (Transport_debug_level > 5) {
-      ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
-                    category == DDS::Security::DATAWRITER_SUBMESSAGE ?
-                    "RtpsUdpReceiveStrategy: decoded writer submessage" :
-                    "RtpsUdpReceiveStrategy: decoded reader submessage"));
-    }
-    RtpsSampleHeader rsh(mb);
-    if (check_header(rsh)) {
-      ReceivedDataSample plain_sample(mb.duplicate());
-      if (rsh.into_received_data_sample(plain_sample)) {
-        deliver_sample_i(plain_sample, rsh.submessage_);
-      }
-    }
-
+  case SEC_POSTFIX:
+    deliver_from_secure(submessage);
     break;
-  }
+
   default:
     break;
+  }
+}
+
+void
+RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
+{
+  using namespace DDS::Security;
+  const ParticipantCryptoHandle local_pch = link_->local_crypto_handle();
+
+  RepoId peer;
+  RTPS::assign(peer.guidPrefix, receiver_.source_guid_prefix_);
+  peer.entityId = ENTITYID_PARTICIPANT;
+  const ParticipantCryptoHandle peer_pch = link_->peer_crypto_handle(peer);
+
+  CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+
+  DDS::OctetSeq encoded_submsg, plain_submsg;
+  sec_submsg_to_octets(encoded_submsg, submessage);
+  secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
+  secure_sample_ = ReceivedDataSample(0);
+
+  if (local_pch == DDS::HANDLE_NIL || !crypto) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy SEC_POSTFIX "
+               "precondition unmet %d %@\n", local_pch, crypto.in()));
+    return;
+  }
+
+  if (peer_pch == DDS::HANDLE_NIL) {
+    VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy SEC_POSTFIX "
+              "no crypto handle for %C\n",
+              OPENDDS_STRING(GuidConverter(peer)).c_str()), 2);
+    return;
+  }
+
+  DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
+  DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
+  SecureSubmessageCategory_t category = INFO_SUBMESSAGE;
+  SecurityException ex = {"", 0, 0};
+
+  bool ok = crypto->preprocess_secure_submsg(dwch, drch, category, encoded_submsg,
+                                             local_pch, peer_pch, ex);
+
+  if (ok && category == DATAWRITER_SUBMESSAGE) {
+    ok = crypto->decode_datawriter_submessage(plain_submsg, encoded_submsg,
+                                              drch, dwch, ex);
+
+  } else if (ok && category == DATAREADER_SUBMESSAGE) {
+    ok = crypto->decode_datareader_submessage(plain_submsg, encoded_submsg,
+                                              dwch, drch, ex);
+
+  } else if (ok && category == INFO_SUBMESSAGE) {
+    return;
+
+  } else {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+               "preprocess_secure_submsg failed RPCH %d, [%d.%d]: %C\n",
+               peer_pch, ex.code, ex.minor_code, ex.message.in()));
+    return;
+  }
+
+  if (!ok) {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy: "
+               "decode_datawriter/reader_submessage failed [%d.%d]: %C\n",
+               ex.code, ex.minor_code, ex.message.in()));
+    return;
+  }
+
+  const char* buff = reinterpret_cast<const char*>(plain_submsg.get_buffer());
+  ACE_Message_Block mb(buff, plain_submsg.length());
+  mb.wr_ptr(plain_submsg.length());
+
+  if (Transport_debug_level > 5) {
+    ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
+                  category == DATAWRITER_SUBMESSAGE ?
+                  "RtpsUdpReceiveStrategy: decoded writer submessage" :
+                  "RtpsUdpReceiveStrategy: decoded reader submessage"));
+  }
+
+  RtpsSampleHeader rsh(mb);
+  if (check_header(rsh)) {
+    ReceivedDataSample plain_sample(mb.duplicate());
+    if (rsh.into_received_data_sample(plain_sample)) {
+      deliver_sample_i(plain_sample, rsh.submessage_);
+    }
   }
 }
 
@@ -494,7 +499,7 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 {
   receiver_.reset(remote_address_, header.header_);
-  secure_prefix_.smHeader.submessageId = 0;
+  secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
   return header.valid();
 }
 

@@ -85,6 +85,8 @@ private:
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
+  void deliver_from_secure(const RTPS::Submessage& submessage);
+
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);
 
