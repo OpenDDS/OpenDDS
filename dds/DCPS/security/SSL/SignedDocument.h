@@ -38,6 +38,8 @@ namespace SSL {
 
     void get_content(std::string& dst) const;
 
+    const std::string& get_content() const;
+
     /**
      * @return int 0 on success; 1 on failure.
      */

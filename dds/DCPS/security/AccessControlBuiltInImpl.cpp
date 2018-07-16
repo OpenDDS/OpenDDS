@@ -57,7 +57,6 @@ AccessControlBuiltInImpl::AccessControlBuiltInImpl()
 
 AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
-    // - Clean up resources used by this implementation
 }
 
 ::DDS::Security::PermissionsHandle AccessControlBuiltInImpl::validate_local_permissions(
@@ -161,7 +160,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (!extract_subject_name(perm_sn)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Could not extract subject name from permissions file");
     return DDS::HANDLE_NIL;
-  };
+  }
 
   TokenReader tr(id_token);
   const char* id_sn = tr.get_property_value("dds.cert.sn");
@@ -179,34 +178,31 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Verify signature of permissions file
 
-  // return of 0 = verified  1 = not verified
-  int perm_verified = local_perm.verify_signature(local_ca);
-  if (0 == perm_verified) {
+  int err = local_perm.verify_signature(local_ca);
+  if (err) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions signature not verified");
+    return DDS::HANDLE_NIL;
+  } else {
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::validate_local_permissions: Permissions document verified.\n")));
     }
-  } else {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions signature not verified");
-    return DDS::HANDLE_NIL;
   }
 
   // If all checks are successful load the content into cache
   AcPerms perm_set;
 
-  if (0 != load_governance_file(&perm_set, gov_content)) {
+  err = load_governance_file(&perm_set, gov_content);
+  if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid governance file");
     return DDS::HANDLE_NIL;
-  };
+  }
 
   // Set and store the permissions credential token while we have the raw content
 
-  //TODO: the SignedDocument class does not allow the retrieval of the raw file.
-  // The file will have to be pulled from the file system until that is fixed.
-
   ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
-  pctWriter.add_property("dds.perm.cert", get_file_contents(perm_file.c_str()).c_str());
+  pctWriter.add_property("dds.perm.cert", local_perm.get_content().c_str());
 
   // Set and store the permissions token
   ::DDS::Security::PermissionsToken permissions_token;
@@ -217,10 +213,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   perm_set.perm_token = permissions_token;
   perm_set.perm_cred_token = permissions_cred_token;
 
-  if (0 != load_permissions_file(&perm_set, perm_content)) {
+  err = load_permissions_file(&perm_set, perm_content);
+  if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permission file");
     return DDS::HANDLE_NIL;
-  };
+  }
 
   // Set the domain of the participant
   perm_set.domain_id = domain_id;
@@ -251,11 +248,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  //if (DDS::HANDLE_NIL == remote_identity_handle) {
-  //  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid Remote Identity");
-  //  return DDS::HANDLE_NIL;
-  //}
-
   if (DDS::HANDLE_NIL == local_identity_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid Local Identity");
     return DDS::HANDLE_NIL;
@@ -285,19 +277,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // permissions file
 
-  // SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
-  // local_perm.get_content(perm_content);
-
-
-  // Instead of pulling the content from a SignedDocument yet, we can strip it from the
-  // c.perm parm of the AuthenticatedCredentialToken properties until SignedDocument is implemented
-
   std::string remote_perm_content;
   OpenDDS::Security::TokenReader remote_perm_wrapper(remote_credential_token);
 
   if (remote_credential_token.binary_properties.length() > 0) {
     const DDS::OctetSeq& raw = remote_perm_wrapper.get_bin_property_value("c.perm");
-
     if (raw.length() > 0) {
       remote_perm_content.assign(reinterpret_cast<const char*>(raw.get_buffer()), raw.length());
     }
@@ -341,6 +325,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Try to locate the payload
+
   if (!clean_smime_content(remote_perm_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid remote permission content");
     return DDS::HANDLE_NIL;
@@ -391,7 +376,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (0 != load_permissions_file(&perm_set, remote_perm_content)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
     return DDS::HANDLE_NIL;
-  };
+  }
 
   ::CORBA::Long perm_handle = generate_handle();
 
