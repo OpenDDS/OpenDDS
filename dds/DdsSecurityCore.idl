@@ -9,6 +9,7 @@
 #define DDS_SECURITY_CORE_IDL
 
 #include "DdsDcpsGuid.idl"
+#include "DdsDcpsInfrastructure.idl"
 #include "DdsDcpsPublication.idl"
 #include "DdsDcpsSubscription.idl"
 #include "DdsSecurityParams.idl"
@@ -17,8 +18,12 @@
 module DDS {
   module Security {
 
+    // TODO: PENDING IDL V4 INHERITANCE
     // Per the security spec these types are expected to be visible in
-    // the DDS::Security namespace.
+    // the DDS::Security namespace, but are pulled into dds/DdsDcpsCore.idl
+    // in order to satisfy dependencies for DomainParticipantQos; once IDL
+    // v4 inheritance is implemented these typedefs will be replaced by their
+    // proper types.
     typedef DDS::Property_t Property_t;
     typedef DDS::PropertySeq PropertySeq;
     typedef DDS::BinaryProperty_t BinaryProperty_t;
@@ -124,9 +129,6 @@ module DDS {
     //@extensibility(MUTABLE)
     struct ParticipantBuiltinTopicDataSecure { // :  ParticipantBuiltinTopicData {
       // TODO: PENDING IDL V4 INHERITANCE
-      // Once structure inheritance from IDL v4 is implemented this field
-      // can be replaced by the commented-out inheritance.
-      // See the OMG reference implementation dds_security_plugins_spis.idl.
       ParticipantBuiltinTopicData base;
 
       IdentityStatusToken identity_status_token;
@@ -135,9 +137,6 @@ module DDS {
     //@extensibility(MUTABLE)
     struct PublicationBuiltinTopicData { //: DDS::PublicationBuiltinTopicData {
       // TODO: PENDING IDL V4 INHERITANCE
-      // Once structure inheritance from IDL v4 is implemented this field
-      // can be replaced by the commented-out inheritance.
-      // See the OMG reference implementation dds_security_plugins_spis.idl.
       DDS::PublicationBuiltinTopicData base;
 
       EndpointSecurityInfo  security_info;
@@ -146,9 +145,6 @@ module DDS {
     //@extensibility(MUTABLE)
     struct SubscriptionBuiltinTopicData { //: DDS::SubscriptionBuiltinTopicData {
       // TODO: PENDING IDL V4 INHERITANCE
-      // Once structure inheritance from IDL v4 is implemented this field
-      // can be replaced by the commented-out inheritance.
-      // See the OMG reference implementation dds_security_plugins_spis.idl.
       DDS::SubscriptionBuiltinTopicData base;
 
       EndpointSecurityInfo  security_info;
@@ -157,9 +153,6 @@ module DDS {
     //@extensibility(MUTABLE)
     struct PublicationBuiltinTopicDataSecure {// :  PublicationBuiltinTopicData {
       // TODO: PENDING IDL V4 INHERITANCE
-      // Once structure inheritance from IDL v4 is implemented this field
-      // can be replaced by the commented-out inheritance.
-      // See the OMG reference implementation dds_security_plugins_spis.idl.
       PublicationBuiltinTopicData base;
 
       DataTags data_tags;
@@ -168,15 +161,10 @@ module DDS {
     //@extensibility(MUTABLE)
     struct SubscriptionBuiltinTopicDataSecure { //  :  SubscriptionBuiltinTopicData {
       // TODO: PENDING IDL V4 INHERITANCE
-      // Once structure inheritance from IDL v4 is implemented this field
-      // can be replaced by the commented-out inheritance.
-      // See the OMG reference implementation dds_security_plugins_spis.idl.
       SubscriptionBuiltinTopicData base;
 
       DataTags data_tags;
     };
-
-    typedef long SecurityExceptionCode;
 
     struct SecurityException {
       string  message;
@@ -193,10 +181,6 @@ module DDS {
       VALIDATION_OK_FINAL_MESSAGE
     };
 
-    //native IdentityHandle;
-    //native HandshakeHandle;
-    //native SharedSecretHandle;
-    //native PermissionsHandle;
     typedef long IdentityHandle;
     typedef long HandshakeHandle;
     typedef long PermissionsHandle;
@@ -206,21 +190,15 @@ module DDS {
       readonly attribute OctetSeq challenge1, challenge2, sharedSecret;
     };
 
-    //native ParticipantCryptoHandle;
-    //native ParticipantCryptoHandleSeq;
     typedef long ParticipantCryptoHandle;
     typedef sequence<ParticipantCryptoHandle> ParticipantCryptoHandleSeq;
 
     // Used internally by OpenDDS Implementation
     typedef long NativeCryptoHandle;
 
-    //native DatawriterCryptoHandle;
-    //native DatawriterCryptoHandleSeq;
     typedef NativeCryptoHandle DatawriterCryptoHandle;
     typedef sequence<DatawriterCryptoHandle> DatawriterCryptoHandleSeq;
 
-    //native DatareaderCryptoHandle;
-    //native DatareaderCryptoHandleSeq;
     typedef NativeCryptoHandle DatareaderCryptoHandle;
     typedef sequence<DatareaderCryptoHandle> DatareaderCryptoHandleSeq;
 
@@ -247,7 +225,7 @@ module DDS {
         inout SecurityException  ex);
     };
 
-    typedef long  DomainId_t;
+    typedef DDS::DomainId_t DomainId_t;
 
     local interface Authentication {
 
@@ -368,7 +346,7 @@ module DDS {
       boolean     is_discovery_protected;
       boolean     is_liveliness_protected;
       PluginParticipantSecurityAttributesMask plugin_participant_attributes;
-      PropertySeq ac_endpoint_properties;
+      PropertySeq ace_endpoint_properties;
     };
 
     struct TopicSecurityAttributes {
