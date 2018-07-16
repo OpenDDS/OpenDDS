@@ -79,6 +79,11 @@ namespace SSL {
 
   void SignedDocument::get_content(std::string& dst) const { dst = plaintext_; }
 
+  const std::string & SignedDocument::get_content() const
+  {
+    return plaintext_;
+  }
+
   class verify_signature_impl
   {
    public:

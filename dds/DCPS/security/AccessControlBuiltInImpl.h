@@ -375,7 +375,7 @@ private:
                          const ::DDS::Security::DataTagQosPolicy & data_tag,
                          ::DDS::Security::EndpointSecurityAttributes & attributes);
 
-  // Returns a 0 if the search is successful.
+  /// @return 0 if the search is successful.
   int search_remote_permissions(const char * topic_name,
                                 const ::DDS::Security::DomainId_t domain_id,
                                 ACPermsMap::iterator ac_iter,
