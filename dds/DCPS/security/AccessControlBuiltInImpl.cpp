@@ -394,8 +394,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   };
 
   ::CORBA::Long perm_handle = generate_handle();
-  local_ac_perms_.insert(std::make_pair(perm_handle, perm_set));
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
+    guard,
+    handle_mutex_,
+    0);
+  local_ac_perms_.insert(std::make_pair(perm_handle, perm_set));
   return perm_handle;
 }
 
