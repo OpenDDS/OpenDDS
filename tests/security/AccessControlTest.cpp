@@ -991,6 +991,8 @@ TEST_F(AccessControlTest, check_remote_topic_Success)
   ::DDS::Security::PermissionsHandle local_permissions_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, domain_id, domain_participant_qos, ex);
 
+  EXPECT_TRUE(local_permissions_handle != DDS::HANDLE_NIL);
+
   remote_perm_token.class_id = Expected_Permissions_Token_Class_Id;
   remote_perm_token.properties.length(1);
   remote_perm_token.properties[0].name = "dds.perm.ca.sn";
