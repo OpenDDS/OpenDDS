@@ -863,7 +863,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                   }
                 }
                 else { // There are no partitions to match
-                  // Start timer here.  
+                  // Start timer here.
                   if (!rp_timer_.is_scheduled()) {
                     ACE_Time_Value timer_length(after_time - cur_utc_time);
 
@@ -941,7 +941,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           return false;
         }
         else {
-          // Start timer here.  
+          // Start timer here.
           if (!rp_timer_.is_scheduled()) {
             ACE_Time_Value timer_length(after_time - cur_utc_time);
 
@@ -963,7 +963,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // No matching topic rule was found of topic_name so return the value in default_permission
   if (strcmp(default_value.c_str(), "ALLOW") == 0) {
-    // Start timer here.  
+    // Start timer here.
     if (!rp_timer_.is_scheduled()) {
       ACE_Time_Value timer_length(after_time - cur_utc_time);
 
@@ -1194,7 +1194,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
     if (local_iter->second.domain_id == domain_id) {
       if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm_token.class_id;
+        std::string local_class_id = local_iter->second.perm_token.class_id.in();
 
         if (local_class_id.length() > 0) {
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
@@ -1415,7 +1415,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Compare the PluginClassName and MajorVersion of the local permissions_token
-  // with those in the remote_permissions_token. 
+  // with those in the remote_permissions_token.
   const std::string remote_class_id = ac_iter->second.perm_token.class_id.in();
 
   std::string local_plugin_class_name,
@@ -1436,7 +1436,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
     if (local_iter->second.domain_id == domain_id) {
       if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm_token.class_id;
+        std::string local_class_id = local_iter->second.perm_token.class_id.in();
 
         if (local_class_id.length() > 0) {
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
@@ -1610,8 +1610,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::InstanceHandle_t instance_handle,
   ::DDS::Security::SecurityException & ex)
 {
-  if (DDS::HANDLE_NIL == permissions_handle || 
-      DDS::HANDLE_NIL == publication_handle || 
+  if (DDS::HANDLE_NIL == permissions_handle ||
+      DDS::HANDLE_NIL == publication_handle ||
       DDS::HANDLE_NIL == instance_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid handle");
     return false;
@@ -1635,7 +1635,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
-  if (DDS::HANDLE_NIL == permissions_handle || 
+  if (DDS::HANDLE_NIL == permissions_handle ||
       DDS::HANDLE_NIL == publication_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_dispose_instance: Invalid handle");
     return false;
@@ -2029,14 +2029,14 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
         permission_tm.tm_hour -= atoi(temp_str.c_str());
         temp_str.clear();
         temp_str = timeString.substr(24, 2);
-        //mins_adj = atoi(temp_str.c_str()); 
+        //mins_adj = atoi(temp_str.c_str());
         permission_tm.tm_min -= atoi(temp_str.c_str());
         //permission_time_t -= (hours_adj + mins_adj);
       }
       else if (strcmp(temp_str.c_str(), "-") == 0) {
         temp_str.clear();
         temp_str = timeString.substr(21, 2);
-        //hours_adj = atoi(temp_str.c_str()); 
+        //hours_adj = atoi(temp_str.c_str());
         permission_tm.tm_hour += atoi(temp_str.c_str());
         temp_str.clear();
         temp_str = timeString.substr(24, 2);
@@ -2054,10 +2054,10 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
   return mktime(&permission_tm);
 }
 
-int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle, 
-                                                 const char * topic_name, 
-                                                 const::DDS::PartitionQosPolicy & partition, 
-                                                 const::DDS::Security::DataTagQosPolicy & data_tag, 
+int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
+                                                 const char * topic_name,
+                                                 const::DDS::PartitionQosPolicy & partition,
+                                                 const::DDS::Security::DataTagQosPolicy & data_tag,
                                                  ::DDS::Security::EndpointSecurityAttributes & attributes)
 {
   ACE_UNUSED_ARG(partition);
@@ -2195,7 +2195,7 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
 }
 
 int AccessControlBuiltInImpl::search_remote_permissions(
-  const char * topic_name, 
+  const char * topic_name,
   const::DDS::Security::DomainId_t domain_id,
   ACPermsMap::iterator ac_iter,
   const PublishSubscribe_t pub_or_sub)
@@ -2286,9 +2286,9 @@ int AccessControlBuiltInImpl::search_remote_permissions(
 }
 
 void AccessControlBuiltInImpl::parse_class_id(
-  const std::string class_id, 
-  std::string & plugin_class_name, 
-  int & major_version, 
+  const std::string class_id,
+  std::string & plugin_class_name,
+  int & major_version,
   int & minor_version)
 {
   const std::string delimiter = ":";
@@ -2570,7 +2570,7 @@ void AccessControlBuiltInImpl::parse_class_id(
       }
       rule_holder_.topic_rules.push_back(t_rules);
     }
- 
+
     ac_perms_holder->gov_rules.push_back( rule_holder_);
   } // domain_rule
 
@@ -2858,7 +2858,7 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Tim
       this->lock_,
       false);
 
-  ::DDS::Security::PermissionsHandle *eh_params_ptr = 
+  ::DDS::Security::PermissionsHandle *eh_params_ptr =
       new ::DDS::Security::PermissionsHandle(pm_handle);
 
   reactor_ = TheServiceParticipant->timer();

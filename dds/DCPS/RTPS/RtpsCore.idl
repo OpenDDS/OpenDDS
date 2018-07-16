@@ -34,10 +34,12 @@ module OpenDDS {
 
     // TODO: PENDING IDL V4 INHERITANCE
     // Remove these typedefs and force dependencies to use the
-    // DDS::Property_t version directly. These had to be moved
-    // into DdsDcpsCore.idl since IDL v4 inheritance support isn't
-    // yet supported (and security-related PropertyQosPolicy func-
-    // tionality depends upon Property_t within DdsDcpsCore.idl).
+    // DDS::Property_t version directly. These were move moved
+    // into DdsDcpsCore.idl because:
+    //  - PropertyQosPolicy depends on the security version of Property_t
+    //  - Security's DomainParticipantQos depends on PropertyQosPolicy
+    //  - Security's DomainParticipantQos inherits from the core DDS DomainParticipantQos
+    //  - IDL v4 inheritance isn't supported yet (so we combined the two)
     typedef DDS::Property_t Property_t;
     typedef DDS::PropertySeq PropertySeq;
 
@@ -669,7 +671,7 @@ module OpenDDS {
     };
 
     enum SubmessageKind {
-      RESERVED_0,
+      SUBMESSAGE_NONE,
       PAD,            /* = 0x01, Pad */
       RESERVED_2,
       RESERVED_3,
