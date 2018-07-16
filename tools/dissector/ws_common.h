@@ -13,6 +13,33 @@ MAJOR * 1000000 + MINOR * 1000 + MICRO
 #define WIRESHARK_VERSION WIRESHARK_VERSION_NUMBER(VERSION_MAJOR,VERSION_MINOR,VERSION_MICRO)
 
 /*
+ * Version 2.5 (Released as 2.6)
+ * This is out of order because it is required by
+ * ws_find_or_create_conversation().
+ */
+#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 5, 0)
+
+// find_conversation after 2.5/2.6 takes endpoint_type instead of port_type
+// but also provides a shortcut function which we will use instead.
+inline conversation_t* ws_find_conversation(packet_info* pinfo)
+{
+  return find_conversation_pinfo(pinfo, 0);
+}
+
+#else // if 2.4.x or before
+
+// else emulate it
+inline conversation_t* ws_find_conversation(packet_info* pinfo)
+{
+  return find_conversation(
+    pinfo->fd->num, &pinfo->src, &pinfo->dst,
+    pinfo->ptype, pinfo->srcport, pinfo->destport, 0
+  );
+}
+
+#endif
+
+/*
  * Version 1.4
  */
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1, 4, 0)
@@ -122,8 +149,6 @@ typedef int field_display_e; // Dummy type for code outside NO_ITL blocks
 
 #else // Before 2.0
 
-#define WS_1
-
 #define WS_DISSECTOR_EXTRA_ARG
 #define ws_tvb_length tvb_length
 #define WS_GET_PDU_LEN_EXTRA_PARAM
@@ -150,29 +175,6 @@ typedef int field_display_e; // Dummy type for code outside NO_ITL blocks
 #define ws_dissector_add_handle dissector_add_handle
 #define WS_CONV_IDX index
 #define WS_DISSECTOR_EXTRA_PARAM
-
-#endif
-
-/*
- * Version 2.5 (Released as 2.6)
- */
-#if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 5, 0)
-
-// find_conversation after 2.5/2.6 takes endpoint_type instead of port_type
-// but also provides a shortcut function which we will use instead.
-inline conversation_t *ws_find_conversation(packet_info *pinfo) {
-  return find_conversation_pinfo(pinfo, 0);
-}
-
-#else // if 2.4.x or before
-
-// else emulate it
-inline conversation_t *ws_find_conversation(packet_info *pinfo) {
-  return find_conversation(
-    pinfo->fd->num, &pinfo->src, &pinfo->dst,
-    pinfo->ptype, pinfo->srcport, pinfo->destport, 0
-  );
-}
 
 #endif
 
