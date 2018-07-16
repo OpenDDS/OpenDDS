@@ -5,8 +5,8 @@
 
 #include "LocalCredentialData.h"
 #include "dds/DCPS/security/CommonUtilities.h"
-#include "dds/DCPS/iterator_adaptor.h"
 #include "dds/DCPS/debug.h"
+#include "dds/DCPS/sequence_iterator.h"
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
