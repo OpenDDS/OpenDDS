@@ -38,23 +38,16 @@ namespace DCPS {
     typedef sequence_back_insert_iterator Iter_Type;
 
     typedef std::output_iterator_tag iterator_category;
-    typedef typename T::value_type value_type;
-    typedef int difference_type;
-    typedef typename T::value_type* pointer;
-    typedef typename T::value_type& reference;
+    typedef void value_type;
+    typedef void difference_type;
+    typedef void pointer;
+    typedef void reference;
 
     sequence_back_insert_iterator(T& sequence) : seq_(&sequence) {}
 
     Iter_Type& operator=(const typename T::value_type& value)
     {
-      const size_t Default = 8;
-
       size_t len = seq_->length();
-
-      if (len == seq_->maximum()) {
-        const size_t newmax = (0 == len ? Default : len + len / 2);
-        seq_->length(newmax);
-      }
 
       seq_->length(len + 1);
       (*seq_)[len] = value;
