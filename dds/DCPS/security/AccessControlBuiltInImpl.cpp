@@ -202,7 +202,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
-  pctWriter.add_property("dds.perm.cert", local_perm.get_content().c_str());
+  pctWriter.add_property("dds.perm.cert", get_file_contents(perm_file.c_str()).c_str());
 
   // Set and store the permissions token
   ::DDS::Security::PermissionsToken permissions_token;

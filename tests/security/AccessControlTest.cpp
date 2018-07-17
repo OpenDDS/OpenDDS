@@ -1186,10 +1186,9 @@ TEST_F(AccessControlTest, get_permissions_credential_token_Success)
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::Security::PermissionsCredentialToken token;
   ::DDS::Security::SecurityException ex;
-
   ::DDS::DomainParticipantQos qos;
-            get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
+  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
   std::string f(domain_participant_qos.property.value[2].value);
   std::string comp_file_ = get_file_contents(extract_file_name(f).c_str());
