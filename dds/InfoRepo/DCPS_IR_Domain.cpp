@@ -1045,22 +1045,17 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
   if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
       topic->get_topic_description();
-    const char* dataTypeName = desc->get_dataTypeName();
+    const char* name = desc->get_name();
+    const char* type = desc->get_dataTypeName();
 
-    bool isNotBIT =
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
-
-    if (isNotBIT) {
+    if (!OpenDDS::DCPS::topicIsBIT(name, type)) {
       try {
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::TopicBuiltinTopicData data;
         get_BuiltinTopicKey(data.key, topic->get_id());
-        data.name = desc->get_name();
-        data.type_name = desc->get_dataTypeName();
+        data.name = name;
+        data.type_name = type;
         data.durability = topicQos->durability;
         data.durability_service = topicQos->durability_service;
         data.deadline = topicQos->deadline;
@@ -1111,16 +1106,10 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
   if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
       subscription->get_topic_description();
+    const char* name = desc->get_name();
+    const char* type = desc->get_dataTypeName();
 
-    const char* dataTypeName = desc->get_dataTypeName();
-
-    bool isNotBIT =
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
-
-    if (isNotBIT) {
+    if (!OpenDDS::DCPS::topicIsBIT(name, type)) {
       try {
         const DDS::DataReaderQos* readerQos = subscription->get_datareader_qos();
         const DDS::SubscriberQos* publisherQos = subscription->get_subscriber_qos();
@@ -1132,8 +1121,8 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
         get_BuiltinTopicKey(data.key, subscription->get_id());
         get_BuiltinTopicKey(data.participant_key,
                             subscription->get_participant_id());
-        data.topic_name = desc->get_name();
-        data.type_name = desc->get_dataTypeName();
+        data.topic_name = name;
+        data.type_name = type;
         data.durability = readerQos->durability;
         data.deadline = readerQos->deadline;
         data.latency_budget = readerQos->latency_budget;

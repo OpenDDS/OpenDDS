@@ -160,10 +160,7 @@ ReplayerImpl::init(
   type_name_     = topic_servant_->get_type_name();
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  is_bit_ = ACE_OS::strcmp(topic_name_.in(), BUILT_IN_PARTICIPANT_TOPIC) == 0
-            || ACE_OS::strcmp(topic_name_.in(), BUILT_IN_TOPIC_TOPIC) == 0
-            || ACE_OS::strcmp(topic_name_.in(), BUILT_IN_SUBSCRIPTION_TOPIC) == 0
-            || ACE_OS::strcmp(topic_name_.in(), BUILT_IN_PUBLICATION_TOPIC) == 0;
+  is_bit_ = topicIsBIT(topic_name_.in(), type_name_.in());
 #endif   // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
