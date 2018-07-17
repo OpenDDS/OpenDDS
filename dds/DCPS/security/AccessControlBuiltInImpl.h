@@ -26,6 +26,7 @@
 
 #include "AccessControl/LocalCredentialData.h"
 #include "AccessControl/Governance.h"
+#include "AccessControl/Permissions.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -235,74 +236,16 @@ private:
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl& right);
   AccessControlBuiltInImpl& operator=(const AccessControlBuiltInImpl& right);
 
-
-
-  // Permission Rule definitions
-
-  enum AllowDeny_t
+  struct AccessData
   {
-    ALLOW,
-    DENY
+    Permissions::shared_ptr perm;
+    Governance::shared_ptr gov;
   };
 
-  enum PublishSubscribe_t
-  {
-    PUBLISH,
-    SUBSCRIBE
-  };
-
-  struct Validity_t {
-    std::string not_before;
-    std::string not_after;
-  };
-
-  struct PermissionTopicPsRule {
-    PublishSubscribe_t  ps_type;
-    std::vector<std::string> topic_list;
-  };
-
-  struct PermissionPartitionPs {
-    PublishSubscribe_t ps_type;
-    std::vector<std::string> partition_list;
-  };
-
-  struct PermissionTopicRule {
-    AllowDeny_t ad_type;
-    std::set< ::DDS::Security::DomainId_t > domain_list;
-    std::list<PermissionTopicPsRule> topic_ps_rules;
-  };
-
-  struct PermissionsPartition {
-    AllowDeny_t ad_type;
-    std::set< ::DDS::Security::DomainId_t > domain_list;
-    std::list<PermissionPartitionPs> partition_ps;
-  };
-
-  struct PermissionGrantRule {
-    std::string grant_name;
-    std::string subject;
-    Validity_t validity;
-    std::string default_permission;
-    std::list<PermissionTopicRule> PermissionTopicRules;
-    std::list<PermissionsPartition> PermissionPartitions;
-  };
-
-  typedef std::vector<PermissionGrantRule> PermissionGrantRules;
-
-  struct AcPerms {
-    ::DDS::Security::DomainId_t domain_id;
-    Governance::shared_ptr gov_rules;
-    PermissionGrantRules perm_rules;
-    ::DDS::Security::PermissionsToken perm_token;
-    ::DDS::Security::PermissionsCredentialToken perm_cred_token;
-  };
-
-  typedef std::map< ::DDS::Security::PermissionsHandle , AcPerms > ACPermsMap;
-
+  typedef std::map<DDS::Security::PermissionsHandle, AccessData> ACPermsMap;
   ACPermsMap local_ac_perms_;
 
-  typedef std::map< ::DDS::Security::IdentityHandle , ::DDS::Security::PermissionsHandle > ACIdentityMap;
-
+  typedef std::map<DDS::Security::IdentityHandle, DDS::Security::PermissionsHandle> ACIdentityMap;
   ACIdentityMap local_identity_map_;
 
   class RevokePermissionsTimer : public ACE_Event_Handler {
@@ -329,13 +272,11 @@ private:
   RevokePermissionsTimer rp_timer_;
 
   ::CORBA::Long generate_handle();
-  ::CORBA::Long load_permissions_file(AcPerms *, std::string);
   ::CORBA::Boolean file_exists(const std::string&);
   std::string extract_file_name(const std::string&);
   std::string get_file_contents(const char *);
   ::CORBA::Boolean clean_smime_content(std::string&);
   ::CORBA::Boolean clean_smime_content(::DDS::OctetSeq&);
-  ::CORBA::Boolean extract_subject_name(std::string&);
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;
@@ -356,7 +297,7 @@ private:
   int search_remote_permissions(const char * topic_name,
                                 const ::DDS::Security::DomainId_t domain_id,
                                 ACPermsMap::iterator ac_iter,
-                                const PublishSubscribe_t pub_or_sub);
+                                const Permissions::PublishSubscribe_t pub_or_sub);
 
   void parse_class_id(const std::string class_id,
                       std::string& plugin_class_name,

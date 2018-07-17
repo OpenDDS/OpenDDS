@@ -40,7 +40,8 @@ Governance::Governance() : access_rules_()
 //    return (char*)(s + input.tellg());
 //}
 
-int Governance::load(const SSL::SignedDocument& doc) {
+int Governance::load(const SSL::SignedDocument& doc)
+{
 
   static const char* gMemBufId = "gov buffer id";
 
