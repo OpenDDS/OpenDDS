@@ -160,7 +160,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   }
 
   SecurityPluginInst_rch ac_plugin_inst = get_plugin_inst(entry->get_access_control_name());
-  if (auth_plugin_inst.is_nil()) {
+  if (ac_plugin_inst.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
                ACE_TEXT("Failed to load access control plugin %C\n"),
@@ -169,7 +169,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   }
 
   SecurityPluginInst_rch crypto_plugin_inst = get_plugin_inst(entry->get_crypto_name());
-  if (auth_plugin_inst.is_nil()) {
+  if (crypto_plugin_inst.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
                ACE_TEXT("Failed to load crypto plugin %C\n"),
@@ -194,6 +194,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
                ACE_TEXT("Error storing config instance %C\n"),
                config_name.c_str()));
+    return SecurityConfig_rch();
   }
 
   return new_config;
@@ -222,6 +223,7 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name,
                ACE_TEXT("(%P|%t) SecurityRegistry::create_config: ")
                ACE_TEXT("Error storing config instance %C\n"),
                config_name.c_str()));
+    return SecurityConfig_rch();
   }
 
   return new_config;
@@ -402,7 +404,8 @@ SecurityRegistry::add_config(const OPENDDS_STRING& name, SecurityConfig_rch& con
   return added_config;
 }
 
-SecurityPluginInst_rch SecurityRegistry::get_plugin_inst(const OPENDDS_STRING& plugin_name)
+SecurityPluginInst_rch
+SecurityRegistry::get_plugin_inst(const OPENDDS_STRING& plugin_name)
 {
   GuardType guard(lock_);
 

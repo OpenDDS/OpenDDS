@@ -70,7 +70,7 @@ TEST_F(SignedDocumentTest, VerifySignature_Data_Success)
   ASSERT_EQ(0, doc_.verify_signature(ca_data_));
 }
 
-TEST(SignedDocumentTestNoFixture, LoadFromMemory)
+TEST_F(SignedDocumentTest, LoadFromMemory)
 {
   const char fname[] = "../governance/governance_SC1_ProtectedDomain1_signed.p7s";
   std::ifstream file(fname);
@@ -81,5 +81,5 @@ TEST(SignedDocumentTestNoFixture, LoadFromMemory)
                     reinterpret_cast<unsigned char*>(
                       const_cast<char*>(str.c_str())));
   SignedDocument doc(seq);
-  ASSERT_EQ(doc, SignedDocument(std::string("file:") + fname));
+  ASSERT_EQ(doc, doc_);
 }
