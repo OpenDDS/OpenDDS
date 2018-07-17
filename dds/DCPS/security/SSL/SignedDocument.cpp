@@ -84,6 +84,38 @@ namespace SSL {
     return plaintext_;
   }
 
+  bool SignedDocument::get_content_minus_smime(std::string & cleaned_content) const
+  {
+    const std::string start_str("Content-Type: text/plain"), 
+                      end_str("dds>");
+
+    cleaned_content = plaintext_;
+
+    size_t found_begin = cleaned_content.find(start_str);
+
+    if (found_begin != std::string::npos) {
+      cleaned_content.erase(0, found_begin + start_str.length());
+
+      const char* t = " \t\n\r\f\v";
+
+      cleaned_content.erase(0, cleaned_content.find_first_not_of(t));
+    }
+    else {
+      return false;
+    }
+
+    size_t found_end = cleaned_content.find(end_str);
+
+    if (found_end != std::string::npos) {
+      cleaned_content.erase(found_end + end_str.length());
+    }
+    else {
+      return false;
+    }
+
+    return true;
+  }
+
   class verify_signature_impl
   {
    public:

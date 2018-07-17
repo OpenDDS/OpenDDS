@@ -40,6 +40,8 @@ namespace SSL {
 
     const std::string& get_content() const;
 
+    bool get_content_minus_smime(std::string& cleaned_content) const;
+
     /**
      * @return int 0 on success; 1 on failure.
      */
