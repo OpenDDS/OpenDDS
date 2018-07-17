@@ -6,11 +6,27 @@
 */
 
 #include "dds/DCPS/security/TokenReader.h"
+#include "dds/DCPS/sequence_iterator.h"
+#include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
+
+template<typename PropType>
+struct has_property
+{
+  has_property(const std::string& name) : name_(name) {}
+
+  bool operator() (const PropType& property)
+  {
+    return (0 == name_.compare(property.name));
+  }
+
+private:
+  const std::string& name_;
+};
 
 TokenReader::TokenReader(const DDS::Security::Token& token_ref)
 : token_ref_(token_ref)
@@ -24,34 +40,40 @@ TokenReader::~TokenReader()
 
 const char* TokenReader::get_property_value(const std::string& property_name) const
 {
-  const char* data_ptr = 0;
+  using namespace DCPS;
 
-  CORBA::ULong num_props = token_ref_.properties.length();
-  for (CORBA::ULong prop_index = 0; prop_index < num_props; ++prop_index) {
-    const DDS::Property_t& prop = token_ref_.properties[prop_index];
-    if (0 == property_name.compare(prop.name)) {
-      data_ptr = prop.value;
-      break;
-    }
+  typedef sequence_iterator<DDS::PropertySeq> iter_t;
+  typedef has_property<DDS::Property_t> has_property;
+
+  DDS::PropertySeq& props = const_cast<DDS::PropertySeq&>(token_ref_.properties);
+
+  iter_t begin = sequence_begin(props), end = sequence_end(props);
+  iter_t result = std::find_if(begin, end, has_property(property_name));
+
+  if (result != end) {
+    return result->value;
   }
-  return data_ptr;
+
+  return 0;
 }
 
 const DDS::OctetSeq& TokenReader::get_bin_property_value(const std::string& property_name) const
 {
-  CORBA::ULong num_props = token_ref_.binary_properties.length();
-  CORBA::ULong prop_index = 0;
-  for (prop_index = 0; prop_index < num_props; ++prop_index) {
-    if (0 == property_name.compare(token_ref_.binary_properties[prop_index].name)) {
-      break;
-    }
+  using namespace DCPS;
+
+  typedef sequence_iterator<DDS::BinaryPropertySeq> iter_t;
+  typedef has_property<DDS::BinaryProperty_t> has_property;
+
+  DDS::BinaryPropertySeq& props = const_cast<DDS::BinaryPropertySeq&>(token_ref_.binary_properties);
+
+  iter_t begin = sequence_begin(props), end = sequence_end(props);
+  iter_t result = std::find_if(begin, end, has_property(property_name));
+
+  if (result != end) {
+    return result->value;
   }
 
-  if (prop_index >= num_props) {
-    return _empty_seq_;
-  }
-
-  return token_ref_.binary_properties[prop_index].value;
+  return _empty_seq_;
 }
 
 } // namespace Security
