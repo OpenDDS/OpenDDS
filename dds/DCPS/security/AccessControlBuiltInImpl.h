@@ -25,6 +25,7 @@
 #include <memory>
 
 #include "AccessControl/LocalCredentialData.h"
+#include "AccessControl/Governance.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -234,29 +235,6 @@ private:
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl& right);
   AccessControlBuiltInImpl& operator=(const AccessControlBuiltInImpl& right);
 
-  // Governance Rule definitions
-
-  struct TopicAccessRule {
-    std::string topic_expression;
-    ::DDS::Security::TopicSecurityAttributes topic_attrs;
-    std::string metadata_protection_kind;
-    std::string data_protection_kind;
-  };
-
-  typedef std::vector<TopicAccessRule> TopicAccessRules;
-
-  struct DomainRule {
-    std::set< ::DDS::Security::DomainId_t > domain_list;
-    ::DDS::Security::ParticipantSecurityAttributes domain_attrs;
-    TopicAccessRules topic_rules;
-  };
-
-
-  typedef std::vector<DomainRule> GovernanceAccessRules;
-
-
-  // TODO: the ParticipantGovMapType needs to support multiple domain_rule(s). See domain_access_rules above
-
 
 
   // Permission Rule definitions
@@ -313,7 +291,7 @@ private:
 
   struct AcPerms {
     ::DDS::Security::DomainId_t domain_id;
-    GovernanceAccessRules gov_rules;
+    Governance::shared_ptr gov_rules;
     PermissionGrantRules perm_rules;
     ::DDS::Security::PermissionsToken perm_token;
     ::DDS::Security::PermissionsCredentialToken perm_cred_token;
@@ -351,7 +329,6 @@ private:
   RevokePermissionsTimer rp_timer_;
 
   ::CORBA::Long generate_handle();
-  ::CORBA::Long load_governance_file(AcPerms *, std::string);
   ::CORBA::Long load_permissions_file(AcPerms *, std::string);
   ::CORBA::Boolean file_exists(const std::string&);
   std::string extract_file_name(const std::string&);
