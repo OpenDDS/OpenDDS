@@ -15,7 +15,12 @@ namespace Security {
 
 Governance::Governance(const SSL::SignedDocument& doc) : access_rules_()
 {
-  load_governance_file(doc);
+  load(doc);
+}
+
+Governance::Governance() : access_rules_()
+{
+
 }
 
 //char * AccessControlBuiltInImpl::strptime(const char * s, const char * f, tm * tm)
@@ -35,7 +40,7 @@ Governance::Governance(const SSL::SignedDocument& doc) : access_rules_()
 //    return (char*)(s + input.tellg());
 //}
 
-int Governance::load_governance_file(const SSL::SignedDocument& doc) {
+int Governance::load(const SSL::SignedDocument& doc) {
 
   static const char* gMemBufId = "gov buffer id";
 
@@ -70,8 +75,11 @@ int Governance::load_governance_file(const SSL::SignedDocument& doc) {
 
   // buffer for parsing
 
-  xercesc::MemBufInputSource contentbuf((const XMLByte*) doc.get_content().c_str(),
-                                        doc.get_content().size(),
+  std::string cleaned;
+  doc.get_content_minus_smime(cleaned);
+
+  xercesc::MemBufInputSource contentbuf((const XMLByte*) cleaned.c_str(),
+                                        cleaned.size(),
                                         gMemBufId);
 
   try {

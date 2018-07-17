@@ -16,7 +16,7 @@
 namespace OpenDDS {
 namespace Security {
 
-class Governance
+class Governance : public DCPS::RcObject<ACE_SYNCH_MUTEX>
 {
 public:
 
@@ -41,13 +41,16 @@ public:
 
   Governance(const SSL::SignedDocument& doc);
 
-  const GovernanceAccessRules& access_rules() const
+  Governance();
+
+  int load(const SSL::SignedDocument& doc);
+
+  GovernanceAccessRules& access_rules()
   {
     return access_rules_;
   }
 
 private:
-  int load_governance_file(const SSL::SignedDocument& doc);
 
   GovernanceAccessRules access_rules_;
 

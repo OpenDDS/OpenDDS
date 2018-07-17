@@ -38,6 +38,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+typedef Governance::GovernanceAccessRules::iterator gov_iter;
+
 static const std::string PermissionsTokenClassId("DDS:Access:Permissions:1.0");
 static const std::string AccessControl_Plugin_Name("DDS:Access:Permissions");
 static const std::string AccessControl_Major_Version("1");
@@ -135,17 +137,21 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Read in governance file
   const SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
 
-  // return of 0 = verified  1 = not verified
-  int gov_verified = local_gov.verify_signature(local_ca);
-  if (1 == gov_verified) {
+  int err = local_gov.verify_signature(local_ca);
+  if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance signature not verified");
     return DDS::HANDLE_NIL;
   }
 
-  std::string gov_content, perm_content, perm_sn;
+  Governance::shared_ptr governance = DCPS::make_rch<Governance>();
 
-  local_gov.get_content(gov_content);
-  clean_smime_content(gov_content);
+  err = governance->load(local_gov);
+  if (err) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid governance file");
+    return DDS::HANDLE_NIL;
+  }
+
+  std::string perm_content, perm_sn;
 
   // permissions file
 
@@ -178,7 +184,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Verify signature of permissions file
 
-  int err = local_perm.verify_signature(local_ca);
+  err = local_perm.verify_signature(local_ca);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions signature not verified");
     return DDS::HANDLE_NIL;
@@ -187,15 +193,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       ACE_DEBUG((LM_DEBUG, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::validate_local_permissions: Permissions document verified.\n")));
     }
-  }
-
-  // If all checks are successful load the content into cache
-  AcPerms perm_set;
-
-  err = load_governance_file(&perm_set, gov_content);
-  if (err) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid governance file");
-    return DDS::HANDLE_NIL;
   }
 
   // Set and store the permissions credential token while we have the raw content
@@ -210,8 +207,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   writer.add_property("dds.perm_ca.sn", "MyCA Name");
   writer.add_property("dds.perm_ca.algo", "RSA-2048");
 
-  perm_set.perm_token = permissions_token;
-  perm_set.perm_cred_token = permissions_cred_token;
+  // If all checks are successful load the content into cache
+  AcPerms perm_set;
 
   err = load_permissions_file(&perm_set, perm_content);
   if (err) {
@@ -219,8 +216,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  // Set the domain of the participant
   perm_set.domain_id = domain_id;
+  perm_set.gov_rules = DCPS::move(governance);
+  perm_set.perm_token = permissions_token;
+  perm_set.perm_cred_token = permissions_cred_token;
 
   ::CORBA::Long perm_handle = generate_handle();
 
@@ -431,9 +430,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ::DDS::Security::DomainId_t domain_to_find = piter->second.domain_id;
 
-  Governance::GovernanceAccessRules::iterator giter;
+  gov_iter begin = piter->second.gov_rules->access_rules().begin();
+  gov_iter end = piter->second.gov_rules->access_rules().end();
 
-  for (giter = piter->second.gov_rules.begin(); giter != piter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d > 0) {
@@ -483,10 +483,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  Governance::GovernanceAccessRules::iterator giter;
-
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
 
     if (d > 0) {
@@ -738,10 +738,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  Governance::GovernanceAccessRules::iterator giter;
-
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
 
     if (d > 0) {
@@ -995,9 +995,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
 
-  Governance::GovernanceAccessRules::iterator giter;
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d) {
@@ -1148,9 +1149,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  Governance::GovernanceAccessRules::iterator giter;
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
 
     if (d > 0) {
@@ -1249,15 +1251,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  Governance::GovernanceAccessRules::iterator gariter;
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  for (gariter = ac_iter->second.gov_rules.begin(); gariter != ac_iter->second.gov_rules.end(); ++gariter) {
-    size_t d = gariter->domain_list.count(domain_id);
+  for (gov_iter giter = begin; giter != end; ++giter) {
+    size_t d = giter->domain_list.count(domain_id);
 
     if (d > 0) {
       Governance::TopicAccessRules::iterator tr_iter;
 
-      for (tr_iter = gariter->topic_rules.begin(); tr_iter != gariter->topic_rules.end(); ++tr_iter) {
+      for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if (::ACE::wild_match(publication_data.base.base.topic_name, tr_iter->topic_expression.c_str(), true, false)) {
           if (tr_iter->topic_attrs.is_write_protected == false) {
             return true;
@@ -1323,9 +1326,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Default this to false for now
   relay_only = false;
 
-  Governance::GovernanceAccessRules::iterator giter;
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
 
     if (d > 0) {
@@ -1449,9 +1453,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Governance file for allowable topic attributes
 
-  Governance::GovernanceAccessRules::iterator giter;
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
 
     if (d) {
@@ -1735,9 +1740,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Check the Governance file for allowable topic attributes
   ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
 
-  Governance::GovernanceAccessRules::iterator giter;
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
 
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d > 0) {
@@ -1780,9 +1786,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ::DDS::Security::DomainId_t domain_to_find = piter->second.domain_id;
 
-  Governance::GovernanceAccessRules::iterator giter;
+  gov_iter begin = piter->second.gov_rules->access_rules().begin();
+  gov_iter end = piter->second.gov_rules->access_rules().end();
 
-  for (giter = piter->second.gov_rules.begin(); giter != piter->second.gov_rules.end(); ++giter) {
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d > 0) {
@@ -2055,9 +2062,11 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
   }
 
   ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
-  Governance::GovernanceAccessRules::iterator giter;
 
-  for (giter = ac_iter->second.gov_rules.begin(); giter != ac_iter->second.gov_rules.end(); ++giter) {
+  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
+  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+
+  for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
 
     if (d > 0) {
