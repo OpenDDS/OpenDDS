@@ -6,7 +6,7 @@
 #include "LocalCredentialData.h"
 
 namespace OpenDDS {
-  namespace Security {
+namespace Security {
 
     LocalAccessCredentialData::LocalAccessCredentialData(const DDS::PropertySeq& props)
     {
@@ -23,8 +23,9 @@ namespace OpenDDS {
 
     }
 
-    void LocalAccessCredentialData::load(const DDS::PropertySeq& props)
+    int LocalAccessCredentialData::load(const DDS::PropertySeq& props)
     {
+      const std::string file("file:");
       bool permission = false,
            governance = false,
            ca = false;
@@ -34,12 +35,42 @@ namespace OpenDDS {
         const std::string value = props[i].value.in();
 
         if (name == "dds.sec.access.permissions_ca") {
+          if (value.find(file) != std::string::npos) {
+            std::string fn = extract_file_name(value);
+
+            if (!fn.empty()) {
+              if (!file_exists(fn)) {
+                return 1;
+              }
+            }
+          }
+
           ca_cert_.reset(new SSL::Certificate(value));
           ca = true;
         } else if (name == "dds.sec.access.governance") {
+          if (value.find(file) != std::string::npos) {
+            std::string fn = extract_file_name(value);
+
+            if (!fn.empty()) {
+              if (!file_exists(fn)) {
+                return 2;
+              }
+            }
+          }
+
           governance_doc_.reset(new SSL::SignedDocument(value));
           governance = true;
         } else if (name == "dds.sec.access.permissions") {
+          if (value.find(file) != std::string::npos) {
+            std::string fn = extract_file_name(value);
+
+            if (!fn.empty()) {
+              if (!file_exists(fn)) {
+                return 3;
+              }
+            }
+          }
+
           permissions_doc_.reset(new SSL::SignedDocument(value));
           permission = true;
         }
@@ -59,7 +90,27 @@ namespace OpenDDS {
           ca_cert_.reset(new SSL::Certificate(""));
         }
       }
+
+      return 0;
     }
 
-  }
+    std::string LocalAccessCredentialData::extract_file_name(const std::string & file_parm)
+    {
+      std::string del = ":";
+      u_long pos = file_parm.find_last_of(del);
+      if ((pos > 0UL) && (pos != file_parm.length() - 1)) {
+        return file_parm.substr(pos + 1);
+      }
+      else {
+        return std::string("");
+      }
+    }
+
+    ::CORBA::Boolean LocalAccessCredentialData::file_exists(const std::string & name)
+    {
+      struct stat buffer;
+      return (stat(name.c_str(), &buffer) == 0);
+    }
+
+}
 }
