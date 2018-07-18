@@ -25,7 +25,13 @@ namespace Security {
 
     ~LocalAccessCredentialData();
 
-    void load(const DDS::PropertySeq& props);
+    /**
+     * @return 0 if load is successful.
+     * @return 1 if certificate file could not be loaded
+     * @return 2 if the governance file could not be loaded
+     * @return 3 if the permissions file could not be loaded
+     */
+    int load(const DDS::PropertySeq& props);
 
     const SSL::Certificate& get_ca_cert()
     {
@@ -48,6 +54,8 @@ namespace Security {
     SSL::SignedDocument::unique_ptr governance_doc_;
     SSL::SignedDocument::unique_ptr permissions_doc_;
 
+    std::string extract_file_name(const std::string& file_parm);
+    ::CORBA::Boolean file_exists(const std::string& name);
   };
 
 }
