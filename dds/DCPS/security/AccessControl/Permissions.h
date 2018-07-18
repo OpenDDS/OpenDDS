@@ -83,8 +83,6 @@ public:
     DDS::Security::PermissionsCredentialToken perm_cred_token;
   };
 
-  Permissions(const SSL::SignedDocument& doc);
-
   Permissions();
 
   int load(const SSL::SignedDocument& doc);

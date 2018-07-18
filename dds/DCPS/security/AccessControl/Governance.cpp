@@ -14,11 +14,6 @@
 namespace OpenDDS {
 namespace Security {
 
-Governance::Governance(const SSL::SignedDocument& doc) : access_rules_()
-{
-  load(doc);
-}
-
 Governance::Governance() : access_rules_()
 {
 

@@ -14,12 +14,6 @@
 namespace OpenDDS {
 namespace Security {
 
-Permissions::Permissions(const SSL::SignedDocument& doc)
-  : perm_data_(), subject_name_()
-{
-
-}
-
 Permissions::Permissions()
   : perm_data_(), subject_name_()
 {

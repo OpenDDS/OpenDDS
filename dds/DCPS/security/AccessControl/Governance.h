@@ -39,8 +39,6 @@ public:
 
   typedef std::vector<DomainRule> GovernanceAccessRules;
 
-  Governance(const SSL::SignedDocument& doc);
-
   Governance();
 
   int load(const SSL::SignedDocument& doc);
