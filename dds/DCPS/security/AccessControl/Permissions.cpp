@@ -9,6 +9,7 @@
 #include "xercesc/sax/HandlerBase.hpp"
 #include "xercesc/framework/MemBufInputSource.hpp"
 #include "ace/OS_NS_strings.h"
+#include <stdexcept>
 
 namespace OpenDDS {
 namespace Security {
