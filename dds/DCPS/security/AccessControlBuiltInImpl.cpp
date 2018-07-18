@@ -2272,32 +2272,6 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
   throw(errno);
 }
 
-::CORBA::Boolean AccessControlBuiltInImpl::strip_smime_content(std::string& content) {
-
-  const std::string start_str("Content-Type: text/plain"), end_str("dds>");
-
-  size_t found_begin = content.find(start_str);
-
-  if (found_begin != std::string::npos) {
-    content.erase(0, found_begin + start_str.length());
-    const char* t = " \t\n\r\f\v";
-    content.erase(0, content.find_first_not_of(t));
-  } else {
-    return false;
-  }
-
-  size_t found_end = content.find(end_str);
-
-  if (found_end != std::string::npos) {
-    content.erase(found_end + end_str.length());
-  } else {
-    return false;
-  }
-
-  return true;
-}
-
-
 AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessControlBuiltInImpl& impl)
     : impl_(impl)
     , scheduled_(false)
