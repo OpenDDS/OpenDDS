@@ -181,7 +181,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Verify signature of permissions file
-
   err = local_perm.verify_signature(local_ca);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions signature not verified");
@@ -194,15 +193,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Set and store the permissions credential token while we have the raw content
-
   ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
-
-  // DEBUG
-  std::string file_contents = get_file_contents(perm_file.c_str());
-  std::string file_sd_contents = local_perm.get_content();
-  //
-
   pctWriter.add_property("dds.perm.cert", get_file_contents(perm_file.c_str()).c_str());
 
   // Set and store the permissions token
@@ -427,7 +419,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 
   ACPermsMap::iterator piter = local_ac_perms_.find(permissions_handle);
-  if(piter == local_ac_perms_.end()) {
+  if (piter == local_ac_perms_.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::check_create_participant: No matching permissions handle present");
     return false;
   }
