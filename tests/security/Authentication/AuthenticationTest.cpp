@@ -9,8 +9,10 @@
 #include "dds/DdsSecurityEntities.h"
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include "dds/DCPS/security/SSL/Utils.h"
+#include "dds/DCPS/security/TokenReader.h"
 #include <cstring>
 #include <algorithm>
+#include <cstdio>
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
@@ -228,6 +230,23 @@ struct AuthenticationTest : public ::testing::Test
 };
 
 DDS::OctetSeq AuthenticationTest::EmptySequence = DDS::OctetSeq();
+
+TEST_F(AuthenticationTest, ValidateLocalIdentity_MultipleParticipants_NoClash)
+{
+  AuthenticationBuiltInImpl auth;
+  auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
+  auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
+
+  auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex);
+  auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex);
+
+  OpenDDS::Security::TokenReader r1(mp1.id_token),  r2(mp2.id_token);
+
+  const char *subject1 = r1.get_property_value("dds.cert.sn"),
+             *subject2 = r2.get_property_value("dds.cert.sn");
+
+  ASSERT_NE(0, std::strcmp(subject1, subject2));
+}
 
 TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
 {
