@@ -14,7 +14,6 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
 #include "ace/Thread_Mutex.h"
 #include <map>
 #include <string>
@@ -149,6 +148,7 @@ private:
   struct IdentityData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
     OpenDDS::DCPS::GUID_t participant_guid;
+    LocalAuthCredentialData::shared_ptr local_credential_data;
     DDS::Security::PermissionsCredentialToken permissions_cred_token;
     DDS::Security::PermissionsToken permissions_token;
     DDS::Security::IdentityToken identity_token;
@@ -205,14 +205,12 @@ private:
 
   DDS::Security::AuthenticationListener_ptr listener_ptr_;
 
-  ACE_Thread_Mutex local_credential_data_mutex_;
   ACE_Thread_Mutex identity_mutex_;
   ACE_Thread_Mutex handshake_mutex_;
   ACE_Thread_Mutex handle_mutex_;
 
   uint64_t next_handle_;
 
-  LocalAuthCredentialData local_credential_data_;
 };
 } // namespace Security
 } // namespace OpenDDS

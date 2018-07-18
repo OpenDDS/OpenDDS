@@ -68,12 +68,10 @@ struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
 AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 : listener_ptr_()
-, local_credential_data_mutex_()
 , identity_mutex_()
 , handshake_mutex_()
 , handle_mutex_()
 , next_handle_(1ULL)
-, local_credential_data_()
 {
 }
 
@@ -95,24 +93,21 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
-  bool credential_valid = false;
-  {
-    ACE_Guard<ACE_Thread_Mutex> local_credential_data_guard(local_credential_data_mutex_);
-    local_credential_data_.load(participant_qos.property.value);
-    credential_valid = local_credential_data_.validate();
-  }
+  LocalAuthCredentialData::shared_ptr local_credential_data = DCPS::make_rch<LocalAuthCredentialData>();
+  local_credential_data->load(participant_qos.property.value);
 
-  if (credential_valid) {
+  if (local_credential_data->validate()) {
     if (candidate_participant_guid != DCPS::GUID_UNKNOWN) {
 
       int err = SSL::make_adjusted_guid(candidate_participant_guid,
                                         adjusted_participant_guid,
-                                        local_credential_data_.get_participant_cert());
+                                        local_credential_data->get_participant_cert());
       if (! err) {
         local_identity_handle = get_next_handle();
 
         IdentityData_Ptr local_identity = DCPS::make_rch<IdentityData>();
         local_identity->participant_guid = adjusted_participant_guid;
+        local_identity->local_credential_data = local_credential_data;
 
         {
           ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
@@ -147,8 +142,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
-    const SSL::Certificate& pcert = local_credential_data_.get_participant_cert();
-    const SSL::Certificate& cacert = local_credential_data_.get_ca_cert();
+    const LocalAuthCredentialData& local_credential_data = *(local_data->local_credential_data);
+
+    const SSL::Certificate& pcert = local_credential_data.get_participant_cert();
+    const SSL::Certificate& cacert = local_credential_data.get_ca_cert();
 
     std::string tmp;
 
@@ -266,6 +263,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         /* Retain all of the data needed for a handshake with the remote participant */
         IdentityData_Ptr newIdentityData = DCPS::make_rch<IdentityData>();
         newIdentityData->participant_guid = remote_participant_guid;
+        newIdentityData->local_credential_data = local_data->local_credential_data;
         newIdentityData->local_handle = local_identity_handle;
         newIdentityData->local_auth_request = local_auth_request_token;
         newIdentityData->remote_auth_request = remote_auth_request_token;
@@ -311,8 +309,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
       IdentityData_Ptr replier_data = get_identity_data(replier_identity_handle);
+
       if (replier_data) {
         if (replier_data->local_handle == initiator_identity_handle) {
+
+          const LocalAuthCredentialData& local_credential_data = *(replier_data->local_credential_data);
 
           SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman(new SSL::ECDH_PRIME_256_V1_CEUM));
 
@@ -321,10 +322,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           /* Compute hash_c1 and store for later */
 
           {
-            CredentialHash hash(local_credential_data_.get_participant_cert(),
+            CredentialHash hash(local_credential_data.get_participant_cert(),
                                 *diffie_hellman,
                                 serialized_local_participant_data,
-                                local_credential_data_.get_access_permissions());
+                                local_credential_data.get_access_permissions());
 
             int err = hash(hash_c1);
             if (err) {
@@ -333,8 +334,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
             }
           }
 
-          message_out.add_bin_property("c.id", local_credential_data_.get_participant_cert().original_bytes());
-          message_out.add_bin_property("c.perm", local_credential_data_.get_access_permissions());
+          message_out.add_bin_property("c.id", local_credential_data.get_participant_cert().original_bytes());
+          message_out.add_bin_property("c.perm", local_credential_data.get_access_permissions());
           message_out.add_bin_property("c.pdata", serialized_local_participant_data);
           message_out.add_bin_property("c.dsign_algo", "RSASSA-PSS-SHA256");
           message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
@@ -638,11 +639,13 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     }
   }
 
+  const LocalAuthCredentialData& local_credential_data = *(initiator_id_data->local_credential_data);
+
   const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
   if (cid.length() > 0) {
 
     remote_cert->deserialize(cid);
-    if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
+    if (X509_V_OK != remote_cert->validate(local_credential_data.get_ca_cert()))
     {
       set_security_error(ex, -1, 0, "Certificate validation failed");
       return Failure;
@@ -689,10 +692,10 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   /* Compute hash_c2 and store for later */
 
   {
-    CredentialHash hash(local_credential_data_.get_participant_cert(),
+    CredentialHash hash(local_credential_data.get_participant_cert(),
                         *diffie_hellman,
                         serialized_local_participant_data,
-                        local_credential_data_.get_access_permissions());
+                        local_credential_data.get_access_permissions());
     int err = hash(hash_c2);
     if (err) {
       set_security_error(ex, -1, 0, "Failed to compute hash_c2.");
@@ -710,8 +713,8 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   TokenWriter message_out(handshake_message_out, build_class_id(Handshake_Reply_Class_Ext));
 
-  message_out.add_bin_property("c.id", local_credential_data_.get_participant_cert().original_bytes());
-  message_out.add_bin_property("c.perm", local_credential_data_.get_access_permissions());
+  message_out.add_bin_property("c.id", local_credential_data.get_participant_cert().original_bytes());
+  message_out.add_bin_property("c.perm", local_credential_data.get_access_permissions());
   message_out.add_bin_property("c.pdata", serialized_local_participant_data);
   message_out.add_bin_property("c.dsign_algo", "RSASSA-PSS-SHA256");
   message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
@@ -750,7 +753,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                                 sign_these);
 
   DDS::OctetSeq signature;
-  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), signature);
+  SSL::sign_serialized(sign_these, local_credential_data.get_participant_private_key(), signature);
   message_out.add_bin_property("signature", signature);
 
   HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
@@ -1021,12 +1024,14 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     }
   }
 
+  const LocalAuthCredentialData& local_credential_data = *(remoteDataPtr->local_credential_data);
+
   const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
   if (cid.length() > 0) {
 
       remote_cert->deserialize(cid);
 
-    if (X509_V_OK != remote_cert->validate(local_credential_data_.get_ca_cert()))
+    if (X509_V_OK != remote_cert->validate(local_credential_data.get_ca_cert()))
     {
       set_security_error(ex, -1, 0, "Certificate validation failed");
       return Failure;
@@ -1135,7 +1140,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
                                 sign_these);
 
   DDS::OctetSeq tmp;
-  SSL::sign_serialized(sign_these, local_credential_data_.get_participant_private_key(), tmp);
+  SSL::sign_serialized(sign_these, local_credential_data.get_participant_private_key(), tmp);
   final_msg.add_bin_property("signature", tmp);
 
   handshakePtr->remote_cert = DCPS::move(remote_cert);

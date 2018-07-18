@@ -12,7 +12,7 @@
 #include "dds/DCPS/security/SSL/PrivateKey.h"
 #include "dds/DCPS/security/SSL/DiffieHellman.h"
 #include "dds/DCPS/security/SSL/Utils.h"
-
+#include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsCoreC.h"
 
 namespace OpenDDS {
@@ -36,9 +36,11 @@ private:
   const DDS::OctetSeq& permissions_data_;
 };
 
-class DdsSecurity_Export LocalAuthCredentialData
+class DdsSecurity_Export LocalAuthCredentialData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
 {
 public:
+  typedef DCPS::RcHandle<LocalAuthCredentialData> shared_ptr;
+
   LocalAuthCredentialData(const DDS::PropertySeq& props);
 
   LocalAuthCredentialData();
