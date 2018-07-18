@@ -86,62 +86,53 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
-  std::string permca_file, gov_file, perm_file;
 
-  //TODO: These comparisons are only supporting the file: protocol type in the property value
-  for (size_t i = 0; i < props.length(); ++i) {
-    const std::string name = props[i].name.in();
-    const std::string value = props[i].value.in();
-
-    if (name == "dds.sec.access.permissions_ca") {
-      std::string fn = extract_file_name(value);
-
-      if (!fn.empty()) {
-        if (file_exists(fn)) {
-          permca_file = fn;
-        } else {
-          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permissions_ca file property." );
-          return DDS::HANDLE_NIL;
-        }
-      }
-
-    } else if (name == "dds.sec.access.governance") {
-      std::string fn = extract_file_name(value);
-
-      if (!fn.empty()) {
-        if (file_exists(fn)) {
-          gov_file = fn;
-        } else {
-          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid governance file property." );
-          return DDS::HANDLE_NIL;
-        }
-      }
-    } else if (name == "dds.sec.access.permissions") {
-      std::string fn = extract_file_name(value);
-
-      if (!fn.empty()) {
-        if (file_exists(fn)) {
-          perm_file = fn;
-        } else {
-          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permissions file property." );
-          return DDS::HANDLE_NIL;
-        }
-      }
+  int err = local_access_control_data_.load(participant_qos.property.value);
+  if (err) {
+    switch (err) {
+    case 1:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate file could not be found");
+      break;
+    case 2:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance file could not be found");
+      break;
+    case 3:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions file could not be found");
+      break;
+    case 4:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate filename not provided");
+      break;
+    case 5:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance filename not provided");
+      break;
+    case 6:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions filename not provided");
+      break;
+    case 7:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate data not provided");
+      break;
+    case 8:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance data not provided");
+      break;
+    case 9:
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions data not provided");
+      break;
     }
-  }
 
-  local_access_control_data_.load(participant_qos.property.value);
+    return DDS::HANDLE_NIL;
+  }
 
   const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
   const SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
 
-  int err = local_gov.verify_signature(local_ca);
+  err = local_gov.verify_signature(local_ca);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance signature not verified");
     return DDS::HANDLE_NIL;
   }
 
   Governance::shared_ptr governance = DCPS::make_rch<Governance>();
+
   err = governance->load(local_gov);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid governance file");
@@ -149,8 +140,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   const SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
-
   Permissions::shared_ptr permissions = DCPS::make_rch<Permissions>();
+
   err = permissions->load(local_perm);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permission file");
@@ -166,6 +157,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   OpenDDS::Security::SSL::SubjectName sn_perm;
 
   const std::string& perm_sn = permissions->subject_name();
+
   if (id_sn == NULL || perm_sn.empty() ||
       sn_id.parse(id_sn) != 0 ||
       sn_perm.parse(perm_sn, true) != 0 ||
@@ -190,6 +182,18 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
+
+  std::string perm_file;
+
+  for (size_t i = 0; i < props.length(); ++i) {
+    const std::string name = props[i].name.in();
+    const std::string value = props[i].value.in();
+
+    if (name == "dds.sec.access.permissions") {
+      perm_file = extract_file_name(value);
+    }
+  }
+
   pctWriter.add_property("dds.perm.cert", get_file_contents(perm_file.c_str()).c_str());
 
   // Set and store the permissions token
@@ -245,7 +249,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Extract Governance and domain id data for new permissions entry
   ::DDS::Security::PermissionsHandle local_ph = iter->second;
-
   ACPermsMap::iterator piter = local_ac_perms_.find(local_ph);
 
   if (piter == local_ac_perms_.end()) {
@@ -255,8 +258,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // permissions file
   OpenDDS::Security::TokenReader remote_perm_wrapper(remote_credential_token);
-
   SSL::SignedDocument remote_perm_doc;
+
   int err = remote_perm_doc.deserialize(remote_perm_wrapper.get_bin_property_value("c.perm"));
   if (err)
   {
@@ -265,6 +268,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   Permissions::shared_ptr permissions = DCPS::make_rch<Permissions>();
+
   err = permissions->load(remote_perm_doc);
   if (err)
   {
@@ -273,10 +277,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Validate the signature of the remote permissions
-
   const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
-
   std::string ca_subject;
+
   local_ca.subject_name_to_str(ca_subject);
 
   err = remote_perm_doc.verify_signature(local_ca);
@@ -292,7 +295,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   //Extract and compare the remote subject name for validation
-
   TokenReader remote_credential_tr(remote_credential_token);
   const DDS::OctetSeq& cid = remote_credential_tr.get_bin_property_value("c.id");
 
@@ -2269,32 +2271,6 @@ std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
   }
   throw(errno);
 }
-
-::CORBA::Boolean AccessControlBuiltInImpl::clean_smime_content(std::string& content_) {
-
-  const std::string start_str("Content-Type: text/plain"), end_str("dds>");
-
-  size_t found_begin = content_.find(start_str);
-
-  if (found_begin != std::string::npos) {
-    content_.erase(0, found_begin + start_str.length());
-    const char* t = " \t\n\r\f\v";
-    content_.erase(0, content_.find_first_not_of(t));
-  } else {
-    return false;
-  }
-
-  size_t found_end = content_.find(end_str);
-
-  if (found_end != std::string::npos) {
-    content_.erase(found_end + end_str.length());
-  } else {
-    return false;
-  }
-
-  return true;
-}
-
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessControlBuiltInImpl& impl)
     : impl_(impl)

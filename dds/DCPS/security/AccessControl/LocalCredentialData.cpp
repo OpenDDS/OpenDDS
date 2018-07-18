@@ -35,40 +35,55 @@ namespace Security {
         const std::string value = props[i].value.in();
 
         if (name == "dds.sec.access.permissions_ca") {
-          if (value.find(file) != std::string::npos) {
-            std::string fn = extract_file_name(value);
+          if (value.length() > 0) {
+            if (value.find(file) != std::string::npos) {
+              std::string fn = extract_file_name(value);
 
-            if (!fn.empty()) {
-              if (!file_exists(fn)) {
-                return 1;
+              if (!fn.empty()) {
+                if (!file_exists(fn)) {
+                  return 1;
+                }
               }
             }
+          }
+          else {
+            return 4;
           }
 
           ca_cert_.reset(new SSL::Certificate(value));
           ca = true;
         } else if (name == "dds.sec.access.governance") {
-          if (value.find(file) != std::string::npos) {
-            std::string fn = extract_file_name(value);
+          if (value.length() > 0) {
+            if (value.find(file) != std::string::npos) {
+              std::string fn = extract_file_name(value);
 
-            if (!fn.empty()) {
-              if (!file_exists(fn)) {
-                return 2;
+              if (!fn.empty()) {
+                if (!file_exists(fn)) {
+                  return 2;
+                }
               }
             }
+          }
+          else {
+            return 5;
           }
 
           governance_doc_.reset(new SSL::SignedDocument(value));
           governance = true;
         } else if (name == "dds.sec.access.permissions") {
-          if (value.find(file) != std::string::npos) {
-            std::string fn = extract_file_name(value);
+          if (value.length() > 0) {
+            if (value.find(file) != std::string::npos) {
+              std::string fn = extract_file_name(value);
 
-            if (!fn.empty()) {
-              if (!file_exists(fn)) {
-                return 3;
+              if (!fn.empty()) {
+                if (!file_exists(fn)) {
+                  return 3;
+                }
               }
             }
+          }
+          else {
+            return 6;
           }
 
           permissions_doc_.reset(new SSL::SignedDocument(value));
@@ -79,15 +94,15 @@ namespace Security {
       // If props did not have all 3 properties in it, set the missing properties to an empty string
       if (props.length() != 3) {
         if (!permission) {
-          permissions_doc_.reset(new SSL::SignedDocument(""));
+          return 7;
         }
 
         if (!governance) {
-          governance_doc_.reset(new SSL::SignedDocument(""));
+          return 8;
         }
 
         if (!ca) {
-          ca_cert_.reset(new SSL::Certificate(""));
+          return 9;
         }
       }
 

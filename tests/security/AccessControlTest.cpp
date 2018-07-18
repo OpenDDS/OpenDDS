@@ -858,7 +858,6 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
   memcpy(remote_apc_token.binary_properties[1].value.get_buffer(), pf.c_str(), pf.size());
   remote_apc_token.binary_properties[1].propagate = true;
 
-//  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
   get_inst().validate_local_permissions(auth_plugin_.get(), 1, domain_id, domain_participant_qos, ex);
 
   ::DDS::Security::PermissionsHandle remote_out_handle = get_inst().validate_remote_permissions(

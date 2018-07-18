@@ -30,6 +30,12 @@ namespace Security {
      * @return 1 if certificate file could not be loaded
      * @return 2 if the governance file could not be loaded
      * @return 3 if the permissions file could not be loaded
+     * @return 4 if the certificate filename not provided
+     * @return 5 if the governance filename not provided
+     * @return 6 if the permissions filename not provided
+     * @return 7 if the certificate data not provided
+     * @return 8 if the governance data not provided
+     * @return 9 if the permissions data not provided
      */
     int load(const DDS::PropertySeq& props);
 
