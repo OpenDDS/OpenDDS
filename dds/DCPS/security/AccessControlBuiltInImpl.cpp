@@ -16,10 +16,6 @@
 #include "ace/Reactor.h"
 #include "tao/debug.h"
 
-#include "xercesc/parsers/XercesDOMParser.hpp"
-#include "xercesc/dom/DOM.hpp"
-#include "xercesc/sax/HandlerBase.hpp"
-#include "xercesc/framework/MemBufInputSource.hpp"
 #include "AccessControlBuiltInImpl.h"
 
 #include <time.h>
