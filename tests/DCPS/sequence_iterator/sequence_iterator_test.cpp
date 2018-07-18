@@ -7,7 +7,7 @@
 
 using namespace OpenDDS;
 
-TEST(IteratorAdaptorTest, Iterator_Concept)
+TEST(SequenceIteratorTest, Iterator_Concept)
 {
   DDS::OctetSeq s(1);
   s.length(1);
@@ -24,7 +24,7 @@ TEST(IteratorAdaptorTest, Iterator_Concept)
   ++i1;
 }
 
-TEST(IteratorAdaptorTest, StdCopy_ToVector_Success)
+TEST(SequenceIteratorTest, StdCopy_ToVector_Success)
 {
   DDS::OctetSeq expected;
   expected.length(4);
@@ -46,7 +46,7 @@ TEST(IteratorAdaptorTest, StdCopy_ToVector_Success)
   }
 }
 
-TEST(IteratorAdaptorTest, StdCopy_FromVector_Success)
+TEST(SequenceIteratorTest, StdCopy_FromVector_Success)
 {
   std::vector<CORBA::Octet> expected;
   for (size_t i = 0; i < 5; ++i) expected.push_back(i);
