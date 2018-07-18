@@ -39,6 +39,11 @@ namespace OpenDDS {
 namespace Security {
 
 typedef Governance::GovernanceAccessRules::iterator gov_iter;
+typedef Permissions::PermissionGrantRules::iterator perm_grant_iter;
+typedef Permissions::TopicRules::iterator perm_topic_rules_iter;
+typedef Permissions::Partitions::iterator perm_partitions_iter;
+typedef Permissions::TopicPsRules::iterator perm_topic_ps_rules_iter;
+typedef Permissions::PartitionPsList::iterator perm_partition_ps_iter;
 
 static const std::string PermissionsTokenClassId("DDS:Access:Permissions:1.0");
 static const std::string AccessControl_Plugin_Name("DDS:Access:Permissions");
@@ -131,10 +136,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   local_access_control_data_.load(participant_qos.property.value);
 
-  // Read in permissions_ca
   const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
-
-  // Read in governance file
   const SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
 
   int err = local_gov.verify_signature(local_ca);
@@ -144,27 +146,22 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   Governance::shared_ptr governance = DCPS::make_rch<Governance>();
-
   err = governance->load(local_gov);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid governance file");
     return DDS::HANDLE_NIL;
   }
 
-  std::string perm_content, perm_sn;
-
-  // permissions file
   const SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
-  local_perm.get_content(perm_content);
-  clean_smime_content(perm_content);
 
-  //Extract and compare the subject name for validation
-  perm_sn.assign(perm_content);
-
-  if (!extract_subject_name(perm_sn)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Could not extract subject name from permissions file");
+  Permissions::shared_ptr permissions = DCPS::make_rch<Permissions>();
+  err = permissions->load(local_perm);
+  if (err) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permission file");
     return DDS::HANDLE_NIL;
   }
+
+  // Compare the subject name for validation
 
   TokenReader tr(id_token);
   const char* id_sn = tr.get_property_value("dds.cert.sn");
@@ -172,6 +169,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   OpenDDS::Security::SSL::SubjectName sn_id;
   OpenDDS::Security::SSL::SubjectName sn_perm;
 
+  const std::string& perm_sn = permissions->subject_name();
   if (id_sn == NULL || perm_sn.empty() ||
       sn_id.parse(id_sn) != 0 ||
       sn_perm.parse(perm_sn, true) != 0 ||
@@ -193,38 +191,32 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Set and store the permissions credential token while we have the raw content
-  ::DDS::Security::PermissionsCredentialToken permissions_cred_token;
+
+  DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
   pctWriter.add_property("dds.perm.cert", get_file_contents(perm_file.c_str()).c_str());
 
   // Set and store the permissions token
-  ::DDS::Security::PermissionsToken permissions_token;
+  DDS::Security::PermissionsToken permissions_token;
   TokenWriter writer(permissions_token, PermissionsTokenClassId);
   writer.add_property("dds.perm_ca.sn", "MyCA Name");
   writer.add_property("dds.perm_ca.algo", "RSA-2048");
 
   // If all checks are successful load the content into cache
-  AcPerms perm_set;
-
-  err = load_permissions_file(&perm_set, perm_content);
-  if (err) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permission file");
-    return DDS::HANDLE_NIL;
-  }
-
-  perm_set.domain_id = domain_id;
-  perm_set.gov_rules = DCPS::move(governance);
-  perm_set.perm_token = permissions_token;
-  perm_set.perm_cred_token = permissions_cred_token;
+  Permissions::AcPerms& perm_data = permissions->data();
+  perm_data.domain_id = domain_id;
+  perm_data.perm_token = permissions_token;
+  perm_data.perm_cred_token = permissions_cred_token;
 
   ::CORBA::Long perm_handle = generate_handle();
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-    guard,
-    handle_mutex_,
-    0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 0);
 
-  local_ac_perms_.insert(std::make_pair(perm_handle, perm_set));
+  AccessData cache_this;
+  cache_this.perm = DCPS::move(permissions);
+  cache_this.gov = DCPS::move(governance);
+
+  local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
   local_identity_map_.insert(std::make_pair(identity, perm_handle));
 
   return perm_handle ;
@@ -265,74 +257,45 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  AcPerms perm_set;
-
-  perm_set.domain_id = piter->second.domain_id;
-  perm_set.gov_rules = piter->second.gov_rules;
-
   // permissions file
-
-  std::string remote_perm_content;
   OpenDDS::Security::TokenReader remote_perm_wrapper(remote_credential_token);
 
-  if (remote_credential_token.binary_properties.length() > 0) {
-    const DDS::OctetSeq& raw = remote_perm_wrapper.get_bin_property_value("c.perm");
-    if (raw.length() > 0) {
-      remote_perm_content.assign(reinterpret_cast<const char*>(raw.get_buffer()), raw.length());
-    }
-    else {
-      // TODO: Should this be an error?
-      remote_perm_content.assign("/0");
-    }
-  } else {
+  SSL::SignedDocument remote_perm_doc;
+  int err = remote_perm_doc.deserialize(remote_perm_wrapper.get_bin_property_value("c.perm"));
+  if (err)
+  {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Failed to deserialize c.perm into signed-document");
+    return DDS::HANDLE_NIL;
+  }
+
+  Permissions::shared_ptr permissions = DCPS::make_rch<Permissions>();
+  err = permissions->load(remote_perm_doc);
+  if (err)
+  {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
     return DDS::HANDLE_NIL;
   }
 
   // Validate the signature of the remote permissions
-  std::string remote_uri_content;
 
-  remote_uri_content.assign("data:");
-  remote_uri_content.append(remote_perm_content);
-
-  SSL::SignedDocument remote_signed;
-
-  remote_signed.load(remote_uri_content);
-
-  // Read in permissions_ca
   const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
-  std::string ca_subject;
 
+  std::string ca_subject;
   local_ca.subject_name_to_str(ca_subject);
 
-  int sign_verified = remote_signed.verify_signature(local_ca);
-
-  if (sign_verified == 0) {
-    // The remote permissions signature is verified
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions document verified.\n")));
-    }
-  }
-  else {
+  err = remote_perm_doc.verify_signature(local_ca);
+  if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions signature not verified");
     return DDS::HANDLE_NIL;
   }
 
-  // Try to locate the payload
-
-  if (!clean_smime_content(remote_perm_content)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid remote permission content");
-    return DDS::HANDLE_NIL;
+  // The remote permissions signature is verified
+  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+      "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions document verified.\n")));
   }
 
   //Extract and compare the remote subject name for validation
-
-  std::string remote_perm_sn(remote_perm_content);
-  if (!extract_subject_name(remote_perm_sn)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Extract remote subject name failed");
-    return DDS::HANDLE_NIL;
-  }
 
   TokenReader remote_credential_tr(remote_credential_token);
   const DDS::OctetSeq& cid = remote_credential_tr.get_bin_property_value("c.id");
@@ -351,6 +314,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   OpenDDS::Security::SSL::SubjectName sn_id_remote;
   OpenDDS::Security::SSL::SubjectName sn_perm_remote;
 
+  const std::string& remote_perm_sn = permissions->subject_name();
   if (remote_identity_sn.empty() || remote_perm_sn.empty() ||
       sn_id_remote.parse(remote_identity_sn) != 0 ||
       sn_perm_remote.parse(remote_perm_sn, true) != 0 ||
@@ -362,24 +326,20 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Set and store the permissions credential token while we have the raw content
 
-  //TODO: the SignedDocument class does not allow the retrieval of the raw file.
-  // The file will have to be pulled from the file system until that is fixed.
-
-  perm_set.perm_token = remote_permissions_token;
-  perm_set.perm_cred_token = remote_credential_token;
-
-  if (0 != load_permissions_file(&perm_set, remote_perm_content)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
-    return DDS::HANDLE_NIL;
-  }
+  Permissions::AcPerms& perm_data = permissions->data();
+  perm_data.domain_id = piter->second.perm->data().domain_id;
+  perm_data.perm_token = remote_permissions_token;
+  perm_data.perm_cred_token = remote_credential_token;
 
   ::CORBA::Long perm_handle = generate_handle();
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-    guard,
-    handle_mutex_,
-    0);
-  local_ac_perms_.insert(std::make_pair(perm_handle, perm_set));
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 0);
+
+  AccessData cache_this;
+  cache_this.perm = DCPS::move(permissions);
+  cache_this.gov = piter->second.gov;
+
+  local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
   return perm_handle;
 }
 
@@ -424,10 +384,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  ::DDS::Security::DomainId_t domain_to_find = piter->second.domain_id;
+  ::DDS::Security::DomainId_t domain_to_find = piter->second.perm->data().domain_id;
 
-  gov_iter begin = piter->second.gov_rules->access_rules().begin();
-  gov_iter end = piter->second.gov_rules->access_rules().end();
+  gov_iter begin = piter->second.gov->access_rules().begin();
+  gov_iter end = piter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
@@ -479,8 +439,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
@@ -500,7 +460,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
 
-  PermissionGrantRules::iterator pm_iter;
   std::string default_value;
 
   // Check the date/time range for validity
@@ -509,7 +468,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
          cur_utc_time;
   time_t current_date_time = time(0);
 
-  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
+  perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
+
+  for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
     default_value = pm_iter->default_permission;
     before_time = convert_permissions_time(pm_iter->validity.not_before);
 
@@ -539,8 +501,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       return false;
     }
 
-    std::list<PermissionTopicRule>::iterator ptr_iter; // allow/deny rules
-    std::list<PermissionsPartition>::iterator pp_iter;
+    perm_topic_rules_iter ptr_iter; // allow/deny rules
+    perm_partitions_iter pp_iter;
     int matched_allow_partitions = 0;
     int matched_deny_partitions = 0;
     CORBA::ULong num_param_partitions = 0;
@@ -548,11 +510,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_id);
 
-      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == PUBLISH) {
+          if (tpsr_iter->ps_type == Permissions::PUBLISH) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -563,11 +525,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                   for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
                     size_t pd = pp_iter->domain_list.count(domain_id);
 
-                    if ((pd > 0) && (pp_iter->ad_type == ALLOW)) {
-                      std::list<PermissionPartitionPs>::iterator pps_iter;
+                    if ((pd > 0) && (pp_iter->ad_type == Permissions::ALLOW)) {
+                      perm_partition_ps_iter pps_iter;
 
                       for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                        if (pps_iter->ps_type == PUBLISH) {
+                        if (pps_iter->ps_type == Permissions::PUBLISH) {
                           std::vector<std::string>::iterator pl_iter; // partition list
                           num_param_partitions = pps_iter->partition_list.size();
 
@@ -604,11 +566,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           }
         }
       }
-      else if ((d > 0) && (ptr_iter->ad_type == DENY)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      else if ((d > 0) && (ptr_iter->ad_type == Permissions::DENY)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == PUBLISH) {
+          if (tpsr_iter->ps_type == Permissions::PUBLISH) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -619,11 +581,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                   for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
                     size_t pd = pp_iter->domain_list.count(domain_id);
 
-                    if ((pd > 0) && (pp_iter->ad_type == DENY)) {
-                      std::list<PermissionPartitionPs>::iterator pps_iter;
+                    if ((pd > 0) && (pp_iter->ad_type == Permissions::DENY)) {
+                      perm_partition_ps_iter pps_iter;
 
                       for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                        if (pps_iter->ps_type == PUBLISH) {
+                        if (pps_iter->ps_type == Permissions::PUBLISH) {
                           std::vector<std::string>::iterator pl_iter; // partition list
 
                           for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
@@ -734,8 +696,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
@@ -757,14 +719,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file
 
-  PermissionGrantRules::iterator pm_iter;
+  Permissions::PermissionGrantRules::iterator pm_iter;
   std::string default_value;
   time_t after_time,
          before_time,
          cur_utc_time;
   time_t current_date_time = time(0);
 
-  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm->data().perm_rules.begin(); pm_iter != ac_iter->second.perm->data().perm_rules.end(); ++pm_iter) {
     default_value = pm_iter->default_permission;
 
     // Check the date/time range for validity
@@ -797,8 +759,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       return false;
     }
 
-    std::list<PermissionTopicRule>::iterator ptr_iter; // allow/deny rules
-    std::list<PermissionsPartition>::iterator pp_iter;
+    perm_topic_rules_iter ptr_iter; // allow/deny rules
+    perm_partitions_iter pp_iter;
     int matched_allow_partitions = 0;
     int matched_deny_partitions = 0;
     CORBA::ULong num_param_partitions = 0;
@@ -806,11 +768,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_id);
 
-      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == SUBSCRIBE) {
+          if (tpsr_iter->ps_type == Permissions::SUBSCRIBE) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -821,11 +783,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                   for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
                     size_t pd = pp_iter->domain_list.count(domain_id);
 
-                    if ((pd > 0) && (pp_iter->ad_type == ALLOW)) {
-                      std::list<PermissionPartitionPs>::iterator pps_iter;
+                    if ((pd > 0) && (pp_iter->ad_type == Permissions::ALLOW)) {
+                      perm_partition_ps_iter pps_iter;
 
                       for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                        if (pps_iter->ps_type == SUBSCRIBE) {
+                        if (pps_iter->ps_type == Permissions::SUBSCRIBE) {
                           std::vector<std::string>::iterator pl_iter; // partition list
                           num_param_partitions = pps_iter->partition_list.size();
 
@@ -862,11 +824,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
           }
         }
       }
-      else if ((d > 0) && (ptr_iter->ad_type == DENY)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      else if ((d > 0) && (ptr_iter->ad_type == Permissions::DENY)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == SUBSCRIBE) {
+          if (tpsr_iter->ps_type == Permissions::SUBSCRIBE) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -877,11 +839,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                   for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
                     size_t pd = pp_iter->domain_list.count(domain_id);
 
-                    if ((pd > 0) && (pp_iter->ad_type == DENY)) {
-                      std::list<PermissionPartitionPs>::iterator pps_iter;
+                    if ((pd > 0) && (pp_iter->ad_type == Permissions::DENY)) {
+                      perm_partition_ps_iter pps_iter;
 
                       for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                        if (pps_iter->ps_type == SUBSCRIBE) {
+                        if (pps_iter->ps_type == Permissions::SUBSCRIBE) {
                           std::vector<std::string>::iterator pl_iter; // partition list
 
                           for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
@@ -989,10 +951,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Governance file for allowable topic attributes
 
-  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
+  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.perm->data().domain_id;
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
@@ -1013,9 +975,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file for grants
 
-  PermissionGrantRules::iterator pm_iter;
+  Permissions::PermissionGrantRules::iterator pm_iter;
 
-  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm->data().perm_rules.begin(); pm_iter != ac_iter->second.perm->data().perm_rules.end(); ++pm_iter) {
     // Check the date/time range for validity
     time_t after_time,
            before_time;
@@ -1050,13 +1012,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       return false;
     }
 
-    std::list<PermissionTopicRule>::iterator ptr_iter; // allow/deny rules
+    perm_topic_rules_iter ptr_iter; // allow/deny rules
 
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_to_find);
 
-      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
           std::vector<std::string>::iterator tl_iter; // topic list
@@ -1145,8 +1107,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
@@ -1175,9 +1137,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
-    if (local_iter->second.domain_id == domain_id) {
+    if (local_iter->second.perm->data().domain_id == domain_id) {
       if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm_token.class_id.in();
+        std::string local_class_id = local_iter->second.perm->data().perm_token.class_id.in();
 
         if (local_class_id.length() > 0) {
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
@@ -1205,17 +1167,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check permissions topic grants
 
-  PermissionGrantRules::iterator pgr_iter;
+  Permissions::PermissionGrantRules::iterator pgr_iter;
 
   // Check topic rules for the given domain id.
 
-  for (pgr_iter = ac_iter->second.perm_rules.begin(); pgr_iter != ac_iter->second.perm_rules.end(); ++pgr_iter) {
+  for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
     // Cycle through topic rules to find an allow
-    std::list<PermissionTopicRule>::iterator ptr_iter;
+    perm_topic_rules_iter ptr_iter;
     for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t z = (ptr_iter->domain_list.count(domain_id));
 
-      if ((z > 0) && (ptr_iter->ad_type == ALLOW)) {
+      if ((z > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
         return true;
       }
     }
@@ -1247,8 +1209,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
@@ -1266,7 +1228,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  PublishSubscribe_t publish = PUBLISH;
+  Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
 
   int ret_value = search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, publish);
 
@@ -1322,8 +1284,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Default this to false for now
   relay_only = false;
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
@@ -1342,7 +1304,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  PublishSubscribe_t subscribe = SUBSCRIBE;
+  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
 
   int ret_value = search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, subscribe);
 
@@ -1401,7 +1363,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Compare the PluginClassName and MajorVersion of the local permissions_token
   // with those in the remote_permissions_token.
-  const std::string remote_class_id = ac_iter->second.perm_token.class_id.in();
+  const std::string remote_class_id = ac_iter->second.perm->data().perm_token.class_id.in();
 
   std::string local_plugin_class_name,
               remote_plugin_class_name;
@@ -1419,9 +1381,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   for (ACPermsMap::iterator local_iter = local_ac_perms_.begin(); local_iter != local_ac_perms_.end(); ++local_iter) {
-    if (local_iter->second.domain_id == domain_id) {
+    if (local_iter->second.perm->data().domain_id == domain_id) {
       if (local_iter->first != permissions_handle) {
-        std::string local_class_id = local_iter->second.perm_token.class_id.in();
+        std::string local_class_id = local_iter->second.perm->data().perm_token.class_id.in();
 
         if (local_class_id.length() > 0) {
           parse_class_id(local_class_id, local_plugin_class_name, local_major_ver, local_minor_ver);
@@ -1449,8 +1411,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Governance file for allowable topic attributes
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_id);
@@ -1471,9 +1433,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // Check the Permissions file for grants
 
-  PermissionGrantRules::iterator pm_iter;
+  Permissions::PermissionGrantRules::iterator pm_iter;
 
-  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm->data().perm_rules.begin(); pm_iter != ac_iter->second.perm->data().perm_rules.end(); ++pm_iter) {
     // Check the date/time range for validity
     time_t after_time,
            before_time;
@@ -1508,16 +1470,16 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
       return false;
     }
 
-    std::list<PermissionTopicRule>::iterator ptr_iter; // allow/deny rules
+    perm_topic_rules_iter ptr_iter; // allow/deny rules
 
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_id);
 
-      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-          if (tpsr_iter->ps_type == PUBLISH || tpsr_iter->ps_type == SUBSCRIBE) {
+          if (tpsr_iter->ps_type == Permissions::PUBLISH || tpsr_iter->ps_type == Permissions::SUBSCRIBE) {
             std::vector<std::string>::iterator tl_iter; // topic list
 
             for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -1650,7 +1612,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator iter = local_ac_perms_.find(handle);
 
   if (iter != local_ac_perms_.end()) {
-    permissions_token = iter->second.perm_token;
+    permissions_token = iter->second.perm->data().perm_token;
     return true;
   } else {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_permissions_token: No PermissionToken found");
@@ -1671,7 +1633,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACPermsMap::iterator iter = local_ac_perms_.find(handle);
 
   if (iter != local_ac_perms_.end()) {
-    permissions_credential_token = iter->second.perm_cred_token;
+    permissions_credential_token = iter->second.perm->data().perm_cred_token;
     return true;
   } else {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_permissions_credential_token: No PermissionToken found");
@@ -1734,10 +1696,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Governance file for allowable topic attributes
-  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
+  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.perm->data().domain_id;
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
@@ -1780,10 +1742,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  ::DDS::Security::DomainId_t domain_to_find = piter->second.domain_id;
+  ::DDS::Security::DomainId_t domain_to_find = piter->second.perm->data().domain_id;
 
-  gov_iter begin = piter->second.gov_rules->access_rules().begin();
-  gov_iter end = piter->second.gov_rules->access_rules().end();
+  gov_iter begin = piter->second.gov->access_rules().begin();
+  gov_iter end = piter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
@@ -1931,32 +1893,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   return new_handle;
 }
 
-
-::CORBA::Boolean AccessControlBuiltInImpl::extract_subject_name(std::string& sn) {
-
-  const std::string start_str("<subject_name>"), end_str("</subject_name>");
-
-  size_t found_begin = sn.find(start_str);
-
-  if (found_begin != std::string::npos) {
-    sn.erase(0, found_begin + start_str.length());
-    const char* t = " \t\n\r\f\v";
-    sn.erase(0, sn.find_first_not_of(t));
-  } else {
-    return false;
-  }
-
-  size_t found_end = sn.find(end_str);
-
-  if (found_end != std::string::npos) {
-    sn.erase(found_end);
-  } else {
-    return false;
-  }
-
-  return true;
-}
-
 // NOTE: This function will return the time value as UTC
 // Format from DDS Security spec 1.1 is:
 //   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
@@ -2057,10 +1993,10 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
     return 1;
   }
 
-  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
+  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.perm->data().domain_id;
 
-  gov_iter begin = ac_iter->second.gov_rules->access_rules().begin();
-  gov_iter end = ac_iter->second.gov_rules->access_rules().end();
+  gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
     size_t d = giter->domain_list.count(domain_to_find);
@@ -2188,9 +2124,9 @@ int AccessControlBuiltInImpl::search_remote_permissions(
   const char * topic_name,
   const::DDS::Security::DomainId_t domain_id,
   ACPermsMap::iterator ac_iter,
-  const PublishSubscribe_t pub_or_sub)
+  const Permissions::PublishSubscribe_t pub_or_sub)
 {
-  PermissionGrantRules::iterator pm_iter;
+  perm_grant_iter pm_iter;
   std::string default_value;
 
   // Check the date/time range for validity
@@ -2199,7 +2135,7 @@ int AccessControlBuiltInImpl::search_remote_permissions(
          cur_utc_time;
   time_t current_date_time = time(0);
 
-  for (pm_iter = ac_iter->second.perm_rules.begin(); pm_iter != ac_iter->second.perm_rules.end(); ++pm_iter) {
+  for (pm_iter = ac_iter->second.perm->data().perm_rules.begin(); pm_iter != ac_iter->second.perm->data().perm_rules.end(); ++pm_iter) {
     default_value = pm_iter->default_permission;
     before_time = convert_permissions_time(pm_iter->validity.not_before);
 
@@ -2225,13 +2161,13 @@ int AccessControlBuiltInImpl::search_remote_permissions(
       return 4;
     }
 
-    std::list<PermissionTopicRule>::iterator ptr_iter; // allow/deny rules
+    perm_topic_rules_iter ptr_iter; // allow/deny rules
 
     for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t  d = ptr_iter->domain_list.count(domain_id);
 
-      if ((d > 0) && (ptr_iter->ad_type == ALLOW)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
           if (tpsr_iter->ps_type == pub_or_sub) {
@@ -2245,8 +2181,8 @@ int AccessControlBuiltInImpl::search_remote_permissions(
           }  // end if (PUBLISH)
         } // end for
       }
-      else if ((d > 0) && (ptr_iter->ad_type == DENY)) {
-        std::list<PermissionTopicPsRule>::iterator tpsr_iter;
+      else if ((d > 0) && (ptr_iter->ad_type == Permissions::DENY)) {
+        perm_topic_ps_rules_iter tpsr_iter;
 
         for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
           if (tpsr_iter->ps_type == pub_or_sub) {
@@ -2310,210 +2246,6 @@ void AccessControlBuiltInImpl::parse_class_id(
     plugin_class_name.clear();
   }
 
-}
-
-::CORBA::Long AccessControlBuiltInImpl::load_permissions_file(AcPerms * ac_perms_holder, std::string p_content) {
-
-  static const char* gMemBufId = "gov buffer id";
-
-  try
-  {
-    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-  }
-  catch( xercesc::XMLException& e )
-  {
-    char* message = xercesc::XMLString::transcode( e.getMessage() );
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-      "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: XML toolkit initialization error:  %C.\n"), message));
-    xercesc::XMLString::release( &message );
-    // throw exception here to return ERROR_XERCES_INIT
-    return -1;
-  }
-
-  xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser();
-  parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
-  parser->setDoNamespaces(true);    // optional
-  parser->setCreateCommentNodes(false);
-
-  xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
-  parser->setErrorHandler(errHandler);
-
-  xercesc::MemBufInputSource contentbuf((const XMLByte*)p_content.c_str(),
-                                        p_content.size(),
-                                        gMemBufId);
-
-  try {
-    parser->parse(contentbuf);
-  }
-  catch (const xercesc::XMLException& toCatch) {
-    char* message = xercesc::XMLString::transcode(toCatch.getMessage());
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Exception message is %C.\n"), message));
-    xercesc::XMLString::release(&message);
-    return -1;
-  }
-  catch (const xercesc::DOMException& toCatch) {
-    char* message = xercesc::XMLString::transcode(toCatch.msg);
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Exception message is: %C.\n"), message));
-    xercesc::XMLString::release(&message);
-    return -1;
-  }
-  catch (...) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Unexpected Permissions XML Parser Exception.\n")));
-    return -1;
-  }
-
-
-  // Successfully parsed the permissions file
-
-  xercesc::DOMDocument* xmlDoc = parser->getDocument();
-
-  xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
-  if ( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
-
-
-  //TODO:  WARNING - this implementation only supports 1 permissions/grant set
- // Different from governance from here forward
-  // Find the validity rules
-  xercesc::DOMNodeList * grantRules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("grant"));
-
-  //PermissionGrantRules grant_rules_list_holder_;
-
-  for (XMLSize_t r = 0; r < grantRules->getLength(); r++) {
-    PermissionGrantRule rule_holder_;
-
-    // Pull out the grant name for this grant
-    xercesc::DOMNamedNodeMap * rattrs = grantRules->item(r)->getAttributes();
-    rule_holder_.grant_name = xercesc::XMLString::transcode(rattrs->item(0)->getTextContent());
-
-    // Pull out subject name, validity, and default
-    xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
-
-    for ( XMLSize_t gn = 0; gn < grantNodes->getLength(); gn++) {
-      char *g_tag = xercesc::XMLString::transcode(grantNodes->item(gn)->getNodeName());
-
-      if (strcmp(g_tag, "subject_name") == 0) {
-        rule_holder_.subject = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
-      } else if (strcmp(g_tag, "validity") == 0) {
-        //Validity_t gn_validity;
-        xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
-
-        for (XMLSize_t vn = 0; vn < validityNodes->getLength(); vn++) {
-          char *v_tag = xercesc::XMLString::transcode((validityNodes->item(vn)->getNodeName()));
-
-          if (strcmp(v_tag, "not_before") == 0) {
-            rule_holder_.validity.not_before = xercesc::XMLString::transcode(
-                      (validityNodes->item(vn)->getTextContent()));
-          } else if (strcmp(v_tag, "not_after") == 0) {
-            rule_holder_.validity.not_after = xercesc::XMLString::transcode(
-                      (validityNodes->item(vn)->getTextContent()));
-          }
-        }
-      } else if (strcmp(g_tag, "default") == 0) {
-        rule_holder_.default_permission = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
-      }
-    }
-    // Pull out allow/deny rules
-    xercesc::DOMNodeList * adGrantNodes = grantRules->item(r)->getChildNodes();
-
-    for (XMLSize_t gn = 0; gn < adGrantNodes->getLength(); gn++) {
-      char *g_tag = xercesc::XMLString::transcode(adGrantNodes->item(gn)->getNodeName());
-
-      if (strcmp(g_tag, "allow_rule") == 0 || strcmp(g_tag, "deny_rule") == 0) {
-        PermissionTopicRule ptr_holder_;
-        PermissionsPartition pp_holder_;
-
-        ptr_holder_.ad_type = (strcmp(g_tag,"allow_rule") ==  0 ? ALLOW : DENY);
-        pp_holder_.ad_type = (strcmp(g_tag, "allow_rule") == 0 ? ALLOW : DENY);
-
-        xercesc::DOMNodeList * adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
-
-        for (XMLSize_t anc = 0; anc < adNodeChildren->getLength(); anc++) {
-          char *anc_tag = xercesc::XMLString::transcode(adNodeChildren->item(anc)->getNodeName());
-
-          if (strcmp(anc_tag, "domains") == 0) {   //domain list
-            xercesc::DOMNodeList * domainIdNodes = adNodeChildren->item(anc)->getChildNodes();
-
-            for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
-              if (strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
-                ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
-                pp_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
-              }
-              else if (strcmp("id_range", xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
-                int min_value = 0;
-                int max_value = 0;
-                xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
-
-                for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
-                  if (strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
-                    min_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
-                  }
-                  else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
-                    max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
-
-                    if ((min_value == 0) || (min_value > max_value)) {
-                      ACE_DEBUG((LM_ERROR, ACE_TEXT(
-                          "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Permission XML Domain Range invalid.\n")));
-                      return -1;
-                    }
-
-                    for (int i = min_value; i <= max_value; i++) {
-                      ptr_holder_.domain_list.insert(i);
-                      pp_holder_.domain_list.insert(i);
-                    }
-                  }
-                }
-              }
-            }
-
-          } else if (ACE_OS::strcasecmp(anc_tag, "publish") == 0 || ACE_OS::strcasecmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
-            PermissionTopicPsRule anc_ps_rule_holder_;
-            PermissionPartitionPs anc_ps_partition_holder_;
-
-            anc_ps_rule_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
-            anc_ps_partition_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag, "publish") == 0 ? PUBLISH : SUBSCRIBE);
-            xercesc::DOMNodeList * topicListNodes = adNodeChildren->item(anc)->getChildNodes();
-
-            for (XMLSize_t tln = 0; tln < topicListNodes->getLength(); tln++) {
-              if (strcmp("topics" , xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
-                xercesc::DOMNodeList * topicNodes = topicListNodes->item(tln)->getChildNodes();
-
-                for (XMLSize_t tn = 0; tn < topicNodes->getLength(); tn++) {
-                  if (strcmp("topic", xercesc::XMLString::transcode(topicNodes->item(tn)->getNodeName())) == 0) {
-                    anc_ps_rule_holder_.topic_list.push_back(xercesc::XMLString::transcode(topicNodes->item(tn)->getTextContent()));
-                  }
-                }
-
-              }
-              else if (strcmp("partitions", xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
-                xercesc::DOMNodeList * partitionNodes = topicListNodes->item(tln)->getChildNodes();
-
-                for (XMLSize_t pn = 0; pn < partitionNodes->getLength(); pn++) {
-                  if (strcmp("partition", xercesc::XMLString::transcode(partitionNodes->item(pn)->getNodeName())) == 0) {
-                    anc_ps_partition_holder_.partition_list.push_back(xercesc::XMLString::transcode(partitionNodes->item(pn)->getTextContent()));
-                  }
-                }
-              }
-            }
-
-            ptr_holder_.topic_ps_rules.push_back(anc_ps_rule_holder_);
-            pp_holder_.partition_ps.push_back(anc_ps_partition_holder_);
-          }
-        }
-
-        rule_holder_.PermissionTopicRules.push_back(ptr_holder_);
-        rule_holder_.PermissionPartitions.push_back(pp_holder_);
-      }
-    }
-
-    ac_perms_holder->perm_rules.push_back(rule_holder_);
-  } // grant_rules
-
-  delete parser;
-  delete errHandler;
-  return 0;
 }
 
 ::CORBA::Boolean AccessControlBuiltInImpl::file_exists(const std::string& name) {
