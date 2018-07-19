@@ -1369,7 +1369,8 @@ std::string AuthenticationBuiltInImpl::get_extension(const char* class_id)
 
 uint64_t AuthenticationBuiltInImpl::get_next_handle()
 {
-  return next_handle_++;
+  ACE_Guard<ACE_Thread_Mutex> guard(handle_mutex_);
+  return (++next_handle_ != DDS::HANDLE_NIL) ? next_handle_ : ++next_handle_;
 }
 
 } // namespace Security
