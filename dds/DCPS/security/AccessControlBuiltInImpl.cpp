@@ -1704,12 +1704,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     if (d > 0) {
       attributes = giter->domain_attrs;
-      //attributes.allow_unauthenticated_participants = giter->domain_attrs.allow_unauthenticated_participants;
-      //attributes.is_access_protected = giter->domain_attrs.is_access_protected;
-      //attributes.is_rtps_protected = giter->domain_attrs.is_rtps_protected;
-      //attributes.is_discovery_protected = giter->domain_attrs.is_discovery_protected;
-      //attributes.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
-      //attributes.plugin_participant_attributes = giter->domain_attrs.plugin_participant_attributes;
       return true;
     }
   }
@@ -1753,11 +1747,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
         if (::ACE::wild_match(topic_name,tr_iter->topic_expression.c_str(), true, false)) {
-          attributes.is_read_protected = tr_iter->topic_attrs.is_read_protected;
-          attributes.is_write_protected = tr_iter->topic_attrs.is_write_protected;
-          attributes.is_discovery_protected = tr_iter->topic_attrs.is_discovery_protected;
-          attributes.is_liveliness_protected = tr_iter->topic_attrs.is_liveliness_protected;
-
+          attributes = tr_iter->topic_attrs;
           return true;
         }
       }
