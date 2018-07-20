@@ -24,6 +24,7 @@ RepoIdGenerator::RepoIdGenerator(long federation, long participant, EntityKind k
   , federation_(federation)
   , participant_(participant)
   , lastKey_(0)
+  , forcedId_(GUID_UNKNOWN)
 {
 }
 
@@ -32,8 +33,14 @@ RepoIdGenerator::~RepoIdGenerator()
 }
 
 RepoId
-RepoIdGenerator::next()
+RepoIdGenerator::next(bool builtin)
 {
+  if (forcedId_ == GUID_UNKNOWN) {
+    RepoId id = forcedId_;
+    cancelForcedId();
+    return id;
+  }
+
   // Generate a new key value.
   ++lastKey_;
 
@@ -72,7 +79,7 @@ RepoIdGenerator::next()
 
     builder.participantId(participant_);
     builder.entityKey(lastKey_);
-    builder.entityKind(kind_);
+    builder.entityKind(kind_, builtin);
   }
 
   return RepoId(builder);
@@ -84,6 +91,16 @@ RepoIdGenerator::last(long key)
   if (key > lastKey_) {
     lastKey_ = key;
   }
+}
+
+void RepoIdGenerator::forceId(const RepoId& forcedId)
+{
+  forcedId_ = forcedId;
+}
+
+void RepoIdGenerator::cancelForceId()
+{
+  forcedId_ = GUID_UNKNOWN;
 }
 
 } // namespace DCPS

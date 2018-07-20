@@ -115,7 +115,7 @@ public:
   virtual ~RepoIdGenerator();
 
   /// Obtain the next RepoId value.
-  RepoId next();
+  RepoId next(bool builtin = false);
 
   /**
    * Set the minimum of the last key (or participant) value used.
@@ -126,6 +126,9 @@ public:
    * generated key value, the new key value replaces the old one.
    */
   void last(long key);
+
+  void forceId(const RepoId& id);
+  void cancelForceId();
 
 private:
   /// Type of Entity to generate GUID values for.
@@ -139,6 +142,8 @@ private:
 
   /// Unique value for the EntityKey.
   long lastKey_;
+
+  RepoId forcedId_;
 };
 
 } // namespace DCPS

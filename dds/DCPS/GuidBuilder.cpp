@@ -105,22 +105,25 @@ GuidBuilder::entityKind(CORBA::Octet entityKind)
 }
 
 void
-GuidBuilder::entityKind(EntityKind kind)
+GuidBuilder::entityKind(EntityKind kind, bool makeBuiltin)
 {
   switch (kind) {
 
   // User Entities
 
   case KIND_WRITER:
-    guid_.entityId.entityKind = ENTITYKIND_USER_WRITER_WITH_KEY;
+    guid_.entityId.entityKind = makeBuiltin ?
+      ENTITYKIND_BUILTIN_WRITER_WITH_KEY : ENTITYKIND_USER_WRITER_WITH_KEY;
     break;
 
   case KIND_READER:
-    guid_.entityId.entityKind = ENTITYKIND_USER_READER_WITH_KEY;
+    guid_.entityId.entityKind = makeBuiltin ?
+      ENTITYKIND_BUILTIN_WRITER_WITH_KEY : ENTITYKIND_USER_READER_WITH_KEY;
     break;
 
   case KIND_TOPIC:
-    guid_.entityId.entityKind = ENTITYKIND_OPENDDS_TOPIC;
+    guid_.entityId.entityKind = makeBuiltin ?
+      ENTITYKIND_BUILTIN_TOPIC : ENTITYKIND_OPENDDS_TOPIC;
     break;
 
   // Builtin Entities
