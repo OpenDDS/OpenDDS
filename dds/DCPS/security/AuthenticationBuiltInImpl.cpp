@@ -94,7 +94,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   LocalAuthCredentialData::shared_ptr local_credential_data = DCPS::make_rch<LocalAuthCredentialData>();
-  local_credential_data->load(participant_qos.property.value);
+  if (! local_credential_data->load(participant_qos.property.value, ex))
+  {
+    return result;
+  }
 
   if (local_credential_data->validate()) {
     if (candidate_participant_guid != DCPS::GUID_UNKNOWN) {

@@ -57,11 +57,6 @@ int CredentialHash::operator()(DDS::OctetSeq& dst) const
   return SSL::hash_serialized(hash_data, dst);
 }
 
-LocalAuthCredentialData::LocalAuthCredentialData(const DDS::PropertySeq& props)
-{
-  load(props);
-}
-
 LocalAuthCredentialData::LocalAuthCredentialData()
 {
 
@@ -72,7 +67,7 @@ LocalAuthCredentialData::~LocalAuthCredentialData()
 
 }
 
-void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
+bool LocalAuthCredentialData::load(const DDS::PropertySeq& props, DDS::Security::SecurityException& ex)
 {
   using namespace CommonUtilities;
 
@@ -121,8 +116,8 @@ void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
         case URI::URI_UNKNOWN:
         default:
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) LocalAuthCredentialData::load: ")
-                     ACE_TEXT("ERROR: unsupported URI scheme in path '%C'\n"),
+                     "(%P|%t) LocalAuthCredentialData::load: "
+                     "ERROR: unsupported URI scheme in path '%C'\n",
                      value.c_str()));
 
           break;
@@ -133,6 +128,25 @@ void LocalAuthCredentialData::load(const DDS::PropertySeq& props)
   if (pkey_uri != "") {
     participant_pkey_.reset(new SSL::PrivateKey(pkey_uri, password));
   }
+
+  if (! ca_cert_) {
+    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load CA certificate");
+    return false;
+
+  } else if (! participant_cert_) {
+    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant certificate");
+    return false;
+
+  } else if (! participant_pkey_) {
+    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant private-key");
+    return false;
+
+  } else if (0 == access_permissions_.length()) {
+    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load access permissions document");
+    return false;
+  }
+
+  return true;
 }
 
 void LocalAuthCredentialData::load_permissions_file(const std::string& path)

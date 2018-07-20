@@ -41,13 +41,11 @@ class DdsSecurity_Export LocalAuthCredentialData : public DCPS::RcObject<ACE_SYN
 public:
   typedef DCPS::RcHandle<LocalAuthCredentialData> shared_ptr;
 
-  LocalAuthCredentialData(const DDS::PropertySeq& props);
-
   LocalAuthCredentialData();
 
   virtual ~LocalAuthCredentialData();
 
-  void load(const DDS::PropertySeq& props);
+  bool load(const DDS::PropertySeq& props, DDS::Security::SecurityException& ex);
 
   const SSL::Certificate& get_ca_cert() const
   {
