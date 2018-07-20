@@ -179,7 +179,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Set and store the permissions credential token while we have the raw content
-
   DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
 
@@ -199,8 +198,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Set and store the permissions token
   DDS::Security::PermissionsToken permissions_token;
   TokenWriter writer(permissions_token, PermissionsTokenClassId);
-  writer.add_property("dds.perm_ca.sn", "MyCA Name");
-  writer.add_property("dds.perm_ca.algo", "RSA-2048");
+  writer.add_property("dds.perm_ca.sn", ""); // "MyCA Name");
+  writer.add_property("dds.perm_ca.algo", ""); // "RSA-2048");
 
   // If all checks are successful load the content into cache
   Permissions::AcPerms& perm_data = permissions->data();
@@ -373,8 +372,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
              Otherwise the operation shall return FALSE.
  */
 
-  // TODO: Optional checking of QoS is not completed ( see  8.4.2.9.3 )
-
 
   ACPermsMap::iterator piter = local_ac_perms_.find(permissions_handle);
   if (piter == local_ac_perms_.end()) {
@@ -420,7 +417,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACE_UNUSED_ARG(data_tag);
 
 
-  //TODO: Options of DataTag, QoS, and Partitions checks are not implemented (See description of Figure 23 )
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Invalid permissions handle");
     return false;
@@ -1227,7 +1223,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
-
   int ret_value = search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, publish);
 
   if (ret_value > 0) {
@@ -1685,7 +1680,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_participant_sec_attributes: Invalid permissions handle");
     return false;
   }
-    // TODO: Need to add the ac_endpoints properties to the returned attributes
 
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
   if (ac_iter == local_ac_perms_.end()) {
@@ -2015,9 +2009,9 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
       if (std::strcmp(topic_name, "DCPSParticipantMessageSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
-        attributes.base.is_liveliness_protected = giter->domain_attrs.is_liveliness_protected;
+        attributes.base.is_liveliness_protected = false; // giter->domain_attrs.is_liveliness_protected;
         attributes.base.is_discovery_protected = false;
-        attributes.is_submessage_protected = true;
+        attributes.is_submessage_protected = giter->domain_attrs.is_liveliness_protected; //true;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
 
@@ -2037,9 +2031,9 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
           std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
-        attributes.base.is_liveliness_protected = giter->domain_attrs.is_discovery_protected;
+        attributes.base.is_liveliness_protected = false; // giter->domain_attrs.is_discovery_protected;
         attributes.base.is_discovery_protected = false;
-        attributes.is_submessage_protected = true;
+        attributes.is_submessage_protected = giter->domain_attrs.is_discovery_protected; // true;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
 
@@ -2166,7 +2160,7 @@ int AccessControlBuiltInImpl::search_remote_permissions(
                 return 0;
               }
             }
-          }  // end if (PUBLISH)
+          }  // end if (tpsr_iter->ps_type)
         } // end for
       }
       else if ((d > 0) && (ptr_iter->ad_type == Permissions::DENY)) {
