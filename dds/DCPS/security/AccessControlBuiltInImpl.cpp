@@ -55,7 +55,6 @@ AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   , handle_mutex_()
   , next_handle_(1)
   , listener_ptr_(NULL)
-  , local_access_control_data_()
 {  }
 
 AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
@@ -87,7 +86,9 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
 
-  int err = local_access_control_data_.load(participant_qos.property.value);
+  LocalAccessCredentialData::shared_ptr local_access_credential_data = DCPS::make_rch<LocalAccessCredentialData>();
+
+  int err = local_access_credential_data->load(participant_qos.property.value);
   if (err) {
     switch (err) {
     case 1:
@@ -122,8 +123,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
-  const SSL::SignedDocument& local_gov = local_access_control_data_.get_governance_doc();
+  const SSL::Certificate& local_ca = local_access_credential_data->get_ca_cert();
+  const SSL::SignedDocument& local_gov = local_access_credential_data->get_governance_doc();
 
   err = local_gov.verify_signature(local_ca);
   if (err) {
@@ -139,7 +140,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  const SSL::SignedDocument& local_perm = local_access_control_data_.get_permissions_doc();
+  const SSL::SignedDocument& local_perm = local_access_credential_data->get_permissions_doc();
   Permissions::shared_ptr permissions = DCPS::make_rch<Permissions>();
 
   err = permissions->load(local_perm);
@@ -214,11 +215,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   AccessData cache_this;
   cache_this.perm = DCPS::move(permissions);
   cache_this.gov = DCPS::move(governance);
+  cache_this.local_access_credential_data = local_access_credential_data;
 
   local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
   local_identity_map_.insert(std::make_pair(identity, perm_handle));
 
-  return perm_handle ;
+  return perm_handle;
 }
 
 ::DDS::Security::PermissionsHandle AccessControlBuiltInImpl::validate_remote_permissions(
@@ -275,8 +277,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
+  const LocalAccessCredentialData::shared_ptr& local_access_credential_data = piter->second.local_access_credential_data;
+
   // Validate the signature of the remote permissions
-  const SSL::Certificate& local_ca = local_access_control_data_.get_ca_cert();
+  const SSL::Certificate& local_ca = local_access_credential_data->get_ca_cert();
   std::string ca_subject;
 
   local_ca.subject_name_to_str(ca_subject);
@@ -335,6 +339,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   AccessData cache_this;
   cache_this.perm = DCPS::move(permissions);
   cache_this.gov = piter->second.gov;
+  cache_this.local_access_credential_data = local_access_credential_data;
 
   local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
   return perm_handle;
