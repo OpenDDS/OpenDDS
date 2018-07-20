@@ -12,8 +12,10 @@
 #include "dds/DCPS/security/SSL/PrivateKey.h"
 #include "dds/DCPS/security/SSL/DiffieHellman.h"
 #include "dds/DCPS/security/SSL/Utils.h"
+
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
 
 namespace OpenDDS {
 namespace Security {

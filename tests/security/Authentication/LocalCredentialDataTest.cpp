@@ -45,7 +45,8 @@ TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
   perms.propagate = false;
   add_property(perms);
 
-  credential_data.load(properties);
+  DDS::Security::SecurityException ex;
+  credential_data.load(properties, ex);
   std::ifstream expected_file(path.c_str(), std::ios::binary);
 
   std::vector<char> expected_bytes((std::istreambuf_iterator<char>(expected_file)),
@@ -72,7 +73,8 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
   idca.propagate = false;
   add_property(idca);
 
-  credential_data.load(properties);
+  DDS::Security::SecurityException ex;
+  credential_data.load(properties, ex);
   ASSERT_TRUE(1); // TODO
 }
 
@@ -90,7 +92,8 @@ TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
   pass.propagate = false;
   add_property(pass);
 
-  credential_data.load(properties);
+  DDS::Security::SecurityException ex;
+  credential_data.load(properties, ex);
   ASSERT_TRUE(1); // TODO
 }
 
@@ -102,6 +105,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
   idcert.propagate = false;
   add_property(idcert);
 
-  credential_data.load(properties);
+  DDS::Security::SecurityException ex;
+  credential_data.load(properties, ex);
   ASSERT_TRUE(1); // TODO
 }
