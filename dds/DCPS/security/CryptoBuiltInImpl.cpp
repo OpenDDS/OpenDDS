@@ -487,7 +487,7 @@ void CryptoBuiltInImpl::clear_endpoint_data(NativeCryptoHandle handle)
   typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
   for (iter_t it = participant_to_entity_.begin(); it != participant_to_entity_.end();) {
     if (it->second.handle_ == handle) {
-      it = participant_to_entity_.erase(it);
+      participant_to_entity_.erase(it++);
     } else {
       ++it;
     }
@@ -495,7 +495,7 @@ void CryptoBuiltInImpl::clear_endpoint_data(NativeCryptoHandle handle)
 
   for (SessionTable_t::iterator st_iter = sessions_.lower_bound(std::make_pair(handle, 0));
        st_iter != sessions_.end() && st_iter->first.first == handle;
-       st_iter = sessions_.erase(st_iter)) {
+       sessions_.erase(st_iter++)) {
   }
 }
 
