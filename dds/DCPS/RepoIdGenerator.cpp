@@ -37,7 +37,7 @@ RepoIdGenerator::next(bool builtin)
 {
   if (forcedId_ == GUID_UNKNOWN) {
     RepoId id = forcedId_;
-    cancelForcedId();
+    cancelForceId();
     return id;
   }
 
