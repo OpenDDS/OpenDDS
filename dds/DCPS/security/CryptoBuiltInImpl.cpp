@@ -139,9 +139,8 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
     return DDS::HANDLE_NIL;
   }
 
-  const NativeCryptoHandle h = generate_handle();
   if (!participant_security_attributes.is_rtps_protected) {
-    return h;
+    return generate_handle();
   }
 
   CommonUtilities::set_security_error(ex, -1, 0, "Unsupported configuration");
@@ -472,36 +471,56 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
   return h;
 }
 
-bool CryptoBuiltInImpl::unregister_participant(
-  ParticipantCryptoHandle participant_crypto_handle,
-  SecurityException& ex)
+bool CryptoBuiltInImpl::unregister_participant(ParticipantCryptoHandle handle, SecurityException& ex)
 {
-  ACE_UNUSED_ARG(participant_crypto_handle);
-  ACE_UNUSED_ARG(ex);
-
-  // The stub will always succeed here
+  if (DDS::HANDLE_NIL == handle) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Crypto Handle");
+    return false;
+  }
   return true;
 }
 
-bool CryptoBuiltInImpl::unregister_datawriter(
-  DatawriterCryptoHandle datawriter_crypto_handle,
-  SecurityException& ex)
+void CryptoBuiltInImpl::clear_endpoint_data(NativeCryptoHandle handle)
 {
-  ACE_UNUSED_ARG(datawriter_crypto_handle);
-  ACE_UNUSED_ARG(ex);
+  keys_.erase(handle);
 
-  // The stub will always succeed here
+  typedef std::multimap<ParticipantCryptoHandle, EntityInfo>::iterator iter_t;
+  for (iter_t it = participant_to_entity_.begin(); it != participant_to_entity_.end();) {
+    if (it->second.handle_ == handle) {
+      it = participant_to_entity_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  for (SessionTable_t::iterator st_iter = sessions_.lower_bound(std::make_pair(handle, 0));
+       st_iter != sessions_.end() && st_iter->first.first == handle;
+       st_iter = sessions_.erase(st_iter)) {
+  }
+}
+
+bool CryptoBuiltInImpl::unregister_datawriter(DatawriterCryptoHandle handle, SecurityException& ex)
+{
+  if (DDS::HANDLE_NIL == handle) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Crypto Handle");
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  writer_options_.erase(handle);
+  clear_endpoint_data(handle);
   return true;
 }
 
-bool CryptoBuiltInImpl::unregister_datareader(
-  DatareaderCryptoHandle datareader_crypto_handle,
-  SecurityException& ex)
+bool CryptoBuiltInImpl::unregister_datareader(DatareaderCryptoHandle handle, SecurityException& ex)
 {
-  ACE_UNUSED_ARG(datareader_crypto_handle);
-  ACE_UNUSED_ARG(ex);
+  if (DDS::HANDLE_NIL == handle) {
+    CommonUtilities::set_security_error(ex, -1, 0, "Invalid Crypto Handle");
+    return false;
+  }
 
-  // The stub will always succeed here
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  clear_endpoint_data(handle);
   return true;
 }
 
@@ -713,16 +732,9 @@ bool CryptoBuiltInImpl::set_remote_datareader_crypto_tokens(
   return true;
 }
 
-bool CryptoBuiltInImpl::return_crypto_tokens(
-  const CryptoTokenSeq& crypto_tokens,
-  SecurityException& ex)
+bool CryptoBuiltInImpl::return_crypto_tokens(const CryptoTokenSeq&, SecurityException&)
 {
-  ACE_UNUSED_ARG(crypto_tokens);
-  ACE_UNUSED_ARG(ex);
-
-  // The stub implementation will always succeed here
-  bool results = true;
-  return results;
+  return true;
 }
 
 

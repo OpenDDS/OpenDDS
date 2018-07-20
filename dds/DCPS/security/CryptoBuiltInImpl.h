@@ -265,6 +265,8 @@ private:
   typedef std::map<KeyId_t, Session> SessionTable_t;
   SessionTable_t sessions_;
 
+  void clear_endpoint_data(DDS::Security::NativeCryptoHandle handle);
+
   bool encode_submessage(DDS::OctetSeq& encoded_rtps_submessage,
                          const DDS::OctetSeq& plain_rtps_submessage,
                          DDS::Security::NativeCryptoHandle sender_handle,

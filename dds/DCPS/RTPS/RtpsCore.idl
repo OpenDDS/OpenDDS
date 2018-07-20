@@ -253,7 +253,7 @@ module OpenDDS {
     //   (the following constants are in the same order as Table 9.14)
     const ParameterId_t PID_CONTENT_FILTER_INFO = 0x0055;
     const ParameterId_t PID_COHERENT_SET = 0x0056;
-    // PID_DIRECTED_WRITE is not supported (RTPS 2.4 will deprecate it?)
+    // PID_DIRECTED_WRITE is not supported
     //    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
     const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
 
