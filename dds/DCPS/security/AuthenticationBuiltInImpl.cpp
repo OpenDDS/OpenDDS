@@ -185,11 +185,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
     OpenDDS::Security::TokenWriter identity_stat_wrapper(identity_status_token, Identity_Status_Token_Class_Id);
-    identity_stat_wrapper.add_property("dds.ocps_status", "TBD");
+    identity_stat_wrapper.add_property("dds.ocps_status", "OCSP not yet supported");
 
     status = true;
   } else {
-    // No real information on what should be in these security exceptions
     set_security_error(ex, -1, 0, "Unknown Identity handle");
   }
 
@@ -212,10 +211,9 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
       local_data->permissions_cred_token = permissions_credential;
       local_data->permissions_token = permissions_token;
     }
-
     status = true;
+
   } else {
-    // TBD - Need definition on what to put into this
     set_security_error(ex, -1, 0, "Identity handle not recognized");
   }
   return status;
