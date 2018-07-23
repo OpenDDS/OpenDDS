@@ -6,8 +6,15 @@ NL / SL / EL / SOL / EOL : Not protected / Signed / Encrypted / Signed with Orig
 NR / SR / ER / SOR / EOR : Not protected / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication RTPS
 
 Naming for Topics:
-OD / PD            : Open / Protected Discovery
-OA / RA / WA / RWA : Open / Read / Write / ReadWrite Access
-OM / SM / EM       : Open / Signed / Encrypted Meta-data
-OD / SD / ED       : Open / Signed / Encrypted Data
+OD / PD                  : Open / Protected Discovery
+OL / PL                  : Open / Protected Liveliness
+OA / RA / WA / RWA       : Open / Read / Write / ReadWrite Access
+OM / SM / EM / SOM / EOM : Open / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication Meta-data
+OD / SD / ED             : Open / Signed / Encrypted Data
+
+Note:
+Governance files in the governance directory have been automatically generated using "governance/gov_gen.cpp".
+
+In the unlikely event you need to build gov_gen, you should be able to simply run g++ to build it:
+g++ -o gov_gen gov_gen.cpp -Wall -pedantic -std=c++11
 
