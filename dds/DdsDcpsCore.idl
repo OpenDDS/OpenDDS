@@ -50,8 +50,7 @@ module DDS {
     const unsigned long DURATION_ZERO_NSEC = 0;
 
     // Property_t, PropertySeq, BinaryProperty_t, BinaryPropertySeq, and PropertyQosPolicy
-    // are all part of the security specification. Once struct inheritance from IDL v4 has
-    // been implemented they can all be moved to dds/DCPS/security/DdsSecurityCore.idl.
+    // are all part of the security specification (ptc/2017-09-26).
     // These structs/typedefs are in this file to satisfy dependencies for
     // DomainParticipantQos (which was extended in the security specification).
     struct Property_t {
@@ -59,14 +58,14 @@ module DDS {
       string value;
       boolean propagate;
     };
-    typedef sequence< Property_t >  PropertySeq;
+    typedef sequence<Property_t> PropertySeq;
 
     struct BinaryProperty_t {
       string name;
       OctetSeq value;
       boolean propagate;
     };
-    typedef sequence< BinaryProperty_t >  BinaryPropertySeq;
+    typedef sequence<BinaryProperty_t> BinaryPropertySeq;
 
     //@extensibility(APPENDABLE)
     struct PropertyQosPolicy {
@@ -284,12 +283,7 @@ module DDS {
     struct DomainParticipantQos {
                 UserDataQosPolicy user_data;
                 EntityFactoryQosPolicy entity_factory;
-                // TODO: PENDING IDL V4 INHERITANCE
-                // Once structure inheritance from IDL v4 is implemented this can be
-                // moved into the IDL struct DDS::Security::DomainParticipantQos
-                // located within dds/DCPS/security/DdsSecurityCore.idl. See the
-                // OMG reference implementation (dds_security_plugins_spis.idl).
-                PropertyQosPolicy  property;
+                PropertyQosPolicy property; // DDS-Security 1.1 ptc/2017-09-26
                 };
 
     struct BuiltinTopicKey_t {
