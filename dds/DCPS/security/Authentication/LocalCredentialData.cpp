@@ -141,9 +141,6 @@ bool LocalAuthCredentialData::load(const DDS::PropertySeq& props, DDS::Security:
     CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant private-key");
     return false;
 
-  } else if (0 == access_permissions_.length()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load access permissions document");
-    return false;
   }
 
   return true;
