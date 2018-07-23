@@ -6,7 +6,7 @@
 */
 
 #include "dds/DCPS/security/TokenReader.h"
-#include "dds/DCPS/sequence_iterator.h"
+#include "dds/DCPS/SequenceIterator.h"
 #include <algorithm>
 
 using namespace OpenDDS::DCPS;

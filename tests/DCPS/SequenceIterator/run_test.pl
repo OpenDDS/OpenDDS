@@ -10,6 +10,6 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-$test->process('test', 'sequence_iterator_test');
+$test->process('test', 'SequenceIteratorTest');
 $test->start_process('test');
 exit $test->finish(60);

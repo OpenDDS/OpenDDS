@@ -1,7 +1,7 @@
 
 #include "gtest/gtest.h"
 #include "dds/DdsDcpsCoreC.h"
-#include "dds/DCPS/sequence_iterator.h"
+#include "dds/DCPS/SequenceIterator.h"
 #include <vector>
 #include <algorithm>
 

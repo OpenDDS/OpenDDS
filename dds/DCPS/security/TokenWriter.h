@@ -10,9 +10,8 @@
 #ifndef DDS_DCPS_TOKEN_WRITER_IMPL_H
 #define DDS_DCPS_TOKEN_WRITER_IMPL_H
 
-#include "dds/DCPS/sequence_iterator.h"
 #include "dds/DCPS/security/DdsSecurity_Export.h"
-
+#include "dds/DCPS/SequenceIterator.h"
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "TokenReader.h"
