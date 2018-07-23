@@ -4,14 +4,15 @@
  */
 
 #include "LocalCredentialData.h"
+#include "dds/DCPS/security/CommonUtilities.h"
 
 namespace OpenDDS {
 namespace Security {
 
-    LocalAccessCredentialData::LocalAccessCredentialData(const DDS::PropertySeq& props)
-    {
-      load(props);
-    }
+    //LocalAccessCredentialData::LocalAccessCredentialData(const DDS::PropertySeq& props)
+    //{
+    //  load(props);
+    //}
 
     LocalAccessCredentialData::LocalAccessCredentialData()
     {
@@ -23,7 +24,8 @@ namespace Security {
 
     }
 
-    int LocalAccessCredentialData::load(const DDS::PropertySeq& props)
+    CORBA::Boolean LocalAccessCredentialData::load(const DDS::PropertySeq& props,
+                                                   ::DDS::Security::SecurityException& ex)
     {
       const std::string file("file:");
       bool permission = false,
@@ -41,13 +43,15 @@ namespace Security {
 
               if (!fn.empty()) {
                 if (!file_exists(fn)) {
-                  return 1;
+                  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate file could not be found");
+                  return false;
                 }
               }
             }
           }
           else {
-            return 4;
+            CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate filename not provided");
+            return false;
           }
 
           ca_cert_.reset(new SSL::Certificate(value));
@@ -59,13 +63,15 @@ namespace Security {
 
               if (!fn.empty()) {
                 if (!file_exists(fn)) {
-                  return 2;
+                  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance file could not be found");
+                  return false;
                 }
               }
             }
           }
           else {
-            return 5;
+            CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance filename not provided");
+            return false;
           }
 
           governance_doc_.reset(new SSL::SignedDocument(value));
@@ -77,13 +83,15 @@ namespace Security {
 
               if (!fn.empty()) {
                 if (!file_exists(fn)) {
-                  return 3;
+                  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions file could not be found");
+                  return false;
                 }
               }
             }
           }
           else {
-            return 6;
+            CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions filename not provided");
+            return false;
           }
 
           permissions_doc_.reset(new SSL::SignedDocument(value));
@@ -94,19 +102,22 @@ namespace Security {
       // If props did not have all 3 properties in it, set the missing properties to an empty string
       if (props.length() != 3) {
         if (!permission) {
-          return 7;
+          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate data not provided");
+          return false;
         }
 
         if (!governance) {
-          return 8;
+          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance data not provided");
+          return false;
         }
 
         if (!ca) {
-          return 9;
+          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions data not provided");
+          return false;
         }
       }
 
-      return 0;
+      return true;
     }
 
     std::string LocalAccessCredentialData::extract_file_name(const std::string & file_parm)
