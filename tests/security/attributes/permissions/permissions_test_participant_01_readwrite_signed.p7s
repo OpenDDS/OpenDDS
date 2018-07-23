@@ -1,9 +1,9 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----7B902E8F250CAA31402EE32F07D339F6"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----5ADC5BC9C7B4394FA9C8BBD1B6CEE617"
 
 This is an S/MIME signed message
 
-------7B902E8F250CAA31402EE32F07D339F6
+------5ADC5BC9C7B4394FA9C8BBD1B6CEE617
 Content-Type: text/plain
 
 <?xml version="1.0"?>
@@ -22,89 +22,498 @@ Content-Type: text/plain
           <id>0</id>
         </domains>
         <!-- Naming for Topics (see governance xml files)
-          OD / PD            : Open / Protected Discovery
-          OA / RA / WA / RWA : Open / Read / Write / ReadWrite Access
-          OM / SM / EM       : Open / Signed / Encrypted Meta-data
-          OD / SD / ED       : Open / Signed / Encrypted Data
+          OD / PD                  : Open / Protected Discovery
+          OL / PL                  : Open / Protected Liveliness
+          OA / RA / WA / RWA       : Open / Read / Write / ReadWrite Access
+          OM / SM / EM / SOM / EOM : Open / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication Meta-data
+          OD / SD / ED             : Open / Signed / Encrypted Data
         -->
         <publish>
           <topics>
-            <topic>OD_RWA_EM_ED</topic>
-            <topic>OD_RWA_EM_OD</topic>
-            <topic>OD_RWA_EM_SD</topic>
-            <topic>OD_RWA_OM_ED</topic>
-            <topic>OD_RWA_OM_OD</topic>
-            <topic>OD_RWA_OM_SD</topic>
-            <topic>OD_RWA_SM_ED</topic>
-            <topic>OD_RWA_SM_OD</topic>
-            <topic>OD_RWA_SM_SD</topic>
-            <topic>OD_WA_EM_ED</topic>
-            <topic>OD_WA_EM_OD</topic>
-            <topic>OD_WA_EM_SD</topic>
-            <topic>OD_WA_OM_ED</topic>
-            <topic>OD_WA_OM_OD</topic>
-            <topic>OD_WA_OM_SD</topic>
-            <topic>OD_WA_SM_ED</topic>
-            <topic>OD_WA_SM_OD</topic>
-            <topic>OD_WA_SM_SD</topic>
-            <topic>PD_RWA_EM_ED</topic>
-            <topic>PD_RWA_EM_OD</topic>
-            <topic>PD_RWA_EM_SD</topic>
-            <topic>PD_RWA_OM_ED</topic>
-            <topic>PD_RWA_OM_OD</topic>
-            <topic>PD_RWA_OM_SD</topic>
-            <topic>PD_RWA_SM_ED</topic>
-            <topic>PD_RWA_SM_OD</topic>
-            <topic>PD_RWA_SM_SD</topic>
-            <topic>PD_WA_EM_ED</topic>
-            <topic>PD_WA_EM_OD</topic>
-            <topic>PD_WA_EM_SD</topic>
-            <topic>PD_WA_OM_ED</topic>
-            <topic>PD_WA_OM_OD</topic>
-            <topic>PD_WA_OM_SD</topic>
-            <topic>PD_WA_SM_ED</topic>
-            <topic>PD_WA_SM_OD</topic>
-            <topic>PD_WA_SM_SD</topic>
+            <topic>OD_OL_OA_OM_OD</topic>
+            <topic>OD_OL_OA_OM_SD</topic>
+            <topic>OD_OL_OA_OM_ED</topic>
+            <topic>OD_OL_OA_SM_OD</topic>
+            <topic>OD_OL_OA_SM_SD</topic>
+            <topic>OD_OL_OA_SM_ED</topic>
+            <topic>OD_OL_OA_EM_OD</topic>
+            <topic>OD_OL_OA_EM_SD</topic>
+            <topic>OD_OL_OA_EM_ED</topic>
+            <topic>OD_OL_OA_SOM_OD</topic>
+            <topic>OD_OL_OA_SOM_SD</topic>
+            <topic>OD_OL_OA_SOM_ED</topic>
+            <topic>OD_OL_OA_EOM_OD</topic>
+            <topic>OD_OL_OA_EOM_SD</topic>
+            <topic>OD_OL_OA_EOM_ED</topic>
+            <topic>OD_OL_WA_OM_OD</topic>
+            <topic>OD_OL_WA_OM_SD</topic>
+            <topic>OD_OL_WA_OM_ED</topic>
+            <topic>OD_OL_WA_SM_OD</topic>
+            <topic>OD_OL_WA_SM_SD</topic>
+            <topic>OD_OL_WA_SM_ED</topic>
+            <topic>OD_OL_WA_EM_OD</topic>
+            <topic>OD_OL_WA_EM_SD</topic>
+            <topic>OD_OL_WA_EM_ED</topic>
+            <topic>OD_OL_WA_SOM_OD</topic>
+            <topic>OD_OL_WA_SOM_SD</topic>
+            <topic>OD_OL_WA_SOM_ED</topic>
+            <topic>OD_OL_WA_EOM_OD</topic>
+            <topic>OD_OL_WA_EOM_SD</topic>
+            <topic>OD_OL_WA_EOM_ED</topic>
+            <topic>OD_OL_RA_OM_OD</topic>
+            <topic>OD_OL_RA_OM_SD</topic>
+            <topic>OD_OL_RA_OM_ED</topic>
+            <topic>OD_OL_RA_SM_OD</topic>
+            <topic>OD_OL_RA_SM_SD</topic>
+            <topic>OD_OL_RA_SM_ED</topic>
+            <topic>OD_OL_RA_EM_OD</topic>
+            <topic>OD_OL_RA_EM_SD</topic>
+            <topic>OD_OL_RA_EM_ED</topic>
+            <topic>OD_OL_RA_SOM_OD</topic>
+            <topic>OD_OL_RA_SOM_SD</topic>
+            <topic>OD_OL_RA_SOM_ED</topic>
+            <topic>OD_OL_RA_EOM_OD</topic>
+            <topic>OD_OL_RA_EOM_SD</topic>
+            <topic>OD_OL_RA_EOM_ED</topic>
+            <topic>OD_OL_RWA_OM_OD</topic>
+            <topic>OD_OL_RWA_OM_SD</topic>
+            <topic>OD_OL_RWA_OM_ED</topic>
+            <topic>OD_OL_RWA_SM_OD</topic>
+            <topic>OD_OL_RWA_SM_SD</topic>
+            <topic>OD_OL_RWA_SM_ED</topic>
+            <topic>OD_OL_RWA_EM_OD</topic>
+            <topic>OD_OL_RWA_EM_SD</topic>
+            <topic>OD_OL_RWA_EM_ED</topic>
+            <topic>OD_OL_RWA_SOM_OD</topic>
+            <topic>OD_OL_RWA_SOM_SD</topic>
+            <topic>OD_OL_RWA_SOM_ED</topic>
+            <topic>OD_OL_RWA_EOM_OD</topic>
+            <topic>OD_OL_RWA_EOM_SD</topic>
+            <topic>OD_OL_RWA_EOM_ED</topic>
+            <topic>OD_PL_OA_OM_OD</topic>
+            <topic>OD_PL_OA_OM_SD</topic>
+            <topic>OD_PL_OA_OM_ED</topic>
+            <topic>OD_PL_OA_SM_OD</topic>
+            <topic>OD_PL_OA_SM_SD</topic>
+            <topic>OD_PL_OA_SM_ED</topic>
+            <topic>OD_PL_OA_EM_OD</topic>
+            <topic>OD_PL_OA_EM_SD</topic>
+            <topic>OD_PL_OA_EM_ED</topic>
+            <topic>OD_PL_OA_SOM_OD</topic>
+            <topic>OD_PL_OA_SOM_SD</topic>
+            <topic>OD_PL_OA_SOM_ED</topic>
+            <topic>OD_PL_OA_EOM_OD</topic>
+            <topic>OD_PL_OA_EOM_SD</topic>
+            <topic>OD_PL_OA_EOM_ED</topic>
+            <topic>OD_PL_WA_OM_OD</topic>
+            <topic>OD_PL_WA_OM_SD</topic>
+            <topic>OD_PL_WA_OM_ED</topic>
+            <topic>OD_PL_WA_SM_OD</topic>
+            <topic>OD_PL_WA_SM_SD</topic>
+            <topic>OD_PL_WA_SM_ED</topic>
+            <topic>OD_PL_WA_EM_OD</topic>
+            <topic>OD_PL_WA_EM_SD</topic>
+            <topic>OD_PL_WA_EM_ED</topic>
+            <topic>OD_PL_WA_SOM_OD</topic>
+            <topic>OD_PL_WA_SOM_SD</topic>
+            <topic>OD_PL_WA_SOM_ED</topic>
+            <topic>OD_PL_WA_EOM_OD</topic>
+            <topic>OD_PL_WA_EOM_SD</topic>
+            <topic>OD_PL_WA_EOM_ED</topic>
+            <topic>OD_PL_RA_OM_OD</topic>
+            <topic>OD_PL_RA_OM_SD</topic>
+            <topic>OD_PL_RA_OM_ED</topic>
+            <topic>OD_PL_RA_SM_OD</topic>
+            <topic>OD_PL_RA_SM_SD</topic>
+            <topic>OD_PL_RA_SM_ED</topic>
+            <topic>OD_PL_RA_EM_OD</topic>
+            <topic>OD_PL_RA_EM_SD</topic>
+            <topic>OD_PL_RA_EM_ED</topic>
+            <topic>OD_PL_RA_SOM_OD</topic>
+            <topic>OD_PL_RA_SOM_SD</topic>
+            <topic>OD_PL_RA_SOM_ED</topic>
+            <topic>OD_PL_RA_EOM_OD</topic>
+            <topic>OD_PL_RA_EOM_SD</topic>
+            <topic>OD_PL_RA_EOM_ED</topic>
+            <topic>OD_PL_RWA_OM_OD</topic>
+            <topic>OD_PL_RWA_OM_SD</topic>
+            <topic>OD_PL_RWA_OM_ED</topic>
+            <topic>OD_PL_RWA_SM_OD</topic>
+            <topic>OD_PL_RWA_SM_SD</topic>
+            <topic>OD_PL_RWA_SM_ED</topic>
+            <topic>OD_PL_RWA_EM_OD</topic>
+            <topic>OD_PL_RWA_EM_SD</topic>
+            <topic>OD_PL_RWA_EM_ED</topic>
+            <topic>OD_PL_RWA_SOM_OD</topic>
+            <topic>OD_PL_RWA_SOM_SD</topic>
+            <topic>OD_PL_RWA_SOM_ED</topic>
+            <topic>OD_PL_RWA_EOM_OD</topic>
+            <topic>OD_PL_RWA_EOM_SD</topic>
+            <topic>OD_PL_RWA_EOM_ED</topic>
+            <topic>PD_OL_OA_OM_OD</topic>
+            <topic>PD_OL_OA_OM_SD</topic>
+            <topic>PD_OL_OA_OM_ED</topic>
+            <topic>PD_OL_OA_SM_OD</topic>
+            <topic>PD_OL_OA_SM_SD</topic>
+            <topic>PD_OL_OA_SM_ED</topic>
+            <topic>PD_OL_OA_EM_OD</topic>
+            <topic>PD_OL_OA_EM_SD</topic>
+            <topic>PD_OL_OA_EM_ED</topic>
+            <topic>PD_OL_OA_SOM_OD</topic>
+            <topic>PD_OL_OA_SOM_SD</topic>
+            <topic>PD_OL_OA_SOM_ED</topic>
+            <topic>PD_OL_OA_EOM_OD</topic>
+            <topic>PD_OL_OA_EOM_SD</topic>
+            <topic>PD_OL_OA_EOM_ED</topic>
+            <topic>PD_OL_WA_OM_OD</topic>
+            <topic>PD_OL_WA_OM_SD</topic>
+            <topic>PD_OL_WA_OM_ED</topic>
+            <topic>PD_OL_WA_SM_OD</topic>
+            <topic>PD_OL_WA_SM_SD</topic>
+            <topic>PD_OL_WA_SM_ED</topic>
+            <topic>PD_OL_WA_EM_OD</topic>
+            <topic>PD_OL_WA_EM_SD</topic>
+            <topic>PD_OL_WA_EM_ED</topic>
+            <topic>PD_OL_WA_SOM_OD</topic>
+            <topic>PD_OL_WA_SOM_SD</topic>
+            <topic>PD_OL_WA_SOM_ED</topic>
+            <topic>PD_OL_WA_EOM_OD</topic>
+            <topic>PD_OL_WA_EOM_SD</topic>
+            <topic>PD_OL_WA_EOM_ED</topic>
+            <topic>PD_OL_RA_OM_OD</topic>
+            <topic>PD_OL_RA_OM_SD</topic>
+            <topic>PD_OL_RA_OM_ED</topic>
+            <topic>PD_OL_RA_SM_OD</topic>
+            <topic>PD_OL_RA_SM_SD</topic>
+            <topic>PD_OL_RA_SM_ED</topic>
+            <topic>PD_OL_RA_EM_OD</topic>
+            <topic>PD_OL_RA_EM_SD</topic>
+            <topic>PD_OL_RA_EM_ED</topic>
+            <topic>PD_OL_RA_SOM_OD</topic>
+            <topic>PD_OL_RA_SOM_SD</topic>
+            <topic>PD_OL_RA_SOM_ED</topic>
+            <topic>PD_OL_RA_EOM_OD</topic>
+            <topic>PD_OL_RA_EOM_SD</topic>
+            <topic>PD_OL_RA_EOM_ED</topic>
+            <topic>PD_OL_RWA_OM_OD</topic>
+            <topic>PD_OL_RWA_OM_SD</topic>
+            <topic>PD_OL_RWA_OM_ED</topic>
+            <topic>PD_OL_RWA_SM_OD</topic>
+            <topic>PD_OL_RWA_SM_SD</topic>
+            <topic>PD_OL_RWA_SM_ED</topic>
+            <topic>PD_OL_RWA_EM_OD</topic>
+            <topic>PD_OL_RWA_EM_SD</topic>
+            <topic>PD_OL_RWA_EM_ED</topic>
+            <topic>PD_OL_RWA_SOM_OD</topic>
+            <topic>PD_OL_RWA_SOM_SD</topic>
+            <topic>PD_OL_RWA_SOM_ED</topic>
+            <topic>PD_OL_RWA_EOM_OD</topic>
+            <topic>PD_OL_RWA_EOM_SD</topic>
+            <topic>PD_OL_RWA_EOM_ED</topic>
+            <topic>PD_PL_OA_OM_OD</topic>
+            <topic>PD_PL_OA_OM_SD</topic>
+            <topic>PD_PL_OA_OM_ED</topic>
+            <topic>PD_PL_OA_SM_OD</topic>
+            <topic>PD_PL_OA_SM_SD</topic>
+            <topic>PD_PL_OA_SM_ED</topic>
+            <topic>PD_PL_OA_EM_OD</topic>
+            <topic>PD_PL_OA_EM_SD</topic>
+            <topic>PD_PL_OA_EM_ED</topic>
+            <topic>PD_PL_OA_SOM_OD</topic>
+            <topic>PD_PL_OA_SOM_SD</topic>
+            <topic>PD_PL_OA_SOM_ED</topic>
+            <topic>PD_PL_OA_EOM_OD</topic>
+            <topic>PD_PL_OA_EOM_SD</topic>
+            <topic>PD_PL_OA_EOM_ED</topic>
+            <topic>PD_PL_WA_OM_OD</topic>
+            <topic>PD_PL_WA_OM_SD</topic>
+            <topic>PD_PL_WA_OM_ED</topic>
+            <topic>PD_PL_WA_SM_OD</topic>
+            <topic>PD_PL_WA_SM_SD</topic>
+            <topic>PD_PL_WA_SM_ED</topic>
+            <topic>PD_PL_WA_EM_OD</topic>
+            <topic>PD_PL_WA_EM_SD</topic>
+            <topic>PD_PL_WA_EM_ED</topic>
+            <topic>PD_PL_WA_SOM_OD</topic>
+            <topic>PD_PL_WA_SOM_SD</topic>
+            <topic>PD_PL_WA_SOM_ED</topic>
+            <topic>PD_PL_WA_EOM_OD</topic>
+            <topic>PD_PL_WA_EOM_SD</topic>
+            <topic>PD_PL_WA_EOM_ED</topic>
+            <topic>PD_PL_RA_OM_OD</topic>
+            <topic>PD_PL_RA_OM_SD</topic>
+            <topic>PD_PL_RA_OM_ED</topic>
+            <topic>PD_PL_RA_SM_OD</topic>
+            <topic>PD_PL_RA_SM_SD</topic>
+            <topic>PD_PL_RA_SM_ED</topic>
+            <topic>PD_PL_RA_EM_OD</topic>
+            <topic>PD_PL_RA_EM_SD</topic>
+            <topic>PD_PL_RA_EM_ED</topic>
+            <topic>PD_PL_RA_SOM_OD</topic>
+            <topic>PD_PL_RA_SOM_SD</topic>
+            <topic>PD_PL_RA_SOM_ED</topic>
+            <topic>PD_PL_RA_EOM_OD</topic>
+            <topic>PD_PL_RA_EOM_SD</topic>
+            <topic>PD_PL_RA_EOM_ED</topic>
+            <topic>PD_PL_RWA_OM_OD</topic>
+            <topic>PD_PL_RWA_OM_SD</topic>
+            <topic>PD_PL_RWA_OM_ED</topic>
+            <topic>PD_PL_RWA_SM_OD</topic>
+            <topic>PD_PL_RWA_SM_SD</topic>
+            <topic>PD_PL_RWA_SM_ED</topic>
+            <topic>PD_PL_RWA_EM_OD</topic>
+            <topic>PD_PL_RWA_EM_SD</topic>
+            <topic>PD_PL_RWA_EM_ED</topic>
+            <topic>PD_PL_RWA_SOM_OD</topic>
+            <topic>PD_PL_RWA_SOM_SD</topic>
+            <topic>PD_PL_RWA_SOM_ED</topic>
+            <topic>PD_PL_RWA_EOM_OD</topic>
+            <topic>PD_PL_RWA_EOM_SD</topic>
+            <topic>PD_PL_RWA_EOM_ED</topic>
           </topics>
         </publish>
         <subscribe>
           <topics>
-            <topic>OD_RA_EM_ED</topic>
-            <topic>OD_RA_EM_OD</topic>
-            <topic>OD_RA_EM_SD</topic>
-            <topic>OD_RA_OM_ED</topic>
-            <topic>OD_RA_OM_OD</topic>
-            <topic>OD_RA_OM_SD</topic>
-            <topic>OD_RA_SM_ED</topic>
-            <topic>OD_RA_SM_OD</topic>
-            <topic>OD_RA_SM_SD</topic>
-            <topic>OD_RWA_EM_ED</topic>
-            <topic>OD_RWA_EM_OD</topic>
-            <topic>OD_RWA_EM_SD</topic>
-            <topic>OD_RWA_OM_ED</topic>
-            <topic>OD_RWA_OM_OD</topic>
-            <topic>OD_RWA_OM_SD</topic>
-            <topic>OD_RWA_SM_ED</topic>
-            <topic>OD_RWA_SM_OD</topic>
-            <topic>OD_RWA_SM_SD</topic>
-            <topic>PD_RA_EM_ED</topic>
-            <topic>PD_RA_EM_OD</topic>
-            <topic>PD_RA_EM_SD</topic>
-            <topic>PD_RA_OM_ED</topic>
-            <topic>PD_RA_OM_OD</topic>
-            <topic>PD_RA_OM_SD</topic>
-            <topic>PD_RA_SM_ED</topic>
-            <topic>PD_RA_SM_OD</topic>
-            <topic>PD_RA_SM_SD</topic>
-            <topic>PD_RWA_EM_ED</topic>
-            <topic>PD_RWA_EM_OD</topic>
-            <topic>PD_RWA_EM_SD</topic>
-            <topic>PD_RWA_OM_ED</topic>
-            <topic>PD_RWA_OM_OD</topic>
-            <topic>PD_RWA_OM_SD</topic>
-            <topic>PD_RWA_SM_ED</topic>
-            <topic>PD_RWA_SM_OD</topic>
-            <topic>PD_RWA_SM_SD</topic>
+            <topic>OD_OL_OA_OM_OD</topic>
+            <topic>OD_OL_OA_OM_SD</topic>
+            <topic>OD_OL_OA_OM_ED</topic>
+            <topic>OD_OL_OA_SM_OD</topic>
+            <topic>OD_OL_OA_SM_SD</topic>
+            <topic>OD_OL_OA_SM_ED</topic>
+            <topic>OD_OL_OA_EM_OD</topic>
+            <topic>OD_OL_OA_EM_SD</topic>
+            <topic>OD_OL_OA_EM_ED</topic>
+            <topic>OD_OL_OA_SOM_OD</topic>
+            <topic>OD_OL_OA_SOM_SD</topic>
+            <topic>OD_OL_OA_SOM_ED</topic>
+            <topic>OD_OL_OA_EOM_OD</topic>
+            <topic>OD_OL_OA_EOM_SD</topic>
+            <topic>OD_OL_OA_EOM_ED</topic>
+            <topic>OD_OL_WA_OM_OD</topic>
+            <topic>OD_OL_WA_OM_SD</topic>
+            <topic>OD_OL_WA_OM_ED</topic>
+            <topic>OD_OL_WA_SM_OD</topic>
+            <topic>OD_OL_WA_SM_SD</topic>
+            <topic>OD_OL_WA_SM_ED</topic>
+            <topic>OD_OL_WA_EM_OD</topic>
+            <topic>OD_OL_WA_EM_SD</topic>
+            <topic>OD_OL_WA_EM_ED</topic>
+            <topic>OD_OL_WA_SOM_OD</topic>
+            <topic>OD_OL_WA_SOM_SD</topic>
+            <topic>OD_OL_WA_SOM_ED</topic>
+            <topic>OD_OL_WA_EOM_OD</topic>
+            <topic>OD_OL_WA_EOM_SD</topic>
+            <topic>OD_OL_WA_EOM_ED</topic>
+            <topic>OD_OL_RA_OM_OD</topic>
+            <topic>OD_OL_RA_OM_SD</topic>
+            <topic>OD_OL_RA_OM_ED</topic>
+            <topic>OD_OL_RA_SM_OD</topic>
+            <topic>OD_OL_RA_SM_SD</topic>
+            <topic>OD_OL_RA_SM_ED</topic>
+            <topic>OD_OL_RA_EM_OD</topic>
+            <topic>OD_OL_RA_EM_SD</topic>
+            <topic>OD_OL_RA_EM_ED</topic>
+            <topic>OD_OL_RA_SOM_OD</topic>
+            <topic>OD_OL_RA_SOM_SD</topic>
+            <topic>OD_OL_RA_SOM_ED</topic>
+            <topic>OD_OL_RA_EOM_OD</topic>
+            <topic>OD_OL_RA_EOM_SD</topic>
+            <topic>OD_OL_RA_EOM_ED</topic>
+            <topic>OD_OL_RWA_OM_OD</topic>
+            <topic>OD_OL_RWA_OM_SD</topic>
+            <topic>OD_OL_RWA_OM_ED</topic>
+            <topic>OD_OL_RWA_SM_OD</topic>
+            <topic>OD_OL_RWA_SM_SD</topic>
+            <topic>OD_OL_RWA_SM_ED</topic>
+            <topic>OD_OL_RWA_EM_OD</topic>
+            <topic>OD_OL_RWA_EM_SD</topic>
+            <topic>OD_OL_RWA_EM_ED</topic>
+            <topic>OD_OL_RWA_SOM_OD</topic>
+            <topic>OD_OL_RWA_SOM_SD</topic>
+            <topic>OD_OL_RWA_SOM_ED</topic>
+            <topic>OD_OL_RWA_EOM_OD</topic>
+            <topic>OD_OL_RWA_EOM_SD</topic>
+            <topic>OD_OL_RWA_EOM_ED</topic>
+            <topic>OD_PL_OA_OM_OD</topic>
+            <topic>OD_PL_OA_OM_SD</topic>
+            <topic>OD_PL_OA_OM_ED</topic>
+            <topic>OD_PL_OA_SM_OD</topic>
+            <topic>OD_PL_OA_SM_SD</topic>
+            <topic>OD_PL_OA_SM_ED</topic>
+            <topic>OD_PL_OA_EM_OD</topic>
+            <topic>OD_PL_OA_EM_SD</topic>
+            <topic>OD_PL_OA_EM_ED</topic>
+            <topic>OD_PL_OA_SOM_OD</topic>
+            <topic>OD_PL_OA_SOM_SD</topic>
+            <topic>OD_PL_OA_SOM_ED</topic>
+            <topic>OD_PL_OA_EOM_OD</topic>
+            <topic>OD_PL_OA_EOM_SD</topic>
+            <topic>OD_PL_OA_EOM_ED</topic>
+            <topic>OD_PL_WA_OM_OD</topic>
+            <topic>OD_PL_WA_OM_SD</topic>
+            <topic>OD_PL_WA_OM_ED</topic>
+            <topic>OD_PL_WA_SM_OD</topic>
+            <topic>OD_PL_WA_SM_SD</topic>
+            <topic>OD_PL_WA_SM_ED</topic>
+            <topic>OD_PL_WA_EM_OD</topic>
+            <topic>OD_PL_WA_EM_SD</topic>
+            <topic>OD_PL_WA_EM_ED</topic>
+            <topic>OD_PL_WA_SOM_OD</topic>
+            <topic>OD_PL_WA_SOM_SD</topic>
+            <topic>OD_PL_WA_SOM_ED</topic>
+            <topic>OD_PL_WA_EOM_OD</topic>
+            <topic>OD_PL_WA_EOM_SD</topic>
+            <topic>OD_PL_WA_EOM_ED</topic>
+            <topic>OD_PL_RA_OM_OD</topic>
+            <topic>OD_PL_RA_OM_SD</topic>
+            <topic>OD_PL_RA_OM_ED</topic>
+            <topic>OD_PL_RA_SM_OD</topic>
+            <topic>OD_PL_RA_SM_SD</topic>
+            <topic>OD_PL_RA_SM_ED</topic>
+            <topic>OD_PL_RA_EM_OD</topic>
+            <topic>OD_PL_RA_EM_SD</topic>
+            <topic>OD_PL_RA_EM_ED</topic>
+            <topic>OD_PL_RA_SOM_OD</topic>
+            <topic>OD_PL_RA_SOM_SD</topic>
+            <topic>OD_PL_RA_SOM_ED</topic>
+            <topic>OD_PL_RA_EOM_OD</topic>
+            <topic>OD_PL_RA_EOM_SD</topic>
+            <topic>OD_PL_RA_EOM_ED</topic>
+            <topic>OD_PL_RWA_OM_OD</topic>
+            <topic>OD_PL_RWA_OM_SD</topic>
+            <topic>OD_PL_RWA_OM_ED</topic>
+            <topic>OD_PL_RWA_SM_OD</topic>
+            <topic>OD_PL_RWA_SM_SD</topic>
+            <topic>OD_PL_RWA_SM_ED</topic>
+            <topic>OD_PL_RWA_EM_OD</topic>
+            <topic>OD_PL_RWA_EM_SD</topic>
+            <topic>OD_PL_RWA_EM_ED</topic>
+            <topic>OD_PL_RWA_SOM_OD</topic>
+            <topic>OD_PL_RWA_SOM_SD</topic>
+            <topic>OD_PL_RWA_SOM_ED</topic>
+            <topic>OD_PL_RWA_EOM_OD</topic>
+            <topic>OD_PL_RWA_EOM_SD</topic>
+            <topic>OD_PL_RWA_EOM_ED</topic>
+            <topic>PD_OL_OA_OM_OD</topic>
+            <topic>PD_OL_OA_OM_SD</topic>
+            <topic>PD_OL_OA_OM_ED</topic>
+            <topic>PD_OL_OA_SM_OD</topic>
+            <topic>PD_OL_OA_SM_SD</topic>
+            <topic>PD_OL_OA_SM_ED</topic>
+            <topic>PD_OL_OA_EM_OD</topic>
+            <topic>PD_OL_OA_EM_SD</topic>
+            <topic>PD_OL_OA_EM_ED</topic>
+            <topic>PD_OL_OA_SOM_OD</topic>
+            <topic>PD_OL_OA_SOM_SD</topic>
+            <topic>PD_OL_OA_SOM_ED</topic>
+            <topic>PD_OL_OA_EOM_OD</topic>
+            <topic>PD_OL_OA_EOM_SD</topic>
+            <topic>PD_OL_OA_EOM_ED</topic>
+            <topic>PD_OL_WA_OM_OD</topic>
+            <topic>PD_OL_WA_OM_SD</topic>
+            <topic>PD_OL_WA_OM_ED</topic>
+            <topic>PD_OL_WA_SM_OD</topic>
+            <topic>PD_OL_WA_SM_SD</topic>
+            <topic>PD_OL_WA_SM_ED</topic>
+            <topic>PD_OL_WA_EM_OD</topic>
+            <topic>PD_OL_WA_EM_SD</topic>
+            <topic>PD_OL_WA_EM_ED</topic>
+            <topic>PD_OL_WA_SOM_OD</topic>
+            <topic>PD_OL_WA_SOM_SD</topic>
+            <topic>PD_OL_WA_SOM_ED</topic>
+            <topic>PD_OL_WA_EOM_OD</topic>
+            <topic>PD_OL_WA_EOM_SD</topic>
+            <topic>PD_OL_WA_EOM_ED</topic>
+            <topic>PD_OL_RA_OM_OD</topic>
+            <topic>PD_OL_RA_OM_SD</topic>
+            <topic>PD_OL_RA_OM_ED</topic>
+            <topic>PD_OL_RA_SM_OD</topic>
+            <topic>PD_OL_RA_SM_SD</topic>
+            <topic>PD_OL_RA_SM_ED</topic>
+            <topic>PD_OL_RA_EM_OD</topic>
+            <topic>PD_OL_RA_EM_SD</topic>
+            <topic>PD_OL_RA_EM_ED</topic>
+            <topic>PD_OL_RA_SOM_OD</topic>
+            <topic>PD_OL_RA_SOM_SD</topic>
+            <topic>PD_OL_RA_SOM_ED</topic>
+            <topic>PD_OL_RA_EOM_OD</topic>
+            <topic>PD_OL_RA_EOM_SD</topic>
+            <topic>PD_OL_RA_EOM_ED</topic>
+            <topic>PD_OL_RWA_OM_OD</topic>
+            <topic>PD_OL_RWA_OM_SD</topic>
+            <topic>PD_OL_RWA_OM_ED</topic>
+            <topic>PD_OL_RWA_SM_OD</topic>
+            <topic>PD_OL_RWA_SM_SD</topic>
+            <topic>PD_OL_RWA_SM_ED</topic>
+            <topic>PD_OL_RWA_EM_OD</topic>
+            <topic>PD_OL_RWA_EM_SD</topic>
+            <topic>PD_OL_RWA_EM_ED</topic>
+            <topic>PD_OL_RWA_SOM_OD</topic>
+            <topic>PD_OL_RWA_SOM_SD</topic>
+            <topic>PD_OL_RWA_SOM_ED</topic>
+            <topic>PD_OL_RWA_EOM_OD</topic>
+            <topic>PD_OL_RWA_EOM_SD</topic>
+            <topic>PD_OL_RWA_EOM_ED</topic>
+            <topic>PD_PL_OA_OM_OD</topic>
+            <topic>PD_PL_OA_OM_SD</topic>
+            <topic>PD_PL_OA_OM_ED</topic>
+            <topic>PD_PL_OA_SM_OD</topic>
+            <topic>PD_PL_OA_SM_SD</topic>
+            <topic>PD_PL_OA_SM_ED</topic>
+            <topic>PD_PL_OA_EM_OD</topic>
+            <topic>PD_PL_OA_EM_SD</topic>
+            <topic>PD_PL_OA_EM_ED</topic>
+            <topic>PD_PL_OA_SOM_OD</topic>
+            <topic>PD_PL_OA_SOM_SD</topic>
+            <topic>PD_PL_OA_SOM_ED</topic>
+            <topic>PD_PL_OA_EOM_OD</topic>
+            <topic>PD_PL_OA_EOM_SD</topic>
+            <topic>PD_PL_OA_EOM_ED</topic>
+            <topic>PD_PL_WA_OM_OD</topic>
+            <topic>PD_PL_WA_OM_SD</topic>
+            <topic>PD_PL_WA_OM_ED</topic>
+            <topic>PD_PL_WA_SM_OD</topic>
+            <topic>PD_PL_WA_SM_SD</topic>
+            <topic>PD_PL_WA_SM_ED</topic>
+            <topic>PD_PL_WA_EM_OD</topic>
+            <topic>PD_PL_WA_EM_SD</topic>
+            <topic>PD_PL_WA_EM_ED</topic>
+            <topic>PD_PL_WA_SOM_OD</topic>
+            <topic>PD_PL_WA_SOM_SD</topic>
+            <topic>PD_PL_WA_SOM_ED</topic>
+            <topic>PD_PL_WA_EOM_OD</topic>
+            <topic>PD_PL_WA_EOM_SD</topic>
+            <topic>PD_PL_WA_EOM_ED</topic>
+            <topic>PD_PL_RA_OM_OD</topic>
+            <topic>PD_PL_RA_OM_SD</topic>
+            <topic>PD_PL_RA_OM_ED</topic>
+            <topic>PD_PL_RA_SM_OD</topic>
+            <topic>PD_PL_RA_SM_SD</topic>
+            <topic>PD_PL_RA_SM_ED</topic>
+            <topic>PD_PL_RA_EM_OD</topic>
+            <topic>PD_PL_RA_EM_SD</topic>
+            <topic>PD_PL_RA_EM_ED</topic>
+            <topic>PD_PL_RA_SOM_OD</topic>
+            <topic>PD_PL_RA_SOM_SD</topic>
+            <topic>PD_PL_RA_SOM_ED</topic>
+            <topic>PD_PL_RA_EOM_OD</topic>
+            <topic>PD_PL_RA_EOM_SD</topic>
+            <topic>PD_PL_RA_EOM_ED</topic>
+            <topic>PD_PL_RWA_OM_OD</topic>
+            <topic>PD_PL_RWA_OM_SD</topic>
+            <topic>PD_PL_RWA_OM_ED</topic>
+            <topic>PD_PL_RWA_SM_OD</topic>
+            <topic>PD_PL_RWA_SM_SD</topic>
+            <topic>PD_PL_RWA_SM_ED</topic>
+            <topic>PD_PL_RWA_EM_OD</topic>
+            <topic>PD_PL_RWA_EM_SD</topic>
+            <topic>PD_PL_RWA_EM_ED</topic>
+            <topic>PD_PL_RWA_SOM_OD</topic>
+            <topic>PD_PL_RWA_SOM_SD</topic>
+            <topic>PD_PL_RWA_SOM_ED</topic>
+            <topic>PD_PL_RWA_EOM_OD</topic>
+            <topic>PD_PL_RWA_EOM_SD</topic>
+            <topic>PD_PL_RWA_EOM_ED</topic>
           </topics>
         </subscribe>
       </allow_rule>
@@ -113,7 +522,7 @@ Content-Type: text/plain
   </permissions>
 </dds>
 
-------7B902E8F250CAA31402EE32F07D339F6
+------5ADC5BC9C7B4394FA9C8BBD1B6CEE617
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -146,16 +555,16 @@ T2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMM
 Jk9iamVjdCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZI
 hvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20CCQCkjopvwK438jANBglg
 hkgBZQMEAgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3
-DQEJBTEPFw0xODA2MTMwNDI2NDBaMC8GCSqGSIb3DQEJBDEiBCAmJ0I6/A4OjXKv
-b4D2R/s9UgYu4EKzBVVqnx6PVYJcFzB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
+DQEJBTEPFw0xODA3MjMxNjUwMTFaMC8GCSqGSIb3DQEJBDEiBCDT9eNBrt1nFvki
+Kcg1zbfOg2igBcGKN4Of2h8iG6no5zB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
 AwQBKjALBglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqG
 SIb3DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIB
-KDANBgkqhkiG9w0BAQEFAASCAQCXVT9zdwJwttkmiO85m11S5or6gg0KsI2T0tTv
-uLBPpxUm7k2HHM5BPOEGJKqfWX8wdKamun6ivv1Ihr/KG3KvqFilhppyFjcz3cLY
-O307Z61ixJrgEDdg/OFyn+GSfffTywRGvvhT4UyUsxT6pvKf5jblmUfiAtiibCZ/
-vZzhjUzG8+gx7WtMeMDbHDfLP71SnvHaaBUzS5yrC0AYk0sIXqCNTpr/33GOPWWH
-lUAnzCeU+CJE1wyrpif6jMEzX6NSIZz2Fz3IPD3cHJVIApLFyNhjnD/BDcDVcWsh
-JK8W3CFScG8ZUZpYCQEnLBnax6shWs6vR7vcLjcZEX8wwLj2
+KDANBgkqhkiG9w0BAQEFAASCAQCDawUi4Wjhj1FNOiVZGoE4lpiiZL5THRYsL1hD
+GZ/81nMH5B+bdqvS5ZTZjFg+uYNDtOktI3ZlAbdgw61BYwZ48Ey14bYsg1l7h0e3
+QlhCt32+0ZNJ3W0eEgtV98At0Czdrlywem0CgF8sqQHEu/qvtZS4HtJVv6qSlWQV
+w01Cy92CFhcOPowoVK0earOWCzL0EiG7ADbH7ozkBsUnxwIPAKka3FXf+wJUTPFU
+IZJS3NIB9NLdF3tSjWGkZhGlJcDVmW500hcCmrie7kL6B5T/uczojmcqn0i6Z5aY
+wtoLRl3zzRj7ws8PT5kOtxnFJD2e2EhRxXvB1AC3+BPzoIwu
 
-------7B902E8F250CAA31402EE32F07D339F6--
+------5ADC5BC9C7B4394FA9C8BBD1B6CEE617--
 
