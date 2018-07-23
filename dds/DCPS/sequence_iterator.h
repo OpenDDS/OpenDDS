@@ -56,21 +56,27 @@ namespace DCPS {
   struct SequenceIterTraits
   {
     typedef Sequence_ Sequence;
-
-    typedef std::random_access_iterator_tag iterator_category;
     typedef typename Sequence::value_type value_type;
-    typedef int difference_type;
     typedef typename Sequence::value_type* pointer;
     typedef typename Sequence::value_type& reference;
+  };
+
+  template <typename Sequence_>
+  struct ConstSequenceIterTraits
+  {
+    typedef const Sequence_ Sequence;
+    typedef const typename Sequence::value_type value_type;
+    typedef const typename Sequence::value_type* pointer;
+    typedef const typename Sequence::value_type& reference;
   };
 
   template <typename Derived, typename IterTraits>
   struct SequenceIteratorBase
   {
-    typedef typename IterTraits::iterator_category iterator_category;
+    typedef std::random_access_iterator_tag iterator_category;
+    typedef int difference_type;
     typedef typename IterTraits::value_type value_type;
-    typedef typename IterTraits::difference_type difference_type;
-    typedef typename IterTraits::value_type* pointer;
+    typedef typename IterTraits::pointer pointer;
     typedef typename IterTraits::reference reference;
 
     Derived& as_derived() {
@@ -89,9 +95,13 @@ namespace DCPS {
 
     // Forward iterator requirements
 
-    reference operator*() const { return (*seq_)[current_]; }
+    reference operator*() const {
+      return (*seq_)[current_];
+    }
 
-    pointer operator->() const { return &(*seq_)[current_]; }
+    pointer operator->() const {
+      return &(*seq_)[current_];
+    }
 
     Derived& operator++()
     {
@@ -222,27 +232,50 @@ namespace DCPS {
   };
 
   template <typename Sequence>
-  struct SequenceIterator : public SequenceIteratorBase<SequenceIterator<Sequence>, SequenceIterTraits<Sequence> >
+  struct SequenceIterator : public SequenceIteratorBase<SequenceIterator<Sequence>,
+                                                        SequenceIterTraits<Sequence> >
   {
-    typedef SequenceIteratorBase<SequenceIterator<Sequence>, SequenceIterTraits<Sequence> > Base;
+    typedef SequenceIteratorBase<SequenceIterator<Sequence>,
+                                 SequenceIterTraits<Sequence> > Base;
 
     SequenceIterator() : Base() {}
-    SequenceIterator(Sequence& seq) : Base(seq) {}
+    SequenceIterator(typename SequenceIterTraits<Sequence>::Sequence& seq) : Base(seq) {}
   };
 
+  template <typename Sequence>
+  struct ConstSequenceIterator : public SequenceIteratorBase<ConstSequenceIterator<Sequence>,
+                                                             ConstSequenceIterTraits<Sequence> >
+  {
+    typedef SequenceIteratorBase<ConstSequenceIterator<Sequence>,
+                                 ConstSequenceIterTraits<Sequence> > Base;
+
+    ConstSequenceIterator() : Base() {}
+    ConstSequenceIterator(typename ConstSequenceIterTraits<Sequence>::Sequence& seq) : Base(seq) {}
+  };
 
   template <typename Sequence>
-  inline SequenceIterator<Sequence> sequence_begin(Sequence& sequence)
+  inline SequenceIterator<Sequence> sequence_begin(Sequence& seq)
   {
-    return SequenceIterator<Sequence>::Base::begin(sequence);
+    return SequenceIterator<Sequence>::Base::begin(seq);
   }
 
   template <typename Sequence>
-  inline SequenceIterator<Sequence> sequence_end(Sequence& sequence)
+  inline SequenceIterator<Sequence> sequence_end(Sequence& seq)
   {
-    return SequenceIterator<Sequence>::Base::end(sequence);
+    return SequenceIterator<Sequence>::Base::end(seq);
   }
 
+  template <typename Sequence>
+  inline ConstSequenceIterator<Sequence> const_sequence_begin(Sequence& seq)
+  {
+    return ConstSequenceIterator<Sequence>::Base::begin(seq);
+  }
+
+  template <typename Sequence>
+  inline ConstSequenceIterator<Sequence> const_sequence_end(Sequence& seq)
+  {
+    return ConstSequenceIterator<Sequence>::Base::end(seq);
+  }
 }  // namespace DCPS
 }  // namespace OpenDDS
 

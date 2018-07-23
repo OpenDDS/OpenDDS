@@ -9,6 +9,8 @@
 #include "dds/DCPS/sequence_iterator.h"
 #include <algorithm>
 
+using namespace OpenDDS::DCPS;
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -40,14 +42,12 @@ TokenReader::~TokenReader()
 
 const char* TokenReader::get_property_value(const std::string& property_name) const
 {
-  using namespace DCPS;
+  typedef ConstSequenceIterator<const DDS::PropertySeq> iter_t;
+  typedef has_property<const DDS::Property_t> has_property;
 
-  typedef SequenceIterator<DDS::PropertySeq> iter_t;
-  typedef has_property<DDS::Property_t> has_property;
+  iter_t begin = const_sequence_begin(token_ref_.properties),
+         end = const_sequence_end(token_ref_.properties);
 
-  DDS::PropertySeq& props = const_cast<DDS::PropertySeq&>(token_ref_.properties);
-
-  iter_t begin = sequence_begin(props), end = sequence_end(props);
   iter_t result = std::find_if(begin, end, has_property(property_name));
 
   if (result != end) {
@@ -59,14 +59,12 @@ const char* TokenReader::get_property_value(const std::string& property_name) co
 
 const DDS::OctetSeq& TokenReader::get_bin_property_value(const std::string& property_name) const
 {
-  using namespace DCPS;
+  typedef ConstSequenceIterator<const DDS::BinaryPropertySeq> iter_t;
+  typedef has_property<const DDS::BinaryProperty_t> has_property;
 
-  typedef SequenceIterator<DDS::BinaryPropertySeq> iter_t;
-  typedef has_property<DDS::BinaryProperty_t> has_property;
+  iter_t begin = const_sequence_begin(token_ref_.binary_properties),
+         end = const_sequence_end(token_ref_.binary_properties);
 
-  DDS::BinaryPropertySeq& props = const_cast<DDS::BinaryPropertySeq&>(token_ref_.binary_properties);
-
-  iter_t begin = sequence_begin(props), end = sequence_end(props);
   iter_t result = std::find_if(begin, end, has_property(property_name));
 
   if (result != end) {
