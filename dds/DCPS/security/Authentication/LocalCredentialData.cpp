@@ -6,7 +6,7 @@
 #include "LocalCredentialData.h"
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DCPS/debug.h"
-#include "dds/DCPS/sequence_iterator.h"
+#include "dds/DCPS/SequenceIterator.h"
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
@@ -20,7 +20,7 @@ int CredentialHash::operator()(DDS::OctetSeq& dst) const
   const DDS::OctetSeq& topic_data = participant_topic_data_;
 
   DDS::BinaryPropertySeq hash_data;
-  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> inserter(hash_data);
+  DCPS::SequenceBackInsertIterator<DDS::BinaryPropertySeq> inserter(hash_data);
 
   DDS::BinaryProperty_t cid, cperm, cpdata, cdsign_algo, ckagree_algo;
 
@@ -141,9 +141,6 @@ bool LocalAuthCredentialData::load(const DDS::PropertySeq& props, DDS::Security:
     CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant private-key");
     return false;
 
-  } else if (0 == access_permissions_.length()) {
-    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load access permissions document");
-    return false;
   }
 
   return true;

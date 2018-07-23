@@ -43,38 +43,38 @@ if (!($scenario eq "")) {
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_sub") { #SC0 (open domain interop w/ unsecure) : unsecure -> secure
     $sub_cfg_file = "unsec_base.ini";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_pub") { #SC0 (open domain interop w/ unsecure) : secure -> unsecure
     $pub_cfg_file = "unsec_base.ini";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_on") { #SC0 (open domain interop w/ unsecure) : secure -> secure
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_on_ec_pub") { #SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve cert for pub)
     $pub_cert_file = "../certs/identity/test_participant_03_cert.pem";
     $pub_key_file = "../certs/identity/test_participant_03_private_key.pem";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_03_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_on_ec_sub") { #SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve certs for sub)
     $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
     $sub_key_file = "../certs/identity/test_participant_04_private_key.pem";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_04_allowall_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_on_ec_both") { #SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve certs for both)
     $pub_cert_file = "../certs/identity/test_participant_03_cert.pem";
     $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
@@ -83,20 +83,20 @@ if (!($scenario eq "")) {
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_03_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_04_allowall_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC1_sec_off_success") { #SC1 (join controlled domain) : unsecure participants won't check governance
     $pub_cfg_file = "unsec_base.ini";
     $sub_cfg_file = "unsec_base.ini";
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC1_sec_sub_failure") { #SC1 (join controlled domain) : unsecure participants won't authenticate, secure participant ignores unauthenticated
     $pub_cfg_file = "unsec_base.ini";
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
     $pub_expect = "~16";
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_pub_failure") { #SC1 (join controlled domain) : unsecure participants won't authenticate, secure participant ignores unauthenticated
@@ -104,7 +104,7 @@ if (!($scenario eq "")) {
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
     $pub_expect = "~16";
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_bad_cert_failure") { #SC1 (join controlled domain) : secure participants with wrong credentials fail to authenticate
@@ -113,53 +113,53 @@ if (!($scenario eq "")) {
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
     $pub_expect = "~16";
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_bad_perm_1_failure") { #SC1 (join controlled domain) : secure participants with wrong permissions fail to validate
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_join_wrong_signed.p7s"); # permissions domain doesn't match governance
     @sub_perm_files = ("permissions/permissions_test_participant_02_join_wrong_signed.p7s"); # permissions domain doesn't match governance
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
     $pub_expect = "~16";
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_bad_perm_2_failure") { #SC1 (join controlled domain) : secure participants with insufficient permissions fail to pass access control checks
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_join_signed.p7s"); # doesn't have permission to write
     @sub_perm_files = ("permissions/permissions_test_participant_02_join_signed.p7s"); # doesn't have permission to read
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
     $pub_expect = "~16";
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_success") { #SC1 (join controlled domain) : valid participants join and send
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_OM_OD");
+    @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC2") {
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_EM_OD");
+    @topic_names = ("OD_OL_OA_EM_OD");
   } elsif ($scenario eq "SC3") {
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_OM_ED");
+    @topic_names = ("OD_OL_OA_OM_ED");
   } elsif ($scenario eq "SC4") {
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
-    @topic_names = ("OD_OA_SM_OD");
+    @topic_names = ("OD_OL_OA_SM_OD");
   } elsif ($scenario eq "TEST_8_8_5_SUCCESS") {
     @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_write_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_read_signed.p7s");
-    @topic_names = ("OD_RWA_OM_OD");
+    @topic_names = ("OD_OL_RWA_OM_OD");
   } elsif ($scenario eq "TEST_8_8_5_FAILURE") {
     @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_read_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_write_signed.p7s");
-    @topic_names = ("OD_RWA_OM_OD");
+    @topic_names = ("OD_OL_RWA_OM_OD");
     $pub_expect = "~15";
     $sub_expect = "~25";
   } else {

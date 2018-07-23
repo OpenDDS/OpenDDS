@@ -10,9 +10,8 @@
 #ifndef DDS_DCPS_TOKEN_WRITER_IMPL_H
 #define DDS_DCPS_TOKEN_WRITER_IMPL_H
 
-#include "dds/DCPS/sequence_iterator.h"
 #include "dds/DCPS/security/DdsSecurity_Export.h"
-
+#include "dds/DCPS/SequenceIterator.h"
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "TokenReader.h"
@@ -57,8 +56,8 @@ public:
   void add_bin_property(const char* prop_name, const std::string& prop_value, bool propagate = true);
 
 private:
-  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> binary_property_inserter_;
-  DCPS::sequence_back_insert_iterator<DDS::PropertySeq> property_inserter_;
+  DCPS::SequenceBackInsertIterator<DDS::BinaryPropertySeq> binary_property_inserter_;
+  DCPS::SequenceBackInsertIterator<DDS::PropertySeq> property_inserter_;
   DDS::Security::Token& token_ref_;
   OpenDDS::Security::TokenReader reader_;
 };
