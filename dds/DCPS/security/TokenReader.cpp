@@ -42,7 +42,7 @@ const char* TokenReader::get_property_value(const std::string& property_name) co
 {
   using namespace DCPS;
 
-  typedef sequence_iterator<DDS::PropertySeq> iter_t;
+  typedef SequenceIterator<DDS::PropertySeq> iter_t;
   typedef has_property<DDS::Property_t> has_property;
 
   DDS::PropertySeq& props = const_cast<DDS::PropertySeq&>(token_ref_.properties);
@@ -61,7 +61,7 @@ const DDS::OctetSeq& TokenReader::get_bin_property_value(const std::string& prop
 {
   using namespace DCPS;
 
-  typedef sequence_iterator<DDS::BinaryPropertySeq> iter_t;
+  typedef SequenceIterator<DDS::BinaryPropertySeq> iter_t;
   typedef has_property<DDS::BinaryProperty_t> has_property;
 
   DDS::BinaryPropertySeq& props = const_cast<DDS::BinaryPropertySeq&>(token_ref_.binary_properties);

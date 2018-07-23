@@ -13,7 +13,7 @@ TEST(SequenceIteratorTest, Iterator_Concept)
   s.length(1);
   s[0] = 1;
 
-  typedef DCPS::sequence_iterator<DDS::OctetSeq> iter_t;
+  typedef DCPS::SequenceIterator<DDS::OctetSeq> iter_t;
   iter_t i1 = DCPS::sequence_begin(s);
   iter_t i2(i1);
   i1 = i2;
