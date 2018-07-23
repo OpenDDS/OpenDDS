@@ -566,8 +566,9 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
 
+  IdentityHandle mp1_remote_mp2;
   /* Both sides of the handshake validate remote identity */
-  r = auth.validate_remote_identity(mp2.id_handle,
+  r = auth.validate_remote_identity(mp1_remote_mp2,
                                     mp1.auth_request_message_token,
                                     mp2.auth_request_message_token,
                                     mp1.id_handle,
@@ -588,13 +589,14 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
   r = auth.begin_handshake_request(mp1.handshake_handle,
                                    request_token,
                                    mp1.id_handle,
-                                   mp2.id_handle,
+                                   mp1_remote_mp2,
                                    pretend_topic_data1,
                                    ex);
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
-  r = auth.validate_remote_identity(mp1.id_handle,
+  IdentityHandle mp2_remote_mp1;
+  r = auth.validate_remote_identity(mp2_remote_mp1,
                                     mp2.auth_request_message_token,
                                     mp1.auth_request_message_token,
                                     mp2.id_handle,
@@ -614,7 +616,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
 
   r = auth.begin_handshake_reply(mp2.handshake_handle,
                                  reply_token,
-                                 mp1.id_handle,
+                                 mp2_remote_mp1,
                                  mp2.id_handle,
                                  pretend_topic_data2,
                                  ex);

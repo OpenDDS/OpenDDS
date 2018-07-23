@@ -1064,9 +1064,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   const DDS::OctetSeq& cpdata = message_in.get_bin_property_value("c.pdata");
 
-// TODO Reinstate this check after the DDS demo.
-#if 0
-
   std::vector<unsigned char> hash;
   if (0 != remote_cert->subject_name_digest(hash)) {
     set_security_error(ex, -1, 0, "Failed to generate subject-name digest from remote certificate.");
@@ -1076,7 +1073,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   if (! validate_topic_data_guid(cpdata, hash, ex)) {
       return Failure;
   }
-#endif
 
   /* Compute/Store the Diffie-Hellman shared-secret */
 
