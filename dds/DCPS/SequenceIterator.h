@@ -12,11 +12,10 @@
 namespace OpenDDS {
 namespace DCPS {
 
-  template <typename T>
-  class sequence_back_insert_iterator
+  template <typename Sequence>
+  class SequenceBackInsertIterator
   {
    public:
-    typedef sequence_back_insert_iterator Iter_Type;
 
     typedef std::output_iterator_tag iterator_category;
     typedef void value_type;
@@ -24,9 +23,9 @@ namespace DCPS {
     typedef void pointer;
     typedef void reference;
 
-    sequence_back_insert_iterator(T& sequence) : seq_(&sequence) {}
+    SequenceBackInsertIterator(Sequence& seq) : seq_(&seq) {}
 
-    Iter_Type& operator=(const typename T::value_type& value)
+    SequenceBackInsertIterator& operator=(const typename Sequence::value_type& value)
     {
       size_t len = seq_->length();
 
@@ -36,20 +35,20 @@ namespace DCPS {
       return *this;
     }
 
-    Iter_Type& operator*() { return *this; }
+    SequenceBackInsertIterator& operator*() { return *this; }
 
-    Iter_Type& operator++() { return *this; }
+    SequenceBackInsertIterator& operator++() { return *this; }
 
-    Iter_Type operator++(int) { return *this; }
+    SequenceBackInsertIterator operator++(int) { return *this; }
 
    private:
-    T* seq_;
+    Sequence* seq_;
   };
 
-  template <typename T>
-  inline sequence_back_insert_iterator<T> back_inserter(T& sequence)
+  template <typename Sequence>
+  inline SequenceBackInsertIterator<Sequence> back_inserter(Sequence& seq)
   {
-    return sequence_back_insert_iterator<T>(sequence);
+    return SequenceBackInsertIterator<Sequence>(seq);
   }
 
   template <typename Sequence_>

@@ -20,7 +20,7 @@ int CredentialHash::operator()(DDS::OctetSeq& dst) const
   const DDS::OctetSeq& topic_data = participant_topic_data_;
 
   DDS::BinaryPropertySeq hash_data;
-  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> inserter(hash_data);
+  DCPS::SequenceBackInsertIterator<DDS::BinaryPropertySeq> inserter(hash_data);
 
   DDS::BinaryProperty_t cid, cperm, cpdata, cdsign_algo, ckagree_algo;
 

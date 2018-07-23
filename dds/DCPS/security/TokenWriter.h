@@ -56,8 +56,8 @@ public:
   void add_bin_property(const char* prop_name, const std::string& prop_value, bool propagate = true);
 
 private:
-  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> binary_property_inserter_;
-  DCPS::sequence_back_insert_iterator<DDS::PropertySeq> property_inserter_;
+  DCPS::SequenceBackInsertIterator<DDS::BinaryPropertySeq> binary_property_inserter_;
+  DCPS::SequenceBackInsertIterator<DDS::PropertySeq> property_inserter_;
   DDS::Security::Token& token_ref_;
   OpenDDS::Security::TokenReader reader_;
 };

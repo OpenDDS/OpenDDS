@@ -472,7 +472,7 @@ static void make_reply_signature_sequence(const DDS::OctetSeq& hash_c2,
                                           const DDS::OctetSeq& hash_c1,
                                           DDS::BinaryPropertySeq& dst)
 {
-  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> inserter(dst);
+  DCPS::SequenceBackInsertIterator<DDS::BinaryPropertySeq> inserter(dst);
 
   {
     DDS::BinaryProperty_t p;
@@ -531,7 +531,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                                           const DDS::OctetSeq& hash_c2,
                                           DDS::BinaryPropertySeq& dst)
 {
-  DCPS::sequence_back_insert_iterator<DDS::BinaryPropertySeq> inserter(dst);
+  DCPS::SequenceBackInsertIterator<DDS::BinaryPropertySeq> inserter(dst);
 
   {
     DDS::BinaryProperty_t p;
