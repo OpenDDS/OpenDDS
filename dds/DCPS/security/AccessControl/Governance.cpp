@@ -40,7 +40,7 @@ int Governance::load(const SSL::SignedDocument& doc)
 
   DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
 
-  if (parser == NULL) {
+  if (!parser) {
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
       "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Governance XML DOMParser Exception.\n")));
     return -1;
