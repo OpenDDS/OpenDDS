@@ -273,9 +273,6 @@ private:
   RevokePermissionsTimer rp_timer_;
 
   ::CORBA::Long generate_handle();
-  ::CORBA::Boolean file_exists(const std::string&);
-  std::string extract_file_name(const std::string&);
-  std::string get_file_contents(const char *);
 
   ACE_Thread_Mutex handle_mutex_;
   ::CORBA::Long next_handle_;

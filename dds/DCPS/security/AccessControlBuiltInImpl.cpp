@@ -84,8 +84,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
-
   LocalAccessCredentialData::shared_ptr local_access_credential_data = DCPS::make_rch<LocalAccessCredentialData>();
 
   int err = local_access_credential_data->load(participant_qos.property.value);
@@ -183,18 +181,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
 
-  std::string perm_file;
-
-  for (size_t i = 0; i < props.length(); ++i) {
-    const std::string name = props[i].name.in();
-    const std::string value = props[i].value.in();
-
-    if (name == "dds.sec.access.permissions") {
-      perm_file = extract_file_name(value);
-    }
-  }
-
-  pctWriter.add_property("dds.perm.cert", get_file_contents(perm_file.c_str()).c_str());
+  pctWriter.add_property("dds.perm.cert", local_perm.get_original());
 
   // Set and store the permissions token
   DDS::Security::PermissionsToken permissions_token;
@@ -2233,32 +2220,6 @@ void AccessControlBuiltInImpl::parse_class_id(
     plugin_class_name.clear();
   }
 
-}
-
-::CORBA::Boolean AccessControlBuiltInImpl::file_exists(const std::string& name) {
-  struct stat buffer;
-  return (stat (name.c_str(), &buffer) == 0);
-}
-
-std::string AccessControlBuiltInImpl::extract_file_name(const std::string& file_parm) {
-  std::string del = ":";
-  u_long pos = file_parm.find_last_of(del);
-  if ((pos > 0UL) && (pos != file_parm.length() - 1)) {
-    return file_parm.substr(pos + 1);
-  } else {
-    return std::string("");
-  }
-}
-
-std::string AccessControlBuiltInImpl::get_file_contents(const char *filename) {
-  std::ifstream in(filename, std::ios::in | std::ios::binary);
-  if (in) {
-    std::ostringstream contents;
-    contents << in.rdbuf();
-    in.close();
-    return(contents.str());
-  }
-  throw(errno);
 }
 
 AccessControlBuiltInImpl::RevokePermissionsTimer::RevokePermissionsTimer(AccessControlBuiltInImpl& impl)

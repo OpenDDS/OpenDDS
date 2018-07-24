@@ -5,28 +5,32 @@
 
 #include "SignedDocument.h"
 #include "dds/DCPS/security/CommonUtilities.h"
+#include "dds/DCPS/SequenceIterator.h"
 #include "Err.h"
 #include <openssl/pem.h>
 #include <cstring>
 #include <sstream>
+#include <iterator>
+#include <algorithm>
+#include <fstream>
 
 namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
   SignedDocument::SignedDocument(const std::string& uri)
-    : doc_(NULL), content_(NULL), plaintext_("")
+    : doc_(NULL), content_(NULL), original_(), verifiable_("")
   {
     load(uri);
   }
 
   SignedDocument::SignedDocument()
-    : doc_(NULL), content_(NULL), plaintext_("")
+    : doc_(NULL), content_(NULL), original_(), verifiable_("")
   {
   }
 
   SignedDocument::SignedDocument(const DDS::OctetSeq& src)
-    : doc_(NULL), content_(NULL), plaintext_("")
+    : doc_(NULL), content_(NULL), original_(), verifiable_("")
   {
     deserialize(src);
   }
@@ -39,14 +43,19 @@ namespace SSL {
   SignedDocument& SignedDocument::operator=(const SignedDocument& rhs)
   {
     if (this != &rhs) {
-      if (rhs.doc_) {
-        doc_ = PKCS7_dup(rhs.doc_);
-
-      } else {
-        doc_ = NULL;
+      if (0 < rhs.original_.length()) {
+        deserialize(rhs.original_);
       }
     }
     return *this;
+  }
+
+  SignedDocument::SignedDocument(const SignedDocument& rhs)
+  : doc_(NULL), content_(NULL), original_()
+  {
+    if (0 < rhs.original_.length()) {
+      deserialize(rhs.original_);
+    }
   }
 
   void SignedDocument::load(const std::string& uri)
@@ -59,8 +68,7 @@ namespace SSL {
 
     switch (uri_info.scheme) {
       case URI::URI_FILE:
-        doc_ = PKCS7_from_SMIME_file(uri_info.everything_else);
-        if (doc_) cache_plaintext();
+        PKCS7_from_SMIME_file(uri_info.everything_else);
         break;
 
       case URI::URI_DATA:
@@ -77,11 +85,13 @@ namespace SSL {
     }
   }
 
-  void SignedDocument::get_content(std::string& dst) const { dst = plaintext_; }
-
-  const std::string & SignedDocument::get_content() const
+  void SignedDocument::get_original(std::string& dst) const
   {
-    return plaintext_;
+    dst = "";
+
+    std::copy(DCPS::const_sequence_begin(original_),
+              DCPS::const_sequence_end(original_),
+              std::back_inserter(dst));
   }
 
   bool SignedDocument::get_content_minus_smime(std::string & cleaned_content) const
@@ -89,7 +99,7 @@ namespace SSL {
     const std::string start_str("Content-Type: text/plain"), 
                       end_str("dds>");
 
-    cleaned_content = plaintext_;
+    get_original(cleaned_content);
 
     size_t found_begin = cleaned_content.find(start_str);
 
@@ -178,113 +188,66 @@ namespace SSL {
 
   int SignedDocument::verify_signature(const Certificate& ca) const
   {
-    verify_signature_impl verify(doc_, plaintext_);
+    verify_signature_impl verify(doc_, verifiable_);
     return verify(ca);
-  }
-
-  int SignedDocument::serialize(std::vector<unsigned char>& dst) const
-  {
-    int result = 1;
-
-    if (doc_) {
-      BIO* buffer = BIO_new(BIO_s_mem());
-      if (buffer) {
-        if (1 == SMIME_write_PKCS7(buffer, doc_, NULL, 0)) {
-          unsigned char tmp[32] = { 0 };
-          int len = 0;
-          while ((len = BIO_read(buffer, tmp, sizeof(tmp))) > 0) {
-            dst.insert(dst.end(), tmp, tmp + len);
-            result = 0;
-          }
-
-        } else {
-          OPENDDS_SSL_LOG_ERR("failed to write X509 to PEM");
-        }
-
-        BIO_free(buffer);
-
-      } else {
-        OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
-      }
-    }
-
-    return result;
   }
 
   int SignedDocument::serialize(DDS::OctetSeq& dst) const
   {
-    std::vector<unsigned char> tmp;
-    int err = serialize(tmp);
-    if (!err) {
-      dst.length(tmp.size());
-      for (size_t i = 0; i < tmp.size(); ++i) {
-        dst[i] = tmp[i];
-      }
+    std::copy(DCPS::const_sequence_begin(original_),
+              DCPS::const_sequence_end(original_),
+              DCPS::back_inserter(dst));
+
+    if (dst.length() == original_.length()) {
+      return 0;
     }
-    return err;
+
+    return 1;
   }
 
   int SignedDocument::deserialize(const DDS::OctetSeq& src)
   {
-    int result = 1;
-
-    if (!doc_) {
-      if (src.length() > 0) {
-        BIO* buffer = BIO_new(BIO_s_mem());
-        if (buffer) {
-          int len = BIO_write(buffer, src.get_buffer(), src.length());
-          if (len > 0) {
-            doc_ = SMIME_read_PKCS7(buffer, &content_);
-            if (doc_) {
-              result = 0;
-              cache_plaintext();
-
-            } else {
-              OPENDDS_SSL_LOG_ERR("failed to read SMIME from BIO");
-              content_ = NULL;
-            }
-
-          } else {
-            OPENDDS_SSL_LOG_ERR("failed to write OctetSeq to BIO");
-          }
-
-          BIO_free(buffer);
-
-        } else {
-          OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
-        }
-
-      } else {
-        ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, source OctetSeq contains no data\n")));
-      }
-
-    } else {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n")));
+    if (doc_) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n"));
+      return 1;
     }
 
-    return result;
+    // Assume the trailing null is already set
+
+    std::copy(DCPS::const_sequence_begin(src),
+              DCPS::const_sequence_end(src),
+              DCPS::back_inserter(original_));
+
+    if (0 < original_.length()) {
+      PKCS7_from_data(original_);
+    }
+
+    return 0;
   }
 
   int SignedDocument::deserialize(const std::string& src)
   {
     if (doc_) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n")));
+      ACE_ERROR((LM_WARNING, "(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n"));
       return 1;
     }
 
-    doc_ = PKCS7_from_data(src);
-    if (doc_) {
-      return cache_plaintext();
+    DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_);
+    std::copy(src.begin(), src.end(), back_inserter);
 
-    } else {
-      return 1;
+    // To appease the other DDS security implementations
+    *back_inserter = 0u;
+
+    if (0 < original_.length()) {
+      PKCS7_from_data(original_);
+      if (! doc_) {
+        return 1;
+      }
     }
+    return 0;
   }
 
-  int SignedDocument::cache_plaintext()
+  int SignedDocument::cache_verifiable()
   {
     int result = 1;
 
@@ -293,7 +256,7 @@ namespace SSL {
         unsigned char tmp[32] = { 0 };
         int len = 0;
         while ((len = BIO_read(content_, tmp, sizeof(tmp))) > 0) {
-          plaintext_.insert(plaintext_.end(), tmp, tmp + len);
+          verifiable_.insert(verifiable_.end(), tmp, tmp + len);
           result = 0;
         }
 
@@ -310,71 +273,68 @@ namespace SSL {
 
   PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
   {
-    PKCS7* result = NULL;
+    std::ifstream in(path.c_str(), std::ios::binary);
 
-    BIO* filebuf = BIO_new_file(path.c_str(), "rb");
-    if (filebuf) {
-      result = SMIME_read_PKCS7(filebuf, &content_);
-      if (!result) {
-        OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
-        content_ = NULL;
-      }
+    DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_);
 
-      BIO_free(filebuf);
+    std::copy((std::istreambuf_iterator<char>(in)),
+               std::istreambuf_iterator<char>(),
+               back_inserter);
 
-    } else {
-      std::stringstream errmsg;
-      errmsg << "failed to read file '" << path << "' using BIO_new_file";
-      OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
+    // To appease the other DDS security implementations
+    *back_inserter = 0u;
+
+    if (0 < original_.length()) {
+      return PKCS7_from_data(original_);
     }
 
-    return result;
+    return NULL;
   }
 
-  PKCS7* SignedDocument::PKCS7_from_data(const std::string& s_mime_data)
+  PKCS7* SignedDocument::PKCS7_from_data(const DDS::OctetSeq& s_mime_data)
   {
-    DDS::OctetSeq original_bytes;
+    if (doc_) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) SignedDocument::PKCS7_from_data: "
+                 "WARNING: document has already been constructed\n"));
+      return NULL;
+    }
 
-    // The minus 1 is because path contains a comma in element 0 and that
-    // comma is not included in the cert string
-    original_bytes.length(s_mime_data.size() - 1);
-    std::memcpy(original_bytes.get_buffer(), &s_mime_data[1],
-                original_bytes.length());
-
-    // To appease the other DDS security implementations which
-    // append a null byte at the end of the cert.
-    original_bytes.length(original_bytes.length() + 1);
-    original_bytes[original_bytes.length() - 1] = 0;
-
-    PKCS7* result = NULL;
     BIO* filebuf = BIO_new(BIO_s_mem());
 
     if (filebuf) {
-      if (0 >= BIO_write(filebuf, original_bytes.get_buffer(),
-                         original_bytes.length())) {
+      if (0 >= BIO_write(filebuf, s_mime_data.get_buffer(),
+                         s_mime_data.length())) {
         OPENDDS_SSL_LOG_ERR("BIO_write failed");
       }
 
-      result = SMIME_read_PKCS7(filebuf, &content_);
+      doc_ = SMIME_read_PKCS7(filebuf, &content_);
 
-      if (!result) {
+      if (!doc_) {
         OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
         content_ = NULL;
       }
 
+      if (0 != cache_verifiable()) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) SignedDocument::PKCS7_from_data: "
+                   "WARNING: failed to cache verifiable part of S/MIME data\n"));
+      }
+
       BIO_free(filebuf);
+
     } else {
       std::stringstream errmsg;
       errmsg << "failed to create data '" << s_mime_data << "' using BIO_new";
       OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
     }
 
-    return result;
+    return doc_;
   }
 
   bool operator==(const SignedDocument& lhs, const SignedDocument& rhs)
   {
-    return lhs.plaintext_ == rhs.plaintext_;
+    return lhs.original_ == rhs.original_ && lhs.verifiable_ == rhs.verifiable_;
   }
 
 }  // namespace SSL
