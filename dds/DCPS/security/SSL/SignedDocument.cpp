@@ -23,7 +23,7 @@ namespace SSL {
   {
     DDS::Security::SecurityException ex;
     if (! load(uri, ex)) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) %C\n", ex.message));
+      ACE_ERROR((LM_WARNING, "(%P|%t) %C\n", ex.message.in()));
     }
   }
 
@@ -111,7 +111,7 @@ namespace SSL {
 
   bool SignedDocument::get_original_minus_smime(std::string& dst) const
   {
-    const std::string start_str("Content-Type: text/plain"), 
+    const std::string start_str("Content-Type: text/plain"),
                       end_str("dds>");
 
     get_original(dst);

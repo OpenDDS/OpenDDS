@@ -172,7 +172,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 }
 
 ::CORBA::Boolean AuthenticationBuiltInImpl::get_identity_status_token(
-  ::DDS::Security::IdentityStatusToken & identity_status_token,
+  ::DDS::Security::IdentityStatusToken&,
   ::DDS::Security::IdentityHandle handle,
   ::DDS::Security::SecurityException & ex)
 {
