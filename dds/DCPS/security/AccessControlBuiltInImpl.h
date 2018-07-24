@@ -285,11 +285,12 @@ private:
                                       time_t& delta_time,
                                       ::DDS::Security::SecurityException & ex);
 
-  int get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
-                         const char * topic_name,
-                         const ::DDS::PartitionQosPolicy & partition,
-                         const ::DDS::Security::DataTagQosPolicy & data_tag,
-                         ::DDS::Security::EndpointSecurityAttributes & attributes);
+  CORBA::Boolean get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
+                                    const char * topic_name,
+                                    const ::DDS::PartitionQosPolicy & partition,
+                                    const ::DDS::Security::DataTagQosPolicy & data_tag,
+                                    ::DDS::Security::EndpointSecurityAttributes & attributes,
+                                    ::DDS::Security::SecurityException & ex);
 
   CORBA::Boolean search_local_permissions(const char * topic_name,
                                           const ::DDS::Security::DomainId_t domain_id,

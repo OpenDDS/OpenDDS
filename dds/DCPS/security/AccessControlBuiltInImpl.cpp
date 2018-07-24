@@ -1309,22 +1309,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  int return_value = get_sec_attributes(permissions_handle, topic_name, partition, data_tag, attributes);
-
-  if (return_value != 0) {
-    switch (return_value) {
-    case 1:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: No matching permissions handle present");
-      break;
-
-    case 2:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: Invalid topic name");
-      break;
-
-    default:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: Error in attributes.");
-    }
-
+  if (!get_sec_attributes(permissions_handle, topic_name, partition, data_tag, attributes, ex)) {
     return false;
   }
 
@@ -1349,22 +1334,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  int return_value = get_sec_attributes(permissions_handle, topic_name, partition, data_tag, attributes);
-
-  if (return_value != 0) {
-    switch (return_value) {
-    case 1:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datareader_sec_attributes: No matching permissions handle present");
-      break;
-
-    case 2:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datareader_sec_attributes: Invalid topic name");
-      break;
-
-    default:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datareader_sec_attributes: Error in attributes.");
-    }
-
+  if (!get_sec_attributes(permissions_handle, topic_name, partition, data_tag, attributes, ex)) {
     return false;
   }
 
@@ -1403,7 +1373,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Long AccessControlBuiltInImpl::generate_handle()
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(handle_mutex_);
+//  ACE_Guard<ACE_Thread_Mutex> guard(handle_mutex_);
   ::CORBA::Long new_handle = next_handle_++;
 
   if (new_handle == DDS::HANDLE_NIL) {
@@ -1544,21 +1514,20 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
   return true;
 }
 
-int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
-                                                 const char * topic_name,
-                                                 const::DDS::PartitionQosPolicy & partition,
-                                                 const::DDS::Security::DataTagQosPolicy & data_tag,
-                                                 ::DDS::Security::EndpointSecurityAttributes & attributes)
+CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
+                                                            const char * topic_name,
+                                                            const::DDS::PartitionQosPolicy & /*partition*/,
+                                                            const::DDS::Security::DataTagQosPolicy & /*data_tag*/,
+                                                            ::DDS::Security::EndpointSecurityAttributes & attributes,
+                                                            ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(partition);
-  ACE_UNUSED_ARG(data_tag);
-
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 1);
 
   ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
 
   if (ac_iter == local_ac_perms_.end()) {
-    return 1;
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: No matching permissions handle present");
+    return false;
   }
 
   ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.perm->data().domain_id;
@@ -1578,7 +1547,7 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
         attributes.is_submessage_protected = true;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
-        return 0;
+        return true;
       }
 
       if (std::strcmp(topic_name, "DCPSParticipantStatelessMessage") == 0) {
@@ -1589,7 +1558,7 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
         attributes.is_submessage_protected = false;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
-        return 0;
+        return true;
       }
 
       if (std::strcmp(topic_name, "DCPSParticipantMessageSecure") == 0) {
@@ -1609,7 +1578,7 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
         }
 
-        return 0;
+        return true;
       }
 
       if (std::strcmp(topic_name, "DCPSParticipantSecure") == 0 ||
@@ -1631,7 +1600,7 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
           attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ORIGIN_AUTHENTICATED;
         }
 
-        return 0;
+        return true;
       }
 
       Governance::TopicAccessRules::iterator tr_iter;
@@ -1679,13 +1648,14 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
             attributes.plugin_endpoint_attributes |= ::DDS::Security::PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_ENCRYPTED;
           }
 
-          return 0;
+          return true;
         }
       }
     }
   }
 
-  return 2;
+  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: Invalid topic name");
+  return false;
 }
 
 CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(const char * topic_name, 
