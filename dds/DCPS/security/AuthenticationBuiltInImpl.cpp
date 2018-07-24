@@ -328,8 +328,8 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
             int err = hash(hash_c1);
             if (err) {
-                set_security_error(ex, -1, 0, "Failed to generate credential-hash 'hash_c1'");
-                return DDS::Security::VALIDATION_FAILED;
+              set_security_error(ex, -1, 0, "Failed to generate credential-hash 'hash_c1'");
+              return DDS::Security::VALIDATION_FAILED;
             }
           }
 
@@ -423,8 +423,8 @@ void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUI
 }
 
 bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
-                                     const std::vector<unsigned char>& subject_name_hash,
-                                     DDS::Security::SecurityException& ex)
+                              const std::vector<unsigned char>& subject_name_hash,
+                              DDS::Security::SecurityException& ex)
 {
   if (cpdata.length() > 5u) { /* Enough to withstand the hash-comparison below */
 
@@ -634,7 +634,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
 
     if (! challenges_match(challenge1, future_challenge)) {
-        return Failure;
+      return Failure;
     }
   }
 
@@ -666,7 +666,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   }
 
   if (! validate_topic_data_guid(cpdata, hash, ex)) {
-      return Failure;
+    return Failure;
   }
 
   cperm = message_in.get_bin_property_value("c.perm");
@@ -893,7 +893,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   const ::DDS::Security::IdentityToken & token,
   ::DDS::Security::SecurityException & ex)
 {
-  // Nothing to do here in the stub version
+  // Nothing to do here yet
   ACE_UNUSED_ARG(token);
   ACE_UNUSED_ARG(ex);
   return true;
@@ -904,7 +904,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   const ::DDS::Security::IdentityStatusToken & token,
   ::DDS::Security::SecurityException & ex)
 {
-  // Nothing to do here in the stub version
+  // Nothing to do here yet
   ACE_UNUSED_ARG(token);
   ACE_UNUSED_ARG(ex);
   return true;
@@ -915,7 +915,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   const ::DDS::Security::AuthenticatedPeerCredentialToken & peer_credential_token,
   ::DDS::Security::SecurityException & ex)
 {
-  // Nothing to do here in the stub version
+  // Nothing to do here yet
   ACE_UNUSED_ARG(peer_credential_token);
   ACE_UNUSED_ARG(ex);
   return true;
@@ -1069,7 +1069,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   }
 
   if (! validate_topic_data_guid(cpdata, hash, ex)) {
-      return Failure;
+    return Failure;
   }
 
   /* Compute/Store the Diffie-Hellman shared-secret */
