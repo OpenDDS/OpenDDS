@@ -86,37 +86,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   LocalAccessCredentialData::shared_ptr local_access_credential_data = DCPS::make_rch<LocalAccessCredentialData>();
 
-  int err = local_access_credential_data->load(participant_qos.property.value);
-  if (err) {
-    switch (err) {
-    case 1:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate file could not be found");
-      break;
-    case 2:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance file could not be found");
-      break;
-    case 3:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions file could not be found");
-      break;
-    case 4:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate filename not provided");
-      break;
-    case 5:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance filename not provided");
-      break;
-    case 6:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions filename not provided");
-      break;
-    case 7:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate data not provided");
-      break;
-    case 8:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance data not provided");
-      break;
-    case 9:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions data not provided");
-      break;
-    }
+  if (! local_access_credential_data->load(participant_qos.property.value, ex)) {
 
     return DDS::HANDLE_NIL;
   }
@@ -124,7 +94,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   const SSL::Certificate& local_ca = local_access_credential_data->get_ca_cert();
   const SSL::SignedDocument& local_gov = local_access_credential_data->get_governance_doc();
 
-  err = local_gov.verify_signature(local_ca);
+  int err = local_gov.verify_signature(local_ca);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance signature not verified");
     return DDS::HANDLE_NIL;
