@@ -275,6 +275,8 @@ private:
   ::CORBA::Long generate_handle();
 
   ACE_Thread_Mutex handle_mutex_;
+  ACE_Thread_Mutex gen_handle_mutex_;
+
   ::CORBA::Long next_handle_;
 
   ::DDS::Security::AccessControlListener_ptr listener_ptr_;

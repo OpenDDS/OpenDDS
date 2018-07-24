@@ -1153,25 +1153,18 @@ TEST_F(AccessControlTest, get_permissions_token_Success)
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
 
-  get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
+  ::DDS::Security::PermissionsHandle perm_handle = get_inst().validate_local_permissions(auth_plugin_.get(), 1, 1, domain_participant_qos, ex);
 
-  ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::Security::PermissionsToken token;
 
   EXPECT_TRUE(get_inst().get_permissions_token(token, perm_handle, ex));
   EXPECT_STREQ(Expected_Permissions_Token_Class_Id, token.class_id);
-  ASSERT_EQ(2U, token.properties.length());
+  ASSERT_EQ(0U, token.properties.length());
 
-  // Technically there's no order defined in the spec, but the implementation
-  // stub just fills them out in this order
-  EXPECT_STREQ("dds.perm_ca.sn", token.properties[0].name);
-  EXPECT_STREQ("dds.perm_ca.algo", token.properties[1].name);
 }
 
 TEST_F(AccessControlTest, get_permissions_credential_token_InvalidInput)
 {
-
-
   ::DDS::Security::PermissionsCredentialToken token;
   ::DDS::Security::SecurityException ex;
 

@@ -155,8 +155,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Set and store the permissions token
   DDS::Security::PermissionsToken permissions_token;
   TokenWriter writer(permissions_token, PermissionsTokenClassId);
-  writer.add_property("dds.perm_ca.sn", ""); // "MyCA Name");
-  writer.add_property("dds.perm_ca.algo", ""); // "RSA-2048");
 
   // If all checks are successful load the content into cache
   Permissions::AcPerms& perm_data = permissions->data();
@@ -1373,7 +1371,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Long AccessControlBuiltInImpl::generate_handle()
 {
-//  ACE_Guard<ACE_Thread_Mutex> guard(handle_mutex_);
+  ACE_Guard<ACE_Thread_Mutex> guard(gen_handle_mutex_);
   ::CORBA::Long new_handle = next_handle_++;
 
   if (new_handle == DDS::HANDLE_NIL) {
