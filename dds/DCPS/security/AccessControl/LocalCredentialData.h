@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include "dds/DCPS/security/SSL/SignedDocument.h"
+#include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsCoreC.h"
 
@@ -21,25 +22,14 @@ namespace Security {
   public:
     typedef DCPS::RcHandle<LocalAccessCredentialData> shared_ptr;
 
-    LocalAccessCredentialData(const DDS::PropertySeq& props);
+//    LocalAccessCredentialData(const DDS::PropertySeq& props);
 
     LocalAccessCredentialData();
 
     ~LocalAccessCredentialData();
 
-    /**
-     * @return 0 if load is successful.
-     * @return 1 if certificate file could not be loaded
-     * @return 2 if the governance file could not be loaded
-     * @return 3 if the permissions file could not be loaded
-     * @return 4 if the certificate filename not provided
-     * @return 5 if the governance filename not provided
-     * @return 6 if the permissions filename not provided
-     * @return 7 if the certificate data not provided
-     * @return 8 if the governance data not provided
-     * @return 9 if the permissions data not provided
-     */
-    int load(const DDS::PropertySeq& props);
+    CORBA::Boolean load(const DDS::PropertySeq& props,
+                        ::DDS::Security::SecurityException& ex);
 
     const SSL::Certificate& get_ca_cert()
     {

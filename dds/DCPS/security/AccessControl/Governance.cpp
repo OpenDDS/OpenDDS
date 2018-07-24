@@ -19,23 +19,6 @@ Governance::Governance() : access_rules_()
 
 }
 
-//char * AccessControlBuiltInImpl::strptime(const char * s, const char * f, tm * tm)
-//{
-//    // Isn't the C++ standard lib nice? std::get_time is defined such that its
-//    // format parameters are the exact same as strptime. Of course, we have to
-//    // create a string stream first, and imbue it with the current C locale, and
-//    // we also have to make sure we return the right things if it fails, or
-//    // if it succeeds, but this is still far simpler an implementation than any
-//    // of the versions in any of the C standard libraries.
-//    std::istringstream input(s);
-//    input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
-//    input >> std::get_time(tm, f);
-//    if (input.fail()) {
-//        return nullptr;
-//    }
-//    return (char*)(s + input.tellg());
-//}
-
 int Governance::load(const SSL::SignedDocument& doc)
 {
 
@@ -55,7 +38,7 @@ int Governance::load(const SSL::SignedDocument& doc)
     return -1;
   }
 
-  xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser();
+  DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
 
   if (parser == NULL) {
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
@@ -67,8 +50,8 @@ int Governance::load(const SSL::SignedDocument& doc)
   parser->setDoNamespaces(true);    // optional
   parser->setCreateCommentNodes(false);
 
-  xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
-  parser->setErrorHandler(errHandler);
+  DCPS::unique_ptr<xercesc::ErrorHandler> errHandler((xercesc::ErrorHandler*) new xercesc::HandlerBase());
+  parser->setErrorHandler(errHandler.get());
 
   // buffer for parsing
 
@@ -274,9 +257,6 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     access_rules_.push_back(rule_holder_);
   } // domain_rule
-
-  delete parser;
-  delete errHandler;
 
   return 0;
 }

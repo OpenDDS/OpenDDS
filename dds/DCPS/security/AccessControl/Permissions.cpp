@@ -72,13 +72,13 @@ int Permissions::load(const SSL::SignedDocument& doc)
     return -1;
   }
 
-  xercesc::XercesDOMParser* parser = new xercesc::XercesDOMParser();
+  DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
   parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
   parser->setDoNamespaces(true);    // optional
   parser->setCreateCommentNodes(false);
 
-  xercesc::ErrorHandler* errHandler = (xercesc::ErrorHandler*) new xercesc::HandlerBase();
-  parser->setErrorHandler(errHandler);
+  DCPS::unique_ptr<xercesc::ErrorHandler> errHandler((xercesc::ErrorHandler*) new xercesc::HandlerBase());
+  parser->setErrorHandler(errHandler.get());
 
   std::string cleaned;
   doc.get_content_minus_smime(cleaned);
@@ -254,8 +254,6 @@ int Permissions::load(const SSL::SignedDocument& doc)
     perm_data_.perm_rules.push_back(rule_holder_);
   } // grant_rules
 
-  delete parser;
-  delete errHandler;
   return 0;
 }
 

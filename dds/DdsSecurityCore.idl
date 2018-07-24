@@ -8,6 +8,15 @@
 #ifndef DDS_SECURITY_CORE_IDL
 #define DDS_SECURITY_CORE_IDL
 
+// DDS Security 1.1 Normative IDL (ptc/2017-09-26)
+// This file follows the spec IDL but includes changes necessary for OpenDDS.
+// Those changes are not expected to impact the interface between plugin
+// implementations and the core.  Where the spec uses the 'native' IDL keyword,
+// the implementation (OpenDDS) may select a mapping either in IDL or as a
+// special case in the compiler.
+// Certain parts of the spec IDL have been moved to DdsSecurityParams.idl
+// or to other files, as noted below.
+
 #include "DdsDcpsGuid.idl"
 #include "DdsDcpsInfrastructure.idl"
 #include "DdsDcpsPublication.idl"
@@ -18,23 +27,20 @@
 module DDS {
   module Security {
 
-    // TODO: PENDING IDL V4 INHERITANCE
-    // Per the security spec these types are expected to be visible in
-    // the DDS::Security namespace, but are pulled into dds/DdsDcpsCore.idl
-    // in order to satisfy dependencies for DomainParticipantQos; once IDL
-    // v4 inheritance is implemented these typedefs will be replaced by their
-    // proper types.
-    typedef DDS::Property_t Property_t;
-    typedef DDS::PropertySeq PropertySeq;
-    typedef DDS::BinaryProperty_t BinaryProperty_t;
-    typedef DDS::BinaryPropertySeq BinaryPropertySeq;
-    typedef DDS::PropertyQosPolicy PropertyQosPolicy;
-
     // Since DynamicData is a feature of the XTypes spec (which isn't yet supported) the
     // native type is replaced with an empty interface to satisfy the access-control methods
     // which use the type.
     local interface DynamicData {
     };
+
+    // Per the security spec these types are expected to be visible in
+    // the DDS::Security namespace. They are defined in dds/DdsDcpsCore.idl
+    // in order to satisfy dependencies of DomainParticipantQos.
+    typedef DDS::Property_t Property_t;
+    typedef DDS::PropertySeq PropertySeq;
+    typedef DDS::BinaryProperty_t BinaryProperty_t;
+    typedef DDS::BinaryPropertySeq BinaryPropertySeq;
+    typedef DDS::PropertyQosPolicy PropertyQosPolicy;
 
     typedef Token MessageToken;
     typedef MessageToken AuthRequestMessageToken;
@@ -42,26 +48,17 @@ module DDS {
 
     typedef Token  AuthenticatedPeerCredentialToken;
     typedef Token  PermissionsCredentialToken;
-    typedef Token  CryptoToken;
 
+    typedef Token  CryptoToken;
     typedef sequence<CryptoToken>  CryptoTokenSeq;
+
+    typedef Token  ParticipantCryptoToken;
+    typedef Token  DatawriterCryptoToken;
+    typedef Token  DatareaderCryptoToken;
+
     typedef CryptoTokenSeq  ParticipantCryptoTokenSeq;
     typedef CryptoTokenSeq  DatawriterCryptoTokenSeq;
     typedef CryptoTokenSeq  DatareaderCryptoTokenSeq;
-
-    typedef unsigned long BuiltinEndpointSet_t;
-    const BuiltinEndpointSet_t SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER = 1 << 16;
-    const BuiltinEndpointSet_t SEDP_BUILTIN_PUBLICATIONS_SECURE_READER = 1 << 17;
-    const BuiltinEndpointSet_t SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER = 1 << 18;
-    const BuiltinEndpointSet_t SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER = 1 << 19;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER = 1 << 20;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER = 1 << 21;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER = 1 << 22;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER = 1 << 23;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER = 1 << 24;
-    const BuiltinEndpointSet_t BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER = 1 << 25;
-    const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER = 1 << 26;
-    const BuiltinEndpointSet_t SPDP_BUILTIN_PARTICIPANT_SECURE_READER = 1 << 27;
 
     struct MessageIdentity {
       OpenDDS::DCPS::GUID_t source_guid;
@@ -114,10 +111,7 @@ module DDS {
     // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
     //@extensibility(MUTABLE)
     struct ParticipantBuiltinTopicData { //  :  DDS::ParticipantBuiltinTopicData {
-      // TODO: PENDING IDL V4 INHERITANCE
-      // Once structure inheritance from IDL v4 is implemented this field
-      // can be replaced by the commented-out inheritance.
-      // See the OMG reference implementation dds_security_plugins_spis.idl.
+      // in this and following structs, 'base' is used in place of struct inheritance
       DDS::ParticipantBuiltinTopicData base;
 
       IdentityToken     identity_token;
@@ -128,7 +122,6 @@ module DDS {
 
     //@extensibility(MUTABLE)
     struct ParticipantBuiltinTopicDataSecure { // :  ParticipantBuiltinTopicData {
-      // TODO: PENDING IDL V4 INHERITANCE
       ParticipantBuiltinTopicData base;
 
       IdentityStatusToken identity_status_token;
@@ -136,7 +129,6 @@ module DDS {
 
     //@extensibility(MUTABLE)
     struct PublicationBuiltinTopicData { //: DDS::PublicationBuiltinTopicData {
-      // TODO: PENDING IDL V4 INHERITANCE
       DDS::PublicationBuiltinTopicData base;
 
       EndpointSecurityInfo  security_info;
@@ -144,7 +136,6 @@ module DDS {
 
     //@extensibility(MUTABLE)
     struct SubscriptionBuiltinTopicData { //: DDS::SubscriptionBuiltinTopicData {
-      // TODO: PENDING IDL V4 INHERITANCE
       DDS::SubscriptionBuiltinTopicData base;
 
       EndpointSecurityInfo  security_info;
@@ -152,7 +143,6 @@ module DDS {
 
     //@extensibility(MUTABLE)
     struct PublicationBuiltinTopicDataSecure {// :  PublicationBuiltinTopicData {
-      // TODO: PENDING IDL V4 INHERITANCE
       PublicationBuiltinTopicData base;
 
       DataTags data_tags;
@@ -160,7 +150,6 @@ module DDS {
 
     //@extensibility(MUTABLE)
     struct SubscriptionBuiltinTopicDataSecure { //  :  SubscriptionBuiltinTopicData {
-      // TODO: PENDING IDL V4 INHERITANCE
       SubscriptionBuiltinTopicData base;
 
       DataTags data_tags;
@@ -346,7 +335,7 @@ module DDS {
       boolean     is_discovery_protected;
       boolean     is_liveliness_protected;
       PluginParticipantSecurityAttributesMask plugin_participant_attributes;
-      PropertySeq ace_endpoint_properties;
+      PropertySeq ac_endpoint_properties;
     };
 
     struct TopicSecurityAttributes {
@@ -357,11 +346,6 @@ module DDS {
     };
 
     struct EndpointSecurityAttributes { //: TopicSecurityAttributes {
-      // TODO: PENDING IDL V4 INHERITANCE
-      // Once structure inheritance from IDL v4 is implemented this field
-      // can be replaced by the commented-out inheritance from base-struct
-      // TopicSecurityAttributes. See the OMG reference implementation
-      // (dds_security_plugins_spis.idl).
       TopicSecurityAttributes base;
 
       boolean     is_submessage_protected;
