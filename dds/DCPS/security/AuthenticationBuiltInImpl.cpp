@@ -83,19 +83,15 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::validate_local_identity(
   ::DDS::Security::IdentityHandle & local_identity_handle,
   ::OpenDDS::DCPS::GUID_t & adjusted_participant_guid,
-  ::DDS::Security::DomainId_t domain_id,
+  ::DDS::Security::DomainId_t /*domain_id*/,
   const ::DDS::DomainParticipantQos & participant_qos,
   const ::OpenDDS::DCPS::GUID_t & candidate_participant_guid,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(ex);
-
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   LocalAuthCredentialData::shared_ptr local_credential_data = DCPS::make_rch<LocalAuthCredentialData>();
-  if (! local_credential_data->load(participant_qos.property.value, ex))
-  {
+  if (! local_credential_data->load(participant_qos.property.value, ex)) {
     return result;
   }
 
