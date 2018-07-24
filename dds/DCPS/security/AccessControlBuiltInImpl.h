@@ -284,11 +284,22 @@ private:
 
   time_t convert_permissions_time(std::string timeString);
 
+  ::CORBA::Boolean validate_date_time(const ACPermsMap::iterator ac_iter,
+                                      time_t& delta_time,
+                                      ::DDS::Security::SecurityException & ex);
+
   int get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
                          const char * topic_name,
                          const ::DDS::PartitionQosPolicy & partition,
                          const ::DDS::Security::DataTagQosPolicy & data_tag,
                          ::DDS::Security::EndpointSecurityAttributes & attributes);
+
+  CORBA::Boolean search_local_permissions(const char * topic_name,
+                                          const ::DDS::Security::DomainId_t domain_id,
+                                          const ::DDS::PartitionQosPolicy & partition,
+                                          ACPermsMap::iterator ac_iter,
+//                                          const Permissions::PublishSubscribe_t pub_or_sub,
+                                          ::DDS::Security::SecurityException & ex);
 
   /// @return 0 if the search is successful.
   int search_remote_permissions(const char * topic_name,

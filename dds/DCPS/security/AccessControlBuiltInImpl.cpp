@@ -85,48 +85,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   const ::DDS::Security::PropertySeq& props = participant_qos.property.value;
-
   LocalAccessCredentialData::shared_ptr local_access_credential_data = DCPS::make_rch<LocalAccessCredentialData>();
 
-  int err = local_access_credential_data->load(participant_qos.property.value);
-  if (err) {
-    switch (err) {
-    case 1:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate file could not be found");
-      break;
-    case 2:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance file could not be found");
-      break;
-    case 3:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions file could not be found");
-      break;
-    case 4:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate filename not provided");
-      break;
-    case 5:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance filename not provided");
-      break;
-    case 6:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions filename not provided");
-      break;
-    case 7:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Certificate data not provided");
-      break;
-    case 8:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance data not provided");
-      break;
-    case 9:
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions data not provided");
-      break;
-    }
-
+  CORBA::Boolean successful = local_access_credential_data->load(participant_qos.property.value, ex);
+  if (!successful) {
     return DDS::HANDLE_NIL;
   }
 
   const SSL::Certificate& local_ca = local_access_credential_data->get_ca_cert();
   const SSL::SignedDocument& local_gov = local_access_credential_data->get_governance_doc();
 
-  err = local_gov.verify_signature(local_ca);
+  int err = local_gov.verify_signature(local_ca);
   if (err) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance signature not verified");
     return DDS::HANDLE_NIL;
@@ -458,45 +427,23 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   // Check the Permissions file
-
   std::string default_value;
 
-  // Check the date/time range for validity
-  time_t after_time,
-         before_time,
-         cur_utc_time;
-  time_t current_date_time = time(0);
+  time_t delta_time;
 
   perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
   perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
 
   for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
     default_value = pm_iter->default_permission;
-    before_time = convert_permissions_time(pm_iter->validity.not_before);
 
-    if (before_time == 0) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions not_before time is invalid.");
+    if (!validate_date_time(ac_iter, delta_time, ex)) {
       return false;
     }
 
-    // Adjust the current time to UTC/GMT
-    tm *current_time_tm = gmtime(&current_date_time);
-    cur_utc_time = mktime(current_time_tm);
+    CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, ac_iter, ex);
 
-    if (cur_utc_time < before_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant hasn't started yet.");
-      return false;
-    }
-
-    after_time = convert_permissions_time(pm_iter->validity.not_after);
-
-    if (after_time == 0) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions not_after time is invalid.");
-      return false;
-    }
-
-    if (cur_utc_time > after_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant has expired.");
+    if (!successful) {
       return false;
     }
 
@@ -549,7 +496,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                 else { // No partitions to match
                   // Start timer
                   if (!rp_timer_.is_scheduled()) {
-                    ACE_Time_Value timer_length(after_time - cur_utc_time);
+                    ACE_Time_Value timer_length(delta_time);
 
                     if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
                       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
@@ -626,7 +573,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         else {
           // Start timer
           if (!rp_timer_.is_scheduled()) {
-            ACE_Time_Value timer_length(after_time - cur_utc_time);
+            ACE_Time_Value timer_length(delta_time);
 
             if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
               CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
@@ -651,7 +598,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
     if (!rp_timer_.is_scheduled()) {
       // Start timer
-      ACE_Time_Value timer_length(after_time - cur_utc_time);
+      ACE_Time_Value timer_length(delta_time);
 
       if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
         CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
@@ -720,41 +667,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   Permissions::PermissionGrantRules::iterator pm_iter;
   std::string default_value;
-  time_t after_time,
-         before_time,
-         cur_utc_time;
-  time_t current_date_time = time(0);
+  time_t delta_time;
 
   for (pm_iter = ac_iter->second.perm->data().perm_rules.begin(); pm_iter != ac_iter->second.perm->data().perm_rules.end(); ++pm_iter) {
     default_value = pm_iter->default_permission;
 
-    // Check the date/time range for validity
-    before_time = convert_permissions_time(pm_iter->validity.not_before);
-
-    if (before_time == 0) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions not_before time is invalid.");
-      return false;
-    }
-
-    struct tm *cdt_tm;
-
-    // Convert to UTC
-    cdt_tm = gmtime(&current_date_time);
-    cur_utc_time = mktime(cdt_tm);
-
-    if (cur_utc_time < before_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant hasn't started yet.");
-      return false;
-    }
-
-    after_time = convert_permissions_time(pm_iter->validity.not_after);
-
-    if (after_time == 0) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions not_after time is invalid.");
-      return false;
-    }
-    if (cur_utc_time > after_time) {
-      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant has expired.");
+    if (!validate_date_time(ac_iter, delta_time, ex)) {
       return false;
     }
 
@@ -807,7 +725,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
                 else { // There are no partitions to match
                   // Start timer here.
                   if (!rp_timer_.is_scheduled()) {
-                    ACE_Time_Value timer_length(after_time - cur_utc_time);
+                    ACE_Time_Value timer_length(delta_time);
 
                     if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
                       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
@@ -885,7 +803,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
         else {
           // Start timer here.
           if (!rp_timer_.is_scheduled()) {
-            ACE_Time_Value timer_length(after_time - cur_utc_time);
+            ACE_Time_Value timer_length(delta_time);
 
             if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
               CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
@@ -907,7 +825,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (strcmp(default_value.c_str(), "ALLOW") == 0) {
     // Start timer here.
     if (!rp_timer_.is_scheduled()) {
-      ACE_Time_Value timer_length(after_time - cur_utc_time);
+      ACE_Time_Value timer_length(delta_time);
 
       if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
         CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
@@ -1227,6 +1145,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
+  time_t delta_time;
+
+  if (!validate_date_time(ac_iter, delta_time, ex)) {
+    return false;
+  }
+
   Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
   int ret_value = search_remote_permissions(publication_data.base.base.topic_name, domain_id, ac_iter, publish);
 
@@ -1302,8 +1226,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     }
   }
 
-  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
+  time_t delta_time;
 
+  if (!validate_date_time(ac_iter, delta_time, ex)) {
+    return false;
+  }
+
+  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
   int ret_value = search_remote_permissions(subscription_data.base.base.topic_name, domain_id, ac_iter, subscribe);
 
   if (ret_value > 0) {
@@ -1965,6 +1894,53 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString
   return mktime(&permission_tm);
 }
 
+::CORBA::Boolean AccessControlBuiltInImpl::validate_date_time(const ACPermsMap::iterator ac_iter,
+  time_t & delta_time,
+  ::DDS::Security::SecurityException & ex)
+{
+  time_t after_time,
+         before_time,
+         cur_utc_time;
+  time_t current_date_time = time(0);
+
+  perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
+  perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
+
+  for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
+    before_time = convert_permissions_time(pm_iter->validity.not_before);
+
+    if (before_time == 0) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions not_before time is invalid.");
+      return false;
+    }
+
+    // Adjust the current time to UTC/GMT
+    tm *current_time_tm = gmtime(&current_date_time);
+    cur_utc_time = mktime(current_time_tm);
+
+    if (cur_utc_time < before_time) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant hasn't started yet.");
+      return false;
+    }
+
+    after_time = convert_permissions_time(pm_iter->validity.not_after);
+
+    if (after_time == 0) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions not_after time is invalid.");
+      return false;
+    }
+
+    if (cur_utc_time > after_time) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant has expired.");
+      return false;
+    }
+
+  }
+
+  delta_time = after_time - cur_utc_time;
+  return true;
+}
+
 int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHandle permissions_handle,
                                                  const char * topic_name,
                                                  const::DDS::PartitionQosPolicy & partition,
@@ -2107,6 +2083,157 @@ int AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::PermissionsHan
   return 2;
 }
 
+CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(const char * topic_name, 
+  const::DDS::Security::DomainId_t domain_id, 
+  const ::DDS::PartitionQosPolicy & partition,
+  ACPermsMap::iterator ac_iter,
+//  const Permissions::PublishSubscribe_t pub_or_sub,
+  ::DDS::Security::SecurityException & ex)
+{
+  std::string default_value;
+
+  perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
+  perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
+
+  for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
+    default_value = pm_iter->default_permission;
+
+    perm_topic_rules_iter ptr_iter; // allow/deny rules
+    perm_partitions_iter pp_iter;
+    int matched_allow_partitions = 0;
+    int matched_deny_partitions = 0;
+    CORBA::ULong num_param_partitions = 0;
+
+    for (ptr_iter = pm_iter->PermissionTopicRules.begin(); ptr_iter != pm_iter->PermissionTopicRules.end(); ++ptr_iter) {
+      size_t  d = ptr_iter->domain_list.count(domain_id);
+
+      if ((d > 0) && (ptr_iter->ad_type == Permissions::ALLOW)) {
+        perm_topic_ps_rules_iter tpsr_iter;
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if (tpsr_iter->ps_type == Permissions::PUBLISH) {
+            std::vector<std::string>::iterator tl_iter; // topic list
+
+            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
+                // Topic matches now check that the partitions match
+                if (partition.name.length() > 0) {
+                  // First look for the ad_type & ps_type in the partitions
+                  for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
+                    size_t pd = pp_iter->domain_list.count(domain_id);
+
+                    if ((pd > 0) && (pp_iter->ad_type == Permissions::ALLOW)) {
+                      perm_partition_ps_iter pps_iter;
+
+                      for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
+                        if (pps_iter->ps_type == Permissions::PUBLISH) {
+                          std::vector<std::string>::iterator pl_iter; // partition list
+                          num_param_partitions = pps_iter->partition_list.size();
+
+                          for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
+                            // Check the pl_iter value against the list of partitions in the partition parameter
+                            for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
+                              if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
+                                matched_allow_partitions++;
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                else { // No partitions to match
+                  return true;
+                }
+
+              }
+            }
+          }
+        }
+      }
+      else if ((d > 0) && (ptr_iter->ad_type == Permissions::DENY)) {
+        perm_topic_ps_rules_iter tpsr_iter;
+
+        for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
+          if (tpsr_iter->ps_type == Permissions::PUBLISH) {
+            std::vector<std::string>::iterator tl_iter; // topic list
+
+            for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
+              if (::ACE::wild_match(topic_name, (*tl_iter).c_str(), true, false)) {
+                // Topic matches now check that the partitions match
+                if (partition.name.length() > 0) {
+                  // First look for the ad_type & ps_type in the partitions
+                  for (pp_iter = pm_iter->PermissionPartitions.begin(); pp_iter != pm_iter->PermissionPartitions.end(); pp_iter++) {
+                    size_t pd = pp_iter->domain_list.count(domain_id);
+
+                    if ((pd > 0) && (pp_iter->ad_type == Permissions::DENY)) {
+                      perm_partition_ps_iter pps_iter;
+
+                      for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
+                        if (pps_iter->ps_type == Permissions::PUBLISH) {
+                          std::vector<std::string>::iterator pl_iter; // partition list
+
+                          for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
+                            // Check the pl_iter value against the list of partitions in the partition parameter
+                            for (CORBA::ULong i = 0; i < partition.name.length(); ++i) {
+                              if (::ACE::wild_match(partition.name[i], (*pl_iter).c_str(), true, false)) {
+                                matched_deny_partitions++;
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                else {
+                  return false;
+                }
+              }
+            }
+          }
+        }
+
+      } // end of DENY
+    }
+
+    // If a topic and partition match were found, return the appropriate value.
+    if ((matched_allow_partitions > 0) && (matched_deny_partitions > 0)) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: Topic is in both allow and deny.");
+      return false;
+    }
+    else {
+      if (matched_allow_partitions > 0) {
+        if (num_param_partitions > partition.name.length()) {
+          CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: Requested more partitions than available in permissions file.");
+          return false;
+        }
+        else {
+          return true;
+        }
+      }
+      else if (matched_deny_partitions > 0) {
+        return false;
+      }
+
+    }
+
+  }
+
+  // If this point in the code is reached it means that either there are no PermissionTopicRules
+  // or the topic_name does not exist in the topic_list so return the value of default_permission
+  if (strcmp(default_value.c_str(), "ALLOW") == 0) {
+    return true;
+  }
+  else {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl: No matching rule for topic, default permission is DENY.");
+    return false;
+  }
+}
+
 int AccessControlBuiltInImpl::search_remote_permissions(
   const char * topic_name,
   const::DDS::Security::DomainId_t domain_id,
@@ -2116,37 +2243,8 @@ int AccessControlBuiltInImpl::search_remote_permissions(
   perm_grant_iter pm_iter;
   std::string default_value;
 
-  // Check the date/time range for validity
-  time_t after_time,
-         before_time,
-         cur_utc_time;
-  time_t current_date_time = time(0);
-
   for (pm_iter = ac_iter->second.perm->data().perm_rules.begin(); pm_iter != ac_iter->second.perm->data().perm_rules.end(); ++pm_iter) {
     default_value = pm_iter->default_permission;
-    before_time = convert_permissions_time(pm_iter->validity.not_before);
-
-    if (before_time == 0) {
-      return 1;
-    }
-
-    // Adjust the current time to UTC/GMT
-    tm *current_time_tm = gmtime(&current_date_time);
-    cur_utc_time = mktime(current_time_tm);
-
-    if (cur_utc_time < before_time) {
-      return 2;
-    }
-
-    after_time = convert_permissions_time(pm_iter->validity.not_after);
-
-    if (after_time == 0) {
-      return 3;
-    }
-
-    if (cur_utc_time > after_time) {
-      return 4;
-    }
 
     perm_topic_rules_iter ptr_iter; // allow/deny rules
 
