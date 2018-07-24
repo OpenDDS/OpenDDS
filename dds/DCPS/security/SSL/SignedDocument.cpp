@@ -35,6 +35,14 @@ namespace SSL {
     deserialize(src);
   }
 
+  SignedDocument::SignedDocument(const SignedDocument& rhs)
+  : doc_(NULL), content_(NULL), original_(), verifiable_("")
+  {
+    if (0 < rhs.original_.length()) {
+      deserialize(rhs.original_);
+    }
+  }
+
   SignedDocument::~SignedDocument()
   {
     if (doc_) PKCS7_free(doc_);
@@ -48,14 +56,6 @@ namespace SSL {
       }
     }
     return *this;
-  }
-
-  SignedDocument::SignedDocument(const SignedDocument& rhs)
-  : doc_(NULL), content_(NULL), original_()
-  {
-    if (0 < rhs.original_.length()) {
-      deserialize(rhs.original_);
-    }
   }
 
   void SignedDocument::load(const std::string& uri)
