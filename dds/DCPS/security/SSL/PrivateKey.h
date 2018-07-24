@@ -22,9 +22,14 @@ namespace SSL {
    public:
     typedef DCPS::unique_ptr<PrivateKey> unique_ptr;
 
+    friend DdsSecurity_Export bool operator==(const PrivateKey& lhs,
+                                              const PrivateKey& rhs);
+
     PrivateKey(const std::string& uri, const std::string password = "");
 
     PrivateKey();
+
+    PrivateKey(const PrivateKey& other);
 
     virtual ~PrivateKey();
 
@@ -44,6 +49,9 @@ namespace SSL {
 
     EVP_PKEY* k_;
   };
+
+  DdsSecurity_Export bool operator==(const PrivateKey& lhs,
+                                     const PrivateKey& rhs);
 
 }  // namespace SSL
 }  // namespace Security

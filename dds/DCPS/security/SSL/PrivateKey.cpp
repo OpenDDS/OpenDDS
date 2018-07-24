@@ -21,7 +21,24 @@ namespace SSL {
     load(uri, password);
   }
 
-  PrivateKey::PrivateKey() : k_(NULL) {}
+  PrivateKey::PrivateKey()
+    : k_(NULL)
+  {
+
+  }
+
+  PrivateKey::PrivateKey(const PrivateKey& other)
+    : k_(NULL)
+  {
+    if (other.k_) {
+      k_ = other.k_;
+
+#ifndef OPENSSL_V_1_0
+      EVP_PKEY_up_ref(k_);
+#endif
+
+    }
+  }
 
   PrivateKey::~PrivateKey()
   {
@@ -33,6 +50,7 @@ namespace SSL {
     if (this != &rhs) {
       if (rhs.k_) {
         k_ = rhs.k_;
+
 #ifndef OPENSSL_V_1_0
         EVP_PKEY_up_ref(k_);
 #endif
@@ -253,6 +271,11 @@ namespace SSL {
     }
 
     return result;
+  }
+
+  bool operator==(const PrivateKey& lhs, const PrivateKey& rhs)
+  {
+    return (1 == EVP_PKEY_cmp(lhs.k_, rhs.k_));
   }
 
 }  // namespace SSL

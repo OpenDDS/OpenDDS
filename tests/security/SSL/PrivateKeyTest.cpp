@@ -204,3 +204,16 @@ TEST_F(PrivateKeyTest, SignAndVerify_DoesNotUseEmptyData)
 
   ASSERT_EQ(0, verify_result);
 }
+
+TEST_F(PrivateKeyTest, Assignment)
+{
+  PrivateKey k;
+  k = privkey_;
+  ASSERT_EQ(k, privkey_);
+}
+
+TEST_F(PrivateKeyTest, CopyConstruct)
+{
+  PrivateKey k(privkey_);
+  ASSERT_EQ(k, privkey_);
+}
