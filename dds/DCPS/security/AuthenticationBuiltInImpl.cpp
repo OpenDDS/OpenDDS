@@ -1364,7 +1364,7 @@ std::string AuthenticationBuiltInImpl::get_extension(const char* class_id)
   return ext_string;
 }
 
-uint64_t AuthenticationBuiltInImpl::get_next_handle()
+CORBA::Long AuthenticationBuiltInImpl::get_next_handle()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(handle_mutex_);
   return (++next_handle_ != DDS::HANDLE_NIL) ? next_handle_ : ++next_handle_;

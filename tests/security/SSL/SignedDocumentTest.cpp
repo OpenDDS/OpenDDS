@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DCPS/security/SSL/Certificate.h"
+#include "dds/DCPS/SequenceIterator.h"
 #include <iostream>
 #include <fstream>
 
@@ -56,7 +57,7 @@ public:
 TEST_F(SignedDocumentTest, GetContent_Success)
 {
   std::string content;
-  doc_.get_content(content);
+  doc_.get_original(content);
   ASSERT_TRUE(0 < content.length());
 }
 
@@ -80,6 +81,31 @@ TEST_F(SignedDocumentTest, LoadFromMemory)
   DDS::OctetSeq seq(str.size(), str.size(),
                     reinterpret_cast<unsigned char*>(
                       const_cast<char*>(str.c_str())));
+
+  *OpenDDS::DCPS::back_inserter(seq) = 0u;
+
   SignedDocument doc(seq);
   ASSERT_EQ(doc, doc_);
 }
+
+TEST_F(SignedDocumentTest, CopyAssignment)
+{
+  SignedDocument doc = doc_;
+  ASSERT_EQ(doc, doc_);
+}
+
+TEST_F(SignedDocumentTest, Assignment)
+{
+  SignedDocument doc;
+  doc = doc_;
+  ASSERT_EQ(doc, doc_);
+}
+
+TEST_F(SignedDocumentTest, CopyConstruct)
+{
+  SignedDocument doc(doc);
+  ASSERT_EQ(doc, doc_);
+}
+
+
+

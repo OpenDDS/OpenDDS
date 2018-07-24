@@ -28,6 +28,8 @@ namespace SSL {
 
     SignedDocument(const DDS::OctetSeq& src);
 
+    SignedDocument(const SignedDocument& rhs);
+
     SignedDocument();
 
     virtual ~SignedDocument();
@@ -36,9 +38,17 @@ namespace SSL {
 
     void load(const std::string& uri);
 
-    void get_content(std::string& dst) const;
+    void get_original(std::string& dst) const;
 
-    const std::string& get_content() const;
+    const DDS::OctetSeq& get_original() const
+    {
+      return original_;
+    }
+
+    const std::string& get_verifiable() const
+    {
+      return verifiable_;
+    }
 
     bool get_content_minus_smime(std::string& cleaned_content) const;
 
@@ -46,11 +56,6 @@ namespace SSL {
      * @return int 0 on success; 1 on failure.
      */
     int verify_signature(const Certificate& ca) const;
-
-    /**
-     * @return int 0 on success; 1 on failure.
-     */
-    int serialize(std::vector<unsigned char>& dst) const;
 
     /**
      * @return int 0 on success; 1 on failure.
@@ -68,18 +73,20 @@ namespace SSL {
     int deserialize(const std::string& src);
 
    private:
+
     /**
      * @return int 0 on success; 1 on failure.
      */
-    int cache_plaintext();
+    int cache_verifiable();
 
     PKCS7* PKCS7_from_SMIME_file(const std::string& path);
 
-    PKCS7* PKCS7_from_data(const std::string& s_mime_data);
+    PKCS7* PKCS7_from_data(const DDS::OctetSeq& s_mime_data);
 
     PKCS7* doc_;
     BIO* content_;
-    std::string plaintext_;
+    DDS::OctetSeq original_;
+    std::string verifiable_;
   };
 
   DdsSecurity_Export bool operator==(const SignedDocument& lhs,
