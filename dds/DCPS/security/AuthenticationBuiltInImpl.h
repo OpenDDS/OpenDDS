@@ -201,7 +201,7 @@ private:
 
   std::string get_extension(const char* class_id);
 
-  uint64_t get_next_handle();
+  CORBA::Long get_next_handle();
 
   DDS::Security::AuthenticationListener_ptr listener_ptr_;
 
@@ -209,7 +209,7 @@ private:
   ACE_Thread_Mutex handshake_mutex_;
   ACE_Thread_Mutex handle_mutex_;
 
-  uint64_t next_handle_;
+  CORBA::Long next_handle_;
 
 };
 } // namespace Security
