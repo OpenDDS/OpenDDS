@@ -5,6 +5,7 @@
 
 #include "Certificate.h"
 #include "dds/DCPS/security/CommonUtilities.h"
+#include "dds/DCPS/SequenceIterator.h"
 #include "Err.h"
 #include <algorithm>
 #include <cstring>
@@ -18,17 +19,30 @@ namespace Security {
 namespace SSL {
   Certificate::Certificate(const std::string& uri,
                            const std::string& password)
-    : x_(NULL)
+    : x_(NULL), original_bytes_()
   {
     load(uri, password);
   }
 
-  Certificate::Certificate(const DDS::OctetSeq& src) : x_(NULL)
+  Certificate::Certificate(const DDS::OctetSeq& src)
+    : x_(NULL), original_bytes_()
   {
     deserialize(src);
   }
 
-  Certificate::Certificate() : x_(NULL) {}
+  Certificate::Certificate()
+    : x_(NULL), original_bytes_()
+  {
+
+  }
+
+  Certificate::Certificate(const Certificate& other)
+    : x_(NULL), original_bytes_()
+  {
+    if (0 < other.original_bytes_.length()) {
+      deserialize(other.original_bytes_);
+    }
+  }
 
   Certificate::~Certificate()
   {
@@ -38,15 +52,10 @@ namespace SSL {
   Certificate& Certificate::operator=(const Certificate& rhs)
   {
     if (this != &rhs) {
-      if (rhs.x_) {
-        x_ = rhs.x_;
-#ifndef OPENSSL_V_1_0
-        X509_up_ref(x_);
-#endif
-
-      } else {
-        x_ = NULL;
+      if (rhs.x_ && (0 < rhs.original_bytes_.length())) {
+        deserialize(rhs.original_bytes_);
       }
+
     }
     return *this;
   }
@@ -469,46 +478,17 @@ namespace SSL {
     return result;
   }
 
-  int Certificate::serialize(std::vector<unsigned char>& dst) const
-  {
-    int result = 1;
-
-    if (x_) {
-      BIO* buffer = BIO_new(BIO_s_mem());
-      if (buffer) {
-        if (1 == PEM_write_bio_X509(buffer, x_)) {
-          unsigned char tmp[32] = { 0 };
-          int len = 0;
-          while ((len = BIO_read(buffer, tmp, sizeof(tmp))) > 0) {
-            dst.insert(dst.end(), tmp, tmp + len);
-            result = 0;
-          }
-
-        } else {
-          OPENDDS_SSL_LOG_ERR("failed to write X509 to PEM");
-        }
-
-        BIO_free(buffer);
-
-      } else {
-        OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
-      }
-    }
-
-    return result;
-  }
-
   int Certificate::serialize(DDS::OctetSeq& dst) const
   {
-    std::vector<unsigned char> tmp;
-    int err = serialize(tmp);
-    if (!err) {
-      dst.length(tmp.size());
-      for (size_t i = 0; i < tmp.size(); ++i) {
-        dst[i] = tmp[i];
-      }
+    std::copy(DCPS::const_sequence_begin(original_bytes_),
+              DCPS::const_sequence_end(original_bytes_),
+              DCPS::back_inserter(dst));
+
+    if (dst.length() == original_bytes_.length()) {
+      return 0;
     }
-    return err;
+
+    return 1;
   }
 
   int Certificate::deserialize(const DDS::OctetSeq& src)
@@ -568,7 +548,8 @@ namespace SSL {
 
   bool operator==(const Certificate& lhs, const Certificate& rhs)
   {
-    return 0 == X509_cmp(lhs.x_, rhs.x_);
+    return (0 == X509_cmp(lhs.x_, rhs.x_)) &&
+           (lhs.original_bytes_ == rhs.original_bytes_);
   }
 }  // namespace SSL
 }  // namespace Security

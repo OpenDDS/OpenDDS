@@ -37,6 +37,8 @@ namespace SSL {
 
     Certificate(const DDS::OctetSeq& src);
 
+    Certificate(const Certificate& other);
+
     Certificate();
 
     virtual ~Certificate();
@@ -72,11 +74,6 @@ namespace SSL {
      * @return int 0 on success; 1 on failure.
      */
     int algorithm(std::string& dst) const;
-
-    /**
-     * @return int 0 on success; 1 on failure.
-     */
-    int serialize(std::vector<unsigned char>& dst) const;
 
     /**
      * @return int 0 on success; 1 on failure.

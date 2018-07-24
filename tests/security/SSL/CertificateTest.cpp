@@ -141,3 +141,16 @@ TEST_F(CertificateTest, SerializeDeserialize_Success)
   Certificate copy(tmp);
   ASSERT_EQ(copy, signed_);
 }
+
+TEST_F(CertificateTest, AssignmentOperator)
+{
+  Certificate c;
+  c = signed_;
+  ASSERT_EQ(c, signed_);
+}
+
+TEST_F(CertificateTest, CopyConstruct)
+{
+  Certificate c(signed_);
+  ASSERT_EQ(c, signed_);
+}
