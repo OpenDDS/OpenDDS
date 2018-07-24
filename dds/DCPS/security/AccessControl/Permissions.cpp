@@ -22,7 +22,7 @@ Permissions::Permissions()
 
 bool Permissions::extract_subject_name(const SSL::SignedDocument& doc)
 {
-  doc.get_content_minus_smime(subject_name_);
+  doc.get_original_minus_smime(subject_name_);
 
   const std::string start_str("<subject_name>"), end_str("</subject_name>");
 
@@ -81,7 +81,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
   parser->setErrorHandler(errHandler.get());
 
   std::string cleaned;
-  doc.get_content_minus_smime(cleaned);
+  doc.get_original_minus_smime(cleaned);
   xercesc::MemBufInputSource contentbuf((const XMLByte*) cleaned.c_str(),
                                         cleaned.size(),
                                         gMemBufId);

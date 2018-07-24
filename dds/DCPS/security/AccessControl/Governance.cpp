@@ -56,7 +56,7 @@ int Governance::load(const SSL::SignedDocument& doc)
   // buffer for parsing
 
   std::string cleaned;
-  doc.get_content_minus_smime(cleaned);
+  doc.get_original_minus_smime(cleaned);
 
   xercesc::MemBufInputSource contentbuf((const XMLByte*) cleaned.c_str(),
                                         cleaned.size(),

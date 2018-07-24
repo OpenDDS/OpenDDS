@@ -94,7 +94,7 @@ namespace SSL {
               std::back_inserter(dst));
   }
 
-  bool SignedDocument::get_content_minus_smime(std::string & cleaned_content) const
+  bool SignedDocument::get_original_minus_smime(std::string & cleaned_content) const
   {
     const std::string start_str("Content-Type: text/plain"), 
                       end_str("dds>");
