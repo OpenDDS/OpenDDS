@@ -103,7 +103,7 @@ TEST_F(SignedDocumentTest, Assignment)
 
 TEST_F(SignedDocumentTest, CopyConstruct)
 {
-  SignedDocument doc(doc);
+  SignedDocument doc(doc_);
   ASSERT_EQ(doc, doc_);
 }
 
