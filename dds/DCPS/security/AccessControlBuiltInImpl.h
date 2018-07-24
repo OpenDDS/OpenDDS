@@ -294,15 +294,15 @@ private:
   CORBA::Boolean search_local_permissions(const char * topic_name,
                                           const ::DDS::Security::DomainId_t domain_id,
                                           const ::DDS::PartitionQosPolicy & partition,
-                                          ACPermsMap::iterator ac_iter,
-//                                          const Permissions::PublishSubscribe_t pub_or_sub,
+                                          const ACPermsMap::iterator ac_iter,
                                           ::DDS::Security::SecurityException & ex);
 
   /// @return 0 if the search is successful.
-  int search_remote_permissions(const char * topic_name,
-                                const ::DDS::Security::DomainId_t domain_id,
-                                ACPermsMap::iterator ac_iter,
-                                const Permissions::PublishSubscribe_t pub_or_sub);
+  CORBA::Boolean search_remote_permissions(const char * topic_name,
+                                           const ::DDS::Security::DomainId_t domain_id,
+                                           const ACPermsMap::iterator ac_iter,
+                                           const Permissions::PublishSubscribe_t pub_or_sub,
+                                           ::DDS::Security::SecurityException & ex);
 
   void parse_class_id(const std::string class_id,
                       std::string& plugin_class_name,
