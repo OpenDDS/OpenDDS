@@ -19,24 +19,24 @@ namespace Security {
 namespace SSL {
 
   SignedDocument::SignedDocument(const std::string& uri)
-    : doc_(NULL), content_(NULL), original_(), verifiable_("")
+    : doc_(NULL), original_(), verifiable_("")
   {
     load(uri);
   }
 
   SignedDocument::SignedDocument()
-    : doc_(NULL), content_(NULL), original_(), verifiable_("")
+    : doc_(NULL), original_(), verifiable_("")
   {
   }
 
   SignedDocument::SignedDocument(const DDS::OctetSeq& src)
-    : doc_(NULL), content_(NULL), original_(), verifiable_("")
+    : doc_(NULL), original_(), verifiable_("")
   {
     deserialize(src);
   }
 
   SignedDocument::SignedDocument(const SignedDocument& rhs)
-  : doc_(NULL), content_(NULL), original_(), verifiable_("")
+  : doc_(NULL), original_(), verifiable_("")
   {
     if (0 < rhs.original_.length()) {
       deserialize(rhs.original_);
@@ -247,28 +247,23 @@ namespace SSL {
     return 0;
   }
 
-  int SignedDocument::cache_verifiable()
+  int SignedDocument::cache_verifiable(BIO* from)
   {
-    int result = 1;
-
-    if (doc_) {
-      if (content_) {
-        unsigned char tmp[32] = { 0 };
-        int len = 0;
-        while ((len = BIO_read(content_, tmp, sizeof(tmp))) > 0) {
-          verifiable_.insert(verifiable_.end(), tmp, tmp + len);
-          result = 0;
-        }
-
-      } else {
-        OPENDDS_SSL_LOG_ERR("PKCS7_decrypt failed");
-      }
-
-      BIO_free(content_);
-      content_ = 0;
+    if (!doc_ || !from) {
+      return 1;
     }
 
-    return result;
+    unsigned char tmp[32] = { 0 };
+    int len = 0;
+    while ((len = BIO_read(from, tmp, sizeof(tmp))) > 0) {
+      verifiable_.insert(verifiable_.end(), tmp, tmp + len);
+    }
+
+    if (0 < verifiable_.length()) {
+      return 0;
+    }
+
+    return 1;
   }
 
   PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
@@ -308,20 +303,22 @@ namespace SSL {
         OPENDDS_SSL_LOG_ERR("BIO_write failed");
       }
 
-      doc_ = SMIME_read_PKCS7(filebuf, &content_);
+      BIO* cache_this = NULL;
+
+      doc_ = SMIME_read_PKCS7(filebuf, &cache_this);
 
       if (!doc_) {
         OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
-        content_ = NULL;
       }
 
-      if (0 != cache_verifiable()) {
+      if (0 != cache_verifiable(cache_this)) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) SignedDocument::PKCS7_from_data: "
                    "WARNING: failed to cache verifiable part of S/MIME data\n"));
       }
 
       BIO_free(filebuf);
+      BIO_free(cache_this);
 
     } else {
       std::stringstream errmsg;

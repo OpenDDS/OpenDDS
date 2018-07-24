@@ -76,15 +76,16 @@ namespace SSL {
 
     /**
      * @return int 0 on success; 1 on failure.
+     *
+     * @param from BIO containing data populated by a call to SMIME_read_PKCS7.
      */
-    int cache_verifiable();
+    int cache_verifiable(BIO* from);
 
     PKCS7* PKCS7_from_SMIME_file(const std::string& path);
 
     PKCS7* PKCS7_from_data(const DDS::OctetSeq& s_mime_data);
 
     PKCS7* doc_;
-    BIO* content_;
     DDS::OctetSeq original_;
     std::string verifiable_;
   };
