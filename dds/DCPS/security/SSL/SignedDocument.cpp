@@ -21,7 +21,10 @@ namespace SSL {
   SignedDocument::SignedDocument(const std::string& uri)
     : doc_(NULL), original_(), verifiable_("")
   {
-    load(uri);
+    DDS::Security::SecurityException ex;
+    if (! load(uri, ex)) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) %C\n", ex.message));
+    }
   }
 
   SignedDocument::SignedDocument()
@@ -58,11 +61,14 @@ namespace SSL {
     return *this;
   }
 
-  void SignedDocument::load(const std::string& uri)
+  bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityException& ex)
   {
     using namespace CommonUtilities;
 
-    if (doc_) return;
+    if (doc_) {
+      CommonUtilities::set_security_error(ex, -1, 0, "SSL::SignedDocument::load: WARNING: document already loaded");
+      return false;
+    }
 
     URI uri_info(uri);
 
@@ -79,10 +85,19 @@ namespace SSL {
       case URI::URI_UNKNOWN:
       default:
         ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) SSL::SignedDocument::load: WARNING: Unsupported URI scheme '%C'\n"),
-                   uri.c_str()));
+                  "(%P|%t) SSL::SignedDocument::load: WARNING: Unsupported URI scheme\n"));
         break;
     }
+
+    if (! loaded()) {
+      std::stringstream msg;
+      msg << "SSL::SignedDocument::load: WARNING: Failed to load document supplied "
+             "with URI '"  << uri << "'";
+      CommonUtilities::set_security_error(ex, -1, 0, msg.str().c_str());
+      return false;
+    }
+
+    return true;
   }
 
   void SignedDocument::get_original(std::string& dst) const
@@ -94,30 +109,30 @@ namespace SSL {
               std::back_inserter(dst));
   }
 
-  bool SignedDocument::get_original_minus_smime(std::string & cleaned_content) const
+  bool SignedDocument::get_original_minus_smime(std::string& dst) const
   {
     const std::string start_str("Content-Type: text/plain"), 
                       end_str("dds>");
 
-    get_original(cleaned_content);
+    get_original(dst);
 
-    size_t found_begin = cleaned_content.find(start_str);
+    size_t found_begin = dst.find(start_str);
 
     if (found_begin != std::string::npos) {
-      cleaned_content.erase(0, found_begin + start_str.length());
+      dst.erase(0, found_begin + start_str.length());
 
       const char* t = " \t\n\r\f\v";
 
-      cleaned_content.erase(0, cleaned_content.find_first_not_of(t));
+      dst.erase(0, dst.find_first_not_of(t));
     }
     else {
       return false;
     }
 
-    size_t found_end = cleaned_content.find(end_str);
+    size_t found_end = dst.find(end_str);
 
     if (found_end != std::string::npos) {
-      cleaned_content.erase(found_end + end_str.length());
+      dst.erase(found_end + end_str.length());
     }
     else {
       return false;

@@ -8,6 +8,7 @@
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/unique_ptr.h"
+#include "dds/DdsSecurityCoreC.h"
 #include "Certificate.h"
 #include <string>
 #include <openssl/pkcs7.h>
@@ -36,7 +37,7 @@ namespace SSL {
 
     SignedDocument& operator=(const SignedDocument& rhs);
 
-    void load(const std::string& uri);
+    bool load(const std::string& uri, DDS::Security::SecurityException& ex);
 
     void get_original(std::string& dst) const;
 
@@ -50,7 +51,7 @@ namespace SSL {
       return verifiable_;
     }
 
-    bool get_original_minus_smime(std::string& cleaned_content) const;
+    bool get_original_minus_smime(std::string& dst) const;
 
     /**
      * @return int 0 on success; 1 on failure.
@@ -73,6 +74,12 @@ namespace SSL {
     int deserialize(const std::string& src);
 
    private:
+
+    bool loaded() {
+      return (doc_ != NULL) &&
+               (0 < original_.length()) &&
+                 (0 < verifiable_.length());
+    }
 
     /**
      * @return int 0 on success; 1 on failure.
