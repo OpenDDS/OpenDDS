@@ -66,7 +66,7 @@ namespace SSL {
     using namespace CommonUtilities;
 
     if (doc_) {
-      CommonUtilities::set_security_error(ex, -1, 0, "SSL::SignedDocument::load: WARNING: document already loaded");
+      set_security_error(ex, -1, 0, "SSL::SignedDocument::load: WARNING: document already loaded");
       return false;
     }
 
@@ -93,7 +93,7 @@ namespace SSL {
       std::stringstream msg;
       msg << "SSL::SignedDocument::load: WARNING: Failed to load document supplied "
              "with URI '"  << uri << "'";
-      CommonUtilities::set_security_error(ex, -1, 0, msg.str().c_str());
+      set_security_error(ex, -1, 0, msg.str().c_str());
       return false;
     }
 

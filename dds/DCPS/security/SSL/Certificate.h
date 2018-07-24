@@ -9,6 +9,7 @@
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DCPS/unique_ptr.h"
 #include "dds/DdsDcpsCoreC.h"
+#include "dds/DdsSecurityCoreC.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -45,7 +46,9 @@ namespace SSL {
 
     Certificate& operator=(const Certificate& rhs);
 
-    void load(const std::string& uri, const std::string& password = "");
+    bool load(DDS::Security::SecurityException& ex,
+              const std::string& uri,
+              const std::string& password = "");
 
     /**
      * @return int 0 on success; 1 on failure.
@@ -90,6 +93,12 @@ namespace SSL {
     const char* dsign_algo() const { return "RSASSA-PSS-SHA256"; }
 
    private:
+
+    bool loaded() {
+      return (x_ != NULL) &&
+                (0 < original_bytes_.length());
+    }
+
     void load_cert_bytes(const std::string& path);
 
     void load_cert_data_bytes(const std::string& data);

@@ -21,7 +21,10 @@ namespace SSL {
                            const std::string& password)
     : x_(NULL), original_bytes_()
   {
-    load(uri, password);
+    DDS::Security::SecurityException ex;
+    if (! load(ex, uri, password)) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) %C\n", ex.message));
+    }
   }
 
   Certificate::Certificate(const DDS::OctetSeq& src)
@@ -60,11 +63,16 @@ namespace SSL {
     return *this;
   }
 
-  void Certificate::load(const std::string& uri, const std::string& password)
+  bool Certificate::load(DDS::Security::SecurityException& ex,
+                         const std::string& uri,
+                         const std::string& password)
   {
     using namespace CommonUtilities;
 
-    if (x_) return;
+    if (x_) {
+      set_security_error(ex, -1, 0, "SSL::Certificate::load: WARNING: document already loaded");
+      return false;
+    }
 
     URI uri_info(uri);
 
@@ -83,11 +91,20 @@ namespace SSL {
       case URI::URI_UNKNOWN:
       default:
         ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) SSL::Certificate::Certificate: WARNING, unsupported URI scheme in "
-                            "cert path '%C'\n"), uri.c_str()));
+                  "(%P|%t) SSL::Certificate::load: WARNING: Unsupported URI scheme\n"));
 
         break;
     }
+
+    if (! loaded()) {
+      std::stringstream msg;
+      msg << "SSL::Certificate::load: WARNING: Failed to load document supplied "
+             "with URI '"  << uri << "'";
+      set_security_error(ex, -1, 0, msg.str().c_str());
+      return false;
+    }
+
+    return true;
   }
 
   int Certificate::validate(const Certificate& ca, unsigned long int flags) const
