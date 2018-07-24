@@ -183,8 +183,10 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   // Populate a simple version of an IdentityStatusToken as long as the handle is known
   IdentityData_Ptr local_data = get_identity_data(handle);
   if (local_data) {
-    OpenDDS::Security::TokenWriter identity_stat_wrapper(identity_status_token, Identity_Status_Token_Class_Id);
-    identity_stat_wrapper.add_property("dds.ocps_status", "OCSP not yet supported");
+
+    // TODO: Pending AuthenticationListener support (see security spec. 8.3.2.2).
+    // This routine will most likely populate the IdentityStatusToken with
+    // useful data once this has been completed. For now it's a glorified no-op!
 
     status = true;
   } else {
