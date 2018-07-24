@@ -53,6 +53,7 @@ static const std::string PermissionsCredentialTokenClassId("DDS:Access:Permissio
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
   : rp_timer_(*this)
   , handle_mutex_()
+  , gen_handle_mutex_()
   , next_handle_(1)
   , listener_ptr_(NULL)
 {  }
@@ -304,13 +305,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_create_participant(
   ::DDS::Security::PermissionsHandle permissions_handle,
-  ::DDS::Security::DomainId_t domain_id,
-  const ::DDS::DomainParticipantQos & qos,
+  ::DDS::Security::DomainId_t /*domain_id*/,
+  const ::DDS::DomainParticipantQos & /*qos*/,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(qos);
-
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_participant: Invalid permissions handle");
     return false;
@@ -372,15 +370,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::Security::DomainId_t domain_id,
   const char * topic_name,
-  const ::DDS::DataWriterQos & qos,
+  const ::DDS::DataWriterQos & /*qos*/,
   const ::DDS::PartitionQosPolicy & partition,
-  const ::DDS::Security::DataTags & data_tag,
+  const ::DDS::Security::DataTags & /*data_tag*/,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(qos);
-  ACE_UNUSED_ARG(data_tag);
-
-
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Invalid permissions handle");
     return false;
@@ -448,14 +442,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::Security::DomainId_t domain_id,
   const char * topic_name,
-  const ::DDS::DataReaderQos & qos,
+  const ::DDS::DataReaderQos & /*qos*/,
   const ::DDS::PartitionQosPolicy & partition,
-  const ::DDS::Security::DataTags & data_tag,
+  const ::DDS::Security::DataTags & /*data_tag*/,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(qos);
-  ACE_UNUSED_ARG(data_tag);
-
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Invalid permissions handle");
     return false;
@@ -523,14 +514,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
 ::CORBA::Boolean AccessControlBuiltInImpl::check_create_topic(
   ::DDS::Security::PermissionsHandle permissions_handle,
-  ::DDS::Security::DomainId_t domain_id,
+  ::DDS::Security::DomainId_t /*domain_id*/,
   const char * topic_name,
-  const ::DDS::TopicQos & qos,
+  const ::DDS::TopicQos & /*qos*/,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(domain_id);
-  ACE_UNUSED_ARG(qos);
-
   if (DDS::HANDLE_NIL == permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: Invalid permissions handle");
     return false;
@@ -1027,13 +1015,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_match(
   ::DDS::Security::PermissionsHandle writer_permissions_handle,
   ::DDS::Security::PermissionsHandle reader_permissions_handle,
-  const ::DDS::Security::PublicationBuiltinTopicDataSecure & publication_data,
-  const ::DDS::Security::SubscriptionBuiltinTopicDataSecure & subscription_data,
+  const ::DDS::Security::PublicationBuiltinTopicDataSecure & /*publication_data*/,
+  const ::DDS::Security::SubscriptionBuiltinTopicDataSecure & /*subscription_data*/,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(publication_data);
-  ACE_UNUSED_ARG(subscription_data);
-
   if (DDS::HANDLE_NIL == writer_permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datawriter_match: Invalid writer permissions handle");
     return false;
@@ -1049,13 +1034,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datareader_match(
   ::DDS::Security::PermissionsHandle reader_permissions_handle,
   ::DDS::Security::PermissionsHandle writer_permissions_handle,
-  const ::DDS::Security::SubscriptionBuiltinTopicDataSecure & subscription_data,
-  const ::DDS::Security::PublicationBuiltinTopicDataSecure & publication_data,
+  const ::DDS::Security::SubscriptionBuiltinTopicDataSecure & /*subscription_data*/,
+  const ::DDS::Security::PublicationBuiltinTopicDataSecure & /*publication_data*/,
   ::DDS::Security::SecurityException & ex)
 {
-  ACE_UNUSED_ARG(subscription_data);
-  ACE_UNUSED_ARG(publication_data);
-
   if (DDS::HANDLE_NIL == writer_permissions_handle) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_local_datareader_match: Invalid writer permissions handle");
     return false;
