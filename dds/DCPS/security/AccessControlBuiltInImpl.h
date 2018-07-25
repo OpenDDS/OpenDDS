@@ -298,6 +298,7 @@ private:
   CORBA::Boolean search_local_permissions(const char * topic_name,
                                           const ::DDS::Security::DomainId_t domain_id,
                                           const ::DDS::PartitionQosPolicy & partition,
+                                          const Permissions::PublishSubscribe_t pub_or_sub,
                                           const ACPermsMap::iterator ac_iter,
                                           ::DDS::Security::SecurityException & ex);
 

@@ -418,7 +418,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, ac_iter, ex);
+  Permissions::PublishSubscribe_t publish = Permissions::PUBLISH;
+  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, publish, ac_iter, ex);
 
   if (!successful) {
     return false;
@@ -493,7 +494,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, ac_iter, ex);
+  Permissions::PublishSubscribe_t subscribe = Permissions::SUBSCRIBE;
+  CORBA::Boolean successful = search_local_permissions(topic_name, domain_id, partition, subscribe, ac_iter, ex);
 
   if (!successful) {
     return false;
@@ -1660,6 +1662,7 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
   const char * topic_name, 
   const ::DDS::Security::DomainId_t domain_id, 
   const ::DDS::PartitionQosPolicy & partition,
+  const Permissions::PublishSubscribe_t pub_or_sub,
   const ACPermsMap::iterator ac_iter,
   ::DDS::Security::SecurityException & ex)
 {
@@ -1688,7 +1691,8 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
           perm_topic_ps_rules_iter tpsr_iter;
 
           for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-            if (tpsr_iter->ps_type == Permissions::PUBLISH) {
+//            if (tpsr_iter->ps_type == Permissions::PUBLISH) {
+            if (tpsr_iter->ps_type == pub_or_sub) {
               std::vector<std::string>::iterator tl_iter; // topic list
 
               for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -1703,7 +1707,8 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
                         perm_partition_ps_iter pps_iter;
 
                         for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                          if (pps_iter->ps_type == Permissions::PUBLISH) {
+//                          if (pps_iter->ps_type == Permissions::PUBLISH) {
+                          if (pps_iter->ps_type == pub_or_sub) {
                             std::vector<std::string>::iterator pl_iter; // partition list
                             num_param_partitions = pps_iter->partition_list.size();
 
@@ -1734,7 +1739,8 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
           perm_topic_ps_rules_iter tpsr_iter;
 
           for (tpsr_iter = ptr_iter->topic_ps_rules.begin(); tpsr_iter != ptr_iter->topic_ps_rules.end(); ++tpsr_iter) {
-            if (tpsr_iter->ps_type == Permissions::PUBLISH) {
+//            if (tpsr_iter->ps_type == Permissions::PUBLISH) {
+            if (tpsr_iter->ps_type == pub_or_sub) {
               std::vector<std::string>::iterator tl_iter; // topic list
 
               for (tl_iter = tpsr_iter->topic_list.begin(); tl_iter != tpsr_iter->topic_list.end(); ++tl_iter) {
@@ -1749,7 +1755,8 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
                         perm_partition_ps_iter pps_iter;
 
                         for (pps_iter = pp_iter->partition_ps.begin(); pps_iter != pp_iter->partition_ps.end(); ++pps_iter) {
-                          if (pps_iter->ps_type == Permissions::PUBLISH) {
+//                          if (pps_iter->ps_type == Permissions::PUBLISH) {
+                          if (pps_iter->ps_type == pub_or_sub) {
                             std::vector<std::string>::iterator pl_iter; // partition list
 
                             for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
