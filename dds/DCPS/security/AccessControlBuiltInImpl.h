@@ -270,7 +270,8 @@ private:
     ACE_Reactor_Timer_Interface* reactor_;
 
   };
-  RevokePermissionsTimer rp_timer_;
+  RevokePermissionsTimer local_rp_timer_;
+  RevokePermissionsTimer remote_rp_timer_;
 
   ::CORBA::Long generate_handle();
 

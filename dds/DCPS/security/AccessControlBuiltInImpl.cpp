@@ -51,7 +51,8 @@ static const std::string PermissionsCredentialTokenClassId("DDS:Access:Permissio
 
 
 AccessControlBuiltInImpl::AccessControlBuiltInImpl()
-  : rp_timer_(*this)
+  : local_rp_timer_(*this)
+  , remote_rp_timer_(*this)
   , handle_mutex_()
   , gen_handle_mutex_()
   , next_handle_(1)
@@ -292,8 +293,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   ::CORBA::Long perm_handle = generate_handle();
 
-//  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 0);
-
   AccessData cache_this;
   cache_this.perm = DCPS::move(permissions);
   cache_this.gov = piter->second.gov;
@@ -425,11 +424,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!rp_timer_.is_scheduled()) {
+  if (!local_rp_timer_.is_scheduled()) {
     // Start timer
     ACE_Time_Value timer_length(delta_time);
 
-    if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+    if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions timer could not be created.");
       return false;
     }
@@ -500,10 +499,10 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (!rp_timer_.is_scheduled()) {
+  if (!local_rp_timer_.is_scheduled()) {
     ACE_Time_Value timer_length(delta_time);
 
-    if (!rp_timer_.start_timer(timer_length, permissions_handle)) {
+    if (!local_rp_timer_.start_timer(timer_length, permissions_handle)) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
       return false;
     }
@@ -736,6 +735,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   for (pgr_iter = ac_iter->second.perm->data().perm_rules.begin(); pgr_iter != ac_iter->second.perm->data().perm_rules.end(); ++pgr_iter) {
     // Cycle through topic rules to find an allow
     perm_topic_rules_iter ptr_iter;
+
     for (ptr_iter = pgr_iter->PermissionTopicRules.begin(); ptr_iter != pgr_iter->PermissionTopicRules.end(); ++ptr_iter) {
       size_t z = (ptr_iter->domain_list.count(domain_id));
 
@@ -806,6 +806,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
+  if (!remote_rp_timer_.is_scheduled()) {
+    ACE_Time_Value timer_length(delta_time);
+
+    if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -865,6 +874,15 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   if (!successful) {
     return false;
+  }
+
+  if (!remote_rp_timer_.is_scheduled()) {
+    ACE_Time_Value timer_length(delta_time);
+
+    if (!remote_rp_timer_.start_timer(timer_length, permissions_handle)) {
+      CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions timer could not be created.");
+      return false;
+    }
   }
 
   return true;
@@ -1544,9 +1562,9 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
       if (std::strcmp(topic_name, "DCPSParticipantMessageSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
-        attributes.base.is_liveliness_protected = false; // giter->domain_attrs.is_liveliness_protected;
+        attributes.base.is_liveliness_protected = false; 
         attributes.base.is_discovery_protected = false;
-        attributes.is_submessage_protected = giter->domain_attrs.is_liveliness_protected; //true;
+        attributes.is_submessage_protected = giter->domain_attrs.is_liveliness_protected; 
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
 
@@ -1566,9 +1584,9 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
           std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
-        attributes.base.is_liveliness_protected = false; // giter->domain_attrs.is_discovery_protected;
+        attributes.base.is_liveliness_protected = false; 
         attributes.base.is_discovery_protected = false;
-        attributes.is_submessage_protected = giter->domain_attrs.is_discovery_protected; // true;
+        attributes.is_submessage_protected = giter->domain_attrs.is_discovery_protected; 
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
 
@@ -1638,7 +1656,8 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
   return false;
 }
 
-CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(const char * topic_name, 
+CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
+  const char * topic_name, 
   const ::DDS::Security::DomainId_t domain_id, 
   const ::DDS::PartitionQosPolicy & partition,
   const ACPermsMap::iterator ac_iter,
