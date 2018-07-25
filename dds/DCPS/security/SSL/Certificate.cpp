@@ -565,7 +565,11 @@ namespace SSL {
 
   bool operator==(const Certificate& lhs, const Certificate& rhs)
   {
-    return (0 == X509_cmp(lhs.x_, rhs.x_)) &&
+    if (lhs.x_ && rhs.x_) {
+      return (0 == X509_cmp(lhs.x_, rhs.x_)) &&
+             (lhs.original_bytes_ == rhs.original_bytes_);
+    }
+    return (lhs.x_ == rhs.x_) &&
            (lhs.original_bytes_ == rhs.original_bytes_);
   }
 }  // namespace SSL

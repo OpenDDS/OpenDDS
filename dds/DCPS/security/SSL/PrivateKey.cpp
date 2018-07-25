@@ -275,7 +275,10 @@ namespace SSL {
 
   bool operator==(const PrivateKey& lhs, const PrivateKey& rhs)
   {
-    return (1 == EVP_PKEY_cmp(lhs.k_, rhs.k_));
+    if (lhs.k_ && rhs.k_) {
+      return (1 == EVP_PKEY_cmp(lhs.k_, rhs.k_));
+    }
+    return lhs.k_ == rhs.k_;
   }
 
 }  // namespace SSL
