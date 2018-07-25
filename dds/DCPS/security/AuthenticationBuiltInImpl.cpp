@@ -242,44 +242,64 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   if (local_data) {
     if (check_class_versions(remote_identity_token.class_id)) {
 
-      TokenReader remote_request(remote_auth_request_token);
-      if (remote_request.is_nil()) {
+      // Make sure that a remote_participant_guid has not already been assigned a
+      // remote-identity-handle before creating a new one.
 
-        DDS::OctetSeq nonce;
-        int err = SSL::make_nonce_256(nonce);
-        if (! err) {
-          TokenWriter auth_req_wrapper(local_auth_request_token, build_class_id(Auth_Request_Class_Ext));
+      Identity_Handle_Data::iterator found, begin = identity_data_.begin(), end = identity_data_.end();
+      found = std::find_if(begin, end, was_guid_validated(remote_participant_guid));
 
-          auth_req_wrapper.add_bin_property("future_challenge", nonce);
-
-        } else {
-          set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for future_challenge property");
-
-          result = DDS::Security::VALIDATION_FAILED;
-        }
-
-      } else {
-        local_auth_request_token = DDS::Security::TokenNIL;
-      }
-
-      if (result == DDS::Security::VALIDATION_OK) {
-
-        /* Retain all of the data needed for a handshake with the remote participant */
-        IdentityData_Ptr newIdentityData = DCPS::make_rch<IdentityData>();
-        newIdentityData->participant_guid = remote_participant_guid;
-        newIdentityData->local_credential_data = local_data->local_credential_data;
-        newIdentityData->local_handle = local_identity_handle;
-        newIdentityData->local_auth_request = local_auth_request_token;
-        newIdentityData->remote_auth_request = remote_auth_request_token;
-
-        remote_identity_handle = get_next_handle();
-        identity_data_[remote_identity_handle] = newIdentityData;
+      if (found != end) {
+        remote_identity_handle = found->first;
+        local_auth_request_token = found->second->local_auth_request;
 
         if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
           result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
 
         } else {
           result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+        }
+
+      } else {
+
+        TokenReader remote_request(remote_auth_request_token);
+        if (remote_request.is_nil()) {
+
+          DDS::OctetSeq nonce;
+          int err = SSL::make_nonce_256(nonce);
+          if (! err) {
+            TokenWriter auth_req_wrapper(local_auth_request_token, build_class_id(Auth_Request_Class_Ext));
+
+            auth_req_wrapper.add_bin_property("future_challenge", nonce);
+
+          } else {
+            set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for future_challenge property");
+
+            result = DDS::Security::VALIDATION_FAILED;
+          }
+
+        } else {
+          local_auth_request_token = DDS::Security::TokenNIL;
+        }
+
+        if (result == DDS::Security::VALIDATION_OK) {
+
+          /* Retain all of the data needed for a handshake with the remote participant */
+          IdentityData_Ptr newIdentityData = DCPS::make_rch<IdentityData>();
+          newIdentityData->participant_guid = remote_participant_guid;
+          newIdentityData->local_credential_data = local_data->local_credential_data;
+          newIdentityData->local_handle = local_identity_handle;
+          newIdentityData->local_auth_request = local_auth_request_token;
+          newIdentityData->remote_auth_request = remote_auth_request_token;
+
+          remote_identity_handle = get_next_handle();
+          identity_data_[remote_identity_handle] = newIdentityData;
+
+          if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
+            result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
+
+          } else {
+            result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+          }
         }
       }
 

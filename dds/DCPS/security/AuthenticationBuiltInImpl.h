@@ -14,6 +14,7 @@
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/GuidUtils.h"
 #include "ace/Thread_Mutex.h"
 #include <map>
 #include <string>
@@ -202,6 +203,19 @@ private:
   std::string get_extension(const char* class_id);
 
   CORBA::Long get_next_handle();
+
+  struct was_guid_validated
+  {
+    was_guid_validated(const OpenDDS::DCPS::GUID_t& expected) : expected_(expected) {}
+
+    bool operator()(const Identity_Handle_Data::value_type& validated) const
+    {
+      return expected_ == validated.second->participant_guid;
+    }
+
+  private:
+    const OpenDDS::DCPS::GUID_t& expected_;
+  };
 
   DDS::Security::AuthenticationListener_ptr listener_ptr_;
 
