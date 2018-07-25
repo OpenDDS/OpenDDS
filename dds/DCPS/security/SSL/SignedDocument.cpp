@@ -291,6 +291,14 @@ namespace SSL {
                std::istreambuf_iterator<char>(),
                back_inserter);
 
+    if (in.fail()) {
+      ACE_ERROR((LM_ERROR,
+                "(%P|%t) SignedDocument::PKCS7_from_SMIME_file:"
+                "WARNING: Failed to load file '%C'; errno: '%C'\n",
+                path.c_str(), strerror(errno)));
+      return NULL;
+    }
+
     // To appease the other DDS security implementations
     *back_inserter = 0u;
 

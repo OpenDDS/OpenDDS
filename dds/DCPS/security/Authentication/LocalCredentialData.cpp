@@ -7,6 +7,9 @@
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/SequenceIterator.h"
+#include <fstream>
+#include <iterator>
+
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
@@ -148,37 +151,26 @@ bool LocalAuthCredentialData::load(const DDS::PropertySeq& props, DDS::Security:
 
 void LocalAuthCredentialData::load_permissions_file(const std::string& path)
 {
-  std::vector<unsigned char> chunks;
-  unsigned char chunk[32] = {0};
+  std::ifstream in(path.c_str(), std::ios::binary);
 
-  FILE* fp = fopen(path.c_str(), "rb");
-  if (fp) {
-    size_t count = 0u;
-    while((count = fread(chunk, sizeof(chunk[0]), sizeof(chunk), fp))) {
-      chunks.insert(chunks.end(),
-                    chunk,
-                    chunk + count);
-    }
-
-    if (ferror(fp)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) LocalAuthCredentialData::load_permissions_file: ")
-                   ACE_TEXT("ERROR: '%C' occured while reading file '%C'\n"),
-                   std::strerror(errno),
-                   path.c_str()));
-
-    } else {
-        access_permissions_.length(chunks.size());
-        std::memcpy(access_permissions_.get_buffer(), &chunks[0], access_permissions_.length());
-    }
-
-    // To appease the other DDS security implementations which
-    // append a null byte at the end of the cert.
-    access_permissions_.length(access_permissions_.length() + 1);
-    access_permissions_[access_permissions_.length() - 1] = 0;
-
-    fclose(fp);
+  if (in.fail()) {
+    ACE_ERROR((LM_ERROR,
+              "(%P|%t) LocalAuthCredentialData::load_permissions_file:"
+              "WARNING: Failed to load file '%C'; errno: '%C'\n",
+              path.c_str(), strerror(errno)));
+    return;
   }
+
+  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(access_permissions_);
+
+  std::copy((std::istreambuf_iterator<char>(in)),
+            std::istreambuf_iterator<char>(),
+            back_inserter);
+
+  // To appease the other DDS security implementations which
+  // append a null byte at the end of the cert.
+  *back_inserter = 0u;
+
 }
 
 void LocalAuthCredentialData::load_permissions_data(const std::string& path)
