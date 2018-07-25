@@ -23,7 +23,7 @@ namespace SSL {
   {
     DDS::Security::SecurityException ex;
     if (! load(ex, uri, password)) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) %C\n", ex.message));
+      ACE_ERROR((LM_WARNING, "(%P|%t) %C\n", ex.message.in()));
     }
   }
 
