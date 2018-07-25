@@ -184,43 +184,33 @@ Sedp::Sedp(const RepoId& participant_id,
   , participant_stateless_message_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER), *this)
   , participant_volatile_message_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER), *this)
   , dcps_participant_secure_writer_(make_id(participant_id, DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER), *this)
-
   , publications_reader_(make_rch<Reader>(
-			   make_id(participant_id,ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
-                           ref(*this)))
-
+      make_id(participant_id,ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
+      ref(*this)))
   , publications_secure_reader_(make_rch<Reader>(
-                           make_id(participant_id,DDS::Security::ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER),
-                           ref(*this)))
-
+      make_id(participant_id,DDS::Security::ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER),
+      ref(*this)))
   , subscriptions_reader_(make_rch<Reader>(
-			    make_id(participant_id,ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
-                            ref(*this)))
-
+      make_id(participant_id,ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
+      ref(*this)))
   , subscriptions_secure_reader_(make_rch<Reader>(
-                            make_id(participant_id,DDS::Security::ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER),
-                            ref(*this)))
-
+      make_id(participant_id,DDS::Security::ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER),
+      ref(*this)))
   , participant_message_reader_(make_rch<Reader>(
-				  make_id(participant_id,ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
-                                  ref(*this)))
-
+      make_id(participant_id,ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
+      ref(*this)))
   , participant_message_secure_reader_(make_rch<Reader>(
-					make_id(participant_id,DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER),
-					ref(*this)))
-
+      make_id(participant_id,DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER),
+      ref(*this)))
   , participant_stateless_message_reader_(make_rch<Reader>(
-					    make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER),
-					    ref(*this)))
-
+      make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER),
+      ref(*this)))
   , participant_volatile_message_secure_reader_(make_rch<Reader>(
-					    make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER),
-					    ref(*this)))
-
+      make_id(participant_id, DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER),
+      ref(*this)))
   , dcps_participant_secure_reader_(make_rch<Reader>(
-                                            make_id(participant_id, DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER),
-                                            ref(*this)))
-
+      make_id(participant_id, DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER),
+      ref(*this)))
   , task_(this)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
@@ -396,11 +386,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
 
-      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure",
+                                              default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantVolatileMessageSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantVolatileMessageSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -409,11 +400,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       local_writer_crypto_handles_[participant_volatile_message_secure_writer_.get_repo_id()] = h;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
-      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantVolatileMessageSecure",
+                                              default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantVolatileMessageSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantVolatileMessageSecure'.")
+          ACE_TEXT(" Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -427,11 +419,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       PropertySeq reader_props, writer_props;
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
-      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantMessageSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantMessageSecure",
+                                              default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantMessageSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantMessageSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -440,11 +433,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       local_writer_crypto_handles_[participant_message_secure_writer_.get_repo_id()] = h;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
-      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantMessageSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantMessageSecure",
+                                              default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantMessageSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantMessageSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -458,11 +452,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       PropertySeq reader_props, writer_props;
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
-      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSPublicationsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSPublicationsSecure",
+                                              default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSPublicationsSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSPublicationsSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -471,11 +466,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       local_writer_crypto_handles_[publications_secure_writer_.get_repo_id()] = h;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
-      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSPublicationsSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSPublicationsSecure",
+                                              default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSPublicationsSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSPublicationsSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -489,11 +485,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       PropertySeq reader_props, writer_props;
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
-      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSSubscriptionsSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSSubscriptionsSecure",
+                                              default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSSubscriptionsSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSSubscriptionsSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -502,11 +499,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       local_writer_crypto_handles_[subscriptions_secure_writer_.get_repo_id()] = h;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
-      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSSubscriptionsSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSSubscriptionsSecure",
+                                              default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSSubscriptionsSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSSubscriptionsSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -520,11 +518,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       PropertySeq reader_props, writer_props;
 
       EndpointSecurityAttributes dw_sec_attr(default_sec_attr);
-      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantSecure", default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
+      ok = acl->get_datawriter_sec_attributes(perm_handle, "DCPSParticipantSecure",
+                                              default_part_qos, default_data_tag_qos, dw_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datawriter_sec_attributes for topic 'DCPSParticipantSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -533,11 +532,12 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
       local_writer_crypto_handles_[dcps_participant_secure_writer_.get_repo_id()] = h;
 
       EndpointSecurityAttributes dr_sec_attr(default_sec_attr);
-      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantSecure", default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
+      ok = acl->get_datareader_sec_attributes(perm_handle, "DCPSParticipantSecure",
+                                              default_part_qos, default_data_tag_qos, dr_sec_attr, ex);
       if (!ok) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantSecure'. Security Exception[%d.%d]: %C\n"),
-            ex.code, ex.minor_code, ex.message.in()));
+          ACE_TEXT("Failure calling get_datareader_sec_attributes for topic 'DCPSParticipantSecure'. ")
+          ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
         result = DDS::RETCODE_ERROR;
       }
 
@@ -548,8 +548,8 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
 
   } else {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::init_security() - ")
-      ACE_TEXT("Failure calling get_participant_sec_attributes. Security Exception[%d.%d]: %C\n"),
-        ex.code, ex.minor_code, ex.message.in()));
+      ACE_TEXT("Failure calling get_participant_sec_attributes. ")
+      ACE_TEXT("Security Exception[%d.%d]: %C\n"), ex.code, ex.minor_code, ex.message.in()));
     result = DDS::RETCODE_ERROR;
   }
   return result;
@@ -583,7 +583,7 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
     if (TheServiceParticipant->default_address ().empty ()) {
       OpenDDS::DCPS::get_interface_addrs(addrs);
     } else {
-      addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
+      addrs.push_back(ACE_INET_Addr(static_cast<u_short>(0), TheServiceParticipant->default_address().c_str()));
     }
     for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
       idx = locators.length();
@@ -753,15 +753,19 @@ void Sedp::associate_volatile(const SPDPdiscoveredParticipantData& pdata)
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, participant_volatile_message_secure_reader_->get_endpoint_crypto_handle());
-    peer.remote_data_ = add_security_info(peer.remote_data_, peer.remote_id_, participant_volatile_message_secure_reader_->get_repo_id());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(
+      part, participant_volatile_message_secure_reader_->get_endpoint_crypto_handle());
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, peer.remote_id_, participant_volatile_message_secure_reader_->get_repo_id());
     participant_volatile_message_secure_reader_->assoc(peer);
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, participant_volatile_message_secure_writer_.get_endpoint_crypto_handle(), false);
-    peer.remote_data_ = add_security_info(peer.remote_data_, participant_volatile_message_secure_writer_.get_repo_id(), peer.remote_id_);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
+      part, participant_volatile_message_secure_writer_.get_endpoint_crypto_handle(), false);
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, participant_volatile_message_secure_writer_.get_repo_id(), peer.remote_id_);
     participant_volatile_message_secure_writer_.assoc(peer);
   }
 }
@@ -781,29 +785,37 @@ void Sedp::associate_secure_writers_to_readers(const SPDPdiscoveredParticipantDa
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, participant_message_secure_reader_->get_endpoint_crypto_handle());
-    peer.remote_data_ = add_security_info(peer.remote_data_, peer.remote_id_, participant_message_secure_reader_->get_repo_id());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(
+      part, participant_message_secure_reader_->get_endpoint_crypto_handle());
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, peer.remote_id_, participant_message_secure_reader_->get_repo_id());
     participant_message_secure_reader_->assoc(peer);
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, dcps_participant_secure_reader_->get_endpoint_crypto_handle());
-    peer.remote_data_ = add_security_info(peer.remote_data_, peer.remote_id_, dcps_participant_secure_reader_->get_repo_id());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(
+      part, dcps_participant_secure_reader_->get_endpoint_crypto_handle());
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, peer.remote_id_, dcps_participant_secure_reader_->get_repo_id());
     dcps_participant_secure_reader_->assoc(peer);
   }
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, publications_secure_reader_->get_endpoint_crypto_handle());
-    peer.remote_data_ = add_security_info(peer.remote_data_, peer.remote_id_, publications_secure_reader_->get_repo_id());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(
+      part, publications_secure_reader_->get_endpoint_crypto_handle());
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, peer.remote_id_, publications_secure_reader_->get_repo_id());
     publications_secure_reader_->assoc(peer);
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
-    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(part, subscriptions_secure_reader_->get_endpoint_crypto_handle());
-    peer.remote_data_ = add_security_info(peer.remote_data_, peer.remote_id_, subscriptions_secure_reader_->get_repo_id());
+    remote_writer_crypto_handles_[peer.remote_id_] = generate_remote_matched_writer_crypto_handle(
+      part, subscriptions_secure_reader_->get_endpoint_crypto_handle());
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, peer.remote_id_, subscriptions_secure_reader_->get_repo_id());
     subscriptions_secure_reader_->assoc(peer);
   }
 }
@@ -823,29 +835,37 @@ void Sedp::associate_secure_readers_to_writers(const SPDPdiscoveredParticipantDa
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, participant_message_secure_writer_.get_endpoint_crypto_handle(), false);
-    peer.remote_data_ = add_security_info(peer.remote_data_, participant_message_secure_writer_.get_repo_id(), peer.remote_id_);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
+      part, participant_message_secure_writer_.get_endpoint_crypto_handle(), false);
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, participant_message_secure_writer_.get_repo_id(), peer.remote_id_);
     participant_message_secure_writer_.assoc(peer);
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, dcps_participant_secure_writer_.get_endpoint_crypto_handle(), false);
-    peer.remote_data_ = add_security_info(peer.remote_data_, dcps_participant_secure_writer_.get_repo_id(), peer.remote_id_);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
+      part, dcps_participant_secure_writer_.get_endpoint_crypto_handle(), false);
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, dcps_participant_secure_writer_.get_repo_id(), peer.remote_id_);
     dcps_participant_secure_writer_.assoc(peer);
   }
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, publications_secure_writer_.get_endpoint_crypto_handle(), false);
-    peer.remote_data_ = add_security_info(peer.remote_data_, publications_secure_writer_.get_repo_id(), peer.remote_id_);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
+      part, publications_secure_writer_.get_endpoint_crypto_handle(), false);
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, publications_secure_writer_.get_repo_id(), peer.remote_id_);
     publications_secure_writer_.assoc(peer);
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(part, subscriptions_secure_writer_.get_endpoint_crypto_handle(), false);
-    peer.remote_data_ = add_security_info(peer.remote_data_, subscriptions_secure_writer_.get_repo_id(), peer.remote_id_);
+    remote_reader_crypto_handles_[peer.remote_id_] = generate_remote_matched_reader_crypto_handle(
+      part, subscriptions_secure_writer_.get_endpoint_crypto_handle(), false);
+    peer.remote_data_ = add_security_info(
+      peer.remote_data_, subscriptions_secure_writer_.get_repo_id(), peer.remote_id_);
     subscriptions_secure_writer_.assoc(peer);
   }
 }
@@ -933,15 +953,15 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   //FUTURE: if/when topic propagation is supported, add it here
 
   // Process deferred publications and subscriptions.
-  for (DeferredSubscriptionMap::iterator pos = sedp_->deferred_subscriptions_.lower_bound (proto.remote_id_),
-         limit = sedp_->deferred_subscriptions_.upper_bound (proto.remote_id_);
+  for (DeferredSubscriptionMap::iterator pos = sedp_->deferred_subscriptions_.lower_bound(proto.remote_id_),
+         limit = sedp_->deferred_subscriptions_.upper_bound(proto.remote_id_);
        pos != limit;
        /* Increment in body. */) {
     sedp_->data_received (pos->second.first, pos->second.second);
     sedp_->deferred_subscriptions_.erase (pos++);
   }
-  for (DeferredPublicationMap::iterator pos = sedp_->deferred_publications_.lower_bound (proto.remote_id_),
-         limit = sedp_->deferred_publications_.upper_bound (proto.remote_id_);
+  for (DeferredPublicationMap::iterator pos = sedp_->deferred_publications_.lower_bound(proto.remote_id_),
+         limit = sedp_->deferred_publications_.upper_bound(proto.remote_id_);
        pos != limit;
        /* Increment in body. */) {
     sedp_->data_received (pos->second.first, pos->second.second);
@@ -1026,7 +1046,8 @@ Sedp::Task::svc_i(DCPS::MessageId message_id,
 }
 
 namespace {
-  void disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags, const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
+  void disassociate_helper(const BuiltinEndpointSet_t& avail, const CORBA::ULong flags,
+                           const RepoId& id, const EntityId_t& ent, DCPS::TransportClient& client)
   {
     if (avail & flags) {
       RepoId temp = id;
@@ -1484,22 +1505,25 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
             DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
 
-            if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
+            if (participant_sec_attr_.is_access_protected &&
+                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
+            {
               ACE_ERROR((LM_WARNING,
-                        ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("Sedp::data_received(dwd) - ")
-                        ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("Sedp::data_received(dwd) - ")
+                ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
             DDS::Security::TopicSecurityAttributes topic_sec_attr;
-            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex)) {
+            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
+            {
               ACE_ERROR((LM_WARNING,
-                        ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("Sedp::data_received(dwd) - ")
-                        ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("Sedp::data_received(dwd) - ")
+                ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
@@ -1511,21 +1535,23 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
               pub_data_sec.base.security_info.plugin_endpoint_security_attributes = security_info->plugin_endpoint_security_attributes;
             }
 
-            if (topic_sec_attr.is_write_protected && !get_access_control()->check_remote_datawriter(remote_permissions, spdp_.get_domain_id(), pub_data_sec, ex)) {
+            if (topic_sec_attr.is_write_protected &&
+              !get_access_control()->check_remote_datawriter(remote_permissions, spdp_.get_domain_id(), pub_data_sec, ex))
+            {
               ACE_ERROR((LM_WARNING,
-                        ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("Sedp::data_received(dwd) - ")
-                        ACE_TEXT("Unable to check remote datawriter '%C'. SecurityException[%d.%d]: %C\n"),
-                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("Sedp::data_received(dwd) - ")
+                ACE_TEXT("Unable to check remote datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
           } else if (auth_state != OpenDDS::DCPS::AS_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
-                      ACE_TEXT("(%P|%t) WARNING: ")
-                      ACE_TEXT("Sedp::data_received(dwd) - ")
-                      ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
-                      topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-              return;
+              ACE_TEXT("(%P|%t) WARNING: ")
+              ACE_TEXT("Sedp::data_received(dwd) - ")
+              ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+              topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+            return;
           }
         }
 
@@ -1545,13 +1571,13 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           inconsistent_topic(top_it->second.endpoints_);
           if (DCPS::DCPS_debug_level) {
             ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - WARNING ")
-                       ACE_TEXT("topic %C discovered data type %C doesn't ")
-                       ACE_TEXT("match known data type %C, ignoring ")
-                       ACE_TEXT("discovered publication.\n"),
-                       topic_name.c_str(),
-                       wdata.ddsPublicationData.type_name.in(),
-                       top_it->second.data_type_.c_str()));
+              ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - WARNING ")
+              ACE_TEXT("topic %C discovered data type %C doesn't ")
+              ACE_TEXT("match known data type %C, ignoring ")
+              ACE_TEXT("discovered publication.\n"),
+              topic_name.c_str(),
+              wdata.ddsPublicationData.type_name.in(),
+              top_it->second.data_type_.c_str()));
           }
           return;
         }
@@ -1757,22 +1783,25 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
             DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(part);
 
-            if (participant_sec_attr_.is_access_protected && !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
+            if (participant_sec_attr_.is_access_protected &&
+                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
+            {
               ACE_ERROR((LM_WARNING,
-                        ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("Sedp::data_received(drd) - ")
-                        ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("Sedp::data_received(drd) - ")
+                ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
             DDS::Security::TopicSecurityAttributes topic_sec_attr;
-            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex)) {
+            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
+            {
               ACE_ERROR((LM_WARNING,
-                        ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("Sedp::data_received(drd) - ")
-                        ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("Sedp::data_received(drd) - ")
+                ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
@@ -1785,12 +1814,14 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
             }
 
             bool relay_only = false;
-            if (topic_sec_attr.is_read_protected && !get_access_control()->check_remote_datareader(remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex)) {
+            if (topic_sec_attr.is_read_protected &&
+                !get_access_control()->check_remote_datareader(remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex))
+            {
               ACE_ERROR((LM_WARNING,
-                        ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("Sedp::data_received(drd) - ")
-                        ACE_TEXT("Unable to check remote datareader '%C'. SecurityException[%d.%d]: %C\n"),
-                        topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("Sedp::data_received(drd) - ")
+                ACE_TEXT("Unable to check remote datareader '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
@@ -1801,11 +1832,11 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
             }
           } else if (auth_state != OpenDDS::DCPS::AS_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
-                      ACE_TEXT("(%P|%t) WARNING: ")
-                      ACE_TEXT("Sedp::data_received(dwd) - ")
-                      ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
-                      topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-              return;
+              ACE_TEXT("(%P|%t) WARNING: ")
+              ACE_TEXT("Sedp::data_received(dwd) - ")
+              ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+              topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+            return;
           }
         }
 
@@ -2291,7 +2322,8 @@ void Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
   if (is_security_enabled()) {
     // TODO: Pending issue DDSSEC12-28 Topic security attributes
     // may get changed to a different set of security attributes.
-    bool ok = get_access_control()->get_topic_sec_attributes(get_permissions_handle(), "DCPSParticipantMessageSecure", attribs, se);
+    bool ok = get_access_control()->get_topic_sec_attributes(
+      get_permissions_handle(), "DCPSParticipantMessageSecure", attribs, se);
 
     if (ok) {
 
@@ -3698,7 +3730,9 @@ Sedp::generate_remote_matched_writer_crypto_handle(const RepoId& writer_part, co
 }
 
 DDS::Security::DatareaderCryptoHandle
-Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only)
+Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part,
+                                                   const DDS::Security::DatawriterCryptoHandle& dwch,
+                                                   bool relay_only)
 {
   DDS::Security::DatareaderCryptoHandle result = DDS::HANDLE_NIL;
 
@@ -3722,18 +3756,21 @@ Sedp::generate_remote_matched_reader_crypto_handle(const RepoId& reader_part, co
 }
 
 void
-Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle& drch, const RepoId& local_reader, const DDS::Security::DatawriterCryptoHandle& dwch, const RepoId& remote_writer)
+Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle& drch,
+                                               const RepoId& local_reader,
+                                               const DDS::Security::DatawriterCryptoHandle& dwch,
+                                               const RepoId& remote_writer)
 {
   DDS::Security::SecurityException se = {"", 0, 0};
   DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
   DDS::Security::DatareaderCryptoTokenSeq drcts;
 
-  if (key_exchange->create_local_datareader_crypto_tokens(drcts, drch, dwch, se) == false) {
+  if (!key_exchange->create_local_datareader_crypto_tokens(drcts, drch, dwch, se)) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
       ACE_TEXT("Sedp::create_and_send_datareader_crypto_tokens() - ")
-      ACE_TEXT("Unable to create local datareader crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+      ACE_TEXT("Unable to create local datareader crypto tokens with crypto key exchange plugin. ")
+      ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return;
   }
 
@@ -3765,7 +3802,10 @@ Sedp::create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCr
 }
 
 void
-Sedp::create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle& dwch, const RepoId& local_writer, const DDS::Security::DatareaderCryptoHandle& drch, const RepoId& remote_reader)
+Sedp::create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle& dwch,
+                                               const RepoId& local_writer,
+                                               const DDS::Security::DatareaderCryptoHandle& drch,
+                                               const RepoId& remote_reader)
 {
   DDS::Security::SecurityException se = {"", 0, 0};
   DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
@@ -3841,11 +3881,11 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
     return;
   }
 
-  if (key_exchange->set_remote_datawriter_crypto_tokens(r_iter->second, w_iter->second, dwcts, se) == false) {
+  if (!key_exchange->set_remote_datawriter_crypto_tokens(r_iter->second, w_iter->second, dwcts, se)) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("(%P|%t) WARNING: Sedp::handle_datawriter_crypto_tokens() - ")
-      ACE_TEXT("Unable to set remote datawriter crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+      ACE_TEXT("Unable to set remote datawriter crypto tokens with crypto key exchange plugin. ")
+      ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return;
   }
 }
@@ -3884,11 +3924,11 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
     return;
   }
 
-  if (key_exchange->set_remote_datareader_crypto_tokens(w_iter->second, r_iter->second, drcts, se) == false) {
+  if (!key_exchange->set_remote_datareader_crypto_tokens(w_iter->second, r_iter->second, drcts, se)) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("(%P|%t) WARNING: Sedp::handle_datareader_crypto_tokens() - ")
-      ACE_TEXT("Unable to set remote datareader crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+      ACE_TEXT("Unable to set remote datareader crypto tokens with crypto key exchange plugin. ")
+      ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return;
   }
 }
