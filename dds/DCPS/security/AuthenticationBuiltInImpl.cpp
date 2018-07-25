@@ -5,30 +5,35 @@
 * See: http://www.opendds.org/license.html
 */
 
+#include "AuthenticationBuiltInImpl.h"
+
+#include "CommonUtilities.h"
+#include "TokenReader.h"
+#include "TokenWriter.h"
+#include "SSL/Utils.h"
+
 #include "dds/DdsSecurityEntities.h"
-#include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
-#include "dds/DCPS/security/TokenReader.h"
-#include "dds/DCPS/security/TokenWriter.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/LocalObject.h"
+#include "dds/DCPS/Serializer.h"
+
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+
 #include "ace/config-macros.h"
 #include "ace/Guard_T.h"
+
 #include <sstream>
 #include <vector>
 #include <algorithm>
 #include <cstdio>
-
-#include "dds/DCPS/security/SSL/Utils.h"
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
-static void set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message);
+using CommonUtilities::set_security_error;
 
 static bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2);
 
@@ -38,16 +43,16 @@ static bool validate_topic_data_guid(const DDS::OctetSeq& cpdata,
                                      const std::vector<unsigned char>& subject_name_hash,
                                      DDS::Security::SecurityException& ex);
 
-static const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
-static const std::string Auth_Plugin_Major_Version("1");
-static const std::string Auth_Plugin_Minor_Version("0");
+const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
+const std::string Auth_Plugin_Major_Version("1");
+const std::string Auth_Plugin_Minor_Version("0");
 
-static const std::string Identity_Status_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
-static const std::string Auth_Peer_Cred_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
-static const std::string Auth_Request_Class_Ext("AuthReq");
-static const std::string Handshake_Request_Class_Ext("Req");
-static const std::string Handshake_Reply_Class_Ext("Reply");
-static const std::string Handshake_Final_Class_Ext("Final");
+const std::string Identity_Status_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
+const std::string Auth_Peer_Cred_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
+const std::string Auth_Request_Class_Ext("AuthReq");
+const std::string Handshake_Request_Class_Ext("Req");
+const std::string Handshake_Reply_Class_Ext("Reply");
+const std::string Handshake_Final_Class_Ext("Final");
 
 struct SharedSecret : DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
 
@@ -71,7 +76,7 @@ AuthenticationBuiltInImpl::AuthenticationBuiltInImpl()
 , identity_mutex_()
 , handshake_mutex_()
 , handle_mutex_()
-, next_handle_(1ULL)
+, next_handle_(1)
 {
 }
 
@@ -1149,7 +1154,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   return FinalMessage;
 }
 
-static bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2)
+bool challenges_match(const DDS::OctetSeq& c1, const DDS::OctetSeq& c2)
 {
   if ((c1.length()) < 1 || (c2.length() < 1)) {
     return false;
@@ -1328,13 +1333,6 @@ bool AuthenticationBuiltInImpl::check_class_versions(const char* remote_class_id
   return class_matches;
 }
 
-void set_security_error(DDS::Security::SecurityException& ex, int code, int minor_code, const char* message)
-{
-  ex.code = code;
-  ex.minor_code = minor_code;
-  ex.message = message;
-}
-
 std::string AuthenticationBuiltInImpl::build_class_id(const std::string& message_ext)
 {
   std::stringstream class_id_stream;
@@ -1365,10 +1363,7 @@ std::string AuthenticationBuiltInImpl::get_extension(const char* class_id)
 CORBA::Long AuthenticationBuiltInImpl::get_next_handle()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(handle_mutex_);
-  if (++next_handle_ <= DDS::HANDLE_NIL) {
-    next_handle_ = DDS::HANDLE_NIL + 1;
-  }
-  return next_handle_;
+  return CommonUtilities::increment_handle(next_handle_);
 }
 
 } // namespace Security

@@ -1374,12 +1374,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Long AccessControlBuiltInImpl::generate_handle()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(gen_handle_mutex_);
-  ::CORBA::Long new_handle = next_handle_++;
-
-  if (new_handle == DDS::HANDLE_NIL) {
-    new_handle = next_handle_++;
-  }
-  return new_handle;
+  return CommonUtilities::increment_handle(next_handle_);
 }
 
 // NOTE: This function will return the time value as UTC
@@ -1564,9 +1559,9 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
       if (std::strcmp(topic_name, "DCPSParticipantMessageSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
-        attributes.base.is_liveliness_protected = false; 
+        attributes.base.is_liveliness_protected = false;
         attributes.base.is_discovery_protected = false;
-        attributes.is_submessage_protected = giter->domain_attrs.is_liveliness_protected; 
+        attributes.is_submessage_protected = giter->domain_attrs.is_liveliness_protected;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
 
@@ -1586,9 +1581,9 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
           std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
-        attributes.base.is_liveliness_protected = false; 
+        attributes.base.is_liveliness_protected = false;
         attributes.base.is_discovery_protected = false;
-        attributes.is_submessage_protected = giter->domain_attrs.is_discovery_protected; 
+        attributes.is_submessage_protected = giter->domain_attrs.is_discovery_protected;
         attributes.is_payload_protected = false;
         attributes.is_key_protected = false;
 
@@ -1659,8 +1654,8 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
 }
 
 CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
-  const char * topic_name, 
-  const ::DDS::Security::DomainId_t domain_id, 
+  const char * topic_name,
+  const ::DDS::Security::DomainId_t domain_id,
   const ::DDS::PartitionQosPolicy & partition,
   const Permissions::PublishSubscribe_t pub_or_sub,
   const ACPermsMap::iterator ac_iter,

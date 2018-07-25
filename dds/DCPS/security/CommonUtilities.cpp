@@ -31,6 +31,27 @@ URI::URI(const std::string& src)
   }
 }
 
+int increment_handle(int& next)
+{
+  // handles are 32-bit signed values (int on all supported platforms)
+  // the only special value is 0 for HANDLE_NIL, 'next' starts at 1
+  // signed increment is not guaranteed to roll over so we implement our own
+  static const int LAST_POSITIVE_HANDLE(0x7fffffff);
+  static const int FIRST_NEGATIVE_HANDLE(-LAST_POSITIVE_HANDLE);
+  if (next == 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) OpenDDS::Security::CommonUtilities::"
+               "increment_handle ERROR - out of handles\n"));
+    return 0;
+  }
+  const int h = next;
+  if (next == LAST_POSITIVE_HANDLE) {
+    next = FIRST_NEGATIVE_HANDLE;
+  } else {
+    ++next;
+  }
+  return h;
+}
+
 void set_security_error(DDS::Security::SecurityException& ex,
                         int code,
                         int minor_code,

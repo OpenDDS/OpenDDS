@@ -69,12 +69,7 @@ bool CryptoBuiltInImpl::marshal(TAO_OutputCDR&)
 NativeCryptoHandle CryptoBuiltInImpl::generate_handle()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  int new_handle = next_handle_++;
-
-  if (new_handle == DDS::HANDLE_NIL) {
-    new_handle = next_handle_++;
-  }
-  return static_cast<NativeCryptoHandle>(new_handle);
+  return CommonUtilities::increment_handle(next_handle_);
 }
 
 

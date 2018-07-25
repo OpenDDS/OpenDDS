@@ -221,7 +221,7 @@ private:
   DDS::Security::NativeCryptoHandle generate_handle();
 
   ACE_Thread_Mutex mutex_;
-  unsigned int next_handle_;
+  int next_handle_;
 
   typedef KeyMaterial_AES_GCM_GMAC KeyMaterial;
   typedef KeyMaterial_AES_GCM_GMAC_Seq KeySeq;
