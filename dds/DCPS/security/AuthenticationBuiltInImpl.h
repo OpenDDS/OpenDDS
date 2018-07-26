@@ -156,6 +156,7 @@ private:
     DDS::Security::IdentityHandle local_handle;
     DDS::Security::AuthRequestMessageToken local_auth_request;
     DDS::Security::AuthRequestMessageToken remote_auth_request;
+    bool is_remote_participant;
   };
   typedef DCPS::RcHandle<IdentityData> IdentityData_Ptr;
   typedef std::map<DDS::Security::IdentityHandle, IdentityData_Ptr> Identity_Handle_Data;
@@ -210,7 +211,8 @@ private:
 
     bool operator()(const Identity_Handle_Data::value_type& validated) const
     {
-      return expected_ == validated.second->participant_guid;
+      return (validated.second->is_remote_participant) &&
+               (expected_ == validated.second->participant_guid);
     }
 
   private:
