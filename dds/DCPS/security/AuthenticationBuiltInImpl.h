@@ -12,6 +12,7 @@
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DdsSecurityEntities.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -146,40 +147,89 @@ public:
 
 private:
 
-  struct IdentityData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
+  struct RemoteParticipantData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
   {
+    typedef DCPS::RcHandle<RemoteParticipantData> shared_ptr;
+
+    // Identity data
+
     OpenDDS::DCPS::GUID_t participant_guid;
-    LocalAuthCredentialData::shared_ptr local_credential_data;
-    DDS::Security::PermissionsCredentialToken permissions_cred_token;
-    DDS::Security::PermissionsToken permissions_token;
-    DDS::Security::IdentityToken identity_token;
-    DDS::Security::IdentityHandle local_handle;
+    DDS::Security::IdentityHandle local_participant;
+
+    // Handshake data
+
     DDS::Security::AuthRequestMessageToken local_auth_request;
     DDS::Security::AuthRequestMessageToken remote_auth_request;
-    bool is_remote_participant;
-  };
-  typedef DCPS::RcHandle<IdentityData> IdentityData_Ptr;
-  typedef std::map<DDS::Security::IdentityHandle, IdentityData_Ptr> Identity_Handle_Data;
-  Identity_Handle_Data identity_data_;
-
-  struct HandshakeData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
-  {
-    DDS::Security::IdentityHandle local_identity_handle;
-    DDS::Security::IdentityHandle remote_identity_handle;
-    DDS::Security::SharedSecretHandle_var secret_handle;
-    DDS::Security::HandshakeMessageToken request_token;
-    DDS::Security::HandshakeMessageToken reply_token;
-    DDS::Security::ValidationResult_t validation_state;
+    DDS::Security::IdentityHandle initiator_identity;
+    DDS::Security::IdentityHandle replier_identity;
+    DDS::Security::SharedSecretHandle_var shared_secret;
+    DDS::Security::HandshakeMessageToken request;
+    DDS::Security::HandshakeMessageToken reply;
+    DDS::Security::ValidationResult_t state;
     OpenDDS::Security::SSL::DiffieHellman::unique_ptr diffie_hellman;
-    OpenDDS::Security::SSL::Certificate::unique_ptr remote_cert;
-    DDS::OctetSeq access_permissions;
+    OpenDDS::Security::SSL::Certificate::unique_ptr certificate;
+    DDS::OctetSeq c_perm;
     DDS::OctetSeq hash_c1;
     DDS::OctetSeq hash_c2;
-    bool local_initiator;
+
+    RemoteParticipantData()
+      : participant_guid(OpenDDS::DCPS::GUID_UNKNOWN),
+        local_participant(DDS::HANDLE_NIL),
+        local_auth_request(DDS::Security::TokenNIL),
+        remote_auth_request(DDS::Security::TokenNIL),
+        initiator_identity(DDS::HANDLE_NIL),
+        replier_identity(DDS::HANDLE_NIL),
+        shared_secret(),
+        request(DDS::Security::TokenNIL),
+        reply(DDS::Security::TokenNIL),
+        state(DDS::Security::VALIDATION_FAILED),
+        diffie_hellman(NULL),
+        certificate(NULL),
+        c_perm(),
+        hash_c1(),
+        hash_c2()
+    {
+
+    }
   };
-  typedef DCPS::RcHandle<HandshakeData> HandshakeData_Ptr;
-  typedef std::map<DDS::Security::HandshakeHandle, HandshakeData_Ptr> Handshake_Handle_Data;
-  Handshake_Handle_Data handshake_data_;
+  typedef std::map<DDS::Security::IdentityHandle, RemoteParticipantData::shared_ptr> RemoteParticipantMap;
+
+  struct LocalParticipantData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
+  {
+    typedef DCPS::RcHandle<LocalParticipantData> shared_ptr;
+
+    OpenDDS::DCPS::GUID_t participant_guid;
+    LocalAuthCredentialData::shared_ptr credentials;
+    DDS::Security::PermissionsCredentialToken permissions_credential;
+    DDS::Security::PermissionsToken permissions;
+    RemoteParticipantMap validated_remotes;
+
+    LocalParticipantData()
+      : participant_guid(OpenDDS::DCPS::GUID_UNKNOWN),
+        credentials(NULL),
+        permissions_credential(DDS::Security::TokenNIL),
+        permissions(DDS::Security::TokenNIL),
+        validated_remotes()
+    {
+
+    }
+  };
+  typedef std::map<DDS::Security::IdentityHandle, LocalParticipantData::shared_ptr> LocalParticipantMap;
+  LocalParticipantMap local_participants_;
+
+  LocalParticipantData::shared_ptr get_local_participant(DDS::Security::IdentityHandle handle);
+
+  typedef std::pair<LocalParticipantData::shared_ptr, RemoteParticipantData::shared_ptr> HandshakeDataPair;
+  typedef std::map<DDS::Security::HandshakeHandle, HandshakeDataPair> HandshakeDataMap;
+  HandshakeDataMap handshake_data_;
+
+  HandshakeDataPair get_handshake_data(DDS::Security::HandshakeHandle handle);
+
+  /// @brief Finds the local and remote data objects associated with h1 and h2.
+  /// This should be used in cases where it's not certain which of the handles is
+  /// local and which is remote, typically when given both initiator and replier handles.
+  HandshakeDataPair get_auth_data_pair(DDS::Security::IdentityHandle h1,
+                                       DDS::Security::IdentityHandle h2);
 
   DDS::Security::ValidationResult_t process_handshake_reply(
     DDS::Security::HandshakeMessageToken & handshake_message_out,
@@ -191,9 +241,6 @@ private:
     const DDS::Security::HandshakeMessageToken & handshake_message_in,
     DDS::Security::HandshakeHandle handshake_handle,
     DDS::Security::SecurityException & ex);
-
-  HandshakeData_Ptr get_handshake_data(DDS::Security::HandshakeHandle handle);
-  IdentityData_Ptr get_identity_data(DDS::Security::IdentityHandle handle);
 
   bool is_handshake_initiator(const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote);
 
@@ -209,10 +256,9 @@ private:
   {
     was_guid_validated(const OpenDDS::DCPS::GUID_t& expected) : expected_(expected) {}
 
-    bool operator()(const Identity_Handle_Data::value_type& validated) const
+    bool operator()(const RemoteParticipantMap::value_type& validated) const
     {
-      return (validated.second->is_remote_participant) &&
-               (expected_ == validated.second->participant_guid);
+      return (expected_ == validated.second->participant_guid);
     }
 
   private:

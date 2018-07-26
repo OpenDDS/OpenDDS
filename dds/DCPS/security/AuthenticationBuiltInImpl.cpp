@@ -95,28 +95,27 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
-  LocalAuthCredentialData::shared_ptr local_credential_data = DCPS::make_rch<LocalAuthCredentialData>();
-  if (! local_credential_data->load(participant_qos.property.value, ex)) {
+  LocalAuthCredentialData::shared_ptr credentials = DCPS::make_rch<LocalAuthCredentialData>();
+  if (! credentials->load(participant_qos.property.value, ex)) {
     return result;
   }
 
-  if (local_credential_data->validate()) {
+  if (credentials->validate()) {
     if (candidate_participant_guid != DCPS::GUID_UNKNOWN) {
 
       int err = SSL::make_adjusted_guid(candidate_participant_guid,
                                         adjusted_participant_guid,
-                                        local_credential_data->get_participant_cert());
+                                        credentials->get_participant_cert());
       if (! err) {
         local_identity_handle = get_next_handle();
 
-        IdentityData_Ptr local_identity = DCPS::make_rch<IdentityData>();
-        local_identity->participant_guid = adjusted_participant_guid;
-        local_identity->local_credential_data = local_credential_data;
-        local_identity->is_remote_participant = false;
+        LocalParticipantData::shared_ptr local_participant = DCPS::make_rch<LocalParticipantData>();
+        local_participant->participant_guid = adjusted_participant_guid;
+        local_participant->credentials = credentials;
 
         {
           ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
-          identity_data_[local_identity_handle] = local_identity;
+          local_participants_[local_identity_handle] = local_participant;
         }
 
         result = DDS::Security::VALIDATION_OK;
@@ -145,13 +144,14 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
-  IdentityData_Ptr local_data = get_identity_data(handle);
+  LocalParticipantData::shared_ptr local_data = get_local_participant(handle);
   if (local_data) {
-    const LocalAuthCredentialData& local_credential_data = *(local_data->local_credential_data);
+    const LocalAuthCredentialData& local_credential_data = *(local_data->credentials);
 
     const SSL::Certificate& pcert = local_credential_data.get_participant_cert();
     const SSL::Certificate& cacert = local_credential_data.get_ca_cert();
 
+    // TODO: Fix this method it is putting garbage in the respective parameters.
     std::string tmp;
 
     OpenDDS::Security::TokenWriter identity_wrapper(identity_token, "DDS:Auth:PKI-DH:1.0");
@@ -187,7 +187,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   // Populate a simple version of an IdentityStatusToken as long as the handle is known
-  IdentityData_Ptr local_data = get_identity_data(handle);
+  LocalParticipantData::shared_ptr local_data = get_local_participant(handle);
   if (local_data) {
 
     // TODO: Pending AuthenticationListener support (see security spec. 8.3.2.2).
@@ -212,11 +212,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
-  IdentityData_Ptr local_data = get_identity_data(handle);
+  LocalParticipantData::shared_ptr local_data = get_local_participant(handle);
   if (local_data) {
     {
-      local_data->permissions_cred_token = permissions_credential;
-      local_data->permissions_token = permissions_token;
+      local_data->permissions_credential = permissions_credential;
+      local_data->permissions = permissions_token;
     }
     status = true;
 
@@ -239,16 +239,17 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
-  IdentityData_Ptr local_data = get_identity_data(local_identity_handle);
+  LocalParticipantData::shared_ptr local_data = get_local_participant(local_identity_handle);
   if (local_data) {
     if (check_class_versions(remote_identity_token.class_id)) {
 
       // Make sure that a remote_participant_guid has not already been assigned a
       // remote-identity-handle before creating a new one.
 
-      Identity_Handle_Data::iterator found, begin = identity_data_.begin(), end = identity_data_.end();
-      found = std::find_if(begin, end, was_guid_validated(remote_participant_guid));
-
+      RemoteParticipantMap::iterator begin = local_data->validated_remotes.begin(),
+                                     end = local_data->validated_remotes.end(),
+                                     found = std::find_if(begin, end,
+                                                          was_guid_validated(remote_participant_guid));
       if (found != end) {
         remote_identity_handle = found->first;
         local_auth_request_token = found->second->local_auth_request;
@@ -284,17 +285,15 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
         if (result == DDS::Security::VALIDATION_OK) {
 
-          /* Retain all of the data needed for a handshake with the remote participant */
-          IdentityData_Ptr newIdentityData = DCPS::make_rch<IdentityData>();
-          newIdentityData->participant_guid = remote_participant_guid;
-          newIdentityData->local_credential_data = local_data->local_credential_data;
-          newIdentityData->local_handle = local_identity_handle;
-          newIdentityData->local_auth_request = local_auth_request_token;
-          newIdentityData->remote_auth_request = remote_auth_request_token;
-          newIdentityData->is_remote_participant = true;
+          // Retain all of the data needed for a handshake with the remote participant
+          RemoteParticipantData::shared_ptr remote_participant = DCPS::make_rch<RemoteParticipantData>();
+          remote_participant->participant_guid = remote_participant_guid;
+          remote_participant->local_participant = local_identity_handle;
+          remote_participant->local_auth_request = local_auth_request_token;
+          remote_participant->remote_auth_request = remote_auth_request_token;
 
           remote_identity_handle = get_next_handle();
-          identity_data_[remote_identity_handle] = newIdentityData;
+          local_data->validated_remotes[remote_identity_handle] = remote_participant;
 
           if (is_handshake_initiator(local_data->participant_guid, remote_participant_guid)) {
             result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST;
@@ -328,98 +327,95 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 {
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
-  DDS::OctetSeq hash_c1;
-
-  if (serialized_local_participant_data.length() != 0) {
-
-      ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
-
-      IdentityData_Ptr replier_data = get_identity_data(replier_identity_handle);
-
-      if (replier_data) {
-        if (replier_data->local_handle == initiator_identity_handle) {
-
-          const LocalAuthCredentialData& local_credential_data = *(replier_data->local_credential_data);
-
-          SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman(new SSL::ECDH_PRIME_256_V1_CEUM));
-
-          OpenDDS::Security::TokenWriter message_out(handshake_message, build_class_id(Handshake_Request_Class_Ext));
-
-          /* Compute hash_c1 and store for later */
-
-          {
-            CredentialHash hash(local_credential_data.get_participant_cert(),
-                                *diffie_hellman,
-                                serialized_local_participant_data,
-                                local_credential_data.get_access_permissions());
-
-            int err = hash(hash_c1);
-            if (err) {
-              set_security_error(ex, -1, 0, "Failed to generate credential-hash 'hash_c1'");
-              return DDS::Security::VALIDATION_FAILED;
-            }
-          }
-
-          message_out.add_bin_property("c.id", local_credential_data.get_participant_cert().original_bytes());
-          message_out.add_bin_property("c.perm", local_credential_data.get_access_permissions());
-          message_out.add_bin_property("c.pdata", serialized_local_participant_data);
-          message_out.add_bin_property("c.dsign_algo", "RSASSA-PSS-SHA256");
-          message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
-          message_out.add_bin_property("hash_c1", hash_c1);
-
-          DDS::OctetSeq dhpub;
-          diffie_hellman->pub_key(dhpub);
-          message_out.add_bin_property("dh1", dhpub);
-
-          OpenDDS::Security::TokenReader auth_wrapper(replier_data->local_auth_request);
-          if (auth_wrapper.is_nil()) {
-            DDS::OctetSeq nonce;
-            int err = SSL::make_nonce_256(nonce);
-            if (! err) {
-              message_out.add_bin_property("challenge1", nonce);
-
-            } else {
-              set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for challenge1 property");
-              return DDS::Security::VALIDATION_FAILED;
-            }
-
-          } else {
-            const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
-            message_out.add_bin_property("challenge1", challenge_data);
-
-          }
-
-          HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
-          newHandshakeData->local_identity_handle = initiator_identity_handle;
-          newHandshakeData->remote_identity_handle = replier_identity_handle;
-          newHandshakeData->local_initiator = true;
-          newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
-          newHandshakeData->request_token = handshake_message;
-          newHandshakeData->reply_token = DDS::Security::TokenNIL;
-          newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
-          newHandshakeData->hash_c1 = hash_c1;
-
-          handshake_handle = get_next_handle();
-          {
-            ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
-            handshake_data_[handshake_handle] = newHandshakeData;
-          }
-
-          result = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
-
-        } else {
-            set_security_error(ex, -1, 0, "Participants are not matched");
-        }
-
-      } else {
-        set_security_error(ex, -1, 0, "Unknown remote participant");
-      }
-
-  } else {
-      set_security_error(ex, -1, 0, "No participant data provided");
+  if (serialized_local_participant_data.length() == 0) {
+    set_security_error(ex, -1, 0, "No participant data provided");
+    return DDS::Security::VALIDATION_FAILED;
   }
 
-  return result;
+  ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
+
+  HandshakeDataPair handshake_data = get_auth_data_pair(initiator_identity_handle, replier_identity_handle);
+
+  if (! handshake_data.first) {
+    set_security_error(ex, -1, 0, "Unknown local participant");
+    return DDS::Security::VALIDATION_FAILED;
+  }
+
+  if (! handshake_data.second) {
+    set_security_error(ex, -1, 0, "Unknown remote participant");
+    return DDS::Security::VALIDATION_FAILED;
+  }
+
+  LocalParticipantData& local_data = *(handshake_data.first);
+  RemoteParticipantData& remote_data = *(handshake_data.second);
+
+  const LocalAuthCredentialData& local_credential_data = *(local_data.credentials);
+
+  SSL::DiffieHellman::unique_ptr diffie_hellman(new SSL::DiffieHellman(new SSL::ECDH_PRIME_256_V1_CEUM));
+
+  OpenDDS::Security::TokenWriter message_out(handshake_message, build_class_id(Handshake_Request_Class_Ext));
+
+  // Compute hash_c1 and store for later
+
+  DDS::OctetSeq hash_c1;
+
+  {
+    CredentialHash hash(local_credential_data.get_participant_cert(),
+                        *diffie_hellman,
+                        serialized_local_participant_data,
+                        local_credential_data.get_access_permissions());
+
+    int err = hash(hash_c1);
+    if (err) {
+      set_security_error(ex, -1, 0, "Failed to generate credential-hash 'hash_c1'");
+      return DDS::Security::VALIDATION_FAILED;
+    }
+  }
+
+  message_out.add_bin_property("c.id", local_credential_data.get_participant_cert().original_bytes());
+  message_out.add_bin_property("c.perm", local_credential_data.get_access_permissions());
+  message_out.add_bin_property("c.pdata", serialized_local_participant_data);
+  message_out.add_bin_property("c.dsign_algo", "RSASSA-PSS-SHA256");
+  message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
+  message_out.add_bin_property("hash_c1", hash_c1);
+
+  DDS::OctetSeq dhpub;
+  diffie_hellman->pub_key(dhpub);
+  message_out.add_bin_property("dh1", dhpub);
+
+  OpenDDS::Security::TokenReader auth_wrapper(remote_data.local_auth_request);
+  if (auth_wrapper.is_nil()) {
+    DDS::OctetSeq nonce;
+    int err = SSL::make_nonce_256(nonce);
+    if (! err) {
+      message_out.add_bin_property("challenge1", nonce);
+
+    } else {
+      set_security_error(ex, -1, 0, "Failed to generate 256-bit nonce value for challenge1 property");
+      return DDS::Security::VALIDATION_FAILED;
+    }
+
+  } else {
+    const DDS::OctetSeq& challenge_data = auth_wrapper.get_bin_property_value("future_challenge");
+    message_out.add_bin_property("challenge1", challenge_data);
+
+  }
+
+  remote_data.initiator_identity = initiator_identity_handle;
+  remote_data.replier_identity = replier_identity_handle;
+  remote_data.state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+  remote_data.request = handshake_message;
+  remote_data.reply = DDS::Security::TokenNIL;
+  remote_data.diffie_hellman = DCPS::move(diffie_hellman);
+  remote_data.hash_c1 = hash_c1;
+
+  handshake_handle = get_next_handle();
+  {
+    ACE_Guard<ACE_Thread_Mutex> identity_data_guard(handshake_mutex_);
+    handshake_data_[handshake_handle] = handshake_data;
+  }
+
+  return DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
 }
 
 void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUID_t& dst)
@@ -620,7 +616,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
-  /* Copy the in part of the inout param */
+  // Copy the "in" part of the inout param
   const DDS::Security::HandshakeMessageToken request_token = handshake_message_out;
   handshake_message_out = DDS::Security::HandshakeMessageToken();
 
@@ -637,15 +633,20 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     return Failure;
   }
 
-  IdentityData_Ptr initiator_id_data = get_identity_data(initiator_identity_handle);
-  if (!initiator_id_data) {
+  HandshakeDataPair handshake_data = get_auth_data_pair(initiator_identity_handle, replier_identity_handle);
+
+  if (! handshake_data.first) {
+    set_security_error(ex, -1, 0, "Unknown local participant");
+    return DDS::Security::VALIDATION_FAILED;
+  }
+
+  if (! handshake_data.second) {
     set_security_error(ex, -1, 0, "Unknown remote participant");
-    return Failure;
+    return DDS::Security::VALIDATION_FAILED;
   }
-  if (initiator_id_data->local_handle != replier_identity_handle) {
-    set_security_error(ex, -1, 0, "Participants are not matched");
-    return Failure;
-  }
+
+  LocalParticipantData& local_data = *(handshake_data.first);
+  RemoteParticipantData& remote_data = *(handshake_data.second);
 
   DDS::Security::HandshakeMessageToken message_data_in(request_token);
   TokenReader message_in(message_data_in);
@@ -656,7 +657,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   }
   challenge1 = message_in.get_bin_property_value("challenge1");
 
-  TokenReader initiator_remote_auth_request(initiator_id_data->remote_auth_request);
+  TokenReader initiator_remote_auth_request(remote_data.remote_auth_request);
   if (! initiator_remote_auth_request.is_nil()) {
     const DDS::OctetSeq& future_challenge = initiator_remote_auth_request.get_bin_property_value("future_challenge");
 
@@ -665,7 +666,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     }
   }
 
-  const LocalAuthCredentialData& local_credential_data = *(initiator_id_data->local_credential_data);
+  const LocalAuthCredentialData& local_credential_data = *(local_data.credentials);
 
   const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
   if (cid.length() > 0) {
@@ -752,7 +753,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   message_out.add_bin_property("dh1", dh1);
   message_out.add_bin_property("challenge1", challenge1);
 
-  TokenReader initiator_local_auth_request(initiator_id_data->local_auth_request);
+  TokenReader initiator_local_auth_request(remote_data.local_auth_request);
   if (! initiator_local_auth_request.is_nil()) {
     const DDS::OctetSeq& future_challenge = initiator_local_auth_request.get_bin_property_value("future_challenge");
     message_out.add_bin_property("challenge2", future_challenge);
@@ -782,23 +783,21 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   SSL::sign_serialized(sign_these, local_credential_data.get_participant_private_key(), signature);
   message_out.add_bin_property("signature", signature);
 
-  HandshakeData_Ptr newHandshakeData = DCPS::make_rch<HandshakeData>();
-  newHandshakeData->local_identity_handle = replier_identity_handle;
-  newHandshakeData->remote_identity_handle = initiator_identity_handle;
-  newHandshakeData->local_initiator = false;
-  newHandshakeData->validation_state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
-  newHandshakeData->diffie_hellman = DCPS::move(diffie_hellman);
-  newHandshakeData->remote_cert = DCPS::move(remote_cert);
-  newHandshakeData->access_permissions = cperm;
-  newHandshakeData->reply_token = handshake_message_out;
-  newHandshakeData->request_token = request_token;
-  newHandshakeData->hash_c1 = hash_c1;
-  newHandshakeData->hash_c2 = hash_c2;
+  remote_data.replier_identity = replier_identity_handle;
+  remote_data.initiator_identity = initiator_identity_handle;
+  remote_data.state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
+  remote_data.diffie_hellman = DCPS::move(diffie_hellman);
+  remote_data.certificate = DCPS::move(remote_cert);
+  remote_data.c_perm = cperm;
+  remote_data.reply = handshake_message_out;
+  remote_data.request = request_token;
+  remote_data.hash_c1 = hash_c1;
+  remote_data.hash_c2 = hash_c2;
 
   handshake_handle = get_next_handle();
   {
     ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
-    handshake_data_[handshake_handle] = newHandshakeData;
+    handshake_data_[handshake_handle] = handshake_data;
   }
 
   return Pending;
@@ -838,11 +837,12 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
-  HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
-  if (handshakeData) {
-    ValidationResult_t state = handshakeData->validation_state;
+  HandshakeDataPair handshake_data = get_handshake_data(handshake_handle);
+  if (handshake_data.first && handshake_data.second) {
+
+    ValidationResult_t state = handshake_data.second->state;
     if (state == VALIDATION_OK || state == VALIDATION_OK_FINAL_MESSAGE) {
-      SharedSecretHandle_var handle = handshakeData->secret_handle;
+      SharedSecretHandle_var handle = handshake_data.second->shared_secret;
       result = handle._retn();
 
     } else {
@@ -866,9 +866,9 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
 
-  HandshakeData_Ptr handshakeData = get_handshake_data(handshake_handle);
-  if (handshakeData) {
-    ValidationResult_t state = handshakeData->validation_state;
+  HandshakeDataPair handshake_data = get_handshake_data(handshake_handle);
+  if (handshake_data.first && handshake_data.second) {
+    ValidationResult_t state = handshake_data.second->state;
     if (state == VALIDATION_OK || state == VALIDATION_OK_FINAL_MESSAGE) {
       OpenDDS::Security::TokenWriter peer_token(peer_credential_token, Auth_Peer_Cred_Token_Class_Id);
 
@@ -877,12 +877,12 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
       DDS::BinaryProperty_t p1;
       p1.name = "c.id";
-      p1.value = handshakeData->remote_cert->original_bytes();
+      p1.value = handshake_data.second->certificate->original_bytes();
       p1.propagate = true;
 
       DDS::BinaryProperty_t p2;
       p2.name = "c.perm";
-      p2.value = handshakeData->access_permissions;
+      p2.value = handshake_data.second->c_perm;
       p2.propagate = true;
 
       props[0] = p1;
@@ -955,16 +955,16 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   ::CORBA::Boolean results = false;
 
   // Cleanup the handshake data from the map
-  ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
-
-  Handshake_Handle_Data::iterator iHandshake = handshake_data_.find(handshake_handle);
-  if (iHandshake != handshake_data_.end()) {
-    handshake_data_.erase(iHandshake);
-    results = true;
-
-  } else {
-    set_security_error(ex, -1, 0, "Handshake handle not recognized");
-  }
+//  ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
+//
+//  Handshake_Handle_Data::iterator iHandshake = handshake_data_.find(handshake_handle);
+//  if (iHandshake != handshake_data_.end()) {
+//    handshake_data_.erase(iHandshake);
+//    results = true;
+//
+//  } else {
+//    set_security_error(ex, -1, 0, "Handshake handle not recognized");
+//  }
   return results;
 }
 
@@ -975,16 +975,16 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   ::CORBA::Boolean results = false;
 
   // Cleanup the identity data from the map
-  ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-
-  Identity_Handle_Data::iterator iData = identity_data_.find(identity_handle);
-  if (iData != identity_data_.end()) {
-    identity_data_.erase(iData);
-    results = true;
-
-  } else {
-    set_security_error(ex, -1, 0, "Identity handle not recognized");
-  }
+//  ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
+//
+//  Identity_Handle_Data::iterator iData = identity_data_.find(identity_handle);
+//  if (iData != identity_data_.end()) {
+//    identity_data_.erase(iData);
+//    results = true;
+//
+//  } else {
+//    set_security_error(ex, -1, 0, "Identity handle not recognized");
+//  }
   return results;
 }
 
@@ -1015,19 +1015,16 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   const DDS::Security::ValidationResult_t Failure = DDS::Security::VALIDATION_FAILED;
   const DDS::Security::ValidationResult_t FinalMessage = DDS::Security::VALIDATION_OK_FINAL_MESSAGE;
 
-  HandshakeData_Ptr handshakePtr = get_handshake_data(handshake_handle);
-  if (!handshakePtr) {
+  HandshakeDataPair handshake_data = get_handshake_data(handshake_handle);
+  if (!handshake_data.first || !handshake_data.second) {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
     return Failure;
   }
 
-  IdentityData_Ptr remoteDataPtr = get_identity_data(handshakePtr->remote_identity_handle);
-  if (!remoteDataPtr) {
-    set_security_error(ex, -1, 0, "Unknown remote participant for handshake");
-    return Failure;
-  }
+  LocalParticipantData& local_data = *(handshake_data.first);
+  RemoteParticipantData& remote_data = *(handshake_data.second);
 
-  if (handshakePtr->validation_state != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+  if (remote_data.state != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
     set_security_error(ex, -1, 0, "Handshake state is not valid");
     return Failure;
   }
@@ -1040,7 +1037,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   const DDS::OctetSeq& challenge2 = message_in.get_bin_property_value("challenge2");
 
-  TokenReader auth_wrapper(remoteDataPtr->remote_auth_request);
+  TokenReader auth_wrapper(remote_data.remote_auth_request);
   if (! auth_wrapper.is_nil()) {
     const DDS::OctetSeq& future_challenge = auth_wrapper.get_bin_property_value("future_challenge");
 
@@ -1050,7 +1047,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
     }
   }
 
-  const LocalAuthCredentialData& local_credential_data = *(remoteDataPtr->local_credential_data);
+  const LocalAuthCredentialData& local_credential_data = *(local_data.credentials);
 
   const DDS::OctetSeq& cid = message_in.get_bin_property_value("c.id");
   if (cid.length() > 0) {
@@ -1070,7 +1067,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   /* Check that challenge1 on message_in matches the one sent in HandshakeRequestMessageToken */
 
-  TokenReader handshake_request_token(handshakePtr->request_token);
+  TokenReader handshake_request_token(remote_data.request);
   if (handshake_request_token.is_nil()) {
     set_security_error(ex, -1, 0, "Handshake-request-token is nil");
     return Failure;
@@ -1102,7 +1099,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   /* Compute/Store the Diffie-Hellman shared-secret */
 
   const DDS::OctetSeq& dh2 = message_in.get_bin_property_value("dh2");
-  if (0 != handshakePtr->diffie_hellman->gen_shared_secret(dh2)) {
+  if (0 != remote_data.diffie_hellman->gen_shared_secret(dh2)) {
     set_security_error(ex, -1, 0, "Failed to generate shared secret from dh1 and dh2");
     return Failure;
   }
@@ -1113,7 +1110,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   {
     CredentialHash hash(*remote_cert,
-                        *handshakePtr->diffie_hellman,
+                        *remote_data.diffie_hellman,
                         cpdata,
                         cperm);
     int err = hash(hash_c2);
@@ -1132,7 +1129,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
                                 dh2,
                                 challenge1,
                                 dh1,
-                                handshakePtr->hash_c1,
+                                remote_data.hash_c1,
                                 verify_these);
 
   const DDS::OctetSeq& remote_signature = message_in.get_bin_property_value("signature");
@@ -1145,7 +1142,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   OpenDDS::Security::TokenWriter final_msg(handshake_message_out, build_class_id(Handshake_Final_Class_Ext));
 
-  final_msg.add_bin_property("hash_c1", handshakePtr->hash_c1);
+  final_msg.add_bin_property("hash_c1", remote_data.hash_c1);
   final_msg.add_bin_property("hash_c2", hash_c2);
   final_msg.add_bin_property("dh1", dh1);
   final_msg.add_bin_property("dh2", dh2);
@@ -1153,7 +1150,7 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   final_msg.add_bin_property("challenge2", challenge2);
 
   DDS::BinaryPropertySeq sign_these;
-  make_final_signature_sequence(handshakePtr->hash_c1,
+  make_final_signature_sequence(remote_data.hash_c1,
                                 challenge1,
                                 dh1,
                                 challenge2,
@@ -1165,14 +1162,13 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
   SSL::sign_serialized(sign_these, local_credential_data.get_participant_private_key(), tmp);
   final_msg.add_bin_property("signature", tmp);
 
-  handshakePtr->remote_cert = DCPS::move(remote_cert);
-  handshakePtr->validation_state = FinalMessage;
-  handshakePtr->access_permissions =  message_in.get_bin_property_value("c.perm");
-  handshakePtr->hash_c2 = hash_c2;
-
-  handshakePtr->secret_handle = new SharedSecret(challenge1,
-                                                 challenge2,
-                                                 handshakePtr->diffie_hellman->get_shared_secret());
+  remote_data.certificate = DCPS::move(remote_cert);
+  remote_data.state = FinalMessage;
+  remote_data.c_perm = message_in.get_bin_property_value("c.perm");
+  remote_data.hash_c2 = hash_c2;
+  remote_data.shared_secret = new SharedSecret(challenge1,
+                                               challenge2,
+                                               remote_data.diffie_hellman->get_shared_secret());
   return FinalMessage;
 }
 
@@ -1203,19 +1199,16 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
   ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
-  HandshakeData_Ptr handshakePtr = get_handshake_data(handshake_handle);
-  if (!handshakePtr) {
+  HandshakeDataPair handshake_data = get_handshake_data(handshake_handle);
+  if (!handshake_data.first || !handshake_data.second) {
     set_security_error(ex, -1, 0, "Unknown handshake handle");
     return Failure;
   }
 
-  IdentityData_Ptr remoteDataPtr = get_identity_data(handshakePtr->remote_identity_handle);
-  if (!remoteDataPtr) {
-    set_security_error(ex, -1, 0, "Unknown remote participant for handshake");
-    return Failure;
-  }
+  LocalParticipantData& local_data = *(handshake_data.first);
+  RemoteParticipantData& remote_data = *(handshake_data.second);
 
-  if (handshakePtr->validation_state != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+  if (remote_data.state != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
     set_security_error(ex, -1, 0, "Handshake state is not valid");
     return Failure;
   }
@@ -1228,14 +1221,14 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
     return Failure;
   }
 
-  TokenReader handshake_reply_token(handshakePtr->reply_token);
+  TokenReader handshake_reply_token(remote_data.reply);
   if (handshake_reply_token.is_nil()) {
     set_security_error(ex, -1, 0, "Handshake-reply-token is nil");
     return Failure;
   }
 
   /* Per the spec, dh1 is optional in all _but_ the request token so it's grabbed from the request */
-  TokenReader handshake_request_token(handshakePtr->request_token);
+  TokenReader handshake_request_token(remote_data.request);
   if (handshake_reply_token.is_nil()) {
     set_security_error(ex, -1, 0, "Handshake-reply-token is nil");
     return Failure;
@@ -1256,15 +1249,15 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
   /* Validate Signature field */
 
-  const SSL::Certificate::unique_ptr& remote_cert = handshakePtr->remote_cert;
+  const SSL::Certificate::unique_ptr& remote_cert = remote_data.certificate;
 
   DDS::BinaryPropertySeq verify_these;
-  make_final_signature_sequence(handshakePtr->hash_c1,
+  make_final_signature_sequence(remote_data.hash_c1,
                                 challenge1_reply,
                                 dh1,
                                 challenge2_reply,
                                 dh2,
-                                handshakePtr->hash_c2,
+                                remote_data.hash_c2,
                                 verify_these);
 
   const DDS::OctetSeq& remote_signature = handshake_final_token.get_bin_property_value("signature");
@@ -1277,40 +1270,67 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
 
   /* Compute/Store the Diffie-Hellman shared-secret */
 
-  if (0 != handshakePtr->diffie_hellman->gen_shared_secret(dh1)) {
+  if (0 != remote_data.diffie_hellman->gen_shared_secret(dh1)) {
     set_security_error(ex, -1, 0, "Failed to generate shared secret from dh2 and dh1");
     return Failure;
   }
 
-  handshakePtr->validation_state = DDS::Security::VALIDATION_OK;
-
-  handshakePtr->secret_handle = new SharedSecret(challenge1_reply,
+  remote_data.state = DDS::Security::VALIDATION_OK;
+  remote_data.shared_secret = new SharedSecret(challenge1_reply,
                                                  challenge2_reply,
-                                                 handshakePtr->diffie_hellman->get_shared_secret());
+                                                 remote_data.diffie_hellman->get_shared_secret());
 
   return ValidationOkay;
 }
 
-AuthenticationBuiltInImpl::HandshakeData_Ptr AuthenticationBuiltInImpl::get_handshake_data(DDS::Security::HandshakeHandle handle)
+AuthenticationBuiltInImpl::LocalParticipantData::shared_ptr
+AuthenticationBuiltInImpl::get_local_participant(DDS::Security::IdentityHandle handle)
 {
-  HandshakeData_Ptr dataPtr;
-  Handshake_Handle_Data::iterator iData = handshake_data_.find(handle);
-  if (iData != handshake_data_.end()) {
-    dataPtr = iData->second;
+  LocalParticipantMap::iterator found = local_participants_.find(handle);
+  if (found != local_participants_.end()) {
+    return found->second;
   }
 
-  return dataPtr;
+  return LocalParticipantData::shared_ptr();
 }
 
-AuthenticationBuiltInImpl::IdentityData_Ptr AuthenticationBuiltInImpl::get_identity_data(DDS::Security::IdentityHandle handle)
+AuthenticationBuiltInImpl::HandshakeDataPair
+AuthenticationBuiltInImpl::get_handshake_data(DDS::Security::HandshakeHandle handle)
 {
-  IdentityData_Ptr dataPtr;
-  Identity_Handle_Data::iterator iData = identity_data_.find(handle);
-  if (iData != identity_data_.end()) {
-    dataPtr = iData->second;
+  HandshakeDataMap::iterator found = handshake_data_.find(handle);
+  if (found != handshake_data_.end()) {
+    return found->second;
   }
 
-  return dataPtr;
+  return HandshakeDataPair();
+}
+
+AuthenticationBuiltInImpl::HandshakeDataPair
+AuthenticationBuiltInImpl::get_auth_data_pair(DDS::Security::IdentityHandle h1,
+                                              DDS::Security::IdentityHandle h2)
+{
+  DDS::Security::IdentityHandle other = DDS::HANDLE_NIL;
+
+  LocalParticipantMap::iterator found_local = local_participants_.find(h1);
+  if (found_local != local_participants_.end()) {
+    other = h2;
+
+  } else {
+    found_local = local_participants_.find(h2);
+    if (found_local != local_participants_.end()) {
+      other = h1;
+
+    } else {
+      return HandshakeDataPair();
+    }
+  }
+
+  RemoteParticipantMap::iterator found_remote = found_local->second->validated_remotes.find(other);
+  if (found_remote != found_local->second->validated_remotes.end()) {
+    return std::make_pair(found_local->second, found_remote->second);
+  }
+
+  return HandshakeDataPair();
 }
 
 bool AuthenticationBuiltInImpl::is_handshake_initiator(const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote)
