@@ -185,12 +185,6 @@ namespace SSL {
         return 1;
       }
 
-      pkey_ctx = EVP_PKEY_CTX_new(public_key, NULL);
-      if (!pkey_ctx) {
-        OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new failed");
-        return 1;
-      }
-
       EVP_MD_CTX_init(md_ctx);
 
       if (1 != EVP_DigestVerifyInit(md_ctx, &pkey_ctx, EVP_sha256(), NULL,
@@ -248,7 +242,7 @@ namespace SSL {
     const DDS::OctetSeq& src,
     const std::vector<const DDS::OctetSeq*>& expected_contents) const
   {
-    verify_implementation verify(X509_get_pubkey(x_));
+    verify_implementation verify(X509_get0_pubkey(x_));
     return verify(src, expected_contents);
   }
 

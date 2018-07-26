@@ -30,6 +30,7 @@ public:
     test_buffer_.length(length);
     for (CORBA::ULong index = 0; index < length; ++index) {
       CORBA::Octet new_value = static_cast<CORBA::Octet>(value * (index + 1));
+      test_buffer_[index] = value;
       value = new_value;
     }
   }

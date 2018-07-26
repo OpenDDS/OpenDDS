@@ -117,12 +117,6 @@ namespace SSL {
         return 1;
       }
 
-      pkey_ctx = EVP_PKEY_CTX_new(private_key, NULL);
-      if (!pkey_ctx) {
-        OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_new failed");
-        return 1;
-      }
-
       EVP_MD_CTX_init(md_ctx);
 
       if (1 != EVP_DigestSignInit(md_ctx, &pkey_ctx, EVP_sha256(), NULL,

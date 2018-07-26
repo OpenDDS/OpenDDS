@@ -21,25 +21,7 @@
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 using OpenDDS::DCPS::GUID_t;
-using OpenDDS::Security::AuthenticationBuiltInImpl;
 using DDS::DomainParticipantQos;
-using DDS::Property_t;
-using DDS::PropertySeq;
-using DDS::BinaryProperty_t;
-using DDS::BinaryPropertySeq;
-//using DDS::Security::SecurityException;
-//using DDS::Security::IdentityHandle;
-//using DDS::Security::IdentityStatusToken;
-//using DDS::Security::IdentityToken;
-//using DDS::Security::PermissionsCredentialToken;
-//using DDS::Security::PermissionsToken;
-//using DDS::Security::AuthRequestMessageToken;
-//using DDS::Security::HandshakeHandle;
-//using DDS::Security::HandshakeMessageToken;
-//using DDS::Security::ValidationResult_t;
-//using DDS::Security::DomainId_t;
-//using DDS::Security::AuthenticatedPeerCredentialToken;
-
 using namespace DDS::Security;
 using namespace OpenDDS::Security;
 using namespace OpenDDS::Security::SSL;
@@ -1096,14 +1078,14 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 
-  SharedSecretHandle* secret1 = mp1.auth.get_shared_secret(mp1.handshake_handle, ex);
-  SharedSecretHandle* secret2 = mp1.auth.get_shared_secret(mp2.handshake_handle, ex);
+  SharedSecretHandle_var secret1 = mp1.auth.get_shared_secret(mp1.handshake_handle, ex);
+  SharedSecretHandle_var secret2 = mp1.auth.get_shared_secret(mp2.handshake_handle, ex);
   ASSERT_NE((void*)0, secret1);
   ASSERT_NE((void*)0, secret2);
-  const DDS::OctetSeq& secret1_data = *(secret1->sharedSecret());
-  const DDS::OctetSeq& secret2_data = *(secret2->sharedSecret());
-  ASSERT_NE(0u, secret1_data.length());
-  ASSERT_EQ(secret1_data, secret2_data);
+  DDS::OctetSeq_var secret1_data = secret1->sharedSecret();
+  DDS::OctetSeq_var secret2_data = secret2->sharedSecret();
+  ASSERT_NE(0u, secret1_data->length());
+  ASSERT_EQ(secret1_data.in(), secret2_data.in());
 }
 
 int main(int argc, char** argv)

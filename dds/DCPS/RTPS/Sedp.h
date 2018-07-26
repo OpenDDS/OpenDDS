@@ -38,6 +38,7 @@
 
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
 #include "dds/DdsSecurityWrappers.h"
+#include "dds/DCPS/RTPS/RtpsSecurityC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -53,7 +54,7 @@ class Spdp;
 
 class WaitForAcks;
 
-class Sedp : public OpenDDS::DCPS::EndpointManager<SPDPdiscoveredParticipantData> {
+class Sedp : public OpenDDS::DCPS::EndpointManager<OpenDDS::Security::SPDPdiscoveredParticipantData> {
 public:
   Sedp(const DCPS::RepoId& participant_id,
        Spdp& owner,
@@ -79,13 +80,13 @@ public:
   const ACE_INET_Addr& multicast_group() const;
   bool map_ipv4_to_ipv6() const;
 
-  void associate_preauth(const SPDPdiscoveredParticipantData& pdata);
-  void associate(const SPDPdiscoveredParticipantData& pdata);
-  void associate_volatile(const SPDPdiscoveredParticipantData& pdata);
-  void associate_secure_writers_to_readers(const SPDPdiscoveredParticipantData& pdata);
-  void associate_secure_readers_to_writers(const SPDPdiscoveredParticipantData& pdata);
-  void send_builtin_crypto_tokens(const SPDPdiscoveredParticipantData& pdata);
-  bool disassociate(const SPDPdiscoveredParticipantData& pdata);
+  void associate_preauth(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void associate(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_volatile(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_writers_to_readers(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_readers_to_writers(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void send_builtin_crypto_tokens(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  bool disassociate(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
 
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::RepoId& reader);
@@ -137,14 +138,13 @@ private:
       MSG_PARTICIPANT_DATA_SECURE,
       MSG_WRITER_SECURE,
       MSG_READER_SECURE,
-      MSG_DCPS_PARTICIPANT_SECURE,
+      MSG_DCPS_PARTICIPANT_SECURE
     } type_;
 
     DCPS::MessageId id_;
 
     union {
-      const SPDPdiscoveredParticipantData* dpdata_;
-      const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper* dpdata_secure_;
+      const OpenDDS::Security::SPDPdiscoveredParticipantData* dpdata_;
 
       const OpenDDS::DCPS::DiscoveredWriterData* wdata_;
       const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* wdata_secure_;
@@ -157,11 +157,8 @@ private:
       const DDS::Security::ParticipantGenericMessage* pgmdata_;
     };
 
-    Msg(MsgType mt, DCPS::MessageId id, const SPDPdiscoveredParticipantData* dpdata)
+    Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData* dpdata)
       : type_(mt), id_(id), dpdata_(dpdata) {}
-
-    Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper* dpdata)
-      : type_(mt), id_(id), dpdata_secure_(dpdata) {}
 
     Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata)
       : type_(mt), id_(id), wdata_(wdata) {}
@@ -281,7 +278,7 @@ private:
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
 
-    DDS::ReturnCode_t write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& msg,
+    DDS::ReturnCode_t write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData& msg,
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
 
@@ -374,8 +371,7 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::unique_ptr<SPDPdiscoveredParticipantData> pdata);
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper> wrapper);
+    void enqueue(DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> pdata);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wrapper);
@@ -396,8 +392,8 @@ private:
   private:
     int svc();
 
-    void svc_i(const SPDPdiscoveredParticipantData* pdata);
-    void svc_i(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper* wrapper);
+    void svc_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
+    void svc_secure_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
 
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* wrapper);
@@ -443,9 +439,6 @@ private:
   typedef LocalParticipantMessageMap::iterator LocalParticipantMessageIter;
   typedef LocalParticipantMessageMap::const_iterator LocalParticipantMessageCIter;
   LocalParticipantMessageMap local_participant_messages_;
-
-  void data_received(DCPS::MessageId message_id,
-                     const OpenDDS::Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper);
 
   void process_discovered_writer_data(DCPS::MessageId message_id,
                                       const OpenDDS::DCPS::DiscoveredWriterData& wdata,

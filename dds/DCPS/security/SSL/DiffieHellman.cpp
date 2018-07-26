@@ -114,7 +114,7 @@ namespace SSL {
     int result = 1;
 
     if (k_) {
-      DH* dh = EVP_PKEY_get1_DH(k_);
+      DH* dh = EVP_PKEY_get0_DH(k_);
       if (dh) {
         const BIGNUM *pubkey,
           *privkey; /* Ignore the privkey but pass it in anyway since nothing
@@ -140,8 +140,8 @@ namespace SSL {
    public:
     dh_shared_secret(EVP_PKEY* pkey) : keypair(NULL), pubkey(NULL)
     {
-      if (NULL == (keypair = EVP_PKEY_get1_DH(pkey))) {
-        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_DH failed");
+      if (NULL == (keypair = EVP_PKEY_get0_DH(pkey))) {
+        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_DH failed");
       }
     }
     ~dh_shared_secret() { BN_free(pubkey); }
@@ -280,8 +280,8 @@ namespace SSL {
     {
       if (!keypair) return 1;
 
-      if (NULL == (keypair_ecdh = EVP_PKEY_get1_EC_KEY(keypair))) {
-        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
+      if (NULL == (keypair_ecdh = EVP_PKEY_get0_EC_KEY(keypair))) {
+        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
         return 1;
       }
 
@@ -329,8 +329,8 @@ namespace SSL {
     ecdh_shared_secret_from_octets(EVP_PKEY* pkey)
       : keypair(NULL), pubkey(NULL), group(NULL), bignum_ctx(NULL)
     {
-      if (NULL == (keypair = EVP_PKEY_get1_EC_KEY(pkey))) {
-        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
+      if (NULL == (keypair = EVP_PKEY_get0_EC_KEY(pkey))) {
+        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
       }
     }
 
