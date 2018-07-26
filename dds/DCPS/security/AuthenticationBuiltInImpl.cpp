@@ -112,6 +112,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
         IdentityData_Ptr local_identity = DCPS::make_rch<IdentityData>();
         local_identity->participant_guid = adjusted_participant_guid;
         local_identity->local_credential_data = local_credential_data;
+        local_identity->is_remote_participant = false;
 
         {
           ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
@@ -290,6 +291,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           newIdentityData->local_handle = local_identity_handle;
           newIdentityData->local_auth_request = local_auth_request_token;
           newIdentityData->remote_auth_request = remote_auth_request_token;
+          newIdentityData->is_remote_participant = true;
 
           remote_identity_handle = get_next_handle();
           identity_data_[remote_identity_handle] = newIdentityData;
