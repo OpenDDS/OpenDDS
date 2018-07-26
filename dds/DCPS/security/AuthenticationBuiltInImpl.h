@@ -206,7 +206,7 @@ private:
 
     LocalParticipantData()
       : participant_guid(OpenDDS::DCPS::GUID_UNKNOWN),
-        credentials(NULL),
+        credentials(),
         permissions_credential(DDS::Security::TokenNIL),
         permissions(DDS::Security::TokenNIL),
         validated_remotes()
