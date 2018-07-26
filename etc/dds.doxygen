@@ -701,8 +701,9 @@ HTML_ALIGN_MEMBERS     = YES
 # will be generated that can be used as input for tools like the 
 # Microsoft HTML help workshop to generate a compressed HTML help file (.chm) 
 # of the generated HTML documentation.
+# Note: Having this enabled disables client side search
 
-GENERATE_HTMLHELP      = YES
+GENERATE_HTMLHELP      = NO
 
 # If the GENERATE_HTMLHELP tag is set to YES, the CHM_FILE tag can 
 # be used to specify the file name of the resulting .chm file. You 
@@ -1181,7 +1182,7 @@ INCLUDED_BY_GRAPH      = YES
 # So in most cases it will be better to enable call graphs for selected 
 # functions only using the \callgraph command.
 
-CALL_GRAPH             = NO
+CALL_GRAPH             = YES
 
 # If the CALLER_GRAPH and HAVE_DOT tags are set to YES then doxygen will 
 # generate a caller dependency graph for every global function or class method. 
@@ -1189,7 +1190,7 @@ CALL_GRAPH             = NO
 # So in most cases it will be better to enable caller graphs for selected 
 # functions only using the \callergraph command.
 
-CALLER_GRAPH           = NO
+CALLER_GRAPH           = YES
 
 # If the GRAPHICAL_HIERARCHY and HAVE_DOT tags are set to YES then doxygen 
 # will graphical hierarchy of all classes instead of a textual one.
@@ -1263,3 +1264,6 @@ DOT_CLEANUP            = YES
 # used. If set to NO the values of all tags below this one will be ignored.
 
 SEARCHENGINE           = YES
+
+# Server based search also has to be disabled for client side search to work.
+SERVER_BASED_SEARCH = NO
