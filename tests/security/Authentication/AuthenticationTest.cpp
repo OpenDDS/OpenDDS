@@ -21,25 +21,7 @@
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 using OpenDDS::DCPS::GUID_t;
-using OpenDDS::Security::AuthenticationBuiltInImpl;
 using DDS::DomainParticipantQos;
-using DDS::Property_t;
-using DDS::PropertySeq;
-using DDS::BinaryProperty_t;
-using DDS::BinaryPropertySeq;
-//using DDS::Security::SecurityException;
-//using DDS::Security::IdentityHandle;
-//using DDS::Security::IdentityStatusToken;
-//using DDS::Security::IdentityToken;
-//using DDS::Security::PermissionsCredentialToken;
-//using DDS::Security::PermissionsToken;
-//using DDS::Security::AuthRequestMessageToken;
-//using DDS::Security::HandshakeHandle;
-//using DDS::Security::HandshakeMessageToken;
-//using DDS::Security::ValidationResult_t;
-//using DDS::Security::DomainId_t;
-//using DDS::Security::AuthenticatedPeerCredentialToken;
-
 using namespace DDS::Security;
 using namespace OpenDDS::Security;
 using namespace OpenDDS::Security::SSL;
