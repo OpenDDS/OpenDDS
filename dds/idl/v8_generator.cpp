@@ -250,7 +250,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
 namespace {
   std::string branchGen(const std::string& name, AST_Type* type,
-                        const std::string& prefix, std::string& intro,
+                        const std::string&, std::string&,
                         const std::string&)
   {
     const std::string source = "src." + name + "()",
