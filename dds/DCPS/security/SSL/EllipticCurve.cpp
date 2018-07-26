@@ -143,8 +143,8 @@ namespace SSL {
     int operator()(DDS::OctetSeq& dst) {
       if (!keypair) return 1;
 
-      if (NULL == (keypair_ecdh = EVP_PKEY_get1_EC_KEY(keypair))) {
-        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
+      if (NULL == (keypair_ecdh = EVP_PKEY_get0_EC_KEY(keypair))) {
+        OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
         return 1;
       }
 
@@ -194,12 +194,12 @@ namespace SSL {
   {
   public:
     ecprime_shared_secret_from_octets(EVP_PKEY* pkey) :
-      keypair(NULL), 
-      pubkey(NULL), 
-      group(NULL), 
+      keypair(NULL),
+      pubkey(NULL),
+      group(NULL),
       bignum_ctx(NULL) {
-        if (NULL == (keypair = EVP_PKEY_get1_EC_KEY(pkey))) {
-          OPENDDS_SSL_LOG_ERR("EVP_PKEY_get1_EC_KEY failed");
+        if (NULL == (keypair = EVP_PKEY_get0_EC_KEY(pkey))) {
+          OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
         }
     }
 

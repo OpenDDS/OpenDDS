@@ -4,11 +4,15 @@
  */
 
 #include "Permissions.h"
+
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/dom/DOM.hpp"
 #include "xercesc/sax/HandlerBase.hpp"
 #include "xercesc/framework/MemBufInputSource.hpp"
+
 #include "ace/OS_NS_strings.h"
+#include "ace/XML_Utils/XercesString.h"
+
 #include <stdexcept>
 
 namespace OpenDDS {
@@ -48,8 +52,26 @@ bool Permissions::extract_subject_name(const SSL::SignedDocument& doc)
   return true;
 }
 
+namespace {
+  std::string toString(const XMLCh* in)
+  {
+    char* c = xercesc::XMLString::transcode(in);
+    const std::string s(c);
+    xercesc::XMLString::release(&c);
+    return s;
+  }
+
+  int toInt(const XMLCh* in)
+  {
+    unsigned int i = 0;
+    xercesc::XMLString::textToBin(in, i);
+    return static_cast<int>(i);
+  }
+}
+
 int Permissions::load(const SSL::SignedDocument& doc)
 {
+  using XML::XStr;
   static const char* gMemBufId = "gov buffer id";
 
   if (!extract_subject_name(doc))
@@ -120,7 +142,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
   //TODO:  WARNING - this implementation only supports 1 permissions/grant set
  // Different from governance from here forward
   // Find the validity rules
-  xercesc::DOMNodeList * grantRules = xmlDoc->getElementsByTagName(xercesc::XMLString::transcode("grant"));
+  xercesc::DOMNodeList * grantRules = xmlDoc->getElementsByTagName(XStr("grant"));
 
   //PermissionGrantRules grant_rules_list_holder_;
 
@@ -129,72 +151,72 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
     // Pull out the grant name for this grant
     xercesc::DOMNamedNodeMap * rattrs = grantRules->item(r)->getAttributes();
-    rule_holder_.grant_name = xercesc::XMLString::transcode(rattrs->item(0)->getTextContent());
+    rule_holder_.grant_name = toString(rattrs->item(0)->getTextContent());
 
     // Pull out subject name, validity, and default
     xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
 
     for ( XMLSize_t gn = 0; gn < grantNodes->getLength(); gn++) {
-      char *g_tag = xercesc::XMLString::transcode(grantNodes->item(gn)->getNodeName());
+      const XStr g_tag = grantNodes->item(gn)->getNodeName();
 
-      if (strcmp(g_tag, "subject_name") == 0) {
-        rule_holder_.subject = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
-      } else if (strcmp(g_tag, "validity") == 0) {
+      if (g_tag == "subject_name") {
+        rule_holder_.subject = toString(grantNodes->item(gn)->getTextContent());
+      } else if (g_tag == "validity") {
         //Validity_t gn_validity;
         xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
 
         for (XMLSize_t vn = 0; vn < validityNodes->getLength(); vn++) {
-          char *v_tag = xercesc::XMLString::transcode((validityNodes->item(vn)->getNodeName()));
+          const XStr v_tag = validityNodes->item(vn)->getNodeName();
 
-          if (strcmp(v_tag, "not_before") == 0) {
-            rule_holder_.validity.not_before = xercesc::XMLString::transcode(
+          if (v_tag == "not_before") {
+            rule_holder_.validity.not_before = toString(
                       (validityNodes->item(vn)->getTextContent()));
-          } else if (strcmp(v_tag, "not_after") == 0) {
-            rule_holder_.validity.not_after = xercesc::XMLString::transcode(
+          } else if (v_tag == "not_after") {
+            rule_holder_.validity.not_after = toString(
                       (validityNodes->item(vn)->getTextContent()));
           }
         }
-      } else if (strcmp(g_tag, "default") == 0) {
-        rule_holder_.default_permission = xercesc::XMLString::transcode(grantNodes->item(gn)->getTextContent());
+      } else if (g_tag == "default") {
+        rule_holder_.default_permission = toString(grantNodes->item(gn)->getTextContent());
       }
     }
     // Pull out allow/deny rules
     xercesc::DOMNodeList * adGrantNodes = grantRules->item(r)->getChildNodes();
 
     for (XMLSize_t gn = 0; gn < adGrantNodes->getLength(); gn++) {
-      char *g_tag = xercesc::XMLString::transcode(adGrantNodes->item(gn)->getNodeName());
+      const XStr g_tag = adGrantNodes->item(gn)->getNodeName();
 
-      if (strcmp(g_tag, "allow_rule") == 0 || strcmp(g_tag, "deny_rule") == 0) {
+      if (g_tag == "allow_rule" || g_tag == "deny_rule") {
         PermissionTopicRule ptr_holder_;
         PermissionsPartition pp_holder_;
 
-        ptr_holder_.ad_type = (strcmp(g_tag,"allow_rule") ==  0 ? ALLOW : DENY);
-        pp_holder_.ad_type = (strcmp(g_tag, "allow_rule") == 0 ? ALLOW : DENY);
+        ptr_holder_.ad_type = (g_tag == "allow_rule") ? ALLOW : DENY;
+        pp_holder_.ad_type = (g_tag == "allow_rule") ? ALLOW : DENY;
 
         xercesc::DOMNodeList * adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
 
         for (XMLSize_t anc = 0; anc < adNodeChildren->getLength(); anc++) {
-          char *anc_tag = xercesc::XMLString::transcode(adNodeChildren->item(anc)->getNodeName());
+          const XStr anc_tag = adNodeChildren->item(anc)->getNodeName();
 
-          if (strcmp(anc_tag, "domains") == 0) {   //domain list
+          if (anc_tag == "domains") {   //domain list
             xercesc::DOMNodeList * domainIdNodes = adNodeChildren->item(anc)->getChildNodes();
 
             for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
-              if (strcmp("id" , xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
-                ptr_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
-                pp_holder_.domain_list.insert(atoi(xercesc::XMLString::transcode(domainIdNodes->item(did)->getTextContent())));
+              if ("id" == XStr(domainIdNodes->item(did)->getNodeName())) {
+                ptr_holder_.domain_list.insert(toInt(domainIdNodes->item(did)->getTextContent()));
+                pp_holder_.domain_list.insert(toInt(domainIdNodes->item(did)->getTextContent()));
               }
-              else if (strcmp("id_range", xercesc::XMLString::transcode(domainIdNodes->item(did)->getNodeName())) == 0) {
+              else if ("id_range" == XStr(domainIdNodes->item(did)->getNodeName())) {
                 int min_value = 0;
                 int max_value = 0;
                 xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
 
                 for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
-                  if (strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
-                    min_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
+                  if ("min" == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
+                    min_value = toInt(domRangeIdNodes->item(drid)->getTextContent());
                   }
-                  else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
-                    max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
+                  else if ("max" == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
+                    max_value = toInt(domRangeIdNodes->item(drid)->getTextContent());
 
                     if ((min_value == 0) || (min_value > max_value)) {
                       ACE_DEBUG((LM_ERROR, ACE_TEXT(
@@ -211,31 +233,31 @@ int Permissions::load(const SSL::SignedDocument& doc)
               }
             }
 
-          } else if (ACE_OS::strcasecmp(anc_tag, "publish") == 0 || ACE_OS::strcasecmp(anc_tag, "subscribe") == 0) {   // pub sub nodes
+          } else if (anc_tag == "publish" || anc_tag == "subscribe") {   // pub sub nodes
             PermissionTopicPsRule anc_ps_rule_holder_;
             PermissionPartitionPs anc_ps_partition_holder_;
 
-            anc_ps_rule_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag,"publish") ==  0 ? PUBLISH : SUBSCRIBE);
-            anc_ps_partition_holder_.ps_type = (ACE_OS::strcasecmp(anc_tag, "publish") == 0 ? PUBLISH : SUBSCRIBE);
+            anc_ps_rule_holder_.ps_type = (anc_tag == "publish") ? PUBLISH : SUBSCRIBE;
+            anc_ps_partition_holder_.ps_type = anc_ps_rule_holder_.ps_type;
             xercesc::DOMNodeList * topicListNodes = adNodeChildren->item(anc)->getChildNodes();
 
             for (XMLSize_t tln = 0; tln < topicListNodes->getLength(); tln++) {
-              if (strcmp("topics" , xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
+              if ("topics" == XStr(topicListNodes->item(tln)->getNodeName())) {
                 xercesc::DOMNodeList * topicNodes = topicListNodes->item(tln)->getChildNodes();
 
                 for (XMLSize_t tn = 0; tn < topicNodes->getLength(); tn++) {
-                  if (strcmp("topic", xercesc::XMLString::transcode(topicNodes->item(tn)->getNodeName())) == 0) {
-                    anc_ps_rule_holder_.topic_list.push_back(xercesc::XMLString::transcode(topicNodes->item(tn)->getTextContent()));
+                  if ("topic" == XStr(topicNodes->item(tn)->getNodeName())) {
+                    anc_ps_rule_holder_.topic_list.push_back(toString(topicNodes->item(tn)->getTextContent()));
                   }
                 }
 
               }
-              else if (strcmp("partitions", xercesc::XMLString::transcode(topicListNodes->item(tln)->getNodeName())) == 0) {
+              else if ("partitions" == XStr(topicListNodes->item(tln)->getNodeName())) {
                 xercesc::DOMNodeList * partitionNodes = topicListNodes->item(tln)->getChildNodes();
 
                 for (XMLSize_t pn = 0; pn < partitionNodes->getLength(); pn++) {
-                  if (strcmp("partition", xercesc::XMLString::transcode(partitionNodes->item(pn)->getNodeName())) == 0) {
-                    anc_ps_partition_holder_.partition_list.push_back(xercesc::XMLString::transcode(partitionNodes->item(pn)->getTextContent()));
+                  if ("partition" == XStr(partitionNodes->item(pn)->getNodeName())) {
+                    anc_ps_partition_holder_.partition_list.push_back(toString(partitionNodes->item(pn)->getTextContent()));
                   }
                 }
               }
