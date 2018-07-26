@@ -276,101 +276,56 @@ namespace {
       dur.nanosec = DDS::DURATION_INFINITE_NSEC;
     }
   }
+
+  OpenDDS::Security::DiscoveredParticipantDataKind find_data_kind(const ParameterList& param_list)
+  {
+    enum FieldMaskNames {
+      ID_TOKEN_FIELD = 0x01,
+      PERM_TOKEN_FIELD = 0x02,
+      PROPERTY_LIST_FIELD = 0x04,
+      PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
+      IDENTITY_STATUS_TOKEN_FIELD = 0x10
+    };
+
+    unsigned char field_mask = 0x00;
+
+    CORBA::ULong length = param_list.length();
+    for (CORBA::ULong i = 0; i < length; ++i) {
+      const Parameter& param = param_list[i];
+      switch (param._d()) {
+        case DDS::Security::PID_IDENTITY_TOKEN:
+          field_mask |= ID_TOKEN_FIELD;
+          break;
+        case DDS::Security::PID_PERMISSIONS_TOKEN:
+          field_mask |= PERM_TOKEN_FIELD;
+          break;
+        case PID_PROPERTY_LIST:
+          field_mask |= PROPERTY_LIST_FIELD;
+          break;
+        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+          field_mask |= PARTICIPANT_SECURITY_INFO_FIELD;
+          break;
+        case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+          field_mask |= IDENTITY_STATUS_TOKEN_FIELD;
+          break;
+      }
+    }
+
+    if ((field_mask & (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) == (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) {
+      if ((field_mask & IDENTITY_STATUS_TOKEN_FIELD) == IDENTITY_STATUS_TOKEN_FIELD) {
+        return OpenDDS::Security::DPDK_SECURE;
+      } else {
+        return OpenDDS::Security::DPDK_ENHANCED;
+      }
+    }
+
+    return OpenDDS::Security::DPDK_ORIGINAL;
+  }
 };
 
 namespace ParameterListConverter {
 
-int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
-                  ParameterList& param_list)
-{
-  // Parameterize ParticipantBuiltinTopicData
-  // Ignore participant builtin topic key
-
-  if (not_default(participant_data.ddsParticipantData.user_data))
-  {
-    Parameter ud_param;
-    ud_param.user_data(participant_data.ddsParticipantData.user_data);
-    add_param(param_list, ud_param);
-  }
-
-  // Parameterize ParticipantProxy_t
-  Parameter pv_param;
-  pv_param.version(participant_data.participantProxy.protocolVersion);
-  add_param(param_list, pv_param);
-
-  // For guid prefix, copy into guid, and force some values
-  Parameter gp_param;
-  GUID_t guid;
-  ACE_OS::memcpy(guid.guidPrefix,
-                 participant_data.participantProxy.guidPrefix,
-                 sizeof(guid.guidPrefix));
-  guid.entityId = DCPS::ENTITYID_PARTICIPANT;
-
-  gp_param.guid(guid);
-  gp_param._d(PID_PARTICIPANT_GUID);
-  add_param(param_list, gp_param);
-
-  Parameter vid_param;
-  vid_param.vendor(participant_data.participantProxy.vendorId);
-  add_param(param_list, vid_param);
-
-  if (participant_data.participantProxy.expectsInlineQos != false)
-  {
-    Parameter eiq_param; // Default is false
-    eiq_param.expects_inline_qos(
-        participant_data.participantProxy.expectsInlineQos);
-    add_param(param_list, eiq_param);
-  }
-
-  Parameter abe_param;
-  abe_param.participant_builtin_endpoints(
-    participant_data.participantProxy.availableBuiltinEndpoints);
-  add_param(param_list, abe_param);
-
-  // Interoperability note:
-  // For interoperability with other DDS implemenations, we'll encode the
-  // availableBuiltinEndpoints as PID_BUILTIN_ENDPOINT_SET in addition to
-  // PID_PARTICIPANT_BUILTIN_ENDPOINTS (above).
-  Parameter be_param;
-  be_param.builtin_endpoints(
-    participant_data.participantProxy.availableBuiltinEndpoints);
-  add_param(param_list, be_param);
-
-  // Each locator
-  add_param_locator_seq(
-      param_list,
-      participant_data.participantProxy.metatrafficUnicastLocatorList,
-      PID_METATRAFFIC_UNICAST_LOCATOR);
-
-  add_param_locator_seq(
-      param_list,
-      participant_data.participantProxy.metatrafficMulticastLocatorList,
-      PID_METATRAFFIC_MULTICAST_LOCATOR);
-
-  add_param_locator_seq(
-      param_list,
-      participant_data.participantProxy.defaultUnicastLocatorList,
-      PID_DEFAULT_UNICAST_LOCATOR);
-
-  add_param_locator_seq(
-      param_list,
-      participant_data.participantProxy.defaultMulticastLocatorList,
-      PID_DEFAULT_MULTICAST_LOCATOR);
-
-  Parameter ml_param;
-  ml_param.count(participant_data.participantProxy.manualLivelinessCount);
-  add_param(param_list, ml_param);
-
-  if ((participant_data.leaseDuration.seconds != 100) ||
-      (participant_data.leaseDuration.fraction != 0))
-  {
-    Parameter ld_param;
-    ld_param.duration(participant_data.leaseDuration);
-    add_param(param_list, ld_param);
-  }
-
-  return 0;
-}
+// DDS::ParticipantBuiltinTopicData
 
 int to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
                   ParameterList& param_list)
@@ -385,15 +340,33 @@ int to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
   return 0;
 }
 
+int from_param_list(const ParameterList& param_list,
+                    DDS::ParticipantBuiltinTopicData& pbtd)
+{
+  pbtd.user_data.value.length(0);
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case PID_USER_DATA:
+        pbtd.user_data = param.user_data();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+
+  return 0;
+}
+
+// DDS::Security::ParticipantBuiltinTopicData
+
 int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
-                  const DCPS::GUID_t& guid,
                   ParameterList& param_list)
 {
-  Parameter gp_param;
-  gp_param.guid(guid);
-  gp_param._d(PID_PARTICIPANT_GUID);
-  add_param(param_list, gp_param);
-
   to_param_list(pbtd.base, param_list);
 
   Parameter param_it;
@@ -418,36 +391,384 @@ int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
   return 0;
 }
 
-int to_param_list(const DDS::Security::IdentityToken& identity_token,
-                  const DDS::Security::PermissionsToken& permissions_token,
-                  const DDS::PropertyQosPolicy& property_qos,
-                  const DDS::Security::ParticipantSecurityInfo& security_info,
-                  ParameterList& param_list)
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::ParticipantBuiltinTopicData& pbtd)
 {
-  Parameter param_it;
-  param_it.identity_token(identity_token);
-  add_param(param_list, param_it);
+  if (from_param_list(param_list, pbtd.base) != 0)
+    return -1;
 
-  Parameter param_pt;
-  param_pt.permissions_token(permissions_token);
-  add_param(param_list, param_pt);
+  pbtd.security_info = {0, 0};
 
-  if (not_default(property_qos))
-  {
-    Parameter param_p;
-    // binary_value is not sent in the parameter list (DDSSEC12-37)
-    DDS::PropertyQosPolicy policy_serialized(property_qos);
-    policy_serialized.binary_value.length(0);
-    param_p.property(policy_serialized);
-    add_param(param_list, param_p);
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case DDS::Security::PID_IDENTITY_TOKEN:
+        pbtd.identity_token = param.identity_token();
+        break;
+      case DDS::Security::PID_PERMISSIONS_TOKEN:
+        pbtd.permissions_token = param.permissions_token();
+        break;
+      case PID_PROPERTY_LIST:
+        pbtd.property = param.property();
+        break;
+      case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+        pbtd.security_info = param.participant_security_info();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
   }
 
-  Parameter param_psi;
-  param_psi.participant_security_info(security_info);
-  add_param(param_list, param_psi);
+  return 0; 
+}
+
+// DDS::Security::ParticipantBuiltinTopicDataSecure
+
+int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
+                  ParameterList& param_list)
+{
+  to_param_list(pbtds.base, param_list);
+
+  Parameter param_ist;
+  param_ist.identity_status_token(pbtds.identity_status_token);
+  add_param(param_list, param_ist);
 
   return 0;
 }
+
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds)
+{
+  if (from_param_list(param_list, pbtds.base) != 0)
+    return -1;
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+        pbtds.identity_status_token = param.identity_status_token();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+
+  return 0;
+}
+
+// OpenDDS::RTPS::ParticipantProxy_t
+
+OpenDDS_Rtps_Export
+int to_param_list(const ParticipantProxy_t& proxy,
+                  ParameterList& param_list)
+{
+  Parameter pv_param;
+  pv_param.version(proxy.protocolVersion);
+  add_param(param_list, pv_param);
+
+  // For guid prefix, copy into guid, and force some values
+  Parameter gp_param;
+  GUID_t guid;
+  ACE_OS::memcpy(guid.guidPrefix,
+                 proxy.guidPrefix,
+                 sizeof(guid.guidPrefix));
+  guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+
+  gp_param.guid(guid);
+  gp_param._d(PID_PARTICIPANT_GUID);
+  add_param(param_list, gp_param);
+
+  Parameter vid_param;
+  vid_param.vendor(proxy.vendorId);
+  add_param(param_list, vid_param);
+
+  if (proxy.expectsInlineQos != false)
+  {
+    Parameter eiq_param; // Default is false
+    eiq_param.expects_inline_qos(
+        proxy.expectsInlineQos);
+    add_param(param_list, eiq_param);
+  }
+
+  Parameter abe_param;
+  abe_param.participant_builtin_endpoints(
+    proxy.availableBuiltinEndpoints);
+  add_param(param_list, abe_param);
+
+  // Interoperability note:
+  // For interoperability with other DDS implemenations, we'll encode the
+  // availableBuiltinEndpoints as PID_BUILTIN_ENDPOINT_SET in addition to
+  // PID_PARTICIPANT_BUILTIN_ENDPOINTS (above).
+  Parameter be_param;
+  be_param.builtin_endpoints(
+    proxy.availableBuiltinEndpoints);
+  add_param(param_list, be_param);
+
+  // Each locator
+  add_param_locator_seq(
+      param_list,
+      proxy.metatrafficUnicastLocatorList,
+      PID_METATRAFFIC_UNICAST_LOCATOR);
+
+  add_param_locator_seq(
+      param_list,
+      proxy.metatrafficMulticastLocatorList,
+      PID_METATRAFFIC_MULTICAST_LOCATOR);
+
+  add_param_locator_seq(
+      param_list,
+      proxy.defaultUnicastLocatorList,
+      PID_DEFAULT_UNICAST_LOCATOR);
+
+  add_param_locator_seq(
+      param_list,
+      proxy.defaultMulticastLocatorList,
+      PID_DEFAULT_MULTICAST_LOCATOR);
+
+  Parameter ml_param;
+  ml_param.count(proxy.manualLivelinessCount);
+  add_param(param_list, ml_param);
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    ParticipantProxy_t& proxy)
+{
+  // Track the state of our locators
+  LocatorState du_last_state = locator_undefined;
+  LocatorState mu_last_state = locator_undefined;
+  LocatorState mm_last_state = locator_undefined;
+
+  // Start by setting defaults
+  proxy.availableBuiltinEndpoints = 0;
+  proxy.expectsInlineQos = false;
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case PID_PROTOCOL_VERSION:
+        proxy.protocolVersion = param.version();
+        break;
+      case PID_PARTICIPANT_GUID:
+        ACE_OS::memcpy(proxy.guidPrefix,
+               param.guid().guidPrefix, sizeof(GuidPrefix_t));
+        break;
+      case PID_VENDORID:
+        ACE_OS::memcpy(proxy.vendorId.vendorId,
+               param.vendor().vendorId, sizeof(OctetArray2));
+        break;
+      case PID_EXPECTS_INLINE_QOS:
+        proxy.expectsInlineQos =
+            param.expects_inline_qos();
+        break;
+      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
+        proxy.availableBuiltinEndpoints =
+            param.participant_builtin_endpoints();
+        break;
+      case PID_BUILTIN_ENDPOINT_SET:
+        // Interoperability note:
+        // OpenSplice uses this in place of PID_PARTICIPANT_BUILTIN_ENDPOINTS
+        // Table 9.13 indicates that PID_PARTICIPANT_BUILTIN_ENDPOINTS should be
+        // used to represent ParticipantProxy::availableBuiltinEndpoints
+        proxy.availableBuiltinEndpoints =
+            param.builtin_endpoints();
+        break;
+      case PID_METATRAFFIC_UNICAST_LOCATOR:
+        append_locator(
+            proxy.metatrafficUnicastLocatorList,
+            param.locator());
+        break;
+      case PID_METATRAFFIC_MULTICAST_LOCATOR:
+        append_locator(
+            proxy.metatrafficMulticastLocatorList,
+            param.locator());
+        break;
+      case PID_DEFAULT_UNICAST_LOCATOR:
+        append_locator(
+            proxy.defaultUnicastLocatorList,
+            param.locator());
+        break;
+      case PID_DEFAULT_MULTICAST_LOCATOR:
+        append_locator(
+            proxy.defaultMulticastLocatorList,
+            param.locator());
+        break;
+      case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
+        proxy.manualLivelinessCount.value =
+            param.count().value;
+        break;
+      case PID_DEFAULT_UNICAST_IPADDRESS:
+        set_ipaddress(
+          proxy.defaultUnicastLocatorList,
+          du_last_state,
+          param.ipv4_address());
+        break;
+      case PID_METATRAFFIC_UNICAST_IPADDRESS:
+        set_ipaddress(
+          proxy.metatrafficUnicastLocatorList,
+          mu_last_state,
+          param.ipv4_address());
+        break;
+      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
+        set_ipaddress(
+          proxy.metatrafficMulticastLocatorList,
+          mm_last_state,
+          param.ipv4_address());
+        break;
+      case PID_DEFAULT_UNICAST_PORT:
+        set_port(proxy.defaultUnicastLocatorList,
+                 du_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_METATRAFFIC_UNICAST_PORT:
+        set_port(proxy.metatrafficUnicastLocatorList,
+                 mu_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_METATRAFFIC_MULTICAST_PORT:
+        set_port(proxy.metatrafficMulticastLocatorList,
+                 mm_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_SENTINEL:
+      case PID_PAD:
+        // ignore
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+
+  return 0;
+}
+
+// OpenDDS::RTPS::Duration_t
+
+OpenDDS_Rtps_Export
+int to_param_list(const Duration_t& duration,
+                  ParameterList& param_list)
+{
+  if ((duration.seconds != 100) ||
+      (duration.fraction != 0))
+  {
+    Parameter ld_param;
+    ld_param.duration(duration);
+    add_param(param_list, ld_param);
+  }
+
+  return 0;
+}
+
+OpenDDS_Rtps_Export
+int from_param_list(const ParameterList& param_list,
+                    Duration_t& duration)
+{
+  duration.seconds = 100;
+  duration.fraction = 0;
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case PID_PARTICIPANT_LEASE_DURATION:
+        duration = param.duration();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+  return 0;
+}
+
+// OpenDDS::RTPS::SPDPdiscoveredParticipantData
+
+OpenDDS_Rtps_Export
+int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
+                  ParameterList& param_list)
+{
+  to_param_list(participant_data.ddsParticipantData, param_list);
+  to_param_list(participant_data.participantProxy, param_list);
+  to_param_list(participant_data.leaseDuration, param_list);
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    SPDPdiscoveredParticipantData& participant_data)
+{
+  int result = from_param_list(param_list, participant_data.ddsParticipantData);
+  if (!result) {
+    result = from_param_list(param_list, participant_data.participantProxy);
+    if (!result) {
+      result = from_param_list(param_list, participant_data.leaseDuration);
+    }
+  }
+
+  return result;
+}
+
+// OpenDDS::Security::SPDPdiscoveredParticipantData
+
+int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
+                  ParameterList& param_list)
+{
+  if (participant_data.dataKind == OpenDDS::Security::DPDK_SECURE) {
+    to_param_list(participant_data.ddsParticipantDataSecure, param_list);
+  } else if (participant_data.dataKind == OpenDDS::Security::DPDK_ENHANCED) {
+    to_param_list(participant_data.ddsParticipantDataSecure.base, param_list);
+  } else {
+    to_param_list(participant_data.ddsParticipantDataSecure.base.base, param_list);
+  }
+  to_param_list(participant_data.participantProxy, param_list);
+  to_param_list(participant_data.leaseDuration, param_list);
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data)
+{
+  int result = 0;
+
+  participant_data.dataKind = find_data_kind(param_list);
+  switch (participant_data.dataKind) {
+    case OpenDDS::Security::DPDK_SECURE: {
+      result = from_param_list(param_list, participant_data.ddsParticipantDataSecure);
+      break;
+    }
+    case OpenDDS::Security::DPDK_ENHANCED: {
+      result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base);
+      break;
+    }
+    default : {
+      result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
+      break;
+    }
+  }
+
+  if (!result) {
+    result = from_param_list(param_list, participant_data.participantProxy);
+    if (!result) {
+      result = from_param_list(param_list, participant_data.leaseDuration);
+    }
+  }
+
+  return result;
+}
+
+// OpenDDS::DCPS::DiscoveredWriterData
 
 int to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                   ParameterList& param_list,
@@ -614,280 +935,165 @@ int to_param_list(const DCPS::DiscoveredWriterData& writer_data,
   return 0;
 }
 
-// Local security-related helper functions.
-namespace {
+int from_param_list(const ParameterList& param_list,
+                    DCPS::DiscoveredWriterData& writer_data)
+{
+  LocatorState last_state = locator_undefined;  // Track state of locator
+  // Collect the rtps_udp locators before appending them to allLocators
+  DCPS::LocatorSeq rtps_udp_locators;
 
-  inline void to_param_list(const DDS::Security::EndpointSecurityInfo& src, ParameterList& dest)
-  {
-    Parameter param;
-    param.endpoint_security_info(src);
-    add_param(dest, param);
-  }
+  // Start by setting defaults
+  writer_data.ddsPublicationData.topic_name = "";
+  writer_data.ddsPublicationData.type_name  = "";
+  writer_data.ddsPublicationData.durability =
+      TheServiceParticipant->initial_DurabilityQosPolicy();
+  writer_data.ddsPublicationData.durability_service =
+      TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+  writer_data.ddsPublicationData.deadline =
+      TheServiceParticipant->initial_DeadlineQosPolicy();
+  writer_data.ddsPublicationData.latency_budget =
+      TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+  writer_data.ddsPublicationData.liveliness =
+      TheServiceParticipant->initial_LivelinessQosPolicy();
+  writer_data.ddsPublicationData.reliability =
+      TheServiceParticipant->initial_DataWriterQos().reliability;
+  writer_data.ddsPublicationData.lifespan =
+      TheServiceParticipant->initial_LifespanQosPolicy();
+  writer_data.ddsPublicationData.user_data =
+      TheServiceParticipant->initial_UserDataQosPolicy();
+  writer_data.ddsPublicationData.ownership =
+      TheServiceParticipant->initial_OwnershipQosPolicy();
+#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  writer_data.ddsPublicationData.ownership_strength.value = 0;
+#else
+  writer_data.ddsPublicationData.ownership_strength =
+      TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+#endif
+  writer_data.ddsPublicationData.destination_order =
+      TheServiceParticipant->initial_DestinationOrderQosPolicy();
+  writer_data.ddsPublicationData.presentation =
+      TheServiceParticipant->initial_PresentationQosPolicy();
+  writer_data.ddsPublicationData.partition =
+      TheServiceParticipant->initial_PartitionQosPolicy();
+  writer_data.ddsPublicationData.topic_data =
+      TheServiceParticipant->initial_TopicDataQosPolicy();
+  writer_data.ddsPublicationData.group_data =
+      TheServiceParticipant->initial_GroupDataQosPolicy();
+  writer_data.writerProxy.unicastLocatorList.length(0);
+  writer_data.writerProxy.multicastLocatorList.length(0);
 
-  inline void to_param_list(const DDS::Security::DataTags& src, ParameterList& dest)
-  {
-    Parameter param;
-    param.data_tags(src);
-    add_param(dest, param);
-  }
-
-  inline void to_param_list(const DDS::Security::ParticipantSecurityInfo& src, ParameterList& dest)
-  {
-    Parameter param;
-    param.participant_security_info(src);
-    add_param(dest, param);
-  }
-
-  int to_param_list(const DDS::Security::Token& src,
-                    CORBA::UShort pid,
-                    ParameterList& dest)
-  {
-    int result = 0;
-
-    Parameter param;
-
-    switch (pid) {
-    case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
-      param.identity_status_token(src);
-      add_param(dest, param);
-      break;
-
-    case DDS::Security::PID_IDENTITY_TOKEN:
-      param.identity_token(src);
-      add_param(dest, param);
-      break;
-
-    case DDS::Security::PID_PERMISSIONS_TOKEN:
-      param.permissions_token(src);
-      add_param(dest, param);
-      break;
-
-    default:
-      result = -1;
-      break;
-    }
-
-    return result;
-  }
-
-  int from_param_list(const ParameterList& param_list,
-                      DDS::Security::EndpointSecurityInfo& security_info,
-                      DDS::Security::DataTags& data_tags)
-  {
-
-    data_tags.tags.length(0);
-    security_info.endpoint_security_attributes = 0;
-    security_info.plugin_endpoint_security_attributes = 0;
-
-    size_t len = param_list.length();
-    for (size_t i = 0; i < len; ++i) {
-
-      const Parameter& p = param_list[i];
-
-      switch(p._d()) {
-      case DDS::Security::PID_DATA_TAGS:
-        data_tags = p.data_tags();
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case PID_TOPIC_NAME:
+        writer_data.ddsPublicationData.topic_name = param.string_data();
         break;
-
-      case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
-        security_info = p.endpoint_security_info();
+      case PID_TYPE_NAME:
+        writer_data.ddsPublicationData.type_name = param.string_data();
         break;
-
+      case PID_DURABILITY:
+        writer_data.ddsPublicationData.durability = param.durability();
+        break;
+      case PID_DURABILITY_SERVICE:
+        writer_data.ddsPublicationData.durability_service =
+             param.durability_service();
+        // Interoperability note: calling normalize() shouldn't be required
+        normalize(writer_data.ddsPublicationData.durability_service.service_cleanup_delay);
+        break;
+      case PID_DEADLINE:
+        writer_data.ddsPublicationData.deadline = param.deadline();
+        // Interoperability note: calling normalize() shouldn't be required
+        normalize(writer_data.ddsPublicationData.deadline.period);
+        break;
+      case PID_LATENCY_BUDGET:
+        writer_data.ddsPublicationData.latency_budget = param.latency_budget();
+        // Interoperability note: calling normalize() shouldn't be required
+        normalize(writer_data.ddsPublicationData.latency_budget.duration);
+        break;
+      case PID_LIVELINESS:
+        writer_data.ddsPublicationData.liveliness = param.liveliness();
+        // Interoperability note: calling normalize() shouldn't be required
+        normalize(writer_data.ddsPublicationData.liveliness.lease_duration);
+        break;
+      case PID_RELIABILITY:
+        writer_data.ddsPublicationData.reliability = param.reliability();
+        // Interoperability note:
+        // Spec creators for RTPS have reliability indexed at 1
+        writer_data.ddsPublicationData.reliability.kind =
+          (DDS::ReliabilityQosPolicyKind)
+              ((int)writer_data.ddsPublicationData.reliability.kind - 1);
+        normalize(writer_data.ddsPublicationData.reliability.max_blocking_time);
+        break;
+      case PID_LIFESPAN:
+        writer_data.ddsPublicationData.lifespan = param.lifespan();
+        // Interoperability note: calling normalize() shouldn't be required
+        normalize(writer_data.ddsPublicationData.lifespan.duration);
+        break;
+      case PID_USER_DATA:
+        writer_data.ddsPublicationData.user_data = param.user_data();
+        break;
+      case PID_OWNERSHIP:
+        writer_data.ddsPublicationData.ownership = param.ownership();
+        break;
+      case PID_OWNERSHIP_STRENGTH:
+        writer_data.ddsPublicationData.ownership_strength = param.ownership_strength();
+        break;
+      case PID_DESTINATION_ORDER:
+        writer_data.ddsPublicationData.destination_order = param.destination_order();
+        break;
+      case PID_PRESENTATION:
+        writer_data.ddsPublicationData.presentation = param.presentation();
+        break;
+      case PID_PARTITION:
+        writer_data.ddsPublicationData.partition = param.partition();
+        break;
+      case PID_TOPIC_DATA:
+        writer_data.ddsPublicationData.topic_data = param.topic_data();
+        break;
+      case PID_GROUP_DATA:
+        writer_data.ddsPublicationData.group_data = param.group_data();
+        break;
+      case PID_ENDPOINT_GUID:
+        writer_data.writerProxy.remoteWriterGuid = param.guid();
+        break;
+      case PID_UNICAST_LOCATOR:
+        append_locator(rtps_udp_locators, param.locator());
+        break;
+      case PID_MULTICAST_LOCATOR:
+        append_locator(rtps_udp_locators, param.locator());
+        break;
+      case PID_MULTICAST_IPADDRESS:
+        set_ipaddress(rtps_udp_locators,
+                      last_state,
+                      param.ipv4_address());
+        break;
+      case PID_OPENDDS_LOCATOR:
+        // Append the rtps_udp_locators, if any, first, to preserve order
+        append_locators_if_present(writer_data.writerProxy.allLocators,
+                                   rtps_udp_locators);
+        rtps_udp_locators.length(0);
+        append_locator(writer_data.writerProxy.allLocators,
+                       param.opendds_locator());
+        break;
+      case PID_SENTINEL:
+      case PID_PAD:
+        // ignore
+        break;
       default:
-        if (p._d() & PIDMASK_INCOMPATIBLE) {
-            return -1;
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
         }
-      }
-    }
-
-    return 0;
-  }
-
-} /* local security-related helpers */
-
-int to_param_list(const Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper,
-                    ParameterList& param_list)
-{
-  int err = to_param_list(wrapper.data, param_list) ||
-            to_param_list(wrapper.identity_token, DDS::Security::PID_IDENTITY_TOKEN, param_list) ||
-            to_param_list(wrapper.permissions_token, DDS::Security::PID_PERMISSIONS_TOKEN, param_list) ||
-            to_param_list(wrapper.identity_status_token, DDS::Security::PID_IDENTITY_STATUS_TOKEN, param_list);
-
-  if (! err) {
-      to_param_list(wrapper.security_info, param_list);
-  }
-
-  return err;
-}
-
-int from_param_list(const ParameterList& param_list,
-                      Security::SPDPdiscoveredParticipantData_SecurityWrapper& wrapper)
-{
-  int result = from_param_list(param_list, wrapper.data) ||
-               from_param_list(param_list,
-                               wrapper.identity_token,
-                               wrapper.permissions_token,
-                               wrapper.property_qos,
-                               wrapper.security_info,
-                               wrapper.identity_status_token);
-  return result;
-}
-
-int from_param_list(const ParameterList& param_list,
-                    DDS::Security::IdentityToken& id_token,
-                    DDS::Security::PermissionsToken& perm_token,
-                    DDS::PropertyQosPolicy& property_qos,
-                    DDS::Security::ParticipantSecurityInfo& security_info)
-{
-  id_token.class_id = "";
-  id_token.properties.length(0);
-  id_token.binary_properties.length(0);
-
-  perm_token.class_id = "";
-  perm_token.properties.length(0);
-  perm_token.binary_properties.length(0);
-
-  property_qos.value.length(0);
-  property_qos.binary_value.length(0);
-
-  security_info.participant_security_attributes = 0;
-  security_info.plugin_participant_security_attributes = 0;
-
-  unsigned char fieldmask = 0x00;
-
-  enum FieldMaskNames {
-    ID_TOKEN_FIELD = 0x01,
-    PERM_TOKEN_FIELD = 0x02,
-    PROPERTY_LIST_FIELD = 0x04,
-    PARTICIPANT_SECURITY_INFO_FIELD = 0x08
-  };
-
-  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD | PERM_TOKEN_FIELD;
-
-  size_t len = param_list.length();
-  for (size_t i = 0; i < len; ++i) {
-    const Parameter& p = param_list[i];
-
-    switch (p._d()) {
-    case DDS::Security::PID_IDENTITY_TOKEN:
-      id_token = p.identity_token();
-      fieldmask |= ID_TOKEN_FIELD;
-      break;
-
-    case DDS::Security::PID_PERMISSIONS_TOKEN:
-      perm_token = p.permissions_token();
-      fieldmask |= PERM_TOKEN_FIELD;
-      break;
-
-    case PID_PROPERTY_LIST:
-      property_qos = p.property();
-      fieldmask |= PROPERTY_LIST_FIELD;
-      break;
-
-    case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
-      security_info = p.participant_security_info();
-      fieldmask |= PARTICIPANT_SECURITY_INFO_FIELD;
-      break;
-
-    default:
-      if (p._d() & PIDMASK_INCOMPATIBLE) {
-        return -1;
-      }
     }
   }
-
-  return ((fieldmask & REQUIRED_FIELDS) == REQUIRED_FIELDS) ? 0 : -1;
+  // Append additional rtps_udp_locators, if any
+  append_locators_if_present(writer_data.writerProxy.allLocators,
+                             rtps_udp_locators);
+  rtps_udp_locators.length(0);
+  return 0;
 }
 
-int from_param_list(const ParameterList& param_list,
-                    DDS::Security::IdentityToken& id_token,
-                    DDS::Security::PermissionsToken& perm_token,
-                    DDS::PropertyQosPolicy& property_qos,
-                    DDS::Security::ParticipantSecurityInfo& security_info,
-                    DDS::Security::IdentityStatusToken& id_status_token)
-{
-
-  id_token.class_id = "";
-  id_token.properties.length(0);
-  id_token.binary_properties.length(0);
-
-  perm_token.class_id = "";
-  perm_token.properties.length(0);
-  perm_token.binary_properties.length(0);
-
-  property_qos.value.length(0);
-  property_qos.binary_value.length(0);
-
-  security_info.participant_security_attributes = 0;
-  security_info.plugin_participant_security_attributes = 0;
-
-  id_status_token.class_id = "";
-  id_status_token.properties.length(0);
-  id_status_token.binary_properties.length(0);
-
-  unsigned char fieldmask = 0x00;
-
-  enum FieldMaskNames {
-    ID_TOKEN_FIELD = 0x01,
-    PERM_TOKEN_FIELD = 0x02,
-    PROPERTY_LIST_FIELD = 0x04,
-    PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
-    IDENTITY_STATUS_TOKEN_FIELD = 0x10
-  };
-
-  const unsigned char REQUIRED_FIELDS = ID_TOKEN_FIELD | PERM_TOKEN_FIELD | PARTICIPANT_SECURITY_INFO_FIELD;
-
-  size_t len = param_list.length();
-  for (size_t i = 0; i < len; ++i) {
-      const Parameter& p = param_list[i];
-
-      switch (p._d()) {
-        case DDS::Security::PID_IDENTITY_TOKEN:
-          id_token = p.identity_token();
-          fieldmask |= ID_TOKEN_FIELD;
-          break;
-
-        case DDS::Security::PID_PERMISSIONS_TOKEN:
-          perm_token = p.permissions_token();
-          fieldmask |= PERM_TOKEN_FIELD;
-          break;
-
-        case PID_PROPERTY_LIST:
-          property_qos = p.property();
-          fieldmask |= PROPERTY_LIST_FIELD;
-          break;
-
-        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
-          security_info = p.participant_security_info();
-          fieldmask |= PARTICIPANT_SECURITY_INFO_FIELD;
-          break;
-
-        case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
-          id_status_token = p.identity_status_token();
-          fieldmask |= IDENTITY_STATUS_TOKEN_FIELD;
-          break;
-
-        default:
-          if (p._d() & PIDMASK_INCOMPATIBLE) {
-              return -1;
-          }
-      }
-  }
-
-  return ((fieldmask & REQUIRED_FIELDS) == REQUIRED_FIELDS) ? 0 : -1;
-}
-
-int to_param_list(const Security::DiscoveredWriterData_SecurityWrapper& wrapper,
-                  ParameterList& param_list,
-                  bool map)
-{
-  int result = to_param_list(wrapper.data, param_list, map);
-
-  to_param_list(wrapper.security_info, param_list);
-  to_param_list(wrapper.data_tags, param_list);
-
-  return result;
-}
+// OpenDDS::DCPS::DiscoveredReaderData
 
 int to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                   ParameterList& param_list,
@@ -1060,307 +1266,6 @@ int to_param_list(const DCPS::DiscoveredReaderData& reader_data,
   return 0;
 }
 
-int to_param_list(const Security::DiscoveredReaderData_SecurityWrapper& wrapper,
-                  ParameterList& param_list,
-                  bool map)
-{
-  int result = to_param_list(wrapper.data, param_list, map);
-
-  to_param_list(wrapper.security_info, param_list);
-  to_param_list(wrapper.data_tags, param_list);
-
-  return result;
-}
-
-int from_param_list(const ParameterList& param_list,
-                    SPDPdiscoveredParticipantData& participant_data)
-{
-  // Track the state of our locators
-  LocatorState du_last_state = locator_undefined;
-  LocatorState mu_last_state = locator_undefined;
-  LocatorState mm_last_state = locator_undefined;
-
-  // Start by setting defaults
-  participant_data.ddsParticipantData.user_data.value.length(0);
-  participant_data.participantProxy.availableBuiltinEndpoints = 0;
-  participant_data.participantProxy.expectsInlineQos = false;
-  participant_data.leaseDuration.seconds = 100;
-  participant_data.leaseDuration.fraction = 0;
-
-  CORBA::ULong length = param_list.length();
-  for (CORBA::ULong i = 0; i < length; ++i) {
-    const Parameter& param = param_list[i];
-    switch (param._d()) {
-      case PID_USER_DATA:
-        participant_data.ddsParticipantData.user_data = param.user_data();
-        break;
-      case PID_PROTOCOL_VERSION:
-        participant_data.participantProxy.protocolVersion = param.version();
-        break;
-      case PID_PARTICIPANT_GUID:
-        ACE_OS::memcpy(participant_data.participantProxy.guidPrefix,
-               param.guid().guidPrefix, sizeof(GuidPrefix_t));
-        break;
-      case PID_VENDORID:
-        ACE_OS::memcpy(participant_data.participantProxy.vendorId.vendorId,
-               param.vendor().vendorId, sizeof(OctetArray2));
-        break;
-      case PID_EXPECTS_INLINE_QOS:
-        participant_data.participantProxy.expectsInlineQos =
-            param.expects_inline_qos();
-        break;
-      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
-        participant_data.participantProxy.availableBuiltinEndpoints =
-            param.participant_builtin_endpoints();
-        break;
-      case PID_BUILTIN_ENDPOINT_SET:
-        // Interoperability note:
-        // OpenSplice uses this in place of PID_PARTICIPANT_BUILTIN_ENDPOINTS
-        // Table 9.13 indicates that PID_PARTICIPANT_BUILTIN_ENDPOINTS should be
-        // used to represent ParticipantProxy::availableBuiltinEndpoints
-        participant_data.participantProxy.availableBuiltinEndpoints =
-            param.builtin_endpoints();
-        break;
-      case PID_METATRAFFIC_UNICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.metatrafficUnicastLocatorList,
-            param.locator());
-        break;
-      case PID_METATRAFFIC_MULTICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.metatrafficMulticastLocatorList,
-            param.locator());
-        break;
-      case PID_DEFAULT_UNICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.defaultUnicastLocatorList,
-            param.locator());
-        break;
-      case PID_DEFAULT_MULTICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.defaultMulticastLocatorList,
-            param.locator());
-        break;
-      case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
-        participant_data.participantProxy.manualLivelinessCount.value =
-            param.count().value;
-        break;
-      case PID_PARTICIPANT_LEASE_DURATION:
-        participant_data.leaseDuration = param.duration();
-        break;
-      case PID_DEFAULT_UNICAST_IPADDRESS:
-        set_ipaddress(
-          participant_data.participantProxy.defaultUnicastLocatorList,
-          du_last_state,
-          param.ipv4_address());
-        break;
-      case PID_METATRAFFIC_UNICAST_IPADDRESS:
-        set_ipaddress(
-          participant_data.participantProxy.metatrafficUnicastLocatorList,
-          mu_last_state,
-          param.ipv4_address());
-        break;
-      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
-        set_ipaddress(
-          participant_data.participantProxy.metatrafficMulticastLocatorList,
-          mm_last_state,
-          param.ipv4_address());
-        break;
-      case PID_DEFAULT_UNICAST_PORT:
-        set_port(participant_data.participantProxy.defaultUnicastLocatorList,
-                 du_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_METATRAFFIC_UNICAST_PORT:
-        set_port(participant_data.participantProxy.metatrafficUnicastLocatorList,
-                 mu_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_METATRAFFIC_MULTICAST_PORT:
-        set_port(participant_data.participantProxy.metatrafficMulticastLocatorList,
-                 mm_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_SENTINEL:
-      case PID_PAD:
-        // ignore
-        break;
-      default:
-        if (param._d() & PIDMASK_INCOMPATIBLE) {
-          return -1;
-        }
-    }
-  }
-  return 0;
-}
-
-int from_param_list(const ParameterList& param_list,
-                    DCPS::DiscoveredWriterData& writer_data)
-{
-  LocatorState last_state = locator_undefined;  // Track state of locator
-  // Collect the rtps_udp locators before appending them to allLocators
-  DCPS::LocatorSeq rtps_udp_locators;
-
-  // Start by setting defaults
-  writer_data.ddsPublicationData.topic_name = "";
-  writer_data.ddsPublicationData.type_name  = "";
-  writer_data.ddsPublicationData.durability =
-      TheServiceParticipant->initial_DurabilityQosPolicy();
-  writer_data.ddsPublicationData.durability_service =
-      TheServiceParticipant->initial_DurabilityServiceQosPolicy();
-  writer_data.ddsPublicationData.deadline =
-      TheServiceParticipant->initial_DeadlineQosPolicy();
-  writer_data.ddsPublicationData.latency_budget =
-      TheServiceParticipant->initial_LatencyBudgetQosPolicy();
-  writer_data.ddsPublicationData.liveliness =
-      TheServiceParticipant->initial_LivelinessQosPolicy();
-  writer_data.ddsPublicationData.reliability =
-      TheServiceParticipant->initial_DataWriterQos().reliability;
-  writer_data.ddsPublicationData.lifespan =
-      TheServiceParticipant->initial_LifespanQosPolicy();
-  writer_data.ddsPublicationData.user_data =
-      TheServiceParticipant->initial_UserDataQosPolicy();
-  writer_data.ddsPublicationData.ownership =
-      TheServiceParticipant->initial_OwnershipQosPolicy();
-#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  writer_data.ddsPublicationData.ownership_strength.value = 0;
-#else
-  writer_data.ddsPublicationData.ownership_strength =
-      TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
-#endif
-  writer_data.ddsPublicationData.destination_order =
-      TheServiceParticipant->initial_DestinationOrderQosPolicy();
-  writer_data.ddsPublicationData.presentation =
-      TheServiceParticipant->initial_PresentationQosPolicy();
-  writer_data.ddsPublicationData.partition =
-      TheServiceParticipant->initial_PartitionQosPolicy();
-  writer_data.ddsPublicationData.topic_data =
-      TheServiceParticipant->initial_TopicDataQosPolicy();
-  writer_data.ddsPublicationData.group_data =
-      TheServiceParticipant->initial_GroupDataQosPolicy();
-  writer_data.writerProxy.unicastLocatorList.length(0);
-  writer_data.writerProxy.multicastLocatorList.length(0);
-
-  CORBA::ULong length = param_list.length();
-  for (CORBA::ULong i = 0; i < length; ++i) {
-    const Parameter& param = param_list[i];
-    switch (param._d()) {
-      case PID_TOPIC_NAME:
-        writer_data.ddsPublicationData.topic_name = param.string_data();
-        break;
-      case PID_TYPE_NAME:
-        writer_data.ddsPublicationData.type_name = param.string_data();
-        break;
-      case PID_DURABILITY:
-        writer_data.ddsPublicationData.durability = param.durability();
-        break;
-      case PID_DURABILITY_SERVICE:
-        writer_data.ddsPublicationData.durability_service =
-             param.durability_service();
-        // Interoperability note: calling normalize() shouldn't be required
-        normalize(writer_data.ddsPublicationData.durability_service.service_cleanup_delay);
-        break;
-      case PID_DEADLINE:
-        writer_data.ddsPublicationData.deadline = param.deadline();
-        // Interoperability note: calling normalize() shouldn't be required
-        normalize(writer_data.ddsPublicationData.deadline.period);
-        break;
-      case PID_LATENCY_BUDGET:
-        writer_data.ddsPublicationData.latency_budget = param.latency_budget();
-        // Interoperability note: calling normalize() shouldn't be required
-        normalize(writer_data.ddsPublicationData.latency_budget.duration);
-        break;
-      case PID_LIVELINESS:
-        writer_data.ddsPublicationData.liveliness = param.liveliness();
-        // Interoperability note: calling normalize() shouldn't be required
-        normalize(writer_data.ddsPublicationData.liveliness.lease_duration);
-        break;
-      case PID_RELIABILITY:
-        writer_data.ddsPublicationData.reliability = param.reliability();
-        // Interoperability note:
-        // Spec creators for RTPS have reliability indexed at 1
-        writer_data.ddsPublicationData.reliability.kind =
-          (DDS::ReliabilityQosPolicyKind)
-              ((int)writer_data.ddsPublicationData.reliability.kind - 1);
-        normalize(writer_data.ddsPublicationData.reliability.max_blocking_time);
-        break;
-      case PID_LIFESPAN:
-        writer_data.ddsPublicationData.lifespan = param.lifespan();
-        // Interoperability note: calling normalize() shouldn't be required
-        normalize(writer_data.ddsPublicationData.lifespan.duration);
-        break;
-      case PID_USER_DATA:
-        writer_data.ddsPublicationData.user_data = param.user_data();
-        break;
-      case PID_OWNERSHIP:
-        writer_data.ddsPublicationData.ownership = param.ownership();
-        break;
-      case PID_OWNERSHIP_STRENGTH:
-        writer_data.ddsPublicationData.ownership_strength = param.ownership_strength();
-        break;
-      case PID_DESTINATION_ORDER:
-        writer_data.ddsPublicationData.destination_order = param.destination_order();
-        break;
-      case PID_PRESENTATION:
-        writer_data.ddsPublicationData.presentation = param.presentation();
-        break;
-      case PID_PARTITION:
-        writer_data.ddsPublicationData.partition = param.partition();
-        break;
-      case PID_TOPIC_DATA:
-        writer_data.ddsPublicationData.topic_data = param.topic_data();
-        break;
-      case PID_GROUP_DATA:
-        writer_data.ddsPublicationData.group_data = param.group_data();
-        break;
-      case PID_ENDPOINT_GUID:
-        writer_data.writerProxy.remoteWriterGuid = param.guid();
-        break;
-      case PID_UNICAST_LOCATOR:
-        append_locator(rtps_udp_locators, param.locator());
-        break;
-      case PID_MULTICAST_LOCATOR:
-        append_locator(rtps_udp_locators, param.locator());
-        break;
-      case PID_MULTICAST_IPADDRESS:
-        set_ipaddress(rtps_udp_locators,
-                      last_state,
-                      param.ipv4_address());
-        break;
-      case PID_OPENDDS_LOCATOR:
-        // Append the rtps_udp_locators, if any, first, to preserve order
-        append_locators_if_present(writer_data.writerProxy.allLocators,
-                                   rtps_udp_locators);
-        rtps_udp_locators.length(0);
-        append_locator(writer_data.writerProxy.allLocators,
-                       param.opendds_locator());
-        break;
-      case PID_SENTINEL:
-      case PID_PAD:
-        // ignore
-        break;
-      default:
-        if (param._d() & PIDMASK_INCOMPATIBLE) {
-          return -1;
-        }
-    }
-  }
-  // Append additional rtps_udp_locators, if any
-  append_locators_if_present(writer_data.writerProxy.allLocators,
-                             rtps_udp_locators);
-  rtps_udp_locators.length(0);
-  return 0;
-}
-
-int from_param_list(const ParameterList& param_list,
-                    Security::DiscoveredWriterData_SecurityWrapper& wrapper)
-{
-  int result = from_param_list(param_list, wrapper.data) ||
-                  from_param_list(param_list, wrapper.security_info, wrapper.data_tags);
-
-  return result;
-}
-
 int from_param_list(const ParameterList& param_list,
                     DCPS::DiscoveredReaderData& reader_data)
 {
@@ -1513,11 +1418,117 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
+// DDS::Security::EndpointSecurityInfo
+
+int to_param_list(const DDS::Security::EndpointSecurityInfo& info,
+                  ParameterList& param_list)
+{
+  Parameter param;
+  param.endpoint_security_info(info);
+  add_param(param_list, param);
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::EndpointSecurityInfo& info)
+{
+  info.endpoint_security_attributes = 0;
+  info.plugin_endpoint_security_attributes = 0;
+
+  size_t len = param_list.length();
+  for (size_t i = 0; i < len; ++i) {
+    const Parameter& p = param_list[i];
+    switch(p._d()) {
+    case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
+      info = p.endpoint_security_info();
+      break;
+    default:
+      if (p._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+// DDS::Security::DataTags& data_tags
+
+int to_param_list(const DDS::Security::DataTags& tags,
+                  ParameterList& param_list)
+{
+  Parameter param;
+  param.data_tags(tags);
+  add_param(param_list, param);
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::DataTags& tags)
+{
+  tags.tags.length(0);
+
+  size_t len = param_list.length();
+  for (size_t i = 0; i < len; ++i) {
+    const Parameter& p = param_list[i];
+    switch(p._d()) {
+    case DDS::Security::PID_DATA_TAGS:
+      tags = p.data_tags();
+      break;
+    default:
+      if (p._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+// OpenDDS::Security::DiscoveredWriterData_SecurityWrapper
+
+int to_param_list(const Security::DiscoveredWriterData_SecurityWrapper& wrapper,
+                  ParameterList& param_list,
+                  bool map)
+{
+  int result = to_param_list(wrapper.data, param_list, map);
+
+  to_param_list(wrapper.security_info, param_list);
+  to_param_list(wrapper.data_tags, param_list);
+
+  return result;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    Security::DiscoveredWriterData_SecurityWrapper& wrapper)
+{
+  int result = from_param_list(param_list, wrapper.data) ||
+               from_param_list(param_list, wrapper.security_info) ||
+               from_param_list(param_list, wrapper.data_tags);
+
+  return result;
+}
+
+// OpenDDS::Security::DiscoveredReaderData_SecurityWrapper
+
+int to_param_list(const Security::DiscoveredReaderData_SecurityWrapper& wrapper,
+                  ParameterList& param_list,
+                  bool map)
+{
+  int result = to_param_list(wrapper.data, param_list, map);
+
+  to_param_list(wrapper.security_info, param_list);
+  to_param_list(wrapper.data_tags, param_list);
+
+  return result;
+}
+
 int from_param_list(const ParameterList& param_list,
                     Security::DiscoveredReaderData_SecurityWrapper& wrapper)
 {
   int result = from_param_list(param_list, wrapper.data) ||
-                  from_param_list(param_list, wrapper.security_info, wrapper.data_tags);
+               from_param_list(param_list, wrapper.security_info) ||
+               from_param_list(param_list, wrapper.data_tags);
 
   return result;
 }

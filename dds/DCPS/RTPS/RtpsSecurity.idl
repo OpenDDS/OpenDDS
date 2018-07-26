@@ -1,0 +1,35 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPEN_SECURITY_CORE_IDL
+#define OPEN_SECURITY_CORE_IDL
+
+#include "dds/DdsSecurityCore.idl"
+#include "dds/DCPS/RTPS/RtpsCore.idl"
+
+module OpenDDS {
+  module Security {
+
+    enum DiscoveredParticipantDataKind {
+      DPDK_NONE,
+      DPDK_ORIGINAL,
+      DPDK_ENHANCED,
+      DPDK_SECURE
+    };
+
+    // top-level data type for SPDP
+    struct SPDPdiscoveredParticipantData {
+      DiscoveredParticipantDataKind dataKind;
+      DDS::Security::ParticipantBuiltinTopicDataSecure ddsParticipantDataSecure;
+      OpenDDS::RTPS::ParticipantProxy_t participantProxy;
+      OpenDDS::RTPS::Duration_t leaseDuration;
+    };
+  };
+};
+
+#endif /* OPEN_SECURITY_CORE_IDL */
+

@@ -12,7 +12,7 @@ using namespace std;
 
 namespace {
 
-  SPDPdiscoveredParticipantData spdp_participant(
+  OpenDDS::RTPS::SPDPdiscoveredParticipantData spdp_participant(
     const void* user_data = NULL,
     CORBA::ULong user_data_len = 0,
     char major_protocol_version = 0,
@@ -34,7 +34,7 @@ namespace {
     unsigned long lease_dur_fraction = 0
   )
   {
-    SPDPdiscoveredParticipantData result;
+    OpenDDS::RTPS::SPDPdiscoveredParticipantData result;
     if (user_data_len && user_data) {
       result.ddsParticipantData.user_data.value.length(user_data_len);
       for (CORBA::ULong i = 0; i < user_data_len; ++i) {
@@ -98,9 +98,9 @@ namespace {
   }
 
   Token token(string classid = "Test-Class-Id",
-                   size_t proplen = 1,
-                   size_t bproplen = 1,
-                   bool propagate = true)
+              size_t proplen = 1,
+              size_t bproplen = 1,
+              bool propagate = true)
   {
     Token t;
 
@@ -167,22 +167,25 @@ namespace {
 
 }
 
-TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_SecurityWrapper_IdentityStatusToken)
+TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
 {
-  SPDPdiscoveredParticipantData_SecurityWrapper w1, w2;
+  OpenDDS::Security::SPDPdiscoveredParticipantData w1, w2;
 
-  w1.data = spdp_participant("Test-Test-Test", 10);
-  w1.identity_status_token = token();
+  OpenDDS::RTPS::SPDPdiscoveredParticipantData temp = spdp_participant("Test-Test-Test", 10);
+
+  w1.dataKind = OpenDDS::Security::DPDK_SECURE;
+  w1.ddsParticipantDataSecure.identity_status_token = token();
+  w1.ddsParticipantDataSecure.base.base = temp.ddsParticipantData;
+  w1.participantProxy = temp.participantProxy;
+  w1.leaseDuration = temp.leaseDuration;
 
   ParameterList p;
   ASSERT_EQ(0, ParameterListConverter::to_param_list(w1, p));
   ASSERT_EQ(0, ParameterListConverter::from_param_list(p, w2));
 
-  ASSERT_EQ(0, strcmp("Property 0", w2.identity_status_token.properties[0].name));
-  ASSERT_EQ(0, strcmp("PropertyValue 0", w2.identity_status_token.properties[0].value));
-  ASSERT_EQ(0, strcmp("BinaryProperty 0", w2.identity_status_token.binary_properties[0].name));
-  ASSERT_EQ(0, memcmp("BinaryPropertyValue 0",  w2.identity_status_token.binary_properties[0].value.get_buffer(),  strlen("BinaryPropertyValue 0")));
-
+  ASSERT_EQ(0, strcmp("Property 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].name));
+  ASSERT_EQ(0, strcmp("PropertyValue 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].value));
+  ASSERT_EQ(0, strcmp("BinaryProperty 0", w2.ddsParticipantDataSecure.identity_status_token.binary_properties[0].name));
+  ASSERT_EQ(0, memcmp("BinaryPropertyValue 0", w2.ddsParticipantDataSecure.identity_status_token.binary_properties[0].value.get_buffer(), strlen("BinaryPropertyValue 0")));
 }
-
 
