@@ -190,15 +190,15 @@ int Governance::load(const SSL::SignedDocument& doc)
     char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
     if (ACE_OS::strcasecmp(attr_lpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = false;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "SIGN") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "ENCRYPT") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
