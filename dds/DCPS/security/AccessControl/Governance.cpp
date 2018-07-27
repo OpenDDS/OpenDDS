@@ -28,20 +28,6 @@ int Governance::load(const SSL::SignedDocument& doc)
   using XML::XStr;
   static const char* gMemBufId = "gov buffer id";
 
-  try
-  {
-    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-  }
-  catch( xercesc::XMLException& e )
-  {
-    char* message = xercesc::XMLString::transcode( e.getMessage() );
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-      "(%P|%t) AccessControlBuiltInImpl::load_governance_file: XML toolkit initialization error: %C.\n"), message));
-    xercesc::XMLString::release( &message );
-    // throw exception here to return ERROR_XERCES_INIT
-    return -1;
-  }
-
   DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
 
   if (!parser) {

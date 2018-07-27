@@ -80,20 +80,6 @@ int Permissions::load(const SSL::SignedDocument& doc)
     return -1;
   }
 
-  try
-  {
-    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-  }
-  catch( xercesc::XMLException& e )
-  {
-    char* message = xercesc::XMLString::transcode( e.getMessage() );
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-      "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: XML toolkit initialization error:  %C.\n"), message));
-    xercesc::XMLString::release( &message );
-    // throw exception here to return ERROR_XERCES_INIT
-    return -1;
-  }
-
   DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
   parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
   parser->setDoNamespaces(true);    // optional
