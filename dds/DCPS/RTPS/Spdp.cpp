@@ -86,6 +86,17 @@ namespace {
     return rhs.class_id == lhs.class_id && rhs.properties == lhs.properties && rhs.binary_properties == lhs.binary_properties;
   }
 
+  void init_participant_sec_attributes(DDS::Security::ParticipantSecurityAttributes& attr)
+  {
+    attr.allow_unauthenticated_participants = false;
+    attr.is_access_protected = false;
+    attr.is_rtps_protected = false;
+    attr.is_discovery_protected = false;
+    attr.is_liveliness_protected = false;
+    attr.plugin_participant_attributes = 0;
+    attr.ac_endpoint_properties.length(0);
+  }
+
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
@@ -204,6 +215,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
         se.code, se.minor_code, se.message.in()));
     throw std::runtime_error("unable to set permissions credential and token");
   }
+
+  init_participant_sec_attributes(participant_sec_attr_);
 
   if (access->get_participant_sec_attributes(permissions_handle_, participant_sec_attr_, se) == false) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
