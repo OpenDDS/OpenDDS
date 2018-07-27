@@ -28,20 +28,6 @@ int Governance::load(const SSL::SignedDocument& doc)
   using XML::XStr;
   static const char* gMemBufId = "gov buffer id";
 
-  try
-  {
-    xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
-  }
-  catch( xercesc::XMLException& e )
-  {
-    char* message = xercesc::XMLString::transcode( e.getMessage() );
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-      "(%P|%t) AccessControlBuiltInImpl::load_governance_file: XML toolkit initialization error: %C.\n"), message));
-    xercesc::XMLString::release( &message );
-    // throw exception here to return ERROR_XERCES_INIT
-    return -1;
-  }
-
   DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
 
   if (!parser) {
@@ -190,15 +176,15 @@ int Governance::load(const SSL::SignedDocument& doc)
     char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
     if (ACE_OS::strcasecmp(attr_lpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = false;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "SIGN") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "ENCRYPT") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_lpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
@@ -212,15 +198,15 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     if (ACE_OS::strcasecmp(attr_rpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = false;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "SIGN") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "ENCRYPT") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
