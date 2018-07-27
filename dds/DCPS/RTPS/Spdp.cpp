@@ -144,6 +144,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   init(domain, guid, qos, disco);
+
+  init_participant_sec_attributes(participant_sec_attr_);
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
