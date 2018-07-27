@@ -76,11 +76,6 @@ namespace SSL {
     /**
      * @return int 0 on success; 1 on failure.
      */
-    int algorithm(std::string& dst) const;
-
-    /**
-     * @return int 0 on success; 1 on failure.
-     */
     int serialize(DDS::OctetSeq& dst) const;
 
     /**
@@ -90,7 +85,9 @@ namespace SSL {
 
     const DDS::OctetSeq& original_bytes() const { return original_bytes_; }
 
-    const char* dsign_algo() const { return "RSASSA-PSS-SHA256"; }
+    const char* dsign_algo() const { return dsign_algo_.c_str(); }
+
+    const char* keypair_algo() const;
 
    private:
 
@@ -98,6 +95,12 @@ namespace SSL {
       return (x_ != NULL) &&
                 (0 < original_bytes_.length());
     }
+
+    /**
+     * @return int 0 on success; 1 on failure.
+     */
+    int cache_dsign_algo();
+
 
     void load_cert_bytes(const std::string& path);
 
@@ -110,6 +113,7 @@ namespace SSL {
 
     X509* x_;
     DDS::OctetSeq original_bytes_;
+    std::string dsign_algo_;
   };
 
   DdsSecurity_Export std::ostream& operator<<(std::ostream&,

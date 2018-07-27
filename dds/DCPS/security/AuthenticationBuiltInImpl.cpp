@@ -157,15 +157,11 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
     pcert.subject_name_to_str(tmp);
     identity_wrapper.add_property("dds.cert.sn", tmp.c_str());
-
-    pcert.algorithm(tmp);
-    identity_wrapper.add_property("dds.cert.algo", tmp.c_str());
+    identity_wrapper.add_property("dds.cert.algo", pcert.keypair_algo());
 
     cacert.subject_name_to_str(tmp);
     identity_wrapper.add_property("dds.ca.sn", tmp.c_str());
-
-    cacert.algorithm(tmp);
-    identity_wrapper.add_property("dds.ca.algo", tmp.c_str());
+    identity_wrapper.add_property("dds.ca.algo", cacert.keypair_algo());
 
     status = true;
 
@@ -371,7 +367,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   message_out.add_bin_property("c.id", local_credential_data.get_participant_cert().original_bytes());
   message_out.add_bin_property("c.perm", local_credential_data.get_access_permissions());
   message_out.add_bin_property("c.pdata", serialized_local_participant_data);
-  message_out.add_bin_property("c.dsign_algo", "RSASSA-PSS-SHA256");
+  message_out.add_bin_property("c.dsign_algo", local_credential_data.get_participant_cert().dsign_algo());
   message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
   message_out.add_bin_property("hash_c1", hash_c1);
 
@@ -739,7 +735,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   message_out.add_bin_property("c.id", local_credential_data.get_participant_cert().original_bytes());
   message_out.add_bin_property("c.perm", local_credential_data.get_access_permissions());
   message_out.add_bin_property("c.pdata", serialized_local_participant_data);
-  message_out.add_bin_property("c.dsign_algo", "RSASSA-PSS-SHA256");
+  message_out.add_bin_property("c.dsign_algo", local_credential_data.get_participant_cert().dsign_algo());
   message_out.add_bin_property("c.kagree_algo", diffie_hellman->kagree_algo());
   message_out.add_bin_property("hash_c2", hash_c2);
 

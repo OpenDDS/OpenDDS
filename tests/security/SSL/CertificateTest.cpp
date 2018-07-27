@@ -77,28 +77,28 @@ public:
   Certificate not_signed_;
 };
 
-TEST_F(CertificateTest, Validate_Success)
+TEST_F(CertificateTest, Validate_RSA_2048_Success)
 {
   ASSERT_EQ(signed_.validate(ca_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, Validate_Data_Success)
+TEST_F(CertificateTest, Validate_RSA_2048_Data_Success)
 {
   ASSERT_EQ(signed_.validate(ca_data_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, Validate_Failure_LoadingWrongKeyType)
+TEST_F(CertificateTest, Validate_RSA_2048_Failure_LoadingWrongKeyType)
 {
   Certificate wrong_key_type("file:../certs/identity/test_participant_01_private_key.pem");
   ASSERT_NE(wrong_key_type.validate(ca_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, Validate_Failure_SelfSigned)
+TEST_F(CertificateTest, Validate_RSA_2048_Failure_SelfSigned)
 {
   ASSERT_NE(not_signed_.validate(ca_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, SubjectNameDigest)
+TEST_F(CertificateTest, SubjectNameDigest_RSA_2048_Success)
 {
   typedef std::vector<unsigned char> hash_vec;
 
@@ -112,16 +112,14 @@ TEST_F(CertificateTest, SubjectNameDigest)
 
 TEST_F(CertificateTest, Algorithm_RSA_2048_Success)
 {
-  std::string algo;
-  ASSERT_EQ(signed_.algorithm(algo), 0 /* success! */);
-  ASSERT_EQ(std::string("RSA-2048"), algo);
+  std::string algorithm(signed_.dsign_algo());
+  ASSERT_EQ(std::string("RSASSA-PSS-SHA256"), algorithm);
 }
 
-TEST_F(CertificateTest, Algorithm_EC_Prime_Success)
+TEST_F(CertificateTest, Algorithm_ECDSA_SHA256_Success)
 {
-    std::string algo;
-    ASSERT_EQ(signed_ec_.algorithm(algo), 0 /* success! */);
-    ASSERT_EQ(std::string("EC-prime256v1"), algo);
+    std::string algorithm(signed_ec_.dsign_algo());
+    ASSERT_EQ(std::string("ECDSA-SHA256"), algorithm);
 }
 
 TEST_F(CertificateTest, SubjectNameToString_Success)
@@ -133,7 +131,7 @@ TEST_F(CertificateTest, SubjectNameToString_Success)
   ASSERT_EQ(name, expected);
 }
 
-TEST_F(CertificateTest, SerializeDeserialize_Success)
+TEST_F(CertificateTest, SerializeDeserialize_RSA_2048_Success)
 {
   DDS::OctetSeq tmp;
   ASSERT_EQ(0, signed_.serialize(tmp));

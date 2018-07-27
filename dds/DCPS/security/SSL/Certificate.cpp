@@ -19,7 +19,7 @@ namespace Security {
 namespace SSL {
   Certificate::Certificate(const std::string& uri,
                            const std::string& password)
-    : x_(NULL), original_bytes_()
+    : x_(NULL), original_bytes_(), dsign_algo_("")
   {
     DDS::Security::SecurityException ex;
     if (! load(ex, uri, password)) {
@@ -28,19 +28,19 @@ namespace SSL {
   }
 
   Certificate::Certificate(const DDS::OctetSeq& src)
-    : x_(NULL), original_bytes_()
+    : x_(NULL), original_bytes_(), dsign_algo_("")
   {
     deserialize(src);
   }
 
   Certificate::Certificate()
-    : x_(NULL), original_bytes_()
+    : x_(NULL), original_bytes_(), dsign_algo_("")
   {
 
   }
 
   Certificate::Certificate(const Certificate& other)
-    : x_(NULL), original_bytes_()
+    : x_(NULL), original_bytes_(), dsign_algo_("")
   {
     if (0 < other.original_bytes_.length()) {
       deserialize(other.original_bytes_);
@@ -104,6 +104,11 @@ namespace SSL {
       return false;
     }
 
+    int err = cache_dsign_algo();
+    if (err) {
+      set_security_error(ex, -1, 0, "SSL::Certificate::load: WARNING: Failed to cache signature algorithm");
+      return false;
+    }
     return true;
   }
 
@@ -314,57 +319,74 @@ namespace SSL {
     return 0;
   }
 
-  int Certificate::algorithm(std::string& dst) const
+  const char* Certificate::keypair_algo() const
   {
-    int result = 1, keylen = 0;
+    // This should probably be pulling the information directly from
+    // the certificate.
+    if (std::string("RSASSA-PSS-SHA256") == dsign_algo_) {
+      return "RSA-2048";
 
-    dst.clear();
+    } else if (std::string("ECDSA-SHA256") == dsign_algo_) {
+      return "EC-prime256v1";
 
-    if (x_) {
-      EVP_PKEY* pkey = X509_get_pubkey(x_);
-      if (pkey) {
-        RSA* rsa = EVP_PKEY_get1_RSA(pkey);
-        if (rsa) {
-          keylen = RSA_bits(rsa);
-          if (keylen == 2048) {
-            dst = "RSA-2048";
-            result = 0;
+    } else {
+      return "UNKNOWN";
+    }
+  }
 
-          } else {
-            ACE_ERROR((LM_WARNING,
-                       ACE_TEXT("(%P|%t) SSL::Certificate::algorithm: WARNING, currently RSA-2048 is the "
-                                "only supported algorithm; "
-                                "received RSA cert with '%i' bits\n"), keylen));
-
-          }
-
-          RSA_free(rsa);
-
-        } else {
-          EC_KEY* eckey = EVP_PKEY_get1_EC_KEY(pkey);
-
-          if (eckey) {
-            dst = "EC-prime256v1";
-            result = 0;
-          } else {
-            ACE_ERROR((LM_WARNING,
-                       ACE_TEXT("(%P|%t) SSL::Certificate::algorithm: WARNING, only RSA-2048 or "
-                                "EC-prime256v1 are currently supported\n")));
-          }
-
-          EC_KEY_free(eckey);
-        }
-
-      } else {
-        ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) SSL::Certificate::algorithm: WARNING, failed to get pubkey from X509 cert\n")));
-
-      }
-
-      EVP_PKEY_free(pkey);
+  struct cache_dsign_algo_impl
+  {
+    cache_dsign_algo_impl() : pkey_(NULL), rsa_(NULL), ec_(NULL) {}
+    ~cache_dsign_algo_impl()
+    {
+      EVP_PKEY_free(pkey_);
+      RSA_free(rsa_);
+      EC_KEY_free(ec_);
     }
 
-    return result;
+    int operator() (X509* cert, std::string& dst)
+    {
+      if (!cert) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) SSL::Certificate::cache_dsign_algo: WARNING, failed to "
+                   "get pubkey from X509 cert\n"));
+        return 1;
+      }
+
+      pkey_ = X509_get_pubkey(cert);
+      if (!pkey_) {
+        OPENDDS_SSL_LOG_ERR("cache_dsign_algo_impl::operator(): x509_get_pubkey failed");
+        return 1;
+      }
+
+      rsa_ = EVP_PKEY_get1_RSA(pkey_);
+      if (rsa_) {
+        dst = "RSASSA-PSS-SHA256";
+        return 0;
+      }
+
+      ec_ = EVP_PKEY_get1_EC_KEY(pkey_);
+      if (ec_) {
+        dst = "ECDSA-SHA256";
+        return 0;
+      }
+
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) SSL::Certificate::cache_dsign_algo: WARNING, only RSASSA-PSS-SHA256 or "
+                 "ECDSA-SHA256 are currently supported signature/verification algorithms\n"));
+
+      return 1;
+    }
+
+  private:
+    EVP_PKEY* pkey_;
+    RSA* rsa_;
+    EC_KEY* ec_;
+  };
+
+  int Certificate::cache_dsign_algo()
+  {
+    return cache_dsign_algo_impl()(x_, dsign_algo_);
   }
 
   void Certificate::load_cert_bytes(const std::string& path)
@@ -502,47 +524,62 @@ namespace SSL {
     return 1;
   }
 
-  int Certificate::deserialize(const DDS::OctetSeq& src)
+  struct deserialize_impl
   {
-    int result = 1;
-
-    if (!x_) {
-      if (src.length() > 0) {
-        BIO* buffer = BIO_new(BIO_s_mem());
-        if (buffer) {
-          int len = BIO_write(buffer, src.get_buffer(), src.length());
-          if (len > 0) {
-            x_ = PEM_read_bio_X509_AUX(buffer, NULL, NULL, NULL);
-
-            if (x_) {
-              original_bytes_ = src;
-              result = 0;
-
-            } else {
-              OPENDDS_SSL_LOG_ERR("failed to read X509 from BIO");
-            }
-
-          } else {
-            OPENDDS_SSL_LOG_ERR("failed to write OctetSeq to BIO");
-          }
-
-          BIO_free(buffer);
-
-        } else {
-          OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
-        }
-
-      } else {
-        ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, source OctetSeq contains no data")));
-      }
-
-    } else {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate has already been loaded\n")));
+    deserialize_impl(const DDS::OctetSeq& src) : src_(src), buffer_(BIO_new(BIO_s_mem())) {}
+    ~deserialize_impl()
+    {
+      BIO_free(buffer_);
     }
 
-    return result;
+    int operator() (X509*& dst)
+    {
+      if (dst) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) SSL::Certificate::deserialize: WARNING, an X509 certificate "
+                   "has already been loaded\n"));
+        return 1;
+      }
+
+      if (0 == src_.length()) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) SSL::Certificate::deserialize: WARNING, source OctetSeq contains no data"));
+        return 1;
+      }
+
+      if (! buffer_) {
+        OPENDDS_SSL_LOG_ERR("failed to allocate buffer with BIO_new");
+        return 1;
+      }
+
+      int len = BIO_write(buffer_, src_.get_buffer(), src_.length());
+      if (len <= 0) {
+        OPENDDS_SSL_LOG_ERR("failed to write OctetSeq to BIO");
+        return 1;
+      }
+
+      dst = PEM_read_bio_X509_AUX(buffer_, NULL, NULL, NULL);
+      if (! dst) {
+        OPENDDS_SSL_LOG_ERR("failed to read X509 from BIO");
+        return 1;
+      }
+
+      return 0;
+    }
+
+  private:
+    const DDS::OctetSeq& src_;
+    BIO* buffer_;
+  };
+
+  int Certificate::deserialize(const DDS::OctetSeq& src)
+  {
+    int err = deserialize_impl(src)(x_) || cache_dsign_algo();
+    if (! err) {
+      original_bytes_ = src;
+    }
+
+    return err;
   }
 
   std::ostream& operator<<(std::ostream& lhs, const Certificate& rhs)
