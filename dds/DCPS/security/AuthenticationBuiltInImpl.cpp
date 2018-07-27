@@ -325,8 +325,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::DDS::OctetSeq & serialized_local_participant_data,
   ::DDS::Security::SecurityException & ex)
 {
-  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
-
   if (serialized_local_participant_data.length() == 0) {
     set_security_error(ex, -1, 0, "No participant data provided");
     return DDS::Security::VALIDATION_FAILED;
@@ -334,7 +332,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
-  HandshakeDataPair handshake_data = get_auth_data_pair(initiator_identity_handle, replier_identity_handle);
+  HandshakeDataPair handshake_data = make_handshake_pair(initiator_identity_handle, replier_identity_handle);
 
   if (! handshake_data.first) {
     set_security_error(ex, -1, 0, "Unknown local participant");
@@ -633,7 +631,7 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
     return Failure;
   }
 
-  HandshakeDataPair handshake_data = get_auth_data_pair(initiator_identity_handle, replier_identity_handle);
+  HandshakeDataPair handshake_data = make_handshake_pair(initiator_identity_handle, replier_identity_handle);
 
   if (! handshake_data.first) {
     set_security_error(ex, -1, 0, "Unknown local participant");
@@ -952,40 +950,40 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   ::DDS::Security::HandshakeHandle handshake_handle,
   ::DDS::Security::SecurityException & ex)
 {
-  ::CORBA::Boolean results = false;
+  ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
 
-  // Cleanup the handshake data from the map
-//  ACE_Guard<ACE_Thread_Mutex> guard(handshake_mutex_);
-//
-//  Handshake_Handle_Data::iterator iHandshake = handshake_data_.find(handshake_handle);
-//  if (iHandshake != handshake_data_.end()) {
-//    handshake_data_.erase(iHandshake);
-//    results = true;
-//
-//  } else {
-//    set_security_error(ex, -1, 0, "Handshake handle not recognized");
-//  }
-  return results;
+  HandshakeDataMap::iterator found = handshake_data_.find(handshake_handle);
+  if (found != handshake_data_.end()) {
+    handshake_data_.erase(found);
+    return true;
+  }
+
+  set_security_error(ex, -1, 0, "Handshake handle not recognized");
+  return false;
 }
 
 ::CORBA::Boolean AuthenticationBuiltInImpl::return_identity_handle(
   ::DDS::Security::IdentityHandle identity_handle,
   ::DDS::Security::SecurityException & ex)
 {
-  ::CORBA::Boolean results = false;
+  ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
 
-  // Cleanup the identity data from the map
-//  ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
-//
-//  Identity_Handle_Data::iterator iData = identity_data_.find(identity_handle);
-//  if (iData != identity_data_.end()) {
-//    identity_data_.erase(iData);
-//    results = true;
-//
-//  } else {
-//    set_security_error(ex, -1, 0, "Identity handle not recognized");
-//  }
-  return results;
+  LocalParticipantMap::iterator local = local_participants_.find(identity_handle);
+  if (local != local_participants_.end()) {
+    local_participants_.erase(local);
+    return true;
+  }
+
+  local = std::find_if(local_participants_.begin(), local_participants_.end(),
+                       local_has_remote_handle(identity_handle));
+
+  if (local != local_participants_.end()) {
+    local->second->validated_remotes.erase(identity_handle);
+    return true;
+  }
+
+  set_security_error(ex, -1, 0, "Identity handle not recognized");
+  return false;
 }
 
 ::CORBA::Boolean AuthenticationBuiltInImpl::return_sharedsecret_handle(
@@ -1205,7 +1203,6 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_final_hands
     return Failure;
   }
 
-  LocalParticipantData& local_data = *(handshake_data.first);
   RemoteParticipantData& remote_data = *(handshake_data.second);
 
   if (remote_data.state != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
@@ -1306,8 +1303,8 @@ AuthenticationBuiltInImpl::get_handshake_data(DDS::Security::HandshakeHandle han
 }
 
 AuthenticationBuiltInImpl::HandshakeDataPair
-AuthenticationBuiltInImpl::get_auth_data_pair(DDS::Security::IdentityHandle h1,
-                                              DDS::Security::IdentityHandle h2)
+AuthenticationBuiltInImpl::make_handshake_pair(DDS::Security::IdentityHandle h1,
+                                               DDS::Security::IdentityHandle h2)
 {
   DDS::Security::IdentityHandle other = DDS::HANDLE_NIL;
 

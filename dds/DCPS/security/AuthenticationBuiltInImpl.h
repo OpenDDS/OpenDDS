@@ -225,11 +225,13 @@ private:
 
   HandshakeDataPair get_handshake_data(DDS::Security::HandshakeHandle handle);
 
-  /// @brief Finds the local and remote data objects associated with h1 and h2.
-  /// This should be used in cases where it's not certain which of the handles is
-  /// local and which is remote, typically when given both initiator and replier handles.
-  HandshakeDataPair get_auth_data_pair(DDS::Security::IdentityHandle h1,
-                                       DDS::Security::IdentityHandle h2);
+  /// @brief Finds the local and remote data objects associated with h1 and h2 and
+  /// creates a new handshake pair with them. It does not matter which handle is local
+  /// and which is remote.
+  /// @param h1 Either a local or remote handle.
+  /// @param h2 Either a local or remote handle.
+  HandshakeDataPair make_handshake_pair(DDS::Security::IdentityHandle h1,
+                                        DDS::Security::IdentityHandle h2);
 
   DDS::Security::ValidationResult_t process_handshake_reply(
     DDS::Security::HandshakeMessageToken & handshake_message_out,
@@ -260,9 +262,21 @@ private:
     {
       return (expected_ == validated.second->participant_guid);
     }
-
   private:
     const OpenDDS::DCPS::GUID_t& expected_;
+  };
+
+  struct local_has_remote_handle
+  {
+    local_has_remote_handle(DDS::Security::IdentityHandle h) : h_(h) {}
+
+    bool operator()(const LocalParticipantMap::value_type& local) const
+    {
+      const RemoteParticipantMap& remotes = local.second->validated_remotes;
+      return remotes.find(h_) != remotes.end();
+    }
+  private:
+    DDS::Security::IdentityHandle h_;
   };
 
   DDS::Security::AuthenticationListener_ptr listener_ptr_;
