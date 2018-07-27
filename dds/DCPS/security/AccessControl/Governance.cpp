@@ -198,15 +198,15 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     if (ACE_OS::strcasecmp(attr_rpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = false;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "SIGN") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "ENCRYPT") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
+    } else if (ACE_OS::strcasecmp(attr_rpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = true;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
       rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
