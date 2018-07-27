@@ -97,6 +97,13 @@ namespace {
     attr.ac_endpoint_properties.length(0);
   }
 
+  GUID_t make_guid(const DCPS::GuidPrefix_t prefix, const DCPS::EntityId_t entity)
+  {
+    GUID_t result;
+    std::memcpy(result.guidPrefix, prefix, sizeof(GuidPrefix_t));
+    std::memcpy(&result.entityId, &entity, sizeof(EntityId_t));
+    return result;
+  }
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
@@ -241,6 +248,9 @@ Spdp::~Spdp()
                  ACE_TEXT("(%P|%t) Spdp::~Spdp ")
                  ACE_TEXT("remove discovered participants\n")));
     }
+
+    write_secure_disposes();
+
     // Iterate through a copy of the repo Ids, rather than the map
     //   as it gets unlocked in remove_discovered_participant()
     DCPS::RepoIdSet participant_ids;
@@ -272,30 +282,37 @@ Spdp::~Spdp()
 }
 
 void
-Spdp::handle_secure_participant_data(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata)
-{
-  ACE_UNUSED_ARG(pdata);
-  // FIXME handle secure participant info
-}
-
-void
-Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
+Spdp::write_secure_updates()
 {
   if (shutdown_flag_.value()) { return; }
 
-  const ACE_Time_Value time = ACE_OS::gettimeofday();
-  OpenDDS::Security::SPDPdiscoveredParticipantData pdata;
-  if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
-      ACE_TEXT("failed to convert from ParameterList to ")
-      ACE_TEXT("SPDPdiscoveredParticipantData\n")));
-    return;
-  }
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  DCPS::RepoId guid;
-  std::memcpy(guid.guidPrefix, pdata.participantProxy.guidPrefix,
-              sizeof(guid.guidPrefix));
-  guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
+  const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata =
+    build_local_pdata(OpenDDS::Security::DPDK_SECURE);
+
+  for (DiscoveredParticipantIter pi = participants_.begin(); pi != participants_.end(); ++pi) {
+    if (pi->second.auth_state_ == DCPS::AS_AUTHENTICATED) {
+      sedp_.write_dcps_participant_secure(pdata, pi->first);
+    }
+  }
+}
+
+void
+Spdp::write_secure_disposes()
+{
+  sedp_.write_dcps_participant_dispose(guid_);
+}
+
+void
+Spdp::handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData& cpdata)
+{
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+
+  // Make a (non-const) copy so we can tweak values below
+  OpenDDS::Security::SPDPdiscoveredParticipantData pdata(cpdata);
+
+  const DCPS::RepoId guid = make_guid(pdata.participantProxy.guidPrefix, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (sedp_.ignoring(guid)) {
@@ -307,12 +324,13 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
 
-  if (data.inlineQos.length() && disposed(data.inlineQos)) {
-    if (iter != participants_.end()) {
-      remove_discovered_participant(iter);
+  if (iter == participants_.end()) {
+
+    // Trying to delete something that doesn't exist is a NOOP
+    if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+      return;
     }
 
-  } else if (iter == participants_.end()) {
     // copy guid prefix (octet[12]) into BIT key (long[3])
     std::memcpy(pdata.ddsParticipantDataSecure.base.base.key.value,
                 pdata.participantProxy.guidPrefix,
@@ -327,7 +345,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     }
 
     // add a new participant
-    participants_[guid] = DiscoveredParticipant(pdata, time);
+    participants_[guid] = DiscoveredParticipant(pdata, now);
     DiscoveredParticipant& dp = participants_[guid];
 
     if (is_security_enabled()) {
@@ -390,6 +408,22 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     }
   } else {
 
+    // Non-secure updates for authenticated participants are used for liveliness but
+    // are otherwise ignored. Non-secure dispose messages are ignored completely.
+    if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED &&
+        pdata.dataKind != OpenDDS::Security::DPDK_SECURE &&
+        id != DCPS::DISPOSE_INSTANCE &&
+        id != DCPS::DISPOSE_UNREGISTER_INSTANCE)
+    {
+      iter->second.last_seen_ = now;
+      return;
+    }
+
+    if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
+      remove_discovered_participant(iter);
+      return;
+    }
+
     // Must unlock when calling into part_bit() as it may call back into us
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
@@ -416,9 +450,27 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     // Participant may have been removed while lock released
     if (iter != participants_.end()) {
       iter->second.pdata_ = pdata;
-      iter->second.last_seen_ = time;
+      iter->second.last_seen_ = now;
     }
   }
+}
+
+void
+Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
+{
+  if (shutdown_flag_.value()) { return; }
+
+  OpenDDS::Security::SPDPdiscoveredParticipantData pdata;
+  if (ParameterListConverter::from_param_list(plist, pdata) < 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
+      ACE_TEXT("failed to convert from ParameterList to ")
+      ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    return;
+  }
+
+  DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
+
+  handle_participant_data(msg_id, pdata);
 }
 
 void
@@ -1075,6 +1127,91 @@ Spdp::is_opendds(const GUID_t& participant) const
                           DCPS::VENDORID_OCI, sizeof(VendorId_t));
 }
 
+OpenDDS::Security::SPDPdiscoveredParticipantData
+Spdp::build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind kind)
+{
+  BuiltinEndpointSet_t availableBuiltinEndpoints =
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
+    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
+    DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
+    DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
+    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
+    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
+    ;
+  if (is_security_enabled()) {
+    availableBuiltinEndpoints |=
+      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
+      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
+      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
+      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
+      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
+      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
+    ;
+  }
+  // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
+
+  // This locator list should not be empty, but we won't actually be using it.
+  // The OpenDDS publication/subscription data will have locators included.
+  OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
+  nonEmptyList.length(1);
+  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
+  nonEmptyList[0].port = 12345;
+  std::memset(nonEmptyList[0].address, 0, 12);
+  nonEmptyList[0].address[12] = 127;
+  nonEmptyList[0].address[13] = 0;
+  nonEmptyList[0].address[14] = 0;
+  nonEmptyList[0].address[15] = 1;
+
+  const GuidPrefix_t& gp = guid_.guidPrefix;
+
+  const OpenDDS::Security::SPDPdiscoveredParticipantData pdata = {
+    kind,
+    { // ParticipantBuiltinTopicDataSecure
+      { // ParticipantBuiltinTopicData (security enhanced)
+        { // ParticipantBuiltinTopicData (original)
+          DDS::BuiltinTopicKey_t() /*ignored*/,
+          qos_.user_data
+        },
+        identity_token_,
+        permissions_token_,
+        qos_.property,
+        {
+          DDS::Security::security_attributes_to_bitmask(participant_sec_attr_),
+          participant_sec_attr_.plugin_participant_attributes
+        }
+      },
+      identity_status_token_
+    },
+    { // ParticipantProxy_t
+      PROTOCOLVERSION,
+      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
+       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
+      VENDORID_OPENDDS,
+      false /*expectsIQoS*/,
+      availableBuiltinEndpoints,
+      sedp_unicast_,
+      sedp_multicast_,
+      nonEmptyList /*defaultMulticastLocatorList*/,
+      nonEmptyList /*defaultUnicastLocatorList*/,
+      {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
+    },
+    { // Duration_t (leaseDuration)
+      static_cast<CORBA::Long>((disco_->resend_period() * LEASE_MULT).sec()),
+      0 // we are not supporting fractional seconds in the lease duration
+    }
+  };
+
+  return pdata;
+}
+
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)
@@ -1288,88 +1425,14 @@ Spdp::SpdpTransport::write()
 void
 Spdp::SpdpTransport::write_i()
 {
-  BuiltinEndpointSet_t availableBuiltinEndpoints =
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
-    DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
-    DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
-    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
-    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
-    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
-    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
-    ;
-  if (outer_->is_security_enabled()) {
-    availableBuiltinEndpoints |=
-      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
-      DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_READER |
-      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER |
-      DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER |
-      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER |
-      DDS::Security::BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER |
-      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER |
-      DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
-    ;
-  }
-  // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
-
-  // This locator list should not be empty, but we won't actually be using it.
-  // The OpenDDS publication/subscription data will have locators included.
-  OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
-  nonEmptyList.length(1);
-  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
-  nonEmptyList[0].port = 12345;
-  std::memset(nonEmptyList[0].address, 0, 12);
-  nonEmptyList[0].address[12] = 127;
-  nonEmptyList[0].address[13] = 0;
-  nonEmptyList[0].address[14] = 0;
-  nonEmptyList[0].address[15] = 1;
+  const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata =
+    outer_->build_local_pdata(outer_->is_security_enabled() ?
+                              OpenDDS::Security::DPDK_ENHANCED :
+                              OpenDDS::Security::DPDK_ORIGINAL);
 
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();
   ++seq_;
-
-  const GuidPrefix_t& gp = outer_->guid_.guidPrefix;
-
-  const OpenDDS::Security::SPDPdiscoveredParticipantData pdata = {
-    (outer_->is_security_enabled() ? OpenDDS::Security::DPDK_ENHANCED : OpenDDS::Security::DPDK_ORIGINAL),
-    { // ParticipantBuiltinTopicDataSecure
-      { // ParticipantBuiltinTopicData (security enhanced)
-        { // ParticipantBuiltinTopicData (original)
-          DDS::BuiltinTopicKey_t() /*ignored*/,
-          outer_->qos_.user_data
-        },
-        outer_->identity_token_,
-        outer_->permissions_token_,
-        outer_->qos_.property,
-        {
-          DDS::Security::security_attributes_to_bitmask(outer_->participant_sec_attr_),
-          outer_->participant_sec_attr_.plugin_participant_attributes
-        }
-      },
-      outer_->identity_status_token_
-    },
-    { // ParticipantProxy_t
-      PROTOCOLVERSION,
-      {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]},
-      VENDORID_OPENDDS,
-      false /*expectsIQoS*/,
-      availableBuiltinEndpoints,
-      outer_->sedp_unicast_,
-      outer_->sedp_multicast_,
-      nonEmptyList /*defaultMulticastLocatorList*/,
-      nonEmptyList /*defaultUnicastLocatorList*/,
-      {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
-    },
-    { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>(lease_duration_.sec()),
-      0 // we are not supporting fractional seconds in the lease duration
-    }
-  };
 
   ParameterList plist;
   if (ParameterListConverter::to_param_list(pdata, plist) < 0) {

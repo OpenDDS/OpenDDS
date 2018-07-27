@@ -94,6 +94,11 @@ public:
   DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                                            const DCPS::RepoId& reader);
 
+  DDS::ReturnCode_t write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData& msg,
+                                                  const DCPS::RepoId& reader);
+
+  DDS::ReturnCode_t write_dcps_participant_dispose(const DCPS::RepoId& part);
+
   // Topic
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
                         OPENDDS_STRING& name);
@@ -282,7 +287,7 @@ private:
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
 
-    DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
+    DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
 
     void end_historic_samples(const DCPS::RepoId& reader);
 
@@ -371,7 +376,7 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> pdata);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wrapper);
@@ -393,7 +398,7 @@ private:
     int svc();
 
     void svc_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
-    void svc_secure_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
+    void svc_secure_i(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
 
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* wrapper);

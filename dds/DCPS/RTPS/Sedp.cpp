@@ -735,7 +735,8 @@ Sedp::associate(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata)
 
   DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> dpd(
     new OpenDDS::Security::SPDPdiscoveredParticipantData(pdata));
-  task_.enqueue(move(dpd));
+
+  task_.enqueue(DCPS::SAMPLE_DATA, move(dpd));
 }
 
 void Sedp::associate_volatile(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata)
@@ -1039,12 +1040,13 @@ Sedp::Task::svc_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* ppdata
 }
 
 void
-Sedp::Task::svc_secure_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* ppdata)
+Sedp::Task::svc_secure_i(DCPS::MessageId id,
+                         const OpenDDS::Security::SPDPdiscoveredParticipantData* ppdata)
 {
   DCPS::unique_ptr<const OpenDDS::Security::SPDPdiscoveredParticipantData> delete_the_data(ppdata);
   const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata = *ppdata;
 
-  spdp_->handle_secure_participant_data(pdata);
+  spdp_->handle_participant_data(id, pdata);
 }
 
 namespace {
@@ -2631,7 +2633,7 @@ Sedp::Writer::write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscove
 
   if (err) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+               ACE_TEXT("(%P|%t) ERROR: Sedp::write_dcps_participant_secure - ")
                ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData ")
                ACE_TEXT("to ParameterList\n")));
 
@@ -2645,12 +2647,12 @@ Sedp::Writer::write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscove
 }
 
 DDS::ReturnCode_t
-Sedp::Writer::write_unregister_dispose(const RepoId& rid)
+Sedp::Writer::write_unregister_dispose(const RepoId& rid, CORBA::UShort pid)
 {
   // Build param list for message
   Parameter param;
   param.guid(rid);
-  param._d(PID_ENDPOINT_GUID);
+  param._d(pid);
   ParameterList plist;
   plist.length(1);
   plist[0] = param;
@@ -2962,7 +2964,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
                    ACE_TEXT("to OpenDDS::Security::SPDPdiscoveredParticipantData\n")));
         return;
       }
-      sedp_.task_.enqueue(move(pdata));
+      sedp_.task_.enqueue(id, move(pdata));
     }
     break;
   }
@@ -3117,6 +3119,24 @@ Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& ms
   static DCPS::SequenceNumber sequence = 0;
   msg.message_identity.sequence_number = static_cast<unsigned long>((++sequence).getValue());
   return participant_volatile_message_secure_writer_.write_volatile_message_secure(msg, reader, sequence);
+}
+
+DDS::ReturnCode_t
+Sedp::write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData& msg,
+                                    const RepoId& reader)
+{
+  static DCPS::SequenceNumber sequence = 0;
+
+  DCPS::RepoId dcps_reader(reader);
+  dcps_reader.entityId = DDS::Security::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
+
+  return dcps_participant_secure_writer_.write_dcps_participant_secure(msg, reader, ++sequence);
+}
+
+DDS::ReturnCode_t
+Sedp::write_dcps_participant_dispose(const RepoId& part)
+{
+  return dcps_participant_secure_writer_.write_unregister_dispose(part, PID_PARTICIPANT_GUID);
 }
 
 DDS::ReturnCode_t
@@ -3327,11 +3347,11 @@ Sedp::acknowledge()
 }
 
 void
-Sedp::Task::enqueue(DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> pdata)
+Sedp::Task::enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> pdata)
 {
   if (spdp_->shutting_down()) { return; }
   Msg::MsgType type = (pdata->dataKind == OpenDDS::Security::DPDK_SECURE) ? Msg::MSG_DCPS_PARTICIPANT_SECURE : Msg::MSG_PARTICIPANT;
-  putq(new Msg(type, DCPS::SAMPLE_DATA, pdata.release()));
+  putq(new Msg(type, id, pdata.release()));
 }
 
 void
@@ -3449,7 +3469,7 @@ Sedp::Task::svc()
       break;
 
     case Msg::MSG_DCPS_PARTICIPANT_SECURE:
-      svc_secure_i(msg->dpdata_);
+      svc_secure_i(msg->id_, msg->dpdata_);
       break;
 
     case Msg::MSG_REMOVE_FROM_PUB_BIT:
