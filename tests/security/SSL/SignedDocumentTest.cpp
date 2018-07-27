@@ -74,7 +74,7 @@ TEST_F(SignedDocumentTest, VerifySignature_Data_Success)
 TEST_F(SignedDocumentTest, LoadFromMemory)
 {
   const char fname[] = "../governance/governance_SC1_ProtectedDomain1_signed.p7s";
-  std::ifstream file(fname);
+  std::ifstream file(fname, std::ifstream::binary);
   std::ostringstream mem;
   mem << file.rdbuf();
   const std::string str = mem.str();
@@ -106,6 +106,3 @@ TEST_F(SignedDocumentTest, CopyConstruct)
   SignedDocument doc(doc_);
   ASSERT_EQ(doc, doc_);
 }
-
-
-
