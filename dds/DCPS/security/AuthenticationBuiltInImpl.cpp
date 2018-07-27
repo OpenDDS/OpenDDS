@@ -151,7 +151,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     const SSL::Certificate& pcert = local_credential_data.get_participant_cert();
     const SSL::Certificate& cacert = local_credential_data.get_ca_cert();
 
-    // TODO: Fix this method it is putting garbage in the respective parameters.
     std::string tmp;
 
     OpenDDS::Security::TokenWriter identity_wrapper(identity_token, "DDS:Auth:PKI-DH:1.0");
@@ -171,7 +170,6 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     status = true;
 
   } else {
-    // No real information on what should be in these security exceptions
     set_security_error(ex, -1, 0, "Unknown Identity handle");
   }
   return status;
