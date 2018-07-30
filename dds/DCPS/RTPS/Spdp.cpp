@@ -1212,6 +1212,13 @@ Spdp::build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind kind)
   return pdata;
 }
 
+bool Spdp::announce_domain_participant_qos()
+{
+  if (is_security_enabled())
+    write_secure_updates();
+  return true;
+}
+
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer, bool securityGuids)
   : outer_(outer), lease_duration_(outer_->disco_->resend_period() * LEASE_MULT)
   , buff_(64 * 1024)

@@ -107,6 +107,7 @@ public:
 protected:
   Sedp& endpoint_manager() { return sedp_; }
   OpenDDS::Security::SPDPdiscoveredParticipantData build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind);
+  bool announce_domain_participant_qos();
 
 private:
 
