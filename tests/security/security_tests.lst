@@ -20,5 +20,6 @@ tests/security/attributes/run_test.pl --scenario SC1_sec_on_success
 tests/security/attributes/run_test.pl --scenario SC2
 tests/security/attributes/run_test.pl --scenario SC3
 tests/security/attributes/run_test.pl --scenario SC4
+tests/security/attributes/run_test.pl --scenario SC5
 tests/security/attributes/run_test.pl --scenario TEST_8_8_5_FAILURE
 tests/security/attributes/run_test.pl --scenario TEST_8_8_5_SUCCESS

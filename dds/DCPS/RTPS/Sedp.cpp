@@ -3050,6 +3050,7 @@ Sedp::write_durable_publication_data(const RepoId& reader)
     write_publication_data(pub->first, pub->second, reader);
   }
   publications_writer_.end_historic_samples(reader);
+  publications_secure_writer_.end_historic_samples(reader);
 }
 
 void
@@ -3070,6 +3071,7 @@ Sedp::write_durable_subscription_data(const RepoId& reader)
     write_subscription_data(sub->first, sub->second, reader);
   }
   subscriptions_writer_.end_historic_samples(reader);
+  subscriptions_secure_writer_.end_historic_samples(reader);
 }
 
 void
@@ -3198,11 +3200,14 @@ Sedp::write_publication_data_secure(
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
-                 ACE_TEXT(" to ParameterList\n")));
+                 ACE_TEXT("to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      result = publications_secure_writer_.write_parameter_list(plist, reader, lp.sequence_);
+      RepoId effective_reader = reader;
+      if (reader != GUID_UNKNOWN)
+        effective_reader.entityId = DDS::Security::ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
+      result = publications_secure_writer_.write_parameter_list(plist, effective_reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
@@ -3286,7 +3291,10 @@ Sedp::write_subscription_data_secure(
       result = DDS::RETCODE_ERROR;
     }
     if (DDS::RETCODE_OK == result) {
-      result = subscriptions_secure_writer_.write_parameter_list(plist, reader, ls.sequence_);
+      RepoId effective_reader = reader;
+      if (reader != GUID_UNKNOWN)
+        effective_reader.entityId = DDS::Security::ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
+      result = subscriptions_secure_writer_.write_parameter_list(plist, effective_reader, ls.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data - ")
