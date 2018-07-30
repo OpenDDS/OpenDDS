@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DiscoveryListener.h"
+#include "dds/DCPS/RcObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -26,7 +27,8 @@ namespace DCPS {
 * @brief Defines the interface for Discovery callbacks into the DataReader.
 *
 */
-class DataReaderCallbacks {
+class DataReaderCallbacks
+  : public virtual RcObject {
 public:
 
   DataReaderCallbacks() {}
@@ -57,9 +59,6 @@ public:
   virtual void unregister_for_writer(const RepoId& /*participant*/,
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/) { }
-
-  virtual void _add_ref() = 0;
-  virtual void _remove_ref() = 0;
 };
 
 } // namespace DCPS

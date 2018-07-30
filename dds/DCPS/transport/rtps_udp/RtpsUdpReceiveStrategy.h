@@ -15,8 +15,8 @@
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
+#include "dds/DCPS/RcEventHandler.h"
 
-#include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
 
 #include <cstring>
@@ -31,7 +31,8 @@ class ReceivedDataSample;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
   : public TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>,
-    public ACE_Event_Handler {
+    public RcEventHandler
+{
 public:
   explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
 

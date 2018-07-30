@@ -15,6 +15,7 @@
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
 #include /**/ "ace/Unbounded_Set.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -37,7 +38,8 @@ typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
  *
  *
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication {
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication
+: public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Publication> {
 public:
   DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
                       DCPS_IR_Participant* participant,

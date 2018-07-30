@@ -10,7 +10,6 @@
 
 #include "Shmem_Export.h"
 
-#include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
 
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"

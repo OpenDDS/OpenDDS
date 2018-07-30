@@ -18,7 +18,6 @@ ACE_INLINE
 TransportRegistry::~TransportRegistry()
 {
   DBG_ENTRY_LVL("TransportRegistry", "~TransportRegistry", 6);
-  release();
 }
 
 ACE_INLINE

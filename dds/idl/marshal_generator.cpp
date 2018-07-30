@@ -1033,7 +1033,7 @@ namespace {
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name;
-    const string indent = (prefix == "uni") ? "      " : "  ";
+    const string indent = (prefix == "uni") ? "    " : "  ";
     if (fld_cls & CL_ENUM) {
       return indent + "find_size_ulong(size, padding);\n";
     } else if (fld_cls & CL_STRING) {
@@ -1059,8 +1059,8 @@ namespace {
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = name;
       if (fld_cls & CL_ARRAY) {
-        intro += indent + getArrayForany(prefix.c_str(), name.c_str(),
-                                         scoped(typedeff->name())) + '\n';
+        intro += "  " + getArrayForany(prefix.c_str(), name.c_str(),
+                                       scoped(typedeff->name())) + '\n';
         fieldref += '_';
         if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
           local.erase(local.size() - 2);
@@ -1687,8 +1687,8 @@ namespace {
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
-                             "", "", cxx);
+      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+                             discriminator, "", "", cxx.c_str());
       be_global->impl_ <<
         "  size += 4; // parameterId & length\n";
     }
@@ -1735,7 +1735,7 @@ namespace {
       insertData.addArg("uni", "const " + cxx + "&");
       insertData.endArgs();
       generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
-                                 "return", "<< ", cxx);
+                             "return", "<< ", cxx.c_str());
     }
     {
       Function extraction("operator>>", "bool");
@@ -1761,8 +1761,8 @@ namespace {
         "  Serializer strm(&param, outer_strm.swap_bytes(), "
         "Serializer::ALIGN_CDR);\n"
         "  switch (disc) {\n";
-      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
-                                 "return", ">> ", cxx, true);
+      generateSwitchBody(streamCommon, branches, discriminator,
+                         "return", ">> ", cxx.c_str(), true);
       be_global->impl_ <<
         "  default:\n"
         "    {\n"
@@ -1787,16 +1787,16 @@ namespace {
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
-                             "", "", cxx);
+      generateSwitchForUnion("uni._d()", findSizeCommon, branches,
+                             discriminator, "", "", cxx.c_str());
     }
     {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
-      generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
-                             "return", "<< ", cxx);
+      generateSwitchForUnion("uni._d()", streamCommon, branches,
+                             discriminator, "return", "<< ", cxx.c_str());
     }
     {
       Function insertion("operator>>", "bool");
@@ -1853,7 +1853,7 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  size += gen_max_marshaled_size(" << wrap_out << ");\n";
     generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
-                           "", "", cxx);
+                           "", "", cxx.c_str());
   }
   {
     Function insertion("operator<<", "bool");
@@ -1862,10 +1862,11 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     insertion.endArgs();
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
-    generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
-                           "return", "<< ", cxx);
-    be_global->impl_ <<
-      "  return true;\n";
+    if (generateSwitchForUnion("uni._d()", streamCommon, branches,
+                               discriminator, "return", "<< ", cxx.c_str())) {
+      be_global->impl_ <<
+        "  return true;\n";
+    }
   }
   {
     Function extraction("operator>>", "bool");
@@ -1875,10 +1876,11 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n" <<
       streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
-    generateSwitchForUnion("disc", streamCommon, branches, discriminator,
-                           "if", ">> ", cxx);
-    be_global->impl_ <<
-      "  return true;\n";
+    if (generateSwitchForUnion("disc", streamCommon, branches,
+                               discriminator, "if", ">> ", cxx.c_str())) {
+      be_global->impl_ <<
+        "  return true;\n";
+    }
   }
   return true;
 }

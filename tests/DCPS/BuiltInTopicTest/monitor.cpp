@@ -224,7 +224,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
           || handles.length () == 0)
         {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant test failed.\n"));
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participants test failed.\n"));
           return 1;
         }
 
@@ -232,7 +232,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (len != num_parts - 1)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  get_discovered_participant expected %d got %d.\n",
+            "(%P|%t) ERROR: monitor: get_discovered_participants expected %d got %d.\n",
             num_parts, len),
             1);
         }
@@ -300,7 +300,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (len != num_parts - !ownEntitiesAreInBIT)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT part data, expected %d parts.\n", len, num_parts),
+          "(%P|%t) monitor: ERROR: read %d BIT part data, expected %d parts.\n", len, num_parts),
           1);
       }
 
@@ -347,7 +347,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (len != num_topics)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  get_discovered_topics expected %d got %d.\n",
+            "(%P|%t) monitor: ERROR: get_discovered_topics expected %d got %d.\n",
             num_topics, len),
             1);
         }
@@ -413,7 +413,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (len != num_topics)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT topic data, expected %d topics.\n", len, num_topics),
+          "(%P|%t) monitor: ERROR: read %d BIT topic data, expected %d topics.\n", len, num_topics),
           1);
       }
 
@@ -423,7 +423,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         if (ACE_OS::strcmp (topicdata[i].name.in (), topic_name) != 0)
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got topic name \"%C\", expected topic name \"%C\"\n",
+            "(%P|%t) monitor: ERROR: got topic name \"%C\", expected topic name \"%C\"\n",
             topicdata[i].name.in (), topic_name),
             1);
         }

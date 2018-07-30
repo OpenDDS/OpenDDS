@@ -25,7 +25,6 @@ namespace DCPS {
 
 ThreadPerConnectionSendTask::ThreadPerConnectionSendTask(DataLink* link)
   : lock_()
-  , queue_(1, 10)
   , work_available_(lock_)
   , shutdown_initiated_(false)
   , opened_(false)

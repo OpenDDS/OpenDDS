@@ -97,15 +97,3 @@ void TAO_DDS_DCPSDataReader_i::update_incompatible_qos (
     }
   received_.received(DiscReceivedCalls::UPDATE_INCOMP_QOS);
 }
-
-void
-TAO_DDS_DCPSDataReader_i::_add_ref()
-{
-  OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>::_add_ref();
-}
-
-void
-TAO_DDS_DCPSDataReader_i::_remove_ref()
-{
-  OpenDDS::DCPS::RcObject<ACE_SYNCH_MUTEX>::_remove_ref();
-}

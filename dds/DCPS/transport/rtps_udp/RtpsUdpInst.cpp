@@ -45,9 +45,9 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
 }
 
 TransportImpl_rch
-RtpsUdpInst::new_impl(const TransportInst_rch& inst)
+RtpsUdpInst::new_impl()
 {
-  return make_rch<RtpsUdpTransport>(inst);
+  return make_rch<RtpsUdpTransport>(ref(*this));
 }
 
 int
@@ -100,7 +100,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 }
 
 OPENDDS_STRING
-RtpsUdpInst::dump_to_str()
+RtpsUdpInst::dump_to_str() const
 {
   OPENDDS_STRING ret;
   // ACE_INET_Addr uses a static buffer for get_host_addr() so we can't

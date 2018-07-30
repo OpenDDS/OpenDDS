@@ -144,15 +144,15 @@ public:
 
   bool is_suspended() const;
 
-  virtual EntityImpl* parent() const;
+  virtual RcHandle<EntityImpl> parent() const;
   static bool validate_datawriter_qos(const DDS::DataWriterQos& qos,
                                          const DDS::DataWriterQos& default_qos,
                                          DDS::Topic_ptr a_topic,
                                          DDS::DataWriterQos& dw_qos);
 private:
-  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataWriterImpl*) DataWriterMap;
+  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataWriterImpl_rch) DataWriterMap;
 
-  typedef OPENDDS_MAP_CMP(PublicationId, DataWriterImpl*, GUID_tKeyLessThan)
+  typedef OPENDDS_MAP_CMP(PublicationId, DataWriterImpl_rch, GUID_tKeyLessThan)
     PublicationMap;
 
   // DataWriter id to qos map.
@@ -171,8 +171,8 @@ private:
   /// Used to notify the entity for relevant events.
   DDS::PublisherListener_var   listener_;
 
-  typedef OPENDDS_SET_CMP(DDS::DataWriter_var, VarLess<DDS::DataWriter>) DataWriterVarSet;
-  DataWriterVarSet writers_not_enabled_;
+  typedef OPENDDS_SET(DataWriterImpl_rch) DataWriterSet;
+  DataWriterSet writers_not_enabled_;
 
   /// This map is used to support datawriter lookup by topic name.
   DataWriterMap                datawriter_map_;
@@ -186,7 +186,7 @@ private:
   /// Domain in which we are contained.
   DDS::DomainId_t              domain_id_;
   /// The DomainParticipant servant that owns this Publisher.
-  DomainParticipantImpl*       participant_;
+  WeakRcHandle<DomainParticipantImpl>       participant_;
   /// The suspend depth count.
   CORBA::Short                 suspend_depth_count_;
   /// Unique sequence number used when the scope_access = GROUP.

@@ -33,7 +33,7 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str();
+  virtual OPENDDS_STRING dump_to_str() const;
 
   /// The address string provided to DCPSInfoRepo for connectors.
   /// This string is either from configuration file or defaults
@@ -116,7 +116,7 @@ private:
   explicit TcpInst(const OPENDDS_STRING& name);
   virtual ~TcpInst();
 
-  TransportImpl_rch new_impl(const TransportInst_rch& inst);
+  TransportImpl_rch new_impl();
 
   /// Describes the local endpoint to be used to accept
   /// passive connections.

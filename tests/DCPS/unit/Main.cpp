@@ -246,7 +246,7 @@ void run_sample_list_test ()
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     sample[i]
-      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), 0, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch());
     list.enqueue_tail(sample[i]);
   }
   TEST_CHECK( list.begin() != list.end() );
@@ -319,8 +319,6 @@ void run_next_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleElement* middle = 0;
 
-  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
-
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder;
@@ -335,7 +333,7 @@ void run_next_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch());
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -411,8 +409,6 @@ void run_next_send_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleElement* middle = 0;
 
-  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
-
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder;
@@ -427,7 +423,7 @@ void run_next_send_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch());
     list.enqueue_tail (sample);
   }
 
@@ -435,7 +431,7 @@ void run_next_send_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch());
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -516,8 +512,6 @@ void run_next_instance_sample_test (ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleElement* middle = 0;
 
-  OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
-
   // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder;
@@ -532,7 +526,7 @@ void run_next_instance_sample_test (ssize_t size)
   {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
-      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch(), &trans_allocator, 0);
+      = new DataSampleElement(repoId, 0, OpenDDS::DCPS::PublicationInstance_rch());
     if (i == pub_id_middle)
     {
       middle = sample;

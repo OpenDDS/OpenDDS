@@ -1,4 +1,4 @@
-/*! \mainpage OpenDDS
+/*! \mainpage %OpenDDS
  *
  * \section intro_sec Introduction
  *
@@ -11,7 +11,21 @@
  *
  * \section ace_tao_sec Built-In ACE/TAO Documentation
  * If this documentation was built using \c generate_combined_doxygen.pl, then
- * you can browse directly: \ref ace_tao_links or through the ACE/TAO
- * references throughout this documentation.
- *
+ * you can browse the \ref ace_tao_links "ACE/TAO documentation directly" or
+ * through the ACE/TAO references throughout this documentation.
+ */
+
+/*
+ * Documentation for namespaces since these namespaces are broken up across
+ * many files.
+ */
+
+/*!
+ * \namespace DDS
+ * \brief The End User API
+ */
+
+/*!
+ * \namespace OpenDDS
+ * \brief The Internal API and Implementation of %OpenDDS
  */

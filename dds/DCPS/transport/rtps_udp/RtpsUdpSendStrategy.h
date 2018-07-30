@@ -23,13 +23,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 class RtpsUdpDataLink;
+class RtpsUdpInst;
 typedef RcHandle<RtpsUdpDataLink> RtpsUdpDataLink_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpSendStrategy
   : public TransportSendStrategy {
 public:
   RtpsUdpSendStrategy(RtpsUdpDataLink* link,
-                      const TransportInst_rch& inst,
                       const GuidPrefix_t& local_prefix);
 
   virtual void stop_i();

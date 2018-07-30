@@ -29,14 +29,14 @@ RtpsCustomizedElement::fragment(size_t size)
     RtpsSampleHeader::split(*msg(), size, head, tail);
 
   RtpsCustomizedElement* frag =
-    RtpsCustomizedElement::alloc(0, move(head), allocator());
+    new RtpsCustomizedElement(0, move(head));
   frag->set_publication_id(publication_id());
   frag->seq_ = sequence();
   frag->set_fragment();
   frag->last_frag_ = fragNumbers.first;
 
   RtpsCustomizedElement* rest =
-    RtpsCustomizedElement::alloc(this, move(tail), allocator());
+    new RtpsCustomizedElement(this, move(tail));
   rest->set_fragment();
   rest->last_frag_ = fragNumbers.second;
 

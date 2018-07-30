@@ -2383,8 +2383,7 @@ Sedp::Endpoint::~Endpoint()
 
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
-  : Endpoint(pub_id, sedp),
-    alloc_(2, sizeof(DCPS::TransportSendElementAllocator))
+  : Endpoint(pub_id, sedp)
 {
   header_.prefix[0] = 'R';
   header_.prefix[1] = 'T';
@@ -2404,6 +2403,11 @@ Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp)
   header_.guidPrefix[9] = pub_id.guidPrefix[9];
   header_.guidPrefix[10] = pub_id.guidPrefix[10];
   header_.guidPrefix[11] = pub_id.guidPrefix[11];
+
+  // The reference count is explicited incremented to avoid been explcitly deleted
+  // via the RcHandle<TransportClient> because the object is always been created
+  // on the stack.
+  RcObject::_add_ref();
 }
 
 Sedp::Writer::~Writer()

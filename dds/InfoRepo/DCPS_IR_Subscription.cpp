@@ -160,10 +160,14 @@ int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+          OpenDDS::DCPS::RepoIdConverter sub_converter(id_);
+          OpenDDS::DCPS::RepoIdConverter pub_converter(pub->get_id());
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DCPS_IR_Subscription::remove_associated_publication:")
-                     ACE_TEXT(" calling sub %d with pub %d\n"),
-                     id_, pub->get_id()));
+                     ACE_TEXT(" calling sub %C with pub %C\n"),
+                     std::string(sub_converter).c_str(),
+                     std::string(pub_converter).c_str()
+                     ));
         }
 
         OpenDDS::DCPS::WriterIdSeq idSeq(5);

@@ -52,9 +52,9 @@ typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink {
 public:
 
-  RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
+  RtpsUdpDataLink(RtpsUdpTransport& transport,
                   const GuidPrefix_t& local_prefix,
-                  const RtpsUdpInst_rch& config,
+                  const RtpsUdpInst& config,
                   const TransportReactorTask_rch& reactor_task);
 
   bool add_delayed_notification(TransportQueueElement* element);
@@ -63,7 +63,7 @@ public:
                         const TransportQueueElement::MatchCriteria& criteria,
                         ACE_Guard<ACE_Thread_Mutex>& guard);
 
-  RtpsUdpInst_rch config() const;
+  RtpsUdpInst& config() const;
 
   ACE_Reactor* get_reactor();
   bool reactor_is_shut_down();
@@ -158,18 +158,17 @@ private:
   friend class ::DDS_TEST;
   /// static member used by testing code to force inline qos
   static bool force_inline_qos_;
-  bool requires_inline_qos(const PublicationId& pub_id);
+  bool requires_inline_qos(const GUIDSeq_var & peers);
 
   typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
   void add_gap_submsg(RTPS::SubmessageSeq& msg,
                       const TransportQueueElement& tqe,
                       const DestToEntityMap& dtem);
 
-  RtpsUdpInst_rch config_;
   TransportReactorTask_rch reactor_task_;
 
-  RtpsUdpSendStrategy_rch send_strategy_;
-  RtpsUdpReceiveStrategy_rch recv_strategy_;
+  RtpsUdpSendStrategy* send_strategy();
+  RtpsUdpReceiveStrategy* receive_strategy();
 
   GuidPrefix_t local_prefix_;
 
@@ -184,8 +183,6 @@ private:
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
-
-  RtpsCustomizedElementAllocator rtps_customized_element_allocator_;
 
   struct MultiSendBuffer : TransportSendBuffer {
 

@@ -22,7 +22,7 @@
 <xsl:variable name="model" select="document(/generator:CodeGen/source/@name)/opendds:OpenDDSModel"/>
 <xsl:variable name="modelname" select="$model/@name"/>
 <xsl:variable name="instances" select="//instance"/>
-<xsl:variable name="tcp-transport-enum" 
+<xsl:variable name="tcp-transport-enum"
             select="'OpenDDS::Model::Transport::Type::tcp'"/>
 <xsl:variable name="multicast-transport-enum"
             select="'OpenDDS::Model::Transport::Type::multicast'"/>
@@ -31,7 +31,7 @@
 
 <!-- process the entire genfile document to produce the C++ code. -->
 <xsl:template match="/">
-  <xsl:value-of select="concat('#include &quot;', $modelname, 'Traits.h&quot;', 
+  <xsl:value-of select="concat('#include &quot;', $modelname, 'Traits.h&quot;',
                                $newline)"/>
   <xsl:text>
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -81,10 +81,10 @@
       '() {', $newline)"/>
   <xsl:variable name="transportInsts" select="//transports/transport"/>
   <xsl:for-each select="$transportInsts">
-    <xsl:variable name="transportinstname" 
+    <xsl:variable name="transportinstname"
                 select="concat($modelname, '_', @name)"/>
     <xsl:variable name="varname" select="concat(@name, '_inst')"/>
-    <xsl:variable name="transport-type" 
+    <xsl:variable name="transport-type"
         select="translate(
                    substring-before(
                        substring-after(@xsi:type, ':'), 'Transport'),
@@ -98,20 +98,20 @@
     </xsl:variable>
     <xsl:value-of select="concat(
         '  OpenDDS::DCPS::TransportInst_rch ', $varname, ' = ', $newline,
-        '      TheTransportRegistry->get_inst(&quot;', $transportinstname, '&quot;);', 
+        '      TheTransportRegistry->get_inst(&quot;', $transportinstname, '&quot;);',
         $newline)"/>
     <xsl:value-of select="concat(
-        '  if (', $varname, '.is_nil()) {', 
+        '  if (', $varname, '.is_nil()) {',
         $newline
     )"/>
     <xsl:value-of select="concat(
-        '    ', $varname, ' = ', 
+        '    ', $varname, ' = ',
         'TheTransportRegistry->create_inst(&quot;', $transportinstname, '&quot;, ',
         '&quot;', $transport-type, '&quot;);', $newline
     )"/>
     <xsl:value-of select="concat(
         '    ', $transport-class, '_rch child_inst =', $newline,
-        '        OpenDDS::DCPS::static_rchandle_cast&lt;', $transport-class, 
+        '        OpenDDS::DCPS::static_rchandle_cast&lt;', $transport-class,
         '&gt;(', $varname, ');', $newline)"/>
     <xsl:apply-templates select="*"/>
     <xsl:text>  }
@@ -123,12 +123,12 @@
 </xsl:text>
   </xsl:if>
   <xsl:for-each select="config">
-    <xsl:variable name="config-name" 
+    <xsl:variable name="config-name"
                 select="concat($modelname, '_', $instname, '_', @name)"/>
     <xsl:variable name="config-varname" select="concat(@name, '_cfg')"/>
     <xsl:value-of select="concat(
         '  OpenDDS::DCPS::TransportConfig_rch ', $config-varname, ' =', $newline,
-        '      TheTransportRegistry->get_config(&quot;', $config-name, 
+        '      TheTransportRegistry->get_config(&quot;', $config-name,
         '&quot;);', $newline
     )"/>
     <xsl:value-of select="concat(
@@ -136,19 +136,19 @@
     )"/>
     <xsl:value-of select="concat(
         '    ', $config-varname,
-        ' = TheTransportRegistry->create_config(&quot;', $config-name, 
+        ' = TheTransportRegistry->create_config(&quot;', $config-name,
         '&quot;);', $newline
     )"/>
     <xsl:for-each select="*[name() != 'transportRef']">
-      <xsl:value-of select="concat('    ', $config-varname, '->', name(), '_ = ', 
+      <xsl:value-of select="concat('    ', $config-varname, '->', name(), '_ = ',
                                    @value, ';', $newline)"/>
     </xsl:for-each>
 
     <xsl:for-each select="transportRef">
       <xsl:variable name="ref-varname" select="concat(
           $transportInsts[@xmi:id = current()/@transport]/@name, '_inst')"/>
-      <xsl:value-of select="concat('    ', $config-varname, 
-                                 '->instances_.push_back(', $ref-varname, 
+      <xsl:value-of select="concat('    ', $config-varname,
+                                 '->instances_.push_back(', $ref-varname,
                                  ');', $newline
       )"/>
     </xsl:for-each>
@@ -180,7 +180,7 @@
 </xsl:template>
 
 <!-- Output general configuration settings -->
-<xsl:template match="queue_messages_per_pool 
+<xsl:template match="queue_messages_per_pool
                    | queue_initial_pools
                    | max_packet_size
                    | max_samples_per_packet
@@ -188,7 +188,7 @@
                    | thread_per_connection
                    | datalink_release_delay
                    | datalink_control_chunks">
-  <xsl:value-of select="concat('    child_inst->', name(), '_ = ', 
+  <xsl:value-of select="concat('    child_inst->', name(), '_ = ',
                                @value, ';', $newline)"/>
 </xsl:template>
 

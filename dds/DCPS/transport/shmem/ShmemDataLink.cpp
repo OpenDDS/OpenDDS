@@ -24,14 +24,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemDataLink::ShmemDataLink(const ShmemTransport_rch& transport)
+ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
   : DataLink(transport,
              0,     // priority
              false, // is_loopback,
              false) // is_active
   , config_(0)
-  , send_strategy_( make_rch<ShmemSendStrategy>(this, transport->config()))
-  , recv_strategy_( make_rch<ShmemReceiveStrategy>(this))
+  , send_strategy_(make_rch<ShmemSendStrategy>(this))
+  , recv_strategy_(make_rch<ShmemReceiveStrategy>(this))
   , peer_alloc_(0)
 {
 }
@@ -110,22 +110,28 @@ ShmemDataLink::stop_i()
   peer_alloc_ = 0;
 }
 
+ShmemTransport&
+ShmemDataLink::impl() const
+{
+  return static_cast<ShmemTransport&>(DataLink::impl());
+}
+
 ShmemAllocator*
 ShmemDataLink::local_allocator()
 {
-  return static_rchandle_cast<ShmemTransport>(impl())->alloc();
+  return impl().alloc();
 }
 
 std::string
 ShmemDataLink::local_address()
 {
-  return static_rchandle_cast<ShmemTransport>(impl())->address();
+  return impl().address();
 }
 
 void
 ShmemDataLink::signal_semaphore()
 {
-  return static_rchandle_cast<ShmemTransport>(impl())->signal_semaphore();
+  return impl().signal_semaphore();
 }
 
 pid_t

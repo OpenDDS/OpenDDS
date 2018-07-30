@@ -13,7 +13,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "TransportDefs.h"
-
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -34,7 +34,8 @@ typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
 class ReaderIdSeq;
 
-class OpenDDS_Dcps_Export TransportSendListener {
+class OpenDDS_Dcps_Export TransportSendListener
+  : public virtual RcObject {
 public:
 
   virtual ~TransportSendListener();
@@ -50,12 +51,8 @@ public:
   virtual void notify_publication_disconnected(const ReaderIdSeq& subids) = 0;
   virtual void notify_publication_reconnected(const ReaderIdSeq& subids) = 0;
   virtual void notify_publication_lost(const ReaderIdSeq& subids) = 0;
-  virtual void notify_connection_deleted(const RepoId& peerId) = 0;
 
   virtual void remove_associations(const ReaderIdSeq& subids, bool notify) = 0;
-
-  virtual void _add_ref() = 0;
-  virtual void _remove_ref() = 0;
 
   /// Hook for the listener to override a normal control message with
   /// customized messages to different DataLinks.

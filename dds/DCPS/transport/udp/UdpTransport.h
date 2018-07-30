@@ -24,15 +24,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 class UdpInst;
-typedef RcHandle<UdpInst> UdpInst_rch;
 
 class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
 public:
-  explicit UdpTransport(const TransportInst_rch& inst);
+  explicit UdpTransport(UdpInst& inst);
 
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const Message_Block_Ptr& data);
-  UdpInst_rch config() const;
+  UdpInst& config() const;
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -42,10 +41,10 @@ protected:
                                               const ConnectionAttribs& attribs,
                                               const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
+  virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id);
 
-  virtual bool configure_i(TransportInst* config);
+  bool configure_i(UdpInst& config);
 
   virtual void shutdown_i();
 

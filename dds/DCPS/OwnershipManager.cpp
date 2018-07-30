@@ -60,13 +60,13 @@ OwnershipManager::instance_lock_release()
   return instance_lock_.release();
 }
 
-void*
+RcHandle<RcObject>
 OwnershipManager::get_instance_map(const char* type_name,
                                    DataReaderImpl* reader)
 {
   InstanceMap* instance = 0;
   if (0 != find(type_instance_map_, type_name, instance)) {
-    return 0;
+    return RcHandle<RcObject>();
   }
 
   instance->readers_.insert(reader);
@@ -75,13 +75,13 @@ OwnershipManager::get_instance_map(const char* type_name,
 
 void
 OwnershipManager::set_instance_map(const char* type_name,
-                                   void* instance_map,
+                                   const RcHandle<RcObject>& instance_map,
                                    DataReaderImpl* reader)
 {
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) OwnershipManager::set_instance_map ")
                ACE_TEXT("instance map %X is created by reader %X \n"),
-               instance_map, reader));
+               instance_map.in(), reader));
   }
 
   if (0 != OpenDDS::DCPS::bind(type_instance_map_, type_name,
@@ -109,9 +109,8 @@ OwnershipManager::unregister_reader(const char* type_name,
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) OwnershipManager::unregister_reader ")
                  ACE_TEXT(" instance map %@ is deleted by reader %@\n"),
-                 instance->map_, reader));
+                 instance->map_.in(), reader));
     }
-    reader->delete_instance_map(instance->map_);
     unbind(type_instance_map_, type_name);
   }
 }

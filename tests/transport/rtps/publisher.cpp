@@ -135,7 +135,6 @@ public:
   void notify_publication_disconnected(const ReaderIdSeq&) {}
   void notify_publication_reconnected(const ReaderIdSeq&) {}
   void notify_publication_lost(const ReaderIdSeq&) {}
-  void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const ReaderIdSeq&, bool) {}
   void _add_ref() {}
   void _remove_ref() {}
@@ -439,10 +438,9 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   // 2b. send sample data through the OpenDDS transport
 
-  TransportSendElementAllocator alloc(2, sizeof(TransportSendElementAllocator));
   DataSampleElement elements[] = {
-    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch(), &alloc, 0),  // Data Sample
-    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch(), &alloc, 0),  // Data Sample (key=99 means end)
+    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch()),  // Data Sample
+    DataSampleElement(local_guid, &sdw, OpenDDS::DCPS::PublicationInstance_rch()),  // Data Sample (key=99 means end)
   };
   SendStateDataSampleList list;
   list.head_ = elements;

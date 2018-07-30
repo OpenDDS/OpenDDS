@@ -15,6 +15,7 @@
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include /**/ "ace/Unbounded_Set.h"
+#include "dds/DCPS/unique_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -37,7 +38,8 @@ class DCPS_IR_Topic;
  *
  *
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Subscription {
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Subscription
+: public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Subscription> {
 public:
   DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
                        DCPS_IR_Participant* participant,

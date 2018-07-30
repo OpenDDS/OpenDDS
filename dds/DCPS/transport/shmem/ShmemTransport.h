@@ -24,18 +24,17 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ShmemInst;
-typedef RcHandle<ShmemInst> ShmemInst_rch;
 
 class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
 public:
-  explicit ShmemTransport(const TransportInst_rch& inst);
+  explicit ShmemTransport(ShmemInst& inst);
 
   // used by our DataLink:
-  ShmemAllocator* alloc() { return alloc_; }
+  ShmemAllocator* alloc() { return alloc_.get(); }
   std::string address();
   void signal_semaphore();
 
-  ShmemInst_rch config() const;
+  ShmemInst& config() const;
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -46,10 +45,10 @@ protected:
                                               const ConnectionAttribs& attribs,
                                               const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
+  virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id);
 
-  virtual bool configure_i(TransportInst* config);
+  bool configure_i(ShmemInst& config);
 
   virtual void shutdown_i();
 
@@ -81,7 +80,7 @@ private:
   typedef OPENDDS_MAP(std::string, ShmemDataLink_rch) ShmemDataLinkMap;
   ShmemDataLinkMap links_;
 
-  ShmemAllocator* alloc_;
+  unique_ptr<ShmemAllocator> alloc_;
 
   struct ReadTask : ACE_Task_Base {
     ReadTask(ShmemTransport* outer, ACE_sema_t semaphore);
@@ -92,7 +91,8 @@ private:
     ACE_sema_t semaphore_;
     bool stopped_;
 
-  }* read_task_;
+  };
+  unique_ptr<ReadTask> read_task_;
 };
 
 } // namespace DCPS

@@ -267,7 +267,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
     have_first_.erase(key);
     VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "removed frag, returning %C\n", data.sample_ ? "true" : "false"));
-    return data.sample_; // could be false if we had data_unavailable()
+    return data.sample_.get(); // could be false if we had data_unavailable()
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "

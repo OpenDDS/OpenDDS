@@ -37,13 +37,16 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // forward declarations
 class DCPS_IR_Topic_Description;
-typedef std::set<DCPS_IR_Topic_Description*> DCPS_IR_Topic_Description_Set;
+typedef std::map<std::string,
+                 OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Topic_Description> > DCPS_IR_Topic_Description_Set;
 
 class DCPS_IR_Participant;
-typedef ACE_Unbounded_Set<DCPS_IR_Participant*> DCPS_IR_Participant_Set;
+typedef OpenDDS::DCPS::RcHandle<DCPS_IR_Participant> DCPS_IR_Participant_rch;
+typedef std::set<DCPS_IR_Participant_rch > DCPS_IR_Participant_Set;
 
-typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Participant*,
-  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Participant_Map;
+typedef std::map<OpenDDS::DCPS::RepoId,
+                 DCPS_IR_Participant_rch ,
+                 OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Participant_Map;
 
 class DCPS_IR_Topic;
 class DCPS_IR_Subscription;
@@ -58,16 +61,16 @@ class DCPS_IR_Publication;
  * representatives of the entities that are in the corresponding
  * system's domain.
  */
-class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain {
+class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
+: public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Domain>{
 public:
   DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator);
 
   ~DCPS_IR_Domain();
 
   /// Add the participant
-  /// This takes ownership of the memory if the particpant is added.
   /// Returns 0 if added, 1 if already exists, -1 other failure
-  int add_participant(DCPS_IR_Participant* participant);
+  int add_participant(DCPS_IR_Participant_rch participant);
 
   /// Remove the particpant
   /// The participant has been deleted if returns successful.
@@ -118,7 +121,7 @@ public:
   /// Mark a participant as being unresponsive (dead) and
   ///  schedule it to be removed next time
   ///  remove_dead_participants is called.
-  void add_dead_participant(DCPS_IR_Participant* participant);
+  void add_dead_participant(DCPS_IR_Participant_rch participant);
 
   /// Remove any participants currently marked as dead
   void remove_dead_participants();
@@ -176,7 +179,7 @@ private:
   /// 1 if description already exists
   /// -1 unknown error
   /// 2 if confliciting dataTypeName
-  int add_topic_description(DCPS_IR_Topic_Description*& desc);
+  int add_topic_description(OpenDDS::DCPS::unique_ptr<DCPS_IR_Topic_Description> desc);
 
   /// Find the topic description with the name and data type name
   /// Does NOT take ownership of any initial memory pointed to by desc
@@ -186,10 +189,8 @@ private:
                              const char* dataTypeName,
                              DCPS_IR_Topic_Description*& desc);
 
-  /// Caller is given ownership of the topic description and any memory
-  ///  that it has ownership of if returns successful
   // Returns 0 if successful
-  int remove_topic_description(DCPS_IR_Topic_Description*& desc);
+  int remove_topic_description(DCPS_IR_Topic_Description* desc);
 
   /// work of initializing the built in topics is
   /// done in these private methods.  They were
@@ -215,8 +216,9 @@ private:
   DCPS_IR_Topic_Description_Set topicDescriptions_;
 
   /// Mapping from RepoId values to Topic object references.
-  typedef std::map<OpenDDS::DCPS::RepoId, DCPS_IR_Topic*,
-    OpenDDS::DCPS::GUID_tKeyLessThan> IdToTopicMap;
+  typedef std::map<OpenDDS::DCPS::RepoId,
+                   OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Topic>,
+                   OpenDDS::DCPS::GUID_tKeyLessThan> IdToTopicMap;
 
   /// Actual mapping of Id values to Topic object references.
   IdToTopicMap idToTopicMap_;
@@ -245,6 +247,9 @@ private:
   DDS::Topic_var                                   bitPublicationTopic_;
   DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+  // MSVC 2017 has trouble to compile std::map<key, std::unique_ptr<Foo> > when it is enclosed
+  // by a DLL exported class whose copy constructor is not explicitly deleted
+  DCPS_IR_Domain(const DCPS_IR_Domain&);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

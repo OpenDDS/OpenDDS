@@ -9,14 +9,15 @@
 #include "TcpSynchResource.h"
 #include "TcpConnection.h"
 #include "TcpSendStrategy.h"
+#include "TcpDataLink.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpSynchResource::TcpSynchResource(
-  const TcpConnection_rch& connection,
+  TcpDataLink& link,
   const int& max_output_pause_period_ms)
-  : ThreadSynchResource(connection->peer().get_handle())
-  , connection_(connection)
+  : ThreadSynchResource()
+  , link_(link)
 {
   DBG_ENTRY_LVL("TcpSynchResource","TcpSynchResource",6);
 
@@ -36,7 +37,8 @@ OpenDDS::DCPS::TcpSynchResource::notify_lost_on_backpressure_timeout()
 {
   DBG_ENTRY_LVL("TcpSynchResource","notify_lost_on_backpressure_timeout",6);
 
-  this->connection_->notify_lost_on_backpressure_timeout();
+  TcpConnection_rch connection = link_.get_connection();
+  connection->notify_lost_on_backpressure_timeout();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

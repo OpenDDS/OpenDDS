@@ -49,10 +49,8 @@ SingleSendBuffer::SingleSendBuffer(size_t capacity,
                                    size_t max_samples_per_packet)
   : TransportSendBuffer(capacity),
     n_chunks_(capacity * max_samples_per_packet),
-    retained_allocator_(this->n_chunks_),
     retained_mb_allocator_(this->n_chunks_ * 2),
     retained_db_allocator_(this->n_chunks_ * 2),
-    replaced_allocator_(this->n_chunks_),
     replaced_mb_allocator_(this->n_chunks_ * 2),
     replaced_db_allocator_(this->n_chunks_ * 2)
 {
@@ -190,7 +188,6 @@ SingleSendBuffer::retain_buffer(const RepoId& pub_id, BufferType& buffer)
   PacketRemoveVisitor visitor(match,
                               buffer.second,
                               buffer.second,
-                              this->replaced_allocator_,
                               this->replaced_mb_allocator_,
                               this->replaced_db_allocator_);
 
@@ -235,10 +232,9 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
 {
   // Copy sample's TransportQueueElements:
   TransportSendStrategy::QueueType*& elems = buffer.first;
-  ACE_NEW(elems, TransportSendStrategy::QueueType(queue->size(), 1));
+  ACE_NEW(elems, TransportSendStrategy::QueueType());
 
   CopyChainVisitor visitor(*elems,
-                           &this->retained_allocator_,
                            &this->retained_mb_allocator_,
                            &this->retained_db_allocator_);
   queue->accept_visitor(visitor);

@@ -62,7 +62,8 @@ private:
   FilterEvaluator filter_eval_;
   DDS::StringSeq expression_parameters_;
   DDS::Topic_var related_topic_;
-  OPENDDS_VECTOR(DataReaderImpl*) readers_;
+  typedef OPENDDS_VECTOR(WeakRcHandle<DataReaderImpl>) Readers;
+  Readers readers_;
 
   /// Concurrent access to expression_parameters_ and readers_
   mutable ACE_Recursive_Thread_Mutex lock_;

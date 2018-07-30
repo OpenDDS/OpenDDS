@@ -31,11 +31,11 @@ bool
     }
 
   OPENDDS_STRING supported;
-  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl_rch)::const_iterator it = tc->impls_.begin(),
+  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl*)::const_iterator it = tc->impls_.begin(),
           end = tc->impls_.end();
           it != end;)
     {
-      supported += (*it)->config()->name();
+      supported += (*it)->config().name();
       if (++it != end)
         {
           supported += ", ";
@@ -47,11 +47,11 @@ bool
              name.c_str(),
              supported.c_str()));
 
-  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl_rch)::const_iterator it = tc->impls_.begin();
+  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl*)::const_iterator it = tc->impls_.begin();
           it != tc->impls_.end(); ++it)
     {
 
-      if ((*it)->config()->name() == name)
+      if ((*it)->config().name() == name)
         {
 //          ACE_ERROR_RETURN((LM_DEBUG,
 //                            ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),
@@ -99,7 +99,7 @@ bool
           end = tc->links_.map().end(); iter != end;)
     {
       const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
-      negotiated += datalink->impl()->config()->name();
+      negotiated += datalink->impl().config().name();
       if (++iter != end)
         {
           negotiated += ", ";
@@ -117,7 +117,7 @@ bool
 
       const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
 
-      if (datalink->impl()->config()->name() == name)
+      if (datalink->impl().config().name() == name)
         {
 //          ACE_ERROR_RETURN((LM_DEBUG,
 //                            ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),

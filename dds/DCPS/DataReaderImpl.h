@@ -32,13 +32,15 @@
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "RcHandle_T.h"
-#include "RcObject_T.h"
+#include "RcObject.h"
 #include "WriterInfo.h"
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
 #include "PoolAllocator.h"
 #include "RemoveAssociationSweeper.h"
 #include "RcEventHandler.h"
+#include "TopicImpl.h"
+#include "DomainParticipantImpl.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -138,7 +140,8 @@ public:
 private:
   ~EndHistoricSamplesMissedSweeper();
 
-  DataReaderImpl* reader_;
+  WeakRcHandle<DataReaderImpl> reader_;
+  OPENDDS_SET(RcHandle<OpenDDS::DCPS::WriterInfo>) info_set_;
 
   class CommandBase : public Command {
   public:
@@ -247,9 +250,6 @@ public:
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
   void writer_removed(WriterInfo& info);
-
-  virtual void _add_ref();
-  virtual void _remove_ref();
 
   virtual void cleanup();
 
@@ -405,7 +405,6 @@ public:
   void notify_subscription_disconnected(const WriterIdSeq& pubids);
   void notify_subscription_reconnected(const WriterIdSeq& pubids);
   void notify_subscription_lost(const WriterIdSeq& pubids);
-  virtual void notify_connection_deleted(const RepoId& peerId);
   void notify_liveliness_change();
 
   bool is_bit() const;
@@ -439,10 +438,30 @@ public:
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   void update_ownership_strength (const PublicationId& pub_id,
                                   const CORBA::Long& ownership_strength);
-  OwnershipManager* ownership_manager() const { return owner_manager_; }
+
+  // Access to OwnershipManager is only valid when the domain participant is valid;
+  // therefore, we must lock the domain pariticipant when using  OwnershipManager.
+  class OwnershipManagerPtr
+  {
+  public:
+    OwnershipManagerPtr(DataReaderImpl* reader)
+      : participant_( reader->is_exclusive_ownership_ ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
+    {
+    }
+    operator bool() const { return participant_.in(); }
+    OwnershipManager* operator->() const
+    {
+      return participant_->ownership_manager();
+    }
+
+  private:
+    RcHandle<DomainParticipantImpl> participant_;
+  };
+  friend class OwnershipManagerPtr;
+
+  OwnershipManagerPtr ownership_manager() { return OwnershipManagerPtr(this); }
 #endif
 
-  virtual void delete_instance_map (void* map) = 0;
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                OpenDDS::DCPS::SubscriptionInstance_rch& instance) = 0;
 
@@ -517,7 +536,7 @@ public:
   // Set the instance related writers to reevaluate the owner.
   void reset_ownership (DDS::InstanceHandle_t instance);
 
-  virtual EntityImpl* parent() const;
+  virtual RcHandle<EntityImpl> parent() const;
 
   void disable_transport();
 
@@ -537,7 +556,7 @@ protected:
 
   void prepare_to_delete();
 
-  SubscriberImpl* get_subscriber_servant();
+  RcHandle<SubscriberImpl> get_subscriber_servant();
 
   void post_read_or_take();
 
@@ -597,7 +616,7 @@ protected:
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
 
-  ReceivedDataAllocator        *rd_allocator_;
+  unique_ptr<ReceivedDataAllocator>  rd_allocator_;
   DDS::DataReaderQos           qos_;
 
   // Status conditions accessible by subclasses.
@@ -610,17 +629,16 @@ protected:
   typedef ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_sample_lock_;
 
-  DomainParticipantImpl*       participant_servant_;
-  TopicImpl*                   topic_servant_;
+  WeakRcHandle<DomainParticipantImpl> participant_servant_;
+  TopicDescriptionPtr<TopicImpl>      topic_servant_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
 
-  OwnershipManager* owner_manager_;
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  DDS::ContentFilteredTopic_var content_filtered_topic_;
+  TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif
 
 
@@ -680,7 +698,11 @@ private:
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
-  SubscriberImpl*              subscriber_servant_;
+  RepoId                       dp_id_;
+  // subscriber_servant_ has to be a weak pinter because it may be used from the
+  // transport reactor thread and that thread doesn't have the owenership of the
+  // the subscriber_servant_ object.
+  WeakRcHandle<SubscriberImpl>              subscriber_servant_;
   RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
   RcHandle<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 
@@ -725,7 +747,7 @@ private:
                     ACE_thread_t owner,
                     DataReaderImpl* data_reader)
       : ReactorInterceptor(reactor, owner)
-      , data_reader_(data_reader)
+      , data_reader_(*data_reader)
       , liveliness_timer_id_(-1)
     { }
 
@@ -749,7 +771,7 @@ private:
   private:
     ~LivelinessTimer() { }
 
-    DataReaderImpl* data_reader_;
+    WeakRcHandle<DataReaderImpl> data_reader_;
 
     /// liveliness timer id; -1 if no timer is set
     long liveliness_timer_id_;
@@ -837,6 +859,8 @@ private:
 
   bool transport_disabled_;
 };
+
+typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;
 
 } // namespace DCPS
 } // namespace OpenDDS

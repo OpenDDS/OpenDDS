@@ -21,20 +21,7 @@ OpenDDS::DCPS::TcpDataLink::remote_address() const
 ACE_INLINE OpenDDS::DCPS::TcpConnection_rch
 OpenDDS::DCPS::TcpDataLink::get_connection()
 {
-  return this->connection_;
-}
-
-ACE_INLINE OpenDDS::DCPS::TcpTransport_rch
-OpenDDS::DCPS::TcpDataLink::get_transport_impl()
-{
-  return this->transport_;
-}
-
-ACE_INLINE
-bool
-OpenDDS::DCPS::TcpDataLink::issues_on_deleted_callback() const
-{
-  return true;
+  return this->connection_.lock();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

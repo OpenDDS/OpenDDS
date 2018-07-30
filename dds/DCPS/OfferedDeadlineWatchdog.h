@@ -45,7 +45,7 @@ public:
   OfferedDeadlineWatchdog(
     lock_type & lock,
     DDS::DeadlineQosPolicy qos,
-    OpenDDS::DCPS::DataWriterImpl * writer_impl,
+    OpenDDS::DCPS::DataWriterImpl & writer_impl,
     DDS::OfferedDeadlineMissedStatus & status,
     CORBA::Long & last_total_count);
 
@@ -61,7 +61,7 @@ public:
    * @c DDS::OfferedDeadlineMissed structure, and calls
    * @c DataWriterListener::on_requested_deadline_missed().
    */
-  void execute(PublicationInstance_rch instance, bool timer_called);
+  void execute(DataWriterImpl& writer, PublicationInstance_rch instance, bool timer_called);
 
   // Schedule timer for the supplied instance.
   void schedule_timer(PublicationInstance_rch instance);
@@ -81,11 +81,7 @@ private:
 
   /// Pointer to the @c DataWriterImpl object from which the
   /// @c DataWriterListener is obtained.
-  OpenDDS::DCPS::DataWriterImpl * const writer_impl_;
-
-  /// Reference to DataWriter passed to listener when the deadline
-  /// expires.
-  DDS::DataWriter_var writer_;
+  WeakRcHandle<DataWriterImpl>  writer_impl_;
 
   /// Reference to the missed requested deadline status
   /// structure.

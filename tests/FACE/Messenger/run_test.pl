@@ -40,4 +40,5 @@ sleep 5;
 
 $test->process('Publisher', 'Publisher/publisher', "$config");
 $test->start_process('Publisher');
+
 exit $test->finish(30);

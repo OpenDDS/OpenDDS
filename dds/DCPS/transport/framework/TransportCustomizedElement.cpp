@@ -33,11 +33,8 @@ TransportCustomizedElement::release_element(bool dropped_by_transport)
     decided = orig_;
   }
 
-  if (allocator_) {
-    OPENDDS_DES_FREE_THIS(allocator_->free, TransportCustomizedElement);
-  } else {
-    delete this;
-  }
+  delete this;
+
   if (decided) {
     decided->decision_made(dropped_by_transport);
   }

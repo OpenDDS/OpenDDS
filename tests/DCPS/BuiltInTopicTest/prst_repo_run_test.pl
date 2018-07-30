@@ -9,14 +9,15 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
+my $status = 0;
 
 my $debug;
 my $transportDebug;
 my $debugFile;
-# $debug = 10;
-# $transportDebug = 10;
+$debug = 8;
+$transportDebug = 0;
 # $debugFile = "debug.out";
 
 my $debugOpts = "";
@@ -25,21 +26,20 @@ $debugOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
 $debugOpts .= "-ORBLogFile $debugFile " if $debugFile and ($debug or $transportDebug);
 
 
-$dcpsrepo_ior = "repo.ior";
-$opts = '';
-$repo_bit_opt = '';
+my $dcpsrepo_ior = "repo.ior";
+my $opts = '';
+my $repo_bit_opt = '';
 
 $opts         .= " " . $debugOpts if $debug or $transportDebug;
 $repo_bit_opt .= " " . $debugOpts if $debug or $transportDebug;
 
-$info_prst_file = "info.pr";
-$num_messages = 60;
-$pub_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
-$pub2_opts = "$opts -DCPSConfigFile pub.ini -n $num_messages";
-$num_messages += 10;
-$sub_opts = "$opts -DCPSConfigFile sub.ini -n $num_messages";
-$SRV_PORT = PerlACE::random_port();
-$synch_file = "monitor1_done";
+my $info_prst_file = "info.pr";
+my $num_messages = 60;
+my $pub_opts = "$opts -n $num_messages";
+my $num_messages += 10;
+my $sub_opts = "$opts -n $num_messages";
+my $SRV_PORT = PerlACE::random_port();
+my $synch_file = "monitor1_done";
 
 unlink $dcpsrepo_ior;
 unlink $info_prst_file;
@@ -49,24 +49,24 @@ unlink $synch_file;
 
 # If InfoRepo is running in persistent mode, use a
 #  static endpoint (instead of transient)
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "$repo_bit_opt -o $dcpsrepo_ior "
-                                    #. "-ORBDebugLevel 10 "
-                                    . "-ORBSvcConf mySvc.conf "
-                                    . "-orbendpoint iiop://:$SRV_PORT");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
-$Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 5");
-$Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
-$Publisher2 = PerlDDS::create_process ("publisher", " $pub_opts");
+my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                        "$repo_bit_opt -o $dcpsrepo_ior "
+                                        #. "-ORBDebugLevel 10 "
+                                        . "-ORBSvcConf mySvc.conf "
+                                        . "-orbendpoint iiop://:$SRV_PORT");
+my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
+my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
+my $Monitor1 = PerlDDS::create_process("monitor", "$opts -l 5");
+my $Monitor2 = PerlDDS::create_process("monitor", "$opts -u");
+my $Publisher2 = PerlDDS::create_process("publisher", $pub_opts);
 
-$data_file = "test_run_prst.data";
-unlink $data_file;
+#$data_file = "test_run_prst.data";
+#unlink $data_file;
 
-open (OLDOUT, ">&STDOUT");
-open (STDOUT, ">$data_file") or die "can't redirect stdout: $!";
-open (OLDERR, ">&STDERR");
-open (STDERR, ">&STDOUT") or die "can't redirect stderror: $!";
+#open (OLDOUT, ">&STDOUT");
+#open (STDOUT, ">$data_file") or die "can't redirect stdout: $!";
+#open (OLDERR, ">&STDERR");
+#open (STDERR, ">&STDOUT") or die "can't redirect stderror: $!";
 
 print "Spawning DCPSInfoRepo.\n";
 
@@ -97,7 +97,7 @@ sleep (15);
 
 print "Killing first DCPSInfoRepo.\n";
 
-$ir = $DCPSREPO->TerminateWaitKill(10);
+my $ir = $DCPSREPO->TerminateWaitKill(10);
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
     $status = 1;
@@ -121,7 +121,7 @@ print "Spawning second monitor.\n";
 print $Monitor2->CommandLine() . "\n";
 $Monitor2->Spawn ();
 
-$MonitorResult = $Monitor1->WaitKill (20);
+my $MonitorResult = $Monitor1->WaitKill (20);
 if ($MonitorResult != 0) {
     print STDERR "ERROR: Monitor1 returned $MonitorResult \n";
     $status = 1;
@@ -139,19 +139,19 @@ $Publisher2->Spawn ();
 
 sleep (5);
 
-$SubscriberResult = $Subscriber->WaitKill (60);
+my $SubscriberResult = $Subscriber->WaitKill (60);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult \n";
     $status = 1;
 }
 
-$PublisherResult = $Publisher->TerminateWaitKill (10);
+my $PublisherResult = $Publisher->TerminateWaitKill (10);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult \n";
     $status = 1;
 }
 
-$Publisher2Result = $Publisher2->TerminateWaitKill (10);
+my $Publisher2Result = $Publisher2->TerminateWaitKill (10);
 if ($Publisher2Result != 0) {
     print STDERR "ERROR: publisher 2 returned $Publisher2Result \n";
     $status = 1;
@@ -163,10 +163,10 @@ if ($ir != 0) {
     $status = 1;
 }
 
-close (STDERR);
-close (STDOUT);
-open (STDOUT, ">&OLDOUT");
-open (STDERR, ">&OLDERR");
+#close (STDERR);
+#close (STDOUT);
+#open (STDOUT, ">&OLDOUT");
+#open (STDERR, ">&OLDERR");
 
 unlink $dcpsrepo_ior;
 #unlink $data_file;

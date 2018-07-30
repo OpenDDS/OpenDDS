@@ -39,6 +39,7 @@
 #include "Util.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
@@ -61,34 +62,28 @@ DataWriterImpl::DataWriterImpl()
     n_chunks_(TheServiceParticipant->n_chunks()),
     association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier()),
     qos_(TheServiceParticipant->initial_DataWriterQos()),
-    participant_servant_(0),
+    db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks())),
     topic_id_(GUID_UNKNOWN),
     topic_servant_(0),
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
-    publisher_servant_(0),
     publication_id_(GUID_UNKNOWN),
     sequence_number_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
     coherent_(false),
     coherent_samples_(0),
-    data_container_(0),
     liveliness_lost_(false),
-    mb_allocator_(0),
-    db_allocator_(0),
-    header_allocator_(0),
     reactor_(0),
     liveliness_check_interval_(ACE_Time_Value::max_time),
     last_liveliness_activity_time_(ACE_Time_Value::zero),
     last_deadline_missed_total_count_(0),
     watchdog_(),
-    cancel_timer_(false),
     is_bit_(false),
     min_suspended_transaction_id_(0),
     max_suspended_transaction_id_(0),
     monitor_(0),
     periodic_monitor_(0),
-    db_lock_pool_(0),
-    liveliness_asserted_(false)
+    liveliness_asserted_(false),
+    liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -112,8 +107,6 @@ DataWriterImpl::DataWriterImpl()
     TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this);
   periodic_monitor_ =
     TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
-
-  db_lock_pool_ = new DataBlockLockPool((unsigned long)n_chunks_);
 }
 
 // This method is called when there are no longer any reference to the
@@ -121,12 +114,6 @@ DataWriterImpl::DataWriterImpl()
 DataWriterImpl::~DataWriterImpl()
 {
   DBG_ENTRY_LVL("DataWriterImpl","~DataWriterImpl",6);
-
-  delete data_container_;
-  delete mb_allocator_;
-  delete db_allocator_;
-  delete header_allocator_;
-  delete db_lock_pool_;
 }
 
 // this method is called when delete_datawriter is called.
@@ -137,41 +124,20 @@ DataWriterImpl::cleanup()
   // back onto the listener at the moment the related DDS entity has been
   // deleted
   set_listener(0, NO_STATUS_MASK);
-
-  // reset the watchdog to deal with the circular references
-  this->watchdog_.reset();
-
-  if (cancel_timer_) {
-    // The cancel_timer will call handle_close to
-    // remove_ref.
-    (void) reactor_->cancel_timer(this, 0);
-    cancel_timer_ = false;
-  }
-
-  // release our Topic_var
-  topic_objref_ = DDS::Topic::_nil();
-  if (topic_servant_) {
-    topic_servant_->remove_entity_ref();
-    topic_servant_->_remove_ref();
-    topic_servant_ = 0;
-  }
+  topic_servant_ = 0;
 }
 
 void
 DataWriterImpl::init(
-  DDS::Topic_ptr                       topic,
   TopicImpl *                          topic_servant,
   const DDS::DataWriterQos &           qos,
   DDS::DataWriterListener_ptr          a_listener,
   const DDS::StatusMask &              mask,
-  OpenDDS::DCPS::DomainParticipantImpl * participant_servant,
+  OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::DomainParticipantImpl> participant_servant,
   OpenDDS::DCPS::PublisherImpl *         publisher_servant)
 {
   DBG_ENTRY_LVL("DataWriterImpl","init",6);
-  topic_objref_ = DDS::Topic::_duplicate(topic);
   topic_servant_ = topic_servant;
-  topic_servant_->_add_ref();
-  topic_servant_->add_entity_ref();
   topic_name_    = topic_servant_->get_name();
   topic_id_      = topic_servant_->get_id();
   type_name_     = topic_servant_->get_type_name();
@@ -192,11 +158,14 @@ DataWriterImpl::init(
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does.
   participant_servant_ = participant_servant;
-  domain_id_ = participant_servant_->get_domain_id();
+
+  RcHandle<DomainParticipantImpl> participant = participant_servant.lock();
+  domain_id_ = participant->get_domain_id();
+  dp_id_ = participant->get_id();
 
   // Only store the publisher pointer, since it is our parent, we will
   // exist as long as it does.
-  publisher_servant_ = publisher_servant;
+  publisher_servant_ = *publisher_servant;
 
   this->reactor_ = TheServiceParticipant->timer();
 }
@@ -204,13 +173,21 @@ DataWriterImpl::init(
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
-  return this->participant_servant_->id_to_handle(publication_id_);
+  using namespace OpenDDS::DCPS;
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (participant)
+    return participant->id_to_handle(publication_id_);
+  return 0;
 }
 
 DDS::InstanceHandle_t
 DataWriterImpl::get_next_handle()
 {
-  return this->participant_servant_->id_to_handle(GUID_UNKNOWN);
+  using namespace OpenDDS::DCPS;
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (participant)
+    return participant->id_to_handle(GUID_UNKNOWN);
+  return 0;
 }
 
 void
@@ -351,7 +328,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
                  OPENDDS_STRING(conv).c_str()));
     }
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->association_complete(domain_id_, participant_servant_->get_id(),
+    disco->association_complete(domain_id_, dp_id_,
                                 publication_id_, remote_id);
   }
 }
@@ -359,17 +336,21 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
                                        const char* filter,
                                        const DDS::StringSeq& params,
-                                       DomainParticipantImpl* participant,
+                                       WeakRcHandle<DomainParticipantImpl> participant,
                                        bool durable)
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   : participant_(participant)
   , filter_class_name_(filterClassName)
   , filter_(filter)
   , expression_params_(params)
-  , eval_(*filter ? participant->get_filter_eval(filter) : RcHandle<FilterEvaluator>())
   , expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
-{}
+{
+  RcHandle<DomainParticipantImpl> part = participant_.lock();
+  if (part && *filter) {
+    eval_ = part->get_filter_eval(filter);
+  }
+}
 #else
   : expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
@@ -385,9 +366,9 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   eval_ = RcHandle<FilterEvaluator>();
-
-  if (!filter_.empty()) {
-    participant_->deref_filter_eval(filter_.c_str());
+  RcHandle<DomainParticipantImpl> participant = participant_.lock();
+  if (participant && !filter_.empty()) {
+    participant->deref_filter_eval(filter_.c_str());
   }
 
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -485,23 +466,22 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
   if (!is_bit_) {
 
+    RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+
+    if (!participant)
+      return;
+
     DDS::InstanceHandle_t handle =
-      this->participant_servant_->id_to_handle(remote_id);
+      participant->id_to_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-      // update the publication_match_status_
-      ++publication_match_status_.total_count;
-      ++publication_match_status_.total_count_change;
-      ++publication_match_status_.current_count;
-      ++publication_match_status_.current_count_change;
-
       if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
         GuidConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
+                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
                    OPENDDS_STRING(converter).c_str(),
                    handle));
@@ -516,8 +496,11 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
                    handle));
       }
 
+      ++publication_match_status_.total_count;
+      ++publication_match_status_.total_count_change;
+      ++publication_match_status_.current_count;
+      ++publication_match_status_.current_count_change;
       publication_match_status_.last_subscription_handle = handle;
-
       set_status_changed_flag(DDS::PUBLICATION_MATCHED_STATUS, true);
     }
 
@@ -576,7 +559,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       }
     }
 
-    if (this->publisher_servant_->is_suspended()) {
+    RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+    if (!publisher || publisher->is_suspended()) {
       this->available_data_list_.enqueue_tail(list);
 
     } else {
@@ -900,14 +884,18 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
     } else {
       Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
       DDS::PublisherQos publisherQos;
-      this->publisher_servant_->get_qos(publisherQos);
-      const bool status
-        = disco->update_publication_qos(this->participant_servant_->get_domain_id(),
-                                        this->participant_servant_->get_id(),
-                                        this->publication_id_,
-                                        qos,
-                                        publisherQos);
+      RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
 
+      bool status = false;
+      if (publisher) {
+        publisher->get_qos(publisherQos);
+        status
+          = disco->update_publication_qos(domain_id_,
+                                          dp_id_,
+                                          this->publication_id_,
+                                          qos,
+                                          publisherQos);
+      }
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
@@ -925,7 +913,7 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
           this->watchdog_= make_rch<OfferedDeadlineWatchdog>(
                                ref(this->lock_),
                                qos.deadline,
-                               this,
+                               ref(*this),
                                ref(this->offered_deadline_missed_status_),
                                ref(this->last_deadline_missed_total_count_));
 
@@ -976,7 +964,7 @@ DataWriterImpl::get_listener()
 DDS::Topic_ptr
 DataWriterImpl::get_topic()
 {
-  return DDS::Topic::_duplicate(topic_objref_.in());
+  return DDS::Topic::_duplicate(topic_servant_.get());
 }
 
 bool
@@ -1076,7 +1064,7 @@ DataWriterImpl::wait_for_specific_ack(const AckToken& token)
 DDS::Publisher_ptr
 DataWriterImpl::get_publisher()
 {
-  return DDS::Publisher::_duplicate(publisher_servant_);
+  return publisher_servant_.lock()._retn();
 }
 
 DDS::ReturnCode_t
@@ -1156,7 +1144,12 @@ DataWriterImpl::assert_liveliness()
     // Do nothing.
     break;
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
-    return participant_servant_->assert_liveliness();
+    {
+      RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+      if (participant)
+        return participant->assert_liveliness();
+      return DDS::RETCODE_OK;
+    }
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
     if (this->send_liveliness(ACE_OS::gettimeofday()) == false) {
       return DDS::RETCODE_ERROR;
@@ -1245,18 +1238,18 @@ DataWriterImpl::get_matched_subscription_data(
                       ACE_TEXT("Entity is not enabled. \n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
 
-  BIT_Helper_1 < DDS::SubscriptionBuiltinTopicDataDataReader,
-               DDS::SubscriptionBuiltinTopicDataDataReader_var,
-               DDS::SubscriptionBuiltinTopicDataSeq > hh;
-
+  DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
   DDS::SubscriptionBuiltinTopicDataSeq data;
 
-  DDS::ReturnCode_t ret =
-    hh.instance_handle_to_bit_data(participant_servant_,
-                                   BUILT_IN_SUBSCRIPTION_TOPIC,
-                                   subscription_handle,
-                                   data);
+  if (participant) {
+    ret = instance_handle_to_bit_data<DDS::SubscriptionBuiltinTopicDataDataReader_var>(
+            participant.in(),
+            BUILT_IN_SUBSCRIPTION_TOPIC,
+            subscription_handle,
+            data);
+  }
 
   if (ret == DDS::RETCODE_OK) {
     subscription_data = data[0];
@@ -1279,7 +1272,8 @@ DataWriterImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  if (!this->publisher_servant_->is_enabled()) {
+  RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+  if (!publisher || !publisher->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -1330,7 +1324,7 @@ DataWriterImpl::enable()
 
   //Note: the QoS used to set n_chunks_ is Changable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ = new WriteDataContainer(this,
+  data_container_ .reset(new WriteDataContainer(this,
                                            max_samples_per_instance,
                                            history_depth,
                                            max_durable_per_instance,
@@ -1344,31 +1338,31 @@ DataWriterImpl::enable()
                                            qos_.durability_service,
 #endif
                                            max_instances,
-                                           max_total_samples);
+                                           max_total_samples));
 
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
-  mb_allocator_ = new MessageBlockAllocator(n_chunks_ * association_chunk_multiplier_);
-  db_allocator_ = new DataBlockAllocator(n_chunks_+1);
-  header_allocator_ = new DataSampleHeaderAllocator(n_chunks_+1);
+  mb_allocator_.reset(new MessageBlockAllocator(n_chunks_ * association_chunk_multiplier_));
+  db_allocator_.reset(new DataBlockAllocator(n_chunks_+1));
+  header_allocator_.reset(new DataSampleHeaderAllocator(n_chunks_+1));
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-mb"
                " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               mb_allocator_,
+               mb_allocator_.get(),
                n_chunks_));
 
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-db"
                " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               db_allocator_,
+               db_allocator_.get(),
                n_chunks_));
 
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-header"
                " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               header_allocator_,
+               header_allocator_.get(),
                n_chunks_));
   }
 
@@ -1381,7 +1375,7 @@ DataWriterImpl::enable()
       liveliness_check_interval_ = ACE_Time_Value (0, 1);
     }
 
-    if (reactor_->schedule_timer(this,
+    if (reactor_->schedule_timer(liveness_timer_.in(),
                                  0,
                                  liveliness_check_interval_,
                                  liveliness_check_interval_) == -1) {
@@ -1389,12 +1383,14 @@ DataWriterImpl::enable()
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: %p.\n"),
                  ACE_TEXT("schedule_timer")));
 
-    } else {
-      cancel_timer_ = true;
     }
   }
 
-  participant_servant_->add_adjust_liveliness_timers(this);
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (!participant)
+    return DDS::RETCODE_ERROR;
+
+  participant->add_adjust_liveliness_timers(this);
 
   // Setup the offered deadline watchdog if the configured deadline
   // period is not the default (infinite).
@@ -1405,7 +1401,7 @@ DataWriterImpl::enable()
     this->watchdog_ = make_rch<OfferedDeadlineWatchdog>(
                            ref(this->lock_),
                            this->qos_.deadline,
-                           this,
+                           ref(*this),
                            ref(this->offered_deadline_missed_status_),
                            ref(this->last_deadline_missed_total_count_));
   }
@@ -1430,19 +1426,21 @@ DataWriterImpl::enable()
   const TransportLocatorSeq& trans_conf_info = connection_info();
 
   DDS::PublisherQos pub_qos;
-  this->publisher_servant_->get_qos(pub_qos);
+
+  publisher->get_qos(pub_qos);
 
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
-                           this->participant_servant_->get_id(),
+                           this->dp_id_,
                            this->topic_servant_->get_id(),
                            this,
                            this->qos_,
                            trans_conf_info,
                            pub_qos);
 
-  if (this->publication_id_ == GUID_UNKNOWN) {
-    ACE_ERROR((LM_WARNING,
+
+  if (!publisher || this->publication_id_ == GUID_UNKNOWN) {
+    ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
                ACE_TEXT("add_publication returned invalid id. \n")));
     data_container_->shutdown_ = true;
@@ -1452,7 +1450,7 @@ DataWriterImpl::enable()
   this->data_container_->publication_id_ = this->publication_id_;
 
   const DDS::ReturnCode_t writer_enabled_result =
-    publisher_servant_->writer_enabled(topic_name_.in(), this);
+    publisher->writer_enabled(topic_name_.in(), this);
 
   if (this->monitor_) {
     this->monitor_->report();
@@ -1468,8 +1466,8 @@ DataWriterImpl::enable()
                                     this->topic_name_,
                                     get_type_name(),
                                     this,
-                                    this->mb_allocator_,
-                                    this->db_allocator_,
+                                    this->mb_allocator_.get(),
+                                    this->db_allocator_.get(),
                                     this->qos_.lifespan)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
@@ -1804,7 +1802,8 @@ DataWriterImpl::write(Message_Block_Ptr data,
 
   ACE_UINT64 transaction_id = this->get_unsent_data(list);
 
-  if (this->publisher_servant_->is_suspended()) {
+  RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+  if (!publisher || publisher->is_suspended()) {
     if (min_suspended_transaction_id_ == 0) {
       //provides transaction id for lower bound of suspended transactions
       //or transaction id for single suspended write transaction
@@ -1947,12 +1946,6 @@ DataWriterImpl::num_samples(DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_all()
 {
-  if (cancel_timer_) {
-    // The cancel_timer will call handle_close to remove_ref.
-    (void) reactor_->cancel_timer(this, 0);
-    cancel_timer_ = false;
-  }
-
   data_container_->unregister_all();
 }
 
@@ -1965,7 +1958,7 @@ DataWriterImpl::get_publication_id()
 RepoId
 DataWriterImpl::get_dp_id()
 {
-  return participant_servant_->get_id();
+  return dp_id_;
 }
 
 char const *
@@ -1994,7 +1987,13 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   header_data.publication_id_ = publication_id_;
-  header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
+
+  RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+  if (!publisher) {
+    return 0;
+  }
+
+  header_data.publisher_id_ = publisher->publisher_id_;
 
   if (message_id == INSTANCE_REGISTRATION
       || message_id == DISPOSE_INSTANCE
@@ -2031,8 +2030,8 @@ DataWriterImpl::create_control_message(MessageId message_id,
                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                           ACE_Time_Value::zero,
                           ACE_Time_Value::max_time,
-                          db_allocator_,
-                          mb_allocator_),
+                          db_allocator_.get(),
+                          mb_allocator_.get()),
                         0);
 
   *message << header_data;
@@ -2081,9 +2080,15 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = this->coherent_;
+
+  RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+
+  if (!publisher)
+    return DDS::RETCODE_ERROR;
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   header_data.group_coherent_ =
-    this->publisher_servant_->qos_.presentation.access_scope
+    publisher->qos_.presentation.access_scope
     == DDS::GROUP_PRESENTATION_QOS;
 #endif
   header_data.content_filter_ = content_filter;
@@ -2110,7 +2115,7 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
   }
 
   header_data.publication_id_ = publication_id_;
-  header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
+  header_data.publisher_id_ = publisher->publisher_id_;
   size_t max_marshaled_size = header_data.max_marshaled_size();
 
   ACE_Message_Block* tmp_message;
@@ -2121,13 +2126,13 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
                                           ACE_Message_Block::MB_DATA,
                                           data.release(), //cont
                                           0, //data
-                                          header_allocator_, //alloc_strategy
+                                          header_allocator_.get(), //alloc_strategy
                                           get_db_lock(), //locking_strategy
                                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                           ACE_Time_Value::zero,
                                           ACE_Time_Value::max_time,
-                                          db_allocator_,
-                                          mb_allocator_),
+                                          db_allocator_.get(),
+                                          mb_allocator_.get()),
                         DDS::RETCODE_ERROR);
   message.reset(tmp_message);
   *message << header_data;
@@ -2171,10 +2176,10 @@ DataWriterImpl::control_delivered(const Message_Block_Ptr&)
   controlTracker.message_delivered();
 }
 
-EntityImpl*
+RcHandle<EntityImpl>
 DataWriterImpl::parent() const
 {
-  return this->publisher_servant_;
+  return this->publisher_servant_.lock();
 }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -2247,11 +2252,16 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   CoherentChangeControl end_msg;
   end_msg.coherent_samples_.num_samples_ = this->coherent_samples_;
   end_msg.coherent_samples_.last_sample_ = this->sequence_number_;
-  end_msg.group_coherent_
-    = this->publisher_servant_->qos_.presentation.access_scope == DDS::GROUP_PRESENTATION_QOS;
 
-  if (end_msg.group_coherent_) {
-    end_msg.publisher_id_ = this->publisher_servant_->publisher_id_;
+  RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+
+  if (publisher) {
+    end_msg.group_coherent_
+      = publisher->qos_.presentation.access_scope == DDS::GROUP_PRESENTATION_QOS;
+  }
+
+  if (publisher && end_msg.group_coherent_) {
+    end_msg.publisher_id_ = publisher->publisher_id_;
     end_msg.group_coherent_samples_ = group_samples;
   }
 
@@ -2317,8 +2327,12 @@ DataWriterImpl::listener_for(DDS::StatusKind kind)
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
+  RcHandle<PublisherImpl> publisher = publisher_servant_.lock();
+  if (!publisher)
+    return 0;
+
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    return publisher_servant_->listener_for(kind);
+    return publisher->listener_for(kind);
 
   } else {
     return DDS::DataWriterListener::_duplicate(listener_.in());
@@ -2357,12 +2371,12 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
   }
   else {
     // Reschedule.
-    if (reactor_->cancel_timer(this) == -1) {
+    if (reactor_->cancel_timer(liveness_timer_.in()) == -1) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::handle_timeout: %p.\n"),
         ACE_TEXT("cancel_timer")));
     }
-    if (reactor_->schedule_timer(this, 0, liveliness_check_interval_ - elapsed,
+    if (reactor_->schedule_timer(liveness_timer_.in(), 0, liveliness_check_interval_ - elapsed,
       liveliness_check_interval_) == -1)
     {
       ACE_ERROR((LM_ERROR,
@@ -2394,12 +2408,6 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
   }
 
   this->liveliness_lost_ = liveliness_lost;
-  return 0;
-}
-
-int
-DataWriterImpl::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
-{
   return 0;
 }
 
@@ -2545,26 +2553,16 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
   }
 }
 
-void
-DataWriterImpl::notify_connection_deleted(const RepoId& peerId)
-{
-  DBG_ENTRY_LVL("DataWriterImpl","notify_connection_deleted",6);
-  on_notification_of_connection_deletion(peerId);
-  // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-  // is given to this DataWriter then narrow() fails.
-  DataWriterListener_var the_listener =
-    DataWriterListener::_narrow(this->listener_.in());
-
-  if (!CORBA::is_nil(the_listener.in())) {
-    the_listener->on_connection_deleted(this);
-  }
-}
 
 void
 DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
                                         DDS::InstanceHandleSeq & hdls)
 {
   CORBA::ULong const num_rds = ids.length();
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+
+  if (!participant)
+    return;
 
   if (DCPS_debug_level > 9) {
     OPENDDS_STRING separator;
@@ -2584,7 +2582,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
-    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
+    hdls[i] = participant->id_to_handle(ids[i]);
   }
 }
 
@@ -2607,14 +2605,18 @@ DataWriterImpl::reschedule_deadline()
 void
 DataWriterImpl::wait_control_pending()
 {
-  OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
-  controlTracker.wait_messages_pending(caller_string);
+  if (!TransportRegistry::instance()->released()) {
+    OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
+    controlTracker.wait_messages_pending(caller_string);
+  }
 }
 
 void
 DataWriterImpl::wait_pending()
 {
-  this->data_container_->wait_pending();
+  if (!TransportRegistry::instance()->released()) {
+    data_container_->wait_pending();
+  }
 }
 
 void
@@ -2633,7 +2635,10 @@ DataWriterImpl::get_readers(RepoIdSet& readers)
 void
 DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos_data) const
 {
-  this->publisher_servant_->get_qos(qos_data.pub_qos);
+  RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
+  if (publisher) {
+    publisher->get_qos(qos_data.pub_qos);
+  }
   qos_data.dw_qos = this->qos_;
   qos_data.topic_name = this->topic_name_.in();
 }
@@ -2678,30 +2683,18 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
   return status;
 }
 
-void
-DataWriterImpl::_add_ref()
+int
+LivenessTimer::handle_timeout(const ACE_Time_Value &tv,
+                             const void *arg)
 {
-  CORBA::Object::_add_ref();
-}
-
-void
-DataWriterImpl::_remove_ref()
-{
-  CORBA::Object::_remove_ref();
-}
-
-ACE_Event_Handler::Reference_Count
-DataWriterImpl::add_reference()
-{
-  CORBA::Object::_add_ref();
-  return 1;
-}
-
-ACE_Event_Handler::Reference_Count
-DataWriterImpl::remove_reference()
-{
-  CORBA::Object::_remove_ref();
-  return 1;
+  DataWriterImpl_rch writer = this->writer_.lock();
+  if (writer) {
+    writer->handle_timeout(tv, arg);
+  }
+  else {
+    this->reactor()->cancel_timer(this);
+  }
+  return 0;
 }
 
 

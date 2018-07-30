@@ -22,7 +22,7 @@
 #include "OfferedDeadlineWatchdog.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
-#include "dds/DCPS/transport/framework/TransportDebug.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/debug.h"
 
@@ -101,10 +101,6 @@ WriteDataContainer::WriteDataContainer(
     wfa_condition_(this->wfa_lock_),
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
-    transport_send_element_allocator_(2 * n_chunks_,
-                                      sizeof(TransportSendElement)),
-    transport_customized_element_allocator_(2 * n_chunks_,
-                                            sizeof(TransportCustomizedElement)),
     shutdown_(false),
     domain_id_(domain_id),
     topic_name_(topic_name),
@@ -120,10 +116,6 @@ WriteDataContainer::WriteDataContainer(
                "(%P|%t) WriteDataContainer "
                "sample_list_element_allocator %x with %d chunks\n",
                &sample_list_element_allocator_, n_chunks_));
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) WriteDataContainer "
-               "transport_send_element_allocator %x with %d chunks\n",
-               &transport_send_element_allocator_, n_chunks_));
   }
 }
 
@@ -137,19 +129,24 @@ WriteDataContainer::~WriteDataContainer()
   }
 
   if (this->sending_data_.size() > 0) {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
-               ACE_TEXT("destroyed with %d samples sending.\n"),
-               this->sending_data_.size()));
+    if (TransportRegistry::instance()->released()) {
+      for (DataSampleElement* e; sending_data_.dequeue_head(e);) {
+        release_buffer(e);
+      }
+    }
+    if (sending_data_.size() && DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
+                 ACE_TEXT("destroyed with %d samples sending.\n"),
+                 this->sending_data_.size()));
+    }
   }
 
   if (this->sent_data_.size() > 0) {
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) WriteDataContainer::~WriteDataContainer() - ")
-                 ACE_TEXT("destroyed with %d samples sent.\n"),
-                 this->sent_data_.size()));
-    }
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) WriteDataContainer::~WriteDataContainer() - ")
+               ACE_TEXT("destroyed with %d samples sent.\n"),
+               this->sent_data_.size()));
   }
 
   if (this->orphaned_to_transport_.size() > 0) {
@@ -197,7 +194,7 @@ WriteDataContainer::enqueue(
   if (this->writer_->watchdog_.in()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
-    this->writer_->watchdog_->execute(instance, false);
+    this->writer_->watchdog_->execute(*this->writer_, instance, false);
   }
 
   //
@@ -288,7 +285,7 @@ WriteDataContainer::register_instance(
     }
 
     // registered the instance for the first time.
-    instance = make_rch<PublicationInstance>(ref(move(registered_sample)));
+    instance.reset(new PublicationInstance(move(registered_sample)), keep_count());
 
     instance_handle = this->writer_->get_next_handle();
 
@@ -1005,9 +1002,7 @@ WriteDataContainer::obtain_buffer_for_control(DataSampleElement*& element)
         sizeof(DataSampleElement))),
     DataSampleElement(publication_id_,
                       this->writer_,
-                      PublicationInstance_rch(),
-                      &transport_send_element_allocator_,
-                      &transport_customized_element_allocator_),
+                      PublicationInstance_rch()),
     DDS::RETCODE_ERROR);
 
   return DDS::RETCODE_OK;
@@ -1034,9 +1029,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         sizeof(DataSampleElement))),
     DataSampleElement(publication_id_,
                           this->writer_,
-                          instance,
-                          &transport_send_element_allocator_,
-                          &transport_customized_element_allocator_),
+                          instance),
     DDS::RETCODE_ERROR);
 
   // Extract the current instance queue.

@@ -24,29 +24,25 @@ TransportSendControlElement::TransportSendControlElement(int initial_count,
                                                          const RepoId& publisher_id,
                                                          TransportSendListener* listener,
                                                          const DataSampleHeader& header,
-                                                         Message_Block_Ptr msg_block,
-                                                         TransportSendControlElementAllocator* allocator)
+                                                         Message_Block_Ptr msg_block)
   : TransportQueueElement(initial_count),
     publisher_id_(publisher_id),
     listener_(listener),
     header_(header),
     msg_(msg_block.release()),
-    dcps_elem_(0),
-    allocator_(allocator)
+    dcps_elem_(0)
 {
   DBG_ENTRY_LVL("TransportSendControlElement","TransportSendControlElement",6);
 }
 
 
 TransportSendControlElement::TransportSendControlElement(int initial_count,
-                                                         const DataSampleElement* dcps_elem,
-                                                         TransportSendControlElementAllocator* allocator)
+                                                         const DataSampleElement* dcps_elem)
   : TransportQueueElement(initial_count)
   , publisher_id_(dcps_elem->get_pub_id())
   , listener_(dcps_elem->get_send_listener())
   , header_(dcps_elem->get_header())
   , dcps_elem_(dcps_elem)
-  , allocator_(allocator)
 {
   DBG_ENTRY_LVL("TransportSendControlElement", "TransportSendControlElement", 6);
 }
@@ -105,12 +101,9 @@ TransportSendControlElement::release_element(bool dropped_by_transport)
   TransportSendListener* const listener = this->listener_;
   const DataSampleElement* dcps_elem = dcps_elem_;
 
-  if (allocator_) {
-    OPENDDS_DES_FREE_THIS(allocator_->free, TransportSendControlElement);
-  }
-  else {
-    delete this;
-  }
+
+  delete this;
+
 
   // reporting the message w/o using "this" pointer
   if (dcps_elem) {

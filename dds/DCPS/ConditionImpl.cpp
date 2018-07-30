@@ -48,7 +48,7 @@ DDS::ReturnCode_t ConditionImpl::attach_to_ws(DDS::WaitSet_ptr ws)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
-  return waitsets_.insert(ws->weak_rchandle_from_this()).second
+  return waitsets_.insert(OpenDDS::DCPS::WeakRcHandle<DDS::WaitSet>(*ws)).second
          ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
 }
 
@@ -56,7 +56,7 @@ DDS::ReturnCode_t ConditionImpl::detach_from_ws(DDS::WaitSet_ptr ws)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
-  return waitsets_.erase(ws->weak_rchandle_from_this())
+  return waitsets_.erase(OpenDDS::DCPS::WeakRcHandle<DDS::WaitSet>(*ws))
          ? DDS::RETCODE_OK : DDS::RETCODE_PRECONDITION_NOT_MET;
 }
 

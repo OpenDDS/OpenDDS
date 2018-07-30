@@ -60,7 +60,6 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
                        const PublicationId&        writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
-  seen_data_(false),
   historic_samples_timer_(NO_TIMER),
   remove_association_timer_(NO_TIMER),
   removal_deadline_(ACE_Time_Value::zero),
@@ -163,20 +162,6 @@ void
 WriterInfo::removed()
 {
   reader_->writer_removed(*this);
-}
-
-void
-WriterInfo::ack_sequence(SequenceNumber value)
-{
-  // sample_lock_ is held by the caller.
-  this->ack_sequence_.insert(value);
-}
-
-SequenceNumber
-WriterInfo::ack_sequence() const
-{
-  // sample_lock_ is held by the caller.
-  return this->ack_sequence_.cumulative_ack();
 }
 
 ACE_Time_Value WriterInfo::activity_wait_period() const

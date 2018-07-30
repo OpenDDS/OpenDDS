@@ -12,7 +12,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/SString.h"
@@ -98,7 +98,7 @@ using OpenDDS::DCPS::RcHandle;
 
 class File;
 
-class OpenDDS_Dcps_Export Directory : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export Directory : public RcObject {
 public:
   typedef RcHandle<Directory> Ptr;
 
@@ -219,7 +219,7 @@ private:
   // phys. prefix (before '.') -> next available counter #
 };
 
-class OpenDDS_Dcps_Export File : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export File : public RcObject {
 public:
   typedef RcHandle<File> Ptr;
 

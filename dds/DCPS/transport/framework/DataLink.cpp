@@ -39,18 +39,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 /// Only called by our TransportImpl object.
-DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback,
+DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
     scheduled_to_stop_at_(ACE_Time_Value::zero),
-    default_listener_(),
     impl_(impl),
-    thr_per_con_send_task_(0),
     transport_priority_(priority),
     scheduling_release_(false),
-    send_control_allocator_(0),
-    mb_allocator_(0),
-    db_allocator_(0),
     is_loopback_(is_loopback),
     is_active_(is_active),
     started_(false),
@@ -58,13 +53,13 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
-  datalink_release_delay_.sec(this->impl_->config_->datalink_release_delay_ / 1000);
-  datalink_release_delay_.usec(this->impl_->config_->datalink_release_delay_ % 1000 * 1000);
+  datalink_release_delay_.sec(impl.config().datalink_release_delay_ / 1000);
+  datalink_release_delay_.usec(impl.config().datalink_release_delay_ % 1000 * 1000);
 
   id_ = DataLink::get_next_datalink_id();
 
-  if (this->impl_->config_->thread_per_connection_) {
-    this->thr_per_con_send_task_ = new ThreadPerConnectionSendTask(this);
+  if (impl.config().thread_per_connection_) {
+    this->thr_per_con_send_task_.reset(new ThreadPerConnectionSendTask(this));
 
     if (this->thr_per_con_send_task_->open() == -1) {
       ACE_ERROR((LM_ERROR,
@@ -79,13 +74,10 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
   }
 
   // Initialize transport control sample allocators:
-  size_t control_chunks = this->impl_->config_->datalink_control_chunks_;
+  size_t control_chunks = impl.config().datalink_control_chunks_;
 
-  this->send_control_allocator_ =
-    new TransportSendControlElementAllocator(control_chunks);
-
-  this->mb_allocator_ = new MessageBlockAllocator(control_chunks);
-  this->db_allocator_ = new DataBlockAllocator(control_chunks);
+  this->mb_allocator_.reset(new MessageBlockAllocator(control_chunks));
+  this->db_allocator_.reset(new DataBlockAllocator(control_chunks));
 }
 
 DataLink::~DataLink()
@@ -99,18 +91,12 @@ DataLink::~DataLink()
                this, assoc_by_local_.size()));
   }
 
-  delete this->db_allocator_;
-  delete this->mb_allocator_;
-
-  delete this->send_control_allocator_;
-
   if (this->thr_per_con_send_task_ != 0) {
     this->thr_per_con_send_task_->close(1);
-    delete this->thr_per_con_send_task_;
   }
 }
 
-TransportImpl_rch
+TransportImpl&
 DataLink::impl() const
 {
   return impl_;
@@ -118,7 +104,7 @@ DataLink::impl() const
 
 
 bool
-DataLink::add_on_start_callback(const TransportClient_rch& client, const RepoId& remote)
+DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
 {
   GuardType guard(strategy_lock_);
 
@@ -130,7 +116,7 @@ DataLink::add_on_start_callback(const TransportClient_rch& client, const RepoId&
 }
 
 void
-DataLink::remove_on_start_callback(const TransportClient_rch& client, const RepoId& remote)
+DataLink::remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
 {
   GuardType guard(strategy_lock_);
   on_start_callbacks_.erase(
@@ -157,7 +143,9 @@ DataLink::invoke_on_start_callbacks(bool success)
     on_start_callbacks_.pop_back();
 
     guard.release();
-    last_callback.first->use_datalink(last_callback.second, link);
+    TransportClient_rch client = last_callback.first.lock();
+    if (client)
+      client->use_datalink(last_callback.second, link);
   }
 }
 
@@ -165,24 +153,16 @@ DataLink::invoke_on_start_callbacks(bool success)
 int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
 {
-  TransportImpl_rch impl = this->impl_;
   if(this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
     }
-    if (impl) {
-      ACE_Reactor_Timer_Interface* reactor = impl->timer();
-      if (reactor->cancel_timer(this) > 0) {
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) DataLink::handle_exception() - cancelled future release timer\n")));
-        }
-      }
-    } else {
+    ACE_Reactor_Timer_Interface* reactor = impl_.timer();
+    if (reactor->cancel_timer(this) > 0) {
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink::handle_exception() - impl_ == 0\n")));
+                   ACE_TEXT("(%P|%t) DataLink::handle_exception() - cancelled future release timer\n")));
       }
     }
     return 0;
@@ -206,11 +186,9 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
-    if (impl) {
-      ACE_Reactor_Timer_Interface* reactor = impl->timer();
-      ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
-      reactor->schedule_timer(this, 0, future_release_time);
-    }
+    ACE_Reactor_Timer_Interface* reactor = impl_.timer();
+    ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
+    reactor->schedule_timer(this, 0, future_release_time);
   }
   return 0;
 }
@@ -236,7 +214,7 @@ DataLink::schedule_stop(const ACE_Time_Value& schedule_to_stop_at)
 void
 DataLink::notify_reactor()
 {
-  TransportReactorTask_rch reactor(impl_->reactor_task());
+  TransportReactorTask_rch reactor(impl_.reactor_task());
   reactor->get_reactor()->notify(this);
 }
 
@@ -283,7 +261,7 @@ DataLink::resume_send()
 int
 DataLink::make_reservation(const RepoId& remote_subscription_id,
                            const RepoId& local_publication_id,
-                           const TransportSendListener_rch& send_listener)
+                           const TransportSendListener_wrch& send_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
@@ -322,7 +300,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
 int
 DataLink::make_reservation(const RepoId& remote_publication_id,
                            const RepoId& local_subscription_id,
-                           const TransportReceiveListener_rch& receive_listener)
+                           const TransportReceiveListener_wrch& receive_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
@@ -415,36 +393,38 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   //pub_sub_maps_lock_
   this->release_reservations_i(remote_id, local_id);
 
-  GuardType guard(this->pub_sub_maps_lock_);
+  bool release_remote_required = false;
+  {
+    GuardType guard(this->pub_sub_maps_lock_);
 
-  ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
-  if (rls->size() == 1) {
-    assoc_by_remote_.erase(remote_id);
-    release_remote_i(remote_id);
-  } else {
-    rls->remove(local_id);
-  }
-  RepoIdSet& ris = assoc_by_local_[local_id];
-  if (ris.size() == 1) {
-    DataLinkSet_rch& links = released_locals[local_id];
-    if (links.is_nil())
-      links = make_rch<DataLinkSet>();
-    links->insert_link(rchandle_from(this));
-    {
-      GuardType guard(this->released_assoc_by_local_lock_);
-      released_assoc_by_local_[local_id].insert(remote_id);
+    ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
+    if (rls->size() == 1) {
+      assoc_by_remote_.erase(remote_id);
+      release_remote_required = true;
+    } else {
+      rls->remove(local_id);
     }
-    assoc_by_local_.erase(local_id);
-  } else {
-    ris.erase(remote_id);
-  }
+    RepoIdSet& ris = assoc_by_local_[local_id];
+    if (ris.size() == 1) {
+      DataLinkSet_rch& links = released_locals[local_id];
+      if (links.is_nil())
+        links = make_rch<DataLinkSet>();
+      links->insert_link(rchandle_from(this));
+      assoc_by_local_.erase(local_id);
+    } else {
+      ris.erase(remote_id);
+    }
 
-  if (assoc_by_local_.empty()) {
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
-              ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
-    this->impl_->release_datalink(this);
+    if (assoc_by_local_.empty()) {
+      VDBG_LVL((LM_DEBUG,
+                ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
+                ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
+
+      impl_.release_datalink(this);
+    }
   }
+  if (release_remote_required)
+    release_remote_i(remote_id);
 }
 
 void
@@ -517,8 +497,8 @@ DataLink::create_control(char submessage_id,
                                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                           ACE_Time_Value::zero,
                                           ACE_Time_Value::max_time,
-                                          this->db_allocator_,
-                                          this->mb_allocator_),
+                                          this->db_allocator_.get(),
+                                          this->mb_allocator_.get()),
                         0);
 
   if (!(*message << header)) {
@@ -537,11 +517,9 @@ DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
-  TransportSendControlElement* const elem =
-    TransportSendControlElement::alloc(1, // initial_count
+  TransportSendControlElement* const elem = new TransportSendControlElement(1, // initial_count
                                        GUID_UNKNOWN, &send_response_listener_,
-                                       header, move(message), send_control_allocator_);
-  if (!elem) return SEND_CONTROL_ERROR;
+                                       header, move(message));
 
   send_response_listener_.track_message();
 
@@ -611,8 +589,10 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     if (iter != assoc_by_remote_.end())
       listener_set = iter->second;
 
-    if (listener_set.is_nil() && this->default_listener_) {
-      this->default_listener_->data_received(sample);
+    if (listener_set.is_nil()) {
+      TransportReceiveListener_rch listener = this->default_listener_.lock();
+      if (listener)
+        listener->data_received(sample);
       return;
     }
   }
@@ -695,20 +675,17 @@ DataLink::transport_shutdown()
 {
   DBG_ENTRY_LVL("DataLink", "transport_shutdown", 6);
 
-  if (!this->send_strategy_.is_nil()) {
-    this->send_strategy_->transport_shutdown();
-  }
-
   //this->cancel_release();
   this->set_scheduling_release(false);
   this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
-  ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
+
+  ACE_Reactor_Timer_Interface* reactor = impl_.timer();
   reactor->cancel_timer(this);
+
   this->stop();
-  this->send_listeners_.clear();
-  this->recv_listeners_.clear();
+  // this->send_listeners_.clear();
+  // this->recv_listeners_.clear();
   // Drop our reference to the TransportImpl object
-  this->impl_.reset();
 }
 
 void
@@ -728,7 +705,7 @@ DataLink::notify(ConnectionNotice notice)
   for (IdToSendListenerMap::iterator itr = send_listeners_.begin();
        itr != send_listeners_.end(); ++itr) {
 
-    const TransportSendListener_rch& tsl = itr->second;
+    TransportSendListener_rch tsl = itr->second.lock();
 
     if (tsl) {
       if (Transport_debug_level > 0) {
@@ -794,7 +771,7 @@ DataLink::notify(ConnectionNotice notice)
   for (IdToRecvListenerMap::iterator itr = recv_listeners_.begin();
        itr != recv_listeners_.end(); ++itr) {
 
-    const TransportReceiveListener_rch& trl = itr->second;
+    TransportReceiveListener_rch trl = itr->second.lock();
 
     if (trl) {
       if (Transport_debug_level > 0) {
@@ -855,61 +832,7 @@ DataLink::notify(ConnectionNotice notice)
   }
 }
 
-void DataLink::notify_connection_deleted()
-{
-  // Locking:
-  // - if released_assoc_by_local_lock_ and pub_sub_maps_lock_ are both held at
-  //   the same time, pub_sub_maps_lock_ must be locked first
-  // - pub_sub_maps_lock_ must not be held during the callbacks to
-  //   notify_connection_deleted() which may re-enter the DataLink
-  AssocByLocal released;
-  {
-    GuardType guard(released_assoc_by_local_lock_);
-    released = released_assoc_by_local_;
-  }
 
-  RepoIdSet found;
-  for (AssocByLocal::iterator iter = released.begin();
-       iter != released.end(); ++iter) {
-
-    TransportSendListener_rch tsl;
-    {
-      GuardType guard(pub_sub_maps_lock_);
-      tsl = send_listener_for(iter->first);
-    }
-
-    if (tsl) {
-      for (RepoIdSet::iterator ris_it = iter->second.begin();
-           ris_it != iter->second.end(); ++ris_it) {
-        tsl->notify_connection_deleted(*ris_it);
-      }
-      found.insert(iter->first);
-      continue;
-    }
-
-    TransportReceiveListener_rch trl;
-    {
-      GuardType guard(pub_sub_maps_lock_);
-      trl = recv_listener_for(iter->first);
-    }
-
-    if (trl) {
-      for (RepoIdSet::iterator ris_it = iter->second.begin();
-           ris_it != iter->second.end(); ++ris_it) {
-        trl->notify_connection_deleted(*ris_it);
-      }
-      found.insert(iter->first);
-    }
-  }
-
-  GuardType guard(released_assoc_by_local_lock_);
-  for (RepoIdSet::const_iterator it = found.begin(); it != found.end(); ++it) {
-    const AssocByLocal::iterator iter = released_assoc_by_local_.find(*it);
-    if (iter != released_assoc_by_local_.end()) {
-      iter->second.clear();
-    }
-  }
-}
 
 void
 DataLink::pre_stop_i()
@@ -925,8 +848,7 @@ DataLink::release_resources()
   DBG_ENTRY_LVL("DataLink", "release_resources", 6);
 
   this->prepare_release();
-
-  return impl_->release_link_resources(this);
+  return impl_.release_link_resources(this);
 }
 
 bool
@@ -1002,7 +924,7 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
   if (this->scheduled_to_stop_at_ != ACE_Time_Value::zero) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
-    this->impl_->unbind_link(this);
+    impl_.unbind_link(this);
 
     if (assoc_by_remote_.empty() && assoc_by_local_.empty()) {
       this->stop();

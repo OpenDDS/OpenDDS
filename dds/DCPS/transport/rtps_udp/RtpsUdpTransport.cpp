@@ -28,26 +28,26 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpTransport::RtpsUdpTransport(const TransportInst_rch& inst)
-  : local_crypto_handle_(DDS::HANDLE_NIL)
+RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
+  : TransportImpl(inst)
+  , local_crypto_handle_(DDS::HANDLE_NIL)
 {
-  if (!inst.is_nil()) {
-    if (!configure(inst)) {
-      throw Transport::UnableToCreate();
-    }
+  if (! (configure_i(inst) && open())) {
+    throw Transport::UnableToCreate();
   }
 }
 
-RtpsUdpInst_rch
+RtpsUdpInst&
 RtpsUdpTransport::config() const
 {
-  return static_rchandle_cast<RtpsUdpInst>(TransportImpl::config());
+  return static_cast<RtpsUdpInst&>(TransportImpl::config());
 }
 
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task());
+
+  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
   link->local_crypto_handle(local_crypto_handle_);
 
@@ -130,7 +130,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
 
 void
-RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_rch& client,
+RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                const RepoId& remote_id)
 {
   GuardType guard(connections_lock_);
@@ -184,7 +184,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
     // If conversion was successful
     if (locator_to_address(addr, locators[i], map_ipv4_to_ipv6()) == 0) {
       // if this is a unicast address, or if we are allowing multicast
-      if (!addr.is_multicast() || config()->use_multicast_) {
+      if (!addr.is_multicast() || config().use_multicast_) {
         return addr;
       }
     }
@@ -197,7 +197,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
 bool
 RtpsUdpTransport::connection_info_i(TransportLocator& info) const
 {
-  this->config()->populate_locator(info);
+  this->config().populate_locator(info);
   return true;
 }
 
@@ -208,7 +208,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       const TransportLocatorSeq& locators,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
-  const TransportBLOB* blob = this->config()->get_blob(locators);
+  const TransportBLOB* blob = this->config().get_blob(locators);
   if (!blob) {
     return;
   }
@@ -238,7 +238,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       const TransportLocatorSeq& locators,
                                       DiscoveryListener* listener)
 {
-  const TransportBLOB* blob = this->config()->get_blob(locators);
+  const TransportBLOB* blob = this->config().get_blob(locators);
   if (!blob) {
     return;
   }
@@ -262,22 +262,12 @@ RtpsUdpTransport::unregister_for_writer(const RepoId& /*participant*/,
 }
 
 bool
-RtpsUdpTransport::configure_i(TransportInst* config)
+RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 {
-  RtpsUdpInst* conf = dynamic_cast<RtpsUdpInst*>(config);
-
-  if (! conf) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpTransport::configure_i: ")
-                      ACE_TEXT("invalid configuration!\n")),
-                     false);
-  }
-
   // Override with DCPSDefaultAddress.
-  if (conf->local_address() == ACE_INET_Addr () &&
+  if (config.local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
-    conf->local_address(0, TheServiceParticipant->default_address ().c_str ());
+    config.local_address(0, TheServiceParticipant->default_address ().c_str ());
   }
 
   // Open the socket here so that any addresses/ports left
@@ -286,7 +276,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  if (!open_appropriate_socket_type(unicast_socket_, conf->local_address())) {
+  if (!open_appropriate_socket_type(unicast_socket_, config.local_address())) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
@@ -294,7 +284,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                       false);
   }
 
-  if (conf->local_address().get_port_number() == 0) {
+  if (config.local_address().get_port_number() == 0) {
 
     ACE_INET_Addr address;
     if (unicast_socket_.get_local_addr(address) != 0) {
@@ -302,15 +292,14 @@ RtpsUdpTransport::configure_i(TransportInst* config)
         ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
         ACE_TEXT("cannot get local addr")), false);
     }
-    conf->local_address_set_port(address.get_port_number());
+    config.local_address_set_port(address.get_port_number());
   }
 
   create_reactor_task();
 
-  if (conf->opendds_discovery_default_listener_) {
-    link_= make_datalink(conf->opendds_discovery_guid_.guidPrefix);
-    link_->default_listener(conf->opendds_discovery_default_listener_);
-    default_listener_ = dynamic_rchandle_cast<TransportClient>(conf->opendds_discovery_default_listener_);
+  if (config.opendds_discovery_default_listener_) {
+    link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
+    link_->default_listener(*config.opendds_discovery_default_listener_);
   }
 
   return true;
@@ -331,14 +320,7 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
   // No-op for rtps_udp: keep the link_ around until the transport is shut down.
 }
 
-void
-RtpsUdpTransport::pre_detach(const TransportClient_rch& c)
-{
-  if (default_listener_ && !link_.is_nil() && c == default_listener_) {
-    default_listener_.reset();
-    link_->default_listener(  TransportReceiveListener_rch() );
-  }
-}
+
 
 bool
 RtpsUdpTransport::map_ipv4_to_ipv6() const

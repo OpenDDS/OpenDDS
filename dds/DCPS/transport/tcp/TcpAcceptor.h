@@ -24,21 +24,21 @@ class TcpAcceptor : public ACE_Acceptor<TcpConnection,
       ACE_SOCK_ACCEPTOR> {
 public:
 
-  TcpAcceptor(const TcpTransport_rch& transport_impl);
+  TcpAcceptor(TcpTransport* transport_impl);
   virtual ~TcpAcceptor();
 
   // Returns a reference that the caller becomes responsible for.
-  TcpTransport_rch transport();
+  TcpTransport* transport();
 
   // This causes the Acceptor to drop its reference to the
   // TcpTransport object.
   void transport_shutdown();
 
-  TcpInst_rch get_configuration();
+  TcpInst& get_configuration();
 
 private:
 
-  TcpTransport_rch transport_;
+  TcpTransport* transport_;
 };
 
 } // namespace DCPS

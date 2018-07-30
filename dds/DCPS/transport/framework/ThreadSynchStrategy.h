@@ -9,7 +9,7 @@
 #define OPENDDS_DCPS_THREADSYNCHSTRATEGY_H
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -22,7 +22,7 @@ class ThreadSynchResource;
 
 //MJM: Some class documentation here would be extremely helpful.
 class OpenDDS_Dcps_Export ThreadSynchStrategy
-  : public RcObject<ACE_SYNCH_MUTEX>
+  : public RcObject
 {
 public:
 

@@ -431,13 +431,14 @@ private:
   int load_discovery_configuration(ACE_Configuration_Heap& cf,
                                    const ACE_TCHAR* section_name);
 
-  OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*) discovery_types_;
+  typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
+  DiscoveryTypes discovery_types_;
 
 #ifndef OPENDDS_SAFETY_PROFILE
   ACE_ARGV ORB_argv_;
 #endif
 
-  ACE_Reactor* reactor_; //TODO: integrate with threadpool
+  unique_ptr<ACE_Reactor> reactor_; //TODO: integrate with threadpool
   ACE_thread_t reactor_owner_;
 
   struct ReactorTask : ACE_Task_Base {
@@ -450,8 +451,7 @@ private:
     ACE_Barrier barrier_;
   } reactor_task_;
 
-  DomainParticipantFactoryImpl* dp_factory_servant_;
-  DDS::DomainParticipantFactory_var dp_factory_;
+  RcHandle<DomainParticipantFactoryImpl> dp_factory_servant_;
 
   /// The RepoKey to Discovery object mapping
   RepoKeyDiscoveryMap discoveryMap_;
@@ -544,7 +544,7 @@ public:
   MonitorFactory* monitor_factory_;
 
   /// Pointer to the monitor object for this object
-  Monitor* monitor_;
+  unique_ptr<Monitor> monitor_;
 
 private:
   /// The FederationRecoveryDuration value in seconds.

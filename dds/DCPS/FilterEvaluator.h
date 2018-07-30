@@ -15,7 +15,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "Comparator_T.h"
-#include "RcObject_T.h"
+#include "RcObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -73,7 +73,7 @@ struct OpenDDS_Dcps_Export Value {
   bool conversion_preferred_;
 };
 
-class OpenDDS_Dcps_Export FilterEvaluator : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export FilterEvaluator : public RcObject {
 public:
 
   struct AstNodeWrapper;

@@ -28,7 +28,6 @@ public:
 
   CopyChainVisitor(
     BasicQueue<TransportQueueElement>& target,
-    TransportRetainedElementAllocator* allocator,
     MessageBlockAllocator*             mb_allocator,
     DataBlockAllocator*                db_allocator
   );
@@ -45,7 +44,6 @@ private:
   BasicQueue<TransportQueueElement>& target_;
 
   /// Allocator to create copied elements.
-  TransportRetainedElementAllocator* allocator_;
   MessageBlockAllocator* mb_allocator_;
   DataBlockAllocator* db_allocator_;
 

@@ -12,7 +12,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcEventHandler.h"
@@ -135,7 +135,7 @@ private:
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  struct SpdpTransport : public OpenDDS::DCPS::RcEventHandler, public OpenDDS::DCPS::PoolAllocationBase {
+  struct SpdpTransport : public OpenDDS::DCPS::RcEventHandler {
     SpdpTransport(Spdp* outer, bool securityGuids);
     ~SpdpTransport();
 

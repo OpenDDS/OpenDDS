@@ -1,0 +1,3 @@
+module M2 {
+  typedef long long MyTypedef;
+};

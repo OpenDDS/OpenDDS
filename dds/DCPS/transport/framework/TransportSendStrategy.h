@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
@@ -18,7 +18,6 @@
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
-#include "TransportInst_rch.h"
 #include "ThreadSynchStrategy_rch.h"
 #include "ace/Synch_Traits.h"
 
@@ -35,6 +34,7 @@ class TransportSendBuffer;
 class DataSampleElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
+class TransportImpl;
 
 /**
  * This class provides methods to fill packets with samples for sending
@@ -126,10 +126,6 @@ public:
 
   bool isDirectMode();
 
-  /// Informed transport shutdown so no more notifications to
-  /// listener.
-  void transport_shutdown();
-
   typedef BasicQueue<TransportQueueElement> QueueType;
 
   /// Convert ACE_Message_Block chain into iovec[] entries for send(),
@@ -142,13 +138,15 @@ public:
   virtual ACE_HANDLE get_handle();
 
   void deliver_ack_request(TransportQueueElement* element);
+
 protected:
 
   TransportSendStrategy(std::size_t id,
-                        const TransportInst_rch& transport_inst,
+                        TransportImpl& transport,
                         ThreadSynchResource* synch_resource,
                         Priority priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
+
 
   // Only our subclass knows how to do this.
   // Third arg is the "back-pressure" flag.  If send_bytes() returns
@@ -321,7 +319,7 @@ private:
   /// completely unsent.
   /// Also used as a bucket for packets which still have to become
   /// part of a packet.
-  QueueType* queue_;
+  QueueType queue_;
 
   /// Maximum marshalled size of the transport packet header.
   size_t max_header_size_;
@@ -334,7 +332,7 @@ private:
 
   /// Current elements that have contributed blocks to the current
   /// transport packet.
-  QueueType* elems_;
+  QueueType elems_;
 
   /// Current (head of chain) block containing unsent bytes for the
   /// current transport packet.
@@ -368,29 +366,23 @@ private:
   OPENDDS_VECTOR(TQESendModePair) delayed_delivered_notification_queue_;
 
   /// Allocator for header data block.
-  TransportMessageBlockAllocator* header_mb_allocator_;
+  unique_ptr<TransportMessageBlockAllocator> header_mb_allocator_;
 
   /// Allocator for header message block.
-  TransportDataBlockAllocator* header_db_allocator_;
+  unique_ptr<TransportDataBlockAllocator> header_db_allocator_;
 
   /// The thread synch object.
-  ThreadSynch* synch_;
+  unique_ptr<ThreadSynch> synch_;
 
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.
   LockType lock_;
 
   /// Cached allocator for TransportReplaceElement.
-  TransportReplacedElementAllocator replaced_element_allocator_;
   MessageBlockAllocator replaced_element_mb_allocator_;
   DataBlockAllocator replaced_element_db_allocator_;
 
-  /// Cached allocator for TransportRetainedElements used by reliable
-  /// datagram transports to retain PDUs after they have been sent.  This
-  /// is created in start if the transport needs it.
-  TransportRetainedElementAllocator* retained_element_allocator_;
-
-  TransportInst_rch transport_inst_;
+  TransportImpl& transport_;
 
   bool graceful_disconnecting_;
 
@@ -402,8 +394,6 @@ private:
   // refactored into the TransportSendStrategy eventually; a good
   // amount of private state is shared between both classes.
   friend class TransportSendBuffer;
-
-  bool transport_shutdown_;
 
 protected:
   ThreadSynch* synch() const;

@@ -181,8 +181,3 @@ void DataReaderListenerImpl::on_subscription_matched (
   {
   }
 
-  void DataReaderListenerImpl::on_connection_deleted (
-    ::DDS::DataReader_ptr
-    )
-  {
-  }

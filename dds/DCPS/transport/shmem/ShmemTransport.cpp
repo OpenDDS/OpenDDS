@@ -24,40 +24,35 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemTransport::ShmemTransport(const TransportInst_rch& inst)
-  : alloc_(0)
-  , read_task_(0)
+ShmemTransport::ShmemTransport(ShmemInst& inst)
+  : TransportImpl(inst)
 {
-  if (!inst.is_nil()) {
-    if (!configure(inst)) {
-      throw Transport::UnableToCreate();
-    }
+  if (! (configure_i(inst) && open()) ) {
+    throw Transport::UnableToCreate();
   }
 }
 
-ShmemInst_rch
+ShmemInst&
 ShmemTransport::config() const
 {
-  return static_rchandle_cast<ShmemInst>(TransportImpl::config());
+  return static_cast<ShmemInst&>(TransportImpl::config());
 }
 
 ShmemDataLink_rch
 ShmemTransport::make_datalink(const std::string& remote_address)
 {
-  ShmemDataLink_rch link = make_rch<ShmemDataLink>(rchandle_from(this));
 
-  link->configure(this->config().in());
+  ShmemDataLink_rch link = make_rch<ShmemDataLink>(ref(*this));
 
   // Open logical connection:
-  if (!link->open(remote_address)) {
-    ACE_ERROR((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ShmemTransport::make_datalink: ")
-                      ACE_TEXT("failed to open DataLink!\n")));
-    return ShmemDataLink_rch();
-  }
+  if (link->open(remote_address))
+    return link;
 
-  return link;
+  ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ERROR: ")
+                    ACE_TEXT("ShmemTransport::make_datalink: ")
+                    ACE_TEXT("failed to open DataLink!\n")));
+  return ShmemDataLink_rch();
 }
 
 TransportImpl::AcceptConnectResult
@@ -66,7 +61,7 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
                                  const TransportClient_rch&)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
-  if (key.first != this->config()->hostname()) {
+  if (key.first != this->config().hostname()) {
     return AcceptConnectResult();
   }
   GuardType guard(links_lock_);
@@ -99,13 +94,13 @@ ShmemTransport::accept_datalink(const RemoteTransport& remote,
 }
 
 void
-ShmemTransport::stop_accepting_or_connecting(const TransportClient_rch&, const RepoId&)
+ShmemTransport::stop_accepting_or_connecting(const TransportClient_wrch&, const RepoId&)
 {
   // no-op: accept and connect either complete or fail immediately
 }
 
 bool
-ShmemTransport::configure_i(TransportInst* config)
+ShmemTransport::configure_i(ShmemInst& config)
 {
 #if (!defined ACE_WIN32 && defined ACE_LACKS_SYSV_SHMEM) || defined ACE_HAS_WINCE
   ACE_UNUSED_ARG(config);
@@ -115,28 +110,20 @@ ShmemTransport::configure_i(TransportInst* config)
                     ACE_TEXT("no platform support for shared memory!\n")),
                    false);
 #else
-  ShmemInst* conf = dynamic_cast<ShmemInst*>(config);
-  if (!conf) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ShmemTransport::configure_i: ")
-                      ACE_TEXT("invalid configuration!\n")),
-                     false);
-  }
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 # ifdef ACE_WIN32
-  alloc_opts.max_size_ = conf->pool_size_;
+  alloc_opts.max_size_ = config.pool_size_;
 # elif !defined ACE_LACKS_SYSV_SHMEM
   alloc_opts.base_addr_ = 0;
-  alloc_opts.segment_size_ = conf->pool_size_;
+  alloc_opts.segment_size_ = config.pool_size_;
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
 # endif
 
-  alloc_ =
-    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(conf->poolname().c_str()),
-                       0 /*lock_name is optional*/, &alloc_opts);
+  alloc_.reset(
+    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(config.poolname().c_str()),
+                       0 /*lock_name is optional*/, &alloc_opts));
 
   void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
   if (mem == 0) {
@@ -178,10 +165,10 @@ ShmemTransport::configure_i(TransportInst* config)
                      false);
   }
 
-  read_task_ = new ReadTask(this, ace_sema);
+  read_task_.reset(new ReadTask(this, ace_sema));
 
   VDBG_LVL((LM_INFO, "(%P|%t) ShmemTransport %@ configured with address %C\n",
-            this, conf->poolname().c_str()), 1);
+            this, config.poolname().c_str()), 1);
 
   return true;
 #endif
@@ -200,29 +187,29 @@ ShmemTransport::shutdown_i()
   }
   links_.clear();
 
-  delete read_task_;
-  read_task_ = 0;
+  read_task_.reset();
 
-  void* mem = 0;
-  alloc_->find("Semaphore", mem);
-  ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
+  if (alloc_) {
+    void* mem = 0;
+    alloc_->find("Semaphore", mem);
+    ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #ifdef ACE_WIN32
-  ::CloseHandle(*pSem);
+    ::CloseHandle(*pSem);
 #elif defined ACE_HAS_POSIX_SEM && !defined ACE_LACKS_UNNAMED_SEMAPHORE
-  ::sem_destroy(pSem);
+    ::sem_destroy(pSem);
 #else
-  ACE_UNUSED_ARG(pSem);
+    ACE_UNUSED_ARG(pSem);
 #endif
 
-  alloc_->release(1 /*close*/);
-  delete alloc_;
-  alloc_ = 0;
+    alloc_->release(1 /*close*/);
+    alloc_.reset();
+  }
 }
 
 bool
 ShmemTransport::connection_info_i(TransportLocator& info) const
 {
-  this->config()->populate_locator(info);
+  this->config().populate_locator(info);
   return true;
 }
 
@@ -309,7 +296,7 @@ ShmemTransport::signal_semaphore()
 std::string
 ShmemTransport::address()
 {
-  return this->config()->poolname();
+  return this->config().poolname();
 }
 
 } // namespace DCPS

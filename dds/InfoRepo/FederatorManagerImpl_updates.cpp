@@ -1340,7 +1340,7 @@ ManagerImpl::pushState(Manager_ptr peer)
         publicationSample.sender         = this->id().id();
         publicationSample.action         = CreateEntity;
 
-        DCPS_IR_Publication* p = currentPublication->second;
+        DCPS_IR_Publication* p = currentPublication->second.get();
         CORBA::ORB_var orb = this->info_->orb();
         CORBA::String_var callback = orb->object_to_string(p->writer());
 
@@ -1365,7 +1365,7 @@ ManagerImpl::pushState(Manager_ptr peer)
         subscriptionSample.sender         = this->id().id();
         subscriptionSample.action         = CreateEntity;
 
-        DCPS_IR_Subscription* s = currentSubscription->second;
+        DCPS_IR_Subscription* s = currentSubscription->second.get();
         CORBA::ORB_var orb = this->info_->orb();
         CORBA::String_var callback = orb->object_to_string(s->reader());
 

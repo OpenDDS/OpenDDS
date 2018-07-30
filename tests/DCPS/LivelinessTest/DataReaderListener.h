@@ -73,10 +73,6 @@ public:
       const ::OpenDDS::DCPS::BudgetExceededStatus& status
     );
 
-  virtual void on_connection_deleted (
-    ::DDS::DataReader_ptr
-    );
-
   int liveliness_changed_count() const { return liveliness_changed_count_ ; }
   void reset_liveliness_changed_count(){ liveliness_changed_count_ = 0 ; }
 

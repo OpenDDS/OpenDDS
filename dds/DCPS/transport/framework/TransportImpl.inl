@@ -15,7 +15,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_INLINE OpenDDS::DCPS::TransportInst_rch
+ACE_INLINE OpenDDS::DCPS::TransportInst&
 OpenDDS::DCPS::TransportImpl::config() const
 {
   return this->config_;
@@ -54,10 +54,5 @@ OpenDDS::DCPS::TransportImpl::connection_info
   return this->connection_info_i(local_info);
 }
 
-ACE_INLINE void
-OpenDDS::DCPS::TransportImpl::pre_shutdown_i()
-{
-  //noop
-}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

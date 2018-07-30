@@ -1,6 +1,7 @@
 [submodule "tools/IntermediateTypeLang/cpp/rapidjson"]
 	path = tools/IntermediateTypeLang/cpp/rapidjson
 	url = git://github.com/miloyip/rapidjson.git
+	branch = version1.1.0
 [submodule "tests/googletest"]
 	path = tests/googletest
 	url = git://github.com/google/googletest

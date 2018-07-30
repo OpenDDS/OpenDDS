@@ -21,7 +21,6 @@
 #include "ace/Thread_Mutex.h"
 #include "ace/Atomic_Op.h"
 #include "ace/Condition_Recursive_Thread_Mutex.h"
-#include "dds/DCPS/WeakRcHandle.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -45,7 +44,7 @@ typedef WaitSet* WaitSet_ptr;
 typedef TAO_Objref_Var_T<WaitSet> WaitSet_var;
 
 class OpenDDS_Dcps_Export WaitSet
-  : public OpenDDS::DCPS::EnableWeakRcHandle<OpenDDS::DCPS::LocalObject<WaitSetInterf>, WaitSet> {
+  : public OpenDDS::DCPS::LocalObject<WaitSetInterf> {
 public:
   typedef WaitSet_ptr _ptr_type;
   typedef WaitSet_var _var_type;

@@ -981,7 +981,8 @@ DomainParticipantImpl::delete_contained_entities()
   // rest of the entities, so need to report to discovery that
   // BIT is no longer available
   Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
-  disc->fini_bit(this);
+  if (disc)
+    disc->fini_bit(this);
 
   if (ACE_OS::thr_equal(TheServiceParticipant->reactor_owner(),
                         ACE_Thread::self())) {
@@ -2001,7 +2002,7 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
 
 #endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
-DomainParticipantImpl::RepoIdSequence::RepoIdSequence(RepoId& base) :
+DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const RepoId& base) :
   base_(base),
   serial_(0),
   builder_(base_)
@@ -2439,7 +2440,7 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 
     RecorderSet::iterator it = recorders_.begin();
     for (; it != recorders_.end(); ++it ){
-      RecorderImpl* impl = static_cast<RecorderImpl* >(it->in());
+      RecorderImpl* impl = dynamic_cast<RecorderImpl* >(it->in());
       DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
       if (impl) result = impl->cleanup();
       if (result != DDS::RETCODE_OK) ret = result;

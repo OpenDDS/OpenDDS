@@ -68,10 +68,6 @@ public:
       const ::OpenDDS::DCPS::SubscriptionLostStatus & status
     );
 
-  virtual void on_connection_deleted (
-    ::DDS::DataReader_ptr reader
-  );
-
 private:
 
   ::DDS::DataReader_var reader_;

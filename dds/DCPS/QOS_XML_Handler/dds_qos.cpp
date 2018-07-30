@@ -5,10 +5,15 @@
  * when the handlers are recompiled.
  *
  * If you find errors or feel that there are bugfixes to be made,
- * please contact the current XSC maintainer:
- *             Will Otte <wotte@dre.vanderbilt.edu>
+ * please report this to the XSC project at
+ * https://github.com/DOCGroup/XSC
  */
 #include "dds_qos.hpp"
+
+#include "ace/ace_wchar.h"
+#include "ace/Null_Mutex.h"
+#include "ace/TSS_T.h"
+#include "ace/Singleton.h"
 
 namespace dds
 {
@@ -196,17 +201,15 @@ namespace dds
 
   // duration
 
-  duration::duration () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  duration::duration ()
+  : ::XSCRT::Type ()
   {
   }
 
   duration::duration (duration const& s) :
-  ::XSCRT::Type (s),
-  sec_ (s.sec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.sec_) : 0),
-  nanosec_ (s.nanosec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.nanosec_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , sec_ (s.sec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.sec_) : 0)
+  , nanosec_ (s.nanosec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.nanosec_) : 0)
   {
     if (sec_.get ()) sec_->container (this);
     if (nanosec_.get ()) nanosec_->container (this);
@@ -291,16 +294,14 @@ namespace dds
 
   // stringSeq
 
-  stringSeq::stringSeq () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  stringSeq::stringSeq ()
+  : ::XSCRT::Type ()
   {
   }
 
   stringSeq::stringSeq (stringSeq const& s) :
-  ::XSCRT::Type (s),
-  element_ (s.element_),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , element_ (s.element_)
   {
   }
 
@@ -356,16 +357,14 @@ namespace dds
 
   // deadlineQosPolicy
 
-  deadlineQosPolicy::deadlineQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  deadlineQosPolicy::deadlineQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   deadlineQosPolicy::deadlineQosPolicy (deadlineQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  period_ (s.period_.get () ? new ::dds::duration (*s.period_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , period_ (s.period_.get () ? new ::dds::duration (*s.period_) : 0)
   {
     if (period_.get ()) period_->container (this);
   }
@@ -416,16 +415,14 @@ namespace dds
 
   // destinationOrderQosPolicy
 
-  destinationOrderQosPolicy::destinationOrderQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  destinationOrderQosPolicy::destinationOrderQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   destinationOrderQosPolicy::destinationOrderQosPolicy (destinationOrderQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::destinationOrderKind (*s.kind_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::destinationOrderKind (*s.kind_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
   }
@@ -476,16 +473,14 @@ namespace dds
 
   // durabilityQosPolicy
 
-  durabilityQosPolicy::durabilityQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  durabilityQosPolicy::durabilityQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   durabilityQosPolicy::durabilityQosPolicy (durabilityQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::durabilityKind (*s.kind_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::durabilityKind (*s.kind_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
   }
@@ -536,21 +531,19 @@ namespace dds
 
   // durabilityServiceQosPolicy
 
-  durabilityServiceQosPolicy::durabilityServiceQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  durabilityServiceQosPolicy::durabilityServiceQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   durabilityServiceQosPolicy::durabilityServiceQosPolicy (durabilityServiceQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  service_cleanup_delay_ (s.service_cleanup_delay_.get () ? new ::dds::duration (*s.service_cleanup_delay_) : 0),
-  history_kind_ (s.history_kind_.get () ? new ::dds::historyKind (*s.history_kind_) : 0),
-  history_depth_ (s.history_depth_.get () ? new ::XMLSchema::positiveInteger (*s.history_depth_) : 0),
-  max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0),
-  max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0),
-  max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , service_cleanup_delay_ (s.service_cleanup_delay_.get () ? new ::dds::duration (*s.service_cleanup_delay_) : 0)
+  , history_kind_ (s.history_kind_.get () ? new ::dds::historyKind (*s.history_kind_) : 0)
+  , history_depth_ (s.history_depth_.get () ? new ::XMLSchema::positiveInteger (*s.history_depth_) : 0)
+  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
+  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
+  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
   {
     if (service_cleanup_delay_.get ()) service_cleanup_delay_->container (this);
     if (history_kind_.get ()) history_kind_->container (this);
@@ -771,16 +764,14 @@ namespace dds
 
   // entityFactoryQosPolicy
 
-  entityFactoryQosPolicy::entityFactoryQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  entityFactoryQosPolicy::entityFactoryQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   entityFactoryQosPolicy::entityFactoryQosPolicy (entityFactoryQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  autoenable_created_entities_ (s.autoenable_created_entities_.get () ? new ::XMLSchema::boolean (*s.autoenable_created_entities_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , autoenable_created_entities_ (s.autoenable_created_entities_.get () ? new ::XMLSchema::boolean (*s.autoenable_created_entities_) : 0)
   {
     if (autoenable_created_entities_.get ()) autoenable_created_entities_->container (this);
   }
@@ -831,16 +822,14 @@ namespace dds
 
   // groupDataQosPolicy
 
-  groupDataQosPolicy::groupDataQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  groupDataQosPolicy::groupDataQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   groupDataQosPolicy::groupDataQosPolicy (groupDataQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -891,17 +880,15 @@ namespace dds
 
   // historyQosPolicy
 
-  historyQosPolicy::historyQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  historyQosPolicy::historyQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   historyQosPolicy::historyQosPolicy (historyQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::historyKind (*s.kind_) : 0),
-  depth_ (s.depth_.get () ? new ::XMLSchema::positiveInteger (*s.depth_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::historyKind (*s.kind_) : 0)
+  , depth_ (s.depth_.get () ? new ::XMLSchema::positiveInteger (*s.depth_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
     if (depth_.get ()) depth_->container (this);
@@ -986,16 +973,14 @@ namespace dds
 
   // latencyBudgetQosPolicy
 
-  latencyBudgetQosPolicy::latencyBudgetQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  latencyBudgetQosPolicy::latencyBudgetQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   latencyBudgetQosPolicy::latencyBudgetQosPolicy (latencyBudgetQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0)
   {
     if (duration_.get ()) duration_->container (this);
   }
@@ -1046,16 +1031,14 @@ namespace dds
 
   // lifespanQosPolicy
 
-  lifespanQosPolicy::lifespanQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  lifespanQosPolicy::lifespanQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   lifespanQosPolicy::lifespanQosPolicy (lifespanQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0)
   {
     if (duration_.get ()) duration_->container (this);
   }
@@ -1106,17 +1089,15 @@ namespace dds
 
   // livelinessQosPolicy
 
-  livelinessQosPolicy::livelinessQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  livelinessQosPolicy::livelinessQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   livelinessQosPolicy::livelinessQosPolicy (livelinessQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::livelinessKind (*s.kind_) : 0),
-  lease_duration_ (s.lease_duration_.get () ? new ::dds::duration (*s.lease_duration_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::livelinessKind (*s.kind_) : 0)
+  , lease_duration_ (s.lease_duration_.get () ? new ::dds::duration (*s.lease_duration_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
     if (lease_duration_.get ()) lease_duration_->container (this);
@@ -1201,16 +1182,14 @@ namespace dds
 
   // ownershipQosPolicy
 
-  ownershipQosPolicy::ownershipQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  ownershipQosPolicy::ownershipQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   ownershipQosPolicy::ownershipQosPolicy (ownershipQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::ownershipKind (*s.kind_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::ownershipKind (*s.kind_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
   }
@@ -1261,16 +1240,14 @@ namespace dds
 
   // ownershipStrengthQosPolicy
 
-  ownershipStrengthQosPolicy::ownershipStrengthQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  ownershipStrengthQosPolicy::ownershipStrengthQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   ownershipStrengthQosPolicy::ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -1321,16 +1298,14 @@ namespace dds
 
   // partitionQosPolicy
 
-  partitionQosPolicy::partitionQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  partitionQosPolicy::partitionQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   partitionQosPolicy::partitionQosPolicy (partitionQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  name_ (s.name_.get () ? new ::dds::stringSeq (*s.name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , name_ (s.name_.get () ? new ::dds::stringSeq (*s.name_) : 0)
   {
     if (name_.get ()) name_->container (this);
   }
@@ -1381,18 +1356,16 @@ namespace dds
 
   // presentationQosPolicy
 
-  presentationQosPolicy::presentationQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  presentationQosPolicy::presentationQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   presentationQosPolicy::presentationQosPolicy (presentationQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  access_scope_ (s.access_scope_.get () ? new ::dds::presentationAccessScopeKind (*s.access_scope_) : 0),
-  coherent_access_ (s.coherent_access_.get () ? new ::XMLSchema::boolean (*s.coherent_access_) : 0),
-  ordered_access_ (s.ordered_access_.get () ? new ::XMLSchema::boolean (*s.ordered_access_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , access_scope_ (s.access_scope_.get () ? new ::dds::presentationAccessScopeKind (*s.access_scope_) : 0)
+  , coherent_access_ (s.coherent_access_.get () ? new ::XMLSchema::boolean (*s.coherent_access_) : 0)
+  , ordered_access_ (s.ordered_access_.get () ? new ::XMLSchema::boolean (*s.ordered_access_) : 0)
   {
     if (access_scope_.get ()) access_scope_->container (this);
     if (coherent_access_.get ()) coherent_access_->container (this);
@@ -1511,17 +1484,15 @@ namespace dds
 
   // readerDataLifecycleQosPolicy
 
-  readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  autopurge_nowriter_samples_delay_ (s.autopurge_nowriter_samples_delay_.get () ? new ::dds::duration (*s.autopurge_nowriter_samples_delay_) : 0),
-  autopurge_disposed_samples_delay_ (s.autopurge_disposed_samples_delay_.get () ? new ::dds::duration (*s.autopurge_disposed_samples_delay_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , autopurge_nowriter_samples_delay_ (s.autopurge_nowriter_samples_delay_.get () ? new ::dds::duration (*s.autopurge_nowriter_samples_delay_) : 0)
+  , autopurge_disposed_samples_delay_ (s.autopurge_disposed_samples_delay_.get () ? new ::dds::duration (*s.autopurge_disposed_samples_delay_) : 0)
   {
     if (autopurge_nowriter_samples_delay_.get ()) autopurge_nowriter_samples_delay_->container (this);
     if (autopurge_disposed_samples_delay_.get ()) autopurge_disposed_samples_delay_->container (this);
@@ -1606,17 +1577,15 @@ namespace dds
 
   // reliabilityQosPolicy
 
-  reliabilityQosPolicy::reliabilityQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  reliabilityQosPolicy::reliabilityQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   reliabilityQosPolicy::reliabilityQosPolicy (reliabilityQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  kind_ (s.kind_.get () ? new ::dds::reliabilityKind (*s.kind_) : 0),
-  max_blocking_time_ (s.max_blocking_time_.get () ? new ::dds::duration (*s.max_blocking_time_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , kind_ (s.kind_.get () ? new ::dds::reliabilityKind (*s.kind_) : 0)
+  , max_blocking_time_ (s.max_blocking_time_.get () ? new ::dds::duration (*s.max_blocking_time_) : 0)
   {
     if (kind_.get ()) kind_->container (this);
     if (max_blocking_time_.get ()) max_blocking_time_->container (this);
@@ -1701,20 +1670,18 @@ namespace dds
 
   // resourceLimitsQosPolicy
 
-  resourceLimitsQosPolicy::resourceLimitsQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  resourceLimitsQosPolicy::resourceLimitsQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   resourceLimitsQosPolicy::resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0),
-  max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0),
-  max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0),
-  initial_samples_ (s.initial_samples_.get () ? new ::XMLSchema::positiveInteger (*s.initial_samples_) : 0),
-  initial_instances_ (s.initial_instances_.get () ? new ::XMLSchema::positiveInteger (*s.initial_instances_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
+  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
+  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
+  , initial_samples_ (s.initial_samples_.get () ? new ::XMLSchema::positiveInteger (*s.initial_samples_) : 0)
+  , initial_instances_ (s.initial_instances_.get () ? new ::XMLSchema::positiveInteger (*s.initial_instances_) : 0)
   {
     if (max_samples_.get ()) max_samples_->container (this);
     if (max_instances_.get ()) max_instances_->container (this);
@@ -1901,16 +1868,14 @@ namespace dds
 
   // timeBasedFilterQosPolicy
 
-  timeBasedFilterQosPolicy::timeBasedFilterQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  timeBasedFilterQosPolicy::timeBasedFilterQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   timeBasedFilterQosPolicy::timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  minimum_separation_ (s.minimum_separation_.get () ? new ::dds::duration (*s.minimum_separation_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , minimum_separation_ (s.minimum_separation_.get () ? new ::dds::duration (*s.minimum_separation_) : 0)
   {
     if (minimum_separation_.get ()) minimum_separation_->container (this);
   }
@@ -1961,16 +1926,14 @@ namespace dds
 
   // topicDataQosPolicy
 
-  topicDataQosPolicy::topicDataQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  topicDataQosPolicy::topicDataQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   topicDataQosPolicy::topicDataQosPolicy (topicDataQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -2021,16 +1984,14 @@ namespace dds
 
   // transportPriorityQosPolicy
 
-  transportPriorityQosPolicy::transportPriorityQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  transportPriorityQosPolicy::transportPriorityQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   transportPriorityQosPolicy::transportPriorityQosPolicy (transportPriorityQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -2081,16 +2042,14 @@ namespace dds
 
   // userDataQosPolicy
 
-  userDataQosPolicy::userDataQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  userDataQosPolicy::userDataQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   userDataQosPolicy::userDataQosPolicy (userDataQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
   {
     if (value_.get ()) value_->container (this);
   }
@@ -2141,16 +2100,14 @@ namespace dds
 
   // writerDataLifecycleQosPolicy
 
-  writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy ()
+  : ::XSCRT::Type ()
   {
   }
 
   writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const& s) :
-  ::XSCRT::Type (s),
-  autodispose_unregistered_instances_ (s.autodispose_unregistered_instances_.get () ? new ::XMLSchema::boolean (*s.autodispose_unregistered_instances_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , autodispose_unregistered_instances_ (s.autodispose_unregistered_instances_.get () ? new ::XMLSchema::boolean (*s.autodispose_unregistered_instances_) : 0)
   {
     if (autodispose_unregistered_instances_.get ()) autodispose_unregistered_instances_->container (this);
   }
@@ -2201,19 +2158,17 @@ namespace dds
 
   // domainparticipantQos
 
-  domainparticipantQos::domainparticipantQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  domainparticipantQos::domainparticipantQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   domainparticipantQos::domainparticipantQos (domainparticipantQos const& s) :
-  ::XSCRT::Type (s),
-  user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0),
-  entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
+  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     if (user_data_.get ()) user_data_->container (this);
     if (entity_factory_.get ()) entity_factory_->container (this);
@@ -2374,21 +2329,19 @@ namespace dds
 
   // publisherQos
 
-  publisherQos::publisherQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  publisherQos::publisherQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   publisherQos::publisherQos (publisherQos const& s) :
-  ::XSCRT::Type (s),
-  presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0),
-  partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0),
-  group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0),
-  entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0)
+  , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
+  , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
+  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     if (presentation_.get ()) presentation_->container (this);
     if (partition_.get ()) partition_->container (this);
@@ -2617,21 +2570,19 @@ namespace dds
 
   // subscriberQos
 
-  subscriberQos::subscriberQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  subscriberQos::subscriberQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   subscriberQos::subscriberQos (subscriberQos const& s) :
-  ::XSCRT::Type (s),
-  presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0),
-  partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0),
-  group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0),
-  entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0)
+  , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
+  , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
+  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     if (presentation_.get ()) presentation_->container (this);
     if (partition_.get ()) partition_->container (this);
@@ -2860,31 +2811,29 @@ namespace dds
 
   // topicQos
 
-  topicQos::topicQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  topicQos::topicQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   topicQos::topicQos (topicQos const& s) :
-  ::XSCRT::Type (s),
-  topic_data_ (s.topic_data_.get () ? new ::dds::topicDataQosPolicy (*s.topic_data_) : 0),
-  durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0),
-  durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0),
-  deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0),
-  latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0),
-  liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0),
-  reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0),
-  destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0),
-  history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0),
-  resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0),
-  transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0),
-  lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0),
-  ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , topic_data_ (s.topic_data_.get () ? new ::dds::topicDataQosPolicy (*s.topic_data_) : 0)
+  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
+  , durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0)
+  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
+  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
+  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
+  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
+  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
+  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
+  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
+  , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
+  , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
+  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
   {
     if (topic_data_.get ()) topic_data_->container (this);
     if (durability_.get ()) durability_->container (this);
@@ -3457,30 +3406,28 @@ namespace dds
 
   // datareaderQos
 
-  datareaderQos::datareaderQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  datareaderQos::datareaderQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   datareaderQos::datareaderQos (datareaderQos const& s) :
-  ::XSCRT::Type (s),
-  durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0),
-  deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0),
-  latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0),
-  liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0),
-  reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0),
-  destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0),
-  history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0),
-  resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0),
-  user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0),
-  ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0),
-  time_based_filter_ (s.time_based_filter_.get () ? new ::dds::timeBasedFilterQosPolicy (*s.time_based_filter_) : 0),
-  reader_data_lifecycle_ (s.reader_data_lifecycle_.get () ? new ::dds::readerDataLifecycleQosPolicy (*s.reader_data_lifecycle_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
+  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
+  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
+  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
+  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
+  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
+  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
+  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
+  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
+  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , time_based_filter_ (s.time_based_filter_.get () ? new ::dds::timeBasedFilterQosPolicy (*s.time_based_filter_) : 0)
+  , reader_data_lifecycle_ (s.reader_data_lifecycle_.get () ? new ::dds::readerDataLifecycleQosPolicy (*s.reader_data_lifecycle_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
   {
     if (durability_.get ()) durability_->container (this);
     if (deadline_.get ()) deadline_->container (this);
@@ -4019,33 +3966,31 @@ namespace dds
 
   // datawriterQos
 
-  datawriterQos::datawriterQos () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  datawriterQos::datawriterQos ()
+  : ::XSCRT::Type ()
   {
   }
 
   datawriterQos::datawriterQos (datawriterQos const& s) :
-  ::XSCRT::Type (s),
-  durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0),
-  durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0),
-  deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0),
-  latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0),
-  liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0),
-  reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0),
-  destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0),
-  history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0),
-  resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0),
-  transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0),
-  lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0),
-  user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0),
-  ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0),
-  ownership_strength_ (s.ownership_strength_.get () ? new ::dds::ownershipStrengthQosPolicy (*s.ownership_strength_) : 0),
-  writer_data_lifecycle_ (s.writer_data_lifecycle_.get () ? new ::dds::writerDataLifecycleQosPolicy (*s.writer_data_lifecycle_) : 0),
-  name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
+  , durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0)
+  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
+  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
+  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
+  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
+  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
+  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
+  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
+  , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
+  , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
+  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
+  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , ownership_strength_ (s.ownership_strength_.get () ? new ::dds::ownershipStrengthQosPolicy (*s.ownership_strength_) : 0)
+  , writer_data_lifecycle_ (s.writer_data_lifecycle_.get () ? new ::dds::writerDataLifecycleQosPolicy (*s.writer_data_lifecycle_) : 0)
+  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
   {
     if (durability_.get ()) durability_->container (this);
     if (durability_service_.get ()) durability_service_->container (this);
@@ -4686,25 +4631,23 @@ namespace dds
 
   // qosProfile
 
-  qosProfile::qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__) :
-  ::XSCRT::Type (),
-  name_ (new ::XMLSchema::string<ACE_TCHAR> (name__)),
-  regulator__ ()
+  qosProfile::qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__)
+  : ::XSCRT::Type ()
+  , name_ (new ::XMLSchema::string<ACE_TCHAR> (name__))
   {
     name_->container (this);
   }
 
   qosProfile::qosProfile (qosProfile const& s) :
-  ::XSCRT::Type (s),
-  datareader_qos_ (s.datareader_qos_),
-  datawriter_qos_ (s.datawriter_qos_),
-  topic_qos_ (s.topic_qos_),
-  domainparticipant_qos_ (s.domainparticipant_qos_),
-  publisher_qos_ (s.publisher_qos_),
-  subscriber_qos_ (s.subscriber_qos_),
-  name_ (new ::XMLSchema::string<ACE_TCHAR> (*s.name_)),
-  base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , datareader_qos_ (s.datareader_qos_)
+  , datawriter_qos_ (s.datawriter_qos_)
+  , topic_qos_ (s.topic_qos_)
+  , domainparticipant_qos_ (s.domainparticipant_qos_)
+  , publisher_qos_ (s.publisher_qos_)
+  , subscriber_qos_ (s.subscriber_qos_)
+  , name_ (new ::XMLSchema::string<ACE_TCHAR> (*s.name_))
+  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   {
     name_->container (this);
     if (base_name_.get ()) base_name_->container (this);
@@ -5015,16 +4958,14 @@ namespace dds
 
   // qosProfile_seq
 
-  qosProfile_seq::qosProfile_seq () :
-  ::XSCRT::Type (),
-  regulator__ ()
+  qosProfile_seq::qosProfile_seq ()
+  : ::XSCRT::Type ()
   {
   }
 
   qosProfile_seq::qosProfile_seq (qosProfile_seq const& s) :
-  ::XSCRT::Type (s),
-  qos_profile_ (s.qos_profile_),
-  regulator__ ()
+  ::XSCRT::Type (s)
+  , qos_profile_ (s.qos_profile_)
   {
   }
 
@@ -5313,7 +5254,7 @@ namespace dds
 
   duration::
   duration (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5345,7 +5286,7 @@ namespace dds
 
   stringSeq::
   stringSeq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5357,7 +5298,7 @@ namespace dds
 
       if (n == ACE_TEXT("element"))
       {
-        ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex>  t (new ::XMLSchema::string<ACE_TCHAR> (e));
+        element_value_type t (new ::XMLSchema::string<ACE_TCHAR> (e));
         add_element (t);
       }
 
@@ -5371,7 +5312,7 @@ namespace dds
 
   deadlineQosPolicy::
   deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5397,7 +5338,7 @@ namespace dds
 
   destinationOrderQosPolicy::
   destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5423,7 +5364,7 @@ namespace dds
 
   durabilityQosPolicy::
   durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5449,7 +5390,7 @@ namespace dds
 
   durabilityServiceQosPolicy::
   durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5505,7 +5446,7 @@ namespace dds
 
   entityFactoryQosPolicy::
   entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5531,7 +5472,7 @@ namespace dds
 
   groupDataQosPolicy::
   groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5557,7 +5498,7 @@ namespace dds
 
   historyQosPolicy::
   historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5589,7 +5530,7 @@ namespace dds
 
   latencyBudgetQosPolicy::
   latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5615,7 +5556,7 @@ namespace dds
 
   lifespanQosPolicy::
   lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5641,7 +5582,7 @@ namespace dds
 
   livelinessQosPolicy::
   livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5673,7 +5614,7 @@ namespace dds
 
   ownershipQosPolicy::
   ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5699,7 +5640,7 @@ namespace dds
 
   ownershipStrengthQosPolicy::
   ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5725,7 +5666,7 @@ namespace dds
 
   partitionQosPolicy::
   partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5751,7 +5692,7 @@ namespace dds
 
   presentationQosPolicy::
   presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5789,7 +5730,7 @@ namespace dds
 
   readerDataLifecycleQosPolicy::
   readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5821,7 +5762,7 @@ namespace dds
 
   reliabilityQosPolicy::
   reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5853,7 +5794,7 @@ namespace dds
 
   resourceLimitsQosPolicy::
   resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5903,7 +5844,7 @@ namespace dds
 
   timeBasedFilterQosPolicy::
   timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5929,7 +5870,7 @@ namespace dds
 
   topicDataQosPolicy::
   topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5955,7 +5896,7 @@ namespace dds
 
   transportPriorityQosPolicy::
   transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -5981,7 +5922,7 @@ namespace dds
 
   userDataQosPolicy::
   userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6007,7 +5948,7 @@ namespace dds
 
   writerDataLifecycleQosPolicy::
   writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6033,7 +5974,7 @@ namespace dds
 
   domainparticipantQos::
   domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6086,7 +6027,7 @@ namespace dds
 
   publisherQos::
   publisherQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6151,7 +6092,7 @@ namespace dds
 
   subscriberQos::
   subscriberQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6216,7 +6157,7 @@ namespace dds
 
   topicQos::
   topicQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6341,7 +6282,7 @@ namespace dds
 
   datareaderQos::
   datareaderQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6460,7 +6401,7 @@ namespace dds
 
   datawriterQos::
   datawriterQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6597,7 +6538,7 @@ namespace dds
 
   qosProfile::
   qosProfile (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6609,37 +6550,37 @@ namespace dds
 
       if (n == ACE_TEXT("datareader_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex>  t (new ::dds::datareaderQos (e));
+        datareader_qos_value_type t (new ::dds::datareaderQos (e));
         add_datareader_qos (t);
       }
 
       else if (n == ACE_TEXT("datawriter_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex>  t (new ::dds::datawriterQos (e));
+        datawriter_qos_value_type t (new ::dds::datawriterQos (e));
         add_datawriter_qos (t);
       }
 
       else if (n == ACE_TEXT("topic_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex>  t (new ::dds::topicQos (e));
+        topic_qos_value_type t (new ::dds::topicQos (e));
         add_topic_qos (t);
       }
 
       else if (n == ACE_TEXT("domainparticipant_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex>  t (new ::dds::domainparticipantQos (e));
+        domainparticipant_qos_value_type t (new ::dds::domainparticipantQos (e));
         add_domainparticipant_qos (t);
       }
 
       else if (n == ACE_TEXT("publisher_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex>  t (new ::dds::publisherQos (e));
+        publisher_qos_value_type t (new ::dds::publisherQos (e));
         add_publisher_qos (t);
       }
 
       else if (n == ACE_TEXT("subscriber_qos"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex>  t (new ::dds::subscriberQos (e));
+        subscriber_qos_value_type t (new ::dds::subscriberQos (e));
         add_subscriber_qos (t);
       }
 
@@ -6674,7 +6615,7 @@ namespace dds
 
   qosProfile_seq::
   qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e), regulator__ ()
+  :Base (e)
   {
 
     ::XSCRT::Parser<ACE_TCHAR> p (e);
@@ -6686,7 +6627,7 @@ namespace dds
 
       if (n == ACE_TEXT("qos_profile"))
       {
-        ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex>  t (new ::dds::qosProfile (e));
+        qos_profile_value_type t (new ::dds::qosProfile (e));
         add_qos_profile (t);
       }
 
@@ -6707,8 +6648,6 @@ namespace dds
       // Initiate our Singleton as an ACE_TSS object (ensures thread
       // specific storage
       ID_Map::TSS_ID_Map* TSS_ID_Map (ACE_Singleton<ID_Map::TSS_ID_Map, ACE_Null_Mutex>::instance());
-
-
       xercesc::DOMElement* dom_element = d->getDocumentElement ();
       if (!dom_element)
       {
@@ -6729,7067 +6668,6 @@ namespace dds
       {
         throw 1;
       }
-    }
-  }
-}
-
-#include "ace/XML_Utils/XMLSchema/TypeInfo.hpp"
-
-namespace dds
-{
-  namespace
-  {
-    ::XMLSchema::TypeInfoInitializer < ACE_TCHAR > XMLSchemaTypeInfoInitializer_ (::XSCRT::extended_type_info_map ());
-
-    struct destinationOrderKindTypeInfoInitializer
-    {
-      destinationOrderKindTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (destinationOrderKind));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    destinationOrderKindTypeInfoInitializer destinationOrderKindTypeInfoInitializer_;
-
-    struct durabilityKindTypeInfoInitializer
-    {
-      durabilityKindTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (durabilityKind));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    durabilityKindTypeInfoInitializer durabilityKindTypeInfoInitializer_;
-
-    struct historyKindTypeInfoInitializer
-    {
-      historyKindTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (historyKind));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    historyKindTypeInfoInitializer historyKindTypeInfoInitializer_;
-
-    struct livelinessKindTypeInfoInitializer
-    {
-      livelinessKindTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (livelinessKind));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    livelinessKindTypeInfoInitializer livelinessKindTypeInfoInitializer_;
-
-    struct presentationAccessScopeKindTypeInfoInitializer
-    {
-      presentationAccessScopeKindTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (presentationAccessScopeKind));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    presentationAccessScopeKindTypeInfoInitializer presentationAccessScopeKindTypeInfoInitializer_;
-
-    struct reliabilityKindTypeInfoInitializer
-    {
-      reliabilityKindTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (reliabilityKind));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    reliabilityKindTypeInfoInitializer reliabilityKindTypeInfoInitializer_;
-
-    struct ownershipKindTypeInfoInitializer
-    {
-      ownershipKindTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (ownershipKind));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    ownershipKindTypeInfoInitializer ownershipKindTypeInfoInitializer_;
-
-    struct durationTypeInfoInitializer
-    {
-      durationTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::duration));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    durationTypeInfoInitializer durationTypeInfoInitializer_;
-
-    struct stringSeqTypeInfoInitializer
-    {
-      stringSeqTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::stringSeq));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    stringSeqTypeInfoInitializer stringSeqTypeInfoInitializer_;
-
-    struct deadlineQosPolicyTypeInfoInitializer
-    {
-      deadlineQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::deadlineQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    deadlineQosPolicyTypeInfoInitializer deadlineQosPolicyTypeInfoInitializer_;
-
-    struct destinationOrderQosPolicyTypeInfoInitializer
-    {
-      destinationOrderQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::destinationOrderQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    destinationOrderQosPolicyTypeInfoInitializer destinationOrderQosPolicyTypeInfoInitializer_;
-
-    struct durabilityQosPolicyTypeInfoInitializer
-    {
-      durabilityQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::durabilityQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    durabilityQosPolicyTypeInfoInitializer durabilityQosPolicyTypeInfoInitializer_;
-
-    struct durabilityServiceQosPolicyTypeInfoInitializer
-    {
-      durabilityServiceQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::durabilityServiceQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    durabilityServiceQosPolicyTypeInfoInitializer durabilityServiceQosPolicyTypeInfoInitializer_;
-
-    struct entityFactoryQosPolicyTypeInfoInitializer
-    {
-      entityFactoryQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::entityFactoryQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    entityFactoryQosPolicyTypeInfoInitializer entityFactoryQosPolicyTypeInfoInitializer_;
-
-    struct groupDataQosPolicyTypeInfoInitializer
-    {
-      groupDataQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::groupDataQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    groupDataQosPolicyTypeInfoInitializer groupDataQosPolicyTypeInfoInitializer_;
-
-    struct historyQosPolicyTypeInfoInitializer
-    {
-      historyQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::historyQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    historyQosPolicyTypeInfoInitializer historyQosPolicyTypeInfoInitializer_;
-
-    struct latencyBudgetQosPolicyTypeInfoInitializer
-    {
-      latencyBudgetQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::latencyBudgetQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    latencyBudgetQosPolicyTypeInfoInitializer latencyBudgetQosPolicyTypeInfoInitializer_;
-
-    struct lifespanQosPolicyTypeInfoInitializer
-    {
-      lifespanQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::lifespanQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    lifespanQosPolicyTypeInfoInitializer lifespanQosPolicyTypeInfoInitializer_;
-
-    struct livelinessQosPolicyTypeInfoInitializer
-    {
-      livelinessQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::livelinessQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    livelinessQosPolicyTypeInfoInitializer livelinessQosPolicyTypeInfoInitializer_;
-
-    struct ownershipQosPolicyTypeInfoInitializer
-    {
-      ownershipQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::ownershipQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    ownershipQosPolicyTypeInfoInitializer ownershipQosPolicyTypeInfoInitializer_;
-
-    struct ownershipStrengthQosPolicyTypeInfoInitializer
-    {
-      ownershipStrengthQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::ownershipStrengthQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    ownershipStrengthQosPolicyTypeInfoInitializer ownershipStrengthQosPolicyTypeInfoInitializer_;
-
-    struct partitionQosPolicyTypeInfoInitializer
-    {
-      partitionQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::partitionQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    partitionQosPolicyTypeInfoInitializer partitionQosPolicyTypeInfoInitializer_;
-
-    struct presentationQosPolicyTypeInfoInitializer
-    {
-      presentationQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::presentationQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    presentationQosPolicyTypeInfoInitializer presentationQosPolicyTypeInfoInitializer_;
-
-    struct readerDataLifecycleQosPolicyTypeInfoInitializer
-    {
-      readerDataLifecycleQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::readerDataLifecycleQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    readerDataLifecycleQosPolicyTypeInfoInitializer readerDataLifecycleQosPolicyTypeInfoInitializer_;
-
-    struct reliabilityQosPolicyTypeInfoInitializer
-    {
-      reliabilityQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::reliabilityQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    reliabilityQosPolicyTypeInfoInitializer reliabilityQosPolicyTypeInfoInitializer_;
-
-    struct resourceLimitsQosPolicyTypeInfoInitializer
-    {
-      resourceLimitsQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::resourceLimitsQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    resourceLimitsQosPolicyTypeInfoInitializer resourceLimitsQosPolicyTypeInfoInitializer_;
-
-    struct timeBasedFilterQosPolicyTypeInfoInitializer
-    {
-      timeBasedFilterQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::timeBasedFilterQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    timeBasedFilterQosPolicyTypeInfoInitializer timeBasedFilterQosPolicyTypeInfoInitializer_;
-
-    struct topicDataQosPolicyTypeInfoInitializer
-    {
-      topicDataQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::topicDataQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    topicDataQosPolicyTypeInfoInitializer topicDataQosPolicyTypeInfoInitializer_;
-
-    struct transportPriorityQosPolicyTypeInfoInitializer
-    {
-      transportPriorityQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::transportPriorityQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    transportPriorityQosPolicyTypeInfoInitializer transportPriorityQosPolicyTypeInfoInitializer_;
-
-    struct userDataQosPolicyTypeInfoInitializer
-    {
-      userDataQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::userDataQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    userDataQosPolicyTypeInfoInitializer userDataQosPolicyTypeInfoInitializer_;
-
-    struct writerDataLifecycleQosPolicyTypeInfoInitializer
-    {
-      writerDataLifecycleQosPolicyTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::writerDataLifecycleQosPolicy));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    writerDataLifecycleQosPolicyTypeInfoInitializer writerDataLifecycleQosPolicyTypeInfoInitializer_;
-
-    struct domainparticipantQosTypeInfoInitializer
-    {
-      domainparticipantQosTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::domainparticipantQos));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    domainparticipantQosTypeInfoInitializer domainparticipantQosTypeInfoInitializer_;
-
-    struct publisherQosTypeInfoInitializer
-    {
-      publisherQosTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::publisherQos));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    publisherQosTypeInfoInitializer publisherQosTypeInfoInitializer_;
-
-    struct subscriberQosTypeInfoInitializer
-    {
-      subscriberQosTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::subscriberQos));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    subscriberQosTypeInfoInitializer subscriberQosTypeInfoInitializer_;
-
-    struct topicQosTypeInfoInitializer
-    {
-      topicQosTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::topicQos));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    topicQosTypeInfoInitializer topicQosTypeInfoInitializer_;
-
-    struct datareaderQosTypeInfoInitializer
-    {
-      datareaderQosTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::datareaderQos));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    datareaderQosTypeInfoInitializer datareaderQosTypeInfoInitializer_;
-
-    struct datawriterQosTypeInfoInitializer
-    {
-      datawriterQosTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::datawriterQos));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    datawriterQosTypeInfoInitializer datawriterQosTypeInfoInitializer_;
-
-    struct qosProfileTypeInfoInitializer
-    {
-      qosProfileTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::qosProfile));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    qosProfileTypeInfoInitializer qosProfileTypeInfoInitializer_;
-
-    struct qosProfile_seqTypeInfoInitializer
-    {
-      qosProfile_seqTypeInfoInitializer ()
-      {
-        ::XSCRT::TypeId id (typeid (::dds::qosProfile_seq));
-        ::XSCRT::ExtendedTypeInfo nf (id);
-
-        nf.add_base (::XSCRT::ExtendedTypeInfo::Access::public_, false, typeid (::XSCRT::Type));
-        ::XSCRT::extended_type_info_map ().insert (std::make_pair (id, nf));
-      }
-    };
-
-    qosProfile_seqTypeInfoInitializer qosProfile_seqTypeInfoInitializer_;
-  }
-}
-
-namespace dds
-{
-  namespace Traversal
-  {
-    // duration
-
-    void duration::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.sec_p ()) sec (o);
-      else sec_none (o);
-      if (o.nanosec_p ()) nanosec (o);
-      else nanosec_none (o);
-      post (o);
-    }
-
-    void duration::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.sec_p ()) sec (o);
-      else sec_none (o);
-      if (o.nanosec_p ()) nanosec (o);
-      else nanosec_none (o);
-      post (o);
-    }
-
-    void duration::
-    pre (Type&)
-    {
-    }
-
-    void duration::
-    pre (Type const&)
-    {
-    }
-
-    void duration::
-    sec (Type& o)
-    {
-      dispatch (o.sec ());
-    }
-
-    void duration::
-    sec (Type const& o)
-    {
-      dispatch (o.sec ());
-    }
-
-    void duration::
-    sec_none (Type&)
-    {
-    }
-
-    void duration::
-    sec_none (Type const&)
-    {
-    }
-
-    void duration::
-    nanosec (Type& o)
-    {
-      dispatch (o.nanosec ());
-    }
-
-    void duration::
-    nanosec (Type const& o)
-    {
-      dispatch (o.nanosec ());
-    }
-
-    void duration::
-    nanosec_none (Type&)
-    {
-    }
-
-    void duration::
-    nanosec_none (Type const&)
-    {
-    }
-
-    void duration::
-    post (Type&)
-    {
-    }
-
-    void duration::
-    post (Type const&)
-    {
-    }
-
-    // stringSeq
-
-    void stringSeq::
-    traverse (Type& o)
-    {
-      pre (o);
-      element (o);
-      post (o);
-    }
-
-    void stringSeq::
-    traverse (Type const& o)
-    {
-      pre (o);
-      element (o);
-      post (o);
-    }
-
-    void stringSeq::
-    pre (Type&)
-    {
-    }
-
-    void stringSeq::
-    pre (Type const&)
-    {
-    }
-
-    void stringSeq::
-    element (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::stringSeq::element_iterator b (o.begin_element()), e (o.end_element());
-
-      if (b != e)
-      {
-        element_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) element_next (o);
-        }
-
-        element_post (o);
-      }
-
-      else element_none (o);
-    }
-
-    void stringSeq::
-    element (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::stringSeq::element_const_iterator b (o.begin_element()), e (o.end_element());
-
-      if (b != e)
-      {
-        element_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) element_next (o);
-        }
-
-        element_post (o);
-      }
-
-      else element_none (o);
-    }
-
-    void stringSeq::
-    element_pre (Type&)
-    {
-    }
-
-    void stringSeq::
-    element_pre (Type const&)
-    {
-    }
-
-    void stringSeq::
-    element_next (Type&)
-    {
-    }
-
-    void stringSeq::
-    element_next (Type const&)
-    {
-    }
-
-    void stringSeq::
-    element_post (Type&)
-    {
-    }
-
-    void stringSeq::
-    element_post (Type const&)
-    {
-    }
-
-    void stringSeq::
-    element_none (Type&)
-    {
-    }
-
-    void stringSeq::
-    element_none (Type const&)
-    {
-    }
-
-    void stringSeq::
-    post (Type&)
-    {
-    }
-
-    void stringSeq::
-    post (Type const&)
-    {
-    }
-
-    // deadlineQosPolicy
-
-    void deadlineQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.period_p ()) period (o);
-      else period_none (o);
-      post (o);
-    }
-
-    void deadlineQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.period_p ()) period (o);
-      else period_none (o);
-      post (o);
-    }
-
-    void deadlineQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void deadlineQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void deadlineQosPolicy::
-    period (Type& o)
-    {
-      dispatch (o.period ());
-    }
-
-    void deadlineQosPolicy::
-    period (Type const& o)
-    {
-      dispatch (o.period ());
-    }
-
-    void deadlineQosPolicy::
-    period_none (Type&)
-    {
-    }
-
-    void deadlineQosPolicy::
-    period_none (Type const&)
-    {
-    }
-
-    void deadlineQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void deadlineQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // destinationOrderQosPolicy
-
-    void destinationOrderQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      post (o);
-    }
-
-    void destinationOrderQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      post (o);
-    }
-
-    void destinationOrderQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void destinationOrderQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void destinationOrderQosPolicy::
-    kind (Type& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void destinationOrderQosPolicy::
-    kind (Type const& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void destinationOrderQosPolicy::
-    kind_none (Type&)
-    {
-    }
-
-    void destinationOrderQosPolicy::
-    kind_none (Type const&)
-    {
-    }
-
-    void destinationOrderQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void destinationOrderQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // durabilityQosPolicy
-
-    void durabilityQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      post (o);
-    }
-
-    void durabilityQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      post (o);
-    }
-
-    void durabilityQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void durabilityQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void durabilityQosPolicy::
-    kind (Type& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void durabilityQosPolicy::
-    kind (Type const& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void durabilityQosPolicy::
-    kind_none (Type&)
-    {
-    }
-
-    void durabilityQosPolicy::
-    kind_none (Type const&)
-    {
-    }
-
-    void durabilityQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void durabilityQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // durabilityServiceQosPolicy
-
-    void durabilityServiceQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.service_cleanup_delay_p ()) service_cleanup_delay (o);
-      else service_cleanup_delay_none (o);
-      if (o.history_kind_p ()) history_kind (o);
-      else history_kind_none (o);
-      if (o.history_depth_p ()) history_depth (o);
-      else history_depth_none (o);
-      if (o.max_samples_p ()) max_samples (o);
-      else max_samples_none (o);
-      if (o.max_instances_p ()) max_instances (o);
-      else max_instances_none (o);
-      if (o.max_samples_per_instance_p ()) max_samples_per_instance (o);
-      else max_samples_per_instance_none (o);
-      post (o);
-    }
-
-    void durabilityServiceQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.service_cleanup_delay_p ()) service_cleanup_delay (o);
-      else service_cleanup_delay_none (o);
-      if (o.history_kind_p ()) history_kind (o);
-      else history_kind_none (o);
-      if (o.history_depth_p ()) history_depth (o);
-      else history_depth_none (o);
-      if (o.max_samples_p ()) max_samples (o);
-      else max_samples_none (o);
-      if (o.max_instances_p ()) max_instances (o);
-      else max_instances_none (o);
-      if (o.max_samples_per_instance_p ()) max_samples_per_instance (o);
-      else max_samples_per_instance_none (o);
-      post (o);
-    }
-
-    void durabilityServiceQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    service_cleanup_delay (Type& o)
-    {
-      dispatch (o.service_cleanup_delay ());
-    }
-
-    void durabilityServiceQosPolicy::
-    service_cleanup_delay (Type const& o)
-    {
-      dispatch (o.service_cleanup_delay ());
-    }
-
-    void durabilityServiceQosPolicy::
-    service_cleanup_delay_none (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    service_cleanup_delay_none (Type const&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    history_kind (Type& o)
-    {
-      dispatch (o.history_kind ());
-    }
-
-    void durabilityServiceQosPolicy::
-    history_kind (Type const& o)
-    {
-      dispatch (o.history_kind ());
-    }
-
-    void durabilityServiceQosPolicy::
-    history_kind_none (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    history_kind_none (Type const&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    history_depth (Type& o)
-    {
-      dispatch (o.history_depth ());
-    }
-
-    void durabilityServiceQosPolicy::
-    history_depth (Type const& o)
-    {
-      dispatch (o.history_depth ());
-    }
-
-    void durabilityServiceQosPolicy::
-    history_depth_none (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    history_depth_none (Type const&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples (Type& o)
-    {
-      dispatch (o.max_samples ());
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples (Type const& o)
-    {
-      dispatch (o.max_samples ());
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples_none (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples_none (Type const&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    max_instances (Type& o)
-    {
-      dispatch (o.max_instances ());
-    }
-
-    void durabilityServiceQosPolicy::
-    max_instances (Type const& o)
-    {
-      dispatch (o.max_instances ());
-    }
-
-    void durabilityServiceQosPolicy::
-    max_instances_none (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    max_instances_none (Type const&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples_per_instance (Type& o)
-    {
-      dispatch (o.max_samples_per_instance ());
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples_per_instance (Type const& o)
-    {
-      dispatch (o.max_samples_per_instance ());
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples_per_instance_none (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples_per_instance_none (Type const&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // entityFactoryQosPolicy
-
-    void entityFactoryQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.autoenable_created_entities_p ()) autoenable_created_entities (o);
-      else autoenable_created_entities_none (o);
-      post (o);
-    }
-
-    void entityFactoryQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.autoenable_created_entities_p ()) autoenable_created_entities (o);
-      else autoenable_created_entities_none (o);
-      post (o);
-    }
-
-    void entityFactoryQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void entityFactoryQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void entityFactoryQosPolicy::
-    autoenable_created_entities (Type& o)
-    {
-      dispatch (o.autoenable_created_entities ());
-    }
-
-    void entityFactoryQosPolicy::
-    autoenable_created_entities (Type const& o)
-    {
-      dispatch (o.autoenable_created_entities ());
-    }
-
-    void entityFactoryQosPolicy::
-    autoenable_created_entities_none (Type&)
-    {
-    }
-
-    void entityFactoryQosPolicy::
-    autoenable_created_entities_none (Type const&)
-    {
-    }
-
-    void entityFactoryQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void entityFactoryQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // groupDataQosPolicy
-
-    void groupDataQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void groupDataQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void groupDataQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void groupDataQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void groupDataQosPolicy::
-    value (Type& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void groupDataQosPolicy::
-    value (Type const& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void groupDataQosPolicy::
-    value_none (Type&)
-    {
-    }
-
-    void groupDataQosPolicy::
-    value_none (Type const&)
-    {
-    }
-
-    void groupDataQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void groupDataQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // historyQosPolicy
-
-    void historyQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      if (o.depth_p ()) depth (o);
-      else depth_none (o);
-      post (o);
-    }
-
-    void historyQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      if (o.depth_p ()) depth (o);
-      else depth_none (o);
-      post (o);
-    }
-
-    void historyQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void historyQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void historyQosPolicy::
-    kind (Type& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void historyQosPolicy::
-    kind (Type const& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void historyQosPolicy::
-    kind_none (Type&)
-    {
-    }
-
-    void historyQosPolicy::
-    kind_none (Type const&)
-    {
-    }
-
-    void historyQosPolicy::
-    depth (Type& o)
-    {
-      dispatch (o.depth ());
-    }
-
-    void historyQosPolicy::
-    depth (Type const& o)
-    {
-      dispatch (o.depth ());
-    }
-
-    void historyQosPolicy::
-    depth_none (Type&)
-    {
-    }
-
-    void historyQosPolicy::
-    depth_none (Type const&)
-    {
-    }
-
-    void historyQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void historyQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // latencyBudgetQosPolicy
-
-    void latencyBudgetQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.duration_p ()) duration (o);
-      else duration_none (o);
-      post (o);
-    }
-
-    void latencyBudgetQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.duration_p ()) duration (o);
-      else duration_none (o);
-      post (o);
-    }
-
-    void latencyBudgetQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void latencyBudgetQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void latencyBudgetQosPolicy::
-    duration (Type& o)
-    {
-      dispatch (o.duration ());
-    }
-
-    void latencyBudgetQosPolicy::
-    duration (Type const& o)
-    {
-      dispatch (o.duration ());
-    }
-
-    void latencyBudgetQosPolicy::
-    duration_none (Type&)
-    {
-    }
-
-    void latencyBudgetQosPolicy::
-    duration_none (Type const&)
-    {
-    }
-
-    void latencyBudgetQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void latencyBudgetQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // lifespanQosPolicy
-
-    void lifespanQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.duration_p ()) duration (o);
-      else duration_none (o);
-      post (o);
-    }
-
-    void lifespanQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.duration_p ()) duration (o);
-      else duration_none (o);
-      post (o);
-    }
-
-    void lifespanQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void lifespanQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void lifespanQosPolicy::
-    duration (Type& o)
-    {
-      dispatch (o.duration ());
-    }
-
-    void lifespanQosPolicy::
-    duration (Type const& o)
-    {
-      dispatch (o.duration ());
-    }
-
-    void lifespanQosPolicy::
-    duration_none (Type&)
-    {
-    }
-
-    void lifespanQosPolicy::
-    duration_none (Type const&)
-    {
-    }
-
-    void lifespanQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void lifespanQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // livelinessQosPolicy
-
-    void livelinessQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      if (o.lease_duration_p ()) lease_duration (o);
-      else lease_duration_none (o);
-      post (o);
-    }
-
-    void livelinessQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      if (o.lease_duration_p ()) lease_duration (o);
-      else lease_duration_none (o);
-      post (o);
-    }
-
-    void livelinessQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void livelinessQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void livelinessQosPolicy::
-    kind (Type& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void livelinessQosPolicy::
-    kind (Type const& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void livelinessQosPolicy::
-    kind_none (Type&)
-    {
-    }
-
-    void livelinessQosPolicy::
-    kind_none (Type const&)
-    {
-    }
-
-    void livelinessQosPolicy::
-    lease_duration (Type& o)
-    {
-      dispatch (o.lease_duration ());
-    }
-
-    void livelinessQosPolicy::
-    lease_duration (Type const& o)
-    {
-      dispatch (o.lease_duration ());
-    }
-
-    void livelinessQosPolicy::
-    lease_duration_none (Type&)
-    {
-    }
-
-    void livelinessQosPolicy::
-    lease_duration_none (Type const&)
-    {
-    }
-
-    void livelinessQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void livelinessQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // ownershipQosPolicy
-
-    void ownershipQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      post (o);
-    }
-
-    void ownershipQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      post (o);
-    }
-
-    void ownershipQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void ownershipQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void ownershipQosPolicy::
-    kind (Type& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void ownershipQosPolicy::
-    kind (Type const& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void ownershipQosPolicy::
-    kind_none (Type&)
-    {
-    }
-
-    void ownershipQosPolicy::
-    kind_none (Type const&)
-    {
-    }
-
-    void ownershipQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void ownershipQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // ownershipStrengthQosPolicy
-
-    void ownershipStrengthQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void ownershipStrengthQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void ownershipStrengthQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void ownershipStrengthQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void ownershipStrengthQosPolicy::
-    value (Type& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void ownershipStrengthQosPolicy::
-    value (Type const& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void ownershipStrengthQosPolicy::
-    value_none (Type&)
-    {
-    }
-
-    void ownershipStrengthQosPolicy::
-    value_none (Type const&)
-    {
-    }
-
-    void ownershipStrengthQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void ownershipStrengthQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // partitionQosPolicy
-
-    void partitionQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      post (o);
-    }
-
-    void partitionQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      post (o);
-    }
-
-    void partitionQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void partitionQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void partitionQosPolicy::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void partitionQosPolicy::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void partitionQosPolicy::
-    name_none (Type&)
-    {
-    }
-
-    void partitionQosPolicy::
-    name_none (Type const&)
-    {
-    }
-
-    void partitionQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void partitionQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // presentationQosPolicy
-
-    void presentationQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.access_scope_p ()) access_scope (o);
-      else access_scope_none (o);
-      if (o.coherent_access_p ()) coherent_access (o);
-      else coherent_access_none (o);
-      if (o.ordered_access_p ()) ordered_access (o);
-      else ordered_access_none (o);
-      post (o);
-    }
-
-    void presentationQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.access_scope_p ()) access_scope (o);
-      else access_scope_none (o);
-      if (o.coherent_access_p ()) coherent_access (o);
-      else coherent_access_none (o);
-      if (o.ordered_access_p ()) ordered_access (o);
-      else ordered_access_none (o);
-      post (o);
-    }
-
-    void presentationQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void presentationQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void presentationQosPolicy::
-    access_scope (Type& o)
-    {
-      dispatch (o.access_scope ());
-    }
-
-    void presentationQosPolicy::
-    access_scope (Type const& o)
-    {
-      dispatch (o.access_scope ());
-    }
-
-    void presentationQosPolicy::
-    access_scope_none (Type&)
-    {
-    }
-
-    void presentationQosPolicy::
-    access_scope_none (Type const&)
-    {
-    }
-
-    void presentationQosPolicy::
-    coherent_access (Type& o)
-    {
-      dispatch (o.coherent_access ());
-    }
-
-    void presentationQosPolicy::
-    coherent_access (Type const& o)
-    {
-      dispatch (o.coherent_access ());
-    }
-
-    void presentationQosPolicy::
-    coherent_access_none (Type&)
-    {
-    }
-
-    void presentationQosPolicy::
-    coherent_access_none (Type const&)
-    {
-    }
-
-    void presentationQosPolicy::
-    ordered_access (Type& o)
-    {
-      dispatch (o.ordered_access ());
-    }
-
-    void presentationQosPolicy::
-    ordered_access (Type const& o)
-    {
-      dispatch (o.ordered_access ());
-    }
-
-    void presentationQosPolicy::
-    ordered_access_none (Type&)
-    {
-    }
-
-    void presentationQosPolicy::
-    ordered_access_none (Type const&)
-    {
-    }
-
-    void presentationQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void presentationQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // readerDataLifecycleQosPolicy
-
-    void readerDataLifecycleQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.autopurge_nowriter_samples_delay_p ()) autopurge_nowriter_samples_delay (o);
-      else autopurge_nowriter_samples_delay_none (o);
-      if (o.autopurge_disposed_samples_delay_p ()) autopurge_disposed_samples_delay (o);
-      else autopurge_disposed_samples_delay_none (o);
-      post (o);
-    }
-
-    void readerDataLifecycleQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.autopurge_nowriter_samples_delay_p ()) autopurge_nowriter_samples_delay (o);
-      else autopurge_nowriter_samples_delay_none (o);
-      if (o.autopurge_disposed_samples_delay_p ()) autopurge_disposed_samples_delay (o);
-      else autopurge_disposed_samples_delay_none (o);
-      post (o);
-    }
-
-    void readerDataLifecycleQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_nowriter_samples_delay (Type& o)
-    {
-      dispatch (o.autopurge_nowriter_samples_delay ());
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_nowriter_samples_delay (Type const& o)
-    {
-      dispatch (o.autopurge_nowriter_samples_delay ());
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_nowriter_samples_delay_none (Type&)
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_nowriter_samples_delay_none (Type const&)
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_disposed_samples_delay (Type& o)
-    {
-      dispatch (o.autopurge_disposed_samples_delay ());
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_disposed_samples_delay (Type const& o)
-    {
-      dispatch (o.autopurge_disposed_samples_delay ());
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_disposed_samples_delay_none (Type&)
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_disposed_samples_delay_none (Type const&)
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // reliabilityQosPolicy
-
-    void reliabilityQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      if (o.max_blocking_time_p ()) max_blocking_time (o);
-      else max_blocking_time_none (o);
-      post (o);
-    }
-
-    void reliabilityQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.kind_p ()) kind (o);
-      else kind_none (o);
-      if (o.max_blocking_time_p ()) max_blocking_time (o);
-      else max_blocking_time_none (o);
-      post (o);
-    }
-
-    void reliabilityQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void reliabilityQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void reliabilityQosPolicy::
-    kind (Type& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void reliabilityQosPolicy::
-    kind (Type const& o)
-    {
-      dispatch (o.kind ());
-    }
-
-    void reliabilityQosPolicy::
-    kind_none (Type&)
-    {
-    }
-
-    void reliabilityQosPolicy::
-    kind_none (Type const&)
-    {
-    }
-
-    void reliabilityQosPolicy::
-    max_blocking_time (Type& o)
-    {
-      dispatch (o.max_blocking_time ());
-    }
-
-    void reliabilityQosPolicy::
-    max_blocking_time (Type const& o)
-    {
-      dispatch (o.max_blocking_time ());
-    }
-
-    void reliabilityQosPolicy::
-    max_blocking_time_none (Type&)
-    {
-    }
-
-    void reliabilityQosPolicy::
-    max_blocking_time_none (Type const&)
-    {
-    }
-
-    void reliabilityQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void reliabilityQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // resourceLimitsQosPolicy
-
-    void resourceLimitsQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.max_samples_p ()) max_samples (o);
-      else max_samples_none (o);
-      if (o.max_instances_p ()) max_instances (o);
-      else max_instances_none (o);
-      if (o.max_samples_per_instance_p ()) max_samples_per_instance (o);
-      else max_samples_per_instance_none (o);
-      if (o.initial_samples_p ()) initial_samples (o);
-      else initial_samples_none (o);
-      if (o.initial_instances_p ()) initial_instances (o);
-      else initial_instances_none (o);
-      post (o);
-    }
-
-    void resourceLimitsQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.max_samples_p ()) max_samples (o);
-      else max_samples_none (o);
-      if (o.max_instances_p ()) max_instances (o);
-      else max_instances_none (o);
-      if (o.max_samples_per_instance_p ()) max_samples_per_instance (o);
-      else max_samples_per_instance_none (o);
-      if (o.initial_samples_p ()) initial_samples (o);
-      else initial_samples_none (o);
-      if (o.initial_instances_p ()) initial_instances (o);
-      else initial_instances_none (o);
-      post (o);
-    }
-
-    void resourceLimitsQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples (Type& o)
-    {
-      dispatch (o.max_samples ());
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples (Type const& o)
-    {
-      dispatch (o.max_samples ());
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples_none (Type&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples_none (Type const&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    max_instances (Type& o)
-    {
-      dispatch (o.max_instances ());
-    }
-
-    void resourceLimitsQosPolicy::
-    max_instances (Type const& o)
-    {
-      dispatch (o.max_instances ());
-    }
-
-    void resourceLimitsQosPolicy::
-    max_instances_none (Type&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    max_instances_none (Type const&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples_per_instance (Type& o)
-    {
-      dispatch (o.max_samples_per_instance ());
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples_per_instance (Type const& o)
-    {
-      dispatch (o.max_samples_per_instance ());
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples_per_instance_none (Type&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples_per_instance_none (Type const&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_samples (Type& o)
-    {
-      dispatch (o.initial_samples ());
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_samples (Type const& o)
-    {
-      dispatch (o.initial_samples ());
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_samples_none (Type&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_samples_none (Type const&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_instances (Type& o)
-    {
-      dispatch (o.initial_instances ());
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_instances (Type const& o)
-    {
-      dispatch (o.initial_instances ());
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_instances_none (Type&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_instances_none (Type const&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // timeBasedFilterQosPolicy
-
-    void timeBasedFilterQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.minimum_separation_p ()) minimum_separation (o);
-      else minimum_separation_none (o);
-      post (o);
-    }
-
-    void timeBasedFilterQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.minimum_separation_p ()) minimum_separation (o);
-      else minimum_separation_none (o);
-      post (o);
-    }
-
-    void timeBasedFilterQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void timeBasedFilterQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void timeBasedFilterQosPolicy::
-    minimum_separation (Type& o)
-    {
-      dispatch (o.minimum_separation ());
-    }
-
-    void timeBasedFilterQosPolicy::
-    minimum_separation (Type const& o)
-    {
-      dispatch (o.minimum_separation ());
-    }
-
-    void timeBasedFilterQosPolicy::
-    minimum_separation_none (Type&)
-    {
-    }
-
-    void timeBasedFilterQosPolicy::
-    minimum_separation_none (Type const&)
-    {
-    }
-
-    void timeBasedFilterQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void timeBasedFilterQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // topicDataQosPolicy
-
-    void topicDataQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void topicDataQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void topicDataQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void topicDataQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void topicDataQosPolicy::
-    value (Type& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void topicDataQosPolicy::
-    value (Type const& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void topicDataQosPolicy::
-    value_none (Type&)
-    {
-    }
-
-    void topicDataQosPolicy::
-    value_none (Type const&)
-    {
-    }
-
-    void topicDataQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void topicDataQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // transportPriorityQosPolicy
-
-    void transportPriorityQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void transportPriorityQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void transportPriorityQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void transportPriorityQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void transportPriorityQosPolicy::
-    value (Type& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void transportPriorityQosPolicy::
-    value (Type const& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void transportPriorityQosPolicy::
-    value_none (Type&)
-    {
-    }
-
-    void transportPriorityQosPolicy::
-    value_none (Type const&)
-    {
-    }
-
-    void transportPriorityQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void transportPriorityQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // userDataQosPolicy
-
-    void userDataQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void userDataQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.value_p ()) value (o);
-      else value_none (o);
-      post (o);
-    }
-
-    void userDataQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void userDataQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void userDataQosPolicy::
-    value (Type& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void userDataQosPolicy::
-    value (Type const& o)
-    {
-      dispatch (o.value ());
-    }
-
-    void userDataQosPolicy::
-    value_none (Type&)
-    {
-    }
-
-    void userDataQosPolicy::
-    value_none (Type const&)
-    {
-    }
-
-    void userDataQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void userDataQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // writerDataLifecycleQosPolicy
-
-    void writerDataLifecycleQosPolicy::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.autodispose_unregistered_instances_p ()) autodispose_unregistered_instances (o);
-      else autodispose_unregistered_instances_none (o);
-      post (o);
-    }
-
-    void writerDataLifecycleQosPolicy::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.autodispose_unregistered_instances_p ()) autodispose_unregistered_instances (o);
-      else autodispose_unregistered_instances_none (o);
-      post (o);
-    }
-
-    void writerDataLifecycleQosPolicy::
-    pre (Type&)
-    {
-    }
-
-    void writerDataLifecycleQosPolicy::
-    pre (Type const&)
-    {
-    }
-
-    void writerDataLifecycleQosPolicy::
-    autodispose_unregistered_instances (Type& o)
-    {
-      dispatch (o.autodispose_unregistered_instances ());
-    }
-
-    void writerDataLifecycleQosPolicy::
-    autodispose_unregistered_instances (Type const& o)
-    {
-      dispatch (o.autodispose_unregistered_instances ());
-    }
-
-    void writerDataLifecycleQosPolicy::
-    autodispose_unregistered_instances_none (Type&)
-    {
-    }
-
-    void writerDataLifecycleQosPolicy::
-    autodispose_unregistered_instances_none (Type const&)
-    {
-    }
-
-    void writerDataLifecycleQosPolicy::
-    post (Type&)
-    {
-    }
-
-    void writerDataLifecycleQosPolicy::
-    post (Type const&)
-    {
-    }
-
-    // domainparticipantQos
-
-    void domainparticipantQos::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.user_data_p ()) user_data (o);
-      else user_data_none (o);
-      if (o.entity_factory_p ()) entity_factory (o);
-      else entity_factory_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void domainparticipantQos::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.user_data_p ()) user_data (o);
-      else user_data_none (o);
-      if (o.entity_factory_p ()) entity_factory (o);
-      else entity_factory_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void domainparticipantQos::
-    pre (Type&)
-    {
-    }
-
-    void domainparticipantQos::
-    pre (Type const&)
-    {
-    }
-
-    void domainparticipantQos::
-    user_data (Type& o)
-    {
-      dispatch (o.user_data ());
-    }
-
-    void domainparticipantQos::
-    user_data (Type const& o)
-    {
-      dispatch (o.user_data ());
-    }
-
-    void domainparticipantQos::
-    user_data_none (Type&)
-    {
-    }
-
-    void domainparticipantQos::
-    user_data_none (Type const&)
-    {
-    }
-
-    void domainparticipantQos::
-    entity_factory (Type& o)
-    {
-      dispatch (o.entity_factory ());
-    }
-
-    void domainparticipantQos::
-    entity_factory (Type const& o)
-    {
-      dispatch (o.entity_factory ());
-    }
-
-    void domainparticipantQos::
-    entity_factory_none (Type&)
-    {
-    }
-
-    void domainparticipantQos::
-    entity_factory_none (Type const&)
-    {
-    }
-
-    void domainparticipantQos::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void domainparticipantQos::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void domainparticipantQos::
-    name_none (Type&)
-    {
-    }
-
-    void domainparticipantQos::
-    name_none (Type const&)
-    {
-    }
-
-    void domainparticipantQos::
-    base_name (Type& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void domainparticipantQos::
-    base_name (Type const& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void domainparticipantQos::
-    base_name_none (Type&)
-    {
-    }
-
-    void domainparticipantQos::
-    base_name_none (Type const&)
-    {
-    }
-
-    void domainparticipantQos::
-    post (Type&)
-    {
-    }
-
-    void domainparticipantQos::
-    post (Type const&)
-    {
-    }
-
-    // publisherQos
-
-    void publisherQos::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.presentation_p ()) presentation (o);
-      else presentation_none (o);
-      if (o.partition_p ()) partition (o);
-      else partition_none (o);
-      if (o.group_data_p ()) group_data (o);
-      else group_data_none (o);
-      if (o.entity_factory_p ()) entity_factory (o);
-      else entity_factory_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void publisherQos::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.presentation_p ()) presentation (o);
-      else presentation_none (o);
-      if (o.partition_p ()) partition (o);
-      else partition_none (o);
-      if (o.group_data_p ()) group_data (o);
-      else group_data_none (o);
-      if (o.entity_factory_p ()) entity_factory (o);
-      else entity_factory_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void publisherQos::
-    pre (Type&)
-    {
-    }
-
-    void publisherQos::
-    pre (Type const&)
-    {
-    }
-
-    void publisherQos::
-    presentation (Type& o)
-    {
-      dispatch (o.presentation ());
-    }
-
-    void publisherQos::
-    presentation (Type const& o)
-    {
-      dispatch (o.presentation ());
-    }
-
-    void publisherQos::
-    presentation_none (Type&)
-    {
-    }
-
-    void publisherQos::
-    presentation_none (Type const&)
-    {
-    }
-
-    void publisherQos::
-    partition (Type& o)
-    {
-      dispatch (o.partition ());
-    }
-
-    void publisherQos::
-    partition (Type const& o)
-    {
-      dispatch (o.partition ());
-    }
-
-    void publisherQos::
-    partition_none (Type&)
-    {
-    }
-
-    void publisherQos::
-    partition_none (Type const&)
-    {
-    }
-
-    void publisherQos::
-    group_data (Type& o)
-    {
-      dispatch (o.group_data ());
-    }
-
-    void publisherQos::
-    group_data (Type const& o)
-    {
-      dispatch (o.group_data ());
-    }
-
-    void publisherQos::
-    group_data_none (Type&)
-    {
-    }
-
-    void publisherQos::
-    group_data_none (Type const&)
-    {
-    }
-
-    void publisherQos::
-    entity_factory (Type& o)
-    {
-      dispatch (o.entity_factory ());
-    }
-
-    void publisherQos::
-    entity_factory (Type const& o)
-    {
-      dispatch (o.entity_factory ());
-    }
-
-    void publisherQos::
-    entity_factory_none (Type&)
-    {
-    }
-
-    void publisherQos::
-    entity_factory_none (Type const&)
-    {
-    }
-
-    void publisherQos::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void publisherQos::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void publisherQos::
-    name_none (Type&)
-    {
-    }
-
-    void publisherQos::
-    name_none (Type const&)
-    {
-    }
-
-    void publisherQos::
-    base_name (Type& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void publisherQos::
-    base_name (Type const& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void publisherQos::
-    base_name_none (Type&)
-    {
-    }
-
-    void publisherQos::
-    base_name_none (Type const&)
-    {
-    }
-
-    void publisherQos::
-    post (Type&)
-    {
-    }
-
-    void publisherQos::
-    post (Type const&)
-    {
-    }
-
-    // subscriberQos
-
-    void subscriberQos::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.presentation_p ()) presentation (o);
-      else presentation_none (o);
-      if (o.partition_p ()) partition (o);
-      else partition_none (o);
-      if (o.group_data_p ()) group_data (o);
-      else group_data_none (o);
-      if (o.entity_factory_p ()) entity_factory (o);
-      else entity_factory_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void subscriberQos::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.presentation_p ()) presentation (o);
-      else presentation_none (o);
-      if (o.partition_p ()) partition (o);
-      else partition_none (o);
-      if (o.group_data_p ()) group_data (o);
-      else group_data_none (o);
-      if (o.entity_factory_p ()) entity_factory (o);
-      else entity_factory_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void subscriberQos::
-    pre (Type&)
-    {
-    }
-
-    void subscriberQos::
-    pre (Type const&)
-    {
-    }
-
-    void subscriberQos::
-    presentation (Type& o)
-    {
-      dispatch (o.presentation ());
-    }
-
-    void subscriberQos::
-    presentation (Type const& o)
-    {
-      dispatch (o.presentation ());
-    }
-
-    void subscriberQos::
-    presentation_none (Type&)
-    {
-    }
-
-    void subscriberQos::
-    presentation_none (Type const&)
-    {
-    }
-
-    void subscriberQos::
-    partition (Type& o)
-    {
-      dispatch (o.partition ());
-    }
-
-    void subscriberQos::
-    partition (Type const& o)
-    {
-      dispatch (o.partition ());
-    }
-
-    void subscriberQos::
-    partition_none (Type&)
-    {
-    }
-
-    void subscriberQos::
-    partition_none (Type const&)
-    {
-    }
-
-    void subscriberQos::
-    group_data (Type& o)
-    {
-      dispatch (o.group_data ());
-    }
-
-    void subscriberQos::
-    group_data (Type const& o)
-    {
-      dispatch (o.group_data ());
-    }
-
-    void subscriberQos::
-    group_data_none (Type&)
-    {
-    }
-
-    void subscriberQos::
-    group_data_none (Type const&)
-    {
-    }
-
-    void subscriberQos::
-    entity_factory (Type& o)
-    {
-      dispatch (o.entity_factory ());
-    }
-
-    void subscriberQos::
-    entity_factory (Type const& o)
-    {
-      dispatch (o.entity_factory ());
-    }
-
-    void subscriberQos::
-    entity_factory_none (Type&)
-    {
-    }
-
-    void subscriberQos::
-    entity_factory_none (Type const&)
-    {
-    }
-
-    void subscriberQos::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void subscriberQos::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void subscriberQos::
-    name_none (Type&)
-    {
-    }
-
-    void subscriberQos::
-    name_none (Type const&)
-    {
-    }
-
-    void subscriberQos::
-    base_name (Type& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void subscriberQos::
-    base_name (Type const& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void subscriberQos::
-    base_name_none (Type&)
-    {
-    }
-
-    void subscriberQos::
-    base_name_none (Type const&)
-    {
-    }
-
-    void subscriberQos::
-    post (Type&)
-    {
-    }
-
-    void subscriberQos::
-    post (Type const&)
-    {
-    }
-
-    // topicQos
-
-    void topicQos::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.topic_data_p ()) topic_data (o);
-      else topic_data_none (o);
-      if (o.durability_p ()) durability (o);
-      else durability_none (o);
-      if (o.durability_service_p ()) durability_service (o);
-      else durability_service_none (o);
-      if (o.deadline_p ()) deadline (o);
-      else deadline_none (o);
-      if (o.latency_budget_p ()) latency_budget (o);
-      else latency_budget_none (o);
-      if (o.liveliness_p ()) liveliness (o);
-      else liveliness_none (o);
-      if (o.reliability_p ()) reliability (o);
-      else reliability_none (o);
-      if (o.destination_order_p ()) destination_order (o);
-      else destination_order_none (o);
-      if (o.history_p ()) history (o);
-      else history_none (o);
-      if (o.resource_limits_p ()) resource_limits (o);
-      else resource_limits_none (o);
-      if (o.transport_priority_p ()) transport_priority (o);
-      else transport_priority_none (o);
-      if (o.lifespan_p ()) lifespan (o);
-      else lifespan_none (o);
-      if (o.ownership_p ()) ownership (o);
-      else ownership_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      if (o.topic_filter_p ()) topic_filter (o);
-      else topic_filter_none (o);
-      post (o);
-    }
-
-    void topicQos::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.topic_data_p ()) topic_data (o);
-      else topic_data_none (o);
-      if (o.durability_p ()) durability (o);
-      else durability_none (o);
-      if (o.durability_service_p ()) durability_service (o);
-      else durability_service_none (o);
-      if (o.deadline_p ()) deadline (o);
-      else deadline_none (o);
-      if (o.latency_budget_p ()) latency_budget (o);
-      else latency_budget_none (o);
-      if (o.liveliness_p ()) liveliness (o);
-      else liveliness_none (o);
-      if (o.reliability_p ()) reliability (o);
-      else reliability_none (o);
-      if (o.destination_order_p ()) destination_order (o);
-      else destination_order_none (o);
-      if (o.history_p ()) history (o);
-      else history_none (o);
-      if (o.resource_limits_p ()) resource_limits (o);
-      else resource_limits_none (o);
-      if (o.transport_priority_p ()) transport_priority (o);
-      else transport_priority_none (o);
-      if (o.lifespan_p ()) lifespan (o);
-      else lifespan_none (o);
-      if (o.ownership_p ()) ownership (o);
-      else ownership_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      if (o.topic_filter_p ()) topic_filter (o);
-      else topic_filter_none (o);
-      post (o);
-    }
-
-    void topicQos::
-    pre (Type&)
-    {
-    }
-
-    void topicQos::
-    pre (Type const&)
-    {
-    }
-
-    void topicQos::
-    topic_data (Type& o)
-    {
-      dispatch (o.topic_data ());
-    }
-
-    void topicQos::
-    topic_data (Type const& o)
-    {
-      dispatch (o.topic_data ());
-    }
-
-    void topicQos::
-    topic_data_none (Type&)
-    {
-    }
-
-    void topicQos::
-    topic_data_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    durability (Type& o)
-    {
-      dispatch (o.durability ());
-    }
-
-    void topicQos::
-    durability (Type const& o)
-    {
-      dispatch (o.durability ());
-    }
-
-    void topicQos::
-    durability_none (Type&)
-    {
-    }
-
-    void topicQos::
-    durability_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    durability_service (Type& o)
-    {
-      dispatch (o.durability_service ());
-    }
-
-    void topicQos::
-    durability_service (Type const& o)
-    {
-      dispatch (o.durability_service ());
-    }
-
-    void topicQos::
-    durability_service_none (Type&)
-    {
-    }
-
-    void topicQos::
-    durability_service_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    deadline (Type& o)
-    {
-      dispatch (o.deadline ());
-    }
-
-    void topicQos::
-    deadline (Type const& o)
-    {
-      dispatch (o.deadline ());
-    }
-
-    void topicQos::
-    deadline_none (Type&)
-    {
-    }
-
-    void topicQos::
-    deadline_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    latency_budget (Type& o)
-    {
-      dispatch (o.latency_budget ());
-    }
-
-    void topicQos::
-    latency_budget (Type const& o)
-    {
-      dispatch (o.latency_budget ());
-    }
-
-    void topicQos::
-    latency_budget_none (Type&)
-    {
-    }
-
-    void topicQos::
-    latency_budget_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    liveliness (Type& o)
-    {
-      dispatch (o.liveliness ());
-    }
-
-    void topicQos::
-    liveliness (Type const& o)
-    {
-      dispatch (o.liveliness ());
-    }
-
-    void topicQos::
-    liveliness_none (Type&)
-    {
-    }
-
-    void topicQos::
-    liveliness_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    reliability (Type& o)
-    {
-      dispatch (o.reliability ());
-    }
-
-    void topicQos::
-    reliability (Type const& o)
-    {
-      dispatch (o.reliability ());
-    }
-
-    void topicQos::
-    reliability_none (Type&)
-    {
-    }
-
-    void topicQos::
-    reliability_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    destination_order (Type& o)
-    {
-      dispatch (o.destination_order ());
-    }
-
-    void topicQos::
-    destination_order (Type const& o)
-    {
-      dispatch (o.destination_order ());
-    }
-
-    void topicQos::
-    destination_order_none (Type&)
-    {
-    }
-
-    void topicQos::
-    destination_order_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    history (Type& o)
-    {
-      dispatch (o.history ());
-    }
-
-    void topicQos::
-    history (Type const& o)
-    {
-      dispatch (o.history ());
-    }
-
-    void topicQos::
-    history_none (Type&)
-    {
-    }
-
-    void topicQos::
-    history_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    resource_limits (Type& o)
-    {
-      dispatch (o.resource_limits ());
-    }
-
-    void topicQos::
-    resource_limits (Type const& o)
-    {
-      dispatch (o.resource_limits ());
-    }
-
-    void topicQos::
-    resource_limits_none (Type&)
-    {
-    }
-
-    void topicQos::
-    resource_limits_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    transport_priority (Type& o)
-    {
-      dispatch (o.transport_priority ());
-    }
-
-    void topicQos::
-    transport_priority (Type const& o)
-    {
-      dispatch (o.transport_priority ());
-    }
-
-    void topicQos::
-    transport_priority_none (Type&)
-    {
-    }
-
-    void topicQos::
-    transport_priority_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    lifespan (Type& o)
-    {
-      dispatch (o.lifespan ());
-    }
-
-    void topicQos::
-    lifespan (Type const& o)
-    {
-      dispatch (o.lifespan ());
-    }
-
-    void topicQos::
-    lifespan_none (Type&)
-    {
-    }
-
-    void topicQos::
-    lifespan_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    ownership (Type& o)
-    {
-      dispatch (o.ownership ());
-    }
-
-    void topicQos::
-    ownership (Type const& o)
-    {
-      dispatch (o.ownership ());
-    }
-
-    void topicQos::
-    ownership_none (Type&)
-    {
-    }
-
-    void topicQos::
-    ownership_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void topicQos::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void topicQos::
-    name_none (Type&)
-    {
-    }
-
-    void topicQos::
-    name_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    base_name (Type& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void topicQos::
-    base_name (Type const& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void topicQos::
-    base_name_none (Type&)
-    {
-    }
-
-    void topicQos::
-    base_name_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    topic_filter (Type& o)
-    {
-      dispatch (o.topic_filter ());
-    }
-
-    void topicQos::
-    topic_filter (Type const& o)
-    {
-      dispatch (o.topic_filter ());
-    }
-
-    void topicQos::
-    topic_filter_none (Type&)
-    {
-    }
-
-    void topicQos::
-    topic_filter_none (Type const&)
-    {
-    }
-
-    void topicQos::
-    post (Type&)
-    {
-    }
-
-    void topicQos::
-    post (Type const&)
-    {
-    }
-
-    // datareaderQos
-
-    void datareaderQos::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.durability_p ()) durability (o);
-      else durability_none (o);
-      if (o.deadline_p ()) deadline (o);
-      else deadline_none (o);
-      if (o.latency_budget_p ()) latency_budget (o);
-      else latency_budget_none (o);
-      if (o.liveliness_p ()) liveliness (o);
-      else liveliness_none (o);
-      if (o.reliability_p ()) reliability (o);
-      else reliability_none (o);
-      if (o.destination_order_p ()) destination_order (o);
-      else destination_order_none (o);
-      if (o.history_p ()) history (o);
-      else history_none (o);
-      if (o.resource_limits_p ()) resource_limits (o);
-      else resource_limits_none (o);
-      if (o.user_data_p ()) user_data (o);
-      else user_data_none (o);
-      if (o.ownership_p ()) ownership (o);
-      else ownership_none (o);
-      if (o.time_based_filter_p ()) time_based_filter (o);
-      else time_based_filter_none (o);
-      if (o.reader_data_lifecycle_p ()) reader_data_lifecycle (o);
-      else reader_data_lifecycle_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      if (o.topic_filter_p ()) topic_filter (o);
-      else topic_filter_none (o);
-      post (o);
-    }
-
-    void datareaderQos::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.durability_p ()) durability (o);
-      else durability_none (o);
-      if (o.deadline_p ()) deadline (o);
-      else deadline_none (o);
-      if (o.latency_budget_p ()) latency_budget (o);
-      else latency_budget_none (o);
-      if (o.liveliness_p ()) liveliness (o);
-      else liveliness_none (o);
-      if (o.reliability_p ()) reliability (o);
-      else reliability_none (o);
-      if (o.destination_order_p ()) destination_order (o);
-      else destination_order_none (o);
-      if (o.history_p ()) history (o);
-      else history_none (o);
-      if (o.resource_limits_p ()) resource_limits (o);
-      else resource_limits_none (o);
-      if (o.user_data_p ()) user_data (o);
-      else user_data_none (o);
-      if (o.ownership_p ()) ownership (o);
-      else ownership_none (o);
-      if (o.time_based_filter_p ()) time_based_filter (o);
-      else time_based_filter_none (o);
-      if (o.reader_data_lifecycle_p ()) reader_data_lifecycle (o);
-      else reader_data_lifecycle_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      if (o.topic_filter_p ()) topic_filter (o);
-      else topic_filter_none (o);
-      post (o);
-    }
-
-    void datareaderQos::
-    pre (Type&)
-    {
-    }
-
-    void datareaderQos::
-    pre (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    durability (Type& o)
-    {
-      dispatch (o.durability ());
-    }
-
-    void datareaderQos::
-    durability (Type const& o)
-    {
-      dispatch (o.durability ());
-    }
-
-    void datareaderQos::
-    durability_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    durability_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    deadline (Type& o)
-    {
-      dispatch (o.deadline ());
-    }
-
-    void datareaderQos::
-    deadline (Type const& o)
-    {
-      dispatch (o.deadline ());
-    }
-
-    void datareaderQos::
-    deadline_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    deadline_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    latency_budget (Type& o)
-    {
-      dispatch (o.latency_budget ());
-    }
-
-    void datareaderQos::
-    latency_budget (Type const& o)
-    {
-      dispatch (o.latency_budget ());
-    }
-
-    void datareaderQos::
-    latency_budget_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    latency_budget_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    liveliness (Type& o)
-    {
-      dispatch (o.liveliness ());
-    }
-
-    void datareaderQos::
-    liveliness (Type const& o)
-    {
-      dispatch (o.liveliness ());
-    }
-
-    void datareaderQos::
-    liveliness_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    liveliness_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    reliability (Type& o)
-    {
-      dispatch (o.reliability ());
-    }
-
-    void datareaderQos::
-    reliability (Type const& o)
-    {
-      dispatch (o.reliability ());
-    }
-
-    void datareaderQos::
-    reliability_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    reliability_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    destination_order (Type& o)
-    {
-      dispatch (o.destination_order ());
-    }
-
-    void datareaderQos::
-    destination_order (Type const& o)
-    {
-      dispatch (o.destination_order ());
-    }
-
-    void datareaderQos::
-    destination_order_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    destination_order_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    history (Type& o)
-    {
-      dispatch (o.history ());
-    }
-
-    void datareaderQos::
-    history (Type const& o)
-    {
-      dispatch (o.history ());
-    }
-
-    void datareaderQos::
-    history_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    history_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    resource_limits (Type& o)
-    {
-      dispatch (o.resource_limits ());
-    }
-
-    void datareaderQos::
-    resource_limits (Type const& o)
-    {
-      dispatch (o.resource_limits ());
-    }
-
-    void datareaderQos::
-    resource_limits_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    resource_limits_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    user_data (Type& o)
-    {
-      dispatch (o.user_data ());
-    }
-
-    void datareaderQos::
-    user_data (Type const& o)
-    {
-      dispatch (o.user_data ());
-    }
-
-    void datareaderQos::
-    user_data_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    user_data_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    ownership (Type& o)
-    {
-      dispatch (o.ownership ());
-    }
-
-    void datareaderQos::
-    ownership (Type const& o)
-    {
-      dispatch (o.ownership ());
-    }
-
-    void datareaderQos::
-    ownership_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    ownership_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    time_based_filter (Type& o)
-    {
-      dispatch (o.time_based_filter ());
-    }
-
-    void datareaderQos::
-    time_based_filter (Type const& o)
-    {
-      dispatch (o.time_based_filter ());
-    }
-
-    void datareaderQos::
-    time_based_filter_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    time_based_filter_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    reader_data_lifecycle (Type& o)
-    {
-      dispatch (o.reader_data_lifecycle ());
-    }
-
-    void datareaderQos::
-    reader_data_lifecycle (Type const& o)
-    {
-      dispatch (o.reader_data_lifecycle ());
-    }
-
-    void datareaderQos::
-    reader_data_lifecycle_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    reader_data_lifecycle_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void datareaderQos::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void datareaderQos::
-    name_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    name_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    base_name (Type& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void datareaderQos::
-    base_name (Type const& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void datareaderQos::
-    base_name_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    base_name_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    topic_filter (Type& o)
-    {
-      dispatch (o.topic_filter ());
-    }
-
-    void datareaderQos::
-    topic_filter (Type const& o)
-    {
-      dispatch (o.topic_filter ());
-    }
-
-    void datareaderQos::
-    topic_filter_none (Type&)
-    {
-    }
-
-    void datareaderQos::
-    topic_filter_none (Type const&)
-    {
-    }
-
-    void datareaderQos::
-    post (Type&)
-    {
-    }
-
-    void datareaderQos::
-    post (Type const&)
-    {
-    }
-
-    // datawriterQos
-
-    void datawriterQos::
-    traverse (Type& o)
-    {
-      pre (o);
-      if (o.durability_p ()) durability (o);
-      else durability_none (o);
-      if (o.durability_service_p ()) durability_service (o);
-      else durability_service_none (o);
-      if (o.deadline_p ()) deadline (o);
-      else deadline_none (o);
-      if (o.latency_budget_p ()) latency_budget (o);
-      else latency_budget_none (o);
-      if (o.liveliness_p ()) liveliness (o);
-      else liveliness_none (o);
-      if (o.reliability_p ()) reliability (o);
-      else reliability_none (o);
-      if (o.destination_order_p ()) destination_order (o);
-      else destination_order_none (o);
-      if (o.history_p ()) history (o);
-      else history_none (o);
-      if (o.resource_limits_p ()) resource_limits (o);
-      else resource_limits_none (o);
-      if (o.transport_priority_p ()) transport_priority (o);
-      else transport_priority_none (o);
-      if (o.lifespan_p ()) lifespan (o);
-      else lifespan_none (o);
-      if (o.user_data_p ()) user_data (o);
-      else user_data_none (o);
-      if (o.ownership_p ()) ownership (o);
-      else ownership_none (o);
-      if (o.ownership_strength_p ()) ownership_strength (o);
-      else ownership_strength_none (o);
-      if (o.writer_data_lifecycle_p ()) writer_data_lifecycle (o);
-      else writer_data_lifecycle_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      if (o.topic_filter_p ()) topic_filter (o);
-      else topic_filter_none (o);
-      post (o);
-    }
-
-    void datawriterQos::
-    traverse (Type const& o)
-    {
-      pre (o);
-      if (o.durability_p ()) durability (o);
-      else durability_none (o);
-      if (o.durability_service_p ()) durability_service (o);
-      else durability_service_none (o);
-      if (o.deadline_p ()) deadline (o);
-      else deadline_none (o);
-      if (o.latency_budget_p ()) latency_budget (o);
-      else latency_budget_none (o);
-      if (o.liveliness_p ()) liveliness (o);
-      else liveliness_none (o);
-      if (o.reliability_p ()) reliability (o);
-      else reliability_none (o);
-      if (o.destination_order_p ()) destination_order (o);
-      else destination_order_none (o);
-      if (o.history_p ()) history (o);
-      else history_none (o);
-      if (o.resource_limits_p ()) resource_limits (o);
-      else resource_limits_none (o);
-      if (o.transport_priority_p ()) transport_priority (o);
-      else transport_priority_none (o);
-      if (o.lifespan_p ()) lifespan (o);
-      else lifespan_none (o);
-      if (o.user_data_p ()) user_data (o);
-      else user_data_none (o);
-      if (o.ownership_p ()) ownership (o);
-      else ownership_none (o);
-      if (o.ownership_strength_p ()) ownership_strength (o);
-      else ownership_strength_none (o);
-      if (o.writer_data_lifecycle_p ()) writer_data_lifecycle (o);
-      else writer_data_lifecycle_none (o);
-      if (o.name_p ()) name (o);
-      else name_none (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      if (o.topic_filter_p ()) topic_filter (o);
-      else topic_filter_none (o);
-      post (o);
-    }
-
-    void datawriterQos::
-    pre (Type&)
-    {
-    }
-
-    void datawriterQos::
-    pre (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    durability (Type& o)
-    {
-      dispatch (o.durability ());
-    }
-
-    void datawriterQos::
-    durability (Type const& o)
-    {
-      dispatch (o.durability ());
-    }
-
-    void datawriterQos::
-    durability_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    durability_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    durability_service (Type& o)
-    {
-      dispatch (o.durability_service ());
-    }
-
-    void datawriterQos::
-    durability_service (Type const& o)
-    {
-      dispatch (o.durability_service ());
-    }
-
-    void datawriterQos::
-    durability_service_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    durability_service_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    deadline (Type& o)
-    {
-      dispatch (o.deadline ());
-    }
-
-    void datawriterQos::
-    deadline (Type const& o)
-    {
-      dispatch (o.deadline ());
-    }
-
-    void datawriterQos::
-    deadline_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    deadline_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    latency_budget (Type& o)
-    {
-      dispatch (o.latency_budget ());
-    }
-
-    void datawriterQos::
-    latency_budget (Type const& o)
-    {
-      dispatch (o.latency_budget ());
-    }
-
-    void datawriterQos::
-    latency_budget_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    latency_budget_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    liveliness (Type& o)
-    {
-      dispatch (o.liveliness ());
-    }
-
-    void datawriterQos::
-    liveliness (Type const& o)
-    {
-      dispatch (o.liveliness ());
-    }
-
-    void datawriterQos::
-    liveliness_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    liveliness_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    reliability (Type& o)
-    {
-      dispatch (o.reliability ());
-    }
-
-    void datawriterQos::
-    reliability (Type const& o)
-    {
-      dispatch (o.reliability ());
-    }
-
-    void datawriterQos::
-    reliability_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    reliability_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    destination_order (Type& o)
-    {
-      dispatch (o.destination_order ());
-    }
-
-    void datawriterQos::
-    destination_order (Type const& o)
-    {
-      dispatch (o.destination_order ());
-    }
-
-    void datawriterQos::
-    destination_order_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    destination_order_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    history (Type& o)
-    {
-      dispatch (o.history ());
-    }
-
-    void datawriterQos::
-    history (Type const& o)
-    {
-      dispatch (o.history ());
-    }
-
-    void datawriterQos::
-    history_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    history_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    resource_limits (Type& o)
-    {
-      dispatch (o.resource_limits ());
-    }
-
-    void datawriterQos::
-    resource_limits (Type const& o)
-    {
-      dispatch (o.resource_limits ());
-    }
-
-    void datawriterQos::
-    resource_limits_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    resource_limits_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    transport_priority (Type& o)
-    {
-      dispatch (o.transport_priority ());
-    }
-
-    void datawriterQos::
-    transport_priority (Type const& o)
-    {
-      dispatch (o.transport_priority ());
-    }
-
-    void datawriterQos::
-    transport_priority_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    transport_priority_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    lifespan (Type& o)
-    {
-      dispatch (o.lifespan ());
-    }
-
-    void datawriterQos::
-    lifespan (Type const& o)
-    {
-      dispatch (o.lifespan ());
-    }
-
-    void datawriterQos::
-    lifespan_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    lifespan_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    user_data (Type& o)
-    {
-      dispatch (o.user_data ());
-    }
-
-    void datawriterQos::
-    user_data (Type const& o)
-    {
-      dispatch (o.user_data ());
-    }
-
-    void datawriterQos::
-    user_data_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    user_data_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    ownership (Type& o)
-    {
-      dispatch (o.ownership ());
-    }
-
-    void datawriterQos::
-    ownership (Type const& o)
-    {
-      dispatch (o.ownership ());
-    }
-
-    void datawriterQos::
-    ownership_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    ownership_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    ownership_strength (Type& o)
-    {
-      dispatch (o.ownership_strength ());
-    }
-
-    void datawriterQos::
-    ownership_strength (Type const& o)
-    {
-      dispatch (o.ownership_strength ());
-    }
-
-    void datawriterQos::
-    ownership_strength_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    ownership_strength_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    writer_data_lifecycle (Type& o)
-    {
-      dispatch (o.writer_data_lifecycle ());
-    }
-
-    void datawriterQos::
-    writer_data_lifecycle (Type const& o)
-    {
-      dispatch (o.writer_data_lifecycle ());
-    }
-
-    void datawriterQos::
-    writer_data_lifecycle_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    writer_data_lifecycle_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void datawriterQos::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void datawriterQos::
-    name_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    name_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    base_name (Type& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void datawriterQos::
-    base_name (Type const& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void datawriterQos::
-    base_name_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    base_name_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    topic_filter (Type& o)
-    {
-      dispatch (o.topic_filter ());
-    }
-
-    void datawriterQos::
-    topic_filter (Type const& o)
-    {
-      dispatch (o.topic_filter ());
-    }
-
-    void datawriterQos::
-    topic_filter_none (Type&)
-    {
-    }
-
-    void datawriterQos::
-    topic_filter_none (Type const&)
-    {
-    }
-
-    void datawriterQos::
-    post (Type&)
-    {
-    }
-
-    void datawriterQos::
-    post (Type const&)
-    {
-    }
-
-    // qosProfile
-
-    void qosProfile::
-    traverse (Type& o)
-    {
-      pre (o);
-      datareader_qos (o);
-      datawriter_qos (o);
-      topic_qos (o);
-      domainparticipant_qos (o);
-      publisher_qos (o);
-      subscriber_qos (o);
-      name (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void qosProfile::
-    traverse (Type const& o)
-    {
-      pre (o);
-      datareader_qos (o);
-      datawriter_qos (o);
-      topic_qos (o);
-      domainparticipant_qos (o);
-      publisher_qos (o);
-      subscriber_qos (o);
-      name (o);
-      if (o.base_name_p ()) base_name (o);
-      else base_name_none (o);
-      post (o);
-    }
-
-    void qosProfile::
-    pre (Type&)
-    {
-    }
-
-    void qosProfile::
-    pre (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::datareader_qos_iterator b (o.begin_datareader_qos()), e (o.end_datareader_qos());
-
-      if (b != e)
-      {
-        datareader_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) datareader_qos_next (o);
-        }
-
-        datareader_qos_post (o);
-      }
-
-      else datareader_qos_none (o);
-    }
-
-    void qosProfile::
-    datareader_qos (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::datareader_qos_const_iterator b (o.begin_datareader_qos()), e (o.end_datareader_qos());
-
-      if (b != e)
-      {
-        datareader_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) datareader_qos_next (o);
-        }
-
-        datareader_qos_post (o);
-      }
-
-      else datareader_qos_none (o);
-    }
-
-    void qosProfile::
-    datareader_qos_pre (Type&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos_pre (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos_next (Type&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos_next (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos_post (Type&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos_post (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos_none (Type&)
-    {
-    }
-
-    void qosProfile::
-    datareader_qos_none (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::datawriter_qos_iterator b (o.begin_datawriter_qos()), e (o.end_datawriter_qos());
-
-      if (b != e)
-      {
-        datawriter_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) datawriter_qos_next (o);
-        }
-
-        datawriter_qos_post (o);
-      }
-
-      else datawriter_qos_none (o);
-    }
-
-    void qosProfile::
-    datawriter_qos (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::datawriter_qos_const_iterator b (o.begin_datawriter_qos()), e (o.end_datawriter_qos());
-
-      if (b != e)
-      {
-        datawriter_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) datawriter_qos_next (o);
-        }
-
-        datawriter_qos_post (o);
-      }
-
-      else datawriter_qos_none (o);
-    }
-
-    void qosProfile::
-    datawriter_qos_pre (Type&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos_pre (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos_next (Type&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos_next (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos_post (Type&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos_post (Type const&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos_none (Type&)
-    {
-    }
-
-    void qosProfile::
-    datawriter_qos_none (Type const&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::topic_qos_iterator b (o.begin_topic_qos()), e (o.end_topic_qos());
-
-      if (b != e)
-      {
-        topic_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) topic_qos_next (o);
-        }
-
-        topic_qos_post (o);
-      }
-
-      else topic_qos_none (o);
-    }
-
-    void qosProfile::
-    topic_qos (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::topic_qos_const_iterator b (o.begin_topic_qos()), e (o.end_topic_qos());
-
-      if (b != e)
-      {
-        topic_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) topic_qos_next (o);
-        }
-
-        topic_qos_post (o);
-      }
-
-      else topic_qos_none (o);
-    }
-
-    void qosProfile::
-    topic_qos_pre (Type&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos_pre (Type const&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos_next (Type&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos_next (Type const&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos_post (Type&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos_post (Type const&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos_none (Type&)
-    {
-    }
-
-    void qosProfile::
-    topic_qos_none (Type const&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::domainparticipant_qos_iterator b (o.begin_domainparticipant_qos()), e (o.end_domainparticipant_qos());
-
-      if (b != e)
-      {
-        domainparticipant_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) domainparticipant_qos_next (o);
-        }
-
-        domainparticipant_qos_post (o);
-      }
-
-      else domainparticipant_qos_none (o);
-    }
-
-    void qosProfile::
-    domainparticipant_qos (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::domainparticipant_qos_const_iterator b (o.begin_domainparticipant_qos()), e (o.end_domainparticipant_qos());
-
-      if (b != e)
-      {
-        domainparticipant_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) domainparticipant_qos_next (o);
-        }
-
-        domainparticipant_qos_post (o);
-      }
-
-      else domainparticipant_qos_none (o);
-    }
-
-    void qosProfile::
-    domainparticipant_qos_pre (Type&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos_pre (Type const&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos_next (Type&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos_next (Type const&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos_post (Type&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos_post (Type const&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos_none (Type&)
-    {
-    }
-
-    void qosProfile::
-    domainparticipant_qos_none (Type const&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::publisher_qos_iterator b (o.begin_publisher_qos()), e (o.end_publisher_qos());
-
-      if (b != e)
-      {
-        publisher_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) publisher_qos_next (o);
-        }
-
-        publisher_qos_post (o);
-      }
-
-      else publisher_qos_none (o);
-    }
-
-    void qosProfile::
-    publisher_qos (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::publisher_qos_const_iterator b (o.begin_publisher_qos()), e (o.end_publisher_qos());
-
-      if (b != e)
-      {
-        publisher_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) publisher_qos_next (o);
-        }
-
-        publisher_qos_post (o);
-      }
-
-      else publisher_qos_none (o);
-    }
-
-    void qosProfile::
-    publisher_qos_pre (Type&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos_pre (Type const&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos_next (Type&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos_next (Type const&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos_post (Type&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos_post (Type const&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos_none (Type&)
-    {
-    }
-
-    void qosProfile::
-    publisher_qos_none (Type const&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::subscriber_qos_iterator b (o.begin_subscriber_qos()), e (o.end_subscriber_qos());
-
-      if (b != e)
-      {
-        subscriber_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) subscriber_qos_next (o);
-        }
-
-        subscriber_qos_post (o);
-      }
-
-      else subscriber_qos_none (o);
-    }
-
-    void qosProfile::
-    subscriber_qos (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile::subscriber_qos_const_iterator b (o.begin_subscriber_qos()), e (o.end_subscriber_qos());
-
-      if (b != e)
-      {
-        subscriber_qos_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) subscriber_qos_next (o);
-        }
-
-        subscriber_qos_post (o);
-      }
-
-      else subscriber_qos_none (o);
-    }
-
-    void qosProfile::
-    subscriber_qos_pre (Type&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos_pre (Type const&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos_next (Type&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos_next (Type const&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos_post (Type&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos_post (Type const&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos_none (Type&)
-    {
-    }
-
-    void qosProfile::
-    subscriber_qos_none (Type const&)
-    {
-    }
-
-    void qosProfile::
-    name (Type& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void qosProfile::
-    name (Type const& o)
-    {
-      dispatch (o.name ());
-    }
-
-    void qosProfile::
-    base_name (Type& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void qosProfile::
-    base_name (Type const& o)
-    {
-      dispatch (o.base_name ());
-    }
-
-    void qosProfile::
-    base_name_none (Type&)
-    {
-    }
-
-    void qosProfile::
-    base_name_none (Type const&)
-    {
-    }
-
-    void qosProfile::
-    post (Type&)
-    {
-    }
-
-    void qosProfile::
-    post (Type const&)
-    {
-    }
-
-    // qosProfile_seq
-
-    void qosProfile_seq::
-    traverse (Type& o)
-    {
-      pre (o);
-      qos_profile (o);
-      post (o);
-    }
-
-    void qosProfile_seq::
-    traverse (Type const& o)
-    {
-      pre (o);
-      qos_profile (o);
-      post (o);
-    }
-
-    void qosProfile_seq::
-    pre (Type&)
-    {
-    }
-
-    void qosProfile_seq::
-    pre (Type const&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile (Type& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile_seq::qos_profile_iterator b (o.begin_qos_profile()), e (o.end_qos_profile());
-
-      if (b != e)
-      {
-        qos_profile_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) qos_profile_next (o);
-        }
-
-        qos_profile_post (o);
-      }
-
-      else qos_profile_none (o);
-    }
-
-    void qosProfile_seq::
-    qos_profile (Type const& o)
-    {
-      // VC6 anathema strikes again
-      ::dds::qosProfile_seq::qos_profile_const_iterator b (o.begin_qos_profile()), e (o.end_qos_profile());
-
-      if (b != e)
-      {
-        qos_profile_pre (o);
-        for (; b != e;)
-        {
-          dispatch (*(*b));
-          if (++b != e) qos_profile_next (o);
-        }
-
-        qos_profile_post (o);
-      }
-
-      else qos_profile_none (o);
-    }
-
-    void qosProfile_seq::
-    qos_profile_pre (Type&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile_pre (Type const&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile_next (Type&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile_next (Type const&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile_post (Type&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile_post (Type const&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile_none (Type&)
-    {
-    }
-
-    void qosProfile_seq::
-    qos_profile_none (Type const&)
-    {
-    }
-
-    void qosProfile_seq::
-    post (Type&)
-    {
-    }
-
-    void qosProfile_seq::
-    post (Type const&)
-    {
-    }
-  }
-}
-
-namespace dds
-{
-  namespace Writer
-  {
-    // destinationOrderKind
-
-    destinationOrderKind::
-    destinationOrderKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    destinationOrderKind::
-    destinationOrderKind ()
-    {
-    }
-
-    void destinationOrderKind::
-    traverse (Type const& o)
-    {
-      std::basic_string<ACE_TCHAR> s;
-
-      if (o == ::dds::destinationOrderKind::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS) s = ACE_TEXT ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS");
-      else if (o == ::dds::destinationOrderKind::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS) s = ACE_TEXT ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS");
-      else
-      {
-      }
-
-      if (::XSCRT::XML::Attribute< ACE_TCHAR >* a = attr_ ())
-      {
-        a->value (s);
-      }
-
-      else
-      {
-        top_().value (s);
-      }
-    }
-
-    // durabilityKind
-
-    durabilityKind::
-    durabilityKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    durabilityKind::
-    durabilityKind ()
-    {
-    }
-
-    void durabilityKind::
-    traverse (Type const& o)
-    {
-      std::basic_string<ACE_TCHAR> s;
-
-      if (o == ::dds::durabilityKind::VOLATILE_DURABILITY_QOS) s = ACE_TEXT ("VOLATILE_DURABILITY_QOS");
-      else if (o == ::dds::durabilityKind::TRANSIENT_LOCAL_DURABILITY_QOS) s = ACE_TEXT ("TRANSIENT_LOCAL_DURABILITY_QOS");
-      else if (o == ::dds::durabilityKind::TRANSIENT_DURABILITY_QOS) s = ACE_TEXT ("TRANSIENT_DURABILITY_QOS");
-      else if (o == ::dds::durabilityKind::PERSISTENT_DURABILITY_QOS) s = ACE_TEXT ("PERSISTENT_DURABILITY_QOS");
-      else
-      {
-      }
-
-      if (::XSCRT::XML::Attribute< ACE_TCHAR >* a = attr_ ())
-      {
-        a->value (s);
-      }
-
-      else
-      {
-        top_().value (s);
-      }
-    }
-
-    // historyKind
-
-    historyKind::
-    historyKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    historyKind::
-    historyKind ()
-    {
-    }
-
-    void historyKind::
-    traverse (Type const& o)
-    {
-      std::basic_string<ACE_TCHAR> s;
-
-      if (o == ::dds::historyKind::KEEP_LAST_HISTORY_QOS) s = ACE_TEXT ("KEEP_LAST_HISTORY_QOS");
-      else if (o == ::dds::historyKind::KEEP_ALL_HISTORY_QOS) s = ACE_TEXT ("KEEP_ALL_HISTORY_QOS");
-      else
-      {
-      }
-
-      if (::XSCRT::XML::Attribute< ACE_TCHAR >* a = attr_ ())
-      {
-        a->value (s);
-      }
-
-      else
-      {
-        top_().value (s);
-      }
-    }
-
-    // livelinessKind
-
-    livelinessKind::
-    livelinessKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    livelinessKind::
-    livelinessKind ()
-    {
-    }
-
-    void livelinessKind::
-    traverse (Type const& o)
-    {
-      std::basic_string<ACE_TCHAR> s;
-
-      if (o == ::dds::livelinessKind::AUTOMATIC_LIVELINESS_QOS) s = ACE_TEXT ("AUTOMATIC_LIVELINESS_QOS");
-      else if (o == ::dds::livelinessKind::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) s = ACE_TEXT ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS");
-      else if (o == ::dds::livelinessKind::MANUAL_BY_TOPIC_LIVELINESS_QOS) s = ACE_TEXT ("MANUAL_BY_TOPIC_LIVELINESS_QOS");
-      else
-      {
-      }
-
-      if (::XSCRT::XML::Attribute< ACE_TCHAR >* a = attr_ ())
-      {
-        a->value (s);
-      }
-
-      else
-      {
-        top_().value (s);
-      }
-    }
-
-    // presentationAccessScopeKind
-
-    presentationAccessScopeKind::
-    presentationAccessScopeKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    presentationAccessScopeKind::
-    presentationAccessScopeKind ()
-    {
-    }
-
-    void presentationAccessScopeKind::
-    traverse (Type const& o)
-    {
-      std::basic_string<ACE_TCHAR> s;
-
-      if (o == ::dds::presentationAccessScopeKind::INSTANCE_PRESENTATION_QOS) s = ACE_TEXT ("INSTANCE_PRESENTATION_QOS");
-      else if (o == ::dds::presentationAccessScopeKind::TOPIC_PRESENTATION_QOS) s = ACE_TEXT ("TOPIC_PRESENTATION_QOS");
-      else if (o == ::dds::presentationAccessScopeKind::GROUP_PRESENTATION_QOS) s = ACE_TEXT ("GROUP_PRESENTATION_QOS");
-      else
-      {
-      }
-
-      if (::XSCRT::XML::Attribute< ACE_TCHAR >* a = attr_ ())
-      {
-        a->value (s);
-      }
-
-      else
-      {
-        top_().value (s);
-      }
-    }
-
-    // reliabilityKind
-
-    reliabilityKind::
-    reliabilityKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    reliabilityKind::
-    reliabilityKind ()
-    {
-    }
-
-    void reliabilityKind::
-    traverse (Type const& o)
-    {
-      std::basic_string<ACE_TCHAR> s;
-
-      if (o == ::dds::reliabilityKind::BEST_EFFORT_RELIABILITY_QOS) s = ACE_TEXT ("BEST_EFFORT_RELIABILITY_QOS");
-      else if (o == ::dds::reliabilityKind::RELIABLE_RELIABILITY_QOS) s = ACE_TEXT ("RELIABLE_RELIABILITY_QOS");
-      else
-      {
-      }
-
-      if (::XSCRT::XML::Attribute< ACE_TCHAR >* a = attr_ ())
-      {
-        a->value (s);
-      }
-
-      else
-      {
-        top_().value (s);
-      }
-    }
-
-    // ownershipKind
-
-    ownershipKind::
-    ownershipKind (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    ownershipKind::
-    ownershipKind ()
-    {
-    }
-
-    void ownershipKind::
-    traverse (Type const& o)
-    {
-      std::basic_string<ACE_TCHAR> s;
-
-      if (o == ::dds::ownershipKind::SHARED_OWNERSHIP_QOS) s = ACE_TEXT ("SHARED_OWNERSHIP_QOS");
-      else if (o == ::dds::ownershipKind::EXCLUSIVE_OWNERSHIP_QOS) s = ACE_TEXT ("EXCLUSIVE_OWNERSHIP_QOS");
-      else
-      {
-      }
-
-      if (::XSCRT::XML::Attribute< ACE_TCHAR >* a = attr_ ())
-      {
-        a->value (s);
-      }
-
-      else
-      {
-        top_().value (s);
-      }
-    }
-
-    // duration
-    duration::
-    duration (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    duration::
-    duration ()
-    {
-    }
-
-    void duration::
-    traverse (Type const& o)
-    {
-      Traversal::duration::traverse (o);
-    }
-
-    void duration::
-    sec (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("sec"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::duration::sec (o);
-      pop_ ();
-    }
-
-    void duration::
-    nanosec (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("nanosec"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::duration::nanosec (o);
-      pop_ ();
-    }
-
-    // stringSeq
-    stringSeq::
-    stringSeq (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    stringSeq::
-    stringSeq ()
-    {
-    }
-
-    void stringSeq::
-    traverse (Type const& o)
-    {
-      Traversal::stringSeq::traverse (o);
-    }
-
-    void stringSeq::
-    element_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("element"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void stringSeq::
-    element_next (Type const& o)
-    {
-      element_post (o);
-      element_pre (o);
-    }
-
-    void stringSeq::
-    element_post (Type const&)
-    {
-      pop_ ();
-    }
-
-    // deadlineQosPolicy
-    deadlineQosPolicy::
-    deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    deadlineQosPolicy::
-    deadlineQosPolicy ()
-    {
-    }
-
-    void deadlineQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::deadlineQosPolicy::traverse (o);
-    }
-
-    void deadlineQosPolicy::
-    period (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("period"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::deadlineQosPolicy::period (o);
-      pop_ ();
-    }
-
-    // destinationOrderQosPolicy
-    destinationOrderQosPolicy::
-    destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    destinationOrderQosPolicy::
-    destinationOrderQosPolicy ()
-    {
-    }
-
-    void destinationOrderQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::destinationOrderQosPolicy::traverse (o);
-    }
-
-    void destinationOrderQosPolicy::
-    kind (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("kind"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::destinationOrderQosPolicy::kind (o);
-      pop_ ();
-    }
-
-    // durabilityQosPolicy
-    durabilityQosPolicy::
-    durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    durabilityQosPolicy::
-    durabilityQosPolicy ()
-    {
-    }
-
-    void durabilityQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::durabilityQosPolicy::traverse (o);
-    }
-
-    void durabilityQosPolicy::
-    kind (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("kind"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::durabilityQosPolicy::kind (o);
-      pop_ ();
-    }
-
-    // durabilityServiceQosPolicy
-    durabilityServiceQosPolicy::
-    durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    durabilityServiceQosPolicy::
-    durabilityServiceQosPolicy ()
-    {
-    }
-
-    void durabilityServiceQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::durabilityServiceQosPolicy::traverse (o);
-    }
-
-    void durabilityServiceQosPolicy::
-    service_cleanup_delay (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("service_cleanup_delay"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::durabilityServiceQosPolicy::service_cleanup_delay (o);
-      pop_ ();
-    }
-
-    void durabilityServiceQosPolicy::
-    history_kind (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("history_kind"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::durabilityServiceQosPolicy::history_kind (o);
-      pop_ ();
-    }
-
-    void durabilityServiceQosPolicy::
-    history_depth (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("history_depth"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::durabilityServiceQosPolicy::history_depth (o);
-      pop_ ();
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("max_samples"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::durabilityServiceQosPolicy::max_samples (o);
-      pop_ ();
-    }
-
-    void durabilityServiceQosPolicy::
-    max_instances (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("max_instances"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::durabilityServiceQosPolicy::max_instances (o);
-      pop_ ();
-    }
-
-    void durabilityServiceQosPolicy::
-    max_samples_per_instance (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("max_samples_per_instance"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::durabilityServiceQosPolicy::max_samples_per_instance (o);
-      pop_ ();
-    }
-
-    // entityFactoryQosPolicy
-    entityFactoryQosPolicy::
-    entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    entityFactoryQosPolicy::
-    entityFactoryQosPolicy ()
-    {
-    }
-
-    void entityFactoryQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::entityFactoryQosPolicy::traverse (o);
-    }
-
-    void entityFactoryQosPolicy::
-    autoenable_created_entities (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("autoenable_created_entities"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::entityFactoryQosPolicy::autoenable_created_entities (o);
-      pop_ ();
-    }
-
-    // groupDataQosPolicy
-    groupDataQosPolicy::
-    groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    groupDataQosPolicy::
-    groupDataQosPolicy ()
-    {
-    }
-
-    void groupDataQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::groupDataQosPolicy::traverse (o);
-    }
-
-    void groupDataQosPolicy::
-    value (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("value"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::groupDataQosPolicy::value (o);
-      pop_ ();
-    }
-
-    // historyQosPolicy
-    historyQosPolicy::
-    historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    historyQosPolicy::
-    historyQosPolicy ()
-    {
-    }
-
-    void historyQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::historyQosPolicy::traverse (o);
-    }
-
-    void historyQosPolicy::
-    kind (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("kind"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::historyQosPolicy::kind (o);
-      pop_ ();
-    }
-
-    void historyQosPolicy::
-    depth (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("depth"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::historyQosPolicy::depth (o);
-      pop_ ();
-    }
-
-    // latencyBudgetQosPolicy
-    latencyBudgetQosPolicy::
-    latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    latencyBudgetQosPolicy::
-    latencyBudgetQosPolicy ()
-    {
-    }
-
-    void latencyBudgetQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::latencyBudgetQosPolicy::traverse (o);
-    }
-
-    void latencyBudgetQosPolicy::
-    duration (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("duration"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::latencyBudgetQosPolicy::duration (o);
-      pop_ ();
-    }
-
-    // lifespanQosPolicy
-    lifespanQosPolicy::
-    lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    lifespanQosPolicy::
-    lifespanQosPolicy ()
-    {
-    }
-
-    void lifespanQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::lifespanQosPolicy::traverse (o);
-    }
-
-    void lifespanQosPolicy::
-    duration (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("duration"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::lifespanQosPolicy::duration (o);
-      pop_ ();
-    }
-
-    // livelinessQosPolicy
-    livelinessQosPolicy::
-    livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    livelinessQosPolicy::
-    livelinessQosPolicy ()
-    {
-    }
-
-    void livelinessQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::livelinessQosPolicy::traverse (o);
-    }
-
-    void livelinessQosPolicy::
-    kind (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("kind"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::livelinessQosPolicy::kind (o);
-      pop_ ();
-    }
-
-    void livelinessQosPolicy::
-    lease_duration (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("lease_duration"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::livelinessQosPolicy::lease_duration (o);
-      pop_ ();
-    }
-
-    // ownershipQosPolicy
-    ownershipQosPolicy::
-    ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    ownershipQosPolicy::
-    ownershipQosPolicy ()
-    {
-    }
-
-    void ownershipQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::ownershipQosPolicy::traverse (o);
-    }
-
-    void ownershipQosPolicy::
-    kind (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("kind"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::ownershipQosPolicy::kind (o);
-      pop_ ();
-    }
-
-    // ownershipStrengthQosPolicy
-    ownershipStrengthQosPolicy::
-    ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    ownershipStrengthQosPolicy::
-    ownershipStrengthQosPolicy ()
-    {
-    }
-
-    void ownershipStrengthQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::ownershipStrengthQosPolicy::traverse (o);
-    }
-
-    void ownershipStrengthQosPolicy::
-    value (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("value"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::ownershipStrengthQosPolicy::value (o);
-      pop_ ();
-    }
-
-    // partitionQosPolicy
-    partitionQosPolicy::
-    partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    partitionQosPolicy::
-    partitionQosPolicy ()
-    {
-    }
-
-    void partitionQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::partitionQosPolicy::traverse (o);
-    }
-
-    void partitionQosPolicy::
-    name (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("name"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::partitionQosPolicy::name (o);
-      pop_ ();
-    }
-
-    // presentationQosPolicy
-    presentationQosPolicy::
-    presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    presentationQosPolicy::
-    presentationQosPolicy ()
-    {
-    }
-
-    void presentationQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::presentationQosPolicy::traverse (o);
-    }
-
-    void presentationQosPolicy::
-    access_scope (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("access_scope"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::presentationQosPolicy::access_scope (o);
-      pop_ ();
-    }
-
-    void presentationQosPolicy::
-    coherent_access (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("coherent_access"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::presentationQosPolicy::coherent_access (o);
-      pop_ ();
-    }
-
-    void presentationQosPolicy::
-    ordered_access (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("ordered_access"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::presentationQosPolicy::ordered_access (o);
-      pop_ ();
-    }
-
-    // readerDataLifecycleQosPolicy
-    readerDataLifecycleQosPolicy::
-    readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    readerDataLifecycleQosPolicy::
-    readerDataLifecycleQosPolicy ()
-    {
-    }
-
-    void readerDataLifecycleQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::readerDataLifecycleQosPolicy::traverse (o);
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_nowriter_samples_delay (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("autopurge_nowriter_samples_delay"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::readerDataLifecycleQosPolicy::autopurge_nowriter_samples_delay (o);
-      pop_ ();
-    }
-
-    void readerDataLifecycleQosPolicy::
-    autopurge_disposed_samples_delay (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("autopurge_disposed_samples_delay"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::readerDataLifecycleQosPolicy::autopurge_disposed_samples_delay (o);
-      pop_ ();
-    }
-
-    // reliabilityQosPolicy
-    reliabilityQosPolicy::
-    reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    reliabilityQosPolicy::
-    reliabilityQosPolicy ()
-    {
-    }
-
-    void reliabilityQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::reliabilityQosPolicy::traverse (o);
-    }
-
-    void reliabilityQosPolicy::
-    kind (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("kind"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::reliabilityQosPolicy::kind (o);
-      pop_ ();
-    }
-
-    void reliabilityQosPolicy::
-    max_blocking_time (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("max_blocking_time"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::reliabilityQosPolicy::max_blocking_time (o);
-      pop_ ();
-    }
-
-    // resourceLimitsQosPolicy
-    resourceLimitsQosPolicy::
-    resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    resourceLimitsQosPolicy::
-    resourceLimitsQosPolicy ()
-    {
-    }
-
-    void resourceLimitsQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::resourceLimitsQosPolicy::traverse (o);
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("max_samples"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::resourceLimitsQosPolicy::max_samples (o);
-      pop_ ();
-    }
-
-    void resourceLimitsQosPolicy::
-    max_instances (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("max_instances"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::resourceLimitsQosPolicy::max_instances (o);
-      pop_ ();
-    }
-
-    void resourceLimitsQosPolicy::
-    max_samples_per_instance (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("max_samples_per_instance"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::resourceLimitsQosPolicy::max_samples_per_instance (o);
-      pop_ ();
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_samples (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("initial_samples"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::resourceLimitsQosPolicy::initial_samples (o);
-      pop_ ();
-    }
-
-    void resourceLimitsQosPolicy::
-    initial_instances (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("initial_instances"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::resourceLimitsQosPolicy::initial_instances (o);
-      pop_ ();
-    }
-
-    // timeBasedFilterQosPolicy
-    timeBasedFilterQosPolicy::
-    timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    timeBasedFilterQosPolicy::
-    timeBasedFilterQosPolicy ()
-    {
-    }
-
-    void timeBasedFilterQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::timeBasedFilterQosPolicy::traverse (o);
-    }
-
-    void timeBasedFilterQosPolicy::
-    minimum_separation (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("minimum_separation"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::timeBasedFilterQosPolicy::minimum_separation (o);
-      pop_ ();
-    }
-
-    // topicDataQosPolicy
-    topicDataQosPolicy::
-    topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    topicDataQosPolicy::
-    topicDataQosPolicy ()
-    {
-    }
-
-    void topicDataQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::topicDataQosPolicy::traverse (o);
-    }
-
-    void topicDataQosPolicy::
-    value (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("value"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicDataQosPolicy::value (o);
-      pop_ ();
-    }
-
-    // transportPriorityQosPolicy
-    transportPriorityQosPolicy::
-    transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    transportPriorityQosPolicy::
-    transportPriorityQosPolicy ()
-    {
-    }
-
-    void transportPriorityQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::transportPriorityQosPolicy::traverse (o);
-    }
-
-    void transportPriorityQosPolicy::
-    value (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("value"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::transportPriorityQosPolicy::value (o);
-      pop_ ();
-    }
-
-    // userDataQosPolicy
-    userDataQosPolicy::
-    userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    userDataQosPolicy::
-    userDataQosPolicy ()
-    {
-    }
-
-    void userDataQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::userDataQosPolicy::traverse (o);
-    }
-
-    void userDataQosPolicy::
-    value (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("value"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::userDataQosPolicy::value (o);
-      pop_ ();
-    }
-
-    // writerDataLifecycleQosPolicy
-    writerDataLifecycleQosPolicy::
-    writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    writerDataLifecycleQosPolicy::
-    writerDataLifecycleQosPolicy ()
-    {
-    }
-
-    void writerDataLifecycleQosPolicy::
-    traverse (Type const& o)
-    {
-      Traversal::writerDataLifecycleQosPolicy::traverse (o);
-    }
-
-    void writerDataLifecycleQosPolicy::
-    autodispose_unregistered_instances (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("autodispose_unregistered_instances"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::writerDataLifecycleQosPolicy::autodispose_unregistered_instances (o);
-      pop_ ();
-    }
-
-    // domainparticipantQos
-    domainparticipantQos::
-    domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    domainparticipantQos::
-    domainparticipantQos ()
-    {
-    }
-
-    void domainparticipantQos::
-    traverse (Type const& o)
-    {
-      Traversal::domainparticipantQos::traverse (o);
-    }
-
-    void domainparticipantQos::
-    user_data (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("user_data"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::domainparticipantQos::user_data (o);
-      pop_ ();
-    }
-
-    void domainparticipantQos::
-    entity_factory (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("entity_factory"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::domainparticipantQos::entity_factory (o);
-      pop_ ();
-    }
-
-    void domainparticipantQos::
-    name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::domainparticipantQos::name (o);
-      attr_ (0);
-    }
-
-    void domainparticipantQos::
-    base_name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("base_name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::domainparticipantQos::base_name (o);
-      attr_ (0);
-    }
-
-    // publisherQos
-    publisherQos::
-    publisherQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    publisherQos::
-    publisherQos ()
-    {
-    }
-
-    void publisherQos::
-    traverse (Type const& o)
-    {
-      Traversal::publisherQos::traverse (o);
-    }
-
-    void publisherQos::
-    presentation (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("presentation"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::publisherQos::presentation (o);
-      pop_ ();
-    }
-
-    void publisherQos::
-    partition (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("partition"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::publisherQos::partition (o);
-      pop_ ();
-    }
-
-    void publisherQos::
-    group_data (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("group_data"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::publisherQos::group_data (o);
-      pop_ ();
-    }
-
-    void publisherQos::
-    entity_factory (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("entity_factory"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::publisherQos::entity_factory (o);
-      pop_ ();
-    }
-
-    void publisherQos::
-    name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::publisherQos::name (o);
-      attr_ (0);
-    }
-
-    void publisherQos::
-    base_name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("base_name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::publisherQos::base_name (o);
-      attr_ (0);
-    }
-
-    // subscriberQos
-    subscriberQos::
-    subscriberQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    subscriberQos::
-    subscriberQos ()
-    {
-    }
-
-    void subscriberQos::
-    traverse (Type const& o)
-    {
-      Traversal::subscriberQos::traverse (o);
-    }
-
-    void subscriberQos::
-    presentation (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("presentation"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::subscriberQos::presentation (o);
-      pop_ ();
-    }
-
-    void subscriberQos::
-    partition (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("partition"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::subscriberQos::partition (o);
-      pop_ ();
-    }
-
-    void subscriberQos::
-    group_data (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("group_data"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::subscriberQos::group_data (o);
-      pop_ ();
-    }
-
-    void subscriberQos::
-    entity_factory (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("entity_factory"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::subscriberQos::entity_factory (o);
-      pop_ ();
-    }
-
-    void subscriberQos::
-    name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::subscriberQos::name (o);
-      attr_ (0);
-    }
-
-    void subscriberQos::
-    base_name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("base_name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::subscriberQos::base_name (o);
-      attr_ (0);
-    }
-
-    // topicQos
-    topicQos::
-    topicQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    topicQos::
-    topicQos ()
-    {
-    }
-
-    void topicQos::
-    traverse (Type const& o)
-    {
-      Traversal::topicQos::traverse (o);
-    }
-
-    void topicQos::
-    topic_data (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("topic_data"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::topic_data (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    durability (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("durability"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::durability (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    durability_service (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("durability_service"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::durability_service (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    deadline (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("deadline"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::deadline (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    latency_budget (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("latency_budget"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::latency_budget (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    liveliness (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("liveliness"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::liveliness (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    reliability (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("reliability"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::reliability (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    destination_order (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("destination_order"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::destination_order (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    history (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("history"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::history (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    resource_limits (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("resource_limits"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::resource_limits (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    transport_priority (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("transport_priority"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::transport_priority (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    lifespan (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("lifespan"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::lifespan (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    ownership (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("ownership"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::topicQos::ownership (o);
-      pop_ ();
-    }
-
-    void topicQos::
-    name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::topicQos::name (o);
-      attr_ (0);
-    }
-
-    void topicQos::
-    base_name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("base_name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::topicQos::base_name (o);
-      attr_ (0);
-    }
-
-    void topicQos::
-    topic_filter (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("topic_filter"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::topicQos::topic_filter (o);
-      attr_ (0);
-    }
-
-    // datareaderQos
-    datareaderQos::
-    datareaderQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    datareaderQos::
-    datareaderQos ()
-    {
-    }
-
-    void datareaderQos::
-    traverse (Type const& o)
-    {
-      Traversal::datareaderQos::traverse (o);
-    }
-
-    void datareaderQos::
-    durability (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("durability"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::durability (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    deadline (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("deadline"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::deadline (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    latency_budget (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("latency_budget"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::latency_budget (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    liveliness (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("liveliness"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::liveliness (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    reliability (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("reliability"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::reliability (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    destination_order (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("destination_order"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::destination_order (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    history (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("history"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::history (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    resource_limits (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("resource_limits"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::resource_limits (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    user_data (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("user_data"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::user_data (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    ownership (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("ownership"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::ownership (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    time_based_filter (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("time_based_filter"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::time_based_filter (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    reader_data_lifecycle (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("reader_data_lifecycle"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datareaderQos::reader_data_lifecycle (o);
-      pop_ ();
-    }
-
-    void datareaderQos::
-    name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::datareaderQos::name (o);
-      attr_ (0);
-    }
-
-    void datareaderQos::
-    base_name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("base_name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::datareaderQos::base_name (o);
-      attr_ (0);
-    }
-
-    void datareaderQos::
-    topic_filter (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("topic_filter"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::datareaderQos::topic_filter (o);
-      attr_ (0);
-    }
-
-    // datawriterQos
-    datawriterQos::
-    datawriterQos (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    datawriterQos::
-    datawriterQos ()
-    {
-    }
-
-    void datawriterQos::
-    traverse (Type const& o)
-    {
-      Traversal::datawriterQos::traverse (o);
-    }
-
-    void datawriterQos::
-    durability (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("durability"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::durability (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    durability_service (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("durability_service"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::durability_service (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    deadline (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("deadline"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::deadline (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    latency_budget (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("latency_budget"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::latency_budget (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    liveliness (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("liveliness"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::liveliness (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    reliability (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("reliability"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::reliability (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    destination_order (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("destination_order"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::destination_order (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    history (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("history"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::history (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    resource_limits (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("resource_limits"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::resource_limits (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    transport_priority (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("transport_priority"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::transport_priority (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    lifespan (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("lifespan"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::lifespan (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    user_data (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("user_data"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::user_data (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    ownership (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("ownership"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::ownership (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    ownership_strength (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("ownership_strength"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::ownership_strength (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    writer_data_lifecycle (Type const& o)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("writer_data_lifecycle"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-      Traversal::datawriterQos::writer_data_lifecycle (o);
-      pop_ ();
-    }
-
-    void datawriterQos::
-    name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::datawriterQos::name (o);
-      attr_ (0);
-    }
-
-    void datawriterQos::
-    base_name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("base_name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::datawriterQos::base_name (o);
-      attr_ (0);
-    }
-
-    void datawriterQos::
-    topic_filter (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("topic_filter"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::datawriterQos::topic_filter (o);
-      attr_ (0);
-    }
-
-    // qosProfile
-    qosProfile::
-    qosProfile (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    qosProfile::
-    qosProfile ()
-    {
-    }
-
-    void qosProfile::
-    traverse (Type const& o)
-    {
-      Traversal::qosProfile::traverse (o);
-    }
-
-    void qosProfile::
-    datareader_qos_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("datareader_qos"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void qosProfile::
-    datareader_qos_next (Type const& o)
-    {
-      datareader_qos_post (o);
-      datareader_qos_pre (o);
-    }
-
-    void qosProfile::
-    datareader_qos_post (Type const&)
-    {
-      pop_ ();
-    }
-
-    void qosProfile::
-    datawriter_qos_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("datawriter_qos"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void qosProfile::
-    datawriter_qos_next (Type const& o)
-    {
-      datawriter_qos_post (o);
-      datawriter_qos_pre (o);
-    }
-
-    void qosProfile::
-    datawriter_qos_post (Type const&)
-    {
-      pop_ ();
-    }
-
-    void qosProfile::
-    topic_qos_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("topic_qos"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void qosProfile::
-    topic_qos_next (Type const& o)
-    {
-      topic_qos_post (o);
-      topic_qos_pre (o);
-    }
-
-    void qosProfile::
-    topic_qos_post (Type const&)
-    {
-      pop_ ();
-    }
-
-    void qosProfile::
-    domainparticipant_qos_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("domainparticipant_qos"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void qosProfile::
-    domainparticipant_qos_next (Type const& o)
-    {
-      domainparticipant_qos_post (o);
-      domainparticipant_qos_pre (o);
-    }
-
-    void qosProfile::
-    domainparticipant_qos_post (Type const&)
-    {
-      pop_ ();
-    }
-
-    void qosProfile::
-    publisher_qos_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("publisher_qos"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void qosProfile::
-    publisher_qos_next (Type const& o)
-    {
-      publisher_qos_post (o);
-      publisher_qos_pre (o);
-    }
-
-    void qosProfile::
-    publisher_qos_post (Type const&)
-    {
-      pop_ ();
-    }
-
-    void qosProfile::
-    subscriber_qos_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("subscriber_qos"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void qosProfile::
-    subscriber_qos_next (Type const& o)
-    {
-      subscriber_qos_post (o);
-      subscriber_qos_pre (o);
-    }
-
-    void qosProfile::
-    subscriber_qos_post (Type const&)
-    {
-      pop_ ();
-    }
-
-    void qosProfile::
-    name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::qosProfile::name (o);
-      attr_ (0);
-    }
-
-    void qosProfile::
-    base_name (Type const& o)
-    {
-      ::XSCRT::XML::Attribute<ACE_TCHAR> a (ACE_TEXT ("base_name"), ACE_TEXT (""), top_ ());
-      attr_ (&a);
-      Traversal::qosProfile::base_name (o);
-      attr_ (0);
-    }
-
-    // qosProfile_seq
-    qosProfile_seq::
-    qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR>& e)
-    : ::XSCRT::Writer<ACE_TCHAR> (e)
-    {
-    }
-
-    qosProfile_seq::
-    qosProfile_seq ()
-    {
-    }
-
-    void qosProfile_seq::
-    traverse (Type const& o)
-    {
-      Traversal::qosProfile_seq::traverse (o);
-    }
-
-    void qosProfile_seq::
-    qos_profile_pre (Type const&)
-    {
-      push_ (::XSCRT::XML::Element<ACE_TCHAR> (ACE_TEXT("qos_profile"), ACE_TEXT("http://www.omg.org/dds"), top_ ()));
-    }
-
-    void qosProfile_seq::
-    qos_profile_next (Type const& o)
-    {
-      qos_profile_post (o);
-      qos_profile_pre (o);
-    }
-
-    void qosProfile_seq::
-    qos_profile_post (Type const&)
-    {
-      pop_ ();
-    }
-  }
-}
-
-namespace dds
-{
-  namespace writer
-  {
-    void
-    dds (::dds::qosProfile_seq const& s, xercesc::DOMDocument* d)
-    {
-      xercesc::DOMElement* dom_element = d->getDocumentElement ();
-      if (!dom_element)
-      {
-        throw 1;
-      }
-
-      ::XSCRT::XML::Element<ACE_TCHAR> e (dom_element);
-      if (e.name () != ACE_TEXT ("dds"))
-      {
-        throw 1;
-      }
-
-      struct W : virtual ::dds::Writer::qosProfile_seq,
-      virtual ::dds::Writer::qosProfile,
-      virtual ::dds::Writer::datareaderQos,
-      virtual ::dds::Writer::durabilityQosPolicy,
-      virtual ::dds::Writer::durabilityKind,
-      virtual ::dds::Writer::deadlineQosPolicy,
-      virtual ::dds::Writer::duration,
-      virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::string< ACE_TCHAR >, ACE_TCHAR >,
-      virtual ::dds::Writer::latencyBudgetQosPolicy,
-      virtual ::dds::Writer::livelinessQosPolicy,
-      virtual ::dds::Writer::livelinessKind,
-      virtual ::dds::Writer::reliabilityQosPolicy,
-      virtual ::dds::Writer::reliabilityKind,
-      virtual ::dds::Writer::destinationOrderQosPolicy,
-      virtual ::dds::Writer::destinationOrderKind,
-      virtual ::dds::Writer::historyQosPolicy,
-      virtual ::dds::Writer::historyKind,
-      //virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::positiveInteger, ACE_TCHAR >,
-      virtual ::dds::Writer::resourceLimitsQosPolicy,
-      virtual ::dds::Writer::userDataQosPolicy,
-      virtual ::dds::Writer::ownershipQosPolicy,
-      virtual ::dds::Writer::ownershipKind,
-      virtual ::dds::Writer::timeBasedFilterQosPolicy,
-      virtual ::dds::Writer::readerDataLifecycleQosPolicy,
-      virtual ::dds::Writer::datawriterQos,
-      virtual ::dds::Writer::durabilityServiceQosPolicy,
-      virtual ::dds::Writer::transportPriorityQosPolicy,
-      virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::nonNegativeInteger, ACE_TCHAR >,
-      virtual ::dds::Writer::lifespanQosPolicy,
-      virtual ::dds::Writer::ownershipStrengthQosPolicy,
-      virtual ::dds::Writer::writerDataLifecycleQosPolicy,
-      virtual ::XMLSchema::Writer::FundamentalType< ::XMLSchema::boolean, ACE_TCHAR >,
-      virtual ::dds::Writer::topicQos,
-      virtual ::dds::Writer::topicDataQosPolicy,
-      virtual ::dds::Writer::domainparticipantQos,
-      virtual ::dds::Writer::entityFactoryQosPolicy,
-      virtual ::dds::Writer::publisherQos,
-      virtual ::dds::Writer::presentationQosPolicy,
-      virtual ::dds::Writer::presentationAccessScopeKind,
-      virtual ::dds::Writer::partitionQosPolicy,
-      virtual ::dds::Writer::stringSeq,
-      virtual ::dds::Writer::groupDataQosPolicy,
-      virtual ::dds::Writer::subscriberQos
-      //virtual ::XSCRT::Writer<ACE_TCHAR>
-      {
-        W (::XSCRT::XML::Element<ACE_TCHAR>& e)
-        : ::XSCRT::Writer<ACE_TCHAR> (e)
-        {
-        }
-      };
-
-      W w (e);
-      w.dispatch (s);
     }
   }
 }

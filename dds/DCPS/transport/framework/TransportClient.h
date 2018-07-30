@@ -50,6 +50,7 @@ class SendStateDataSampleListIterator;
  * currently active communication channels to peers.
  */
 class OpenDDS_Dcps_Export TransportClient
+  : public virtual RcObject
 {
 public:
   // Used by TransportImpl to complete associate() processing:
@@ -57,10 +58,6 @@ public:
 
   // values for flags parameter of transport_assoc_done():
   enum { ASSOC_OK = 1, ASSOC_ACTIVE = 2 };
-
-  virtual void _add_ref() {}
-  virtual void _remove_ref() {}
-
   TransportClient();
   virtual ~TransportClient();
 
@@ -129,9 +126,6 @@ public:
 
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
-  void on_notification_of_connection_deletion(const RepoId& peerId);
-
-
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
@@ -146,10 +140,6 @@ private:
     return DDS::HANDLE_NIL;
   }
 
-  // transport_detached() is called from TransportImpl when it shuts down
-  friend class TransportImpl;
-  void transport_detached(TransportImpl* which);
-
   // helpers
   typedef ACE_Guard<ACE_Thread_Mutex> Guard;
   void use_datalink_i(const RepoId& remote_id,
@@ -162,7 +152,7 @@ private:
   //allows PendingAssoc to temporarily release lock_ to allow
   //TransportImpl to access Reactor if needed
   bool initiate_connect_i(TransportImpl::AcceptConnectResult& result,
-                          const TransportImpl_rch impl,
+                          TransportImpl* impl,
                           const TransportImpl::RemoteTransport& remote,
                           const TransportImpl::ConnectionAttribs& attribs_,
                           Guard& guard);
@@ -174,9 +164,9 @@ private:
   friend class ::DDS_TEST;
 
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
-  typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
+  typedef OPENDDS_VECTOR(TransportImpl*) ImplsType;
 
-  struct PendingAssoc : RcEventHandler, PoolAllocationBase {
+  struct PendingAssoc : RcEventHandler {
     bool active_, removed_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
@@ -275,7 +265,6 @@ private:
   ImplsType impls_;
   PendingMap pending_;
   DataLinkSet links_;
-  DataLinkIndex links_waiting_for_on_deleted_callback_;
 
   /// These are the links being used during the call to send(). This is made a member of the
   /// class to minimize allocation/deallocations of the data link set.

@@ -18,17 +18,19 @@ OpenDDS::DCPS::ThreadSynch::ThreadSynch(ThreadSynchResource* resource)
 }
 
 ACE_INLINE
-OpenDDS::DCPS::ThreadSynchWorker*
+OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::ThreadSynchWorker>
 OpenDDS::DCPS::ThreadSynch::worker()
 {
-  return worker_.in();
+  return worker_;
 }
 
 ACE_INLINE int
-OpenDDS::DCPS::ThreadSynch::register_worker(const ThreadSynchWorker_rch& worker)
+OpenDDS::DCPS::ThreadSynch::register_worker(ThreadSynchWorker& worker)
 {
   DBG_ENTRY_LVL("ThreadSynch","register_worker",6);
   this->worker_ = worker;
+  if (resource_)
+    resource_->set_handle(worker.get_handle());
   return this->register_worker_i();
 }
 
@@ -37,22 +39,8 @@ OpenDDS::DCPS::ThreadSynch::unregister_worker()
 {
   DBG_ENTRY_LVL("ThreadSynch","unregister_worker",6);
   this->unregister_worker_i();
-  this->worker_.reset();
-  delete this->resource_;
-  this->resource_ = 0;
 }
 
-ACE_INLINE OpenDDS::DCPS::ThreadSynchWorker::WorkOutcome
-OpenDDS::DCPS::ThreadSynch::perform_work()
-{
-  DBG_ENTRY_LVL("ThreadSynch","perform_work",6);
-
-  if (this->worker_ == 0) {
-    return ThreadSynchWorker::WORK_OUTCOME_NO_MORE_TO_DO;
-  }
-
-  return this->worker_->perform_work();
-}
 
 ACE_INLINE int
 OpenDDS::DCPS::ThreadSynch::wait_on_clogged_resource()

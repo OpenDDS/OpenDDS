@@ -31,8 +31,8 @@ namespace OpenDDS {
     typedef DDSTraits<MessageType> TraitsType;
     typedef MarshalTraits<MessageType> MarshalTraitsType;
 
-    typedef OPENDDS_MAP_CMP(MessageType, DDS::InstanceHandle_t,
-                            typename TraitsType::LessThanType) InstanceMap;
+    typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
+                              typename TraitsType::LessThanType) InstanceMap;
     typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>  DataAllocator;
 
     enum {
@@ -42,9 +42,6 @@ namespace OpenDDS {
     DataWriterImpl_T (void)
       : marshaled_size_ (0)
       , key_marshaled_size_ (0)
-      , data_allocator_ (0)
-      , mb_allocator_ (0)
-      , db_allocator_ (0)
     {
       MessageType data;
       if (MarshalTraitsType::gen_is_bounded_size()) {
@@ -64,9 +61,6 @@ namespace OpenDDS {
 
     virtual ~DataWriterImpl_T (void)
     {
-      delete data_allocator_;
-      delete mb_allocator_;
-      delete db_allocator_;
     }
 
   virtual DDS::InstanceHandle_t register_instance (
@@ -313,7 +307,7 @@ namespace OpenDDS {
     {
       if (MarshalTraitsType::gen_is_bounded_size ())
         {
-          data_allocator_ = new DataAllocator (n_chunks_, marshaled_size_);
+          data_allocator_.reset(new DataAllocator (n_chunks_, marshaled_size_));
           if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
             ACE_DEBUG((LM_DEBUG,
                        ACE_TEXT("(%P|%t) %CDataWriterImpl::")
@@ -321,7 +315,7 @@ namespace OpenDDS {
                        ACE_TEXT(" Dynamic_Cached_Allocator_With_Overflow %x ")
                        ACE_TEXT("with %d chunks\n"),
                        TraitsType::type_name(),
-                       data_allocator_,
+                       data_allocator_.get(),
                        n_chunks_));
         }
       else
@@ -332,10 +326,10 @@ namespace OpenDDS {
                        ACE_TEXT(" is unbounded data - allocate from heap\n"), TraitsType::type_name()));
         }
 
-      mb_allocator_ =
+      mb_allocator_.reset(
         new ::OpenDDS::DCPS::MessageBlockAllocator (
-                                                    n_chunks_ * association_chunk_multiplier_);
-      db_allocator_ = new ::OpenDDS::DCPS::DataBlockAllocator (n_chunks_);
+                                                    n_chunks_ * association_chunk_multiplier_));
+      db_allocator_.reset(new ::OpenDDS::DCPS::DataBlockAllocator (n_chunks_));
 
       if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
         {
@@ -345,7 +339,7 @@ namespace OpenDDS {
                      ACE_TEXT("Cached_Allocator_With_Overflow ")
                      ACE_TEXT("%x with %d chunks\n"),
                      TraitsType::type_name(),
-                     mb_allocator_,
+                     mb_allocator_.get(),
                      n_chunks_ * association_chunk_multiplier_));
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) %CDataWriterImpl::")
@@ -353,7 +347,7 @@ namespace OpenDDS {
                      ACE_TEXT("Cached_Allocator_With_Overflow ")
                      ACE_TEXT("%x with %d chunks\n"),
                      TraitsType::type_name(),
-                     db_allocator_,
+                     db_allocator_.get(),
                      n_chunks_));
         }
 
@@ -365,7 +359,7 @@ namespace OpenDDS {
    */
   ACE_INLINE
   DataAllocator* data_allocator () const  {
-    return data_allocator_;
+    return data_allocator_.get();
   };
 
 private:
@@ -457,13 +451,13 @@ private:
                                                 ACE_Message_Block::MB_DATA,
                                                 0, //cont
                                                 0, //data
-                                                data_allocator_, //allocator_strategy
+                                                data_allocator_.get(), //allocator_strategy
                                                 get_db_lock(), //data block locking_strategy
                                                 ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                                 ACE_Time_Value::zero,
                                                 ACE_Time_Value::max_time,
-                                                db_allocator_,
-                                                mb_allocator_),
+                                                db_allocator_.get(),
+                                                mb_allocator_.get()),
                               0);
         mb.reset(tmp_mb);
         OpenDDS::DCPS::Serializer serializer(mb.get(), swap, cdr
@@ -573,9 +567,9 @@ private:
     InstanceMap  instance_map_;
     size_t       marshaled_size_;
     size_t       key_marshaled_size_;
-    DataAllocator* data_allocator_;
-    ::OpenDDS::DCPS::MessageBlockAllocator* mb_allocator_;
-    ::OpenDDS::DCPS::DataBlockAllocator*    db_allocator_;
+    unique_ptr<DataAllocator> data_allocator_;
+    unique_ptr<MessageBlockAllocator> mb_allocator_;
+    unique_ptr<DataBlockAllocator>    db_allocator_;
 
     // A class, normally provided by an unit test, that needs access to
     // private methods/members.

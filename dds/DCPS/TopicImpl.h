@@ -101,6 +101,8 @@ private:
   Monitor* monitor_;
 };
 
+
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -30,7 +30,6 @@ public:
   PacketRemoveVisitor(const TransportQueueElement::MatchCriteria& match,
                       ACE_Message_Block*&          unsent_head_block,
                       ACE_Message_Block*           header_block,
-                      TransportReplacedElementAllocator& allocator,
                       MessageBlockAllocator& mb_allocator,
                       DataBlockAllocator& db_allocator);
 
@@ -65,8 +64,6 @@ private:
   /// to the current_block_.
   ACE_Message_Block* previous_block_;
 
-  /// Cached allocator for TransportReplaceElement.
-  TransportReplacedElementAllocator& replaced_element_allocator_;
   /// Cached allocator for DataSampleHeader message block
   MessageBlockAllocator& replaced_element_mb_allocator_;
   /// Cached allocator for DataSampleHeader data block

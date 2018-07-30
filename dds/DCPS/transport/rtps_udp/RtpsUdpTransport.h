@@ -26,12 +26,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 class RtpsUdpInst;
-typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
-  RtpsUdpTransport(const TransportInst_rch& inst);
-  RtpsUdpInst_rch config() const;
+  RtpsUdpTransport(RtpsUdpInst& inst);
+  RtpsUdpInst& config() const;
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -41,10 +40,10 @@ private:
                                               const ConnectionAttribs& attribs,
                                               const TransportClient_rch& client);
 
-  virtual void stop_accepting_or_connecting(const TransportClient_rch& client,
+  virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id);
 
-  virtual bool configure_i(TransportInst* config);
+  bool configure_i(RtpsUdpInst& config);
 
   virtual void shutdown_i();
 
@@ -74,7 +73,6 @@ private:
                                     unsigned int* blob_bytes_read = 0) const;
 
   virtual void release_datalink(DataLink* link);
-  void pre_detach(const TransportClient_rch& client);
 
   virtual OPENDDS_STRING transport_type() const { return "rtps_udp"; }
 
@@ -115,7 +113,7 @@ private:
 
   ACE_SOCK_Dgram unicast_socket_;
 
-  TransportClient_rch default_listener_;
+  TransportClient_wrch default_listener_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 };
 

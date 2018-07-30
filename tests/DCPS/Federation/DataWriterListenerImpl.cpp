@@ -76,9 +76,3 @@ DataWriterListenerImpl::on_publication_lost (
   this->complete_ = true;
   this->condition_.signal();
 }
-
-void
-DataWriterListenerImpl::on_connection_deleted (
-    ::DDS::DataWriter_ptr /* writer */)
-{
-}

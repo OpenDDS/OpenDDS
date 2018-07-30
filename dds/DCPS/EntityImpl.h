@@ -57,7 +57,7 @@ public:
   virtual void transport_config(const TransportConfig_rch& cfg);
   TransportConfig_rch transport_config() const;
 
-  virtual EntityImpl* parent() const { return 0; }
+  virtual RcHandle<EntityImpl> parent() const { return RcHandle<EntityImpl>(); }
 
 protected:
   DDS::ReturnCode_t set_enabled();

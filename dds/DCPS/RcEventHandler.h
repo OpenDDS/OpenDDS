@@ -10,6 +10,7 @@
 
 #include "ace/Event_Handler.h"
 #include "dds/Versioned_Namespace.h"
+#include "RcObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -18,7 +19,9 @@ namespace DCPS {
 
 /// Templated Reference counted handle to a pointer.
 /// A non-DDS specific helper class.
-class RcEventHandler : public ACE_Event_Handler {
+class RcEventHandler
+  : public ACE_Event_Handler
+  , public virtual RcObject {
 public:
 
   RcEventHandler()
@@ -27,14 +30,16 @@ public:
 
   }
 
-  void _add_ref()
+  ACE_Event_Handler::Reference_Count add_reference()
   {
-    this->add_reference();
+    RcObject::_add_ref();
+    return 1;
   }
 
-  void _remove_ref()
+  ACE_Event_Handler::Reference_Count remove_reference()
   {
-    this->remove_reference();
+    RcObject::_remove_ref();
+    return 1;
   }
 
 };

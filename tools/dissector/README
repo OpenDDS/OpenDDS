@@ -2,7 +2,7 @@ The OpenDDS DCPS Wireshark dissector supports the TCP/IP, UDP/IP, and IP
 multicast transports. Dissection of transport headers and encapsulated sample
 headers are fully supported. Optional dissection of sample payloads is also
 supported from Wireshark 1.12 on. The dissector is compatible with Wireshark
-1.2 up to at least 2.4 and has been tested with Windows, macOS, and Linux.
+1.2 up to at least 2.6 and has been tested with Windows, macOS, and Linux.
 
 
 ======================================================================
@@ -44,7 +44,7 @@ libraries must be installed through a development package like:
 
        - Any version of Wireshark built with autoconf, which is try if you
          ran autogen.sh. This is the recommended way to build on Linux as
-         of Wireshark 2.4.
+         of Wireshark 2.6.
 
        - Wireshark 1.x built on Windows. Also %WIRETAP_VERSION% should also
          be set to the version of wiretap in the build.

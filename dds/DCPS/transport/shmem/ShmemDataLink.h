@@ -72,11 +72,7 @@ class OpenDDS_Shmem_Export ShmemDataLink
   : public DataLink {
 public:
 
-  ShmemDataLink(const ShmemTransport_rch& transport);
-
-  void configure(ShmemInst* config);
-
-  ShmemInst* config();
+  ShmemDataLink(ShmemTransport& transport);
 
   bool open(const std::string& peer_address);
 
@@ -91,6 +87,7 @@ public:
 
   void read() { recv_strategy_->read(); }
   void signal_semaphore();
+  ShmemTransport& impl() const;
 
 protected:
   ShmemInst* config_;

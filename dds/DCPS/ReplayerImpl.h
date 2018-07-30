@@ -120,7 +120,6 @@ public:
   virtual void notify_publication_disconnected(const ReaderIdSeq& subids);
   virtual void notify_publication_reconnected(const ReaderIdSeq& subids);
   virtual void notify_publication_lost(const ReaderIdSeq& subids);
-  virtual void notify_connection_deleted(const RepoId&);
 
   /// Statistics counter.
   int data_dropped_count_;
@@ -167,9 +166,6 @@ public:
   virtual DDS::InstanceHandle_t get_instance_handle();
 
 private:
-
-  void _add_ref() { EntityImpl::_add_ref(); }
-  void _remove_ref() { EntityImpl::_remove_ref(); }
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
@@ -224,7 +220,7 @@ private:
   /// The object reference of the associated topic.
   DDS::Topic_var topic_objref_;
   /// The topic servant.
-  TopicImpl*                      topic_servant_;
+  TopicDescriptionPtr<TopicImpl> topic_servant_;
 
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
@@ -286,14 +282,6 @@ private:
   /// The cached allocator to allocate DataSampleElement
   /// objects.
   unique_ptr<DataSampleElementAllocator> sample_list_element_allocator_;
-
-  /// The allocator for TransportSendElement.
-  /// The TransportSendElement allocator is put here because it
-  /// needs the number of chunks information that WriteDataContainer
-  /// has.
-  unique_ptr<TransportSendElementAllocator>  transport_send_element_allocator_;
-
-  unique_ptr<TransportCustomizedElementAllocator> transport_customized_element_allocator_;
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.

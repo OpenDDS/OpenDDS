@@ -10,11 +10,10 @@
 
 #include "Udp_Export.h"
 
-#include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
 
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/RcEventHandler.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -25,7 +24,8 @@ class UdpDataLink;
 
 class OpenDDS_Udp_Export UdpReceiveStrategy
   : public TransportReceiveStrategy<>,
-    public ACE_Event_Handler {
+    public RcEventHandler
+{
 public:
   explicit UdpReceiveStrategy(UdpDataLink* link);
 

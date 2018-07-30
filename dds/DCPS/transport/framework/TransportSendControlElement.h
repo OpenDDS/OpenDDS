@@ -38,23 +38,10 @@ public:
                               const RepoId& publisher_id,
                               TransportSendListener* listener,
                               const DataSampleHeader& header,
-                              Message_Block_Ptr msg_block,
-                              TransportSendControlElementAllocator* allocator = 0);
+                              Message_Block_Ptr msg_block);
 
   TransportSendControlElement(int initial_count,
-                              const DataSampleElement* dcps_elem,
-                              TransportSendControlElementAllocator* allocator);
-
-  static TransportSendControlElement* alloc(int initial_count,
-                                            const RepoId& publisher_id,
-                                            TransportSendListener* listener,
-                                            const DataSampleHeader& header,
-                                            Message_Block_Ptr message,
-                                            TransportSendControlElementAllocator* allocator);
-
-  static TransportSendControlElement* alloc(int initial_count,
-                                            const DataSampleElement* dcps_elem,
-                                            TransportSendControlElementAllocator* allocator);
+                              const DataSampleElement* dcps_elem);
 
   virtual ~TransportSendControlElement();
 

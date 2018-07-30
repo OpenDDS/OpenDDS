@@ -23,7 +23,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao_version = '6.4.6';
+my $doc_tao_version = '6.5.0';
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
@@ -50,9 +50,6 @@ my %platforminfo =
    'macosx' => {
                 'compilers' => ['clang++'],
                 'libpath' => 'DYLD_LIBRARY_PATH',
-                'versions' => {5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
-                               8 => 'mountainlion', 9 => 'mavericks',
-                               10 => 'yosemite', 11 => 'elcapitan'},
                },
    'solaris' => {
                  'compilers' => ['CC', 'g++'],
@@ -614,7 +611,25 @@ if (!$ace_src || !$tao_src) {
       else {
         $err = system(($^O eq 'solaris' ? 'g' : '') . "tar xzf $ddsroot/$file");
       }
+    } else {
+      # Try Archive::Zip
+      print "Archive::Extract isn't installed, trying Archive::Zip\n" if $opts{'verbose'};
+      eval {require Archive::Zip};
+      if ($@) {
+        print "Neither Archive::Extract or Archive::Zip are installed\n" if $opts{'verbose'};
+      } else {
+        if ($opts{'dry-run'}) {
+          print "Dry-run: would Archive::Zip $file\n";
+        } else {
+          my $zip = Archive::Zip->new();
+          if ($zip->read( $file ) == Archive::Zip::AZ_OK() &&
+            $zip->extractTree() == Archive::Zip::AZ_OK()) {
+            $err = 0;
+          }
+        }
+      }
     }
+
     if ($err) {
       die "ERROR: Can't extract $file, extract it to " . Cwd::abs_path('.') .
         "\nand run this script again.\nStopped";
@@ -765,6 +780,7 @@ sub write_platform_macros {
     my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
+    my $macro_cross_compile = 0;
     if ($buildEnv{'build'} eq 'target') {
       for my $line (@{$opts{'macros'}}) {
         print $PMG "$line\n";
@@ -784,6 +800,7 @@ sub write_platform_macros {
         if ($opts{'target-compiler'}) {
           my $tcomp = $opts{'target-compiler'};
           if ($tcomp =~ s/-g([c+])\1$/-/) {
+            $macro_cross_compile = 1;
             print $PMG 'CROSS_COMPILE = ', $tcomp, "\n";
           }
           else {
@@ -812,7 +829,7 @@ sub write_platform_macros {
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
-    if ($opts{'nonstdcompiler'}) {
+    if ($opts{'nonstdcompiler'} && !$macro_cross_compile) {
       for my $var ('CC', 'CXX', 'LD') {
         print $PMG "$var = $opts{'compiler'}\n";
       }
@@ -1006,7 +1023,7 @@ if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
   if (!exists $opts{'glib'}) {
     die "ERROR: --glib is required for --wireshark and --wireshark_cmake\n";
   }
-  
+
   if (exists $opts{'wireshark_cmake'}) {
 
     if (exists $opts{'wireshark'}) {
@@ -1236,6 +1253,10 @@ EOT
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
         while (my $row = <$fh>) {
           chomp $row;
+          $row =~ s/\/\/.*//;
+          $row =~ s/^\s+//;
+          $row =~ s/\s+$//;
+          next if $row eq '';
           my ($key, $value) = split(/=/, $row);
           $existing_features{$key} = $value;
         }
@@ -1411,7 +1432,7 @@ sub write_environment {
   }
 }
 
-sub get_mac_version {
+sub check_mac_version {
   my $buildEnvRef = shift;
   if (-r "$buildEnvRef->{ACE_ROOT}/ace/config-macosx.h") {
     my $cfg = new FileHandle("$buildEnvRef->{ACE_ROOT}/ace/config-macosx.h");
@@ -1422,13 +1443,8 @@ sub get_mac_version {
     }
   }
 
-  my $vers = `sw_vers -productVersion`;
-  $vers =~ /10\.(\d+)\.?/;
-  if (!exists $platforminfo{'macosx'}->{'versions'}->{$1}) {
-    die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
-  }
-  $opts{'host_version'} = $platforminfo{'macosx'}->{'versions'}->{$1};
-  print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
+  die "ERROR: This version of ACE doesn't contain the required configuration " .
+    "files for Apple macOS.  Stopped";
 }
 
 sub configure_build {
@@ -1437,7 +1453,7 @@ sub configure_build {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   }
   else {
-    get_mac_version($buildEnvRef) if $opts{'host'} eq 'macosx';
+    check_mac_version($buildEnvRef) if $opts{'host'} eq 'macosx';
 
     write_config_h($buildEnvRef);
     write_default_features($buildEnvRef);

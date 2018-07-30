@@ -326,8 +326,4 @@ Test::DataReaderListener::on_budget_exceeded (
 {
 }
 
-void
-Test::DataReaderListener::on_connection_deleted (DDS::DataReader_ptr)
-{
-}
 

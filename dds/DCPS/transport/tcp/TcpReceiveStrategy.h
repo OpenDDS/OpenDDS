@@ -12,6 +12,7 @@
 #include "TcpDataLink_rch.h"
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
+#include "dds/DCPS/RcEventHandler.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -20,16 +21,18 @@ namespace DCPS {
 
 class TcpConnection;
 
-class TcpReceiveStrategy : public TransportReceiveStrategy<> {
+class TcpReceiveStrategy
+  : public TransportReceiveStrategy<>,
+    public RcEventHandler
+{
 public:
 
-  TcpReceiveStrategy(const TcpDataLink_rch& link,
-                     const TcpConnection_rch& connection,
+  TcpReceiveStrategy(TcpDataLink& link,
                      const TransportReactorTask_rch& task);
 
   virtual ~TcpReceiveStrategy();
 
-  int reset(const TcpConnection_rch& connection);
+  int reset(TcpConnection* old_connection, TcpConnection* new_connection);
 
   ACE_Reactor* get_reactor();
 
@@ -54,8 +57,7 @@ protected:
 
 private:
 
-  TcpDataLink_rch    link_;
-  TcpConnection_rch  connection_;
+  TcpDataLink& link_;
   TransportReactorTask_rch reactor_task_;
 };
 

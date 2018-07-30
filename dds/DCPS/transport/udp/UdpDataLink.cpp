@@ -27,17 +27,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-UdpDataLink::UdpDataLink(const UdpTransport_rch& transport,
+UdpDataLink::UdpDataLink(UdpTransport& transport,
                          Priority   priority,
+                         TransportReactorTask* reactor_task,
                          bool       active)
   : DataLink(transport,
              priority,
              false, // is_loopback,
              active),// is_active
     active_(active),
-    config_(0),
-    reactor_task_(0),
-    send_strategy_(make_rch<UdpSendStrategy>(this, transport->config())),
+    reactor_task_(reactor_task),
+    send_strategy_(make_rch<UdpSendStrategy>(this)),
     recv_strategy_(make_rch<UdpReceiveStrategy>(this))
 {
 }
@@ -46,7 +46,10 @@ bool
 UdpDataLink::open(const ACE_INET_Addr& remote_address)
 {
   this->remote_address_ = remote_address;
-  this->is_loopback_ = this->remote_address_ == this->config_->local_address();
+
+  UdpInst& config = static_cast<UdpTransport&>(this->impl()).config();
+
+  this->is_loopback_ = this->remote_address_ == config.local_address();
 
   ACE_INET_Addr local_address;
   if (this->active_) {
@@ -54,7 +57,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       local_address.set(0, "", 0, remote_address.get_type());
     }
   } else {
-    local_address = this->config_->local_address();
+    local_address = config.local_address();
   }
 
   if (!open_appropriate_socket_type(this->socket_, local_address)) {
@@ -70,7 +73,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   // If listening on "any" host/port, need to record the actual port number
   // selected by the OS, as well as our actual hostname, into the config_
   // object's local_address_ for use in UdpTransport::connection_info_i().
-  if (!this->active_ && this->config_->local_address().is_any()) {
+  if (!this->active_ && config.local_address().is_any()) {
     ACE_INET_Addr address;
     if (this->socket_.get_local_addr(address) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -82,11 +85,12 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) UdpDataLink::open listening on host %C:%hu\n"),
               hostname.c_str(), port), 2);
-    this->config_->local_address(port, hostname.c_str());
+
+    config.local_address(port, hostname.c_str());
 
   // Similar case to the "if" case above, but with a bound host/IP but no port
   } else if (!this->active_ &&
-             0 == this->config_->local_address().get_port_number()) {
+             0 == config.local_address().get_port_number()) {
     ACE_INET_Addr address;
     if (this->socket_.get_local_addr(address) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -97,11 +101,11 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) UdpDataLink::open listening on port %hu\n"),
               port), 2);
-    this->config_->local_address_set_port(port);
+    config.local_address_set_port(port);
   }
 
-  if (this->config_->send_buffer_size_ > 0) {
-    int snd_size = this->config_->send_buffer_size_;
+  if (config.send_buffer_size_ > 0) {
+    int snd_size = config.send_buffer_size_;
     if (this->socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 (void *) &snd_size,
@@ -115,8 +119,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     }
   }
 
-  if (this->config_->rcv_buffer_size_ > 0) {
-    int rcv_size = this->config_->rcv_buffer_size_;
+  if (config.rcv_buffer_size_ > 0) {
+    int rcv_size = config.rcv_buffer_size_;
     if (this->socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 (void *) &rcv_size,
@@ -151,7 +155,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       remote_address.get_host_addr(), remote_address.get_port_number()));
 
     TransportLocator info;
-    this->impl()->connection_info_i(info);
+    this->impl().connection_info_i(info);
     ACE_Message_Block* data_block;
     ACE_NEW_RETURN(data_block,
                    ACE_Message_Block(info.data.length()+sizeof(Priority),
@@ -269,13 +273,11 @@ void
 UdpDataLink::control_received(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address)
 {
-  TransportImpl_rch impl = this->impl();
-  RcHandle<UdpTransport> ut = static_rchandle_cast<UdpTransport>(impl);
   // At this time, the TRANSPORT_CONTROL messages in Udp are only used for
   // the connection handshaking, so receiving one is an indication of the
   // passive_connection event.  In the future the submessage_id_ could be used
   // to allow different types of messages here.
-  ut->passive_connection(remote_address, sample.sample_);
+  static_cast<UdpTransport&>(this->impl()).passive_connection(remote_address, sample.sample_);
 }
 
 void

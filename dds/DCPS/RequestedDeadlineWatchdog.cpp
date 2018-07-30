@@ -19,14 +19,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
-  OpenDDS::DCPS::DataReaderImpl * reader_impl,
+  OpenDDS::DCPS::DataReaderImpl & reader_impl,
   DDS::RequestedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
   : Watchdog(duration_to_time_value(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
   , reader_impl_(reader_impl)
-  , reader_(DDS::DataReader::_duplicate(reader_impl))
   , status_(status)
   , last_total_count_(last_total_count)
 {
@@ -70,9 +69,15 @@ int
 OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
 {
   DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
-  SubscriptionInstance_rch instance = this->reader_impl_->get_handle_instance(handle);
-  if (instance)
-    execute(instance, true);
+  DataReaderImpl_rch reader = this->reader_impl_.lock();
+  if (reader) {
+    SubscriptionInstance_rch instance = reader->get_handle_instance(handle);
+    if (instance)
+      execute(instance, true);
+  }
+  else {
+    this->reactor()->purge_pending_notifications(this);
+  }
   return 0;
 }
 
@@ -95,6 +100,10 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
     }
 
     if (missed) {
+      DataReaderImpl_rch reader = this->reader_impl_.lock();
+      if (!reader)
+        return;
+
       ACE_GUARD(ACE_Recursive_Thread_Mutex, monitor, this->status_lock_);
       // Only update the status upon timer is called and not
       // when receiving a sample after the interval.
@@ -105,16 +114,18 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
           this->status_.total_count - this->last_total_count_;
         this->status_.last_instance_handle = instance->instance_handle_;
 
-        this->reader_impl_->set_status_changed_flag(
+        reader->set_status_changed_flag(
           DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
 
         DDS::DataReaderListener_var listener =
-          this->reader_impl_->listener_for(
+          reader->listener_for(
             DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         if (instance->instance_state_.is_exclusive()) {
-          reader_impl_->owner_manager_->remove_writers (instance->instance_handle_);
+          DataReaderImpl::OwnershipManagerPtr owner_manager = reader->ownership_manager();
+          if (owner_manager)
+            owner_manager->remove_writers (instance->instance_handle_);
         }
 #endif
 
@@ -126,11 +137,11 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
           ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
           // @todo Will this operation ever throw?  If so we may want to
           //       catch all exceptions, and act accordingly.
-          listener->on_requested_deadline_missed(this->reader_.in(),
+          listener->on_requested_deadline_missed(reader.in(),
                                                 status);
         }
 
-        this->reader_impl_->notify_status_condition();
+        reader->notify_status_condition();
       }
     }
 
@@ -149,7 +160,9 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
 void
 OpenDDS::DCPS::RequestedDeadlineWatchdog::reschedule_deadline()
 {
-  this->reader_impl_->reschedule_deadline();
+  DataReaderImpl_rch reader = this->reader_impl_.lock();
+  if (reader)
+    reader->reschedule_deadline();
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

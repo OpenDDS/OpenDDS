@@ -121,8 +121,6 @@ ReplayerImpl::cleanup()
 
     // release our Topic_var
     topic_objref_ = DDS::Topic::_nil();
-    topic_servant_->remove_entity_ref();
-    topic_servant_->_remove_ref();
     topic_servant_ = 0;
 
   }
@@ -157,8 +155,6 @@ ReplayerImpl::init(
   DBG_ENTRY_LVL("ReplayerImpl","init",6);
   topic_objref_ = DDS::Topic::_duplicate(topic);
   topic_servant_ = topic_servant;
-  topic_servant_->_add_ref();
-  topic_servant_->add_entity_ref();
   topic_name_    = topic_servant_->get_name();
   topic_id_      = topic_servant_->get_id();
   type_name_     = topic_servant_->get_type_name();
@@ -328,10 +324,6 @@ ReplayerImpl::enable()
 
   sample_list_element_allocator_.reset(new DataSampleElementAllocator(2 * n_chunks_));
 
-  transport_send_element_allocator_.reset(new TransportSendElementAllocator(2 * n_chunks_,
-                                                       sizeof(TransportSendElement)));
-  transport_customized_element_allocator_.reset(new TransportCustomizedElementAllocator(2 * n_chunks_,
-                                                             sizeof(TransportCustomizedElement)));
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
@@ -945,10 +937,6 @@ ReplayerImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
   ACE_UNUSED_ARG(handles);
 }
 
-void
-ReplayerImpl::notify_connection_deleted(const RepoId&)
-{
-}
 
 void
 ReplayerImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos_data) const
@@ -988,9 +976,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
           sizeof(DataSampleElement))),
       DataSampleElement(publication_id_,
                             this,
-                            PublicationInstance_rch(),
-                            transport_send_element_allocator_.get(),
-                            transport_customized_element_allocator_.get()),
+                            PublicationInstance_rch()),
       DDS::RETCODE_ERROR);
 
     element->get_header().byte_order_ = samples[i].sample_byte_order_;

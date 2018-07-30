@@ -121,10 +121,6 @@ RecorderImpl::cleanup()
 
   this->remove_all_associations();
 
-  if (topic_servant_) {
-    topic_servant_->remove_entity_ref();
-    topic_servant_->_remove_ref();
-  }
   {
     ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
                    read_guard,
@@ -160,9 +156,6 @@ void RecorderImpl::init(
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
-    topic_servant_->_add_ref();
-
-    topic_servant_->add_entity_ref();
   }
 
   CORBA::String_var topic_name = a_topic_desc->get_name();
@@ -268,12 +261,6 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 {
 
 }
-
-void RecorderImpl::notify_connection_deleted(const RepoId&)
-{
-
-}
-
 
 
 void
@@ -1070,17 +1057,13 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
                    this->publication_handle_lock_,
                    DDS::RETCODE_ERROR);
 
-  BIT_Helper_1 < DDS::PublicationBuiltinTopicDataDataReader,
-                 DDS::PublicationBuiltinTopicDataDataReader_var,
-                 DDS::PublicationBuiltinTopicDataSeq > hh;
-
   DDS::PublicationBuiltinTopicDataSeq data;
 
-  DDS::ReturnCode_t ret
-    = hh.instance_handle_to_bit_data(participant_servant_,
-                                     BUILT_IN_PUBLICATION_TOPIC,
-                                     publication_handle,
-                                     data);
+  DDS::ReturnCode_t ret = instance_handle_to_bit_data<DDS::PublicationBuiltinTopicDataDataReader_var>(
+                            participant_servant_,
+                            BUILT_IN_PUBLICATION_TOPIC,
+                            publication_handle,
+                            data);
 
   if (ret == DDS::RETCODE_OK) {
     key = data[0].key;

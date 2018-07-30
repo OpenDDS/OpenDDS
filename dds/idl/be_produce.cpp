@@ -286,6 +286,10 @@ BE_produce()
   //search for #includes in the IDL, add them as #includes in the stubs/skels
   const char* idl_fn = idl_global->main_filename()->get_string();
 
+  const BE_GlobalData::stream_enum_t out_stream =
+    be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE
+    ? BE_GlobalData::STREAM_H : BE_GlobalData::STREAM_LANG_H;
+
   ifstream idl(idl_fn);
   const size_t buffer_sz = 512;
   char buffer[buffer_sz];
@@ -317,7 +321,7 @@ BE_produce()
 
       string stb_inc = base_name + "C.h";
       if (stb_inc != "tao/orbC.h") {
-        be_global->add_include(stb_inc.c_str());
+        be_global->add_include(stb_inc.c_str(), out_stream);
         if (stb_inc == "orbC.h" ||
             (stb_inc.size() >= 7
             && stb_inc.substr(stb_inc.size() - 7) == "/orbC.h") ) {

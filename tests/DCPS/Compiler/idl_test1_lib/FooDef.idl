@@ -44,7 +44,7 @@ module Xyz {
   };
 
   // +4
-  enum ColorX { redx, greenx, bluex };
+  enum ColorX { redx, greenx, bluex, yellowx };
 
   const ColorX c15 = greenx;
 
@@ -69,10 +69,9 @@ module Xyz {
 
   union AUnion switch (ColorX) {
     case redx:
-      //long rlv;
+    case yellowx:
       string rsv;
     case greenx:
-      //short gsv;
       AStruct gsv;
     default:
       unsigned short usv;
@@ -148,6 +147,35 @@ module Xyz {
     TestEnum te;
   case TRUE:
     StructWithTypedefedEnum swte;
+  };
+
+  union TestUnion2 switch (boolean) {
+  case FALSE:
+    octet o;
+  };
+
+  union TestUnion3 switch (boolean) {
+  case TRUE:
+    octet o;
+  };
+
+  union TestUnion4 switch (boolean) {
+  default:
+    octet o;
+  };
+
+  union TestUnion5 switch (boolean) {
+  case FALSE:
+    TestEnum te;
+  default:
+    octet o;
+  };
+
+  union TestUnion6 switch (boolean) {
+  case TRUE:
+    TestEnum te;
+  default:
+    octet o;
   };
 };
 

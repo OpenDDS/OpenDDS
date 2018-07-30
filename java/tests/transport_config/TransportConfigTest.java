@@ -58,8 +58,6 @@ public class TransportConfigTest {
         assert ti2.getMaxSamplesPerPacket() == 6;
         TcpInst ti_tcp2 = (TcpInst) ti2;
         assert ti_tcp2.getConnRetryAttempts() == 49;
-
-        TheTransportRegistry.remove_inst(ti);
     }
 
 
