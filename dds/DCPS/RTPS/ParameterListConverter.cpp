@@ -397,7 +397,8 @@ int from_param_list(const ParameterList& param_list,
   if (from_param_list(param_list, pbtd.base) != 0)
     return -1;
 
-  pbtd.security_info = {0, 0};
+  pbtd.security_info.participant_security_attributes = 0;
+  pbtd.security_info.plugin_participant_security_attributes = 0;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {

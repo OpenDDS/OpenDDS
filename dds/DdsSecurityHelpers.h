@@ -47,7 +47,7 @@ security_attributes_to_bitmask(const DDS::Security::EndpointSecurityAttributes& 
 {
   using namespace DDS::Security;
 
-  EndpointSecurityAttributesMask result = 0u;
+  EndpointSecurityAttributesMask result = ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
 
   if (sec_attr.base.is_read_protected)
     result |= ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_READ_PROTECTED;

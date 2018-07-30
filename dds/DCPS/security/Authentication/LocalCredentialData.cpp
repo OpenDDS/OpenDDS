@@ -5,17 +5,17 @@
 
 #include "LocalCredentialData.h"
 #include "dds/DCPS/security/CommonUtilities.h"
+#include "dds/DCPS/security/TokenReader.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/SequenceIterator.h"
-#include <fstream>
-#include <iterator>
-
-#include <cstdio>
+#include <algorithm>
 #include <cstring>
 #include <cerrno>
 
 namespace OpenDDS {
 namespace Security {
+
+using namespace CommonUtilities;
 
 int CredentialHash::operator()(DDS::OctetSeq& dst) const
 {
@@ -70,24 +70,38 @@ LocalAuthCredentialData::~LocalAuthCredentialData()
 
 }
 
-bool LocalAuthCredentialData::load(const DDS::PropertySeq& props, DDS::Security::SecurityException& ex)
+bool LocalAuthCredentialData::load_access_permissions(const DDS::Security::PermissionsCredentialToken& src,
+                                                      DDS::Security::SecurityException& ex)
 {
-  using namespace CommonUtilities;
+  const char* cperm = TokenReader(src).get_property_value("dds.perm.cert");
+  if (! cperm) {
+    set_security_error(ex, -1, 0,
+                       "LocalAuthCredentialData::load_access_permissions: "
+                       "no 'dds.perm.cert' property provided");
+    return false;
+  }
+  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(access_permissions_);
+  std::copy(cperm, cperm + std::strlen(cperm), back_inserter);
 
+  // Set trailing null bit
+  *back_inserter = 0u;
+
+  return true;
+}
+
+bool LocalAuthCredentialData::load_credentials(const DDS::PropertySeq& props, DDS::Security::SecurityException& ex)
+{
   std::string name, value, pkey_uri, password;
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-      "(%P|%t) LocalAuthCredentialData::load: Number of Properties: %i\n"
-    ), props.length()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalAuthCredentialData::load: Number of Properties: %i\n", props.length()));
   }
   for (size_t i = 0; i < props.length(); ++i) {
     name = props[i].name;
     value = props[i].value;
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) LocalAuthCredentialData::load: property %i: %C: %C\n"
-      ), i, name.c_str(), value.c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalAuthCredentialData::load: property %i: %C: %C\n",
+                i, name.c_str(), value.c_str()));
     }
 
     if (name == "dds.sec.auth.identity_ca") {
@@ -102,29 +116,6 @@ bool LocalAuthCredentialData::load(const DDS::PropertySeq& props, DDS::Security:
     } else if (name == "dds.sec.auth.password") {
         password = value;
 
-    } else if (name == "dds.sec.access.permissions") {
-
-      URI uri_info(value);
-
-      switch(uri_info.scheme) {
-        case URI::URI_FILE:
-          load_permissions_file(uri_info.everything_else);
-          break;
-
-        case URI::URI_DATA:
-          load_permissions_data(uri_info.everything_else);
-          break;
-
-        case URI::URI_PKCS11:
-        case URI::URI_UNKNOWN:
-        default:
-          ACE_ERROR((LM_ERROR,
-                     "(%P|%t) LocalAuthCredentialData::load: "
-                     "ERROR: unsupported URI scheme in path '%C'\n",
-                     value.c_str()));
-
-          break;
-      }
     }
   }
 
@@ -133,57 +124,20 @@ bool LocalAuthCredentialData::load(const DDS::PropertySeq& props, DDS::Security:
   }
 
   if (! ca_cert_) {
-    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load CA certificate");
+    set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load CA certificate");
     return false;
 
   } else if (! participant_cert_) {
-    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant certificate");
+    set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant certificate");
     return false;
 
   } else if (! participant_pkey_) {
-    CommonUtilities::set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant private-key");
+    set_security_error(ex, -1, 0, "LocalAuthCredentialData::load: failed to load participant private-key");
     return false;
 
   }
 
   return true;
-}
-
-void LocalAuthCredentialData::load_permissions_file(const std::string& path)
-{
-  std::ifstream in(path.c_str(), std::ios::binary);
-
-  if (in.fail()) {
-    ACE_ERROR((LM_ERROR,
-              "(%P|%t) LocalAuthCredentialData::load_permissions_file:"
-              "WARNING: Failed to load file '%C'; errno: '%C'\n",
-              path.c_str(), strerror(errno)));
-    return;
-  }
-
-  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(access_permissions_);
-
-  std::copy((std::istreambuf_iterator<char>(in)),
-            std::istreambuf_iterator<char>(),
-            back_inserter);
-
-  // To appease the other DDS security implementations which
-  // append a null byte at the end of the cert.
-  *back_inserter = 0u;
-
-}
-
-void LocalAuthCredentialData::load_permissions_data(const std::string& path)
-{
-  // The minus 1 is because path contains a comma in element 0 and that comma
-  // is not included in the cert string
-  access_permissions_.length(path.size() - 1);
-  std::memcpy(access_permissions_.get_buffer(), &path[1], access_permissions_.length());
-
-  // To appease the other DDS security implementations which
-  // append a null byte at the end of the cert.
-  access_permissions_.length(access_permissions_.length() + 1);
-  access_permissions_[access_permissions_.length() - 1] = 0;
 }
 
 }

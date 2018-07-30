@@ -1251,12 +1251,18 @@ namespace OpenDDS {
         }
       }
 
+      virtual bool
+      announce_domain_participant_qos()
+      {
+        return true;
+      }
+
       bool
       update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
         qos_ = qos;
-        return true;
+        return announce_domain_participant_qos();
       }
 
       DCPS::TopicStatus

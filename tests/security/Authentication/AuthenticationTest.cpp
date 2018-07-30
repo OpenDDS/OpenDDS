@@ -54,8 +54,8 @@ struct MockParticipantData
 
   static GUID_t make_guid()
   {
-    /* Each subsequent call should have a lexicographically-greater value than the previous */
-    GUID_t result = { {0x01,0x03, /* Vendor ID */
+    // Each subsequent call should have a lexicographically-greater value than the previous
+    GUID_t result = { {0x01,0x03, // Vendor ID
                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, next_guid_modifier},
                       { {0x01, 0x02, next_guid_modifier}, 0xFF} };
 
@@ -214,7 +214,7 @@ struct AuthenticationTest : public ::testing::Test
   static void fake_topic_data_from_cert(const std::string& path, DDS::OctetSeq& dst, GUID_t guid)
   {
     using namespace OpenDDS::DCPS;
-    /* Fill this with data directly from the cert */
+    // Fill this with data directly from the cert
 
     OpenDDS::Security::SSL::Certificate cert(path);
 
@@ -273,10 +273,10 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
 
 TEST_F(AuthenticationTest, GetIdentityToken_Success)
 {
-  /* From this cmd:  openssl x509 -noout -subject -in certs/identity/test_participant_01_cert.pem */
+  // From this cmd:  openssl x509 -noout -subject -in certs/identity/test_participant_01_cert.pem
   std::string cert_sn("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
 
-  /* Same thing but with certs/identity/identity_ca_cert.pem */
+  // Same thing but with certs/identity/identity_ca_cert.pem
   std::string ca_sn("C = US, ST = MO, L = Saint Louis, O = Object Computing (Test Identity CA), CN = Object Computing (Test Identity CA), emailAddress = info@objectcomputing.com");
 
   AuthenticationBuiltInImpl auth;
@@ -297,17 +297,17 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_Pen
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
 
-  /* Local participant */
+  // Local participant
   ValidationResult_t r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
 
-  /* Remote participant */
+  // Remote participant
   r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Leave the remote-auth-request-token set to TokenNil to force local-auth-request */
+  // Leave the remote-auth-request-token set to TokenNil to force local-auth-request
   r = auth.validate_remote_identity(mp2.id_handle,
                                     mp1.auth_request_message_token,
                                     mp2.auth_request_message_token,
@@ -316,26 +316,11 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_Pen
                                     mp2.guid_adjusted,
                                     ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
 
-  /*  Given the hash of the subject names in the local/remote keys, the first 11 bytes of
-   *  the adjusted GUIDs are shown below. Since byte 2 in the remote GUID is lexicographically
-   *  greater than byte 2 in the local GUID we have: remote > local and hence the
-   *  VALIDATION_PENDING_HANDSHAKE_REQUEST is returned. Otherwise per the spec we would get
-   *  VALIDATION_PENDING_HANDSHAKE_MESSAGE.
-   *
-   *  (gdb) x/11bx &local
-   *    0x6e9268:       0x80    0x07    0xbb    0xb3    0x1d    0x43    0xbd    0x8d
-   *    0x6e9270:       0x42    0x60    0x62
-   *
-   *  (gdb) x/11bx &remote
-   *    0x6cc8e0:       0x80    0xa0    0x5c    0xda    0xc4    0x66    0xd3    0x6c
-   *    0x6cc8e8:       0x0c    0xd8    0xfc
-   *
-   */
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, r);
 }
 
@@ -344,12 +329,12 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_Pendi
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
 
-  /* Local participant: notice how it is mp2 this time */
+  // Local participant: notice how it is mp2 this time
   ValidationResult_t r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Remote participant: mp1 this time */
+  // Remote participant: mp1 this time
   r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
@@ -358,10 +343,10 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_Pendi
   mp1.id_token_remote = mp2.id_token;
   mp1.guid_adjusted_remote = mp2.guid_adjusted;
 
-  /* First, generate an auth-request-token for the "remote" participant mp1. TokenNil is passed in this time
-   * so it will force-generate a local token associated with mp1. The results for this don't matter that much
-   * because the next call to validate_remote_identity is where the magic (in this test) happens. */
-  /* Both sides of the handshake validate remote identity */
+  // First, generate an auth-request-token for the "remote" participant mp1. TokenNil is passed in this time
+  // so it will force-generate a local token associated with mp1. The results for this don't matter that much
+  // because the next call to validate_remote_identity is where the magic (in this test) happens.
+  // Both sides of the handshake validate remote identity
   r = auth.validate_remote_identity(mp1.id_handle_remote,
                                     mp1.auth_request_message_token,
                                     mp1.auth_request_message_token_remote,
@@ -383,12 +368,12 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_Pendi
                                     mp2.guid_adjusted_remote,
                                     ex);
 
-  /* Make sure mp2 auth-request-token is TokenNil per the spec */
+  // Make sure mp2 auth-request-token is TokenNil per the spec
   ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
   ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
 
-  /* Expected since now lexicographical GUID comparison yields: local > remote (in contrast to the test above) */
+  // Expected since now lexicographical GUID comparison yields: local > remote (in contrast to the test above)
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 }
 
@@ -397,12 +382,12 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
 
-  /* Local participant */
+  // Local participant
   ValidationResult_t r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
 
-  /* Remote participant */
+  // Remote participant
   r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
@@ -412,7 +397,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
 
   AuthRequestMessageToken niltoken = DDS::Security::TokenNIL;
 
-  /* Leave the remote-auth-request-token set to TokenNil to force local-auth-request */
+  // Leave the remote-auth-request-token set to TokenNil to force local-auth-request
   r = auth.validate_remote_identity(mp1.id_handle_remote,
                                     mp1.auth_request_message_token,
                                     mp1.auth_request_message_token_remote,
@@ -421,21 +406,21 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
                                     mp1.guid_adjusted_remote,
                                     ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
 
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, r);
 
-  /* Arbitrary... This isn't used in begin_handshake_request anyway! */
+  // Arbitrary... This isn't used in begin_handshake_request anyway!
   DDS::OctetSeq pretend_topic_data;
   pretend_topic_data.length(1);
   pretend_topic_data[0] = 'A';
 
   DDS::Security::HandshakeMessageToken request_token;
 
-  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  // Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier
   r = auth.begin_handshake_request(mp1.handshake_handle,
                                    request_token,
                                    mp1.id_handle,
@@ -445,8 +430,8 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
-  /* Since many of the out-params are randomly-generated it is only
-   * practical to check the lengths of the resultant parameters */
+  // Since many of the out-params are randomly-generated it is only
+  // practical to check the lengths of the resultant parameters
   const DDS::BinaryPropertySeq& bprops = request_token.binary_properties;
   const DDS::PropertySeq& props = request_token.properties;
   ASSERT_EQ(8u, bprops.length());
@@ -471,13 +456,13 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
 
   ASSERT_EQ(32u, value_of("challenge1", bprops).length());
 
-  /* The operation shall check the content of the local_auth_request_token associated
-   * with the remote_identity_handle. If the value is _not_ TokenNIL then "challenge1"
-   * should be equal to the local_auth_request_token "future_challenge" property.
-   *
-   * Above the local-auth-request was forced, so the remote_identity_handle must map to
-   * a non-nil local_auth_request_token. As such, "future_challenge" and "challenge1"
-   * should be equivalent. */
+  // The operation shall check the content of the local_auth_request_token associated
+  // with the remote_identity_handle. If the value is _not_ TokenNIL then "challenge1"
+  // should be equal to the local_auth_request_token "future_challenge" property.
+  //
+  // Above the local-auth-request was forced, so the remote_identity_handle must map to
+  // a non-nil local_auth_request_token. As such, "future_challenge" and "challenge1"
+  // should be equivalent.
   {
     const DDS::OctetSeq& prop1 = value_of("challenge1", bprops);
     const DDS::OctetSeq& prop2 = value_of("future_challenge", mp1.auth_request_message_token.binary_properties);
@@ -503,12 +488,12 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
 
-  /* Local participant: notice how it is mp2 this time */
+  // Local participant: notice how it is mp2 this time
   ValidationResult_t r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Remote participant: mp1 this time */
+  // Remote participant: mp1 this time
   r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
@@ -516,7 +501,7 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
   mp1.id_token_remote = mp2.id_token;
   mp1.guid_adjusted_remote = mp2.guid_adjusted;
 
-  /* Both sides of the handshake validate remote identity */
+  // Both sides of the handshake validate remote identity
   r = auth.validate_remote_identity(mp1.id_handle_remote,
                                     mp1.auth_request_message_token,
                                     mp1.auth_request_message_token_remote,
@@ -525,7 +510,7 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
                                     mp1.guid_adjusted_remote,
                                     ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
@@ -534,7 +519,7 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
 
   DDS::Security::HandshakeMessageToken request_token;
 
-  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  // Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier
   r = auth.begin_handshake_request(mp1.handshake_handle,
                                    request_token,
                                    mp1.id_handle,
@@ -552,18 +537,18 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
                                     mp1.guid_adjusted,
                                     ex);
 
-  /* Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in */
+  // Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in
   ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
   ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
 
-  /* mp2 is the one performing the handhsake reply */
+  // mp2 is the one performing the handhsake reply
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
   DDS::Security::HandshakeMessageToken reply_token(request_token);
 
   r = auth.begin_handshake_reply(mp2.handshake_handle,
-                                 reply_token, /* Token received from mp1 after it called begin_handhsake_request */
+                                 reply_token, // Token received from mp1 after it called begin_handhsake_request
                                  mp1.id_handle,
                                  mp2.id_handle,
                                  mp2.mock_participant_builtin_topic_data,
@@ -577,18 +562,18 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
 
-  /* Local participant: notice how it is mp2 this time */
+  // Local participant: notice how it is mp2 this time
   ValidationResult_t r = auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Remote participant: mp1 this time */
+  // Remote participant: mp1 this time
   r = auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
 
   IdentityHandle mp1_remote_mp2;
-  /* Both sides of the handshake validate remote identity */
+  // Both sides of the handshake validate remote identity
   r = auth.validate_remote_identity(mp1_remote_mp2,
                                     mp1.auth_request_message_token,
                                     mp2.auth_request_message_token,
@@ -597,7 +582,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
                                     mp2.guid_adjusted,
                                     ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
@@ -606,7 +591,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
 
   DDS::Security::HandshakeMessageToken request_token;
 
-  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  // Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier
   r = auth.begin_handshake_request(mp1.handshake_handle,
                                    request_token,
                                    mp1.id_handle,
@@ -625,15 +610,15 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
                                     mp1.guid_adjusted,
                                     ex);
 
-  /* Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in */
+  // Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in
   ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
   ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
 
-  /* mp2 is the one performing the handhsake reply */
+  // mp2 is the one performing the handhsake reply
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
-  DDS::Security::HandshakeMessageToken reply_token(request_token); /* Request was an in-out param */
+  DDS::Security::HandshakeMessageToken reply_token(request_token); // Request was an in-out param
 
   r = auth.begin_handshake_reply(mp2.handshake_handle,
                                  reply_token,
@@ -644,7 +629,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
-  /* Process handshake on mp1 */
+  // Process handshake on mp1
   DDS::Security::HandshakeMessageToken final_token;
   r = auth.process_handshake(final_token,
                              reply_token,
@@ -653,7 +638,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK_FINAL_MESSAGE);
 
-  /* Process handshake on mp2 */
+  // Process handshake on mp2
   DDS::Security::HandshakeMessageToken unused_token;
   r = auth.process_handshake(unused_token,
                              final_token,
@@ -669,12 +654,12 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
   // With the obvious exception of the data that is passed in messages
   SecurityException ex;
 
-  /* Local participant: notice how it is mp2 this time */
+  // Local participant: notice how it is mp2 this time
   ValidationResult_t r = mp2.auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp2.auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Remote participant: mp1 this time */
+  // Remote participant: mp1 this time
   r = mp1.auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp1.auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
@@ -683,7 +668,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
   mp1.id_token_remote = mp2.id_token;
   mp1.guid_adjusted_remote = mp2.guid_adjusted;
 
-  /* Both sides of the handshake validate remote identity */
+  // Both sides of the handshake validate remote identity
   r = mp1.auth.validate_remote_identity(mp1.id_handle_remote,
                                      mp1.auth_request_message_token,
                                      mp1.auth_request_message_token_remote,
@@ -692,7 +677,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
                                      mp1.guid_adjusted_remote,
                                      ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
@@ -701,7 +686,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
 
   DDS::Security::HandshakeMessageToken request_token;
 
-  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  // Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier
   r = mp1.auth.begin_handshake_request(mp1.handshake_handle,
                                     request_token,
                                     mp1.id_handle,
@@ -724,15 +709,15 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
                                      mp2.guid_adjusted_remote,
                                      ex);
 
-  /* Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in */
+  // Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in
   ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
   ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
 
-  /* mp2 is the one performing the handhsake reply */
+  // mp2 is the one performing the handhsake reply
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
-  DDS::Security::HandshakeMessageToken reply_token(request_token); /* Request was an in-out param */
+  DDS::Security::HandshakeMessageToken reply_token(request_token); // Request was an in-out param
 
   r = mp2.auth.begin_handshake_reply(mp2.handshake_handle,
                                   reply_token,
@@ -743,7 +728,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
-  /* Process handshake on mp1 */
+  // Process handshake on mp1
   DDS::Security::HandshakeMessageToken final_token;
   r = mp1.auth.process_handshake(final_token,
                               reply_token,
@@ -752,7 +737,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK_FINAL_MESSAGE);
 
-  /* Process handshake on mp2 */
+  // Process handshake on mp2
   DDS::Security::HandshakeMessageToken unused_token;
   r = mp2.auth.process_handshake(unused_token,
                               final_token,
@@ -768,12 +753,12 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
   // With the obvious exception of the data that is passed in messages
   SecurityException ex;
 
-  /* Local participant: notice how it is mp2 this time */
+  // Local participant: notice how it is mp2 this time
   ValidationResult_t r = mp2.auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp2.auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Remote participant: mp1 this time */
+  // Remote participant: mp1 this time
   r = mp1.auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp1.auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
@@ -782,7 +767,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
   mp1.id_token_remote = mp2.id_token;
   mp1.guid_adjusted_remote = mp2.guid_adjusted;
 
-  /* Both sides of the handshake validate remote identity */
+  // Both sides of the handshake validate remote identity
   r = mp1.auth.validate_remote_identity(mp1.id_handle_remote,
                                      mp1.auth_request_message_token,
                                      mp1.auth_request_message_token_remote,
@@ -791,7 +776,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
                                      mp1.guid_adjusted_remote,
                                      ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
@@ -800,7 +785,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
 
   DDS::Security::HandshakeMessageToken request_token;
 
-  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  // Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier
   r = mp1.auth.begin_handshake_request(mp1.handshake_handle,
                                     request_token,
                                     mp1.id_handle,
@@ -822,15 +807,15 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
                                      mp2.guid_adjusted_remote,
                                      ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp2.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp2.auth_request_message_token.binary_properties[0].value.length());
 
-  /* mp2 is the one performing the handhsake reply */
+  // mp2 is the one performing the handhsake reply
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
-  DDS::Security::HandshakeMessageToken reply_token(request_token); /* Request was an in-out param */
+  DDS::Security::HandshakeMessageToken reply_token(request_token); // Request was an in-out param
 
   r = mp2.auth.begin_handshake_reply(mp2.handshake_handle,
                                   reply_token,
@@ -841,7 +826,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
-  /* Process handshake on mp1 */
+  // Process handshake on mp1
   DDS::Security::HandshakeMessageToken final_token;
   r = mp1.auth.process_handshake(final_token,
                               reply_token,
@@ -850,7 +835,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK_FINAL_MESSAGE);
 
-  /* Process handshake on mp2 */
+  // Process handshake on mp2
   DDS::Security::HandshakeMessageToken unused_token;
   r = mp2.auth.process_handshake(unused_token,
                               final_token,
@@ -866,12 +851,12 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
   // With the obvious exception of the data that is passed in messages
   SecurityException ex;
 
-  /* Local participant: notice how it is mp2 this time */
+  // Local participant: notice how it is mp2 this time
   ValidationResult_t r = mp2.auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp2.auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Remote participant: mp1 this time */
+  // Remote participant: mp1 this time
   r = mp1.auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp1.auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
@@ -880,7 +865,7 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
   mp1.id_token_remote = mp2.id_token;
   mp1.guid_adjusted_remote = mp2.guid_adjusted;
 
-  /* Both sides of the handshake validate remote identity */
+  // Both sides of the handshake validate remote identity
   r = mp1.auth.validate_remote_identity(mp1.id_handle_remote,
                                      mp1.auth_request_message_token,
                                      mp1.auth_request_message_token_remote,
@@ -889,7 +874,7 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
                                      mp1.guid_adjusted_remote,
                                      ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
@@ -898,7 +883,7 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
 
   DDS::Security::HandshakeMessageToken request_token;
 
-  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  // Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier
   r = mp1.auth.begin_handshake_request(mp1.handshake_handle,
                                     request_token,
                                     mp1.id_handle,
@@ -921,15 +906,15 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
                                      mp2.guid_adjusted_remote,
                                      ex);
 
-  /* Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in */
+  // Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in
   ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
   ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
 
-  /* mp2 is the one performing the handhsake reply */
+  // mp2 is the one performing the handhsake reply
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
-  DDS::Security::HandshakeMessageToken reply_token(request_token); /* Request was an in-out param */
+  DDS::Security::HandshakeMessageToken reply_token(request_token); // Request was an in-out param
 
   r = mp2.auth.begin_handshake_reply(mp2.handshake_handle,
                                   reply_token,
@@ -940,7 +925,7 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
-  /* Process handshake on mp1 */
+  // Process handshake on mp1
   DDS::Security::HandshakeMessageToken final_token;
   r = mp1.auth.process_handshake(final_token,
                               reply_token,
@@ -949,7 +934,7 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK_FINAL_MESSAGE);
 
-  /* Process handshake on mp2 */
+  // Process handshake on mp2
   DDS::Security::HandshakeMessageToken unused_token;
   r = mp2.auth.process_handshake(unused_token,
                               final_token,
@@ -986,12 +971,12 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
   // With the obvious exception of the data that is passed in messages
   SecurityException ex;
 
-  /* Local participant: notice how it is mp2 this time */
+  // Local participant: notice how it is mp2 this time
   ValidationResult_t r = mp2.auth.validate_local_identity(mp2.id_handle, mp2.guid_adjusted, mp2.domain_id, mp2.qos, mp2.guid, mp2.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp2.auth.get_identity_token(mp2.id_token, mp2.id_handle, mp2.ex));
 
-  /* Remote participant: mp1 this time */
+  // Remote participant: mp1 this time
   r = mp1.auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
   ASSERT_EQ(DDS::Security::VALIDATION_OK, r);
   ASSERT_EQ(true, mp1.auth.get_identity_token(mp1.id_token, mp1.id_handle, mp1.ex));
@@ -1000,7 +985,7 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
   mp1.id_token_remote = mp2.id_token;
   mp1.guid_adjusted_remote = mp2.guid_adjusted;
 
-  /* Both sides of the handshake validate remote identity */
+  // Both sides of the handshake validate remote identity
   r = mp1.auth.validate_remote_identity(mp1.id_handle_remote,
                                      mp1.auth_request_message_token,
                                      mp1.auth_request_message_token_remote,
@@ -1009,7 +994,7 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
                                      mp1.guid_adjusted_remote,
                                      ex);
 
-  /* Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in */
+  // Expected: Local auth request token non-nil because a nil remote-auth-request-token was passed-in
   ASSERT_EQ(1u, mp1.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0, strcmp(mp1.auth_request_message_token.binary_properties[0].name, "future_challenge"));
   ASSERT_EQ(32u /* 256bit nonce = 32 bytes */, mp1.auth_request_message_token.binary_properties[0].value.length());
@@ -1018,7 +1003,7 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
 
   DDS::Security::HandshakeMessageToken request_token;
 
-  /* Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier */
+  // Since mp1 received VALIDATION_PENDING_HANDSHAKE_REQUEST: mp1 = initiator, mp2 = replier
   r = mp1.auth.begin_handshake_request(mp1.handshake_handle,
                                     request_token,
                                     mp1.id_handle,
@@ -1041,15 +1026,15 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
                                      mp2.guid_adjusted_remote,
                                      ex);
 
-  /* Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in */
+  // Make sure mp2 auth-request-token is TokenNil because a non-nil (received over the network) remote-auth-request-token was passed in
   ASSERT_EQ(0u, mp2.auth_request_message_token.binary_properties.length());
   ASSERT_EQ(0u, mp2.auth_request_message_token.properties.length());
   ASSERT_EQ(0, strcmp(mp2.auth_request_message_token.class_id, ""));
 
-  /* mp2 is the one performing the handhsake reply */
+  // mp2 is the one performing the handhsake reply
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 
-  DDS::Security::HandshakeMessageToken reply_token(request_token); /* Request was an in-out param */
+  DDS::Security::HandshakeMessageToken reply_token(request_token); // Request was an in-out param
 
   r = mp2.auth.begin_handshake_reply(mp2.handshake_handle,
                                   reply_token,
@@ -1060,7 +1045,7 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE);
 
-  /* Process handshake on mp1 */
+  // Process handshake on mp1
   DDS::Security::HandshakeMessageToken final_token;
   r = mp1.auth.process_handshake(final_token,
                               reply_token,
@@ -1069,7 +1054,7 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
 
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK_FINAL_MESSAGE);
 
-  /* Process handshake on mp2 */
+  // Process handshake on mp2
   DDS::Security::HandshakeMessageToken unused_token;
   r = mp2.auth.process_handshake(unused_token,
                               final_token,

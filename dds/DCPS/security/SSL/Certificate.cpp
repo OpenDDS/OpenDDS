@@ -9,6 +9,9 @@
 #include "Err.h"
 #include <algorithm>
 #include <cstring>
+#include <fstream>
+#include <iterator>
+#include <cerrno>
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
@@ -391,36 +394,25 @@ namespace SSL {
 
   void Certificate::load_cert_bytes(const std::string& path)
   {
-    std::vector<CORBA::Octet> chunks;
-    CORBA::Octet chunk[32] = { 0 };
+    std::ifstream in(path.c_str(), std::ios::binary);
 
-    FILE* fp = fopen(path.c_str(), "r");
-    if (fp) {
-      size_t count = 0u;
-      while ((count = fread(chunk, sizeof(chunk[0]), sizeof(chunk), fp))) {
-        chunks.insert(chunks.end(), chunk, chunk + count);
-      }
-
-      if (ferror(fp)) {
-        ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) SSL::LocalAuthCredentialData::load_permissions_file: WARNING '%C' "
-                            "occured while reading file '%C'\n"),
-                   std::strerror(errno),
-                   path.c_str()));
-
-      } else {
-        original_bytes_.length(chunks.size());
-        std::memcpy(original_bytes_.get_buffer(), &chunks[0],
-                    original_bytes_.length());
-      }
-
-      // To appease the other DDS security implementations which
-      // append a null byte at the end of the cert.
-      original_bytes_.length(original_bytes_.length() + 1);
-      original_bytes_[original_bytes_.length() - 1] = 0;
-
-      fclose(fp);
+    if (in.fail()) {
+      ACE_ERROR((LM_ERROR,
+                "(%P|%t) Certificate::load_cert_bytes:"
+                "WARNING: Failed to load file '%C'; errno: '%C'\n",
+                path.c_str(), strerror(errno)));
+      return;
     }
+
+    DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_bytes_);
+
+    std::copy((std::istreambuf_iterator<char>(in)),
+              std::istreambuf_iterator<char>(),
+              back_inserter);
+
+    // To appease the other DDS security implementations which
+    // append a null byte at the end of the cert.
+    *back_inserter = 0u;
   }
 
   void Certificate::load_cert_data_bytes(const std::string& data)
