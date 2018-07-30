@@ -96,7 +96,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_FAILED;
 
   LocalAuthCredentialData::shared_ptr credentials = DCPS::make_rch<LocalAuthCredentialData>();
-  if (! credentials->load(participant_qos.property.value, ex)) {
+  if (! credentials->load_credentials(participant_qos.property.value, ex)) {
     return result;
   }
 
@@ -202,22 +202,17 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   const ::DDS::Security::PermissionsToken & permissions_token,
   ::DDS::Security::SecurityException & ex)
 {
-  ::CORBA::Boolean status = false;
+  ACE_UNUSED_ARG(permissions_token);
 
   ACE_Guard<ACE_Thread_Mutex> identity_data_guard(identity_mutex_);
 
   LocalParticipantData::shared_ptr local_data = get_local_participant(handle);
-  if (local_data) {
-    {
-      local_data->permissions_credential = permissions_credential;
-      local_data->permissions = permissions_token;
-    }
-    status = true;
-
-  } else {
+  if (! local_data) {
     set_security_error(ex, -1, 0, "Identity handle not recognized");
+    return false;
   }
-  return status;
+
+  return local_data->credentials->load_access_permissions(permissions_credential, ex);
 }
 
 ::DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::validate_remote_identity(

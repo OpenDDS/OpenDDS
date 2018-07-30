@@ -5,12 +5,14 @@
 
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/Authentication/LocalCredentialData.h"
+#include "dds/DCPS/security/TokenWriter.h"
 #include <iterator>
 #include <fstream>
 #include <cstring>
 
 using DDS::Property_t;
 using DDS::PropertySeq;
+using OpenDDS::Security::TokenWriter;
 
 struct LocalAuthCredentialDataTest : public ::testing::Test
 {
@@ -38,30 +40,27 @@ struct LocalAuthCredentialDataTest : public ::testing::Test
 TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
 {
   std::string path("permissions/permissions_test_participant_01_JoinDomain_signed.p7s");
-
-  Property_t perms;
-  perms.name = "dds.sec.access.permissions";
-  perms.value = ("file:" + path).c_str();
-  perms.propagate = false;
-  add_property(perms);
-
   DDS::Security::SecurityException ex;
-  credential_data.load(properties, ex);
+
+  DDS::OctetSeq expected_bytes;
+  OpenDDS::DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(expected_bytes);
   std::ifstream expected_file(path.c_str(), std::ios::binary);
 
-  std::vector<char> expected_bytes((std::istreambuf_iterator<char>(expected_file)),
-                                   std::istreambuf_iterator<char>());
+  std::copy((std::istreambuf_iterator<char>(expected_file)),
+            std::istreambuf_iterator<char>(),
+            back_inserter);
 
-  // To appease the other DDS security implementations which
-  // append a null byte at the end of the cert.
-  // see LocalAuthCredentialData::load_permissions_file()
-  expected_bytes.push_back(0);
+  *back_inserter = 0u;
+
+  DDS::Security::PermissionsCredentialToken t;
+  TokenWriter(t).add_property("dds.perm.cert", expected_bytes);
+  credential_data.load_access_permissions(t, ex);
 
   const DDS::OctetSeq& access_bytes = credential_data.get_access_permissions();
 
-  ASSERT_EQ(access_bytes.length(), expected_bytes.size());
+  ASSERT_EQ(access_bytes.length(), expected_bytes.length());
   ASSERT_EQ(0, std::memcmp(access_bytes.get_buffer(),
-                           reinterpret_cast<const CORBA::Octet*>(&expected_bytes[0]),
+                           expected_bytes.get_buffer(),
                            access_bytes.length()));
 }
 
@@ -74,7 +73,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
   add_property(idca);
 
   DDS::Security::SecurityException ex;
-  credential_data.load(properties, ex);
+  credential_data.load_credentials(properties, ex);
   ASSERT_TRUE(1); // TODO
 }
 
@@ -93,7 +92,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
   add_property(pass);
 
   DDS::Security::SecurityException ex;
-  credential_data.load(properties, ex);
+  credential_data.load_credentials(properties, ex);
   ASSERT_TRUE(1); // TODO
 }
 
@@ -106,6 +105,6 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
   add_property(idcert);
 
   DDS::Security::SecurityException ex;
-  credential_data.load(properties, ex);
+  credential_data.load_credentials(properties, ex);
   ASSERT_TRUE(1); // TODO
 }

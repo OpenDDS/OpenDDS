@@ -47,7 +47,10 @@ public:
 
   virtual ~LocalAuthCredentialData();
 
-  bool load(const DDS::PropertySeq& props, DDS::Security::SecurityException& ex);
+  bool load_access_permissions(const DDS::Security::PermissionsCredentialToken& src,
+                               DDS::Security::SecurityException& ex);
+
+  bool load_credentials(const DDS::PropertySeq& props, DDS::Security::SecurityException& ex);
 
   const SSL::Certificate& get_ca_cert() const
   {
@@ -73,26 +76,20 @@ public:
   {
     if (!participant_cert_) {
       ACE_ERROR((LM_WARNING,
-        ACE_TEXT("(%P|%t) LocalAuthCredentialData::validate(): WARNING: participant_cert_ is null,")
-        ACE_TEXT(" some of the security properties might be missing!\n")
-      ));
+                "(%P|%t) LocalAuthCredentialData::validate(): WARNING: participant_cert_ is null,"
+                " some of the security properties might be missing!\n"));
       return false;
     }
     if (!ca_cert_) {
       ACE_ERROR((LM_WARNING,
-        ACE_TEXT("(%P|%t) LocalAuthCredentialData::validate(): WARNING: ca_cert_ is null,")
-        ACE_TEXT(" some of the security properties might be missing!\n")
-      ));
+        "(%P|%t) LocalAuthCredentialData::validate(): WARNING: ca_cert_ is null,"
+        " some of the security properties might be missing!\n"));
       return false;
     }
     return (X509_V_OK == participant_cert_->validate(*ca_cert_));
   }
 
 private:
-
-  void load_permissions_file(const std::string& path);
-
-  void load_permissions_data(const std::string& path);
 
   SSL::Certificate::unique_ptr ca_cert_;
   SSL::Certificate::unique_ptr participant_cert_;
