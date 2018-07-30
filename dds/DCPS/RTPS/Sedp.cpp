@@ -367,6 +367,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
     default_sec_attr.is_submessage_protected = false;
     default_sec_attr.is_payload_protected = false;
     default_sec_attr.is_key_protected = false;
+    default_sec_attr.plugin_endpoint_attributes = 0;
 
     NativeCryptoHandle h = DDS::HANDLE_NIL;
 
@@ -1723,13 +1724,7 @@ void Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wrapper.data, guid);
-
-  DiscoveredPublication& pub = discovered_publications_[guid];
-  security_bitmask_to_attributes(wrapper.security_info.endpoint_security_attributes,
-                                 pub.security_attribs_);
-
-  // TODO: Handle wrapper.security_info.plugin_endpoint_security_attributes
+  process_discovered_writer_data(message_id, wrapper.data, guid, &wrapper.security_info);
 }
 
 void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
@@ -2055,12 +2050,6 @@ void Sedp::data_received(DCPS::MessageId message_id,
   }
 
   process_discovered_reader_data(message_id, wrapper.data, guid, &wrapper.security_info);
-
-  DiscoveredSubscription& sub = discovered_subscriptions_[guid];
-  security_bitmask_to_attributes(wrapper.security_info.endpoint_security_attributes,
-                                 sub.security_attribs_);
-
-  // TODO: Handle wrapper.security_info.plugin_endpoint_security_attributes
 }
 
 void
@@ -3149,7 +3138,6 @@ Sedp::write_publication_data(
 
   if (lp.security_attribs_.base.is_discovery_protected) {
     result = write_publication_data_secure(rid, lp, reader);
-
   } else {
     result = write_publication_data_unsecure(rid, lp, reader);
   }
@@ -3203,7 +3191,7 @@ Sedp::write_publication_data_secure(
     populate_discovered_writer_msg(dwd.data, rid, lp);
 
     dwd.security_info.endpoint_security_attributes = security_attributes_to_bitmask(lp.security_attribs_);
-    // TODO: Handle dwd.security_info.plugin_endpoint_security_attributes??
+    dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
@@ -3287,7 +3275,7 @@ Sedp::write_subscription_data_secure(
     populate_discovered_reader_msg(drd.data, rid, ls);
 
     drd.security_info.endpoint_security_attributes = security_attributes_to_bitmask(ls.security_attribs_);
-    // TODO: Handle dwd.security_info.plugin_endpoint_security_attributes??
+    drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
     if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
