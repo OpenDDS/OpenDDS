@@ -318,7 +318,7 @@ foreach my $gov_file (@gov_files) {
 
         # start killing processes in 10 seconds
         $test->{wait_after_first_proc} = 10;
-        my $status = $test->finish(15);
+        my $status = $test->finish(30);
 
         #if ($status != 0) {
           $current_test_num++;
