@@ -150,6 +150,11 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_SM_OD");
+  } elsif ($scenario eq "SC5") {
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
+    @topic_names = ("PD_OL_OA_OM_OD");
   } elsif ($scenario eq "TEST_8_8_5_SUCCESS") {
     @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_write_signed.p7s");
@@ -313,7 +318,7 @@ foreach my $gov_file (@gov_files) {
 
         # start killing processes in 10 seconds
         $test->{wait_after_first_proc} = 10;
-        my $status = $test->finish(15);
+        my $status = $test->finish(30);
 
         #if ($status != 0) {
           $current_test_num++;

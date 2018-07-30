@@ -195,15 +195,11 @@ private:
 
     OpenDDS::DCPS::GUID_t participant_guid;
     LocalAuthCredentialData::shared_ptr credentials;
-    DDS::Security::PermissionsCredentialToken permissions_credential;
-    DDS::Security::PermissionsToken permissions;
     RemoteParticipantMap validated_remotes;
 
     LocalParticipantData()
       : participant_guid(OpenDDS::DCPS::GUID_UNKNOWN),
         credentials(),
-        permissions_credential(DDS::Security::TokenNIL),
-        permissions(DDS::Security::TokenNIL),
         validated_remotes()
     {
 
