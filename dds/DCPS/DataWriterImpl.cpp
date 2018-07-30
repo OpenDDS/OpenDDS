@@ -2645,7 +2645,8 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
 
 DDS::Security::ParticipantCryptoHandle DataWriterImpl::get_crypto_handle() const
 {
-  return participant_servant_->crypto_handle();
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return participant ? participant->crypto_handle() : DDS::HANDLE_NIL;
 }
 
 bool

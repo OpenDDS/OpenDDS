@@ -437,7 +437,7 @@ private:
   /// The id of the domain that creates this participant.
   const DDS::DomainId_t domain_id_;
   /// This participant id given by discovery.
-  const RepoId dp_id_;
+  RepoId dp_id_;
 
   /// Whether this DomainParticipant is attached to a federated
   /// repository.

@@ -781,7 +781,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
-  send_strategy_->encode_payload(pub_id, data, subm);
+  send_strategy()->encode_payload(pub_id, data, subm);
 
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
@@ -2074,7 +2074,7 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
       SingleSendBuffer& sb = *writer.send_buff_;
       ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
       const RtpsUdpSendStrategy::OverrideToken ot =
-        send_strategy_->override_destinations(addr);
+        send_strategy()->override_destinations(addr);
       for (size_t i = 0; i < ranges.size(); ++i) {
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_directed_nack_replies "
@@ -2096,7 +2096,7 @@ RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
   ACE_Message_Block* mb_gap =
     marshal_gaps(writerId, readerId, gaps, writer.durable_);
   if (mb_gap) {
-    send_strategy_->send_rtps_control(*mb_gap, addr);
+    send_strategy()->send_rtps_control(*mb_gap, addr);
     mb_gap->release();
   }
 }
@@ -2502,7 +2502,7 @@ RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessa
           Serializer ser(mb.get(), false, Serializer::ALIGN_CDR);
           ser << idst;
           ser << *it;
-          send_strategy_->send_rtps_control(*mb, locators_[ri->first].addr_);
+          send_strategy()->send_rtps_control(*mb, locators_[ri->first].addr_);
         }
       }
       std::iter_swap(it, --last);

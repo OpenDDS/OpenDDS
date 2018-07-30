@@ -93,7 +93,7 @@ private:
   static const OPENDDS_STRING CRYPTO_PLUGIN_NAME;
 
   // Internal class used to store configuration information
-  class SecurityConfigEntry : public DCPS::RcObject<ACE_SYNCH_MUTEX>
+  class SecurityConfigEntry : public DCPS::RcObject
   {
   public:
 

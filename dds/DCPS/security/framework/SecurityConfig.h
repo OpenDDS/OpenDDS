@@ -15,7 +15,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/security/framework/SecurityConfigPropertyList.h"
 #include "ace/Synch_Traits.h"
 
@@ -30,7 +30,7 @@ using DDS::Security::CryptoKeyExchange_var;
 using DDS::Security::CryptoKeyFactory_var;
 using DDS::Security::CryptoTransform_var;
 
-class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
  public:
 
   OPENDDS_STRING name() const

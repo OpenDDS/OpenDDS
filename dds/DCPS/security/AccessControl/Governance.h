@@ -8,7 +8,7 @@
 
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include <string>
 #include <vector>
 #include <set>
@@ -16,8 +16,7 @@
 namespace OpenDDS {
 namespace Security {
 
-class Governance : public DCPS::RcObject<ACE_SYNCH_MUTEX>
-{
+class Governance : public DCPS::RcObject {
 public:
 
   typedef DCPS::RcHandle<Governance> shared_ptr;

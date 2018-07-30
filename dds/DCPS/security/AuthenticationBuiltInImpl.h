@@ -147,8 +147,7 @@ public:
 
 private:
 
-  struct RemoteParticipantData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
-  {
+  struct RemoteParticipantData : public DCPS::RcObject {
     typedef DCPS::RcHandle<RemoteParticipantData> shared_ptr;
 
     // Identity data
@@ -183,19 +182,15 @@ private:
         request(DDS::Security::TokenNIL),
         reply(DDS::Security::TokenNIL),
         state(DDS::Security::VALIDATION_FAILED),
-        diffie_hellman(NULL),
-        certificate(NULL),
         c_perm(),
         hash_c1(),
         hash_c2()
     {
-
     }
   };
   typedef std::map<DDS::Security::IdentityHandle, RemoteParticipantData::shared_ptr> RemoteParticipantMap;
 
-  struct LocalParticipantData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
-  {
+  struct LocalParticipantData : public DCPS::RcObject {
     typedef DCPS::RcHandle<LocalParticipantData> shared_ptr;
 
     OpenDDS::DCPS::GUID_t participant_guid;

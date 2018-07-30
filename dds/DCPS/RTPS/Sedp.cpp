@@ -2448,7 +2448,7 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
                                DCPS::SequenceNumber& sequence,
                                bool historic)
 {
-  DCPS::DataSampleElement* el = new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch(), &alloc_, 0);
+  DCPS::DataSampleElement* el = new DCPS::DataSampleElement(repo_id_, this, DCPS::PublicationInstance_rch());
   set_header_fields(el->get_header(), size, reader, sequence, historic);
 
   DCPS::Message_Block_Ptr sample(new ACE_Message_Block(size));

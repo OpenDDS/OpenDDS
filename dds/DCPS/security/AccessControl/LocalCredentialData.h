@@ -11,14 +11,13 @@
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsCoreC.h"
+#include "dds/DCPS/RcObject.h"
 
 namespace OpenDDS {
 namespace Security {
 
-  class LocalAccessCredentialData: public DCPS::RcObject<ACE_SYNCH_MUTEX>
-  {
+  class LocalAccessCredentialData: public DCPS::RcObject {
   public:
     typedef DCPS::RcHandle<LocalAccessCredentialData> shared_ptr;
 

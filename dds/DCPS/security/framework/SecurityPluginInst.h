@@ -11,7 +11,7 @@
 #include "dds/DdsSecurityCoreC.h"
 
 #include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 
 #include "ace/Synch_Traits.h"
 
@@ -38,7 +38,7 @@ using DDS::Security::CryptoTransform_var;
  * to provide the implementations of the various plugins.
  *
  */
-class OpenDDS_Dcps_Export SecurityPluginInst : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export SecurityPluginInst : public DCPS::RcObject {
 public:
 
   // Factory methods for the plugin specific interfaces.  A SecurityPluginInst

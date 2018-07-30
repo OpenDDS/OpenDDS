@@ -13,8 +13,7 @@
 namespace OpenDDS {
 namespace Security {
 
-class Permissions : public DCPS::RcObject<ACE_SYNCH_MUTEX>
-{
+class Permissions : public DCPS::RcObject {
 public:
 
   typedef DCPS::RcHandle<Permissions> shared_ptr;

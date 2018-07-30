@@ -13,7 +13,7 @@
 #include "dds/DCPS/security/SSL/DiffieHellman.h"
 #include "dds/DCPS/security/SSL/Utils.h"
 
-#include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DdsSecurityCoreC.h"
 
@@ -38,8 +38,7 @@ private:
   const DDS::OctetSeq& permissions_data_;
 };
 
-class DdsSecurity_Export LocalAuthCredentialData : public DCPS::RcObject<ACE_SYNCH_MUTEX>
-{
+class DdsSecurity_Export LocalAuthCredentialData : public DCPS::RcObject {
 public:
   typedef DCPS::RcHandle<LocalAuthCredentialData> shared_ptr;
 
