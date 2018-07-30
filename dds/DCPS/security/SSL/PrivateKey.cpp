@@ -90,7 +90,6 @@ namespace SSL {
     }
   }
 
-  //      class sign_rsassa_pss_mgf1_sha256_impl
   class sign_implementation
   {
    public:
@@ -152,13 +151,13 @@ namespace SSL {
         }
       }
 
-      /* First call with NULL to extract size */
+      // First call with NULL to extract size
       if (1 != EVP_DigestSignFinal(md_ctx, NULL, &len)) {
         OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
         return 1;
       }
 
-      /* Second call to extract the data */
+      // Second call to extract the data
       dst.length(static_cast<unsigned int>(len));
       if (1 != EVP_DigestSignFinal(md_ctx, dst.get_buffer(), &len)) {
         OPENDDS_SSL_LOG_ERR("EVP_DigestSignFinal failed");
