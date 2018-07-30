@@ -1945,14 +1945,15 @@ bool AccessControlBuiltInImpl::RevokePermissionsTimer::start_timer(const ACE_Tim
   if (reactor_ != NULL) {
     timer_id_ = reactor_->schedule_timer(this, eh_params_ptr, length);
 
-    if (timer_id_ == -1) {
-      return false;
+    if (timer_id_ != -1) {
+      scheduled_ = true;
+      delete eh_params_ptr;
+      return true;
     }
 
-    scheduled_ = true;
-    return true;
   }
 
+  delete eh_params_ptr;
   return false;
 }
 
