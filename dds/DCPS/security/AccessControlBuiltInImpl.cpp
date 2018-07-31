@@ -294,7 +294,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::CORBA::Long perm_handle = generate_handle();
 
   AccessData cache_this;
-  cache_this.perm = DCPS::move(permissions);
+  cache_this.perm = permissions;
   cache_this.gov = piter->second.gov;
   cache_this.local_access_credential_data = local_access_credential_data;
 
