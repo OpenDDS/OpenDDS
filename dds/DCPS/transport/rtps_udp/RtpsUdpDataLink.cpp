@@ -20,11 +20,11 @@
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
 
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
-#include "dds/DdsSecurityEntities.h"
 
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
@@ -1898,7 +1898,7 @@ RtpsUdpDataLink::send_nack_replies()
     SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
 
     const EntityId_t& pvs_writer =
-      DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+      RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
     const bool is_pvs_writer =
       0 == std::memcmp(&pvs_writer, &rw->first.entityId, sizeof pvs_writer);
 
@@ -2471,7 +2471,7 @@ void
 RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs)
 {
   const EntityId_t& volatile_writer =
-    DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
   RTPS::InfoDestinationSubmessage idst;
   idst.smHeader.submessageId = RTPS::INFO_DST;
   idst.smHeader.flags = RTPS::FLAG_E;
