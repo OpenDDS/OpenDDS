@@ -169,8 +169,8 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 0);
 
   AccessData cache_this;
-  cache_this.perm = DCPS::move(permissions);
-  cache_this.gov = DCPS::move(governance);
+  cache_this.perm = permissions;
+  cache_this.gov = governance;
   cache_this.local_access_credential_data = local_access_credential_data;
 
   local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
