@@ -183,7 +183,6 @@ void DataReaderImpl::init(
   participant_servant_ = *participant;
 
   domain_id_ = participant->get_domain_id();
-  dp_id_ = participant->get_id();
 
   subscriber_servant_ = *subscriber;
 
@@ -1153,6 +1152,11 @@ DataReaderImpl::enable()
 
   if (!subscriber->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    dp_id_ = participant->get_id();
   }
 
   if (qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS) {
