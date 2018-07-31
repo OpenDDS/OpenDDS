@@ -12,7 +12,6 @@
 #include "TokenWriter.h"
 #include "SSL/Utils.h"
 
-#include "dds/DdsSecurityEntities.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/Serializer.h"
@@ -269,7 +268,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
           }
 
         } else {
-          local_auth_request_token = DDS::Security::TokenNIL;
+          local_auth_request_token = DDS::Security::Token();
         }
 
         if (result == DDS::Security::VALIDATION_OK) {
@@ -392,7 +391,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   remote_data.replier_identity = replier_identity_handle;
   remote_data.state = DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE;
   remote_data.request = handshake_message;
-  remote_data.reply = DDS::Security::TokenNIL;
+  remote_data.reply = DDS::Security::Token();
   remote_data.diffie_hellman = DCPS::move(diffie_hellman);
   remote_data.hash_c1 = hash_c1;
 

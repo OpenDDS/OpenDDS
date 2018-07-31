@@ -11,12 +11,14 @@
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
 
-#include "dds/DdsSecurityWrappers.h"
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+
+struct DiscoveredWriterData_SecurityWrapper;
+struct DiscoveredReaderData_SecurityWrapper;
+
 namespace ParameterListConverter {
 
 // DDS::ParticipantBuiltinTopicData
@@ -131,27 +133,27 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::DataTags& tags);
 
-// OpenDDS::Security::DiscoveredWriterData_SecurityWrapper
+// DiscoveredWriterData_SecurityWrapper
 
 OpenDDS_Rtps_Export
-int to_param_list(const Security::DiscoveredWriterData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   Security::DiscoveredWriterData_SecurityWrapper& wrapper);
+                   DiscoveredWriterData_SecurityWrapper& wrapper);
 
-// OpenDDS::Security::DiscoveredReaderData_SecurityWrapper
+// DiscoveredReaderData_SecurityWrapper
 
 OpenDDS_Rtps_Export
-int to_param_list(const Security::DiscoveredReaderData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
-                   Security::DiscoveredReaderData_SecurityWrapper& wrapper);
+                   DiscoveredReaderData_SecurityWrapper& wrapper);
 
 }
 }

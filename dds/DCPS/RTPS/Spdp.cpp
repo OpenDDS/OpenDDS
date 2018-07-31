@@ -6,14 +6,15 @@
  */
 
 #include "Spdp.h"
+
 #include "BaseMessageTypes.h"
 #include "MessageTypes.h"
-#include "RtpsCoreTypeSupportImpl.h"
 #include "ParameterListConverter.h"
+#include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsDiscovery.h"
+#include "SecurityHelpers.h"
 
 #include "dds/DdsDcpsGuidC.h"
-#include "dds/DdsSecurityHelpers.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -24,8 +25,6 @@
 
 #include "ace/Reactor.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
-
-#include "dds/DdsSecurityEntities.h"
 
 #include <cstring>
 #include <stdexcept>
@@ -572,10 +571,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DiscoveredParticipant& dp = iter->second;
 
   DCPS::RepoId writer = guid_;
-  writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+  writer.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
 
   DCPS::RepoId reader = src_participant;
-  reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+  reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
   if (dp.auth_state_ == OpenDDS::DCPS::AS_HANDSHAKE_REPLY && msg.related_message_identity.source_guid == GUID_UNKNOWN) {
     DDS::Security::ParticipantBuiltinTopicDataSecure pbtds = {
@@ -593,7 +592,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     };
 
     pbtds.base.security_info.plugin_participant_security_attributes = participant_sec_attr_.plugin_participant_attributes;
-    pbtds.base.security_info.participant_security_attributes = DDS::Security::security_attributes_to_bitmask(participant_sec_attr_);
+    pbtds.base.security_info.participant_security_attributes = security_attributes_to_bitmask(participant_sec_attr_);
 
     ParameterList plist;
     set_participant_guid(guid_, plist);
@@ -723,7 +722,7 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
           to_erase.insert(pi->first);
         } else if (pi->second.has_last_stateless_msg_ && (tv > (pi->second.last_stateless_msg_time_ + AUTH_RESEND_PERIOD))) {
           RepoId reader = pi->first;
-          reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+          reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
           pi->second.last_stateless_msg_time_ = tv;
           if (sedp_.write_stateless_message(pi->second.last_stateless_msg_, reader) != DDS::RETCODE_OK) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: Spdp::check_auth_states() - ")
@@ -905,7 +904,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_, identity_handle_, dp.identity_token_, guid, se);
 
     // Take care of any auth tokens that need to be sent before handling return value
-    if (!(dp.local_auth_request_token_ == DDS::Security::TokenNIL)) {
+    if (!(dp.local_auth_request_token_ == DDS::Security::Token())) {
       DDS::Security::ParticipantStatelessMessage msg;
       msg.message_identity.source_guid = guid_;
       msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_REQUEST;
@@ -918,7 +917,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
       msg.message_data[0] = dp.local_auth_request_token_;
 
       DCPS::RepoId reader = guid;
-      reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+      reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
       if (sedp_.write_stateless_message(msg, reader) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
@@ -1010,10 +1009,10 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     }
 
     DCPS::RepoId writer = guid_;
-    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
+    writer.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
 
     DCPS::RepoId reader = guid;
-    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
+    reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
 
     DDS::Security::ParticipantStatelessMessage msg;
     msg.message_identity.source_guid = guid_;
@@ -1184,7 +1183,7 @@ Spdp::build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind kind)
         permissions_token_,
         qos_.property,
         {
-          DDS::Security::security_attributes_to_bitmask(participant_sec_attr_),
+          security_attributes_to_bitmask(participant_sec_attr_),
           participant_sec_attr_.plugin_participant_attributes
         }
       },
@@ -1753,10 +1752,10 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
   if (crypto_tokens_.length() != 0) {
     DCPS::RepoId writer = guid_;
-    writer.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    writer.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
 
     DCPS::RepoId reader = id;
-    reader.entityId = DDS::Security::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
+    reader.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
 
     DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;

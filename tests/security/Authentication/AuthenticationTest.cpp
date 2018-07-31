@@ -6,12 +6,13 @@
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "dds/DdsSecurityEntities.h"
+
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DCPS/security/SSL/Utils.h"
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DCPS/security/TokenReader.h"
+
 #include <cstring>
 #include <algorithm>
 #include <cstdio>
@@ -72,13 +73,7 @@ struct MockParticipantData
     ex(),
     id_handle(DDS::HANDLE_NIL),
     id_handle_remote(DDS::HANDLE_NIL),
-    id_token(DDS::Security::TokenNIL),
-    id_token_remote(DDS::Security::TokenNIL),
-    auth_request_message_token(DDS::Security::TokenNIL),
-    auth_request_message_token_remote(DDS::Security::TokenNIL),
-    handshake_handle(DDS::HANDLE_NIL),
-    auth_peer_credential_token(DDS::Security::TokenNIL),
-    mock_participant_builtin_topic_data()
+    handshake_handle(DDS::HANDLE_NIL)
   {
     guid = make_guid();
   }
@@ -394,8 +389,6 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
 
   mp1.id_token_remote = mp2.id_token;
   mp1.guid_adjusted_remote = mp2.guid_adjusted;
-
-  AuthRequestMessageToken niltoken = DDS::Security::TokenNIL;
 
   // Leave the remote-auth-request-token set to TokenNil to force local-auth-request
   r = auth.validate_remote_identity(mp1.id_handle_remote,

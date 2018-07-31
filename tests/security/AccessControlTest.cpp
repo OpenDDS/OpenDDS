@@ -9,7 +9,6 @@
 #include <sstream>
 #include <fstream>
 #include <dds/DCPS/security/TokenWriter.h>
-#include <dds/DdsSecurityEntities.h>
 
 #include <dds/DCPS/Service_Participant.h>
 
@@ -326,7 +325,7 @@ public:
   DomainParticipantQos domain_participant_qos;
   MockAuthentication::SmartPtr auth_plugin_;
 
-  Property_t perm_ca_; 
+  Property_t perm_ca_;
   Property_t gov_0_p7s_, gov_1_p7s_, gov_2_p7s_, gov_3_p7s_, gov_4_p7s_, gov_5_p7s_, gov_6_p7s_;
   Property_t perm_allowall_p7s_, perm_topic_p7s_, perm_topic2_p7s_;
   Property_t perm_date_p7s_, perm_dateoffset_p7s_;
@@ -628,7 +627,7 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
 //    // Delay here...
 //    int milliseconds = 1000 * 20;
 //    clock_t start_time = clock();
-//    
+//
 //    while (clock() < start_time + milliseconds)
 //        ;
 //

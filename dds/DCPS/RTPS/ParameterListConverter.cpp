@@ -6,10 +6,13 @@
  */
 
 #include "ParameterListConverter.h"
+
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
 
 #include <cstring>
 
@@ -423,7 +426,7 @@ int from_param_list(const ParameterList& param_list,
     }
   }
 
-  return 0; 
+  return 0;
 }
 
 // DDS::Security::ParticipantBuiltinTopicDataSecure
@@ -1486,9 +1489,9 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-// OpenDDS::Security::DiscoveredWriterData_SecurityWrapper
+// DiscoveredWriterData_SecurityWrapper
 
-int to_param_list(const Security::DiscoveredWriterData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
 {
@@ -1501,7 +1504,7 @@ int to_param_list(const Security::DiscoveredWriterData_SecurityWrapper& wrapper,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    Security::DiscoveredWriterData_SecurityWrapper& wrapper)
+                    DiscoveredWriterData_SecurityWrapper& wrapper)
 {
   int result = from_param_list(param_list, wrapper.data) ||
                from_param_list(param_list, wrapper.security_info) ||
@@ -1510,9 +1513,9 @@ int from_param_list(const ParameterList& param_list,
   return result;
 }
 
-// OpenDDS::Security::DiscoveredReaderData_SecurityWrapper
+// DiscoveredReaderData_SecurityWrapper
 
-int to_param_list(const Security::DiscoveredReaderData_SecurityWrapper& wrapper,
+int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
 {
@@ -1525,7 +1528,7 @@ int to_param_list(const Security::DiscoveredReaderData_SecurityWrapper& wrapper,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    Security::DiscoveredReaderData_SecurityWrapper& wrapper)
+                    DiscoveredReaderData_SecurityWrapper& wrapper)
 {
   int result = from_param_list(param_list, wrapper.data) ||
                from_param_list(param_list, wrapper.security_info) ||

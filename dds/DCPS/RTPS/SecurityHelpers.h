@@ -5,13 +5,33 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DDS_SECURITY_HELPERS_H
-#define DDS_SECURITY_HELPERS_H
+#ifndef OPENDDS_SECURITY_HELPERS_H
+#define OPENDDS_SECURITY_HELPERS_H
 
 #include "dds/DdsSecurityCoreC.h"
 
-namespace DDS {
-namespace Security {
+namespace OpenDDS {
+namespace RTPS {
+
+/*
+ * The below entities are from the security spec. V1.1
+ * section 7.3.7.1 "Mapping of the EntityIds for the Builtin DataWriters and DataReaders"
+ */
+const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER = {{0xff, 0x00, 0x03}, 0xc2};
+const EntityId_t ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER = {{0xff, 0x00, 0x03}, 0xc7};
+const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER = {{0xff, 0x00, 0x04}, 0xc2};
+const EntityId_t ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER = {{0xff, 0x00, 0x04}, 0xc7};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER = {{0xff, 0x02, 0x00}, 0xc2};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER = {{0xff, 0x02, 0x00}, 0xc7};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER = {{0x00, 0x02, 0x01}, 0xc3};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER = {{0x00, 0x02, 0x01}, 0xc4};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER = {{0xff, 0x02, 0x02}, 0xc3};
+const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER = {{0xff, 0x02, 0x02}, 0xc4};
+const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER = {{0xff, 0x01, 0x01}, 0xc2};
+const EntityId_t ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER = {{0xff, 0x01, 0x01}, 0xc7};
+
+const DDS::Security::ParticipantSecurityInfo PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
+const DDS::Security::EndpointSecurityInfo ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
 
 inline DDS::Security::ParticipantSecurityAttributesMask
 security_attributes_to_bitmask(const DDS::Security::ParticipantSecurityAttributes& sec_attr)
@@ -29,17 +49,6 @@ security_attributes_to_bitmask(const DDS::Security::ParticipantSecurityAttribute
     result |= PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
   }
   return result;
-}
-
-inline void
-security_bitmask_to_attributes(const DDS::Security::ParticipantSecurityAttributesMask& mask,
-                               DDS::Security::ParticipantSecurityAttributes& sec_attr)
-{
-  using namespace DDS::Security;
-
-  sec_attr.is_rtps_protected = (mask & PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_PROTECTED);
-  sec_attr.is_discovery_protected = (mask & PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED);
-  sec_attr.is_liveliness_protected = (mask & PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED);
 }
 
 inline DDS::Security::EndpointSecurityAttributesMask
@@ -73,21 +82,6 @@ security_attributes_to_bitmask(const DDS::Security::EndpointSecurityAttributes& 
   return result;
 }
 
-inline void
-security_bitmask_to_attributes(const DDS::Security::EndpointSecurityAttributesMask& mask,
-                               DDS::Security::EndpointSecurityAttributes& sec_attr)
-{
-  using namespace DDS::Security;
-
-  sec_attr.base.is_read_protected = (mask & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_READ_PROTECTED);
-  sec_attr.base.is_write_protected = (mask & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_WRITE_PROTECTED);
-  sec_attr.base.is_discovery_protected = (mask & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED);
-  sec_attr.base.is_liveliness_protected = (mask & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED);
-  sec_attr.is_submessage_protected = (mask & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_PROTECTED);
-  sec_attr.is_payload_protected = (mask & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_PAYLOAD_PROTECTED);
-  sec_attr.is_key_protected = (mask & ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_KEY_PROTECTED);
-}
-
 inline DDS::OctetSeq
 handle_to_octets(DDS::Security::NativeCryptoHandle handle)
 {
@@ -101,6 +95,18 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
   }
   return handleOctets;
 }
+
+struct DiscoveredWriterData_SecurityWrapper {
+  DCPS::DiscoveredWriterData data;
+  DDS::Security::EndpointSecurityInfo security_info;
+  DDS::Security::DataTags data_tags;
+};
+
+struct DiscoveredReaderData_SecurityWrapper {
+  DCPS::DiscoveredReaderData data;
+  DDS::Security::EndpointSecurityInfo security_info;
+  DDS::Security::DataTags data_tags;
+};
 
 }
 }

@@ -31,14 +31,13 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DdsSecurityCoreTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsSecurityC.h"
+
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Thread_Mutex.h"
-#include "dds/DCPS/PoolAllocator.h"
-
-#include "dds/DdsSecurityCoreTypeSupportImpl.h"
-#include "dds/DdsSecurityWrappers.h"
-#include "dds/DCPS/RTPS/RtpsSecurityC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -51,8 +50,10 @@ namespace RTPS {
 
 class RtpsDiscovery;
 class Spdp;
-
 class WaitForAcks;
+
+struct DiscoveredWriterData_SecurityWrapper;
+struct DiscoveredReaderData_SecurityWrapper;
 
 class Sedp : public OpenDDS::DCPS::EndpointManager<OpenDDS::Security::SPDPdiscoveredParticipantData> {
 public:
@@ -152,10 +153,10 @@ private:
       const OpenDDS::Security::SPDPdiscoveredParticipantData* dpdata_;
 
       const OpenDDS::DCPS::DiscoveredWriterData* wdata_;
-      const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* wdata_secure_;
+      const DiscoveredWriterData_SecurityWrapper* wdata_secure_;
 
       const OpenDDS::DCPS::DiscoveredReaderData* rdata_;
-      const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper* rdata_secure_;
+      const DiscoveredReaderData_SecurityWrapper* rdata_secure_;
 
       const ParticipantMessageData* pmdata_;
       DDS::InstanceHandle_t ih_;
@@ -168,13 +169,13 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata)
       : type_(mt), id_(id), wdata_(wdata) {}
 
-    Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* wdata)
+    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredWriterData_SecurityWrapper* wdata)
       : type_(mt), id_(id), wdata_secure_(wdata) {}
 
     Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata)
       : type_(mt), id_(id), rdata_(rdata) {}
 
-    Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper* rdata)
+    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredReaderData_SecurityWrapper* rdata)
       : type_(mt), id_(id), rdata_secure_(rdata) {}
 
     Msg(MsgType mt, DCPS::MessageId id, const ParticipantMessageData* pmdata)
@@ -369,10 +370,10 @@ private:
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> pdata);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata);
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredWriterData_SecurityWrapper> wrapper);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredWriterData_SecurityWrapper> wrapper);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata);
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::DiscoveredReaderData_SecurityWrapper> wrapper);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredReaderData_SecurityWrapper> wrapper);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
@@ -391,10 +392,10 @@ private:
     void svc_secure_i(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
 
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
-    void svc_i(DCPS::MessageId id, const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper* wrapper);
+    void svc_i(DCPS::MessageId id, const DiscoveredWriterData_SecurityWrapper* wrapper);
 
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
-    void svc_i(DCPS::MessageId id, const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper* wrapper);
+    void svc_i(DCPS::MessageId id, const DiscoveredReaderData_SecurityWrapper* wrapper);
 
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
@@ -444,7 +445,7 @@ private:
                      const OpenDDS::DCPS::DiscoveredWriterData& wdata);
 
   void data_received(DCPS::MessageId message_id,
-                     const OpenDDS::Security::DiscoveredWriterData_SecurityWrapper& wrapper);
+                     const DiscoveredWriterData_SecurityWrapper& wrapper);
 
   void process_discovered_reader_data(DCPS::MessageId message_id,
                                       const OpenDDS::DCPS::DiscoveredReaderData& rdata,
@@ -455,7 +456,7 @@ private:
                      const OpenDDS::DCPS::DiscoveredReaderData& rdata);
 
   void data_received(DCPS::MessageId message_id,
-                     const OpenDDS::Security::DiscoveredReaderData_SecurityWrapper& wrapper);
+                     const DiscoveredReaderData_SecurityWrapper& wrapper);
 
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);

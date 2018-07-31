@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPEN_SECURITY_CORE_IDL
-#define OPEN_SECURITY_CORE_IDL
+#ifndef OPENDDS_RTPS_SECURITY_IDL
+#define OPENDDS_RTPS_SECURITY_IDL
 
 #include "dds/DdsSecurityCore.idl"
 #include "dds/DCPS/RTPS/RtpsCore.idl"
@@ -31,5 +31,4 @@ module OpenDDS {
   };
 };
 
-#endif /* OPEN_SECURITY_CORE_IDL */
-
+#endif

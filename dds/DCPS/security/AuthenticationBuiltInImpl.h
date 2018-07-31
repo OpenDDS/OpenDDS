@@ -12,7 +12,6 @@
 
 #include "dds/DCPS/security/DdsSecurity_Export.h"
 #include "dds/DdsSecurityCoreC.h"
-#include "dds/DdsSecurityEntities.h"
 #include "dds/Versioned_Namespace.h"
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -47,7 +46,7 @@ namespace Security {
 *
 */
 class DdsSecurity_Export  AuthenticationBuiltInImpl
-	: public virtual DDS::Security::Authentication
+  : public virtual DDS::Security::Authentication
 {
 public:
   AuthenticationBuiltInImpl();
@@ -55,10 +54,10 @@ public:
 
   virtual ::DDS::Security::ValidationResult_t validate_local_identity(
     ::DDS::Security::IdentityHandle & local_identity_handle,
-    ::OpenDDS::DCPS::GUID_t & adjusted_participant_guid,
+    DCPS::GUID_t & adjusted_participant_guid,
     ::DDS::Security::DomainId_t domain_id,
     const ::DDS::DomainParticipantQos & participant_qos,
-    const ::OpenDDS::DCPS::GUID_t & candidate_participant_guid,
+    const DCPS::GUID_t & candidate_participant_guid,
     ::DDS::Security::SecurityException & ex);
 
   virtual ::CORBA::Boolean get_identity_token(
@@ -83,7 +82,7 @@ public:
     const ::DDS::Security::AuthRequestMessageToken & remote_auth_request_token,
     ::DDS::Security::IdentityHandle local_identity_handle,
     const ::DDS::Security::IdentityToken & remote_identity_token,
-    const ::OpenDDS::DCPS::GUID_t & remote_participant_guid,
+    const DCPS::GUID_t & remote_participant_guid,
     ::DDS::Security::SecurityException & ex);
 
   virtual ::DDS::Security::ValidationResult_t begin_handshake_request(
@@ -152,7 +151,7 @@ private:
 
     // Identity data
 
-    OpenDDS::DCPS::GUID_t participant_guid;
+    DCPS::GUID_t participant_guid;
     DDS::Security::IdentityHandle local_participant;
 
     // Handshake data
@@ -165,26 +164,18 @@ private:
     DDS::Security::HandshakeMessageToken request;
     DDS::Security::HandshakeMessageToken reply;
     DDS::Security::ValidationResult_t state;
-    OpenDDS::Security::SSL::DiffieHellman::unique_ptr diffie_hellman;
-    OpenDDS::Security::SSL::Certificate::unique_ptr certificate;
+    SSL::DiffieHellman::unique_ptr diffie_hellman;
+    SSL::Certificate::unique_ptr certificate;
     DDS::OctetSeq c_perm;
     DDS::OctetSeq hash_c1;
     DDS::OctetSeq hash_c2;
 
     RemoteParticipantData()
-      : participant_guid(OpenDDS::DCPS::GUID_UNKNOWN),
-        local_participant(DDS::HANDLE_NIL),
-        local_auth_request(DDS::Security::TokenNIL),
-        remote_auth_request(DDS::Security::TokenNIL),
-        initiator_identity(DDS::HANDLE_NIL),
-        replier_identity(DDS::HANDLE_NIL),
-        shared_secret(),
-        request(DDS::Security::TokenNIL),
-        reply(DDS::Security::TokenNIL),
-        state(DDS::Security::VALIDATION_FAILED),
-        c_perm(),
-        hash_c1(),
-        hash_c2()
+      : participant_guid(DCPS::GUID_UNKNOWN)
+      , local_participant(DDS::HANDLE_NIL)
+      , initiator_identity(DDS::HANDLE_NIL)
+      , replier_identity(DDS::HANDLE_NIL)
+      , state(DDS::Security::VALIDATION_FAILED)
     {
     }
   };
@@ -193,12 +184,12 @@ private:
   struct LocalParticipantData : public DCPS::RcObject {
     typedef DCPS::RcHandle<LocalParticipantData> shared_ptr;
 
-    OpenDDS::DCPS::GUID_t participant_guid;
+    DCPS::GUID_t participant_guid;
     LocalAuthCredentialData::shared_ptr credentials;
     RemoteParticipantMap validated_remotes;
 
     LocalParticipantData()
-      : participant_guid(OpenDDS::DCPS::GUID_UNKNOWN),
+      : participant_guid(DCPS::GUID_UNKNOWN),
         credentials(),
         validated_remotes()
     {
@@ -235,7 +226,7 @@ private:
     DDS::Security::HandshakeHandle handshake_handle,
     DDS::Security::SecurityException & ex);
 
-  bool is_handshake_initiator(const OpenDDS::DCPS::GUID_t& local, const OpenDDS::DCPS::GUID_t& remote);
+  bool is_handshake_initiator(const DCPS::GUID_t& local, const DCPS::GUID_t& remote);
 
   bool check_class_versions(const char* remote_class_id);
 
@@ -247,14 +238,14 @@ private:
 
   struct was_guid_validated
   {
-    was_guid_validated(const OpenDDS::DCPS::GUID_t& expected) : expected_(expected) {}
+    was_guid_validated(const DCPS::GUID_t& expected) : expected_(expected) {}
 
     bool operator()(const RemoteParticipantMap::value_type& validated) const
     {
       return (expected_ == validated.second->participant_guid);
     }
   private:
-    const OpenDDS::DCPS::GUID_t& expected_;
+    const DCPS::GUID_t& expected_;
   };
 
   struct local_has_remote_handle

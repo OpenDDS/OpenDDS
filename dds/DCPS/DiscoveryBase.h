@@ -16,11 +16,10 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/DataReaderImpl_T.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "dds/DdsSecurityCoreC.h"
+
 #include "ace/Select_Reactor.h"
 #include "ace/Condition_Thread_Mutex.h"
-
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DdsSecurityEntities.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -1392,9 +1391,8 @@ namespace OpenDDS {
           has_last_stateless_msg_(false),
           last_stateless_msg_time_(0, 0),
           auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN),
-          local_auth_request_token_(DDS::Security::TokenNIL),
-          remote_auth_request_token_(DDS::Security::TokenNIL) {}
+          auth_state_(AS_UNKNOWN)
+        {}
 
         DiscoveredParticipant(const DiscoveredParticipantData& p, const ACE_Time_Value& t) :
           pdata_(p),
@@ -1403,9 +1401,8 @@ namespace OpenDDS {
           has_last_stateless_msg_(false),
           last_stateless_msg_time_(0, 0),
           auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN),
-          local_auth_request_token_(DDS::Security::TokenNIL),
-          remote_auth_request_token_(DDS::Security::TokenNIL) {}
+          auth_state_(AS_UNKNOWN)
+        {}
 
         DiscoveredParticipantData pdata_;
         ACE_Time_Value last_seen_;
