@@ -317,6 +317,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
+#if defined(OPENDDS_SECURITY)
 DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant_secure(DDS::DomainId_t domain,
                                       const DDS::DomainParticipantQos& qos,
@@ -338,6 +339,7 @@ RtpsDiscovery::add_domain_participant_secure(DDS::DomainId_t domain,
   }
   return ads;
 }
+#endif
 
 void
 RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
