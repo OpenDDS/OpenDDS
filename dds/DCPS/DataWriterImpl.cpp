@@ -2646,11 +2646,13 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
   qos_data.topic_name = this->topic_name_.in();
 }
 
+#if defined(OPENDDS_SECURITY)
 DDS::Security::ParticipantCryptoHandle DataWriterImpl::get_crypto_handle() const
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   return participant ? participant->crypto_handle() : DDS::HANDLE_NIL;
 }
+#endif
 
 bool
 DataWriterImpl::need_sequence_repair()
