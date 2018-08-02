@@ -996,9 +996,11 @@ Sedp::Task::svc_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* ppdata
     sedp_->participant_message_writer_.assoc(peer);
   }
 
+#if defined(OPENDDS_SECURITY)
   if (sedp_->is_security_enabled()) {
     sedp_->associate_secure_readers_to_writers(*ppdata);
   }
+#endif
 
   //FUTURE: if/when topic propagation is supported, add it here
 
@@ -1024,10 +1026,12 @@ Sedp::Task::svc_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* ppdata
   proto.remote_id_.entityId = ENTITYID_PARTICIPANT;
   sedp_->associated_participants_.insert(proto.remote_id_);
 
+#if defined(OPENDDS_SECURITY)
   if (sedp_->is_security_enabled()) {
     spdp_->send_participant_crypto_tokens(proto.remote_id_);
     sedp_->send_builtin_crypto_tokens(*ppdata);
   }
+#endif
 
   // Write durable data
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {

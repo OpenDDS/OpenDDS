@@ -560,7 +560,9 @@ private:
     return this->qos_.transport_priority.value;
   }
 
+#if defined(OPENDDS_SECURITY)
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
+#endif
 
   void association_complete_i(const RepoId& remote_id);
 

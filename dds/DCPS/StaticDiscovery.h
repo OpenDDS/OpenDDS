@@ -248,6 +248,7 @@ public:
   virtual AddDomainStatus add_domain_participant(DDS::DomainId_t domain,
                                                  const DDS::DomainParticipantQos& qos);
 
+#if defined(OPENDDS_SECURITY)
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
@@ -255,6 +256,7 @@ public:
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
     DDS::Security::ParticipantCryptoHandle part_crypto);
+#endif
 
   EndpointRegistry registry;
 

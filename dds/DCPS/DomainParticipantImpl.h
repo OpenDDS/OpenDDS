@@ -369,7 +369,9 @@ private:
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
+#if defined(OPENDDS_SECURITY)
   void set_security_config(const Security::SecurityConfig_rch& config);
+#endif
 
   DDS::Security::ParticipantCryptoHandle crypto_handle() const
   {

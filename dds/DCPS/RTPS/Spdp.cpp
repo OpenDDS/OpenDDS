@@ -57,6 +57,7 @@ namespace {
     return false;
   }
 
+#if defined(OPENDDS_SECURITY)
   bool operator==(const DDS::Security::Property_t& rhs, const DDS::Security::Property_t& lhs) {
     return rhs.name == lhs.name && rhs.value == lhs.value && rhs.propagate == lhs.propagate;
   }
@@ -84,6 +85,7 @@ namespace {
   bool operator==(const DDS::Security::DataHolder& rhs, const DDS::Security::DataHolder& lhs) {
     return rhs.class_id == lhs.class_id && rhs.properties == lhs.properties && rhs.binary_properties == lhs.binary_properties;
   }
+  #endif
 
   void init_participant_sec_attributes(DDS::Security::ParticipantSecurityAttributes& attr)
   {
@@ -234,7 +236,10 @@ Spdp::Spdp(DDS::DomainId_t domain,
     throw std::runtime_error("unable to retrieve participant security attributes");
   }
 
+#if defined(OPENDDS_SECURITY)
   sedp_.init_security(identity_handle, perm_handle, crypto_handle);
+#endif
+
 }
 
 Spdp::~Spdp()
@@ -248,7 +253,9 @@ Spdp::~Spdp()
                  ACE_TEXT("remove discovered participants\n")));
     }
 
+#if defined(OPENDDS_SECURITY)
     write_secure_disposes();
+#endif
 
     // Iterate through a copy of the repo Ids, rather than the map
     //   as it gets unlocked in remove_discovered_participant()
@@ -280,6 +287,7 @@ Spdp::~Spdp()
   }
 }
 
+#if defined(OPENDDS_SECURITY)
 void
 Spdp::write_secure_updates()
 {
@@ -302,6 +310,7 @@ Spdp::write_secure_disposes()
 {
   sedp_.write_dcps_participant_dispose(guid_);
 }
+#endif
 
 void
 Spdp::handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData& cpdata)
@@ -347,6 +356,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPd
     participants_[guid] = DiscoveredParticipant(pdata, now);
     DiscoveredParticipant& dp = participants_[guid];
 
+#if defined(OPENDDS_SECURITY)
     if (is_security_enabled()) {
       // Associate the stateless reader / writer for handshakes & auth requests
       sedp_.associate_preauth(dp.pdata_);
@@ -358,11 +368,13 @@ Spdp::handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPd
         pending_remote_auth_tokens_.erase(token_iter);
       }
     }
+#endif
 
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     this->tport_->write_i();
 
+#if defined(OPENDDS_SECURITY)
     if (is_security_enabled()) {
       bool has_security_data = dp.pdata_.dataKind == OpenDDS::Security::DPDK_ENHANCED ||
                                dp.pdata_.dataKind == OpenDDS::Security::DPDK_SECURE;
@@ -402,9 +414,15 @@ Spdp::handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPd
         // otherwise just return, since we're waiting for input to finish authentication
       }
     } else {
+#endif
+
       dp.auth_state_ = OpenDDS::DCPS::AS_UNAUTHENTICATED;
       match_unauthenticated(guid, dp);
+
+#if defined(OPENDDS_SECURITY)
     }
+#endif
+
   } else {
 
     // Non-secure updates for authenticated participants are used for liveliness but
@@ -500,6 +518,7 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
   }
 }
 
+#if defined(OPENDDS_SECURITY)
 void
 Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 {
@@ -754,6 +773,7 @@ Spdp::check_auth_states(const ACE_Time_Value& tv) {
   }
 }
 
+
 void
 Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg) {
   DDS::Security::SecurityException se = {"", 0, 0};
@@ -790,7 +810,9 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return;
   }
 }
+#endif
 
+#if defined(OPENDDS_SECURITY)
 bool
 Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
@@ -1038,6 +1060,7 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   return;
 }
+#endif
 
 void
 Spdp::remove_expired_participants()
@@ -1213,8 +1236,12 @@ Spdp::build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind kind)
 
 bool Spdp::announce_domain_participant_qos()
 {
+
+#if defined(OPENDDS_SECURITY)
   if (is_security_enabled())
     write_secure_updates();
+#endif
+
   return true;
 }
 
@@ -1482,7 +1509,11 @@ Spdp::SpdpTransport::handle_timeout(const ACE_Time_Value& tv, const void*)
     outer_->remove_expired_participants();
     last_disco_resend_ = tv;
   }
+
+#if defined(OPENDDS_SECURITY)
   outer_->check_auth_states(tv);
+#endif
+
   return 0;
 }
 
@@ -1747,6 +1778,7 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
   return result;
 }
 
+#if defined(OPENDDS_SECURITY)
 void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
@@ -1772,6 +1804,7 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
   }
   return;
 }
+#endif
 
 DDS::Security::PermissionsHandle
 Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const

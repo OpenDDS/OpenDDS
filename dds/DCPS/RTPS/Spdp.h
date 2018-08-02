@@ -85,13 +85,19 @@ public:
   OpenDDS::Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
 
+#if defined(OPENDDS_SECURITY)
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
+#endif
+
   void handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+
+#if defined(OPENDDS_SECURITY)
   void check_auth_states(const ACE_Time_Value& tv);
   void write_secure_updates();
   void write_secure_disposes();
+#endif
 
   bool is_opendds(const GUID_t& participant) const;
   bool is_security_enabled() const { return security_enabled_; }
@@ -128,8 +134,11 @@ private:
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+
+#if defined(OPENDDS_SECURITY)
   bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
+#endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();

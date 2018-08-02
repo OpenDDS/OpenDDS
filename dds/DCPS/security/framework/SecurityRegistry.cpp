@@ -271,11 +271,19 @@ void
 SecurityRegistry::bind_config(const SecurityConfig_rch& config,
                               DDS::DomainParticipant_ptr domain_participant)
 {
+
+#if defined(OPENDDS_SECURITY)
   DCPS::DomainParticipantImpl* const dpi =
     dynamic_cast<DCPS::DomainParticipantImpl*>(domain_participant);
   if (dpi) {
     dpi->set_security_config(config);
   }
+
+#else
+  ACE_UNUSED_ARG(config);
+  ACE_UNUSED_ARG(domain_participant);
+#endif
+
 }
 
 int
