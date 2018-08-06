@@ -143,7 +143,11 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
         const CORBA::ULong len = conn_info_.length();
         conn_info_.length(len + 1);
         impl->connection_info(conn_info_[len]);
+
+#if defined(OPENDDS_SECURITY)
         impl->local_crypto_handle(get_crypto_handle());
+#endif
+
         cdr_encapsulation_ |= inst->requires_cdr();
       }
     }

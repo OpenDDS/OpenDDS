@@ -135,10 +135,12 @@ private:
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
 
+#if defined(OPENDDS_SECURITY)
   virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
   {
     return DDS::HANDLE_NIL;
   }
+#endif
 
   // helpers
   typedef ACE_Guard<ACE_Thread_Mutex> Guard;

@@ -21,7 +21,11 @@
 #include "DataLinkCleanupTask.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
+
+#if defined(OPENDDS_SECURITY)
 #include "dds/DdsSecurityCoreC.h"
+#endif
+
 #include "ace/Synch_Traits.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -225,7 +229,9 @@ private:
                            const ConnectionAttribs& attribs,
                            bool active, bool connect);
 
+#if defined(OPENDDS_SECURITY)
   virtual void local_crypto_handle(DDS::Security::ParticipantCryptoHandle) {}
+#endif
 
 public:
   /// Called by our friends, the TransportClient, and the DataLink.
