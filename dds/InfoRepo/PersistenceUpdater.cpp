@@ -500,8 +500,8 @@ PersistenceUpdater::requestImage()
     BinSeq in_drdw_seq(qos_len, buf);
     QosSeq drdw_qos(actor->drdwQos.first, in_drdw_seq);
 
-    qos_len = actor->transportInterfaceInfo.first;
-    ACE_NEW_NORETURN(buf, char[qos_len]);
+    size_t transport_len = actor->transportInterfaceInfo.first;
+    ACE_NEW_NORETURN(buf, char[transport_len]);
     qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     if (buf == 0) {
@@ -510,9 +510,9 @@ PersistenceUpdater::requestImage()
       return;
     }
 
-    ACE_OS::memcpy(buf, actor->transportInterfaceInfo.second, qos_len);
+    ACE_OS::memcpy(buf, actor->transportInterfaceInfo.second, transport_len);
 
-    BinSeq in_transport_seq(qos_len, buf);
+    BinSeq in_transport_seq(transport_len, buf);
 
     ContentSubscriptionBin in_csp_bin;
     if (actor->type == DataReader) {
