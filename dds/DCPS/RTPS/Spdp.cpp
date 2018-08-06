@@ -420,17 +420,18 @@ Spdp::handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPd
         // otherwise just return, since we're waiting for input to finish authentication
       }
     } else {
-#endif
 
       dp.auth_state_ = OpenDDS::DCPS::AS_UNAUTHENTICATED;
       match_unauthenticated(guid, dp);
 
-#if defined(OPENDDS_SECURITY)
     }
+#else
+    match_unauthenticated(guid, dp);
 #endif
 
   } else {
 
+#if defined(OPENDDS_SECURITY)
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
     if (iter->second.auth_state_ == DCPS::AS_AUTHENTICATED &&
@@ -441,6 +442,7 @@ Spdp::handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPd
       iter->second.last_seen_ = now;
       return;
     }
+#endif
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
       remove_discovered_participant(iter);
@@ -1796,6 +1798,7 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
   }
 }
 
+#if defined(OPENDDS_SECURITY)
 Spdp::ParticipantCryptoInfoPair
 Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
 {
@@ -1810,7 +1813,6 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
   return result;
 }
 
-#if defined(OPENDDS_SECURITY)
 void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
@@ -1836,7 +1838,6 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
   }
   return;
 }
-#endif
 
 DDS::Security::PermissionsHandle
 Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const
@@ -1863,6 +1864,7 @@ Spdp::lookup_participant_auth_state(const DCPS::RepoId& id) const
   }
   return result;
 }
+#endif
 
 }
 }

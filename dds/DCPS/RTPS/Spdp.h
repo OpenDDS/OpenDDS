@@ -104,13 +104,16 @@ public:
 
   bool is_opendds(const GUID_t& participant) const;
 
+#if defined(OPENDDS_SECURITY)
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id) const;
   void send_participant_crypto_tokens(const DCPS::RepoId& id);
 
   DDS::DomainId_t get_domain_id() const { return domain_; }
   DDS::Security::PermissionsHandle lookup_participant_permissions(const DCPS::RepoId& id) const;
+
   OpenDDS::DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
+#endif
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }

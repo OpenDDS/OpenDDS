@@ -4086,11 +4086,11 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
     return;
   }
 }
-#endif
 
 DDS::DomainId_t Sedp::get_domain_id() const {
   return spdp_.get_domain_id();
 }
+#endif
 
 WaitForAcks::WaitForAcks()
 : cond_(lock_)

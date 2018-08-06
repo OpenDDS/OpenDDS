@@ -653,9 +653,10 @@ protected:
   void create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& local_writer, const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& remote_reader);
   void handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
   void handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
-#endif
 
   DDS::DomainId_t get_domain_id() const;
+#endif
+
 };
 
 /// A class to wait on acknowledgments from other threads
