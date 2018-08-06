@@ -12,7 +12,6 @@
 #include "ParameterListConverter.h"
 #include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsDiscovery.h"
-#include "SecurityHelpers.h"
 
 #include "dds/DdsDcpsGuidC.h"
 
@@ -21,7 +20,10 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 
+#if defined(OPENDDS_SECURITY)
+#include "SecurityHelpers.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
+#endif
 
 #include "ace/Reactor.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
@@ -146,16 +148,22 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
   , sedp_(guid_, *this, lock_)
+#if defined(OPENDDS_SECURITY)
   , security_config_()
   , security_enabled_(false)
+#endif
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   init(domain, guid, qos, disco);
 
+#if defined(OPENDDS_SECURITY)
   init_participant_sec_attributes(participant_sec_attr_);
+#endif
+
 }
 
+#if defined(OPENDDS_SECURITY)
 Spdp::Spdp(DDS::DomainId_t domain,
            const DCPS::RepoId& guid,
            const DDS::DomainParticipantQos& qos,
@@ -236,11 +244,9 @@ Spdp::Spdp(DDS::DomainId_t domain,
     throw std::runtime_error("unable to retrieve participant security attributes");
   }
 
-#if defined(OPENDDS_SECURITY)
   sedp_.init_security(identity_handle, perm_handle, crypto_handle);
-#endif
-
 }
+#endif
 
 Spdp::~Spdp()
 {
@@ -810,9 +816,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return;
   }
 }
-#endif
 
-#if defined(OPENDDS_SECURITY)
 bool
 Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
@@ -1162,6 +1166,8 @@ Spdp::build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind kind)
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
     BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
     ;
+
+#if defined(OPENDDS_SECURITY)
   if (is_security_enabled()) {
     availableBuiltinEndpoints |=
       DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER |
@@ -1178,6 +1184,8 @@ Spdp::build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind kind)
       DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER
     ;
   }
+#endif
+
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
 
   // This locator list should not be empty, but we won't actually be using it.
@@ -1202,15 +1210,34 @@ Spdp::build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind kind)
           DDS::BuiltinTopicKey_t() /*ignored*/,
           qos_.user_data
         },
+
+#if defined(OPENDDS_SECURITY)
         identity_token_,
         permissions_token_,
+#else
+        DDS::Security::Token(),
+        DDS::Security::Token(),
+#endif
+
         qos_.property,
+
+#if defined(OPENDDS_SECURITY)
         {
           security_attributes_to_bitmask(participant_sec_attr_),
           participant_sec_attr_.plugin_participant_attributes
         }
+#else
+        DDS::Security::ParticipantSecurityInfo()
+#endif
+
       },
+
+#if defined(OPENDDS_SECURITY)
       identity_status_token_
+#else
+      DDS::Security::Token()
+#endif
+
     },
     { // ParticipantProxy_t
       PROTOCOLVERSION,
@@ -1458,10 +1485,15 @@ Spdp::SpdpTransport::write()
 void
 Spdp::SpdpTransport::write_i()
 {
+#if defined(OPENDDS_SECURITY)
   const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata =
     outer_->build_local_pdata(outer_->is_security_enabled() ?
                               OpenDDS::Security::DPDK_ENHANCED :
                               OpenDDS::Security::DPDK_ORIGINAL);
+#else
+    const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata =
+      outer_->build_local_pdata(OpenDDS::Security::DPDK_ORIGINAL);
+#endif
 
   data_.writerSN.high = seq_.getHigh();
   data_.writerSN.low = seq_.getLow();

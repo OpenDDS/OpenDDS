@@ -52,6 +52,7 @@ public:
        const DDS::DomainParticipantQos& qos,
        RtpsDiscovery* disco);
 
+#if defined(OPENDDS_SECURITY)
   Spdp(DDS::DomainId_t domain,
        const DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
@@ -59,6 +60,7 @@ public:
        DDS::Security::IdentityHandle id_handle,
        DDS::Security::PermissionsHandle perm_handle,
        DDS::Security::ParticipantCryptoHandle crypto_handle);
+#endif
 
   ~Spdp();
 
@@ -82,10 +84,10 @@ public:
 
   WaitForAcks& wait_for_acks();
 
+#if defined(OPENDDS_SECURITY)
   OpenDDS::Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
 
-#if defined(OPENDDS_SECURITY)
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
@@ -97,10 +99,10 @@ public:
   void check_auth_states(const ACE_Time_Value& tv);
   void write_secure_updates();
   void write_secure_disposes();
+  bool is_security_enabled() const { return security_enabled_; }
 #endif
 
   bool is_opendds(const GUID_t& participant) const;
-  bool is_security_enabled() const { return security_enabled_; }
 
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id) const;
@@ -186,6 +188,7 @@ private:
   // when BIT is being removed (fini_bit)
   WaitForAcks wait_for_acks_;
 
+#if defined(OPENDDS_SECURITY)
   OpenDDS::Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 
@@ -200,6 +203,7 @@ private:
   DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
+#endif
 };
 
 }
