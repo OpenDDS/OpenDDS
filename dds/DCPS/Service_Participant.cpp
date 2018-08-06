@@ -170,7 +170,9 @@ Service_Participant::Service_Participant()
       true
 #endif
     ),
+#if defined(OPENDDS_SECURITY)
     security_enabled_(false),
+#endif
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
     global_transport_config_(ACE_TEXT("")),
     monitor_factory_(0),

@@ -1835,6 +1835,7 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
   return result;
 }
 
+#if defined(OPENDDS_SECURITY)
 namespace {
 
   bool
@@ -1846,6 +1847,7 @@ namespace {
   }
 
 }
+#endif
 
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
