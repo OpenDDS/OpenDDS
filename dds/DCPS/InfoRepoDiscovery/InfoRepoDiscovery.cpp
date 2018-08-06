@@ -465,6 +465,7 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
   return ads;
 }
 
+#if defined(OPENDDS_SECURITY)
 DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
@@ -477,6 +478,7 @@ InfoRepoDiscovery::add_domain_participant_secure(
   const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
   return ads;
 }
+#endif
 
 bool
 InfoRepoDiscovery::remove_domain_participant(DDS::DomainId_t domainId,
