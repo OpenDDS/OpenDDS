@@ -155,10 +155,11 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
 {
   topicId = OpenDDS::DCPS::GUID_UNKNOWN;
 
-  OpenDDS::DCPS::RepoId new_topic_id = participantPtr->get_next_topic_id();
+  bool isBIT = OpenDDS::DCPS::topicIsBIT(topicName, dataTypeName);
+  OpenDDS::DCPS::RepoId new_topic_id = participantPtr->get_next_topic_id(isBIT);
   OpenDDS::DCPS::TopicStatus status = add_topic_i(new_topic_id, topicName
                                                   , dataTypeName
-                                                  , qos, participantPtr);
+                                                  , qos, participantPtr, isBIT);
 
   if (status == OpenDDS::DCPS::CREATED) {
     topicId = new_topic_id;
@@ -175,9 +176,10 @@ DCPS_IR_Domain::force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
                                 DCPS_IR_Participant* participantPtr)
 {
   OpenDDS::DCPS::RepoId topic_id = topicId;
+  bool isBIT = OpenDDS::DCPS::topicIsBIT(topicName, dataTypeName);
   OpenDDS::DCPS::TopicStatus status = add_topic_i(topic_id, topicName
                                                   , dataTypeName
-                                                  , qos, participantPtr);
+                                                  , qos, participantPtr, isBIT);
 
   return status;
 }
@@ -186,7 +188,8 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
                                                        const char * topicName,
                                                        const char * dataTypeName,
                                                        const DDS::TopicQos & qos,
-                                                       DCPS_IR_Participant* participantPtr)
+                                                       DCPS_IR_Participant* participantPtr,
+                                                       bool isBIT)
 {
   DCPS_IR_Topic_Description* description;
   int descriptionLookup = find_topic_description(topicName, dataTypeName, description);
@@ -223,7 +226,8 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
                    qos,
                    this,
                    participantPtr,
-                   description));
+                   description,
+                   isBIT));
 
   OpenDDS::DCPS::TopicStatus topicStatus = OpenDDS::DCPS::NOT_FOUND;
 
@@ -248,7 +252,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
       publish_topic_bit(topic.get());
 
       // Keep a reference to easily locate the topic by id.
-      this->idToTopicMap_[ topicId] = move(topic);
+      this->idToTopicMap_[topicId] = move(topic);
 
     }
     break;

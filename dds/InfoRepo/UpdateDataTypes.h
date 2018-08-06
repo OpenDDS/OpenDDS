@@ -74,7 +74,8 @@ struct TopicStrt {
     IdType       pa,
     const char*  na,
     const char*  da,
-    Q            tQos) : domainId(dom),
+    Q            tQos) :
+      domainId(dom),
       topicId(to),
       participantId(pa),
       name(na),
@@ -95,7 +96,8 @@ struct ParticipantStrt {
     DomainIdType dom,
     long         own,
     IdType       part,
-    Q            pQos) : domainId(dom),
+    Q            pQos):
+      domainId(dom),
       owner(own),
       participantId(part),
       participantQos(pQos) { };
