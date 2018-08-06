@@ -152,8 +152,12 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const ACE_INET_Addr& addr)
 {
   rtps_header_mb_.cont(&submessages);
+#if defined(OPENDDS_SECURITY)
   Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
   ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
+#else
+  ACE_Message_Block& use_mb =  rtps_header_mb_;
+#endif
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
@@ -172,8 +176,12 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
   rtps_header_mb_.cont(&submessages);
+#if defined(OPENDDS_SECURITY)
   Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
   ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
+#else
+  ACE_Message_Block& use_mb =  rtps_header_mb_;
+#endif
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
@@ -253,6 +261,7 @@ RtpsUdpSendStrategy::do_remove_sample(const RepoId& pub_id,
   return TransportSendStrategy::do_remove_sample(pub_id, criteria, 0);
 }
 
+#if defined(OPENDDS_SECURITY)
 void
 RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
                                     Message_Block_Ptr& payload,
@@ -628,6 +637,7 @@ RtpsUdpSendStrategy::replace_chunks(const ACE_Message_Block* plain,
 
   return out.release();
 }
+#endif
 
 void
 RtpsUdpSendStrategy::stop_i()

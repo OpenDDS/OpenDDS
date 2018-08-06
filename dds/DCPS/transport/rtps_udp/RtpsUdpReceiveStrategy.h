@@ -83,6 +83,7 @@ private:
 
   virtual bool reassemble(ReceivedDataSample& data);
 
+#if defined(OPENDDS_SECURITY)
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
@@ -90,6 +91,7 @@ private:
 
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);
+#endif
 
   RtpsUdpDataLink* link_;
   SequenceNumber last_received_;
@@ -129,9 +131,11 @@ private:
   MessageReceiver receiver_;
   ACE_INET_Addr remote_address_;
 
+#if defined(OPENDDS_SECURITY)
   RTPS::SecuritySubmessage secure_prefix_;
   OPENDDS_VECTOR(RTPS::Submessage) secure_submessages_;
   ReceivedDataSample secure_sample_;
+#endif
 };
 
 } // namespace DCPS

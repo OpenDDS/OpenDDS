@@ -45,6 +45,7 @@ RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
   locators_.erase(remote_id);
 }
 
+#if defined(OPENDDS_SECURITY)
 ACE_INLINE DDS::Security::ParticipantCryptoHandle
 RtpsUdpDataLink::local_crypto_handle() const
 {
@@ -77,6 +78,7 @@ RtpsUdpDataLink::reader_crypto_handle(const RepoId& reader) const
   const PeerHandlesCIter it = peer_crypto_handles_.find(reader);
   return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
 }
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS
