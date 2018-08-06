@@ -2127,7 +2127,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos(
 }
 
 DCPS_IR_Domain*
-TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
+TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain, bool initBITs)
 {
   if (domain == OpenDDS::DCPS::Service_Participant::ANY_DOMAIN) {
     ACE_ERROR((LM_ERROR,
@@ -2152,16 +2152,10 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
       where,
       DCPS_IR_Domain_Map::value_type(domain, OpenDDS::DCPS::move(domain_uptr)));
 
-    int bit_status = 0;
-
-    if (TheServiceParticipant->get_BIT()) {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-      bit_status = domainPtr->init_built_in_topics(
-        this->federation_.overridden(), reincarnate_);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-    }
-
-    if (0 != bit_status) {
+#ifndef DDS_HAS_MINIMUM_BIT
+    if (TheServiceParticipant->get_BIT() && !domainPtr->useBIT() && initBITs &&
+      domainPtr->init_built_in_topics(federation_.overridden(), reincarnate_)
+    ) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::domain: ")
                  ACE_TEXT("failed to initialize the Built-In Topics ")
@@ -2170,6 +2164,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
       this->domains_.erase(domain);
       return 0;
     }
+#endif
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -2244,7 +2239,33 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                ACE_TEXT("processing persistent data.\n")));
   }
 
-  // Ensure that new BIT participants do not reuse an id
+  // Initialize builtin topics first so that they always have the same IDs
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (TheServiceParticipant->get_BIT()) {
+    for (Update::UImage::ParticipantSeq::const_iterator
+         iter = image.participants.begin();
+         iter != image.participants.end(); iter++) {
+      const Update::UParticipant* part = *iter;
+      if (!domain(part->domainId, true /* initBITs */)) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+          ACE_DEBUG((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i::receive_image: ")
+                     ACE_TEXT("invalid domain Id: %d\n"),
+                     part->domainId));
+        }
+        return false;
+      }
+    }
+
+    for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
+         currentDomain != domains_.end();
+         ++currentDomain) {
+      currentDomain->second->reassociate_built_in_topic_pubs();
+    }
+  }
+#endif
+
+  // Ensure that new non-BIT participants do not reuse an id
   participantIdGenerator_.last(image.lastPartId);
 
   for (Update::UImage::ParticipantSeq::const_iterator
@@ -2363,16 +2384,6 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                  std::string(part_converter).c_str()));
     }
   }
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  // reassociate the bit publisher and subscribers
-  for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
-       currentDomain != domains_.end();
-       ++currentDomain) {
-
-    currentDomain->second->reassociate_built_in_topic_pubs();
-  }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   return true;
 }
