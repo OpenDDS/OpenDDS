@@ -127,9 +127,6 @@ public:
    */
   void last(long key);
 
-  void forceId(const RepoId& id);
-  void cancelForceId();
-
 private:
   /// Type of Entity to generate GUID values for.
   EntityKind kind_;
@@ -142,8 +139,6 @@ private:
 
   /// Unique value for the EntityKey.
   long lastKey_;
-
-  RepoId forcedId_;
 };
 
 } // namespace DCPS
