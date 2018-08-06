@@ -155,10 +155,11 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
 {
   topicId = OpenDDS::DCPS::GUID_UNKNOWN;
 
-  OpenDDS::DCPS::RepoId new_topic_id = participantPtr->get_next_topic_id();
+  bool isBIT = OpenDDS::DCPS::topicIsBIT(topicName, dataTypeName);
+  OpenDDS::DCPS::RepoId new_topic_id = participantPtr->get_next_topic_id(isBIT);
   OpenDDS::DCPS::TopicStatus status = add_topic_i(new_topic_id, topicName
                                                   , dataTypeName
-                                                  , qos, participantPtr);
+                                                  , qos, participantPtr, isBIT);
 
   if (status == OpenDDS::DCPS::CREATED) {
     topicId = new_topic_id;
@@ -175,9 +176,10 @@ DCPS_IR_Domain::force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
                                 DCPS_IR_Participant* participantPtr)
 {
   OpenDDS::DCPS::RepoId topic_id = topicId;
+  bool isBIT = OpenDDS::DCPS::topicIsBIT(topicName, dataTypeName);
   OpenDDS::DCPS::TopicStatus status = add_topic_i(topic_id, topicName
                                                   , dataTypeName
-                                                  , qos, participantPtr);
+                                                  , qos, participantPtr, isBIT);
 
   return status;
 }
@@ -186,7 +188,8 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
                                                        const char * topicName,
                                                        const char * dataTypeName,
                                                        const DDS::TopicQos & qos,
-                                                       DCPS_IR_Participant* participantPtr)
+                                                       DCPS_IR_Participant* participantPtr,
+                                                       bool isBIT)
 {
   DCPS_IR_Topic_Description* description;
   int descriptionLookup = find_topic_description(topicName, dataTypeName, description);
@@ -223,7 +226,8 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
                    qos,
                    this,
                    participantPtr,
-                   description));
+                   description,
+                   isBIT));
 
   OpenDDS::DCPS::TopicStatus topicStatus = OpenDDS::DCPS::NOT_FOUND;
 
@@ -248,7 +252,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
       publish_topic_bit(topic.get());
 
       // Keep a reference to easily locate the topic by id.
-      this->idToTopicMap_[ topicId] = move(topic);
+      this->idToTopicMap_[topicId] = move(topic);
 
     }
     break;
@@ -1045,22 +1049,17 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
   if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
       topic->get_topic_description();
-    const char* dataTypeName = desc->get_dataTypeName();
+    const char* name = desc->get_name();
+    const char* type = desc->get_dataTypeName();
 
-    bool isNotBIT =
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
-
-    if (isNotBIT) {
+    if (!OpenDDS::DCPS::topicIsBIT(name, type)) {
       try {
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::TopicBuiltinTopicData data;
         get_BuiltinTopicKey(data.key, topic->get_id());
-        data.name = desc->get_name();
-        data.type_name = desc->get_dataTypeName();
+        data.name = name;
+        data.type_name = type;
         data.durability = topicQos->durability;
         data.durability_service = topicQos->durability_service;
         data.deadline = topicQos->deadline;
@@ -1111,16 +1110,10 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
   if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
       subscription->get_topic_description();
+    const char* name = desc->get_name();
+    const char* type = desc->get_dataTypeName();
 
-    const char* dataTypeName = desc->get_dataTypeName();
-
-    bool isNotBIT =
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE) &&
-      ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
-
-    if (isNotBIT) {
+    if (!OpenDDS::DCPS::topicIsBIT(name, type)) {
       try {
         const DDS::DataReaderQos* readerQos = subscription->get_datareader_qos();
         const DDS::SubscriberQos* publisherQos = subscription->get_subscriber_qos();
@@ -1132,8 +1125,8 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
         get_BuiltinTopicKey(data.key, subscription->get_id());
         get_BuiltinTopicKey(data.participant_key,
                             subscription->get_participant_id());
-        data.topic_name = desc->get_name();
-        data.type_name = desc->get_dataTypeName();
+        data.topic_name = name;
+        data.type_name = type;
         data.durability = readerQos->durability;
         data.deadline = readerQos->deadline;
         data.latency_budget = readerQos->latency_budget;

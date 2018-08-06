@@ -188,7 +188,7 @@ public:
 
   ///@{
   /// Next Entity Id value in sequence.
-  OpenDDS::DCPS::RepoId get_next_topic_id();
+  OpenDDS::DCPS::RepoId get_next_topic_id(bool builtin);
   OpenDDS::DCPS::RepoId get_next_publication_id();
   OpenDDS::DCPS::RepoId get_next_subscription_id();
   ///@}

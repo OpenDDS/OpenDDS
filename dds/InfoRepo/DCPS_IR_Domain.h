@@ -180,7 +180,8 @@ private:
                                          const char * topicName,
                                          const char * dataTypeName,
                                          const DDS::TopicQos & qos,
-                                         DCPS_IR_Participant* participantPtr);
+                                         DCPS_IR_Participant* participantPtr,
+                                         bool isBIT);
 
   /// Takes ownership of the memory pointed to by desc if successful
   /// returns 0 if successful,

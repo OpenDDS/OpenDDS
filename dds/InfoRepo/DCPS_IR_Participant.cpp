@@ -841,9 +841,9 @@ DCPS_IR_Domain* DCPS_IR_Participant::get_domain_reference() const
 }
 
 OpenDDS::DCPS::RepoId
-DCPS_IR_Participant::get_next_topic_id()
+DCPS_IR_Participant::get_next_topic_id(bool builtin)
 {
-  return this->topicIdGenerator_.next();
+  return this->topicIdGenerator_.next(builtin);
 }
 
 OpenDDS::DCPS::RepoId
