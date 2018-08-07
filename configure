@@ -900,7 +900,7 @@ if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
   $wireshark_lib_defaulted = 1;
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3/;
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl/;
 my %use_win_default = ('boost' => 'c:\\Boost');
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
