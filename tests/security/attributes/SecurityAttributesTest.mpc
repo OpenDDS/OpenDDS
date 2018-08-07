@@ -3,6 +3,7 @@ project(DDS*idl): dcps_test_lib {
                    -Wb,stub_export_macro=SecurityAttributes_Export -SS
   dcps_ts_flags += -Wb,export_macro=SecurityAttributes_Export
   dynamicflags  += SECURITYATTRIBUTES_BUILD_DLL
+  avoids        += no_opendds_security
 
   TypeSupport_Files {
     SecurityAttributesMessage.idl
@@ -14,6 +15,7 @@ project(DDS*Publisher): dcpsexe, dcps_rtps_udp {
   exename   = publisher
   after    += DDS*idl
   libs     += DDS*idl
+  avoids   += no_opendds_security
 
   Idl_Files {
   }
@@ -30,6 +32,7 @@ project(DDS*Subscriber): dcpsexe, dcps_rtps_udp {
   exename   = subscriber
   after    += DDS*idl
   libs     += DDS*idl
+  avoids   += no_opendds_security
 
   Idl_Files {
   }

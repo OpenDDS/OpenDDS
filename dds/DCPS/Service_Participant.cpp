@@ -127,7 +127,11 @@ static bool got_bit_transport_ip = false;
 static bool got_bit_lookup_duration_msec = false;
 static bool got_global_transport_config = false;
 static bool got_bit_flag = false;
+
+#if defined(OPENDDS_SECURITY)
 static bool got_security_flag = false;
+#endif
+
 static bool got_publisher_content_filter = false;
 static bool got_transport_debug_level = false;
 static bool got_pending_timeout = false;
@@ -166,7 +170,9 @@ Service_Participant::Service_Participant()
       true
 #endif
     ),
+#if defined(OPENDDS_SECURITY)
     security_enabled_(false),
+#endif
     bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
     global_transport_config_(ACE_TEXT("")),
     monitor_factory_(0),
@@ -571,10 +577,12 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_monitor = true;
 
+#if defined(OPENDDS_SECURITY)
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSecurity"))) != 0) {
       security_enabled_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
       got_security_flag = true;
+#endif
 
     } else {
       arg_shifter.ignore_arg();
@@ -1514,12 +1522,14 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
     }
 
+#if defined(OPENDDS_SECURITY)
     if (got_security_flag) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSSecurity value from command option (overrides value if it's in config file).\n")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSSecurity"), this->security_enabled_, int)
     }
+#endif
 
     if (got_transport_debug_level) {
       ACE_DEBUG((LM_NOTICE,

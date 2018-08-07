@@ -12,7 +12,10 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
+
+#if defined(OPENDDS_SECURITY)
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
+#endif
 
 #include <cstring>
 
@@ -247,6 +250,7 @@ namespace {
     return qos != def_qos;
   }
 
+#if defined(OPENDDS_SECURITY)
   bool not_default(const DDS::PropertyQosPolicy& qos) {
     for (unsigned int i = 0; i < qos.value.length(); ++i) {
       if (qos.value[i].propagate) {
@@ -256,6 +260,7 @@ namespace {
     // binary_value is not sent in the parameter list (DDSSEC12-37)
     return false;
   }
+#endif
 
   bool not_default(const DDS::TimeBasedFilterQosPolicy& qos)
   {
@@ -324,6 +329,8 @@ namespace {
 
     return OpenDDS::Security::DPDK_ORIGINAL;
   }
+
+
 };
 
 namespace ParameterListConverter {
@@ -365,8 +372,7 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-// DDS::Security::ParticipantBuiltinTopicData
-
+#if defined(OPENDDS_SECURITY)
 int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
                   ParameterList& param_list)
 {
@@ -429,8 +435,6 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-// DDS::Security::ParticipantBuiltinTopicDataSecure
-
 int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
                   ParameterList& param_list)
 {
@@ -465,8 +469,7 @@ int from_param_list(const ParameterList& param_list,
 
   return 0;
 }
-
-// OpenDDS::RTPS::ParticipantProxy_t
+#endif
 
 OpenDDS_Rtps_Export
 int to_param_list(const ParticipantProxy_t& proxy,
@@ -723,18 +726,26 @@ int from_param_list(const ParameterList& param_list,
   return result;
 }
 
-// OpenDDS::Security::SPDPdiscoveredParticipantData
-
 int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
                   ParameterList& param_list)
 {
+
+#if defined(OPENDDS_SECURITY)
   if (participant_data.dataKind == OpenDDS::Security::DPDK_SECURE) {
     to_param_list(participant_data.ddsParticipantDataSecure, param_list);
+
   } else if (participant_data.dataKind == OpenDDS::Security::DPDK_ENHANCED) {
     to_param_list(participant_data.ddsParticipantDataSecure.base, param_list);
+
   } else {
+#endif
+
     to_param_list(participant_data.ddsParticipantDataSecure.base.base, param_list);
+
+#if defined(OPENDDS_SECURITY)
   }
+#endif
+
   to_param_list(participant_data.participantProxy, param_list);
   to_param_list(participant_data.leaseDuration, param_list);
 
@@ -748,14 +759,19 @@ int from_param_list(const ParameterList& param_list,
 
   participant_data.dataKind = find_data_kind(param_list);
   switch (participant_data.dataKind) {
+
+#if defined(OPENDDS_SECURITY)
     case OpenDDS::Security::DPDK_SECURE: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure);
       break;
     }
+
     case OpenDDS::Security::DPDK_ENHANCED: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base);
       break;
     }
+#endif
+
     default : {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
       break;
@@ -771,6 +787,7 @@ int from_param_list(const ParameterList& param_list,
 
   return result;
 }
+
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
@@ -1422,8 +1439,7 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-// DDS::Security::EndpointSecurityInfo
-
+#if defined(OPENDDS_SECURITY)
 int to_param_list(const DDS::Security::EndpointSecurityInfo& info,
                   ParameterList& param_list)
 {
@@ -1456,8 +1472,6 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-// DDS::Security::DataTags& data_tags
-
 int to_param_list(const DDS::Security::DataTags& tags,
                   ParameterList& param_list)
 {
@@ -1489,8 +1503,6 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-// DiscoveredWriterData_SecurityWrapper
-
 int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
@@ -1513,8 +1525,6 @@ int from_param_list(const ParameterList& param_list,
   return result;
 }
 
-// DiscoveredReaderData_SecurityWrapper
-
 int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
                   ParameterList& param_list,
                   bool map)
@@ -1536,6 +1546,7 @@ int from_param_list(const ParameterList& param_list,
 
   return result;
 }
+#endif
 
 } // ParameterListConverter
 } // RTPS

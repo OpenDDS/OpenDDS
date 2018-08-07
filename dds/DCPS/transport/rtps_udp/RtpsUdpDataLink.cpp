@@ -20,9 +20,11 @@
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
 
+#if defined(OPENDDS_SECURITY)
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
+#endif
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
@@ -92,9 +94,13 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                      config.heartbeat_response_delay_),
     heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
     heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
+#if defined(OPENDDS_SECURITY)
     held_data_delivery_handler_(this),
     security_config_(Security::SecurityRegistry::instance()->default_config()),
     local_crypto_handle_(DDS::HANDLE_NIL)
+#else
+    held_data_delivery_handler_(this)
+#endif
 {
   this->send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
   this->receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
@@ -781,7 +787,9 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
+#if defined(OPENDDS_SECURITY)
   send_strategy()->encode_payload(pub_id, data, subm);
+#endif
 
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
@@ -1897,10 +1905,12 @@ RtpsUdpDataLink::send_nack_replies()
     //track if any messages have been fully acked by all readers
     SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
 
+#if defined(OPENDDS_SECURITY)
     const EntityId_t& pvs_writer =
       RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
     const bool is_pvs_writer =
       0 == std::memcmp(&pvs_writer, &rw->first.entityId, sizeof pvs_writer);
+#endif
 
     typedef ReaderInfoMap::iterator ri_iter;
     const ri_iter end = writer.remote_readers_.end();
@@ -1910,10 +1920,12 @@ RtpsUdpDataLink::send_nack_replies()
         all_readers_ack = ri->second.cur_cumulative_ack_;
       }
 
+#if defined(OPENDDS_SECURITY)
       if (is_pvs_writer && !ri->second.requested_changes_.empty()) {
         send_directed_nack_replies(rw->first, writer, ri->first, ri->second);
         continue;
       }
+#endif
 
       process_requested_changes(requests, writer, ri->second);
 
@@ -2470,8 +2482,10 @@ RtpsUdpDataLink::send_heartbeats()
 void
 RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs)
 {
+#if defined(OPENDDS_SECURITY)
   const EntityId_t& volatile_writer =
     RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+
   RTPS::InfoDestinationSubmessage idst;
   idst.smHeader.submessageId = RTPS::INFO_DST;
   idst.smHeader.flags = RTPS::FLAG_E;
@@ -2511,6 +2525,9 @@ RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessa
     }
   }
   hbs.erase(last, hbs.end());
+#else
+  ACE_UNUSED_ARG(hbs);
+#endif
 }
 
 void
@@ -2610,6 +2627,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
   }
 }
 
+#if defined(OPENDDS_SECURITY)
 void
 RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
                                            const RepoId& remote_id,
@@ -2678,6 +2696,7 @@ RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
 
   }
 }
+#endif
 
 RtpsUdpDataLink::ReaderInfo::~ReaderInfo()
 {

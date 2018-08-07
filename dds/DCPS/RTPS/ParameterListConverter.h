@@ -16,8 +16,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
+#if defined(OPENDDS_SECURITY)
 struct DiscoveredWriterData_SecurityWrapper;
 struct DiscoveredReaderData_SecurityWrapper;
+#endif
 
 namespace ParameterListConverter {
 
@@ -31,6 +33,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::ParticipantBuiltinTopicData& pbtd);
 
+#if defined(OPENDDS_SECURITY)
 // DDS::Security::ParticipantBuiltinTopicData
 
 OpenDDS_Rtps_Export
@@ -50,6 +53,7 @@ int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds);
+#endif
 
 // OpenDDS::RTPS::ParticipantProxy_t
 
@@ -133,6 +137,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::DataTags& tags);
 
+#if defined(OPENDDS_SECURITY)
 // DiscoveredWriterData_SecurityWrapper
 
 OpenDDS_Rtps_Export
@@ -154,6 +159,7 @@ int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                    DiscoveredReaderData_SecurityWrapper& wrapper);
+#endif
 
 }
 }

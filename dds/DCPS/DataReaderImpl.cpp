@@ -3318,11 +3318,13 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 }
 
+#if defined(OPENDDS_SECURITY)
 DDS::Security::ParticipantCryptoHandle DataReaderImpl::get_crypto_handle() const
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   return participant ? participant->crypto_handle() : DDS::HANDLE_NIL;
 }
+#endif
 
 EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                                                  ACE_thread_t owner,

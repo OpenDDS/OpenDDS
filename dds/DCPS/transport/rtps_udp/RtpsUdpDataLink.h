@@ -33,8 +33,10 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RcEventHandler.h"
 
+#if defined(OPENDDS_SECURITY)
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#endif
 
 class DDS_TEST;
 
@@ -129,6 +131,7 @@ public:
 
   virtual void send_final_acks (const RepoId& readerid);
 
+#if defined(OPENDDS_SECURITY)
   Security::SecurityConfig_rch security_config() const
   { return security_config_; }
 
@@ -142,6 +145,7 @@ public:
   void populate_security_handles(const RepoId& local_id, const RepoId& remote_id,
                                  const unsigned char* buffer,
                                  unsigned int buffer_size);
+#endif
 
 private:
   virtual void stop_i();
@@ -526,6 +530,7 @@ private:
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
 
+#if defined(OPENDDS_SECURITY)
   Security::SecurityConfig_rch security_config_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
@@ -535,6 +540,8 @@ private:
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
                           GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
+#endif
+
 };
 
 } // namespace DCPS

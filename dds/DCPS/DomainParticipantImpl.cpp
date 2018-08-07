@@ -26,7 +26,10 @@
 #include "MultiTopicImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
+
+#if defined(OPENDDS_SECURITY)
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
+#endif
 
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
@@ -1619,12 +1622,14 @@ DomainParticipantImpl::enable()
     TheServiceParticipant->monitor_->report();
   }
 
+#if defined(OPENDDS_SECURITY)
   if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
     if (!security_config_) {
       security_config_ = TheSecurityRegistry->fix_empty_default();
     }
   }
+#endif
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
 
@@ -1636,6 +1641,7 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
+#if defined(OPENDDS_SECURITY)
   if (TheServiceParticipant->get_security() && !security_config_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -1643,8 +1649,11 @@ DomainParticipantImpl::enable()
                ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
     return DDS::RETCODE_ERROR;
   }
+#endif
 
   AddDomainStatus value = {GUID_UNKNOWN, false};
+
+#if defined(OPENDDS_SECURITY)
   if (TheServiceParticipant->get_security()) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
@@ -1721,6 +1730,8 @@ DomainParticipantImpl::enable()
     }
 
   } else {
+#endif
+
     value = disco->add_domain_participant(domain_id_, qos_);
 
     if (value.id == GUID_UNKNOWN) {
@@ -1730,7 +1741,10 @@ DomainParticipantImpl::enable()
                  ACE_TEXT("add_domain_participant returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
+
+#if defined(OPENDDS_SECURITY)
   }
+#endif
 
   dp_id_ = value.id;
   federated_ = value.federated;
@@ -1821,6 +1835,7 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
   return result;
 }
 
+#if defined(OPENDDS_SECURITY)
 namespace {
 
   bool
@@ -1832,6 +1847,7 @@ namespace {
   }
 
 }
+#endif
 
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
@@ -1848,6 +1864,7 @@ DomainParticipantImpl::create_new_topic(
                    this->topics_protector_,
                    DDS::Topic::_nil());
 
+#if defined(OPENDDS_SECURITY)
   if (TheServiceParticipant->get_security() && !is_bit(topic_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 
@@ -1873,6 +1890,7 @@ DomainParticipantImpl::create_new_topic(
       return DDS::Topic::_nil();
     }
   }
+#endif
 
   TopicImpl* topic_servant = 0;
 
@@ -2332,11 +2350,13 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
 }
 
+#if defined(OPENDDS_SECURITY)
 void
 DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& cfg)
 {
   security_config_ = cfg;
 }
+#endif
 
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)

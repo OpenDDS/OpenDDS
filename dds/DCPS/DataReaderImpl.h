@@ -676,7 +676,9 @@ private:
     return data.publication_transport_priority_;
   }
 
+#if defined(OPENDDS_SECURITY)
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
+#endif
 
   /// when done handling historic samples, resume
   void resume_sample_processing(const PublicationId& pub_id);

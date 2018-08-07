@@ -111,13 +111,14 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   CASE_SMKIND(DATA, DataSubmessage, data)
   CASE_SMKIND(DATA_FRAG, DataFragSubmessage, data_frag)
 
+#if defined(OPENDDS_SECURITY)
     // Each submessage type introduced by the Security spec is treated
     // as an opaque octet sequence at this layer.
-  case SEC_BODY:
-  case SEC_PREFIX:
-  case SEC_POSTFIX:
-  case SRTPS_PREFIX:
-  case SRTPS_POSTFIX: {
+    case SEC_BODY:
+    case SEC_PREFIX:
+    case SEC_POSTFIX:
+    case SRTPS_PREFIX:
+    case SRTPS_POSTFIX: {
     SecuritySubmessage submessage;
     if (ser >> submessage) {
       octetsToNextHeader = submessage.smHeader.submessageLength;
@@ -126,7 +127,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       valid_ = true;
     }
     break;
-  }
+    }
+#endif
 
   default:
     {

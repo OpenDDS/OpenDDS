@@ -78,6 +78,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
 
+#if defined(OPENDDS_SECURITY)
       if (TheServiceParticipant->get_security()) {
         DDS::PropertySeq& props = part_qos.property.value;
         append(props, DDSSEC_PROP_IDENTITY_CA, auth_ca_file);
@@ -87,6 +88,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         append(props, DDSSEC_PROP_PERM_GOV_DOC, governance_file);
         append(props, DDSSEC_PROP_PERM_DOC, permissions_file);
       }
+#endif
 
       // Create DomainParticipant
       participant = dpf->create_participant(4,

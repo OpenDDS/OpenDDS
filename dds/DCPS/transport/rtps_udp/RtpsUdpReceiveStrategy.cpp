@@ -26,9 +26,13 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , last_received_()
   , recvd_sample_(0)
   , receiver_(local_prefix)
+#if defined(OPENDDS_SECURITY)
   , secure_sample_(0)
+#endif
 {
+#if defined(OPENDDS_SECURITY)
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
+#endif
 }
 
 int
@@ -78,6 +82,8 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   }
 
   const RtpsSampleHeader& rsh = received_sample_header();
+
+#if defined(OPENDDS_SECURITY)
   const SubmessageKind kind = rsh.submessage_._d();
 
   if ((secure_prefix_.smHeader.submessageId == SRTPS_PREFIX
@@ -93,6 +99,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     }
     return;
   }
+#endif
 
   deliver_sample_i(sample, rsh.submessage_);
 }
@@ -138,9 +145,14 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
                                sample.header_.sequence_.getValue(),
                                OPENDDS_STRING(reader_conv).c_str()));
         }
+#if defined(OPENDDS_SECURITY)
         if (decode_payload(sample, data)) {
           link_->data_received(sample, reader);
         }
+#else
+        link_->data_received(sample, reader);
+#endif
+
       }
 
     } else {
@@ -170,17 +182,29 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n", this,
                                sample.header_.sequence_.getValue()));
         }
+
+#if defined(OPENDDS_SECURITY)
         if (decode_payload(sample, data)) {
           link_->data_received(sample);
         }
+#else
+        link_->data_received(sample);
+#endif
+
       } else {
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received_include for seq: %q to readers_selected_\n", this,
                                sample.header_.sequence_.getValue()));
         }
+
+#if defined(OPENDDS_SECURITY)
         if (decode_payload(sample, data)) {
           link_->data_received_include(sample, readers_selected_);
         }
+#else
+        link_->data_received_include(sample, readers_selected_);
+#endif
+
       }
     }
     break;
@@ -220,6 +244,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
      has successfully reassembled the fragments and we now have a DATA submsg
    */
 
+#if defined(OPENDDS_SECURITY)
   case SRTPS_PREFIX:
   case SEC_PREFIX:
     secure_prefix_ = submessage.security_sm();
@@ -234,12 +259,14 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   case SEC_POSTFIX:
     deliver_from_secure(submessage);
     break;
+#endif
 
   default:
     break;
   }
 }
 
+#if defined(OPENDDS_SECURITY)
 void
 RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
 {
@@ -425,6 +452,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 
   return ok;
 }
+#endif
 
 int
 RtpsUdpReceiveStrategy::start_i()
@@ -498,16 +526,23 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 {
   receiver_.reset(remote_address_, header.header_);
+
+#if defined(OPENDDS_SECURITY)
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
+#endif
+
   return header.valid();
 }
 
 bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
+
+#if defined(OPENDDS_SECURITY)
   if (secure_prefix_.smHeader.submessageId) {
     return header.valid();
   }
+#endif
 
   receiver_.submsg(header.submessage_);
 

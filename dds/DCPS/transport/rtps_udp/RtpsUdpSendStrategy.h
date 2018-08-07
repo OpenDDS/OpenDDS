@@ -10,7 +10,10 @@
 
 #include "Rtps_Udp_Export.h"
 
+#if defined(OPENDDS_SECURITY)
 #include "dds/DdsSecurityCoreC.h"
+#endif
+
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #include "dds/DCPS/RTPS/MessageTypes.h"
@@ -50,8 +53,10 @@ public:
   void send_rtps_control(ACE_Message_Block& submessages,
                          const OPENDDS_SET(ACE_INET_Addr)& destinations);
 
+#if defined(OPENDDS_SECURITY)
   void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
                       RTPS::SubmessageSeq& submessages);
+#endif
 
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
@@ -73,6 +78,7 @@ private:
   ssize_t send_single_i(const iovec iov[], int n,
                         const ACE_INET_Addr& addr);
 
+#if defined(OPENDDS_SECURITY)
   ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
 
   struct Chunk {
@@ -97,6 +103,7 @@ private:
 
   ACE_Message_Block* replace_chunks(const ACE_Message_Block* plain,
                                     const OPENDDS_VECTOR(Chunk)& replacements);
+#endif
 
   RtpsUdpDataLink* link_;
   const OPENDDS_SET(ACE_INET_Addr)* override_dest_;

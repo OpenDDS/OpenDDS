@@ -240,6 +240,7 @@ SecurityRegistry::get_config(const OPENDDS_STRING& config_name) const
 SecurityConfig_rch
 SecurityRegistry::default_config() const
 {
+#if defined(OPENDDS_SECURITY)
   GuardType guard(lock_);
   if (!default_config_ && !TheServiceParticipant->get_security()) {
     Authentication_var a;
@@ -250,6 +251,7 @@ SecurityRegistry::default_config() const
     default_config_ = DCPS::make_rch<SecurityConfig>("NoPlugins", a, b, c, d, e,
                                                      ConfigPropertyList());
   }
+#endif
   return default_config_;
 }
 
@@ -271,11 +273,19 @@ void
 SecurityRegistry::bind_config(const SecurityConfig_rch& config,
                               DDS::DomainParticipant_ptr domain_participant)
 {
+
+#if defined(OPENDDS_SECURITY)
   DCPS::DomainParticipantImpl* const dpi =
     dynamic_cast<DCPS::DomainParticipantImpl*>(domain_participant);
   if (dpi) {
     dpi->set_security_config(config);
   }
+
+#else
+  ACE_UNUSED_ARG(config);
+  ACE_UNUSED_ARG(domain_participant);
+#endif
+
 }
 
 int
@@ -349,9 +359,12 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
 SecurityConfig_rch
 SecurityRegistry::fix_empty_default()
 {
+#if defined(OPENDDS_SECURITY)
   if (!default_config()) {
     load_security_plugin_lib(DEFAULT_PLUGIN_NAME);
   }
+#endif
+
   return default_config();
 }
 

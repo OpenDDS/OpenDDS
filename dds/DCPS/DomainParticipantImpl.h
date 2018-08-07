@@ -369,12 +369,14 @@ private:
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
+#if defined(OPENDDS_SECURITY)
   void set_security_config(const Security::SecurityConfig_rch& config);
 
   DDS::Security::ParticipantCryptoHandle crypto_handle() const
   {
     return part_crypto_handle_;
   }
+#endif
 
 private:
 
@@ -428,12 +430,16 @@ private:
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask listener_mask_;
+
+  #if defined(OPENDDS_SECURITY)
   /// This participant id handle given by authentication.
   DDS::Security::IdentityHandle id_handle_;
   /// This participant permissions handle given by access constrol.
   DDS::Security::PermissionsHandle perm_handle_;
   /// This participant crypto handle given by crypto
   DDS::Security::ParticipantCryptoHandle part_crypto_handle_;
+  #endif
+
   /// The id of the domain that creates this participant.
   const DDS::DomainId_t domain_id_;
   /// This participant id given by discovery.
@@ -502,7 +508,9 @@ private:
   RecorderSet recorders_;
   ReplayerSet replayers_;
 
+#if defined(OPENDDS_SECURITY)
   Security::SecurityConfig_rch security_config_;
+#endif
 
   /// Protect the recorders collection.
   ACE_Recursive_Thread_Mutex recorders_protector_;

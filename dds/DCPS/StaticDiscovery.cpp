@@ -710,6 +710,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
+#if defined(OPENDDS_SECURITY)
 AddDomainStatus
 StaticDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
@@ -725,6 +726,7 @@ StaticDiscovery::add_domain_participant_secure(
               ACE_TEXT("Security not supported for static discovery.\n")));
   return ads;
 }
+#endif
 
 namespace {
   const ACE_TCHAR TOPIC_SECTION_NAME[] = ACE_TEXT("topic");
