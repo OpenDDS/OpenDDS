@@ -50,12 +50,14 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
+    $pub_timeout = $sub_timeout = 20;
   } elsif ($scenario eq "SC0_sec_pub") { #SC0 (open domain interop w/ unsecure) : secure -> unsecure
     $pub_cfg_file = "unsec_base.ini";
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
+    $pub_timeout = $sub_timeout = 20;
   } elsif ($scenario eq "SC0_sec_on") { #SC0 (open domain interop w/ unsecure) : secure -> secure
     @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
