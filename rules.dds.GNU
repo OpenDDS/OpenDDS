@@ -43,6 +43,7 @@ object_model_profile ?= 1
 persistence_profile ?= 1
 exceptions ?= 1
 no_opendds_safety_profile ?= 1
+no_opendds_security ?= 1
 
 OPENDDS_IDL = $(DDS_ROOT)/bin/opendds_idl
 OPENDDS_IDL_DEP = $(OPENDDS_IDL)
