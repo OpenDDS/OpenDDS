@@ -304,9 +304,8 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
     return;
   }
 
-  const char* buff = reinterpret_cast<const char*>(plain_submsg.get_buffer());
-  ACE_Message_Block mb(buff, plain_submsg.length());
-  mb.wr_ptr(plain_submsg.length());
+  ACE_Message_Block mb(plain_submsg.length());
+  mb.copy(reinterpret_cast<const char*>(plain_submsg.get_buffer()), mb.size());
 
   if (Transport_debug_level > 5) {
     ACE_HEX_DUMP((LM_DEBUG, mb.rd_ptr(), mb.length(),
