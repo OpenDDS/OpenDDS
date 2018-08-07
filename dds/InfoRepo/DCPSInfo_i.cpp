@@ -2127,7 +2127,7 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_domain_participant_qos(
 }
 
 DCPS_IR_Domain*
-TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain, bool initBITs)
+TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
 {
   if (domain == OpenDDS::DCPS::Service_Participant::ANY_DOMAIN) {
     ACE_ERROR((LM_ERROR,
@@ -2153,7 +2153,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain, bool initBITs)
       DCPS_IR_Domain_Map::value_type(domain, OpenDDS::DCPS::move(domain_uptr)));
 
 #ifndef DDS_HAS_MINIMUM_BIT
-    if (TheServiceParticipant->get_BIT() && !domainPtr->useBIT() && initBITs &&
+    if (TheServiceParticipant->get_BIT() && !domainPtr->useBIT() &&
       domainPtr->init_built_in_topics(federation_.overridden(), reincarnate_)
     ) {
       ACE_ERROR((LM_ERROR,
@@ -2246,7 +2246,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
          iter = image.participants.begin();
          iter != image.participants.end(); iter++) {
       const Update::UParticipant* part = *iter;
-      if (!domain(part->domainId, true /* initBITs */)) {
+      if (!domain(part->domainId)) {
         if (OpenDDS::DCPS::DCPS_debug_level > 4) {
           ACE_DEBUG((LM_WARNING,
                      ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i::receive_image: ")
@@ -2255,12 +2255,6 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
         }
         return false;
       }
-    }
-
-    for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
-         currentDomain != domains_.end();
-         ++currentDomain) {
-      currentDomain->second->reassociate_built_in_topic_pubs();
     }
   }
 #endif
@@ -2384,6 +2378,16 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                  std::string(part_converter).c_str()));
     }
   }
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (TheServiceParticipant->get_BIT()) {
+    for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
+         currentDomain != domains_.end();
+         ++currentDomain) {
+      currentDomain->second->reassociate_built_in_topic_pubs();
+    }
+  }
+#endif
 
   return true;
 }
