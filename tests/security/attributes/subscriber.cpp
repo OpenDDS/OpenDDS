@@ -88,7 +88,6 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
 
-#if defined(OPENDDS_SECURITY)
     if (TheServiceParticipant->get_security()) {
       DDS::PropertySeq& props = part_qos.property.value;
       append(props, DDSSEC_PROP_IDENTITY_CA, my_args.auth_ca_file_.data());
@@ -98,7 +97,6 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
       append(props, DDSSEC_PROP_PERM_GOV_DOC, my_args.governance_file_.data());
       append(props, DDSSEC_PROP_PERM_DOC, my_args.permissions_file_.data());
     }
-#endif
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
