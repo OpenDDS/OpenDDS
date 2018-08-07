@@ -391,7 +391,7 @@ public:
   void add(Update::Updater* updater);
 
   /// Convert a domain Id into a reference to a DCPS_IR_Domain object.
-  DCPS_IR_Domain* domain(DDS::DomainId_t domain, bool initBITs = false);
+  DCPS_IR_Domain* domain(DDS::DomainId_t domain);
 
   /// Expose a readable reference of the domain map.
   const DCPS_IR_Domain_Map& domains() const;
