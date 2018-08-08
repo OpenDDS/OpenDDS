@@ -118,7 +118,7 @@ GuidBuilder::entityKind(EntityKind kind, bool makeBuiltin)
 
   case KIND_READER:
     guid_.entityId.entityKind = makeBuiltin ?
-      ENTITYKIND_BUILTIN_WRITER_WITH_KEY : ENTITYKIND_USER_READER_WITH_KEY;
+      ENTITYKIND_BUILTIN_READER_WITH_KEY : ENTITYKIND_USER_READER_WITH_KEY;
     break;
 
   case KIND_TOPIC:
@@ -133,7 +133,7 @@ GuidBuilder::entityKind(EntityKind kind, bool makeBuiltin)
     break;
 
   case KIND_BUILTIN_READER:
-    guid_.entityId.entityKind = ENTITYKIND_BUILTIN_WRITER_WITH_KEY;
+    guid_.entityId.entityKind = ENTITYKIND_BUILTIN_READER_WITH_KEY;
     break;
 
   case KIND_BUILTIN_TOPIC:

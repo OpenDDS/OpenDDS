@@ -847,15 +847,15 @@ DCPS_IR_Participant::get_next_topic_id(bool builtin)
 }
 
 OpenDDS::DCPS::RepoId
-DCPS_IR_Participant::get_next_publication_id()
+DCPS_IR_Participant::get_next_publication_id(bool builtin)
 {
-  return this->publicationIdGenerator_.next();
+  return this->publicationIdGenerator_.next(builtin);
 }
 
 OpenDDS::DCPS::RepoId
-DCPS_IR_Participant::get_next_subscription_id()
+DCPS_IR_Participant::get_next_subscription_id(bool builtin)
 {
-  return this->subscriptionIdGenerator_.next();
+  return this->subscriptionIdGenerator_.next(builtin);
 }
 
 void

@@ -407,7 +407,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
     throw OpenDDS::DCPS::Invalid_Topic();
   }
 
-  OpenDDS::DCPS::RepoId pubId = partPtr->get_next_publication_id();
+  // Get a Id for the Writer, make it a builtin kind if this is for a BIT
+  OpenDDS::DCPS::RepoId pubId = partPtr->get_next_publication_id(
+    OpenDDS::DCPS::RepoIdConverter(topicId).isBuiltinDomainEntity());
 
   OpenDDS::DCPS::DataWriterRemote_var dispatchingPublication =
     OpenDDS::DCPS::DataWriterRemote::_duplicate(publication);
@@ -710,7 +712,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-    subId = partPtr->get_next_subscription_id();
+    // Get a Id for the Reader, make it a builtin kind if this is for a BIT
+    subId = partPtr->get_next_subscription_id(
+      OpenDDS::DCPS::RepoIdConverter(topicId).isBuiltinDomainEntity());
 
     OpenDDS::DCPS::DataReaderRemote_var dispatchingSubscription (
       OpenDDS::DCPS::DataReaderRemote::_duplicate(subscription));
