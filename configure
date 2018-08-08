@@ -163,6 +163,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling (optional)',
     'ssl:s', 'OpenSSL for cryptography (optional)',
+    'dds-security:s', 'DDS Security plugin (optional)',
    ],
    ['Minimizing OpenDDS:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -860,6 +861,8 @@ my %optdep =
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
    'ssl' =>       ['SSL_ROOT',      'include/openssl/ssl.h',       'ssl'],
+   'dds-security' =>
+                  [undef,           undef,                         'xerces3'],
   );
 
 my @ace_features = ('xerces3');
@@ -1053,7 +1056,6 @@ if (exists $opts{'wireshark_build'} && !exists $opts{'wireshark_cmake'}) {
   die "ERROR: --wireshark_cmake is required for --wireshark_build\n";
 }
 
-
 if ($opts{'glib'}) {
   if (!-r "$opts{'glib'}/lib/glib-2.0/include/glibconfig.h") {
     my $pc = `pkg-config --cflags-only-I glib-2.0`;
@@ -1163,6 +1165,10 @@ sub generate_workspace {
     if (exists $opts{$feat} && !$opts{$feat}) {
       disable_feature(\@features, $feat);
     }
+  }
+
+  if (exists $opts{'dds-security'}) {
+      disable_feature(\@features, 'no-opendds-security');
   }
 
   # default of these depends on whether we are doing a safety-profile build
