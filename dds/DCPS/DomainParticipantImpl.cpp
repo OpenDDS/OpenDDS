@@ -641,7 +641,7 @@ DomainParticipantImpl::find_topic(
         if (DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                        ACE_TEXT("DomainParticipantImpl::find_topic, ")
-                       ACE_TEXT("can't create a Topic: type_name \"%C\"")
+                       ACE_TEXT("can't create a Topic: type_name \"%C\" ")
                        ACE_TEXT("is not registered.\n"), type_name.in()));
         }
 
