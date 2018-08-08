@@ -58,7 +58,7 @@ my $client_args = "$common_args";
 
 my $dcpsrepo_ior = "repo.ior";
 my $info_prst_file = "info.pr";
-my $num_messages = 60;
+my $num_messages = 30;
 my $pub_opts = "$client_args -n $num_messages";
 $num_messages += 10;
 my $sub_opts = "$client_args -n $num_messages";
