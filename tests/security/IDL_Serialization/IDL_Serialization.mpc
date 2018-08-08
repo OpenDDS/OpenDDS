@@ -1,5 +1,6 @@
 project (Security*): dcpsexe, googletest {
   requires += no_opendds_safety_profile
+  avoids += no_opendds_security
   exename = *
 
   Source_Files {
