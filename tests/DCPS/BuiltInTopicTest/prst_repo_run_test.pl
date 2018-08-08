@@ -17,7 +17,7 @@ my $status = 0;
 my $force_local;
 my $dcps_dbl = 2;
 my $transport_dbl = 0;
-my $print_to_screen;
+my $print_to_screen = 1;
 my $help;
 
 my $localhost = "127.0.0.1";
@@ -29,8 +29,6 @@ my $help_message = "prst_repo_run_test.pl options:\n"
   . "    Enable DCPS Debugging, where LEVEL is 0 up to 10. Default is $dcps_dbl.\n"
   . "  --TransportDebugLevel LEVEL\n"
   . "    Enable DCPS Debugging, where LEVEL is 0 up to 6. Default is $transport_dbl.\n"
-  . "  --print_to_sceen\n"
-  . "    Disable logging to file and log to screen instead.\n"
   . "  --help|-h\n"
   . "    Print this message.\n"
 ;
@@ -39,7 +37,6 @@ GetOptions(
   "force_local" => \$force_local,
   "DCPSDebugLevel=i"=> \$dcps_dbl,
   "TransportDebugLevel=i"=> \$transport_dbl,
-  "print_to_screen" => \$print_to_screen,
   "help|h" => \$help
 ) or die("Invalid Command Line Argument(s)\n$help_message");
 
@@ -58,10 +55,11 @@ my $client_args = "$common_args";
 
 my $dcpsrepo_ior = "repo.ior";
 my $info_prst_file = "info.pr";
-my $num_messages = 30;
-my $pub_opts = "$client_args -n $num_messages";
-$num_messages += 10;
-my $sub_opts = "$client_args -n $num_messages";
+my $pub1_msg_count = 30;
+my $pub2_msg_count = 10;
+my $sub_msg_count = $pub1_msg_count + $pub2_msg_count - 5;
+my $pub_opts = "$client_args";
+my $sub_opts = "$client_args -n $sub_msg_count";
 my $SRV_PORT = PerlACE::random_port();
 my $synch_file = "monitor1_done";
 
@@ -153,7 +151,7 @@ my $Subscriber1 = PerlDDS::create_process("subscriber",
   "$sub_opts" . ($print_to_screen ? "" : " -ORBLogFile $sub_log")
 );
 my $Publisher1 = PerlDDS::create_process("publisher",
-  "$pub_opts" . ($print_to_screen ? "" : " -ORBLogFile $pub1_log")
+  "$pub_opts -n $pub1_msg_count" . ($print_to_screen ? "" : " -ORBLogFile $pub1_log")
 );
 my $Monitor1 = PerlDDS::create_process("monitor",
   "$common_args -l 5" . ($print_to_screen ? "" : " -ORBLogFile $mon1_log")
@@ -162,7 +160,7 @@ my $Monitor2 = PerlDDS::create_process("monitor",
   "$common_args -u" . ($print_to_screen ? "" : " -ORBLogFile $mon2_log")
 );
 my $Publisher2 = PerlDDS::create_process("publisher",
-  "$pub_opts" . ($print_to_screen ? "" : " -ORBLogFile $pub2_log")
+  "$pub_opts -n $pub2_msg_count" . ($print_to_screen ? "" : " -ORBLogFile $pub2_log")
 );
 
 sub print_logs() {
@@ -251,7 +249,7 @@ if (!$status) {
   $Publisher2->Spawn ();
   $pub2_started = 1;
 
-  sleep (5);
+  sleep (20);
 }
 
 my $SubscriberResult = $Subscriber1->WaitKill (60);
