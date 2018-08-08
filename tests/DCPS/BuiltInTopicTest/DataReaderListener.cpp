@@ -15,8 +15,7 @@ using namespace std;
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
     publication_handle_ (::DDS::HANDLE_NIL),
-    post_restart_publication_handle_ (::DDS::HANDLE_NIL),
-    builtin_read_error_(false)
+    post_restart_publication_handle_ (::DDS::HANDLE_NIL)
 {
 }
 
@@ -115,15 +114,27 @@ void DataReaderListenerImpl::on_subscription_matched (
   } else {
     this->post_restart_publication_handle_ = status.last_publication_handle;
   }
+}
 
+bool DataReaderListenerImpl::read_bit_instance()
+{
   DDS::PublicationBuiltinTopicDataDataReader_var rdr =
     DDS::PublicationBuiltinTopicDataDataReader::_narrow(builtin_);
   for (int i = 0; i < 100; ++i) {
     // BIT Data is not necessarily ready when this callback happens
+    DDS::InstanceHandle_t handle;
+    if (post_restart_publication_handle_ != ::DDS::HANDLE_NIL) {
+      handle = post_restart_publication_handle_;
+    } else if (publication_handle_ != ::DDS::HANDLE_NIL) {
+      handle = publication_handle_;
+    } else {
+      ACE_DEBUG((LM_ERROR, ACE_TEXT(
+        "(%P|%t) Can't read bit instance, pre and post restart handles are invalid.\n")));
+      return false;
+    }
     DDS::PublicationBuiltinTopicDataSeq data;
     DDS::SampleInfoSeq infos;
-    DDS::ReturnCode_t ret = rdr->read_instance(data, infos, 1,
-                                               status.last_publication_handle,
+    DDS::ReturnCode_t ret = rdr->read_instance(data, infos, 1, handle,
                                                DDS::NOT_READ_SAMPLE_STATE,
                                                DDS::ANY_VIEW_STATE,
                                                DDS::ALIVE_INSTANCE_STATE);
@@ -132,7 +143,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     case DDS::RETCODE_OK:
       ACE_DEBUG((LM_DEBUG, ACE_TEXT(
         "(%P|%t) read bit instance returned ok\n")));
-      return;
+      return false;
     case DDS::RETCODE_NO_DATA:
       ACE_ERROR((LM_WARNING, ACE_TEXT(
         "(%P|%t) read bit instance returned no data\n")));
@@ -144,15 +155,14 @@ void DataReaderListenerImpl::on_subscription_matched (
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT(
         "(%P|%t) ERROR read bit instance returned %i\n"), ret));
-      builtin_read_error_ = true;
-      return;
+      return true;
     }
     ACE_OS::sleep(ACE_Time_Value(0, 100000));
   }
 
   ACE_ERROR((LM_ERROR, ACE_TEXT(
     "(%P|%t) ERROR read bit instance: giving up after retries\n")));
-  builtin_read_error_ = true;
+  return true;
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
