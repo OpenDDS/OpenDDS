@@ -10,7 +10,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/SequenceNumber.h"
 
-#include "gtest/gtest.h"
+#include "../common/TestSupport.h"
 
 using namespace OpenDDS::DCPS;
 
@@ -20,9 +20,8 @@ namespace {
   const SequenceNumber::Value SN_SEAM  = ACE_INT32_MAX;
 }
 
-#define TEST_CHECK EXPECT_TRUE
-
-TEST(SequenceNumber, Basic)
+int
+ACE_TMAIN(int, ACE_TCHAR*[])
 {
   // Construction (default)
   TEST_CHECK(SequenceNumber(SN_MIN) == SequenceNumber());
@@ -32,25 +31,25 @@ TEST(SequenceNumber, Basic)
   TEST_CHECK(++SequenceNumber(SequenceNumber::ZERO()) == SequenceNumber());
 
   // testing numerical sequence
-  TEST_CHECK(SequenceNumber(SN_MIN) < SequenceNumber(SN_MIN + 1));
-  TEST_CHECK(!(SequenceNumber(SN_MIN + 1) < SequenceNumber(SN_MIN)));
-  TEST_CHECK(SequenceNumber(SN_SEAM) < SequenceNumber(SN_SEAM + 1));
-  TEST_CHECK(!(SequenceNumber(SN_SEAM + 1) < SequenceNumber(SN_SEAM)));
-  TEST_CHECK(SequenceNumber(SN_MAX - 1) < SequenceNumber(SN_MAX));
-  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_MAX - 1)));
+  TEST_CHECK(SequenceNumber(SN_MIN) < SequenceNumber(SN_MIN+1));
+  TEST_CHECK(!(SequenceNumber(SN_MIN+1) < SequenceNumber(SN_MIN)));
+  TEST_CHECK(SequenceNumber(SN_SEAM) < SequenceNumber(SN_SEAM+1));
+  TEST_CHECK(!(SequenceNumber(SN_SEAM+1) < SequenceNumber(SN_SEAM)));
+  TEST_CHECK(SequenceNumber(SN_MAX-1) < SequenceNumber(SN_MAX));
+  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_MAX-1)));
 
   // testing values and increment operator
   {
     SequenceNumber num(SN_MIN);
     TEST_CHECK(num.getValue() == SN_MIN);
-    TEST_CHECK((++num).getValue() == SN_MIN + 1);
+    TEST_CHECK((++num).getValue() == SN_MIN+1);
   }
 
   {
     SequenceNumber num(SN_SEAM);
     TEST_CHECK(num.getValue() == SN_SEAM);
-    TEST_CHECK((++num).getValue() == SN_SEAM + 1);
-    TEST_CHECK((++num).getValue() == SN_SEAM + 2);
+    TEST_CHECK((++num).getValue() == SN_SEAM+1);
+    TEST_CHECK((++num).getValue() == SN_SEAM+2);
   }
 
   {
@@ -59,7 +58,7 @@ TEST(SequenceNumber, Basic)
     TEST_CHECK((++num).getValue() == SN_MIN);
     // test post-incrementer
     TEST_CHECK((num++).getValue() == SN_MIN);
-    TEST_CHECK(num.getValue() == SN_MIN + 1);
+    TEST_CHECK(num.getValue() == SN_MIN+1);
   }
 
   // Test SEQUENCENUMBER_UNKNOWN
@@ -78,7 +77,7 @@ TEST(SequenceNumber, Basic)
   }
 
   {
-    SequenceNumber num(SN_SEAM + 1);
+    SequenceNumber num(SN_SEAM+1);
     TEST_CHECK(num.previous() == SN_SEAM);
   }
 
@@ -89,12 +88,9 @@ TEST(SequenceNumber, Basic)
 
   {
     SequenceNumber num(SN_MAX);
-    TEST_CHECK(num.previous() == SN_MAX - 1);
+    TEST_CHECK(num.previous() == SN_MAX-1);
   }
-}
 
-int main(int argc, char **argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+
+  return 0;
 }
