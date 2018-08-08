@@ -846,23 +846,23 @@ sub write_platform_macros {
 
 my %optdep =
 # %opts key =>    [env var,         sanity check,                  MPC feature]
-  ('java' =>      ['JAVA_HOME',     'include/jni.h',               'java'],
+  ('java' =>      ['JAVA_HOME',     'include/jni.h',               ['java']],
    'jboss' =>     ['JBOSS_HOME',    'lib/jboss-common.jar'],
    'ant' =>       ['ANT_HOME',      'bin/ant'],
-   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               'wireshark'],
-   'wireshark_cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          'wireshark_cmake'],
+   'wireshark' => ['WIRESHARK_SRC', 'epan/packet.h',               ['wireshark']],
+   'wireshark_cmake' =>['WIRESHARK_SRC', 'epan/packet.h',          ['wireshark_cmake']],
    'wireshark_build' =>
                   ['WIRESHARK_BUILD', 'config.h'],
    'wireshark_lib' =>
                   ['WIRESHARK_LIB'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
-   'rapidjson' => [undef,           undef,                         'no_itl=0'],
-   'qt' =>        ['QTDIR',         '',                            'qt4'],
-   'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
-   'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
-   'ssl' =>       ['SSL_ROOT',      'include/openssl/ssl.h',       'ssl'],
+   'rapidjson' => [undef,           undef,                         ['no_itl=0']],
+   'qt' =>        ['QTDIR',         '',                            ['qt4']],
+   'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   ['boost']],
+   'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', ['xerces3']],
+   'ssl' =>       ['SSL_ROOT',      'include/openssl/ssl.h',       ['ssl']],
    'security' =>
-                  [undef,           undef,                         'xerces3'],
+                  [undef,           undef,                         ['xerces3', 'ssl']],
   );
 
 my @ace_features = ('xerces3');
@@ -1009,8 +1009,10 @@ for my $key (keys %optdep) {
     if ($s && !-r $targetEnv{$e} . '/' . $s) {
       die "ERROR: Can't find $key at $targetEnv{$e} (using $s)\n";
     }
-    push(@features, $m) if $m;
-    push(@platformmacros, $m) if $need_platform_macros{$key};
+    for my $dep (@{$m}) {
+      push(@features, $dep) if $dep;
+      push(@platformmacros, $dep) if $need_platform_macros{$key};
+    }
   }
 }
 
