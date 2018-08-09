@@ -340,10 +340,8 @@ OpenDDS::DCPS::InstanceState::instance_state_string(DDS::InstanceStateKind value
     return OPENDDS_STRING("ANY_INSTANCE_STATE");
   default:
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT(
-        "(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): "
-        "%d is either completely invalid or at least not defined in this function.\n"
-      ),
+      ACE_TEXT("(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): ")
+      ACE_TEXT("%d is either completely invalid or at least not defined in this function.\n"),
       value
     ));
 

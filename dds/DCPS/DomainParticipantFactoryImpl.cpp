@@ -92,10 +92,9 @@ DomainParticipantFactoryImpl::create_participant(
 
   if (DCPS_debug_level >= 2) {
     GuidConverter converter(value.id);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) DomainParticipantFactoryImpl::create_participant: "
-        "created participant %C\n"
-      ),
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) DomainParticipantFactoryImpl::create_participant: ")
+      ACE_TEXT("created participant %C\n"),
       OPENDDS_STRING(converter).c_str()
     ));
   }
