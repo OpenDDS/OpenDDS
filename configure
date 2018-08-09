@@ -1060,7 +1060,27 @@ for my $key (keys %optdep) {
 
 ## Google Test
 if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
- # TODO
+  my $cwd = Cwd::getcwd();
+  my $build_dir = 'tests/googletest/build';
+  my $cmake = $opts{'cmake'} . '/' . $optdep{'cmake'}->[1];
+  my @cmake_cmds = (["$cmake", ".."],
+                    ["$cmake", "--build", "."]);
+
+  mkdir($build_dir)
+    or die "ERROR '$!': failed to make directory $build_dir from $cwd"
+      if ! -d $build_dir;
+    
+  chdir($build_dir)
+    or  die "ERROR '$!': failed to change into $build_dir from $cwd";
+
+  for my $cmd (@cmake_cmds) {
+    print "Running @{$cmd}\n";
+    system(@{$cmd}) == 0
+      or die "ERROR: Invoking @{$cmd} failed with error '$?'\n";
+  }
+
+  chdir($cwd)
+    or  die "ERROR '$!': failed to change back to $cwd";
 }
 
 
