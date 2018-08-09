@@ -990,16 +990,15 @@ Sedp::send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& 
 void
 Sedp::Task::svc_i(const Security::SPDPdiscoveredParticipantData* ppdata)
 {
-  DCPS::unique_ptr<const Security::SPDPdiscoveredParticipantData> delete_the_data(ppdata);
-  const Security::SPDPdiscoveredParticipantData& pdata = *ppdata;
+  DCPS::unique_ptr<const Security::SPDPdiscoveredParticipantData> pdata(ppdata);
 
   // First create a 'prototypical' instance of AssociationData.  It will
   // be copied and modified for each of the (up to) four SEDP Endpoints.
   DCPS::AssociationData proto;
-  create_association_data_proto(proto, pdata);
+  create_association_data_proto(proto, *pdata);
 
   const BuiltinEndpointSet_t& avail =
-    pdata.participantProxy.availableBuiltinEndpoints;
+    pdata->participantProxy.availableBuiltinEndpoints;
 
   // See RTPS v2.1 section 8.5.5.1
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
@@ -1020,7 +1019,7 @@ Sedp::Task::svc_i(const Security::SPDPdiscoveredParticipantData* ppdata)
 
 #if defined(OPENDDS_SECURITY)
   if (sedp_->is_security_enabled()) {
-    sedp_->associate_secure_readers_to_writers(*ppdata);
+    sedp_->associate_secure_readers_to_writers(*pdata);
   }
 #endif
 
@@ -1051,7 +1050,7 @@ Sedp::Task::svc_i(const Security::SPDPdiscoveredParticipantData* ppdata)
 #if defined(OPENDDS_SECURITY)
   if (sedp_->is_security_enabled()) {
     spdp_->send_participant_crypto_tokens(proto.remote_id_);
-    sedp_->send_builtin_crypto_tokens(*ppdata);
+    sedp_->send_builtin_crypto_tokens(*pdata);
   }
 #endif
 

@@ -696,7 +696,6 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
     DDS::Security::ValidationResult_t vr = auth->process_handshake(reply.message_data[0], msg.message_data[0], dp.handshake_handle_, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
-      std::string expected = dp.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT ? "handshake reply" : "final message";
       if (dp.auth_state_ == DCPS::AS_HANDSHAKE_REQUEST_SENT) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
           ACE_TEXT("Failed to process incoming handshake message when expecting reply from %C. Security Exception[%d.%d]: %C\n"),
