@@ -67,7 +67,7 @@ void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
   si.instance_handle = handle_;
   RcHandle<DomainParticipantImpl> participant = this->reader_->participant_servant_.lock();
   si.publication_handle = participant ? participant->id_to_handle(de->pub_) : 0;
-  si.valid_data = de->registered_data_ != 0;
+  si.valid_data = de->valid_data_;
   /*
    * These are actually calculated later...
    */

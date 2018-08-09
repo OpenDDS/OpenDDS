@@ -1628,9 +1628,8 @@ void store_instance_data(
 
   if ((is_dispose_msg || is_unregister_msg) && it == instance_map_.end())
   {
-     return;
+    return;
   }
-
 
   if (it == instance_map_.end())
   {
@@ -1922,11 +1921,6 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         item->dec_ref();
       }
     }
-  }
-
-  if (is_dispose_msg || is_unregister_msg)
-  {
-    instance_data.reset();
   }
 
   bool event_notify = false;
