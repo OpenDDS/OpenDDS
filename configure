@@ -163,9 +163,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling (optional)',
     'ssl:s', 'OpenSSL for cryptography (optional)',
-    'security:s', 'DDS Security plugin (optional)',
    ],
-   ['Minimizing OpenDDS:',
+   ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
     'content-subscription!', 'Content-Subscription Profile (yes)',
     'content-filtered-topic!', 'ContentFilteredTopic (CS Profile) (yes)',
@@ -177,6 +176,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile:s', 'Safety Profile: base or extended (none)',
     'tests!', 'Build tests, examples, and performance tests (yes)',
+    'security!', 'DDS Security plugin (no)',
    ],
   );
 
@@ -861,8 +861,11 @@ my %optdep =
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   ['boost']],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', ['xerces3']],
    'ssl' =>       ['SSL_ROOT',      'include/openssl/ssl.h',       ['ssl']],
-   'security' =>
-                  [undef,           undef,                         ['xerces3', 'ssl']],
+   
+   'cmake' =>     ['CMAKE_ROOT',
+                   'bin' . $slash . 'cmake' . (($slash eq '/') ? '' : '.exe'),
+                   undef],
+
   );
 
 my @ace_features = ('xerces3');
@@ -903,8 +906,32 @@ if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
   $wireshark_lib_defaulted = 1;
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl/;
-my %use_win_default = ('boost' => 'c:\\Boost');
+## Security
+
+if ($opts{'security'}) {
+  if (! exists $opts{'ssl'}) {
+    $opts{'ssl'} = '';
+    print "Forcing --ssl (security dependency)\n" if $opts{'verbose'};
+  }
+  if (! exists $opts{'xerces3'}) {
+    $opts{'xerces3'} = '';
+    print "Forcing --xerces3 (security dependency)\n" if $opts{'verbose'};
+  }
+  if ($opts{'tests'}) {
+    # CMake is not something users specify on the command-line but it's
+    # treated as such here for code-reuse. CMake is required in order to
+    # compile the Google Test framework (which security tests rely on).
+    $opts{'cmake'} = '';
+    print "Forcing --cmake (security-tests dependency)\n" if $opts{'verbose'};
+  }
+}
+
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
+my %use_win_default = (
+    'boost' => ['c:\\Boost'],
+    'cmake' => ['c:\\Program Files (x86)\\CMake',
+                'c:\\Program Files\\CMake']);
+
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
 sub default_java_home {
@@ -928,6 +955,8 @@ sub default_java_home {
   }
 }
 
+# Detect and populate dependency info from environment variables
+# or system-wide default paths.
 for my $key (keys %optdep) {
   if (exists $opts{$key} && $opts{$key} eq '') {
     if (defined $optdep{$key}->[0] && $ENV{$optdep{$key}->[0]}) {
@@ -948,8 +977,18 @@ for my $key (keys %optdep) {
       print "Defaulting $key to /usr\n" if $opts{'verbose'};
     }
     elsif ($slash ne '/' && exists $use_win_default{$key}) {
-      $opts{$key} = $use_win_default{$key};
-      print "Defaulting $key to $use_win_default{$key}\n" if $opts{'verbose'};
+      # Use the first available default
+      for my $dir (@{$use_win_default{$key}}) {
+        if (-d $dir) {
+          $opts{$key} = $dir;
+          last;
+        }
+      }
+      if ($opts{$key} eq '') {
+        die "Default '$key' directory not found. Searched '" .
+              join(', ', @{$use_win_default{$key}}) . "'\n";
+      }
+      print "Defaulting $key to $opts{$key}\n" if $opts{'verbose'};
     }
     elsif ($key eq 'java') {
 
@@ -1000,6 +1039,8 @@ if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
   }
 }
 
+# Enable MPC features and populate expected environment variables
+# for all required "optional" dependencies.
 my @features;
 for my $key (keys %optdep) {
   if (exists $opts{$key}) {
@@ -1010,11 +1051,18 @@ for my $key (keys %optdep) {
       die "ERROR: Can't find $key at $targetEnv{$e} (using $s)\n";
     }
     for my $dep (@{$m}) {
+      #TODO: only push if it hasn't already been done...
       push(@features, $dep) if $dep;
       push(@platformmacros, $dep) if $need_platform_macros{$key};
     }
   }
 }
+
+## Google Test
+if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
+ # TODO
+}
+
 
 if (exists $opts{'jboss'} && !exists $opts{'java'}) {
   die "ERROR: --java is required for --jboss (OpenDDS JMS Provider)\n";
@@ -1169,7 +1217,7 @@ sub generate_workspace {
     }
   }
 
-  if (exists $opts{'security'}) {
+  if ($opts{'security'}) {
       disable_feature(\@features, 'no-opendds-security');
   }
 
