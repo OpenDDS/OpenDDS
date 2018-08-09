@@ -68,16 +68,6 @@ DomainParticipantFactoryImpl::create_participant(
   RcHandle<DomainParticipantImpl> dp =
     make_rch<DomainParticipantImpl>(this, domainId, par_qos, a_listener, mask);
 
-  if (DCPS_debug_level >= 2) {
-    GuidConverter converter(value.id);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) DomainParticipantFactoryImpl::create_participant: "
-        "created participant %C\n"
-      ),
-      OPENDDS_STRING(converter).c_str()
-    ));
-  }
-
   if (qos_.entity_factory.autoenable_created_entities) {
     if (dp->enable() != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
