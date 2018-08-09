@@ -44,7 +44,7 @@ class RtpsDiscovery;
 
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
-class OpenDDS_Rtps_Export Spdp : public OpenDDS::DCPS::LocalParticipant<Sedp> {
+class OpenDDS_Rtps_Export Spdp : public DCPS::LocalParticipant<Sedp> {
 public:
 
   Spdp(DDS::DomainId_t domain,
@@ -70,7 +70,7 @@ public:
   void fini_bit();
 
   bool get_default_locators(const DCPS::RepoId& part_id,
-                            OpenDDS::DCPS::LocatorSeq& target,
+                            DCPS::LocatorSeq& target,
                             bool& inlineQos);
 
   // Managing reader/writer associations
@@ -85,7 +85,7 @@ public:
   WaitForAcks& wait_for_acks();
 
 #if defined(OPENDDS_SECURITY)
-  OpenDDS::Security::SecurityConfig_rch get_security_config() const { return security_config_; }
+  Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
@@ -93,7 +93,7 @@ public:
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
 
-  void handle_participant_data(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void handle_participant_data(DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData& pdata);
 
 #if defined(OPENDDS_SECURITY)
   void check_auth_states(const ACE_Time_Value& tv);
@@ -112,12 +112,12 @@ public:
   DDS::DomainId_t get_domain_id() const { return domain_; }
   DDS::Security::PermissionsHandle lookup_participant_permissions(const DCPS::RepoId& id) const;
 
-  OpenDDS::DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
+  DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
 #endif
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }
-  OpenDDS::Security::SPDPdiscoveredParticipantData build_local_pdata(OpenDDS::Security::DiscoveredParticipantDataKind);
+  Security::SPDPdiscoveredParticipantData build_local_pdata(Security::DiscoveredParticipantDataKind);
   bool announce_domain_participant_qos();
 
 private:
@@ -134,7 +134,7 @@ private:
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
-  OpenDDS::DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;
+  DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
@@ -149,7 +149,7 @@ private:
   DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  struct SpdpTransport : public OpenDDS::DCPS::RcEventHandler {
+  struct SpdpTransport : public DCPS::RcEventHandler {
     SpdpTransport(Spdp* outer, bool securityGuids);
     ~SpdpTransport();
 
@@ -192,7 +192,7 @@ private:
   WaitForAcks wait_for_acks_;
 
 #if defined(OPENDDS_SECURITY)
-  OpenDDS::Security::SecurityConfig_rch security_config_;
+  Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 
   DDS::Security::IdentityHandle identity_handle_;
