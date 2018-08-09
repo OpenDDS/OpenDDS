@@ -14,6 +14,24 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
+struct DH_Handle {
+  DH* dh_;
+  explicit DH_Handle(EVP_PKEY* key)
+#ifdef OPENSSL_V_1_0
+    : dh_(EVP_PKEY_get1_DH(key))
+#else
+    : dh_(EVP_PKEY_get0_DH(key))
+#endif
+  {}
+  operator DH*() { return dh_; }
+  ~DH_Handle()
+  {
+#ifdef OPENSSL_V_1_0
+    DH_free(dh_);
+#endif
+  }
+};
+
   DHAlgorithm::~DHAlgorithm() { EVP_PKEY_free(k_); }
 
   bool DHAlgorithm::cmp_shared_secret(const DHAlgorithm& other) const
@@ -114,7 +132,7 @@ namespace SSL {
     int result = 1;
 
     if (k_) {
-      DH* dh = EVP_PKEY_get0_DH(k_);
+      DH_Handle dh(k_);
       if (dh) {
         const BIGNUM *pubkey,
           *privkey; /* Ignore the privkey but pass it in anyway since nothing
@@ -137,14 +155,17 @@ namespace SSL {
 
   class dh_shared_secret
   {
-   public:
-    dh_shared_secret(EVP_PKEY* pkey) : keypair(NULL), pubkey(NULL)
+  public:
+    explicit dh_shared_secret(EVP_PKEY* pkey)
+      : keypair(pkey), pubkey(NULL)
     {
-      if (NULL == (keypair = EVP_PKEY_get0_DH(pkey))) {
+      if (!keypair) {
         OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_DH failed");
       }
     }
+
     ~dh_shared_secret() { BN_free(pubkey); }
+
     int operator()(const DDS::OctetSeq& pub_key, DDS::OctetSeq& dst)
     {
       if (!keypair) return 1;
@@ -170,7 +191,7 @@ namespace SSL {
     }
 
    private:
-    DH* keypair;
+    DH_Handle keypair;
     BIGNUM* pubkey;
   };
 
@@ -180,6 +201,24 @@ namespace SSL {
     dh_shared_secret secret(k_);
     return secret(pub_key, shared_secret_);
   }
+
+struct EC_Handle {
+  EC_KEY* ec_;
+  explicit EC_Handle(EVP_PKEY* key)
+#ifdef OPENSSL_V_1_0
+    : ec_(EVP_PKEY_get1_EC_KEY(key))
+#else
+    : ec_(EVP_PKEY_get0_EC_KEY(key))
+#endif
+  {}
+  operator EC_KEY*() { return ec_; }
+  ~EC_Handle()
+  {
+#ifdef OPENSSL_V_1_0
+    EC_KEY_free(ec_);
+#endif
+  }
+};
 
   ECDH_PRIME_256_V1_CEUM::ECDH_PRIME_256_V1_CEUM() { init(); }
 
@@ -270,7 +309,7 @@ namespace SSL {
   {
    public:
     ecdh_pubkey_as_octets(EVP_PKEY* pkey)
-      : keypair(pkey), keypair_ecdh(NULL), pubkey(NULL)
+      : keypair(pkey)
     {
     }
 
@@ -280,12 +319,14 @@ namespace SSL {
     {
       if (!keypair) return 1;
 
-      if (NULL == (keypair_ecdh = EVP_PKEY_get0_EC_KEY(keypair))) {
+      EC_Handle keypair_ecdh(keypair);
+      if (!keypair_ecdh) {
         OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
         return 1;
       }
 
-      if (NULL == (pubkey = EC_KEY_get0_public_key(keypair_ecdh))) {
+      const EC_POINT* pubkey = EC_KEY_get0_public_key(keypair_ecdh);
+      if (!pubkey) {
         OPENDDS_SSL_LOG_ERR("EC_KEY_get0_public_key failed");
         return 1;
       }
@@ -313,8 +354,6 @@ namespace SSL {
 
    private:
     EVP_PKEY* keypair;
-    EC_KEY* keypair_ecdh;
-    const EC_POINT* pubkey;
   };
 
   int ECDH_PRIME_256_V1_CEUM::pub_key(DDS::OctetSeq& dst)
@@ -325,11 +364,11 @@ namespace SSL {
 
   class ecdh_shared_secret_from_octets
   {
-   public:
+  public:
     ecdh_shared_secret_from_octets(EVP_PKEY* pkey)
-      : keypair(NULL), pubkey(NULL), group(NULL), bignum_ctx(NULL)
+      : keypair(pkey), pubkey(NULL), group(NULL), bignum_ctx(NULL)
     {
-      if (NULL == (keypair = EVP_PKEY_get0_EC_KEY(pkey))) {
+      if (!keypair) {
         OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
       }
     }
@@ -376,7 +415,7 @@ namespace SSL {
     }
 
    private:
-    EC_KEY* keypair;
+    EC_Handle keypair;
     EC_POINT* pubkey;
     const EC_GROUP* group;
     BN_CTX* bignum_ctx;
