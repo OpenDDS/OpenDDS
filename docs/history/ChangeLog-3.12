@@ -600,10 +600,10 @@ Wed May 31 16:38:56 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
           f420fe33331328c650c5fa4a1d0062dd45ba6158)
 
           # Conflicts:
-          #	tests/DCPS/FooTest3_0/DataReaderQCListener.cpp
-          #	tests/DCPS/FooTest3_0/DataReaderQCListener.h
-          #	tests/DCPS/FooTest3_0/SubDriver.cpp
-          #	tests/DCPS/FooTest3_0/SubDriver.h
+          #  tests/DCPS/FooTest3_0/DataReaderQCListener.cpp
+          #  tests/DCPS/FooTest3_0/DataReaderQCListener.h
+          #  tests/DCPS/FooTest3_0/SubDriver.cpp
+          #  tests/DCPS/FooTest3_0/SubDriver.h
 
 Fri Aug 18 17:45:45 UTC 2017  Adam Mitz  <mitza@ociweb.com>
         commit 09f600bdb3112617895bdaeeac3490f80690f8e6
@@ -1147,7 +1147,7 @@ Sun Jul 09 12:46:17 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
           Added tcp_latency
 
           # Conflicts:
-          #	performance-tests/Bench/src/CMakeLists.txt
+          #  performance-tests/Bench/src/CMakeLists.txt
 
 Thu Jul 06 15:13:10 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
         commit cc143b6b364e72180e9bb616fa6bd1f54041f208
@@ -3325,8 +3325,8 @@ Fri Jun 09 20:37:28 UTC 2017  Adam Mitz  <mitza@ociweb.com>
           Merge branch 'master' into merge_pull_requests
 
           # Conflicts:
-          #	dds/DCPS/DataReaderImpl_T.h
-          #	dds/DCPS/DataWriterImpl.cpp
+          #  dds/DCPS/DataReaderImpl_T.h
+          #  dds/DCPS/DataWriterImpl.cpp
 
 Fri Jun 09 19:36:04 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
         commit 8a7dcbb8a047ba9b5bca06c9ebee260c9599a4cf
@@ -3597,7 +3597,7 @@ Thu Jun 08 20:54:41 UTC 2017  Adam Mitz  <mitza@ociweb.com>
           Merge remote-tracking branch 'upstream/pr580'
 
           # Conflicts:
-          #	dds/DCPS/DataReaderImpl.h
+          #  dds/DCPS/DataReaderImpl.h
 
 Thu Jun 08 20:50:46 UTC 2017  Adam Mitz  <mitza@ociweb.com>
         commit 580b4336fc08d20ab15bda351e22171055af3fd3

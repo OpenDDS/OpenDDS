@@ -24,6 +24,7 @@ tests/DCPS/Dispose/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl: !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl unregister: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
+tests/DCPS/FooTest3_0/run_test.pl dispose_qc: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_QUERY_CONDITION
 tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
