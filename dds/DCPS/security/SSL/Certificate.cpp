@@ -250,7 +250,17 @@ namespace SSL {
     const DDS::OctetSeq& src,
     const std::vector<const DDS::OctetSeq*>& expected_contents) const
   {
-    verify_implementation verify(X509_get0_pubkey(x_));
+#ifdef OPENSSL_V_1_0
+    struct EVP_PKEY_Handle {
+      EVP_PKEY* pkey_;
+      explicit EVP_PKEY_Handle(EVP_PKEY* pkey) : pkey_(pkey) {}
+      operator EVP_PKEY*() { return pkey_; }
+      ~EVP_PKEY_Handle() { EVP_PKEY_free(pkey_); }
+    } pkey(X509_get_pubkey(x_));
+#else
+    EVP_PKEY* pkey = X509_get0_pubkey(x_);
+#endif
+    verify_implementation verify(pkey);
     return verify(src, expected_contents);
   }
 
