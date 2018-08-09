@@ -32,7 +32,7 @@ RepoIdGenerator::~RepoIdGenerator()
 }
 
 RepoId
-RepoIdGenerator::next()
+RepoIdGenerator::next(bool builtin)
 {
   // Generate a new key value.
   ++lastKey_;
@@ -72,7 +72,7 @@ RepoIdGenerator::next()
 
     builder.participantId(participant_);
     builder.entityKey(lastKey_);
-    builder.entityKind(kind_);
+    builder.entityKind(kind_, builtin);
   }
 
   return RepoId(builder);

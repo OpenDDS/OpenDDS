@@ -407,7 +407,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
     throw OpenDDS::DCPS::Invalid_Topic();
   }
 
-  OpenDDS::DCPS::RepoId pubId = partPtr->get_next_publication_id();
+  // Get a Id for the Writer, make it a builtin kind if this is for a BIT
+  OpenDDS::DCPS::RepoId pubId = partPtr->get_next_publication_id(
+    OpenDDS::DCPS::RepoIdConverter(topicId).isBuiltinDomainEntity());
 
   OpenDDS::DCPS::DataWriterRemote_var dispatchingPublication =
     OpenDDS::DCPS::DataWriterRemote::_duplicate(publication);
@@ -710,7 +712,9 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
       throw OpenDDS::DCPS::Invalid_Topic();
     }
 
-    subId = partPtr->get_next_subscription_id();
+    // Get a Id for the Reader, make it a builtin kind if this is for a BIT
+    subId = partPtr->get_next_subscription_id(
+      OpenDDS::DCPS::RepoIdConverter(topicId).isBuiltinDomainEntity());
 
     OpenDDS::DCPS::DataReaderRemote_var dispatchingSubscription (
       OpenDDS::DCPS::DataReaderRemote::_duplicate(subscription));
@@ -998,19 +1002,21 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
   // Obtain a shiny new GUID value.
   OpenDDS::DCPS::RepoId participantId = domainPtr->get_next_participant_id();
 
+  // Determine if this is the 'special' repository internal participant
+  // that publishes the built-in topics for a domain.
+  bool isBitPart = domainPtr->participants().empty() && TheServiceParticipant->get_BIT();
+
   DCPS_IR_Participant_rch participant =
     OpenDDS::DCPS::make_rch<DCPS_IR_Participant>(
                    this->federation_,
                    participantId,
                    domainPtr,
-                   qos, um_);
+                   qos, um_, isBitPart);
 
   // We created the participant, now we can return the Id value (eventually).
   value.id = participantId;
 
-  // Determine if this is the 'special' repository internal participant
-  // that publishes the built-in topics for a domain.
-  if (domainPtr->participants().empty() && TheServiceParticipant->get_BIT()) {
+  if (isBitPart) {
     participant->isBitPublisher() = true;
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -1023,33 +1029,38 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
     }
   }
 
-  // Assume responsibilty for writing back to the participant.
+  // Assume responsibility for writing back to the participant.
   participant->takeOwnership();
 
   int status = domainPtr->add_participant(participant);
 
   if (0 != status) {
     // Adding the participant failed return the invalid
-    // pariticipant Id number.
+    // participant Id number.
     participantId = OpenDDS::DCPS::GUID_UNKNOWN;
 
-  } else if (this->um_ && (participant->isBitPublisher() == false)) {
-    // Push this participant to interested observers.
-    Update::UParticipant updateParticipant(
-      domain,
-      participant->owner(),
-      participantId,
-      const_cast<DDS::DomainParticipantQos &>(qos));
-    this->um_->create(updateParticipant);
+  } else if (this->um_) {
+    OpenDDS::DCPS::RepoIdConverter converter(participantId);
+    if (participant->isBitPublisher() == false) {
+      // Push this participant to interested observers.
+      Update::UParticipant updateParticipant(
+        domain,
+        participant->owner(),
+        participantId,
+        const_cast<DDS::DomainParticipantQos &>(qos));
+      this->um_->create(updateParticipant);
 
-    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      OpenDDS::DCPS::RepoIdConverter converter(participantId);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
-                 ACE_TEXT("pushing creation of participant %C in domain %d.\n"),
-                 std::string(converter).c_str(),
-                 domain));
+      if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) (RepoId)TAO_DDS_DCPSInfo_i::add_domain_participant: ")
+                   ACE_TEXT("pushing creation of participant %C in domain %d.\n"),
+                   std::string(converter).c_str(),
+                   domain));
+      }
     }
+
+    // Update what the last participant id was
+    um_->updateLastPartId(converter.participantId());
   }
 
   if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -1088,9 +1099,12 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
   // Prepare to manipulate the participant's Id value.
   OpenDDS::DCPS::RepoIdConverter converter(participantId);
 
+  // Determine if this is the 'special' repository internal participant
+  // that publishes the built-in topics for a domain.
+  bool isBitPart = domainPtr->participants().empty() && TheServiceParticipant->get_BIT();
+
   // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = domainPtr->participant(participantId);
+  DCPS_IR_Participant* partPtr = domainPtr->participant(participantId);
 
   if (0 != partPtr) {
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -1107,7 +1121,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
     OpenDDS::DCPS::make_rch<DCPS_IR_Participant>(this->federation_,
                                      participantId,
                                      domainPtr,
-                                     qos, um_);
+                                     qos, um_, isBitPart);
 
   switch (domainPtr->add_participant(participant)) {
   case -1: {
@@ -2142,15 +2156,10 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
       where,
       DCPS_IR_Domain_Map::value_type(domain, OpenDDS::DCPS::move(domain_uptr)));
 
-    int bit_status = 0;
-
-    if (TheServiceParticipant->get_BIT()) {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-      bit_status = domainPtr->init_built_in_topics(this->federation_.overridden());
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-    }
-
-    if (0 != bit_status) {
+#ifndef DDS_HAS_MINIMUM_BIT
+    if (TheServiceParticipant->get_BIT() && !domainPtr->useBIT() &&
+      domainPtr->init_built_in_topics(federation_.overridden(), reincarnate_)
+    ) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::domain: ")
                  ACE_TEXT("failed to initialize the Built-In Topics ")
@@ -2159,6 +2168,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
       this->domains_.erase(domain);
       return 0;
     }
+#endif
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -2233,16 +2243,28 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                ACE_TEXT("processing persistent data.\n")));
   }
 
-  // Ensure that new BIT participants do not reuse an id
-  for (Update::UImage::ParticipantSeq::const_iterator
-       iter = image.participants.begin();
-       iter != image.participants.end(); iter++) {
-    const Update::UParticipant* part = *iter;
-    OpenDDS::DCPS::RepoIdConverter converter(part->participantId);
-    if (converter.federationId() == this->federation_.id()) {
-      participantIdGenerator_.last(converter.participantId());
+  // Initialize builtin topics first so that they always have the same IDs
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (TheServiceParticipant->get_BIT()) {
+    for (Update::UImage::ParticipantSeq::const_iterator
+         iter = image.participants.begin();
+         iter != image.participants.end(); iter++) {
+      const Update::UParticipant* part = *iter;
+      if (!domain(part->domainId)) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+          ACE_DEBUG((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i::receive_image: ")
+                     ACE_TEXT("invalid domain Id: %d\n"),
+                     part->domainId));
+        }
+        return false;
+      }
     }
   }
+#endif
+
+  // Ensure that new non-BIT participants do not reuse an id
+  participantIdGenerator_.last(image.lastPartId);
 
   for (Update::UImage::ParticipantSeq::const_iterator
        iter = image.participants.begin();
@@ -2361,15 +2383,15 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
     }
   }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  // reassociate the bit publisher and subscribers
-  for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
-       currentDomain != domains_.end();
-       ++currentDomain) {
-
-    currentDomain->second->reassociate_built_in_topic_pubs();
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (TheServiceParticipant->get_BIT()) {
+    for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
+         currentDomain != domains_.end();
+         ++currentDomain) {
+      currentDomain->second->reassociate_built_in_topic_pubs();
+    }
   }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   return true;
 }

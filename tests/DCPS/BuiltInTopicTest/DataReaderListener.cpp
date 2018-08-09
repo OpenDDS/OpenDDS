@@ -12,12 +12,10 @@
 
 using namespace std;
 
-
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
     publication_handle_ (::DDS::HANDLE_NIL),
-    post_restart_publication_handle_ (::DDS::HANDLE_NIL),
-    builtin_read_error_(false)
+    post_restart_publication_handle_ (::DDS::HANDLE_NIL)
 {
 }
 
@@ -32,7 +30,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   try {
     ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
-      cerr << "DataReaderListener: read: _narrow failed." << endl;
+      ACE_ERROR((LM_ERROR, ACE_TEXT(
+        "(%P|%t) DataReaderListener: read: _narrow failed.\n")));
       exit(1);
     }
 
@@ -48,11 +47,13 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           || (si.publication_handle != this->publication_handle_
             && si.publication_handle != this->post_restart_publication_handle_))
         {
-          cerr << "DataReaderListener: ERROR: publication_handle validate failed." << endl;
+          ACE_ERROR((LM_ERROR, ACE_TEXT(
+            "(%P|%t) DataReaderListener: ERROR: publication_handle validate failed.\n")));
           exit(1);
         }
 
-        cout << "DataReaderListener: Message count = " << message.count << endl;
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+          "(%P|%t) DataReaderListener: Message count = %i\n"), message.count));
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
@@ -63,12 +64,15 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is unregistered\n")));
       }
     } else if (status == DDS::RETCODE_NO_DATA) {
-      cerr << "DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
+      ACE_ERROR((LM_ERROR, ACE_TEXT(
+        "(%P|%t) DataReaderListener: ERROR: reader received DDS::RETCODE_NO_DATA!\n")));
     } else {
-      cerr << "DataReaderListener: ERROR: read Message: Error: " <<  status << endl;
+      ACE_ERROR((LM_ERROR, ACE_TEXT(
+        "(%P|%t) DataReaderListener: ERROR: read Message: Error: %i\n"), status));
     }
   } catch (CORBA::Exception& e) {
-    cerr << "DataReaderListener: Exception caught in read:" << endl << e << endl;
+    e._tao_print_exception(
+      "DataReaderListener: Exception caught in read:", stderr);
     exit(1);
   }
 }
@@ -77,104 +81,128 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
     DDS::DataReader_ptr,
     const DDS::RequestedDeadlineMissedStatus &)
 {
-  cerr << "DataReaderListenerImpl::on_requested_deadline_missed" << endl;
+  ACE_ERROR((LM_ERROR, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed\n")));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos (
     DDS::DataReader_ptr,
     const DDS::RequestedIncompatibleQosStatus &)
 {
-  cerr << "DataReaderListenerImpl::on_requested_incompatible_qos" << endl;
+  ACE_ERROR((LM_ERROR, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos\n")));
 }
 
 void DataReaderListenerImpl::on_liveliness_changed (
     DDS::DataReader_ptr,
     const DDS::LivelinessChangedStatus &)
 {
-  cerr << "DataReaderListenerImpl::on_liveliness_changed" << endl;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_liveliness_changed\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus & status)
 {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_subscription_matched handle=%i\n"),
+    status.last_publication_handle));
+
   if (this->publication_handle_ == ::DDS::HANDLE_NIL) {
     this->publication_handle_ = status.last_publication_handle;
-    cerr << "DataReaderListenerImpl::on_subscription_matched handle="
-      << publication_handle_ << endl;
-  }
-  else {
+  } else {
     this->post_restart_publication_handle_ = status.last_publication_handle;
-    cerr << "DataReaderListenerImpl::on_subscription_matched handle="
-      << post_restart_publication_handle_ << endl;
   }
+}
 
+bool DataReaderListenerImpl::read_bit_instance()
+{
   DDS::PublicationBuiltinTopicDataDataReader_var rdr =
     DDS::PublicationBuiltinTopicDataDataReader::_narrow(builtin_);
   for (int i = 0; i < 100; ++i) {
     // BIT Data is not necessarily ready when this callback happens
+    DDS::InstanceHandle_t handle;
+    if (post_restart_publication_handle_ != ::DDS::HANDLE_NIL) {
+      handle = post_restart_publication_handle_;
+    } else if (publication_handle_ != ::DDS::HANDLE_NIL) {
+      handle = publication_handle_;
+    } else {
+      ACE_DEBUG((LM_ERROR, ACE_TEXT(
+        "(%P|%t) Can't read bit instance, pre and post restart handles are invalid.\n")));
+      return false;
+    }
     DDS::PublicationBuiltinTopicDataSeq data;
     DDS::SampleInfoSeq infos;
-    DDS::ReturnCode_t ret = rdr->read_instance(data, infos, 1,
-                                               status.last_publication_handle,
+    DDS::ReturnCode_t ret = rdr->read_instance(data, infos, 1, handle,
                                                DDS::NOT_READ_SAMPLE_STATE,
                                                DDS::ANY_VIEW_STATE,
                                                DDS::ALIVE_INSTANCE_STATE);
+
     switch (ret) {
     case DDS::RETCODE_OK:
-      cerr << "read bit instance returned ok" << endl;
-      return;
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT(
+        "(%P|%t) read bit instance returned ok\n")));
+      return false;
     case DDS::RETCODE_NO_DATA:
-      cerr << "read bit instance returned no data" << endl;
+      ACE_ERROR((LM_WARNING, ACE_TEXT(
+        "(%P|%t) read bit instance returned no data\n")));
       break;
     case DDS::RETCODE_BAD_PARAMETER:
-      cerr << "read bit instance returned bad parameter" << endl;
+      ACE_ERROR((LM_ERROR, ACE_TEXT(
+        "(%P|%t) read bit instance returned bad parameter\n")));
       break;
     default:
-      cerr << "ERROR read bit instance returned " << ret << endl;
-      builtin_read_error_ = true;
-      return;
+      ACE_ERROR((LM_ERROR, ACE_TEXT(
+        "(%P|%t) ERROR read bit instance returned %i\n"), ret));
+      return true;
     }
     ACE_OS::sleep(ACE_Time_Value(0, 100000));
   }
 
-  cerr << "ERROR read bit instance: giving up after retries" << endl;
-  builtin_read_error_ = true;
+  ACE_ERROR((LM_ERROR, ACE_TEXT(
+    "(%P|%t) ERROR read bit instance: giving up after retries\n")));
+  return true;
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
     DDS::DataReader_ptr,
     const DDS::SampleRejectedStatus&)
 {
-  cerr << "DataReaderListenerImpl::on_sample_rejected" << endl;
+  ACE_ERROR((LM_ERROR, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
 }
 
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
 {
-  cerr << "DataReaderListenerImpl::on_sample_lost" << endl;
+  ACE_ERROR((LM_ERROR, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_disconnected (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus &)
 {
-  cerr << "DataReaderListenerImpl::on_subscription_disconnected" << endl;
+  ACE_ERROR((LM_WARNING, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_subscription_disconnected\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_reconnected (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionReconnectedStatus &)
 {
-  cerr << "DataReaderListenerImpl::on_subscription_reconnected" << endl;
+  ACE_ERROR((LM_WARNING, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_subscription_reconnected\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_lost (
   DDS::DataReader_ptr,
   const ::OpenDDS::DCPS::SubscriptionLostStatus &)
 {
-  cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
+  ACE_ERROR((LM_WARNING, ACE_TEXT(
+    "(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
 }
 
 void DataReaderListenerImpl::set_builtin_datareader (

@@ -298,8 +298,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const GuidConverter conv(local_id);
-  const EntityKind kind = conv.entityKind();
-  if (kind == KIND_WRITER && remote_reliable) {
+  if (conv.isWriter() && remote_reliable) {
     // Insert count if not already there.
     heartbeat_counts_.insert(HeartBeatCountMapType::value_type(local_id, 0));
     RtpsWriter& w = writers_[local_id];
@@ -307,7 +306,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     w.durable_ = local_durable;
     enable_heartbeat = true;
 
-  } else if (kind == KIND_READER) {
+  } else if (conv.isReader()) {
     RtpsReaderMap::iterator rr = readers_.find(local_id);
     if (rr == readers_.end()) {
       rr = readers_.insert(RtpsReaderMap::value_type(local_id, RtpsReader()))
@@ -329,8 +328,7 @@ RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
                                           const RepoId& remote_id)
 {
   const GuidConverter conv(local_id);
-  const EntityKind kind = conv.entityKind();
-  if (kind == KIND_WRITER) {
+  if (conv.isWriter()) {
     RtpsWriterMap::iterator rw = writers_.find(local_id);
     if (rw == writers_.end()) {
       return true; // not reliable, no handshaking
@@ -341,7 +339,7 @@ RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
     }
     return ri->second.handshake_done_;
 
-  } else if (kind == KIND_READER) {
+  } else if (conv.isReader()) {
     return true; // no handshaking for local reader
   }
   return false;
@@ -496,8 +494,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   using std::pair;
   const GuidConverter conv(local_id);
-  const EntityKind kind = conv.entityKind();
-  if (kind == KIND_WRITER) {
+  if (conv.isWriter()) {
     const RtpsWriterMap::iterator rw = writers_.find(local_id);
 
     if (rw != writers_.end()) {
@@ -537,7 +534,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       }
     }
 
-  } else if (kind == KIND_READER) {
+  } else if (conv.isReader()) {
     const RtpsReaderMap::iterator rr = readers_.find(local_id);
 
     if (rr != readers_.end()) {

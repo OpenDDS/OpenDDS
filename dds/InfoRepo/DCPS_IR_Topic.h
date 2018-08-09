@@ -48,7 +48,8 @@ public:
                 const DDS::TopicQos& qos,
                 DCPS_IR_Domain* domain,
                 DCPS_IR_Participant* creator,
-                DCPS_IR_Topic_Description* description);
+                DCPS_IR_Topic_Description* description,
+                bool isBIT);
 
   ~DCPS_IR_Topic();
 

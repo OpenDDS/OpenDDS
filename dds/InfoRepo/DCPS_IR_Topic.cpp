@@ -26,14 +26,15 @@ DCPS_IR_Topic::DCPS_IR_Topic(const OpenDDS::DCPS::RepoId& id,
                              const DDS::TopicQos& qos,
                              DCPS_IR_Domain* domain,
                              DCPS_IR_Participant* creator,
-                             DCPS_IR_Topic_Description* description)
+                             DCPS_IR_Topic_Description* description,
+                             bool isBIT)
   : id_(id),
     qos_(qos),
     domain_(domain),
     participant_(creator),
     description_(description),
     handle_(0),
-    isBIT_(0),
+    isBIT_(isBIT),
     removed_(false)
 {
 }
