@@ -68,7 +68,6 @@ DomainParticipantFactoryImpl::create_participant(
   RcHandle<DomainParticipantImpl> dp =
     make_rch<DomainParticipantImpl>(this, domainId, par_qos, a_listener, mask);
 
-
   if (qos_.entity_factory.autoenable_created_entities) {
     if (dp->enable() != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,

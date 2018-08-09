@@ -34,11 +34,7 @@ namespace DCPS {
           DCPS Information Repository identifiers.
  *
  * This class encapsulates the conversion of a GUID_t value to and from
- * other types used within OpenDDS.  This includes the ability to
- * create new RepoId values with a specific federation Id and Participant
- * instance handle as well as extracting the Instance handle for an
- * Entity from the RepoId value.  Tests for Entity Kind as well as the
- * type (User v. Builtin) of Entity are also included.
+ * other types used within OpenDDS.
  *
  * Currently the RepoId is a typedef for GUID_t.  This class assumes
  * responsibility for insulating users from future change.
@@ -74,8 +70,10 @@ public:
 
   ~RepoIdConverter();
 
+  /// Get the federeation id from the GUID
   OpenDDS::Federator::RepoKey federationId() const;
 
+  /// Get the participant id from the GUID
   ParticipantId participantId() const;
 };
 

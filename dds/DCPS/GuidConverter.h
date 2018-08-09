@@ -85,6 +85,21 @@ public:
   /// Extract the EntityKind value.
   EntityKind entityKind() const;
 
+  /// Returns true if the GUID represents a builtin type domain entity.
+  bool isBuiltinDomainEntity() const;
+
+  /// Returns true if the GUID represents a user defined type domain entity.
+  bool isUserDomainEntity() const;
+
+  /// Returns true if the GUID represents a writer entity.
+  bool isWriter() const;
+
+  /// Returns true if the GUID represents a reader entity.
+  bool isReader() const;
+
+  /// Returns true if the GUID represents a topic entity.
+  bool isTopic() const;
+
   /// Convert to diagnostic string.
   operator OPENDDS_STRING() const;
 #ifdef DDS_HAS_WCHAR

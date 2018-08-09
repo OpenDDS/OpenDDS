@@ -161,10 +161,7 @@ void RecorderImpl::init(
   CORBA::String_var topic_name = a_topic_desc->get_name();
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  is_bit_ = ACE_OS::strcmp(topic_name.in(), BUILT_IN_PARTICIPANT_TOPIC) == 0
-            || ACE_OS::strcmp(topic_name.in(), BUILT_IN_TOPIC_TOPIC) == 0
-            || ACE_OS::strcmp(topic_name.in(), BUILT_IN_SUBSCRIPTION_TOPIC) == 0
-            || ACE_OS::strcmp(topic_name.in(), BUILT_IN_PUBLICATION_TOPIC) == 0;
+  is_bit_ = topicIsBIT(topic_name.in(), a_topic_desc->get_type_name());
 #endif   // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;

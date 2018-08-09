@@ -661,7 +661,7 @@ DomainParticipantImpl::find_topic(
         if (DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                        ACE_TEXT("DomainParticipantImpl::find_topic, ")
-                       ACE_TEXT("can't create a Topic: type_name \"%C\"")
+                       ACE_TEXT("can't create a Topic: type_name \"%C\" ")
                        ACE_TEXT("is not registered.\n"), type_name.in()));
         }
 
@@ -1528,7 +1528,7 @@ DomainParticipantImpl::get_discovered_topics(
        iter != itEnd; ++iter) {
     GuidConverter converter(iter->first);
 
-    if (converter.entityKind() == KIND_TOPIC) {
+    if (converter.isTopic()) {
 
       // skip the ignored topic
       if (this->ignored_topics_.find(iter->first)
@@ -1561,8 +1561,7 @@ DomainParticipantImpl::get_discovered_topic_data(
          iter != itEnd; ++iter) {
       GuidConverter converter(iter->first);
 
-      if (topic_handle == iter->second
-          && converter.entityKind() == KIND_TOPIC) {
+      if (topic_handle == iter->second && converter.isTopic()) {
         found = true;
         break;
       }
@@ -1636,7 +1635,7 @@ DomainParticipantImpl::enable()
   if (disco.is_nil()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipant::enable, ")
+               ACE_TEXT("DomainParticipantImpl::enable, ")
                ACE_TEXT("no repository found for domain id: %d.\n"), domain_id_));
     return DDS::RETCODE_ERROR;
   }
@@ -1645,7 +1644,7 @@ DomainParticipantImpl::enable()
   if (TheServiceParticipant->get_security() && !security_config_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipant::enable, ")
+               ACE_TEXT("DomainParticipantImpl::enable, ")
                ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
     return DDS::RETCODE_ERROR;
   }
@@ -1665,7 +1664,7 @@ DomainParticipantImpl::enable()
     if (val_res != DDS::Security::VALIDATION_OK) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipant::enable, ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1678,7 +1677,7 @@ DomainParticipantImpl::enable()
     if (perm_handle_ == DDS::HANDLE_NIL) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipant::enable, ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1688,7 +1687,7 @@ DomainParticipantImpl::enable()
     if (!check_create) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipant::enable, ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
@@ -1700,7 +1699,7 @@ DomainParticipantImpl::enable()
     if (!check_part_sec_attr) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipant::enable, ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::RETCODE_ERROR;
@@ -1713,7 +1712,7 @@ DomainParticipantImpl::enable()
     if (part_crypto_handle_ == DDS::HANDLE_NIL) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("DomainParticipant::enable, ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
         ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));
       return DDS::RETCODE_ERROR;
@@ -1724,7 +1723,7 @@ DomainParticipantImpl::enable()
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipant::enable, ")
+                 ACE_TEXT("DomainParticipantImpl::enable, ")
                  ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
@@ -1737,7 +1736,7 @@ DomainParticipantImpl::enable()
     if (value.id == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipant::enable, ")
+                 ACE_TEXT("DomainParticipantImpl::enable, ")
                  ACE_TEXT("add_domain_participant returned invalid id.\n")));
       return DDS::RETCODE_ERROR;
     }
@@ -1749,11 +1748,21 @@ DomainParticipantImpl::enable()
   dp_id_ = value.id;
   federated_ = value.federated;
 
-  DDS::ReturnCode_t ret = this->set_enabled();
+  const DDS::ReturnCode_t ret = this->set_enabled();
+
+  if (DCPS_debug_level > 1) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DomainParticipantImpl::enable: ")
+               ACE_TEXT("enabled participant %C in domain %d\n"),
+               OPENDDS_STRING(GuidConverter(dp_id_)).c_str(), domain_id_));
+  }
 
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
     this->bit_subscriber_ = disc->init_bit(this);
+  }
+
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
   }
 
   if (qos_.entity_factory.autoenable_created_entities) {
@@ -1771,7 +1780,7 @@ DomainParticipantImpl::enable()
     }
   }
 
-  return ret;
+  return DDS::RETCODE_OK;
 }
 
 RepoId
@@ -1874,7 +1883,7 @@ DomainParticipantImpl::create_new_topic(
     if (!access->get_topic_sec_attributes(perm_handle_, topic_name, sec_attr, se)) {
       ACE_ERROR((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: ")
-        ACE_TEXT("DomainParticipant::create_new_topic, ")
+        ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
         ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
           topic_name, se.code, se.minor_code, se.message.in()));
       return DDS::Topic::_nil();
@@ -1884,7 +1893,7 @@ DomainParticipantImpl::create_new_topic(
         !access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
       ACE_ERROR((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: ")
-        ACE_TEXT("DomainParticipant::create_new_topic, ")
+        ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
         ACE_TEXT("Permissions check failed to create new topic '%C'. SecurityException[%d.%d]: %C\n"),
           topic_name, se.code, se.minor_code, se.message.in()));
       return DDS::Topic::_nil();

@@ -57,7 +57,7 @@ struct DiscoveredWriterData_SecurityWrapper;
 struct DiscoveredReaderData_SecurityWrapper;
 #endif
 
-class Sedp : public OpenDDS::DCPS::EndpointManager<OpenDDS::Security::SPDPdiscoveredParticipantData> {
+class Sedp : public DCPS::EndpointManager<Security::SPDPdiscoveredParticipantData> {
 public:
   Sedp(const DCPS::RepoId& participant_id,
        Spdp& owner,
@@ -77,7 +77,7 @@ public:
   void acknowledge();
 
   void shutdown();
-  void unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const;
+  void unicast_locators(DCPS::LocatorSeq& locators) const;
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
@@ -85,17 +85,19 @@ public:
   const ACE_INET_Addr& multicast_group() const;
   bool map_ipv4_to_ipv6() const;
 
-  void associate(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void associate(const Security::SPDPdiscoveredParticipantData& pdata);
 
 #if defined(OPENDDS_SECURITY)
-  void associate_preauth(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
-  void associate_volatile(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
-  void associate_secure_writers_to_readers(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
-  void associate_secure_readers_to_writers(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
-  void send_builtin_crypto_tokens(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_preauth(const Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata);
+  void associate_secure_readers_to_writers(const Security::SPDPdiscoveredParticipantData& pdata);
+  void send_builtin_crypto_tokens(const Security::SPDPdiscoveredParticipantData& pdata);
+  void send_builtin_crypto_tokens(const DCPS::RepoId& dstParticipant,
+                                  const DCPS::EntityId_t& dstEntity, const DCPS::RepoId& src);
 #endif
 
-  bool disassociate(const OpenDDS::Security::SPDPdiscoveredParticipantData& pdata);
+  bool disassociate(const Security::SPDPdiscoveredParticipantData& pdata);
 
 #if defined(OPENDDS_SECURITY)
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
@@ -104,7 +106,7 @@ public:
   DDS::ReturnCode_t write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                                            const DCPS::RepoId& reader);
 
-  DDS::ReturnCode_t write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData& msg,
+  DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                   const DCPS::RepoId& reader);
 #endif
 
@@ -142,7 +144,7 @@ private:
   Spdp& spdp_;
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
-  struct Msg : public OpenDDS::DCPS::PoolAllocationBase {
+  struct Msg : public DCPS::PoolAllocationBase {
     enum MsgType {
       MSG_PARTICIPANT,
       MSG_WRITER,
@@ -167,15 +169,15 @@ private:
     DCPS::MessageId id_;
 
     union {
-      const OpenDDS::Security::SPDPdiscoveredParticipantData* dpdata_;
+      const Security::SPDPdiscoveredParticipantData* dpdata_;
 
-      const OpenDDS::DCPS::DiscoveredWriterData* wdata_;
+      const DCPS::DiscoveredWriterData* wdata_;
 
 #if defined(OPENDDS_SECURITY)
       const DiscoveredWriterData_SecurityWrapper* wdata_secure_;
 #endif
 
-      const OpenDDS::DCPS::DiscoveredReaderData* rdata_;
+      const DCPS::DiscoveredReaderData* rdata_;
 
 #if defined(OPENDDS_SECURITY)
       const DiscoveredReaderData_SecurityWrapper* rdata_secure_;
@@ -186,10 +188,10 @@ private:
       const DDS::Security::ParticipantGenericMessage* pgmdata_;
     };
 
-    Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData* dpdata)
+    Msg(MsgType mt, DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData* dpdata)
       : type_(mt), id_(id), dpdata_(dpdata) {}
 
-    Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata)
+    Msg(MsgType mt, DCPS::MessageId id, const DCPS::DiscoveredWriterData* wdata)
       : type_(mt), id_(id), wdata_(wdata) {}
 
 #if defined(OPENDDS_SECURITY)
@@ -197,7 +199,7 @@ private:
       : type_(mt), id_(id), wdata_secure_(wdata) {}
 #endif
 
-    Msg(MsgType mt, DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata)
+    Msg(MsgType mt, DCPS::MessageId id, const DCPS::DiscoveredReaderData* rdata)
       : type_(mt), id_(id), rdata_(rdata) {}
 
 #if defined(OPENDDS_SECURITY)
@@ -310,7 +312,7 @@ private:
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
 
-    DDS::ReturnCode_t write_dcps_participant_secure(const OpenDDS::Security::SPDPdiscoveredParticipantData& msg,
+    DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
 
@@ -416,10 +418,10 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::Security::SPDPdiscoveredParticipantData> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<Security::SPDPdiscoveredParticipantData> pdata);
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata);
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredWriterData> wdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredReaderData> rdata);
 
 #if defined(OPENDDS_SECURITY)
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredWriterData_SecurityWrapper> wrapper);
@@ -441,11 +443,11 @@ private:
   private:
     int svc();
 
-    void svc_i(const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
-    void svc_secure_i(DCPS::MessageId id, const OpenDDS::Security::SPDPdiscoveredParticipantData* pdata);
+    void svc_i(const Security::SPDPdiscoveredParticipantData* pdata);
+    void svc_secure_i(DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData* pdata);
 
-    void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
-    void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
+    void svc_i(DCPS::MessageId id, const DCPS::DiscoveredWriterData* wdata);
+    void svc_i(DCPS::MessageId id, const DCPS::DiscoveredReaderData* rdata);
 
 #if defined(OPENDDS_SECURITY)
     void svc_i(DCPS::MessageId id, const DiscoveredWriterData_SecurityWrapper* wrapper);
@@ -470,18 +472,18 @@ private:
   DCPS::TransportInst_rch transport_inst_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  OpenDDS::DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
-  OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+  DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
+  DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+  DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   void populate_discovered_writer_msg(
-      OpenDDS::DCPS::DiscoveredWriterData& dwd,
+      DCPS::DiscoveredWriterData& dwd,
       const DCPS::RepoId& publication_id,
       const LocalPublication& pub);
 
   void populate_discovered_reader_msg(
-      OpenDDS::DCPS::DiscoveredReaderData& drd,
+      DCPS::DiscoveredReaderData& drd,
       const DCPS::RepoId& subscription_id,
       const LocalSubscription& sub);
 
@@ -494,12 +496,12 @@ private:
   LocalParticipantMessageMap local_participant_messages_;
 
   void process_discovered_writer_data(DCPS::MessageId message_id,
-                                      const OpenDDS::DCPS::DiscoveredWriterData& wdata,
+                                      const DCPS::DiscoveredWriterData& wdata,
                                       const DCPS::RepoId& guid,
                                       const DDS::Security::EndpointSecurityInfo* security_info = NULL);
 
   void data_received(DCPS::MessageId message_id,
-                     const OpenDDS::DCPS::DiscoveredWriterData& wdata);
+                     const DCPS::DiscoveredWriterData& wdata);
 
 #if defined(OPENDDS_SECURITY)
   void data_received(DCPS::MessageId message_id,
@@ -507,12 +509,12 @@ private:
 #endif
 
   void process_discovered_reader_data(DCPS::MessageId message_id,
-                                      const OpenDDS::DCPS::DiscoveredReaderData& rdata,
+                                      const DCPS::DiscoveredReaderData& rdata,
                                       const DCPS::RepoId& guid,
                                       const DDS::Security::EndpointSecurityInfo* security_info = NULL);
 
   void data_received(DCPS::MessageId message_id,
-                     const OpenDDS::DCPS::DiscoveredReaderData& rdata);
+                     const DCPS::DiscoveredReaderData& rdata);
 
 #if defined(OPENDDS_SECURITY)
   void data_received(DCPS::MessageId message_id,
@@ -537,12 +539,12 @@ private:
                      const DDS::Security::ParticipantVolatileMessageSecure& data);
 #endif
 
-  typedef std::pair<DCPS::MessageId, OpenDDS::DCPS::DiscoveredWriterData> MsgIdWtrDataPair;
+  typedef std::pair<DCPS::MessageId, DCPS::DiscoveredWriterData> MsgIdWtrDataPair;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdWtrDataPair,
                    DCPS::GUID_tKeyLessThan) DeferredPublicationMap;
   DeferredPublicationMap deferred_publications_;  // Publications that Spdp has not discovered.
 
-  typedef std::pair<DCPS::MessageId, OpenDDS::DCPS::DiscoveredReaderData> MsgIdRdrDataPair;
+  typedef std::pair<DCPS::MessageId, DCPS::DiscoveredReaderData> MsgIdRdrDataPair;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdRdrDataPair,
                    DCPS::GUID_tKeyLessThan) DeferredSubscriptionMap;
   DeferredSubscriptionMap deferred_subscriptions_; // Subscriptions that Sedp has not discovered.

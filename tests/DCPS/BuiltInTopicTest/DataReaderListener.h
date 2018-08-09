@@ -63,9 +63,7 @@ public:
 
   void set_builtin_datareader (DDS::DataReader_ptr builtin);
 
-  bool builtin_read_errors () const {
-    return builtin_read_error_;
-  }
+  bool read_bit_instance();
 
 private:
 
@@ -73,7 +71,6 @@ private:
   long                    num_reads_;
   ::DDS::InstanceHandle_t publication_handle_;
   ::DDS::InstanceHandle_t post_restart_publication_handle_;
-  bool                    builtin_read_error_;
   DDS::DataReader_var     builtin_;
 };
 

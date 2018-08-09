@@ -284,6 +284,8 @@ Manager::pushImage(const DImage& image)
     }
   }
 
+  u_image.lastPartId = image.lastPartId;
+
   info_->receive_image(u_image);
 }
 
@@ -396,7 +398,17 @@ Manager::add(const DActor& actor)
   }
 }
 
+void Manager::updateLastPartId(PartIdType partId)
+{
+  for (Updaters::iterator iter = updaters_.begin();
+       iter != updaters_.end();
+       iter++) {
+    (*iter)->updateLastPartId(partId);
+  }
+}
+
 } // namespace Update
+
 
 int
 UpdateManagerSvc_Loader::init()

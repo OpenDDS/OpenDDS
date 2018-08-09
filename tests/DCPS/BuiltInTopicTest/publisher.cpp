@@ -56,6 +56,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
         "-n <num of messages> "
+        "-T <Where to look for monitor1_done>"
         "\n",
         argv [0]),
         -1);
@@ -94,14 +95,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ())) {
-        cerr << "publisher: create_participant failed." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) publisher: create_participant failed.")));
         return 1;
       }
 
       ::Messenger::MessageTypeSupport_var ts = new ::Messenger::MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != ts->register_type(participant.in (), "Messenger")) {
-        cerr << "publisher: register_type failed." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) publisher: register_type failed.\n")));
         exit(1);
       }
 
@@ -120,7 +123,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                    DDS::TopicListener::_nil(),
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
-        cerr << "publisher: create_topic failed." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) publisher: create_topic failed.\n")));
         exit(1);
       }
 
@@ -137,7 +141,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         DDS::PublisherListener::_nil(),
         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (pub.in ())) {
-        cerr << "publisher: create_publisher failed." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) publisher: create_publisher failed.\n")));
         exit(1);
       }
 
@@ -162,7 +167,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                                DDS::DataWriterListener::_nil(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw.in ())) {
-        cerr << "publisher: create_datawriter failed." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) publisher: create_datawriter failed.\n")));
         exit(1);
       }
 
@@ -226,12 +232,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       dpf->delete_participant(participant.in ());
       TheServiceParticipant->shutdown ();
   }
-  catch (CORBA::Exception& e)
-    {
-       cerr << "publisher: PUB: Exception caught in main.cpp:" << endl
-         << e << endl;
-      exit(1);
-    }
+  catch (CORBA::Exception& e) {
+    e._tao_print_exception("publisher: PUB: Exception caught in main.cpp:");
+    exit(1);
+  }
 
   return 0;
 }

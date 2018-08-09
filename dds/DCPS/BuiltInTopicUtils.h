@@ -33,6 +33,26 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
+/**
+ * Returns true if the topic name and type pair matches one of the built-in
+ * topic name and type pairs.
+ */
+inline bool topicIsBIT(const char* name, const char* type)
+{
+    return (
+      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC) &&
+      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC_TYPE)
+    ) || (
+      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC) &&
+      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC_TYPE)
+    ) || (
+      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) &&
+      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC_TYPE)
+    ) || (
+      !ACE_OS::strcmp(name, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) &&
+      !ACE_OS::strcmp(type, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE)
+    );
+}
 
 class DomainParticipantImpl;
 

@@ -38,7 +38,7 @@ public:
   void entityKey(long entityKey);
 
   void entityKind(CORBA::Octet entityKind);
-  void entityKind(EntityKind kind);
+  void entityKind(EntityKind kind, bool makeBuiltin);
 
   operator GUID_t();
 
