@@ -171,17 +171,15 @@ DDS::ReturnCode_t
 PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 {
   DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
-  if (dw_servant) {
-    // marks entity as deleted and stops future associating
-    dw_servant->prepare_to_delete();
-  }
-
   if (!dw_servant) {
     ACE_ERROR((LM_ERROR,
               "(%P|%t) PublisherImpl::delete_datawriter - dynamic cast to DataWriterImpl failed\n"
     ));
     return DDS::RETCODE_ERROR;
   }
+
+  // marks entity as deleted and stops future associating
+  dw_servant->prepare_to_delete();
 
   {
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());

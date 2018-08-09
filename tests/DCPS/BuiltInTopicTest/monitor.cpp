@@ -102,6 +102,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
         "-s <num of subs> "
         "-p <num of pubs> "
         "-u "
+        "-T <Where to put monitor1_done>"
         "\n",
         argv [0]),
         -1);
@@ -651,11 +652,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       }
     }
-  catch (CORBA::Exception& e)
-    {
-      cerr << " monitor: SUB: Exception caught in main ():" << endl << e << endl;
-      return 1;
-    }
+  catch (CORBA::Exception& e) {
+    e._tao_print_exception(
+      "monitor: SUB: Exception caught in main ():", stderr);
+    return 1;
+  }
 
   return 0;
 }

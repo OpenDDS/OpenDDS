@@ -1355,14 +1355,14 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
          topic_endpoints != topic.endpoints_.end(); ++topic_endpoints) {
 
       const RepoId& rid = *topic_endpoints;
-      EntityKind kind = GuidConverter(rid).entityKind();
-      if (KIND_WRITER == kind) {
+      GuidConverter conv(rid);
+      if (conv.isWriter()) {
         // This may be our local publication, verify
         LocalPublicationIter lp = local_publications_.find(rid);
         if (lp != local_publications_.end()) {
           write_publication_data(rid, lp->second);
         }
-      } else if (KIND_READER == kind) {
+      } else if (conv.isReader()) {
         // This may be our local subscription, verify
         LocalSubscriptionIter ls = local_subscriptions_.find(rid);
         if (ls != local_subscriptions_.end()) {
@@ -2842,8 +2842,9 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
   dsh.publication_id_ = repo_id_;
 
-  if (reader == GUID_UNKNOWN ||
-      sequence == DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+  if (id != DCPS::END_HISTORIC_SAMPLES &&
+      (reader == GUID_UNKNOWN ||
+      sequence == DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())) {
     sequence = seq_++;
   }
 

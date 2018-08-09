@@ -84,6 +84,7 @@ public:
   /// Find the participant with the id.
   DCPS_IR_Participant* participant(const OpenDDS::DCPS::RepoId& id) const;
 
+  ///@{
   /// Add a topic to the domain
   /// Returns OpenDDS::DCPS::CREATED if successfull
   OpenDDS::DCPS::TopicStatus add_topic(OpenDDS::DCPS::RepoId_out topicId,
@@ -97,6 +98,7 @@ public:
                                              const char* dataTypeName,
                                              const DDS::TopicQos & qos,
                                              DCPS_IR_Participant* participantPtr);
+  ///@}
 
   /// Find the topic with the topic name
   /// Does NOT take ownership of any initial memory pointed to by topic
@@ -128,16 +130,16 @@ public:
 
   DDS::DomainId_t get_id();
 
-  // Next Entity Id value in sequence.
+  /// Next Entity Id value in sequence.
   OpenDDS::DCPS::RepoId get_next_participant_id();
 
-  // Ensure no conflicts with sequence values from persistent storage.
+  /// Ensure no conflicts with sequence values from persistent storage.
   void last_participant_key(long key);
 
   /// Initialize the Built-In Topic structures
   /// This needs to be called before the run begins
   /// Returns 0 (zero) if successful
-  int init_built_in_topics(bool federated = false);
+  int init_built_in_topics(bool federated, bool persistent);
 
   /// Cleans up the Built-In Topic structures
   int cleanup_built_in_topics();
@@ -148,16 +150,22 @@ public:
   /// Returns 0 (zero) if successful
   int reassociate_built_in_topic_pubs();
 
-  /// Publish the Built-In Topic information
+  /// Publish Participant in the Participant Built-In Topic
   void publish_participant_bit(DCPS_IR_Participant* participant);
+  /// Publish Topic in the Topic Built-In Topic
   void publish_topic_bit(DCPS_IR_Topic* topic);
+  /// Publish Subscription in the Subscription Built-In Topic
   void publish_subscription_bit(DCPS_IR_Subscription* subscription);
+  /// Publish Publication in the Publication Built-In Topic
   void publish_publication_bit(DCPS_IR_Publication* publication);
 
-  /// Remove the Built-In Topic information
+  /// Dispose Participant in the Participant Built-In Topic
   void dispose_participant_bit(DCPS_IR_Participant* participant);
+  /// Dispose Topic in the Topic Built-In Topic
   void dispose_topic_bit(DCPS_IR_Topic* topic);
+  /// Dispose Subscription in the Subscription Built-In Topic
   void dispose_subscription_bit(DCPS_IR_Subscription* subscription);
+  /// Dispose Publication in the Publication Built-In Topic
   void dispose_publication_bit(DCPS_IR_Publication* publication);
 
   /// Expose a readable reference to the participant map.
@@ -172,7 +180,8 @@ private:
                                          const char * topicName,
                                          const char * dataTypeName,
                                          const DDS::TopicQos & qos,
-                                         DCPS_IR_Participant* participantPtr);
+                                         DCPS_IR_Participant* participantPtr,
+                                         bool isBIT);
 
   /// Takes ownership of the memory pointed to by desc if successful
   /// returns 0 if successful,
@@ -189,20 +198,24 @@ private:
                              const char* dataTypeName,
                              DCPS_IR_Topic_Description*& desc);
 
-  // Returns 0 if successful
+  /// Returns 0 if successful
   int remove_topic_description(DCPS_IR_Topic_Description* desc);
 
-  /// work of initializing the built in topics is
-  /// done in these private methods.  They were
-  /// broken up for readability.
+  ///@{
+  /**
+   * work of initializing the built in topics is
+   * done in these private methods.  They were
+   * broken up for readability.
+   */
   int init_built_in_topics_topics();
   int init_built_in_topics_datawriters(bool federated);
-  int init_built_in_topics_transport();
+  int init_built_in_topics_transport(bool persistent);
+  ///@}
 
   DDS::DomainId_t id_;
 
-  // Participant GUID Id generator.  The remaining Entities have their
-  // values generated within the containing Participant.
+  /// Participant GUID Id generator.  The remaining Entities have their
+  /// values generated within the containing Participant.
   OpenDDS::DCPS::RepoIdGenerator& participantIdGenerator_;
 
   /// all the participants
@@ -226,6 +239,7 @@ private:
   /// indicates if the BuiltIn Topics are enabled
   bool useBIT_;
 
+  ///@{
   /// Built-in Topic variables
   DDS::DomainParticipantFactory_var                bitParticipantFactory_;
   DDS::DomainParticipant_var                       bitParticipant_;
@@ -247,6 +261,8 @@ private:
   DDS::Topic_var                                   bitPublicationTopic_;
   DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+  ///@}
+
   // MSVC 2017 has trouble to compile std::map<key, std::unique_ptr<Foo> > when it is enclosed
   // by a DLL exported class whose copy constructor is not explicitly deleted
   DCPS_IR_Domain(const DCPS_IR_Domain&);

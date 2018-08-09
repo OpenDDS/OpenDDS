@@ -94,10 +94,10 @@ public:
   typedef OPENDDS_SET(Publisher_Pair) PublisherSet;
 
   class OpenDDS_Dcps_Export RepoIdSequence {
-public:
+  public:
     explicit RepoIdSequence(const RepoId& base);
     RepoId next();
-private:
+  private:
     RepoId base_;          // will be combined with serial to produce next
     long serial_;          // will be incremented each time
     GuidBuilder builder_;  // used to modify base

@@ -27,7 +27,7 @@ namespace DCPS {
 ///   (If the object is on the stack and hence it does not require the
 ///    cost of allocating and deallocating on the heap.  It object is on the
 ///    heap then it requires just one allocation; not two.)
-/// @WARNING The object using this allocator must not have a scope smaller than this object !!!
+/// *WARNING* The object using this allocator must not have a scope smaller than this object !!!
 template <class T, std::size_t N>
 class FirstTimeFastAllocator : public ACE_Allocator {
 public:

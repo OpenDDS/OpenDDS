@@ -14,6 +14,7 @@
 #include "ReceivedDataElementList.h"
 #include "Time_Helper.h"
 #include "DomainParticipantImpl.h"
+#include "GuidConverter.h"
 
 #if !defined (__ACE_INLINE__)
 # include "InstanceState.inl"
@@ -137,6 +138,16 @@ OpenDDS::DCPS::InstanceState::dispose_was_received(const PublicationId& writer_i
 bool
 OpenDDS::DCPS::InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
+  if (OpenDDS::DCPS::DCPS_debug_level > 1) {
+    GuidConverter conv(writer_id);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT(
+        "(%P|%t) InstanceState::unregister_was_received on %C\n"
+      ),
+      OPENDDS_STRING(conv).c_str()
+    ));
+  }
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard, this->lock_, false);
   writers_.erase(writer_id);
@@ -165,6 +176,16 @@ OpenDDS::DCPS::InstanceState::writer_became_dead(
   int                   /*num_alive_writers*/,
   const ACE_Time_Value& /* when */)
 {
+  if (OpenDDS::DCPS::DCPS_debug_level > 1) {
+    GuidConverter conv(writer_id);
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT(
+        "(%P|%t) InstanceState::writer_became_dead on %C\n"
+      ),
+      OPENDDS_STRING(conv).c_str()
+    ));
+  }
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard, this->lock_);
   writers_.erase(writer_id);
@@ -301,6 +322,33 @@ OpenDDS::DCPS::InstanceState::reset_ownership (::DDS::InstanceHandle_t instance)
   this->registered_ = false;
 
   this->reader_->reset_ownership(instance);
+}
+
+OPENDDS_STRING
+OpenDDS::DCPS::InstanceState::instance_state_string(DDS::InstanceStateKind value)
+{
+  switch (value) {
+  case DDS::ALIVE_INSTANCE_STATE:
+    return OPENDDS_STRING("ALIVE_INSTANCE_STATE");
+  case DDS::NOT_ALIVE_INSTANCE_STATE:
+    return OPENDDS_STRING("NOT_ALIVE_INSTANCE_STATE");
+  case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
+    return OPENDDS_STRING("NOT_ALIVE_DISPOSED_INSTANCE_STATE");
+  case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
+    return OPENDDS_STRING("NOT_ALIVE_NO_WRITERS_INSTANCE_STATE");
+  case DDS::ANY_INSTANCE_STATE:
+    return OPENDDS_STRING("ANY_INSTANCE_STATE");
+  default:
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT(
+        "(%P|%t) ERROR: OpenDDS::DCPS::InstanceState::instance_state_string(): "
+        "%d is either completely invalid or at least not defined in this function.\n"
+      ),
+      value
+    ));
+
+    return OPENDDS_STRING("(Unknown Instance State: ") + to_dds_string(value) + ")";
+  }
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

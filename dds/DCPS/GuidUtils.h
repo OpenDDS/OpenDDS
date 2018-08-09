@@ -33,6 +33,7 @@ const GuidVendorId_t VENDORID_OCI = { 0x01, 0x03 };
 /// Nil value for the GUID prefix (participant identifier).
 const GuidPrefix_t GUIDPREFIX_UNKNOWN = { 0 };
 
+///@{
 /// Entity Id values specified in Version 2.1 of RTPS specification.
 const EntityId_t ENTITYID_UNKNOWN                                = { {0x00,0x00,0x00}, 0x00};
 const EntityId_t ENTITYID_PARTICIPANT                            = { {0x00,0x00,0x01}, 0xc1};
@@ -46,21 +47,43 @@ const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER        = { {0x00,0x01,
 const EntityId_t ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER        = { {0x00,0x01,0x00}, 0xc7};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER = { {0x00,0x02,0x00}, 0xc2};
 const EntityId_t ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER = { {0x00,0x02,0x00}, 0xc7};
+///@}
 
 /// Nil value for GUID.
-const GUID_t GUID_UNKNOWN = { {0,0,0,0,0,0,0,0,0,0,0,0}, { {0,0,0}, 0} };
+const GUID_t GUID_UNKNOWN = { { 0 }, { { 0 }, 0 } };
 
-/// Summary kinds of entities within the service.
+/**
+ * Summary kinds of entities within the service.
+ *
+ * See dds/DdsDcpsGuid.idl for the values these map to.
+ */
 enum EntityKind {     // EntityId_t.entityKind value(s)
+
+  /// Represents ENTITYKIND_USER_UNKNOWN and ENTITYKIND_BUILTIN_UNKNOWN
   KIND_UNKNOWN,       // 0x3f & 0x00 (and all other unspecified values)
+  /// Represents ENTITYKIND_BUILTIN_PARTICIPANT
   KIND_PARTICIPANT,   // 0x3f & 0x01
+
+  /// Represents ENTITYKIND_USER_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
   KIND_WRITER,        // 0x3f & 0x02 | 0x3f & 0x03
+  /// Represents ENTITYKIND_USER_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
   KIND_READER,        // 0x3f & 0x04 | 0x3f & 0x07
+  /// Represents ENTITYKIND_OPENDDS_TOPIC
   KIND_TOPIC,         // 0x3f & 0x05
 
-  KIND_PUBLISHER,     // OpenDDS specific Publisher Guid values
-  KIND_SUBSCRIBER,    // OpenDDS specific Subscriber Guid values
-  KIND_USER           // OpenDDS specific other Guid values
+  /// Represents ENTITYKIND_BUILTIN_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
+  KIND_BUILTIN_WRITER,
+  /// Represents ENTITYKIND_BUILTIN_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
+  KIND_BUILTIN_READER,
+  /// Represents ENTITYKIND_BUILTIN_TOPIC
+  KIND_BUILTIN_TOPIC,
+
+  /// OpenDDS specific Publisher Guid values
+  KIND_PUBLISHER,
+  /// OpenDDS specific Subscriber Guid values
+  KIND_SUBSCRIBER,
+  /// OpenDDS specific other Guid values
+  KIND_USER
 };
 
 struct OpenDDS_Dcps_Export GUID_tKeyLessThan {

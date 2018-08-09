@@ -58,6 +58,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
         "-n <num of messages> "
+        "-T <Where to look for monitor1_done>"
         "\n",
         argv [0]),
         -1);
@@ -98,16 +99,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                             DDS::DomainParticipantListener::_nil(),
                                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (participant.in ())) {
-        cerr << "subscriber: create_participant failed." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) subscriber: create_participant failed.\n")));
         return 1 ;
       }
 
       ::Messenger::MessageTypeSupport_var mts = new ::Messenger::MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != mts->register_type(participant.in (), "Messenger")) {
-          cerr << "subscriber: Failed to register the MessageTypeTypeSupport." << endl;
-          exit(1);
-        }
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) subscriber: Failed to register the MessageTypeTypeSupport.\n")));
+        exit(1);
+      }
 
       DDS::TopicQos topic_qos;
       participant->get_default_topic_qos(topic_qos);
@@ -123,7 +126,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                         DDS::TopicListener::_nil(),
                                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
-        cerr << "subscriber: Failed to create_topic." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) subscriber: Failed to create_topic.\n")));
         exit(1);
       }
 
@@ -142,7 +146,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                        DDS::SubscriberListener::_nil(),
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ())) {
-        cerr << "subscriber: Failed to create_subscriber." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) subscriber: Failed to create_subscriber.\n")));
         exit(1);
       }
 
@@ -153,7 +158,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (!listener_servant)
       {
         ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("(%P|%t) %N:%l main()")
           ACE_TEXT(" ERROR: failed to obtain DataReaderListenerImpl!\n")), -1);
       }
 
@@ -163,12 +168,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       listener_servant->set_builtin_datareader(bitdr.in());
 
       if (CORBA::is_nil (listener.in ())) {
-        cerr << "subscriber: listener is nil." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) subscriber: listener is nil.\n")));
         exit(1);
       }
       if (!listener_servant) {
         ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("%N:%l main()")
+          ACE_TEXT("(%P|%t) %N:%l main()")
           ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
       }
 
@@ -188,7 +194,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                       listener.in (),
                                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dr.in ())) {
-        cerr << "subscriber: create_datareader failed." << endl;
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) subscriber: create_datareader failed.\n")));
         exit(1);
       }
 
@@ -203,8 +210,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ++i;
         fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
       }
-      if (fp != 0)
+      if (fp) {
         ACE_OS::fclose (fp);
+      }
 
       // Now change the changeable qos. The second monitor should get the updated qos from BIT.
       part_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (UPDATED_PART_USER_DATA));
@@ -239,8 +247,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
-      if (listener_servant->builtin_read_errors()) {
-        cerr << "subscriber: Built in topic read failure." << endl;
+      if (listener_servant->read_bit_instance()) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT(
+          "(%P|%t) subscriber: Built in topic read failure.\n")));
         result = 1;
       }
 
@@ -257,11 +266,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       TheServiceParticipant->shutdown ();
     }
-  catch (CORBA::Exception& e)
-    {
-      cerr << "subscriber: SUB: Exception caught in main ():" << endl << e << endl;
-      return 1;
-    }
+  catch (CORBA::Exception& e) {
+    e._tao_print_exception(
+      "subscriber: SUB: Exception caught in main ():", stderr);
+    return 1;
+  }
 
   return result;
 }

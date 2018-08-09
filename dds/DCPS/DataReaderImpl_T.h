@@ -8,6 +8,7 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/Watchdog.h"
 #include "dcps_export.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #include "ace/Bound_Ptr.h"
 #include "ace/Time_Value.h"
@@ -1339,8 +1340,10 @@ int ignored)
   OpenDDS::DCPS::SubscriptionInstance_rch inst = get_handle_instance(a_handle);
   if (!inst) return DDS::RETCODE_BAD_PARAMETER;
 
-  if ((inst->instance_state_.view_state() & view_states) &&
-      (inst->instance_state_.instance_state() & instance_states))
+  InstanceState& state_obj = inst->instance_state_;
+  bool valid_view_state = state_obj.view_state() & view_states;
+  bool valid_instance_state = state_obj.instance_state() & instance_states;
+  if (valid_view_state && valid_instance_state)
     {
       size_t i(0);
       for (OpenDDS::DCPS::ReceivedDataElement* item = inst->rcvd_samples_.head_;
@@ -1355,7 +1358,34 @@ int ignored)
               results.insert_sample(item, inst, ++i);
             }
         }
-    }
+      }
+    else
+      {
+        if (OpenDDS::DCPS::DCPS_debug_level >= 8) {
+          OPENDDS_STRING msg;
+          if (!valid_view_state) {
+            msg += "view state is not valid";
+            if (!valid_instance_state) {
+              msg += " and ";
+            }
+          }
+          if (!valid_instance_state) {
+            msg = msg
+              + "instance state is "
+              + state_obj.instance_state_string()
+              + " while the validity mask is "
+              + InstanceState::instance_state_string(instance_states);
+          }
+          GuidConverter conv(get_subscription_id());
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT(
+              "(%P|%t) DataReaderImpl_T::read_instance_i: "
+              "will return no data reading sub %C because:\n  %C\n"
+            ),
+            OPENDDS_STRING(conv).c_str(), msg.c_str()
+          ));
+        }
+      }
 
   results.copy_to_user();
 

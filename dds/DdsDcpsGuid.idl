@@ -33,6 +33,7 @@ module OpenDDS
     const octet ENTITYKIND_BUILTIN_WRITER_NO_KEY   = 0xc3;
     const octet ENTITYKIND_BUILTIN_READER_NO_KEY   = 0xc4;
     const octet ENTITYKIND_BUILTIN_READER_WITH_KEY = 0xc7;
+    const octet ENTITYKIND_BUILTIN_TOPIC           = 0xc5;
 
     const octet ENTITYKIND_USER_UNKNOWN         = 0x00;
     const octet ENTITYKIND_USER_WRITER_WITH_KEY = 0x02;

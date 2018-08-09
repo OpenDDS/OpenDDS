@@ -60,18 +60,25 @@ GuidConverter::entityKind() const
   case ENTITYKIND_OPENDDS_TOPIC:
     return KIND_TOPIC;
 
+  case ENTITYKIND_BUILTIN_TOPIC:
+    return KIND_BUILTIN_TOPIC;
+
   case ENTITYKIND_USER_READER_NO_KEY:
   case ENTITYKIND_USER_READER_WITH_KEY:
-  case ENTITYKIND_BUILTIN_READER_NO_KEY:
-  case ENTITYKIND_BUILTIN_READER_WITH_KEY:
     return KIND_READER;
 
   case ENTITYKIND_USER_WRITER_NO_KEY:
   case ENTITYKIND_USER_WRITER_WITH_KEY:
-  case ENTITYKIND_BUILTIN_WRITER_NO_KEY:
-  case ENTITYKIND_BUILTIN_WRITER_WITH_KEY:
   case ENTITYKIND_OPENDDS_NIL_WRITER:
     return KIND_WRITER;
+
+  case ENTITYKIND_BUILTIN_READER_NO_KEY:
+  case ENTITYKIND_BUILTIN_READER_WITH_KEY:
+    return KIND_BUILTIN_READER;
+
+  case ENTITYKIND_BUILTIN_WRITER_NO_KEY:
+  case ENTITYKIND_BUILTIN_WRITER_WITH_KEY:
+    return KIND_BUILTIN_WRITER;
 
   case ENTITYKIND_BUILTIN_PARTICIPANT:
     return KIND_PARTICIPANT;
@@ -90,6 +97,56 @@ GuidConverter::entityKind() const
   default:
     return KIND_UNKNOWN;
   }
+}
+
+bool GuidConverter::isBuiltinDomainEntity() const
+{
+  switch (guid_.entityId.entityKind) {
+
+  case ENTITYKIND_BUILTIN_READER_NO_KEY:
+  case ENTITYKIND_BUILTIN_READER_WITH_KEY:
+  case ENTITYKIND_BUILTIN_WRITER_NO_KEY:
+  case ENTITYKIND_BUILTIN_WRITER_WITH_KEY:
+  case ENTITYKIND_BUILTIN_TOPIC:
+    return true;
+
+  default:
+    return false;
+  }
+}
+
+bool GuidConverter::isUserDomainEntity() const
+{
+  switch (guid_.entityId.entityKind) {
+
+  case ENTITYKIND_USER_READER_NO_KEY:
+  case ENTITYKIND_USER_READER_WITH_KEY:
+  case ENTITYKIND_USER_WRITER_NO_KEY:
+  case ENTITYKIND_USER_WRITER_WITH_KEY:
+  case ENTITYKIND_OPENDDS_TOPIC:
+    return true;
+
+  default:
+    return false;
+  }
+}
+
+bool GuidConverter::isWriter() const
+{
+  EntityKind kind = entityKind();
+  return kind == KIND_WRITER || kind == KIND_BUILTIN_WRITER;
+}
+
+bool GuidConverter::isReader() const
+{
+  EntityKind kind = entityKind();
+  return kind == KIND_READER || kind == KIND_BUILTIN_READER;
+}
+
+bool GuidConverter::isTopic() const
+{
+  EntityKind kind = entityKind();
+  return kind == KIND_TOPIC || kind == KIND_BUILTIN_TOPIC;
 }
 
 GuidConverter::operator OPENDDS_STRING() const
