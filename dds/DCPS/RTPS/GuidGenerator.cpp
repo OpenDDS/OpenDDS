@@ -158,6 +158,7 @@ GuidGenerator::interfaceName(const char* iface)
       const sockaddr_dl* sdl =
         reinterpret_cast<const sockaddr_dl*>(&ifr->ifr_addr);
       std::memcpy(node_id_, LLADDR(sdl), sizeof node_id_);
+      found = true;
     }
 
     ptr += sizeof ifr->ifr_name + std::max(sizeof ifr->ifr_addr,

@@ -173,7 +173,7 @@ namespace SSL {
   class verify_implementation
   {
    public:
-    verify_implementation(EVP_PKEY* pkey)
+    explicit verify_implementation(EVP_PKEY* pkey)
       : public_key(pkey), md_ctx(NULL), pkey_ctx(NULL)
     {
     }
@@ -267,7 +267,7 @@ namespace SSL {
   int Certificate::subject_name_to_str(std::string& dst,
                                        unsigned long flags) const
   {
-    int result = 1, len = 0;
+    int result = 1;
 
     dst.clear();
 
@@ -277,7 +277,7 @@ namespace SSL {
       if (name) {
         BIO* buffer = BIO_new(BIO_s_mem());
         if (buffer) {
-          len = X509_NAME_print_ex(buffer, name, 0, flags);
+          int len = X509_NAME_print_ex(buffer, name, 0, flags);
           if (len > 0) {
             std::vector<char> tmp(len +
                                   1);  // BIO_gets will add null hence +1
@@ -528,7 +528,10 @@ namespace SSL {
 
   struct deserialize_impl
   {
-    deserialize_impl(const DDS::OctetSeq& src) : src_(src), buffer_(BIO_new(BIO_s_mem())) {}
+    explicit deserialize_impl(const DDS::OctetSeq& src)
+      : src_(src), buffer_(BIO_new(BIO_s_mem()))
+    {}
+
     ~deserialize_impl()
     {
       BIO_free(buffer_);

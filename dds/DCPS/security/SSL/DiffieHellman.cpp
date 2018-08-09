@@ -156,7 +156,7 @@ struct DH_Handle {
   class dh_shared_secret
   {
   public:
-    dh_shared_secret(EVP_PKEY* pkey)
+    explicit dh_shared_secret(EVP_PKEY* pkey)
       : keypair(pkey), pubkey(NULL)
     {
       if (!keypair) {
