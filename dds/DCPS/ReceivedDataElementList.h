@@ -20,10 +20,6 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -40,9 +36,9 @@ public:
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       coherent_change_(header.coherent_change_),
       group_coherent_(header.group_coherent_),
-      publisher_id_ (header.publisher_id_),
+      publisher_id_(header.publisher_id_),
 #endif
-      valid_data_ (received_data != 0),
+      valid_data_(received_data != 0),
       disposed_generation_count_(0),
       no_writers_generation_count_(0),
       zero_copy_cnt_(0),
@@ -59,26 +55,31 @@ public:
 
     // When we have a dispose or unregister instance we shouldn't let the
     // user read our received data
-    if (header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
-        header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE ||
-        header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE ||
-        header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE) {
-        valid_data_ = false;
-      }
+    if (header.message_id_ == DISPOSE_INSTANCE ||
+      header.message_id_ == DISPOSE_UNREGISTER_INSTANCE ||
+      header.message_id_ == UNREGISTER_INSTANCE ||
+      header.message_id_ == DISPOSE_UNREGISTER_INSTANCE
+    ) {
+      valid_data_ = false;
+    }
   }
 
   virtual ~ReceivedDataElement(){}
 
-  void dec_ref() {
-     if (0 == --this->ref_count_)
-       delete this;
+  void dec_ref()
+  {
+    if (0 == --this->ref_count_) {
+      delete this;
+    }
   }
 
-  void inc_ref() {
+  void inc_ref()
+  {
     ++this->ref_count_;
   }
 
-  long ref_count() {
+  long ref_count()
+  {
     return this->ref_count_.value();
   }
 
@@ -86,11 +87,11 @@ public:
 
   /// Data sample received, could only be the keyed fields
   /// in case we received a dispose message
-  void * const registered_data_;  // ugly, but works....
+  void* const registered_data_;  // ugly, but works....
 
   /// Sample state for this data sample:
   /// DDS::NOT_READ_SAMPLE_STATE/DDS::READ_SAMPLE_STATE
-  DDS::SampleStateKind sample_state_ ;
+  DDS::SampleStateKind sample_state_;
 
   /// Source time stamp for this data sample
   DDS::Time_t source_timestamp_;
@@ -114,24 +115,24 @@ public:
 
   /// The data sample's instance's disposed_generation_count_
   /// at the time the sample was received
-  size_t disposed_generation_count_ ;
+  size_t disposed_generation_count_;
 
   /// The data sample's instance's no_writers_generation_count_
   /// at the time the sample was received
-  size_t no_writers_generation_count_ ;
+  size_t no_writers_generation_count_;
 
   /// This is needed to know if delete DataReader should fail with
   /// PRECONDITION_NOT_MET because there are outstanding loans.
   ACE_Atomic_Op<ACE_Thread_Mutex, long> zero_copy_cnt_;
 
   /// The data sample's sequence number
-  SequenceNumber sequence_ ;
+  SequenceNumber sequence_;
 
   /// the previous data sample in the ReceivedDataElementList
-  ReceivedDataElement *previous_data_sample_ ;
+  ReceivedDataElement* previous_data_sample_;
 
   /// the next data sample in the ReceivedDataElementList
-  ReceivedDataElement *next_data_sample_ ;
+  ReceivedDataElement* next_data_sample_;
 
   void* operator new(size_t size, ACE_New_Allocator& pool);
   void operator delete(void* memory);
@@ -185,35 +186,35 @@ public:
 
 class OpenDDS_Dcps_Export ReceivedDataElementList {
 public:
-  ReceivedDataElementList(InstanceState *instance_state = 0) ;
+  ReceivedDataElementList(InstanceState* instance_state = 0);
 
-  ~ReceivedDataElementList() ;
+  ~ReceivedDataElementList();
 
   void apply_all(ReceivedDataFilter& match, ReceivedDataOperation& func);
 
   // adds a data sample to the end of the list
-  void add(ReceivedDataElement *data_sample) ;
+  void add(ReceivedDataElement* data_sample);
 
   // returns true if the instance was released
-  bool remove(ReceivedDataElement *data_sample) ;
+  bool remove(ReceivedDataElement* data_sample);
 
   // returns true if the instance was released
   bool remove(ReceivedDataFilter& match, bool eval_all);
 
-  ReceivedDataElement *remove_head() ;
-  ReceivedDataElement *remove_tail() ;
+  ReceivedDataElement* remove_head();
+  ReceivedDataElement* remove_tail();
 
   /// The first element of the list.
-  ReceivedDataElement* head_ ;
+  ReceivedDataElement* head_;
 
   /// The last element of the list.
-  ReceivedDataElement* tail_ ;
+  ReceivedDataElement* tail_;
 
   /// Number of elements in the list.
-  ssize_t              size_ ;
+  ssize_t size_;
 
 private:
-  InstanceState *instance_state_ ;
+  InstanceState* instance_state_;
 }; // ReceivedDataElementList
 
 } // namespace DCPS
