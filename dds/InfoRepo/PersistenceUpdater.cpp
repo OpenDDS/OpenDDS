@@ -1062,7 +1062,6 @@ PersistenceUpdaterSvc_Loader::init()
 {
   return ACE_Service_Config::process_directive
          (ace_svc_desc_PersistenceUpdaterSvc);
-  return 0;
 }
 
 // from the "ACE Programmers Guide (P. 424)
