@@ -29,7 +29,7 @@
 #include "ace/Arg_Shifter.h"
 
 #include "common.h"
-
+#include <cmath>
 
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
@@ -41,27 +41,29 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   while (arg_shifter.is_anything_left())
   {
     // options:
-    //  -t threshold liveliness lost defaults to 1000
-    //  -l lease duration           defaults to 10
-    //  -x test duration in sec     defaults to 40
-    //  -z                          verbose transport debug
+    //  -t threshold liveliness lost   defaults to 1000
+    //  -l lease duration              defaults to 10
+    //  -x test duration in sec        defaults to 40
+    //  -z                             verbose transport debug
 
     const ACE_TCHAR *currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
     {
-      LEASE_DURATION_SEC = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
+      LEASE_DURATION_SEC = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
     {
-      threshold_liveliness_lost = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
+      threshold_liveliness_lost = ACE_OS::atoi(currentArg);
+      arg_shifter.consume_arg();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-x"))) != 0)
     {
-      test_duration = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
+      float temp = ACE_OS::atof(currentArg);
+      TEST_DURATION_SEC.sec(std::floor(temp));
+      TEST_DURATION_SEC.usec((temp - static_cast<float>(TEST_DURATION_SEC.sec())) * 1e6);
+      arg_shifter.consume_arg();
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
@@ -172,7 +174,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                   drl.in (),
                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      ACE_OS::sleep(test_duration);
+      ACE_OS::sleep(TEST_DURATION_SEC);
 
       // clean up subscriber objects
 

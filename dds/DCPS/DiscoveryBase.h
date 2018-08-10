@@ -16,6 +16,8 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/DataReaderImpl_T.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "dds/DdsSecurityCoreC.h"
+
 #include "ace/Select_Reactor.h"
 #include "ace/Condition_Thread_Mutex.h"
 
@@ -31,6 +33,25 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::PublicationBuiltinTopicData> PublicationBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
+
+#if defined(OPENDDS_SECURITY)
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan) DatareaderCryptoHandleMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoHandle, DCPS::GUID_tKeyLessThan) DatawriterCryptoHandleMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatareaderCryptoTokenSeqMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatawriterCryptoTokenSeqMap;
+    typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan) EndpointSecurityAttributesMap;
+
+    typedef enum {
+      AS_UNKNOWN,
+      AS_VALIDATING_REMOTE,
+      AS_HANDSHAKE_REQUEST,
+      AS_HANDSHAKE_REQUEST_SENT,
+      AS_HANDSHAKE_REPLY,
+      AS_HANDSHAKE_REPLY_SENT,
+      AS_AUTHENTICATED,
+      AS_UNAUTHENTICATED
+    } AuthState;
+#endif
 
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
     {
@@ -87,23 +108,52 @@ namespace OpenDDS {
     template <typename DiscoveredParticipantData_>
     class EndpointManager {
     protected:
+
       struct DiscoveredSubscription {
-        DiscoveredSubscription() : bit_ih_(DDS::HANDLE_NIL) {}
+        DiscoveredSubscription()
+        : bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         explicit DiscoveredSubscription(const OpenDDS::DCPS::DiscoveredReaderData& r)
-          : reader_data_(r), bit_ih_(DDS::HANDLE_NIL) {}
+        : reader_data_(r)
+        , bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         OpenDDS::DCPS::DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
+
+#if defined(OPENDDS_SECURITY)
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
+#endif
+
       };
+
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredSubscription,
                               DCPS::GUID_tKeyLessThan) DiscoveredSubscriptionMap;
+
       typedef typename DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
 
       struct DiscoveredPublication {
-        DiscoveredPublication() : bit_ih_(DDS::HANDLE_NIL) {}
+        DiscoveredPublication()
+        : bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         explicit DiscoveredPublication(const OpenDDS::DCPS::DiscoveredWriterData& w)
-          : writer_data_(w), bit_ih_(DDS::HANDLE_NIL) {}
+        : writer_data_(w)
+        , bit_ih_(DDS::HANDLE_NIL)
+        {
+        }
+
         OpenDDS::DCPS::DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
+
+#if defined(OPENDDS_SECURITY)
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
+#endif
+
       };
 
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredPublication,
@@ -127,7 +177,14 @@ namespace OpenDDS {
         , publication_counter_(0)
         , subscription_counter_(0)
         , topic_counter_(0)
-      { }
+
+#if defined(OPENDDS_SECURITY)
+        , permissions_handle_(DDS::HANDLE_NIL)
+#endif
+
+      {
+
+      }
 
       virtual ~EndpointManager() { }
 
@@ -264,6 +321,7 @@ namespace OpenDDS {
                                    const DDS::PublisherQos& publisherQos)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+
         RepoId rid = participant_id_;
         assign_publication_key(rid, topicId, qos);
         LocalPublication& pb = local_publications_[rid];
@@ -272,7 +330,59 @@ namespace OpenDDS {
         pb.qos_ = qos;
         pb.trans_info_ = transInfo;
         pb.publisher_qos_ = publisherQos;
-        TopicDetails& td = topics_[topic_names_[topicId]];
+
+        const std::string& topic_name = topic_names_[topicId];
+
+#if defined(OPENDDS_SECURITY)
+        if (is_security_enabled()) {
+          DDS::Security::SecurityException ex;
+
+          DDS::Security::TopicSecurityAttributes topic_sec_attr;
+          if (!get_access_control()->get_topic_sec_attributes(get_permissions_handle(), topic_name.data(), topic_sec_attr, ex)) {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("DomainParticipant::add_publication, ")
+              ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
+
+          if (topic_sec_attr.is_write_protected == true) {
+            if (!get_access_control()->check_create_datawriter(get_permissions_handle(), get_domain_id(), topic_name.data(), qos,
+                                                               publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+              ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("EndpointManager::add_publication() - ")
+                ACE_TEXT("Permissions check failed for local datawriter on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_name.data(),
+                  ex.code, ex.minor_code, ex.message.in()));
+              return RepoId();
+            }
+          }
+
+          if (!get_access_control()->get_datawriter_sec_attributes(get_permissions_handle(), topic_name.data(),
+              publisherQos.partition, DDS::Security::DataTagQosPolicy(), pb.security_attribs_, ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                       ACE_TEXT("EndpointManager::add_publication() - ")
+                       ACE_TEXT("Unable to get security attributes for local datawriter. Security Exception[%d.%d]: %C\n"),
+                       ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
+
+          if (pb.security_attribs_.is_submessage_protected || pb.security_attribs_.is_payload_protected) {
+            DDS::Security::DatawriterCryptoHandle handle = get_crypto_key_factory()->register_local_datawriter(crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
+            if (handle == DDS::HANDLE_NIL) {
+              ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                         ACE_TEXT("EndpointManager::add_publication() - ")
+                         ACE_TEXT("Unable to get local datawriter crypto handle. Security Exception[%d.%d]: %C\n"),
+                         ex.code, ex.minor_code, ex.message.in()));
+            }
+
+            local_writer_crypto_handles_[rid] = handle;
+            local_writer_security_attribs_[rid] = pb.security_attribs_;
+          }
+        }
+#endif
+
+        TopicDetails& td = topics_[topic_name];
         td.endpoints_.insert(rid);
 
         if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
@@ -329,6 +439,7 @@ namespace OpenDDS {
                                     const DDS::StringSeq& params)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+
         RepoId rid = participant_id_;
         assign_subscription_key(rid, topicId, qos);
         LocalSubscription& sb = local_subscriptions_[rid];
@@ -341,7 +452,58 @@ namespace OpenDDS {
         sb.filterProperties.filterExpression = filterExpr;
         sb.filterProperties.expressionParameters = params;
 
-        TopicDetails& td = topics_[topic_names_[topicId]];
+        const std::string& topic_name = topic_names_[topicId];
+
+#if defined(OPENDDS_SECURITY)
+        if (is_security_enabled()) {
+          DDS::Security::SecurityException ex;
+
+          DDS::Security::TopicSecurityAttributes topic_sec_attr;
+          if (!get_access_control()->get_topic_sec_attributes(get_permissions_handle(), topic_name.data(), topic_sec_attr, ex)) {
+            ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("DomainParticipant::add_subscription, ")
+              ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
+                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
+
+          if (topic_sec_attr.is_read_protected == true) {
+            if (!get_access_control()->check_create_datareader(get_permissions_handle(), get_domain_id(), topic_name.data(), qos,
+                                                               subscriberQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
+              ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                ACE_TEXT("EndpointManager::add_subscription() - ")
+                ACE_TEXT("Permissions check failed for local datareader on topic '%C'. Security Exception[%d.%d]: %C\n"), topic_name.data(),
+                  ex.code, ex.minor_code, ex.message.in()));
+              return RepoId();
+            }
+          }
+
+          if (!get_access_control()->get_datareader_sec_attributes(get_permissions_handle(), topic_name.data(),
+              subscriberQos.partition, DDS::Security::DataTagQosPolicy(), sb.security_attribs_, ex)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                       ACE_TEXT("EndpointManager::add_subscription() - ")
+                       ACE_TEXT("Unable to get security attributes for local datareader. Security Exception[%d.%d]: %C\n"),
+                       ex.code, ex.minor_code, ex.message.in()));
+            return RepoId();
+          }
+
+          if (sb.security_attribs_.is_submessage_protected || sb.security_attribs_.is_payload_protected) {
+            DDS::Security::DatareaderCryptoHandle handle = get_crypto_key_factory()->register_local_datareader(crypto_handle_, DDS::PropertySeq(), sb.security_attribs_, ex);
+            if (handle == DDS::HANDLE_NIL) {
+              ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                         ACE_TEXT("EndpointManager::add_subscription() - ")
+                         ACE_TEXT("Unable to get local datareader crypto handle. Security Exception[%d.%d]: %C\n"),
+                         ex.code, ex.minor_code, ex.message.in()));
+            }
+
+            local_reader_crypto_handles_[rid] = handle;
+            local_reader_security_attribs_[rid] = sb.security_attribs_;
+          }
+        }
+#endif
+
+        TopicDetails& td = topics_[topic_name];
         td.endpoints_.insert(rid);
 
         if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
@@ -410,6 +572,11 @@ namespace OpenDDS {
         DCPS::DataWriterCallbacks* publication_;
         DDS::DataWriterQos qos_;
         DDS::PublisherQos publisher_qos_;
+
+#if defined(OPENDDS_SECURITY)
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
+#endif
+
       };
 
       struct LocalSubscription : LocalEndpoint {
@@ -417,6 +584,11 @@ namespace OpenDDS {
         DDS::DataReaderQos qos_;
         DDS::SubscriberQos subscriber_qos_;
         OpenDDS::DCPS::ContentFilterProperty_t filterProperties;
+
+#if defined(OPENDDS_SECURITY)
+        DDS::Security::EndpointSecurityAttributes security_attribs_;
+#endif
+
       };
 
       typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, DCPS::RepoId,
@@ -545,6 +717,38 @@ namespace OpenDDS {
                                                           false /*notify_lost*/);
           }
         }
+      }
+
+#if defined(OPENDDS_SECURITY)
+      virtual DDS::Security::DatawriterCryptoHandle
+      generate_remote_matched_writer_crypto_handle(const RepoId&, const DDS::Security::DatareaderCryptoHandle&)
+      {
+        return DDS::HANDLE_NIL;
+      }
+
+      virtual DDS::Security::DatareaderCryptoHandle
+      generate_remote_matched_reader_crypto_handle(const RepoId&, const DDS::Security::DatawriterCryptoHandle&, bool)
+      {
+        return DDS::HANDLE_NIL;
+      }
+
+      virtual void
+      create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&, const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&)
+      {
+        return;
+      }
+
+      virtual void
+      create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandle&, const DCPS::RepoId&, const DDS::Security::DatareaderCryptoHandle&, const DCPS::RepoId&)
+      {
+        return;
+      }
+#endif
+
+      virtual DDS::DomainId_t
+      get_domain_id() const
+      {
+        return -1;
       }
 
       void
@@ -723,6 +927,60 @@ namespace OpenDDS {
           if (!call_writer && !call_reader) {
             return; // nothing more to do
           }
+
+#if defined(OPENDDS_SECURITY)
+          if (is_security_enabled()) {
+            if (call_reader) {
+              RepoId writer_participant = writer;
+              writer_participant.entityId = ENTITYID_PARTICIPANT;
+              DatareaderCryptoHandleMap::const_iterator iter = local_reader_crypto_handles_.find(reader);
+              if (iter != local_reader_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
+                DDS::Security::DatareaderCryptoHandle drch = iter->second;
+                remote_writer_crypto_handles_[writer] = generate_remote_matched_writer_crypto_handle(writer_participant, drch);
+                DatawriterCryptoTokenSeqMap::iterator t_iter = pending_remote_writer_crypto_tokens_.find(writer);
+                if (t_iter != pending_remote_writer_crypto_tokens_.end()) {
+                  DDS::Security::SecurityException se;
+                  if (get_crypto_key_exchange()->set_remote_datawriter_crypto_tokens(iter->second, remote_writer_crypto_handles_[writer], t_iter->second, se) == false) {
+                    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
+                      ACE_TEXT("Unable to set pending remote datawriter crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                        se.code, se.minor_code, se.message.in()));
+                  }
+                  pending_remote_writer_crypto_tokens_.erase(t_iter);
+                }
+                EndpointSecurityAttributesMap::const_iterator s_iter = local_reader_security_attribs_.find(reader);
+                if (s_iter != local_reader_security_attribs_.end() && s_iter->second.is_submessage_protected) { // Yes, this is different for remote datawriters than readers (see 8.8.9.3 vs 8.8.9.2)
+                  create_and_send_datareader_crypto_tokens(drch, reader, remote_writer_crypto_handles_[writer], writer);
+                }
+              }
+            }
+            if (call_writer) {
+              RepoId reader_participant = reader;
+              reader_participant.entityId = ENTITYID_PARTICIPANT;
+              DatawriterCryptoHandleMap::const_iterator iter = local_writer_crypto_handles_.find(writer);
+              if (iter != local_writer_crypto_handles_.end()) { // It might not exist due to security attributes, and that's OK
+                DDS::Security::DatawriterCryptoHandle dwch = iter->second;
+                remote_reader_crypto_handles_[reader] = generate_remote_matched_reader_crypto_handle(reader_participant, dwch, (relay_only_readers_.count(reader) != 0));
+                DatareaderCryptoTokenSeqMap::iterator t_iter = pending_remote_reader_crypto_tokens_.find(reader);
+                if (t_iter != pending_remote_reader_crypto_tokens_.end()) {
+                  DDS::Security::SecurityException se;
+                  if (get_crypto_key_exchange()->set_remote_datareader_crypto_tokens(iter->second, remote_reader_crypto_handles_[reader], t_iter->second, se) == false) {
+                    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("(%P|%t) ERROR: DiscoveryBase::match() - ")
+                      ACE_TEXT("Unable to set pending remote datareader crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
+                        se.code, se.minor_code, se.message.in()));
+                  }
+                  pending_remote_reader_crypto_tokens_.erase(t_iter);
+                }
+                EndpointSecurityAttributesMap::const_iterator s_iter = local_writer_security_attribs_.find(writer);
+                if (s_iter != local_writer_security_attribs_.end() && (s_iter->second.is_submessage_protected || s_iter->second.is_payload_protected)) {
+                  create_and_send_datawriter_crypto_tokens(dwch, writer, remote_reader_crypto_handles_[reader], reader);
+                }
+              }
+            }
+          }
+#endif
+
           // Copy reader and writer association data prior to releasing lock
 #ifdef __SUNPRO_CC
           DCPS::ReaderAssociation ra;
@@ -740,7 +998,7 @@ namespace OpenDDS {
           wa.writerQos = *dwQos;
 #else
           const DCPS::ReaderAssociation ra =
-            {*rTls, reader, *subQos, *drQos,
+            {add_security_info(*rTls, writer, reader), reader, *subQos, *drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
              cfProp->filterClassName, cfProp->filterExpression,
 #else
@@ -748,7 +1006,8 @@ namespace OpenDDS {
 #endif
              cfProp->expressionParameters};
 
-          const DCPS::WriterAssociation wa = {*wTls, writer, *pubQos, *dwQos};
+          const DCPS::WriterAssociation wa =
+            {add_security_info(*wTls, writer, reader), writer, *pubQos, *dwQos};
 #endif
 
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
@@ -828,7 +1087,7 @@ namespace OpenDDS {
         }
       }
 
-      static bool is_opendds(const GUID_t& endpoint)
+      virtual bool is_opendds(const GUID_t& endpoint) const
       {
         return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
                             sizeof(DCPS::VENDORID_OCI));
@@ -843,6 +1102,11 @@ namespace OpenDDS {
       virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& tls,
                                                        DiscoveredPublicationIter& iter,
                                                        const RepoId& reader) = 0;
+
+      virtual DCPS::TransportLocatorSeq
+      add_security_info(const DCPS::TransportLocatorSeq& locators,
+                        const RepoId& /*writer*/, const RepoId& /*reader*/)
+      { return locators; }
 
       virtual bool defer_writer(const RepoId& writer,
                                 const RepoId& writer_participant) = 0;
@@ -901,6 +1165,53 @@ namespace OpenDDS {
                    ACE_TEXT("ran out of builtin topic keys\n")));
       }
 
+#if defined(OPENDDS_SECURITY)
+      inline bool is_security_enabled()
+      {
+        return (permissions_handle_ != DDS::HANDLE_NIL) && (access_control_ != 0);
+      }
+
+      inline void set_permissions_handle(DDS::Security::PermissionsHandle h)
+      {
+        permissions_handle_ = h;
+      }
+
+      inline DDS::Security::PermissionsHandle get_permissions_handle() const
+      {
+        return permissions_handle_;
+      }
+
+      inline void set_access_control(DDS::Security::AccessControl_var acl)
+      {
+        access_control_ = acl;
+      }
+
+      inline DDS::Security::AccessControl_var get_access_control() const
+      {
+        return access_control_;
+      }
+
+      inline void set_crypto_key_factory(DDS::Security::CryptoKeyFactory_var ckf)
+      {
+        crypto_key_factory_ = ckf;
+      }
+
+      inline DDS::Security::CryptoKeyFactory_var get_crypto_key_factory() const
+      {
+        return crypto_key_factory_;
+      }
+
+      inline void set_crypto_key_exchange(DDS::Security::CryptoKeyExchange_var ckf)
+      {
+        crypto_key_exchange_ = ckf;
+      }
+
+      inline DDS::Security::CryptoKeyExchange_var get_crypto_key_exchange() const
+      {
+        return crypto_key_exchange_;
+      }
+#endif
+
       ACE_Thread_Mutex& lock_;
       DCPS::RepoId participant_id_;
       BitKeyMap pub_key_to_id_, sub_key_to_id_;
@@ -913,7 +1224,30 @@ namespace OpenDDS {
       OPENDDS_MAP(OPENDDS_STRING, TopicDetails) topics_;
       TopicNameMap topic_names_;
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
+      OPENDDS_SET_CMP(DCPS::RepoId, DCPS::GUID_tKeyLessThan) relay_only_readers_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
+
+#if defined(OPENDDS_SECURITY)
+      DDS::Security::AccessControl_var access_control_;
+      DDS::Security::CryptoKeyFactory_var crypto_key_factory_;
+      DDS::Security::CryptoKeyExchange_var crypto_key_exchange_;
+
+      DDS::Security::PermissionsHandle permissions_handle_;
+      DDS::Security::ParticipantCryptoHandle crypto_handle_;
+
+      DatareaderCryptoHandleMap local_reader_crypto_handles_;
+      DatawriterCryptoHandleMap local_writer_crypto_handles_;
+
+      EndpointSecurityAttributesMap local_reader_security_attribs_;
+      EndpointSecurityAttributesMap local_writer_security_attribs_;
+
+      DatareaderCryptoHandleMap remote_reader_crypto_handles_;
+      DatawriterCryptoHandleMap remote_writer_crypto_handles_;
+
+      DatareaderCryptoTokenSeqMap pending_remote_reader_crypto_tokens_;
+      DatawriterCryptoTokenSeqMap pending_remote_writer_crypto_tokens_;
+#endif
+
     };
 
     template <typename EndpointManagerType>
@@ -953,12 +1287,18 @@ namespace OpenDDS {
         }
       }
 
+      virtual bool
+      announce_domain_participant_qos()
+      {
+        return true;
+      }
+
       bool
       update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
         qos_ = qos;
-        return true;
+        return announce_domain_participant_qos();
       }
 
       DCPS::TopicStatus
@@ -1082,18 +1422,78 @@ namespace OpenDDS {
     protected:
 
       struct DiscoveredParticipant {
-        DiscoveredParticipant() : bit_ih_(0) {}
-        DiscoveredParticipant(const DiscoveredParticipantData& p,
-                              const ACE_Time_Value& t)
-          : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL) {}
+
+        DiscoveredParticipant() :
+#if defined(OPENDDS_SECURITY)
+          bit_ih_(0),
+          has_last_stateless_msg_(false),
+          last_stateless_msg_time_(0, 0),
+          auth_started_time_(0, 0),
+          auth_state_(AS_UNKNOWN)
+#else
+          bit_ih_(0)
+#endif
+        {
+
+        }
+
+        DiscoveredParticipant(const DiscoveredParticipantData& p, const ACE_Time_Value& t) :
+#if defined(OPENDDS_SECURITY)
+          pdata_(p),
+          last_seen_(t),
+          bit_ih_(DDS::HANDLE_NIL),
+          has_last_stateless_msg_(false),
+          last_stateless_msg_time_(0, 0),
+          auth_started_time_(0, 0),
+          auth_state_(AS_UNKNOWN)
+#else
+        pdata_(p),
+        last_seen_(t),
+        bit_ih_(DDS::HANDLE_NIL)
+#endif
+        {
+
+        }
 
         DiscoveredParticipantData pdata_;
         ACE_Time_Value last_seen_;
         DDS::InstanceHandle_t bit_ih_;
+
+#if defined(OPENDDS_SECURITY)
+        bool has_last_stateless_msg_;
+        ACE_Time_Value last_stateless_msg_time_;
+        DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
+
+        ACE_Time_Value auth_started_time_;
+        AuthState auth_state_;
+
+        DDS::Security::IdentityToken identity_token_;
+        DDS::Security::PermissionsToken permissions_token_;
+        DDS::Security::PropertyQosPolicy property_qos_;
+        DDS::Security::ParticipantSecurityInfo security_info_;
+        DDS::Security::IdentityStatusToken identity_status_token_;
+        DDS::Security::IdentityHandle identity_handle_;
+        DDS::Security::HandshakeHandle handshake_handle_;
+        DDS::Security::AuthRequestMessageToken local_auth_request_token_;
+        DDS::Security::AuthRequestMessageToken remote_auth_request_token_;
+        DDS::Security::AuthenticatedPeerCredentialToken authenticated_peer_credential_token_;
+        DDS::Security::SharedSecretHandle_var shared_secret_handle_;
+        DDS::Security::PermissionsHandle permissions_handle_;
+        DDS::Security::ParticipantCryptoHandle crypto_handle_;
+        DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
+#endif
+
       };
+
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
                               DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;
       typedef typename DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+      typedef typename DiscoveredParticipantMap::const_iterator
+        DiscoveredParticipantConstIter;
+
+#if defined(OPENDDS_SECURITY)
+      typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::AuthRequestMessageToken, DCPS::GUID_tKeyLessThan) PendingRemoteAuthTokenMap;
+#endif
 
       virtual EndpointManagerType& endpoint_manager() = 0;
 
@@ -1130,10 +1530,15 @@ namespace OpenDDS {
       }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      ACE_Thread_Mutex lock_;
+      mutable ACE_Thread_Mutex lock_;
       DDS::Subscriber_var bit_subscriber_;
       DDS::DomainParticipantQos qos_;
       DiscoveredParticipantMap participants_;
+
+#if defined(OPENDDS_SECURITY)
+      PendingRemoteAuthTokenMap pending_remote_auth_tokens_;
+#endif
+
     };
 
     template<typename Participant>
@@ -1379,8 +1784,7 @@ namespace OpenDDS {
                                                     const DCPS::TransportLocatorSeq& transInfo,
                                                     const DDS::PublisherQos& publisherQos)
       {
-        return get_part(domainId, participantId)->add_publication(
-                                                                  topicId, publication, qos, transInfo, publisherQos);
+        return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos);
       }
 
       virtual bool remove_publication(DDS::DomainId_t domainId,

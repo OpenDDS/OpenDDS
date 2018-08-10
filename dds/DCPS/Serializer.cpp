@@ -137,6 +137,12 @@ Serializer::read_string(ACE_CDR::Char*& dest,
     return 0;
   }
 
+  if (length == 0) {
+    // not legal CDR, but we need to accept it since other implementations may generate this
+    dest = str_alloc(0);
+    return 0;
+  }
+
   //
   // NOTE: Maintain the ACE implementation where the length check is
   //       done here before the allocation even though it will be

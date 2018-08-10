@@ -65,42 +65,17 @@ DomainParticipantFactoryImpl::create_participant(
     return DDS::DomainParticipant::_nil();
   }
 
-  Discovery_rch disco = TheServiceParticipant->get_discovery(domainId);
-
-  if (disco.is_nil()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-               ACE_TEXT("no repository found for domainId: %d.\n"), domainId));
-    return DDS::DomainParticipant::_nil();
-  }
-
-  const AddDomainStatus value =
-    disco->add_domain_participant(domainId, par_qos);
-
-  if (value.id == GUID_UNKNOWN) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
-               ACE_TEXT("add_domain_participant returned invalid id.\n")));
-    return DDS::DomainParticipant::_nil();
-  }
-
-  RcHandle<DomainParticipantImpl> dp = make_rch<DomainParticipantImpl>(
-    this, domainId, value.id, par_qos, a_listener, mask, value.federated
-  );
-
-  if (DCPS_debug_level >= 2) {
-    GuidConverter converter(value.id);
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DomainParticipantFactoryImpl::create_participant: ")
-      ACE_TEXT("created participant %C\n"),
-      OPENDDS_STRING(converter).c_str()
-    ));
-  }
+  RcHandle<DomainParticipantImpl> dp =
+    make_rch<DomainParticipantImpl>(this, domainId, par_qos, a_listener, mask);
 
   if (qos_.entity_factory.autoenable_created_entities) {
-    dp->enable();
+    if (dp->enable() != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantFactoryImpl::create_participant, ")
+                 ACE_TEXT("unable to enable DomainParticipant.\n")));
+      return DDS::DomainParticipant::_nil();
+    }
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,

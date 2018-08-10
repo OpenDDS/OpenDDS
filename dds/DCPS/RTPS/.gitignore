@@ -17,6 +17,10 @@
 /RtpsCoreC.h
 /RtpsCoreC.inl
 /RtpsCoreS.h
+/RtpsSecurityC.cpp
+/RtpsSecurityC.h
+/RtpsSecurityC.inl
+/RtpsSecurityS.h
 /RtpsCoreTypeSupport.idl
 /RtpsCoreTypeSupportC.cpp
 /RtpsCoreTypeSupportC.h

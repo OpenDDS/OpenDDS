@@ -4,6 +4,7 @@ feature(no_opendds_safety_profile) : dcps_ts_defaults, dds_versioning_idl_defaul
 
   IDL_Files {
     RtpsCore.idl
+    RtpsSecurity.idl
   }
 
   TypeSupport_Files {

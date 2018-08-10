@@ -1,0 +1,772 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef DDS_SECURITY_CORE_IDL
+#define DDS_SECURITY_CORE_IDL
+
+// DDS Security 1.1 Normative IDL (ptc/2017-09-26)
+// This file follows the spec IDL but includes changes necessary for OpenDDS.
+// Those changes are not expected to impact the interface between plugin
+// implementations and the core.  Where the spec uses the 'native' IDL keyword,
+// the implementation (OpenDDS) may select a mapping either in IDL or as a
+// special case in the compiler.
+// Certain parts of the spec IDL have been moved to DdsSecurityParams.idl
+// or to other files, as noted below.
+
+#include "DdsDcpsGuid.idl"
+#include "DdsDcpsInfrastructure.idl"
+#include "DdsDcpsPublication.idl"
+#include "DdsDcpsSubscription.idl"
+#include "DdsSecurityParams.idl"
+
+// The types in this file shall be serialized with XCDR encoding version 1
+module DDS {
+  module Security {
+
+    // Since DynamicData is a feature of the XTypes spec (which isn't yet supported) the
+    // native type is replaced with an empty interface to satisfy the access-control methods
+    // which use the type.
+    local interface DynamicData {
+    };
+
+    // Per the security spec these types are expected to be visible in
+    // the DDS::Security namespace. They are defined in dds/DdsDcpsCore.idl
+    // in order to satisfy dependencies of DomainParticipantQos.
+    typedef DDS::Property_t Property_t;
+    typedef DDS::PropertySeq PropertySeq;
+    typedef DDS::BinaryProperty_t BinaryProperty_t;
+    typedef DDS::BinaryPropertySeq BinaryPropertySeq;
+    typedef DDS::PropertyQosPolicy PropertyQosPolicy;
+
+    typedef Token MessageToken;
+    typedef MessageToken AuthRequestMessageToken;
+    typedef MessageToken HandshakeMessageToken;
+
+    typedef Token  AuthenticatedPeerCredentialToken;
+    typedef Token  PermissionsCredentialToken;
+
+    typedef Token  CryptoToken;
+    typedef sequence<CryptoToken>  CryptoTokenSeq;
+
+    typedef Token  ParticipantCryptoToken;
+    typedef Token  DatawriterCryptoToken;
+    typedef Token  DatareaderCryptoToken;
+
+    typedef CryptoTokenSeq  ParticipantCryptoTokenSeq;
+    typedef CryptoTokenSeq  DatawriterCryptoTokenSeq;
+    typedef CryptoTokenSeq  DatareaderCryptoTokenSeq;
+
+    struct MessageIdentity {
+      OpenDDS::DCPS::GUID_t source_guid;
+      long long sequence_number;
+    };
+
+    typedef string GenericMessageClassId;
+
+    //@extensibility(APPENDABLE)
+    struct ParticipantGenericMessage {
+      MessageIdentity message_identity;
+      MessageIdentity related_message_identity;
+      OpenDDS::DCPS::GUID_t destination_participant_guid;
+      OpenDDS::DCPS::GUID_t destination_endpoint_guid;
+      OpenDDS::DCPS::GUID_t source_endpoint_guid;
+      GenericMessageClassId message_class_id;
+      DataHolderSeq message_data;
+    };
+
+    typedef ParticipantGenericMessage ParticipantStatelessMessage;
+    typedef ParticipantGenericMessage ParticipantVolatileMessageSecure;
+
+    const string GMCLASSID_SECURITY_AUTH_REQUEST = "dds.sec.auth_request";
+    const string GMCLASSID_SECURITY_AUTH_HANDSHAKE = "dds.sec.auth";
+    const string GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS = "dds.sec.participant_crypto_tokens";
+    const string GMCLASSID_SECURITY_DATAWRITER_CRYPTO_TOKENS = "dds.sec.datawriter_crypto_tokens";
+    const string GMCLASSID_SECURITY_DATAREADER_CRYPTO_TOKENS = "dds.sec.datareader_crypto_tokens";
+
+    const ReturnCode_t RETCODE_NOT_ALLOWED_BY_SECURITY = 1000;
+
+    typedef DataTags DataTagQosPolicy;
+
+    /* TODO: PENDING DATA TAGS IMPLEMENTATION
+        // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
+        @extensibility(MUTABLE)
+        struct DataWriterQos  :  DDS::DataWriterQos {
+            PropertyQosPolicy  property;
+            DataTagQosPolicy   data_tags;
+        };
+
+        // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
+        @extensibility(MUTABLE)
+        struct DataReaderQos  :  DDS::DataReaderQos {
+            PropertyQosPolicy  property;
+            DataTagQosPolicy   data_tags;
+        };
+
+    */
+
+    // See http://www.omg.org/spec/DDS-XTypes/20170301/dds-xtypes_discovery.idl
+    //@extensibility(MUTABLE)
+    struct ParticipantBuiltinTopicData { //  :  DDS::ParticipantBuiltinTopicData {
+      // in this and following structs, 'base' is used in place of struct inheritance
+      DDS::ParticipantBuiltinTopicData base;
+
+      IdentityToken     identity_token;
+      PermissionsToken  permissions_token;
+      PropertyQosPolicy property;
+      ParticipantSecurityInfo  security_info;
+    };
+
+    //@extensibility(MUTABLE)
+    struct ParticipantBuiltinTopicDataSecure { // :  ParticipantBuiltinTopicData {
+      ParticipantBuiltinTopicData base;
+
+      IdentityStatusToken identity_status_token;
+    };
+
+    //@extensibility(MUTABLE)
+    struct PublicationBuiltinTopicData { //: DDS::PublicationBuiltinTopicData {
+      DDS::PublicationBuiltinTopicData base;
+
+      EndpointSecurityInfo  security_info;
+    };
+
+    //@extensibility(MUTABLE)
+    struct SubscriptionBuiltinTopicData { //: DDS::SubscriptionBuiltinTopicData {
+      DDS::SubscriptionBuiltinTopicData base;
+
+      EndpointSecurityInfo  security_info;
+    };
+
+    //@extensibility(MUTABLE)
+    struct PublicationBuiltinTopicDataSecure {// :  PublicationBuiltinTopicData {
+      PublicationBuiltinTopicData base;
+
+      DataTags data_tags;
+    };
+
+    //@extensibility(MUTABLE)
+    struct SubscriptionBuiltinTopicDataSecure { //  :  SubscriptionBuiltinTopicData {
+      SubscriptionBuiltinTopicData base;
+
+      DataTags data_tags;
+    };
+
+    struct SecurityException {
+      string  message;
+      long    code;
+      long    minor_code;
+    };
+
+    enum ValidationResult_t {
+      VALIDATION_OK,
+      VALIDATION_FAILED,
+      VALIDATION_PENDING_RETRY,
+      VALIDATION_PENDING_HANDSHAKE_REQUEST,
+      VALIDATION_PENDING_HANDSHAKE_MESSAGE,
+      VALIDATION_OK_FINAL_MESSAGE
+    };
+
+    typedef long IdentityHandle;
+    typedef long HandshakeHandle;
+    typedef long PermissionsHandle;
+
+    // https://issues.omg.org/issues/DDSSEC12-2
+    local interface SharedSecretHandle {
+      readonly attribute OctetSeq challenge1, challenge2, sharedSecret;
+    };
+
+    typedef long ParticipantCryptoHandle;
+    typedef sequence<ParticipantCryptoHandle> ParticipantCryptoHandleSeq;
+
+    // Used internally by OpenDDS Implementation
+    typedef long NativeCryptoHandle;
+
+    typedef NativeCryptoHandle DatawriterCryptoHandle;
+    typedef sequence<DatawriterCryptoHandle> DatawriterCryptoHandleSeq;
+
+    typedef NativeCryptoHandle DatareaderCryptoHandle;
+    typedef sequence<DatareaderCryptoHandle> DatareaderCryptoHandleSeq;
+
+    local interface Authentication;
+
+    enum AuthStatusKind {
+      RESERVED_AUTH_STATUS_KIND_0,
+      //@value(1) IDENTITY_STATUS
+      IDENTITY_STATUS
+    };
+
+    local interface AuthenticationListener {
+      boolean
+      on_revoke_identity(
+        in    Authentication     plugin,
+        in    IdentityHandle     handle,
+        inout SecurityException  ex);
+
+      boolean
+      on_status_changed(
+        in    Authentication     plugin,
+        in    IdentityHandle     handle,
+        in    AuthStatusKind     status_kind,
+        inout SecurityException  ex);
+    };
+
+    typedef DDS::DomainId_t DomainId_t;
+
+    local interface Authentication {
+
+      ValidationResult_t
+      validate_local_identity(
+        inout IdentityHandle        local_identity_handle,
+        inout OpenDDS::DCPS::GUID_t adjusted_participant_guid,
+        in    DomainId_t            domain_id,
+        in    DomainParticipantQos  participant_qos,
+        in    OpenDDS::DCPS::GUID_t candidate_participant_guid,
+        inout SecurityException     ex );
+
+      boolean
+      get_identity_token(
+        inout IdentityToken      identity_token,
+        in    IdentityHandle     handle,
+        inout SecurityException  ex );
+
+      boolean
+      get_identity_status_token(
+        inout IdentityStatusToken      identity_status_token,
+        in    IdentityHandle           handle,
+        inout SecurityException        ex );
+
+      boolean
+      set_permissions_credential_and_token(
+        in    IdentityHandle         handle,
+        in    PermissionsCredentialToken  permissions_credential,
+        in    PermissionsToken       permissions_token,
+        inout SecurityException      ex );
+
+      ValidationResult_t
+      validate_remote_identity(
+        inout  IdentityHandle           remote_identity_handle,
+        inout  AuthRequestMessageToken  local_auth_request_token,
+        in     AuthRequestMessageToken  remote_auth_request_token,
+        in     IdentityHandle           local_identity_handle,
+        in     IdentityToken            remote_identity_token,
+        in     OpenDDS::DCPS::GUID_t    remote_participant_guid,
+        inout  SecurityException        ex );
+
+      ValidationResult_t
+      begin_handshake_request(
+        inout HandshakeHandle        handshake_handle,
+        inout HandshakeMessageToken  handshake_message,
+        in    IdentityHandle         initiator_identity_handle,
+        in    IdentityHandle         replier_identity_handle,
+        in    OctetSeq               serialized_local_participant_data,
+        inout SecurityException      ex );
+
+      ValidationResult_t
+      begin_handshake_reply(
+        inout HandshakeHandle        handshake_handle,
+        inout HandshakeMessageToken  handshake_message_out,
+        in    IdentityHandle         initiator_identity_handle,
+        in    IdentityHandle         replier_identity_handle,
+        in    OctetSeq               serialized_local_participant_data,
+        inout SecurityException      ex );
+
+      ValidationResult_t
+      process_handshake(
+        inout HandshakeMessageToken  handshake_message_out,
+        in    HandshakeMessageToken  handshake_message_in,
+        in    HandshakeHandle        handshake_handle,
+        inout SecurityException      ex );
+
+      SharedSecretHandle
+      get_shared_secret(
+        in    HandshakeHandle    handshake_handle,
+        inout SecurityException  ex );
+
+      boolean
+      get_authenticated_peer_credential_token(
+        inout AuthenticatedPeerCredentialToken  peer_credential_token,
+        in    HandshakeHandle                   handshake_handle,
+        inout SecurityException                 ex );
+
+      boolean
+      set_listener(
+        in   AuthenticationListener  listener,
+        inout SecurityException   ex );
+
+      boolean
+      return_identity_token(
+        in    IdentityToken      token,
+        inout SecurityException  ex);
+
+      boolean
+      return_identity_status_token(
+        in    IdentityStatusToken  token,
+        inout SecurityException    ex);
+
+      boolean
+      return_authenticated_peer_credential_token(
+        in   AuthenticatedPeerCredentialToken peer_credential_token,
+        inout SecurityException  ex);
+
+      boolean
+      return_handshake_handle(
+        in    HandshakeHandle    handshake_handle,
+        inout SecurityException  ex);
+
+      boolean
+      return_identity_handle(
+        in   IdentityHandle      identity_handle,
+        inout SecurityException  ex);
+
+      boolean
+      return_sharedsecret_handle(
+        in    SharedSecretHandle  sharedsecret_handle,
+        inout SecurityException   ex);
+    };
+
+    struct ParticipantSecurityAttributes {
+      boolean     allow_unauthenticated_participants;
+      boolean     is_access_protected;
+      boolean     is_rtps_protected;
+      boolean     is_discovery_protected;
+      boolean     is_liveliness_protected;
+      PluginParticipantSecurityAttributesMask plugin_participant_attributes;
+      PropertySeq ac_endpoint_properties;
+    };
+
+    struct TopicSecurityAttributes {
+      boolean  is_read_protected;
+      boolean  is_write_protected;
+      boolean  is_discovery_protected;
+      boolean  is_liveliness_protected;
+    };
+
+    struct EndpointSecurityAttributes { //: TopicSecurityAttributes {
+      TopicSecurityAttributes base;
+
+      boolean     is_submessage_protected;
+      boolean     is_payload_protected;
+      boolean     is_key_protected;
+      PluginEndpointSecurityAttributesMask  plugin_endpoint_attributes;
+      PropertySeq ac_endpoint_properties;
+    };
+
+    local interface AccessControl;
+
+    local interface AccessControlListener {
+      boolean
+      on_revoke_permissions(
+        in   AccessControl plugin,
+        in   PermissionsHandle handle);
+    };
+
+    local interface AccessControl {
+      PermissionsHandle
+      validate_local_permissions(
+        in    Authentication         auth_plugin,
+        in    IdentityHandle         identity,
+        in    DomainId_t             domain_id,
+        in    DomainParticipantQos   participant_qos,
+        inout SecurityException      ex );
+
+      PermissionsHandle
+      validate_remote_permissions(
+        in    Authentication                    auth_plugin,
+        in    IdentityHandle                    local_identity_handle,
+        in    IdentityHandle                    remote_identity_handle,
+        in    PermissionsToken                  remote_permissions_token,
+        in    AuthenticatedPeerCredentialToken  remote_credential_token,
+        inout SecurityException                 ex );
+
+      boolean
+      check_create_participant(
+        in    PermissionsHandle     permissions_handle,
+        in    DomainId_t            domain_id,
+        in    DomainParticipantQos  qos,
+        inout SecurityException     ex );
+
+      boolean
+      check_create_datawriter(
+        in    PermissionsHandle   permissions_handle,
+        in    DomainId_t          domain_id,
+        in    string              topic_name,
+        in    DataWriterQos       qos,
+        in    PartitionQosPolicy  partition,
+        in    DataTags            data_tag,
+        inout SecurityException   ex);
+
+      boolean
+      check_create_datareader(
+        in    PermissionsHandle   permissions_handle,
+        in    DomainId_t          domain_id,
+        in    string              topic_name,
+        in    DataReaderQos       qos,
+        in    PartitionQosPolicy  partition,
+        in    DataTags            data_tag,
+        inout SecurityException   ex);
+
+      boolean
+      check_create_topic(
+        in    PermissionsHandle permissions_handle,
+        in    DomainId_t         domain_id,
+        in    string             topic_name,
+        in    TopicQos           qos,
+        inout SecurityException  ex);
+
+      boolean
+      check_local_datawriter_register_instance(
+        in    PermissionsHandle  permissions_handle,
+        in    DataWriter         writer,
+        in    DynamicData        key,
+        inout SecurityException  ex);
+
+      boolean
+      check_local_datawriter_dispose_instance(
+        in    PermissionsHandle  permissions_handle,
+        in    DataWriter         writer,
+        in    DynamicData        key,
+        inout SecurityException  ex);
+
+      boolean
+      check_remote_participant(
+        in    PermissionsHandle                  permissions_handle,
+        in    DomainId_t                         domain_id,
+        in    ParticipantBuiltinTopicDataSecure  participant_data,
+        inout SecurityException                  ex);
+
+      boolean
+      check_remote_datawriter(
+        in   PermissionsHandle                  permissions_handle,
+        in   DomainId_t                         domain_id,
+        in   PublicationBuiltinTopicDataSecure  publication_data,
+        inout SecurityException                 ex);
+
+      boolean
+      check_remote_datareader(
+        in    PermissionsHandle                   permissions_handle,
+        in    DomainId_t                          domain_id,
+        in    SubscriptionBuiltinTopicDataSecure  subscription_data,
+        inout boolean                             relay_only,
+        inout SecurityException                   ex);
+
+      boolean
+      check_remote_topic(
+        in    PermissionsHandle      permissions_handle,
+        in    DomainId_t             domain_id,
+        in    TopicBuiltinTopicData  topic_data,
+        inout SecurityException      ex);
+
+      boolean
+      check_local_datawriter_match(
+        in    PermissionsHandle  writer_permissions_handle,
+        in    PermissionsHandle  reader_permissions_handle,
+        in    PublicationBuiltinTopicDataSecure  publication_data,
+        in    SubscriptionBuiltinTopicDataSecure subscription_data,
+        inout SecurityException  ex);
+
+      boolean
+      check_local_datareader_match(
+        in    PermissionsHandle  reader_permissions_handle,
+        in    PermissionsHandle  writer_permissions_handle,
+        in    SubscriptionBuiltinTopicDataSecure subscription_data,
+        in    PublicationBuiltinTopicDataSecure  publication_data,
+        inout SecurityException  ex);
+
+      boolean
+      check_remote_datawriter_register_instance(
+        in    PermissionsHandle   permissions_handle,
+        in    DataReader          reader,
+        in    InstanceHandle_t    publication_handle,
+        in    DynamicData         key,
+        in    InstanceHandle_t    instance_handle,
+        inout SecurityException   ex);
+
+      boolean
+      check_remote_datawriter_dispose_instance(
+        in    PermissionsHandle  permissions_handle,
+        in    DataReader         reader,
+        in    InstanceHandle_t   publication_handle,
+        in    DynamicData        key,
+        inout SecurityException  ex);
+
+      boolean
+      get_permissions_token(
+        inout PermissionsToken   permissions_token,
+        in    PermissionsHandle  handle,
+        inout SecurityException  ex);
+
+      boolean
+      get_permissions_credential_token(
+        inout PermissionsCredentialToken permissions_credential_token,
+        in    PermissionsHandle  handle,
+        inout SecurityException  ex);
+
+      boolean
+      set_listener(
+        in    AccessControlListener  listener,
+        inout SecurityException      ex);
+
+      boolean
+      return_permissions_token(
+        in    PermissionsToken   token,
+        inout SecurityException  ex);
+
+      boolean
+      return_permissions_credential_token(
+        in    PermissionsCredentialToken  permissions_credential_token,
+        inout SecurityException           ex);
+
+      boolean
+      get_participant_sec_attributes(
+        in    PermissionsHandle              permissions_handle,
+        inout ParticipantSecurityAttributes  attributes,
+        inout SecurityException              ex);
+
+      boolean
+      get_topic_sec_attributes (
+        in    PermissionsHandle           permissions_handle,
+        in    string                      topic_name,
+        inout TopicSecurityAttributes     attributes,
+        inout SecurityException           ex);
+
+      boolean
+      get_datawriter_sec_attributes(
+        in    PermissionsHandle           permissions_handle,
+	in    string                      topic_name,
+        in    PartitionQosPolicy          partition,
+        in    DataTagQosPolicy            data_tag,
+        inout EndpointSecurityAttributes  attributes,
+        inout SecurityException           ex);
+
+      boolean
+      get_datareader_sec_attributes(
+        in    PermissionsHandle           permissions_handle,
+	in    string                      topic_name,
+        in    PartitionQosPolicy          partition,
+        in    DataTagQosPolicy            data_tag,
+        inout EndpointSecurityAttributes  attributes,
+        inout SecurityException           ex);
+
+      boolean
+      return_participant_sec_attributes(
+        in ParticipantSecurityAttributes  attributes,
+        inout SecurityException           ex);
+
+      boolean
+      return_datawriter_sec_attributes(
+        in EndpointSecurityAttributes  attributes,
+        inout SecurityException        ex);
+
+      boolean
+      return_datareader_sec_attributes(
+        in EndpointSecurityAttributes  attributes,
+        inout SecurityException        ex);
+    };
+
+
+
+    local interface CryptoKeyFactory {
+
+      ParticipantCryptoHandle
+      register_local_participant(
+        in    IdentityHandle                 participant_identity,
+        in    PermissionsHandle              participant_permissions,
+        in    PropertySeq                    participant_properties,
+        in    ParticipantSecurityAttributes  participant_security_attributes,
+        inout SecurityException              ex  );
+
+      ParticipantCryptoHandle
+      register_matched_remote_participant(
+        in    ParticipantCryptoHandle  local_participant_crypto_handle,
+        in    IdentityHandle           remote_participant_identity,
+        in    PermissionsHandle        remote_participant_permissions,
+        in    SharedSecretHandle       shared_secret,
+        inout SecurityException        ex);
+
+      DatawriterCryptoHandle
+      register_local_datawriter(
+        in    ParticipantCryptoHandle  participant_crypto,
+        in    PropertySeq              datawriter_properties,
+        in    EndpointSecurityAttributes datawriter_security_attributes,
+        inout SecurityException        ex);
+
+      DatareaderCryptoHandle
+      register_matched_remote_datareader(
+        in    DatawriterCryptoHandle   local_datawritert_crypto_handle,
+        in    ParticipantCryptoHandle  remote_participant_crypto,
+        in    SharedSecretHandle       shared_secret,
+        in    boolean                  relay_only,
+        inout SecurityException        ex);
+
+      DatareaderCryptoHandle
+      register_local_datareader(
+        in    ParticipantCryptoHandle     participant_crypto,
+        in    PropertySeq                 datareader_properties,
+        in    EndpointSecurityAttributes  datareader_security_attributes,
+        inout SecurityException           ex);
+
+      DatawriterCryptoHandle
+      register_matched_remote_datawriter(
+        in    DatareaderCryptoHandle   local_datareader_crypto_handle,
+        in    ParticipantCryptoHandle  remote_participant_crypt,
+        in    SharedSecretHandle       shared_secret,
+        inout SecurityException        ex );
+
+      boolean
+      unregister_participant(
+        in    ParticipantCryptoHandle  participant_crypto_handle,
+        inout SecurityException        ex);
+
+      boolean
+      unregister_datawriter(
+        in    DatawriterCryptoHandle  datawriter_crypto_handle,
+        inout SecurityException       ex  );
+
+      boolean
+      unregister_datareader(
+        in    DatareaderCryptoHandle  datareader_crypto_handle,
+        inout SecurityException       ex  );
+    };
+
+    local interface CryptoKeyExchange {
+      boolean
+      create_local_participant_crypto_tokens(
+        inout ParticipantCryptoTokenSeq  local_participant_crypto_tokens,
+        in    ParticipantCryptoHandle    local_participant_crypto,
+        in    ParticipantCryptoHandle    remote_participant_crypto,
+        inout SecurityException          ex);
+
+      boolean
+      set_remote_participant_crypto_tokens(
+        in    ParticipantCryptoHandle    local_participant_crypto,
+        in    ParticipantCryptoHandle    remote_participant_crypto,
+        in    ParticipantCryptoTokenSeq  remote_participant_tokens,
+        inout SecurityException          ex);
+
+      boolean
+      create_local_datawriter_crypto_tokens(
+        inout DatawriterCryptoTokenSeq  local_datawriter_crypto_tokens,
+        in    DatawriterCryptoHandle    local_datawriter_crypto,
+        in    DatareaderCryptoHandle    remote_datareader_crypto,
+        inout SecurityException         ex);
+
+      boolean
+      set_remote_datawriter_crypto_tokens(
+        in    DatareaderCryptoHandle    local_datareader_crypto,
+        in    DatawriterCryptoHandle    remote_datawriter_crypto,
+        in    DatawriterCryptoTokenSeq  remote_datawriter_tokens,
+        inout SecurityException         ex);
+
+      boolean
+      create_local_datareader_crypto_tokens(
+        inout DatareaderCryptoTokenSeq  local_datareader_cryto_tokens,
+        in    DatareaderCryptoHandle    local_datareader_crypto,
+        in    DatawriterCryptoHandle    remote_datawriter_crypto,
+        inout SecurityException         ex);
+
+      boolean
+      set_remote_datareader_crypto_tokens(
+        in    DatawriterCryptoHandle    local_datawriter_crypto,
+        in    DatareaderCryptoHandle    remote_datareader_crypto,
+        in    DatareaderCryptoTokenSeq  remote_datareader_tokens,
+        inout SecurityException         ex);
+
+      boolean
+      return_crypto_tokens(
+        in    CryptoTokenSeq     crypto_tokens,
+        inout SecurityException  ex);
+    };
+
+    enum SecureSubmessageCategory_t {
+      INFO_SUBMESSAGE,
+      DATAWRITER_SUBMESSAGE,
+      DATAREADER_SUBMESSAGE
+    };
+
+    local interface CryptoTransform {
+      boolean
+      encode_serialized_payload(
+        inout OctetSeq                encoded_buffer,
+        inout OctetSeq                extra_inline_qos,
+        in    OctetSeq                plain_buffer,
+        in    DatawriterCryptoHandle  sending_datawriter_crypto,
+        inout SecurityException       ex);
+
+      boolean
+      encode_datawriter_submessage(
+        inout OctetSeq                   encoded_rtps_submessage,
+        in    OctetSeq                   plain_rtps_submessage,
+        in    DatawriterCryptoHandle     sending_datawriter_crypto,
+        in    DatareaderCryptoHandleSeq  receiving_datareader_crypto_list,
+        inout long                       receiving_datareader_crypto_list_index,
+        inout SecurityException          ex);
+
+      boolean
+      encode_datareader_submessage(
+        inout OctetSeq                   encoded_rtps_submessage,
+        in    OctetSeq                   plain_rtps_submessage,
+        in    DatareaderCryptoHandle     sending_datareader_crypto,
+        in    DatawriterCryptoHandleSeq  receiving_datawriter_crypto_list,
+        inout SecurityException          ex);
+
+      boolean
+      encode_rtps_message(
+        inout OctetSeq encoded_rtps_message,
+        in    OctetSeq plain_rtps_message,
+        in    ParticipantCryptoHandle sending_participant_crypto,
+        in    ParticipantCryptoHandleSeq receiving_participant_crypto_list,
+        inout long                       receiving_participant_crypto_list_index,
+        inout SecurityException ex);
+
+      boolean
+      decode_rtps_message(
+        inout OctetSeq                 plain_buffer,
+        in    OctetSeq                 encoded_buffer,
+        in    ParticipantCryptoHandle  receiving_participant_crypto,
+        in    ParticipantCryptoHandle  sending_participant_crypto,
+        inout SecurityException        ex);
+
+      boolean
+      preprocess_secure_submsg(
+        inout DatawriterCryptoHandle         datawriter_crypto,
+        inout DatareaderCryptoHandle         datareader_crypto,
+        inout SecureSubmessageCategory_t     secure_submessage_category,
+        in    OctetSeq                       encoded_rtps_submessage,
+        in    ParticipantCryptoHandle        receiving_participant_crypto,
+        in    ParticipantCryptoHandle        sending_participant_crypto,
+        inout SecurityException              ex);
+
+      boolean
+      decode_datawriter_submessage(
+        inout OctetSeq                plain_rtps_submessage,
+        in    OctetSeq                encoded_rtps_submessage,
+        in    DatareaderCryptoHandle  receiving_datareader_crypto,
+        in    DatawriterCryptoHandle  sending_datawriter_crypto,
+        inout SecurityException       ex); // DDSSEC12-21
+
+      boolean
+      decode_datareader_submessage(
+        inout OctetSeq                plain_rtps_submessage,
+        in    OctetSeq                encoded_rtps_submessage,
+        in    DatawriterCryptoHandle  receiving_datawriter_crypto,
+        in    DatareaderCryptoHandle  sending_datareader_crypto,
+        inout SecurityException       ex);
+
+      boolean
+      decode_serialized_payload(
+        inout OctetSeq                plain_buffer,
+        in    OctetSeq                encoded_buffer,
+        in    OctetSeq                inline_qos,
+        in    DatareaderCryptoHandle  receiving_datareader_crypto,
+        in    DatawriterCryptoHandle  sending_datawriter_crypto,
+        inout SecurityException       ex);
+    };
+
+  };
+};
+
+#endif /* DDS_SECURITY_CORE_IDL */

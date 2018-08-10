@@ -158,7 +158,6 @@ DataWriterImpl::init(
 
   RcHandle<DomainParticipantImpl> participant = participant_servant.lock();
   domain_id_ = participant->get_domain_id();
-  dp_id_ = participant->get_id();
 
   // Only store the publisher pointer, since it is our parent, we will
   // exist as long as it does.
@@ -1274,6 +1273,11 @@ DataWriterImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    dp_id_ = participant->get_id();
+  }
+
   // Note: do configuration based on QoS in enable() because
   //       before enable is called the QoS can be changed -- even
   //       for Changeable=NO
@@ -1383,7 +1387,6 @@ DataWriterImpl::enable()
     }
   }
 
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (!participant)
     return DDS::RETCODE_ERROR;
 
@@ -1416,8 +1419,8 @@ DataWriterImpl::enable()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
                ACE_TEXT("Transport Exception.\n")));
+    data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
-
   }
 
   const TransportLocatorSeq& trans_conf_info = connection_info();
@@ -1437,9 +1440,10 @@ DataWriterImpl::enable()
 
 
   if (!publisher || this->publication_id_ == GUID_UNKNOWN) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
+    ACE_DEBUG((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
                ACE_TEXT("add_publication returned invalid id. \n")));
+    data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
   }
 
@@ -2638,6 +2642,14 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
   qos_data.dw_qos = this->qos_;
   qos_data.topic_name = this->topic_name_.in();
 }
+
+#if defined(OPENDDS_SECURITY)
+DDS::Security::ParticipantCryptoHandle DataWriterImpl::get_crypto_handle() const
+{
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return participant ? participant->crypto_handle() : DDS::HANDLE_NIL;
+}
+#endif
 
 bool
 DataWriterImpl::need_sequence_repair()

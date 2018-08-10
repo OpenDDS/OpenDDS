@@ -133,6 +133,7 @@ public:
   DDS::EntityFactoryQosPolicy       initial_EntityFactoryQosPolicy() const;
   DDS::WriterDataLifecycleQosPolicy initial_WriterDataLifecycleQosPolicy() const;
   DDS::ReaderDataLifecycleQosPolicy initial_ReaderDataLifecycleQosPolicy() const;
+  DDS::PropertyQosPolicy            initial_PropertyQosPolicy() const;
 
   DDS::DomainParticipantFactoryQos  initial_DomainParticipantFactoryQos() const;
   DDS::DomainParticipantQos         initial_DomainParticipantQos() const;
@@ -286,6 +287,16 @@ public:
   int bit_lookup_duration_msec() const;
   void bit_lookup_duration_msec(int msec);
   //@}
+
+#if defined(OPENDDS_SECURITY)
+  bool get_security() {
+    return security_enabled_;
+  }
+
+  void set_security(bool b) {
+    security_enabled_ = b;
+  }
+#endif
 
   bool get_BIT() {
     return bit_enabled_;
@@ -481,6 +492,7 @@ private:
   DDS::EntityFactoryQosPolicy         initial_EntityFactoryQosPolicy_;
   DDS::WriterDataLifecycleQosPolicy   initial_WriterDataLifecycleQosPolicy_;
   DDS::ReaderDataLifecycleQosPolicy   initial_ReaderDataLifecycleQosPolicy_;
+  DDS::PropertyQosPolicy              initial_PropertyQosPolicy_;
 
   DDS::DomainParticipantQos           initial_DomainParticipantQos_;
   DDS::TopicQos                       initial_TopicQos_;
@@ -509,6 +521,10 @@ private:
   int bit_transport_port_;
 
   bool bit_enabled_;
+
+#if defined(OPENDDS_SECURITY)
+  bool security_enabled_;
+#endif
 
   /// The timeout for lookup data from the builtin topic
   /// @c DataReader.

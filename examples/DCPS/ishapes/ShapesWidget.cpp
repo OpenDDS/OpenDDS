@@ -2,10 +2,21 @@
 #include <QtGui/QtGui>
 #include <ShapesWidget.hpp>
 
+#include "dds/DCPS/Service_Participant.h"
+
+namespace {
+  const char* logoFile()
+  {
+    return TheServiceParticipant->get_security()
+      ? ":/images/logo_secure_beta.png"
+      : ":/images/logo.png";
+  }
+}
+
 ShapesWidget::ShapesWidget(QWidget *parent)
 : QWidget(parent),
   showCurrentFilter_(false),
-  logo_(":/images/logo.png")
+  logo_(logoFile())
 {
     this->setBackgroundRole(QPalette::Base);
     this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

@@ -127,6 +127,8 @@ public:
 
   static bool valid(const DDS::EntityFactoryQosPolicy& qos);
 
+  static bool valid(const DDS::PropertyQosPolicy& qos);
+
   static bool valid(const DDS::WriterDataLifecycleQosPolicy& qos);
 
   static bool valid(const DDS::ReaderDataLifecycleQosPolicy& qos);
@@ -447,6 +449,10 @@ bool operator!=(const DDS::WriterDataLifecycleQosPolicy& qos1,
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::ReaderDataLifecycleQosPolicy& qos1,
                 const DDS::ReaderDataLifecycleQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::PropertyQosPolicy& qos1,
+                const DDS::PropertyQosPolicy& qos2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::DomainParticipantQos& qos1,
