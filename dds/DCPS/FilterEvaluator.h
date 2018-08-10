@@ -92,6 +92,11 @@ public:
 
   size_t number_parameters() const { return number_parameters_; }
 
+  bool FilterEvaluator::has_unsafe_fieldnames()
+  {
+    return has_unsafe_fieldnames_;
+  }
+
   template<typename T>
   bool eval(const T& sample, const DDS::StringSeq& params) const
   {
@@ -129,6 +134,7 @@ private:
 
   EvalNode* walkAst(const AstNodeWrapper& node);
   Operand* walkOperand(const AstNodeWrapper& node);
+  void walkForUnsafeFieldNames(const AstNodeWrapper& node);
 
   struct OpenDDS_Dcps_Export DeserializedForEval : DataForEval {
     DeserializedForEval(const void* data, const MetaStruct& meta,
@@ -157,6 +163,8 @@ private:
   /// Number of parameter used in the filter, this should
   /// match the number of values passed when evaluating the filter
   size_t number_parameters_;
+
+  bool has_unsafe_fieldnames_;
 };
 
 class OpenDDS_Dcps_Export MetaStruct {
