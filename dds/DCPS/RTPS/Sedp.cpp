@@ -2305,7 +2305,7 @@ bool Sedp::should_drop_message(const char* unsecure_topic_name)
 
 void
 Sedp::Task::svc_stateless_message(DCPS::MessageId id,
-		  const DDS::Security::ParticipantStatelessMessage* data)
+                                  const DDS::Security::ParticipantStatelessMessage* data)
 {
   DCPS::unique_ptr<const DDS::Security::ParticipantStatelessMessage> delete_the_data(data);
   sedp_->received_stateless_message(id, *data);
@@ -2336,7 +2336,7 @@ Sedp::received_stateless_message(DCPS::MessageId /*message_id*/,
 
 void
 Sedp::Task::svc_volatile_message_secure(DCPS::MessageId id,
-		  const DDS::Security::ParticipantVolatileMessageSecure* data)
+                                        const DDS::Security::ParticipantVolatileMessageSecure* data)
 {
   DCPS::unique_ptr<const DDS::Security::ParticipantVolatileMessageSecure> delete_the_data(data);
   sedp_->received_volatile_message_secure(id, *data);
@@ -2682,8 +2682,8 @@ Sedp::Writer::write_stateless_message(const DDS::Security::ParticipantStatelessM
 
 DDS::ReturnCode_t
 Sedp::Writer::write_volatile_message_secure(const DDS::Security::ParticipantVolatileMessageSecure& msg,
-					    const RepoId& reader,
-					    DCPS::SequenceNumber& sequence)
+                                            const RepoId& reader,
+                                            DCPS::SequenceNumber& sequence)
 {
   using DCPS::Serializer;
 

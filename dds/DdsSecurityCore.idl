@@ -536,7 +536,7 @@ module DDS {
       boolean
       get_datawriter_sec_attributes(
         in    PermissionsHandle           permissions_handle,
-	in    string                      topic_name,
+        in    string                      topic_name,
         in    PartitionQosPolicy          partition,
         in    DataTagQosPolicy            data_tag,
         inout EndpointSecurityAttributes  attributes,
@@ -545,7 +545,7 @@ module DDS {
       boolean
       get_datareader_sec_attributes(
         in    PermissionsHandle           permissions_handle,
-	in    string                      topic_name,
+        in    string                      topic_name,
         in    PartitionQosPolicy          partition,
         in    DataTagQosPolicy            data_tag,
         inout EndpointSecurityAttributes  attributes,

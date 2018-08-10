@@ -50,8 +50,8 @@ namespace Security {
 * the interface this class is implementing.
 *
 */
-class DdsSecurity_Export  AccessControlBuiltInImpl
-	: public virtual DDS::Security::AccessControl
+class DdsSecurity_Export AccessControlBuiltInImpl
+  : public virtual DDS::Security::AccessControl
 {
 public:
   AccessControlBuiltInImpl();

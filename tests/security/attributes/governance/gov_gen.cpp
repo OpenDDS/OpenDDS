@@ -154,7 +154,7 @@ void write_global_elements(std::ostream& os, size_t ilvl, size_t aup, size_t eja
 
 void write_topic_rule_elements(std::ostream& os, size_t ilvl, const std::string& expression, size_t edp, size_t elp, size_t erac, size_t ewac, size_t mpk, size_t dpk)
 {
-  write_element_line(os, ilvl, "topic_expression", expression); 
+  write_element_line(os, ilvl, "topic_expression", expression);
   write_element_line(os, ilvl, "enable_discovery_protection", topic_edp_options_names[edp]);
   write_element_line(os, ilvl, "enable_liveliness_protection", topic_elp_options_names[edp]);
   write_element_line(os, ilvl, "enable_read_access_control", topic_erac_options_names[erac]);
@@ -294,7 +294,7 @@ void write_docs()
       }
     }
   }
-  
+
 }
 
 int main(int argc, char** argv)

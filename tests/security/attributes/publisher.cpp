@@ -180,7 +180,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       Writer* writer = new Writer(dw.in(), my_args);
 
       DDS::Duration_t timeout;
-      if (my_args.timeout_ == 0) { 
+      if (my_args.timeout_ == 0) {
         timeout.sec = DDS::DURATION_INFINITE_SEC;
         timeout.nanosec = DDS::DURATION_INFINITE_NSEC;
       } else {

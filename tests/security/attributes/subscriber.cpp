@@ -179,7 +179,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
     ws->attach_condition(condition);
 
     DDS::Duration_t timeout;
-    if (my_args.timeout_ == 0) { 
+    if (my_args.timeout_ == 0) {
       timeout.sec = DDS::DURATION_INFINITE_SEC;
       timeout.nanosec = DDS::DURATION_INFINITE_NSEC;
     } else {
@@ -201,7 +201,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args) {
       if (matches.current_count == 0 && matches.total_count > 0) {
         break;
       }
-      
+
       DDS::ReturnCode_t rc = ws->wait(conditions, timeout);
       if (rc == DDS::RETCODE_TIMEOUT) {
         CLEAN2_ERROR_RETURN((LM_WARNING,
