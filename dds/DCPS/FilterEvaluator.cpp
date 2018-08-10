@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
+#include <cctype>
 
 namespace {
   const char MOD[] = "MOD";
@@ -44,6 +45,7 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : extended_grammar_(false)
   , filter_root_(0)
   , number_parameters_(0)
+  , has_unsafe_fieldnames_(false)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
@@ -62,6 +64,12 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
     } else {
       filter_root_ = walkAst(iter);
     }
+  }
+
+  // Check for Unsafe Field References
+  for (AstNode* iter = parser.GetAstRoot()->GetFirstChild(); iter;
+      iter = iter->GetSibling()) {
+    walkForUnsafeFieldNames(AstNodeWrapper(iter));
   }
 }
 
@@ -503,6 +511,60 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
   }
   assert(0);
   return 0;
+}
+
+OPENDDS_STRING trim_whitespace(const OPENDDS_STRING& string)
+{
+  if (!string.length()) {
+    return string;
+  }
+  OPENDDS_STRING::const_iterator i;
+
+  size_t right = 0;
+  for (i = string.begin(); i != string.end() && isspace(*i); i++) {
+    right++;
+  }
+
+  size_t left = 0;
+  i = string.end() - 1;
+  while (isspace(*i)) {
+    left++;
+    if (i == string.begin()) {
+      break;
+    }
+    i--;
+  }
+
+  return string.substr(right, string.length() - left - right);
+}
+
+void FilterEvaluator::walkForUnsafeFieldNames(const AstNodeWrapper& node)
+{
+  // Check if the Node is a Field References
+  if (node->TypeMatches<FieldName>() || node->TypeMatches<CallDef>()) {
+    OPENDDS_STRING str(trim_whitespace(toString(node)));
+    const OPENDDS_STRING keyStr("key");
+    if (str.find(keyStr)) {
+      has_unsafe_fieldnames_ = true;
+    }
+
+  // Else Continue Along the Tree
+  } else if (node->TypeMatches<CompPredDef>()) {
+    walkForUnsafeFieldNames(child(node, 0));
+    walkForUnsafeFieldNames(child(node, 2));
+  } else if (node->TypeMatches<BetweenPredDef>()) {
+    walkForUnsafeFieldNames(child(node, 0));
+  } else if (node->TypeMatches<CondDef>() || node->TypeMatches<Cond>()) {
+    size_t a = arity(node);
+    if (a == 1) {
+      walkForUnsafeFieldNames(child(node, 0));
+    } else if (a == 2) {
+      walkForUnsafeFieldNames(child(node, 1));
+    } else if (a == 3) {
+      walkForUnsafeFieldNames(child(node, 0));
+      walkForUnsafeFieldNames(child(node, 2));
+    }
+  }
 }
 
 bool
