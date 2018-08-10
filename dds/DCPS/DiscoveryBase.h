@@ -331,7 +331,7 @@ namespace OpenDDS {
         pb.trans_info_ = transInfo;
         pb.publisher_qos_ = publisherQos;
 
-        const std::string& topic_name = topic_names_[topicId];
+        const OPENDDS_STRING& topic_name = topic_names_[topicId];
 
 #if defined(OPENDDS_SECURITY)
         if (is_security_enabled()) {
@@ -452,7 +452,7 @@ namespace OpenDDS {
         sb.filterProperties.filterExpression = filterExpr;
         sb.filterProperties.expressionParameters = params;
 
-        const std::string& topic_name = topic_names_[topicId];
+        const OPENDDS_STRING& topic_name = topic_names_[topicId];
 
 #if defined(OPENDDS_SECURITY)
         if (is_security_enabled()) {
