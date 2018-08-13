@@ -91,10 +91,6 @@ private:
 
   /// If constructed from a DataSampleElement, keep it around for release
   const DataSampleElement* const dcps_elem_;
-
-  /// Reference to the TransportSendControlElement
-  /// allocator.
-  TransportSendControlElementAllocator* allocator_;
 };
 
 } // namespace DCPS
