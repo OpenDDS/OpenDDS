@@ -7,7 +7,9 @@
 
 #include "dds/DCPS/security/BuiltInPluginLoader.h"
 #include "dds/DCPS/security/BuiltInSecurityPluginInst.h"
+#include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
+
 #include "dds/DCPS/RcHandle_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

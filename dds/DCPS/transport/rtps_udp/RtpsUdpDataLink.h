@@ -33,8 +33,9 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RcEventHandler.h"
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #endif
 
@@ -131,7 +132,7 @@ public:
 
   virtual void send_final_acks (const RepoId& readerid);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
   { return security_config_; }
 
@@ -530,7 +531,7 @@ private:
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 

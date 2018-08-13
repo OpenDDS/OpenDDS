@@ -143,7 +143,7 @@ int from_param_list(const ParameterList& param_list,
                     DDS::Security::DataTags& tags);
 
 #ifdef OPENDDS_SECURITY
-f// DiscoveredWriterData_SecurityWrapper
+// DiscoveredWriterData_SecurityWrapper
 
 OpenDDS_Rtps_Export
 int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,

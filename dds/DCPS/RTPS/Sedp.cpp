@@ -39,6 +39,10 @@
 #include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
+#ifdef OPENDDS_SECURITY
+#include "dds/DdsSecurityCoreTypeSupportImpl.h"
+#endif
+
 #include <ace/Reverse_Lock_T.h>
 #include <ace/Auto_Ptr.h>
 

@@ -30,6 +30,9 @@
 #include "dds/DCPS/PoolAllocationBase.h"
 
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#ifdef OPENDDS_SECURITY
+#include "dds/DCPS/security/framework/SecurityConfig.h"
+#endif
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
