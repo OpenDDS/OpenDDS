@@ -1445,14 +1445,21 @@ namespace OpenDDS {
           has_last_stateless_msg_(false),
           last_stateless_msg_time_(0, 0),
           auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN)
+          auth_state_(AS_UNKNOWN),
+          identity_handle_(DDS::HANDLE_NIL),
+          handshake_handle_(DDS::HANDLE_NIL),
+          permissions_handle_(DDS::HANDLE_NIL),
+          crypto_handle_(DDS::HANDLE_NIL)
 #else
         pdata_(p),
         last_seen_(t),
         bit_ih_(DDS::HANDLE_NIL)
 #endif
         {
-
+#ifdef OPENDDS_SECURITY
+          security_info_.participant_security_attributes = 0;
+          security_info_.plugin_participant_security_attributes = 0;
+#endif
         }
 
         DiscoveredParticipantData pdata_;

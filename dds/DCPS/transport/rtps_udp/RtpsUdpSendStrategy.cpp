@@ -479,6 +479,12 @@ RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
     while (current && !current->length()) {
       current = current->cont();
     }
+
+    if (!current) {
+      ok = false;
+      break;
+    }
+
     char* submessage_start = current->rd_ptr();
 
     CORBA::Octet msgId, flags;

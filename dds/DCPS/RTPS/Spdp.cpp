@@ -260,7 +260,12 @@ Spdp::~Spdp()
     }
 
 #if defined(OPENDDS_SECURITY)
-    write_secure_disposes();
+    try {
+      write_secure_disposes();
+    } catch (const CORBA::Exception& e) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::~Spdp() - from ")
+                 ACE_TEXT("write_secure_disposes: %C\n"), e._info().c_str()));
+    }
 #endif
 
     // Iterate through a copy of the repo Ids, rather than the map

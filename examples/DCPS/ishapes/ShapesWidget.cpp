@@ -7,9 +7,11 @@
 namespace {
   const char* logoFile()
   {
-    return TheServiceParticipant->get_security()
-      ? ":/images/logo_secure_beta.png"
-      : ":/images/logo.png";
+    return
+#ifdef OPENDDS_SECURITY
+      TheServiceParticipant->get_security() ? ":/images/logo_secure_beta.png" :
+#endif
+      ":/images/logo.png";
   }
 }
 
