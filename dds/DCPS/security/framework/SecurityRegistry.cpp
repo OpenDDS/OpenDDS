@@ -295,7 +295,7 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
   ACE_TString sect_name;
 
   for (int index = 0; cf.enumerate_sections(root, index, sect_name) == 0; ++index) {
-    if (ACE_OS::strcmp(sect_name.c_str(), SECURITY_SECTION_NAME.c_str()) == 0) {
+    if (ACE_OS::strcmp(sect_name.c_str(), ACE_TEXT_CHAR_TO_TCHAR(SECURITY_SECTION_NAME.c_str())) == 0) {
       // found the section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
       if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
