@@ -239,7 +239,7 @@ std::string ior(const char* target, const char* key)
 int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
   int status = 0;
-  const char* exename = "repoctl";
+  std::string exename = "repoctl";
 
   try {
     // Initialize an ORB.
@@ -247,7 +247,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Grab our information from the command line.
     Options options(argc, argv);
-    exename = ACE_OS::strdup( options.name().c_str());
+    exename = options.name();
 
     OpenDDS::DCPS::DCPSInfo_var ir;
     OpenDDS::Federator::Manager_var target;
