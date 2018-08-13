@@ -1,5 +1,6 @@
 
 
+#include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityPluginInst_rch.h"
 #include "ace/Configuration.h"

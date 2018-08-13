@@ -122,6 +122,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                    DCPS::DiscoveredReaderData& reader_data);
 
+#ifdef OPENDDS_SECURITY
 // DDS::Security::EndpointSecurityInfo
 
 OpenDDS_Rtps_Export
@@ -132,7 +133,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::EndpointSecurityInfo& info);
 
-// DDS::Security::DataTags& data_tags
+// DDS::Security::DataTags data_tags
 
 OpenDDS_Rtps_Export
 int to_param_list(const DDS::Security::DataTags& tags,
@@ -142,7 +143,6 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::DataTags& tags);
 
-#ifdef OPENDDS_SECURITY
 // DiscoveredWriterData_SecurityWrapper
 
 OpenDDS_Rtps_Export
