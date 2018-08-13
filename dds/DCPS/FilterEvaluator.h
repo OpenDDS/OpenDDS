@@ -92,7 +92,7 @@ public:
 
   size_t number_parameters() const { return number_parameters_; }
 
-  bool FilterEvaluator::has_unsafe_fieldnames()
+  bool has_unsafe_fieldnames()
   {
     return has_unsafe_fieldnames_;
   }
