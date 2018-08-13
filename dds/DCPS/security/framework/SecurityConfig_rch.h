@@ -14,13 +14,13 @@
 #endif
 
 #include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/security/framework/SecurityConfig.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
 
+class SecurityConfig;
 typedef DCPS::RcHandle<SecurityConfig> SecurityConfig_rch;
 
 }

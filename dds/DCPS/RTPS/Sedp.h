@@ -32,8 +32,10 @@
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DdsSecurityCoreTypeSupportImpl.h"
+
+#ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
+#endif
 
 #include "ace/Task_Ex_T.h"
 #include "ace/Thread_Mutex.h"
@@ -52,12 +54,15 @@ class RtpsDiscovery;
 class Spdp;
 class WaitForAcks;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 struct DiscoveredWriterData_SecurityWrapper;
 struct DiscoveredReaderData_SecurityWrapper;
+typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
+#else
+typedef SPDPdiscoveredParticipantData ParticipantData_t;
 #endif
 
-class Sedp : public DCPS::EndpointManager<Security::SPDPdiscoveredParticipantData> {
+class Sedp : public DCPS::EndpointManager<ParticipantData_t> {
 public:
   Sedp(const DCPS::RepoId& participant_id,
        Spdp& owner,
@@ -67,7 +72,7 @@ public:
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,
                                   DDS::Security::PermissionsHandle perm_handle,
                                   DDS::Security::ParticipantCryptoHandle crypto_handle);
@@ -85,9 +90,9 @@ public:
   const ACE_INET_Addr& multicast_group() const;
   bool map_ipv4_to_ipv6() const;
 
-  void associate(const Security::SPDPdiscoveredParticipantData& pdata);
+  void associate(const ParticipantData_t& pdata);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void associate_preauth(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_volatile(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_writers_to_readers(const Security::SPDPdiscoveredParticipantData& pdata);
@@ -97,9 +102,9 @@ public:
                                   const DCPS::EntityId_t& dstEntity, const DCPS::RepoId& src);
 #endif
 
-  bool disassociate(const Security::SPDPdiscoveredParticipantData& pdata);
+  bool disassociate(const ParticipantData_t& pdata);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_stateless_message(DDS::Security::ParticipantStatelessMessage& msg,
                                             const DCPS::RepoId& reader);
 
@@ -135,14 +140,17 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
   void signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
 
   static const bool host_is_bigendian_;
 private:
   Spdp& spdp_;
+
+#ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
+#endif
 
   struct Msg : public DCPS::PoolAllocationBase {
     enum MsgType {
@@ -155,7 +163,7 @@ private:
       MSG_FINI_BIT,
       MSG_STOP,
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       MSG_PARTICIPANT_STATELESS_DATA,
       MSG_PARTICIPANT_VOLATILE_SECURE,
       MSG_PARTICIPANT_DATA_SECURE,
@@ -169,32 +177,35 @@ private:
     DCPS::MessageId id_;
 
     union {
-      const Security::SPDPdiscoveredParticipantData* dpdata_;
+      const ParticipantData_t* dpdata_;
 
       const DCPS::DiscoveredWriterData* wdata_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       const DiscoveredWriterData_SecurityWrapper* wdata_secure_;
 #endif
 
       const DCPS::DiscoveredReaderData* rdata_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       const DiscoveredReaderData_SecurityWrapper* rdata_secure_;
 #endif
 
       const ParticipantMessageData* pmdata_;
       DDS::InstanceHandle_t ih_;
+
+#ifdef OPENDDS_SECURITY
       const DDS::Security::ParticipantGenericMessage* pgmdata_;
+#endif
     };
 
-    Msg(MsgType mt, DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData* dpdata)
+    Msg(MsgType mt, DCPS::MessageId id, const ParticipantData_t* dpdata)
       : type_(mt), id_(id), dpdata_(dpdata) {}
 
     Msg(MsgType mt, DCPS::MessageId id, const DCPS::DiscoveredWriterData* wdata)
       : type_(mt), id_(id), wdata_(wdata) {}
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     Msg(MsgType mt, DCPS::MessageId id, const DiscoveredWriterData_SecurityWrapper* wdata)
       : type_(mt), id_(id), wdata_secure_(wdata) {}
 #endif
@@ -202,7 +213,7 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, const DCPS::DiscoveredReaderData* rdata)
       : type_(mt), id_(id), rdata_(rdata) {}
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     Msg(MsgType mt, DCPS::MessageId id, const DiscoveredReaderData_SecurityWrapper* rdata)
       : type_(mt), id_(id), rdata_secure_(rdata) {}
 #endif
@@ -213,9 +224,10 @@ private:
     Msg(MsgType mt, DCPS::MessageId id, DDS::InstanceHandle_t ih)
       : type_(mt), id_(id), ih_(ih) {}
 
+#ifdef OPENDDS_SECURITY
     Msg(MsgType mt, DCPS::MessageId id, const DDS::Security::ParticipantGenericMessage* data)
       : type_(mt), id_(id), pgmdata_(data) {}
-
+#endif
   };
 
 
@@ -224,8 +236,10 @@ private:
     Endpoint(const DCPS::RepoId& repo_id, Sedp& sedp)
       : repo_id_(repo_id)
       , sedp_(sedp)
+#ifdef OPENDDS_SECURITY
       , participant_crypto_handle_(DDS::HANDLE_NIL)
       , endpoint_crypto_handle_(DDS::HANDLE_NIL)
+#endif
     {}
 
     virtual ~Endpoint();
@@ -243,6 +257,7 @@ private:
     using DCPS::TransportClient::enable_transport_using_config;
     using DCPS::TransportClient::disassociate;
 
+#ifdef OPENDDS_SECURITY
     void set_crypto_handles(DDS::Security::ParticipantCryptoHandle p,
                             DDS::Security::NativeCryptoHandle e = DDS::HANDLE_NIL)
     {
@@ -259,12 +274,15 @@ private:
     {
       return endpoint_crypto_handle_;
     }
+#endif
 
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
+#ifdef OPENDDS_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;
+#endif
   };
 
   class Writer : public DCPS::TransportSendListener, public Endpoint {
@@ -304,6 +322,7 @@ private:
                                                 const DCPS::RepoId& reader,
                                                 DCPS::SequenceNumber& sequence);
 
+#ifdef OPENDDS_SECURITY
     DDS::ReturnCode_t write_stateless_message(const DDS::Security::ParticipantStatelessMessage& msg,
                                               const DCPS::RepoId& reader,
                                               DCPS::SequenceNumber& sequence);
@@ -315,6 +334,7 @@ private:
     DDS::ReturnCode_t write_dcps_participant_secure(const Security::SPDPdiscoveredParticipantData& msg,
                                                     const DCPS::RepoId& reader,
                                                     DCPS::SequenceNumber& sequence);
+#endif
 
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid, CORBA::UShort pid = PID_ENDPOINT_GUID);
 
@@ -340,19 +360,19 @@ private:
 
   Writer publications_writer_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Writer publications_secure_writer_;
 #endif
 
   Writer subscriptions_writer_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Writer subscriptions_secure_writer_;
 #endif
 
   Writer participant_message_writer_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Writer participant_message_secure_writer_;
   Writer participant_stateless_message_writer_;
   Writer participant_volatile_message_secure_writer_;
@@ -389,19 +409,19 @@ private:
 
   Reader_rch publications_reader_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Reader_rch publications_secure_reader_;
 #endif
 
   Reader_rch subscriptions_reader_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Reader_rch subscriptions_secure_reader_;
 #endif
 
   Reader_rch participant_message_reader_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Reader_rch participant_message_secure_reader_;
   Reader_rch participant_stateless_message_reader_;
   Reader_rch participant_volatile_message_secure_reader_;
@@ -418,12 +438,12 @@ private:
     }
     ~Task();
 
-    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<Security::SPDPdiscoveredParticipantData> pdata);
+    void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantData_t> pdata);
 
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredWriterData> wdata);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DCPS::DiscoveredReaderData> rdata);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredWriterData_SecurityWrapper> wrapper);
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<DiscoveredReaderData_SecurityWrapper> wrapper);
 #endif
@@ -431,7 +451,7 @@ private:
     void enqueue(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     void enqueue_participant_message_secure(DCPS::MessageId id, DCPS::unique_ptr<ParticipantMessageData> data);
     void enqueue_stateless_message(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantStatelessMessage> data);
     void enqueue_volatile_message_secure(DCPS::MessageId id, DCPS::unique_ptr<DDS::Security::ParticipantVolatileMessageSecure> data);
@@ -443,13 +463,16 @@ private:
   private:
     int svc();
 
-    void svc_i(const Security::SPDPdiscoveredParticipantData* pdata);
+    void svc_i(const ParticipantData_t* pdata);
+
+#ifdef OPENDDS_SECURITY
     void svc_secure_i(DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData* pdata);
+#endif
 
     void svc_i(DCPS::MessageId id, const DCPS::DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const DCPS::DiscoveredReaderData* rdata);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     void svc_i(DCPS::MessageId id, const DiscoveredWriterData_SecurityWrapper* wrapper);
     void svc_i(DCPS::MessageId id, const DiscoveredReaderData_SecurityWrapper* wrapper);
 #endif
@@ -457,7 +480,7 @@ private:
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     void svc_participant_message_data_secure(DCPS::MessageId id, const ParticipantMessageData* data);
     void svc_stateless_message(DCPS::MessageId id, const DDS::Security::ParticipantStatelessMessage* data);
     void svc_volatile_message_secure(DCPS::MessageId id, const DDS::Security::ParticipantVolatileMessageSecure* data);
@@ -497,26 +520,32 @@ private:
 
   void process_discovered_writer_data(DCPS::MessageId message_id,
                                       const DCPS::DiscoveredWriterData& wdata,
-                                      const DCPS::RepoId& guid,
-                                      const DDS::Security::EndpointSecurityInfo* security_info = NULL);
+                                      const DCPS::RepoId& guid
+#ifdef OPENDDS_SECURITY
+                                      , const DDS::Security::EndpointSecurityInfo* security_info = NULL
+#endif
+                                      );
 
   void data_received(DCPS::MessageId message_id,
                      const DCPS::DiscoveredWriterData& wdata);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredWriterData_SecurityWrapper& wrapper);
 #endif
 
   void process_discovered_reader_data(DCPS::MessageId message_id,
                                       const DCPS::DiscoveredReaderData& rdata,
-                                      const DCPS::RepoId& guid,
-                                      const DDS::Security::EndpointSecurityInfo* security_info = NULL);
+                                      const DCPS::RepoId& guid
+#ifdef OPENDDS_SECURITY
+                                      , const DDS::Security::EndpointSecurityInfo* security_info = NULL
+#endif
+                                      );
 
   void data_received(DCPS::MessageId message_id,
                      const DCPS::DiscoveredReaderData& rdata);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredReaderData_SecurityWrapper& wrapper);
 #endif
@@ -524,19 +553,19 @@ private:
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void received_participant_message_data_secure(DCPS::MessageId message_id,
-            const ParticipantMessageData& data);
+                                                const ParticipantMessageData& data);
 
   bool should_drop_stateless_message(const DDS::Security::ParticipantGenericMessage& msg);
   bool should_drop_volatile_message(const DDS::Security::ParticipantGenericMessage& msg);
   bool should_drop_message(const char* unsecure_topic_name);
 
   void received_stateless_message(DCPS::MessageId message_id,
-                     const DDS::Security::ParticipantStatelessMessage& data);
+                                  const DDS::Security::ParticipantStatelessMessage& data);
 
   void received_volatile_message_secure(DCPS::MessageId message_id,
-                     const DDS::Security::ParticipantVolatileMessageSecure& data);
+                                        const DDS::Security::ParticipantVolatileMessageSecure& data);
 #endif
 
   typedef std::pair<DCPS::MessageId, DCPS::DiscoveredWriterData> MsgIdWtrDataPair;
@@ -577,7 +606,7 @@ private:
                                                    DiscoveredPublicationIter& iter,
                                                    const DCPS::RepoId& writer);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DCPS::TransportLocatorSeq
   add_security_info(const DCPS::TransportLocatorSeq& locators,
                     const DCPS::RepoId& writer, const DCPS::RepoId& reader);
@@ -597,7 +626,7 @@ private:
   void write_durable_publication_data(const DCPS::RepoId& reader);
   void write_durable_subscription_data(const DCPS::RepoId& reader);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void write_durable_publication_data_secure(const DCPS::RepoId& reader);
   void write_durable_subscription_data_secure(const DCPS::RepoId& reader);
 #endif
@@ -608,7 +637,7 @@ private:
                                            LocalPublication& pub,
                                            const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_publication_data_secure(const DCPS::RepoId& rid,
                                                   LocalPublication& pub,
                                                   const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
@@ -622,7 +651,7 @@ private:
                                             LocalSubscription& pub,
                                             const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::RepoId& rid,
                                                    LocalSubscription& pub,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
@@ -638,7 +667,7 @@ private:
 
   bool is_opendds(const GUID_t& endpoint) const;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DCPS::SequenceNumber secure_automatic_liveliness_seq_;
   DCPS::SequenceNumber secure_manual_liveliness_seq_;
 #endif
@@ -648,7 +677,7 @@ private:
 
 protected:
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DDS::Security::DatawriterCryptoHandle generate_remote_matched_writer_crypto_handle(const DCPS::RepoId& writer_part, const DDS::Security::DatareaderCryptoHandle& drch);
   DDS::Security::DatareaderCryptoHandle generate_remote_matched_reader_crypto_handle(const DCPS::RepoId& reader_part, const DDS::Security::DatawriterCryptoHandle& dwch, bool relay_only);
   void create_and_send_datareader_crypto_tokens(const DDS::Security::DatareaderCryptoHandle& drch, const DCPS::RepoId& local_reader, const DDS::Security::DatawriterCryptoHandle& dwch, const DCPS::RepoId& remote_writer);

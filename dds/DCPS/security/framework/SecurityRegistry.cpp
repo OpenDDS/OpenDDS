@@ -182,11 +182,13 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name)
   // release the new config and fail
   SecurityConfig_rch new_config =
     DCPS::make_rch<SecurityConfig>(config_name,
+#ifdef OPENDDS_SECURITY
                                    auth_plugin_inst->create_authentication(),
                                    ac_plugin_inst->create_access_control(),
                                    crypto_plugin_inst->create_crypto_key_exchange(),
                                    crypto_plugin_inst->create_crypto_key_factory(),
                                    crypto_plugin_inst->create_crypto_transform(),
+#endif
                                    entry->get_properties());
 
   if (!add_config(config_name, new_config)) {
@@ -204,6 +206,10 @@ SecurityConfig_rch
 SecurityRegistry::create_config(const OPENDDS_STRING& config_name,
                                 SecurityPluginInst_rch plugin)
 {
+#ifndef OPENDDS_SECURITY
+  ACE_UNUSED_ARG(plugin);
+#endif
+
   SecurityConfig_rch existing_config;
   if (find_config(config_name, existing_config)) {
     return existing_config;
@@ -211,11 +217,13 @@ SecurityRegistry::create_config(const OPENDDS_STRING& config_name,
 
   SecurityConfig_rch new_config =
     DCPS::make_rch<SecurityConfig>(config_name,
+#ifdef OPENDDS_SECURITY
                                    plugin->create_authentication(),
                                    plugin->create_access_control(),
                                    plugin->create_crypto_key_exchange(),
                                    plugin->create_crypto_key_factory(),
                                    plugin->create_crypto_transform(),
+#endif
                                    ConfigPropertyList());
 
   if (!add_config(config_name, new_config)) {

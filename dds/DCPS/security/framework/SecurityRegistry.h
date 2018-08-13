@@ -11,7 +11,6 @@
 #include "dds/DCPS/dcps_export.h"
 
 #include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsSecurityCoreC.h"
 
 #include "dds/DCPS/PoolAllocator.h"
 

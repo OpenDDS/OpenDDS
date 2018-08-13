@@ -21,6 +21,8 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
     DdsDcpsInfoUtils.idl
     DdsDcpsConditionSeq.idl
     DdsDcpsDataReaderSeq.idl
+    DdsSecurityParams.idl
+    DdsSecurityCore.idl
   }
 
   TypeSupport_Files {
@@ -38,6 +40,8 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
   TypeSupport_Files {
     dcps_ts_flags += -SI
     DdsDcpsInfoUtils.idl
+    DdsSecurityParams.idl
+    DdsSecurityCore.idl
   }
 
   // Special for CorbaSeq directory.
@@ -70,6 +74,8 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
     DdsDcpsInfoUtils.idl
     DdsDcpsConditionSeq.idl
     DdsDcpsDataReaderSeq.idl
+    DdsSecurityParams.idl
+    DdsSecurityCore.idl
   }
 
   TypeSupport_Files {
@@ -77,6 +83,8 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
     DdsDcpsGuid.idl
     DdsDcpsCore.idl
     DdsDcpsInfoUtils.idl
+    DdsSecurityParams.idl
+    DdsSecurityCore.idl
   }
 
   TypeSupport_Files {
@@ -111,6 +119,7 @@ feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support,
     dcps_ts_flags += -SI -Lspcpp
     DdsDcpsGuid.idl
     DdsDcpsInfoUtils.idl
+    DdsSecurityParams.idl
   }
 
   TypeSupport_Files {

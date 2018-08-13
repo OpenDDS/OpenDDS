@@ -9,7 +9,10 @@
 #define RTPS_RTPSCORE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
+
+#ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityParams.idl"
+#endif
 
 module OpenDDS {
   module RTPS {
@@ -408,6 +411,7 @@ module OpenDDS {
       case PID_OPENDDS_LOCATOR:
         DCPS::TransportLocator opendds_locator;
 
+#ifdef OPENDDS_SECURITY
       case DDS::Security::PID_IDENTITY_TOKEN:
         DDS::Security::IdentityToken identity_token;
 
@@ -425,6 +429,7 @@ module OpenDDS {
 
       case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
         DDS::Security::IdentityStatusToken identity_status_token;
+#endif
 
       default:
         DDS::OctetSeq unknown_data;

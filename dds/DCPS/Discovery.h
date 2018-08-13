@@ -19,7 +19,10 @@
 
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+
+#ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
+#endif
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
