@@ -96,7 +96,7 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
       (
         // Omit from results if there are fields other than "key" in the query
         // and the sample just has a "key" field.
-        qci->has_unsafe_fields() && !sample->valid_data_
+        qci->has_non_key_fields() && !sample->valid_data_
       ) ||
       !qci->filter(*typed_sample)
     ) {
