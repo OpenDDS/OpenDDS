@@ -335,6 +335,7 @@ sub remedy_changelog {
   open(GITLOG, "git log $prev_tag..$branch --name-status --date=raw |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
+    s/\t/  /g;
     if (/^commit /) {
       # print out previous
       if ($author) {

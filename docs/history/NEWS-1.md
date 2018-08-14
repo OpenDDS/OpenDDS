@@ -417,7 +417,7 @@ Version 1.0 of OpenDDS.
 
    3. Implementation reference counting cleanup code is no longer used
 
-	For example:
+  For example:
        
             SimpleTypeSupportImpl sts_servant = new SimpleTypeSupportImpl;
             PortableServer::ServantBase_var safe_servant = sts_servant;
@@ -433,7 +433,7 @@ Version 1.0 of OpenDDS.
 
             if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
 
-	**Note: Although the old style is discouraged it will still work.**
+  **Note: Although the old style is discouraged it will still work.**
 
 
    4. Since the DCPS interfaces are now local, there is very little

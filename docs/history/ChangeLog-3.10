@@ -1374,7 +1374,7 @@ Sun Jan 15 17:36:07 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
           Fix RcHandle usage for ishapes
 
           # Conflicts:
-          #	examples/DCPS/ishapes/main.cpp
+          #  examples/DCPS/ishapes/main.cpp
 
 Mon Jan 16 13:13:24 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
         commit 04a70cecd455d663c80d1547140d1e7a6b4e5ac2
@@ -1620,9 +1620,9 @@ Thu Jan 12 21:31:16 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
           Merge branch 'master' into RcHandle
 
           # Conflicts:
-          #	dds/DCPS/DataReaderImpl.cpp
-          #	dds/DCPS/DataReaderImpl.h
-          #	dds/DCPS/DataReaderImpl_T.h
+          #  dds/DCPS/DataReaderImpl.cpp
+          #  dds/DCPS/DataReaderImpl.h
+          #  dds/DCPS/DataReaderImpl_T.h
 
 Thu Jan 12 18:11:15 UTC 2017  Adam Mitz  <mitza@ociweb.com>
         commit 48ea7b0b0584fafe32d7752112bebe58ea63d625
@@ -2652,7 +2652,7 @@ Tue Jan 03 20:50:06 UTC 2017  Huang-Ming Huang  <huangming.huang@gmail.com>
           Merge branch 'master' into RcHandle
 
           # Conflicts:
-          #	dds/DCPS/DomainParticipantImpl.cpp
+          #  dds/DCPS/DomainParticipantImpl.cpp
 
 Tue Jan 03 20:09:48 UTC 2017  Peter Oschwald  <oschwaldp@ociweb.com>
         commit 304f7b2e3e71ac79d37173c793fea1b91eb2ad8b
@@ -2829,10 +2829,10 @@ Fri Dec 30 23:08:43 UTC 2016  Adam Mitz  <mitza@ociweb.com>
           Merge branch 'DDS-3.6-wireshark' into DDS-3.9-wireshark
 
           # Conflicts:
-          #	bin/PerlDDS/Run_Test.pm
-          #	tests/DCPS/StringKey/Messenger.idl
-          #	tests/DCPS/StringKey/Writer.cpp
-          #	tools/dissector/sample_manager.cpp
+          #  bin/PerlDDS/Run_Test.pm
+          #  tests/DCPS/StringKey/Messenger.idl
+          #  tests/DCPS/StringKey/Writer.cpp
+          #  tools/dissector/sample_manager.cpp
 
 Fri Dec 30 22:47:50 UTC 2016  Adam Mitz  <mitza@ociweb.com>
         commit 56a9bc1c5780027d9b7b740123cab7f25e8bf278
@@ -2955,7 +2955,7 @@ Wed Nov 23 19:23:41 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
           and TransportReceiveListener to remove manual reference
           counting on those objects.
           # Conflicts:
-          #	dds/DCPS/transport/framework/ReceiveListenerSetMap.inl
+          #  dds/DCPS/transport/framework/ReceiveListenerSetMap.inl
 
 Thu Dec 29 21:47:27 UTC 2016  Adam Mitz  <mitza@ociweb.com>
         commit 672aab1ef6196e02f47ab69ec11ebdd3300c10fc
@@ -3113,19 +3113,19 @@ Wed Nov 23 15:14:01 UTC 2016  Huang-Ming Huang  <huangh@ociweb.com>
           Replace some manual _add_ref() _remove_ref() with RcHandle
           objects.
           # Conflicts:
-          #	dds/DCPS/RemoveAssociationSweeper.h
-          #	dds/DCPS/transport/multicast/MulticastDataLink.cpp
-          #	dds/DCPS/transport/multicast/MulticastDataLink.h
-          #	dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp
-          #	dds/DCPS/transport/shmem/ShmemDataLink.h
-          #	dds/DCPS/transport/shmem/ShmemTransport.cpp
-          #	dds/DCPS/transport/tcp/TcpConnection.cpp
-          #	dds/DCPS/transport/tcp/TcpDataLink.h
-          #	dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp
-          #	dds/DCPS/transport/tcp/TcpSendStrategy.cpp
-          #	dds/DCPS/transport/tcp/TcpTransport.cpp
-          #	dds/DCPS/transport/tcp/TcpTransport.h
-          #	dds/DCPS/transport/udp/UdpTransport.cpp
+          #  dds/DCPS/RemoveAssociationSweeper.h
+          #  dds/DCPS/transport/multicast/MulticastDataLink.cpp
+          #  dds/DCPS/transport/multicast/MulticastDataLink.h
+          #  dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp
+          #  dds/DCPS/transport/shmem/ShmemDataLink.h
+          #  dds/DCPS/transport/shmem/ShmemTransport.cpp
+          #  dds/DCPS/transport/tcp/TcpConnection.cpp
+          #  dds/DCPS/transport/tcp/TcpDataLink.h
+          #  dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp
+          #  dds/DCPS/transport/tcp/TcpSendStrategy.cpp
+          #  dds/DCPS/transport/tcp/TcpTransport.cpp
+          #  dds/DCPS/transport/tcp/TcpTransport.h
+          #  dds/DCPS/transport/udp/UdpTransport.cpp
 
 Wed Dec 28 19:46:53 UTC 2016  Huang-Ming Huang  <huangming.huang@gmail.com>
         commit 5acc466543139b2416c5e9c97f0f63ff561bbf59
@@ -3284,7 +3284,7 @@ Tue Dec 27 17:00:21 UTC 2016  Adam Mitz  <mitza@ociweb.com>
           Merge branch 'master' into guid-mac
 
           # Conflicts:
-          #	dds/DCPS/RTPS/GuidGenerator.cpp
+          #  dds/DCPS/RTPS/GuidGenerator.cpp
 
 Tue Dec 27 16:57:51 UTC 2016  Adam Mitz  <mitza@ociweb.com>
         commit f12f903bdfd2d42631767f9c7010712b8045aa0d
@@ -12449,7 +12449,7 @@ Thu Sep 03 20:38:03 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
           Merge branch 'master' of github.com:objectcomputing/OpenDDS
 
           Conflicts:
-          	NEWS
+            NEWS
 
 Thu Sep 03 19:31:09 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
         commit e79f67f6c14ae7504377eff0439339428ffcb55f
@@ -13786,7 +13786,7 @@ Mon Aug 10 20:39:27 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
           Merge branch 'master' into static_discovery_no_bit
 
           Conflicts:
-          	bin/dcps_tests.lst
+            bin/dcps_tests.lst
 
 Mon Aug 10 20:04:12 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
         commit 051db4291804695b3a676c00d28a7406e9d8ed8e
@@ -14521,7 +14521,7 @@ Fri Jul 24 20:44:42 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
           Merge branch 'master' of github.com:iamtheschmitzer/OpenDDS
 
           Conflicts:
-          	bin/gitrelease.pl
+            bin/gitrelease.pl
 
 Fri Jul 24 20:39:50 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
         commit 0e870e6b82e1c0cf292e1ba96efb88d602191e66
@@ -15366,7 +15366,7 @@ Fri Jul 17 18:53:28 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           Merge branch 'master' into static_discovery
 
           Conflicts:
-          	dds/DCPS/Qos_Helper.h
+            dds/DCPS/Qos_Helper.h
 
 Fri Jul 17 18:41:01 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
         commit 1b2d241bc3c4281ae6d5d0519b8184918e16e873
@@ -15596,8 +15596,8 @@ Thu Jul 16 14:21:09 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
           Merge remote-tracking branch 'origin/master'
 
           Conflicts:
-          	dds/DCPS/RecorderImpl.cpp
-          	dds/DCPS/RemoveAssociationSweeper.h
+            dds/DCPS/RecorderImpl.cpp
+            dds/DCPS/RemoveAssociationSweeper.h
 
 Thu Jul 16 14:18:13 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
         commit 5ceb339ffa9262ed5e999898965736f80d37c939
@@ -15814,8 +15814,8 @@ Tue Jul 14 15:57:48 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           Merge branch 'master' into static_discovery
 
           Conflicts:
-          	dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp
-          	dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h
+            dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp
+            dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h
 
 Tue Jul 14 15:54:04 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
         commit 64741c1820a03d1e400b6a09a601fe9cae0129e5
@@ -18847,7 +18847,7 @@ Fri Jun 26 02:06:01 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
           https://github.com/objectcomputing/OpenDDS
 
           Conflicts:
-          	configure
+            configure
 
 Fri Jun 26 01:51:21 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
         commit cb078ad76f96541de970d0c054d42347aa91632a
@@ -20088,7 +20088,7 @@ Fri May 29 20:54:57 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           Merge branch 'master' into operator_new_seek_and_destroy
 
           Conflicts:
-          	dds/.gitignore
+            dds/.gitignore
 
 Fri May 29 20:54:07 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
         commit 57264e6d8d818b067d414a74e6ce273117d8c03d
@@ -20127,7 +20127,7 @@ Fri May 29 19:55:46 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           operator_new_seek_and_destroy
 
           Conflicts:
-          	dds/.gitignore
+            dds/.gitignore
 
 Fri May 29 19:54:35 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
         commit 0f2c11d0e62fede29b06073a68a0594db158c04c
@@ -20818,7 +20818,7 @@ Wed May 20 13:57:50 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           Merge branch 'master' into opendds_idl_union
 
           Conflicts:
-          	dds/idl/langmap_generator.cpp
+            dds/idl/langmap_generator.cpp
 
 Wed May 20 13:50:33 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
         commit fd362c3cc1fb3cbee62d15263441206a4da09d1c
@@ -21090,9 +21090,9 @@ Mon May 18 21:34:59 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
           Merge branch 'master' into ts_api_updates_redmine_2334
 
           Conflicts:
-          	dds/DCPS/transport/framework/TransportInst.cpp
-          	dds/FACE/FaceTSS.cpp
-          	tests/FACE/Reliability/Publisher/Publisher.cpp
+            dds/DCPS/transport/framework/TransportInst.cpp
+            dds/FACE/FaceTSS.cpp
+            tests/FACE/Reliability/Publisher/Publisher.cpp
 
 Mon May 18 21:23:27 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
         commit 615d534131da5662933e6b8cd5095bab67155bd2
@@ -21554,8 +21554,8 @@ Wed May 13 20:57:55 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           writer_reader_impl_templates
 
           Conflicts:
-          	dds/DdsDcpsCore.idl
-          	dds/DdsDcpsInfrastructure.idl
+            dds/DdsDcpsCore.idl
+            dds/DdsDcpsInfrastructure.idl
 
 Wed May 13 20:56:40 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
         commit f6764c93fabc8935bb06afedd6fb4f5221a06ca9
@@ -21701,7 +21701,7 @@ Wed May 13 16:51:08 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           writer_reader_impl_templates
 
           Conflicts:
-          	dds/.gitignore
+            dds/.gitignore
 
 Wed May 13 16:49:54 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
         commit 17e03b7027ec6ece7aa481a59ad0c27425101225
@@ -22007,10 +22007,10 @@ Fri May 08 17:58:40 UTC 2015  Adam Mitz  <mitza@ociweb.com>
           Merge remote branch 'upstream/master' into face-conf-test-suite
 
           Conflicts:
-          	dds/CORBA/tao/BasicSequences.cpp
-          	dds/CORBA/tao/ORB_Misc.cpp
-          	dds/CORBA/tao/OctetSeqC.cpp
-          	dds/CORBA/tao/SystemException.cpp
+            dds/CORBA/tao/BasicSequences.cpp
+            dds/CORBA/tao/ORB_Misc.cpp
+            dds/CORBA/tao/OctetSeqC.cpp
+            dds/CORBA/tao/SystemException.cpp
 
 Fri May 08 17:39:34 UTC 2015  Justin Wilson  <jrw972@users.noreply.github.com>
         commit 8f4105573a996725847d5ee147e7557edabf458f
@@ -22402,7 +22402,7 @@ Tue May 05 17:43:16 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           Merge branch 'master' into writer_reader_impl_templates
 
           Conflicts:
-          	dds/idl/langmap_generator.cpp
+            dds/idl/langmap_generator.cpp
 
 Tue May 05 17:18:18 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
         commit a93ea8b8bc0c7933b6462f381370a1644916a326
@@ -22626,7 +22626,7 @@ Fri May 01 15:51:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
           Merge branch 'master' into ts_api_updates_redmine_2334
 
           Conflicts:
-          	tests/FACE/Reliability/Publisher/Publisher.cpp
+            tests/FACE/Reliability/Publisher/Publisher.cpp
 
 Fri May 01 15:42:09 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
         commit 2c189f9c5b3bf169a892e2db8c4eb2894868a6ea
@@ -22673,7 +22673,7 @@ Thu Apr 30 21:33:31 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
           writer_reader_impl_templates
 
           Conflicts:
-          	dds/idl/langmap_generator.cpp
+            dds/idl/langmap_generator.cpp
 
 Thu Apr 30 21:30:33 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
         commit 070664f050d3f6cdb83ba2a0b451911c4f45393d
@@ -24005,14 +24005,14 @@ Tue Mar 31 18:11:54 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
           Merge branch 'master' of github.com:objectcomputing/OpenDDS
 
           Conflicts:
-          	dds/DCPS/DataDurabilityCache.h
-          	dds/DCPS/FilterEvaluator.h
-          	dds/DCPS/Registered_Data_Types.h
-          	dds/DCPS/transport/framework/TransportConfig.h
-          	dds/DCPS/transport/framework/TransportImpl.h
-          	dds/DCPS/transport/framework/TransportRegistry.h
-          	dds/FACE/FaceTSS.cpp
-          	tools/modeling/codegen/model/Entities.h
+            dds/DCPS/DataDurabilityCache.h
+            dds/DCPS/FilterEvaluator.h
+            dds/DCPS/Registered_Data_Types.h
+            dds/DCPS/transport/framework/TransportConfig.h
+            dds/DCPS/transport/framework/TransportImpl.h
+            dds/DCPS/transport/framework/TransportRegistry.h
+            dds/FACE/FaceTSS.cpp
+            tools/modeling/codegen/model/Entities.h
 
 Tue Mar 31 18:06:28 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
         commit f3776f6039de9694fed1ff4351c50a79f64f030f
@@ -25295,11 +25295,11 @@ Wed Mar 18 20:36:19 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
           merge-upstream-master
 
           Conflicts:
-          	.gitignore
-          	dds/DCPS/DataReaderImpl.cpp
-          	dds/DCPS/DataWriterImpl.cpp
-          	dds/DCPS/WriteDataContainer.h
-          	dds/DCPS/transport/framework/DataLink.cpp
+            .gitignore
+            dds/DCPS/DataReaderImpl.cpp
+            dds/DCPS/DataWriterImpl.cpp
+            dds/DCPS/WriteDataContainer.h
+            dds/DCPS/transport/framework/DataLink.cpp
 
 Wed Mar 18 20:33:02 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
         commit 054441b89278b190c69c5d2733f865d4acd68b2c
@@ -57171,8 +57171,8 @@ Tue Aug 09 18:22:18 UTC 2011  Byron Harris  <harris_b@ociweb.com>
 
            Change that should have been part of "Tue Aug 9 14:45:00 UTC
           2011"
-          	  commit. Thanks to Adam Mitz for pointing out the unexpected
-          	  diffs after code generation.
+              commit. Thanks to Adam Mitz for pointing out the unexpected
+              diffs after code generation.
 
 Tue Aug 09 17:08:46 UTC 2011  Jeff Schmitz  <schmitzj@ociweb.com>
         commit 1c8fd0c203ae50ad6bdb79821fe26d3090a32218
@@ -57247,12 +57247,12 @@ Tue Aug 09 14:55:40 UTC 2011  Byron Harris  <harris_b@ociweb.com>
           *
           tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgraph:
 
-          	  Added labels for transportConfig.
+              Added labels for transportConfig.
 
           *
           tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfmap:
 
-          	  Incorporated transportConfig attribute.
+              Incorporated transportConfig attribute.
 
           *
           tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
@@ -57263,24 +57263,24 @@ Tue Aug 09 14:55:40 UTC 2011  Byron Harris  <harris_b@ociweb.com>
 
            GMF Auto generated updates based on inclusion of
           transportConfig.
-          	  Note there's currently an issue with
+              Note there's currently an issue with
           
           org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibUriEditorInputTester
            not being generated by GMF. This results in a No property
           tester”
            error message being generated when editing DcpsLib diagrams, but
-          	  otherwise diagrams can be edited as expected.
+              otherwise diagrams can be edited as expected.
 
           *
           tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts:
 
-          	  svn ignore transportConfig related edit part files.
+              svn ignore transportConfig related edit part files.
 
           * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds:
           * tools/modeling/testdata/DcpsLib/DcpsLibTest.opendds_diagram:
           * tools/modeling/testdata/DcpsLib/DcpsLibTest_screenshot_2.png:
 
-          	  Update to account for transportConfig.
+              Update to account for transportConfig.
 
 Tue Aug 09 13:02:15 UTC 2011  Jeff Schmitz  <schmitzj@ociweb.com>
         commit 2fa9e1d8d7634d573002e78bc9da2c55d73a87a4
@@ -59551,9 +59551,9 @@ Mon Jul 18 19:59:44 UTC 2011  Byron Harris  <harris_b@ociweb.com>
           *
           tools/modeling/plugins/org.opendds.modeling.model/model/Domain.ecore:
 
-          	  Added transportConfig attribute to DomainEntity.
-          	  Note: The changes on the GMF side are not included yet until
-          	  versioning issues get resolved.
+              Added transportConfig attribute to DomainEntity.
+              Note: The changes on the GMF side are not included yet until
+              versioning issues get resolved.
 
           *
           tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
