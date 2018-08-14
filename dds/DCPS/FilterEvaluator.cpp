@@ -521,7 +521,7 @@ OPENDDS_STRING trim_whitespace(const OPENDDS_STRING& string)
   OPENDDS_STRING::const_iterator i;
 
   size_t right = 0;
-  for (i = string.begin(); i != string.end() && isspace(*i); i++) {
+  for (i = string.begin(); i != string.end() && isspace(*i); ++i) {
     right++;
   }
 
@@ -532,7 +532,7 @@ OPENDDS_STRING trim_whitespace(const OPENDDS_STRING& string)
     if (i == string.begin()) {
       break;
     }
-    i--;
+    ++i;
   }
 
   return string.substr(right, string.length() - left - right);
@@ -544,7 +544,7 @@ void FilterEvaluator::walkForUnsafeFields(const AstNodeWrapper& node)
   if (node->TypeMatches<FieldName>() || node->TypeMatches<CallDef>()) {
     OPENDDS_STRING str(trim_whitespace(toString(node)));
     const OPENDDS_STRING keyStr("key");
-    if (str.find(keyStr)) {
+    if (str == keyStr) {
       has_unsafe_fields_ = true;
     }
 
