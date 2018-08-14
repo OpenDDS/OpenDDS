@@ -4,6 +4,9 @@
 * Distributed under the OpenDDS License.
 * See: http://www.opendds.org/license.html
 */
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include <vector>
 #include <map>

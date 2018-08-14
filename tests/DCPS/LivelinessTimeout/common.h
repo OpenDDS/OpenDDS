@@ -7,7 +7,9 @@
  *
  */
 // ============================================================================
-
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "ace/SString.h"
 

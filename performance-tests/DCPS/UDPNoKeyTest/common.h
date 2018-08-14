@@ -8,6 +8,9 @@
  */
 // ============================================================================
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 const long  TEST_DOMAIN   = 111;
 const char* TEST_TOPIC    = "PerfTest";
