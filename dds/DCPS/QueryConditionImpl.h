@@ -58,6 +58,11 @@ public:
     return evaluator_.eval(s, query_parameters_);
   }
 
+  bool has_unsafe_fields() const
+  {
+    return evaluator_.has_unsafe_fields();
+  }
+
 private:
   CORBA::String_var query_expression_;
   DDS::StringSeq query_parameters_;

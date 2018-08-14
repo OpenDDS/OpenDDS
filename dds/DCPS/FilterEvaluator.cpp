@@ -45,7 +45,7 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : extended_grammar_(false)
   , filter_root_(0)
   , number_parameters_(0)
-  , has_unsafe_fieldnames_(false)
+  , has_unsafe_fields_(false)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
@@ -69,7 +69,7 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   // Check for Unsafe Field References
   for (AstNode* iter = parser.GetAstRoot()->GetFirstChild(); iter;
       iter = iter->GetSibling()) {
-    walkForUnsafeFieldNames(AstNodeWrapper(iter));
+    walkForUnsafeFields(AstNodeWrapper(iter));
   }
 }
 
@@ -538,31 +538,31 @@ OPENDDS_STRING trim_whitespace(const OPENDDS_STRING& string)
   return string.substr(right, string.length() - left - right);
 }
 
-void FilterEvaluator::walkForUnsafeFieldNames(const AstNodeWrapper& node)
+void FilterEvaluator::walkForUnsafeFields(const AstNodeWrapper& node)
 {
-  // Check if the Node is a Field References
+  // Check if the Node is a Field
   if (node->TypeMatches<FieldName>() || node->TypeMatches<CallDef>()) {
     OPENDDS_STRING str(trim_whitespace(toString(node)));
     const OPENDDS_STRING keyStr("key");
     if (str.find(keyStr)) {
-      has_unsafe_fieldnames_ = true;
+      has_unsafe_fields_ = true;
     }
 
   // Else Continue Along the Tree
   } else if (node->TypeMatches<CompPredDef>()) {
-    walkForUnsafeFieldNames(child(node, 0));
-    walkForUnsafeFieldNames(child(node, 2));
+    walkForUnsafeFields(child(node, 0));
+    walkForUnsafeFields(child(node, 2));
   } else if (node->TypeMatches<BetweenPredDef>()) {
-    walkForUnsafeFieldNames(child(node, 0));
+    walkForUnsafeFields(child(node, 0));
   } else if (node->TypeMatches<CondDef>() || node->TypeMatches<Cond>()) {
     size_t a = arity(node);
     if (a == 1) {
-      walkForUnsafeFieldNames(child(node, 0));
+      walkForUnsafeFields(child(node, 0));
     } else if (a == 2) {
-      walkForUnsafeFieldNames(child(node, 1));
+      walkForUnsafeFields(child(node, 1));
     } else if (a == 3) {
-      walkForUnsafeFieldNames(child(node, 0));
-      walkForUnsafeFieldNames(child(node, 2));
+      walkForUnsafeFields(child(node, 0));
+      walkForUnsafeFields(child(node, 2));
     }
   }
 }
