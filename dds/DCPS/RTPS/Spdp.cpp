@@ -332,15 +332,6 @@ namespace {
     return pdata.ddsParticipantData;
 #endif
   }
-
-  const DDS::ParticipantBuiltinTopicData& partBitData(const ParticipantData_t& pdata)
-  {
-#ifdef OPENDDS_SECURITY
-    return pdata.ddsParticipantDataSecure.base.base;
-#else
-    return pdata.ddsParticipantData;
-#endif
-  }
 }
 
 void
