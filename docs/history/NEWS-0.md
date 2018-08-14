@@ -222,8 +222,8 @@ Version 0.9 of TAO DDS.
       The sample may also be dropped on the subscriber side because the
       connection exists between the publisher and subscriber but the
       associations have not been mapped on the subscriber side."
-	
-	
+
+
   - Supported thread-per-connection send.
    
      - A new configuration "thread\_per\_connection" is added to turn on and turn
@@ -343,7 +343,7 @@ Version 0.8 of TAO DDS.
 
    - New configuration values are added to support the reconnect strategy.
 
-	```
+  ```
     ###=== Configurations for connector side during reconnecting===
     
     # The initial retry delay in milliseconds.
@@ -416,8 +416,8 @@ Version 0.8 of TAO DDS.
     datareaders and datawriters associated with the same transport in the same
     process. To work around this limitation, the datareader and the datawriter
     need use different TransportImpl objects. Otherwise, there are such errors:
-	
-	```
+
+  ```
     (1428|2740) ERROR: RepoId (9) already exists in RepoIdSet for RepoId (8).
     (1428|2740) ERROR: Failed to insert local subscriber_id (8) to remote publisher_id (9)
     ```
