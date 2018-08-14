@@ -3270,7 +3270,7 @@ Sedp::write_publication_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
 #ifdef OPENDDS_SECURITY
-  if (lp.security_attribs_.base.is_discovery_protected) {
+  if (is_security_enabled() && lp.security_attribs_.base.is_discovery_protected) {
     result = write_publication_data_secure(rid, lp, reader);
 
   } else {
@@ -3365,7 +3365,7 @@ Sedp::write_subscription_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
 #ifdef OPENDDS_SECURITY
-  if (ls.security_attribs_.base.is_discovery_protected) {
+  if (is_security_enabled() && ls.security_attribs_.base.is_discovery_protected) {
     result = write_subscription_data_secure(rid, ls, reader);
 
   } else {
