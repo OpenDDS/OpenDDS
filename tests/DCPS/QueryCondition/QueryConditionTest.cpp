@@ -19,6 +19,8 @@ using namespace DDS;
 using namespace OpenDDS::DCPS;
 using namespace Messenger;
 
+const Duration_t max_wait_time = {3, 0};
+
 class MessengerListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
@@ -176,8 +178,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   ConditionSeq active;
-  Duration_t three_sec = {3, 0};
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   // expect a timeout because the sample doesn't match the query string
   if (ret != RETCODE_TIMEOUT) {
     cout << "ERROR: wait(qc) should have timed out" << endl;
@@ -205,7 +206,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   if (!waitForSample(dr)) return false;
 
   ws->attach_condition(dr_qc);
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   if (ret != RETCODE_OK) {
     cout << "ERROR: wait(qc) should not time out" << endl;
     return false;
@@ -476,8 +477,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   ConditionSeq active;
-  Duration_t three_sec = {3, 0};
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   // expect a timeout because the sample doesn't match the query string
   if (ret != RETCODE_TIMEOUT) {
     cout << "ERROR: wait(qc) should have timed out" << endl;
@@ -520,7 +520,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   }
 
   ws->attach_condition(dr_qc);
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   if (ret != RETCODE_OK) {
     cout << "ERROR: wait(qc) should not time out" << endl;
     return false;
