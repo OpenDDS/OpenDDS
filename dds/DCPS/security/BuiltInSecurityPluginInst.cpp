@@ -17,11 +17,13 @@ using DDS::Security::CryptoKeyExchange;
 using DDS::Security::CryptoTransform;
 
 BuiltInSecurityPluginInst::BuiltInSecurityPluginInst()
+#ifdef OPENDDS_SECURITY
   : authentication_(new AuthenticationBuiltInImpl)
   , access_control_(new AccessControlBuiltInImpl)
   , key_factory_(new CryptoBuiltInImpl)
   , key_exchange_(CryptoKeyExchange::_narrow(key_factory_))
   , transform_(CryptoTransform::_narrow(key_factory_))
+#endif
 {
 }
 
@@ -29,6 +31,7 @@ BuiltInSecurityPluginInst::~BuiltInSecurityPluginInst()
 {
 }
 
+#ifdef OPENDDS_SECURITY
 Authentication_var BuiltInSecurityPluginInst::create_authentication()
 {
   return authentication_;
@@ -53,6 +56,7 @@ CryptoTransform_var BuiltInSecurityPluginInst::create_crypto_transform()
 {
   return transform_;
 }
+#endif
 
 void BuiltInSecurityPluginInst::shutdown()
 {

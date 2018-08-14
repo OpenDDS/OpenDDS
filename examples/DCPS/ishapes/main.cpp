@@ -136,10 +136,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         defaultSize = ACE_OS::atoi(argv[++curr]);
       } else if ((ACE_OS::strcmp(ACE_TEXT("-governance"), argv[curr]) == 0) &&
         (curr + 1 < argc)) {
-        governance = argv[++curr];
+        governance = ACE_TEXT_ALWAYS_CHAR(argv[++curr]);
       } else if ((ACE_OS::strcmp(ACE_TEXT("-permissions"), argv[curr]) == 0) &&
         (curr + 1 < argc)) {
-        permissions = argv[++curr];
+        permissions = ACE_TEXT_ALWAYS_CHAR(argv[++curr]);
       } else {
         std::cout << "Ignoring unknown param: " <<
           ACE_TEXT_ALWAYS_CHAR(argv[curr]) << std::endl;

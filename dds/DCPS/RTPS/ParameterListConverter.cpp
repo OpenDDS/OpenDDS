@@ -13,7 +13,7 @@
 
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
 #endif
 
@@ -250,7 +250,7 @@ namespace {
     return qos != def_qos;
   }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   bool not_default(const DDS::PropertyQosPolicy& qos) {
     for (unsigned int i = 0; i < qos.value.length(); ++i) {
       if (qos.value[i].propagate) {
@@ -285,6 +285,7 @@ namespace {
     }
   }
 
+#ifdef OPENDDS_SECURITY
   OpenDDS::Security::DiscoveredParticipantDataKind find_data_kind(const ParameterList& param_list)
   {
     enum FieldMaskNames {
@@ -329,7 +330,7 @@ namespace {
 
     return OpenDDS::Security::DPDK_ORIGINAL;
   }
-
+#endif
 
 };
 
@@ -372,7 +373,7 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
                   ParameterList& param_list)
 {
@@ -726,11 +727,11 @@ int from_param_list(const ParameterList& param_list,
   return result;
 }
 
+#ifdef OPENDDS_SECURITY
 int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
                   ParameterList& param_list)
 {
 
-#if defined(OPENDDS_SECURITY)
   if (participant_data.dataKind == OpenDDS::Security::DPDK_SECURE) {
     to_param_list(participant_data.ddsParticipantDataSecure, param_list);
 
@@ -738,13 +739,10 @@ int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& partic
     to_param_list(participant_data.ddsParticipantDataSecure.base, param_list);
 
   } else {
-#endif
 
     to_param_list(participant_data.ddsParticipantDataSecure.base.base, param_list);
 
-#if defined(OPENDDS_SECURITY)
   }
-#endif
 
   to_param_list(participant_data.participantProxy, param_list);
   to_param_list(participant_data.leaseDuration, param_list);
@@ -760,7 +758,6 @@ int from_param_list(const ParameterList& param_list,
   participant_data.dataKind = find_data_kind(param_list);
   switch (participant_data.dataKind) {
 
-#if defined(OPENDDS_SECURITY)
     case OpenDDS::Security::DPDK_SECURE: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure);
       break;
@@ -770,7 +767,6 @@ int from_param_list(const ParameterList& param_list,
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base);
       break;
     }
-#endif
 
     default : {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
@@ -787,7 +783,7 @@ int from_param_list(const ParameterList& param_list,
 
   return result;
 }
-
+#endif
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
@@ -1439,7 +1435,7 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 int to_param_list(const DDS::Security::EndpointSecurityInfo& info,
                   ParameterList& param_list)
 {

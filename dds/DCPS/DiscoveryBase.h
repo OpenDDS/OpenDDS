@@ -16,7 +16,10 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/DataReaderImpl_T.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
+
+#ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
+#endif
 
 #include "ace/Select_Reactor.h"
 #include "ace/Condition_Thread_Mutex.h"

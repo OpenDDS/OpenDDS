@@ -30,6 +30,9 @@
 #include "dds/DCPS/PoolAllocationBase.h"
 
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#ifdef OPENDDS_SECURITY
+#include "dds/DCPS/security/framework/SecurityConfig.h"
+#endif
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -52,7 +55,7 @@ public:
        const DDS::DomainParticipantQos& qos,
        RtpsDiscovery* disco);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Spdp(DDS::DomainId_t domain,
        const DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
@@ -84,7 +87,7 @@ public:
 
   WaitForAcks& wait_for_acks();
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const { return crypto_handle_; }
 
@@ -93,9 +96,9 @@ public:
   void handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
 #endif
 
-  void handle_participant_data(DCPS::MessageId id, const Security::SPDPdiscoveredParticipantData& pdata);
+  void handle_participant_data(DCPS::MessageId id, const ParticipantData_t& pdata);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   void check_auth_states(const ACE_Time_Value& tv);
   void write_secure_updates();
   void write_secure_disposes();
@@ -104,7 +107,7 @@ public:
 
   bool is_opendds(const GUID_t& participant) const;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   typedef std::pair<DDS::Security::ParticipantCryptoHandle, DDS::Security::SharedSecretHandle_var> ParticipantCryptoInfoPair;
   ParticipantCryptoInfoPair lookup_participant_crypto_info(const DCPS::RepoId& id) const;
   void send_participant_crypto_tokens(const DCPS::RepoId& id);
@@ -117,7 +120,13 @@ public:
 
 protected:
   Sedp& endpoint_manager() { return sedp_; }
-  Security::SPDPdiscoveredParticipantData build_local_pdata(Security::DiscoveredParticipantDataKind);
+
+  ParticipantData_t build_local_pdata(
+#ifdef OPENDDS_SECURITY
+                                      Security::DiscoveredParticipantDataKind kind
+#endif
+                                      );
+
   bool announce_domain_participant_qos();
 
 private:
@@ -140,7 +149,7 @@ private:
 
   void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   bool match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
   void attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp);
 #endif
@@ -191,7 +200,7 @@ private:
   // when BIT is being removed (fini_bit)
   WaitForAcks wait_for_acks_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
   bool security_enabled_;
 

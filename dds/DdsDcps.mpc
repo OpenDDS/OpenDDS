@@ -29,13 +29,6 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsSubscriptionExt.idl
     DdsDcpsTopic.idl
     DdsDcpsTypeSupportExt.idl
-    DdsSecurityCore.idl
-    DdsSecurityParams.idl
-  }
-
-  TypeSupport_Files {
-    DdsSecurityCore.idl
-    DdsSecurityParams.idl
   }
 
   Source_Files {
@@ -49,6 +42,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     Versioned_Namespace.h
     DCPS
     DCPS/transport/framework
+    DCPS/security/framework
     DCPS/yard
 
     // Although these files only contain comments since

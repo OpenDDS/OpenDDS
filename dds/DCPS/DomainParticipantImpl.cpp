@@ -27,8 +27,9 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
+#include "dds/DCPS/security/framework/SecurityConfig.h"
 #endif
 
 #include "RecorderImpl.h"
@@ -1621,7 +1622,7 @@ DomainParticipantImpl::enable()
     TheServiceParticipant->monitor_->report();
   }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (!security_config_ && TheServiceParticipant->get_security()) {
     security_config_ = TheSecurityRegistry->default_config();
     if (!security_config_) {
@@ -1640,7 +1641,7 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (TheServiceParticipant->get_security() && !security_config_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -1652,7 +1653,7 @@ DomainParticipantImpl::enable()
 
   AddDomainStatus value = {GUID_UNKNOWN, false};
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (TheServiceParticipant->get_security()) {
     Security::Authentication_var auth = security_config_->get_authentication();
 
@@ -1741,7 +1742,7 @@ DomainParticipantImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   }
 #endif
 
@@ -1844,7 +1845,7 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
   return result;
 }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 namespace {
 
   bool
@@ -1873,7 +1874,7 @@ DomainParticipantImpl::create_new_topic(
                    this->topics_protector_,
                    DDS::Topic::_nil());
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   if (TheServiceParticipant->get_security() && !is_bit(topic_name)) {
     Security::AccessControl_var access = security_config_->get_access_control();
 
@@ -2359,7 +2360,7 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
 }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 void
 DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& cfg)
 {

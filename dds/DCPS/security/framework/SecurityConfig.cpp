@@ -14,25 +14,29 @@ namespace OpenDDS {
 namespace Security {
 
 SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
+#ifdef OPENDDS_SECURITY
                                Authentication_var authentication_plugin,
                                AccessControl_var access_ctrl_plugin,
                                CryptoKeyExchange_var key_exchange_plugin,
                                CryptoKeyFactory_var key_factory_plugin,
                                CryptoTransform_var transform_plugin,
+#endif
                                const ConfigPropertyList& properties)
   : name_(name)
+#ifdef OPENDDS_SECURITY
   , authentication_plugin_(authentication_plugin)
   , access_control_plugin_(access_ctrl_plugin)
   , key_exchange_plugin_(key_exchange_plugin)
   , key_factory_plugin_(key_factory_plugin)
   , transform_plugin_(transform_plugin)
+#endif
   , properties_(properties)
 {}
 
 SecurityConfig::~SecurityConfig()
 {}
 
-void SecurityConfig::get_properties(DDS::Security::PropertyQosPolicy& out_properties) const
+void SecurityConfig::get_properties(DDS::PropertyQosPolicy& out_properties) const
 {
   // The names on the internal attributes of the PropertyQosPolicy are
   // strange, but value is a properties sequence

@@ -9,14 +9,17 @@
 
 #include "dds/DCPS/RTPS/rtps_export.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
+
+#ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/RtpsSecurityC.h"
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 struct DiscoveredWriterData_SecurityWrapper;
 struct DiscoveredReaderData_SecurityWrapper;
 #endif
@@ -33,7 +36,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::ParticipantBuiltinTopicData& pbtd);
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
 // DDS::Security::ParticipantBuiltinTopicData
 
 OpenDDS_Rtps_Export
@@ -85,6 +88,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     SPDPdiscoveredParticipantData& participant_data);
 
+#ifdef OPENDDS_SECURITY
 // OpenDDS::Security::SPDPdiscoveredParticipantData
 
 OpenDDS_Rtps_Export
@@ -94,6 +98,7 @@ int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& partic
 OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data);
+#endif
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
@@ -117,6 +122,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                    DCPS::DiscoveredReaderData& reader_data);
 
+#ifdef OPENDDS_SECURITY
 // DDS::Security::EndpointSecurityInfo
 
 OpenDDS_Rtps_Export
@@ -127,7 +133,7 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::EndpointSecurityInfo& info);
 
-// DDS::Security::DataTags& data_tags
+// DDS::Security::DataTags data_tags
 
 OpenDDS_Rtps_Export
 int to_param_list(const DDS::Security::DataTags& tags,
@@ -137,7 +143,6 @@ OpenDDS_Rtps_Export
 int from_param_list(const ParameterList& param_list,
                     DDS::Security::DataTags& tags);
 
-#if defined(OPENDDS_SECURITY)
 // DiscoveredWriterData_SecurityWrapper
 
 OpenDDS_Rtps_Export
