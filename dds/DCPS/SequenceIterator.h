@@ -6,8 +6,13 @@
 #ifndef DDS_DCPS_ITERATOR_ADAPTOR_H
 #define DDS_DCPS_ITERATOR_ADAPTOR_H
 
+#include "dds/Versioned_Namespace.h"
+
 #include "tao/Unbounded_Value_Sequence_T.h"
+
 #include <iterator>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
@@ -275,7 +280,10 @@ namespace DCPS {
   {
     return ConstSequenceIterator<Sequence>::Base::end(seq);
   }
+
 }  // namespace DCPS
 }  // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

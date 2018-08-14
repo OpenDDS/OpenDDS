@@ -1380,7 +1380,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 // NOTE: This function will return the time value as UTC
 // Format from DDS Security spec 1.1 is:
 //   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
-time_t AccessControlBuiltInImpl::convert_permissions_time(std::string timeString)
+time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& timeString)
 {
   // Check for a valid length time string, which is 19 characters (up through seconds)
   if (timeString.length() < 19) {
@@ -1880,7 +1880,7 @@ CORBA::Boolean AccessControlBuiltInImpl::search_remote_permissions(
 }
 
 void AccessControlBuiltInImpl::parse_class_id(
-  const std::string class_id,
+  const std::string& class_id,
   std::string & plugin_class_name,
   int & major_version,
   int & minor_version)

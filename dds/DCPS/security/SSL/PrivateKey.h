@@ -13,48 +13,51 @@
 #include <vector>
 #include <openssl/evp.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
-  class DdsSecurity_Export PrivateKey
-  {
-   public:
-    typedef DCPS::unique_ptr<PrivateKey> unique_ptr;
+class DdsSecurity_Export PrivateKey
+{
+public:
+  typedef DCPS::unique_ptr<PrivateKey> unique_ptr;
 
-    friend DdsSecurity_Export bool operator==(const PrivateKey& lhs,
-                                              const PrivateKey& rhs);
+  friend DdsSecurity_Export bool operator==(const PrivateKey& lhs,
+                                            const PrivateKey& rhs);
 
-    PrivateKey(const std::string& uri, const std::string password = "");
+  explicit PrivateKey(const std::string& uri, const std::string& password = "");
 
-    PrivateKey();
+  PrivateKey();
 
-    PrivateKey(const PrivateKey& other);
+  virtual ~PrivateKey();
 
-    virtual ~PrivateKey();
+  void load(const std::string& uri, const std::string& password = "");
 
-    PrivateKey& operator=(const PrivateKey& rhs);
+  int sign(const std::vector<const DDS::OctetSeq*>& src,
+           DDS::OctetSeq& dst) const;
 
-    void load(const std::string& uri, const std::string& password = "");
+private:
+  PrivateKey(const PrivateKey&);
+  PrivateKey& operator=(const PrivateKey&);
 
-    int sign(const std::vector<const DDS::OctetSeq*>& src,
-             DDS::OctetSeq& dst) const;
+  static EVP_PKEY* EVP_PKEY_from_pem(const std::string& path,
+                                     const std::string& password = "");
 
-   private:
-    static EVP_PKEY* EVP_PKEY_from_pem(const std::string& path,
-                                       const std::string& password = "");
+  static EVP_PKEY* EVP_PKEY_from_pem_data(const std::string& data,
+                                          const std::string& password);
 
-    static EVP_PKEY* EVP_PKEY_from_pem_data(const std::string& data,
-                                            const std::string& password);
+  EVP_PKEY* k_;
+};
 
-    EVP_PKEY* k_;
-  };
-
-  DdsSecurity_Export bool operator==(const PrivateKey& lhs,
-                                     const PrivateKey& rhs);
+DdsSecurity_Export bool operator==(const PrivateKey& lhs,
+                                   const PrivateKey& rhs);
 
 }  // namespace SSL
 }  // namespace Security
 }  // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

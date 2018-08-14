@@ -10,6 +10,8 @@
 #include "Governance.h"
 #include <list>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 
@@ -36,7 +38,7 @@ public:
   };
 
   struct PermissionTopicPsRule {
-    PublishSubscribe_t  ps_type;
+    PublishSubscribe_t ps_type;
     std::vector<std::string> topic_list;
   };
 
@@ -107,5 +109,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif

@@ -20,7 +20,7 @@
 #include <string>
 #include <memory>
 
-#include "Authentication/LocalCredentialData.h"
+#include "Authentication/LocalAuthCredentialData.h"
 #include "SSL/DiffieHellman.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

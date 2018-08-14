@@ -4,7 +4,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "dds/DCPS/security/Authentication/LocalCredentialData.h"
+#include "dds/DCPS/security/Authentication/LocalAuthCredentialData.h"
 #include "dds/DCPS/security/TokenWriter.h"
 #include <iterator>
 #include <fstream>
