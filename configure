@@ -926,6 +926,13 @@ if ($opts{'security'}) {
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
 my %use_win_default = (
     'boost' => ['c:\\Boost'],
+
+    'ssl' => ['c:\\Program Files (x86)\\OpenSSL',
+              'c:\\Program Files\\OpenSSL'],
+
+    'xerces3' => ['c:\\Program Files (x86)\\xerces-c',
+                  'c:\\Program Files\\xerces-c'],
+
     'cmake' => ['c:\\Program Files (x86)\\CMake',
                 'c:\\Program Files\\CMake']);
 
