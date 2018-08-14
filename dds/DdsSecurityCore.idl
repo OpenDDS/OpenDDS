@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DDS_SECURITY_CORE_IDL
+#if !defined(DDS_SECURITY_CORE_IDL) && defined(OPENDDS_SECURITY)
 #define DDS_SECURITY_CORE_IDL
 
 // DDS Security 1.1 Normative IDL (ptc/2017-09-26)

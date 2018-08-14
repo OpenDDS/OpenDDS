@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPS_SECURITY_IDL
+#if !defined(OPENDDS_RTPS_SECURITY_IDL) && defined(OPENDDS_SECURITY)
 #define OPENDDS_RTPS_SECURITY_IDL
 
 #include "dds/DdsSecurityCore.idl"
