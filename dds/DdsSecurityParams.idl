@@ -10,7 +10,7 @@
  *
  */
 
-#ifndef DDS_SECURITY_PARAMS_IDL
+#if !defined(DDS_SECURITY_PARAMS_IDL) && defined(OPENDDS_SECURITY)
 #define DDS_SECURITY_PARAMS_IDL
 
 #include "DdsDcpsCore.idl"
