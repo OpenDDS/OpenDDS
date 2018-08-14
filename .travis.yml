@@ -8,7 +8,7 @@ env:
   matrix:
     - FUZZ=1 STATIC=1 XERCES3=1 NO_TESTS=1
     - NO_INLINE=1 NO_BIT=1
-    - NO_INLINE=1 VERSIONED_NS=1
+    - NO_INLINE=1 VERSIONED_NS=1 DDS_SECURITY=1
     - NO_DEBUG=1 NO_TESTS=1
     - SAFETY_PROFILE=1
     - NO_INLINE=1 USES_WCHAR=1
@@ -82,6 +82,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libxerces-c-dev
+      - libssl-dev
       - g++-8
 
 before_install:
@@ -111,6 +112,7 @@ before_script:
   - if [ "$XERCES3" == "1" ]; then CONFIG_OPTIONS+=" --xerces3"; fi
   - if [ "$CXX" == "g++" ]; then CONFIG_OPTIONS+=" --macros=c++11=1"; fi
   - if [ "$VERSIONED_NS" == 1 ]; then CONFIG_OPTIONS+=" --features=versioned_namespace=1"; fi
+  - if [ "$DDS_SECURITY" == 1 ]; then CONFIG_OPTIONS+=" --security"; fi
   - ./configure --mpcopts="-workers 2" --compiler=$COMPILER $CONFIG_OPTIONS
   - tools/scripts/show_build_config.pl
   - if [ "$SAFETY_PROFILE" == "1" ]; then
