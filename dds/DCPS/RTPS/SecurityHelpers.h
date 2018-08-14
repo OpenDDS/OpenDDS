@@ -10,6 +10,8 @@
 
 #include "dds/DdsSecurityCoreC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace RTPS {
 
@@ -111,4 +113,5 @@ struct DiscoveredReaderData_SecurityWrapper {
 }
 }
 
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #endif
