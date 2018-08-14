@@ -58,9 +58,9 @@ public:
     return evaluator_.eval(s, query_parameters_);
   }
 
-  bool has_unsafe_fields() const
+  bool has_non_key_fields() const
   {
-    return evaluator_.has_unsafe_fields();
+    return evaluator_.has_non_key_fields();
   }
 
 private:
