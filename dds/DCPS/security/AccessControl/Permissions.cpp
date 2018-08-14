@@ -15,13 +15,14 @@
 
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 
 Permissions::Permissions()
   : perm_data_(), subject_name_()
 {
-
 }
 
 bool Permissions::extract_subject_name(const SSL::SignedDocument& doc)
@@ -30,7 +31,7 @@ bool Permissions::extract_subject_name(const SSL::SignedDocument& doc)
 
   const std::string start_str("<subject_name>"), end_str("</subject_name>");
 
-  size_t found_begin = subject_name_.find(start_str);
+  const size_t found_begin = subject_name_.find(start_str);
 
   if (found_begin != std::string::npos) {
     subject_name_.erase(0, found_begin + start_str.length());
@@ -41,7 +42,7 @@ bool Permissions::extract_subject_name(const SSL::SignedDocument& doc)
     return false;
   }
 
-  size_t found_end = subject_name_.find(end_str);
+  const size_t found_end = subject_name_.find(end_str);
 
   if (found_end != std::string::npos) {
     subject_name_.erase(found_end);
@@ -74,8 +75,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
   using XML::XStr;
   static const char* gMemBufId = "gov buffer id";
 
-  if (!extract_subject_name(doc))
-  {
+  if (!extract_subject_name(doc)) {
     ACE_ERROR((LM_ERROR, "Permissions::load: WARNING, Could not extract subject name from permissions file"));
     return -1;
   }
@@ -95,22 +95,22 @@ int Permissions::load(const SSL::SignedDocument& doc)
                                         gMemBufId);
   try {
     parser->parse(contentbuf);
-  }
-  catch (const xercesc::XMLException& toCatch) {
+
+  } catch (const xercesc::XMLException& toCatch) {
     char* message = xercesc::XMLString::transcode(toCatch.getMessage());
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Exception message is %C.\n"), message));
     xercesc::XMLString::release(&message);
     return -1;
-  }
-  catch (const xercesc::DOMException& toCatch) {
+
+  } catch (const xercesc::DOMException& toCatch) {
     char* message = xercesc::XMLString::transcode(toCatch.msg);
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Exception message is: %C.\n"), message));
     xercesc::XMLString::release(&message);
     return -1;
-  }
-  catch (...) {
+
+  } catch (...) {
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Unexpected Permissions XML Parser Exception.\n")));
     return -1;
@@ -122,17 +122,16 @@ int Permissions::load(const SSL::SignedDocument& doc)
   xercesc::DOMDocument* xmlDoc = parser->getDocument();
 
   xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
-  if ( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
-
+  if (!elementRoot) {
+    throw std::runtime_error("empty XML document");
+  }
 
   //TODO:  WARNING - this implementation only supports 1 permissions/grant set
- // Different from governance from here forward
+  // Different from governance from here forward
   // Find the validity rules
   xercesc::DOMNodeList * grantRules = xmlDoc->getElementsByTagName(XStr("grant"));
 
-  //PermissionGrantRules grant_rules_list_holder_;
-
-  for (XMLSize_t r = 0; r < grantRules->getLength(); r++) {
+  for (XMLSize_t r = 0; r < grantRules->getLength(); ++r) {
     PermissionGrantRule rule_holder_;
 
     // Pull out the grant name for this grant
@@ -142,7 +141,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
     // Pull out subject name, validity, and default
     xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
 
-    for ( XMLSize_t gn = 0; gn < grantNodes->getLength(); gn++) {
+    for (XMLSize_t gn = 0; gn < grantNodes->getLength(); gn++) {
       const XStr g_tag = grantNodes->item(gn)->getNodeName();
 
       if (g_tag == "subject_name") {
@@ -191,8 +190,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
               if ("id" == XStr(domainIdNodes->item(did)->getNodeName())) {
                 ptr_holder_.domain_list.insert(toInt(domainIdNodes->item(did)->getTextContent()));
                 pp_holder_.domain_list.insert(toInt(domainIdNodes->item(did)->getTextContent()));
-              }
-              else if ("id_range" == XStr(domainIdNodes->item(did)->getNodeName())) {
+              } else if ("id_range" == XStr(domainIdNodes->item(did)->getNodeName())) {
                 int min_value = 0;
                 int max_value = 0;
                 xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
@@ -200,8 +198,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
                 for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
                   if ("min" == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
                     min_value = toInt(domRangeIdNodes->item(drid)->getTextContent());
-                  }
-                  else if ("max" == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
+                  } else if ("max" == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
                     max_value = toInt(domRangeIdNodes->item(drid)->getTextContent());
 
                     if ((min_value == 0) || (min_value > max_value)) {
@@ -237,8 +234,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
                   }
                 }
 
-              }
-              else if ("partitions" == XStr(topicListNodes->item(tln)->getNodeName())) {
+              } else if ("partitions" == XStr(topicListNodes->item(tln)->getNodeName())) {
                 xercesc::DOMNodeList * partitionNodes = topicListNodes->item(tln)->getChildNodes();
 
                 for (XMLSize_t pn = 0; pn < partitionNodes->getLength(); pn++) {
@@ -268,3 +264,5 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -15,12 +15,13 @@
 
 #include <stdexcept>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 
-Governance::Governance() : access_rules_()
+Governance::Governance()
 {
-
 }
 
 int Governance::load(const SSL::SignedDocument& doc)
@@ -54,22 +55,22 @@ int Governance::load(const SSL::SignedDocument& doc)
 
   try {
     parser->parse(contentbuf);
-  }
-  catch (const xercesc::XMLException& toCatch) {
+
+  } catch (const xercesc::XMLException& toCatch) {
     char* message = xercesc::XMLString::transcode(toCatch.getMessage());
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Exception message is %C.\n"), message));
     xercesc::XMLString::release(&message);
     return -1;
-  }
-  catch (const xercesc::DOMException& toCatch) {
+
+  } catch (const xercesc::DOMException& toCatch) {
     char* message = xercesc::XMLString::transcode(toCatch.msg);
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Exception message is %C.\n"), message));
     xercesc::XMLString::release(&message);
     return -1;
-  }
-  catch (...) {
+
+  } catch (...) {
     ACE_DEBUG((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Unexpected Governance XML Parser Exception.\n")));
     return -1;
@@ -80,12 +81,14 @@ int Governance::load(const SSL::SignedDocument& doc)
   xercesc::DOMDocument* xmlDoc = parser->getDocument();
 
   xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
-  if ( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
+  if (!elementRoot) {
+    throw std::runtime_error("empty XML document");
+  }
 
   // Find the domain rules
   xercesc::DOMNodeList * domainRules = xmlDoc->getElementsByTagName(XStr("domain_rule"));
 
-  for (XMLSize_t r = 0; r < domainRules->getLength(); r++) {
+  for (XMLSize_t r = 0; r < domainRules->getLength(); ++r) {
     Governance::DomainRule rule_holder_;
     rule_holder_.domain_attrs.plugin_participant_attributes = 0;
 
@@ -105,8 +108,7 @@ int Governance::load(const SSL::SignedDocument& doc)
             if (xercesc::XMLString::textToBin(t, i)) {
               rule_holder_.domain_list.insert(i);
             }
-          }
-          else if ("id_range" == XStr(domainIdNodes->item(did)->getNodeName())) {
+          } else if ("id_range" == XStr(domainIdNodes->item(did)->getNodeName())) {
             int min_value = 0;
             int max_value = 0;
             xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
@@ -114,8 +116,7 @@ int Governance::load(const SSL::SignedDocument& doc)
             for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
               if (strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
                 min_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
-              }
-              else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
+              } else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
                 max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
 
                 if ((min_value == 0) || (min_value > max_value)) {
@@ -124,7 +125,7 @@ int Governance::load(const SSL::SignedDocument& doc)
                   return -1;
                 }
 
-                for (int i = min_value; i <= max_value; i++) {
+                for (int i = min_value; i <= max_value; ++i) {
                   rule_holder_.domain_list.insert(i);
                 }
               }
@@ -229,23 +230,17 @@ int Governance::load(const SSL::SignedDocument& doc)
 
         if (tr_tag == "topic_expression") {
           t_rules.topic_expression = tr_val;
-        }
-        else if (tr_tag == "enable_discovery_protection") {
+        } else if (tr_tag == "enable_discovery_protection") {
           t_rules.topic_attrs.is_discovery_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        }
-        else if (tr_tag == "enable_liveliness_protection") {
+        } else if (tr_tag == "enable_liveliness_protection") {
           t_rules.topic_attrs.is_liveliness_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        }
-        else if (tr_tag == "enable_read_access_control") {
+        } else if (tr_tag == "enable_read_access_control") {
           t_rules.topic_attrs.is_read_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        }
-        else if (tr_tag == "enable_write_access_control") {
+        } else if (tr_tag == "enable_write_access_control") {
           t_rules.topic_attrs.is_write_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        }
-        else if (tr_tag == "metadata_protection_kind") {
+        } else if (tr_tag == "metadata_protection_kind") {
           t_rules.metadata_protection_kind.assign(tr_val);
-        }
-        else if (tr_tag == "data_protection_kind") {
+        } else if (tr_tag == "data_protection_kind") {
           t_rules.data_protection_kind.assign(tr_val);
         }
         xercesc::XMLString::release(&tr_val);
@@ -262,3 +257,5 @@ int Governance::load(const SSL::SignedDocument& doc)
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

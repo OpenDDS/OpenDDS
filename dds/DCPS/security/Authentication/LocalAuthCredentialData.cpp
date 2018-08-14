@@ -3,7 +3,7 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#include "LocalCredentialData.h"
+#include "LocalAuthCredentialData.h"
 #include "dds/DCPS/security/CommonUtilities.h"
 #include "dds/DCPS/security/TokenReader.h"
 #include "dds/DCPS/debug.h"
