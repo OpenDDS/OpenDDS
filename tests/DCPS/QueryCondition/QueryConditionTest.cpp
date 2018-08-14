@@ -537,6 +537,112 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   return true;
 }
 
+bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub,
+  const char* query, bool expect_dispose)
+{
+  ReturnCode_t ret;
+
+  DataWriter_var dw;
+  DataReader_var dr;
+  if (!test_setup(dp, ts, pub, sub, "run_dispose_filter_test_topic", dw, dr)) {
+    cerr << "ERROR: run_dispose_filter_test: setup failed" << endl;
+    return false;
+  }
+
+  // Write Sample with Valid Data
+  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Message sample;
+  sample.key = 0;
+  sample.iteration = 0;
+  ret = mdw->write(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_dispose_filter_test: write failed" << endl;
+    return false;
+  }
+
+  // Create Dispose Sample with Invalid Data by Disposing the Writer
+  mdw->dispose(sample, HANDLE_NIL);
+
+  // Wait for samples matching the query from the disposed writer
+  ReadCondition_var dr_qc = dr->create_querycondition(
+    ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE,
+    query, DDS::StringSeq());
+  if (!dr_qc) {
+    cerr << "ERROR: run_dispose_filter_test: create read condition failed" << endl;
+    return false;
+  }
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_qc);
+  ConditionSeq active;
+  if (ws->wait(active, max_wait_time) != RETCODE_OK) {
+    cerr << "ERROR: run_dispose_filter_test: wait failed" << endl;
+    return false;
+  }
+  ws->detach_condition(dr_qc);
+
+  // Read the Number of Invalid Messages Taken
+  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  MessageSeq data;
+  SampleInfoSeq infoseq;
+  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_dispose_filter_test: take_w_condition failed" << endl;
+    return false;
+  }
+  unsigned num_valid = 0;
+  unsigned num_invalid = 0;
+  for (size_t i = 0; i < infoseq.length(); i++) {
+    if (infoseq[i].valid_data) {
+      num_valid++;
+    } else {
+      num_invalid++;
+    }
+  }
+
+  // Compare Numbers to what was Expected
+  if (num_valid != 1) {
+    cerr << "ERROR: run_dispose_filter_test: "
+      "expected one sample with valid data, got " << num_valid << endl;
+    return false;
+  }
+  if (num_invalid != (expect_dispose ? 1 : 0)) {
+    cerr << "ERROR: run_dispose_filter_test: expected "
+      << (expect_dispose ? "one sample" : "no samples")
+      << " with invalid data, got " << num_invalid << endl;
+    return false;
+  }
+
+  dr->delete_readcondition(dr_qc);
+  return true;
+}
+
+bool run_dispose_filter_tests(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub)
+{
+  /*
+   * Run a "Safe" Query that just references key;
+   * assert a normal message and a dispose message are in the results.
+   */
+  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0", true)) {
+    cerr << "ERROR: run_dispose_filter_tests: safe query test failed!" << endl;
+    return false;
+  }
+
+  /*
+   * Setup a "Unsafe" Query that references key and a normal field;
+   * assert just a normal message is in the results.
+   */
+  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0 AND iteration >= 0", false)) {
+    cerr << "ERROR: run_dispose_filter_tests: unsafe query test failed!" << endl;
+    return false;
+  }
+
+  return true;
+}
+
 int run_test(int argc, ACE_TCHAR *argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -556,6 +662,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
   passed &= run_filtering_test(dp, ts, pub, sub);
   passed &= run_change_parameter_test(dp, ts, pub, sub);
   passed &= run_complex_filtering_test(dp, ts, pub, sub);
+  passed &= run_dispose_filter_tests(dp, ts, pub, sub);
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
