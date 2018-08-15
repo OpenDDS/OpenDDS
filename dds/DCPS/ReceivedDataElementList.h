@@ -21,7 +21,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once	
+#pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -61,8 +61,7 @@ public:
     // user read our received data
     if (header.message_id_ == DISPOSE_INSTANCE ||
       header.message_id_ == DISPOSE_UNREGISTER_INSTANCE ||
-      header.message_id_ == UNREGISTER_INSTANCE ||
-      header.message_id_ == DISPOSE_UNREGISTER_INSTANCE
+      header.message_id_ == UNREGISTER_INSTANCE
     ) {
       valid_data_ = false;
     }
