@@ -394,16 +394,19 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
-    if (/version (\d+)\.(\d+)/i) { # match i18n version strings
+    if (/version (\d+)\.(\d+)\.[\d]+ for (x\d+)/i) { # match i18n version strings
       my $ver = ($2 == 0) ? $1 : "$1.$2";
+      my $arch = "$3";
       $ver =~ s/0+$// unless $2 == 0;
       $ver =~ s/\.(\d)\d*/.$1/; # only keep one digit after .
       if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
         die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
           . "Stopped";
       }
-      $opts{'compiler_version'} =
-        $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+
+      $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+      $opts{'compiler_target_architecture'} = $arch;
+
       if ($ver >= 19) {
         push(@{$opts{'features'}}, 'no_cxx11=0');
         print "Visual C++ has C++11 support\n" if $opts{'verbose'};
@@ -927,14 +930,14 @@ my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
 my %use_win_default = (
     'boost' => ['c:\\Boost'],
 
-    'ssl' => ['c:\\Program Files (x86)\\OpenSSL',
-              'c:\\Program Files\\OpenSSL'],
+    'ssl' => ['c:\\Program Files\\OpenSSL',
+              'c:\\Program Files (x86)\\OpenSSL'],
 
-    'xerces3' => ['c:\\Program Files (x86)\\xerces-c',
-                  'c:\\Program Files\\xerces-c'],
+    'xerces3' => ['c:\\Program Files\\xerces-c',
+                  'c:\\Program Files (x86)\\xerces-c'],
 
-    'cmake' => ['c:\\Program Files (x86)\\CMake',
-                'c:\\Program Files\\CMake']);
+    'cmake' => ['c:\\Program Files\\CMake',
+                'c:\\Program Files (x86)\\CMake']);
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
@@ -1071,20 +1074,47 @@ if ($opts{'ssl'}) {
     if grep m/OpenSSL[\W]+1.1/, <$fh>;
 }
 
+sub is_windows {
+  return $slash eq '\\';
+}
+
+sub win32_cmake_generator {
+  my $ver = shift;
+  my $arch = shift;
+
+  my %map = ('vc9' => 'Visual Studio 9 2008',
+             'vc10' => 'Visual Studio 10 2010',
+             'vc11' => 'Visual Studio 11 2012',
+             'vc12' => 'Visual Studio 12 2013',
+             'vc14' => 'Visual Studio 14 2015',
+             'vs2017' => 'Visual Studio 15 2017');
+
+  die "ERROR: Unsupported Visual Studio version '$ver' supplied\n"
+    if ! exists $map{$ver};
+
+  return $map{$ver} . ($arch eq 'x64' ? ' Win64' : '');
+}
+
 ## Google Test
 if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
   my $cwd = Cwd::getcwd();
-  my $build_dir = 'tests/googletest/build';
-  my $cmake = $opts{'cmake'} . '/' . $optdep{'cmake'}->[1];
-  my @cmake_cmds = (["$cmake", ".."],
+  my $build_dir = 'tests' . $slash . 'googletest' . $slash . 'build';
+  my $cmake = $opts{'cmake'} . $slash . $optdep{'cmake'}->[1];
+  my @cmake_cmds = ((is_windows() ?
+                      ["$cmake",
+                       "-D", "CMAKE_CXX_FLAGS=-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
+                       "-G", win32_cmake_generator(
+                               $opts{'compiler_version'},
+                               $opts{'compiler_target_architecture'}),
+                       ".."] : ["$cmake", ".."]),
                     ["$cmake", "--build", "."]);
 
   mkdir($build_dir)
-    or die "ERROR '$!': failed to make directory $build_dir from $cwd"
+    or die "ERROR '$!': failed to make directory $build_dir from $cwd\n"
       if ! -d $build_dir;
-    
+
   chdir($build_dir)
-    or  die "ERROR '$!': failed to change into $build_dir from $cwd";
+    or  die "ERROR '$!': failed to change into $build_dir from $cwd\n";
 
   for my $cmd (@cmake_cmds) {
     print "Running @{$cmd}...\n";
@@ -1093,7 +1123,7 @@ if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
   }
 
   chdir($cwd)
-    or  die "ERROR '$!': failed to change back to $cwd";
+    or die "ERROR '$!': failed to change back to $cwd\n";
 }
 
 
