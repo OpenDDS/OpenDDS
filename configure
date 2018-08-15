@@ -1685,7 +1685,11 @@ if ($cross_compile) {
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
     if ($opts{'ssl'}) {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
+    }
+
+    if ($opts{'xerces3'}) {
+      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
     }
   }
 
@@ -1709,7 +1713,11 @@ else { # not cross-compiling:
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
     if ($opts{'ssl'}) {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
+    }
+
+    if ($opts{'xerces3'}) {
+      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
     }
   }
 
