@@ -927,7 +927,10 @@ if ($opts{'security'}) {
 }
 
 sub targets_win64 {
-  return $opts{'compiler_target_architecture'} eq 'x64';
+  my $arch = exists $opts{'compiler_target_architecture'} ?
+               $opts{'compiler_target_architecture'} : '';
+
+  return $arch eq 'x64';
 }
 
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
