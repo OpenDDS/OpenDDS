@@ -96,7 +96,7 @@ bool LocalAuthCredentialData::load_credentials(const DDS::PropertySeq& props, DD
 
   std::string pkey_uri, password;
   for (unsigned int i = 0; i < props.length(); ++i) {
-    const std::string name = props[i].name, value = props[i].value;
+    const std::string name = props[i].name.in(), value = props[i].value.in();
 
     if (DCPS::DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalAuthCredentialData::load: property %i: %C: %C\n",

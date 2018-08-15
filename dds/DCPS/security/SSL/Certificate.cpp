@@ -126,7 +126,7 @@ int Certificate::validate(const Certificate& ca, unsigned long int flags) const
                       ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, a ")
                       ACE_TEXT("certificate must be loaded before it can be verified\n")), 1);
   }
-  
+
   if (!ca.x_) {
     ACE_ERROR_RETURN((LM_WARNING,
                       ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, passed-in ")
@@ -150,7 +150,7 @@ int Certificate::validate(const Certificate& ca, unsigned long int flags) const
   X509_STORE_CTX_init(validation_ctx, certs, x_, NULL);
   X509_STORE_CTX_set_flags(validation_ctx, flags);
 
-  int result = 
+  int result =
     X509_verify_cert(validation_ctx) == 1
     ? X509_V_OK : 1; // X509_V_ERR_UNSPECIFIED is not provided by all OpenSSL versions
 
