@@ -91,15 +91,7 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
     const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
     typedef typename SampleSeq::value_type VT;
     const VT* typed_sample = static_cast<VT*>(sample->registered_data_);
-    if (
-      !qci || !typed_sample ||
-      (
-        // Omit from results if there are fields other than "key" in the query
-        // and the sample just has a "key" field.
-        qci->has_non_key_fields() && !sample->valid_data_
-      ) ||
-      !qci->filter(*typed_sample)
-    ) {
+    if (!qci || !typed_sample || !qci->filter(*typed_sample, !sample->valid_data_)) {
       return false;
     }
   }

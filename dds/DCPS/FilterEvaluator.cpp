@@ -45,7 +45,6 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   : extended_grammar_(false)
   , filter_root_(0)
   , number_parameters_(0)
-  , has_non_key_fields_(false)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
@@ -65,12 +64,6 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
       filter_root_ = walkAst(iter);
     }
   }
-
-  // Check for Fields that are not Key
-  for (AstNode* iter = parser.GetAstRoot()->GetFirstChild(); iter;
-      iter = iter->GetSibling()) {
-    walkForNonKeyFields(AstNodeWrapper(iter));
-  }
 }
 
 FilterEvaluator::FilterEvaluator(const AstNodeWrapper& yardNode)
@@ -89,6 +82,20 @@ public:
   virtual ~EvalNode()
   {
     std::for_each(children_.begin(), children_.end(), deleteChild);
+  }
+
+  virtual bool has_non_key_fields(const MetaStruct& meta) const
+  {
+    for (
+      OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin();
+      i != children_.end(); i++
+    ) {
+      EvalNode* child = *i;
+      if (child->has_non_key_fields(meta)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   virtual Value eval(DataForEval& data) = 0;
@@ -137,17 +144,43 @@ FilterEvaluator::~FilterEvaluator()
   delete filter_root_;
 }
 
+bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
+{
+  // Check Order
+  for (
+    OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.cbegin();
+    i != order_bys_.cend(); i++
+  ) {
+    if (!meta.isDcpsKey(i->c_str())) {
+      return true;
+    }
+  }
+
+  // Check Rest of Query
+  if (filter_root_->has_non_key_fields(meta)) {
+    return true;
+  }
+
+  return false;
+}
+
 namespace {
 
   class FieldLookup : public FilterEvaluator::Operand {
   public:
     explicit FieldLookup(AstNode* fnNode)
       : fieldName_(toString(fnNode))
-    {}
+    {
+    }
 
     Value eval(FilterEvaluator::DataForEval& data)
     {
       return data.lookup(fieldName_.c_str());
+    }
+
+    bool has_non_key_fields(const MetaStruct& meta) const
+    {
+      return !meta.isDcpsKey(fieldName_.c_str());
     }
 
     OPENDDS_STRING fieldName_;
@@ -511,60 +544,6 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
   }
   assert(0);
   return 0;
-}
-
-OPENDDS_STRING trim_whitespace(const OPENDDS_STRING& string)
-{
-  if (!string.length()) {
-    return string;
-  }
-  OPENDDS_STRING::const_iterator i;
-
-  size_t right = 0;
-  for (i = string.begin(); i != string.end() && isspace(*i); ++i) {
-    right++;
-  }
-
-  size_t left = 0;
-  i = string.end() - 1;
-  while (isspace(*i)) {
-    left++;
-    if (i == string.begin()) {
-      break;
-    }
-    ++i;
-  }
-
-  return string.substr(right, string.length() - left - right);
-}
-
-void FilterEvaluator::walkForNonKeyFields(const AstNodeWrapper& node)
-{
-  // Check if the Node is a Field
-  if (node->TypeMatches<FieldName>() || node->TypeMatches<CallDef>()) {
-    OPENDDS_STRING str(trim_whitespace(toString(node)));
-    const OPENDDS_STRING keyStr("key");
-    if (str != keyStr) {
-      has_non_key_fields_ = true;
-    }
-
-  // Else Continue Along the Tree
-  } else if (node->TypeMatches<CompPredDef>()) {
-    walkForNonKeyFields(child(node, 0));
-    walkForNonKeyFields(child(node, 2));
-  } else if (node->TypeMatches<BetweenPredDef>()) {
-    walkForNonKeyFields(child(node, 0));
-  } else if (node->TypeMatches<CondDef>() || node->TypeMatches<Cond>()) {
-    size_t a = arity(node);
-    if (a == 1) {
-      walkForNonKeyFields(child(node, 0));
-    } else if (a == 2) {
-      walkForNonKeyFields(child(node, 1));
-    } else if (a == 3) {
-      walkForNonKeyFields(child(node, 0));
-      walkForNonKeyFields(child(node, 2));
-    }
-  }
 }
 
 bool
