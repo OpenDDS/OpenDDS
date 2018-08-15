@@ -35,9 +35,9 @@ public:
   friend DdsSecurity_Export bool operator==(const Certificate& lhs,
                                             const Certificate& rhs);
 
-  Certificate(const std::string& uri, const std::string& password = "");
+  explicit Certificate(const std::string& uri, const std::string& password = "");
 
-  Certificate(const DDS::OctetSeq& src);
+  explicit Certificate(const DDS::OctetSeq& src);
 
   Certificate(const Certificate& other);
 

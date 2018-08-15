@@ -101,7 +101,7 @@ public:
 
   static DiffieHellman* factory(const DDS::OctetSeq& kagree_algo);
 
-  DiffieHellman(DHAlgorithm* algorithm) : algo_(algorithm) {}
+  explicit DiffieHellman(DHAlgorithm* algorithm) : algo_(algorithm) {}
 
   ~DiffieHellman() {}
 

@@ -338,9 +338,7 @@ PKCS7* SignedDocument::PKCS7_from_data(const DDS::OctetSeq& s_mime_data)
     BIO_free(cache_this);
 
   } else {
-    std::stringstream errmsg;
-    errmsg << "failed to create data '" << s_mime_data << "' using BIO_new";
-    OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
+    OPENDDS_SSL_LOG_ERR("failed to create data using BIO_new");
   }
 
   return doc_;
