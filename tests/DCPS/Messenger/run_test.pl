@@ -78,6 +78,21 @@ elsif ($test->flag('rtps_disc')) {
     $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
 }
+elsif ($test->flag('rtps_disc_half_sec_pub')) {
+    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $is_rtps_disc = 1;
+}
+elsif ($test->flag('rtps_disc_half_sec_sub')) {
+    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $is_rtps_disc = 1;
+}
+elsif ($test->flag('rtps_disc_sec')) {
+    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $is_rtps_disc = 1;
+}
 elsif ($test->flag('rtps_disc_tcp')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
@@ -119,7 +134,7 @@ $test->report_unused_flags(!$flag_found);
 $pub_opts .= $thread_per_connection;
 
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                       "$repo_bit_opt");
+                       "$repo_bit_opt") unless $is_rtps_disc;
 
 $test->process("publisher", "publisher", $pub_opts);
 my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";

@@ -443,6 +443,12 @@ InfoRepoDiscovery::attach_participant(DDS::DomainId_t domainId,
   }
 }
 
+OpenDDS::DCPS::RepoId
+InfoRepoDiscovery::generate_participant_guid()
+{
+  return GUID_UNKNOWN;
+}
+
 DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
                                           const DDS::DomainParticipantQos& qos)
@@ -458,6 +464,21 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
   const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
   return ads;
 }
+
+#if defined(OPENDDS_SECURITY)
+DCPS::AddDomainStatus
+InfoRepoDiscovery::add_domain_participant_secure(
+  DDS::DomainId_t /*domain*/,
+  const DDS::DomainParticipantQos& /*qos*/,
+  const OpenDDS::DCPS::RepoId& /*guid*/,
+  DDS::Security::IdentityHandle /*id*/,
+  DDS::Security::PermissionsHandle /*perm*/,
+  DDS::Security::ParticipantCryptoHandle /*part_crypto*/)
+{
+  const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  return ads;
+}
+#endif
 
 bool
 InfoRepoDiscovery::remove_domain_participant(DDS::DomainId_t domainId,

@@ -51,7 +51,6 @@ public:
   TestParticipantImpl()
     : DomainParticipantImpl(0,
                             MY_DOMAIN,
-                            GUID_UNKNOWN,
                             PARTICIPANT_QOS_DEFAULT,
                             ::DDS::DomainParticipantListener::_nil(),
                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK) {};

@@ -58,7 +58,6 @@ public:
 
   // values for flags parameter of transport_assoc_done():
   enum { ASSOC_OK = 1, ASSOC_ACTIVE = 2 };
-protected:
   TransportClient();
   virtual ~TransportClient();
 
@@ -135,6 +134,13 @@ private:
   virtual DDS::DomainId_t domain_id() const = 0;
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
+
+#if defined(OPENDDS_SECURITY)
+  virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
+  {
+    return DDS::HANDLE_NIL;
+  }
+#endif
 
   // helpers
   typedef ACE_Guard<ACE_Thread_Mutex> Guard;

@@ -153,8 +153,8 @@ PublisherImpl::create_datawriter(
     const DDS::ReturnCode_t ret = dw_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_ERROR((LM_WARNING,
+          ACE_TEXT("(%P|%t) WARNING: ")
           ACE_TEXT("PublisherImpl::create_datawriter, ")
           ACE_TEXT("enable failed.\n")));
       return DDS::DataWriter::_nil();

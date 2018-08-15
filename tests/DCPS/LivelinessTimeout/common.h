@@ -42,6 +42,7 @@ enum TransportInstanceId
 
 extern int LEASE_DURATION_SEC; // seconds
 
-extern int test_duration;
+extern ACE_Time_Value TEST_DURATION_SEC; // seconds
+
 // default to using TCP
 extern unsigned int threshold_liveliness_lost;

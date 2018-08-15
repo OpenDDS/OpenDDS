@@ -45,6 +45,41 @@ RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
   locators_.erase(remote_id);
 }
 
+#if defined(OPENDDS_SECURITY)
+ACE_INLINE DDS::Security::ParticipantCryptoHandle
+RtpsUdpDataLink::local_crypto_handle() const
+{
+  return local_crypto_handle_;
+}
+
+ACE_INLINE void
+RtpsUdpDataLink::local_crypto_handle(DDS::Security::ParticipantCryptoHandle h)
+{
+  local_crypto_handle_ = h;
+}
+
+ACE_INLINE DDS::Security::ParticipantCryptoHandle
+RtpsUdpDataLink::peer_crypto_handle(const RepoId& peer) const
+{
+  const PeerHandlesCIter it = peer_crypto_handles_.find(peer);
+  return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
+}
+
+ACE_INLINE DDS::Security::DatawriterCryptoHandle
+RtpsUdpDataLink::writer_crypto_handle(const RepoId& writer) const
+{
+  const PeerHandlesCIter it = peer_crypto_handles_.find(writer);
+  return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
+}
+
+ACE_INLINE DDS::Security::DatareaderCryptoHandle
+RtpsUdpDataLink::reader_crypto_handle(const RepoId& reader) const
+{
+  const PeerHandlesCIter it = peer_crypto_handles_.find(reader);
+  return (it == peer_crypto_handles_.end()) ? DDS::HANDLE_NIL : it->second;
+}
+#endif
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -27,6 +27,10 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
+#if defined(OPENDDS_SECURITY)
+#include "dds/DCPS/security/framework/SecurityRegistry.h"
+#endif
+
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 
@@ -41,22 +45,36 @@
 
 namespace Util {
 
-template <typename Key>
-int find(
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap& c,
-  const Key& key,
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value)
-{
-  OpenDDS::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
-    c.find(key);
+  template <typename Key>
+  int find(
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap& c,
+    const Key& key,
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::mapped_type*& value)
+  {
+    OpenDDS::DCPS::DomainParticipantImpl::TopicMap::iterator iter =
+      c.find(key);
 
-  if (iter == c.end()) {
-    return -1;
+    if (iter == c.end()) {
+      return -1;
+    }
+
+    value = &iter->second;
+    return 0;
   }
 
-  value = &iter->second;
-  return 0;
-}
+  DDS::PropertySeq filter_properties(const DDS::PropertySeq& properties, const std::string& prefix)
+  {
+    DDS::PropertySeq result(properties.length());
+    result.length(properties.length());
+    size_t count = 0;
+    for (size_t i = 0, len = properties.length(); i < len; ++i) {
+      if (std::string(properties[i].name.in()).find(prefix) == 0) {
+        result[count++] = properties[i];
+      }
+    }
+    result.length(count);
+    return result;
+  }
 
 } // namespace Util
 
@@ -72,19 +90,17 @@ namespace DCPS {
 // Implementation skeleton constructor
 DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
                                              const DDS::DomainId_t&             domain_id,
-                                             const RepoId&                      dp_id,
                                              const DDS::DomainParticipantQos &  qos,
                                              DDS::DomainParticipantListener_ptr a_listener,
-                                             const DDS::StatusMask &            mask,
-                                             bool                               federated)
+                                             const DDS::StatusMask &            mask)
   : factory_(factory),
     default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
     default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
     qos_(qos),
     domain_id_(domain_id),
-    dp_id_(dp_id),
-    federated_(federated),
+    dp_id_(GUID_UNKNOWN),
+    federated_(false),
     shutdown_condition_(shutdown_mutex_),
     shutdown_complete_(false),
     monitor_(0),
@@ -456,25 +472,29 @@ DomainParticipantImpl::create_topic_i(
       }
       has_keys = type_support->has_dcps_key();
     }
-    RepoId topic_id;
 
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    TopicStatus status = disco->assert_topic(topic_id,
-                                             domain_id_,
-                                             dp_id_,
-                                             topic_name,
-                                             type_name,
-                                             topic_qos,
-                                             has_keys);
+    RepoId topic_id = GUID_UNKNOWN;
+    TopicStatus status = TOPIC_DISABLED;
 
-    if (status == CREATED || status == FOUND) {
+    if (is_enabled()) {
+      Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+      status = disco->assert_topic(topic_id,
+                                   domain_id_,
+                                   dp_id_,
+                                   topic_name,
+                                   type_name,
+                                   topic_qos,
+                                   has_keys);
+    }
+
+    if (status == CREATED || status == FOUND || status == TOPIC_DISABLED) {
       DDS::Topic_ptr new_topic = create_new_topic(topic_id,
-                                                topic_name,
-                                                type_name,
-                                                topic_qos,
-                                                a_listener,
-                                                mask,
-                                                type_support);
+                                                  topic_name,
+                                                  type_name,
+                                                  topic_qos,
+                                                  a_listener,
+                                                  mask,
+                                                  type_support);
       if (this->monitor_) {
         this->monitor_->report();
       }
@@ -1593,18 +1613,156 @@ DomainParticipantImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  DDS::ReturnCode_t ret = this->set_enabled();
-
   if (monitor_) {
     monitor_->report();
   }
+
   if (TheServiceParticipant->monitor_) {
     TheServiceParticipant->monitor_->report();
+  }
+
+#if defined(OPENDDS_SECURITY)
+  if (!security_config_ && TheServiceParticipant->get_security()) {
+    security_config_ = TheSecurityRegistry->default_config();
+    if (!security_config_) {
+      security_config_ = TheSecurityRegistry->fix_empty_default();
+    }
+  }
+#endif
+
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+
+  if (disco.is_nil()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantImpl::enable, ")
+               ACE_TEXT("no repository found for domain id: %d.\n"), domain_id_));
+    return DDS::RETCODE_ERROR;
+  }
+
+#if defined(OPENDDS_SECURITY)
+  if (TheServiceParticipant->get_security() && !security_config_) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("DomainParticipantImpl::enable, ")
+               ACE_TEXT("DCPSSecurity flag is set, but unable to load security plugin configuration.\n")));
+    return DDS::RETCODE_ERROR;
+  }
+#endif
+
+  AddDomainStatus value = {GUID_UNKNOWN, false};
+
+#if defined(OPENDDS_SECURITY)
+  if (TheServiceParticipant->get_security()) {
+    Security::Authentication_var auth = security_config_->get_authentication();
+
+    DDS::Security::SecurityException se;
+    DDS::Security::ValidationResult_t val_res =
+      auth->validate_local_identity(id_handle_, dp_id_, domain_id_, qos_, disco->generate_participant_guid(), se);
+
+    /* TODO - Handle VALIDATION_PENDING_RETRY */
+    if (val_res != DDS::Security::VALIDATION_OK) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("Unable to validate local identity. SecurityException[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
+    }
+
+    Security::AccessControl_var access = security_config_->get_access_control();
+
+    perm_handle_ = access->validate_local_permissions(auth, id_handle_, domain_id_, qos_, se);
+
+    if (perm_handle_ == DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("Unable to validate local permissions. SecurityException[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
+    }
+
+    bool check_create = access->check_create_participant(perm_handle_, domain_id_, qos_, se);
+    if (!check_create) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("Unable to create participant. SecurityException[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
+    }
+
+    DDS::Security::ParticipantSecurityAttributes part_sec_attr;
+    bool check_part_sec_attr = access->get_participant_sec_attributes(perm_handle_, part_sec_attr, se);
+
+    if (!check_part_sec_attr) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("Unable to get participant security attributes. SecurityException[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return DDS::RETCODE_ERROR;
+    }
+
+    Security::CryptoKeyFactory_var crypto = security_config_->get_crypto_key_factory();
+
+    part_crypto_handle_ = crypto->register_local_participant(id_handle_, perm_handle_,
+      Util::filter_properties(qos_.property.value, "dds.sec.crypto."), part_sec_attr, se);
+    if (part_crypto_handle_ == DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("DomainParticipantImpl::enable, ")
+        ACE_TEXT("Unable to register local participant. SecurityException[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
+      return DDS::RETCODE_ERROR;
+    }
+
+    value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
+
+    if (value.id == GUID_UNKNOWN) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::enable, ")
+                 ACE_TEXT("add_domain_participant_secure returned invalid id.\n")));
+      return DDS::RETCODE_ERROR;
+    }
+
+  } else {
+#endif
+
+    value = disco->add_domain_participant(domain_id_, qos_);
+
+    if (value.id == GUID_UNKNOWN) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::enable, ")
+                 ACE_TEXT("add_domain_participant returned invalid id.\n")));
+      return DDS::RETCODE_ERROR;
+    }
+
+#if defined(OPENDDS_SECURITY)
+  }
+#endif
+
+  dp_id_ = value.id;
+  federated_ = value.federated;
+
+  const DDS::ReturnCode_t ret = this->set_enabled();
+
+  if (DCPS_debug_level > 1) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DomainParticipantImpl::enable: ")
+               ACE_TEXT("enabled participant %C in domain %d\n"),
+               OPENDDS_STRING(GuidConverter(dp_id_)).c_str(), domain_id_));
   }
 
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
     Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
     this->bit_subscriber_ = disc->init_bit(this);
+  }
+
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
   }
 
   if (qos_.entity_factory.autoenable_created_entities) {
@@ -1622,7 +1780,7 @@ DomainParticipantImpl::enable()
     }
   }
 
-  return ret;
+  return DDS::RETCODE_OK;
 }
 
 RepoId
@@ -1686,6 +1844,20 @@ DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
   return result;
 }
 
+#if defined(OPENDDS_SECURITY)
+namespace {
+
+  bool
+  is_bit(const char* topic_name) {
+    return strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
+      || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
+      || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
+      || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
+  }
+
+}
+#endif
+
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
   const RepoId topic_id,
@@ -1701,14 +1873,33 @@ DomainParticipantImpl::create_new_topic(
                    this->topics_protector_,
                    DDS::Topic::_nil());
 
-  /*
-  TopicMap::mapped_type* entry = 0;
+#if defined(OPENDDS_SECURITY)
+  if (TheServiceParticipant->get_security() && !is_bit(topic_name)) {
+    Security::AccessControl_var access = security_config_->get_access_control();
 
-  if (Util::find(topics_, topic_name, entry) == 0) {
-    ++entry->client_refs_;
-    return DDS::Topic::_duplicate(entry->pair_.obj_.in());
+    DDS::Security::SecurityException se;
+
+    DDS::Security::TopicSecurityAttributes sec_attr;
+    if (!access->get_topic_sec_attributes(perm_handle_, topic_name, sec_attr, se)) {
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: ")
+        ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
+        ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
+          topic_name, se.code, se.minor_code, se.message.in()));
+      return DDS::Topic::_nil();
+    }
+
+    if ((sec_attr.is_write_protected || sec_attr.is_read_protected) &&
+        !access->check_create_topic(perm_handle_, domain_id_, topic_name, qos, se)) {
+      ACE_ERROR((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: ")
+        ACE_TEXT("DomainParticipantImpl::create_new_topic, ")
+        ACE_TEXT("Permissions check failed to create new topic '%C'. SecurityException[%d.%d]: %C\n"),
+          topic_name, se.code, se.minor_code, se.message.in()));
+      return DDS::Topic::_nil();
+    }
   }
-  */
+#endif
 
   TopicImpl* topic_servant = 0;
 
@@ -1735,7 +1926,7 @@ DomainParticipantImpl::create_new_topic(
 
   if (OpenDDS::DCPS::bind(topics_, topic_name, refCounted_topic) == -1) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_topic, ")
+               ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_new_topic, ")
                ACE_TEXT("%p \n"),
                ACE_TEXT("bind")));
     return DDS::Topic::_nil();
@@ -2167,6 +2358,14 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
 {
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
 }
+
+#if defined(OPENDDS_SECURITY)
+void
+DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& cfg)
+{
+  security_config_ = cfg;
+}
+#endif
 
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)

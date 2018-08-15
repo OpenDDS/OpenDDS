@@ -247,8 +247,10 @@ void* createIndex(const std::string& tag
   }
 
   if (!index) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PersistenceUpdater::init "
-      "Initial allocation/Bind failed for %C.\n"), tag.c_str()));
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: PersistenceUpdater::init: ")
+      ACE_TEXT("Initial allocation/Bind failed for %C.\n"),
+      tag.c_str()));
   }
 
   return index;
@@ -264,8 +266,9 @@ index_cleanup(I* index
     iter++;
 
     if (index->unbind((*current_iter).ext_id_, allocator) != 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PersistenceUpdater::init:"
-        "Index unbind failed.\n")));
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: PersistenceUpdater::init: ")
+        ACE_TEXT("Index unbind failed.\n")));
     }
   }
 }
@@ -1059,7 +1062,6 @@ PersistenceUpdaterSvc_Loader::init()
 {
   return ACE_Service_Config::process_directive
          (ace_svc_desc_PersistenceUpdaterSvc);
-  return 0;
 }
 
 // from the "ACE Programmers Guide (P. 424)

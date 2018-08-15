@@ -43,7 +43,7 @@ operator<<(std::ostream& out,
 struct InlineType {
   AST_Type* type;
 
-  InlineType(AST_Type* t)
+  explicit InlineType(AST_Type* t)
     : type(t)
   { }
 };
