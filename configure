@@ -1102,7 +1102,8 @@ if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
   my $cmake = $opts{'cmake'} . $slash . $optdep{'cmake'}->[1];
   my @cmake_cmds = ((is_windows() ?
                       ["$cmake",
-                       "-D", "CMAKE_CXX_FLAGS=-D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
+                       "-D", "gtest_force_shared_crt=ON",
+                       "-D", "CMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
                        "-G", win32_cmake_generator(
                                $opts{'compiler_version'},
                                $opts{'compiler_target_architecture'}),
