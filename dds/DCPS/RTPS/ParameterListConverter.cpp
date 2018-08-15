@@ -6,22 +6,30 @@
  */
 
 #include "ParameterListConverter.h"
+
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
+
+#if defined(OPENDDS_SECURITY)
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#endif
 
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS { namespace RTPS {
+namespace OpenDDS {
+namespace RTPS {
 
 #ifndef OPENDDS_SAFETY_PROFILE
 using DCPS::operator!=;
 #endif
 
 namespace {
+
   void add_param(ParameterList& param_list, const Parameter& param) {
     const CORBA::ULong length = param_list.length();
     param_list.length(length + 1);
@@ -29,7 +37,7 @@ namespace {
   }
 
   void add_param_locator_seq(ParameterList& param_list,
-                             const OpenDDS::DCPS::LocatorSeq& locator_seq,
+                             const DCPS::LocatorSeq& locator_seq,
                              const ParameterId_t pid) {
     const CORBA::ULong length = locator_seq.length();
     for (CORBA::ULong i = 0; i < length; ++i) {
@@ -44,14 +52,12 @@ namespace {
                               const DCPS::TransportLocator& dcps_locator,
                               bool map /*map IPV4 to IPV6 addr*/) {
     // Convert the tls blob to an RTPS locator seq
-    OpenDDS::DCPS::LocatorSeq locators;
-    bool ignore_requires_inline_qos;
-    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators,
-                                                ignore_requires_inline_qos);
+    DCPS::LocatorSeq locators;
+    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
     if (result == DDS::RETCODE_OK) {
       const CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
-        OpenDDS::DCPS::Locator_t& rtps_locator = locators[i];
+        DCPS::Locator_t& rtps_locator = locators[i];
         ACE_INET_Addr address;
         if (locator_to_address(address, rtps_locator, map) == 0) {
           Parameter param;
@@ -79,23 +85,23 @@ namespace {
     add_param(param_list, param);
   }
 
-  void append_locator(OpenDDS::DCPS::LocatorSeq& list, const OpenDDS::DCPS::Locator_t& locator) {
+  void append_locator(DCPS::LocatorSeq& list, const DCPS::Locator_t& locator) {
     const CORBA::ULong length = list.length();
     list.length(length + 1);
     list[length] = locator;
   }
 
   void append_locator(
-      OpenDDS::DCPS::TransportLocatorSeq& list,
-      const OpenDDS::DCPS::TransportLocator& locator) {
+      DCPS::TransportLocatorSeq& list,
+      const DCPS::TransportLocator& locator) {
     const CORBA::ULong length = list.length();
     list.length(length + 1);
     list[length] = locator;
   }
 
   void append_locators_if_present(
-      OpenDDS::DCPS::TransportLocatorSeq& list,
-      const OpenDDS::DCPS::LocatorSeq& rtps_udp_locators) {
+      DCPS::TransportLocatorSeq& list,
+      const DCPS::LocatorSeq& rtps_udp_locators) {
     if (rtps_udp_locators.length()) {
       const CORBA::ULong length = list.length();
       list.length(length + 1);
@@ -110,7 +116,7 @@ namespace {
     locator_port_only
   };
 
-  void append_associated_writer(OpenDDS::DCPS::DiscoveredReaderData& reader_data,
+  void append_associated_writer(DCPS::DiscoveredReaderData& reader_data,
                                 const Parameter& param)
   {
     const CORBA::ULong len = reader_data.readerProxy.associatedWriters.length();
@@ -118,24 +124,24 @@ namespace {
     reader_data.readerProxy.associatedWriters[len] = param.guid();
   }
 
-  void set_ipaddress(OpenDDS::DCPS::LocatorSeq& locators,
+  void set_ipaddress(DCPS::LocatorSeq& locators,
                      LocatorState& last_state,
                      const unsigned long addr) {
     const CORBA::ULong length = locators.length();
     // Update last locator if the last state is port only
     if (last_state == locator_port_only && length > 0) {
       // Update last locator
-      OpenDDS::DCPS::Locator_t& partial = locators[length - 1];
-      OpenDDS::RTPS::assign(partial.address, addr);
+      DCPS::Locator_t& partial = locators[length - 1];
+      assign(partial.address, addr);
       // there is no longer a partially complete locator, set state
       last_state = locator_complete;
     // Else there is no partially complete locator available
     } else {
       // initialize and append new locator
-      OpenDDS::DCPS::Locator_t locator;
+      DCPS::Locator_t locator;
       locator.kind = LOCATOR_KIND_UDPv4;
       locator.port = 0;
-      OpenDDS::RTPS::assign(locator.address, addr);
+      assign(locator.address, addr);
       locators.length(length + 1);
       locators[length] = locator;
       // there is now a paritally complete locator, set state
@@ -143,24 +149,24 @@ namespace {
     }
   }
 
-  void set_port(OpenDDS::DCPS::LocatorSeq& locators,
+  void set_port(DCPS::LocatorSeq& locators,
                 LocatorState& last_state,
                 const unsigned long port) {
     const CORBA::ULong length = locators.length();
     // Update last locator if the last state is address only
     if (last_state == locator_address_only && length > 0) {
       // Update last locator
-      OpenDDS::DCPS::Locator_t& partial = locators[length - 1];
+      DCPS::Locator_t& partial = locators[length - 1];
       partial.port = port;
       // there is no longer a partially complete locator, set state
       last_state = locator_complete;
     // Else there is no partially complete locator available
     } else {
       // initialize and append new locator
-      OpenDDS::DCPS::Locator_t locator;
+      DCPS::Locator_t locator;
       locator.kind = LOCATOR_KIND_UDPv4;
       locator.port = port;
-      OpenDDS::RTPS::assign(locator.address, 0);
+      assign(locator.address, 0);
       locators.length(length + 1);
       locators[length] = locator;
       // there is now a paritally complete locator, set state
@@ -244,6 +250,18 @@ namespace {
     return qos != def_qos;
   }
 
+#if defined(OPENDDS_SECURITY)
+  bool not_default(const DDS::PropertyQosPolicy& qos) {
+    for (unsigned int i = 0; i < qos.value.length(); ++i) {
+      if (qos.value[i].propagate) {
+        return true;
+      }
+    }
+    // binary_value is not sent in the parameter list (DDSSEC12-37)
+    return false;
+  }
+#endif
+
   bool not_default(const DDS::TimeBasedFilterQosPolicy& qos)
   {
     DDS::TimeBasedFilterQosPolicy def_qos =
@@ -251,7 +269,7 @@ namespace {
     return qos != def_qos;
   }
 
-  bool not_default(const OpenDDS::DCPS::ContentFilterProperty_t& cfprop)
+  bool not_default(const DCPS::ContentFilterProperty_t& cfprop)
   {
     return std::strlen(cfprop.filterExpression);
   }
@@ -266,54 +284,228 @@ namespace {
       dur.nanosec = DDS::DURATION_INFINITE_NSEC;
     }
   }
+
+  OpenDDS::Security::DiscoveredParticipantDataKind find_data_kind(const ParameterList& param_list)
+  {
+    enum FieldMaskNames {
+      ID_TOKEN_FIELD = 0x01,
+      PERM_TOKEN_FIELD = 0x02,
+      PROPERTY_LIST_FIELD = 0x04,
+      PARTICIPANT_SECURITY_INFO_FIELD = 0x08,
+      IDENTITY_STATUS_TOKEN_FIELD = 0x10
+    };
+
+    unsigned char field_mask = 0x00;
+
+    CORBA::ULong length = param_list.length();
+    for (CORBA::ULong i = 0; i < length; ++i) {
+      const Parameter& param = param_list[i];
+      switch (param._d()) {
+        case DDS::Security::PID_IDENTITY_TOKEN:
+          field_mask |= ID_TOKEN_FIELD;
+          break;
+        case DDS::Security::PID_PERMISSIONS_TOKEN:
+          field_mask |= PERM_TOKEN_FIELD;
+          break;
+        case PID_PROPERTY_LIST:
+          field_mask |= PROPERTY_LIST_FIELD;
+          break;
+        case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+          field_mask |= PARTICIPANT_SECURITY_INFO_FIELD;
+          break;
+        case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+          field_mask |= IDENTITY_STATUS_TOKEN_FIELD;
+          break;
+      }
+    }
+
+    if ((field_mask & (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) == (ID_TOKEN_FIELD | PERM_TOKEN_FIELD)) {
+      if ((field_mask & IDENTITY_STATUS_TOKEN_FIELD) == IDENTITY_STATUS_TOKEN_FIELD) {
+        return OpenDDS::Security::DPDK_SECURE;
+      } else {
+        return OpenDDS::Security::DPDK_ENHANCED;
+      }
+    }
+
+    return OpenDDS::Security::DPDK_ORIGINAL;
+  }
+
+
 };
 
 namespace ParameterListConverter {
-int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
+
+// DDS::ParticipantBuiltinTopicData
+
+int to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
                   ParameterList& param_list)
 {
-  // Parameterize ParticipantBuiltinTopicData
-  // Ignore participant builtin topic key
-
-  if (not_default(participant_data.ddsParticipantData.user_data))
+  if (not_default(pbtd.user_data))
   {
-    Parameter ud_param;
-    ud_param.user_data(participant_data.ddsParticipantData.user_data);
-    add_param(param_list, ud_param);
+    Parameter param_ud;
+    param_ud.user_data(pbtd.user_data);
+    add_param(param_list, param_ud);
   }
 
-  // Parameterize ParticipantProxy_t
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DDS::ParticipantBuiltinTopicData& pbtd)
+{
+  pbtd.user_data.value.length(0);
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case PID_USER_DATA:
+        pbtd.user_data = param.user_data();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+
+  return 0;
+}
+
+#if defined(OPENDDS_SECURITY)
+int to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
+                  ParameterList& param_list)
+{
+  to_param_list(pbtd.base, param_list);
+
+  Parameter param_it;
+  param_it.identity_token(pbtd.identity_token);
+  add_param(param_list, param_it);
+
+  Parameter param_pt;
+  param_pt.permissions_token(pbtd.permissions_token);
+  add_param(param_list, param_pt);
+
+  if (not_default(pbtd.property))
+  {
+    Parameter param_p;
+    param_p.property(pbtd.property);
+    add_param(param_list, param_p);
+  }
+
+  Parameter param_psi;
+  param_psi.participant_security_info(pbtd.security_info);
+  add_param(param_list, param_psi);
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::ParticipantBuiltinTopicData& pbtd)
+{
+  if (from_param_list(param_list, pbtd.base) != 0)
+    return -1;
+
+  pbtd.security_info.participant_security_attributes = 0;
+  pbtd.security_info.plugin_participant_security_attributes = 0;
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case DDS::Security::PID_IDENTITY_TOKEN:
+        pbtd.identity_token = param.identity_token();
+        break;
+      case DDS::Security::PID_PERMISSIONS_TOKEN:
+        pbtd.permissions_token = param.permissions_token();
+        break;
+      case PID_PROPERTY_LIST:
+        pbtd.property = param.property();
+        break;
+      case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+        pbtd.security_info = param.participant_security_info();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+
+  return 0;
+}
+
+int to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds,
+                  ParameterList& param_list)
+{
+  to_param_list(pbtds.base, param_list);
+
+  Parameter param_ist;
+  param_ist.identity_status_token(pbtds.identity_status_token);
+  add_param(param_list, param_ist);
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds)
+{
+  if (from_param_list(param_list, pbtds.base) != 0)
+    return -1;
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+        pbtds.identity_status_token = param.identity_status_token();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+
+  return 0;
+}
+#endif
+
+OpenDDS_Rtps_Export
+int to_param_list(const ParticipantProxy_t& proxy,
+                  ParameterList& param_list)
+{
   Parameter pv_param;
-  pv_param.version(participant_data.participantProxy.protocolVersion);
+  pv_param.version(proxy.protocolVersion);
   add_param(param_list, pv_param);
 
   // For guid prefix, copy into guid, and force some values
   Parameter gp_param;
   GUID_t guid;
   ACE_OS::memcpy(guid.guidPrefix,
-                 participant_data.participantProxy.guidPrefix,
+                 proxy.guidPrefix,
                  sizeof(guid.guidPrefix));
-  guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
+  guid.entityId = DCPS::ENTITYID_PARTICIPANT;
 
   gp_param.guid(guid);
   gp_param._d(PID_PARTICIPANT_GUID);
   add_param(param_list, gp_param);
 
   Parameter vid_param;
-  vid_param.vendor(participant_data.participantProxy.vendorId);
+  vid_param.vendor(proxy.vendorId);
   add_param(param_list, vid_param);
 
-  if (participant_data.participantProxy.expectsInlineQos != false)
+  if (proxy.expectsInlineQos != false)
   {
     Parameter eiq_param; // Default is false
     eiq_param.expects_inline_qos(
-        participant_data.participantProxy.expectsInlineQos);
+        proxy.expectsInlineQos);
     add_param(param_list, eiq_param);
   }
 
   Parameter abe_param;
   abe_param.participant_builtin_endpoints(
-    participant_data.participantProxy.availableBuiltinEndpoints);
+    proxy.availableBuiltinEndpoints);
   add_param(param_list, abe_param);
 
   // Interoperability note:
@@ -322,46 +514,284 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
   // PID_PARTICIPANT_BUILTIN_ENDPOINTS (above).
   Parameter be_param;
   be_param.builtin_endpoints(
-    participant_data.participantProxy.availableBuiltinEndpoints);
+    proxy.availableBuiltinEndpoints);
   add_param(param_list, be_param);
 
   // Each locator
   add_param_locator_seq(
       param_list,
-      participant_data.participantProxy.metatrafficUnicastLocatorList,
+      proxy.metatrafficUnicastLocatorList,
       PID_METATRAFFIC_UNICAST_LOCATOR);
 
   add_param_locator_seq(
       param_list,
-      participant_data.participantProxy.metatrafficMulticastLocatorList,
+      proxy.metatrafficMulticastLocatorList,
       PID_METATRAFFIC_MULTICAST_LOCATOR);
 
   add_param_locator_seq(
       param_list,
-      participant_data.participantProxy.defaultUnicastLocatorList,
+      proxy.defaultUnicastLocatorList,
       PID_DEFAULT_UNICAST_LOCATOR);
 
   add_param_locator_seq(
       param_list,
-      participant_data.participantProxy.defaultMulticastLocatorList,
+      proxy.defaultMulticastLocatorList,
       PID_DEFAULT_MULTICAST_LOCATOR);
 
   Parameter ml_param;
-  ml_param.count(participant_data.participantProxy.manualLivelinessCount);
+  ml_param.count(proxy.manualLivelinessCount);
   add_param(param_list, ml_param);
 
-  if ((participant_data.leaseDuration.seconds != 100) ||
-      (participant_data.leaseDuration.fraction != 0))
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    ParticipantProxy_t& proxy)
+{
+  // Track the state of our locators
+  LocatorState du_last_state = locator_undefined;
+  LocatorState mu_last_state = locator_undefined;
+  LocatorState mm_last_state = locator_undefined;
+
+  // Start by setting defaults
+  proxy.availableBuiltinEndpoints = 0;
+  proxy.expectsInlineQos = false;
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case PID_PROTOCOL_VERSION:
+        proxy.protocolVersion = param.version();
+        break;
+      case PID_PARTICIPANT_GUID:
+        ACE_OS::memcpy(proxy.guidPrefix,
+               param.guid().guidPrefix, sizeof(GuidPrefix_t));
+        break;
+      case PID_VENDORID:
+        ACE_OS::memcpy(proxy.vendorId.vendorId,
+               param.vendor().vendorId, sizeof(OctetArray2));
+        break;
+      case PID_EXPECTS_INLINE_QOS:
+        proxy.expectsInlineQos =
+            param.expects_inline_qos();
+        break;
+      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
+        proxy.availableBuiltinEndpoints =
+            param.participant_builtin_endpoints();
+        break;
+      case PID_BUILTIN_ENDPOINT_SET:
+        // Interoperability note:
+        // OpenSplice uses this in place of PID_PARTICIPANT_BUILTIN_ENDPOINTS
+        // Table 9.13 indicates that PID_PARTICIPANT_BUILTIN_ENDPOINTS should be
+        // used to represent ParticipantProxy::availableBuiltinEndpoints
+        proxy.availableBuiltinEndpoints =
+            param.builtin_endpoints();
+        break;
+      case PID_METATRAFFIC_UNICAST_LOCATOR:
+        append_locator(
+            proxy.metatrafficUnicastLocatorList,
+            param.locator());
+        break;
+      case PID_METATRAFFIC_MULTICAST_LOCATOR:
+        append_locator(
+            proxy.metatrafficMulticastLocatorList,
+            param.locator());
+        break;
+      case PID_DEFAULT_UNICAST_LOCATOR:
+        append_locator(
+            proxy.defaultUnicastLocatorList,
+            param.locator());
+        break;
+      case PID_DEFAULT_MULTICAST_LOCATOR:
+        append_locator(
+            proxy.defaultMulticastLocatorList,
+            param.locator());
+        break;
+      case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
+        proxy.manualLivelinessCount.value =
+            param.count().value;
+        break;
+      case PID_DEFAULT_UNICAST_IPADDRESS:
+        set_ipaddress(
+          proxy.defaultUnicastLocatorList,
+          du_last_state,
+          param.ipv4_address());
+        break;
+      case PID_METATRAFFIC_UNICAST_IPADDRESS:
+        set_ipaddress(
+          proxy.metatrafficUnicastLocatorList,
+          mu_last_state,
+          param.ipv4_address());
+        break;
+      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
+        set_ipaddress(
+          proxy.metatrafficMulticastLocatorList,
+          mm_last_state,
+          param.ipv4_address());
+        break;
+      case PID_DEFAULT_UNICAST_PORT:
+        set_port(proxy.defaultUnicastLocatorList,
+                 du_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_METATRAFFIC_UNICAST_PORT:
+        set_port(proxy.metatrafficUnicastLocatorList,
+                 mu_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_METATRAFFIC_MULTICAST_PORT:
+        set_port(proxy.metatrafficMulticastLocatorList,
+                 mm_last_state,
+                 param.udpv4_port());
+        break;
+      case PID_SENTINEL:
+      case PID_PAD:
+        // ignore
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+
+  return 0;
+}
+
+// OpenDDS::RTPS::Duration_t
+
+OpenDDS_Rtps_Export
+int to_param_list(const Duration_t& duration,
+                  ParameterList& param_list)
+{
+  if ((duration.seconds != 100) ||
+      (duration.fraction != 0))
   {
     Parameter ld_param;
-    ld_param.duration(participant_data.leaseDuration);
+    ld_param.duration(duration);
     add_param(param_list, ld_param);
   }
 
   return 0;
 }
 
-int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
+OpenDDS_Rtps_Export
+int from_param_list(const ParameterList& param_list,
+                    Duration_t& duration)
+{
+  duration.seconds = 100;
+  duration.fraction = 0;
+
+  CORBA::ULong length = param_list.length();
+  for (CORBA::ULong i = 0; i < length; ++i) {
+    const Parameter& param = param_list[i];
+    switch (param._d()) {
+      case PID_PARTICIPANT_LEASE_DURATION:
+        duration = param.duration();
+        break;
+      default:
+        if (param._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+        }
+    }
+  }
+  return 0;
+}
+
+// OpenDDS::RTPS::SPDPdiscoveredParticipantData
+
+OpenDDS_Rtps_Export
+int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
+                  ParameterList& param_list)
+{
+  to_param_list(participant_data.ddsParticipantData, param_list);
+  to_param_list(participant_data.participantProxy, param_list);
+  to_param_list(participant_data.leaseDuration, param_list);
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    SPDPdiscoveredParticipantData& participant_data)
+{
+  int result = from_param_list(param_list, participant_data.ddsParticipantData);
+  if (!result) {
+    result = from_param_list(param_list, participant_data.participantProxy);
+    if (!result) {
+      result = from_param_list(param_list, participant_data.leaseDuration);
+    }
+  }
+
+  return result;
+}
+
+int to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
+                  ParameterList& param_list)
+{
+
+#if defined(OPENDDS_SECURITY)
+  if (participant_data.dataKind == OpenDDS::Security::DPDK_SECURE) {
+    to_param_list(participant_data.ddsParticipantDataSecure, param_list);
+
+  } else if (participant_data.dataKind == OpenDDS::Security::DPDK_ENHANCED) {
+    to_param_list(participant_data.ddsParticipantDataSecure.base, param_list);
+
+  } else {
+#endif
+
+    to_param_list(participant_data.ddsParticipantDataSecure.base.base, param_list);
+
+#if defined(OPENDDS_SECURITY)
+  }
+#endif
+
+  to_param_list(participant_data.participantProxy, param_list);
+  to_param_list(participant_data.leaseDuration, param_list);
+
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data)
+{
+  int result = 0;
+
+  participant_data.dataKind = find_data_kind(param_list);
+  switch (participant_data.dataKind) {
+
+#if defined(OPENDDS_SECURITY)
+    case OpenDDS::Security::DPDK_SECURE: {
+      result = from_param_list(param_list, participant_data.ddsParticipantDataSecure);
+      break;
+    }
+
+    case OpenDDS::Security::DPDK_ENHANCED: {
+      result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base);
+      break;
+    }
+#endif
+
+    default : {
+      result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
+      break;
+    }
+  }
+
+  if (!result) {
+    result = from_param_list(param_list, participant_data.participantProxy);
+    if (!result) {
+      result = from_param_list(param_list, participant_data.leaseDuration);
+    }
+  }
+
+  return result;
+}
+
+
+// OpenDDS::DCPS::DiscoveredWriterData
+
+int to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                   ParameterList& param_list,
                   bool map)
 {
@@ -526,305 +956,12 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
   return 0;
 }
 
-int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
-                  ParameterList& param_list,
-                  bool map)
-{
-  // Ignore builtin topic key
-  {
-    Parameter param;
-    param.string_data(reader_data.ddsSubscriptionData.topic_name);
-    param._d(PID_TOPIC_NAME);
-    add_param(param_list, param);
-  }
-  {
-    Parameter param;
-    param.string_data(reader_data.ddsSubscriptionData.type_name);
-    param._d(PID_TYPE_NAME);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.durability))
-  {
-    Parameter param;
-    param.durability(reader_data.ddsSubscriptionData.durability);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.deadline))
-  {
-    Parameter param;
-    param.deadline(reader_data.ddsSubscriptionData.deadline);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.latency_budget))
-  {
-    Parameter param;
-    param.latency_budget(reader_data.ddsSubscriptionData.latency_budget);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.liveliness))
-  {
-    Parameter param;
-    param.liveliness(reader_data.ddsSubscriptionData.liveliness);
-    add_param(param_list, param);
-  }
-
-  // Interoperability note:
-  // For interoperability, always write the reliability info
-  // if (not_default(reader_data.ddsSubscriptionData.reliability, false))
-  {
-    Parameter param;
-    // Interoperability note:
-    // Spec creators for RTPS have reliability indexed at 1
-    DDS::ReliabilityQosPolicy reliability_copy =
-        reader_data.ddsSubscriptionData.reliability;
-    reliability_copy.kind =
-        (DDS::ReliabilityQosPolicyKind)((int)reliability_copy.kind + 1);
-    param.reliability(reliability_copy);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.user_data))
-  {
-    Parameter param;
-    param.user_data(reader_data.ddsSubscriptionData.user_data);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.ownership))
-  {
-    Parameter param;
-    param.ownership(reader_data.ddsSubscriptionData.ownership);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.destination_order))
-  {
-    Parameter param;
-    param.destination_order(reader_data.ddsSubscriptionData.destination_order);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.time_based_filter))
-  {
-    Parameter param;
-    param.time_based_filter(reader_data.ddsSubscriptionData.time_based_filter);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.presentation))
-  {
-    Parameter param;
-    param.presentation(reader_data.ddsSubscriptionData.presentation);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.partition))
-  {
-    Parameter param;
-    param.partition(reader_data.ddsSubscriptionData.partition);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.topic_data))
-  {
-    Parameter param;
-    param.topic_data(reader_data.ddsSubscriptionData.topic_data);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.group_data))
-  {
-    Parameter param;
-    param.group_data(reader_data.ddsSubscriptionData.group_data);
-    add_param(param_list, param);
-  }
-
-  {
-    Parameter param;
-    param.guid(reader_data.readerProxy.remoteReaderGuid);
-    param._d(PID_ENDPOINT_GUID);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.contentFilterProperty))
-  {
-    Parameter param;
-    OpenDDS::DCPS::ContentFilterProperty_t cfprop_copy = reader_data.contentFilterProperty;
-    if (!std::strlen(cfprop_copy.filterClassName)) {
-      cfprop_copy.filterClassName = "DDSSQL";
-    }
-    param.content_filter_property(cfprop_copy);
-    add_param(param_list, param);
-  }
-
-  CORBA::ULong i;
-  CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
-  // Serialize from allLocators, rather than the unicastLocatorList
-  // and multicastLocatorList.  This allows OpenDDS transports to be
-  // serialized in the proper order using custom PIDs.
-  for (i = 0; i < locator_len; ++i) {
-    // Each locator has a blob of interest
-    const DCPS::TransportLocator& tl = reader_data.readerProxy.allLocators[i];
-    // If this is an rtps udp transport
-    if (!std::strcmp(tl.transport_type, "rtps_udp")) {
-      // Append the locator's deserialized locator and an RTPS PID
-      add_param_rtps_locator(param_list, tl, map);
-    // Otherwise, this is an OpenDDS, custom transport
-    } else {
-      // Append the blob and a custom PID
-      add_param_dcps_locator(param_list, tl);
-      if (!std::strcmp(tl.transport_type, "multicast")) {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) to_param_list(drd) - ")
-                   ACE_TEXT("Multicast transport with RTPS ")
-                   ACE_TEXT("discovery has known issues")));
-      }
-    }
-  }
-
-  CORBA::ULong num_associations =
-      reader_data.readerProxy.associatedWriters.length();
-  for (i = 0; i < num_associations; ++i) {
-    Parameter param;
-    param.guid(reader_data.readerProxy.associatedWriters[i]);
-    param._d(PID_OPENDDS_ASSOCIATED_WRITER);
-    add_param(param_list, param);
-  }
-  return 0;
-}
-
 int from_param_list(const ParameterList& param_list,
-                    SPDPdiscoveredParticipantData& participant_data)
-{
-  // Track the state of our locators
-  LocatorState du_last_state = locator_undefined;
-  LocatorState mu_last_state = locator_undefined;
-  LocatorState mm_last_state = locator_undefined;
-
-  // Start by setting defaults
-  participant_data.ddsParticipantData.user_data.value.length(0);
-  participant_data.participantProxy.availableBuiltinEndpoints = 0;
-  participant_data.participantProxy.expectsInlineQos = false;
-  participant_data.leaseDuration.seconds = 100;
-  participant_data.leaseDuration.fraction = 0;
-
-  CORBA::ULong length = param_list.length();
-  for (CORBA::ULong i = 0; i < length; ++i) {
-    const Parameter& param = param_list[i];
-    switch (param._d()) {
-      case PID_USER_DATA:
-        participant_data.ddsParticipantData.user_data = param.user_data();
-        break;
-      case PID_PROTOCOL_VERSION:
-        participant_data.participantProxy.protocolVersion = param.version();
-        break;
-      case PID_PARTICIPANT_GUID:
-        ACE_OS::memcpy(participant_data.participantProxy.guidPrefix,
-               param.guid().guidPrefix, sizeof(GuidPrefix_t));
-        break;
-      case PID_VENDORID:
-        ACE_OS::memcpy(participant_data.participantProxy.vendorId.vendorId,
-               param.vendor().vendorId, sizeof(OctetArray2));
-        break;
-      case PID_EXPECTS_INLINE_QOS:
-        participant_data.participantProxy.expectsInlineQos =
-            param.expects_inline_qos();
-        break;
-      case PID_PARTICIPANT_BUILTIN_ENDPOINTS:
-        participant_data.participantProxy.availableBuiltinEndpoints =
-            param.participant_builtin_endpoints();
-        break;
-      case PID_BUILTIN_ENDPOINT_SET:
-        // Interoperability note:
-        // OpenSplice uses this in place of PID_PARTICIPANT_BUILTIN_ENDPOINTS
-        // Table 9.13 indicates that PID_PARTICIPANT_BUILTIN_ENDPOINTS should be
-        // used to represent ParticipantProxy::availableBuiltinEndpoints
-        participant_data.participantProxy.availableBuiltinEndpoints =
-            param.builtin_endpoints();
-        break;
-      case PID_METATRAFFIC_UNICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.metatrafficUnicastLocatorList,
-            param.locator());
-        break;
-      case PID_METATRAFFIC_MULTICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.metatrafficMulticastLocatorList,
-            param.locator());
-        break;
-      case PID_DEFAULT_UNICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.defaultUnicastLocatorList,
-            param.locator());
-        break;
-      case PID_DEFAULT_MULTICAST_LOCATOR:
-        append_locator(
-            participant_data.participantProxy.defaultMulticastLocatorList,
-            param.locator());
-        break;
-      case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
-        participant_data.participantProxy.manualLivelinessCount.value =
-            param.count().value;
-        break;
-      case PID_PARTICIPANT_LEASE_DURATION:
-        participant_data.leaseDuration = param.duration();
-        break;
-      case PID_DEFAULT_UNICAST_IPADDRESS:
-        set_ipaddress(
-          participant_data.participantProxy.defaultUnicastLocatorList,
-          du_last_state,
-          param.ipv4_address());
-        break;
-      case PID_METATRAFFIC_UNICAST_IPADDRESS:
-        set_ipaddress(
-          participant_data.participantProxy.metatrafficUnicastLocatorList,
-          mu_last_state,
-          param.ipv4_address());
-        break;
-      case PID_METATRAFFIC_MULTICAST_IPADDRESS:
-        set_ipaddress(
-          participant_data.participantProxy.metatrafficMulticastLocatorList,
-          mm_last_state,
-          param.ipv4_address());
-        break;
-      case PID_DEFAULT_UNICAST_PORT:
-        set_port(participant_data.participantProxy.defaultUnicastLocatorList,
-                 du_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_METATRAFFIC_UNICAST_PORT:
-        set_port(participant_data.participantProxy.metatrafficUnicastLocatorList,
-                 mu_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_METATRAFFIC_MULTICAST_PORT:
-        set_port(participant_data.participantProxy.metatrafficMulticastLocatorList,
-                 mm_last_state,
-                 param.udpv4_port());
-        break;
-      case PID_SENTINEL:
-      case PID_PAD:
-        // ignore
-        break;
-      default:
-        if (param._d() & PIDMASK_INCOMPATIBLE) {
-          return -1;
-        }
-    }
-  }
-  return 0;
-}
-
-int from_param_list(const ParameterList& param_list,
-                    OpenDDS::DCPS::DiscoveredWriterData& writer_data)
+                    DCPS::DiscoveredWriterData& writer_data)
 {
   LocatorState last_state = locator_undefined;  // Track state of locator
   // Collect the rtps_udp locators before appending them to allLocators
-  OpenDDS::DCPS::LocatorSeq rtps_udp_locators;
+  DCPS::LocatorSeq rtps_udp_locators;
 
   // Start by setting defaults
   writer_data.ddsPublicationData.topic_name = "";
@@ -977,13 +1114,186 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
+// OpenDDS::DCPS::DiscoveredReaderData
+
+int to_param_list(const DCPS::DiscoveredReaderData& reader_data,
+                  ParameterList& param_list,
+                  bool map)
+{
+  // Ignore builtin topic key
+  {
+    Parameter param;
+    param.string_data(reader_data.ddsSubscriptionData.topic_name);
+    param._d(PID_TOPIC_NAME);
+    add_param(param_list, param);
+  }
+  {
+    Parameter param;
+    param.string_data(reader_data.ddsSubscriptionData.type_name);
+    param._d(PID_TYPE_NAME);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.durability))
+  {
+    Parameter param;
+    param.durability(reader_data.ddsSubscriptionData.durability);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.deadline))
+  {
+    Parameter param;
+    param.deadline(reader_data.ddsSubscriptionData.deadline);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.latency_budget))
+  {
+    Parameter param;
+    param.latency_budget(reader_data.ddsSubscriptionData.latency_budget);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.liveliness))
+  {
+    Parameter param;
+    param.liveliness(reader_data.ddsSubscriptionData.liveliness);
+    add_param(param_list, param);
+  }
+
+  // Interoperability note:
+  // For interoperability, always write the reliability info
+  // if (not_default(reader_data.ddsSubscriptionData.reliability, false))
+  {
+    Parameter param;
+    // Interoperability note:
+    // Spec creators for RTPS have reliability indexed at 1
+    DDS::ReliabilityQosPolicy reliability_copy =
+        reader_data.ddsSubscriptionData.reliability;
+    reliability_copy.kind =
+        (DDS::ReliabilityQosPolicyKind)((int)reliability_copy.kind + 1);
+    param.reliability(reliability_copy);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.user_data))
+  {
+    Parameter param;
+    param.user_data(reader_data.ddsSubscriptionData.user_data);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.ownership))
+  {
+    Parameter param;
+    param.ownership(reader_data.ddsSubscriptionData.ownership);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.destination_order))
+  {
+    Parameter param;
+    param.destination_order(reader_data.ddsSubscriptionData.destination_order);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.time_based_filter))
+  {
+    Parameter param;
+    param.time_based_filter(reader_data.ddsSubscriptionData.time_based_filter);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.presentation))
+  {
+    Parameter param;
+    param.presentation(reader_data.ddsSubscriptionData.presentation);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.partition))
+  {
+    Parameter param;
+    param.partition(reader_data.ddsSubscriptionData.partition);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.topic_data))
+  {
+    Parameter param;
+    param.topic_data(reader_data.ddsSubscriptionData.topic_data);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.group_data))
+  {
+    Parameter param;
+    param.group_data(reader_data.ddsSubscriptionData.group_data);
+    add_param(param_list, param);
+  }
+
+  {
+    Parameter param;
+    param.guid(reader_data.readerProxy.remoteReaderGuid);
+    param._d(PID_ENDPOINT_GUID);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.contentFilterProperty))
+  {
+    Parameter param;
+    DCPS::ContentFilterProperty_t cfprop_copy = reader_data.contentFilterProperty;
+    if (!std::strlen(cfprop_copy.filterClassName)) {
+      cfprop_copy.filterClassName = "DDSSQL";
+    }
+    param.content_filter_property(cfprop_copy);
+    add_param(param_list, param);
+  }
+
+  CORBA::ULong i;
+  CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
+  // Serialize from allLocators, rather than the unicastLocatorList
+  // and multicastLocatorList.  This allows OpenDDS transports to be
+  // serialized in the proper order using custom PIDs.
+  for (i = 0; i < locator_len; ++i) {
+    // Each locator has a blob of interest
+    const DCPS::TransportLocator& tl = reader_data.readerProxy.allLocators[i];
+    // If this is an rtps udp transport
+    if (!std::strcmp(tl.transport_type, "rtps_udp")) {
+      // Append the locator's deserialized locator and an RTPS PID
+      add_param_rtps_locator(param_list, tl, map);
+    // Otherwise, this is an OpenDDS, custom transport
+    } else {
+      // Append the blob and a custom PID
+      add_param_dcps_locator(param_list, tl);
+      if (!std::strcmp(tl.transport_type, "multicast")) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) to_param_list(drd) - ")
+                   ACE_TEXT("Multicast transport with RTPS ")
+                   ACE_TEXT("discovery has known issues")));
+      }
+    }
+  }
+
+  CORBA::ULong num_associations =
+      reader_data.readerProxy.associatedWriters.length();
+  for (i = 0; i < num_associations; ++i) {
+    Parameter param;
+    param.guid(reader_data.readerProxy.associatedWriters[i]);
+    param._d(PID_OPENDDS_ASSOCIATED_WRITER);
+    add_param(param_list, param);
+  }
+  return 0;
+}
+
 int from_param_list(const ParameterList& param_list,
-                    OpenDDS::DCPS::DiscoveredReaderData& reader_data)
+                    DCPS::DiscoveredReaderData& reader_data)
 {
   LocatorState last_state = locator_undefined;  // Track state of locator
   // Collect the rtps_udp locators before appending them to allLocators
 
-  OpenDDS::DCPS::LocatorSeq rtps_udp_locators;
+  DCPS::LocatorSeq rtps_udp_locators;
   // Start by setting defaults
   reader_data.ddsSubscriptionData.topic_name = "";
   reader_data.ddsSubscriptionData.type_name  = "";
@@ -1129,8 +1439,117 @@ int from_param_list(const ParameterList& param_list,
   return 0;
 }
 
+#if defined(OPENDDS_SECURITY)
+int to_param_list(const DDS::Security::EndpointSecurityInfo& info,
+                  ParameterList& param_list)
+{
+  Parameter param;
+  param.endpoint_security_info(info);
+  add_param(param_list, param);
+  return 0;
 }
 
-} }
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::EndpointSecurityInfo& info)
+{
+  info.endpoint_security_attributes = 0;
+  info.plugin_endpoint_security_attributes = 0;
+
+  size_t len = param_list.length();
+  for (size_t i = 0; i < len; ++i) {
+    const Parameter& p = param_list[i];
+    switch(p._d()) {
+    case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
+      info = p.endpoint_security_info();
+      break;
+    default:
+      if (p._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+int to_param_list(const DDS::Security::DataTags& tags,
+                  ParameterList& param_list)
+{
+  Parameter param;
+  param.data_tags(tags);
+  add_param(param_list, param);
+  return 0;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DDS::Security::DataTags& tags)
+{
+  tags.tags.length(0);
+
+  size_t len = param_list.length();
+  for (size_t i = 0; i < len; ++i) {
+    const Parameter& p = param_list[i];
+    switch(p._d()) {
+    case DDS::Security::PID_DATA_TAGS:
+      tags = p.data_tags();
+      break;
+    default:
+      if (p._d() & PIDMASK_INCOMPATIBLE) {
+          return -1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+int to_param_list(const DiscoveredWriterData_SecurityWrapper& wrapper,
+                  ParameterList& param_list,
+                  bool map)
+{
+  int result = to_param_list(wrapper.data, param_list, map);
+
+  to_param_list(wrapper.security_info, param_list);
+  to_param_list(wrapper.data_tags, param_list);
+
+  return result;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DiscoveredWriterData_SecurityWrapper& wrapper)
+{
+  int result = from_param_list(param_list, wrapper.data) ||
+               from_param_list(param_list, wrapper.security_info) ||
+               from_param_list(param_list, wrapper.data_tags);
+
+  return result;
+}
+
+int to_param_list(const DiscoveredReaderData_SecurityWrapper& wrapper,
+                  ParameterList& param_list,
+                  bool map)
+{
+  int result = to_param_list(wrapper.data, param_list, map);
+
+  to_param_list(wrapper.security_info, param_list);
+  to_param_list(wrapper.data_tags, param_list);
+
+  return result;
+}
+
+int from_param_list(const ParameterList& param_list,
+                    DiscoveredReaderData_SecurityWrapper& wrapper)
+{
+  int result = from_param_list(param_list, wrapper.data) ||
+               from_param_list(param_list, wrapper.security_info) ||
+               from_param_list(param_list, wrapper.data_tags);
+
+  return result;
+}
+#endif
+
+} // ParameterListConverter
+} // RTPS
+} // OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

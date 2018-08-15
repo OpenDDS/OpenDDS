@@ -214,10 +214,20 @@ Serializer::good_bit() const
   return this->good_bit_;
 }
 
+ACE_INLINE size_t
+Serializer::length() const
+{
+  return this->good_bit_ && this->current_ ? this->current_->total_length() : 0;
+}
+
 ACE_INLINE bool
 Serializer::skip(ACE_CDR::UShort n, int size)
 {
   if (size > 1 && this->alignment_ != ALIGN_NONE) {
+    if (!this->current_) {
+      this->good_bit_ = false;
+      return false;
+    }
     this->align_r(size_t(size) > MAX_ALIGN ? MAX_ALIGN : size_t(size));
   }
   for (size_t len = static_cast<size_t>(n * size); len;) {

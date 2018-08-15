@@ -92,7 +92,7 @@ to_dds_string(unsigned long to_convert, bool as_hex)
 {
   const char* fmt;
   if (as_hex) {
-    fmt = "%0lx";
+    fmt = "%0.8lx";
   } else {
     fmt = "%lu";
   }

@@ -209,13 +209,36 @@ bool operator==(const DDS::ReaderDataLifecycleQosPolicy& qos1,
 
 }
 
+template <typename T>
+ACE_INLINE
+bool operator==(const TAO::unbounded_value_sequence<T>& seq1, const TAO::unbounded_value_sequence<T>& seq2)
+{
+  if (seq1.length() != seq2.length())
+    return false;
+
+  for (size_t i = 0; i < seq1.length(); ++i)
+  {
+    if (seq1[i].name != seq2[i].name || seq1[i].value != seq2[i].value || seq1[i].propagate != seq2[i].propagate)
+      return false;
+  }
+  return true;
+}
+
+ACE_INLINE
+bool operator==(const DDS::PropertyQosPolicy& qos1,
+                const DDS::PropertyQosPolicy& qos2)
+{
+  return qos1.value == qos2.value && qos1.binary_value == qos2.binary_value;
+}
+
 ACE_INLINE
 bool operator==(const DDS::DomainParticipantQos& qos1,
                 const DDS::DomainParticipantQos& qos2)
 {
   return
     qos1.user_data == qos2.user_data
-    && qos1.entity_factory == qos2.entity_factory;
+    && qos1.entity_factory == qos2.entity_factory
+    && qos1.property == qos2.property;
 }
 
 ACE_INLINE
@@ -461,6 +484,13 @@ bool operator!=(const DDS::WriterDataLifecycleQosPolicy& qos1,
 ACE_INLINE
 bool operator!=(const DDS::ReaderDataLifecycleQosPolicy& qos1,
                 const DDS::ReaderDataLifecycleQosPolicy& qos2)
+{
+  return !(qos1 == qos2);
+}
+
+ACE_INLINE
+bool operator!=(const DDS::PropertyQosPolicy& qos1,
+                const DDS::PropertyQosPolicy& qos2)
 {
   return !(qos1 == qos2);
 }
@@ -825,6 +855,12 @@ bool Qos_Helper::valid(const DDS::EntityFactoryQosPolicy& qos)
 }
 
 ACE_INLINE
+bool Qos_Helper::valid(const DDS::PropertyQosPolicy& /* qos */)
+{
+  return true;
+}
+
+ACE_INLINE
 bool Qos_Helper::valid(const DDS::WriterDataLifecycleQosPolicy&)
 {
   return true;
@@ -839,7 +875,7 @@ bool Qos_Helper::valid(const DDS::ReaderDataLifecycleQosPolicy&)
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::DomainParticipantQos& qos)
 {
-  return valid(qos.user_data) && valid(qos.entity_factory);
+  return valid(qos.user_data) && valid(qos.entity_factory) && valid(qos.property);
 }
 
 ACE_INLINE

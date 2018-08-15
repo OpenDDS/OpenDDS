@@ -7,17 +7,120 @@
 
 #include "marshal_generator.h"
 #include "be_extern.h"
-
 #include "utl_identifier.h"
-
 #include <string>
-#include <map>
 #include <sstream>
 #include <iostream>
 #include <cctype>
-using std::string;
+#include <map>
 
+using std::string;
 using namespace AstTypeClassification;
+
+#define LENGTH(CARRAY) (sizeof(CARRAY)/sizeof(CARRAY[0]))
+
+namespace {
+
+  typedef bool (*is_special_case)(const string& cxx);
+  typedef bool (*gen_special_case)(const string& cxx);
+
+  typedef is_special_case is_special_sequence;
+  typedef gen_special_case gen_special_sequence;
+
+  typedef is_special_case is_special_struct;
+  typedef gen_special_case gen_special_struct;
+
+  typedef is_special_case is_special_union;
+  typedef bool (*gen_special_union)(const string& cxx,
+                                    AST_Type* discriminator,
+                                    const std::vector<AST_UnionBranch*>& branches);
+
+  struct special_sequence
+  {
+    is_special_sequence check;
+    gen_special_sequence gen;
+  };
+
+  struct special_struct
+  {
+    is_special_struct check;
+    gen_special_struct gen;
+  };
+
+  struct special_union
+  {
+    is_special_union check;
+    gen_special_union gen;
+  };
+
+  bool isRtpsSpecialSequence(const string& cxx);
+  bool genRtpsSpecialSequence(const string& cxx);
+
+  bool isPropertySpecialSequence(const string& cxx);
+  bool genPropertySpecialSequence(const string& cxx);
+
+  bool isRtpsSpecialStruct(const string& cxx);
+  bool genRtpsSpecialStruct(const string& cxx);
+
+  bool isRtpsSpecialUnion(const string& cxx);
+  bool genRtpsSpecialUnion(const string& cxx,
+                           AST_Type* discriminator,
+                           const std::vector<AST_UnionBranch*>& branches);
+
+  bool isProperty_t(const string& cxx);
+  bool genProperty_t(const string& cxx);
+
+  bool isBinaryProperty_t(const string& cxx);
+  bool genBinaryProperty_t(const string& cxx);
+
+  bool isPropertyQosPolicy(const string& cxx);
+  bool genPropertyQosPolicy(const string& cxx);
+
+  bool isSecuritySubmessage(const string& cxx);
+  bool genSecuritySubmessage(const string& cxx);
+
+  const special_sequence special_sequences[] = {
+    {
+      isRtpsSpecialSequence,
+      genRtpsSpecialSequence,
+    },
+    {
+      isPropertySpecialSequence,
+      genPropertySpecialSequence,
+    },
+  };
+
+  const special_struct special_structs[] = {
+    {
+      isRtpsSpecialStruct,
+      genRtpsSpecialStruct,
+    },
+    {
+      isProperty_t,
+      genProperty_t,
+    },
+    {
+      isBinaryProperty_t,
+      genBinaryProperty_t,
+    },
+    {
+      isPropertyQosPolicy,
+      genPropertyQosPolicy,
+    },
+    {
+      isSecuritySubmessage,
+      genSecuritySubmessage,
+    },
+  };
+
+  const special_union special_unions[] = {
+    {
+      isRtpsSpecialUnion,
+      genRtpsSpecialUnion,
+    },
+  };
+
+} /* namespace */
 
 bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>&, const char*)
@@ -209,15 +312,82 @@ namespace {
     return true;
   }
 
+  bool isPropertySpecialSequence(const string& cxx)
+  {
+    return cxx == "DDS::PropertySeq"
+      || cxx == "DDS::BinaryPropertySeq";
+  }
+
+  bool genPropertySpecialSequence(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("seq", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  find_size_ulong(size, padding);\n"
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    gen_find_size(seq[i], size, padding);\n"
+        "  }\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("seq", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  CORBA::ULong serlen = 0;\n"
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (seq[i].propagate) {\n"
+        "      ++serlen;\n"
+        "    }\n"
+        "  }\n"
+        "  if (!(strm << serlen)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
+        "    if (!(strm << seq[i])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("seq", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  CORBA::ULong length;\n"
+        "  if (!(strm >> length)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  seq.length(length);\n"
+        "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
+        "    if (!(strm >> seq[i])) {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    return true;
+  }
+
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     string cxx = scoped(tdname);
-    if (isRtpsSpecialSequence(cxx)) {
-      genRtpsSpecialSequence(cxx);
-      return;
+
+    for (size_t i = 0; i < LENGTH(special_sequences); ++i) {
+      if (special_sequences[i].check(cxx)) {
+        special_sequences[i].gen(cxx);
+        return;
+      }
     }
+
     AST_Type* elem = resolveActualType(seq->base_type());
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()) {
@@ -476,7 +646,7 @@ namespace {
       insertion.addArg("arr", "const " + cxx + "_forany&");
       insertion.endArgs();
       if (elem_cls & CL_PRIMITIVE) {
-        std::string suffix;
+        string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += "[0]";
         be_global->impl_ <<
@@ -507,7 +677,7 @@ namespace {
       extraction.addArg("arr", cxx + "_forany&");
       extraction.endArgs();
       if (elem_cls & CL_PRIMITIVE) {
-        std::string suffix;
+        string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += "[0]";
         be_global->impl_ <<
@@ -558,13 +728,13 @@ namespace {
     string key_rem;          // the sub-field we will look for recursively
     bool is_array = false;
     size_t pos = key.find_first_of(".[");
-    if (pos != std::string::npos) {
+    if (pos != string::npos) {
       key_base = key.substr(0, pos);
       if (key[pos] == '[') {
         is_array = true;
         size_t l_brack = key.find("]");
-        if (l_brack == std::string::npos) {
-          throw std::string("Missing right bracket");
+        if (l_brack == string::npos) {
+          throw string("Missing right bracket");
         } else if (l_brack != key.length()) {
           key_rem = key.substr(l_brack+1);
         }
@@ -582,14 +752,14 @@ namespace {
           // identify specific sub-fields).
           AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
           if (sub_struct != 0) {
-            throw std::string("Structs not allowed as keys");
+            throw string("Structs not allowed as keys");
           }
           AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
           if (typedef_node != 0) {
             AST_Array* array_node =
               dynamic_cast<AST_Array*>(typedef_node->base_type());
             if (array_node != 0) {
-              throw std::string("Arrays not allowed as keys");
+              throw string("Arrays not allowed as keys");
             }
           }
           return field_type;
@@ -597,22 +767,22 @@ namespace {
           // must be a typedef of an array
           AST_Typedef* typedef_node = dynamic_cast<AST_Typedef*>(field_type);
           if (typedef_node == 0) {
-            throw std::string("Indexing for non-array type");
+            throw string("Indexing for non-array type");
           }
           AST_Array* array_node =
             dynamic_cast<AST_Array*>(typedef_node->base_type());
           if (array_node == 0) {
-            throw std::string("Indexing for non-array type");
+            throw string("Indexing for non-array type");
           }
           if (array_node->n_dims() > 1) {
-            throw std::string("Only single dimension arrays allowed in keys");
+            throw string("Only single dimension arrays allowed in keys");
           }
           if (key_rem == "") {
             return array_node->base_type();
           } else {
             // This must be a struct...
             if ((key_rem[0] != '.') || (key_rem.length() == 1)) {
-              throw std::string("Unexpected characters after array index");
+              throw string("Unexpected characters after array index");
             } else {
               // Set up key_rem and field_type and let things fall into
               // the struct code below
@@ -625,7 +795,7 @@ namespace {
         // nested structures
         AST_Structure* sub_struct = dynamic_cast<AST_Structure*>(field_type);
         if (sub_struct == 0) {
-          throw std::string("Expected structure field for ") + key_base;
+          throw string("Expected structure field for ") + key_base;
         }
         size_t nfields = sub_struct->nfields();
         std::vector<AST_Field*> sub_fields;
@@ -640,7 +810,7 @@ namespace {
         return find_type(sub_fields, key_rem);
       }
     }
-    throw std::string("Field not found.");
+    throw string("Field not found.");
   }
 
   bool is_bounded_type(AST_Type* type)
@@ -723,113 +893,113 @@ namespace {
     type = resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
-        AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
-        switch (p->pt()) {
-        case AST_PredefinedType::PT_char:
-        case AST_PredefinedType::PT_boolean:
-        case AST_PredefinedType::PT_octet:
-          size += 1;
-          break;
-        case AST_PredefinedType::PT_short:
-        case AST_PredefinedType::PT_ushort:
-          align(2, size, padding);
-          size += 2;
-          break;
-        case AST_PredefinedType::PT_wchar:
-          size += 3; // see Serializer::max_marshaled_size_wchar()
-          break;
-        case AST_PredefinedType::PT_long:
-        case AST_PredefinedType::PT_ulong:
-        case AST_PredefinedType::PT_float:
-          align(4, size, padding);
-          size += 4;
-          break;
-        case AST_PredefinedType::PT_longlong:
-        case AST_PredefinedType::PT_ulonglong:
-        case AST_PredefinedType::PT_double:
-          align(8, size, padding);
-          size += 8;
-          break;
-        case AST_PredefinedType::PT_longdouble:
-          align(8, size, padding);
-          size += 16;
-          break;
-        default:
-          // Anything else shouldn't be in a DDS type or is unbounded.
-          break;
-        }
+      AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
+      switch (p->pt()) {
+      case AST_PredefinedType::PT_char:
+      case AST_PredefinedType::PT_boolean:
+      case AST_PredefinedType::PT_octet:
+        size += 1;
+        break;
+      case AST_PredefinedType::PT_short:
+      case AST_PredefinedType::PT_ushort:
+        align(2, size, padding);
+        size += 2;
+        break;
+      case AST_PredefinedType::PT_wchar:
+        size += 3; // see Serializer::max_marshaled_size_wchar()
+        break;
+      case AST_PredefinedType::PT_long:
+      case AST_PredefinedType::PT_ulong:
+      case AST_PredefinedType::PT_float:
+        align(4, size, padding);
+        size += 4;
+        break;
+      case AST_PredefinedType::PT_longlong:
+      case AST_PredefinedType::PT_ulonglong:
+      case AST_PredefinedType::PT_double:
+        align(8, size, padding);
+        size += 8;
+        break;
+      case AST_PredefinedType::PT_longdouble:
+        align(8, size, padding);
+        size += 16;
+        break;
+      default:
+        // Anything else shouldn't be in a DDS type or is unbounded.
         break;
       }
+      break;
+    }
     case AST_Decl::NT_enum:
       align(4, size, padding);
       size += 4;
       break;
     case AST_Decl::NT_string:
     case AST_Decl::NT_wstring: {
-        AST_String* string_node = dynamic_cast<AST_String*>(type);
-        align(4, size, padding);
-        size += 4;
-        const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
-        size += width * string_node->max_size()->ev()->u.ulval;
-        if (type->node_type() == AST_Decl::NT_string) {
-          size += 1; // narrow string includes the null terminator
-        }
-        break;
+      AST_String* string_node = dynamic_cast<AST_String*>(type);
+      align(4, size, padding);
+      size += 4;
+      const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
+      size += width * string_node->max_size()->ev()->u.ulval;
+      if (type->node_type() == AST_Decl::NT_string) {
+        size += 1; // narrow string includes the null terminator
       }
+      break;
+    }
     case AST_Decl::NT_struct: {
-        AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
-        for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
-          AST_Field** f;
-          struct_node->field(f, i);
-          AST_Type* field_type = (*f)->field_type();
-          max_marshaled_size(field_type, size, padding);
-        }
-        break;
+      AST_Structure* struct_node = dynamic_cast<AST_Structure*>(type);
+      for (unsigned long i = 0; i < struct_node->nfields(); ++i) {
+        AST_Field** f;
+        struct_node->field(f, i);
+        AST_Type* field_type = (*f)->field_type();
+        max_marshaled_size(field_type, size, padding);
       }
+      break;
+    }
     case AST_Decl::NT_sequence: {
-        AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
-        AST_Type* base_node = seq_node->base_type();
-        size_t bound = seq_node->max_size()->ev()->u.ulval;
-        align(4, size, padding);
-        size += 4;
-        mms_repeating(base_node, bound, size, padding);
-        break;
-      }
+      AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
+      AST_Type* base_node = seq_node->base_type();
+      size_t bound = seq_node->max_size()->ev()->u.ulval;
+      align(4, size, padding);
+      size += 4;
+      mms_repeating(base_node, bound, size, padding);
+      break;
+    }
     case AST_Decl::NT_array: {
-        AST_Array* array_node = dynamic_cast<AST_Array*>(type);
-        AST_Type* base_node = array_node->base_type();
-        size_t array_size = 1;
-        AST_Expression** dims = array_node->dims();
-        for (unsigned long i = 0; i < array_node->n_dims(); i++) {
-          array_size *= dims[i]->ev()->u.ulval;
-        }
-        mms_repeating(base_node, array_size, size, padding);
-        break;
+      AST_Array* array_node = dynamic_cast<AST_Array*>(type);
+      AST_Type* base_node = array_node->base_type();
+      size_t array_size = 1;
+      AST_Expression** dims = array_node->dims();
+      for (unsigned long i = 0; i < array_node->n_dims(); i++) {
+        array_size *= dims[i]->ev()->u.ulval;
       }
+      mms_repeating(base_node, array_size, size, padding);
+      break;
+    }
     case AST_Decl::NT_union: {
-        AST_Union* union_node = dynamic_cast<AST_Union*>(type);
-        max_marshaled_size(union_node->disc_type(), size, padding);
-        size_t largest_field_size = 0, largest_field_pad = 0;
-        const size_t starting_size = size, starting_pad = padding;
-        for (unsigned long i = 0; i < union_node->nfields(); ++i) {
-          AST_Field** f;
-          union_node->field(f, i);
-          AST_Type* field_type = (*f)->field_type();
-          max_marshaled_size(field_type, size, padding);
-          size_t field_size = size - starting_size,
-            field_pad = padding - starting_pad;
-          if (field_size > largest_field_size) {
-            largest_field_size = field_size;
-            largest_field_pad = field_pad;
-          }
-          // rewind:
-          size = starting_size;
-          padding = starting_pad;
+      AST_Union* union_node = dynamic_cast<AST_Union*>(type);
+      max_marshaled_size(union_node->disc_type(), size, padding);
+      size_t largest_field_size = 0, largest_field_pad = 0;
+      const size_t starting_size = size, starting_pad = padding;
+      for (unsigned long i = 0; i < union_node->nfields(); ++i) {
+        AST_Field** f;
+        union_node->field(f, i);
+        AST_Type* field_type = (*f)->field_type();
+        max_marshaled_size(field_type, size, padding);
+        size_t field_size = size - starting_size,
+          field_pad = padding - starting_pad;
+        if (field_size > largest_field_size) {
+          largest_field_size = field_size;
+          largest_field_pad = field_pad;
         }
-        size += largest_field_size;
-        padding += largest_field_pad;
-        break;
+        // rewind:
+        size = starting_size;
+        padding = starting_pad;
       }
+      size += largest_field_size;
+      padding += largest_field_pad;
+      break;
+    }
     default:
       // Anything else should be not here or is unbounded
       break;
@@ -948,6 +1118,181 @@ namespace {
     }
   }
 
+  bool isBinaryProperty_t(const string& cxx)
+  {
+    return cxx == "DDS::BinaryProperty_t";
+  }
+
+  bool genBinaryProperty_t(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  if (stru.propagate) {\n"
+        "    find_size_ulong(size, padding);\n"
+        "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
+        "    gen_find_size(stru.value, size, padding);\n"
+        "  }\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if (stru.propagate) {\n"
+        "    return (strm << stru.name.in()) && (strm << stru.value);\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  stru.propagate = true;\n"
+        "  return (strm >> stru.name.out()) && (strm >> stru.value);\n";
+    }
+    return true;
+  }
+
+  bool isProperty_t(const string& cxx)
+  {
+    return cxx == "DDS::Property_t";
+  }
+
+  bool genProperty_t(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  if (stru.propagate) {\n"
+        "    find_size_ulong(size, padding);\n"
+        "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
+        "    find_size_ulong(size, padding);\n"
+        "    size += ACE_OS::strlen(stru.value.in()) + 1;\n"
+        "  }\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  if (stru.propagate) {\n"
+        "    return (strm << stru.name.in()) && (strm << stru.value.in());\n"
+        "  }\n"
+        "  return true;\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  stru.propagate = true;\n"
+        "  return (strm >> stru.name.out()) && (strm >> stru.value.out());\n";
+    }
+    return true;
+  }
+
+  bool isPropertyQosPolicy(const string& cxx)
+  {
+    return cxx == "DDS::PropertyQosPolicy";
+  }
+
+  bool genPropertyQosPolicy(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  gen_find_size(stru.value, size, padding);\n"
+        "  gen_find_size(stru.binary_value, size, padding);\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  return (strm << stru.value)\n"
+        "    && (strm << stru.binary_value);\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  if (!(strm >> stru.value)) {\n"
+        "    return false;\n"
+        "  }\n"
+        "  if (!strm.length() || !strm.skip(0, 4) || !strm.length()) {\n"
+        "    return true; // optional member missing\n"
+        "  }\n"
+        "  return strm >> stru.binary_value;\n";
+    }
+    return true;
+  }
+
+  bool isSecuritySubmessage(const string& cxx)
+  {
+    return cxx == "OpenDDS::RTPS::SecuritySubmessage";
+  }
+
+  bool genSecuritySubmessage(const string& cxx)
+  {
+    {
+      Function find_size("gen_find_size", "void");
+      find_size.addArg("stru", "const " + cxx + "&");
+      find_size.addArg("size", "size_t&");
+      find_size.addArg("padding", "size_t&");
+      find_size.endArgs();
+      be_global->impl_ <<
+        "  gen_find_size(stru.smHeader, size, padding);\n"
+        "  size += stru.content.length() * max_marshaled_size_octet();\n";
+    }
+    {
+      Function insertion("operator<<", "bool");
+      insertion.addArg("strm", "Serializer&");
+      insertion.addArg("stru", "const " + cxx + "&");
+      insertion.endArgs();
+      be_global->impl_ <<
+        "  return (strm << stru.smHeader)\n"
+        "    && strm.write_octet_array(stru.content.get_buffer(), "
+        "stru.content.length());\n";
+    }
+    {
+      Function extraction("operator>>", "bool");
+      extraction.addArg("strm", "Serializer&");
+      extraction.addArg("stru", cxx + "&");
+      extraction.endArgs();
+      be_global->impl_ <<
+        "  if (strm >> stru.smHeader) {\n"
+        "    stru.content.length(stru.smHeader.submessageLength);\n"
+        "    if (strm.read_octet_array(stru.content.get_buffer(),\n"
+        "                              stru.smHeader.submessageLength)) {\n"
+        "      return true;\n"
+        "    }\n"
+        "  }\n"
+        "  return false;\n";
+    }
+    return true;
+  }
+
   bool isRtpsSpecialStruct(const string& cxx)
   {
     return cxx == "OpenDDS::RTPS::SequenceNumberSet"
@@ -1064,15 +1409,22 @@ namespace {
   };
 }
 
-bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
+bool marshal_generator::gen_struct(AST_Structure* /* node */,
+                                   UTL_ScopedName* name,
+                                   const std::vector<AST_Field*>& fields,
+                                   AST_Type::SIZE_TYPE /* size */,
+                                   const char* /* repoid */)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
-  if (isRtpsSpecialStruct(cxx)) {
-    return genRtpsSpecialStruct(cxx);
+
+  for (size_t i = 0; i < LENGTH(special_structs); ++i) {
+    if (special_structs[i].check(cxx)) {
+      return special_structs[i].gen(cxx);
+    }
   }
+
   RtpsFieldCustomizer rtpsCustom(cxx);
   {
     Function find_size("gen_find_size", "void");
@@ -1147,12 +1499,10 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   // Only generate these methods if this is a DCPS type
   if (info != 0) {
     bool is_bounded_struct = true;
-    {
-      for (size_t i = 0; i < fields.size(); ++i) {
-        if (!is_bounded_type(fields[i]->field_type())) {
-          is_bounded_struct = false;
-          break;
-        }
+    for (size_t i = 0; i < fields.size(); ++i) {
+      if (!is_bounded_type(fields[i]->field_type())) {
+        is_bounded_struct = false;
+        break;
       }
     }
     {
@@ -1180,22 +1530,20 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
     // Generate key-related marshaling code
     bool bounded_key = true;
-    {
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* field_type = 0;
-        try {
-          field_type = find_type(fields, key_name);
-        } catch (const std::string& error) {
-          std::cerr << "ERROR: Invalid key specification for " << cxx
-                    << " (" << key_name << "). " << error << std::endl;
-          return false;
-        }
-        if (!is_bounded_type(field_type)) {
-          bounded_key = false;
-          break;
-        }
+    IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
+    for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
+      string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+      AST_Type* field_type = 0;
+      try {
+        field_type = find_type(fields, key_name);
+      } catch (const string& error) {
+        std::cerr << "ERROR: Invalid key specification for " << cxx
+                  << " (" << key_name << "). " << error << std::endl;
+        return false;
+      }
+      if (!is_bounded_type(field_type)) {
+        bounded_key = false;
+        break;
       }
     }
 
@@ -1213,7 +1561,7 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
           AST_Type* field_type = 0;
           try {
             field_type = find_type(fields, key_name);
-          } catch (const std::string& error) {
+          } catch (const string& error) {
             std::cerr << "ERROR: Invalid key specification for " << cxx
                       << " (" << key_name << "). " << error << std::endl;
             return false;
@@ -1246,7 +1594,7 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
         AST_Type* field_type = 0;
         try {
           field_type = find_type(fields, key_name);
-        } catch (const std::string& error) {
+        } catch (const string& error) {
           std::cerr << "ERROR: Invalid key specification for " << cxx
                     << " (" << key_name << "). " << error << std::endl;
           return false;
@@ -1270,7 +1618,7 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
         AST_Type* field_type = 0;
         try {
           field_type = find_type(fields, key_name);
-        } catch (const std::string& error) {
+        } catch (const string& error) {
           std::cerr << "ERROR: Invalid key specification for " << cxx
                     << " (" << key_name << "). " << error << std::endl;
           return false;
@@ -1297,7 +1645,7 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
         AST_Type* field_type = 0;
         try {
           field_type = find_type(fields, key_name);
-        } catch (const std::string& error) {
+        } catch (const string& error) {
           std::cerr << "ERROR: Invalid key specification for " << cxx
                     << " (" << key_name << "). " << error << std::endl;
           return false;
@@ -1480,9 +1828,13 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
-  if (isRtpsSpecialUnion(cxx)) {
-    return genRtpsSpecialUnion(cxx, discriminator, branches);
+
+  for (size_t i = 0; i < LENGTH(special_unions); ++i) {
+    if (special_unions[i].check(cxx)) {
+      return special_unions[i].gen(cxx, discriminator, branches);
+    }
   }
+
   const string wrap_out = getWrapper("uni._d()", discriminator, WD_OUTPUT);
   {
     Function find_size("gen_find_size", "void");
@@ -1500,8 +1852,8 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     }
     be_global->impl_ <<
       "  size += gen_max_marshaled_size(" << wrap_out << ");\n";
-      generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
-                             "", "", cxx.c_str());
+    generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
+                           "", "", cxx.c_str());
   }
   {
     Function insertion("operator<<", "bool");

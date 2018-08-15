@@ -1,0 +1,16 @@
+1. your OpenDDS git repo needs to have submodules enabled
+the directory $DDS_ROOT/tests/googletest shouldn't be empty,
+if it is, run "git submodule init" followed by "git submodule update"
+see https://git-scm.com/book/en/v2/Git-Tools-Submodules
+
+2. build the Gtest library
+create the directory "build" in $DDS_ROOT/tests/googletest
+run cmake with this new one as the build directory and
+$DDS_ROOT/tests/googletest as the source directory
+(if using Visual C++ and your OpenDDS build is not static,
+enable gtest_force_shared_crt or BUILD_SHARED_LIBS) then
+build with Gtest library with GNU Make or Visual Studio
+
+3. configure and build OpenDDS as usual
+any test executables that depend on Gtest can use the googletest.mpb
+MPC base project (in $DDS_ROOT/MPC/config)

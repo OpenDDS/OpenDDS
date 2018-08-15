@@ -41,3 +41,4 @@ lib*.dylib
 /ACE_TAO
 .idea/
 .vs/
+/tags

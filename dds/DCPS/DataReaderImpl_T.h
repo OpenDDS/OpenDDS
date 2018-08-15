@@ -1378,10 +1378,8 @@ int ignored)
           }
           GuidConverter conv(get_subscription_id());
           ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT(
-              "(%P|%t) DataReaderImpl_T::read_instance_i: "
-              "will return no data reading sub %C because:\n  %C\n"
-            ),
+            ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")
+            ACE_TEXT("will return no data reading sub %C because:\n  %C\n"),
             OPENDDS_STRING(conv).c_str(), msg.c_str()
           ));
         }

@@ -30,6 +30,9 @@ namespace DCPS {
 
 RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
   : TransportImpl(inst)
+#if defined(OPENDDS_SECURITY)
+  , local_crypto_handle_(DDS::HANDLE_NIL)
+#endif
 {
   if (! (configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -47,6 +50,10 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
+
+#if defined(OPENDDS_SECURITY)
+  link->local_crypto_handle(local_crypto_handle_);
+#endif
 
   if (!link->open(unicast_socket_)) {
     ACE_ERROR((LM_ERROR,
@@ -148,20 +155,32 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                bool local_durable, bool remote_durable)
 {
   bool requires_inline_qos;
-  ACE_INET_Addr addr = get_connection_addr(remote_data, requires_inline_qos);
+  unsigned int blob_bytes_read;
+  ACE_INET_Addr addr = get_connection_addr(remote_data, &requires_inline_qos,
+                                           &blob_bytes_read);
   link_->add_locator(remote_id, addr, requires_inline_qos);
+
+#if defined(OPENDDS_SECURITY)
+  if (remote_data.length() > blob_bytes_read) {
+    link_->populate_security_handles(local_id, remote_id,
+                                     remote_data.get_buffer() + blob_bytes_read,
+                                     remote_data.length() - blob_bytes_read);
+  }
+#endif
+
   link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                     local_durable, remote_durable);
 }
 
 ACE_INET_Addr
 RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
-                                      bool& requires_inline_qos) const
+                                      bool* requires_inline_qos,
+                                      unsigned int* blob_bytes_read) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
   DDS::ReturnCode_t result =
-    blob_to_locators(remote, locators, requires_inline_qos);
+    blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
     return ACE_INET_Addr();
   }
@@ -196,13 +215,16 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
   const TransportBLOB* blob = this->config().get_blob(locators);
-  if (!blob)
+  if (!blob) {
     return;
+  }
+
   if (!link_) {
     link_ = make_datalink(participant.guidPrefix);
   }
-  bool requires_inline_qos;
-  link_->register_for_reader(writerid, readerid, get_connection_addr(*blob, requires_inline_qos), listener);
+
+  link_->register_for_reader(writerid, readerid, get_connection_addr(*blob),
+                             listener);
 }
 
 void
@@ -223,13 +245,16 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       DiscoveryListener* listener)
 {
   const TransportBLOB* blob = this->config().get_blob(locators);
-  if (!blob)
+  if (!blob) {
     return;
+  }
+
   if (!link_) {
     link_ = make_datalink(participant.guidPrefix);
   }
-  bool requires_inline_qos;
-  link_->register_for_writer(readerid, writerid, get_connection_addr(*blob, requires_inline_qos), listener);
+
+  link_->register_for_writer(readerid, writerid, get_connection_addr(*blob),
+                             listener);
 }
 
 void

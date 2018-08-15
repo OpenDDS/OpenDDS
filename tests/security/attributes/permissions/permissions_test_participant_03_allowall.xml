@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+  <permissions>
+    <grant name="factory_grant_all_domain_0">
+      <!-- only allow joining domain 0. No explicit permission to read or write any topic -->
+      <subject_name>/C=GB/ST=JQ/O=Bob's Magical Widget Factory/CN=Roberto Gonzales/emailAddress=bob@magicalwidgets.com</subject_name>
+      <validity>
+        <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
+        <not_before>2015-09-15T01:00:00</not_before>
+        <not_after>2025-09-15T01:00:00</not_after>
+      </validity>
+      <allow_rule>
+        <domains>
+          <id>0</id>
+        </domains>
+        <publish>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </publish>
+        <subscribe>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </subscribe>
+      </allow_rule>
+      <default>DENY</default>
+    </grant>
+  </permissions>
+</dds>

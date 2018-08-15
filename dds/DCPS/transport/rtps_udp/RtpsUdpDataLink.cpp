@@ -21,6 +21,13 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
+#if defined(OPENDDS_SECURITY)
+#include "dds/DCPS/RTPS/SecurityHelpers.h"
+#include "dds/DCPS/security/framework/SecurityRegistry.h"
+#endif
+
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
+
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
@@ -85,9 +92,15 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                 config.nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config.heartbeat_response_delay_),
-  heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
-  heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
-  held_data_delivery_handler_(this)
+    heartbeat_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::send_heartbeats)),
+    heartbeatchecker_(make_rch<HeartBeat>(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this, &RtpsUdpDataLink::check_heartbeats)),
+#if defined(OPENDDS_SECURITY)
+    held_data_delivery_handler_(this),
+    security_config_(Security::SecurityRegistry::instance()->default_config()),
+    local_crypto_handle_(DDS::HANDLE_NIL)
+#else
+    held_data_delivery_handler_(this)
+#endif
 {
   this->send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
   this->receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
@@ -771,6 +784,10 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     return element;
   }
 
+#if defined(OPENDDS_SECURITY)
+  send_strategy()->encode_payload(pub_id, data, subm);
+#endif
+
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
@@ -912,7 +929,7 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
     bitmap[0] = 0;
 
     GapSubmessage gap = {
-      {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
+      {GAP, FLAG_E, 0 /*length determined below*/},
       ENTITYID_UNKNOWN, // readerId: applies to all matched readers
       pub.entityId,
       gapStart,
@@ -930,7 +947,7 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
       msg[i].gap_sm(gap);
     } else {
       InfoDestinationSubmessage idst = {
-        {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+        {INFO_DST, FLAG_E, INFO_DST_SZ},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
       };
       CORBA::ULong ml = msg.length();
@@ -1201,8 +1218,8 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
 
   info.initial_hb_ = false;
 
-  const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
-    liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
+  const bool final = heartbeat.smHeader.flags & RTPS::FLAG_F,
+    liveliness = heartbeat.smHeader.flags & RTPS::FLAG_L;
 
   if (!final || (!liveliness && (info.should_nack() ||
       rr.second.nack_durable(info) ||
@@ -1350,7 +1367,7 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag)
 
       AckNackSubmessage acknack = {
         {ACKNACK,
-         CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
+         CORBA::Octet(FLAG_E | (final ? FLAG_F : 0)),
          0 /*length*/},
         rr->first.entityId,
         wi->first.entityId,
@@ -1366,7 +1383,7 @@ RtpsUdpDataLink::send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag)
       acknack.smHeader.submessageLength =
         static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
       InfoDestinationSubmessage info_dst = {
-        {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+        {INFO_DST, FLAG_E, INFO_DST_SZ},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
       };
       gen_find_size(info_dst, size, padding);
@@ -1421,7 +1438,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
     AckNackSubmessage acknack = {
       {ACKNACK,
-       CORBA::Octet(1 /*FLAG_E*/ | 2 /*FLAG_F*/),
+       CORBA::Octet(FLAG_E | FLAG_F),
        0 /*length*/},
       pos->readerid.entityId,
       pos->writerid.entityId,
@@ -1437,7 +1454,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
     acknack.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
     InfoDestinationSubmessage info_dst = {
-      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+      {INFO_DST, FLAG_E, INFO_DST_SZ},
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
     gen_find_size(info_dst, size, padding);
@@ -1523,7 +1540,7 @@ RtpsUdpDataLink::generate_nack_frags(OPENDDS_VECTOR(RTPS::NackFragSubmessage)& n
   }
 
   const RTPS::NackFragSubmessage nackfrag_prototype = {
-    {RTPS::NACK_FRAG, 1 /*FLAG_E*/, 0 /* length set below */},
+    {RTPS::NACK_FRAG, RTPS::FLAG_E, 0 /* length set below */},
     ENTITYID_UNKNOWN, // readerId will be filled-in by send_heartbeat_replies()
     ENTITYID_UNKNOWN, // writerId will be filled-in by send_heartbeat_replies()
     {0, 0}, // writerSN set below
@@ -1687,7 +1704,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
-  const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
+  const bool final = acknack.smHeader.flags & RTPS::FLAG_F;
 
   if (!ri->second.durable_data_.empty()) {
     if (Transport_debug_level > 5) {
@@ -1885,6 +1902,13 @@ RtpsUdpDataLink::send_nack_replies()
     //track if any messages have been fully acked by all readers
     SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
 
+#if defined(OPENDDS_SECURITY)
+    const EntityId_t& pvs_writer =
+      RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+    const bool is_pvs_writer =
+      0 == std::memcmp(&pvs_writer, &rw->first.entityId, sizeof pvs_writer);
+#endif
+
     typedef ReaderInfoMap::iterator ri_iter;
     const ri_iter end = writer.remote_readers_.end();
     for (ri_iter ri = writer.remote_readers_.begin(); ri != end; ++ri) {
@@ -1893,24 +1917,16 @@ RtpsUdpDataLink::send_nack_replies()
         all_readers_ack = ri->second.cur_cumulative_ack_;
       }
 
-      for (size_t i = 0; i < ri->second.requested_changes_.size(); ++i) {
-        const SequenceNumberSet& sn_state = ri->second.requested_changes_[i];
-        SequenceNumber base;
-        base.setValue(sn_state.bitmapBase.high, sn_state.bitmapBase.low);
-        if (sn_state.numBits == 1 && !(sn_state.bitmap[0] & 1)
-            && base == writer.heartbeat_high(ri->second)) {
-          // Since there is an entry in requested_changes_, the DR must have
-          // sent a non-final AckNack.  If the base value is the high end of
-          // the heartbeat range, treat it as a request for that seq#.
-          if (!writer.send_buff_.is_nil() && writer.send_buff_->contains(base)) {
-            requests.insert(base);
-          }
-        } else {
-          requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
-        }
+#if defined(OPENDDS_SECURITY)
+      if (is_pvs_writer && !ri->second.requested_changes_.empty()) {
+        send_directed_nack_replies(rw->first, writer, ri->first, ri->second);
+        continue;
       }
+#endif
 
-      if (ri->second.requested_changes_.size()) {
+      process_requested_changes(requests, writer, ri->second);
+
+      if (!ri->second.requested_changes_.empty()) {
         if (locators_.count(ri->first)) {
           recipients.insert(locators_[ri->first].addr_);
           if (Transport_debug_level > 5) {
@@ -2020,6 +2036,81 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
 }
 
 void
+RtpsUdpDataLink::process_requested_changes(DisjointSequence& requests,
+                                           const RtpsWriter& writer,
+                                           const ReaderInfo& reader)
+{
+  for (size_t i = 0; i < reader.requested_changes_.size(); ++i) {
+    const RTPS::SequenceNumberSet& sn_state = reader.requested_changes_[i];
+    SequenceNumber base;
+    base.setValue(sn_state.bitmapBase.high, sn_state.bitmapBase.low);
+    if (sn_state.numBits == 1 && !(sn_state.bitmap[0] & 1)
+        && base == writer.heartbeat_high(reader)) {
+      // Since there is an entry in requested_changes_, the DR must have
+      // sent a non-final AckNack.  If the base value is the high end of
+      // the heartbeat range, treat it as a request for that seq#.
+      if (!writer.send_buff_.is_nil() && writer.send_buff_->contains(base)) {
+        requests.insert(base);
+      }
+    } else {
+      requests.insert(base, sn_state.numBits, sn_state.bitmap.get_buffer());
+    }
+  }
+}
+
+void
+RtpsUdpDataLink::send_directed_nack_replies(const RepoId& writerId,
+                                            RtpsWriter& writer,
+                                            const RepoId& readerId,
+                                            ReaderInfo& reader)
+{
+  if (!locators_.count(readerId)) {
+    return;
+  }
+
+  DisjointSequence requests;
+  process_requested_changes(requests, writer, reader);
+  reader.requested_changes_.clear();
+
+  DisjointSequence gaps;
+  ACE_INET_Addr addr = locators_[readerId].addr_;
+
+  if (!requests.empty()) {
+    if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
+      gaps = requests;
+    } else {
+      OPENDDS_VECTOR(SequenceRange) ranges = requests.present_sequence_ranges();
+      SingleSendBuffer& sb = *writer.send_buff_;
+      ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
+      const RtpsUdpSendStrategy::OverrideToken ot =
+        send_strategy()->override_destinations(addr);
+      for (size_t i = 0; i < ranges.size(); ++i) {
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_directed_nack_replies "
+                     "resend data %d-%d\n", int(ranges[i].first.getValue()),
+                     int(ranges[i].second.getValue())));
+        }
+        sb.resend_i(ranges[i], &gaps, readerId);
+      }
+    }
+  }
+
+  if (gaps.empty()) {
+    return;
+  }
+  if (Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_directed_nack_replies GAPs: "));
+    gaps.dump();
+  }
+  ACE_Message_Block* mb_gap =
+    marshal_gaps(writerId, readerId, gaps, writer.durable_);
+  if (mb_gap) {
+    send_strategy()->send_rtps_control(*mb_gap, addr);
+    mb_gap->release();
+  }
+}
+
+void
 RtpsUdpDataLink::process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const RepoId& pub_id)
 {
   using namespace OpenDDS::RTPS;
@@ -2116,7 +2207,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
   }
 
   GapSubmessage gap = {
-    {GAP, 1 /*FLAG_E*/, 0 /*length determined below*/},
+    {GAP, FLAG_E, 0 /*length determined below*/},
     reader.entityId,
     writer.entityId,
     gapStart,
@@ -2179,7 +2270,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     ser << gap;
   } else {
     InfoDestinationSubmessage idst = {
-      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+      {INFO_DST, FLAG_E, INFO_DST_SZ},
       {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
     for (size_t i = 0; i < readers.size(); ++i) {
@@ -2208,7 +2299,7 @@ RtpsUdpDataLink::send_durability_gaps(const RepoId& writer,
   ACE_Message_Block mb(RTPS::INFO_DST_SZ + RTPS::SMHDR_SZ);
   Serializer ser(&mb, false, Serializer::ALIGN_CDR);
   RTPS::InfoDestinationSubmessage info_dst = {
-    {RTPS::INFO_DST, 1 /*FLAG_E*/, RTPS::INFO_DST_SZ},
+    {RTPS::INFO_DST, RTPS::FLAG_E, RTPS::INFO_DST_SZ},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
   std::memcpy(info_dst.guidPrefix, reader.guidPrefix, sizeof(GuidPrefix_t));
@@ -2324,7 +2415,7 @@ RtpsUdpDataLink::send_heartbeats()
 
       const HeartBeatSubmessage hb = {
         {HEARTBEAT,
-         CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
+         CORBA::Octet(FLAG_E | (final ? FLAG_F : 0)),
          HEARTBEAT_SZ},
         ENTITYID_UNKNOWN, // any matched reader may be interested in this
         rw->first.entityId,
@@ -2342,7 +2433,7 @@ RtpsUdpDataLink::send_heartbeats()
       const SequenceNumber SN = 1;
       const HeartBeatSubmessage hb = {
         {HEARTBEAT,
-         CORBA::Octet(1 /*FLAG_E*/),
+         FLAG_E,
          HEARTBEAT_SZ},
         ENTITYID_UNKNOWN, // any matched reader may be interested in this
         pos->entityId,
@@ -2352,6 +2443,8 @@ RtpsUdpDataLink::send_heartbeats()
       };
       subm.push_back(hb);
     }
+
+    send_directed_heartbeats(subm);
 
     if (!subm.empty()) {
       ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * subm.size()); //FUTURE: allocators?
@@ -2381,6 +2474,57 @@ RtpsUdpDataLink::send_heartbeats()
   for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
     pendingCallbacks[i]->data_dropped();
   }
+}
+
+void
+RtpsUdpDataLink::send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs)
+{
+#if defined(OPENDDS_SECURITY)
+  const EntityId_t& volatile_writer =
+    RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
+
+  RTPS::InfoDestinationSubmessage idst;
+  idst.smHeader.submessageId = RTPS::INFO_DST;
+  idst.smHeader.flags = RTPS::FLAG_E;
+  idst.smHeader.submessageLength = RTPS::INFO_DST_SZ;
+  const size_t block_size = RTPS::INFO_DST_SZ + RTPS::HEARTBEAT_SZ
+    + 2 * RTPS::SMHDR_SZ;
+  Message_Block_Ptr mb;
+
+  typedef OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)::iterator iter_t;
+  iter_t it = hbs.begin(), last = hbs.end();
+  while (it != last) {
+    if (0 == std::memcmp(&it->writerId, &volatile_writer, sizeof(EntityId_t))) {
+      RepoId local;
+      RTPS::assign(local.guidPrefix, local_prefix_);
+      local.entityId = it->writerId;
+      RtpsWriterMap::const_iterator rw = writers_.find(local);
+      if (rw != writers_.end()) {
+        const ReaderInfoMap& rinfo = rw->second.remote_readers_;
+        for (ReaderInfoMap::const_iterator ri = rinfo.begin();
+             ri != rinfo.end(); ++ri) {
+          RTPS::assign(idst.guidPrefix, ri->first.guidPrefix);
+          it->readerId = ri->first.entityId;
+          if (mb) {
+            mb->reset();
+          } else {
+            mb.reset(new ACE_Message_Block(block_size));
+          }
+          Serializer ser(mb.get(), false, Serializer::ALIGN_CDR);
+          ser << idst;
+          ser << *it;
+          send_strategy()->send_rtps_control(*mb, locators_[ri->first].addr_);
+        }
+      }
+      std::iter_swap(it, --last);
+    } else {
+      ++it;
+    }
+  }
+  hbs.erase(last, hbs.end());
+#else
+  ACE_UNUSED_ARG(hbs);
+#endif
 }
 
 void
@@ -2459,7 +2603,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
 
   const HeartBeatSubmessage hb = {
     {HEARTBEAT,
-     CORBA::Octet(1 /*FLAG_E*/ | 2 /*FLAG_F*/ | 4 /*FLAG_L*/),
+     CORBA::Octet(FLAG_E | FLAG_F | FLAG_L),
      HEARTBEAT_SZ},
     ENTITYID_UNKNOWN, // any matched reader may be interested in this
     pub_id.entityId,
@@ -2479,6 +2623,77 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
                "failed to serialize HEARTBEAT submessage\n"));
   }
 }
+
+#if defined(OPENDDS_SECURITY)
+void
+RtpsUdpDataLink::populate_security_handles(const RepoId& local_id,
+                                           const RepoId& remote_id,
+                                           const unsigned char* buffer,
+                                           unsigned int buffer_size)
+{
+  using DDS::Security::ParticipantCryptoHandle;
+  using DDS::Security::DatawriterCryptoHandle;
+  using DDS::Security::DatareaderCryptoHandle;
+
+  ACE_Data_Block db(buffer_size, ACE_Message_Block::MB_DATA,
+    reinterpret_cast<const char*>(buffer),
+    0 /*alloc*/, 0 /*lock*/, ACE_Message_Block::DONT_DELETE, 0 /*db_alloc*/);
+  ACE_Message_Block mb(&db, ACE_Message_Block::DONT_DELETE, 0 /*mb_alloc*/);
+  mb.wr_ptr(mb.space());
+  DCPS::Serializer ser(&mb, ACE_CDR_BYTE_ORDER, DCPS::Serializer::ALIGN_CDR);
+
+  const EntityKind localKind(GuidConverter(local_id).entityKind());
+  const RepoId& writer_id = (localKind == KIND_WRITER) ? local_id : remote_id;
+  const RepoId& reader_id = (localKind == KIND_WRITER) ? remote_id : local_id;
+
+  while (mb.length()) {
+    DDS::BinaryProperty_t prop;
+    if (!(ser >> prop)) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::populate_security_handles()"
+                 " - failed to deserialize BinaryProperty_t\n"));
+      return;
+    }
+
+    if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_PART_CRYPTO_HANDLE) == 0
+        && prop.value.length() >= sizeof(ParticipantCryptoHandle)) {
+      unsigned int handle = 0;
+      for (unsigned int i = 0; i < prop.value.length(); ++i) {
+        handle = handle << 8 | prop.value[i];
+      }
+
+      RepoId remote_participant;
+      RTPS::assign(remote_participant.guidPrefix, remote_id.guidPrefix);
+      remote_participant.entityId = ENTITYID_PARTICIPANT;
+      peer_crypto_handles_[remote_participant] = handle;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RPCH %C = %d\n",
+                 std::string(GuidConverter(remote_participant)).c_str(), handle));
+    }
+
+    else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DW_CRYPTO_HANDLE) == 0
+             && prop.value.length() >= sizeof(DatawriterCryptoHandle)) {
+      unsigned int handle = 0;
+      for (unsigned int i = 0; i < prop.value.length(); ++i) {
+        handle = handle << 8 | prop.value[i];
+      }
+      peer_crypto_handles_[writer_id] = handle;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DWCH %C = %d\n",
+                 std::string(GuidConverter(writer_id)).c_str(), handle));
+    }
+
+    else if (std::strcmp(prop.name.in(), RTPS::BLOB_PROP_DR_CRYPTO_HANDLE) == 0
+             && prop.value.length() >= sizeof(DatareaderCryptoHandle)) {
+      unsigned int handle = 0;
+      for (unsigned int i = 0; i < prop.value.length(); ++i) {
+        handle = handle << 8 | prop.value[i];
+      }
+      peer_crypto_handles_[reader_id] = handle;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DRCH %C = %d\n",
+                 std::string(GuidConverter(reader_id)).c_str(), handle));
+    }
+
+  }
+}
+#endif
 
 RtpsUdpDataLink::ReaderInfo::~ReaderInfo()
 {

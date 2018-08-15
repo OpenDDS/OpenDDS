@@ -9,6 +9,7 @@
 #define RTPS_RTPSCORE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
+#include "dds/DdsSecurityParams.idl"
 
 module OpenDDS {
   module RTPS {
@@ -31,12 +32,16 @@ module OpenDDS {
       FilterSignatureSeq filterSignatures;
     };
 
-    struct Property_t {
-      string name;
-      string value;
-    };
-
-    typedef sequence<Property_t> PropertySeq;
+    // TODO: PENDING IDL V4 INHERITANCE
+    // Remove these typedefs and force dependencies to use the
+    // DDS::Property_t version directly. These were move moved
+    // into DdsDcpsCore.idl because:
+    //  - PropertyQosPolicy depends on the security version of Property_t
+    //  - Security's DomainParticipantQos depends on PropertyQosPolicy
+    //  - Security's DomainParticipantQos inherits from the core DDS DomainParticipantQos
+    //  - IDL v4 inheritance isn't supported yet (so we combined the two)
+    typedef DDS::Property_t Property_t;
+    typedef DDS::PropertySeq PropertySeq;
 
     struct EntityName_t {
       string name;
@@ -248,7 +253,8 @@ module OpenDDS {
     //   (the following constants are in the same order as Table 9.14)
     const ParameterId_t PID_CONTENT_FILTER_INFO = 0x0055;
     const ParameterId_t PID_COHERENT_SET = 0x0056;
-    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
+    // PID_DIRECTED_WRITE is not supported
+    //    const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
     const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
 
     // ParameterId Bitmask values (Table 9.11)
@@ -263,6 +269,7 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_BASE = PIDMASK_VENDOR_SPECIFIC + 0x3000;
     const ParameterId_t PID_OPENDDS_LOCATOR           = PID_OPENDDS_BASE + 1;
     const ParameterId_t PID_OPENDDS_ASSOCIATED_WRITER = PID_OPENDDS_BASE + 2;
+
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -372,7 +379,10 @@ module OpenDDS {
         BuiltinEndpointSet_t builtin_endpoints;
 
       case PID_PROPERTY_LIST:
-        PropertySeq properties;
+        // IDL compiler adds support for reading the RTPS version of this
+        // PID (which has one sequence in it), or the Security version which
+        // contains the optional second sequence for binary properties.
+        DDS::PropertyQosPolicy property;
 
       case PID_TYPE_MAX_SIZE_SERIALIZED:
         long type_max_size_serialized;
@@ -392,18 +402,43 @@ module OpenDDS {
       case PID_COHERENT_SET:
         SequenceNumber_t coherent_set;
 
-      case PID_DIRECTED_WRITE:
-        DCPS::GUIDSeq directed_write;
-
       case PID_ORIGINAL_WRITER_INFO:
         OriginalWriterInfo_t original_writer_info;
 
       case PID_OPENDDS_LOCATOR:
         DCPS::TransportLocator opendds_locator;
 
+      case DDS::Security::PID_IDENTITY_TOKEN:
+        DDS::Security::IdentityToken identity_token;
+
+      case DDS::Security::PID_PERMISSIONS_TOKEN:
+        DDS::Security::PermissionsToken permissions_token;
+
+      case DDS::Security::PID_DATA_TAGS:
+        DDS::Security::DataTags data_tags;
+
+      case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
+        DDS::Security::EndpointSecurityInfo endpoint_security_info;
+
+      case DDS::Security::PID_PARTICIPANT_SECURITY_INFO:
+        DDS::Security::ParticipantSecurityInfo participant_security_info;
+
+      case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
+        DDS::Security::IdentityStatusToken identity_status_token;
+
       default:
         DDS::OctetSeq unknown_data;
     };
+
+    const octet FLAG_E = 1; // All Submessages: little Endian
+    const octet FLAG_Q = 2; // Data, DataFrag: inline Qos present
+    const octet FLAG_F = 2; // AckNack, Heartbeat: Final
+    const octet FLAG_I = 2; // InfoTimestamp: Invalidate
+    const octet FLAG_M = 2; // InfoReplyIp4: Multicast present
+    const octet FLAG_D = 4; // Data: sample Data present
+    const octet FLAG_L = 4; // Heartbeat: Liveliness
+    const octet FLAG_K_IN_FRAG = 4; // DataFrag: Key present
+    const octet FLAG_K_IN_DATA = 8; // Data: Key present
 
     /* all Submessages are composed of a leading SubmessageHeader */
     struct SubmessageHeader {
@@ -537,7 +572,7 @@ module OpenDDS {
       DCPS::EntityId_t writerId;
       SequenceNumber_t writerSN;
       ParameterList inlineQos; // if Q
-      // SerializedPayload payload; // if D||K
+      // SerializedPayload payload; // if D|K
       //   These Submessages correspond to the OpenDDS::DCPS::DataSampleHeader,
       //   so they do not contain any payload data.
     };
@@ -628,8 +663,15 @@ module OpenDDS {
       LocatorUDPv4_t multicastLocator; // if M
     };
 
+    // Security Submessages (0x30-0x3f) don't have a defined structure since
+    // each plugin can impose its own definitions of CryptoContent/Header/Footer
+    struct SecuritySubmessage {
+      SubmessageHeader smHeader;
+      DDS::OctetSeq content;
+    };
+
     enum SubmessageKind {
-      RESERVED_0,
+      SUBMESSAGE_NONE,
       PAD,            /* = 0x01, Pad */
       RESERVED_2,
       RESERVED_3,
@@ -651,7 +693,38 @@ module OpenDDS {
       HEARTBEAT_FRAG, /* = 0x13, HeartbeatFrag */
       RESERVED_20,
       DATA,           /* = 0x15, Data */
-      DATA_FRAG       /* = 0x16, DataFrag */
+      DATA_FRAG,      /* = 0x16, DataFrag */
+      RESERVED_23,
+      RESERVED_24,
+      RESERVED_25,
+      RESERVED_26,
+      RESERVED_27,
+      RESERVED_28,
+      RESERVED_29,
+      RESERVED_30,
+      RESERVED_31,
+      RESERVED_32,
+      RESERVED_33,
+      RESERVED_34,
+      RESERVED_35,
+      RESERVED_36,
+      RESERVED_37,
+      RESERVED_38,
+      RESERVED_39,
+      RESERVED_40,
+      RESERVED_41,
+      RESERVED_42,
+      RESERVED_43,
+      RESERVED_44,
+      RESERVED_45,
+      RESERVED_46,
+      RESERVED_47,
+      SEC_BODY,  // SubmessageKinds 0x30-3f reserved for security
+      SEC_PREFIX,
+      SEC_POSTFIX,
+      SRTPS_PREFIX,
+      SRTPS_POSTFIX,
+      RESERVED_53_SECURITY
     };
 
     union Submessage switch (SubmessageKind) {
@@ -693,6 +766,13 @@ module OpenDDS {
 
       case DATA_FRAG:
         DataFragSubmessage data_frag_sm;
+
+      case SEC_BODY:
+      case SEC_PREFIX:
+      case SEC_POSTFIX:
+      case SRTPS_PREFIX:
+      case SRTPS_POSTFIX:
+        SecuritySubmessage security_sm;
 
       default:
         SubmessageHeader unknown_sm;

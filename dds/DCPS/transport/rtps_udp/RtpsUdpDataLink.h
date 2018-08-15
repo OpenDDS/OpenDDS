@@ -33,6 +33,10 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/RcEventHandler.h"
 
+#if defined(OPENDDS_SECURITY)
+#include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#endif
 
 class DDS_TEST;
 
@@ -126,6 +130,22 @@ public:
   virtual void pre_stop_i();
 
   virtual void send_final_acks (const RepoId& readerid);
+
+#if defined(OPENDDS_SECURITY)
+  Security::SecurityConfig_rch security_config() const
+  { return security_config_; }
+
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle() const;
+  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
+
+  DDS::Security::ParticipantCryptoHandle peer_crypto_handle(const RepoId& peer) const;
+  DDS::Security::DatawriterCryptoHandle writer_crypto_handle(const RepoId& writer) const;
+  DDS::Security::DatareaderCryptoHandle reader_crypto_handle(const RepoId& reader) const;
+
+  void populate_security_handles(const RepoId& local_id, const RepoId& remote_id,
+                                 const unsigned char* buffer,
+                                 unsigned int buffer_size);
+#endif
 
 private:
   virtual void stop_i();
@@ -342,11 +362,15 @@ private:
     }
   }
 
-
-  // Timers for reliability:
   void send_nack_replies();
+  void send_directed_nack_replies(const RepoId& writerId, RtpsWriter& writer,
+                                  const RepoId& readerId, ReaderInfo& reader);
+  void process_requested_changes(DisjointSequence& requests,
+                                 const RtpsWriter& writer,
+                                 const ReaderInfo& reader);
   void process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const RepoId& pub_id);
   void send_heartbeats();
+  void send_directed_heartbeats(OPENDDS_VECTOR(RTPS::HeartBeatSubmessage)& hbs);
   void check_heartbeats();
   void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
@@ -505,6 +529,19 @@ private:
     HeldData held_data_;
   };
   HeldDataDeliveryHandler held_data_delivery_handler_;
+
+#if defined(OPENDDS_SECURITY)
+  Security::SecurityConfig_rch security_config_;
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
+                          GUID_tKeyLessThan) PeerHandlesMap;
+  PeerHandlesMap peer_crypto_handles_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::Security::NativeCryptoHandle,
+                          GUID_tKeyLessThan)::const_iterator PeerHandlesCIter;
+#endif
+
 };
 
 } // namespace DCPS

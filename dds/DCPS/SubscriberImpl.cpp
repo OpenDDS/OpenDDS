@@ -51,7 +51,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
   listener_mask_(mask),
   participant_(*participant),
   domain_id_(participant->get_domain_id()),
-  dp_id_(participant->get_id()),
   raw_latency_buffer_size_(0),
   raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
   monitor_(0),
@@ -230,8 +229,8 @@ SubscriberImpl::create_datareader(
     const DDS::ReturnCode_t ret = dr_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("SubscriberImpl::create_datareader, ")
                  ACE_TEXT("enable failed.\n")));
       return DDS::DataReader::_nil();
@@ -805,6 +804,8 @@ SubscriberImpl::enable()
   if (!participant || participant->is_enabled() == false) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
+
+  dp_id_ = participant->get_id();
 
   if (this->monitor_) {
     this->monitor_->report();

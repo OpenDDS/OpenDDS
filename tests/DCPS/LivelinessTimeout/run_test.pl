@@ -66,6 +66,9 @@ if ($sub_lease_time > $pub_lease_time * $inflation_factor) {
 # The - 1 handles corner cases.
 my $threshold_liveliness_lost = floor(($sub_time - $start_delay) / ($inflation_factor * $pub_lease_time)) - 1;
 
+$sub_time += 0.1;
+$pub_time += 0.1;
+
 if ($threshold_liveliness_lost == 0) {
   print STDERR "ERROR:  Test misconfiguration.  Expected number of liveliness lost events is 0.\n";
   exit 1;

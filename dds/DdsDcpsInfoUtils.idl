@@ -52,7 +52,8 @@ module OpenDDS
       REMOVED,
       CONFLICTING_TYPENAME,
       PRECONDITION_NOT_MET,
-      INTERNAL_ERROR
+      INTERNAL_ERROR,
+      TOPIC_DISABLED
     };
 
     struct WriterAssociation {
