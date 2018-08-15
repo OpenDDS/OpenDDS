@@ -20,6 +20,10 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once	
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
