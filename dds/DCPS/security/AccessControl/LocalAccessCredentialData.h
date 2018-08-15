@@ -29,17 +29,17 @@ public:
 
   bool load(const DDS::PropertySeq& props, DDS::Security::SecurityException& ex);
 
-  const SSL::Certificate& get_ca_cert()
+  const SSL::Certificate& get_ca_cert() const
   {
     return *ca_cert_;
   }
 
-  const SSL::SignedDocument& get_governance_doc()
+  const SSL::SignedDocument& get_governance_doc() const
   {
     return *governance_doc_;
   }
 
-  const SSL::SignedDocument& get_permissions_doc()
+  const SSL::SignedDocument& get_permissions_doc() const
   {
     return *permissions_doc_;
   }
@@ -49,9 +49,6 @@ private:
   SSL::Certificate::unique_ptr ca_cert_;
   SSL::SignedDocument::unique_ptr governance_doc_;
   SSL::SignedDocument::unique_ptr permissions_doc_;
-
-  std::string extract_file_name(const std::string& file_parm);
-  bool file_exists(const std::string& name);
 };
 
 }
