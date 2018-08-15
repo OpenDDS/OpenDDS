@@ -10,6 +10,8 @@
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
 #include "dds/DCPS/security/CryptoBuiltInImpl.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 
@@ -65,3 +67,5 @@ void BuiltInSecurityPluginInst::shutdown()
 
 } // namespace Security
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

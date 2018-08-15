@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <vector>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 namespace CommonUtilities {
@@ -80,3 +82,5 @@ void set_security_error(DDS::Security::SecurityException& ex,
 }
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

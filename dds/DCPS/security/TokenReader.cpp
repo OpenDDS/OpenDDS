@@ -9,9 +9,8 @@
 #include "dds/DCPS/SequenceIterator.h"
 #include <algorithm>
 
-using namespace OpenDDS::DCPS;
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+using namespace OpenDDS::DCPS;
 
 namespace OpenDDS {
 namespace Security {
