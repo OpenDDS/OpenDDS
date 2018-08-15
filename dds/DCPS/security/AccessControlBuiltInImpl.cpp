@@ -1705,7 +1705,7 @@ CORBA::Boolean AccessControlBuiltInImpl::search_local_permissions(
 //                          if (pps_iter->ps_type == Permissions::PUBLISH) {
                           if (pps_iter->ps_type == pub_or_sub) {
                             std::vector<std::string>::iterator pl_iter; // partition list
-                            num_param_partitions = pps_iter->partition_list.size();
+                            num_param_partitions = static_cast<unsigned int>(pps_iter->partition_list.size());
 
                             for (pl_iter = pps_iter->partition_list.begin(); pl_iter != pps_iter->partition_list.end(); ++pl_iter) {
                               // Check the pl_iter value against the list of partitions in the partition parameter

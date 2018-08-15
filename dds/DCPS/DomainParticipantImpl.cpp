@@ -67,8 +67,8 @@ namespace Util {
   {
     DDS::PropertySeq result(properties.length());
     result.length(properties.length());
-    size_t count = 0;
-    for (size_t i = 0, len = properties.length(); i < len; ++i) {
+    unsigned int count = 0;
+    for (unsigned int i = 0; i < properties.length(); ++i) {
       if (std::string(properties[i].name.in()).find(prefix) == 0) {
         result[count++] = properties[i];
       }

@@ -180,13 +180,14 @@ public:
       return 1;
     }
 
-    const size_t len = BIO_write(reader_, content_.c_str(), content_.length());
+    const size_t len = BIO_write(reader_, content_.c_str(),
+                                 static_cast<unsigned int>(content_.size()));
     if (len <= 0) {
       OPENDDS_SSL_LOG_ERR("BIO_write failed");
       return 1;
     }
 
-    if (1 != PKCS7_verify(doc_, NULL, store_, reader_, NULL, flags)) {
+    if (1 != PKCS7_verify(doc_, 0, store_, reader_, 0, flags)) {
       OPENDDS_SSL_LOG_ERR("PKCS7_verify failed");
       return 1;
     }
@@ -337,9 +338,7 @@ PKCS7* SignedDocument::PKCS7_from_data(const DDS::OctetSeq& s_mime_data)
     BIO_free(cache_this);
 
   } else {
-    std::stringstream errmsg;
-    errmsg << "failed to create data '" << s_mime_data << "' using BIO_new";
-    OPENDDS_SSL_LOG_ERR(errmsg.str().c_str());
+    OPENDDS_SSL_LOG_ERR("failed to create data using BIO_new");
   }
 
   return doc_;

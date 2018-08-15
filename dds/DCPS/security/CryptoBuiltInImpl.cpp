@@ -837,7 +837,7 @@ bool CryptoBuiltInImpl::encode_serialized_payload(
   size += pOut->length();
   gen_find_size(footer, size, padding);
 
-  encoded_buffer.length(size + padding);
+  encoded_buffer.length(static_cast<unsigned int>(size + padding));
   ACE_Message_Block mb(to_mb(encoded_buffer.get_buffer()), size + padding);
   Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);
   ser << header;
@@ -1065,7 +1065,7 @@ bool CryptoBuiltInImpl::encode_submessage(
   size_t preFooter = size + padding;
   gen_find_size(footer, size, padding);
 
-  encoded_rtps_submessage.length(size + padding);
+  encoded_rtps_submessage.length(static_cast<unsigned int>(size + padding));
   ACE_Message_Block mb(to_mb(encoded_rtps_submessage.get_buffer()),
                        size + padding);
   Serializer ser(&mb, Serializer::SWAP_BE, Serializer::ALIGN_CDR);

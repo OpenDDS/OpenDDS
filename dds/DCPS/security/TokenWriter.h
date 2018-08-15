@@ -41,7 +41,7 @@ namespace Security {
 class DdsSecurity_Export TokenWriter
 {
 public:
-  TokenWriter(DDS::Security::Token& token_ref);
+  explicit TokenWriter(DDS::Security::Token& token_ref);
   TokenWriter(DDS::Security::Token& token_ref, const std::string& class_id);
 
   virtual ~TokenWriter();

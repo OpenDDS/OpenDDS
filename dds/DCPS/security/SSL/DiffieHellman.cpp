@@ -78,6 +78,10 @@ public:
 
   EVP_PKEY* operator()()
   {
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
+    OPENDDS_SSL_LOG_ERR("DH_get_2048_256 not provided by this OpenSSL library");
+    return 0;
+#else
     if (!(params = EVP_PKEY_new())) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_new failed");
       return 0;
@@ -109,6 +113,7 @@ public:
     }
 
     return result;
+#endif
   }
 
 private:
@@ -332,7 +337,7 @@ public:
       return 1;
     }
 
-    dst.length(len);
+    dst.length(static_cast<unsigned int>(len));
 
     if (0 == EC_POINT_point2oct(EC_KEY_get0_group(keypair_ecdh), pubkey,
                                 EC_KEY_get_conv_form(keypair_ecdh),

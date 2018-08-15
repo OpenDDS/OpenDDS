@@ -17,16 +17,17 @@
 #include "dds/DdsDcpsCoreC.h"
 #include "dds/DdsSecurityCoreC.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace Security {
 
 class DdsSecurity_Export CredentialHash
 {
 public:
-  CredentialHash(const SSL::Certificate& cid, const SSL::DiffieHellman& dh, const DDS::OctetSeq& cpdata, const DDS::OctetSeq& cperm) :
-    pubcert_(cid), dh_(dh), participant_topic_data_(cpdata), permissions_data_(cperm)
+  CredentialHash(const SSL::Certificate& cid, const SSL::DiffieHellman& dh, const DDS::OctetSeq& cpdata, const DDS::OctetSeq& cperm)
+    : pubcert_(cid), dh_(dh), participant_topic_data_(cpdata), permissions_data_(cperm)
   {
-
   }
 
   int operator()(DDS::OctetSeq& dst) const;
@@ -85,7 +86,7 @@ public:
         " some of the security properties might be missing!\n"));
       return false;
     }
-    return (X509_V_OK == participant_cert_->validate(*ca_cert_));
+    return X509_V_OK == participant_cert_->validate(*ca_cert_);
   }
 
 private:
@@ -98,5 +99,7 @@ private:
 
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
