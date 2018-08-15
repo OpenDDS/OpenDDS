@@ -394,16 +394,19 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
-    if (/version (\d+)\.(\d+)/i) { # match i18n version strings
+    if (/version (\d+)\.(\d+)\.[\d]+ for (x\d+)/i) { # match i18n version strings
       my $ver = ($2 == 0) ? $1 : "$1.$2";
+      my $arch = "$3";
       $ver =~ s/0+$// unless $2 == 0;
       $ver =~ s/\.(\d)\d*/.$1/; # only keep one digit after .
       if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
         die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
           . "Stopped";
       }
-      $opts{'compiler_version'} =
-        $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+
+      $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
+      $opts{'compiler_target_architecture'} = $arch;
+
       if ($ver >= 19) {
         push(@{$opts{'features'}}, 'no_cxx11=0');
         print "Visual C++ has C++11 support\n" if $opts{'verbose'};
@@ -860,7 +863,7 @@ my %optdep =
    'qt' =>        ['QTDIR',         '',                            'qt4'],
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
-   'ssl' =>       ['SSL_ROOT',      'include/openssl/ssl.h',       'ssl'],
+   'ssl' =>       ['SSL_ROOT',      'include/openssl/opensslv.h',       'ssl'],
    'cmake' =>     ['CMAKE_ROOT', 'bin/cmake' . (($slash eq '/') ? '' : '.exe')],
 
   );
@@ -923,11 +926,29 @@ if ($opts{'security'}) {
   }
 }
 
+sub targets_win64 {
+  my $arch = exists $opts{'compiler_target_architecture'} ?
+               $opts{'compiler_target_architecture'} : '';
+
+  return $arch eq 'x64';
+}
+
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
+
 my %use_win_default = (
-    'boost' => ['c:\\Boost'],
-    'cmake' => ['c:\\Program Files (x86)\\CMake',
-                'c:\\Program Files\\CMake']);
+    'boost' => 'c:\\Boost',
+
+    'ssl' => (targets_win64() ?
+                'c:\\Program Files\\OpenSSL' :
+                'c:\\Program Files (x86)\\OpenSSL'),
+
+    'xerces3' => (targets_win64() ?
+                    'c:\\Program Files\\xerces-c' :
+                    'c:\\Program Files (x86)\\xerces-c'),
+
+    'cmake' => ( -d 'c:\\Program Files\\CMake' ?
+                  'c:\\Program Files\\CMake' :
+                  'c:\\Program Files (x86)\\CMake'));
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
@@ -974,17 +995,15 @@ for my $key (keys %optdep) {
       print "Defaulting $key to /usr\n" if $opts{'verbose'};
     }
     elsif ($slash ne '/' && exists $use_win_default{$key}) {
-      # Use the first available default
-      for my $dir (@{$use_win_default{$key}}) {
-        if (-d $dir) {
-          $opts{$key} = $dir;
-          last;
-        }
+      my $dir = $use_win_default{$key};
+
+      if (-d $dir) {
+        $opts{$key} = $dir;
+
+      } else {
+        die "Default '$key' directory '$dir' not found.\n";
       }
-      if ($opts{$key} eq '') {
-        die "Default '$key' directory not found. Searched '" .
-              join(', ', @{$use_win_default{$key}}) . "'\n";
-      }
+
       print "Defaulting $key to $opts{$key}\n" if $opts{'verbose'};
     }
     elsif ($key eq 'java') {
@@ -1052,20 +1071,60 @@ for my $key (keys %optdep) {
   }
 }
 
+## SSL version-detection / feature-injection
+if ($opts{'ssl'}) {
+  my $ssl_version_file = $opts{'ssl'} . '/' .
+                           $optdep{'ssl'}->[1]; # Use sanity file
+
+  open my $fh, '<', $ssl_version_file
+    or die "ERROR: Failed to open '$ssl_version_file' for SSL version detection\n";
+
+  push(@features, 'openssl11=1')
+    if grep m/OpenSSL[\W]+1.1/, <$fh>;
+}
+
+sub is_windows {
+  return $slash eq '\\';
+}
+
+sub win32_cmake_generator {
+  my $ver = shift;
+  my $arch = shift;
+
+  my %map = ('vc9' => 'Visual Studio 9 2008',
+             'vc10' => 'Visual Studio 10 2010',
+             'vc11' => 'Visual Studio 11 2012',
+             'vc12' => 'Visual Studio 12 2013',
+             'vc14' => 'Visual Studio 14 2015',
+             'vs2017' => 'Visual Studio 15 2017');
+
+  die "ERROR: Unsupported Visual Studio version '$ver' supplied\n"
+    if ! exists $map{$ver};
+
+  return $map{$ver} . ($arch eq 'x64' ? ' Win64' : '');
+}
+
 ## Google Test
 if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
   my $cwd = Cwd::getcwd();
-  my $build_dir = 'tests/googletest/build';
-  my $cmake = $opts{'cmake'} . '/' . $optdep{'cmake'}->[1];
-  my @cmake_cmds = (["$cmake", ".."],
+  my $build_dir = 'tests' . $slash . 'googletest' . $slash . 'build';
+  my $cmake = $opts{'cmake'} . $slash . $optdep{'cmake'}->[1];
+  my @cmake_cmds = ((is_windows() ?
+                      ["$cmake",
+                       "-D", "gtest_force_shared_crt=ON",
+                       "-D", "CMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
+                       "-G", win32_cmake_generator(
+                               $opts{'compiler_version'},
+                               $opts{'compiler_target_architecture'}),
+                       ".."] : ["$cmake", ".."]),
                     ["$cmake", "--build", "."]);
 
   mkdir($build_dir)
-    or die "ERROR '$!': failed to make directory $build_dir from $cwd"
+    or die "ERROR '$!': failed to make directory $build_dir from $cwd\n"
       if ! -d $build_dir;
-    
+
   chdir($build_dir)
-    or  die "ERROR '$!': failed to change into $build_dir from $cwd";
+    or  die "ERROR '$!': failed to change into $build_dir from $cwd\n";
 
   for my $cmd (@cmake_cmds) {
     print "Running @{$cmd}...\n";
@@ -1074,7 +1133,7 @@ if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
   }
 
   chdir($cwd)
-    or  die "ERROR '$!': failed to change back to $cwd";
+    or die "ERROR '$!': failed to change back to $cwd\n";
 }
 
 
@@ -1231,6 +1290,7 @@ sub generate_workspace {
     }
   }
 
+  ## Security
   if ($opts{'security'}) {
       disable_feature(\@features, 'no-opendds-security');
   }
