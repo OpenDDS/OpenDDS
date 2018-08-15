@@ -88,7 +88,7 @@ public:
   {
     for (
       OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin();
-      i != children_.end(); i++
+      i != children_.end(); ++i
     ) {
       EvalNode* child = *i;
       if (child->has_non_key_fields(meta)) {
@@ -149,7 +149,7 @@ bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
   // Check Order
   for (
     OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.cbegin();
-    i != order_bys_.cend(); i++
+    i != order_bys_.cend(); ++i
   ) {
     if (!meta.isDcpsKey(i->c_str())) {
       return true;
