@@ -186,6 +186,8 @@ public:
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;
 
+  virtual bool isDcpsKey(const char*) const = 0;
+
   virtual const char** getFieldNames() const = 0;
 
   virtual void assign(void* lhs, const char* lhsFieldSpec,
