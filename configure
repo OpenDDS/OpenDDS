@@ -943,7 +943,7 @@ my %use_win_default = (
                     'c:\\Program Files\\xerces-c' :
                     'c:\\Program Files (x86)\\xerces-c'),
 
-    'cmake' => (targets_win64() ?
+    'cmake' => ( -d 'c:\\Program Files\\CMake' ?
                   'c:\\Program Files\\CMake' :
                   'c:\\Program Files (x86)\\CMake'));
 
