@@ -27,6 +27,7 @@ lib*.dylib
 *.VC.db
 *.VC.opendb
 .vs/
+.vscode/
 
 /setenv.sh
 /setenv.cmd
