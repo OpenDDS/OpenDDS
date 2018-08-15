@@ -192,7 +192,7 @@ EVP_PKEY* PrivateKey::EVP_PKEY_from_pem_data(const std::string& data,
 
   // The minus 1 is because path contains a comma in element 0 and that
   // comma is not included in the cert string
-  original_bytes.length(data.size() - 1);
+  original_bytes.length(static_cast<unsigned int>(data.size() - 1));
   std::memcpy(original_bytes.get_buffer(), &data[1],
               original_bytes.length());
 

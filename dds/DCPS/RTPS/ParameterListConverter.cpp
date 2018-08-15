@@ -1451,16 +1451,16 @@ int from_param_list(const ParameterList& param_list,
   info.endpoint_security_attributes = 0;
   info.plugin_endpoint_security_attributes = 0;
 
-  size_t len = param_list.length();
-  for (size_t i = 0; i < len; ++i) {
+  const unsigned int len = param_list.length();
+  for (unsigned int i = 0; i < len; ++i) {
     const Parameter& p = param_list[i];
-    switch(p._d()) {
+    switch (p._d()) {
     case DDS::Security::PID_ENDPOINT_SECURITY_INFO:
       info = p.endpoint_security_info();
       break;
     default:
       if (p._d() & PIDMASK_INCOMPATIBLE) {
-          return -1;
+        return -1;
       }
     }
   }
@@ -1482,16 +1482,16 @@ int from_param_list(const ParameterList& param_list,
 {
   tags.tags.length(0);
 
-  size_t len = param_list.length();
-  for (size_t i = 0; i < len; ++i) {
+  const unsigned int len = param_list.length();
+  for (unsigned int i = 0; i < len; ++i) {
     const Parameter& p = param_list[i];
-    switch(p._d()) {
+    switch (p._d()) {
     case DDS::Security::PID_DATA_TAGS:
       tags = p.data_tags();
       break;
     default:
       if (p._d() & PIDMASK_INCOMPATIBLE) {
-          return -1;
+        return -1;
       }
     }
   }

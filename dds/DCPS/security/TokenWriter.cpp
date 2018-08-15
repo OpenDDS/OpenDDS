@@ -70,7 +70,7 @@ void TokenWriter::add_bin_property(const char* prop_name, const std::string& pro
   DDS::BinaryProperty_t p;
   p.name = prop_name;
   p.propagate = propagate;
-  p.value.length(prop_value.length() + 1 /* For null */);
+  p.value.length(static_cast<unsigned int>(prop_value.size() + 1 /* For null */));
   std::memcpy(p.value.get_buffer(),
               prop_value.c_str(),
               p.value.length());

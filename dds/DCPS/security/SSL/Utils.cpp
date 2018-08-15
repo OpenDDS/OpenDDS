@@ -101,9 +101,9 @@ int make_nonce_256(DDS::OctetSeq& nonce)
   std::vector<unsigned char> tmp;
   int err = make_nonce<256>(tmp);
   if (!err) {
-    nonce.length(tmp.size());
+    nonce.length(static_cast<unsigned int>(tmp.size()));
     for (size_t i = 0; i < tmp.size(); ++i) {
-      nonce[i] = tmp[i];
+      nonce[static_cast<unsigned int>(i)] = tmp[i];
     }
   }
   return err;
@@ -211,7 +211,7 @@ int sign_serialized(const DDS::BinaryPropertySeq& src,
   DCPS::gen_find_size(src, size, padding);
 
   DDS::OctetSeq tmp;
-  tmp.length(size + padding);
+  tmp.length(static_cast<unsigned int>(size + padding));
   ACE_Message_Block buffer(reinterpret_cast<const char*>(tmp.get_buffer()),
                            tmp.length());
 
@@ -240,7 +240,7 @@ int verify_serialized(const DDS::BinaryPropertySeq& src,
   DCPS::gen_find_size(src, size, padding);
 
   DDS::OctetSeq tmp;
-  tmp.length(size + padding);
+  tmp.length(static_cast<unsigned int>(size + padding));
   ACE_Message_Block buffer(reinterpret_cast<const char*>(tmp.get_buffer()),
                            tmp.length());
 

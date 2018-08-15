@@ -121,56 +121,51 @@ bool Certificate::load(DDS::Security::SecurityException& ex,
 
 int Certificate::validate(const Certificate& ca, unsigned long int flags) const
 {
-  int result = X509_V_ERR_UNSPECIFIED;
-
-  if (x_) {
-    if (ca.x_) {
-      X509_STORE* certs = X509_STORE_new();
-      if (certs) {
-        X509_STORE_add_cert(certs, ca.x_);
-
-        X509_STORE_CTX* validation_ctx = X509_STORE_CTX_new();
-        if (validation_ctx) {
-          X509_STORE_CTX_init(validation_ctx, certs, x_, NULL);
-          X509_STORE_CTX_set_flags(validation_ctx, flags);
-
-          if (X509_verify_cert(validation_ctx) == 1) {
-            result = X509_V_OK;
-
-          } else {
-            int err = X509_STORE_CTX_get_error(validation_ctx),
-              depth = X509_STORE_CTX_get_error_depth(validation_ctx);
-
-            ACE_ERROR((LM_WARNING,
-                       ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING '%C' occurred using cert at "
-                                "depth '%i', validation failed.\n"),
-                       X509_verify_cert_error_string(err),
-                       depth));
-
-            result = err;
-          }
-
-          X509_STORE_CTX_free(validation_ctx);
-        }
-
-        X509_STORE_free(certs);
-
-      } else {
-        OPENDDS_SSL_LOG_ERR("failed to create X509_STORE");
-      }
-
-    } else {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, passed-in CA has not loaded a "
-                          "certificate\n")));
-    }
-
-  } else {
-    ACE_ERROR((LM_WARNING,
-               ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, a certificate must be loaded before "
-                        "it can be verified\n")));
+  if (!x_) {
+    ACE_ERROR_RETURN((LM_WARNING,
+                      ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, a ")
+                      ACE_TEXT("certificate must be loaded before it can be verified\n")), 1);
+  }
+  
+  if (!ca.x_) {
+    ACE_ERROR_RETURN((LM_WARNING,
+                      ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING, passed-in ")
+                      ACE_TEXT("CA has not loaded a certificate\n")), 1);
   }
 
+  X509_STORE* const certs = X509_STORE_new();
+  if (!certs) {
+    OPENDDS_SSL_LOG_ERR("failed to create X509_STORE");
+    return 1;
+  }
+
+  X509_STORE_add_cert(certs, ca.x_);
+
+  X509_STORE_CTX* validation_ctx = X509_STORE_CTX_new();
+  if (!validation_ctx) {
+    X509_STORE_free(certs);
+    return 1;
+  }
+
+  X509_STORE_CTX_init(validation_ctx, certs, x_, NULL);
+  X509_STORE_CTX_set_flags(validation_ctx, flags);
+
+  int result = 
+    X509_verify_cert(validation_ctx) == 1
+    ? X509_V_OK : 1; // X509_V_ERR_UNSPECIFIED is not provided by all OpenSSL versions
+
+  if (result == 1) {
+    const int err = X509_STORE_CTX_get_error(validation_ctx),
+      depth = X509_STORE_CTX_get_error_depth(validation_ctx);
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) SSL::Certificate::verify: WARNING '%C' occurred using cert at ")
+               ACE_TEXT("depth '%i', validation failed.\n"),
+               X509_verify_cert_error_string(err), depth));
+    result = err;
+  }
+
+  X509_STORE_CTX_free(validation_ctx);
+  X509_STORE_free(certs);
   return result;
 }
 
@@ -233,7 +228,13 @@ public:
       }
     }
 
-    int err = EVP_DigestVerifyFinal(md_ctx, src.get_buffer(), src.length());
+#ifdef OPENSSL_V_1_0
+    // some versions of OpenSSL take a pointer to non-const
+    unsigned char* buffer = const_cast<unsigned char*>(src.get_buffer());
+#else
+    const unsigned char* buffer = src.get_buffer();
+#endif
+    const int err = EVP_DigestVerifyFinal(md_ctx, buffer, src.length());
     if (0 == err) {
       return 1;  // Verification failed, but no error occurred
 
@@ -434,7 +435,7 @@ void Certificate::load_cert_data_bytes(const std::string& data)
 {
   // The minus 1 is because path contains a comma in element 0 and that
   // comma is not included in the cert string
-  original_bytes_.length(data.size() - 1);
+  original_bytes_.length(static_cast<unsigned int>(data.size() - 1));
   std::memcpy(original_bytes_.get_buffer(), &data[1],
               original_bytes_.length());
 

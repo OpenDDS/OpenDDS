@@ -37,14 +37,14 @@ namespace OpenDDS {
     typedef DataReaderImpl_T<DDS::SubscriptionBuiltinTopicData> SubscriptionBuiltinTopicDataDataReaderImpl;
     typedef DataReaderImpl_T<DDS::TopicBuiltinTopicData> TopicBuiltinTopicDataDataReaderImpl;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoHandle, DCPS::GUID_tKeyLessThan) DatareaderCryptoHandleMap;
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoHandle, DCPS::GUID_tKeyLessThan) DatawriterCryptoHandleMap;
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatareaderCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatareaderCryptoTokenSeqMap;
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::DatawriterCryptoTokenSeq, DCPS::GUID_tKeyLessThan) DatawriterCryptoTokenSeqMap;
     typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::EndpointSecurityAttributes, DCPS::GUID_tKeyLessThan) EndpointSecurityAttributesMap;
 
-    typedef enum {
+    enum AuthState {
       AS_UNKNOWN,
       AS_VALIDATING_REMOTE,
       AS_HANDSHAKE_REQUEST,
@@ -53,7 +53,7 @@ namespace OpenDDS {
       AS_HANDSHAKE_REPLY_SENT,
       AS_AUTHENTICATED,
       AS_UNAUTHENTICATED
-    } AuthState;
+    };
 #endif
 
     inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
@@ -127,7 +127,7 @@ namespace OpenDDS {
         OpenDDS::DCPS::DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
 
@@ -153,7 +153,7 @@ namespace OpenDDS {
         OpenDDS::DCPS::DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
 
@@ -180,13 +180,11 @@ namespace OpenDDS {
         , publication_counter_(0)
         , subscription_counter_(0)
         , topic_counter_(0)
-
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         , permissions_handle_(DDS::HANDLE_NIL)
+        , crypto_handle_(DDS::HANDLE_NIL)
 #endif
-
       {
-
       }
 
       virtual ~EndpointManager() { }
@@ -336,7 +334,7 @@ namespace OpenDDS {
 
         const OPENDDS_STRING& topic_name = topic_names_[topicId];
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (is_security_enabled()) {
           DDS::Security::SecurityException ex;
 
@@ -457,7 +455,7 @@ namespace OpenDDS {
 
         const OPENDDS_STRING& topic_name = topic_names_[topicId];
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         if (is_security_enabled()) {
           DDS::Security::SecurityException ex;
 
@@ -576,7 +574,7 @@ namespace OpenDDS {
         DDS::DataWriterQos qos_;
         DDS::PublisherQos publisher_qos_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
 
@@ -588,7 +586,7 @@ namespace OpenDDS {
         DDS::SubscriberQos subscriber_qos_;
         OpenDDS::DCPS::ContentFilterProperty_t filterProperties;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
 
@@ -722,7 +720,7 @@ namespace OpenDDS {
         }
       }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       virtual DDS::Security::DatawriterCryptoHandle
       generate_remote_matched_writer_crypto_handle(const RepoId&, const DDS::Security::DatareaderCryptoHandle&)
       {
@@ -931,7 +929,7 @@ namespace OpenDDS {
             return; // nothing more to do
           }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
           if (is_security_enabled()) {
             if (call_reader) {
               RepoId writer_participant = writer;
@@ -1168,7 +1166,7 @@ namespace OpenDDS {
                    ACE_TEXT("ran out of builtin topic keys\n")));
       }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       inline bool is_security_enabled()
       {
         return (permissions_handle_ != DDS::HANDLE_NIL) && (access_control_ != 0);
@@ -1230,7 +1228,7 @@ namespace OpenDDS {
       OPENDDS_SET_CMP(DCPS::RepoId, DCPS::GUID_tKeyLessThan) relay_only_readers_;
       DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       DDS::Security::AccessControl_var access_control_;
       DDS::Security::CryptoKeyFactory_var crypto_key_factory_;
       DDS::Security::CryptoKeyExchange_var crypto_key_exchange_;
@@ -1427,21 +1425,28 @@ namespace OpenDDS {
       struct DiscoveredParticipant {
 
         DiscoveredParticipant() :
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
           bit_ih_(0),
           has_last_stateless_msg_(false),
           last_stateless_msg_time_(0, 0),
           auth_started_time_(0, 0),
-          auth_state_(AS_UNKNOWN)
+          auth_state_(AS_UNKNOWN),
+          identity_handle_(DDS::HANDLE_NIL),
+          handshake_handle_(DDS::HANDLE_NIL),
+          permissions_handle_(DDS::HANDLE_NIL),
+          crypto_handle_(DDS::HANDLE_NIL)
 #else
           bit_ih_(0)
 #endif
         {
-
+#ifdef OPENDDS_SECURITY
+          security_info_.participant_security_attributes = 0;
+          security_info_.plugin_participant_security_attributes = 0;
+#endif
         }
 
         DiscoveredParticipant(const DiscoveredParticipantData& p, const ACE_Time_Value& t) :
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
           pdata_(p),
           last_seen_(t),
           bit_ih_(DDS::HANDLE_NIL),
@@ -1454,9 +1459,9 @@ namespace OpenDDS {
           permissions_handle_(DDS::HANDLE_NIL),
           crypto_handle_(DDS::HANDLE_NIL)
 #else
-        pdata_(p),
-        last_seen_(t),
-        bit_ih_(DDS::HANDLE_NIL)
+          pdata_(p),
+          last_seen_(t),
+          bit_ih_(DDS::HANDLE_NIL)
 #endif
         {
 #ifdef OPENDDS_SECURITY
@@ -1469,7 +1474,7 @@ namespace OpenDDS {
         ACE_Time_Value last_seen_;
         DDS::InstanceHandle_t bit_ih_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
         bool has_last_stateless_msg_;
         ACE_Time_Value last_stateless_msg_time_;
         DDS::Security::ParticipantStatelessMessage last_stateless_msg_;
@@ -1501,7 +1506,7 @@ namespace OpenDDS {
       typedef typename DiscoveredParticipantMap::const_iterator
         DiscoveredParticipantConstIter;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::AuthRequestMessageToken, DCPS::GUID_tKeyLessThan) PendingRemoteAuthTokenMap;
 #endif
 
@@ -1545,7 +1550,7 @@ namespace OpenDDS {
       DDS::DomainParticipantQos qos_;
       DiscoveredParticipantMap participants_;
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
       PendingRemoteAuthTokenMap pending_remote_auth_tokens_;
 #endif
 

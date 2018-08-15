@@ -332,7 +332,7 @@ public:
       return 1;
     }
 
-    dst.length(len);
+    dst.length(static_cast<unsigned int>(len));
 
     if (0 == EC_POINT_point2oct(EC_KEY_get0_group(keypair_ecdh), pubkey,
                                 EC_KEY_get_conv_form(keypair_ecdh),

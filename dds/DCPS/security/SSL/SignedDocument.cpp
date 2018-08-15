@@ -180,13 +180,14 @@ public:
       return 1;
     }
 
-    const size_t len = BIO_write(reader_, content_.c_str(), content_.length());
+    const size_t len = BIO_write(reader_, content_.c_str(),
+                                 static_cast<unsigned int>(content_.size()));
     if (len <= 0) {
       OPENDDS_SSL_LOG_ERR("BIO_write failed");
       return 1;
     }
 
-    if (1 != PKCS7_verify(doc_, NULL, store_, reader_, NULL, flags)) {
+    if (1 != PKCS7_verify(doc_, 0, store_, reader_, 0, flags)) {
       OPENDDS_SSL_LOG_ERR("PKCS7_verify failed");
       return 1;
     }

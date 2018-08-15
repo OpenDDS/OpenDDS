@@ -27,7 +27,7 @@ bool LocalAccessCredentialData::load(const DDS::PropertySeq& props,
   const std::string file("file:");
   bool permission = false, governance = false, ca = false;
 
-  for (size_t i = 0; i < props.length(); ++i) {
+  for (unsigned int i = 0; i < props.length(); ++i) {
     const std::string name = props[i].name.in();
     const std::string value = props[i].value.in();
 

@@ -3835,7 +3835,7 @@ Sedp::add_security_info(const DCPS::TransportLocatorSeq& locators,
         if (dr_handle != DDS::HANDLE_NIL) {
           ser << dr_p;
         }
-        added.length(mb.size());
+        added.length(static_cast<unsigned int>(mb.size()));
         std::memcpy(added.get_buffer(), mb.rd_ptr(), mb.size());
       }
 
