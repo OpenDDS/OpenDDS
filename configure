@@ -926,18 +926,26 @@ if ($opts{'security'}) {
   }
 }
 
+sub targets_win64 {
+  return $opts{'compiler_target_architecture'} eq 'x64';
+}
+
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
+
 my %use_win_default = (
-    'boost' => ['c:\\Boost'],
+    'boost' => 'c:\\Boost',
 
-    'ssl' => ['c:\\Program Files\\OpenSSL',
-              'c:\\Program Files (x86)\\OpenSSL'],
+    'ssl' => (targets_win64() ?
+                'c:\\Program Files\\OpenSSL' :
+                'c:\\Program Files (x86)\\OpenSSL'),
 
-    'xerces3' => ['c:\\Program Files\\xerces-c',
-                  'c:\\Program Files (x86)\\xerces-c'],
+    'xerces3' => (targets_win64() ?
+                    'c:\\Program Files\\xerces-c' :
+                    'c:\\Program Files (x86)\\xerces-c'),
 
-    'cmake' => ['c:\\Program Files\\CMake',
-                'c:\\Program Files (x86)\\CMake']);
+    'cmake' => (targets_win64() ?
+                  'c:\\Program Files\\CMake' :
+                  'c:\\Program Files (x86)\\CMake'));
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
@@ -984,17 +992,15 @@ for my $key (keys %optdep) {
       print "Defaulting $key to /usr\n" if $opts{'verbose'};
     }
     elsif ($slash ne '/' && exists $use_win_default{$key}) {
-      # Use the first available default
-      for my $dir (@{$use_win_default{$key}}) {
-        if (-d $dir) {
-          $opts{$key} = $dir;
-          last;
-        }
+      my $dir = $use_win_default{$key};
+
+      if (-d $dir) {
+        $opts{$key} = $dir;
+
+      } else {
+        die "Default '$key' directory '$dir' not found.\n";
       }
-      if ($opts{$key} eq '') {
-        die "Default '$key' directory not found. Searched '" .
-              join(', ', @{$use_win_default{$key}}) . "'\n";
-      }
+
       print "Defaulting $key to $opts{$key}\n" if $opts{'verbose'};
     }
     elsif ($key eq 'java') {
