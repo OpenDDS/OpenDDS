@@ -24,18 +24,9 @@ LocalAccessCredentialData::~LocalAccessCredentialData()
 bool LocalAccessCredentialData::load(const DDS::PropertySeq& props,
                                      DDS::Security::SecurityException& ex)
 {
-<<<<<<< HEAD
   for (unsigned int i = 0; i < props.length(); ++i) {
     const std::string name(props[i].name);
     const std::string value(props[i].value);
-=======
-  const std::string file("file:");
-  bool permission = false, governance = false, ca = false;
-
-  for (unsigned int i = 0; i < props.length(); ++i) {
-    const std::string name = props[i].name.in();
-    const std::string value = props[i].value.in();
->>>>>>> master
 
     if (name == "dds.sec.access.permissions_ca") {
       ca_cert_.reset(new SSL::Certificate(value));
