@@ -477,14 +477,14 @@ my $ace_src;
 if ($opts{'ace'}) {
   if ($opts{'ace'} ne 'download') {
     if (!-r $opts{'ace'} . '/ace/ACE.h') {
-      die "ERROR: Can't find ACE at $opts{'ace'}\n";
+      die "ERROR: Can't find ACE at $opts{'ace'}.\nStopped";
     }
     $ace_src = $opts{'ace'};
   }
 }
 elsif ($ENV{'ACE_ROOT'}) {
   if (!-r $ENV{'ACE_ROOT'} . '/ace/ACE.h') {
-    die "ERROR: Can't find ACE at $ENV{'ACE_ROOT'}\n";
+    die "ERROR: Can't find ACE at $ENV{'ACE_ROOT'}.\nStopped";
   }
   $ace_src = $ENV{'ACE_ROOT'};
 }
@@ -492,7 +492,7 @@ elsif (-r '../ACE_wrappers/ace/ACE.h') {
   die "ERROR: Older versions of this script would default to using ACE at " .
     "../ACE_wrappers, but this version doesn't.  Use the --ace command line " .
     "option to override this error.  Use --ace=download to have this script " .
-    "download an ACE+TAO package and expand it to ACE_wrappers.\n";
+    "download an ACE+TAO package and expand it to ACE_wrappers.\nStopped";
 }
 elsif (-r 'ACE_wrappers/ace/ACE.h') {
   $ace_src = 'ACE_wrappers';
@@ -511,13 +511,13 @@ my $tao_src;
 
 if ($opts{'tao'}) {
   if (!-r $opts{'tao'} . '/tao/ORB.h') {
-    die "ERROR: Can't find TAO at $opts{'tao'}\n";
+    die "ERROR: Can't find TAO at $opts{'tao'}.\nStopped";
   }
   $tao_src = $opts{'tao'};
 }
 elsif ($ENV{'TAO_ROOT'}) {
   if  (!-r $ENV{'TAO_ROOT'} . '/tao/ORB.h') {
-    die "ERROR: Can't find TAO at $ENV{'TAO_ROOT'}\n";
+    die "ERROR: Can't find TAO at $ENV{'TAO_ROOT'}.\nStopped";
   }
   $tao_src = $ENV{'TAO_ROOT'};
 }
@@ -594,7 +594,7 @@ if (!$ace_src || !$tao_src) {
       else {
         die "ERROR: Can't download ACE+TAO using LWP, wget, or curl.\n" .
           "Download ACE+TAO from $urlbase$file, place the file here\n, " .
-          "and re-run the script.\n";
+          "and re-run the script.\nStopped";
       }
     }
   }
@@ -868,11 +868,14 @@ my %optdep =
 
   );
 
+# Use this to check if tests are enabled (instead of $opts{'tests'} directly).
+my $tests = !exists $opts{'tests'} || $opts{'tests'};
+
 my @ace_features = ('xerces3');
 
 if (exists $opts{'java'}) {
   if ($opts{'static'}) {
-    die "ERROR: --static can't be used with --java\n";
+    die "ERROR: --static can't be used with --java\nStopped";
   }
   setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
 }
@@ -888,7 +891,7 @@ if (exists $opts{'wireshark'} && !defined $ENV{'WIRESHARK_SRC'} && $opts{'wiresh
     $opts{'wireshark'} = $wireshark_install;
   } else {
     die "ERROR: --wireshark must be given a value because there is not a " .
-        "development package installed at " . $wireshark_install;
+        "development package installed at " . $wireshark_install . ", stopped";
   }
 }
 
@@ -917,7 +920,7 @@ if ($opts{'security'}) {
     $opts{'xerces3'} = '';
     print "Forcing --xerces3 (security dependency)\n" if $opts{'verbose'};
   }
-  if ($opts{'tests'}) {
+  if ($tests) {
     # CMake is not something users specify on the command-line but it's
     # treated as such here for code-reuse. CMake is required in order to
     # compile the Google Test framework (which security tests rely on).
@@ -963,7 +966,7 @@ sub default_java_home {
   else {
     $result = which('javac');
     if (!$result) {
-      die "ERROR: No javac in PATH.\n";
+      die "ERROR: No javac in PATH.\nStopped";
     }
     while (-l $result) {
       $result = readlink($result);
@@ -1001,7 +1004,7 @@ for my $key (keys %optdep) {
         $opts{$key} = $dir;
 
       } else {
-        die "Default '$key' directory '$dir' not found.\n";
+        die "Default '$key' directory '$dir' not found.\nStopped";
       }
 
       print "Defaulting $key to $opts{$key}\n" if $opts{'verbose'};
@@ -1011,11 +1014,11 @@ for my $key (keys %optdep) {
       $opts{'java'} = default_java_home();
 
       if ($opts{'java'} eq '') {
-          die "ERROR: --$key requires a value\n";
+          die "ERROR: --$key requires a value.\nStopped";
       }
     }
     elsif (defined $optdep{$key}->[0]) {
-      die "ERROR: --$key requires a value\n";
+      die "ERROR: --$key requires a value.\nStopped";
     }
   }
 }
@@ -1064,7 +1067,7 @@ for my $key (keys %optdep) {
     my ($e, $s, $m) = @{$optdep{$key}};
     env_from_opt($key, $e) if defined $e;
     if ($s && !-r $targetEnv{$e} . '/' . $s) {
-      die "ERROR: Can't find $key at $targetEnv{$e} (using $s)\n";
+      die "ERROR: Can't find $key at $targetEnv{$e} (using $s).\nStopped";
     }
     push(@features, $m) if $m;
     push(@platformmacros, $m) if $need_platform_macros{$key};
@@ -1077,7 +1080,7 @@ if ($opts{'ssl'}) {
                            $optdep{'ssl'}->[1]; # Use sanity file
 
   open my $fh, '<', $ssl_version_file
-    or die "ERROR: Failed to open '$ssl_version_file' for SSL version detection\n";
+    or die "ERROR: Failed to open '$ssl_version_file' for SSL version detection.\nStopped";
 
   push(@features, 'openssl11=1')
     if grep m/OpenSSL[\W]+1.1/, <$fh>;
@@ -1098,14 +1101,14 @@ sub win32_cmake_generator {
              'vc14' => 'Visual Studio 14 2015',
              'vs2017' => 'Visual Studio 15 2017');
 
-  die "ERROR: Unsupported Visual Studio version '$ver' supplied\n"
+  die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
     if ! exists $map{$ver};
 
   return $map{$ver} . ($arch eq 'x64' ? ' Win64' : '');
 }
 
 ## Google Test
-if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
+if ($opts{'security'} && $tests && $opts{'cmake'}) {
   my $cwd = Cwd::getcwd();
   my $build_dir = 'tests' . $slash . 'googletest' . $slash . 'build';
   my $cmake = $opts{'cmake'} . $slash . $optdep{'cmake'}->[1];
@@ -1120,40 +1123,40 @@ if ($opts{'security'} && $opts{'tests'} && $opts{'cmake'}) {
                     ["$cmake", "--build", "."]);
 
   mkdir($build_dir)
-    or die "ERROR '$!': failed to make directory $build_dir from $cwd\n"
+    or die "ERROR '$!': failed to make directory $build_dir from $cwd.\nStopped"
       if ! -d $build_dir;
 
   chdir($build_dir)
-    or  die "ERROR '$!': failed to change into $build_dir from $cwd\n";
+    or  die "ERROR '$!': failed to change into $build_dir from $cwd.\nStopped";
 
   for my $cmd (@cmake_cmds) {
     print "Running @{$cmd}...\n";
     system(@{$cmd}) == 0
-      or die "ERROR: Invoking @{$cmd} failed with error '$?'\n";
+      or die "ERROR: Invoking @{$cmd} failed with error '$?'.\nStopped";
   }
 
   chdir($cwd)
-    or die "ERROR '$!': failed to change back to $cwd\n";
+    or die "ERROR '$!': failed to change back to $cwd.\nStopped";
 }
 
 
 if (exists $opts{'jboss'} && !exists $opts{'java'}) {
-  die "ERROR: --java is required for --jboss (OpenDDS JMS Provider)\n";
+  die "ERROR: --java is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
 if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
-  die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider)\n";
+  die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
 if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
   if (!exists $opts{'glib'}) {
-    die "ERROR: --glib is required for --wireshark and --wireshark_cmake\n";
+    die "ERROR: --glib is required for --wireshark and --wireshark_cmake.\nStopped";
   }
 
   if (exists $opts{'wireshark_cmake'}) {
 
     if (exists $opts{'wireshark'}) {
-      die "ERROR: --wireshark and --wireshark_cmake can not be used at the same time.\n";
+      die "ERROR: --wireshark and --wireshark_cmake can not be used at the same time.\nStopped";
     }
 
     if (! -d ($opts{'wireshark_build'} . '/' . $opts{'wireshark_lib'})) {
@@ -1168,15 +1171,15 @@ if (exists $opts{'wireshark'} || exists $opts{'wireshark_cmake'}) {
 }
 
 if (exists $opts{'wireshark_cmake'} && !exists $opts{'wireshark_build'}) {
-  die "ERROR: --wireshark_build are required with --wireshark_cmake\n";
+  die "ERROR: --wireshark_build are required with --wireshark_cmake.\nStopped";
 }
 
 if (exists $opts{'wireshark_lib'} && !exists $opts{'wireshark_cmake'}) {
-  die "ERROR: --wireshark_cmake and --wireshark_build is required for --wireshark_lib\n";
+  die "ERROR: --wireshark_cmake and --wireshark_build is required for --wireshark_lib.\nStopped";
 }
 
 if (exists $opts{'wireshark_build'} && !exists $opts{'wireshark_cmake'}) {
-  die "ERROR: --wireshark_cmake is required for --wireshark_build\n";
+  die "ERROR: --wireshark_cmake is required for --wireshark_build.\nStopped";
 }
 
 if ($opts{'glib'}) {
@@ -1341,8 +1344,6 @@ EOT
       dump_and_unlink($UM) if $UM && $opts{'dry-run'};
     }
   }
-
-  my $tests = !exists $opts{'tests'} || $opts{'tests'};
 
   if ($opts{'safety-profile'} && $buildEnv->{'build'} eq 'target') {
     $buildtao = 0; # TAO will be built seperately
@@ -1685,7 +1686,11 @@ if ($cross_compile) {
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
     if ($opts{'ssl'}) {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
+    }
+
+    if ($opts{'xerces3'}) {
+      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
     }
   }
 
@@ -1709,7 +1714,11 @@ else { # not cross-compiling:
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
     if ($opts{'ssl'}) {
-      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'lib');
+      push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
+    }
+
+    if ($opts{'xerces3'}) {
+      push_libpath(\%targetEnv, $targetEnv{'XERCESCROOT'} . $slash . 'bin');
     }
   }
 
