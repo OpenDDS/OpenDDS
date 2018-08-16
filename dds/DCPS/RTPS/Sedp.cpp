@@ -927,7 +927,7 @@ Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& dstParticipant, const DCPS:
 {
   DCPS::RepoId dst = dstParticipant;
   dst.entityId = dstEntity;
-  if (DCPS::GuidConverter(src).entityKind() == DCPS::KIND_READER) {
+  if (DCPS::GuidConverter(src).entityKind() == DCPS::KIND_BUILTIN_READER) {
     create_and_send_datareader_crypto_tokens(local_reader_crypto_handles_[src],
                                              src, remote_writer_crypto_handles_[dst],
                                              dst);
@@ -3991,8 +3991,8 @@ Sedp::create_and_send_datawriter_crypto_tokens(const DDS::Security::DatawriterCr
   if (key_exchange->create_local_datawriter_crypto_tokens(dwcts, dwch, drch, se) == false) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
       ACE_TEXT("Sedp::create_and_send_datawriter_crypto_tokens() - ")
-      ACE_TEXT("Unable to create local datawriter crypto tokens with crypto key exchange plugin. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
+      ACE_TEXT("Unable to create local datawriter crypto tokens with crypto key exchange plugin. ")
+      ACE_TEXT("Security Exception[%d.%d]: %C\n"), se.code, se.minor_code, se.message.in()));
     return;
   }
 
