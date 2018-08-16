@@ -1,5 +1,6 @@
 
 #include "dds/DCPS/security/AccessControlBuiltInImpl.h"
+#include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DdsDcpsC.h"
 #include "ace/Bound_Ptr.h"
 #include "ace/Null_Mutex.h"
@@ -1353,6 +1354,7 @@ TEST_F(AccessControlTest, return_datareader_sec_attributes)
 
 int main(int argc, char** argv)
 {
+  openssl_init();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
