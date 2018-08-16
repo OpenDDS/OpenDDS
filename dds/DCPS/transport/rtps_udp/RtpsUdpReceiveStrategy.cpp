@@ -380,13 +380,14 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
       const CORBA::Octet* sample_bytes =
         reinterpret_cast<const CORBA::Octet*>(secure_sample_.sample_->rd_ptr());
-      ser.write_octet_array(sample_bytes, secure_sample_.sample_->length());
+      ser.write_octet_array(sample_bytes,
+                            static_cast<unsigned int>(secure_sample_.sample_->length()));
     }
     ser.align_r(4);
   }
   ser << postfix;
 
-  encoded.length(mb.length());
+  encoded.length(static_cast<unsigned int>(mb.length()));
   std::memcpy(encoded.get_buffer(), mb.rd_ptr(), mb.length());
   secure_submessages_.resize(0);
 }
@@ -404,16 +405,17 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
   }
 
   DDS::OctetSeq encoded, plain, iQos;
-  encoded.length(sample.sample_->total_length());
+  encoded.length(static_cast<unsigned int>(sample.sample_->total_length()));
+  unsigned char* const buffer = encoded.get_buffer();
   ACE_Message_Block* mb(sample.sample_.get());
-  for (CORBA::ULong i = 0; mb; mb = mb->cont()) {
-    std::memcpy(encoded.get_buffer() + i, mb->rd_ptr(), mb->length());
-    i += mb->length();
+  for (unsigned int i = 0; mb; mb = mb->cont()) {
+    std::memcpy(buffer + i, mb->rd_ptr(), mb->length());
+    i += static_cast<unsigned int>(mb->length());
   }
 
   size_t iQosSize = 0, iQosPadding = 0;
   gen_find_size(submsg.inlineQos, iQosSize, iQosPadding);
-  iQos.length(iQosSize + iQosPadding);
+  iQos.length(static_cast<unsigned int>(iQosSize + iQosPadding));
   const char* iQos_raw = reinterpret_cast<const char*>(iQos.get_buffer());
   ACE_Message_Block iQosMb(iQos_raw, iQos.length());
   Serializer ser(&iQosMb, ACE_CDR_BYTE_ORDER != (submsg.smHeader.flags & 1),

@@ -70,7 +70,7 @@ namespace {
 
   bool operator==(const DDS::Security::PropertySeq& rhs, const DDS::Security::PropertySeq& lhs) {
     bool result = (rhs.length() == lhs.length());
-    for (size_t i = 0; result && i < rhs.length(); ++i) {
+    for (unsigned int i = 0; result && i < rhs.length(); ++i) {
       result = (rhs[i] == lhs[i]);
     }
     return result;
@@ -78,7 +78,7 @@ namespace {
 
   bool operator==(const DDS::Security::BinaryPropertySeq& rhs, const DDS::Security::BinaryPropertySeq& lhs) {
     bool result = (rhs.length() == lhs.length());
-    for (size_t i = 0; result && i < rhs.length(); ++i) {
+    for (unsigned int i = 0; result && i < rhs.length(); ++i) {
       result = (rhs[i] == lhs[i]);
     }
     return result;
@@ -662,7 +662,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     reply.message_data.length(1);
     reply.message_data[0] = msg.message_data[0];
 
-    DDS::Security::ValidationResult_t vr = auth->begin_handshake_reply(dp.handshake_handle_, reply.message_data[0], dp.identity_handle_, identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se);
+    const DDS::OctetSeq local_participant(static_cast<unsigned int>(temp_buff.length()), &temp_buff);
+    const DDS::Security::ValidationResult_t vr =
+      auth->begin_handshake_reply(dp.handshake_handle_, reply.message_data[0], dp.identity_handle_,
+                                  identity_handle_, local_participant, se);
     if (vr == DDS::Security::VALIDATION_FAILED) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Spdp::handle_handshake_message() - ")
         ACE_TEXT("Failed to reply to incoming handshake message. Security Exception[%d.%d]: %C\n"),
@@ -1041,8 +1044,10 @@ Spdp::attempt_authentication(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     }
 
     DDS::Security::HandshakeMessageToken hs_mt;
-
-    if (auth->begin_handshake_request(dp.handshake_handle_, hs_mt, identity_handle_, dp.identity_handle_, DDS::OctetSeq(temp_buff.length(), &temp_buff), se) != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
+    const DDS::OctetSeq local_participant(static_cast<unsigned int>(temp_buff.length()), &temp_buff);
+    if (auth->begin_handshake_request(dp.handshake_handle_, hs_mt, identity_handle_, dp.identity_handle_,
+                                      local_participant, se)
+        != DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::attempt_authentication() - ")
         ACE_TEXT("Failed to begin handshake_request. Security Exception[%d.%d]: %C\n"),
           se.code, se.minor_code, se.message.in()));

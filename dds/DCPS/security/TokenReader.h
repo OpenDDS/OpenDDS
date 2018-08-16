@@ -41,7 +41,7 @@ class DdsSecurity_Export TokenReader
 {
 public:
 
-  TokenReader(const DDS::Security::Token& token_ref);
+  explicit TokenReader(const DDS::Security::Token& token_ref);
   virtual ~TokenReader();
 
   bool is_nil() const;

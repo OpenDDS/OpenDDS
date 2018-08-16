@@ -83,7 +83,7 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
   }
 
   if (pBytesRead) {
-    *pBytesRead = blob.length() - mb.length();
+    *pBytesRead = blob.length() - static_cast<unsigned int>(mb.length());
   }
   return DDS::RETCODE_OK;
 }

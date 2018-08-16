@@ -26,9 +26,9 @@ public:
   friend DdsSecurity_Export bool operator==(const SignedDocument& lhs,
                                             const SignedDocument& rhs);
 
-  SignedDocument(const std::string& uri);
+  explicit SignedDocument(const std::string& uri);
 
-  SignedDocument(const DDS::OctetSeq& src);
+  explicit SignedDocument(const DDS::OctetSeq& src);
 
   SignedDocument(const SignedDocument& rhs);
 

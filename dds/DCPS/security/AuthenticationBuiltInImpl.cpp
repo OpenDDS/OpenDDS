@@ -414,7 +414,7 @@ void extract_participant_guid_from_cpdata(const DDS::OctetSeq& cpdata, DCPS::GUI
   RTPS::ParameterList params;
 
   if (serializer >> params) {
-    for (size_t i = 0; i < params.length(); ++i) {
+    for (unsigned int i = 0; i < params.length(); ++i) {
       const RTPS::Parameter& p = params[i];
 
       if (p._d() == RTPS::PID_PARTICIPANT_GUID) {

@@ -277,11 +277,12 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
   }
 
   DDS::OctetSeq encoded, plain, iQos;
-  plain.length(payload->total_length());
+  plain.length(static_cast<unsigned int>(payload->total_length()));
+  unsigned char* const buffer = plain.get_buffer();
   ACE_Message_Block* mb(payload.get());
-  for (CORBA::ULong i = 0; mb; mb = mb->cont()) {
-    std::memcpy(plain.get_buffer() + i, mb->rd_ptr(), mb->length());
-    i += mb->length();
+  for (unsigned int i = 0; mb; mb = mb->cont()) {
+    std::memcpy(buffer + i, mb->rd_ptr(), mb->length());
+    i += static_cast<unsigned int>(mb->length());
   }
 
   DDS::Security::SecurityException ex = {"", 0, 0};
@@ -334,7 +335,7 @@ namespace {
   {
     const bool shortMsg = (msgId == RTPS::PAD || msgId == RTPS::INFO_TS);
     CORBA::ULong size = RTPS::SMHDR_SZ +
-      ((octetsToNextHeader == 0 && !shortMsg) ? remain : octetsToNextHeader);
+      ((octetsToNextHeader == 0 && !shortMsg) ? static_cast<unsigned int>(remain) : octetsToNextHeader);
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
@@ -348,7 +349,7 @@ namespace {
     ser2 << readerId;
     ser2 << writerId;
     ser1.read_octet_array(reinterpret_cast<CORBA::Octet*>(mb.wr_ptr()),
-                          mb.space());
+                          static_cast<unsigned int>(mb.space()));
     return out;
   }
 
@@ -602,7 +603,7 @@ ACE_Message_Block*
 RtpsUdpSendStrategy::replace_chunks(const ACE_Message_Block* plain,
                                     const OPENDDS_VECTOR(Chunk)& replacements)
 {
-  unsigned int out_size = plain->total_length();
+  unsigned int out_size = static_cast<unsigned int>(plain->total_length());
   for (size_t i = 0; i < replacements.size(); ++i) {
     out_size += replacements[i].encoded_.length();
     out_size -= replacements[i].length_;
