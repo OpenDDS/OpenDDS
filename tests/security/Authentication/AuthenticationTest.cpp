@@ -5,6 +5,7 @@
 
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/AuthenticationBuiltInImpl.h"
+#include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/GuidUtils.h"
 
 #include "dds/DCPS/security/SSL/Certificate.h"
@@ -1068,6 +1069,7 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
 
 int main(int argc, char** argv)
 {
+  openssl_init();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
