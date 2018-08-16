@@ -65,9 +65,9 @@ enum EntityKind {     // EntityId_t.entityKind value(s)
   KIND_PARTICIPANT,   // 0x3f & 0x01
 
   /// Represents ENTITYKIND_USER_WRITER_WITH_KEY and ENTITYKIND_USER_WRITER_NO_KEY
-  KIND_WRITER,        // 0x3f & 0x02 | 0x3f & 0x03
+  KIND_WRITER,        // Non-builtin writers
   /// Represents ENTITYKIND_USER_READER_WITH_KEY and ENTITYKIND_USER_READER_NO_KEY
-  KIND_READER,        // 0x3f & 0x04 | 0x3f & 0x07
+  KIND_READER,        // Non-builtin readers
   /// Represents ENTITYKIND_OPENDDS_TOPIC
   KIND_TOPIC,         // 0x3f & 0x05
 
