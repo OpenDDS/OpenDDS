@@ -148,8 +148,8 @@ bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
 {
   // Check Order
   for (
-    OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.cbegin();
-    i != order_bys_.cend(); ++i
+    OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin();
+    i != order_bys_.end(); ++i
   ) {
     if (!meta.isDcpsKey(i->c_str())) {
       return true;
