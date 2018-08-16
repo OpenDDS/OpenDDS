@@ -1,16 +1,18 @@
-FROM ubuntu
+FROM ubuntu:xenial
 
 RUN apt-get update && apt-get install -y \
     curl \
     g++ \
     make \
+    libxerces-c-dev \
+    libssl-dev \
     perl-base \
     perl-modules
 
 ADD . /opt/OpenDDS
 
 RUN cd /opt/OpenDDS && \
-    ./configure --prefix=/usr/local --no-tests && \
+    ./configure --prefix=/usr/local --no-tests --security && \
     make && \
     make install && \
     cp -a /opt/OpenDDS/ACE_wrappers/MPC /usr/local/share/ace/MPC
