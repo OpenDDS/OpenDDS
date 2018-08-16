@@ -927,7 +927,7 @@ Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& dstParticipant, const DCPS:
 {
   DCPS::RepoId dst = dstParticipant;
   dst.entityId = dstEntity;
-  if (DCPS::GuidConverter(src).entityKind() == DCPS::KIND_BUILTIN_READER) {
+  if (DCPS::GuidConverter(src).isReader()) {
     create_and_send_datareader_crypto_tokens(local_reader_crypto_handles_[src],
                                              src, remote_writer_crypto_handles_[dst],
                                              dst);
