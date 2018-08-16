@@ -341,7 +341,7 @@ namespace {
 
   void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
   {
-    if (info) {
+    if (info && info->key_list_.size()) {
       for (
         IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
         !i.done(); i.advance()
@@ -397,12 +397,12 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "  void* allocate() const { return new T; }\n\n"
     "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
     "  size_t numDcpsKeys() const { return " << nKeys << "; }\n\n"
+    "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
     "  bool isDcpsKey(const char* field) const\n"
     "  {\n";
   gen_isDcpsKey(info);
   be_global->impl_ <<
     "  }\n\n"
-    "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz
