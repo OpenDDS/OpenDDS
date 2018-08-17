@@ -163,6 +163,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security (optional)',
     'ssl:s', 'OpenSSL for DDS Security (optional)',
+    'cmake:s', 'Path to cmake binary for compiling Google Test Framework (optional)',
    ],
    ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -864,8 +865,6 @@ my %optdep =
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
    'ssl' =>       ['SSL_ROOT',      'include/openssl/opensslv.h',       'ssl'],
-   'cmake' =>     ['CMAKE_ROOT', 'bin/cmake' . (($slash eq '/') ? '' : '.exe')],
-
   );
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
@@ -912,20 +911,39 @@ if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
 ## Security
 
 if ($opts{'security'}) {
-  if (! exists $opts{'ssl'}) {
+  unless (exists $opts{'ssl'}) {
     $opts{'ssl'} = '';
     print "Forcing --ssl (security dependency)\n" if $opts{'verbose'};
   }
-  if (! exists $opts{'xerces3'}) {
+  unless (exists $opts{'xerces3'}) {
     $opts{'xerces3'} = '';
     print "Forcing --xerces3 (security dependency)\n" if $opts{'verbose'};
   }
   if ($tests) {
-    # CMake is not something users specify on the command-line but it's
-    # treated as such here for code-reuse. CMake is required in order to
-    # compile the Google Test framework (which security tests rely on).
-    $opts{'cmake'} = '';
-    print "Forcing --cmake (security + tests dependency)\n" if $opts{'verbose'};
+    # CMake is required in order to compile the Google Test Framework.
+    unless ($opts{'cmake'}) {
+      print "--cmake not specified by user; searching path...\n" if $opts{'verbose'};
+      $opts{'cmake'} = which('cmake');
+
+      unless ($opts{'cmake'}) {
+        print "CMake not found in path; searching default location...\n"
+          if $opts{'verbose'};
+
+        my $cmake_default =
+          (is_windows() ?
+            (-f $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' ?
+                $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' :
+                $ENV{'ProgramFiles(x86)'} . '\\CMake\\bin\\cmake.exe') :
+            '/usr/bin/cmake');
+
+        $opts{'cmake'} = $cmake_default;
+      }
+    }
+
+    die "ERROR: CMake program does not exist..." unless -f $opts{'cmake'};
+
+    print "Using CMake '$opts{'cmake'}' to compile Google Test Framework\n"
+      if $opts{'verbose'};
   }
 }
 
@@ -936,22 +954,18 @@ sub targets_win64 {
   return $arch eq 'x64';
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl/;
 
 my %use_win_default = (
     'boost' => 'c:\\Boost',
 
     'ssl' => (targets_win64() ?
-                'c:\\Program Files\\OpenSSL' :
-                'c:\\Program Files (x86)\\OpenSSL'),
+                $ENV{'ProgramFiles'} . '\\OpenSSL' :
+                $ENV{'ProgramFiles(x86)'} . '\\OpenSSL'),
 
     'xerces3' => (targets_win64() ?
-                    'c:\\Program Files\\xerces-c' :
-                    'c:\\Program Files (x86)\\xerces-c'),
-
-    'cmake' => ( -d 'c:\\Program Files\\CMake' ?
-                  'c:\\Program Files\\CMake' :
-                  'c:\\Program Files (x86)\\CMake'));
+                    $ENV{'ProgramFiles'} . '\\xerces-c' :
+                    $ENV{'ProgramFiles(x86)'} . '\\xerces-c'));
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
@@ -1111,7 +1125,7 @@ sub win32_cmake_generator {
 if ($opts{'security'} && $tests && $opts{'cmake'}) {
   my $cwd = Cwd::getcwd();
   my $build_dir = 'tests' . $slash . 'googletest' . $slash . 'build';
-  my $cmake = $opts{'cmake'} . $slash . $optdep{'cmake'}->[1];
+  my $cmake = $opts{'cmake'};
   my @cmake_cmds = ((is_windows() ?
                       ["$cmake",
                        "-D", "gtest_force_shared_crt=ON",
