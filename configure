@@ -908,16 +908,6 @@ if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
   $wireshark_lib_defaulted = 1;
 }
 
-sub path_parent_dir {
-  my $path = shift;
-  # Each invocation cuts off the trailing piece of the path
-  # (file or directory) and returns the remaining directory.
-  my ($vol, $path, undef) = File::Spec->splitpath($path);
-  my @path_parts = File::Spec->splitdir($path);
-
-  return File::Spec->canonpath($vol . join('/', @path_parts));
-}
-
 ## Security
 
 if ($opts{'security'}) {
