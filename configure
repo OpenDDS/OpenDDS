@@ -864,8 +864,6 @@ my %optdep =
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
    'ssl' =>       ['SSL_ROOT',      'include/openssl/opensslv.h',       'ssl'],
-   'cmake' =>     ['CMAKE_ROOT', 'bin/cmake' . (($slash eq '/') ? '' : '.exe')],
-
   );
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
@@ -931,24 +929,14 @@ if ($opts{'security'}) {
     print "Forcing --xerces3 (security dependency)\n" if $opts{'verbose'};
   }
   if ($tests) {
-    # CMake is not something users specify on the command-line but it's
-    # treated as such here for code-reuse. CMake is required in order to
-    # compile the Google Test framework (which security tests rely on).
-    my $cmake_path = which('cmake');
-    if ($cmake_path) {
-      # Pop off the .../bin/cmake to normalize the directory.
-      $opts{'cmake'} = path_parent_dir(
-                        path_parent_dir($cmake_path));
+    # CMake is required in order to compile the Google Test framework
+    # (which security tests rely on).
+    $opts{'cmake'} = which('cmake');
 
-      print "Using Cmake base dir '$opts{'cmake'}' from environment path\n"
-        if $opts{'verbose'};
+    die "ERROR: CMake not found on PATH"
+      unless defined $opts{'cmake'};
 
-    } else {
-      $opts{'cmake'} = '';
-
-      print "Cmake not found on path; queued force-check of default location.\n"
-        if $opts{'verbose'};
-    }
+    print "Using CMake '$opts{'cmake'}' from PATH\n" if $opts{'verbose'};
   }
 }
 
@@ -959,7 +947,7 @@ sub targets_win64 {
   return $arch eq 'x64';
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl cmake/;
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl/;
 
 my %use_win_default = (
     'boost' => 'c:\\Boost',
@@ -970,11 +958,7 @@ my %use_win_default = (
 
     'xerces3' => (targets_win64() ?
                     'c:\\Program Files\\xerces-c' :
-                    'c:\\Program Files (x86)\\xerces-c'),
-
-    'cmake' => ( -d 'c:\\Program Files\\CMake' ?
-                  'c:\\Program Files\\CMake' :
-                  'c:\\Program Files (x86)\\CMake'));
+                    'c:\\Program Files (x86)\\xerces-c'));
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
@@ -1134,7 +1118,7 @@ sub win32_cmake_generator {
 if ($opts{'security'} && $tests && $opts{'cmake'}) {
   my $cwd = Cwd::getcwd();
   my $build_dir = 'tests' . $slash . 'googletest' . $slash . 'build';
-  my $cmake = $opts{'cmake'} . $slash . $optdep{'cmake'}->[1];
+  my $cmake = $opts{'cmake'};
   my @cmake_cmds = ((is_windows() ?
                       ["$cmake",
                        "-D", "gtest_force_shared_crt=ON",
