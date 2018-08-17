@@ -348,6 +348,146 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
   return true;
 }
 
+/*
+ * NOTE: There is a test almost exactly like this in the QueryConditon test to
+ * test the same situation with QueryConditions.
+ */
+bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub,
+  const char* filter, bool expect_dispose)
+{
+  Duration_t max_wait_time = {3, 0}; // 3 sec
+  ReturnCode_t ret;
+
+  // Create Topic
+  CORBA::String_var type_name = ts->get_type_name();
+  Topic_var topic = dp->create_topic(
+    "Messenger Topic", type_name,
+    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+
+  // Create ContentFilteredTopic
+  ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
+    expect_dispose ? "Safe Filtered Messenger Topic" : "Unsafe Filtered Messenger Topic",
+    topic, filter, StringSeq());
+  if (!cft) {
+    cerr << "ERROR: creating cft failed" << endl;
+    return false;
+  }
+
+  // Create Writer
+  DataWriterQos dw_qos;
+  pub->get_default_datawriter_qos(dw_qos);
+  dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
+  dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+  DataWriter_var dw = pub->create_datawriter(
+    topic, dw_qos, 0, DEFAULT_STATUS_MASK);
+
+  // Create Reader
+  DataReaderQos dr_qos;
+  sub->get_default_datareader_qos(dr_qos);
+  dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
+  dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  DataReader_var dr = sub->create_datareader(
+    cft, dr_qos, 0, DEFAULT_STATUS_MASK);
+
+  // Write Sample with Valid Data
+  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Message sample;
+  sample.key = 0;
+  sample.ull = 0;
+  ret = mdw->write(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_dispose_filter_test: write failed" << endl;
+    return false;
+  }
+
+  // Create Dispose Sample with Invalid Data by Disposing the Writer
+  mdw->dispose(sample, HANDLE_NIL);
+
+  // Wait for samples matching the filter from the disposed writer
+  ReadCondition_var dr_qc = dr->create_readcondition(
+    ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+  if (!dr_qc) {
+    cerr << "ERROR: run_dispose_filter_test: create read condition failed" << endl;
+    return false;
+  }
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_qc);
+  ConditionSeq active;
+  cerr << "FWH: Start Wait" << endl;
+  if (ws->wait(active, max_wait_time) != RETCODE_OK) {
+    cerr << "ERROR: run_dispose_filter_test: wait failed" << endl;
+    return false;
+  }
+  ws->detach_condition(dr_qc);
+
+  // Read the Number of Invalid Messages Taken
+  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  MessageSeq data;
+  SampleInfoSeq infoseq;
+  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_dispose_filter_test: take_w_condition failed" << endl;
+    return false;
+  }
+  unsigned num_valid = 0;
+  unsigned num_invalid = 0;
+  for (size_t i = 0; i < infoseq.length(); i++) {
+    if (infoseq[i].valid_data) {
+      num_valid++;
+    } else {
+      num_invalid++;
+    }
+  }
+
+  // Compare Numbers to what was Expected
+  if (num_valid != 1) {
+    cerr << "ERROR: run_dispose_filter_test: "
+      "expected one sample with valid data, got " << num_valid << endl;
+    return false;
+  }
+  if (num_invalid != (expect_dispose ? 1 : 0)) {
+    cerr << "ERROR: run_dispose_filter_test: expected "
+      << (expect_dispose ? "one sample" : "no samples")
+      << " with invalid data, got " << num_invalid << endl;
+    return false;
+  }
+
+  sub->delete_datareader(dr);
+  pub->delete_datawriter(dw);
+  dr->delete_readcondition(dr_qc);
+  dp->delete_contentfilteredtopic(cft);
+  dp->delete_topic(topic);
+  return true;
+}
+
+bool run_dispose_filter_tests(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub)
+{
+  /*
+   * Run a "Safe" Filter that just references key;
+   * assert a normal message and a dispose message are in the results.
+   */
+  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0", true)) {
+    cerr << "ERROR: run_dispose_filter_tests: safe filter test failed!" << endl;
+    return false;
+  }
+
+  /*
+   * Setup a "Unsafe" Filter that references key and a normal field;
+   * assert just a normal message is in the results.
+   */
+  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0 AND ull >= 0", false)) {
+    cerr << "ERROR: run_dispose_filter_tests: unsafe filter test failed!" << endl;
+    return false;
+  }
+
+  return true;
+}
+
 int run_test(int argc, ACE_TCHAR *argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
@@ -373,8 +513,12 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
   TransportRegistry::instance()->bind_config("c3", sub2);
 
-  bool passed = run_filtering_test(dp, ts, pub, sub, sub2);
+  bool passed = true;
+  /*
+  passed &= run_filtering_test(dp, ts, pub, sub, sub2);
   passed &= run_unsignedlonglong_test(dp, ts, pub, sub);
+  */
+  passed &= run_dispose_filter_tests(dp, ts, pub, sub);
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
