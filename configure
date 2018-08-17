@@ -931,9 +931,9 @@ if ($opts{'security'}) {
 
         my $cmake_default =
           (is_windows() ?
-            (-f 'c:\\Program Files\\CMake\\bin\\cmake.exe' ?
-                'c:\\Program Files\\CMake\\bin\\cmake.exe' :
-                'c:\\Program Files (x86)\\CMake\\bin\\cmake.exe') :
+            (-f $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' ?
+                $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' :
+                $ENV{'ProgramFiles(x86)'} . '\\CMake\\bin\\cmake.exe') :
             '/usr/bin/cmake');
 
         $opts{'cmake'} = $cmake_default;
