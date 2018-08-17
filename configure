@@ -163,6 +163,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security (optional)',
     'ssl:s', 'OpenSSL for DDS Security (optional)',
+    'cmake:s', 'Path to cmake binary for compiling Google Test Framework (optional)',
    ],
    ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -920,23 +921,39 @@ sub path_parent_dir {
 ## Security
 
 if ($opts{'security'}) {
-  if (! exists $opts{'ssl'}) {
+  unless (exists $opts{'ssl'}) {
     $opts{'ssl'} = '';
     print "Forcing --ssl (security dependency)\n" if $opts{'verbose'};
   }
-  if (! exists $opts{'xerces3'}) {
+  unless (exists $opts{'xerces3'}) {
     $opts{'xerces3'} = '';
     print "Forcing --xerces3 (security dependency)\n" if $opts{'verbose'};
   }
   if ($tests) {
-    # CMake is required in order to compile the Google Test framework
-    # (which security tests rely on).
-    $opts{'cmake'} = which('cmake');
+    # CMake is required in order to compile the Google Test Framework.
+    unless ($opts{'cmake'}) {
+      print "--cmake not specified by user; searching path...\n" if $opts{'verbose'};
+      $opts{'cmake'} = which('cmake');
 
-    die "ERROR: CMake not found on PATH"
-      unless defined $opts{'cmake'};
+      unless ($opts{'cmake'}) {
+        print "CMake not found in path; searching default location...\n"
+          if $opts{'verbose'};
 
-    print "Using CMake '$opts{'cmake'}' from PATH\n" if $opts{'verbose'};
+        my $cmake_default =
+          (is_windows() ?
+            (-f 'c:\\Program Files\\CMake\\bin\\cmake.exe' ?
+                'c:\\Program Files\\CMake\\bin\\cmake.exe' :
+                'c:\\Program Files (x86)\\CMake\\bin\\cmake.exe') :
+            '/usr/bin/cmake');
+
+        $opts{'cmake'} = $cmake_default;
+      }
+    }
+
+    die "ERROR: CMake program does not exist..." unless -f $opts{'cmake'};
+
+    print "Using CMake '$opts{'cmake'}' to compile Google Test Framework\n"
+      if $opts{'verbose'};
   }
 }
 
