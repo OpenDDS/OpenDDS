@@ -960,12 +960,12 @@ my %use_win_default = (
     'boost' => 'c:\\Boost',
 
     'ssl' => (targets_win64() ?
-                'c:\\Program Files\\OpenSSL' :
-                'c:\\Program Files (x86)\\OpenSSL'),
+                $ENV{'ProgramFiles'} . '\\OpenSSL' :
+                $ENV{'ProgramFiles(x86)'} . '\\OpenSSL'),
 
     'xerces3' => (targets_win64() ?
-                    'c:\\Program Files\\xerces-c' :
-                    'c:\\Program Files (x86)\\xerces-c'));
+                    $ENV{'ProgramFiles'} . '\\xerces-c' :
+                    $ENV{'ProgramFiles(x86)'} . '\\xerces-c'));
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
