@@ -157,6 +157,15 @@ if (!($scenario eq "")) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_OD");
+  } elsif ($scenario eq "multiple_grants") { #EC certs, read/write access controls and multiple grants in a single (huge) permissions file
+    $pub_cert_file = "../certs/identity/test_participant_03_cert.pem";
+    $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
+    $pub_key_file = "../certs/identity/test_participant_03_private_key.pem";
+    $sub_key_file = "../certs/identity/test_participant_04_private_key.pem";
+    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @pub_perm_files = ("permissions/permissions_multi_p_01_02_03_04_readwrite_signed.p7s");
+    @sub_perm_files = ("permissions/permissions_multi_p_01_02_03_04_readwrite_signed.p7s");
+    @topic_names = ("PD_OL_RWA_EM_ED");
   } elsif ($scenario eq "TEST_8_8_5_SUCCESS") {
     @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_write_signed.p7s");

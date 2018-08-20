@@ -27,6 +27,7 @@
 #include "AccessControl/LocalAccessCredentialData.h"
 #include "AccessControl/Governance.h"
 #include "AccessControl/Permissions.h"
+#include "SSL/SubjectName.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -236,6 +237,9 @@ private:
   AccessControlBuiltInImpl& operator=(const AccessControlBuiltInImpl&);
 
   struct AccessData {
+    DDS::Security::IdentityHandle identity;
+    DDS::Security::DomainId_t domain_id;
+    SSL::SubjectName subject;
     Permissions::shared_ptr perm;
     Governance::shared_ptr gov;
     LocalAccessCredentialData::shared_ptr local_access_credential_data;

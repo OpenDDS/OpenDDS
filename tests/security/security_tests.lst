@@ -23,3 +23,4 @@ tests/security/attributes/run_test.pl --scenario SC4
 tests/security/attributes/run_test.pl --scenario SC5
 tests/security/attributes/run_test.pl --scenario TEST_8_8_5_FAILURE
 tests/security/attributes/run_test.pl --scenario TEST_8_8_5_SUCCESS
+tests/security/attributes/run_test.pl --scenario multiple_grants

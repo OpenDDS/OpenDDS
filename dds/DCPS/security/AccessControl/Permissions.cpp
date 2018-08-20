@@ -21,36 +21,8 @@ namespace OpenDDS {
 namespace Security {
 
 Permissions::Permissions()
-  : perm_data_(), subject_name_()
+  : perm_data_()
 {
-}
-
-bool Permissions::extract_subject_name(const SSL::SignedDocument& doc)
-{
-  doc.get_original_minus_smime(subject_name_);
-
-  const std::string start_str("<subject_name>"), end_str("</subject_name>");
-
-  const size_t found_begin = subject_name_.find(start_str);
-
-  if (found_begin != std::string::npos) {
-    subject_name_.erase(0, found_begin + start_str.length());
-    const char* t = " \t\n\r\f\v";
-    subject_name_.erase(0, subject_name_.find_first_not_of(t));
-
-  } else {
-    return false;
-  }
-
-  const size_t found_end = subject_name_.find(end_str);
-
-  if (found_end != std::string::npos) {
-    subject_name_.erase(found_end);
-  } else {
-    return false;
-  }
-
-  return true;
 }
 
 namespace {
@@ -74,11 +46,6 @@ int Permissions::load(const SSL::SignedDocument& doc)
 {
   using XML::XStr;
   static const char* gMemBufId = "gov buffer id";
-
-  if (!extract_subject_name(doc)) {
-    ACE_ERROR((LM_ERROR, "Permissions::load: WARNING, Could not extract subject name from permissions file"));
-    return -1;
-  }
 
   DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
   parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
@@ -126,8 +93,6 @@ int Permissions::load(const SSL::SignedDocument& doc)
     throw std::runtime_error("empty XML document");
   }
 
-  //TODO:  WARNING - this implementation only supports 1 permissions/grant set
-  // Different from governance from here forward
   // Find the validity rules
   xercesc::DOMNodeList * grantRules = xmlDoc->getElementsByTagName(XStr("grant"));
 
@@ -141,11 +106,12 @@ int Permissions::load(const SSL::SignedDocument& doc)
     // Pull out subject name, validity, and default
     xercesc::DOMNodeList * grantNodes = grantRules->item(r)->getChildNodes();
 
+    bool valid_subject = false;
     for (XMLSize_t gn = 0; gn < grantNodes->getLength(); gn++) {
       const XStr g_tag = grantNodes->item(gn)->getNodeName();
 
       if (g_tag == "subject_name") {
-        rule_holder_.subject = toString(grantNodes->item(gn)->getTextContent());
+        valid_subject = (rule_holder_.subject.parse(toString(grantNodes->item(gn)->getTextContent())) == 0);
       } else if (g_tag == "validity") {
         //Validity_t gn_validity;
         xercesc::DOMNodeList *validityNodes = grantNodes->item(gn)->getChildNodes();
@@ -255,12 +221,28 @@ int Permissions::load(const SSL::SignedDocument& doc)
       }
     }
 
-    perm_data_.perm_rules.push_back(rule_holder_);
+    if (!valid_subject) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Unable to parse subject name, ignoring grant.\n")));
+    } else if (contains_subject_name(rule_holder_.subject)) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Ignoring grant with duplicate subject name.\n")));
+    } else {
+      perm_data_.perm_rules.push_back(rule_holder_);
+    }
   } // grant_rules
 
   return 0;
 }
 
+bool Permissions::contains_subject_name(const SSL::SubjectName& name) const
+{
+  for (PermissionGrantRules::const_iterator it = perm_data_.perm_rules.begin(); it != perm_data_.perm_rules.end(); ++it) {
+    if (name == it->subject)
+      return true;
+  }
+  return false;
+}
 
 }
 }
