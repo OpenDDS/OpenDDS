@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
-#include <cctype>
 
 namespace {
   const char MOD[] = "MOD";
