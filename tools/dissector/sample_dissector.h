@@ -305,6 +305,48 @@ namespace OpenDDS
 
       void init_ws_fields(bool first_pass);
 
+      /**
+       * Get Name of an IDL Basic Type
+       */
+      static const char* IDLTypeID_string(IDLTypeID type) {
+        switch (type) {
+          case Boolean:
+            return "Boolean";
+          case Char:
+            return "Char";
+          case Octet:
+            return "Octet";
+          case WChar:
+            return "WChar";
+          case Short:
+            return "Short";
+          case UShort:
+            return "UShort";
+          case Long:
+            return "Long";
+          case ULong:
+            return "ULong";
+          case LongLong:
+            return "LongLong";
+          case ULongLong:
+            return "ULongLong";
+          case Float:
+            return "Float";
+          case Double:
+            return "Double";
+          case LongDouble:
+            return "LongDouble";
+          case String:
+            return "String";
+          case WString:
+            return "WString";
+          case Enumeration:
+            return "Enumeration";
+          default:
+            return "Undefined";
+        }
+      }
+
       /// Fixed length fields supply a label for identifying the field along
       /// with a type identifier. Fields that are members of an array or
       /// sequence will have an index value adjusted as the owning dissector
