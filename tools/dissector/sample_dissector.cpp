@@ -322,106 +322,127 @@ namespace OpenDDS
       TAO::WString_Manager wstring_value;
       std::string converted;
 
-      switch (this->type_id_) {
+      switch (type_id_) {
       case Char:
         ACE_CDR::Char char_value;
-        p.serializer >> char_value;
-        s << char_value;
+        if (p.serializer >> char_value) {
+          s << char_value;
+        }
         break;
 
       case Boolean:
         ACE_CDR::Boolean boolean_value;
-        p.serializer >> ACE_InputCDR::to_boolean(boolean_value);
-        if (boolean_value)
-          s << "true";
-        else
-          s << "false";
+        if (p.serializer >> ACE_InputCDR::to_boolean(boolean_value)) {
+          s << (boolean_value ? "true" : "false");
+        }
         break;
 
       case Octet:
         ACE_CDR::Octet octet_value;
-        p.serializer >> ACE_InputCDR::to_octet(octet_value);
-        s << octet_value;
+        if (p.serializer >> ACE_InputCDR::to_octet(octet_value)) {
+          s << octet_value;
+        }
         break;
 
       case WChar:
         ACE_CDR::WChar wchar_value;
-        p.serializer >> ACE_InputCDR::to_wchar(wchar_value);
-        utf16_to_utf8(converted, &wchar_value);
-        s << converted;
+        if (p.serializer >> ACE_InputCDR::to_wchar(wchar_value)) {
+          utf16_to_utf8(converted, &wchar_value);
+          s << converted;
+        }
         break;
 
       case Short:
         ACE_CDR::Short short_value;
-        p.serializer >> short_value;
-        s << short_value;
+        if (p.serializer >> short_value) {
+          s << short_value;
+        }
         break;
 
       case Long:
         ACE_CDR::Long long_value;
-        p.serializer >> long_value;
-        s << long_value;
+        if (p.serializer >> long_value) {
+          s << long_value;
+        }
         break;
 
       case LongLong:
         ACE_CDR::LongLong longlong_value;
-        p.serializer >> longlong_value;
-        s << longlong_value;
+        if (p.serializer >> longlong_value) {
+          s << longlong_value;
+        }
         break;
 
       case UShort:
         ACE_CDR::UShort ushort_value;
-        p.serializer >> ushort_value;
-        s << ushort_value;
+        if (p.serializer >> ushort_value) {
+          s << ushort_value;
+        }
         break;
 
       case ULong:
         ACE_CDR::ULong ulong_value;
-        p.serializer >> ulong_value;
-        s << ulong_value;
+        if (p.serializer >> ulong_value) {
+          s << ulong_value;
+        }
         break;
 
       case ULongLong:
         ACE_CDR::ULongLong ulonglong_value;
-        p.serializer >> ulonglong_value;
-        s << ulonglong_value;
+        if (p.serializer >> ulonglong_value) {
+          s << ulonglong_value;
+        }
         break;
 
       case Float:
         ACE_CDR::Float float_value;
-        p.serializer >> float_value;
-        s << float_value;
+        if (p.serializer >> float_value) {
+          s << float_value;
+        }
         break;
 
       case Double:
         ACE_CDR::Double double_value;
-        p.serializer >> double_value;
-        s << double_value;
+        if (p.serializer >> double_value) {
+          s << double_value;
+        }
         break;
 
       case LongDouble:
         ACE_CDR::LongDouble longdouble_value;
-        p.serializer >> longdouble_value;
-        s << longdouble_value;
+        if (p.serializer >> longdouble_value) {
+          s << longdouble_value;
+        }
         break;
 
       case String:
         p.serializer.read_string(string_value.inout());
-        s << string_value;
+        if (p.serializer.good_bit()) {
+          s << string_value;
+        }
         break;
 
       case WString:
         wstring_length = p.serializer.read_string(wstring_value.inout());
-        utf16_to_utf8(converted, wstring_value, wstring_length);
-        s << converted;
+        if (p.serializer.good_bit()) {
+          utf16_to_utf8(converted, wstring_value, wstring_length);
+          s << converted;
+        }
         break;
 
       case Enumeration:
         break; // only the label is used, not directly presented
 
-      case Undefined:
-        s << "type undefined";
+      default:
+        throw Sample_Dissector_Error(
+          get_ns()  + " does not have a valid type.");
+      }
 
+      if (!p.serializer.good_bit()) {
+        throw Sample_Dissector_Error(
+          "Failed to deserialize " + get_ns() +
+          " that has the type " + IDLTypeID_string(type_id_)
+        );
       }
 
       p.offset += (p.buffer_pos() - location);
@@ -453,17 +474,20 @@ namespace OpenDDS
           TAO::WString_Manager wstring_value;
 
           // Set Field
-          switch (this->type_id_) {
+          switch (type_id_) {
 
           case Boolean:
             ACE_CDR::Boolean boolean_value;
             params.serializer >> ACE_InputCDR::to_boolean(boolean_value);
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
                 proto_tree_add_boolean_format(
                   ADD_FIELD_PARAMS, boolean_value,
-                  "[%u]: %s", params.index, boolean_value ? "True" : "False"
+                  "[%u]: %s", params.index, boolean_value ? "true" : "false"
                 );
               } else {
                 proto_tree_add_boolean(ADD_FIELD_PARAMS, boolean_value);
@@ -474,6 +498,9 @@ namespace OpenDDS
           case Char:
             ACE_CDR::Char char_value;
             params.serializer >> char_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -490,6 +517,9 @@ namespace OpenDDS
           case WChar:
             ACE_CDR::WChar wchar_value;
             params.serializer >> ACE_InputCDR::to_wchar(wchar_value);
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               std::string s;
@@ -521,6 +551,9 @@ namespace OpenDDS
           case Octet:
             ACE_CDR::Octet octet_value;
             params.serializer >> ACE_InputCDR::to_octet(octet_value);
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -537,6 +570,9 @@ namespace OpenDDS
           case Short:
             ACE_CDR::Short short_value;
             params.serializer >> short_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -553,6 +589,9 @@ namespace OpenDDS
           case Long:
             ACE_CDR::Long long_value;
             params.serializer >> long_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -569,6 +608,9 @@ namespace OpenDDS
           case LongLong:
             ACE_CDR::LongLong longlong_value;
             params.serializer >> longlong_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -585,6 +627,9 @@ namespace OpenDDS
           case UShort:
             ACE_CDR::UShort ushort_value;
             params.serializer >> ushort_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -601,6 +646,9 @@ namespace OpenDDS
           case ULong:
             ACE_CDR::ULong ulong_value;
             params.serializer >> ulong_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -617,6 +665,9 @@ namespace OpenDDS
           case ULongLong:
             ACE_CDR::ULongLong ulonglong_value;
             params.serializer >> ulonglong_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -633,6 +684,9 @@ namespace OpenDDS
           case Float:
             ACE_CDR::Float float_value;
             params.serializer >> float_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -649,6 +703,9 @@ namespace OpenDDS
           case Double:
             ACE_CDR::Double double_value;
             params.serializer >> double_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               if (params.use_index) {
@@ -665,6 +722,9 @@ namespace OpenDDS
           case LongDouble:
             ACE_CDR::LongDouble longdouble_value;
             params.serializer >> longdouble_value;
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
             if (!params.get_size_only) {
               // Casting to double because ws doesn't support long double
@@ -683,6 +743,9 @@ namespace OpenDDS
           case String:
             // Get String
             params.serializer.read_string(string_value.inout());
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
 
             // Add to Tree
@@ -702,6 +765,9 @@ namespace OpenDDS
           case WString:
             // Get String
             wstring_length = params.serializer.read_string(wstring_value.inout());
+            if (!params.serializer.good_bit()) {
+              break;
+            }
             len = params.buffer_pos() - location;
 
             // Add to Tree
@@ -737,7 +803,13 @@ namespace OpenDDS
 
           default:
             throw Sample_Dissector_Error(
-              get_ns()  + " is not a valid Field Type."
+              get_ns()  + " does not have a valid type.");
+          }
+
+          if (!params.serializer.good_bit()) {
+            throw Sample_Dissector_Error(
+              "Failed to deserialize " + get_ns() +
+              " that has the type " + IDLTypeID_string(type_id_)
             );
           }
 
@@ -827,8 +899,7 @@ namespace OpenDDS
 
         default:
           throw Sample_Dissector_Error(
-            get_ns()  + " is not a valid Field Type."
-          );
+            get_ns()  + " does not have a valid type.");
         }
       } else if (nested_) {
         push_ns(label_);
