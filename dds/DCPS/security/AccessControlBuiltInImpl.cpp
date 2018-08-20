@@ -686,7 +686,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   std::string local_plugin_class_name,
               remote_plugin_class_name;
-  int local_major_ver,
+  int local_major_ver = 0,
       local_minor_ver,
       remote_major_ver,
       remote_minor_ver;
@@ -761,7 +761,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (publication_data.base.base.topic_name == "") {
+  if (publication_data.base.base.topic_name[0] == 0) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Invalid topic name");
     return false;
   }
@@ -902,7 +902,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  if (topic_data.name == "") {
+  if (topic_data.name[0] == 0) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: Invalid topic data");
     return false;
   }
@@ -922,7 +922,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   std::string local_plugin_class_name,
               remote_plugin_class_name;
-  int local_major_ver,
+  int local_major_ver = 0,
       local_minor_ver,
       remote_major_ver,
       remote_minor_ver;
@@ -1466,16 +1466,14 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
   time_t & delta_time,
   ::DDS::Security::SecurityException & ex)
 {
-  time_t after_time,
-         before_time,
-         cur_utc_time;
+  time_t after_time = 0, cur_utc_time = 0;
   time_t current_date_time = time(0);
 
   perm_grant_iter pbegin = ac_iter->second.perm->data().perm_rules.begin();
   perm_grant_iter pend = ac_iter->second.perm->data().perm_rules.end();
 
   for (perm_grant_iter pm_iter = pbegin; pm_iter != pend; ++pm_iter) {
-    before_time = convert_permissions_time(pm_iter->validity.not_before);
+    const time_t before_time = convert_permissions_time(pm_iter->validity.not_before);
 
     if (before_time == 0) {
       CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions not_before time is invalid.");
