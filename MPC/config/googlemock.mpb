@@ -1,5 +1,5 @@
 project : googletest {
-  includes += $(DDS_ROOT)/tests/googletest/googlemock/include
-  libpaths += $(DDS_ROOT)/tests/googletest/build/googlemock/$(Configuration)
+  includes += $(GTEST_ROOT)/googlemock/include
+  libpaths += $(GTEST_ROOT)/build/googlemock/$(Configuration)
   lit_libs += gmock
 }

@@ -1,6 +1,11 @@
 feature(!no_itl) {
   includes += $(DDS_ROOT)/tools/IntermediateTypeLang/cpp
-  includes += $(DDS_ROOT)/tools/IntermediateTypeLang/cpp/rapidjson/include
+
+  expand(RAPIDJSON_ROOT) {
+    $RAPIDJSON_ROOT
+    $(DDS_ROOT)/tools/IntermediateTypeLang/cpp/rapidjson
+  }
+  includes += $(RAPIDJSON_ROOT)/include
 }
 
 feature(no_itl) {
