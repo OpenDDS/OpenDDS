@@ -1,13 +1,31 @@
-Version 3.13(?) of OpenDDS
+Version 3.13 of OpenDDS
 
 ##### Additions:
-- TODO: Add your features here
+- Includes a beta implementation of the OMG DDS Security 1.1 specification
+- Monitor library can be enabled with -DCPSMonitor 1 or ini file
+- Updated Wireshark dissector now supports Wireshark version 2.x
+- MultiTopic: use Topic's QoS when creating constituent data readers
 
 ##### Fixes:
-- TODO: Add your fixes here
+- Memory management improvements
+- Command-line argument -DCPSRTISerialization takes a 0/1 parameter
+- Further refined fix for RtpsUdpDataLink::remove_sample locking
+- Improved Java bindings build process when using GNU Make
+- RTPS interoperability fixes from testing at OMG conferences
+- OpenDDS can be completely shut down and restarted within a process
+- Improved code generation for IDL unions, including in Javascript/V8
+- Fix for in-process messaging in FACE TSS (PR #819)
+- Fix for ReadCondition leak in OpenDDS::FaceTSS::receive_message (PR #832)
+- TCP reconnect enhancements
+- Removed unused sequence number tracking in DataReaderImpl
+- Fixed a memory leak in content filtering on the subscriber side
+- rtps_udp transport: improved handling of socket errors
+- RTPS discovery: avoid skipping sequence numbers in SEDP
+- InfoRepo: improved persistence with Built-in Topics
 
 ##### Notes:
-- TODO: Add your notes here
+- The contrib directory, which contained unmaintained code, was removed
+
 _______________________________________________________________________________
 Version 3.12 of OpenDDS
 

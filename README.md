@@ -6,7 +6,8 @@
 OpenDDS is an open-source C\++ implementation of the Object Management Group's
 specification "Data Distribution Service for Real-time Systems".  Although
 OpenDDS is itself developed in C++, Java and JMS bindings are provided so
-that Java applications can use OpenDDS.
+that Java applications can use OpenDDS.  OpenDDS also includes support for the
+DDS Security specification.
 
 OpenDDS is built on the [ACE](http://www.theaceorb.com/product/aboutace.html)
 abstraction layer to provide platform portability.  OpenDDS also leverages
@@ -71,8 +72,8 @@ the "configure" script will download it for you.
 
 Use one of the following versions when building OpenDDS:
 
-* TAO 2.2a patch 12
-* TAO 2.4.4 (DOC Group)
+* TAO 2.2a patch 15
+* TAO 2.5.1 (DOC Group)
 
 Note that the 2.2a release is from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -95,11 +96,10 @@ we recommend the use of ActiveState Perl.  The configure script also uses Perl.
 This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
-* Red Hat EL 5 and 5.3, x86_64
-* Red Hat EL and CentOS 6.6 and 6.8, x86_64
+* Red Hat EL and CentOS 6.6 and 6.9, x86_64
 * Red Hat EL and CentOS 7.2 and 7.3, x86_64
-* Fedora Core 6, x86
-* Fedora 24 and 26, x86_64
+* Fedora 24 and 28, x86_64
+* Debian 9.4, i686
 * Ubuntu 16.04 LTS, x86_64
 * openSUSE 42.1, and 42.2, x86_64
 
@@ -109,13 +109,12 @@ Windows family:
 * Windows 10 (64-bit)
 
 Others:
-* SunOS 5.10 (Solaris 10) (SPARC)
-* Mac OSX 10.11 (El Capitan)
+* macOS 10.13 (High Sierra)
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9 and 7 (see below)
-* Linux on Raspberry Pi and Intel Edison
+* Linux on Raspberry Pi
 * Android NDK r12b (ARM)
 
 We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
@@ -136,16 +135,13 @@ This release of OpenDDS has been tested using the following compilers:
 * Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
 * Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
 * Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-* Microsoft Visual C++ 14.1 (Visual Studio 2017) - Update 3
-* gcc 4.1.x
-* gcc 4.4.x
-* gcc 4.8.x
-* gcc 4.9.x
+* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.12.25835
+* gcc 4.4.7, 4.8, 4.9
 * gcc 5.4
-* gcc 6.2
+* gcc 6.2, 6.3
 * gcc 7.2
-* Clang 4.0 (llvm.org) and 7.3 (Apple)
-* Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
+* gcc 8.1, 8.2
+* Clang 6.0 (llvm.org) and 9.0 (Apple)
 
 
 # Building and Installing
