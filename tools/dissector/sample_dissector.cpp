@@ -333,7 +333,7 @@ namespace OpenDDS
       case Boolean:
         ACE_CDR::Boolean boolean_value;
         if (p.serializer >> ACE_InputCDR::to_boolean(boolean_value)) {
-          s << boolean_value ? "true" : "false";
+          s << (boolean_value ? "true" : "false");
         }
         break;
 
@@ -487,7 +487,7 @@ namespace OpenDDS
               if (params.use_index) {
                 proto_tree_add_boolean_format(
                   ADD_FIELD_PARAMS, boolean_value,
-                  "[%u]: %s", params.index, boolean_value ? "True" : "False"
+                  "[%u]: %s", params.index, boolean_value ? "true" : "false"
                 );
               } else {
                 proto_tree_add_boolean(ADD_FIELD_PARAMS, boolean_value);
