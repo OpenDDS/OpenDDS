@@ -18,9 +18,8 @@ using namespace testing;
 class SecurityConfigTest : public Test
 {
 public:
-        SecurityConfigTest()
+   SecurityConfigTest()
   {
-
   }
 
   ~SecurityConfigTest()
@@ -29,17 +28,13 @@ public:
 
   static void SetUpTestCase()
   {
-        // TODO - Add handling of an error here to avoid blaming
-        // the test class for failing
-        cf_.open();
-        ACE_Ini_ImpExp import(cf_);
-    import.import_config("test1.ini");
+    cf_.open();
+    ACE_Ini_ImpExp import(cf_);
+    ASSERT_EQ(0, import.import_config("test1.ini"));
     ASSERT_EQ(0, TheSecurityRegistry->load_security_configuration(cf_));
   }
 
   static ACE_Configuration_Heap cf_;
-
-private:
 };
 
 ACE_Configuration_Heap SecurityConfigTest::cf_;
