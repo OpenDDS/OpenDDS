@@ -59,10 +59,7 @@ public:
 
     // When we have a dispose or unregister instance we shouldn't let the
     // user read our received data
-    if (header.message_id_ == DISPOSE_INSTANCE ||
-      header.message_id_ == DISPOSE_UNREGISTER_INSTANCE ||
-      header.message_id_ == UNREGISTER_INSTANCE
-    ) {
+    if (!header.valid_data()) {
       valid_data_ = false;
     }
   }

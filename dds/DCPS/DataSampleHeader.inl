@@ -161,3 +161,10 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
   // Test flag bit.
   return base[FLAGS_OFFSET] & mask_flag(flag);
 }
+
+ACE_INLINE bool OpenDDS::DCPS::DataSampleHeader::valid_data() const {
+  return !(message_id_ == DISPOSE_INSTANCE
+    || message_id_ == DISPOSE_UNREGISTER_INSTANCE
+    || message_id_ == UNREGISTER_INSTANCE
+  );
+}
