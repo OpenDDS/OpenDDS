@@ -70,6 +70,7 @@ struct MockParticipantData
     auth(),
     guid(OpenDDS::DCPS::GUID_UNKNOWN),
     guid_adjusted(OpenDDS::DCPS::GUID_UNKNOWN),
+    guid_adjusted_remote(OpenDDS::DCPS::GUID_UNKNOWN),
     domain_id(),
     ex(),
     id_handle(DDS::HANDLE_NIL),
