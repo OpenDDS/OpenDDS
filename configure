@@ -1025,14 +1025,8 @@ my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl/;
 
 my %use_win_default = (
     'boost' => 'c:\\Boost',
-
-    'ssl' => (targets_win64() ?
-                $ENV{'ProgramFiles'} . '\\OpenSSL' :
-                $ENV{'ProgramFiles(x86)'} . '\\OpenSSL'),
-
-    'xerces3' => (targets_win64() ?
-                    $ENV{'ProgramFiles'} . '\\xerces-c' :
-                    $ENV{'ProgramFiles(x86)'} . '\\xerces-c'));
+    'ssl' => system_default_install_dir() . '/OpenSSL',
+    'xerces3' => system_default_install_dir() . '/xerces-c');
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
 
@@ -1202,7 +1196,10 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
                        "-G", win32_cmake_generator(
                                $opts{'compiler_version'},
                                $opts{'compiler_target_architecture'}),
-                       ".."] : ["$cmake", ".."]),
+                       ".."] :
+                      ["$cmake",
+                       "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
+                       ".."]),
                     ["$cmake", "--build", ".", "--target", "install"]);
 
   mkdir($build_dir)
