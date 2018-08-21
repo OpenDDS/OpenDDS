@@ -94,6 +94,9 @@ public:
 
   bool has_non_key_fields(const MetaStruct& meta) const;
 
+  /**
+   * Returns true if the unserialized sample matches the filter.
+   */
   template<typename T>
   bool eval(const T& sample, const DDS::StringSeq& params) const
   {
@@ -101,6 +104,9 @@ public:
     return eval_i(data);
   }
 
+  /**
+   * Returns true if the serialized sample matches the filter.
+   */
   bool eval(ACE_Message_Block* serializedSample, bool swap_bytes,
             bool cdr_encap, const MetaStruct& meta,
             const DDS::StringSeq& params) const

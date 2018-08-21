@@ -367,7 +367,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
     expect_dispose ? "Safe Filtered Messenger Topic" : "Unsafe Filtered Messenger Topic",
     topic, filter, StringSeq());
   if (!cft) {
-    cerr << "ERROR: creating cft failed" << endl;
+    cerr << "ERROR: run_dispose_filter_test: creating ContentFilteredTopic failed" << endl;
     return false;
   }
 
@@ -407,28 +407,41 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   mdw->dispose(sample, HANDLE_NIL);
 
   // Wait for samples matching the filter from the disposed writer
-  ReadCondition_var dr_qc = dr->create_readcondition(
+  ReadCondition_var disposed_condition = dr->create_readcondition(
     ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  if (!dr_qc) {
-    cerr << "ERROR: run_dispose_filter_test: create read condition failed" << endl;
+  if (!disposed_condition) {
+    cerr << "ERROR: run_dispose_filter_test: "
+      "create disposed read condition failed" << endl;
     return false;
   }
   WaitSet_var ws = new WaitSet;
-  ws->attach_condition(dr_qc);
+  ws->attach_condition(disposed_condition);
   ConditionSeq active;
   if (ws->wait(active, max_wait_time) != RETCODE_OK) {
-    cerr << "ERROR: run_dispose_filter_test: wait failed" << endl;
-    return false;
+    // In the case of ContentFilteredTopic a DISPOSE/UNREGISTER sample
+    // doesn't dispose or unregister the instance if the filter has non-key
+    // fields.
+    if (expect_dispose) {
+      cerr << "ERROR: run_dispose_filter_test: "
+        "wait for disposed sample failed" << endl;
+      return false;
+    }
   }
-  ws->detach_condition(dr_qc);
+  ws->detach_condition(disposed_condition);
 
   // Read the Number of Invalid Messages Taken
   MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
   MessageSeq data;
   SampleInfoSeq infoseq;
-  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  if (expect_dispose) {
+    ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED,
+      disposed_condition);
+  } else {
+    ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
+      ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  }
   if (ret != RETCODE_OK) {
-    cerr << "ERROR: run_dispose_filter_test: take_w_condition failed" << endl;
+    cerr << "ERROR: run_dispose_filter_test: take failed" << endl;
     return false;
   }
   unsigned num_valid = 0;
@@ -456,7 +469,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
 
   sub->delete_datareader(dr);
   pub->delete_datawriter(dw);
-  dr->delete_readcondition(dr_qc);
+  dr->delete_readcondition(disposed_condition);
   dp->delete_contentfilteredtopic(cft);
   dp->delete_topic(topic);
   return true;
@@ -467,8 +480,8 @@ bool run_dispose_filter_tests(const DomainParticipant_var& dp,
   const Subscriber_var& sub)
 {
   /*
-   * Run a "Safe" Filter that just references key;
-   * assert a normal message and a dispose message are in the results.
+   * Run a "Safe" Filter that just references a key.
+   * Assert a normal message and a dispose message are in the results.
    */
   if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0", true)) {
     cerr << "ERROR: run_dispose_filter_tests: safe filter test failed!" << endl;
@@ -476,8 +489,9 @@ bool run_dispose_filter_tests(const DomainParticipant_var& dp,
   }
 
   /*
-   * Setup a "Unsafe" Filter that references key and a normal field;
-   * assert just a normal message is in the results.
+   * Setup a "Unsafe" Filter that references a key and a normal field.
+   * Assert that there is a normal field in the results and the instance
+   * is not disposed.
    */
   if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0 AND ull >= 0", false)) {
     cerr << "ERROR: run_dispose_filter_tests: unsafe filter test failed!" << endl;

@@ -42,10 +42,19 @@ public:
 
   DDS::Topic_ptr get_related_topic();
 
+  /**
+   * Returns true if the sample matches the filter.
+   */
   template<typename Sample>
-  bool filter(const Sample& s) const
+  bool filter(const Sample& s, bool has_invalid_data) const
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    const MetaStruct& meta = getMetaStruct<Sample>();
+    // Omit the sample from results if there are non-key fields in the filter
+    // and the filter only has key fields.
+    if (filter_eval_.has_non_key_fields(meta) && has_invalid_data) {
+      return false;
+    }
     return filter_eval_.eval(s, expression_parameters_);
   }
 
