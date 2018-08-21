@@ -1,5 +1,8 @@
 project : googletest {
-  // includes += $(GTEST_ROOT)/include
-  // libpaths += $(GTEST_ROOT)/lib
+
+  // For backwards-compatibility.
+  includes += $(GTEST_ROOT)/../../googlemock/include
+  libpaths += $(GTEST_ROOT)/../googlemock/$(Configuration)
+
   lit_libs += gmock
 }
