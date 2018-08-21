@@ -735,6 +735,8 @@ namespace OpenDDS {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, false);
 
+    bool has_non_key_fields = evaluator.has_non_key_fields(getMetaStruct<MessageType>());
+
     for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
            end = instances_.end(); iter != end; ++iter) {
       SubscriptionInstance& inst = *iter->second;
@@ -748,6 +750,9 @@ namespace OpenDDS {
               && !item->coherent_change_
 #endif
               && item->registered_data_) {
+            if (!item->valid_data_ && has_non_key_fields) {
+              continue;
+            }
             if (evaluator.eval(*static_cast< MessageType* >(item->registered_data_), params)) {
               return true;
             }
@@ -1053,8 +1058,10 @@ protected:
     if (!sample.header_.content_filter_) { // if this is true, the writer has already filtered
       using OpenDDS::DCPS::ContentFilteredTopicImpl;
       if (content_filtered_topic_) {
-        if (sample.header_.message_id_ == OpenDDS::DCPS::SAMPLE_DATA
-            && !content_filtered_topic_->filter(static_cast<MessageType&>(*data))) {
+        if (
+          !content_filtered_topic_->filter(static_cast<MessageType&>(*data),
+            !sample.header_.valid_data())
+        ) {
           filtered = true;
           return;
         }
