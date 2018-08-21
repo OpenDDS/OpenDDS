@@ -48,6 +48,27 @@ bool waitForSample(const DataReader_var& dr)
   return true;
 }
 
+bool waitForPublicationMatched(const DataWriter_var& dw, const int count = 1)
+{
+  StatusCondition_var dw_sc = dw->get_statuscondition();
+  dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dw_sc);
+  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
+  PublicationMatchedStatus status;
+  while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
+         && status.current_count < count) {
+    ConditionSeq active;
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      cerr << "Publication Matched Failed" << endl;
+      return true;
+    }
+  }
+  ws->detach_condition(dw_sc);
+
+  return false;
+}
+
 template <typename F>
 size_t takeSamples(const DataReader_var& dr, F filter)
 {
@@ -135,22 +156,8 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     "MyTopic-Filtered2", topic, "key > %0", mytopicfiltered2_params);
   DataReader_var sub2_dr2 =
     sub2->create_datareader(cft2, dr_qos, 0, DEFAULT_STATUS_MASK);
-  const int N_MATCHES = 4; // each writer matches 4 readers
 
-  StatusCondition_var dw_sc = dw->get_statuscondition();
-  dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
-  WaitSet_var ws = new WaitSet;
-  ws->attach_condition(dw_sc);
-  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
-  PublicationMatchedStatus status;
-  while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
-         && status.current_count < N_MATCHES) {
-    ConditionSeq active;
-    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
-      return false;
-    }
-  }
-  ws->detach_condition(dw_sc);
+  waitForPublicationMatched(dw, 4); // each writer matches 4 readers
 
   // read durable data from dr
   if (!waitForSample(dr)) return false;
@@ -294,20 +301,9 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
   DataReader_var dr =
     sub->create_datareader(cft, DATAREADER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
-  StatusCondition_var dw_sc = dw->get_statuscondition();
-  dw_sc->set_enabled_statuses(PUBLICATION_MATCHED_STATUS);
-  WaitSet_var ws = new WaitSet;
-  ws->attach_condition(dw_sc);
-  Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
-  PublicationMatchedStatus status;
-  while (dw->get_publication_matched_status(status) == DDS::RETCODE_OK
-         && status.current_count < 1) {
-    ConditionSeq active;
-    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
-      return false;
-    }
+  if (waitForPublicationMatched(dw)) {
+    return false;
   }
-  ws->detach_condition(dw_sc);
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample = {0, INT64_LITERAL_SUFFIX(1485441228338)};
@@ -392,6 +388,10 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   DataReader_var dr = sub->create_datareader(
     cft, dr_qos, 0, DEFAULT_STATUS_MASK);
 
+  if (waitForPublicationMatched(dw)) {
+    return false;
+  }
+
   // Write Sample with Valid Data
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
@@ -416,7 +416,6 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   ConditionSeq active;
-  cerr << "FWH: Start Wait" << endl;
   if (ws->wait(active, max_wait_time) != RETCODE_OK) {
     cerr << "ERROR: run_dispose_filter_test: wait failed" << endl;
     return false;
@@ -514,10 +513,8 @@ int run_test(int argc, ACE_TCHAR *argv[])
   TransportRegistry::instance()->bind_config("c3", sub2);
 
   bool passed = true;
-  /*
   passed &= run_filtering_test(dp, ts, pub, sub, sub2);
   passed &= run_unsignedlonglong_test(dp, ts, pub, sub);
-  */
   passed &= run_dispose_filter_tests(dp, ts, pub, sub);
 
   dp->delete_contained_entities();
