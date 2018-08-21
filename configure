@@ -866,7 +866,6 @@ my %optdep =
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
    'ssl' =>       ['SSL_ROOT',      'include/openssl/opensslv.h',       'ssl'],
-   'gtest' =>     ['GTEST_ROOT',    'include/gtest/gtest.h'],
   );
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
@@ -970,27 +969,55 @@ sub system_default_install_dir {
 
 ## Detect Google Test
 if (exists $opts{'gtest'}) {
+  my $sanity = 'include/gtest/gtest.h';
+
   if ($opts{'gtest'}) {
+    die "ERROR: '$sanity' not found in supplied gtest directory '$opts{'gtest'}'"
+      if ! -f File::Spec->catfile($opts{'gtest'}, $sanity);
+
     # It is expected that the user has already compiled gtest since
     # they have a custom location in mind...
     $opts{'gtest-precompiled'} = 1;
 
+    env_from_opt('gtest', 'GTEST_ROOT');
+
   } else {
-    # Sanity check will be done twice (unfortunately), but it needs
-    # to be done here given the variety of possible paths.
-    my $sanity = $optdep{'gtest'}->[1];
     my $sm_dir = Cwd::abs_path('./tests/googletest');
+    my $sm_src = File::Spec->catdir($sm_dir, 'googletest');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               is_windows() ? 'googletest-distribution' : ''));
 
-    if (-f File::Spec->catfile($sm_dir, $sanity)) {
+    if (-f File::Spec->catfile($sm_src, $sanity)) {
       $opts{'gtest-precompiled'} = 0;
       $opts{'gtest'} = $sm_dir;
+      # No need to set env. variable with submodule.
 
     } elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
       $opts{'gtest-precompiled'} = 1;
       $opts{'gtest'} = $sys_dir;
+      env_from_opt('gtest', 'GTEST_ROOT');
     }
+    die "ERROR: gtest '$sanity' not found in submodule src '$sm_src' or default install dir '$sys_dir'"
+      if ! $opts{'gtest'};
+  }
+}
+
+## Detect RapidJSON
+if (exists $opts{'rapidjson'}) {
+  if ($opts{'rapidjson'} eq '') {
+    my $sanity = $optdep{'rapidjson'}->[1];
+    my $sm_dir = Cwd::abs_path('./tools/IntermediateTypeLang/cpp/rapidjson');
+    my $sys_dir = File::Spec->catdir((system_default_install_dir(),
+                              is_windows() ? 'RapidJSON' : ''));
+
+    if (-f File::Spec->catfile($sm_dir, $sanity)) {
+      $opts{'rapidjson'} = $sm_dir;
+
+    } elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
+      $opts{'rapidjson'} = $sys_dir;
+    }
+    die "ERROR: rapidjson '$sanity' not found in submodule dir '$sm_dir' or default install dir '$sys_dir'"
+      if ! $opts{'rapidjson'};
   }
 }
 
@@ -1165,20 +1192,26 @@ sub win32_cmake_generator {
 if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'}) {
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
+  my $install_dir = $build_dir . $slash . 'install';
   my $cmake = $opts{'cmake'};
   my @cmake_cmds = ((is_windows() ?
                       ["$cmake",
                        "-D", "gtest_force_shared_crt=ON",
                        "-D", "CMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
+                       "-D", "CMAKE_INSTALL_PREFIX=$install_dir",
                        "-G", win32_cmake_generator(
                                $opts{'compiler_version'},
                                $opts{'compiler_target_architecture'}),
                        ".."] : ["$cmake", ".."]),
-                    ["$cmake", "--build", "."]);
+                    ["$cmake", "--build", ".", "--target", "install"]);
 
   mkdir($build_dir)
     or die "ERROR '$!': failed to make directory $build_dir from $cwd.\nStopped"
       if ! -d $build_dir;
+
+  mkdir($install_dir)
+    or die "ERROR '$!': failed to make directory $install_dir from $cwd.\nStopped"
+      if ! -d $install_dir;
 
   chdir($build_dir)
     or  die "ERROR '$!': failed to change into $build_dir from $cwd.\nStopped";
