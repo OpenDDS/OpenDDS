@@ -156,15 +156,15 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'wireshark_build:s', 'Wireshark CMake Build Location',
     'wireshark_lib:s', 'Wireshark CMake libraries location, relative to wireshark_build',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
-    'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection(optional)',
+    'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
     'qt:s', 'Qt (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security (optional)',
-    'ssl:s', 'OpenSSL for DDS Security (optional)',
+    'openssl:s', 'OpenSSL for DDS Security (optional)',
     'cmake:s', 'Path to cmake binary for compiling Google Test Framework (optional)',
-    'gtest:s', 'Path to Google Test Framework root (optional)',
+    'gtest:s', 'Path to Google Test Framework (optional)',
    ],
    ['Optional OpenDDS features:',
     'built-in-topics!', 'Built-in Topics (yes)',
@@ -865,7 +865,7 @@ my %optdep =
    'qt' =>        ['QTDIR',         '',                            'qt4'],
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
-   'ssl' =>       ['SSL_ROOT',      'include/openssl/opensslv.h',       'ssl'],
+   'openssl' =>   ['SSL_ROOT',      'include/openssl/opensslv.h',  'ssl'],
   );
 
 # Use this to check if tests are enabled (instead of $opts{'tests'} directly).
@@ -909,12 +909,10 @@ if (exists $opts{'wirehshark_cmake'} && !exists $opts{'wireshark_lib'}) {
   $wireshark_lib_defaulted = 1;
 }
 
-## Security
-
 if ($opts{'security'}) {
-  unless (exists $opts{'ssl'}) {
-    $opts{'ssl'} = '';
-    print "Forcing --ssl (security dependency)\n" if $opts{'verbose'};
+  unless (exists $opts{'openssl'}) {
+    $opts{'openssl'} = '';
+    print "Forcing --openssl (security dependency)\n" if $opts{'verbose'};
   }
   unless (exists $opts{'xerces3'}) {
     $opts{'xerces3'} = '';
@@ -962,12 +960,15 @@ sub targets_win64 {
 
 sub system_default_install_dir {
   if (is_windows()) {
+    # When the host is 32-bit.
+    return $ENV{'ProgramFiles'}
+      if ! exists $ENV{'ProgramFiles(x86)'};
+
     return targets_win64() ? $ENV{'ProgramFiles'} : $ENV{'ProgramFiles(x86)'};
   }
   return '/usr';
 }
 
-## Detect Google Test
 if (exists $opts{'gtest'}) {
   my $sanity = 'include/gtest/gtest.h';
 
@@ -1002,7 +1003,6 @@ if (exists $opts{'gtest'}) {
   }
 }
 
-## Detect RapidJSON
 if (exists $opts{'rapidjson'}) {
   if ($opts{'rapidjson'} eq '') {
     my $sanity = $optdep{'rapidjson'}->[1];
@@ -1021,11 +1021,11 @@ if (exists $opts{'rapidjson'}) {
   }
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 ssl/;
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 openssl/;
 
 my %use_win_default = (
     'boost' => 'c:\\Boost',
-    'ssl' => system_default_install_dir() . '/OpenSSL',
+    'openssl' => system_default_install_dir() . '/OpenSSL',
     'xerces3' => system_default_install_dir() . '/xerces-c');
 
 my %need_platform_macros = map {$_, 1} qw/xerces3/;
@@ -1149,13 +1149,13 @@ for my $key (keys %optdep) {
   }
 }
 
-## SSL version-detection / feature-injection
-if ($opts{'ssl'}) {
-  my $ssl_version_file = $opts{'ssl'} . '/' .
-                           $optdep{'ssl'}->[1]; # Use sanity file
+## OpenSSL version-detection / feature-injection
+if ($opts{'openssl'}) {
+  my $ssl_version_file = $opts{'openssl'} . '/' .
+                           $optdep{'openssl'}->[1]; # Use sanity file
 
   open my $fh, '<', $ssl_version_file
-    or die "ERROR: Failed to open '$ssl_version_file' for SSL version detection.\nStopped";
+    or die "ERROR: Failed to open '$ssl_version_file' for OpenSSL version detection.\nStopped";
 
   push(@features, 'openssl11=1')
     if grep m/OpenSSL[\W]+1.1/, <$fh>;
@@ -1182,7 +1182,6 @@ sub win32_cmake_generator {
   return $map{$ver} . ($arch eq 'x64' ? ' Win64' : '');
 }
 
-## Build Google Test
 if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'}) {
   my $cwd = Cwd::getcwd();
   my $build_dir = $opts{'gtest'} . $slash . 'build';
@@ -1377,7 +1376,6 @@ sub generate_workspace {
     }
   }
 
-  ## Security
   if ($opts{'security'}) {
       disable_feature(\@features, 'no-opendds-security');
   }
@@ -1769,7 +1767,7 @@ if ($cross_compile) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
-    if ($opts{'ssl'}) {
+    if ($opts{'openssl'}) {
       push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
     }
 
@@ -1797,7 +1795,7 @@ else { # not cross-compiling:
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
-    if ($opts{'ssl'}) {
+    if ($opts{'openssl'}) {
       push_libpath(\%targetEnv, $targetEnv{'SSL_ROOT'} . $slash . 'bin');
     }
 

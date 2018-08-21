@@ -1,6 +1,6 @@
 project : googletest {
 
-  // For backwards-compatibility.
+  // For compatibility with tests/gtest_setup.txt instructions
   includes += $(GTEST_ROOT)/../../googlemock/include
   libpaths += $(GTEST_ROOT)/../googlemock/$(Configuration)
 
