@@ -37,9 +37,9 @@ MPC base project (in $DDS_ROOT/MPC/config) to pull in the required libraries.
 
      ~~~
      cd tests\googletest\build
-     cmake -DCMAKE_INSTALL_PREFIX=.\install \
-           -Dgtest_force_shared_crt=ON \
-           -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1 \
+     cmake -DCMAKE_INSTALL_PREFIX=.\install ^
+           -Dgtest_force_shared_crt=ON ^
+           -DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1 ^
            -G "Visual Studio 15 2017 Win64" ..
      ~~~
 
