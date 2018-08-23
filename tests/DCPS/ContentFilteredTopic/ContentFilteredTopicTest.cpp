@@ -367,7 +367,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
     expect_dispose ? "Safe Filtered Messenger Topic" : "Unsafe Filtered Messenger Topic",
     topic, filter, StringSeq());
   if (!cft) {
-    cerr << "ERROR: run_dispose_filter_test: creating ContentFilteredTopic failed" << endl;
+    cerr << "ERROR: run_single_dispose_filter_test: creating ContentFilteredTopic failed" << endl;
     return false;
   }
 
@@ -399,7 +399,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   sample.ull = 0;
   ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
-    cerr << "ERROR: run_dispose_filter_test: write failed" << endl;
+    cerr << "ERROR: run_single_dispose_filter_test: write failed" << endl;
     return false;
   }
 
@@ -410,7 +410,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   ReadCondition_var disposed_condition = dr->create_readcondition(
     ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   if (!disposed_condition) {
-    cerr << "ERROR: run_dispose_filter_test: "
+    cerr << "ERROR: run_single_dispose_filter_test: "
       "create disposed read condition failed" << endl;
     return false;
   }
@@ -422,7 +422,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
     // doesn't dispose or unregister the instance if the filter has non-key
     // fields.
     if (expect_dispose) {
-      cerr << "ERROR: run_dispose_filter_test: "
+      cerr << "ERROR: run_single_dispose_filter_test: "
         "wait for disposed sample failed" << endl;
       return false;
     }
@@ -441,7 +441,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
       ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
   }
   if (ret != RETCODE_OK) {
-    cerr << "ERROR: run_dispose_filter_test: take failed" << endl;
+    cerr << "ERROR: run_single_dispose_filter_test: take failed" << endl;
     return false;
   }
   unsigned num_valid = 0;
@@ -456,12 +456,12 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
 
   // Compare Numbers to what was Expected
   if (num_valid != 1) {
-    cerr << "ERROR: run_dispose_filter_test: "
+    cerr << "ERROR: run_single_dispose_filter_test: "
       "expected one sample with valid data, got " << num_valid << endl;
     return false;
   }
   if (num_invalid != (expect_dispose ? 1 : 0)) {
-    cerr << "ERROR: run_dispose_filter_test: expected "
+    cerr << "ERROR: run_single_dispose_filter_test: expected "
       << (expect_dispose ? "one sample" : "no samples")
       << " with invalid data, got " << num_invalid << endl;
     return false;
