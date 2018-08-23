@@ -50,8 +50,10 @@ public:
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
     const MetaStruct& meta = getMetaStruct<Sample>();
-    // Omit the sample from results if there are non-key fields in the filter
-    // and the filter only has key fields.
+    /*
+     * Omit the sample from results if the filter references non-key fields
+     * and the sample only has key fields.
+     */
     if (filter_eval_.has_non_key_fields(meta) && has_invalid_data) {
       return false;
     }
