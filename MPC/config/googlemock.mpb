@@ -1,8 +1,4 @@
 project : googletest {
 
-  // For compatibility with tests/gtest_setup.txt instructions
-  includes += $(DDS_ROOT)/tests/googletest/googlemock/include
-  libpaths += $(DDS_ROOT)/tests/googletest/build/googlemock/$(Configuration)
-
   lit_libs += gmock
 }

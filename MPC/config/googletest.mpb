@@ -6,10 +6,6 @@ project {
   includes += $(GTEST_ROOT)/include
   libpaths += $(GTEST_ROOT)/lib
 
-  // For compatibility with tests/gtest_setup.txt instructions
-  includes += $(DDS_ROOT)/tests/googletest/googletest/include
-  libpaths += $(DDS_ROOT)/tests/googletest/build/googlemock/gtest/$(Configuration)
-
   lit_libs += gtest
 
   specific (prop:microsoft) {
