@@ -70,11 +70,29 @@ MPC base project (in $DDS_ROOT/MPC/config) to pull in the required libraries.
          prefix is omitted.
 
       c. When invoking the OpenDDS configure script, if the default system location
-         is _not_ used, then the gtest switch must be used to inform MPC where the
-         gtest libraries are located. Otherwise, the configure script should detect
-         the default location.
+         is _not_ used, then the gtest switch can be used to inform the configure
+         script where the gtest libraries are located. Otherwise, the configure script
+         should detect the default location.
 
          ~~~
          ./configure --gtest=/path/the/gtest/install/dir
          ~~~
 
+      d. Alternatively, the Gtest root can be overridden by setting the GTEST_ROOT
+         environment variable before regenerating the build files with MWC.pl.
+
+         For example (within the DDS_ROOT directory):
+
+         Windows:
+         ~~~
+         set GTEST_ROOT=c:\path\to\gtest\root
+         mwc.pl -type vs2017 DDS.mwc
+         msbuild /m DDS_TAOv2_all.sln
+         ~~~
+
+         Unix:
+         ~~~
+         export GTEST_ROOT=/path/to/gtest/root
+         mwc.pl -type gnuace DDS.mwc
+         make
+         ~~~
