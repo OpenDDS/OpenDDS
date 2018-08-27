@@ -99,6 +99,11 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
     default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
     qos_(qos),
+#ifdef OPENDDS_SECURITY
+    id_handle_(DDS::HANDLE_NIL),
+    perm_handle_(DDS::HANDLE_NIL),
+    part_crypto_handle_(DDS::HANDLE_NIL),
+#endif
     domain_id_(domain_id),
     dp_id_(GUID_UNKNOWN),
     federated_(false),
