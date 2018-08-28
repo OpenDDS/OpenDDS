@@ -12,7 +12,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QtAlgorithms>
 #include <QtGui/QColor>
-#include <QtGui/QCheckBox>
+#include <QtWidgets/QCheckBox>
 
 namespace Monitor {
 
