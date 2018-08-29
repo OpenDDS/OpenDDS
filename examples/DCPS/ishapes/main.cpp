@@ -1,5 +1,5 @@
 #include <ShapesDialog.hpp>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>

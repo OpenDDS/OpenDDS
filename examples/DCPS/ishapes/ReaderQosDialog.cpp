@@ -64,7 +64,7 @@ ReaderQosDialog::get_qos()
     qos_.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
   qos_.time_based_filter.minimum_separation.sec =
-    std::atoi(qosForm_.tbFilterInput->text().toAscii().constData());
+    std::atoi(qosForm_.tbFilterInput->text().toLatin1().constData());
 
   return qos_;
 }
