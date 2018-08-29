@@ -94,6 +94,7 @@ my %platforminfo =
   );
 
 sub targetUsage {
+  my $status = shift;
   print "Cross-compile targets: specify --target=TGT where TGT is one of:\n";
   for my $k (sort keys %platforminfo) {
     if ($platforminfo{$k}->{'no_host'}) {
@@ -105,7 +106,7 @@ sub targetUsage {
       }
     }
   }
-  exit 1;
+  exit $status;
 }
 
 ## arg processing and usage
@@ -195,6 +196,7 @@ sub iterate {
 }
 
 sub usage {
+  my $status = shift;
   my $current;
   my $ver;
   open VER, 'dds/Version.h' or die "ERROR: can't open dds/Version.h, stopped";
@@ -231,7 +233,7 @@ EOT
             print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
           }
          );
-  exit 1;
+  exit $status;
 }
 
 sub parseArgs {
@@ -248,9 +250,9 @@ sub parseArgs {
   }
 
   my $opts = {};
-  GetOptions($opts, @getopts) or usage();
-  usage() if $opts->{'help'};
-  targetUsage() if $opts->{'target-help'};
+  GetOptions($opts, @getopts) or usage(1);
+  usage(0) if $opts->{'help'};
+  targetUsage(0) if $opts->{'target-help'};
 
   if ($opts->{'verbose'}) {
     print "Options:\n";
