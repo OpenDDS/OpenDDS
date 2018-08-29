@@ -20,10 +20,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 namespace {
-  const size_t BYTES_IN_VENDOR = 2;
-  const size_t HEX_DIGITS_IN_VENDOR = 2 * BYTES_IN_VENDOR;
-  const size_t BYTES_IN_DOMAIN = 4;
-  const size_t HEX_DIGITS_IN_DOMAIN = 2 * BYTES_IN_DOMAIN;
   const size_t BYTES_IN_PARTICIPANT = 6;
   const size_t HEX_DIGITS_IN_PARTICIPANT = 2 * BYTES_IN_PARTICIPANT;
   const size_t BYTES_IN_ENTITY = 3;
