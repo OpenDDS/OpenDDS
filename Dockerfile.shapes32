@@ -1,0 +1,30 @@
+FROM ubuntu:xenial
+
+RUN dpkg --add-architecture i386 && apt-get update && apt-get install -y \
+    curl \
+    g++ \
+    make \
+    perl-base \
+    perl-modules \
+    lib32gcc-5-dev \
+    lib32stdc++-5-dev \
+    libboost1.58-dev \
+    libc6-dev-i386 \
+    libc6-dev:i386 \
+    libc6:i386 \
+    libqt4-dev:i386 \
+    libstdc++-5-dev:i386
+
+
+ADD . /opt/OpenDDS
+
+RUN cd /opt/OpenDDS && \
+    ./configure --static --no-debug --optimize --qt --boost --macros=static_stdlibs=1 --macros=dynamic_loader=0 --macros=buildbits=32 && \
+    make ishapes
+
+WORKDIR /opt/workspace
+
+# To determine the necessary libraries:
+#   echo '#include <iostream>' > hello.cpp
+#   echo 'int main() { std::cout << "hi\n"; }' >> hello.cpp
+#   g++ -m32 -static-libgcc -static-libstdc++ -o hello hello.cpp -Wl,-verbose 2>&1 | grep succeeded | grep -v /tmp | cut -d' ' -f4 | sort -u | xargs realpath | xargs dpkg -S | perl -pe's/: .*//' | sort -u
