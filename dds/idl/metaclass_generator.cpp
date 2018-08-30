@@ -342,14 +342,11 @@ namespace {
   void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
   {
     if (info && info->key_list_.size()) {
-      for (
-        IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
-        !i.done(); i.advance()
-      ) {
-        ACE_TString* key;
-        i.next(key);
+      IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
+      for (ACE_TString* key = 0; i.next(key); i.advance()) {
         be_global->impl_ <<
-          "    if (!ACE_OS::strcmp(field, \"" << *key << "\")) {\n"
+          "    if (!ACE_OS::strcmp(field, \""
+        << ACE_TEXT_ALWAYS_CHAR(key->c_str()) << "\")) {\n"
           "      return true;\n"
           "    }\n";
       }

@@ -46,7 +46,7 @@ public:
    * Returns true if the sample matches the filter.
    */
   template<typename Sample>
-  bool filter(const Sample& s, bool has_invalid_data) const
+  bool filter(const Sample& s, bool sample_only_has_key_fields) const
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
     const MetaStruct& meta = getMetaStruct<Sample>();
@@ -54,7 +54,7 @@ public:
      * Omit the sample from results if the filter references non-key fields
      * and the sample only has key fields.
      */
-    if (filter_eval_.has_non_key_fields(meta) && has_invalid_data) {
+    if (filter_eval_.has_non_key_fields(meta) && sample_only_has_key_fields) {
       return false;
     }
     return filter_eval_.eval(s, expression_parameters_);

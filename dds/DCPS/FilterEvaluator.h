@@ -184,7 +184,7 @@ public:
   virtual bool compare(const void* lhs, const void* rhs,
                        const char* fieldSpec) const = 0;
 
-  virtual bool isDcpsKey(const char*) const = 0;
+  virtual bool isDcpsKey(const char* field) const = 0;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;
