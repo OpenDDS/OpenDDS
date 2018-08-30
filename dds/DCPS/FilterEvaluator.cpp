@@ -145,7 +145,6 @@ FilterEvaluator::~FilterEvaluator()
 
 bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
 {
-  // Check Order
   for (
     OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin();
     i != order_bys_.end(); ++i
@@ -155,7 +154,6 @@ bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
     }
   }
 
-  // Check Rest of Query
   if (filter_root_->has_non_key_fields(meta)) {
     return true;
   }

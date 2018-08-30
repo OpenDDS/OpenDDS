@@ -57,8 +57,10 @@ public:
     this->source_timestamp_.sec = header.source_timestamp_sec_;
     this->source_timestamp_.nanosec = header.source_timestamp_nanosec_;
 
-    // When we have a dispose or unregister instance we shouldn't let the
-    // user read our received data
+    /*
+     * In some situations, we will not have data to give to the user and
+     * valid_data is how we communcate that to the user through a SampleInfo.
+     */
     if (!header.valid_data()) {
       valid_data_ = false;
     }
@@ -85,8 +87,10 @@ public:
 
   PublicationId pub_;
 
-  /// Data sample received, could only be the keyed fields
-  /// in case we received a dispose message
+  /**
+   * Data sample received, could only be the key fields in case we received
+   * dispose and/or unregister message.
+   */
   void* const registered_data_;  // ugly, but works....
 
   /// Sample state for this data sample:
