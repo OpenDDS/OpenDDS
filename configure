@@ -1325,6 +1325,11 @@ sub push_libpath {
   push_env_dir($buildEnvRef, $libpathname, $path);
 }
 
+if (exists $opts{'qt'}) {
+  push_libpath(\%targetEnv,
+    $targetEnv{'QT5_DIR'} . $slash . (is_windows() ? 'bin' : 'lib'));
+}
+
 sub write_host_workspace {
   my %buildEnv = %{shift()};
   my $MWC = backup_and_open($buildEnv{'DDS_ROOT'} . '/host_tools.mwc');
