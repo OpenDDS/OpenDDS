@@ -63,7 +63,7 @@ public:
      * Omit the sample from results if the query references non-key fields
      * and the sample only has key fields.
      */
-    if (evaluator_.has_non_key_fields(meta) && sample_only_has_key_fields) {
+    if (sample_only_has_key_fields && evaluator_.has_non_key_fields(meta)) {
       return false;
     }
     return evaluator_.eval(s, query_parameters_);
