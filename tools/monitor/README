@@ -8,6 +8,9 @@ Documentation describing how to build and execute the application is
 included at doc/userguide.html.  That includes establishing the build and
 execution environments as well.
 
+NOTE: After OpenDDS 3.13, support for MSVC 9 (Microsoft Visual Studio 2008)
+has been dropped for this tool.
+
 ------------------------------------------------------------------------
 DIRECTORIES:
 
