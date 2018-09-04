@@ -3,7 +3,7 @@ project(*App): dcpsexe, dcps_tcp, dcps_monitor, qt5_widgets {
   exeout  = $(DDS_ROOT)/bin
   requires += built_in_topics
 
-  specific (prop:windows) {
+  specific (prop:microsoft) {
     compile_flags += /bigobj
   }
 
