@@ -146,6 +146,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
     'mpcopts=s@', 'Extra command-line args for MPC (if MPC is run)',
+    'cmake-config', 'Generate FindOpenDDS.cmake configuration',
    ],
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -1674,6 +1675,47 @@ sub configure_build {
   }
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
+  if ($opts{'cmake-config'}) {
+    write_cmake_file($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
+  }
+}
+
+sub configure_std_cxx_cmake {
+  if ($opts{'std'} && $opts{'std'} =~ /(03|98)$/) {
+    return "cxx_std_98";
+  } elsif ($opts{'std'} && $opts{'std'} =~ /(0x|11)$/) {
+    return "cxx_std_11";
+  } elsif ($opts{'std'} && $opts{'std'} =~ /(1y|14)$/) {
+    return "cxx_std_14";
+  } elsif ($opts{'std'} && $opts{'std'} =~ /(1z|17)$/) {
+    return "cxx_std_17";
+  } else {
+    return "none";
+  }
+}
+
+sub configure_cxx_compile_opts_cmake {
+  my $cxxopts = "";
+  #inline / debug - we will only create this for Makefile-based solutions
+
+  if ($_[0] eq 'gnuace') {
+    if ($opts{'no-inline'}) {
+      $cxxopts .= ' -DACE_NO_INLINE';
+    }
+    else {
+      $cxxopts .= ' -DACE_INLINE';
+    }
+
+    if ($opts{'no-debug'}) {
+      $cxxopts .= ' -DACE_NDEBUG';
+    }
+  }
+
+  if ($opts{'ipv6'}) {
+     $cxxopts .= ' -DACE_HAS_IPV6';
+   }
+
+  return $cxxopts;
 }
 
 sub write_cross_compile_makefile {
@@ -1832,4 +1874,93 @@ print " to compile ",
 if ($slash ne '/') {
   print "Start Visual Studio from this command prompt so that it inherits ",
     "the correct\nenvironment variables.\n";
+}
+
+sub write_cmake_file {
+  my %buildEnv = %{shift()};
+  my $dir = shift;
+  my $cmake_common = <<"EOT";
+#TODO: Document this as an exported variable to use in application CMake files
+set(OPENDDS_LIBS
+        OpenDDS_Dcps
+        TAO_BiDirGIOP
+        TAO_PI
+        TAO_CodecFactory
+        TAO_PortableServer
+        TAO_AnyTypeCode
+        TAO
+        ACE)
+EOT
+
+  my $CM = backup_and_open($dir . '/etc/FindOpenDDS.cmake');
+
+  my $args_ = join(' ', map {/ / ? ('"' . $_ . '"') : $_} @ARGS);
+  print $CM "$specific{'comment'} OpenDDS configure script: $0 $args_\n";
+
+  # TODO: which CMake versions are supported?
+  print $CM "cmake_minimum_required (VERSION 3.8)\n";
+
+  for my $key (keys %buildEnv) {
+    if ($key ne 'build' && $key ne 'mpctype' && $buildEnv{$key} ne 'unused') {
+      print $CM "SET (OPENDDS_$key \"$buildEnv{$key}\")\n";
+    }
+  }
+
+  # This setting assures that whatever compiler standard level was used
+  # to build OpenDDS is used in the user's application
+  print $CM "SET (CXX_STANDARD_REQUIRED ON)\n";
+
+  # This step selects the CMake compiler options for the standard level used
+  # to build OpenDDS
+  if ($opts{'std'}) {
+    my $cxxstd = configure_std_cxx_cmake();
+    print $CM "SET (OPENDDS_CXX_STD \"$cxxstd\")\n" if ($cxxstd ne 'none');
+  }
+  # TODO: Do we need to distinguish between -std=c++11 vs. -std=g++11?
+  # This may require setting CMAKE_CXX_EXTENSIONS if so
+  # See this description: http://crascit.com/2015/03/28/enabling-cxx11-in-cmake/
+
+  my $cxxcompileopts = configure_cxx_compile_opts_cmake($buildEnv{'mpctype'});
+  print $CM "SET (OPENDDS_CXX_COMPILE_OPTIONS \"$cxxcompileopts\")\n" if ($cxxcompileopts ne 'none');
+
+  # We are checking for static build here and passing to CMake that fact. In the FindOpenDDS.cmake file
+  # there will be a check to see if it is set to the global setting BUILD_STATIC_LIBS=ON. If it matches
+  # then the CMake project build proceeds, otherwise we full-stop with error message.
+  if ($opts{'static'}) {
+    print $CM "SET (OPENDDS_STATIC_BUILD_ON \"TRUE\")\n";
+  }
+  else {
+    print $CM "SET (OPENDDS_STATIC_BUILD_ON \"FALSE\")\n";
+  }
+
+  print $CM <<"EOT";
+
+include_directories(\${OPENDDS_ACE_ROOT} \${OPENDDS_TAO_ROOT} \${OPENDDS_DDS_ROOT})
+
+link_directories(\${OPENDDS_ACE_ROOT}/lib "\${OPENDDS_DDS_ROOT}/lib" )
+
+$cmake_common
+EOT
+
+  $CM->close;
+  print "Wrote $dir/FindOpenDDS.cmake\n" if $opts{'verbose'};
+
+  if ($opts{'prefix'}) {
+    my $CMINSTALL = backup_and_open($dir . '/etc/FindOpenDDSInstall.cmake');
+    print $CMINSTALL "$specific{'comment'} OpenDDS configure script: $0 $args_\n";
+    print $CMINSTALL "cmake_minimum_required (VERSION 3.8)\n"; #TODO: version?
+    print $CMINSTALL <<"EOT";
+SET (OPENDDS_ACE_ROOT "$opts{'prefix'}/share/ace")
+SET (OPENDDS_TAO_ROOT "$opts{'prefix'}/share/tao")
+SET (OPENDDS_DDS_ROOT "$opts{'prefix'}/share/dds")
+
+include_directories($opts{'prefix'}/include)
+
+link_directories($opts{'prefix'}/lib)
+
+$cmake_common
+EOT
+    $CMINSTALL->close;
+  }
+  dump_and_unlink($CM) if $opts{'dry-run'};
 }
