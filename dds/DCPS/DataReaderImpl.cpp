@@ -681,7 +681,7 @@ DataReaderImpl::remove_all_associations()
 
   } catch (const CORBA::Exception&) {
       ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
+                 ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::remove_all_associations() - ")
                  ACE_TEXT("caught exception from remove_associations.\n")));
   }
 }
