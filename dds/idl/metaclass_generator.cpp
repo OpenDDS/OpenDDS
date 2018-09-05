@@ -338,6 +338,23 @@ namespace {
     }
     be_global->impl_ << "    }\n";
   }
+
+  void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
+  {
+    if (info && info->key_list_.size()) {
+      IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
+      for (ACE_TString* key = 0; i.next(key); i.advance()) {
+        be_global->impl_ <<
+          "    if (!ACE_OS::strcmp(field, \""
+        << ACE_TEXT_ALWAYS_CHAR(key->c_str()) << "\")) {\n"
+          "      return true;\n"
+          "    }\n";
+      }
+    } else {
+      be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
+    }
+    be_global->impl_ << "    return false;\n";
+  }
 }
 
 bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
@@ -376,8 +393,13 @@ bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
     "  void* allocate() const { return new T; }\n\n"
     "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
-    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n"
+    "  size_t numDcpsKeys() const { return " << nKeys << "; }\n\n"
     "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
+    "  bool isDcpsKey(const char* field) const\n"
+    "  {\n";
+  gen_isDcpsKey(info);
+  be_global->impl_ <<
+    "  }\n\n"
     "  Value getValue(const void* stru, const char* field) const\n"
     "  {\n"
     "    const " << clazz << "& typed = *static_cast<const " << clazz

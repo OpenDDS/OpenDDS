@@ -83,6 +83,20 @@ public:
     std::for_each(children_.begin(), children_.end(), deleteChild);
   }
 
+  virtual bool has_non_key_fields(const MetaStruct& meta) const
+  {
+    for (
+      OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin();
+      i != children_.end(); ++i
+    ) {
+      EvalNode* child = *i;
+      if (child->has_non_key_fields(meta)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   virtual Value eval(DataForEval& data) = 0;
 
 private:
@@ -129,17 +143,41 @@ FilterEvaluator::~FilterEvaluator()
   delete filter_root_;
 }
 
+bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
+{
+  for (
+    OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin();
+    i != order_bys_.end(); ++i
+  ) {
+    if (!meta.isDcpsKey(i->c_str())) {
+      return true;
+    }
+  }
+
+  if (filter_root_->has_non_key_fields(meta)) {
+    return true;
+  }
+
+  return false;
+}
+
 namespace {
 
   class FieldLookup : public FilterEvaluator::Operand {
   public:
     explicit FieldLookup(AstNode* fnNode)
       : fieldName_(toString(fnNode))
-    {}
+    {
+    }
 
     Value eval(FilterEvaluator::DataForEval& data)
     {
       return data.lookup(fieldName_.c_str());
+    }
+
+    bool has_non_key_fields(const MetaStruct& meta) const
+    {
+      return !meta.isDcpsKey(fieldName_.c_str());
     }
 
     OPENDDS_STRING fieldName_;

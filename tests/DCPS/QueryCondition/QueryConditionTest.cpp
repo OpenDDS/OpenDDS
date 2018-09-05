@@ -19,6 +19,8 @@ using namespace DDS;
 using namespace OpenDDS::DCPS;
 using namespace Messenger;
 
+const Duration_t max_wait_time = {3, 0};
+
 class MessengerListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
@@ -53,7 +55,7 @@ public:
     MessageSeq data;
     SampleInfoSeq infoseq;
     if (mdr->read_w_condition(data, infoseq, LENGTH_UNLIMITED, rc_) == RETCODE_ERROR) {
-      cout << "ERROR: read_w_condition failed" << endl;
+      cerr << "ERROR: read_w_condition failed" << endl;
     }
   }
 
@@ -146,7 +148,7 @@ bool waitForSample(const DataReader_var& dr)
   ws->detach_condition(dr_rc);
   dr->delete_readcondition(dr_rc);
   if (ret != RETCODE_OK) {
-    cout << "ERROR: wait(rc) failed" << endl;
+    cerr << "ERROR: wait(rc) failed" << endl;
     return false;
   }
   return true;
@@ -170,17 +172,16 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key > 1", DDS::StringSeq());
   if (!dr_qc) {
-    cout << "ERROR: failed to create QueryCondition" << endl;
+    cerr << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   ConditionSeq active;
-  Duration_t three_sec = {3, 0};
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   // expect a timeout because the sample doesn't match the query string
   if (ret != RETCODE_TIMEOUT) {
-    cout << "ERROR: wait(qc) should have timed out" << endl;
+    cerr << "ERROR: wait(qc) should have timed out" << endl;
     return false;
   }
   ws->detach_condition(dr_qc);
@@ -190,13 +191,13 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   SampleInfoSeq infoseq;
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_NO_DATA) {
-    cout << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
     return false;
   }
 
   SampleInfo info;
   if (mdr->take_next_sample(sample, info) != RETCODE_OK) {
-    cout << "ERROR: take_next_sample() should have returned data" << endl;
+    cerr << "ERROR: take_next_sample() should have returned data" << endl;
     return false;
   }
 
@@ -205,16 +206,16 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   if (!waitForSample(dr)) return false;
 
   ws->attach_condition(dr_qc);
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   if (ret != RETCODE_OK) {
-    cout << "ERROR: wait(qc) should not time out" << endl;
+    cerr << "ERROR: wait(qc) should not time out" << endl;
     return false;
   }
   ws->detach_condition(dr_qc);
 
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_OK) {
-    cout << "ERROR: take_w_condition(qc) should have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc) should have returned data" << endl;
     return false;
   }
 
@@ -238,13 +239,13 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   QueryCondition_var dr_qc1 = dr1->create_querycondition(NOT_READ_SAMPLE_STATE,
     NEW_VIEW_STATE | NOT_NEW_VIEW_STATE, ANY_INSTANCE_STATE, "( (iteration > %0) AND (iteration < %1) )", params);
   if (!dr_qc1) {
-    cout << "ERROR: failed to create QueryCondition 1" << endl;
+    cerr << "ERROR: failed to create QueryCondition 1" << endl;
     return false;
   }
   QueryCondition_var dr_qc2 = dr2->create_querycondition(NOT_READ_SAMPLE_STATE,
     NEW_VIEW_STATE | NOT_NEW_VIEW_STATE, ANY_INSTANCE_STATE, "( (iteration < %0) OR (iteration > %1) )", params);
   if (!dr_qc2) {
-    cout << "ERROR: failed to create QueryCondition 2" << endl;
+    cerr << "ERROR: failed to create QueryCondition 2" << endl;
     return false;
   }
 
@@ -258,12 +259,12 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   SampleInfoSeq infoseq;
   ReturnCode_t ret = mdr1->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc1);
   if (ret != RETCODE_NO_DATA) {
-    cout << "ERROR: take_w_condition(qc1) shouldn't have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc1) shouldn't have returned data" << endl;
     return false;
   }
   ret = mdr2->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc2);
   if (ret != RETCODE_NO_DATA) {
-    cout << "ERROR: take_w_condition(qc2) shouldn't have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc2) shouldn't have returned data" << endl;
     return false;
   }
 
@@ -272,7 +273,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   for (CORBA::Long i = 0; i < 6; i++) {
     sample.key = i;
     if (mdw->register_instance(sample) == HANDLE_NIL) {
-      cout << "ERROR: Registering instance failed" << endl;
+      cerr << "ERROR: Registering instance failed" << endl;
       return false;
     }
   }
@@ -282,7 +283,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
       sample.key = i;
       const DDS::InstanceHandle_t hnd = mdw->lookup_instance(sample);
       if (hnd == HANDLE_NIL) {
-        cout << "ERROR: Lookup instance failed" << endl;
+        cerr << "ERROR: Lookup instance failed" << endl;
         return false;
       }
       sample.iteration = j;
@@ -294,15 +295,15 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
     sample.key = i;
     const DDS::InstanceHandle_t hnd = mdw->lookup_instance(sample);
     if (hnd == HANDLE_NIL) {
-      cout << "ERROR: Lookup instance failed" << endl;
+      cerr << "ERROR: Lookup instance failed" << endl;
       return false;
     }
     if (mdw->dispose(sample, hnd) != RETCODE_OK) {
-      cout << "ERROR: Dispose instance failed" << endl;
+      cerr << "ERROR: Dispose instance failed" << endl;
       return false;
     }
     if (mdw->unregister_instance(sample, hnd) != RETCODE_OK) {
-      cout << "ERROR: Unregistering instance failed" << endl;
+      cerr << "ERROR: Unregistering instance failed" << endl;
       return false;
     }
   }
@@ -348,7 +349,7 @@ bool run_sorting_test(const DomainParticipant_var& dp,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "ORDER BY name, nest.value",
     empty_query_params);
   if (!dr_qc) {
-    cout << "ERROR: failed to create QueryCondition" << endl;
+    cerr << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
   WaitSet_var ws = new WaitSet;
@@ -373,7 +374,7 @@ bool run_sorting_test(const DomainParticipant_var& dp,
     if (ret == RETCODE_NO_DATA) {
       // fall-through
     } else if (ret != RETCODE_OK) {
-      cout << "ERROR: take_w_condition returned " << ret << endl;
+      cerr << "ERROR: take_w_condition returned " << ret << endl;
       passed = false;
       done = true;
     } else {
@@ -389,7 +390,7 @@ bool run_sorting_test(const DomainParticipant_var& dp,
           if (data[i].name[5] >= largest) {
             largest = data[i].name[5];
           } else {
-            cout << "ERROR: data is not sorted for key: " <<
+            cerr << "ERROR: data is not sorted for key: " <<
               data[i].key << endl;
             passed = false;
           }
@@ -403,7 +404,7 @@ bool run_sorting_test(const DomainParticipant_var& dp,
   SampleInfoSeq info;
   ret = mdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_NO_DATA) {
-    cout << "WARNING: there is still data in the reader\n";
+    cerr << "WARNING: there is still data in the reader\n";
   }
 
   ws->detach_condition(dr_qc);
@@ -431,7 +432,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_empty);
   if (dr_qc) {
-    cout << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed " << endl;
+    cerr << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed " << endl;
     return false;
   }
 
@@ -442,7 +443,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_two);
   if (dr_qc) {
-    cout << "ERROR: Creating QueryCondition with 1 token and 2 parameters should have failed " << endl;
+    cerr << "ERROR: Creating QueryCondition with 1 token and 2 parameters should have failed " << endl;
     return false;
   }
 
@@ -452,35 +453,34 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params);
   if (!dr_qc) {
-    cout << "ERROR: failed to create QueryCondition" << endl;
+    cerr << "ERROR: failed to create QueryCondition" << endl;
     return false;
   }
 
   QueryCondition_var query_cond = QueryCondition::_narrow(dr_qc);
   CORBA::String_var expr = query_cond->get_query_expression();
   if (std::string("key = %0") != expr.in()) {
-    cout << "ERROR: get_query_expression() query expression should match " << endl;
+    cerr << "ERROR: get_query_expression() query expression should match " << endl;
     return false;
   }
 
   params = DDS::StringSeq();
   ret = query_cond->get_query_parameters(params);
   if (ret != RETCODE_OK) {
-    cout << "ERROR: get_query_parameters() failed " << endl;
+    cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
   } else if (params.length() != 1 || std::string(params[0]) != "2") {
-    cout << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
+    cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
 
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
   ConditionSeq active;
-  Duration_t three_sec = {3, 0};
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   // expect a timeout because the sample doesn't match the query string
   if (ret != RETCODE_TIMEOUT) {
-    cout << "ERROR: wait(qc) should have timed out" << endl;
+    cerr << "ERROR: wait(qc) should have timed out" << endl;
     return false;
   }
   ws->detach_condition(dr_qc);
@@ -490,17 +490,17 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   SampleInfoSeq infoseq;
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_NO_DATA) {
-    cout << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
     return false;
   }
 
   if (query_cond->set_query_parameters(params_empty) != RETCODE_ERROR) {
-    cout << "ERROR: Setting 0 parameters for query condition with 1 token should have failed " << endl;
+    cerr << "ERROR: Setting 0 parameters for query condition with 1 token should have failed " << endl;
     return false;
   }
 
   if (query_cond->set_query_parameters(params_two) != RETCODE_ERROR) {
-    cout << "ERROR: Setting 2 parameters for query condition with 1 token should have failed " << endl;
+    cerr << "ERROR: Setting 2 parameters for query condition with 1 token should have failed " << endl;
     return false;
   }
 
@@ -512,28 +512,134 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   params = DDS::StringSeq();
   ret = query_cond->get_query_parameters(params);
   if (ret != RETCODE_OK) {
-    cout << "ERROR: get_query_parameters() failed " << endl;
+    cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
   } else if (params.length() != 1 || std::string(params[0]) != "3") {
-    cout << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
+    cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
 
   ws->attach_condition(dr_qc);
-  ret = ws->wait(active, three_sec);
+  ret = ws->wait(active, max_wait_time);
   if (ret != RETCODE_OK) {
-    cout << "ERROR: wait(qc) should not time out" << endl;
+    cerr << "ERROR: wait(qc) should not time out" << endl;
     return false;
   }
   ws->detach_condition(dr_qc);
 
   ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
   if (ret != RETCODE_OK) {
-    cout << "ERROR: take_w_condition(qc) should have returned data" << endl;
+    cerr << "ERROR: take_w_condition(qc) should have returned data" << endl;
     return false;
   }
 
   dr->delete_readcondition(dr_qc);
+  return true;
+}
+
+bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub,
+  const char* query, bool expect_dispose)
+{
+  ReturnCode_t ret;
+
+  DataWriter_var dw;
+  DataReader_var dr;
+  if (!test_setup(dp, ts, pub, sub, "run_dispose_filter_test_topic", dw, dr)) {
+    cerr << "ERROR: run_single_dispose_filter_test: setup failed" << endl;
+    return false;
+  }
+
+  // Write Sample with Valid Data
+  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Message sample;
+  sample.key = 0;
+  sample.iteration = 0;
+  ret = mdw->write(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_single_dispose_filter_test: write failed" << endl;
+    return false;
+  }
+
+  // Create Dispose Sample with Invalid Data by Disposing the Writer
+  mdw->dispose(sample, HANDLE_NIL);
+
+  // Wait for samples matching the query from the disposed writer
+  ReadCondition_var dr_qc = dr->create_querycondition(
+    ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE,
+    query, DDS::StringSeq());
+  if (!dr_qc) {
+    cerr << "ERROR: run_single_dispose_filter_test: create read condition failed" << endl;
+    return false;
+  }
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_qc);
+  ConditionSeq active;
+  if (ws->wait(active, max_wait_time) != RETCODE_OK) {
+    cerr << "ERROR: run_single_dispose_filter_test: wait failed" << endl;
+    return false;
+  }
+  ws->detach_condition(dr_qc);
+
+  // Read the Number of Invalid Messages Taken
+  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  MessageSeq data;
+  SampleInfoSeq infoseq;
+  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_single_dispose_filter_test: take_w_condition failed" << endl;
+    return false;
+  }
+  unsigned num_valid = 0;
+  unsigned num_invalid = 0;
+  for (size_t i = 0; i < infoseq.length(); i++) {
+    if (infoseq[i].valid_data) {
+      num_valid++;
+    } else {
+      num_invalid++;
+    }
+  }
+
+  // Compare Numbers to what was Expected
+  if (num_valid != 1) {
+    cerr << "ERROR: run_single_dispose_filter_test: "
+      "expected one sample with valid data, got " << num_valid << endl;
+    return false;
+  }
+  if (num_invalid != (expect_dispose ? 1 : 0)) {
+    cerr << "ERROR: run_single_dispose_filter_test: expected "
+      << (expect_dispose ? "one sample" : "no samples")
+      << " with invalid data, got " << num_invalid << endl;
+    return false;
+  }
+
+  dr->delete_readcondition(dr_qc);
+  return true;
+}
+
+bool run_dispose_filter_tests(const DomainParticipant_var& dp,
+  const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub)
+{
+  /*
+   * Run a "Safe" Query that just references key;
+   * assert a normal message and a dispose message are in the results.
+   */
+  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0", true)) {
+    cerr << "ERROR: run_dispose_filter_tests: safe query test failed!" << endl;
+    return false;
+  }
+
+  /*
+   * Setup a "Unsafe" Query that references key and a normal field;
+   * assert just a normal message is in the results.
+   */
+  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0 AND iteration >= 0", false)) {
+    cerr << "ERROR: run_dispose_filter_tests: unsafe query test failed!" << endl;
+    return false;
+  }
+
   return true;
 }
 
@@ -556,6 +662,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
   passed &= run_filtering_test(dp, ts, pub, sub);
   passed &= run_change_parameter_test(dp, ts, pub, sub);
   passed &= run_complex_filtering_test(dp, ts, pub, sub);
+  passed &= run_dispose_filter_tests(dp, ts, pub, sub);
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);

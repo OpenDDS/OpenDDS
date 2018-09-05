@@ -2199,9 +2199,13 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
 
   if (filterClassName == "DDSSQL" ||
       filterClassName == "OPENDDSSQL") {
+    const MetaStruct& meta = typesupport->getMetaStructForType();
+    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
+      return true;
+    }
     return !evaluator.eval(elt.get_sample()->cont(),
                            elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                           elt.get_header().cdr_encapsulation_, typesupport->getMetaStructForType(),
+                           elt.get_header().cdr_encapsulation_, meta,
                            expression_params);
   }
   else {
