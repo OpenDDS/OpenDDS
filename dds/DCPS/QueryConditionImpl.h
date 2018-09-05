@@ -51,10 +51,21 @@ public:
 
   bool hasFilter() const;
 
+  /**
+   * Returns true if the sample matches the query.
+   */
   template<typename Sample>
-  bool filter(const Sample& s) const
+  bool filter(const Sample& s, bool sample_only_has_key_fields) const
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    const MetaStruct& meta = getMetaStruct<Sample>();
+    /*
+     * Omit the sample from results if the query references non-key fields
+     * and the sample only has key fields.
+     */
+    if (sample_only_has_key_fields && evaluator_.has_non_key_fields(meta)) {
+      return false;
+    }
     return evaluator_.eval(s, query_parameters_);
   }
 

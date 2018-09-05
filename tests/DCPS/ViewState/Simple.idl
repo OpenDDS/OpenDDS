@@ -4,7 +4,6 @@ module Test {
 #pragma DCPS_DATA_TYPE "Test::Simple"
 #pragma DCPS_DATA_KEY "Test::Simple key"
 
-
   struct Simple {
     long   key;
     long   count;
