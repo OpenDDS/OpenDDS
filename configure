@@ -396,7 +396,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
-    if (/version (\d+)\.(\d+)\.[\d]+ for (x\d+)/i) { # match i18n version strings
+    if (/version (\d+)\.(\d+)\.[\d\.]+ for (x\d+)/i) { # match i18n version strings
       my $ver = ($2 == 0) ? $1 : "$1.$2";
       my $arch = "$3";
       $ver =~ s/0+$// unless $2 == 0;
