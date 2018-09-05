@@ -79,7 +79,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         ACE_DEBUG((LM_DEBUG, "(%P|%t) datareader deleted\n"));
         done_callback_(builtin_read_error_);
       } else {
-        ACE_DEBUG((LM_INFO, "(%P|%t) Got message %d\n", received_samples_));
+        ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from writer %C)\n", id_.data(), received_samples_, message.value, writers_[message.src].data()));
       }
     }
   } else {

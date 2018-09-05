@@ -183,6 +183,18 @@ if ($test->flag('mp')) {
   # mw
   # 1 process with 1 reader and 5 writers
   runTest(1, 1, 5, 0, 0, 0, 0, 45000000);
+} elsif ($test->flag('mrmw9')) {
+  # mw
+  # 1 process with 5 readers and 5 writers
+  runTest(1, 9, 9, 0, 0, 0, 0, 128000000);
+} elsif ($test->flag('mrmw16')) {
+  # mw
+  # 1 process with 5 readers and 5 writers
+  runTest(1, 16, 16, 0, 0, 0, 0, 256000000);
+} elsif ($test->flag('mrmw25')) {
+  # mw
+  # 1 process with 25 readers and 25 writers
+  runTest(1, 25, 25, 0, 0, 0, 0, 512000000);
 } elsif ($test->flag('mpmrmw')) {
   # mpmrmw
   # 5 processes with 5 readers and 5 writers

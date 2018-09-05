@@ -22,6 +22,7 @@
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_unistd.h"
 
+#include <sstream>
 /*
   NOTE:  The messages may not be processed by the reader in this test.
   This behavior is not an error.
@@ -87,6 +88,11 @@ public:
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writers_[thread_id].c_str()));
 
+    size_t v = static_cast<size_t>(fromhex(writers_[thread_id], 2)) + (256 * static_cast<size_t>(fromhex(writers_[thread_id], 1))) + (256 * 256 * static_cast<size_t>(fromhex(writers_[thread_id], 0)));
+    std::stringstream ss;
+    ss << "Config" << v;
+    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(ss.str().data(), publisher);
+
     DDS::DataWriterQos qos;
     publisher->get_default_datawriter_qos(qos);
     qos.user_data.value.length(3);
@@ -101,6 +107,8 @@ public:
     } else {
       qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
+    qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+    qos.history.depth = 10;
 
     // Create DataWriter
     DDS::DataWriter_var writer =
@@ -160,7 +168,8 @@ public:
 
     // Write samples
     TestMsg message;
-    message.value = 0;
+    message.src = thread_id;
+    message.value = 1;
     for (int i = 0; i < MSGS_PER_WRITER; ++i) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
       ++message.value;
@@ -338,7 +347,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, n_msgs, reader_done_callback, subscriber.in(), check_bits));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
@@ -356,6 +365,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       listener_servant->set_builtin_datareader(bitdr.in());
 #endif /* DDS_HAS_MINIMUM_BIT */
 
+      size_t v = static_cast<size_t>(fromhex(*pos, 2)) + (256 * static_cast<size_t>(fromhex(*pos, 1))) + (256 * 256 * static_cast<size_t>(fromhex(*pos, 0)));
+      std::stringstream ss;
+      ss << "Config" << v;
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(ss.str().data(), subscriber);
+
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);
       qos.user_data.value.length(3);
@@ -363,6 +377,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       qos.user_data.value[1] = fromhex(*pos, 1);
       qos.user_data.value[2] = fromhex(*pos, 2);
       qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
+      qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+      qos.history.depth = 10;
+
 
       DDS::DataReader_var reader =
         subscriber->create_datareader(topic,
