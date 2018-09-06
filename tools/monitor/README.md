@@ -18,6 +18,10 @@ Once configured, the mointor should be able to be built using the
 target/project named `MonitorApp` but will also be built by default if
 everything is being built.
 
+**NOTE: After OpenDDS 3.13, support for MSVC 9 (Microsoft Visual Studio 2008)
+has been dropped for the Montior and ExcelRTD even though OpenDDS supports it
+in the core libraries.**
+
 ## Usage
 
 If the application has been built and the environment has been set correctly
