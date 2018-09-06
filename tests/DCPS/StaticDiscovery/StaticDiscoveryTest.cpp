@@ -109,7 +109,7 @@ public:
       qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
     qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-    qos.history.depth = 10;
+    qos.history.depth = MSGS_PER_WRITER;
 
     // Create DataWriter
     DDS::DataWriter_var writer =
@@ -381,7 +381,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       qos.user_data.value[2] = fromhex(*pos, 2);
       qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-      qos.history.depth = 10;
+      qos.history.depth = MSGS_PER_WRITER;
 
 
       DDS::DataReader_var reader =
