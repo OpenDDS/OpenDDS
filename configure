@@ -158,8 +158,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'wireshark_lib:s', 'Wireshark CMake libraries location, relative to wireshark_build',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
-    'qt:s', 'Qt5 (use QT5_DIR or system pkg)',
-    'qt-include:s', 'Qt include dir (use QT5_INCDIR or QT5_DIR/include)',
+    'qt:s', 'Qt5 (use QTDIR or system pkg)',
+    'qt-include:s', 'Qt include dir (use QT5_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security (optional)',
@@ -864,7 +864,7 @@ my %optdep =
                   ['WIRESHARK_LIB'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
    'rapidjson' => ['RAPIDJSON_ROOT', 'include/rapidjson/rapidjson.h', 'no_itl=0'],
-   'qt' =>        ['QT5_DIR',       '',                            'qt5'],
+   'qt' =>        ['QTDIR',       '',                            'qt5'],
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
    'openssl' =>   ['SSL_ROOT',      'include/openssl/opensslv.h',  'ssl'],
@@ -1286,8 +1286,8 @@ if ($opts{'qt-include'}) {
   setEnv('QT5_INCDIR', $opts{'qt-include'});
 }
 elsif (exists $opts{'qt'} && !$ENV{'QT5_INCDIR'} && !$targetEnv{'QT5_INCDIR'}) {
-  setEnv('QT5_INCDIR', $targetEnv{'QT5_DIR'} . "/include/qt5")
-    if -r "$targetEnv{'QT5_DIR'}/include/qt5/QtCore/qglobal.h";
+  setEnv('QT5_INCDIR', $targetEnv{'QTDIR'} . "/include/qt5")
+    if -r "$targetEnv{'QTDIR'}/include/qt5/QtCore/qglobal.h";
 }
 elsif (exists $opts{'qt'} && $ENV{'QT5_INCDIR'} && !$targetEnv{'QT5_INCDIR'}) {
   setEnv('QT5_INCDIR', $ENV{'QT5_INCDIR'});
@@ -1295,11 +1295,11 @@ elsif (exists $opts{'qt'} && $ENV{'QT5_INCDIR'} && !$targetEnv{'QT5_INCDIR'}) {
 
 if (exists $opts{'qt'} && !-r ($targetEnv{'QT5_INCDIR'} ?
                                $targetEnv{'QT5_INCDIR'} :
-                               "$targetEnv{'QT5_DIR'}/include")
+                               "$targetEnv{'QTDIR'}/include")
     . '/QtCore/qconfig.h') {
   die "ERROR: Can't find qt at " . ($targetEnv{'QT5_INCDIR'} ?
                                     $targetEnv{'QT5_INCDIR'} :
-                                    $targetEnv{'QT5_DIR'}) . "\nstopped";
+                                    $targetEnv{'QTDIR'}) . "\nstopped";
 }
 
 sub push_env_dir {
@@ -1327,7 +1327,7 @@ sub push_libpath {
 
 if (exists $opts{'qt'}) {
   push_libpath(\%targetEnv,
-    $targetEnv{'QT5_DIR'} . $slash . (is_windows() ? 'bin' : 'lib'));
+    $targetEnv{'QTDIR'} . $slash . (is_windows() ? 'bin' : 'lib'));
 }
 
 sub write_host_workspace {
