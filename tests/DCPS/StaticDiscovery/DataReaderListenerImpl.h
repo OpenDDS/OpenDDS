@@ -13,14 +13,17 @@
 #include <dds/DCPS/Definitions.h>
 
 #include <string>
+#include <vector>
 
 typedef void (*callback_t)(bool);
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const std::string& id, int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
+  DataReaderListenerImpl(const std::string& id, const std::vector<std::string>& writers, const int total_writers, const int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
     : id_(id)
+    , writers_(writers)
+    , total_writers_(total_writers)
     , expected_samples_(expected_samples)
     , received_samples_(0)
     , done_callback_(done_callback)
@@ -70,6 +73,8 @@ public:
 
 private:
   std::string id_;
+  const std::vector<std::string>& writers_;
+  const int total_writers_;
   const int expected_samples_;
   int received_samples_;
   callback_t done_callback_;

@@ -1140,10 +1140,10 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
       RtpsReaderMap::const_iterator riter = readers_.find(readerid);
       if (riter == readers_.end()) {
         // Reader has no associations.
-        interesting_ack_nacks_.insert (InterestingAckNack(writerid, readerid, pos->second.address));
+        interesting_ack_nacks_.insert(InterestingAckNack(writerid, readerid, pos->second.address));
       } else if (riter->second.remote_writers_.find(writerid) == riter->second.remote_writers_.end()) {
         // Reader is not associated with this writer.
-        interesting_ack_nacks_.insert (InterestingAckNack(writerid, readerid, pos->second.address));
+        interesting_ack_nacks_.insert(InterestingAckNack(writerid, readerid, pos->second.address));
       }
       pos->second.last_activity = now;
       if (pos->second.status == InterestingRemote::DOES_NOT_EXIST) {
@@ -1475,7 +1475,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
   for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end();
        ++rr) {
-    send_ack_nacks (rr);
+    send_ack_nacks(rr);
   }
 }
 
@@ -2565,7 +2565,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
 
   // Populate the recipients.
   OPENDDS_SET(ACE_INET_Addr) recipients;
-  get_locators (pub_id, recipients);
+  get_locators(pub_id, recipients);
   if (recipients.empty()) {
     return;
   }
@@ -2574,8 +2574,8 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
 
   SequenceNumber firstSN, lastSN;
   CORBA::Long counter;
-  RtpsWriterMap::iterator pos = writers_.find (pub_id);
-  if (pos != writers_.end ()) {
+  RtpsWriterMap::iterator pos = writers_.find(pub_id);
+  if (pos != writers_.end()) {
     // Reliable.
     const bool has_data = !pos->second.send_buff_.is_nil() && !pos->second.send_buff_->empty();
     SequenceNumber durable_max;
@@ -2797,12 +2797,12 @@ RtpsUdpDataLink::HeartBeat::disable()
 }
 
 void
-RtpsUdpDataLink::send_final_acks (const RepoId& readerid)
+RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  RtpsReaderMap::iterator rr = readers_.find (readerid);
-  if (rr != readers_.end ()) {
-    send_ack_nacks (rr, true);
+  RtpsReaderMap::iterator rr = readers_.find(readerid);
+  if (rr != readers_.end()) {
+    send_ack_nacks(rr, true);
   }
 }
 

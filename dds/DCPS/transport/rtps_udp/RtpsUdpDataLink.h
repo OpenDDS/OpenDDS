@@ -130,7 +130,7 @@ public:
 
   virtual void pre_stop_i();
 
-  virtual void send_final_acks (const RepoId& readerid);
+  virtual void send_final_acks(const RepoId& readerid);
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
