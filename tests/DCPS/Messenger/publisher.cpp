@@ -30,6 +30,7 @@
 #include "Writer.h"
 #include "Args.h"
 
+#ifdef OPENDDS_SECURITY
 const char auth_ca_file[] = "file:../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../security/certs/identity/test_participant_01_cert.pem";
@@ -43,6 +44,7 @@ const char DDSSEC_PROP_IDENTITY_PRIVKEY[] = "dds.sec.auth.private_key";
 const char DDSSEC_PROP_PERM_CA[] = "dds.sec.access.permissions_ca";
 const char DDSSEC_PROP_PERM_GOV_DOC[] = "dds.sec.access.governance";
 const char DDSSEC_PROP_PERM_DOC[] = "dds.sec.access.permissions";
+#endif
 
 bool dw_reliable() {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
