@@ -1,9 +1,8 @@
 # OpenDDS Monitor
 
-![Splash](images/splash.jpg)
-
-The monitor tool is provided to inspect information available about an
-operating OpenDDS system.  The viewer attaches to a single OpenDDS
+The monitor tool allows one to inspect information available about an
+operating OpenDDS system. It only works with an OpenDDS system using an
+InfoRepo, it will not work with RTPS. The viewer attaches to a single OpenDDS
 repository at a time and subscribes to both the DDS specification defined
 Builtin Topics and the OpenDDS specific Monitor topics. It is possible to
 switch from viewing the information from one repository to another while the
