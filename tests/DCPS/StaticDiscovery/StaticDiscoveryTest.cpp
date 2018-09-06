@@ -347,7 +347,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, writers, total_writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
