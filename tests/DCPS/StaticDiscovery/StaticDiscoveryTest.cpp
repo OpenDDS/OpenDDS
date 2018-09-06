@@ -22,7 +22,6 @@
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_unistd.h"
 
-#include <sstream>
 /*
   NOTE:  The messages may not be processed by the reader in this test.
   This behavior is not an error.
@@ -88,10 +87,12 @@ public:
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writers_[thread_id].c_str()));
 
-    size_t v = static_cast<size_t>(fromhex(writers_[thread_id], 2)) + (256 * static_cast<size_t>(fromhex(writers_[thread_id], 1))) + (256 * 256 * static_cast<size_t>(fromhex(writers_[thread_id], 0)));
-    std::stringstream ss;
-    ss << "Config" << v;
-    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(ss.str().data(), publisher);
+    unsigned long binary_id = static_cast<unsigned long>(fromhex(writers_[thread_id], 2))
+                            + (256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 1)))
+                            + (256 * 256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 0)));
+    char config_name_buffer[16];
+    sprintf(config_name_buffer, "Config%lu", binary_id);
+    OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name_buffer, publisher);
 
     DDS::DataWriterQos qos;
     publisher->get_default_datawriter_qos(qos);
@@ -365,10 +366,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       listener_servant->set_builtin_datareader(bitdr.in());
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      size_t v = static_cast<size_t>(fromhex(*pos, 2)) + (256 * static_cast<size_t>(fromhex(*pos, 1))) + (256 * 256 * static_cast<size_t>(fromhex(*pos, 0)));
-      std::stringstream ss;
-      ss << "Config" << v;
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(ss.str().data(), subscriber);
+      unsigned long binary_id = static_cast<unsigned long>(fromhex(*pos, 2))
+                              + (256 * static_cast<unsigned long>(fromhex(*pos, 1)))
+                              + (256 * 256 * static_cast<unsigned long>(fromhex(*pos, 0)));
+      char config_name_buffer[16];
+      sprintf(config_name_buffer, "Config%lu", binary_id);
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config_name_buffer, subscriber);
 
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);

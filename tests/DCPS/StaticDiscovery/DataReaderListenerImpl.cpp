@@ -13,8 +13,6 @@
 #include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-#include <iostream>
-
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C is done\n", id_.c_str()));
