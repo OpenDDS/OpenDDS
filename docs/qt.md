@@ -1,4 +1,4 @@
-# Configuring for Qt5 OpenDDS Applications
+# Configuring Qt5 OpenDDS Applications
 
 Some included OpenDDS applications require Qt5:
 
@@ -25,7 +25,7 @@ and basic Qt development tools.
 ## If Using the Configure Script
 
 If using the configure script, supply the `--qt` option. If your Qt was
-downloaded from source or installed in a specific place (the case for prebuilt
+built from source or installed in a specific place (the case for prebuilt
 binaries on Windows), you will need to supply the root of the Qt directory so
 the build system can find the Qt tools, libraries, and headers. It's possible
 for Qt to put in it's headers in a sub directory of the include directory,
