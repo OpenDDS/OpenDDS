@@ -12,7 +12,7 @@ monitor is running.
 ## Building
 
 The monitor relies on OpenDDS so make sure you are able to build that before
-attempting to have the monitor. It also uses Qt5, which is freely available
+attempting to build the monitor. It also uses Qt5, which is freely available
 from [qt.io](https://qt.io) or through your system's package manager.
 
 If using the configure script, supply the `--qt` option. If your Qt was
@@ -20,7 +20,13 @@ downloaded from source or installed in a specific place (the case for prebuilt
 binaries on Windows), you will need to supply the root of the Qt directory so
 the build system can find the Qt tools, libraries, and headers. It's possible
 for Qt to put in it's headers in a sub directory of the include directory,
-so the location can be supplied with `--qt-include`.
+so the location can be supplied with `--qt-include`. This is the case on
+x86\_64 Ubuntu 18.04 with Qt5 installed from apt, which places them at
+`/usr/include/x86_64-linux-gnu/qt5`.
+In that case the options whould be
+`--qt --qt-include /usr/include/x86_64-linux-gnu/qt5`
+because the tools and libraries are in the standard locations but the headers
+are not.
 
 If not using the configure script then:
 
