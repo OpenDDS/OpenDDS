@@ -15,7 +15,7 @@ concepts by making use of the included application.
 ishapes requires the core OpenDDS libraries so make sure you are able to build
 them before attempting to build ishapes. It also uses Qt5.
 To configure Qt5 applications in OpenDDS, please follow the
-[OpenDDS Qt5 documentation (DDS\_ROOT/docs/qt5.md)](../../../docs/qt5.md).
+[OpenDDS Qt5 documentation (DDS\_ROOT/docs/qt.md)](../../../docs/qt.md).
 Once configured, ishapes should be able to be built using the target/project
 named `ishapes` but will also be built by default if everything is being
 built.
