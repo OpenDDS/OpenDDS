@@ -13,7 +13,7 @@ monitor is running.
 The monitor requires the core OpenDDS libraries so make sure you are able to
 build them first. It also uses Qt5.
 To configure Qt5 applications in OpenDDS, please follow the
-[OpenDDS Qt5 documentation (DDS\_ROOT/docs/qt.md)](../../../docs/qt.md).
+[OpenDDS Qt5 documentation (DDS\_ROOT/docs/qt.md)](../../docs/qt.md).
 Once configured, the mointor should be able to be built using the
 target/project named `MonitorApp` but will also be built by default if
 everything is being built.
