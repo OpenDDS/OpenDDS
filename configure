@@ -1882,7 +1882,7 @@ sub write_cmake_file {
   my $dir = shift;
   my $module_dir = $dir . '/lib/cmake/Modules';
 
-  make_path($module_dir);
+  make_path($module_dir) if ! -d $module_dir;
   my $CM = backup_and_open($module_dir . '/FindOpenDDS.cmake');
 
   print $CM <<"FIND_OPENDDS_CMAKE";
@@ -2043,6 +2043,10 @@ if(OPENDDS_FOUND)
       \${TAO_UTIL_LIBRARY}
       \${DDS_EXTRA_LIBRARIES}
   )
+
+  include(tao_idl_sources)
+  include(dds_idl_sources)
+
 endif()
 
 FIND_OPENDDS_CMAKE
