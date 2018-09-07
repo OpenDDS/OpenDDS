@@ -1911,6 +1911,7 @@ sub write_cmake_file {
 
 if (NOT DEFINED \${DDS_ROOT})
   set(DDS_ROOT \$ENV{DDS_ROOT})
+  set(OPENDDS_ROOT_DIR \${DDS_ROOT}
 endif()
 
 if (NOT DEFINED \${ACE_ROOT})
@@ -1992,7 +1993,6 @@ if(OPENDDS_VERSION_FILE)
   string(REGEX MATCH "OpenDDS version ([0-9]+).([0-9]+)" OPENDDS_VERSION "\${OPENDDS_VERSION_FILE}")
   set(OPENDDS_VERSION_MAJOR \${CMAKE_MATCH_1})
   set(OPENDDS_VERSION_MINOR \${CMAKE_MATCH_2})
-  set(OPENDDS_VERSION_CAN)
 endif()
 
 include(FindPackageHandleStandardArgs)
