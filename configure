@@ -1911,8 +1911,8 @@ sub write_cmake_file {
 
 if (NOT DEFINED \${DDS_ROOT})
   set(DDS_ROOT \$ENV{DDS_ROOT})
-  set(OPENDDS_ROOT_DIR \${DDS_ROOT}
 endif()
+set(OPENDDS_ROOT_DIR \${DDS_ROOT}
 
 if (NOT DEFINED \${ACE_ROOT})
   set(ACE_ROOT \$ENV{ACE_ROOT})
