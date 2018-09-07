@@ -1912,6 +1912,7 @@ sub write_cmake_file {
 if (NOT DEFINED \${DDS_ROOT})
   set(DDS_ROOT \$ENV{DDS_ROOT})
 endif()
+
 if (NOT DEFINED \${ACE_ROOT})
   set(ACE_ROOT \$ENV{ACE_ROOT})
 endif()
@@ -1921,56 +1922,70 @@ if (MSVC)
 endif()
 
 find_path(OPENDDS_INCLUDE_DIR dds
-  HINTS \${DDS_ROOT} \$ENV{DDS_ROOT})
+  HINTS
+    \${DDS_ROOT}
+    \$ENV{DDS_ROOT}
+)
 
 find_path(ACE_INCLUDE_DIR ace
-  HINTS \${ACE_ROOT} \$ENV{ACE_ROOT})
+  HINTS
+    \${ACE_ROOT}
+    \$ENV{ACE_ROOT}
+)
 
 find_path(TAO_INCLUDE_DIR tao
-  HINTS \${ACE_ROOT}/TAO \$ENV{ACE_ROOT}/TAO)
+  HINTS
+    \${ACE_ROOT}/TAO
+    \$ENV{ACE_ROOT}/TAO
+)
 
 find_library(DDS_CORE_LIBRARY OpenDDS_Dcps\${DEBUG_SUFFIX}
-  HINTS \${DDS_ROOT}/lib \$ENV{DDS_ROOT}/lib)
+  HINTS
+    \${DDS_ROOT}/lib
+    \$ENV{DDS_ROOT}/lib
+)
 
 find_library(DDS_TCP_LIBRARY OpenDDS_Tcp\${DEBUG_SUFFIX}
-  HINTS \${DDS_ROOT}/lib \$ENV{DDS_ROOT}/lib)
+  HINTS
+    \${DDS_ROOT}/lib
+    \$ENV{DDS_ROOT}/lib
+)
 
 find_library(DDS_REPO_LIBRARY OpenDDS_InfoRepoDiscovery\${DEBUG_SUFFIX}
-  HINTS \${DDS_ROOT}/lib \$ENV{DDS_ROOT}/lib)
+  HINTS
+    \${DDS_ROOT}/lib
+    \$ENV{DDS_ROOT}/lib
+)
 
 find_library(TAO_CORE_LIBRARY TAO\${DEBUG_SUFFIX}
-  HINTS \${ACE_ROOT}/lib \$ENV{ACE_ROOT}/lib)
+  HINTS
+    \${ACE_ROOT}/lib
+    \$ENV{ACE_ROOT}/lib
+)
 
 find_library(ACE_CORE_LIBRARY ACE\${DEBUG_SUFFIX}
-  HINTS \${ACE_ROOT}/lib \$ENV{ACE_ROOT}/lib)
+  HINTS
+    \${ACE_ROOT}/lib
+    \$ENV{ACE_ROOT}/lib
+)
 
 find_library(TAO_SERVER_LIBRARY TAO_PortableServer\${DEBUG_SUFFIX}
-  HINTS \${ACE_ROOT}/lib \$ENV{ACE_ROOT}/lib)
+  HINTS
+    \${ACE_ROOT}/lib
+    \$ENV{ACE_ROOT}/lib
+)
 
 find_library(TAO_ANY_LIBRARY TAO_AnyTypeCode\${DEBUG_SUFFIX}
-  HINTS \${ACE_ROOT}/lib \$ENV{ACE_ROOT}/lib)
+  HINTS
+    \${ACE_ROOT}/lib
+    \$ENV{ACE_ROOT}/lib
+)
 
 find_library(TAO_UTIL_LIBRARY TAO_Svc_Utils\${DEBUG_SUFFIX}
-  HINTS \${ACE_ROOT}/lib \$ENV{ACE_ROOT}/lib)
-
-if(WIN32)
-  set(DDS_EXTRA_LIBRARIES netapi32 advapi32 user32 ws2_32)
-  set(OPENDDS_DEFINITIONS -DRTI_WIN32 -DNDDS_DLL_VARIABLE /MD)
-else(WIN32)
-  set(DDS_EXTRA_LIBRARIES dl nsl m pthread rt)
-  if(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-    set(bits_flag -m64)
-		set(OPENDDS_DEFINITIONS -DRTI_UNIX -m64)
-    else(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-      set(bits_flag -m32)
-		set(OPENDDS_DEFINITIONS -DRTI_UNIX -D__i386__=1 -m32)
-  endif(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-endif(WIN32)
-
-set(OPENDDS_INCLUDE_DIRS \${OPENDDS_INCLUDE_DIR} \${ACE_INCLUDE_DIR} \${TAO_INCLUDE_DIR} \${TAO_INCLUDE_DIR}/orbsvcs)
-set(OPENDDS_LIBRARIES \${DDS_CORE_LIBRARY} \${DDS_TCP_LIBRARY} \${DDS_REPO_LIBRARY}
-  \${TAO_CORE_LIBRARY} \${ACE_CORE_LIBRARY} \${TAO_SEVER_LIBRARY} \${TAO_ANY_LIBRARY}
-  \${TAO_UTIL_LIBRARY} \${DDS_EXTRA_LIBRARIES})
+  HINTS
+    \${ACE_ROOT}/lib
+    \$ENV{ACE_ROOT}/lib
+)
 
 file(GLOB OPENDDS_VERSION_FILE  \${DDS_ROOT}/VERSION  \$ENV{DDS_ROOT}/VERSION)
 if(OPENDDS_VERSION_FILE)
@@ -1978,7 +1993,7 @@ if(OPENDDS_VERSION_FILE)
   set(OPENDDS_VERSION_MAJOR \${CMAKE_MATCH_1})
   set(OPENDDS_VERSION_MINOR \${CMAKE_MATCH_2})
   set(OPENDDS_VERSION_CAN)
-endif(OPENDDS_VERSION_FILE)
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OPENDDS
@@ -1990,6 +2005,45 @@ find_package_handle_standard_args(OPENDDS
     ACE_CORE_LIBRARY
   VERSION_VAR OPENDDS_VERSION
 )
+
+if(OPENDDS_FOUND)
+  if(WIN32)
+    # TODO: Test which Windows libraries are necessary.
+    # set(DDS_EXTRA_LIBRARIES netapi32 advapi32 user32 ws2_32)
+
+    # TODO: Set flags based on configuration (static/dynamic, etc...).
+    # set(OPENDDS_DEFINITIONS -DRTI_WIN32 -DNDDS_DLL_VARIABLE /MD)
+  else()
+    # TODO: Test which Linux libraries are necessary.
+    # set(DDS_EXTRA_LIBRARIES dl nsl m pthread rt)
+    # if(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+    #   set(bits_flag -m64)
+    #   set(OPENDDS_DEFINITIONS -DRTI_UNIX -m64)
+    #   else(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+    #     set(bits_flag -m32)
+    #   set(OPENDDS_DEFINITIONS -DRTI_UNIX -D__i386__=1 -m32)
+    # endif(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+  endif()
+
+  set(OPENDDS_INCLUDE_DIRS
+      \${OPENDDS_INCLUDE_DIR}
+      \${ACE_INCLUDE_DIR}
+      \${TAO_INCLUDE_DIR}
+      \${TAO_INCLUDE_DIR}/orbsvcs
+  )
+
+  set(OPENDDS_LIBRARIES
+      \${DDS_CORE_LIBRARY}
+      \${DDS_TCP_LIBRARY}
+      \${DDS_REPO_LIBRARY}
+      \${TAO_CORE_LIBRARY}
+      \${ACE_CORE_LIBRARY}
+      \${TAO_SEVER_LIBRARY}
+      \${TAO_ANY_LIBRARY}
+      \${TAO_UTIL_LIBRARY}
+      \${DDS_EXTRA_LIBRARIES}
+  )
+endif()
 
 FIND_OPENDDS_CMAKE
 
