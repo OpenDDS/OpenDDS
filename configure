@@ -882,7 +882,8 @@ if (exists $opts{'java'}) {
   setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
 }
 
-$opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
+my $try_to_use_qt_system_pkg =
+  exists $opts{'qt'} && !length($opts{'qt'}) && !exists $opts{'qt-include'};
 $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 
 # Default to Wireshark Development Package if installed and a path wasn't
@@ -1282,26 +1283,6 @@ if ($opts{'glib'}) {
   }
 }
 
-if ($opts{'qt-include'}) {
-  setEnv('QT5_INCDIR', $opts{'qt-include'});
-}
-elsif (exists $opts{'qt'} && !$ENV{'QT5_INCDIR'} && !$targetEnv{'QT5_INCDIR'}) {
-  setEnv('QT5_INCDIR', $targetEnv{'QTDIR'} . "/include/qt5")
-    if -r "$targetEnv{'QTDIR'}/include/qt5/QtCore/qglobal.h";
-}
-elsif (exists $opts{'qt'} && $ENV{'QT5_INCDIR'} && !$targetEnv{'QT5_INCDIR'}) {
-  setEnv('QT5_INCDIR', $ENV{'QT5_INCDIR'});
-}
-
-if (exists $opts{'qt'} && !-r ($targetEnv{'QT5_INCDIR'} ?
-                               $targetEnv{'QT5_INCDIR'} :
-                               "$targetEnv{'QTDIR'}/include")
-    . '/QtCore/qconfig.h') {
-  die "ERROR: Can't find qt at " . ($targetEnv{'QT5_INCDIR'} ?
-                                    $targetEnv{'QT5_INCDIR'} :
-                                    $targetEnv{'QTDIR'}) . "\nstopped";
-}
-
 sub push_env_dir {
   my ($buildEnvRef, $var, $path) = @_;
   if (exists $buildEnvRef->{$var}) {
@@ -1326,8 +1307,71 @@ sub push_libpath {
 }
 
 if (exists $opts{'qt'}) {
-  push_libpath(\%targetEnv,
-    $targetEnv{'QTDIR'} . $slash . (is_windows() ? 'bin' : 'lib'));
+  my $qglobal = "QtCore" . $slash . "qglobal.h";
+  my $qt_include;
+  my $qt_bin;
+  my $qt_lib;
+
+  if ($try_to_use_qt_system_pkg) {
+    # Try to use pkg-config to get Qt locations
+    my $mesg = ", stopped\nPlease either install Qt or provide the Qt " .
+      "locations (see docs/qt.md for details).\n";
+    `pkg-config --print-variables Qt5Core`;
+    if ($!) {
+      die "ERROR: Trying to use system Qt package but could not confirm " .
+        "Qt and/or pkg-config exists on the system$mesg" .
+    }
+    $qt_include = `pkg-config --variable=includedir Qt5Core`;
+    die "ERROR: could not resolve system Qt include location$mesg" if ($!);
+    chomp $qt_include;
+    $qt_bin = `pkg-config --variable=host_bins Qt5Core`;
+    die "ERROR: could not resolve system Qt bin location$mesg" if ($!);
+    chomp $qt_bin;
+    $qt_lib = `pkg-config --variable=libdir Qt5Core`;
+    die "ERROR: could not resolve system Qt lib location$mesg\n" if ($!);
+    chomp $qt_lib;
+  } else {
+    if (exists $opts{'qt-include'}) {
+      if (!length($opts{'qt-include'})) {
+        die "ERROR: --qt-include requires an argument, stopped\n";
+      }
+      $qt_include = $opts{'qt-include'};
+    } else {
+      $qt_include = $targetEnv{'QTDIR'} . $slash . 'include' . $slash;
+    }
+
+    if (exists $ENV{'QT5_BINDIR'}) {
+      $qt_bin = $ENV{'QT5_BINDIR'};
+    } else {
+      $qt_bin = $targetEnv{'QTDIR'} . $slash . 'bin';
+    }
+
+    if (exists $ENV{'QT5_LIBDIR'}) {
+      $qt_lib = $ENV{'QT5_LIBDIR'};
+    } else {
+      $qt_lib = $targetEnv{'QTDIR'} . $slash . (is_windows() ? 'bin' : 'lib');
+    }
+  }
+
+  # Check for Qt Headers using qglobal.h
+  # Also try to dectect if Qt Headers were just put in the include directory or
+  # put in qt5 directory inside the include directory. For example, the former
+  # might happen on Windows with prebuilt Qt while the latter might be the
+  # case with Linux with Qt installed from package manager.
+  if (! -r  $qt_include . $slash . $qglobal) {
+    if (-r $qt_include . $slash . 'qt5' . $slash . $qglobal) {
+      $qt_include = $qt_include . $slash . 'qt5';
+    } else {
+      die "ERROR: Could not find Qt headers at $qt_include" .
+        " ($qglobal could not be found), stopped\n";
+    }
+  }
+
+  setEnv('QT5_INCDIR', $qt_include);
+  setEnv('QT5_BINDIR', $qt_bin);
+  push_libpath(\%targetEnv, $qt_lib);
+} elsif (exists $opts{'qt-include'}) {
+  die "ERROR: --qt-include requires --qt, stopped\n";
 }
 
 sub write_host_workspace {
