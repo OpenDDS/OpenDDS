@@ -36,7 +36,7 @@ and you want to use the system Qt (which is recommended), just supplying the
 `--qt` option should be enough and the configure script will take care of the
 rest. Should the configure script fail to recognize your Qt installation or
 the build fails due to missing Qt files, you might have to supply Qt
-parameters manually. In this case read the next section.
+parameters manually.
 
 ### Manually Specifying Qt Locations
 
@@ -75,7 +75,7 @@ script in general.
     - MPC defaults to `QTDIR/include` if not defined.
     - This is supplied to the configure script using the `--qt-include` option
       and defaults to `/usr/include` or `/usr/include/qt5` in the configure
-      script. This value is manulputed because the headers can be either
+      script. This value is manipulated because the headers can be either
       location. This isn't an issue when using the configure script but should
       be noted if forgoing the configure script.
   - `QT5_BINDIR` environment variable is optional and points to the location

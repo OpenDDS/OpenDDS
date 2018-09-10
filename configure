@@ -1354,7 +1354,7 @@ if (exists $opts{'qt'}) {
   }
 
   # Check for Qt Headers using qglobal.h
-  # Also try to dectect if Qt Headers were just put in the include directory or
+  # Also try to detect if Qt Headers were just put in the include directory or
   # put in qt5 directory inside the include directory. For example, the former
   # might happen on Windows with prebuilt Qt while the latter might be the
   # case with Linux with Qt installed from package manager.
