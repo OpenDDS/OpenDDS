@@ -1,4 +1,4 @@
-# OpenDDS Excel 
+# OpenDDS Excel Real Time Data
 
 Excel Real Time Data (RTD) server and Add-in for viewing OpenDDS
 instrumentation. As with the OpenDDS Monitor, ExcelRTD only works
@@ -20,7 +20,7 @@ in the core libraries.**
 
 ## Installing and Usage
 
-OpenDDS Real-Time Data for Microsoft Excel allows visualization of an operating OpenDDS system. This application can monitor multiple OpenDDS repositories at a time by subscribing to both the DDS specification defined Builtin Topics and the OpenDDS specific Monitor topics. Repository monitors may be simultaneously running in multiple workbooks in the same and/or separate instances of Excel. However, embedding workbooks containing repository monitors in documents, presentations, etc., is not supported due to limitations in the underlying technology. The content of the monitor tree in this application mirrors the content of the monitor tree portion of the stand-alone OpenDDS Monitor application. Additional features of this application include a repository monitor saved on a worksheet will automatically restart when the workbook is opened and a snapshot of a repository monitor can be taken in-place or to another location in the same workbook. 
+OpenDDS Real-Time Data for Microsoft Excel allows visualization of an operating OpenDDS system. This application can monitor multiple OpenDDS repositories at a time by subscribing to both the DDS specification defined Builtin Topics and the OpenDDS specific Monitor topics. Repository monitors may be simultaneously running in multiple workbooks in the same and/or separate instances of Excel. However, embedding workbooks containing repository monitors in documents, presentations, etc., is not supported due to limitations in the underlying technology. The content of the monitor tree in this application mirrors the content of the monitor tree portion of the stand-alone OpenDDS Monitor application. Additional features of this application include a repository monitor saved on a worksheet will automatically restart when the workbook is opened and a snapshot of a repository monitor can be taken in-place or to another location in the same workbook.
 
 The project is in `%DDS_ROOT%\tools\excelRTD` and consists of an Excel add-in and an Excel Real-Time Data (RTD) server. The OpenDDS Excel Add-in is `%DDS_ROOT%\tools\excelRTD\OpenDDS.xlam` and contains Visual Basic for Applications (VBA) macros. The OpenDDS Excel RTD Server is installed to `%DDS_ROOT%\lib\OpenDDS_RTD(d).dll` and is the interface between Excel and OpenDDS. It is a C++ in-process COM server. To-date, OpenDDS Real-Time Data for Excel has only been used with a 32-bit OpenDDS Excel RTD Server and 32-bit version of Excel.
 
