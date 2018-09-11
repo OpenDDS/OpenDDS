@@ -1,0 +1,84 @@
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----10B2324314E820317A28986E2CD37BD4"
+
+This is an S/MIME signed message
+
+------10B2324314E820317A28986E2CD37BD4
+Content-Type: text/plain
+
+<?xml version="1.0" encoding="utf-8"?>
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+  <permissions>
+    <grant name="ShapesPermissionTOC">
+      <subject_name>/CN=Tahoe Joe/O=Super Swanky Ski and Snow Shop/ST=California/C=US</subject_name>
+      <validity>
+        <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
+        <not_before>2015-09-15T01:00:00</not_before>
+        <not_after>2025-09-15T01:00:00</not_after>
+      </validity>
+      <allow_rule>
+        <domains>
+          <id>4</id>
+        </domains>
+        <publish>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </publish>
+        <subscribe>
+          <topics>
+            <topic>*</topic>
+          </topics>
+        </subscribe>
+      </allow_rule>
+      <default>DENY</default>
+    </grant>
+  </permissions>
+</dds>
+
+------10B2324314E820317A28986E2CD37BD4
+Content-Type: application/x-pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+
+MIIHEAYJKoZIhvcNAQcCoIIHATCCBv0CAQExDzANBglghkgBZQMEAgEFADALBgkq
+hkiG9w0BBwGgggP4MIID9DCCAtwCCQCkjopvwK438jANBgkqhkiG9w0BAQsFADCB
+uzELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3Vp
+czEvMC0GA1UECgwmT2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBD
+QSkxLzAtBgNVBAMMJk9iamVjdCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMg
+Q0EpMScwJQYJKoZIhvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wHhcN
+MTgwNjEzMDQyMDEzWhcNMjgwNjEwMDQyMDEzWjCBuzELMAkGA1UEBhMCVVMxCzAJ
+BgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEvMC0GA1UECgwmT2JqZWN0
+IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMMJk9iamVj
+dCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZIhvcNAQkB
+FhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IB
+DwAwggEKAoIBAQCd3osCHskwiWPkgQ+FiUJEPj9lGAV6gqnG9XcTHPzOsv+hrWck
+lq4WcTcu5ERxjvwzrfB9MV2Jj1mhnAQfp0sIuTJe4QoXigyf0IyezsSA1oeofkJu
+BlA6cR+5ATzfNEcJJG3sVaEaa0L92CXb147LczMMY+6I/jD9H/Kamoph1hCgdh2l
+GnYN97ETMxX5qINthO17/qZ55R+H5nE2Op1f4Y0LhjKu3WztEjIZeAJDgAksoYRy
+nVhfDsshdZWUMSO0jHJGPwEvxwhTsAknWdthuE/xgZQqDP3aXj3MFJcZkydS+8xv
+nX0cuHsr/7MqVK0oOmjWS7pi7cMBY9DtB3KVAgMBAAEwDQYJKoZIhvcNAQELBQAD
+ggEBAE9QWa1xNjxLWIw88eVrQxOBCIlqCkAiTx2pAurEdiDtz8ZQdDMQQmoAuppT
+6LWVVtOWc1bP3a+IHBolNAimXOm+B9fMSvQnqRbriJZ8Hc5+Y5TXlJ3iyqJDEyPi
+WhUFLfQfnjE8hRL5oKPkhk2gRC6K5x+10cZMclgEmZONANtAuSJurMhwgqLxwgGw
+51aIpL6LTxtdZ33LIPM8AN51Tgj5t2VM/49iNq9HdqAl7VQuyHEc/eCAIp7p69nq
+cpS9VBJAJoHN8lmDDHYxM+pYtQAgmBKLBxTyDrgJZ+3j3FVOp0orRxarE3XjJ+0b
+IVnO6yhjunPOpgsyEcxH9/7Enm8xggLcMIIC2AIBATCByTCBuzELMAkGA1UEBhMC
+VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEvMC0GA1UECgwm
+T2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMM
+Jk9iamVjdCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZI
+hvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20CCQCkjopvwK438jANBglg
+hkgBZQMEAgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3
+DQEJBTEPFw0xODA2MTMwNTE4NTJaMC8GCSqGSIb3DQEJBDEiBCCaOeOWR4F/PtrE
+Li18+rUEKTIhjSIt8jXCV0ZVAXWGeTB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
+AwQBKjALBglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqG
+SIb3DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIB
+KDANBgkqhkiG9w0BAQEFAASCAQBDMydZz+3Siak16bZ+0mSqGdzCr5LC8K7kC2DG
+kRW4/MJnmju0jYvOPKeEYcZ95P65IMziueGEwDyjRLm7jfZMOswAj4BXDRcHeSEl
+IDhEFDmZCjXukQ/0oj60TbXEIs7Ls33mqmMeBVfp5IyJ+fOt6zZVBF15VLs17R9t
+Mk8nke8nx4+r8n/JHwFYhGWnAsLREffRTIlXcy5nDNkgemkW2kHNs8fc1xzBFiHB
+vEUFzXpMEAyeUF2MmjrGNmz6hAlLmZyzQgOZJQVyuoHBcrcyYw9ARLVxwNN0MHuf
+pJIJzoxIs/B//6kzjUGtI9IKWa8VqS7kG3Lt9uhmEhEhVcfE
+
+------10B2324314E820317A28986E2CD37BD4--
+
