@@ -1900,7 +1900,6 @@ sub write_cmake_file {
 # This module defines the following variables::
 #
 # OPENDDS_FOUND - True if OpenDDS was found.
-# OPENDDS_ROOT_DIR - Root of OpenDDS install or build-tree.
 # OPENDDS_INCLUDE_DIRS - Directories containing OpenDDS include files.
 # OPENDDS_LIBRARIES - Libraries needed to link against OpenDDS.
 # OPENDDS_DEFINITIONS - Compiler flags required by OpenDDS.
@@ -1909,93 +1908,100 @@ sub write_cmake_file {
 # OPENDDS_VERSION_MINOR - Minor version of OpenDDS.
 # OPENDDS_VERSION_PATCH - Patch version of OpenDDS.
 
-if (NOT DEFINED \${DDS_ROOT})
+if (NOT DEFINED DDS_ROOT)
   set(DDS_ROOT \$ENV{DDS_ROOT})
 endif()
-set(OPENDDS_ROOT_DIR \${DDS_ROOT}
 
-if (NOT DEFINED \${ACE_ROOT})
+if (NOT DEFINED ACE_ROOT)
   set(ACE_ROOT \$ENV{ACE_ROOT})
+endif()
+
+if (NOT DEFINED TAO_ROOT)
+  set(TAO_ROOT \$ENV{TAO_ROOT})
 endif()
 
 if (MSVC)
   set(CMAKE_MSVCIDE_RUN_PATH \${CMAKE_MSVCIDE_RUN_PATH} \${DDS_ROOT}/lib \${ACE_ROOT}/lib)
 endif()
 
-find_path(OPENDDS_INCLUDE_DIR dds
-  HINTS
-    \${DDS_ROOT}
-    \$ENV{DDS_ROOT}
+find_path(OPENDDS_INCLUDE_DIR
+  dds
+  HINTS \${DDS_ROOT}
 )
 
-find_path(ACE_INCLUDE_DIR ace
-  HINTS
-    \${ACE_ROOT}
-    \$ENV{ACE_ROOT}
+find_path(_ACE_INCLUDE_DIR
+  ace
+  HINTS \${ACE_ROOT}
 )
 
-find_path(TAO_INCLUDE_DIR tao
-  HINTS
-    \${ACE_ROOT}/TAO
-    \$ENV{ACE_ROOT}/TAO
+find_path(_TAO_INCLUDE_DIR
+  tao
+  HINTS \${ACE_ROOT}/TAO
 )
 
-find_library(DDS_CORE_LIBRARY OpenDDS_Dcps\${DEBUG_SUFFIX}
-  HINTS
-    \${DDS_ROOT}/lib
-    \$ENV{DDS_ROOT}/lib
-)
+set(_dds_lib_hints  \${DDS_ROOT}/lib  \$ENV{DDS_ROOT}/lib)
+set(_ace_lib_hints  \${ACE_ROOT}/lib  \$ENV{ACE_ROOT}/lib)
+set(_suffix_RELEASE "")
+set(_suffix_DEBUG "d")
 
-find_library(DDS_TCP_LIBRARY OpenDDS_Tcp\${DEBUG_SUFFIX}
-  HINTS
-    \${DDS_ROOT}/lib
-    \$ENV{DDS_ROOT}/lib
-)
+foreach(_cfg  "RELEASE" "DEBUG")
+  set(_sfx \${_suffix_\${_cfg}})
 
-find_library(DDS_REPO_LIBRARY OpenDDS_InfoRepoDiscovery\${DEBUG_SUFFIX}
-  HINTS
-    \${DDS_ROOT}/lib
-    \$ENV{DDS_ROOT}/lib
-)
+  find_library(DDS_CORE_LIBRARY_\${_cfg}
+    OpenDDS_Dcps\${_sfx}
+    HINTS \${_dds_lib_hints}
+  )
 
-find_library(TAO_CORE_LIBRARY TAO\${DEBUG_SUFFIX}
-  HINTS
-    \${ACE_ROOT}/lib
-    \$ENV{ACE_ROOT}/lib
-)
+  find_library(DDS_TCP_LIBRARY_\${_cfg}
+    OpenDDS_Tcp\${_sfx}
+    HINTS \${_dds_lib_hints}
+  )
 
-find_library(ACE_CORE_LIBRARY ACE\${DEBUG_SUFFIX}
-  HINTS
-    \${ACE_ROOT}/lib
-    \$ENV{ACE_ROOT}/lib
-)
+  find_library(DDS_REPO_LIBRARY_\${_cfg}
+    OpenDDS_InfoRepoDiscovery\${_sfx}
+    HINTS \${_dds_lib_hints}
+  )
 
-find_library(TAO_SERVER_LIBRARY TAO_PortableServer\${DEBUG_SUFFIX}
-  HINTS
-    \${ACE_ROOT}/lib
-    \$ENV{ACE_ROOT}/lib
-)
+  find_library(TAO_CORE_LIBRARY_\${_cfg}
+    TAO\${_sfx}
+    HINTS \${_ace_lib_hints}
+  )
 
-find_library(TAO_ANY_LIBRARY TAO_AnyTypeCode\${DEBUG_SUFFIX}
-  HINTS
-    \${ACE_ROOT}/lib
-    \$ENV{ACE_ROOT}/lib
-)
+  find_library(ACE_CORE_LIBRARY_\${_cfg}
+    ACE\${_sfx}
+    HINTS \${_ace_lib_hints}
+  )
 
-find_library(TAO_UTIL_LIBRARY TAO_Svc_Utils\${DEBUG_SUFFIX}
-  HINTS
-    \${ACE_ROOT}/lib
-    \$ENV{ACE_ROOT}/lib
-)
+  find_library(TAO_SERVER_LIBRARY_\${_cfg}
+    TAO_PortableServer\${_sfx}
+    HINTS \${_ace_lib_hints}
+  )
 
-file(GLOB OPENDDS_VERSION_FILE  \${DDS_ROOT}/VERSION  \$ENV{DDS_ROOT}/VERSION)
-if(OPENDDS_VERSION_FILE)
-  string(REGEX MATCH "OpenDDS version ([0-9]+).([0-9]+)" OPENDDS_VERSION "\${OPENDDS_VERSION_FILE}")
+  find_library(TAO_ANY_LIBRARY_\${_cfg}
+    TAO_AnyTypeCode\${_sfx}
+    HINTS \${_ace_lib_hints}
+  )
+
+  find_library(TAO_UTIL_LIBRARY_\${_cfg}
+    TAO_Svc_Utils\${_sfx}
+    HINTS \${_ace_lib_hints}
+  )
+endforeach()
+
+file(GLOB _opendds_version_file \${DDS_ROOT}/VERSION)
+if(_opendds_version_file)
+  string(REGEX MATCH "OpenDDS version ([0-9]+).([0-9]+)" OPENDDS_VERSION "\${_opendds_version_file}")
   set(OPENDDS_VERSION_MAJOR \${CMAKE_MATCH_1})
   set(OPENDDS_VERSION_MINOR \${CMAKE_MATCH_2})
 endif()
 
+include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
+
+foreach(_required  ACE_CORE  TAO_CORE  DDS_CORE)
+  select_library_configurations(\${_required})
+endforeach()
+
 find_package_handle_standard_args(OPENDDS
   FOUND_VAR OPENDDS_FOUND
   REQUIRED_VARS
@@ -2005,6 +2011,45 @@ find_package_handle_standard_args(OPENDDS
     ACE_CORE_LIBRARY
   VERSION_VAR OPENDDS_VERSION
 )
+
+macro(_ADD_TARGET_LIB  target  var_prefix  include_dir)
+  set(_debug_lib "\${\${var_prefix}_LIBRARY_DEBUG}")
+  set(_release_lib "\${\${var_prefix}_LIBRARY_RELEASE}")
+
+  if (NOT TARGET \${target} AND
+      (EXISTS "\${_debug_lib}" OR EXISTS "\${_release_lib}"))
+
+    add_library(\${target} UNKNOWN IMPORTED)
+    set_target_properties(\${target}
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "\${include_dir}"
+    )
+
+    if (EXISTS "\${_release_lib}")
+      set_property(TARGET \${target}
+        APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE
+      )
+      set_target_properties(\${target}
+        PROPERTIES
+          IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
+          IMPORTED_LOCATION_RELEASE "\${_release_lib}"
+      )
+    endif()
+
+    if (EXISTS "\${_debug_lib}")
+      set_property(TARGET \${target}
+        APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG
+      )
+      set_target_properties(\${target}
+        PROPERTIES
+          IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+          IMPORTED_LOCATION_DEBUG "\${_debug_lib}"
+      )
+    endif()
+  endif()
+endmacro()
 
 if(OPENDDS_FOUND)
   if(WIN32)
@@ -2044,8 +2089,22 @@ if(OPENDDS_FOUND)
       \${DDS_EXTRA_LIBRARIES}
   )
 
-  include(tao_idl_sources)
-  include(dds_idl_sources)
+  _ADD_TARGET_LIB(ACE::Core ACE_CORE "\${ACE_INCLUDE_DIR}")
+  _ADD_TARGET_LIB(TAO::Core TAO_CORE "\${TAO_INCLUDE_DIR}")
+  _ADD_TARGET_LIB(DDS::Core DDS_CORE "\${OPENDDS_INCLUDE_DIR}")
+
+  if(NOT TARGET OpenDDS::OpenDDS)
+    add_library(OpenDDS::OpenDDS UNKNOWN IMPORTED)
+
+    set_target_properties(OpenDDS::OpenDDS
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "\${OPENDDS_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES
+          ACE::Core
+          TAO::Core
+          DDS::Core
+    )
+  endif()
 
 endif()
 
