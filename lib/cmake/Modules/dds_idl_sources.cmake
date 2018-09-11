@@ -9,6 +9,7 @@ define_property(SOURCE PROPERTY DDS_IDL_MAIN_TARGET
   FULL_DOCS "the main target to process the IDL file"
 )
 
+include(tao_idl_sources)
 
 set(DDS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -26,9 +27,9 @@ endif()
 if (WIN32 AND NOT TAO_INSTALL_DIR)
   ## we use TAO_INSTALL_DIR to check if tao_idl is imported or not;
   ## TAO_INSTALL_DIR is only defined when TAO is not imported
-  get_target_property(tao_idl_fe_loc TAO_IDL_FE LOCATION)
-  get_filename_component(tao_idl_fe_dir ${tao_idl_fe_loc} DIRECTORY)
-
+  # get_target_property(tao_idl_fe_loc TAO_IDL_FE LOCATION)
+  # get_filename_component(tao_idl_fe_dir ${tao_idl_fe_loc} DIRECTORY)
+  set (tao_idl_fe_dir "$ACE_ROOT/bin")
   set(IDL_PATH_ENV "PATH=\"${tao_idl_fe_dir}\;%PATH%\"")
 endif()
 
