@@ -2156,6 +2156,9 @@ if(OPENDDS_FOUND)
     )
   endif()
 
+  include(dds_idl_sources)
+  include(ace_utils)
+
 endif()
 
 FIND_OPENDDS_CMAKE

@@ -6,21 +6,7 @@ if (DEFINED ENV{DDS_ROOT})
   list(APPEND CMAKE_MODULE_PATH "${DDS_ROOT}/lib/cmake/Modules")
 endif()
 
-# if (DEFINED ENV{TAO_ROOT})
-  # set(TAO_ROOT $ENV{TAO_ROOT})
-# endif()
-
-# if (DEFINED ENV{ACE_ROOT})
-  # set(ACE_ROOT $ENV{ACE_ROOT})
-# endif()
-
 find_package(OpenDDS 3 REQUIRED)
-include(dds_idl_sources)
-include(ace_utils)
-
-# if (NOT OpenDDS_INCLUDE_DIR)
-  # find_package(OpenDDS REQUIRED CONFIG)
-# endif()
 
 # ace_requires("TARGET tao_nsadd")
 
