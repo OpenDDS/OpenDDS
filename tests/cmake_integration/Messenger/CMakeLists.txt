@@ -25,19 +25,23 @@ dds_idl_sources(
   IDL_FILES Messenger.idl
 )
 
+ace_add_exe(DDS_Messenger_Publisher
+  OUTPUT_NAME publisher
+  LINK_LIBRARIES OpenDDS::Tcp
+                 OpenDDS::Udp
+                 OpenDDS::Multicast
+                 OpenDDS::Rtps_Udp
+                 OpenDDS::Shmem
+                 DDS_Messenger_Idl
+                 OpenDDS::InfoRepo
+                 OpenDDS::Rtps
+)
 
-# ace_add_exe(DDS_Messenger_Publisher
-  # OUTPUT_NAME publisher
-  # LINK_LIBRARIES OpenDDS_Transports_For_Test
-                 # DDS_Messenger_Idl
-                 # OpenDDS_Default_Discovery
-# )
-# ace_target_cxx_sources(DDS_Messenger_Publisher
-  # SOURCE_FILES Writer.cpp
-               # publisher.cpp
-  # HEADER_FILES Writer.h
-# )
-
+ace_target_cxx_sources(DDS_Messenger_Publisher
+  SOURCE_FILES Writer.cpp
+               publisher.cpp
+  HEADER_FILES Writer.h
+)
 
 # ace_add_exe(DDS_Messenger_Subscriber
   # OUTPUT_NAME subscriber
