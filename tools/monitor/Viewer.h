@@ -12,7 +12,7 @@
 #include "GvOptions.h"
 #include "NodeOptions.h"
 
-#include <QtGui/QScrollArea>
+#include <QtWidgets/QScrollArea>
 
 // context menu items
 #define EXPAND_ACTION "Expand All"

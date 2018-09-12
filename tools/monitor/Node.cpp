@@ -5,8 +5,8 @@
 * See: http://www.opendds.org/license.html
 */
 
-#include <QtGui/QMenu>
-#include <QtGui/QGraphicsSceneContextMenuEvent>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QGraphicsSceneContextMenuEvent>
 #include <vector>
 
 #include "Node.h"

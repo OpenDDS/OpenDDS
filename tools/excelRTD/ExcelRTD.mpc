@@ -1,18 +1,13 @@
-project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monitor, qt4_settings {
+project(ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_monitor, qt5_widgets {
   requires += microsoft
   requires += built_in_topics
   includes += $(DDS_ROOT)/tools/monitor
 
   macros += _USRDLL RTDServer_EXPORTS
+  macros += RTD_DLL_NAME=<%quote%>$(TargetFileName)<%quote%>
 
-  specific (vc9, vc10, vc11, vc12, vc14, vs2017, nmake) {
+  specific(prop:microsoft) {
     compile_flags += /bigobj
-  }
-
-  specific (vc10, vc11, vc12, vc14) {
-    macros += RTD_DLL_NAME=<%quote%>$(TargetFileName)<%quote%>
-  } else {
-    macros += RTD_DLL_NAME=<%equote%>$(TargetFileName)<%equote%>
   }
 
   specific(nmake) {

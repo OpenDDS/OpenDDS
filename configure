@@ -94,6 +94,7 @@ my %platforminfo =
   );
 
 sub targetUsage {
+  my $status = shift;
   print "Cross-compile targets: specify --target=TGT where TGT is one of:\n";
   for my $k (sort keys %platforminfo) {
     if ($platforminfo{$k}->{'no_host'}) {
@@ -105,7 +106,7 @@ sub targetUsage {
       }
     }
   }
-  exit 1;
+  exit $status;
 }
 
 ## arg processing and usage
@@ -157,8 +158,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'wireshark_lib:s', 'Wireshark CMake libraries location, relative to wireshark_build',
     'glib:s', 'GLib for Wireshark (use GLIB_ROOT or system pkg)',
     'rapidjson:s', 'RapidJSON for Wireshark Sample Dissection (optional)',
-    'qt:s', 'Qt (use QTDIR or system pkg)',
-    'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
+    'qt:s', 'Qt5 (use QTDIR or system pkg)',
+    'qt-include:s', 'Qt include dir (use QT5_INCDIR or QTDIR/include)',
     'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security (optional)',
@@ -195,6 +196,7 @@ sub iterate {
 }
 
 sub usage {
+  my $status = shift;
   my $current;
   my $ver;
   open VER, 'dds/Version.h' or die "ERROR: can't open dds/Version.h, stopped";
@@ -231,7 +233,7 @@ EOT
             print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
           }
          );
-  exit 1;
+  exit $status;
 }
 
 sub parseArgs {
@@ -248,9 +250,9 @@ sub parseArgs {
   }
 
   my $opts = {};
-  GetOptions($opts, @getopts) or usage();
-  usage() if $opts->{'help'};
-  targetUsage() if $opts->{'target-help'};
+  GetOptions($opts, @getopts) or usage(1);
+  usage(0) if $opts->{'help'};
+  targetUsage(0) if $opts->{'target-help'};
 
   if ($opts->{'verbose'}) {
     print "Options:\n";
@@ -862,7 +864,7 @@ my %optdep =
                   ['WIRESHARK_LIB'],
    'glib' =>      ['GLIB_ROOT',     'include/glib-2.0/glib.h'],
    'rapidjson' => ['RAPIDJSON_ROOT', 'include/rapidjson/rapidjson.h', 'no_itl=0'],
-   'qt' =>        ['QTDIR',         '',                            'qt4'],
+   'qt' =>        ['QTDIR',       '',                            'qt5'],
    'boost' =>     ['BOOST_ROOT',    'include/boost/version.hpp',   'boost'],
    'xerces3' =>   ['XERCESCROOT',   'include/xercesc/dom/DOM.hpp', 'xerces3'],
    'openssl' =>   ['SSL_ROOT',      'include/openssl/opensslv.h',  'ssl'],
@@ -880,7 +882,8 @@ if (exists $opts{'java'}) {
   setEnv('JAVA_PLATFORM', perlOS_to_java_platform());
 }
 
-$opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
+my $try_to_use_qt_system_pkg =
+  exists $opts{'qt'} && !length($opts{'qt'}) && !exists $opts{'qt-include'};
 $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 
 # Default to Wireshark Development Package if installed and a path wasn't
@@ -1280,26 +1283,6 @@ if ($opts{'glib'}) {
   }
 }
 
-if ($opts{'qt-include'}) {
-  setEnv('QT4_INCDIR', $opts{'qt-include'});
-}
-elsif (exists $opts{'qt'} && !$ENV{'QT4_INCDIR'} && !$targetEnv{'QT4_INCDIR'}) {
-  setEnv('QT4_INCDIR', $targetEnv{'QTDIR'} . "/include/qt4")
-    if -r "$targetEnv{'QTDIR'}/include/qt4/QtCore/qglobal.h";
-}
-elsif (exists $opts{'qt'} && $ENV{'QT4_INCDIR'} && !$targetEnv{'QT4_INCDIR'}) {
-  setEnv('QT4_INCDIR', $ENV{'QT4_INCDIR'});
-}
-
-if (exists $opts{'qt'} && !-r ($targetEnv{'QT4_INCDIR'} ?
-                               $targetEnv{'QT4_INCDIR'} :
-                               "$targetEnv{'QTDIR'}/include")
-    . '/QtCore/qconfig.h') {
-  die "ERROR: Can't find qt at " . ($targetEnv{'QT4_INCDIR'} ?
-                                    $targetEnv{'QT4_INCDIR'} :
-                                    $targetEnv{'QTDIR'}) . "\nstopped";
-}
-
 sub push_env_dir {
   my ($buildEnvRef, $var, $path) = @_;
   if (exists $buildEnvRef->{$var}) {
@@ -1321,6 +1304,74 @@ sub push_libpath {
   my $platform = $opts{$build};
   my $libpathname = $platforminfo{$platform}->{'libpath'};
   push_env_dir($buildEnvRef, $libpathname, $path);
+}
+
+if (exists $opts{'qt'}) {
+  my $qglobal = "QtCore" . $slash . "qglobal.h";
+  my $qt_include;
+  my $qt_bin;
+  my $qt_lib;
+
+  if ($try_to_use_qt_system_pkg) {
+    # Try to use pkg-config to get Qt locations
+    my $mesg = ", stopped\nPlease either install Qt or provide the Qt " .
+      "locations (see docs/qt.md for details).\n";
+    `pkg-config --print-variables Qt5Core`;
+    if ($!) {
+      die "ERROR: Trying to use system Qt package but could not confirm " .
+        "Qt and/or pkg-config exists on the system$mesg";
+    }
+    $qt_include = `pkg-config --variable=includedir Qt5Core`;
+    die "ERROR: could not resolve system Qt include location$mesg" if ($!);
+    chomp $qt_include;
+    $qt_bin = `pkg-config --variable=host_bins Qt5Core`;
+    die "ERROR: could not resolve system Qt bin location$mesg" if ($!);
+    chomp $qt_bin;
+    $qt_lib = `pkg-config --variable=libdir Qt5Core`;
+    die "ERROR: could not resolve system Qt lib location$mesg\n" if ($!);
+    chomp $qt_lib;
+  } else {
+    if (exists $opts{'qt-include'}) {
+      if (!length($opts{'qt-include'})) {
+        die "ERROR: --qt-include requires an argument, stopped\n";
+      }
+      $qt_include = $opts{'qt-include'};
+    } else {
+      $qt_include = $targetEnv{'QTDIR'} . $slash . 'include' . $slash;
+    }
+
+    if (exists $ENV{'QT5_BINDIR'}) {
+      $qt_bin = $ENV{'QT5_BINDIR'};
+    } else {
+      $qt_bin = $targetEnv{'QTDIR'} . $slash . 'bin';
+    }
+
+    if (exists $ENV{'QT5_LIBDIR'}) {
+      $qt_lib = $ENV{'QT5_LIBDIR'};
+    } else {
+      $qt_lib = $targetEnv{'QTDIR'} . $slash . (is_windows() ? 'bin' : 'lib');
+    }
+  }
+
+  # Check for Qt Headers using qglobal.h
+  # Also try to detect if Qt Headers were just put in the include directory or
+  # put in qt5 directory inside the include directory. For example, the former
+  # might happen on Windows with prebuilt Qt while the latter might be the
+  # case with Linux with Qt installed from package manager.
+  if (! -r  $qt_include . $slash . $qglobal) {
+    if (-r $qt_include . $slash . 'qt5' . $slash . $qglobal) {
+      $qt_include = $qt_include . $slash . 'qt5';
+    } else {
+      die "ERROR: Could not find Qt headers at $qt_include" .
+        " ($qglobal could not be found), stopped\n";
+    }
+  }
+
+  setEnv('QT5_INCDIR', $qt_include);
+  setEnv('QT5_BINDIR', $qt_bin);
+  push_libpath(\%targetEnv, $qt_lib);
+} elsif (exists $opts{'qt-include'}) {
+  die "ERROR: --qt-include requires --qt, stopped\n";
 }
 
 sub write_host_workspace {
