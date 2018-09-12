@@ -1929,12 +1929,12 @@ find_path(OPENDDS_INCLUDE_DIR
   HINTS \${DDS_ROOT}
 )
 
-find_path(_ACE_INCLUDE_DIR
+find_path(ACE_INCLUDE_DIR
   ace
   HINTS \${ACE_ROOT}
 )
 
-find_path(_TAO_INCLUDE_DIR
+find_path(TAO_INCLUDE_DIR
   tao
   HINTS \${ACE_ROOT}/TAO
 )
@@ -1988,12 +1988,21 @@ foreach(_cfg  "RELEASE" "DEBUG")
   )
 endforeach()
 
-file(GLOB _opendds_version_file \${DDS_ROOT}/VERSION)
-if(_opendds_version_file)
-  string(REGEX MATCH "OpenDDS version ([0-9]+).([0-9]+)" OPENDDS_VERSION "\${_opendds_version_file}")
-  set(OPENDDS_VERSION_MAJOR \${CMAKE_MATCH_1})
-  set(OPENDDS_VERSION_MINOR \${CMAKE_MATCH_2})
-endif()
+function(opendds_extract_version  in_version_file  out_version  out_major  out_minor)
+  file(READ "\${in_version_file}" contents)
+  if(contents)
+    string(REGEX MATCH "OpenDDS version (([0-9]+).([0-9]+))" _ "\${contents}")
+    set(\${out_version} \${CMAKE_MATCH_1} PARENT_SCOPE)
+    set(\${out_major}   \${CMAKE_MATCH_2} PARENT_SCOPE)
+    set(\${out_minor}   \${CMAKE_MATCH_3} PARENT_SCOPE)
+  endif()
+endfunction()
+
+opendds_extract_version("\${DDS_ROOT}/VERSION"
+  OPENDDS_VERSION
+  OPENDDS_VERSION_MAJOR
+  OPENDDS_VERSION_MINOR
+)
 
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
