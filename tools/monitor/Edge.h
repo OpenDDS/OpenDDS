@@ -8,7 +8,7 @@
 #ifndef EDGE_H
 #define EDGE_H
 
-#include <QtGui/QGraphicsTextItem>
+#include <QtWidgets/QGraphicsTextItem>
 #include <QtGui/QPainter>
 
 #include "Node.h"

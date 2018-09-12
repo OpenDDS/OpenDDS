@@ -1,7 +1,7 @@
 Version 3.14 of OpenDDS
 
 ##### Additions:
-- TODO: Add your features here
+- Monitor and the ishapes demo now use Qt5
 
 ##### Fixes:
 - TODO: Add your fixes here
