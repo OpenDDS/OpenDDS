@@ -1319,7 +1319,7 @@ if (exists $opts{'qt'}) {
     `pkg-config --print-variables Qt5Core`;
     if ($!) {
       die "ERROR: Trying to use system Qt package but could not confirm " .
-        "Qt and/or pkg-config exists on the system$mesg" .
+        "Qt and/or pkg-config exists on the system$mesg";
     }
     $qt_include = `pkg-config --variable=includedir Qt5Core`;
     die "ERROR: could not resolve system Qt include location$mesg" if ($!);
