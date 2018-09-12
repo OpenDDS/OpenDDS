@@ -17,11 +17,12 @@ use strict;
 
 ################################################################################
 
-my ($opt_h, $opt_d, $opt_a, $opt_s, @opt_l);
+my ($opt_h, $opt_d, $opt_a, $opt_x, $opt_s, @opt_l);
 
 if (!GetOptions('h' => \$opt_h,
                 'd' => \$opt_d,
                 'a' => \$opt_a,
+                'x' => \$opt_x,
                 's=s' => \$opt_s,
                 'l=s' => \@opt_l)
     || $opt_h) {
@@ -35,6 +36,7 @@ if (!GetOptions('h' => \$opt_h,
     print "    -Config cfg Run the tests for the <cfg> configuration\n";
     print "    -s sandbox  Runs each program using a sandbox program\n";
     print "    -a          Run all DDS (DCPS) tests (default unless -l)\n";
+    print "    -x          Stop on any failure\n";
     print "    -l listfile Run the tests specified in list file\n";
     print "\n";
     my $dcps_config_list = new PerlACE::ConfigList;
@@ -133,6 +135,9 @@ foreach my $test_lst (@file_list) {
 
             if ($result != 0) {
                 print "Error: $test returned with status $result\n";
+                if ($opt_x) {
+                    exit($result);
+                }
             }
 
             my $stop_time_string = localtime;
