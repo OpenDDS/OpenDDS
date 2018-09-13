@@ -1,9 +1,9 @@
-project(*App): dcpsexe, dcps_tcp, dcps_monitor, qt4_settings {
+project(*App): dcpsexe, dcps_tcp, dcps_monitor, qt5_widgets {
   exename = monitor
   exeout  = $(DDS_ROOT)/bin
   requires += built_in_topics
 
-  specific (vc9, vc10, vc11, vc12, vc14, vs2017, nmake) {
+  specific (prop:microsoft) {
     compile_flags += /bigobj
   }
 
