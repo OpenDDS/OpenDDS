@@ -6,14 +6,17 @@ if (DEFINED ENV{DDS_ROOT})
   list(APPEND CMAKE_MODULE_PATH "${DDS_ROOT}/lib/cmake/Modules")
 endif()
 
+include(opendds_options)
+
 find_package(OpenDDS 3 REQUIRED)
 
 # ace_requires("TARGET tao_nsadd")
 
 ace_add_lib(DDS_Messenger_Idl
   OUTPUT_NAME DDS_Messenger_Idl
-  DEFINE_SYMBOL MESSENGER_BUILD_DLL
-  PUBLIC_LINK_LIBRARIES OpenDDS::OpenDDS
+  PUBLIC_COMPILE_DEFINITIONS MESSENGER_BUILD_DLL
+  PUBLIC_LINK_LIBRARIES OpenDDS::Dcps
+  INCLUDE_DIRECTORIES "${OPENDDS_INCLUDE_DIRS}"
 )
 
 dds_idl_sources(
@@ -33,8 +36,11 @@ ace_add_exe(DDS_Messenger_Publisher
                  OpenDDS::Rtps_Udp
                  OpenDDS::Shmem
                  DDS_Messenger_Idl
-                 OpenDDS::InfoRepo
+                 OpenDDS::InfoRepoDiscovery
                  OpenDDS::Rtps
+                 OpenDDS::Dcps
+                 ACE::Core
+                 TAO::Core
 )
 
 ace_target_cxx_sources(DDS_Messenger_Publisher
