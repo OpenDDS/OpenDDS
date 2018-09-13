@@ -7,7 +7,7 @@
 
 #include "Viewer.h"
 #include "Options.h"
-#include <QtGui/QSplashScreen>
+#include <QtWidgets/QSplashScreen>
 
 #include "dds/DCPS/Service_Participant.h"
 #include <ace/Argv_Type_Converter.h>
