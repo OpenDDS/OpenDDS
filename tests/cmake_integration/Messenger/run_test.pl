@@ -6,20 +6,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 my @original_ARGV = @ARGV;
 
-use Getopt::Long qw(GetOptionsFromArray);
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
-
-
-my $config_dir = ".";
-GetOptionsFromArray(\@ARGV, ("cfg-dir:s" => \$config_dir));
-
-die "Invalid directory '$config_dir' supplied"
-  if ! -d $config_dir;
 
 my $status = 0;
 
@@ -44,12 +36,12 @@ if ($test->flag('thread_per')) {
 
 my $flag_found = 1;
 if ($test->flag('udp')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/pub_udp.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/sub_udp.ini";
+    $pub_opts .= " -DCPSConfigFile pub_udp.ini";
+    $sub_opts .= " -DCPSConfigFile sub_udp.ini";
 }
 elsif ($test->flag('multicast')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/pub_multicast.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/sub_multicast.ini";
+    $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
+    $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
 }
 elsif ($test->flag('default_tcp')) {
     $pub_opts .= " -t tcp";
@@ -65,12 +57,12 @@ elsif ($test->flag('default_multicast')) {
 }
 elsif ($test->flag('nobits')) {
     # nobits handled by TestFramework
-    $pub_opts .= ' -DCPSConfigFile $config_dir/pub.ini';
-    $sub_opts .= ' -DCPSConfigFile $config_dir/sub.ini';
+    $pub_opts .= ' -DCPSConfigFile pub.ini';
+    $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
 elsif ($test->flag('ipv6')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/pub_ipv6.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/sub_ipv6.ini";
+    $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
+    $sub_opts .= " -DCPSConfigFile sub_ipv6.ini";
 }
 elsif ($test->flag('stack')) {
     $pub_opts .= " -t tcp";
@@ -78,47 +70,47 @@ elsif ($test->flag('stack')) {
     $stack_based = 1;
 }
 elsif ($test->flag('rtps')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps.ini";
+    $pub_opts .= " -DCPSConfigFile rtps.ini";
+    $sub_opts .= " -DCPSConfigFile rtps.ini";
 }
 elsif ($test->flag('rtps_disc')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps_disc.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps_disc.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_half_sec_pub')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_sec.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps_disc.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_half_sec_sub')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps_disc.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_sec.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_sec')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_sec.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_sec.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_tcp')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_tcp.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_tcp.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_tcp_udp')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_tcp_udp.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps_disc_tcp_udp.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_unicast')) {
     $test->{nobits} = 1;
-    $pub_opts .= " -DCPSConfigFile $config_dir/rtps_uni.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/rtps_uni.ini";
+    $pub_opts .= " -DCPSConfigFile rtps_uni.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_uni.ini";
 }
 elsif ($test->flag('shmem')) {
-    $pub_opts .= " -DCPSConfigFile $config_dir/shmem.ini";
-    $sub_opts .= " -DCPSConfigFile $config_dir/shmem.ini";
+    $pub_opts .= " -DCPSConfigFile shmem.ini";
+    $sub_opts .= " -DCPSConfigFile shmem.ini";
 }
 elsif ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
@@ -133,8 +125,8 @@ elsif ($test->flag('all')) {
 }
 else {
     $flag_found = 0;
-    $pub_opts .= ' -DCPSConfigFile $config_dir/pub.ini';
-    $sub_opts .= ' -DCPSConfigFile $config_dir/sub.ini';
+    $pub_opts .= ' -DCPSConfigFile pub.ini';
+    $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
 
 $test->report_unused_flags(!$flag_found);
