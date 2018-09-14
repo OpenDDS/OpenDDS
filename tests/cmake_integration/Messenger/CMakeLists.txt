@@ -30,17 +30,17 @@ dds_idl_sources(
 
 ace_add_exe(DDS_Messenger_Publisher
   OUTPUT_NAME publisher
-  LINK_LIBRARIES OpenDDS::Tcp
+  LINK_LIBRARIES ACE::Core
+                 TAO::Core
+                 OpenDDS::Tcp
                  OpenDDS::Udp
                  OpenDDS::Multicast
                  OpenDDS::Rtps_Udp
                  OpenDDS::Shmem
-                 DDS_Messenger_Idl
                  OpenDDS::InfoRepoDiscovery
                  OpenDDS::Rtps
                  OpenDDS::Dcps
-                 ACE::Core
-                 TAO::Core
+                 DDS_Messenger_Idl
 )
 
 ace_target_cxx_sources(DDS_Messenger_Publisher
@@ -49,30 +49,46 @@ ace_target_cxx_sources(DDS_Messenger_Publisher
   HEADER_FILES Writer.h
 )
 
-# ace_add_exe(DDS_Messenger_Subscriber
-  # OUTPUT_NAME subscriber
-  # LINK_LIBRARIES OpenDDS_Transports_For_Test
-                 # DDS_Messenger_Idl
-                 # OpenDDS_Default_Discovery
-# )
-# ace_target_cxx_sources(DDS_Messenger_Subscriber
-  # SOURCE_FILES DataReaderListener.cpp
-               # subscriber.cpp
-  # HEADER_FILES DataReaderListener.h
-# )
+ace_add_exe(DDS_Messenger_Subscriber
+  OUTPUT_NAME subscriber
+  LINK_LIBRARIES ACE::Core
+                 TAO::Core
+                 OpenDDS::Tcp
+                 OpenDDS::Udp
+                 OpenDDS::Multicast
+                 OpenDDS::Rtps_Udp
+                 OpenDDS::Shmem
+                 OpenDDS::InfoRepoDiscovery
+                 OpenDDS::Rtps
+                 OpenDDS::Dcps
+                 DDS_Messenger_Idl
+)
+ace_target_cxx_sources(DDS_Messenger_Subscriber
+  SOURCE_FILES DataReaderListener.cpp
+               subscriber.cpp
+  HEADER_FILES DataReaderListener.h
+)
 
 
-# ace_add_exe(DDS_Messenger_Stacksubscriber
-  # OUTPUT_NAME stack_subscriber
-  # LINK_LIBRARIES OpenDDS_Transports_For_Test
-                 # DDS_Messenger_Idl
-                 # OpenDDS_Default_Discovery
-# )
-# ace_target_cxx_sources(DDS_Messenger_Stacksubscriber
-  # SOURCE_FILES DataReaderListener.cpp
-               # stack_subscriber.cpp
-  # HEADER_FILES DataReaderListener.h
-# )
+ace_add_exe(DDS_Messenger_Stacksubscriber
+  OUTPUT_NAME stack_subscriber
+  LINK_LIBRARIES ACE::Core
+                 TAO::Core
+                 OpenDDS::Tcp
+                 OpenDDS::Udp
+                 OpenDDS::Multicast
+                 OpenDDS::Rtps_Udp
+                 OpenDDS::Shmem
+                 OpenDDS::InfoRepoDiscovery
+                 OpenDDS::Rtps
+                 OpenDDS::Dcps
+                 DDS_Messenger_Idl
+)
+ace_target_cxx_sources(DDS_Messenger_Stacksubscriber
+  SOURCE_FILES DataReaderListener.cpp
+               stack_subscriber.cpp
+  HEADER_FILES DataReaderListener.h
+)
 
 # include(${OpenDDS_INCLUDE_DIR}/cmake/dds_add_test.cmake)
 
