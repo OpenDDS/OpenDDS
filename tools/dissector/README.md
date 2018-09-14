@@ -1,70 +1,72 @@
+# OpenDDS DCPS Wireshark Dissector
+
 The OpenDDS DCPS Wireshark dissector supports the TCP/IP, UDP/IP, and IP
 multicast transports. Dissection of transport headers and encapsulated sample
 headers are fully supported. Optional dissection of sample payloads is also
 supported from Wireshark 1.12 on. The dissector is compatible with Wireshark
 1.2 up to at least 2.6 and has been tested with Windows, macOS, and Linux.
 
+## See also
 
-======================================================================
-* See also
-
-  - Wireshark Project Page
-      <https://www.wireshark.org/>
-  - Wireshark Download Page
-      <https://www.wireshark.org/download.html>
-  - Wireshark User's Guide
-      <https://www.wireshark.org/docs/wsug_html_chunked/>
-  - Wireshark Developer's Guide
-      <https://www.wireshark.org/docs/wsdg_html_chunked/>
+- For Users:
+  - [Wireshark Project Page](
+      https://www.wireshark.org/>)
+  - [Wireshark Download Page](
+      https://www.wireshark.org/download.html)
+  - [Wireshark User's Guide](
+      https://www.wireshark.org/docs/wsug_html_chunked/)
+- For Developing This Plugin:
+  - [Wireshark Developer's Guide](
+      https://www.wireshark.org/docs/wsdg_html_chunked/)
   - doc/README.dissector located in the Wireshark source
-      Has information not found in the Developer's Guide
-  - Wireshark Dissector API Doxygen
-      <https://www.wireshark.org/docs/wsar_html/epan/modules.html>
+    - Has **very important** information not found in the Developer's Guide
+  - [Wireshark Dissector API Doxygen](
+      https://www.wireshark.org/docs/wsar_html/epan/modules.html)
 
-
-======================================================================
-* Building the OpenDDS DCPS dissector
+## Building the OpenDDS DCPS dissector
 
 Follow the steps in the INSTALL file in the root of OpenDDS directory, along
 with the steps here.
 
 In addition, the Wireshark sources must be available and built locally
-according to the Wireshark Developer's Guide (see above) or the headers and
-libraries must be installed through a development package like:
- - "wireshark-devel" on Fedora derived Linux distributions.
- - "wireshark-dev" on Debian derived Linux distributions.
+according to the [Wireshark Developer's Guide](https://www.wireshark.org/docs/wsdg_html_chunked/)
+or the headers and libraries must be installed through a development package
+like:
+
+ - `wireshark-devel` on Fedora derived Linux distributions.
+ - `wireshark-dev` on Debian derived Linux distributions.
 
 1. Set up the Build System to Build the Dissector
 
    There are two ways to build against Wireshark depending on how Wireshark
    was built or was acquired:
 
-    - The older method, "--wireshark" passed with the location of the
+    - The older method, `--wireshark` passed with the location of the
       Wireshark headers and libraries. This should be used with:
 
        - Any version of Wireshark built with autoconf, which is try if you
          ran autogen.sh. This is the recommended way to build on Linux as
          of Wireshark 2.6.
 
-       - Wireshark 1.x built on Windows. Also %WIRETAP_VERSION% should also
+       - Wireshark 1.x built on Windows. Also `%WIRETAP_VERSION%` should also
          be set to the version of wiretap in the build.
 
        - If there is a development package available for your system
          and you want to use it to avoid having to build Wireshark.
-         This option defaults to /usr/include/wireshark if it exists, so
+         This option defaults to `/usr/include/wireshark` if it exists, so
          supplying the path isn't necessary.
 
-    - The newer out-of-source method, "--wireshark_cmake", should be used if
+    - The newer out-of-source method, `--wireshark_cmake`, should be used if
       Wireshark was built using CMake, which can put "config.h" header and
       the Wireshark libraries somewhere other than the source tree. This is
       Wireshark's recommended method for Windows and macOS and can optionally
       be used on Linux. This method has two more parameters:
 
-       --wireshark_build
+       `--wireshark_build`
          Is the build directory the user choose before building Wireshark.
          This is required and an absolute path.
 
-       --wireshark_lib
+       `--wireshark_lib`
          Is the location of the Wireshark libraries RELATIVE to the build
          location. It's optional but it might have to be supplied depending
          on the version of Wireshark as these defaults are based on
@@ -119,8 +121,7 @@ libraries must be installed through a development package like:
    The OpenDDS_Dissector library we created above should appear in the
    list of plugins or protocols.
 
-======================================================================
-* Environment Variables
+## Environment Variables
 
    OPENDDS_DISSECTORS
      If set the dissector will look for ITL files in that location
@@ -139,8 +140,7 @@ libraries must be installed through a development package like:
      and close Wireshark. Setting this might be more helpful if
      using a debugger to see where the segfault occurred.
 
-======================================================================
-* Available Display Filters
+## Available Display Filters
 
 A number of display filters are supported by the OpenDDS DCPS dissector:
 
@@ -213,8 +213,7 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
 
   See below for Filtering based on the sample payload.
 
-======================================================================
-* Available Color Filters
+## Available Color Filters
 
 A set of color filters are included in the source distribution which may
 be imported to highlight DCPS protocol packets.
@@ -229,9 +228,7 @@ NOTE: Coloring rules are applied on a first match basis; you may need to
       changed, you must ensure the "OpenDDS (Important)" rule appears
       before the "OpenDDS" rule.
 
-======================================================================
-
-* Sample Dissection
+## Sample Dissection
 
 The dissector, when configured with RapidJSON, can dissect sample data on
 Wireshark 1.12 and later. To use this:
@@ -252,9 +249,7 @@ Type information is exported using Intermediate Type Language (ITL).
 For more information, see
   <https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang>.
 
-======================================================================
-
-* Sample Dissection Filtering
+## Sample Dissection Filtering
 
 When the dissector can dissect sample data, it also allows Wireshark to filter
 OpenDDS packets based on contents.
@@ -312,8 +307,7 @@ Notes:
     applies to WChars, but that's because Wireshark does not have a dedicated
     wide character type.
 
-======================================================================
-* Known Limitations
+## Known Limitations
 
   - OpenDDS only maintains wire compatibility with the current revision
     of the DCPS protocol.  This dissector is effective for the compiled
