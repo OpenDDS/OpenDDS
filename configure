@@ -273,7 +273,7 @@ $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
 my $is_windows = $opts{'host'} eq 'win32';
 
-my ($slash, $exeext) = is_windows ? ('\\', '.exe') : ('/', '');
+my ($slash, $exeext) = $is_windows ? ('\\', '.exe') : ('/', '');
 
 my %specific =
   ($slash eq '/' ?
@@ -389,7 +389,7 @@ else {
   }
   if (!defined $opts{'compiler'}) {
     die "ERROR: Can't find a compiler, set PATH or run this script with the ".
-      "--compiler option.\n" . (is_windows ? "  For Microsoft Visual C++, ".
+      "--compiler option.\n" . ($is_windows ? "  For Microsoft Visual C++, ".
                                 "run this script from the Visual Studio ".
                                 "Command Prompt.\n" : '') . "Stopped";
   }
@@ -470,7 +470,7 @@ sub setSomeEnv {
   if ($opts{'dry-run'} && !$notdir && looksRelative($val)) {
     $val = getcwd . $slash . $val;
   }
-  $val =~ s!/!\\!g if is_windows;
+  $val =~ s!/!\\!g if $is_windows;
   $hashref->{$name} = $val;
 }
 
@@ -554,12 +554,12 @@ if (!$ace_src || !$tao_src) {
   if ($opts{'doc_group'}) {
     $urlbase = 'http://download.dre.vanderbilt.edu/previous_versions/';
     $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
-      . (is_windows ? 'zip' : 'tar.gz');
+      . ($is_windows ? 'zip' : 'tar.gz');
     $download_message = "Downloading $file";
   } else {
     $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
     $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
-      . (is_windows ? 'zip' : 'tar.gz');
+      . ($is_windows ? 'zip' : 'tar.gz');
     $download_message =
       "Downloading ACE+TAO $oci_tao_version with latest patches";
   }
@@ -617,7 +617,7 @@ if (!$ace_src || !$tao_src) {
   if ($@) {
     my $err = 1;
     my $ddsroot = getcwd;
-    if (!is_windows) {
+    if (!$is_windows) {
       if ($opts{'dry-run'}) {
         print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
           "tar xzf $ddsroot/$file\n";
@@ -790,7 +790,7 @@ my @ace_macros = ('debug',
 my @platformmacros;
 sub write_platform_macros {
   my %buildEnv = %{shift()};
-  if (!is_windows ||
+  if (!$is_windows ||
       ($cross_compile && $buildEnv{'build'} eq 'target')) {
     my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
@@ -944,7 +944,7 @@ if ($opts{'security'}) {
           if $opts{'verbose'};
 
         my $cmake_default =
-          (is_windows ?
+          ($is_windows ?
             (-f $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' ?
                 $ENV{'ProgramFiles'} . '\\CMake\\bin\\cmake.exe' :
                 $ENV{'ProgramFiles(x86)'} . '\\CMake\\bin\\cmake.exe') :
@@ -969,7 +969,7 @@ sub targets_win64 {
 }
 
 sub system_default_install_dir {
-  if (is_windows) {
+  if ($is_windows) {
     # When the host is 32-bit.
     return $ENV{'ProgramFiles'}
       if ! exists $ENV{'ProgramFiles(x86)'};
@@ -996,7 +996,7 @@ if (exists $opts{'gtest'}) {
     my $sm_dir = Cwd::abs_path('./tests/googletest');
     my $sm_src = File::Spec->catdir($sm_dir, 'googletest');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
-                              is_windows ? 'googletest-distribution' : ''));
+                              $is_windows ? 'googletest-distribution' : ''));
 
     if (-f File::Spec->catfile($sm_src, $sanity)) {
       $opts{'gtest-precompiled'} = 0;
@@ -1018,7 +1018,7 @@ if (exists $opts{'rapidjson'}) {
     my $sanity = $optdep{'rapidjson'}->[1];
     my $sm_dir = Cwd::abs_path('./tools/IntermediateTypeLang/cpp/rapidjson');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
-                              is_windows ? 'RapidJSON' : ''));
+                              $is_windows ? 'RapidJSON' : ''));
 
     if (-f File::Spec->catfile($sm_dir, $sanity)) {
       $opts{'rapidjson'} = $sm_dir;
@@ -1078,11 +1078,11 @@ for my $key (keys %optdep) {
         }
       }
     }
-    elsif (!is_windows && exists $use_system_pkg{$key}) {
+    elsif (!$is_windows && exists $use_system_pkg{$key}) {
       $opts{$key} = '/usr';
       print "Defaulting $key to $opts{$key}\n" if $opts{'verbose'};
     }
-    elsif (is_windows && exists $use_win_default{$key}) {
+    elsif ($is_windows && exists $use_win_default{$key}) {
       my $dir = $use_win_default{$key};
 
       if (-d $dir) {
@@ -1193,7 +1193,7 @@ if ($opts{'security'} && $tests && $opts{'cmake'} && ! $opts{'gtest-precompiled'
   my $build_dir = $opts{'gtest'} . $slash . 'build';
   my $install_dir = $build_dir . $slash . 'install';
   my $cmake = $opts{'cmake'};
-  my @cmake_cmds = ((is_windows ?
+  my @cmake_cmds = (($is_windows ?
                       ["$cmake",
                        "-D", "gtest_force_shared_crt=ON",
                        "-D", "CMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1",
@@ -1357,7 +1357,7 @@ if (exists $opts{'qt'}) {
     if (exists $ENV{'QT5_LIBDIR'}) {
       $qt_lib = $ENV{'QT5_LIBDIR'};
     } else {
-      $qt_lib = $targetEnv{'QTDIR'} . $slash . (is_windows ? 'bin' : 'lib');
+      $qt_lib = $targetEnv{'QTDIR'} . $slash . ($is_windows ? 'bin' : 'lib');
     }
   }
 
@@ -1366,14 +1366,14 @@ if (exists $opts{'qt'}) {
   my $assume_vcpkg =
     (-r $vcpkg_tools . $slash . $qt_moc) &&
     !exists $ENV{'QT5_LIBDIR'} &&
-	!exists $ENV{'QT5_BINDIR'};
+    !exists $ENV{'QT5_BINDIR'};
   if ($assume_vcpkg) {
-	$qt_bin = $vcpkg_tools;
-	if ($debug) {
-	  setEnv('QT5_LIBDIR', join($slash, $targetEnv{'QTDIR'}, "debug", "lib"));
-	  $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug",
-	    (is_windows ? 'bin' : 'lib'));
-	}
+    $qt_bin = $vcpkg_tools;
+    if ($debug) {
+      setEnv('QT5_LIBDIR', join($slash, $targetEnv{'QTDIR'}, "debug", "lib"));
+      $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug",
+        ($is_windows ? 'bin' : 'lib'));
+    }
   }
 
   # Check for Qt Headers using qglobal.h
@@ -1393,14 +1393,14 @@ if (exists $opts{'qt'}) {
 
   # Check for Qt Tools using moc
   if (! -r $qt_bin . $slash . $qt_moc) {
-	# If QT5_SUFFIX isn't defined, maybe it needs a suffix
-	if ((!exists $ENV{'QT5_SUFFIX'}) &&
-	  (-r $qt_bin . $slash . $qt_moc_default_suffix)) {
-	  $qt_bin_suffix = $qt_default_suffix;
-	} else {
-	  die "ERROR: Could not find Qt build tools at $qt_bin" .
+    # If QT5_SUFFIX isn't defined, maybe it needs a suffix
+    if ((!exists $ENV{'QT5_SUFFIX'}) &&
+      (-r $qt_bin . $slash . $qt_moc_default_suffix)) {
+      $qt_bin_suffix = $qt_default_suffix;
+    } else {
+      die "ERROR: Could not find Qt build tools at $qt_bin" .
         " ($qt_moc could not be found)$qt_help_mesg";
-	}
+    }
   }
 
   setEnv('QT5_INCDIR', $qt_include);
@@ -1483,7 +1483,7 @@ sub generate_workspace {
     }
   }
 
-  my $mpctype = (!is_windows ||
+  my $mpctype = (!$is_windows ||
                   ($cross_compile && $buildEnv->{'build'} eq 'target'))
                 ? 'gnuace' : $opts{'compiler_version'};
 
@@ -1632,7 +1632,7 @@ EOT
     $ws = 'DDS_TAOv2_all.mwc';
   }
 
-  my $static = (($opts{'static'} && is_windows) ||
+  my $static = (($opts{'static'} && $is_windows) ||
     ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'))
     ? '-static' : '';
 
@@ -1714,7 +1714,7 @@ sub write_environment {
       print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
       if ($MK) {
         my $value = $buildEnv{$key};
-        convert_environment(\$value) if is_windows;
+        convert_environment(\$value) if $is_windows;
         print $MK "export $key := $value\n" if $MK;
       }
     }
@@ -1869,7 +1869,7 @@ if ($cross_compile) {
   write_environment(\%targetEnv, $targetEnv{'ACE_ROOT'} . '/ace')
     if $opts{'safety-profile'};
 
-  write_cross_compile_makefile() if !is_windows;
+  write_cross_compile_makefile() if !$is_windows;
 }
 else { # not cross-compiling:
   setEnv('ACE_ROOT', $ace_src);
@@ -1896,7 +1896,7 @@ else { # not cross-compiling:
 }
 
 print "Completed configuring OpenDDS, next ";
-if (!is_windows) {
+if (!$is_windows) {
   print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
 }
 elsif ($cross_compile) {
@@ -1917,7 +1917,7 @@ print " to compile ",
   ($cross_compile ?
    "in the\nbuild${slash}host and build${slash}target dirs " : ''),
   "to set environment\nvariables for future shell sessions.\n";
-if (is_windows) {
+if ($is_windows) {
   print "Start Visual Studio from this command prompt so that it inherits ",
     "the correct\nenvironment variables.\n";
 }
