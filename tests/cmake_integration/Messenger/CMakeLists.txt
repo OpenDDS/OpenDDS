@@ -30,8 +30,8 @@ dds_idl_sources(
 
 ace_add_exe(DDS_Messenger_Publisher
   OUTPUT_NAME publisher
-  LINK_LIBRARIES ACE::Core
-                 TAO::Core
+  LINK_LIBRARIES ACE::ACE
+                 TAO::TAO
                  OpenDDS::Tcp
                  OpenDDS::Udp
                  OpenDDS::Multicast
@@ -51,8 +51,8 @@ ace_target_cxx_sources(DDS_Messenger_Publisher
 
 ace_add_exe(DDS_Messenger_Subscriber
   OUTPUT_NAME subscriber
-  LINK_LIBRARIES ACE::Core
-                 TAO::Core
+  LINK_LIBRARIES ACE::ACE
+                 TAO::TAO
                  OpenDDS::Tcp
                  OpenDDS::Udp
                  OpenDDS::Multicast
@@ -72,8 +72,8 @@ ace_target_cxx_sources(DDS_Messenger_Subscriber
 
 ace_add_exe(DDS_Messenger_Stacksubscriber
   OUTPUT_NAME stack_subscriber
-  LINK_LIBRARIES ACE::Core
-                 TAO::Core
+  LINK_LIBRARIES ACE::ACE
+                 TAO::TAO
                  OpenDDS::Tcp
                  OpenDDS::Udp
                  OpenDDS::Multicast
@@ -101,6 +101,6 @@ ace_target_cxx_sources(DDS_Messenger_Stacksubscriber
 
 # dds_configure_test_files(replace_nsadd replace_nsadd_check_condition shouldnt_ignore_exesubdir)
 
-# file(GLOB files *.ini)
-# file(COPY ${files}
-     # DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB files *.ini)
+file(COPY ${files}
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

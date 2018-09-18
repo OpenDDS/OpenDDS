@@ -1964,45 +1964,273 @@ find_program(ACE_GPERF
     \${_ace_bin_hints}
 )
 
+set(_ace_libs
+  ACE_XML_Utils
+  ACE
+)
+
+set(_tao_libs
+  TAO_IORManip
+  TAO_ImR_Client
+  TAO_Svc_Utils
+  TAO_IORTable
+  TAO_IDL_FE
+  TAO_PortableServer
+  TAO_BiDirGIOP
+  TAO_PI
+  TAO_CodecFactory
+  TAO_AnyTypeCode
+  TAO
+)
+
 set(_opendds_libs
   OpenDDS_Dcps
-  OpenDDS_Rtps
+  OpenDDS_FACE
+  OpenDDS_Federator
   OpenDDS_InfoRepoDiscovery
+  OpenDDS_InfoRepoLib
+  OpenDDS_InfoRepoServ
+  OpenDDS_Model
+  OpenDDS_monitor
+  OpenDDS_Multicast
+  OpenDDS_QOS_XML_XSC_Handler
+  OpenDDS_Rtps
+  OpenDDS_Rtps_Udp
+  OpenDDS_Security
+  OpenDDS_Shmem
   OpenDDS_Tcp
   OpenDDS_Udp
-  OpenDDS_Multicast
-  OpenDDS_Rtps_Udp
-  OpenDDS_Shmem
+)
+
+set(OPENDDS_IDL_DEPS
+  TAO::IDL_FE
+  ACE::ACE
+)
+
+set(OPENDDS_DCPS_DEPS
+  TAO::PortableServer
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_FACE_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_FEDERATOR_DEPS
+  OpenDDS::InfoRepoLib
+  TAO::IORTable
+  OpenDDS::Tcp
+  OpenDDS::InfoRepoDiscovery
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_INFOREPODISCOVERY_DEPS
+  OpenDDS::Tcp
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_INFOREPOLIB_DEPS
+  TAO::Svc_Utils
+  TAO::ImR_Client
+  TAO::IORManip
+  OpenDDS::Tcp
+  OpenDDS::InfoRepoDiscovery
+  TAO::IORTable
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_INFOREPOSERV_DEPS
+  OpenDDS::InfoRepoLib
+  OpenDDS::Federator
+  TAO::Svc_Utils
+  TAO::ImR_Client
+  TAO::IORManip
+  OpenDDS::Tcp
+  TAO::IORTable
+  OpenDDS::InfoRepoDiscovery
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_MODEL_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_MONITOR_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_MULTICAST_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_QOS_XML_XSC_HANDLER_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::XML_Utils
+  ACE::ACE
+)
+
+set(OPENDDS_RTPS_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_RTPS_UDP_DEPS
+  OpenDDS::Rtps
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_SECURITY_DEPS
+  ACE::XML_Utils
+  OpenDDS::Rtps
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_SHMEM_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_TCP_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
+)
+
+set(OPENDDS_UDP_DEPS
+  OpenDDS::Dcps
+  TAO::BiDirGIOP
+  TAO::PI
+  TAO::CodecFactory
+  TAO::PortableServer
+  TAO::AnyTypeCode
+  TAO::TAO
+  ACE::ACE
 )
 
 set(_dds_lib_hints  \${DDS_ROOT}/lib  \$ENV{DDS_ROOT}/lib)
 set(_ace_lib_hints  \${ACE_ROOT}/lib  \$ENV{ACE_ROOT}/lib)
+set(_tao_lib_hints  \${ACE_ROOT}/lib  \$ENV{ACE_ROOT}/lib)
 
 set(_suffix_RELEASE "")
 set(_suffix_DEBUG d)
 foreach(_cfg  RELEASE  DEBUG)
   set(_sfx \${_suffix_\${_cfg}})
 
-  find_library(TAO_CORE_LIBRARY_\${_cfg}
-    TAO\${_sfx}
-    HINTS \${_ace_lib_hints}
-  )
-  find_library(ACE_CORE_LIBRARY_\${_cfg}
-    ACE\${_sfx}
-    HINTS \${_ace_lib_hints}
-  )
-  find_library(TAO_SERVER_LIBRARY_\${_cfg}
-    TAO_PortableServer\${_sfx}
-    HINTS \${_ace_lib_hints}
-  )
-  find_library(TAO_ANY_LIBRARY_\${_cfg}
-    TAO_AnyTypeCode\${_sfx}
-    HINTS \${_ace_lib_hints}
-  )
-  find_library(TAO_UTIL_LIBRARY_\${_cfg}
-    TAO_Svc_Utils\${_sfx}
-    HINTS \${_ace_lib_hints}
-  )
+  foreach(_lib \${_ace_libs})
+    string(TOUPPER \${_lib} _LIB_VAR)
+
+    find_library(\${_LIB_VAR}_LIBRARY_\${_cfg}
+      \${_lib}\${_sfx}
+      HINTS \${_ace_lib_hints}
+    )
+  endforeach()
+
+  foreach(_lib \${_tao_libs})
+    string(TOUPPER \${_lib} _LIB_VAR)
+
+    find_library(\${_LIB_VAR}_LIBRARY_\${_cfg}
+      \${_lib}\${_sfx}
+      HINTS \${_tao_lib_hints}
+    )
+  endforeach()
 
   foreach(_lib \${_opendds_libs})
     string(TOUPPER \${_lib} _LIB_VAR)
@@ -2034,8 +2262,11 @@ opendds_extract_version("\${DDS_ROOT}/VERSION"
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-foreach(_required  ACE_CORE  TAO_CORE  OPENDDS_DCPS)
-  select_library_configurations(\${_required})
+foreach(_lib_group ace tao opendds)
+  foreach(_lib \${_\${_lib_group}_libs})
+    string(TOUPPER \${_lib} _LIB_VAR)
+    select_library_configurations(\${_LIB_VAR})
+  endforeach()
 endforeach()
 
 find_package_handle_standard_args(OPENDDS
@@ -2044,9 +2275,9 @@ find_package_handle_standard_args(OPENDDS
     OPENDDS_INCLUDE_DIR
     OPENDDS_DCPS_LIBRARY
     OPENDDS_IDL
-    ACE_CORE_LIBRARY
+    ACE_LIBRARY
     ACE_GPERF
-    TAO_CORE_LIBRARY
+    TAO_LIBRARY
     TAO_IDL
   VERSION_VAR OPENDDS_VERSION
 )
@@ -2064,6 +2295,7 @@ endmacro()
 macro(_ADD_TARGET_LIB  target  var_prefix  include_dir)
   set(_debug_lib "\${\${var_prefix}_LIBRARY_DEBUG}")
   set(_release_lib "\${\${var_prefix}_LIBRARY_RELEASE}")
+  set(_deps "\${\${var_prefix}_DEPS}")
 
   if (NOT TARGET \${target} AND
       (EXISTS "\${_debug_lib}" OR EXISTS "\${_release_lib}"))
@@ -2072,6 +2304,7 @@ macro(_ADD_TARGET_LIB  target  var_prefix  include_dir)
     set_target_properties(\${target}
       PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "\${include_dir}"
+        INTERFACE_LINK_LIBRARIES "\${_deps}"
     )
 
     if (EXISTS "\${_release_lib}")
@@ -2133,8 +2366,29 @@ if(OPENDDS_FOUND)
   _ADD_TARGET_BINARY(tao_idl "\${TAO_IDL}")
   _ADD_TARGET_BINARY(ace_gperf "\${ACE_GPERF}")
 
-  _ADD_TARGET_LIB(ACE::Core ACE_CORE "\${ACE_INCLUDE_DIR}")
-  _ADD_TARGET_LIB(TAO::Core TAO_CORE "\${TAO_INCLUDE_DIR}")
+  foreach(_lib \${_ace_libs})
+    string(TOUPPER \${_lib} _VAR_PREFIX)
+
+    if("\${_lib}" STREQUAL "ACE")
+      set(_target "ACE::ACE")
+    else()
+      string(REPLACE "ACE_" "ACE::" _target \${_lib})
+    endif()
+
+    _ADD_TARGET_LIB(\${_target} \${_VAR_PREFIX} "\${ACE_INCLUDE_DIR}")
+  endforeach()
+
+  foreach(_lib \${_tao_libs})
+    string(TOUPPER \${_lib} _VAR_PREFIX)
+
+    if("\${_lib}" STREQUAL "TAO")
+      set(_target "TAO::TAO")
+    else()
+      string(REPLACE "TAO_" "TAO::" _target \${_lib})
+    endif()
+
+    _ADD_TARGET_LIB(\${_target} \${_VAR_PREFIX} "\${TAO_INCLUDE_DIR}")
+  endforeach()
 
   foreach(_lib \${_opendds_libs})
     string(TOUPPER \${_lib} _VAR_PREFIX)
