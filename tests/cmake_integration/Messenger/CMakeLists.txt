@@ -41,6 +41,7 @@ ace_add_exe(DDS_Messenger_Publisher
                  OpenDDS::InfoRepoDiscovery
                  OpenDDS::Rtps
                  OpenDDS::Dcps
+                 OpenDDS::Security
                  DDS_Messenger_Idl
   COMPILE_DEFINITIONS OPENDDS_SECURITY
 )
@@ -63,6 +64,7 @@ ace_add_exe(DDS_Messenger_Subscriber
                  OpenDDS::InfoRepoDiscovery
                  OpenDDS::Rtps
                  OpenDDS::Dcps
+                 OpenDDS::Security
                  DDS_Messenger_Idl
   COMPILE_DEFINITIONS OPENDDS_SECURITY
 )
@@ -85,6 +87,7 @@ ace_add_exe(DDS_Messenger_Stacksubscriber
                  OpenDDS::InfoRepoDiscovery
                  OpenDDS::Rtps
                  OpenDDS::Dcps
+                 OpenDDS::Security
                  DDS_Messenger_Idl
   COMPILE_DEFINITIONS OPENDDS_SECURITY
 )
