@@ -2002,6 +2002,8 @@ set(_opendds_libs
   OpenDDS_Udp
 )
 
+list(APPEND _all_libs \${_opendds_libs} \${_ace_libs} \${_tao_libs})
+
 set(OPENDDS_IDL_DEPS
   TAO::IDL_FE
   ACE::ACE
@@ -2019,190 +2021,69 @@ set(OPENDDS_DCPS_DEPS
 
 set(OPENDDS_FACE_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_FEDERATOR_DEPS
   OpenDDS::InfoRepoLib
-  TAO::IORTable
-  OpenDDS::Tcp
-  OpenDDS::InfoRepoDiscovery
-  OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_INFOREPODISCOVERY_DEPS
   OpenDDS::Tcp
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_INFOREPOLIB_DEPS
+  OpenDDS::InfoRepoDiscovery
   TAO::Svc_Utils
   TAO::ImR_Client
   TAO::IORManip
-  OpenDDS::Tcp
-  OpenDDS::InfoRepoDiscovery
   TAO::IORTable
-  OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_INFOREPOSERV_DEPS
-  OpenDDS::InfoRepoLib
   OpenDDS::Federator
-  TAO::Svc_Utils
-  TAO::ImR_Client
-  TAO::IORManip
-  OpenDDS::Tcp
-  TAO::IORTable
-  OpenDDS::InfoRepoDiscovery
-  OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_MODEL_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_MONITOR_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_MULTICAST_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_QOS_XML_XSC_HANDLER_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
   ACE::XML_Utils
-  ACE::ACE
 )
 
 set(OPENDDS_RTPS_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_RTPS_UDP_DEPS
   OpenDDS::Rtps
-  OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_SECURITY_DEPS
-  ACE::XML_Utils
   OpenDDS::Rtps
-  OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
+  ACE::XML_Utils
 )
 
 set(OPENDDS_SHMEM_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_TCP_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(OPENDDS_UDP_DEPS
   OpenDDS::Dcps
-  TAO::BiDirGIOP
-  TAO::PI
-  TAO::CodecFactory
-  TAO::PortableServer
-  TAO::AnyTypeCode
-  TAO::TAO
-  ACE::ACE
 )
 
 set(_dds_lib_hints  \${DDS_ROOT}/lib  \$ENV{DDS_ROOT}/lib)
@@ -2262,11 +2143,13 @@ opendds_extract_version("\${DDS_ROOT}/VERSION"
 include(SelectLibraryConfigurations)
 include(FindPackageHandleStandardArgs)
 
-foreach(_lib_group ace tao opendds)
-  foreach(_lib \${_\${_lib_group}_libs})
-    string(TOUPPER \${_lib} _LIB_VAR)
-    select_library_configurations(\${_LIB_VAR})
-  endforeach()
+foreach(_lib \${_all_libs})
+  string(TOUPPER \${_lib} _LIB_VAR)
+  select_library_configurations(\${_LIB_VAR})
+
+  if(\${\${_LIB_VAR}_FOUND})
+    message(STATUS "\${_lib} -> \${\${_LIB_VAR}_LIBRARY}")
+  endif()
 endforeach()
 
 find_package_handle_standard_args(OPENDDS
@@ -2337,24 +2220,6 @@ macro(_ADD_TARGET_LIB  target  var_prefix  include_dir)
 endmacro()
 
 if(OPENDDS_FOUND)
-  if(WIN32)
-    # TODO: Test which Windows libraries are necessary.
-    # set(DDS_EXTRA_LIBRARIES netapi32 advapi32 user32 ws2_32)
-
-    # TODO: Set flags based on configuration (static/dynamic, etc...).
-    # set(OPENDDS_DEFINITIONS -DRTI_WIN32 -DNDDS_DLL_VARIABLE /MD)
-  else()
-    # TODO: Test which Linux libraries are necessary.
-    # set(DDS_EXTRA_LIBRARIES dl nsl m pthread rt)
-    # if(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-    #   set(bits_flag -m64)
-    #   set(OPENDDS_DEFINITIONS -DRTI_UNIX -m64)
-    #   else(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-    #     set(bits_flag -m32)
-    #   set(OPENDDS_DEFINITIONS -DRTI_UNIX -D__i386__=1 -m32)
-    # endif(\${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-  endif()
-
   set(OPENDDS_INCLUDE_DIRS
       \${OPENDDS_INCLUDE_DIR}
       \${ACE_INCLUDE_DIR}
