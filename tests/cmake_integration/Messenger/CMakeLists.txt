@@ -17,6 +17,7 @@ ace_add_lib(DDS_Messenger_Idl
   PUBLIC_COMPILE_DEFINITIONS MESSENGER_BUILD_DLL
   PUBLIC_LINK_LIBRARIES OpenDDS::Dcps
   INCLUDE_DIRECTORIES "${OPENDDS_INCLUDE_DIRS}"
+  COMPILE_DEFINITIONS OPENDDS_SECURITY
 )
 
 dds_idl_sources(
@@ -41,6 +42,7 @@ ace_add_exe(DDS_Messenger_Publisher
                  OpenDDS::Rtps
                  OpenDDS::Dcps
                  DDS_Messenger_Idl
+  COMPILE_DEFINITIONS OPENDDS_SECURITY
 )
 
 ace_target_cxx_sources(DDS_Messenger_Publisher
@@ -62,6 +64,7 @@ ace_add_exe(DDS_Messenger_Subscriber
                  OpenDDS::Rtps
                  OpenDDS::Dcps
                  DDS_Messenger_Idl
+  COMPILE_DEFINITIONS OPENDDS_SECURITY
 )
 ace_target_cxx_sources(DDS_Messenger_Subscriber
   SOURCE_FILES DataReaderListener.cpp
@@ -83,6 +86,7 @@ ace_add_exe(DDS_Messenger_Stacksubscriber
                  OpenDDS::Rtps
                  OpenDDS::Dcps
                  DDS_Messenger_Idl
+  COMPILE_DEFINITIONS OPENDDS_SECURITY
 )
 ace_target_cxx_sources(DDS_Messenger_Stacksubscriber
   SOURCE_FILES DataReaderListener.cpp
