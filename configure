@@ -1348,11 +1348,11 @@ if (exists $opts{'qt'}) {
       $qt_include = $targetEnv{'QTDIR'} . $slash . 'include';
     }
 
-	if (exists $ENV{'QT5_BINDIR'}) {
-	  $qt_bin = $ENV{'QT5_BINDIR'};
-	} else {
-	  $qt_bin = $targetEnv{'QTDIR'} . $slash . 'bin';
-	}
+    if (exists $ENV{'QT5_BINDIR'}) {
+      $qt_bin = $ENV{'QT5_BINDIR'};
+    } else {
+      $qt_bin = $targetEnv{'QTDIR'} . $slash . 'bin';
+    }
 
     if (exists $ENV{'QT5_LIBDIR'}) {
       $qt_lib = $ENV{'QT5_LIBDIR'};
