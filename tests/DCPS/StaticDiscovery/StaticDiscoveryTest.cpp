@@ -432,7 +432,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     TheServiceParticipant->shutdown();
 
-  } catch (const OpenDDS::DCPS::Transport::Exception& e) {
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
     ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT("Unexpected Transport Exception!\n")),
