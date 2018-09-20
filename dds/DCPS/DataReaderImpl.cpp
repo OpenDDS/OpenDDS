@@ -57,26 +57,28 @@ DataReaderImpl::DataReaderImpl()
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ (false),
 #endif
-    coherent_(false),
-    subqos_ (TheServiceParticipant->initial_SubscriberQos()),
-    topic_desc_(0),
-    listener_mask_(DEFAULT_STATUS_MASK),
-    domain_id_(0),
-    end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    n_chunks_(TheServiceParticipant->n_chunks()),
-    reverse_pub_handle_lock_(publication_handle_lock_),
-    reactor_(0),
-    liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    last_deadline_missed_total_count_(0),
-    is_bit_(false),
-    always_get_history_(false),
-    statistics_enabled_(false),
-    raw_latency_buffer_size_(0),
-    raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-    monitor_(0),
-    periodic_monitor_(0),
-    transport_disabled_(false)
+  coherent_(false),
+  subqos_ (TheServiceParticipant->initial_SubscriberQos()),
+  topic_desc_(0),
+  listener_mask_(DEFAULT_STATUS_MASK),
+  domain_id_(0),
+  end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  n_chunks_(TheServiceParticipant->n_chunks()),
+  reverse_pub_handle_lock_(publication_handle_lock_),
+  reactor_(0),
+  liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+  last_deadline_missed_total_count_(0),
+  watchdog_(),
+  watchdog_lock_(),
+  is_bit_(false),
+  always_get_history_(false),
+  statistics_enabled_(false),
+  raw_latency_buffer_size_(0),
+  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
+  monitor_(0),
+  periodic_monitor_(0),
+  transport_disabled_(false)
 {
   reactor_ = TheServiceParticipant->timer();
 
@@ -895,6 +897,8 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
 
 void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
 {
+  ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+
   // Reset the deadline timer if the period has changed.
   if (qos_.deadline.period.sec != qos.deadline.period.sec ||
       qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
@@ -1208,15 +1212,19 @@ DataReaderImpl::enable()
   // period is not the default (infinite).
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
 
-  if (!this->watchdog_
-      && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
-          || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
-    this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
-            ref(this->sample_lock_),
-            this->qos_.deadline,
-            ref(*this),
-            ref(this->requested_deadline_missed_status_),
-            ref(this->last_deadline_missed_total_count_));
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, watchdog_lock_, DDS::RETCODE_ERROR);
+
+    if (!this->watchdog_
+        && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
+            || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
+      this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
+              ref(this->sample_lock_),
+              this->qos_.deadline,
+              ref(*this),
+              ref(this->requested_deadline_missed_status_),
+              ref(this->last_deadline_missed_total_count_));
+    }
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -1509,25 +1517,29 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
-      // Find the instance first for timer cancellation since
-      // the instance may be deleted during dispose and can
-      // not be accessed.
-      ReceivedDataSample dup(sample);
-      this->lookup_instance(dup, instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      OwnershipManagerPtr owner_manager = this->ownership_manager();
+    {
+      ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
 
-      if (! this->is_exclusive_ownership_
-          || (owner_manager
-              && (instance)
-              && (owner_manager->is_owner (instance->instance_handle_,
-                  sample.header_.publication_id_)))) {
-#endif
-        this->watchdog_->cancel_timer(instance);
+      if (this->watchdog_.in()) {
+        // Find the instance first for timer cancellation since
+        // the instance may be deleted during dispose and can
+        // not be accessed.
+        ReceivedDataSample dup(sample);
+        this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      }
+        OwnershipManagerPtr owner_manager = this->ownership_manager();
+
+        if (! this->is_exclusive_ownership_
+            || (owner_manager
+                && (instance)
+                && (owner_manager->is_owner (instance->instance_handle_,
+                    sample.header_.publication_id_)))) {
 #endif
+          this->watchdog_->cancel_timer(instance);
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+        }
+#endif
+      }
     }
     instance.reset();
     this->dispose_unregister(sample, instance);
@@ -1540,22 +1552,26 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
-      // Find the instance first for timer cancellation since
-      // the instance may be deleted during dispose and can
-      // not be accessed.
-      ReceivedDataSample dup(sample);
-      this->lookup_instance(dup, instance);
-      if (instance) {
+    {
+      ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+
+      if (this->watchdog_.in()) {
+        // Find the instance first for timer cancellation since
+        // the instance may be deleted during dispose and can
+        // not be accessed.
+        ReceivedDataSample dup(sample);
+        this->lookup_instance(dup, instance);
+        if (instance) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-        if (! this->is_exclusive_ownership_
-            || (this->is_exclusive_ownership_
-                && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+          if (! this->is_exclusive_ownership_
+              || (this->is_exclusive_ownership_
+                  && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-          this->watchdog_->cancel_timer(instance);
+            this->watchdog_->cancel_timer(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+          }
+#endif
         }
-#endif
       }
     }
     instance.reset();
@@ -1569,29 +1585,33 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
-      // Find the instance first for timer cancellation since
-      // the instance may be deleted during dispose and can
-      // not be accessed.
-      ReceivedDataSample dup(sample);
-      this->lookup_instance(dup, instance);
+    {
+      ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+
+      if (this->watchdog_.in()) {
+        // Find the instance first for timer cancellation since
+        // the instance may be deleted during dispose and can
+        // not be accessed.
+        ReceivedDataSample dup(sample);
+        this->lookup_instance(dup, instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      OwnershipManagerPtr owner_manager = this->ownership_manager();
-      if (! this->is_exclusive_ownership_
-          || (owner_manager
-              && (instance)
-              && (owner_manager->is_owner (instance->instance_handle_,
-                  sample.header_.publication_id_)))
-                  || (this->is_exclusive_ownership_
-                      && (instance)
-                      && instance->instance_state_.is_last (sample.header_.publication_id_))) {
+        OwnershipManagerPtr owner_manager = this->ownership_manager();
+        if (! this->is_exclusive_ownership_
+            || (owner_manager
+                && (instance)
+                && (owner_manager->is_owner (instance->instance_handle_,
+                    sample.header_.publication_id_)))
+                    || (this->is_exclusive_ownership_
+                        && (instance)
+                        && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-        if (instance) {
-          this->watchdog_->cancel_timer(instance);
+          if (instance) {
+            this->watchdog_->cancel_timer(instance);
+          }
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         }
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      }
 #endif
+      }
     }
     instance.reset();
     this->dispose_unregister(sample, instance);
@@ -2801,6 +2821,7 @@ void DataReaderImpl::post_read_or_take()
 
 void DataReaderImpl::reschedule_deadline()
 {
+  ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
   if (this->watchdog_.in()) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
     for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
@@ -3300,17 +3321,27 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 #endif
 
-  if (instance && watchdog_.in()) {
-    instance->last_sample_tv_ = instance->cur_sample_tv_;
-    instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
 
-    // Watchdog can't be called with sample_lock_ due to reactor deadlock
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-    if (is_new_instance) {
-      watchdog_->schedule_timer(instance);
-    } else {
-      watchdog_->execute(instance, false);
+//ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::accept_sample_processing() - checking     - %d - %@ -  %@\n"), instance->instance_handle_, instance.in(), watchdog_.in()));
+
+    if (instance && watchdog_.in()) {
+      instance->last_sample_tv_ = instance->cur_sample_tv_;
+      instance->cur_sample_tv_ = ACE_OS::gettimeofday();
+
+      // Watchdog can't be called with sample_lock_ due to reactor deadlock
+      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+      if (is_new_instance) {
+//ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::accept_sample_processing() - - scheduling - %d - %@ -  %@\n"), instance->instance_handle_, instance.in(), watchdog_.in()));
+        watchdog_->schedule_timer(instance);
+      } else {
+        watchdog_->execute(instance, false);
+      }
     }
+//    } else {
+//ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::accept_sample_processing() - - ignoring   - %d - %@ -  %@\n"), instance->instance_handle_, instance.in(), watchdog_.in()));
+//    }
   }
 
   if (accepted) {
