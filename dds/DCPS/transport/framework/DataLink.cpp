@@ -397,6 +397,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   {
     GuardType guard(this->pub_sub_maps_lock_);
 
+    if (this->stopped_) return;
+
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
     if (rls->size() == 1) {
       assoc_by_remote_.erase(remote_id);
