@@ -6,22 +6,28 @@ headers are fully supported. Optional dissection of sample payloads is also
 supported from Wireshark 1.12 on. The dissector is compatible with Wireshark
 1.2 up to at least 2.6 and has been tested with Windows, macOS, and Linux.
 
+If you need to dissect packets in RTPS DDS systems, all recent versions of
+Wireshark have a built-in RTPS dissector. This dissector, at least for the
+moment, just dissects classic OpenDDS systems using an InfoRepo. Once set up
+though, this dissector allows viewing and filtering by sample data from within
+Wireshark.
+
 ## See also
 
 - For Users:
   - [Wireshark Project Page](
-      https://www.wireshark.org/>)
+      https://www.wireshark.org/)
   - [Wireshark Download Page](
       https://www.wireshark.org/download.html)
   - [Wireshark User's Guide](
       https://www.wireshark.org/docs/wsug_html_chunked/)
-- For Developing This Plugin:
+- For Developers Working on this Plugin:
   - [Wireshark Developer's Guide](
       https://www.wireshark.org/docs/wsdg_html_chunked/)
   - doc/README.dissector located in the Wireshark source
     - Has **very important** information not found in the Developer's Guide
   - [Wireshark Dissector API Doxygen](
-      https://www.wireshark.org/docs/wsar_html/epan/modules.html)
+      https://www.wireshark.org/docs/wsar_html/)
 
 ## Building the OpenDDS DCPS dissector
 
@@ -54,91 +60,102 @@ like:
        - If there is a development package available for your system
          and you want to use it to avoid having to build Wireshark.
          This option defaults to `/usr/include/wireshark` if it exists, so
-         supplying the path isn't necessary.
+         supplying the path isn't necessary unless wireshark was installed
+         else where.
 
     - The newer out-of-source method, `--wireshark_cmake`, should be used if
       Wireshark was built using CMake, which can put "config.h" header and
       the Wireshark libraries somewhere other than the source tree. This is
       Wireshark's recommended method for Windows and macOS and can optionally
-      be used on Linux. This method has two more parameters:
+      be used on Linux. This complicates things somewhat so two more
+      options with arguments provied:
 
-       `--wireshark_build`
-         Is the build directory the user choose before building Wireshark.
-         This is required and an absolute path.
+      - `--wireshark_build`
+        - Is the build directory the user choose before building Wireshark.
+          This is required and an absolute path.
 
-       `--wireshark_lib`
-         Is the location of the Wireshark libraries RELATIVE to the build
-         location. It's optional but it might have to be supplied depending
-         on the version of Wireshark as these defaults are based on
-         Wireshark 2.4:
-           - On Windows the default is "run\RelWithDebInfo".
-           - On macOS the default is "run/Wireshark.app/Contents/Frameworks".
-           - On Linux the default is "" (They are in the build directory).
+      - `--wireshark_lib`
+        - Is the location of the Wireshark libraries RELATIVE to the build
+          location. It's optional but it might have to be supplied depending
+          on the version of Wireshark as these defaults are based on
+          Wireshark 2.4:
+          - On Windows the default is `run\RelWithDebInfo`.
+          - On macOS the default is `run/Wireshark.app/Contents/Frameworks`.
+          - On Linux the default is an empty string as the libraries are in
+            the build directory.
 
-   Glib is also required to build the dissector, so "--glib" must be passed.
+   Glib is also required to build the dissector, so `--glib` must be passed.
    If Wireshark was not built with the system Glib or Glib is not installed,
    the install prefix of Glib must be passed as well:
-    - On Windows this will be something like: wireshark-win(32|64)-libs-*\gtk2
+    - On Windows this will be something like: `wireshark-win(32|64)-libs-*\gtk2`
     - On macOS it depends on if the built-in dependency script or a package
       manager like Homebrew was used to install Wireshark's dependencies.
     - On the average Linux, it shouldn't be necessary unless you needed to use
-      a Glib that is not installed to build Wireshark.
+      a Glib that is not installed (in `/usr`) to build Wireshark.
 
    For optional sample payload dissection support, RapidJSON must be available
-   and "--rapidjson" must be passed. It might already be available if OpenDDS
+   and `--rapidjson` must be passed. It might already be available if OpenDDS
    was recursively cloned by a git client or RapidJSON is installed in a
    default include location (RapidJSON is header only library).
    If RapidJSON is not installed on the system, it must be downloaded using:
-     git submodule update --init --recursive
+```
+git submodule update --init --recursive
+```
    or equivalent for your git client or manually downloading and placing the
-   library at DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson.
+   library at `DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson`.
 
 2. Build
 
-   Build normally as described in the $DDS_ROOT/INSTALL document.
+   Build normally as described in the `$DDS_ROOT/INSTALL document`.
 
 3. Install Plugin
 
    To install the dissector plugin, copy the plugin file  from
-   DDS_ROOT/tools/dissector to one of the plugin directories listed in the
-   Folders section in Wireshark's About Dialog which can be found in the Help
-   menu. On Windows, the plugin file will be named OpenDDS_Dissector.dll or
-   OpenDDS_Dissectord.dll. On UNIX-like systems it will be named
-   OpenDDS_Dissector.so.
+   `DDS_ROOT/tools/dissector` to one of the plugin directories listed in the
+   Folders section in Wireshark's "About" dialog which can be found in the "Help"
+   menu. On Windows, the plugin file will be named `OpenDDS_Dissector.dll` or
+   `OpenDDS_Dissectord.dll` depending if OpenDDS was a Release or Debug Build.
+   On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
 
-   See <https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html>
-   for details on where Wireshark looks for plugins.
+   See [Wireshark Userguide's Page on Plugins Folders](
+https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html)
+   for details on where Wireshark looks for plugins. This page, if working
+   will be accurate for the latest stable version, but maybe not previous
+   versions.
 
 4. Run Wireshark
 
-   setenv.sh or setenv.cmd must be sourced before running Wireshark or
-   it will complain that it couldn't load the dissector if the OpenDDS
-   libraries are not installed system-wide.
+   `setenv.sh` (or `setenv.cmd` for Windows) must be sourced before
+   running Wireshark or it will complain that it couldn't load the
+   dissector if the OpenDDS libraries are not installed system-wide.
 
    You may verify the plugin is installed correctly by looking at the
-   Supported Protocols list.  Depending on the Wireshark version, this
-   can usually be found somewhere under the Help or Internals menus.
-   The OpenDDS_Dissector library we created above should appear in the
+   "Supported Protocols" list. Depending on the Wireshark version, this
+   can usually be found somewhere under the "Help" or "Internals" menus.
+   The `OpenDDS_Dissector` library we created above should appear in the
    list of plugins or protocols.
 
 ## Environment Variables
 
-   OPENDDS_DISSECTORS
-     If set the dissector will look for ITL files in that location
-     to use for sample payload dissection.
+  - `OPENDDS_DISSECTORS`
+    - If set the dissector will look for ITL files in that location
+      to use for sample payload dissection.
 
-   There are two environment variables the dissector will use for debugging:
+  - There are two environment variables the dissector will use for debugging:
 
-   OPENDDS_DISSECTOR_LOG
-     If set, the dissector will write log output to
-     OpenDDS_wireshark.log in the current directory.
+  - `OPENDDS_DISSECTOR_LOG`
+    - If set, the dissector will write log output to `OpenDDS_wireshark.log` in
+      the current directory.
 
-   OPENDDS_DISSECTOR_SIGSEGV
-     If set, the dissector will not handle segfaults when they occur
+  - `OPENDDS_DISSECTOR_SIGSEGV`
+    - If set, the dissector will not handle segfaults when they occur
      during sample payload dissection. If not set, a segfault will
      cause a dialog to appear to suggest that the ITL file is wrong
      and close Wireshark. Setting this might be more helpful if
      using a debugger to see where the segfault occurred.
+     Wireshark has a variable called `WIRESHARK_ABORT_ON_DISSECTOR_BUG` that
+     is realted, but it has not been determined if how it relates exactly
+     behaivoir wise.
 
 ## Available Display Filters
 
@@ -146,70 +163,70 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
 
 1. Transport header display filters
 
-   opendds.version
-     Revision of the DCPS protocol.
+  - `opendds.version`
+    - Revision of the DCPS protocol.
 
-   opendds.byte_order
-     Byte order of transport header contents.
+  - `opendds.byte_order`
+    - Byte order of transport header contents.
 
-   opendds.length
-     Total length of payload, including sample headers.
+  - `opendds.length`
+    - Total length of payload, including sample headers.
 
-   opendds.sequence
-     Sequence number of transmitted PDU.
+  - `opendds.sequence`
+    - Sequence number of transmitted PDU.
 
-   opendds.source
-     Source identifier; only used by the multicast transport.
+  - `opendds.source`
+    - Source identifier; only used by the multicast transport.
 
 2. Sample header display filters
 
-   opendds.sample.id
-     Message ID of sample (i.e. SAMPLE_DATA).
+  - `opendds.sample.id`
+    - Message ID of sample (i.e. `SAMPLE_DATA`).
 
-   opendds.sample.sub_id
-     Sub-Message ID of sample (i.e. MULTICAST_SYN).
+  - `opendds.sample.sub_id`
+    - Sub-Message ID of sample (i.e. `MULTICAST_SYN`).
 
-   opendds.sample.flags
-     Flags field (see below).
+  - `opendds.sample.flags`
+    - Flags field (see below).
 
-   opendds.sample.flags.byte_order
-     Indicates byte order of sample data.
+  - `opendds.sample.flags.byte_order`
+    - Indicates byte order of sample data.
 
-   opendds.sample.flags.coherent
-     Indicates sample belongs to a coherent change group.
+  - `opendds.sample.flags.coherent`
+    - Indicates sample belongs to a coherent change group.
 
-   opendds.sample.flags.historic
-     Indicates sample is historic; resent by DataWriter.
+  - `opendds.sample.flags.historic`
+    - Indicates sample is historic; resent by DataWriter.
 
-   opendds.sample.flags.lifespan
-     Indicates sample defines a lifespan.
+  - `opendds.sample.flags.lifespan`
+    - Indicates sample defines a lifespan.
 
-   opendds.sample.flags.group_coherent
-     Indicates sample uses PRESENTATION.coherent_access.
+  - `opendds.sample.flags.group_coherent`
+    - Indicates sample uses `PRESENTATION.coherent_access`.
 
-   opendds.sample.flags.content_filter
-     Indicates the publisher has applied filters for Content-Filtered Topics.
+  - `opendds.sample.flags.content_filter`
+    - Indicates the publisher has applied filters for Content-Filtered Topics.
 
-   opendds.sample.length
-     Total length of sample data, not including sample header.
+  - `opendds.sample.length`
+    - Total length of sample data, not including sample header.
 
-   opendds.sample.sequence
-     Sequence number of transmitted SAMPLE_DATA.
+  - `opendds.sample.sequence`
+    - Sequence number of transmitted `SAMPLE_DATA`.
 
-   opendds.sample.timestamp
-     Source timestamp of sample.
+  - `opendds.sample.timestamp`
+    - Source timestamp of sample.
 
-   opendds.sample.lifespan
-     Lifespan duration of sample (iff lifespan flag is set).
+  - `opendds.sample.lifespan`
+    - Lifespan duration of sample (iff lifespan flag is set).
 
-   opendds.sample.publication
-     Publication ID of transmitting DataWriter.
+  - `opendds.sample.publication`
+    - Publication ID of transmitting DataWriter.
 
-   opendds.sample.publisher
-     ID representing the coherent group (if group_coherent flag is set).
+  - `opendds.sample.publisher`
+    - ID representing the coherent group (if `group_coherent` flag is set).
 
-   opendds.sample.content_filter_entries
-     Number of entries in this list for filtering (if content_filter flag is set).
+  - `opendds.sample.content_filter_entries`
+    - Number of entries in this list for filtering (if `content_filter` flag is set).
 
   See below for Filtering based on the sample payload.
 
@@ -220,7 +237,7 @@ be imported to highlight DCPS protocol packets.
 
 To import these filters, click on the View -> Coloring Rules menu item,
 followed by the Import button.  Select the colorfilters file in the
-$DDS_ROOT/tools/dissector/ directory and click the Open button.
+`$DDS_ROOT/tools/dissector/` directory and click the Open button.
 
 NOTE: Coloring rules are applied on a first match basis; you may need to
       move the imported rules above the "tcp" and "udp" rules using the
@@ -234,67 +251,83 @@ The dissector, when configured with RapidJSON, can dissect sample data on
 Wireshark 1.12 and later. To use this:
 
 1. Export type information using the OpenDDS IDL compiler.  The
-   command "opendds_idl -Gitl <filename>.idl" will produce a file
-   called <filename>.itl which contains the necessary type
-   information.  The new MPC base project "gen_dissector" may be used
-   in MPC to add -Gitl to the opendds_idl command line.
+   command `opendds_idl -Gitl <filename>.idl` will produce a file
+   called `<filename>.itl` which contains the necessary type
+   information.  The new MPC base project `gen_dissector` may be used
+   in MPC to add `-Gitl` to the `opendds_idl` command line.
 
-2. Start wireshark in the directory containing the itl file or set the
-   OPENDDS_DISSECTORS environment variable to the directory containing
+2. Start Wireshark in the directory containing the itl file or set the
+   `OPENDDS_DISSECTORS` environment variable to the directory containing
    the itl file.  The OpenDDS Wireshark plugin will try to load all
-   .itl files in either OPENDDS_DISSECTORS if specified or the current
+   .itl files in either `OPENDDS_DISSECTORS` if specified or the current
    directory.
 
 Type information is exported using Intermediate Type Language (ITL).
 For more information, see
-  <https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang>.
+  [https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang](
+  https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang)
 
 ## Sample Dissection Filtering
 
 When the dissector can dissect sample data, it also allows Wireshark to filter
 OpenDDS packets based on contents.
 
-The base of this filter namespace is "opendds.sample.payload".
-If the type "Messenger::Message" is being used by OpenDDS and the ITL
-file is located in OPENDDS_DISSECTORS (or the directory Wireshark was started
+The base of this filter namespace is `opendds.sample.payload`.
+If the type `Messenger::Message` is being used by OpenDDS and the ITL
+file is located in `OPENDDS_DISSECTORS` (or the directory Wireshark was started
 in), then packets that carry this can be filtered by
-"opendds.sample.payload.Messenger.Message". Further more packets can be
+`opendds.sample.payload.Messenger.Message`. Further more packets can be
 filtered by the data in the payload, for example:
 
-  opendds.sample.payload.Messenger.Message.subject contains "DDS"
-  opendds.sample.payload.Messenger.Message.count >= 4
+```
+opendds.sample.payload.Messenger.Message.subject contains "DDS"
+opendds.sample.payload.Messenger.Message.count >= 4
+```
 
-See <https://wiki.wireshark.org/DisplayFilters> and
-<https://www.wireshark.org/docs/man-pages/wireshark-filter.html>
+See [Wireshark Wiki page on Display Filters](https://wiki.wireshark.org/DisplayFilters)
+and the [Wireshark man page on Display Filters](
+<https://www.wireshark.org/docs/man-pages/wireshark-filter.html)
 for examples of how Wireshark display filters can be used.
 
-Notes:
+### Usage and Notes
 
-  - IDL Arrays and Sequences value is the number of elements:
+### Arrays and Sequences
 
-      opendds.sample.payload.Messenger.Message.seq < 3
+IDL Arrays and Sequences value is the number of elements:
 
-      This will show all OpenDDS packets with a payload of type
-      "Messenger::Message" where it's "seq" member has less than 3 elements.
+```
+opendds.sample.payload.Messenger.Message.seq < 3
+```
 
-    To filter the items inside use "_e" (element). Items can not be
-    filtered by index of the elements:
+This will show all OpenDDS packets with a payload of type
+`Messenger::Message` where it's `seq` member has less than 3 elements.
 
-      opendds.sample.payload.Messenger.Message.seq._e.some_value == 1
+It is not possible to filter based on index of elements but elements
+inside the arrays and sequences can be filtered using
+`_e` (short for **e**lement):
+```
+opendds.sample.payload.Messenger.Message.seq._e.some_value == 1
+```
 
-  - Values of Enums are represented by string names of the members. So if a
-    Enum has a member "Invalid", then you can filter for packets with that
-    value with:
+### Enums
 
-      opendds.sample.payload.Messenger.Message.enum == "Invalid"
+Values of Enums are represented by string names of the members. So if a
+Enum has a member `Invalid`, then you can filter for packets with that
+value with:
 
-  - Union members are accessible by their name, not by their discriminator
-    value. If packets have a Union u on a boolean member u_b that is true,
-    then they can be found with:
+```
+opendds.sample.payload.Messenger.Message.enum == "Invalid"
+```
 
-      opendds.sample.payload.Messenger.Message.u.u_b == 1
+### Unions
+Union members are accessible by their name, not by their discriminator
+value. If packets have a Union `u` on a boolean member `u_b` that is true,
+then they can be found with:
+```
+opendds.sample.payload.Messenger.Message.u.u_b == 1
+```
 
-  - Long Doubles are cast down to doubles.
+### Strings and Characters
 
   - Wide strings and wide characters are converted from UTF-16 to UTF-8 using
     iconv. Data that is invalid UTF-16 is replaced by a message saying that
@@ -306,6 +339,10 @@ Notes:
     literal, not single quotes (') like a C character literal. The same
     applies to WChars, but that's because Wireshark does not have a dedicated
     wide character type.
+
+### Others
+
+  - Long Doubles are cast down to doubles.
 
 ## Known Limitations
 
