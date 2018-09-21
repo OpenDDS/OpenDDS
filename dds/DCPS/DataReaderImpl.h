@@ -821,7 +821,7 @@ private:
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
   RcHandle<RequestedDeadlineWatchdog> watchdog_;
-  ACE_Thread_Mutex watchdog_lock_;
+  ACE_Recursive_Thread_Mutex watchdog_lock_;
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.
