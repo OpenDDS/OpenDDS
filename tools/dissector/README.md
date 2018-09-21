@@ -9,9 +9,23 @@ supported from Wireshark 1.12 on. The dissector is compatible with Wireshark
 If you need to dissect packets in RTPS DDS systems, all recent versions of
 Wireshark have a built-in RTPS dissector. This dissector, at least for the
 moment, just dissects classic OpenDDS systems using an InfoRepo. Once set up
-though, this dissector allows viewing and filtering by sample data from within
-Wireshark.
+though, this dissector allows viewing and filtering by dissected sample data
+from within Wireshark.
 
+## Table of Contents
+
+- [See Also](#see-also)
+- [Building](#building)
+- [Usage](#usage)
+  - [Enviroment Variables](#enviroment-variables)
+  - [Display Filters](#display-filters)
+  - [Color Filters](#color-filters)
+- [Sample Dissection](#sample-dissection)
+  - [Generating ITL Files](#sample-dissection-itl)
+  - [Using Display Filters with Samples](#sample-dissection-filtering)
+- [Known Limitations](#limitations)
+
+<a name="see-also"></a>
 ## See also
 
 - For Users:
@@ -29,7 +43,8 @@ Wireshark.
   - [Wireshark Dissector API Doxygen](
       https://www.wireshark.org/docs/wsar_html/)
 
-## Building the OpenDDS DCPS dissector
+<a name="building"></a>
+## Building
 
 Follow the steps in the INSTALL file in the root of OpenDDS directory, along
 with the steps here.
@@ -44,8 +59,11 @@ like:
 
 1. Set up the Build System to Build the Dissector
 
-   There are two ways to build against Wireshark depending on how Wireshark
-   was built or was acquired:
+  To build the dissector, additional options must be passed to the configure
+  script before building OpenDDS, most importantly where to find Wireshark.
+
+  There are two ways to build against Wireshark depending on how Wireshark
+  was built or was acquired:
 
     - The older method, `--wireshark` passed with the location of the
       Wireshark headers and libraries. This should be used with:
@@ -84,58 +102,58 @@ like:
           - On Linux the default is an empty string as the libraries are in
             the build directory.
 
-   Glib is also required to build the dissector, so `--glib` must be passed.
-   If Wireshark was not built with the system Glib or Glib is not installed,
-   the install prefix of Glib must be passed as well:
-    - On Windows this will be something like: `wireshark-win(32|64)-libs-*\gtk2`
-    - On macOS it depends on if the built-in dependency script or a package
-      manager like Homebrew was used to install Wireshark's dependencies.
-    - On the average Linux, it shouldn't be necessary unless you needed to use
-      a Glib that is not installed (in `/usr`) to build Wireshark.
+  Glib is also required to build the dissector, so `--glib` must be passed.
+  If Wireshark was not built with the system Glib or Glib is not installed,
+  the install prefix of Glib must be passed as well:
+   - On Windows this will be something like: `wireshark-win(32|64)-libs-*\gtk2`
+   - On macOS it depends on if the built-in dependency script or a package
+     manager like Homebrew was used to install Wireshark's dependencies.
+   - On the average Linux, it shouldn't be necessary unless you needed to use
+     a Glib that is not installed (in `/usr`) to build Wireshark.
 
-   For optional sample payload dissection support, RapidJSON must be available
-   and `--rapidjson` must be passed. It might already be available if OpenDDS
-   was recursively cloned by a git client or RapidJSON is installed in a
-   default include location (RapidJSON is header only library).
-   If RapidJSON is not installed on the system, it must be downloaded using:
-```
-git submodule update --init --recursive
-```
-   or equivalent for your git client or manually downloading and placing the
-   library at `DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson`.
+  For optional sample payload dissection support, RapidJSON must be available
+  and `--rapidjson` must be passed. It might already be available if OpenDDS
+  was recursively cloned by a git client or RapidJSON is installed in a
+  default include location (RapidJSON is header only library).
+  If RapidJSON is not installed on the system, it must be downloaded using:
+  `git submodule update --init --recursive` or equivalent for your git client
+  or manually downloading and placing the
+  library at `DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson`.
 
 2. Build
 
-   Build normally as described in the `$DDS_ROOT/INSTALL document`.
+  Build normally as described in the `$DDS_ROOT/INSTALL document`.
 
 3. Install Plugin
 
-   To install the dissector plugin, copy the plugin file  from
-   `DDS_ROOT/tools/dissector` to one of the plugin directories listed in the
-   Folders section in Wireshark's "About" dialog which can be found in the "Help"
-   menu. On Windows, the plugin file will be named `OpenDDS_Dissector.dll` or
-   `OpenDDS_Dissectord.dll` depending if OpenDDS was a Release or Debug Build.
-   On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
+  To install the dissector plugin, copy the plugin file  from
+  `DDS_ROOT/tools/dissector` to one of the plugin directories listed in the
+  Folders section in Wireshark's "About" dialog which can be found in the "Help"
+  menu. On Windows, the plugin file will be named `OpenDDS_Dissector.dll` or
+  `OpenDDS_Dissectord.dll` depending if OpenDDS was a Release or Debug Build.
+  On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
 
-   See [Wireshark Userguide's Page on Plugins Folders](
+  See [Wireshark User's Guide Page on Plugins Folders](
 https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html)
-   for details on where Wireshark looks for plugins. This page, if working
-   will be accurate for the latest stable version, but maybe not previous
-   versions.
+  for details on where Wireshark looks for plugins. This page, if working
+  will be accurate for the latest stable version, but maybe not previous
+  versions.
 
-4. Run Wireshark
+<a name="usage"></a>
+## Usage
 
-   `setenv.sh` (or `setenv.cmd` for Windows) must be sourced before
-   running Wireshark or it will complain that it couldn't load the
-   dissector if the OpenDDS libraries are not installed system-wide.
+`setenv.sh` (or `setenv.cmd` for Windows) must be sourced before
+running Wireshark or it will complain that it couldn't load the
+dissector if the OpenDDS libraries are not installed system-wide.
 
-   You may verify the plugin is installed correctly by looking at the
-   "Supported Protocols" list. Depending on the Wireshark version, this
-   can usually be found somewhere under the "Help" or "Internals" menus.
-   The `OpenDDS_Dissector` library we created above should appear in the
-   list of plugins or protocols.
+You may verify the plugin is installed correctly by looking at the
+"Supported Protocols" list. Depending on the Wireshark version, this
+can usually be found somewhere under the "Help" or "Internals" menus.
+The `OpenDDS_Dissector` library we created above should appear in the
+list of plugins or protocols.
 
-## Environment Variables
+<a name="enviroment-variables"></a>
+### Environment Variables
 
   - `OPENDDS_DISSECTORS`
     - If set the dissector will look for ITL files in that location
@@ -157,7 +175,8 @@ https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html)
      is realted, but it has not been determined if how it relates exactly
      behaivoir wise.
 
-## Available Display Filters
+<a name="display-filters"></a>
+### Available Display Filters
 
 A number of display filters are supported by the OpenDDS DCPS dissector:
 
@@ -228,9 +247,16 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
   - `opendds.sample.content_filter_entries`
     - Number of entries in this list for filtering (if `content_filter` flag is set).
 
-  See below for Filtering based on the sample payload.
+See [below for Filtering based on the sample payload](#sample-dissection-filtering).
 
-## Available Color Filters
+See the [Wireshark Wiki page on Display Filters](
+  https://wiki.wireshark.org/DisplayFilters)
+and the [Wireshark man page on Display Filters](
+  https://www.wireshark.org/docs/man-pages/wireshark-filter.html)
+for examples of how Wireshark display filters can be used.
+
+<a name="color-filters"></a>
+### Available Color Filters
 
 A set of color filters are included in the source distribution which may
 be imported to highlight DCPS protocol packets.
@@ -245,10 +271,17 @@ NOTE: Coloring rules are applied on a first match basis; you may need to
       changed, you must ensure the "OpenDDS (Important)" rule appears
       before the "OpenDDS" rule.
 
+<a name="sample-dissection"></a>
 ## Sample Dissection
 
 The dissector, when configured with RapidJSON, can dissect sample data on
-Wireshark 1.12 and later. To use this:
+Wireshark 1.12 and later. This requires `--rapidjson` to be passed to the
+configure script before building OpenDDS.
+
+<a name="sample-dissection-itl"></a>
+### Generating ITL files
+
+To create an ITL file from your IDL files:
 
 1. Export type information using the OpenDDS IDL compiler.  The
    command `opendds_idl -Gitl <filename>.idl` will produce a file
@@ -267,7 +300,8 @@ For more information, see
   [https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang](
   https://github.com/objectcomputing/OpenDDS/tree/master/tools/IntermediateTypeLang)
 
-## Sample Dissection Filtering
+<a name="sample-dissection-filtering"></a>
+### Using Display Filters with Samples
 
 When the dissector can dissect sample data, it also allows Wireshark to filter
 OpenDDS packets based on contents.
@@ -284,14 +318,13 @@ opendds.sample.payload.Messenger.Message.subject contains "DDS"
 opendds.sample.payload.Messenger.Message.count >= 4
 ```
 
-See [Wireshark Wiki page on Display Filters](https://wiki.wireshark.org/DisplayFilters)
+See the [Wireshark Wiki page on Display Filters](
+  https://wiki.wireshark.org/DisplayFilters)
 and the [Wireshark man page on Display Filters](
-<https://www.wireshark.org/docs/man-pages/wireshark-filter.html)
+  https://www.wireshark.org/docs/man-pages/wireshark-filter.html)
 for examples of how Wireshark display filters can be used.
 
-### Usage and Notes
-
-### Arrays and Sequences
+#### Arrays and Sequences
 
 IDL Arrays and Sequences value is the number of elements:
 
@@ -302,14 +335,14 @@ opendds.sample.payload.Messenger.Message.seq < 3
 This will show all OpenDDS packets with a payload of type
 `Messenger::Message` where it's `seq` member has less than 3 elements.
 
-It is not possible to filter based on index of elements but elements
-inside the arrays and sequences can be filtered using
-`_e` (short for **e**lement):
+Because of how the Wireshark filter queries work it, it is not possible to
+filter based on index of elements but elements inside the arrays and sequences
+can be filtered using `_e` (short for **e**lement):
 ```
 opendds.sample.payload.Messenger.Message.seq._e.some_value == 1
 ```
 
-### Enums
+#### Enums
 
 Values of Enums are represented by string names of the members. So if a
 Enum has a member `Invalid`, then you can filter for packets with that
@@ -319,7 +352,8 @@ value with:
 opendds.sample.payload.Messenger.Message.enum == "Invalid"
 ```
 
-### Unions
+#### Unions
+
 Union members are accessible by their name, not by their discriminator
 value. If packets have a Union `u` on a boolean member `u_b` that is true,
 then they can be found with:
@@ -327,7 +361,7 @@ then they can be found with:
 opendds.sample.payload.Messenger.Message.u.u_b == 1
 ```
 
-### Strings and Characters
+#### Strings and Characters
 
   - Wide strings and wide characters are converted from UTF-16 to UTF-8 using
     iconv. Data that is invalid UTF-16 is replaced by a message saying that
@@ -340,11 +374,15 @@ opendds.sample.payload.Messenger.Message.u.u_b == 1
     applies to WChars, but that's because Wireshark does not have a dedicated
     wide character type.
 
-### Others
+#### Numbers
 
   - Long Doubles are cast down to doubles.
 
+<a name="limitations"></a>
 ## Known Limitations
+
+  - As noted in the introduction, this dissector only works with OpenDDS
+    systems using an InfoRepo, which is a differnt protocal than RTPS.
 
   - OpenDDS only maintains wire compatibility with the current revision
     of the DCPS protocol.  This dissector is effective for the compiled
