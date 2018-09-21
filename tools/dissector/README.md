@@ -57,87 +57,87 @@ like:
  - `wireshark-devel` on Fedora derived Linux distributions.
  - `wireshark-dev` on Debian derived Linux distributions.
 
-1. Set up the Build System to Build the Dissector
+### Configure
 
-  To build the dissector, additional options must be passed to the configure
-  script before building OpenDDS, most importantly where to find Wireshark.
+To build the dissector, additional options must be passed to the configure
+script before building OpenDDS, most importantly where to find Wireshark.
 
-  There are two ways to build against Wireshark depending on how Wireshark
-  was built or was acquired:
+There are two ways to build against Wireshark depending on how Wireshark
+was built or was acquired:
 
-    - The older method, `--wireshark` passed with the location of the
-      Wireshark headers and libraries. This should be used with:
+- The older method, `--wireshark` passed with the location of the
+  Wireshark headers and libraries. This should be used with:
 
-       - Any version of Wireshark built with autoconf, which is try if you
-         ran autogen.sh. This is the recommended way to build on Linux as
-         of Wireshark 2.6.
+   - Any version of Wireshark built with autoconf, which is try if you
+     ran autogen.sh. This is the recommended way to build on Linux as
+     of Wireshark 2.6.
 
-       - Wireshark 1.x built on Windows. Also `%WIRETAP_VERSION%` should also
-         be set to the version of wiretap in the build.
+   - Wireshark 1.x built on Windows. Also `%WIRETAP_VERSION%` should also
+     be set to the version of wiretap in the build.
 
-       - If there is a development package available for your system
-         and you want to use it to avoid having to build Wireshark.
-         This option defaults to `/usr/include/wireshark` if it exists, so
-         supplying the path isn't necessary unless wireshark was installed
-         else where.
+   - If there is a development package available for your system
+     and you want to use it to avoid having to build Wireshark.
+     This option defaults to `/usr/include/wireshark` if it exists, so
+     supplying the path isn't necessary unless wireshark was installed
+     else where.
 
-    - The newer out-of-source method, `--wireshark_cmake`, should be used if
-      Wireshark was built using CMake, which can put "config.h" header and
-      the Wireshark libraries somewhere other than the source tree. This is
-      Wireshark's recommended method for Windows and macOS and can optionally
-      be used on Linux. This complicates things somewhat so two more
-      options with arguments provied:
+- The newer out-of-source method, `--wireshark_cmake`, should be used if
+  Wireshark was built using CMake, which can put "config.h" header and
+  the Wireshark libraries somewhere other than the source tree. This is
+  Wireshark's recommended method for Windows and macOS and can optionally
+  be used on Linux. This complicates things somewhat so two more
+  options with arguments provied:
 
-      - `--wireshark_build`
-        - Is the build directory the user choose before building Wireshark.
-          This is required and an absolute path.
+  - `--wireshark_build`
+    - Is the build directory the user choose before building Wireshark.
+      This is required and an absolute path.
 
-      - `--wireshark_lib`
-        - Is the location of the Wireshark libraries RELATIVE to the build
-          location. It's optional but it might have to be supplied depending
-          on the version of Wireshark as these defaults are based on
-          Wireshark 2.4:
-          - On Windows the default is `run\RelWithDebInfo`.
-          - On macOS the default is `run/Wireshark.app/Contents/Frameworks`.
-          - On Linux the default is an empty string as the libraries are in
-            the build directory.
+  - `--wireshark_lib`
+    - Is the location of the Wireshark libraries RELATIVE to the build
+      location. It's optional but it might have to be supplied depending
+      on the version of Wireshark as these defaults are based on
+      Wireshark 2.4:
+      - On Windows the default is `run\RelWithDebInfo`.
+      - On macOS the default is `run/Wireshark.app/Contents/Frameworks`.
+      - On Linux the default is an empty string as the libraries are in
+        the build directory.
 
-  Glib is also required to build the dissector, so `--glib` must be passed.
-  If Wireshark was not built with the system Glib or Glib is not installed,
-  the install prefix of Glib must be passed as well:
-   - On Windows this will be something like: `wireshark-win(32|64)-libs-*\gtk2`
-   - On macOS it depends on if the built-in dependency script or a package
-     manager like Homebrew was used to install Wireshark's dependencies.
-   - On the average Linux, it shouldn't be necessary unless you needed to use
-     a Glib that is not installed (in `/usr`) to build Wireshark.
+Glib is also required to build the dissector, so `--glib` must be passed.
+If Wireshark was not built with the system Glib or Glib is not installed,
+the install prefix of Glib must be passed as well:
+ - On Windows this will be something like: `wireshark-win(32|64)-libs-*\gtk2`
+ - On macOS it depends on if the built-in dependency script or a package
+   manager like Homebrew was used to install Wireshark's dependencies.
+ - On the average Linux, it shouldn't be necessary unless you needed to use
+   a Glib that is not installed (in `/usr`) to build Wireshark.
 
-  For optional sample payload dissection support, RapidJSON must be available
-  and `--rapidjson` must be passed. It might already be available if OpenDDS
-  was recursively cloned by a git client or RapidJSON is installed in a
-  default include location (RapidJSON is header only library).
-  If RapidJSON is not installed on the system, it must be downloaded using:
-  `git submodule update --init --recursive` or equivalent for your git client
-  or manually downloading and placing the
-  library at `DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson`.
+For optional sample payload dissection support, RapidJSON must be available
+and `--rapidjson` must be passed. It might already be available if OpenDDS
+was recursively cloned by a git client or RapidJSON is installed in a
+default include location (RapidJSON is header only library).
+If RapidJSON is not installed on the system, it must be downloaded using:
+`git submodule update --init --recursive` or equivalent for your git client
+or manually downloading and placing the
+library at `DDS_ROOT/tools/IntermediateTypeLang/cpp/rapidjson`.
 
-2. Build
+### Build
 
-  Build normally as described in the `$DDS_ROOT/INSTALL document`.
+Build normally as described in the `$DDS_ROOT/INSTALL document`.
 
-3. Install Plugin
+### Install Plugin
 
-  To install the dissector plugin, copy the plugin file  from
-  `DDS_ROOT/tools/dissector` to one of the plugin directories listed in the
-  Folders section in Wireshark's "About" dialog which can be found in the "Help"
-  menu. On Windows, the plugin file will be named `OpenDDS_Dissector.dll` or
-  `OpenDDS_Dissectord.dll` depending if OpenDDS was a Release or Debug Build.
-  On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
+To install the dissector plugin, copy the plugin file  from
+`DDS_ROOT/tools/dissector` to one of the plugin directories listed in the
+Folders section in Wireshark's "About" dialog which can be found in the "Help"
+menu. On Windows, the plugin file will be named `OpenDDS_Dissector.dll` or
+`OpenDDS_Dissectord.dll` depending if OpenDDS was a Release or Debug Build.
+On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
 
-  See [Wireshark User's Guide Page on Plugins Folders](
+See [Wireshark User's Guide Page on Plugins Folders](
 https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html)
-  for details on where Wireshark looks for plugins. This page, if working
-  will be accurate for the latest stable version, but maybe not previous
-  versions.
+for details on where Wireshark looks for plugins. This page, if working
+will be accurate for the latest stable version, but maybe not previous
+versions.
 
 <a name="usage"></a>
 ## Usage
