@@ -3324,8 +3324,6 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_);
 
-//ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::accept_sample_processing() - checking     - %d - %@ -  %@\n"), instance->instance_handle_, instance.in(), watchdog_.in()));
-
     if (instance && watchdog_.in()) {
       instance->last_sample_tv_ = instance->cur_sample_tv_;
       instance->cur_sample_tv_ = ACE_OS::gettimeofday();
@@ -3333,15 +3331,11 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
       // Watchdog can't be called with sample_lock_ due to reactor deadlock
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
       if (is_new_instance) {
-//ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::accept_sample_processing() - - scheduling - %d - %@ -  %@\n"), instance->instance_handle_, instance.in(), watchdog_.in()));
         watchdog_->schedule_timer(instance);
       } else {
         watchdog_->execute(instance, false);
       }
     }
-//    } else {
-//ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::accept_sample_processing() - - ignoring   - %d - %@ -  %@\n"), instance->instance_handle_, instance.in(), watchdog_.in()));
-//    }
   }
 
   if (accepted) {
