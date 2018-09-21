@@ -38,7 +38,7 @@ from within Wireshark.
 - For Developers Working on this Plugin:
   - [Wireshark Developer's Guide](
       https://www.wireshark.org/docs/wsdg_html_chunked/)
-  - doc/README.dissector located in the Wireshark source
+  - `doc/README.dissector` located in the Wireshark source
     - Has **very important** information not found in the Developer's Guide
   - [Wireshark Dissector API Doxygen](
       https://www.wireshark.org/docs/wsar_html/)
@@ -86,7 +86,7 @@ was built or was acquired:
   the Wireshark libraries somewhere other than the source tree. This is
   Wireshark's recommended method for Windows and macOS and can optionally
   be used on Linux. This complicates things somewhat so two more
-  options with arguments provied:
+  options with arguments provided:
 
   - `--wireshark_build`
     - Is the build directory the user choose before building Wireshark.
@@ -180,7 +180,7 @@ list of plugins or protocols.
 
 A number of display filters are supported by the OpenDDS DCPS dissector:
 
-1. Transport header display filters
+#### Transport header display filters
 
   - `opendds.version`
     - Revision of the DCPS protocol.
@@ -197,7 +197,7 @@ A number of display filters are supported by the OpenDDS DCPS dissector:
   - `opendds.source`
     - Source identifier; only used by the multicast transport.
 
-2. Sample header display filters
+#### Sample header display filters
 
   - `opendds.sample.id`
     - Message ID of sample (i.e. `SAMPLE_DATA`).
@@ -275,11 +275,15 @@ NOTE: Coloring rules are applied on a first match basis; you may need to
 ## Sample Dissection
 
 The dissector, when configured with RapidJSON, can dissect sample data on
-Wireshark 1.12 and later. This requires `--rapidjson` to be passed to the
-configure script before building OpenDDS.
+Wireshark 1.12 and later. See the [section about building above](#building)
+to enable sample dissection.
 
 <a name="sample-dissection-itl"></a>
 ### Generating ITL files
+
+ITL files are how the sample dissector knows the type names and structure
+of the sample data. They must be generated from the same IDL files that
+OpenDDS uses and must be updated when they are.
 
 To create an ITL file from your IDL files:
 
@@ -382,7 +386,7 @@ opendds.sample.payload.Messenger.Message.u.u_b == 1
 ## Known Limitations
 
   - As noted in the introduction, this dissector only works with OpenDDS
-    systems using an InfoRepo, which is a differnt protocal than RTPS.
+    systems using an InfoRepo, which is a different protocal than RTPS.
 
   - OpenDDS only maintains wire compatibility with the current revision
     of the DCPS protocol.  This dissector is effective for the compiled
