@@ -897,7 +897,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
 
 void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
 {
-  ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_);
 
   // Reset the deadline timer if the period has changed.
   if (qos_.deadline.period.sec != qos.deadline.period.sec ||
@@ -1213,7 +1213,7 @@ DataReaderImpl::enable()
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
 
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, watchdog_lock_, DDS::RETCODE_ERROR);
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_, DDS::RETCODE_ERROR);
 
     if (!this->watchdog_
         && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
@@ -1518,7 +1518,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance_rch instance;
 
     {
-      ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_);
 
       if (this->watchdog_.in()) {
         // Find the instance first for timer cancellation since
@@ -1553,7 +1553,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance_rch instance;
 
     {
-      ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_);
 
       if (this->watchdog_.in()) {
         // Find the instance first for timer cancellation since
@@ -1586,7 +1586,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance_rch instance;
 
     {
-      ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_);
 
       if (this->watchdog_.in()) {
         // Find the instance first for timer cancellation since
@@ -2821,7 +2821,7 @@ void DataReaderImpl::post_read_or_take()
 
 void DataReaderImpl::reschedule_deadline()
 {
-  ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_);
   if (this->watchdog_.in()) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
     for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
@@ -3322,7 +3322,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
 #endif
 
   {
-    ACE_GUARD(ACE_Thread_Mutex, guard, watchdog_lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, watchdog_lock_);
 
 //ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::accept_sample_processing() - checking     - %d - %@ -  %@\n"), instance->instance_handle_, instance.in(), watchdog_.in()));
 
