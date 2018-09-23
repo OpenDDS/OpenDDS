@@ -144,8 +144,14 @@ DataReaderImpl::cleanup()
   // deleted
   set_listener(0, NO_STATUS_MASK);
   topic_servant_ = 0;
+
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   content_filtered_topic_ = 0;
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
   multi_topic_ = 0;
+#endif
 }
 
 void DataReaderImpl::init(
