@@ -763,10 +763,10 @@ private:
       , liveliness_timer_id_(-1)
     { }
 
-	void check_liveliness()
-	{
-	  CheckLivelinessCommand c(this);
-	  execute_or_enqueue(c);
+    void check_liveliness()
+    {
+     CheckLivelinessCommand c(this);
+     execute_or_enqueue(c);
 	}
 
     void cancel_timer()
