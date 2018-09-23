@@ -765,8 +765,8 @@ private:
 
 	void check_liveliness()
 	{
-		CheckLivelinessCommand c(this);
-		execute_or_enqueue(c);
+	  CheckLivelinessCommand c(this);
+	  execute_or_enqueue(c);
 	}
 
     void cancel_timer()
