@@ -767,7 +767,7 @@ private:
     {
      CheckLivelinessCommand c(this);
      execute_or_enqueue(c);
-	}
+    }
 
     void cancel_timer()
     {
