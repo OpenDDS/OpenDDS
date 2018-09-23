@@ -143,8 +143,9 @@ DataReaderImpl::cleanup()
   // back onto the listener at the moment the related DDS entity has been
   // deleted
   set_listener(0, NO_STATUS_MASK);
-
-
+  topic_servant_ = 0;
+  content_filtered_topic_ = 0;
+  multi_topic_ = 0;
 }
 
 void DataReaderImpl::init(
@@ -3137,6 +3138,14 @@ DDS::ContentFilteredTopic_ptr
 DataReaderImpl::get_cf_topic() const
 {
   return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_.get());
+}
+#endif
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+void
+DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
+{
+	multi_topic_ = mt;
 }
 #endif
 
