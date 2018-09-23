@@ -3145,7 +3145,7 @@ DataReaderImpl::get_cf_topic() const
 void
 DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
 {
-	multi_topic_ = mt;
+  multi_topic_ = mt;
 }
 #endif
 
