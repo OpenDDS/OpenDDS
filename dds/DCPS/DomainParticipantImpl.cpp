@@ -551,10 +551,24 @@ DomainParticipantImpl::delete_topic_i(
     DomainParticipantImpl* the_dp_servant =
       dynamic_cast<DomainParticipantImpl*>(dp.in());
 
-    if (the_dp_servant != this ||
-        (!remove_objref && the_topic_servant->has_entity_refs())) {
+    if (the_dp_servant != this) {
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
+          ACE_TEXT("will return PRECONDITION_NOT_MET because this is not the ")
+          ACE_TEXT("participant that owns this topic\n")));
+      }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+    if (!remove_objref && the_topic_servant->has_entity_refs()) {
       // If entity_refs is true (nonzero), then some reader or writer is using
       // this topic and the spec requires delete_topic() to fail with the error:
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
+          ACE_TEXT("will return PRECONDITION_NOT_MET because there are still ")
+          ACE_TEXT("outstanding references to this topic\n")));
+      }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
