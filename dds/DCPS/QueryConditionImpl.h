@@ -64,6 +64,13 @@ public:
      * and the sample only has key fields.
      */
     if (sample_only_has_key_fields && evaluator_.has_non_key_fields(meta)) {
+      if (DCPS_debug_level > 8) {
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) QueryConditionImpl::filter: ")
+          ACE_TEXT("Sample has been filtered because the query ")
+          ACE_TEXT("references fields that are not readable\n")
+        ));
+      }
       return false;
     }
     return evaluator_.eval(s, query_parameters_);
