@@ -73,6 +73,7 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
       elseif("${arg}" MATCHES "\\.idl$")
         # Implicit sources default to PUBLIC
         list(APPEND ${idl_prefix}_PUBLIC ${arg})
+
       else()
         list(APPEND ${src_prefix}_PUBLIC ${arg})
       endif()
@@ -90,11 +91,14 @@ macro(OPENDDS_IDL_COMMANDS target
   options)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
-    foreach(idl_file ${${idl_prefix}_${scope}})
-      # TODO: Generate custom command for the IDL file
-      # and append the expected output sources to the
-      # ${src_prefix}_${scope}} list.
-    endforeach()
+    if(${idl_prefix}_${scope})
+      dds_idl_sources(
+        TARGETS ${target}
+        TAO_IDL_FLAGS ${tao_options}
+        DDS_IDL_FLAGS ${opendds_options}
+        IDL_FILES ${${idl_prefix}_${scope}}
+        ${options})
+    endif()
   endforeach()
 endmacro()
 

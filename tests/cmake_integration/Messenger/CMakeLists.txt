@@ -40,8 +40,7 @@ OPENDDS_ADD_EXECUTABLE(DDS_Messenger_Publisher
   DDS_Messenger_Idl
   Writer.cpp
   publisher.cpp
-  Writer.h
-  Messenger.idl)
+  Writer.h)
 
 target_compile_definitions(DDS_Messenger_Publisher
   PUBLIC
