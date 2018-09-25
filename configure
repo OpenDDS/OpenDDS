@@ -2255,25 +2255,18 @@ if(OPENDDS_FOUND)
     _ADD_TARGET_LIB(\${_target} \${_VAR_PREFIX} "\${TAO_INCLUDE_DIR}")
   endforeach()
 
+  if(NOT TARGET OpenDDS::OpenDDS)
+    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
+  endif()
+
   foreach(_lib \${_opendds_libs})
     string(TOUPPER \${_lib} _VAR_PREFIX)
     string(REPLACE "OpenDDS_" "OpenDDS::" _target \${_lib})
 
     _ADD_TARGET_LIB(\${_target} \${_VAR_PREFIX} "\${OPENDDS_INCLUDE_DIR}")
+
+    target_link_libraries(OpenDDS::OpenDDS INTERFACE \${_target})
   endforeach()
-
-  if(NOT TARGET OpenDDS::OpenDDS)
-    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
-
-    set_target_properties(OpenDDS::OpenDDS
-      PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "\${OPENDDS_INCLUDE_DIRS}"
-        # INTERFACE_LINK_LIBRARIES
-          # ACE::Core
-          # TAO::Core
-          # DDS::Core
-    )
-  endif()
 
   include(\${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/api_macros.cmake)
 

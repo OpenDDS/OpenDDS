@@ -8,7 +8,7 @@ endif()
 
 include(opendds_options)
 
-find_package(OpenDDS 3 REQUIRED)
+find_package(OpenDDS)
 
 OPENDDS_ADD_LIBRARY(DDS_Messenger_Idl
   OpenDDS::Dcps
@@ -26,70 +26,28 @@ target_compile_definitions(DDS_Messenger_Idl
     MESSENGER_BUILD_DLL)
 
 OPENDDS_ADD_EXECUTABLE(DDS_Messenger_Publisher
-  ACE::ACE
-  TAO::TAO
-  OpenDDS::Tcp
-  OpenDDS::Udp
-  OpenDDS::Multicast
-  OpenDDS::Rtps_Udp
-  OpenDDS::Shmem
-  OpenDDS::InfoRepoDiscovery
-  OpenDDS::Rtps
-  OpenDDS::Dcps
-  OpenDDS::Security
-  DDS_Messenger_Idl
-  Writer.cpp
-  publisher.cpp
-  Writer.h)
+  OpenDDS::OpenDDS DDS_Messenger_Idl
+  Writer.cpp Writer.h publisher.cpp)
 
 target_compile_definitions(DDS_Messenger_Publisher
   PUBLIC
     OPENDDS_SECURITY)
 
-# ace_add_exe(DDS_Messenger_Subscriber
-  # OUTPUT_NAME subscriber
-  # LINK_LIBRARIES ACE::ACE
-                 # TAO::TAO
-                 # OpenDDS::Tcp
-                 # OpenDDS::Udp
-                 # OpenDDS::Multicast
-                 # OpenDDS::Rtps_Udp
-                 # OpenDDS::Shmem
-                 # OpenDDS::InfoRepoDiscovery
-                 # OpenDDS::Rtps
-                 # OpenDDS::Dcps
-                 # OpenDDS::Security
-                 # DDS_Messenger_Idl
-  # COMPILE_DEFINITIONS OPENDDS_SECURITY
-# )
-# ace_target_cxx_sources(DDS_Messenger_Subscriber
-  # SOURCE_FILES DataReaderListener.cpp
-               # subscriber.cpp
-  # HEADER_FILES DataReaderListener.h
-# )
+OPENDDS_ADD_EXECUTABLE(DDS_Messenger_Subscriber
+  OpenDDS::OpenDDS DDS_Messenger_Idl
+  DataReaderListener.cpp DataReaderListener.h subscriber.cpp)
 
+target_compile_definitions(DDS_Messenger_Subscriber
+  PUBLIC
+    OPENDDS_SECURITY)
 
-# ace_add_exe(DDS_Messenger_Stacksubscriber
-  # OUTPUT_NAME stack_subscriber
-  # LINK_LIBRARIES ACE::ACE
-                 # TAO::TAO
-                 # OpenDDS::Tcp
-                 # OpenDDS::Udp
-                 # OpenDDS::Multicast
-                 # OpenDDS::Rtps_Udp
-                 # OpenDDS::Shmem
-                 # OpenDDS::InfoRepoDiscovery
-                 # OpenDDS::Rtps
-                 # OpenDDS::Dcps
-                 # OpenDDS::Security
-                 # DDS_Messenger_Idl
-  # COMPILE_DEFINITIONS OPENDDS_SECURITY
-# )
-# ace_target_cxx_sources(DDS_Messenger_Stacksubscriber
-  # SOURCE_FILES DataReaderListener.cpp
-               # stack_subscriber.cpp
-  # HEADER_FILES DataReaderListener.h
-# )
+OPENDDS_ADD_EXECUTABLE(DDS_Messenger_Stacksubscriber
+  OpenDDS::OpenDDS DDS_Messenger_Idl
+  DataReaderListener.cpp DataReaderListener.h stack_subscriber.cpp)
+
+target_compile_definitions(DDS_Messenger_Stacksubscriber
+  PUBLIC
+    OPENDDS_SECURITY)
 
 # include(${OpenDDS_INCLUDE_DIR}/cmake/dds_add_test.cmake)
 
