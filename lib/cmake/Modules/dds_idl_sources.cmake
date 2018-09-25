@@ -42,7 +42,7 @@ function(dds_idl_command Name)
   set(dds_idl_command_usage "dds_idl_command(<Name> TAO_IDL_FLAGS flags DDS_IDL_FLAGS flags IDL_FILES Input1 Input2 ...]")
 
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES USED_BY WORKING_DIRECTORY)
-  cmake_parse_arguments(_arg "NO_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_arg "SKIP_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
 
   if ((CMAKE_GENERATOR MATCHES "Visual Studio") AND (_arg_USED_BY MATCHES ";"))
     set(exclude_cpps_from_command_output ON)
@@ -152,7 +152,7 @@ function(dds_idl_command Name)
 
   endforeach(input)
 
-  if (NOT _arg_NO_TAO_IDL)
+  if (NOT _arg_SKIP_TAO_IDL)
     tao_idl_command(${Name}
       IDL_FLAGS -I${DDS_ROOT} ${_arg_TAO_IDL_FLAGS}
       IDL_FILES ${_taoidl_inputs}
@@ -183,7 +183,7 @@ endfunction()
 
 function(dds_idl_sources)
   set(multiValueArgs TARGETS TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
-  cmake_parse_arguments(_arg "NO_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_arg "SKIP_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
 
   set(is_face OFF)
 
@@ -222,8 +222,8 @@ function(dds_idl_sources)
 
   file(RELATIVE_PATH rel_path ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_LIST_DIR})
 
-  if (_arg_NO_TAO_IDL)
-    set(OPTIONAL_TAO_IDL NO_TAO_IDL)
+  if (_arg_SKIP_TAO_IDL)
+    set(OPTIONAL_TAO_IDL SKIP_TAO_IDL)
   endif()
 
   if (is_face)
