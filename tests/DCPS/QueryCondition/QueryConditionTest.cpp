@@ -651,7 +651,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   // Create Dispose Sample with Invalid Data by Disposing the Sample Instance
   mdw->dispose(sample, HANDLE_NIL);
 
-  // Wait for samples matching the query from the disposed writer
+  // Wait for samples matching the query from the disposed instance
   if (ws->wait(active, max_wait_time) != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: wait failed" << endl;
     return false;

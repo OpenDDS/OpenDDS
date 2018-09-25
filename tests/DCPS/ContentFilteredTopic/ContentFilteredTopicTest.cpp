@@ -403,10 +403,10 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  // Create Dispose Sample with Invalid Data by Disposing the Writer
+  // Create Dispose Sample with Invalid Data by Disposing the instance
   mdw->dispose(sample, HANDLE_NIL);
 
-  // Wait for samples matching the filter from the disposed writer
+  // Wait for samples matching the filter from the disposed instance
   ReadCondition_var disposed_condition = dr->create_readcondition(
     ANY_SAMPLE_STATE, ANY_VIEW_STATE, NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   if (!disposed_condition) {
