@@ -16,116 +16,162 @@ function(OPENDDS_INCLUDE_DIRS_ONCE)
   endif()
 endfunction()
 
+
 macro(OPENDDS_GET_SOURCES_AND_OPTIONS
-  _sources _idl_sources
-  _cmake_options _tao_options _opendds_options _options)
+  src_prefix
+  idl_prefix
+  libs
+  cmake_options
+  tao_options
+  opendds_options
+  options)
 
-  set(${_sources})
-  set(${_idl_sources})
-  set(${_cmake_options})
-  set(${_tao_options})
-  set(${_opendds_options})
-  set(${_options})
-  set(_found_tao_options FALSE)
-  set(_found_opendds_options FALSE)
+  set(_options_n
+    PUBLIC PRIVATE INTERFACE
+    TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS)
 
-  foreach(arg ${ARGN})
-    if("x${arg}" STREQUAL "xTAO_IDL_OPTIONS")
-      set(_found_tao_options TRUE)
-      set(_found_opendds_options FALSE)
+  cmake_parse_arguments(_arg "" "" "${_options_n}" ${ARGN})
 
-    elseif("x${arg}" STREQUAL "xOPENDDS_IDL_OPTIONS")
-      set(_found_tao_options FALSE)
-      set(_found_opendds_options TRUE)
+  # Handle explicit sources per scope
+  foreach (scope PUBLIC PRIVATE INTERFACE)
+    set(${src_prefix}_${scope})
+    set(${idl_prefix}_${scope})
 
-    elseif("x${arg}" STREQUAL "xWIN32" OR
-           "x${arg}" STREQUAL "xMACOSX_BUNDLE" OR
-           "x${arg}" STREQUAL "xEXCLUDE_FROM_ALL" OR
-           "x${arg}" STREQUAL "xSTATIC" OR
-           "x${arg}" STREQUAL "xSHARED" OR
-           "x${arg}" STREQUAL "xMODULE")
-      list(APPEND ${_cmake_options} ${arg})
+    if(_arg_${scope})
+      foreach(src ${_arg_${scope}})
+        if("${src}" MATCHES "\\.idl$")
+          list(APPEND ${idl_prefix}_${scope} ${src})
+        else()
+          list(APPEND ${src_prefix}_${scope} ${src})
+        endif()
+      endforeach()
+    endif()
+  endforeach()
+
+  set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
+  set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
+
+  set(${cmake_options})
+  set(${options})
+
+  foreach(arg ${_arg_UNPARSED_ARGUMENTS})
+    if("x${arg}" STREQUAL "xWIN32" OR
+       "x${arg}" STREQUAL "xMACOSX_BUNDLE" OR
+       "x${arg}" STREQUAL "xEXCLUDE_FROM_ALL" OR
+       "x${arg}" STREQUAL "xSTATIC" OR
+       "x${arg}" STREQUAL "xSHARED" OR
+       "x${arg}" STREQUAL "xMODULE")
+      list(APPEND ${cmake_options} ${arg})
 
     elseif("x${arg}" STREQUAL "xSKIP_TAO_IDL")
-      list(APPEND ${_options} ${arg})
+      list(APPEND ${options} ${arg})
 
     else()
-      if(_found_tao_options)
-        list(APPEND ${_tao_options} ${arg})
+      if(TARGET ${arg})
+        list(APPEND ${libs} ${arg})
 
-      elseif (_found_opendds_options)
-        list(APPEND ${_opendds_options} ${arg})
-
+      elseif("${arg}" MATCHES "\\.idl$")
+        # Implicit sources default to PUBLIC
+        list(APPEND ${idl_prefix}_PUBLIC ${arg})
       else()
-        if(${arg} MATCHES "\\.idl$")
-          list(APPEND ${_idl_sources} ${arg})
-        else()
-          list(APPEND ${_sources} ${arg})
-        endif()
+        list(APPEND ${src_prefix}_PUBLIC ${arg})
       endif()
     endif()
   endforeach()
 endmacro()
 
-# OPENDDS_IDL_COMMANDS(target generated_files
-#                cmake_options tao_options opendds_options options
-#                file0 file1 ...)
-macro(OPENDDS_IDL_COMMANDS target generated_files
-  cmake_options tao_options opendds_options options)
 
-  set(_argn_list "${ARGN}")
+macro(OPENDDS_IDL_COMMANDS target
+  idl_prefix
+  src_prefix
+  cmake_options
+  tao_options
+  opendds_options
+  options)
+
+  foreach(scope PUBLIC PRIVATE INTERFACE)
+    foreach(idl_file ${${idl_prefix}_${scope}})
+      # TODO: Generate custom command for the IDL file
+      # and append the expected output sources to the
+      # ${src_prefix}_${scope}} list.
+    endforeach()
+  endforeach()
 endmacro()
 
-# OPENDDS_ADD_LIBRARY(target file0 file1 ...
-#                 [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL]
-#                 [SKIP_TAO_IDL]
-#                 [TAO_IDL_OPTIONS ...]
-#                 [OPENDDS_IDL_OPTIONS ...])
-macro(OPENDDS_ADD_LIBRARY _target)
+
+# OPENDDS_ADD_LIBRARY(target
+#   file0 file1 ...
+#   [<INTERFACE|PUBLIC|PRIVATE> file0 file1...] ...]
+#   [lib0 lib1 ...]
+#   [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL]
+#   [SKIP_TAO_IDL]
+#   [TAO_IDL_OPTIONS ...]
+#   [OPENDDS_IDL_OPTIONS ...])
+macro(OPENDDS_ADD_LIBRARY target)
 
   OPENDDS_INCLUDE_DIRS_ONCE()
 
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
     _idl_sources
+    _libs
     _cmake_options
     _tao_options
     _opendds_options
     _options
     ${ARGN})
 
-  OPENDDS_IDL_COMMANDS(${_target} _generated_files
-    "${_cmake_options}" "${_tao_options}" "${_opendds_options}" "${_options}"
-    ${_idl_sources})
+  add_library(${target} ${_cmake_options})
+  target_link_libraries(${target} ${_libs})
 
-  add_library(${_target} ${_cmake_options}
-    ${_generated_files} ${_sources})
+  OPENDDS_IDL_COMMANDS(${target}
+    _idl_sources
+    _sources
+    "${_cmake_options}"
+    "${_tao_options}"
+    "${_opendds_options}"
+    "${_options}")
 
+  foreach(scope PUBLIC PRIVATE INTERFACE)
+    target_sources(${target} ${scope} ${_sources_${scope}})
+  endforeach()
 endmacro()
 
-# OPENDDS_ADD_EXECUTABLE(target file0 file1 ...
-#                    [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
-#                    [SKIP_TAO_IDL]
-#                    [TAO_IDL_OPTIONS ...]
-#                    [OPENDDS_IDL_OPTIONS ...] )
-macro(OPENDDS_ADD_EXECUTABLE _target)
+
+# OPENDDS_ADD_EXECUTABLE(target
+#   file0 file1 ...
+#   [<INTERFACE|PUBLIC|PRIVATE> file0 file1...] ...]
+#   [lib0 lib1 ...]
+#   [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
+#   [SKIP_TAO_IDL]
+#   [TAO_IDL_OPTIONS ...]
+#   [OPENDDS_IDL_OPTIONS ...])
+macro(OPENDDS_ADD_EXECUTABLE target)
 
   OPENDDS_INCLUDE_DIRS_ONCE()
 
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
     _idl_sources
+    _libs
     _cmake_options
     _tao_options
     _opendds_options
     _options
     ${ARGN})
 
-  OPENDDS_IDL_COMMANDS(${_target} _generated_files
-    "${_cmake_options}" "${_tao_options}" "${_opendds_options}" "${_options}"
-    ${_idl_sources})
+  add_executable(${target} ${_cmake_options})
+  target_link_libraries(${target} ${_libs})
 
-  add_executable(${_target} ${_cmake_options}
-    ${_generated_files} ${_sources})
+  OPENDDS_IDL_COMMANDS(${target}
+    _idl_sources
+    _sources
+    "${_cmake_options}"
+    "${_tao_options}"
+    "${_opendds_options}"
+    "${_options}")
 
+  foreach(scope PUBLIC PRIVATE INTERFACE)
+    target_sources(${target} ${scope} ${_sources_${scope}})
+  endforeach()
 endmacro()

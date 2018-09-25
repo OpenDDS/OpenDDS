@@ -11,6 +11,7 @@ include(opendds_options)
 find_package(OpenDDS 3 REQUIRED)
 
 OPENDDS_ADD_LIBRARY(DDS_Messenger_Idl
+  OpenDDS::Dcps
   Messenger.idl
   TAO_IDL_OPTIONS
     -Wb,stub_export_include=Messenger_export.h
@@ -19,19 +20,12 @@ OPENDDS_ADD_LIBRARY(DDS_Messenger_Idl
   OPENDDS_IDL_OPTIONS
     -Wb,export_macro=Messenger_Export)
 
-target_link_libraries(DDS_Messenger_Idl OpenDDS::Dcps)
 target_compile_definitions(DDS_Messenger_Idl
   PUBLIC
     OPENDDS_SECURITY
     MESSENGER_BUILD_DLL)
 
 OPENDDS_ADD_EXECUTABLE(DDS_Messenger_Publisher
-  Writer.cpp
-  publisher.cpp
-  Writer.h
-  Messenger.idl)
-
-target_link_libraries(DDS_Messenger_Publisher
   ACE::ACE
   TAO::TAO
   OpenDDS::Tcp
@@ -43,7 +37,11 @@ target_link_libraries(DDS_Messenger_Publisher
   OpenDDS::Rtps
   OpenDDS::Dcps
   OpenDDS::Security
-  DDS_Messenger_Idl)
+  DDS_Messenger_Idl
+  Writer.cpp
+  publisher.cpp
+  Writer.h
+  Messenger.idl)
 
 target_compile_definitions(DDS_Messenger_Publisher
   PUBLIC
