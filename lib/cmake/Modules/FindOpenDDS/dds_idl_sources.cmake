@@ -9,8 +9,6 @@ define_property(SOURCE PROPERTY DDS_IDL_MAIN_TARGET
   FULL_DOCS "the main target to process the IDL file"
 )
 
-include(tao_idl_sources)
-
 set(DDS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 if (NOT DEFINED DDS_BASE_IDL_FLAGS)
