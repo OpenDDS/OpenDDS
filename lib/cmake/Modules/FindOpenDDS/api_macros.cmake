@@ -67,7 +67,8 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
        "x${arg}" STREQUAL "xMODULE")
       list(APPEND ${cmake_options} ${arg})
 
-    elseif("x${arg}" STREQUAL "xSKIP_TAO_IDL")
+    elseif("x${arg}" STREQUAL "xSKIP_TAO_IDL" OR
+           "x${arg}" STREQUAL "xSKIP_TAO_IDL_EXPORT")
       list(APPEND ${options} ${arg})
 
     else()

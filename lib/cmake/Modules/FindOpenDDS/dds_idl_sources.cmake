@@ -40,7 +40,7 @@ function(dds_idl_command Name)
   set(dds_idl_command_usage "dds_idl_command(<Name> TAO_IDL_FLAGS flags DDS_IDL_FLAGS flags IDL_FILES Input1 Input2 ...]")
 
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES USED_BY WORKING_DIRECTORY)
-  cmake_parse_arguments(_arg "SKIP_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_arg "SKIP_TAO_IDL;SKIP_TAO_IDL_EXPORT" "" "${multiValueArgs}" ${ARGN})
 
   if ((CMAKE_GENERATOR MATCHES "Visual Studio") AND (_arg_USED_BY MATCHES ";"))
     set(exclude_cpps_from_command_output ON)
@@ -147,6 +147,16 @@ function(dds_idl_command Name)
               ${_ddsidl_flags} ${file_dds_idl_flags} ${abs_filename}
       WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}
     )
+
+    if (NOT _arg_SKIP_TAO_IDL_EXPORT)
+      tao_idl_export_command(${Name}
+        IDL_FLAGS -I${DDS_ROOT} ${_arg_TAO_IDL_FLAGS}
+        IDL_FILES ${input}
+        USED_BY ${_arg_USED_BY})
+
+      list(APPEND ${Name}_HEADER_FILES ${${Name}_EXPORT_HEADER_FILES})
+      list(APPEND ${Name}_OUTPUT_FILES ${${Name}_EXPORT_HEADER_FILES})
+    endif()
 
   endforeach(input)
 
