@@ -1,9 +1,11 @@
+# OpenDDS
+
 [![Build Status](https://travis-ci.org/objectcomputing/OpenDDS.svg?branch=master)](https://travis-ci.org/objectcomputing/OpenDDS)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/objectcomputing/OpenDDS?svg=true)](https://ci.appveyor.com/project/mitza-oci/opendds/branch/master)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4647c7248ac14e7bb60c142c626ba574)](https://www.codacy.com/app/OpenDDS/OpenDDS?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=objectcomputing/OpenDDS&amp;utm_campaign=Badge_Grade)
 
-OpenDDS is an open-source C\++ implementation of the Object Management Group's
+OpenDDS is an open-source C++ implementation of the Object Management Group's
 specification "Data Distribution Service for Real-time Systems".  Although
 OpenDDS is itself developed in C++, Java and JMS bindings are provided so
 that Java applications can use OpenDDS.  OpenDDS also includes support for the
@@ -17,7 +19,19 @@ and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
 The primary development of OpenDDS was done by
 [Object Computing, Incorporated](http://www.objectcomputing.com) in
 St. Louis and Phoenix.  It is released under the same generous license
-terms as ACE, TAO and MPC.  See the LICENSE file for details.
+terms as ACE, TAO and MPC.  See the [LICENSE](LICENSE) file for details.
+
+* [Documentation](#documentation)
+* [Support](#support)
+* [Features](#features)
+* [Dependencies](#dependencies)
+  * [TAO](#tao)
+  * [Perl](#perl)
+* [Supported Platforms](#supported-platforms)
+  * [Operating Systems](#operating-systems)
+  * [Compilers](#compilers)
+* [Building and Installing](#building-and-installing)
+* [Quick Start with Docker](#quick-start-with-docker)
 
 
 # Documentation
@@ -27,6 +41,9 @@ http://download.objectcomputing.com/OpenDDS/
 
 The TAO Developer's Guide book set may also be purchased from:
 http://www.theaceorb.com/purchase/index.html
+
+For developer's wanting to contribute to OpenDDS, please take the time to read
+[the developer's guidelines](docs/guidelines.md).
 
 
 # Support
@@ -63,11 +80,14 @@ the Support section above for contact information.
 
 # Dependencies
 
+For a complete detailed list of dependencies, see
+[docs/dependencies.md](docs/dependencies.md).
+
 ## TAO
 
 OpenDDS requires TAO for both IDL compilation as well as interaction
 with the DCPSInfoRepo.  If you will be using the "configure" script for OpenDDS
-(see the INSTALL file for details), you do not need to download TAO first --
+(see the [INSTALL.md](INSTALL.md) file for details), you do not need to download TAO first --
 the "configure" script will download it for you.
 
 Use one of the following versions when building OpenDDS:
@@ -79,29 +99,28 @@ Note that the 2.2a release is from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
 
-## GNU Make
-
-GNU Make 3.80+ was used for automating the compiling and linking of OpenDDS
-on Unix and Linux systems.
-
 ## Perl
 
 Perl is used for running the automated tests and examples included in this
-source tree and generating Makefiles or Visual Studio project files.  On Windows
-we recommend the use of ActiveState Perl.  The configure script also uses Perl.
+source tree and generating Makefiles or Visual Studio project files. The
+configure script also uses Perl.
 
+On Windows we recommend the use of [ActiveState Perl](
+https://www.activestate.com/activeperl).
 
-# Operating Systems
+# Supported Platforms
+
+## Operating Systems
 
 This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
-* Red Hat EL and CentOS 6.6 and 6.9, x86_64
-* Red Hat EL and CentOS 7.2 and 7.3, x86_64
-* Fedora 24 and 28, x86_64
+* Red Hat EL and CentOS 6.6 and 6.9, x86\_64
+* Red Hat EL and CentOS 7.2 and 7.3, x86\_64
+* Fedora 24 and 28, x86\_64
 * Debian 9.4, i686
-* Ubuntu 16.04 LTS, x86_64
-* openSUSE 42.1, and 42.2, x86_64
+* Ubuntu 16.04 LTS, x86\_64
+* openSUSE 42.1, and 42.2, x86\_64
 
 Windows family:
 * Windows 7 (32-bit, 64-bit)
@@ -126,7 +145,7 @@ Marketplace at:
 https://marketplace.windriver.com/index.php?partners&on=details&id=33
 
 
-# Compilers
+## Compilers
 
 This release of OpenDDS has been tested using the following compilers:
 
@@ -147,11 +166,14 @@ This release of OpenDDS has been tested using the following compilers:
 # Building and Installing
 
 For building and installation instructions
-see the INSTALL file in this directory.
+see the [INSTALL.md](INSTALL.md) file in this directory.
 
 # Quick Start with Docker
 
-Docker images containing a pre-built OpenDDS are available on [DockerHub](https://hub.docker.com/r/objectcomputing/opendds/).  An image corresponding to a particular release has a tag of the form `release-DDS-X.xx`, e.g., `release-DDS-3.12`.
+Docker images containing a pre-built OpenDDS are available on
+[DockerHub](https://hub.docker.com/r/objectcomputing/opendds/).  An image
+corresponding to a particular release has a tag of the form `release-DDS-X.xx`,
+e.g., `release-DDS-3.12`.
 
 1. Check for prerequisites
 
@@ -198,7 +220,3 @@ Docker images containing a pre-built OpenDDS are available on [DockerHub](https:
         docker-compose -f docker-compose-inforepo.yml up
         # Use Control-C to kill the InfoRepo process
 
-# OpenDDS Compliance with the DDS Specification
-
-See http://www.opendds.org and the OpenDDS Developer's Guide at:
-http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf
