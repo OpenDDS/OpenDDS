@@ -16,7 +16,7 @@
 ## Java
 
 If you're building OpenDDS for use by Java applications, please see the file
-[java/INSTALL](java/INSTALL.md) instead of this one.
+[java/INSTALL](java/INSTALL) instead of this one.
 
 ## Supported platforms
 
@@ -94,11 +94,11 @@ bin\auto_run_test.pl
   argument of `--prefix=<prefix>` the `make install` target is available.
 
   After running `make` (and before `make install`) you have one completely ready
-  and useable OpenDDS.  Its `DDS_ROOT` is the top of the source tree -- the same
+  and usable OpenDDS.  Its `DDS_ROOT` is the top of the source tree -- the same
   directory from which you ran configure and make.  That `DDS_ROOT` should work
   for building application code, and some users may prefer using it this way.
 
-  After `make install` there is a second completely ready and useable OpenDDS
+  After `make install` there is a second completely ready and usable OpenDDS
   that's under the installation prefix directory.  It comes with a one-line
   shell script in `<prefix>/share/dds/dds-devel.sh` that sets a `DDS_ROOT` which
   is used for building an application using this installed OpenDDS.  The
