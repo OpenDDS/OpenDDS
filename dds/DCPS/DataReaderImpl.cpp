@@ -125,14 +125,6 @@ DataReaderImpl::DataReaderImpl()
 DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
-
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  OwnershipManagerPtr owner_manager = this->ownership_manager();
-  if (owner_manager) {
-    owner_manager->unregister_reader(topic_servant_->type_name(), this);
-  }
-#endif
-
 }
 
 // this method is called when delete_datareader is called.
@@ -143,6 +135,14 @@ DataReaderImpl::cleanup()
   // back onto the listener at the moment the related DDS entity has been
   // deleted
   set_listener(0, NO_STATUS_MASK);
+
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+  OwnershipManagerPtr owner_manager = this->ownership_manager();
+  if (owner_manager) {
+    owner_manager->unregister_reader(topic_servant_->type_name(), this);
+  }
+#endif
+
   topic_servant_ = 0;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -152,6 +152,7 @@ DataReaderImpl::cleanup()
 #ifndef OPENDDS_NO_MULTI_TOPIC
   multi_topic_ = 0;
 #endif
+
 }
 
 void DataReaderImpl::init(
