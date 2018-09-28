@@ -10,6 +10,27 @@ guidelines, in reality the code has evolved over more than eight years by a
 diverse group of developers. At one point an automated re-formatter was run on
 the codebase, but automated tools can only cover a subset of the guidelines.
 
+
+<!-- vim-markdown-toc GFM -->
+
+* [Repository](#repository)
+* [Automated Build Systems](#automated-build-systems)
+* [Doxygen](#doxygen)
+* [Dependencies](#dependencies)
+* [Text File Formatting](#text-file-formatting)
+* [C++ Standard](#c-standard)
+* [C++ Coding Style](#c-coding-style)
+  * [Example](#example)
+  * [Punctuation](#punctuation)
+  * [Whitespace](#whitespace)
+  * [Language Usage](#language-usage)
+  * [Pointers and References](#pointers-and-references)
+  * [Naming](#naming)
+  * [Comments](#comments)
+  * [Documenting Code for Doxygen](#documenting-code-for-doxygen)
+
+<!-- vim-markdown-toc -->
+
 ## Repository
 
 The repository is hosted on Github at
@@ -29,13 +50,15 @@ test suite.
 
 ## Doxygen
 
-Doxygen is run on OpenDDS automatically. There are two hosted versions of this:
+Doxygen is run on OpenDDS regularly. There are two hosted versions of this:
 
 - [Latest Release](http://download.opendds.org/doxygen)
-- [master](http://scoreboard.ociweb.com/dds_doc_master_mosquito_linux_doxygen_u1/Doxygen/html/dds/)
-  - This version is **unstable** because generating the Doxygen is slow and
-    changes to master are made on a regular basis. This leads to links
-    changing from PR to PR with some pages not catching up for a while.
+  - Based on the current release of OpenDDS.
+- [Master](http://scoreboard.ociweb.com/dds_doc_master_mosquito_linux_doxygen_u1/Doxygen/html/dds/)
+  - Based on the master branch in the repository. Depending on the activity in
+    the repository this might be unstable because of the time it takes to
+    get the updated Doxygen on to the web sever. Perfer latest release unless
+    working with newer code.
 
 See [Documenting Code for Doxygen](#documenting-doxygen) to see how to take
 advantage of Doxygen when writing code in OpenDDS.
@@ -44,12 +67,12 @@ advantage of Doxygen when writing code in OpenDDS.
 
 - MPC is the build system, used to configure the build and generate platform
   specific build files (Makefiles, VS solution files, etc.).
-- ACE is a general library used for cross-platform compatibility, especially
+- ACE is a library used for cross-platform compatibility, especially
   networking and event loops. It is used both directly and through TAO.
-- TAO is a C++ CORBA Implementation built on ACE used extensively in the
+- TAO is a C++ CORBA implementation built on ACE used extensively in the
   traditional OpenDDS operating mode which uses the DCPSInfoRepo. TAO types are
-  also used in the End User DDS API. The TAO IDL compiler is internally and
-  used by the end user to allow OpenDDS to use user defined IDL types as topic
+  also used in the End User DDS API. The TAO IDL compiler is used internally
+  and by the end user to allow OpenDDS to use user defined IDL types as topic
   data.
 - Perl is an interpreted language used in the configure script, the tests, and any
   other scripting in OpenDDS codebase.
@@ -177,7 +200,7 @@ The punctuation placement rules can be summarized as:
   desirable.
 - Use the constructor initializer list and make sure its order matches the
   declaration order.
-- Prefer preincrement/decrement (`++x`) to postincrement/decrement (`x++`)
+- Prefer pre-increment/decrement (`++x`) to post-increment/decrement (`x++`)
 - All currently supported compilers use the template inclusion mechanism. Thus
   function/method template definitions may not be placed in normal `*.cpp`
   files, instead they can go in `_T.cpp` (which are `#included` and not
@@ -194,14 +217,16 @@ int* intPtr = &someInt;
 ```
 
 Watch out for multiple declarations in one statement.  `int* c, b;` does not
-declare two pointers!It's best just to break these into separate statements:
+declare two pointers! It's best just to break these into separate statements:
 
 ```
 int* c;
 int* b;
 ```
 
-### Naming (for library code that the user may link to)
+### Naming
+
+**(For library code that the user may link to)**
 
 - Preprocessor macros visible to user code must begin with `OPENDDS_`
 - C++ identifiers are either in top-level namespace `DDS` (OMG spec defined) or
@@ -232,10 +257,11 @@ int* b;
 <a name="documenting-doxygen"></a>
 ### Documenting Code for Doxygen
 
-Doxygen is run on the codebase and released with OpenDDS. This is a simplified
-guide with preferred way of documenting.
+Doxygen is run on the codebase with each change in master and each release.
+This is a simple guide showing the way of documenting in OpenDDS.
 
-Doxygen supports styles of documenting comments but this style should be used:
+Doxygen supports multiple styles of documenting comments but this style should
+be used in non-trivial situations:
 
 ```
 /**
@@ -248,27 +274,33 @@ class DoesStuff {
 };
 ```
 
-For simple items, a single line documenting comment can be made like:
+For simple things, a single line documenting comment can be made like:
 
 ```
-\\\ The count of times I introduced a bug into OpenDDS
-int my_bugs = 0: \\ Hopefully
+\\\ Number of bugs in the code
+unsigned bug_count = -1; // Woops
 ```
 
-For groups of very similar things you can make a group with `\\\{` and `\\\}`.
+The extra `*` on the multiline comment and `\` on the single line comment are
+important. They inform Doxygen that comment is the documentation for the
+following construct.
+
+For groups of very similar things you can avoid repeating yourself with `\\\{`
+and `\\\}`:
 
 ```
 /**
- * These things are related!
+ * Get a string
  */
 \\\{
-char* get_cstring();
-std::string get_string();
+char* get_c_string();
+std::string get_cpp_string();
 \\\}
 ```
 
 If referring to something that happens to be a namespace or other global
-thing (like DDS, OpenDDS, or RTPS), you should precede it with a `%`.
+object (like DDS, OpenDDS, or RTPS), you should precede it with a `%`.
+If not it will turn into a link to that object.
 
 For more information, see [the Doxygen manual](http://www.doxygen.nl/manual/).
 
