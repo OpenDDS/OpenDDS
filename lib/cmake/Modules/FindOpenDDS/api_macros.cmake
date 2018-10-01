@@ -86,6 +86,92 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   endforeach()
 endmacro()
 
+macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
+  set(_bin_dir ${CMAKE_CURRENT_BINARY_DIR})
+  set(_src_dir ${CMAKE_CURRENT_SOURCE_DIR})
+  set(_output_file "${_bin_dir}/${target}_export.h")
+
+  find_file(_gen_script "generate_export_file.pl" HINTS ${ACE_BIN_DIR})
+  if(NOT EXISTS ${_gen_script})
+    message(FATAL_ERROR "Failed to find required script 'generate_export_file.pl'")
+  endif()
+
+  add_custom_command(
+    OUTPUT ${_output_file}
+    DEPENDS perl
+    COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
+      $<TARGET_FILE:perl> ${_gen_script} ${target} $<ANGLE-R> ${_output_file}
+    VERBATIM
+  )
+
+  set(${output} ${_output_file})
+endmacro()
+
+macro(OPENDDS_TARGET_SOURCES target)
+  OPENDDS_INCLUDE_DIRS_ONCE()
+
+  OPENDDS_GET_SOURCES_AND_OPTIONS(
+    _sources
+    _idl_sources
+    _libs
+    _cmake_options
+    _tao_options
+    _opendds_options
+    _options
+    ${ARGN})
+
+  if(_libs)
+    message(WARNING "Ignoring libs '${_libs}' passed into OPENDDS_TARGET_SOURCES.")
+  endif()
+
+  get_property(_export_generated TARGET ${target}
+    PROPERTY OPENDDS_EXPORT_GENERATED SET)
+
+  if(NOT _export_generated)
+    _OPENDDS_GENERATE_EXPORT_MACRO_COMMAND(${target} _export_generated)
+
+    set_property(TARGET ${target}
+      PROPERTY OPENDDS_EXPORT_GENERATED ${_export_generated})
+
+    target_sources(${target} PUBLIC ${_export_generated})
+
+    string(TOUPPER "${target}" _target_upper)
+    target_compile_definitions(${target} PUBLIC ${_target_upper}_BUILD_DLL)
+  endif()
+
+  if(NOT "${tao_options}" MATCHES "-Wb,stub_export_include")
+    list(APPEND tao_options "-Wb,stub_export_include=${_export_generated}")
+  endif()
+
+  if(NOT "${tao_options}" MATCHES "-Wb,stub_export_macro")
+    list(APPEND tao_options "-Wb,stub_export_macro=${target}_Export")
+  endif()
+
+  if(NOT "${tao_options}" MATCHES "-SS")
+    list(APPEND tao_options "-SS")
+  endif()
+
+  if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
+    list(APPEND opendds_options "-Wb,export_macro=${target}_Export")
+  endif()
+
+  foreach(scope PUBLIC PRIVATE INTERFACE)
+    if(_idl_sources_${scope})
+      dds_idl_sources(
+        TARGETS ${target}
+        TAO_IDL_FLAGS ${tao_options}
+        DDS_IDL_FLAGS ${opendds_options}
+        IDL_FILES ${_idl_sources_${scope}}
+        ${options})
+    endif()
+
+    # The above should add IDL-Generated sources; here, the
+    # regular c/cpp/h files specified by the user are added.
+    target_sources(${target} ${scope} ${_sources_${scope}})
+
+  endforeach()
+endmacro()
+
 
 macro(OPENDDS_IDL_COMMANDS target
   idl_prefix
