@@ -67,130 +67,6 @@ macro(tao_setup_visual_studio_custom_command_fanout_dependencies)
   endif()
 endmacro(tao_setup_visual_studio_custom_command_fanout_dependencies)
 
-
-function(tao_idl_export_command name)
-  set(multiValueArgs IDL_FLAGS IDL_FILES USED_BY WORKING_DIRECTORY)
-  cmake_parse_arguments(_arg "" "" "${multiValueArgs}" ${ARGN})
-
-  set(_arg_IDL_FLAGS ${TAO_BASE_IDL_FLAGS} ${_arg_IDL_FLAGS})
-
-  if (NOT _arg_IDL_FILES)
-    message(FATAL_ERROR "using tao_idl_command(${name}) without specifying IDL_FILES")
-  endif()
-
-  if ((CMAKE_GENERATOR MATCHES "Visual Studio") AND (_arg_USED_BY MATCHES ";"))
-    set(exclude_cpps_from_command_output ON)
-  endif()
-
-  if (NOT _arg_WORKING_DIRECTORY)
-    set(_working_binary_dir ${CMAKE_CURRENT_BINARY_DIR})
-    set(_working_source_dir ${CMAKE_CURRENT_SOURCE_DIR})
-  elseif (NOT IS_ABSOLUTE "${_arg_WORKING_DIRECTORY}")
-    set(_working_binary_dir ${CMAKE_CURRENT_BINARY_DIR}/${_arg_WORKING_DIRECTORY})
-    set(_working_source_dir ${CMAKE_CURRENT_SOURCE_DIR}/${_arg_WORKING_DIRECTORY})
-  else()
-    set(_working_binary_dir ${_arg_WORKING_DIRECTORY})
-    set(_working_source_dir ${CMAKE_CURRENT_SOURCE_DIR})
-  endif()
-
-  ## convert all include paths to be relative to binary tree instead of to source tree
-  file(RELATIVE_PATH _rel_path_to_source_tree ${_working_binary_dir} ${_working_source_dir})
-  foreach(flag ${_arg_IDL_FLAGS})
-    if ("${flag}" MATCHES "^-I(\\.\\..*)")
-       list(APPEND _converted_flags -I${_rel_path_to_source_tree}/${CMAKE_MATCH_1})
-     else()
-       list(APPEND _converted_flags ${flag})
-       # if the flag is like "-Wb,stub_export_file=filename" then set the variable
-       # like "idl_cmd_arg-wb-stub_export_file" to filename
-       string(REGEX MATCH "^-Wb,([^=]+)=(.+)" m "${flag}")
-       if (m)
-         set(idl_cmd_arg-Wb-${CMAKE_MATCH_1} ${CMAKE_MATCH_2})
-       endif()
-    endif()
-  endforeach()
-
-  set(optionArgs -Sch -Sci -Scc -Ssh -SS -GA -GT -GX -Gxhst -Gxhsk)
-  cmake_parse_arguments(_idl_cmd_arg "${optionArgs}" "-o;-oS;-oA" "" ${_arg_IDL_FLAGS})
-
-  if ("${_idl_cmd_arg_-o}" STREQUAL "")
-    set(_output_dir "${_working_binary_dir}")
-  else()
-    set(_output_dir "${_working_binary_dir}/${_idl_cmd_arg_-o}")
-  endif()
-
-  if ("${_idl_cmd_arg_-oS}" STREQUAL "")
-    set(_skel_output_dir ${_output_dir})
-  else()
-    set(_skel_output_dir "${_working_binary_dir}/${_idl_cmd_arg_-oS}")
-  endif()
-
-  if ("${_idl_cmd_arg_-oA}" STREQUAL "")
-    set(_anyop_output_dir ${_output_dir})
-  else()
-    set(_anyop_output_dir "${_working_binary_dir}/${_idl_cmd_arg_-oA}")
-  endif()
-
-  foreach(idl_file ${_arg_IDL_FILES})
-    get_filename_component(idl_file_base ${idl_file} NAME_WE)
-    get_filename_component(abs_filename ${idl_file} ABSOLUTE)
-    get_filename_component(file_ext ${idl_file} EXT)
-
-    if (_idl_cmd_arg_-o)
-      set(output_prefix ${_working_binary_dir}/${_idl_cmd_arg_-o}/${idl_file_base})
-    else()
-      set(output_prefix ${_working_binary_dir}/${idl_file_base})
-    endif()
-
-#    get_property(export_flags SOURCE ${idl_file} PROPERTY TAO_IDL_EXPORT_FLAGS)
-
-#    set(export_cmd_args
-#      -Wb,stub_export_include
-#      -Wb,stub_export_macro
-#      -Wb,stub_export_file)
-
-#    cmake_parse_arguments(_export_cmd_arg "" "${export_cmd_args}" ""
-#      ${_arg_IDL_FLAGS} ${export_flags})
-
-    set(_stub_export_include "${_output_dir}/${idl_file_base}_export.h")
-    if (idl_cmd_arg-Wb-stub_export_include)
-      set(_stub_export_include "${idl_cmd_arg-Wb-stub_export_include}")
-    endif()
-
-    string(TOUPPER ${idl_file_base} _export_macro_prefix)
-    set(_stub_export_macro "${_export_macro_prefix}_Export")
-    if (idl_cmd_arg-Wb-stub_export_macro)
-      set(_stub_export_macro "${idl_cmd_arg-Wb-stub_export_macro}")
-    endif()
-
-    set(_stub_export_file "${idl_file_base}_export.h")
-    if (idl_cmd_arg-Wb-stub_export_file)
-      set(_stub_export_file "${idl_cmd_arg-Wb-stub_export_file}")
-    endif()
-
-    set(output_file ${idl_file_base}_export.h)
-    add_custom_command(
-      OUTPUT ${output_file}
-      DEPENDS tao_idl
-      MAIN_DEPENDENCY ${abs_filename}
-      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}"  "TAO_ROOT=${TAO_INCLUDE_DIR}" "${IDL_PATH_ENV}"
-              $<TARGET_FILE:tao_idl> -I${_working_source_dir}
-              -Gp -Gd -Sci -SS -Sorb -Sal -GX
-              -Wb,stub_export_macro=${_stub_export_macro}
-              -Wb,stub_export_include=${_stub_export_include}
-              -Wb,stub_export_file=${_stub_export_file}
-              -iC ${_output_dir}
-              -Gxhst
-              ${idl_file}
-      WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}
-    )
-
-    list(APPEND export_headers ${output_file})
-  endforeach()
-
-  set(${Name}_EXPORT_HEADER_FILES ${export_headers} PARENT_SCOPE)
-endfunction()
-
-
 function(tao_idl_command name)
   set(multiValueArgs IDL_FLAGS IDL_FILES USED_BY WORKING_DIRECTORY)
   cmake_parse_arguments(_arg "" "" "${multiValueArgs}" ${ARGN})
@@ -256,7 +132,6 @@ function(tao_idl_command name)
   foreach(idl_file ${_arg_IDL_FILES})
 
     get_filename_component(idl_file_base ${idl_file} NAME_WE)
-
     set(_STUB_HEADER_FILES)
     set(_SKEL_HEADER_FILES)
 
@@ -341,11 +216,7 @@ function(tao_idl_command name)
       OUTPUT ${_OUTPUT_FILES}
       DEPENDS tao_idl ${tao_idl_shared_libs} ace_gperf
       MAIN_DEPENDENCY ${idl_file}
-      COMMAND tao_idl -g ${GPERF_LOCATION} ${TAO_CORBA_IDL_FLAGS}
-              -Sg -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h
-              -I${TAO_INCLUDE_DIR} -I${_working_source_dir}
-              ${_converted_flags}
-              ${idl_file_path}
+      COMMAND tao_idl -g ${GPERF_LOCATION} ${TAO_CORBA_IDL_FLAGS} -Sg -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h -I${TAO_INCLUDE_DIR} -I${_working_source_dir} ${_converted_flags} ${idl_file_path}
       WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}
       VERBATIM
     )
