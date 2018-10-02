@@ -265,9 +265,6 @@ my $cross_compile = 0;
 my %opts = %{parseArgs()};
 
 my $debug = exists $opts{'debug'} ? $opts{'debug'} : 1;
-if ($opts{'verbose'}) {
-  print "Debug is " . ($debug ? 'enabled' : 'disabled') . '\n';
-}
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
