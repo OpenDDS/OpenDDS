@@ -11,49 +11,71 @@ include(opendds_options)
 find_package(OpenDDS)
 
 # IDL Library
-add_library(DDS_Messenger_Idl)
-OPENDDS_TARGET_SOURCES(DDS_Messenger_Idl Messenger.idl)
+add_library(messenger)
+OPENDDS_TARGET_SOURCES(messenger Messenger.idl)
 target_link_libraries(OpenDDS::Dcps)
 
-target_compile_definitions(DDS_Messenger_Idl
+target_compile_definitions(messenger
   PUBLIC
     OPENDDS_SECURITY)
 
 # Publisher
-add_executable(DDS_Messenger_Publisher)
-target_sources(DDS_Messenger_Publisher
+add_executable(publisher)
+target_sources(publisher
   PUBLIC
     Writer.cpp Writer.h publisher.cpp)
 
-target_link_libraries(DDS_Messenger_Publisher
-  DDS_Messenger_Idl OpenDDS::OpenDDS)
+target_link_libraries(publisher
+  messenger OpenDDS::OpenDDS)
 
-target_compile_definitions(DDS_Messenger_Publisher
+target_compile_definitions(publisher
   PUBLIC
     OPENDDS_SECURITY)
 
 # Subscriber
-add_executable(DDS_Messenger_Subscriber)
-target_sources(DDS_Messenger_Subscriber
+add_executable(subscriber)
+target_sources(subscriber
   PUBLIC
     DataReaderListener.cpp DataReaderListener.h subscriber.cpp)
 
-target_link_libraries(DDS_Messenger_Subscriber
-  DDS_Messenger_Idl OpenDDS::OpenDDS)
+target_link_libraries(subscriber
+  messenger OpenDDS::OpenDDS)
 
-target_compile_definitions(DDS_Messenger_Subscriber
+target_compile_definitions(subscriber
   PUBLIC
     OPENDDS_SECURITY)
 
 # Stacksubscriber
-add_executable(DDS_Messenger_Stacksubscriber)
-target_sources(DDS_Messenger_Stacksubscriber
+add_executable(stack_subscriber)
+target_sources(stack_subscriber
   PUBLIC
     DataReaderListener.cpp DataReaderListener.h stack_subscriber.cpp)
 
-target_link_libraries(DDS_Messenger_Stacksubscriber
-  DDS_Messenger_Idl OpenDDS::OpenDDS)
+target_link_libraries(stack_subscriber
+  messenger OpenDDS::OpenDDS)
 
-target_compile_definitions(DDS_Messenger_Stacksubscriber
+target_compile_definitions(stack_subscriber
   PUBLIC
     OPENDDS_SECURITY)
+
+# Copy configs/scripts into build-output directory
+set(_src_dir ${CMAKE_CURRENT_SOURCE_DIR})
+set(_dst_dir ${CMAKE_CURRENT_BINARY_DIR})
+
+file(GLOB _ini_src "${_src_dir}/*.ini")
+file(GLOB _pl_src "${_src_dir}/*.pl")
+add_custom_target(Copy_ini_and_scripts
+  ALL
+  COMMAND_EXPAND_LISTS
+  VERBATIM
+  COMMENT "Copying configs/scripts into build-output directory"
+  COMMAND ${CMAKE_COMMAND} -E
+    copy ${_ini_src} ${_pl_src} ${_dst_dir}/$<CONFIG>)
+
+set(_post_build_deps
+  messenger
+  publisher
+  subscriber
+  stack_subscriber)
+
+add_dependencies(Copy_ini_and_scripts ${_post_build_deps})
