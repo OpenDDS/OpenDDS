@@ -1,0 +1,50 @@
+variables:
+   ACE_ROOT: $(Build.SourcesDirectory)\ACE_TAO\ACE
+   TAO_ROOT: $(Build.SourcesDirectory)\ACE_TAO\TAO
+   system.prefergit: true
+
+resources:
+- repo: self
+  fetchDepth: 1
+
+queue:
+  name: Hosted VS2017
+  demands:
+  - Cmd
+  - msbuild
+  - visualstudio
+
+steps:
+- powershell: |
+   $client = new-object System.Net.WebClient
+   $client.DownloadFile("http://strawberryperl.com/download/5.28.0.1/strawberry-perl-5.28.0.1-64bit.zip","strawberry-perl.zip");
+  displayName: 'PowerShell Script'
+
+- task: ExtractFiles@1
+  displayName: 'Extract files '
+  inputs:
+    archiveFilePatterns: 'strawberry-perl.zip'
+    destinationFolder: perl
+
+- powershell: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO.git $(Build.SourcesDirectory)\ACE_TAO
+  displayName: 'git clone ACE_TAO'
+
+- powershell: git clone --depth 1 git://github.com/DOCGroup/MPC.git $(Build.SourcesDirectory)\ACE_TAO\ACE\MPC
+  displayName: 'git clone MPC'
+
+- powershell: |
+   '#include "ace/config-win32.h"' > $(Build.SourcesDirectory)\ACE_TAO\ACE\ace\config.h
+  displayName: 'Create config.h file'
+
+- task: BatchScript@1
+  displayName: 'Run script perl\perl\bin\perl'
+  inputs:
+    filename: 'perl\perl\bin\perl'
+    arguments: 'ACE_TAO\ACE\bin\mwc.pl -type vs2017 DDS_TAOv2_all.sln.mwc'
+    modifyEnvironment: false
+
+- task: VSBuild@1
+  displayName: 'Build solution DDS_TAOv2_all.sln.sln'
+  inputs:
+    solution: 'DDS_TAOv2_all.sln.sln'
+    maximumCpuCount: true
