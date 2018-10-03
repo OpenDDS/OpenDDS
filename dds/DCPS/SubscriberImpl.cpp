@@ -89,10 +89,11 @@ SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
                    this->si_lock_,
                    false);
 
-  for (DataReaderSet::iterator it(datareader_set_.begin());
-       it != datareader_set_.end(); ++it) {
-    if (a_handle == (*it)->get_instance_handle())
+  for (DataReaderMap::iterator it(datareader_map_.begin());
+       it != datareader_map_.end(); ++it) {
+    if (a_handle == it->second->get_instance_handle()) {
       return true;
+    }
   }
 
   return false;
