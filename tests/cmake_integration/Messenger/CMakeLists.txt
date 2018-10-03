@@ -6,8 +6,6 @@ if (DEFINED ENV{DDS_ROOT})
   list(APPEND CMAKE_MODULE_PATH "${DDS_ROOT}/lib/cmake/Modules")
 endif()
 
-include(opendds_options)
-
 find_package(OpenDDS)
 
 # IDL Library
