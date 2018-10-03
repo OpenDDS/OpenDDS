@@ -1,7 +1,4 @@
 variables:
-   ACE_ROOT: $(Build.SourcesDirectory)\ext\ACE_TAO\ACE
-   TAO_ROOT: $(Build.SourcesDirectory)\ext\ACE_TAO\TAO
-   MPC_ROOT: $(Build.SourcesDirectory)\ext\MPC
    system.prefergit: true
 
 resources:
@@ -32,8 +29,13 @@ jobs:
     inputs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
       modifyEnvironment: true
-  - script: ext\strawberry\perl\bin\perl configure -v
+  - script: ext\strawberry\perl\bin\perl configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC
     displayName: Run configure script
+  - task: BatchScript@1
+    displayName: Setenv from configure script
+    inputs:
+      filename: setenv.cmd
+      modifyEnvironment: true
   - task: VSBuild@1
     displayName: Build solution DDS_TAOv2_all.sln
     inputs:
