@@ -25,6 +25,10 @@ jobs:
       destinationFolder: perl
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC %MPC_ROOT%
     displayName: 'git clone MPC'
+  - task: BatchScript@1
+    inputs:
+      filename: "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      modifyEnvironment: true
   - script: configure -v
     displayName: 'Run configure script'
   - task: VSBuild@1
