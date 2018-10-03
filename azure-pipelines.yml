@@ -1,7 +1,7 @@
 variables:
-   ACE_ROOT: $(Build.SourcesDirectory)/ext/ACE_TAO/ACE
-   TAO_ROOT: $(Build.SourcesDirectory)/ext/ACE_TAO/TAO
-   MPC_ROOT: $(Build.SourcesDirectory)/ext/MPC
+   ACE_ROOT: $(Build.SourcesDirectory)\ext\ACE_TAO\ACE
+   TAO_ROOT: $(Build.SourcesDirectory)\ext\ACE_TAO\TAO
+   MPC_ROOT: $(Build.SourcesDirectory)\ext\MPC
    system.prefergit: true
 
 resources:
@@ -12,30 +12,30 @@ jobs:
 - job: VisualStudio2017
   timeoutInMinutes: 90
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: vs2017-win2016
   steps:
   - powershell: |
       $client = new-object System.Net.WebClient
       $client.DownloadFile("http://strawberryperl.com/download/5.28.0.1/strawberry-perl-5.28.0.1-64bit.zip","strawberry-perl.zip");
-    displayName: 'Download perl'
+    displayName: Download perl
   - task: ExtractFiles@1
-    displayName: 'Extract perl'
+    displayName: Extract perl
     inputs:
-      archiveFilePatterns: 'strawberry-perl.zip'
+      archiveFilePatterns: strawberry-perl.zip
       destinationFolder: perl
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC %MPC_ROOT%
-    displayName: 'git clone MPC'
+    displayName: git clone MPC
   - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
-    displayName: 'git clone ACE_TAO'
+    displayName: git clone ACE_TAO
   - task: BatchScript@1
     displayName: VcVars64
     inputs:
-      filename: "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
       modifyEnvironment: true
   - script: configure -v
-    displayName: 'Run configure script'
+    displayName: Run configure script
   - task: VSBuild@1
-    displayName: 'Build solution DDS_TAOv2_all.sln'
+    displayName: Build solution DDS_TAOv2_all.sln
     inputs:
       solution: DDS_TAOv2_all.sln
       platform: x64
