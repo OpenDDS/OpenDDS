@@ -29,7 +29,7 @@ my $doc_tao_version = '6.5.2';
 my @ARGS = @ARGV;
 
 sub perlOS_to_host {
-  return 'win32' if $^O eq 'MSWin32' || $^O eq 'msys';
+  return 'win32' if $^O eq 'MSWin32';
   return 'macosx' if $^O eq 'darwin';
   return $^O;
 }

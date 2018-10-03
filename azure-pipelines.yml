@@ -16,14 +16,14 @@ jobs:
   steps:
   - powershell: |
       $client = new-object System.Net.WebClient
-      $client.DownloadFile("http://strawberryperl.com/download/5.28.0.1/strawberry-perl-5.28.0.1-64bit.zip","strawberry-perl.zip");
+      $client.DownloadFile("http://strawberryperl.com/download/5.28.0.1/strawberry-perl-5.28.0.1-64bit-portable.zip", "strawberry-perl.zip");
     displayName: Download perl
   - task: ExtractFiles@1
     displayName: Extract perl
     inputs:
       archiveFilePatterns: strawberry-perl.zip
-      destinationFolder: perl
-  - script: git clone --depth 1 git://github.com/DOCGroup/MPC %MPC_ROOT%
+      destinationFolder: ext\strawberry
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
     displayName: git clone MPC
   - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
     displayName: git clone ACE_TAO
@@ -32,7 +32,7 @@ jobs:
     inputs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
       modifyEnvironment: true
-  - script: configure -v
+  - script: ext\strawberry\perl\bin\perl configure -v
     displayName: Run configure script
   - task: VSBuild@1
     displayName: Build solution DDS_TAOv2_all.sln
