@@ -25,7 +25,10 @@ jobs:
       destinationFolder: perl
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC %MPC_ROOT%
     displayName: 'git clone MPC'
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
+    displayName: 'git clone ACE_TAO'
   - task: BatchScript@1
+    displayName: VcVars64
     inputs:
       filename: "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
       modifyEnvironment: true
@@ -34,7 +37,7 @@ jobs:
   - task: VSBuild@1
     displayName: 'Build solution DDS_TAOv2_all.sln'
     inputs:
-      solution: 'DDS_TAOv2_all.sln'
+      solution: DDS_TAOv2_all.sln
       platform: x64
       configuration: debug
       maximumCpuCount: true
