@@ -1,15 +1,23 @@
-variables:
-   system.prefergit: true
-
-resources:
-- repo: self
-  fetchDepth: 1
-
 jobs:
 - job: VisualStudio2017
   timeoutInMinutes: 90
   pool:
     vmImage: vs2017-win2016
+  strategy:
+    maxParallel: 4
+    matrix:
+      Debug64:
+        BuildPlatform: x64
+        BuildConfiguration: Debug
+      Release64:
+        BuildPlatform: x64
+        BuildConfiguration: Release
+      Debug32:
+        BuildPlatform: Win32
+        BuildConfiguration: Debug
+      Release32:
+        BuildPlatform: Win32
+        BuildConfiguration: Release
   steps:
   - powershell: |
       $client = new-object System.Net.WebClient
@@ -20,16 +28,21 @@ jobs:
     inputs:
       archiveFilePatterns: strawberry-perl.zip
       destinationFolder: ext\strawberry
+  - task: BatchScript@1
+    displayName: Put perl on PATH
+    inputs:
+      filename: set PATH=%CD%\ext\strawberry\perl\bin;%PATH%
+      modifyEnvironment: true
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
     displayName: git clone MPC
   - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
     displayName: git clone ACE_TAO
   - task: BatchScript@1
-    displayName: VcVars64
+    displayName: VcVars
     inputs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
       modifyEnvironment: true
-  - script: ext\strawberry\perl\bin\perl configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC
+  - script: perl configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC
     displayName: Run configure script
   - task: BatchScript@1
     displayName: Setenv from configure script
@@ -40,6 +53,6 @@ jobs:
     displayName: Build solution DDS_TAOv2_all.sln
     inputs:
       solution: DDS_TAOv2_all.sln
-      platform: x64
-      configuration: debug
+      platform: $(BuildPlatform)
+      configuration: $(BuildConfiguration)
       maximumCpuCount: true
