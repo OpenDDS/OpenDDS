@@ -43,7 +43,7 @@ jobs:
     inputs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
       modifyEnvironment: true
-  - script: perl configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC
+  - script: configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC
     displayName: Run configure script
   - task: BatchScript@1
     displayName: Setenv from configure script
@@ -57,3 +57,47 @@ jobs:
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
+
+- job: Linux
+  timeoutInMinutes: 90
+  pool:
+    vmImage: ubuntu-16.04
+  strategy:
+    maxParallel: 3
+    matrix:
+      Debug:
+        ConfigOpts: --no-inline
+      Release:
+        ConfigOpts: --no-debug --optimize
+      Safety:
+        ConfigOpts: --safety-profile
+  steps:
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
+    displayName: git clone MPC
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
+    displayName: git clone ACE_TAO
+  - script: configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC $(ConfigOpts)
+    displayName: Run configure script
+  - script: make -sj6
+    displayName: Compile
+
+- job: macOS
+  timeoutInMinutes: 90
+  pool:
+    vmImage: macOS-10.13
+  strategy:
+    maxParallel: 2
+    matrix:
+      Debug:
+        ConfigOpts: --no-inline
+      Release:
+        ConfigOpts: --no-debug --optimize
+  steps:
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
+    displayName: git clone MPC
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
+    displayName: git clone ACE_TAO
+  - script: configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC $(ConfigOpts)
+    displayName: Run configure script
+  - script: make -sj6
+    displayName: Compile
