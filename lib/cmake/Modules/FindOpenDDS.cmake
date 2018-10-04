@@ -364,21 +364,36 @@ if(OPENDDS_FOUND)
     _ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${TAO_INCLUDE_DIR}")
   endforeach()
 
-  if(NOT TARGET OpenDDS::OpenDDS)
-    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
-  endif()
-
   foreach(_lib ${_opendds_libs})
     string(TOUPPER ${_lib} _VAR_PREFIX)
     string(REPLACE "OpenDDS_" "OpenDDS::" _target ${_lib})
 
     _ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${OPENDDS_INCLUDE_DIR}")
 
-    target_link_libraries(OpenDDS::OpenDDS INTERFACE ${_target})
   endforeach()
 
   include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/options.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/api_macros.cmake)
+
+  if(NOT TARGET OpenDDS::OpenDDS)
+    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
+
+    set(_opendds_core_libs
+      OpenDDS::Dcps
+      OpenDDS::Multicast
+      OpenDDS::Rtps
+      OpenDDS::Rtps_Udp
+      OpenDDS::InfoRepoDiscovery
+      OpenDDS::Shmem
+      OpenDDS::Tcp
+      OpenDDS::Udp)
+
+    if(OPENDDS_SECURITY)
+      list(APPEND _opendds_core_libs OpenDDS::Security)
+    endif()
+
+    target_link_libraries(OpenDDS::OpenDDS INTERFACE ${_opendds_core_libs})
+  endif()
 
 endif()
 

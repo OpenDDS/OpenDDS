@@ -13,10 +13,6 @@ add_library(messenger)
 OPENDDS_TARGET_SOURCES(messenger Messenger.idl)
 target_link_libraries(OpenDDS::Dcps)
 
-target_compile_definitions(messenger
-  PUBLIC
-    OPENDDS_SECURITY)
-
 # Publisher
 add_executable(publisher)
 target_sources(publisher
@@ -25,10 +21,6 @@ target_sources(publisher
 
 target_link_libraries(publisher
   messenger OpenDDS::OpenDDS)
-
-target_compile_definitions(publisher
-  PUBLIC
-    OPENDDS_SECURITY)
 
 # Subscriber
 add_executable(subscriber)
@@ -39,10 +31,6 @@ target_sources(subscriber
 target_link_libraries(subscriber
   messenger OpenDDS::OpenDDS)
 
-target_compile_definitions(subscriber
-  PUBLIC
-    OPENDDS_SECURITY)
-
 # Stacksubscriber
 add_executable(stack_subscriber)
 target_sources(stack_subscriber
@@ -51,10 +39,6 @@ target_sources(stack_subscriber
 
 target_link_libraries(stack_subscriber
   messenger OpenDDS::OpenDDS)
-
-target_compile_definitions(stack_subscriber
-  PUBLIC
-    OPENDDS_SECURITY)
 
 # Copy configs/scripts into build-output directory
 set(_src_dir ${CMAKE_CURRENT_SOURCE_DIR})
