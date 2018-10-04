@@ -72,11 +72,11 @@ jobs:
       Safety:
         ConfigOpts: --safety-profile
   steps:
-  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext/MPC
     displayName: git clone MPC
-  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext/ACE_TAO
     displayName: git clone ACE_TAO
-  - script: ./configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC $(ConfigOpts)
+  - script: ./configure -v --ace=ext/ACE_TAO/ACE --mpc=ext/MPC $(ConfigOpts)
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
@@ -93,11 +93,11 @@ jobs:
       Release:
         ConfigOpts: --no-debug --optimize
   steps:
-  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
+  - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext/MPC
     displayName: git clone MPC
-  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext\ACE_TAO
+  - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO ext/ACE_TAO
     displayName: git clone ACE_TAO
-  - script: ./configure -v --ace=ext\ACE_TAO\ACE --mpc=ext\MPC $(ConfigOpts)
+  - script: ./configure -v --ace=ext/ACE_TAO/ACE --mpc=ext/MPC $(ConfigOpts)
     displayName: Run configure script
   - script: make -sj6
     displayName: Compile
