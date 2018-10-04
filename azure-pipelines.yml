@@ -32,7 +32,7 @@ jobs:
     displayName: Put perl on PATH
     inputs:
       filename: tools\scripts\prepend_path
-      arguments: %CD%\ext\strawberry\perl\bin
+      arguments: '%CD%\ext\strawberry\perl\bin'
       modifyEnvironment: true
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext\MPC
     displayName: git clone MPC
