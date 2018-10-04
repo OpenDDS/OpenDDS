@@ -34,8 +34,6 @@ if (MSVC)
   set(CMAKE_MSVCIDE_RUN_PATH ${CMAKE_MSVCIDE_RUN_PATH} ${DDS_ROOT}/lib ${ACE_ROOT}/lib)
 endif()
 
-find_package(perl)
-
 find_path(OPENDDS_INCLUDE_DIR dds HINTS ${DDS_ROOT})
 find_path(OPENDDS_BIN_DIR bin HINTS ${DDS_ROOT})
 find_path(OPENDDS_LIB_DIR lib HINTS ${DDS_ROOT})
@@ -49,6 +47,8 @@ set(TAO_LIB_DIR ${ACE_LIB_DIR})
 set(_dds_bin_hints ${OPENDDS_BIN_DIR} $ENV{DDS_ROOT}/bin)
 set(_tao_bin_hints ${ACE_BIN_DIR} $ENV{ACE_ROOT}/bin)
 set(_ace_bin_hints ${TAO_BIN_DIR} $ENV{TAO_ROOT}/bin)
+
+find_program(PERL perl)
 
 find_program(OPENDDS_IDL
   NAMES
@@ -216,7 +216,9 @@ foreach(_cfg  RELEASE  DEBUG)
 
     find_library(${_LIB_VAR}_LIBRARY_${_cfg}
       ${_lib}${_sfx}
-      HINTS ${_tao_lib_hints}
+      # By default TAO libraries are built into ACE_ROOT/lib
+      # so the hints are shared here.
+      HINTS ${_tao_lib_hints} ${_ace_lib_hints}
     )
   endforeach()
 
@@ -338,7 +340,7 @@ if(OPENDDS_FOUND)
   _ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
   _ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
   _ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
-  _ADD_TARGET_BINARY(perl "${PERL_EXECUTABLE}")
+  _ADD_TARGET_BINARY(perl "${PERL}")
 
   foreach(_lib ${_ace_libs})
     string(TOUPPER ${_lib} _VAR_PREFIX)
