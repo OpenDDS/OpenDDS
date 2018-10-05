@@ -43,12 +43,12 @@ jobs:
     inputs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
       modifyEnvironment: true
-  - script: configure -v --mpc=ext\MPC & echo '##vso[task.setvariable variable=BuildSolution]DDS_TAOv2_all.sln'
+  - script: |
+      if %BuildConfiguration%==Release set OPT=--no-tests
+      configure -v --mpc=ext\MPC %OPT%
+      if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
+      echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     displayName: Run configure script
-    condition: eq(variables.BuildConfiguration, 'Debug')
-  - script: configure -v --mpc=ext\MPC --no-tests & echo '##vso[task.setvariable variable=BuildSolution]DDS_TAOv2.sln'
-    displayName: Run configure script
-    condition: eq(variables.BuildConfiguration, 'Release')
   - task: BatchScript@1
     displayName: Setenv from configure script
     inputs:
