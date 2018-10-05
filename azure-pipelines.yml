@@ -43,17 +43,21 @@ jobs:
     inputs:
       filename: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
       modifyEnvironment: true
-  - script: configure -v --mpc=ext\MPC
+  - script: configure -v --mpc=ext\MPC & echo ##vso[task.setvariable variable=BuildSolution]DDS_TAOv2_all.sln
     displayName: Run configure script
+    condition: eq(variables.BuildConfiguration, 'Debug')
+  - script: configure -v --mpc=ext\MPC --no-tests & echo ##vso[task.setvariable variable=BuildSolution]DDS_TAOv2.sln
+    displayName: Run configure script
+    condition: eq(variables.BuildConfiguration, 'Release')
   - task: BatchScript@1
     displayName: Setenv from configure script
     inputs:
       filename: setenv.cmd
       modifyEnvironment: true
   - task: VSBuild@1
-    displayName: Build solution DDS_TAOv2_all.sln
+    displayName: Build solution
     inputs:
-      solution: DDS_TAOv2_all.sln
+      solution: $(BuildSolution)
       platform: $(BuildPlatform)
       configuration: $(BuildConfiguration)
       maximumCpuCount: true
