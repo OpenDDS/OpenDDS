@@ -45,7 +45,7 @@ jobs:
       modifyEnvironment: true
   - script: |
       if %BuildConfiguration%==Release set OPT=--no-tests
-      configure -v --mpc=ext\MPC %OPT%
+      call configure -v --mpc=ext\MPC %OPT%
       if %BuildConfiguration%==Release (set SLN=DDS_TAOv2.sln) else set SLN=DDS_TAOv2_all.sln
       echo ##vso[task.setvariable variable=BuildSolution]%SLN%
     displayName: Run configure script
