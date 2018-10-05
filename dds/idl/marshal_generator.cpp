@@ -401,7 +401,12 @@ namespace {
         be_global->add_referenced(elem->file_name().c_str());
       }
     }
+
     string cxx_elem = scoped(elem->name());
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const string check_empty = use_cxx11 ? "seq.empty()" : "seq.length() == 0";
+    const string get_length = use_cxx11 ? "static_cast<uint32_t>(seq.size())" : "seq.length()";
+    const string get_buffer = use_cxx11 ? "seq.data()" : "seq.get_buffer()";
     {
       Function find_size("gen_find_size", "void");
       find_size.addArg("seq", "const " + cxx + "&");
@@ -410,15 +415,15 @@ namespace {
       find_size.endArgs();
       be_global->impl_ <<
         "  find_size_ulong(size, padding);\n"
-        "  if (seq.length() == 0) {\n"
+        "  if (" << check_empty << ") {\n"
         "    return;\n"
         "  }\n";
       if (elem_cls & CL_ENUM) {
         be_global->impl_ <<
-          "  size += seq.length() * max_marshaled_size_ulong();\n";
+          "  size += " << get_length << " * max_marshaled_size_ulong();\n";
       } else if (elem_cls & CL_PRIMITIVE) {
         be_global->impl_ << checkAlignment(elem) <<
-          "  size += seq.length() * " << getMaxSizeExprPrimitive(elem) << ";\n";
+          "  size += " << get_length << " * " << getMaxSizeExprPrimitive(elem) << ";\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
@@ -427,23 +432,31 @@ namespace {
           "  // sequence of unknown/unsupported type\n";
       } else { // String, Struct, Array, Sequence, Union
         be_global->impl_ <<
-          "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n";
+          "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
-            "    find_size_ulong(size, padding);\n"
-            "    if (seq[i]) {\n"
-            "      size += ACE_OS::strlen(seq[i])"
+            "    find_size_ulong(size, padding);\n";
+          if (use_cxx11) {
+            be_global->impl_ <<
+              "    {\n"
+              "      size += seq[i].size()";
+          } else {
+            be_global->impl_ <<
+              "    if (seq[i]) {\n"
+              "      size += ACE_OS::strlen(seq[i])";
+          }
+          be_global->impl_
             << ((elem_cls & CL_WIDE)
                 ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
                 : " + 1;\n") <<
             "    }\n";
-        } else if (elem_cls & CL_ARRAY) {
+        } else if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           be_global->impl_ <<
             "    " << cxx_elem << "_var tmp_var = " << cxx_elem
             << "_dup(seq[i]);\n"
             "    " << cxx_elem << "_forany tmp = tmp_var.inout();\n"
             "    gen_find_size(tmp, size, padding);\n";
-        } else { // Struct, Sequence, Union
+        } else { // Struct, Sequence, Union, (if C++11: Array)
           be_global->impl_ <<
             "    gen_find_size(seq[i], size, padding);\n";
         }
@@ -457,7 +470,7 @@ namespace {
       insertion.addArg("seq", "const " + cxx + "&");
       insertion.endArgs();
       be_global->impl_ <<
-        "  const CORBA::ULong length = seq.length();\n"
+        "  const CORBA::ULong length = " << get_length << ";\n"
         << streamAndCheck("<< length") <<
         "  if (length == 0) {\n"
         "    return true;\n"
@@ -465,7 +478,7 @@ namespace {
       if (elem_cls & CL_PRIMITIVE) {
         be_global->impl_ <<
           "  return strm.write_" << getSerializerName(elem)
-          << "_array(seq.get_buffer(), length);\n";
+          << "_array(" << get_buffer << ", length);\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
@@ -475,7 +488,7 @@ namespace {
       } else { // Enum, String, Struct, Array, Sequence, Union
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
-        if (elem_cls & CL_ARRAY) {
+        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           const string typedefname = scoped(seq->base_type()->name());
           be_global->impl_ <<
             "    " << typedefname << "_var tmp_var = " << typedefname
@@ -498,21 +511,21 @@ namespace {
       be_global->impl_ <<
         "  CORBA::ULong length;\n"
         << streamAndCheck(">> length");
-      if (!seq->unbounded()) {
+      if (!use_cxx11 && !seq->unbounded()) {
         be_global->impl_ <<
           "  if (length > seq.maximum()) {\n"
           "    return false;\n"
           "  }\n";
       }
       be_global->impl_ <<
-        "  seq.length(length);\n";
+        (use_cxx11 ? "  seq.resize(length);\n" : "  seq.length(length);\n");
       if (elem_cls & CL_PRIMITIVE) {
         be_global->impl_ <<
           "  if (length == 0) {\n"
           "    return true;\n"
           "  }\n"
           "  return strm.read_" << getSerializerName(elem)
-          << "_array(seq.get_buffer(), length);\n";
+          << "_array(" << get_buffer << ", length);\n";
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
@@ -522,7 +535,7 @@ namespace {
       } else { // Enum, String, Struct, Array, Sequence, Union
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
-        if (elem_cls & CL_ARRAY) {
+        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           const string typedefname = scoped(seq->base_type()->name());
           be_global->impl_ <<
             "    " << typedefname << "_var tmp = " << typedefname
@@ -543,7 +556,7 @@ namespace {
               ? ".get_buffer()" : "";
             be_global->impl_ << streamAndCheck(">> seq" + getbuffer + "[i]", 4);
           }
-        } else { // Enum, Struct, Sequence, Union
+        } else { // Enum, Struct, Sequence, Union, (if C++11: Array)
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);
         }
         be_global->impl_ <<
@@ -580,7 +593,12 @@ namespace {
   {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     string cxx = scoped(name);
+    if (!use_cxx11) {
+      cxx += "_forany";
+    }
+
     AST_Type* elem = resolveActualType(arr->base_type());
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()
@@ -594,7 +612,7 @@ namespace {
     }
     {
       Function find_size("gen_find_size", "void");
-      find_size.addArg("arr", "const " + cxx + "_forany&");
+      find_size.addArg("arr", "const " + cxx + "&");
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
@@ -623,11 +641,16 @@ namespace {
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
             indent << "find_size_ulong(size, padding);\n" <<
-            indent << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())"
-            << ((elem_cls & CL_WIDE)
-                ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
-                : " + 1;\n");
-        } else if (elem_cls & CL_ARRAY) {
+            indent;
+          if (use_cxx11) {
+            be_global->impl_ << "size += arr" << nfl.index_ << ".size()";
+          } else {
+            be_global->impl_ << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())";
+          }
+          be_global->impl_ << ((elem_cls & CL_WIDE)
+            ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
+            : " + 1;\n");
+        } else if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
           be_global->impl_ <<
             indent << cxx_elem << "_var tmp_var = " << cxx_elem
             << "_dup(arr" << nfl.index_ << ");\n" <<
@@ -643,27 +666,28 @@ namespace {
     {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
-      insertion.addArg("arr", "const " + cxx + "_forany&");
+      insertion.addArg("arr", "const " + cxx + "&");
       insertion.endArgs();
+      const std::string accessor = use_cxx11 ? ".data()" : ".in()";
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
-          suffix += "[0]";
+          suffix += use_cxx11 ? accessor : "[0]";
         be_global->impl_ <<
           "  return strm.write_" << getSerializerName(elem)
-          << "_array(arr.in()" << suffix << ", " << n_elems << ");\n";
+          << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         {
           string indent = "  ";
           NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-          if (elem_cls & CL_ARRAY) {
+          if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
             be_global->impl_ <<
               indent << cxx_elem << "_var tmp_var = " << cxx_elem
               << "_dup(arr" << nfl.index_ << ");\n" <<
               indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
               streamAndCheck("<< tmp", indent.size());
           } else {
-            string suffix = (elem_cls & CL_STRING) ? ".in()" : "";
+            string suffix = (elem_cls & CL_STRING) ? (use_cxx11 ? "" : ".in()") : "";
             be_global->impl_ <<
               streamAndCheck("<< arr" + nfl.index_ + suffix , indent.size());
           }
@@ -674,20 +698,21 @@ namespace {
     {
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
-      extraction.addArg("arr", cxx + "_forany&");
+      extraction.addArg("arr", cxx + "&");
       extraction.endArgs();
+      const std::string accessor = use_cxx11 ? ".data()" : ".out()";
       if (elem_cls & CL_PRIMITIVE) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
-          suffix += "[0]";
+          suffix += use_cxx11 ? accessor : "[0]";
         be_global->impl_ <<
           "  return strm.read_" << getSerializerName(elem)
-          << "_array(arr.out()" << suffix << ", " << n_elems << ");\n";
+          << "_array(arr" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
         {
           string indent = "  ";
           NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-          if (elem_cls & CL_ARRAY) {
+          if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
             const string typedefname = scoped(arr->base_type()->name());
             be_global->impl_ <<
               indent << typedefname << "_var tmp = " << typedefname
@@ -697,7 +722,7 @@ namespace {
               indent << typedefname << "_copy(arr" << nfl.index_ <<
               ", tmp.in());\n";
           } else {
-            string suffix = (elem_cls & CL_STRING) ? ".out()" : "";
+            string suffix = (elem_cls & CL_STRING) ? (use_cxx11 ? "" : ".out()") : "";
             be_global->impl_ <<
               streamAndCheck(">> arr" + nfl.index_ + suffix, indent.size());
           }
@@ -1029,6 +1054,7 @@ namespace {
                         const string& prefix, string& intro,
                         const string& = "") // same sig as streamCommon
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* typedeff = type;
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
@@ -1058,7 +1084,7 @@ namespace {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
       string fieldref = prefix, local = name;
-      if (fld_cls & CL_ARRAY) {
+      if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         intro += "  " + getArrayForany(prefix.c_str(), name.c_str(),
                                        scoped(typedeff->name())) + '\n';
         fieldref += '_';
@@ -1078,6 +1104,7 @@ namespace {
                       const string& prefix, string& intro,
                       const string& stru = "")
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* typedeff = type;
     type = resolveActualType(type);
     Classification fld_cls = classify(type);
@@ -1099,7 +1126,7 @@ namespace {
       string fieldref = prefix, local = name;
       const bool accessor =
         local.size() > 2 && local.substr(local.size() - 2) == "()";
-      if (fld_cls & CL_ARRAY) {
+      if (!use_cxx11 && (fld_cls & CL_ARRAY)) {
         string pre = prefix;
         if (shift == ">>" || shift == "<<") {
           pre.erase(0, 3);

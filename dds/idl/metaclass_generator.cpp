@@ -164,6 +164,7 @@ namespace {
 
   void gen_field_getValueFromSerialized(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* type = field->field_type();
     const Classification cls = classify(type);
     const std::string fieldName = field->local_name()->get_string();
@@ -218,7 +219,7 @@ namespace {
     } else { // array, sequence, union:
       be_global->impl_ <<
         "    if (!gen_skip_over(ser, static_cast<" << cxx_type
-        << ((cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) {\n"
+        << ((!use_cxx11 && (cls & CL_ARRAY)) ? "_forany" : "") << "*>(0))) {\n"
         "      throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \""
         " could not be skipped\");\n"
         "    }\n";
@@ -265,13 +266,15 @@ namespace {
 
   void assign_field(AST_Field* field)
   {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     if (!cls) return; // skip CL_UNKNOWN types
     const char* fieldName = field->local_name()->get_string();
     const std::string fieldType = (cls & CL_STRING) ?
       ((cls & CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager")
       : scoped(field->field_type()->name());
-    if (cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION)) {
+    if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
+        || (use_cxx11 && (cls & CL_ARRAY))) {
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
         "      static_cast<T*>(lhs)->" << fieldName <<
@@ -496,6 +499,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   if (!arr && !(seq = AST_Sequence::narrow_from_decl(type))) {
     return true;
   }
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
   const Classification cls = classify(type);
   const std::string clazz = scoped(name);
@@ -503,7 +507,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   NamespaceGuard ng;
   Function f("gen_skip_over", "bool");
   f.addArg("ser", "Serializer&");
-  f.addArg("", clazz + ((cls & CL_ARRAY) ? "_forany*" : "*"));
+  f.addArg("", clazz + (!use_cxx11 && (cls & CL_ARRAY) ? "_forany*" : "*"));
   f.endArgs();
 
   std::string len;
@@ -552,7 +556,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
     } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
       be_global->impl_ <<
         "    if (!gen_skip_over(ser, static_cast<" << cxx_elem <<
-        ((elem_cls & CL_ARRAY) ? "_forany" : "") << "*>(0))) return false;\n";
+        ((!use_cxx11 && (elem_cls & CL_ARRAY)) ? "_forany" : "") << "*>(0))) return false;\n";
     }
     be_global->impl_ <<
       "  }\n";

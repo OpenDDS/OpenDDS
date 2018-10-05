@@ -19,7 +19,11 @@
 
 using namespace AstTypeClassification;
 
+struct GeneratorBase;
+
 namespace {
+  GeneratorBase* generator_ = 0;
+
   std::map<AST_PredefinedType::PredefinedType, std::string> primtype_;
 
   enum Helper {
@@ -32,88 +36,9 @@ namespace {
   };
   std::map<Helper, std::string> helpers_;
 
-  std::string map_type(AST_Type* type)
-  {
-    if (AST_Typedef::narrow_from_decl(type)) {
-      return scoped(type->name());
-    }
-    const Classification cls = classify(type);
-    if (cls & CL_PRIMITIVE) {
-      AST_Type* actual = resolveActualType(type);
-      return primtype_[AST_PredefinedType::narrow_from_decl(actual)->pt()];
-    }
-    if (cls & CL_STRING) {
-      const AST_PredefinedType::PredefinedType chartype = (cls & CL_WIDE)
-        ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
-      return primtype_[chartype] + '*';
-    }
-    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
-      return scoped(type->name());
-    }
-    if (cls & CL_INTERFACE) {
-      return scoped(type->name()) + "_var";
-    }
-    return "<<unknown>>";
-  }
-
-  std::string map_type(AST_Expression::ExprType type)
-  {
-    AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
-    switch (type)
-    {
-    case AST_Expression::EV_short: pt = AST_PredefinedType::PT_short; break;
-    case AST_Expression::EV_ushort: pt = AST_PredefinedType::PT_ushort; break;
-    case AST_Expression::EV_long: pt = AST_PredefinedType::PT_long; break;
-    case AST_Expression::EV_ulong: pt = AST_PredefinedType::PT_ulong; break;
-    case AST_Expression::EV_longlong: pt = AST_PredefinedType::PT_longlong; break;
-    case AST_Expression::EV_ulonglong: pt = AST_PredefinedType::PT_ulonglong; break;
-    case AST_Expression::EV_float: pt = AST_PredefinedType::PT_float; break;
-    case AST_Expression::EV_double: pt = AST_PredefinedType::PT_double; break;
-    case AST_Expression::EV_longdouble: pt = AST_PredefinedType::PT_longdouble; break;
-    case AST_Expression::EV_char: pt = AST_PredefinedType::PT_char; break;
-    case AST_Expression::EV_wchar: pt = AST_PredefinedType::PT_wchar; break;
-    case AST_Expression::EV_octet: pt = AST_PredefinedType::PT_octet; break;
-    case AST_Expression::EV_bool: pt = AST_PredefinedType::PT_boolean; break;
-    case AST_Expression::EV_string: pt = AST_PredefinedType::PT_char; break;
-    case AST_Expression::EV_wstring: pt = AST_PredefinedType::PT_wchar; break;
-#ifdef ACE_HAS_CDR_FIXED
-    case AST_Expression::EV_fixed:
-      be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
-      return helpers_[HLP_FIXED_CONSTANT];
-#endif
-    default: break;
-    }
-    if (type == AST_Expression::EV_string || type == AST_Expression::EV_wstring)
-      return primtype_[pt] + "* const";
-    return primtype_[pt];
-  }
-
   std::string exporter() {
     return be_global->export_macro().empty() ? ""
       : be_global->export_macro().c_str() + std::string(" ");
-  }
-
-  void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE size, const char* struct_or_class = "struct")
-  {
-    be_global->add_include("<tao/VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = name->last_component()->get_string();
-    be_global->lang_header_ <<
-      struct_or_class << ' ' << nm << ";\n";
-    switch (size) {
-    case AST_Type::SIZE_UNKNOWN:
-      be_global->lang_header_ << "/* Unknown size */\n";
-      break;
-    case AST_Type::FIXED:
-      be_global->lang_header_ <<
-        "typedef " << helpers_[HLP_FIX_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
-        "typedef " << nm << "& " << nm << "_out;\n";
-      break;
-    case AST_Type::VARIABLE:
-      be_global->lang_header_ <<
-        "typedef " << helpers_[HLP_VAR_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
-        "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
-      break;
-    }
   }
 
   std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems) {
@@ -146,13 +71,112 @@ namespace {
 
 }
 
-class GeneratorBase
+struct GeneratorBase
 {
-public:
   virtual ~GeneratorBase() {}
   virtual void init() = 0;
   virtual void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq) = 0;
   virtual bool gen_struct(AST_Structure* s, UTL_ScopedName* name, const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size, const char* x) = 0;
+
+  virtual std::string const_keyword(AST_Expression::ExprType)
+  {
+    return "const";
+  }
+
+  std::string map_type(AST_Type* type)
+  {
+    if (AST_Typedef::narrow_from_decl(type)) {
+      return scoped(type->name());
+    }
+    const Classification cls = classify(type);
+    if (cls & CL_PRIMITIVE) {
+      AST_Type* actual = resolveActualType(type);
+      return primtype_[AST_PredefinedType::narrow_from_decl(actual)->pt()];
+    }
+    if (cls & CL_STRING) {
+      const AST_PredefinedType::PredefinedType chartype = (cls & CL_WIDE)
+        ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
+      return map_type_string(chartype, false);
+    }
+    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
+      return scoped(type->name());
+    }
+    if (cls & CL_INTERFACE) {
+      return scoped(type->name()) + "_var";
+    }
+    return "<<unknown>>";
+  }
+
+  virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
+  {
+    return primtype_[chartype] + '*' + (constant ? " const" : "");
+  }
+
+  std::string map_type(AST_Expression::ExprType type)
+  {
+    AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
+    switch (type)
+    {
+    case AST_Expression::EV_short: pt = AST_PredefinedType::PT_short; break;
+    case AST_Expression::EV_ushort: pt = AST_PredefinedType::PT_ushort; break;
+    case AST_Expression::EV_long: pt = AST_PredefinedType::PT_long; break;
+    case AST_Expression::EV_ulong: pt = AST_PredefinedType::PT_ulong; break;
+    case AST_Expression::EV_longlong: pt = AST_PredefinedType::PT_longlong; break;
+    case AST_Expression::EV_ulonglong: pt = AST_PredefinedType::PT_ulonglong; break;
+    case AST_Expression::EV_float: pt = AST_PredefinedType::PT_float; break;
+    case AST_Expression::EV_double: pt = AST_PredefinedType::PT_double; break;
+    case AST_Expression::EV_longdouble: pt = AST_PredefinedType::PT_longdouble; break;
+    case AST_Expression::EV_char: pt = AST_PredefinedType::PT_char; break;
+    case AST_Expression::EV_wchar: pt = AST_PredefinedType::PT_wchar; break;
+    case AST_Expression::EV_octet: pt = AST_PredefinedType::PT_octet; break;
+    case AST_Expression::EV_bool: pt = AST_PredefinedType::PT_boolean; break;
+    case AST_Expression::EV_string: pt = AST_PredefinedType::PT_char; break;
+    case AST_Expression::EV_wstring: pt = AST_PredefinedType::PT_wchar; break;
+#ifdef ACE_HAS_CDR_FIXED
+    case AST_Expression::EV_fixed:
+      be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
+      return helpers_[HLP_FIXED_CONSTANT];
+#endif
+    default: break;
+    }
+
+    if (type == AST_Expression::EV_string || type == AST_Expression::EV_wstring)
+      return map_type_string(pt, true);
+
+    return primtype_[pt];
+  }
+
+  virtual void gen_simple_out(const char* nm)
+  {
+    be_global->lang_header_ <<
+      "typedef " << nm << "& " << nm << "_out;\n";
+  }
+
+  virtual bool scoped_enum() { return false; }
+  virtual std::string enum_base() { return ""; }
+
+  virtual void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE size, const char* struct_or_class = "struct")
+  {
+    be_global->add_include("<tao/VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
+    const char* const nm = name->last_component()->get_string();
+    be_global->lang_header_ <<
+      struct_or_class << ' ' << nm << ";\n";
+    switch (size) {
+    case AST_Type::SIZE_UNKNOWN:
+      be_global->lang_header_ << "/* Unknown size */\n";
+      break;
+    case AST_Type::FIXED:
+      be_global->lang_header_ <<
+        "typedef " << helpers_[HLP_FIX_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
+        "typedef " << nm << "& " << nm << "_out;\n";
+      break;
+    case AST_Type::VARIABLE:
+      be_global->lang_header_ <<
+        "typedef " << helpers_[HLP_VAR_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
+        "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
+      break;
+    }
+  }
 
   static std::string generateDefaultValue(AST_Union* the_union, AST_Type* discriminator)
   {
@@ -205,17 +229,17 @@ public:
     return first_label.str();
   }
 
-  struct GenerateGettersAndSetters
+  struct GenerateUnionAccessors
   {
     AST_Union* the_union;
     AST_Type* discriminator;
 
-    GenerateGettersAndSetters (AST_Union* u, AST_Type* d)
+    GenerateUnionAccessors(AST_Union* u, AST_Type* d)
       : the_union(u)
       , discriminator(d)
     { }
 
-    void operator() (AST_UnionBranch* branch)
+    void operator()(AST_UnionBranch* branch)
     {
       const char* field_name = branch->local_name()->get_string();
       std::stringstream first_label;
@@ -231,7 +255,7 @@ public:
       }
 
       AST_Type* field_type = branch->field_type();
-      const std::string field_type_string = map_type(field_type);
+      const std::string field_type_string = generator_->map_type(field_type);
       AST_Type* actual_field_type = resolveActualType(field_type);
       const Classification cls = classify(actual_field_type);
       if (cls & (CL_PRIMITIVE | CL_ENUM)) {
@@ -329,14 +353,15 @@ public:
     return !hasDefaultLabel(branches) && needSyntheticDefault(discriminator, countLabels(branches));
   }
 
-  static void generate_union_field (AST_UnionBranch* branch)
+  static void generate_union_field(AST_UnionBranch* branch)
   {
     AST_Type* field_type = branch->field_type();
     AST_Type* actual_field_type = resolveActualType(field_type);
     const Classification cls = classify(actual_field_type);
+    const std::string lang_field_type = generator_->map_type(field_type);
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       be_global->lang_header_ <<
-        "    " << map_type(field_type) << ' ' << branch->local_name()->get_string() << ";\n";
+        "    " << lang_field_type << ' ' << branch->local_name()->get_string() << ";\n";
     } else if (cls & CL_STRING) {
       const AST_PredefinedType::PredefinedType chartype = (cls & CL_WIDE)
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
@@ -344,10 +369,10 @@ public:
         "    " << primtype_[chartype] << "* " << branch->local_name()->get_string() << ";\n";
     } else if (cls & CL_ARRAY) {
       be_global->lang_header_ <<
-        "    " << map_type(field_type) << "_slice* " << branch->local_name()->get_string() << ";\n";
+        "    " << lang_field_type << "_slice* " << branch->local_name()->get_string() << ";\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       be_global->lang_header_ <<
-        "    " << map_type(field_type) << "* " << branch->local_name()->get_string() << ";\n";
+        "    " << lang_field_type << "* " << branch->local_name()->get_string() << ";\n";
     } else {
       std::cerr << "Unsupported type for union element\n";
     }
@@ -360,6 +385,7 @@ public:
     std::stringstream ss;
     AST_Type* actual_field_type = resolveActualType(field_type);
     const Classification cls = classify(actual_field_type);
+    const std::string lang_field_type = generator_->map_type(field_type);
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       ss <<
         "    this->_u." << name << " = other._u." << name << ";\n";
@@ -368,10 +394,10 @@ public:
         "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? new " << map_type(field_type) << "(*other._u." << name << ") : 0;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? new " << lang_field_type << "(*other._u." << name << ") : 0;\n";
     } else {
       std::cerr << "Unsupported type for union element\n";
     }
@@ -386,6 +412,7 @@ public:
     std::stringstream ss;
     AST_Type* actual_field_type = resolveActualType(field_type);
     const Classification cls = classify(actual_field_type);
+    const std::string lang_field_type = generator_->map_type(field_type);
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       ss <<
         "    this->_u." << name << " = other._u." << name << ";\n";
@@ -394,10 +421,10 @@ public:
         "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? new " << map_type(field_type) << "(*other._u." << name << ") : 0;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? new " << lang_field_type << "(*other._u." << name << ") : 0;\n";
     } else {
       std::cerr << "Unsupported type for union element\n";
     }
@@ -449,7 +476,7 @@ public:
         "    this->_u." << name << " = 0;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
-        "    " << map_type(field_type) << "_free(this->_u." << name << ");\n"
+        "    " << generator_->map_type(field_type) << "_free(this->_u." << name << ");\n"
         "    this->_u." << name << " = 0;\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
       ss <<
@@ -462,7 +489,8 @@ public:
     return ss.str();
   }
 
-  bool gen_union(AST_Union* u, UTL_ScopedName* name, const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
+  virtual bool gen_union(AST_Union* u, UTL_ScopedName* name,
+                         const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
@@ -481,7 +509,7 @@ public:
       "  void _d(" << scoped(discriminator->name()) << " d) { _discriminator = d; }\n"
       "  " << scoped(discriminator->name()) << " _d() const { return _discriminator; }\n";
 
-    std::for_each (branches.begin(), branches.end(), GenerateGettersAndSetters(u, discriminator));
+    std::for_each (branches.begin(), branches.end(), GenerateUnionAccessors(u, discriminator));
 
     if (needsDefault(branches, discriminator)) {
       be_global->lang_header_ <<
@@ -572,11 +600,230 @@ public:
     gen_typecode(name);
     return true;
   }
+
+  virtual void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
+  {
+    be_global->add_include("<tao/Array_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
+    be_global->add_include("dds/DCPS/SafetyProfilePool.h", BE_GlobalData::STREAM_LANG_H);
+    const char* const nm = tdname->last_component()->get_string();
+    AST_Type* elem = arr->base_type();
+    const Classification elem_cls = classify(elem);
+    const Helper var = (elem->size_type() == AST_Type::VARIABLE)
+      ? HLP_ARR_VAR_VAR : HLP_ARR_FIX_VAR,
+      out = HLP_ARR_OUT,
+      forany = HLP_ARR_FORANY;
+
+    std::ostringstream bound, nofirst, total;
+    std::string zeros;
+    for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
+      const ACE_CDR::ULong extent = arr->dims()[dim]->ev()->u.ulval;
+      bound << '[' << extent << ']';
+      if (dim) {
+        nofirst << '[' << extent << ']';
+        zeros += "[0]";
+        total << " * ";
+      }
+      total << extent;
+    }
+
+    std::string elem_type = map_type(elem);
+    if (elem_cls & CL_STRING) {
+      elem_type = helpers_[(elem_cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
+    }
+
+    std::string out_type = nm;
+    if (elem->size_type() == AST_Type::VARIABLE) {
+      out_type = helpers_[out] + '<' + nm + ", " + nm + "_var, " + nm +
+        "_slice, " + nm + "_tag>";
+    }
+
+    be_global->lang_header_ <<
+      "typedef " << elem_type << ' ' << nm << bound.str() << ";\n"
+      "typedef " << elem_type << ' ' << nm << "_slice" << nofirst.str() << ";\n"
+      "struct " << nm << "_tag {};\n"
+      "typedef " << helpers_[var] << '<' << nm << ", " << nm << "_slice, "
+      << nm << "_tag> " << nm << "_var;\n"
+      "typedef " << out_type << ' ' << nm << "_out;\n"
+      "typedef " << helpers_[forany] << '<' << nm << ", " << nm << "_slice, "
+      << nm << "_tag> " << nm << "_forany;\n\n" <<
+      exporter() << nm << "_slice* " << nm << "_alloc();\n" <<
+      exporter() << "void " << nm << "_init_i(" << elem_type << "* begin);\n" <<
+      exporter() << "void " << nm << "_fini_i(" << elem_type << "* begin);\n" <<
+      exporter() << "void " << nm << "_free(" << nm << "_slice* slice);\n" <<
+      exporter() << nm << "_slice* " << nm << "_dup(const " << nm
+      << "_slice* slice);\n" <<
+      exporter() << "void " << nm << "_copy(" << nm << "_slice* dst, const "
+      << nm << "_slice* src);\n\n";
+    const ScopedNamespaceGuard namespaces(tdname, be_global->impl_);
+    be_global->impl_ <<
+      nm << "_slice* " << nm << "_alloc()\n"
+      "{\n"
+      "  void* const raw = ACE_Allocator::instance()->malloc"
+      "(sizeof(" << nm << "));\n"
+      "  " << nm << "_slice* const slice = static_cast<" << nm << "_slice*"
+      << ">(raw);\n"
+      "  " << nm << "_init_i(slice" << zeros << ");\n"
+      "  return slice;\n"
+      "}\n\n"
+      "void " << nm << "_init_i(" << elem_type << "* begin)\n"
+      "{\n";
+
+    if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
+      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
+    } else if (elem_cls & CL_ARRAY) {
+      std::string indent = "  ";
+      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
+      be_global->impl_ <<
+        indent << elem_type << "_init_i(begin" << nfl.index_ << ");\n";
+    } else {
+      be_global->impl_ <<
+        "  std::uninitialized_fill_n(begin, " << total.str() << ", "
+        << elem_type << "());\n";
+    }
+
+    be_global->impl_ <<
+      "}\n\n"
+      "void " << nm << "_fini_i(" << elem_type << "* begin)\n"
+      "{\n";
+
+    if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
+      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
+    } else if (elem_cls & CL_ARRAY) {
+      std::string indent = "  ";
+      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
+      be_global->impl_ <<
+        indent << elem_type << "_fini_i(begin" << nfl.index_ << ");\n";
+    } else {
+      const std::string::size_type idx_last = elem_type.rfind("::");
+      const std::string elem_last =
+        (elem_cls & CL_STRING) ? "StringManager" :
+        ((idx_last == std::string::npos) ? elem_type
+         : elem_type.substr(idx_last + 2));
+      be_global->impl_ <<
+        "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
+        "    begin[i]."
+#ifdef __SUNPRO_CC
+        << elem_type << "::"
+#endif
+        "~" << elem_last << "();\n"
+        "  }\n";
+    }
+
+    be_global->impl_ <<
+      "}\n\n"
+      "void " << nm << "_free(" << nm << "_slice* slice)\n"
+      "{\n"
+      "  if (!slice) return;\n"
+      "  " << nm << "_fini_i(slice" << zeros << ");\n"
+      "  ACE_Allocator::instance()->free(slice);\n"
+      "}\n\n" <<
+      nm << "_slice* " << nm << "_dup(const " << nm << "_slice* slice)\n"
+      "{\n"
+      "  " << nm << "_slice* const arr = " << nm << "_alloc();\n"
+      "  if (arr) " << nm << "_copy(arr, slice);\n"
+      "  return arr;\n"
+      "}\n\n"
+      "void " << nm << "_copy(" << nm << "_slice* dst, const " << nm
+      << "_slice* src)\n"
+      "{\n"
+      "  if (!src || !dst) return;\n";
+
+    {
+      std::string indent = "  ";
+      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
+      if (elem_cls & CL_ARRAY) {
+        be_global->impl_ <<
+          indent << elem_type << "_copy(dst" << nfl.index_ << ", src"
+          << nfl.index_ << ");\n";
+      } else {
+        be_global->impl_ <<
+          indent << "dst" << nfl.index_ << " = src" << nfl.index_ << ";\n";
+      }
+    }
+
+    be_global->impl_ <<
+      "}\n\n";
+
+    be_global->lang_header_ <<
+      "inline ACE_CDR::Boolean operator<<(ACE_OutputCDR &, const " << nm << "_forany&) { return true; }\n\n"
+      "inline ACE_CDR::Boolean operator>>(ACE_InputCDR &, " << nm << "_forany&) { return true; }\n\n";
+  }
+
+  // Outside of user's namespace: add Traits for arrays so that they can be
+  // used in Sequences and Array_var/_out/_forany.
+  virtual void gen_array_traits(UTL_ScopedName* tdname, AST_Array* arr)
+  {
+    const std::string nm = scoped(tdname);
+    std::string zeros;
+    for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) zeros += "[0]";
+    be_global->lang_header_ <<
+      "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace TAO {\n"
+      "template <>\n"
+      "struct " << exporter() << "Array_Traits<" << nm << "_forany>\n"
+      "{\n"
+      "  static void free(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_free(slice);\n"
+      "  }\n\n"
+      "  static " << nm << "_slice* dup(const " << nm << "_slice* slice)\n"
+      "  {\n"
+      "    return " << nm << "_dup(slice);\n"
+      "  }\n\n"
+      "  static void copy(" << nm << "_slice* dst, const " << nm
+      << "_slice* src)\n"
+      "  {\n"
+      "    " << nm << "_copy(dst, src);\n"
+      "  }\n\n"
+      "  static " << nm << "_slice* alloc()\n"
+      "  {\n"
+      "    return " << nm << "_alloc();\n"
+      "  }\n\n"
+      "  static void zero(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_fini_i(slice" << zeros << ");\n"
+      "    " << nm << "_init_i(slice" << zeros << ");\n"
+      "  }\n"
+      "  static void construct(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_init_i(slice" << zeros << ");\n"
+      "  }\n"
+      "  static void destroy(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_fini_i(slice" << zeros << ");\n"
+      "  }\n"
+      "};\n}\nTAO_END_VERSIONED_NAMESPACE_DECL\n\n";
+  }
+
+  virtual void gen_array_typedef(const char* nm, AST_Type* base)
+  {
+    be_global->lang_header_ <<
+      "typedef " << map_type(base) << "_var " << nm << "_var;\n" <<
+      "typedef " << map_type(base) << "_slice " << nm << "_slice;\n" <<
+      "typedef " << map_type(base) << "_forany " << nm << "_forany;\n\n" <<
+      "inline " << nm << "_slice *" << nm << "_alloc() { return " << map_type(base) << "_alloc(); }\n" <<
+      "inline " << nm << "_slice* " << nm << "_dup(" << nm << "_slice *a) { return " << map_type(base) << "_dup(a); }\n" <<
+      "inline void " << nm << "_copy(" << nm << "_slice* to, const " << nm << "_slice* from) { " << map_type(base) << "_copy(to, from); }\n" <<
+      "inline void " << nm << "_free(" << nm << "_slice *a) { " << map_type(base) << "_free(a); }\n";
+  }
+
+  virtual void gen_typedef_varout(const char* nm, AST_Type* base)
+  {
+    const Classification cls = classify(base);
+    if (cls & CL_STRING) {
+      const Helper var = (cls & CL_WIDE) ? HLP_WSTR_VAR : HLP_STR_VAR,
+        out = (cls & CL_WIDE) ? HLP_WSTR_OUT : HLP_STR_OUT;
+      be_global->lang_header_ <<
+        "typedef " << helpers_[var] << ' ' << nm << "_var;\n"
+        "typedef " << helpers_[out] << ' ' << nm << "_out;\n";
+    } else {
+      be_global->lang_header_ <<
+        "typedef " << generator_->map_type(base) << "_out " << nm << "_out;\n";
+    }
+  }
 };
 
-class FaceGenerator : public GeneratorBase
+struct FaceGenerator : GeneratorBase
 {
-public:
   virtual void init()
   {
     be_global->add_include("FACE/types.hpp", BE_GlobalData::STREAM_LANG_H);
@@ -809,9 +1056,8 @@ public:
 };
 FaceGenerator FaceGenerator::instance;
 
-class SafetyProfileGenerator : public GeneratorBase
+struct SafetyProfileGenerator : GeneratorBase
 {
-public:
   virtual void init()
   {
     be_global->add_include("tao/String_Manager_T.h", BE_GlobalData::STREAM_LANG_H);
@@ -1041,6 +1287,170 @@ public:
 };
 SafetyProfileGenerator SafetyProfileGenerator::instance;
 
+struct Cxx11Generator : GeneratorBase
+{
+  void init()
+  {
+    be_global->add_include("<cstdint>", BE_GlobalData::STREAM_LANG_H);
+    be_global->add_include("<string>", BE_GlobalData::STREAM_LANG_H);
+    primtype_[AST_PredefinedType::PT_long] = "int32_t";
+    primtype_[AST_PredefinedType::PT_ulong] = "uint32_t";
+    primtype_[AST_PredefinedType::PT_longlong] = "int64_t";
+    primtype_[AST_PredefinedType::PT_ulonglong] = "uint64_t";
+    primtype_[AST_PredefinedType::PT_short] = "int16_t";
+    primtype_[AST_PredefinedType::PT_ushort] = "uint16_t";
+    primtype_[AST_PredefinedType::PT_float] = "float";
+    primtype_[AST_PredefinedType::PT_double] = "double";
+    primtype_[AST_PredefinedType::PT_longdouble] = "long double";
+    primtype_[AST_PredefinedType::PT_char] = "char";
+    primtype_[AST_PredefinedType::PT_wchar] = "wchar_t";
+    primtype_[AST_PredefinedType::PT_boolean] = "bool";
+    primtype_[AST_PredefinedType::PT_octet] = "uint8_t";
+    helpers_[HLP_STR_VAR] = "std::string";
+    helpers_[HLP_STR_OUT] = "std::string";
+    helpers_[HLP_WSTR_VAR] = "std::wstring";
+    helpers_[HLP_WSTR_OUT] = "std::wstring";
+    helpers_[HLP_STR_MGR] = "std::string";
+    helpers_[HLP_WSTR_MGR] = "std::wstring";
+    helpers_[HLP_FIX_VAR] = "<<fixed-size var>>";
+    helpers_[HLP_VAR_VAR] = "<<variable-size var>>";
+    helpers_[HLP_OUT] = "<<out>>";
+    helpers_[HLP_SEQ] = "std::vector";
+    helpers_[HLP_SEQ_NS] = "std";
+    helpers_[HLP_SEQ_VAR_VAR] = "<<variable sequence var>>";
+    helpers_[HLP_SEQ_FIX_VAR] = "<<fixed sequence var>>";
+    helpers_[HLP_SEQ_OUT] = "<<sequence out>>";
+    helpers_[HLP_ARR_VAR_VAR] = "<<variable array var>>";
+    helpers_[HLP_ARR_FIX_VAR] = "<<fixed array var>>";
+    helpers_[HLP_ARR_OUT] = "<<array out>>";
+    helpers_[HLP_ARR_FORANY] = "<<array forany>>";
+    helpers_[HLP_FIXED] = "IDL::Fixed_T";
+    helpers_[HLP_FIXED_CONSTANT] = "IDL::Fixed_T";
+  }
+
+  std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool)
+  {
+    return chartype == AST_PredefinedType::PT_char ? "std::string" : "std::wstring";
+  }
+
+  std::string const_keyword(AST_Expression::ExprType type)
+  {
+    switch (type) {
+    case AST_Expression::EV_string:
+    case AST_Expression::EV_wstring:
+      return "const";
+    default:
+      return "constexpr";
+    }
+  }
+
+  void gen_simple_out(const char*) {}
+
+  bool scoped_enum() { return true; }
+  std::string enum_base() { return " : uint32_t"; }
+  
+  void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE, const char*)
+  {
+    be_global->lang_header_ <<
+      "class " << name->last_component()->get_string() << ";\n";
+  }
+
+  void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
+  {
+    be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
+    const char* const nm = tdname->last_component()->get_string();
+    AST_Type* elem = arr->base_type();
+    const Classification elem_cls = classify(elem);
+    const std::string elem_type = map_type(elem);
+
+    std::ostringstream bounds;
+    std::string array;
+    for (ACE_CDR::ULong dim = arr->n_dims(); dim; --dim) {
+      const ACE_CDR::ULong extent = arr->dims()[dim - 1]->ev()->u.ulval;
+      array += "std::array<";
+      bounds << ", " << extent << '>';
+    }
+
+    be_global->lang_header_ <<
+      "using " << nm << " = " << array << elem_type << bounds.str() << ";\n";
+  }
+
+  void gen_array_traits(UTL_ScopedName*, AST_Array*) {}
+  void gen_array_typedef(const char*, AST_Type*) {}
+  void gen_typedef_varout(const char*, AST_Type*) {}
+
+  void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
+  {    
+    be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
+    const char* const nm = tdname->last_component()->get_string();
+    AST_Type* elem = seq->base_type();
+    const Classification elem_cls = classify(elem);
+    const std::string elem_type = map_type(elem);
+    be_global->lang_header_ <<
+      "using " << nm << " = std::vector<" << elem_type << ">;\n";
+  }
+
+  void gen_common_strunion_pre(const char* nm)
+  {
+    be_global->lang_header_ <<
+      "\n"
+      "class " << exporter() << nm << "\n"
+      "{\n"
+      "public: \n\n";
+  }
+
+  void gen_common_strunion_post(const char* nm)
+  {
+    be_global->lang_header_ <<
+      "\n"
+      "};\n\n"
+      << exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
+  }
+
+  bool gen_struct(AST_Structure*, UTL_ScopedName* name,
+                  const std::vector<AST_Field*>& fields,
+                  AST_Type::SIZE_TYPE size,
+                  const char*)
+  {
+    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const ScopedNamespaceGuard namespaces2(name, be_global->impl_);
+    const char* const nm = name->last_component()->get_string();
+    gen_common_strunion_pre(nm);
+
+    std::string swaps;
+    for (size_t i = 0; i < fields.size(); ++i) {
+      AST_Type* field_type = fields[i]->field_type();
+      const std::string field_name = fields[i]->local_name()->get_string();
+      std::string type_name = map_type(field_type);
+      const Classification cls = classify(field_type);
+      be_global->lang_header_ <<
+        "  " << type_name << ' ' << field_name << ";\n";
+      swaps += "  swap(lhs." + field_name + ", rhs." + field_name + ");\n";
+    }
+
+    gen_common_strunion_post(nm);
+    be_global->impl_ <<
+      "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
+      "{\n"
+      "  using std::swap;\n"
+      << swaps << "}\n\n";
+    return true;
+  }
+
+  bool gen_union(AST_Union* u, UTL_ScopedName* name,
+                 const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
+  {
+    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const char* const nm = name->last_component()->get_string();
+    gen_common_strunion_pre(nm);
+    gen_common_strunion_post(nm);
+    return true;
+  }
+
+  static Cxx11Generator instance;
+};
+Cxx11Generator Cxx11Generator::instance;
+
 void langmap_generator::init()
 {
   switch (be_global->language_mapping()) {
@@ -1050,6 +1460,10 @@ void langmap_generator::init()
     break;
   case BE_GlobalData::LANGMAP_SP_CXX:
     generator_ = &SafetyProfileGenerator::instance;
+    generator_->init();
+    break;
+  case BE_GlobalData::LANGMAP_CXX11:
+    generator_ = &Cxx11Generator::instance;
     generator_->init();
     break;
   default: break;
@@ -1065,167 +1479,19 @@ bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
   const AST_Expression::ExprType type = constant->et();
   const bool is_enum = (type == AST_Expression::EV_enum);
   const std::string type_name = is_enum
-    ? scoped(constant->enum_full_name()) : map_type(type);
+    ? scoped(constant->enum_full_name()) : generator_->map_type(type);
   be_global->lang_header_ <<
-    "const " << type_name << ' ' << nm << " = ";
+    generator_->const_keyword(type) << ' ' << type_name << ' ' << nm << " = ";
 
   if (is_enum) {
+    if (generator_->scoped_enum()) {
+      be_global->lang_header_ << type_name << "::";
+    }
     be_global->lang_header_ << scoped(constant->constant_value()->n()) << ";\n";
   } else {
     be_global->lang_header_ << *constant->constant_value()->ev() << ";\n";
   }
   return true;
-}
-
-namespace {
-  void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
-  {
-    be_global->add_include("<tao/Array_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("dds/DCPS/SafetyProfilePool.h", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
-    AST_Type* elem = arr->base_type();
-    const Classification elem_cls = classify(elem);
-    const Helper var = (elem->size_type() == AST_Type::VARIABLE)
-                        ? HLP_ARR_VAR_VAR : HLP_ARR_FIX_VAR,
-      out = HLP_ARR_OUT,
-      forany = HLP_ARR_FORANY;
-
-    std::ostringstream bound, nofirst, total;
-    std::string zeros;
-    for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
-      const ACE_CDR::ULong extent = arr->dims()[dim]->ev()->u.ulval;
-      bound << '[' << extent << ']';
-      if (dim) {
-        nofirst << '[' << extent << ']';
-        zeros += "[0]";
-        total << " * ";
-      }
-      total << extent;
-    }
-
-    std::string elem_type = map_type(elem);
-    if (elem_cls & CL_STRING) {
-      elem_type = helpers_[(elem_cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
-    }
-
-    std::string out_type = nm;
-    if (elem->size_type() == AST_Type::VARIABLE) {
-      out_type = helpers_[out] + '<' + nm + ", " + nm + "_var, " + nm +
-        "_slice, " + nm + "_tag>";
-    }
-
-    be_global->lang_header_ <<
-      "typedef " << elem_type << ' ' << nm << bound.str() << ";\n"
-      "typedef " << elem_type << ' ' << nm << "_slice" << nofirst.str() << ";\n"
-      "struct " << nm << "_tag {};\n"
-      "typedef " << helpers_[var] << '<' << nm << ", " << nm << "_slice, "
-      << nm << "_tag> " << nm << "_var;\n"
-      "typedef " << out_type << ' ' << nm << "_out;\n"
-      "typedef " << helpers_[forany] << '<' << nm << ", " << nm << "_slice, "
-      << nm << "_tag> " << nm << "_forany;\n\n" <<
-      exporter() << nm << "_slice* " << nm << "_alloc();\n" <<
-      exporter() << "void " << nm << "_init_i(" << elem_type << "* begin);\n" <<
-      exporter() << "void " << nm << "_fini_i(" << elem_type << "* begin);\n" <<
-      exporter() << "void " << nm << "_free(" << nm << "_slice* slice);\n" <<
-      exporter() << nm << "_slice* " << nm << "_dup(const " << nm
-      << "_slice* slice);\n" <<
-      exporter() << "void " << nm << "_copy(" << nm << "_slice* dst, const "
-      << nm << "_slice* src);\n\n";
-    const ScopedNamespaceGuard namespaces(tdname, be_global->impl_);
-    be_global->impl_ <<
-      nm << "_slice* " << nm << "_alloc()\n"
-      "{\n"
-      "  void* const raw = ACE_Allocator::instance()->malloc"
-      "(sizeof(" << nm << "));\n"
-      "  " << nm << "_slice* const slice = static_cast<" << nm << "_slice*"
-      << ">(raw);\n"
-      "  " << nm << "_init_i(slice" << zeros << ");\n"
-      "  return slice;\n"
-      "}\n\n"
-      "void " << nm << "_init_i(" << elem_type << "* begin)\n"
-      "{\n";
-
-    if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
-      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
-    } else if (elem_cls & CL_ARRAY) {
-      std::string indent = "  ";
-      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
-      be_global->impl_ <<
-        indent << elem_type << "_init_i(begin" << nfl.index_ << ");\n";
-    } else {
-      be_global->impl_ <<
-        "  std::uninitialized_fill_n(begin, " << total.str() << ", "
-        << elem_type << "());\n";
-    }
-
-    be_global->impl_ <<
-      "}\n\n"
-      "void " << nm << "_fini_i(" << elem_type << "* begin)\n"
-      "{\n";
-
-    if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
-      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
-    } else if (elem_cls & CL_ARRAY) {
-      std::string indent = "  ";
-      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
-      be_global->impl_ <<
-        indent << elem_type << "_fini_i(begin" << nfl.index_ << ");\n";
-    } else {
-      const std::string::size_type idx_last = elem_type.rfind("::");
-      const std::string elem_last =
-        (elem_cls & CL_STRING) ? "StringManager" :
-        ((idx_last == std::string::npos) ? elem_type
-          : elem_type.substr(idx_last + 2));
-      be_global->impl_ <<
-        "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
-        "    begin[i]."
-#ifdef __SUNPRO_CC
-        << elem_type << "::"
-#endif
-        "~" << elem_last << "();\n"
-        "  }\n";
-    }
-
-    be_global->impl_ <<
-      "}\n\n"
-      "void " << nm << "_free(" << nm << "_slice* slice)\n"
-      "{\n"
-      "  if (!slice) return;\n"
-      "  " << nm << "_fini_i(slice" << zeros << ");\n"
-      "  ACE_Allocator::instance()->free(slice);\n"
-      "}\n\n" <<
-      nm << "_slice* " << nm << "_dup(const " << nm << "_slice* slice)\n"
-      "{\n"
-      "  " << nm << "_slice* const arr = " << nm << "_alloc();\n"
-      "  if (arr) " << nm << "_copy(arr, slice);\n"
-      "  return arr;\n"
-      "}\n\n"
-      "void " << nm << "_copy(" << nm << "_slice* dst, const " << nm
-      << "_slice* src)\n"
-      "{\n"
-      "  if (!src || !dst) return;\n";
-
-    {
-      std::string indent = "  ";
-      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
-      if (elem_cls & CL_ARRAY) {
-        be_global->impl_ <<
-          indent << elem_type << "_copy(dst" << nfl.index_ << ", src"
-          << nfl.index_ << ");\n";
-      } else {
-        be_global->impl_ <<
-          indent << "dst" << nfl.index_ << " = src" << nfl.index_ << ";\n";
-      }
-    }
-
-    be_global->impl_ <<
-      "}\n\n";
-
-
-    be_global->lang_header_ <<
-      "inline ACE_CDR::Boolean operator<<(ACE_OutputCDR &, const " << nm << "_forany&) { return true; }\n\n"
-      "inline ACE_CDR::Boolean operator>>(ACE_InputCDR &, " << nm << "_forany&) { return true; }\n\n";
-  }
 }
 
 bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
@@ -1234,16 +1500,18 @@ bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 {
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
   const char* const nm = name->last_component()->get_string();
+  const char* scoped_enum = generator_->scoped_enum() ? "class " : "";
+  const std::string enum_base = generator_->enum_base();
   be_global->lang_header_ <<
-    "enum " << nm << " {\n";
+    "enum " << scoped_enum << nm << enum_base << " {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
     be_global->lang_header_ <<
       "  " << contents[i]->local_name()->get_string()
       << ((i < contents.size() - 1) ? ",\n" : "\n");
   }
   be_global->lang_header_ <<
-    "};\n\n"
-    "typedef " << nm << "& " << nm << "_out;\n";
+    "};\n\n";
+  generator_->gen_simple_out(nm);
   gen_typecode(name);
   return true;
 }
@@ -1252,7 +1520,7 @@ bool langmap_generator::gen_struct_fwd(UTL_ScopedName* name,
                                        AST_Type::SIZE_TYPE size)
 {
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-  struct_decls(name, size);
+  generator_->struct_decls(name, size);
   return true;
 }
 
@@ -1265,51 +1533,6 @@ bool langmap_generator::gen_struct(AST_Structure* s, UTL_ScopedName* name,
 }
 
 namespace {
-
-  // Outside of user's namespace: add Traits for arrays so that they can be
-  // used in Sequences and Array_var/_out/_forany.
-  void gen_array_traits(UTL_ScopedName* tdname, AST_Array* arr)
-  {
-    const std::string nm = scoped(tdname);
-    std::string zeros;
-    for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) zeros += "[0]";
-    be_global->lang_header_ <<
-      "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace TAO {\n"
-      "template <>\n"
-      "struct " << exporter() << "Array_Traits<" << nm << "_forany>\n"
-      "{\n"
-      "  static void free(" << nm << "_slice* slice)\n"
-      "  {\n"
-      "    " << nm << "_free(slice);\n"
-      "  }\n\n"
-      "  static " << nm << "_slice* dup(const " << nm << "_slice* slice)\n"
-      "  {\n"
-      "    return " << nm << "_dup(slice);\n"
-      "  }\n\n"
-      "  static void copy(" << nm << "_slice* dst, const " << nm
-      << "_slice* src)\n"
-      "  {\n"
-      "    " << nm << "_copy(dst, src);\n"
-      "  }\n\n"
-      "  static " << nm << "_slice* alloc()\n"
-      "  {\n"
-      "    return " << nm << "_alloc();\n"
-      "  }\n\n"
-      "  static void zero(" << nm << "_slice* slice)\n"
-      "  {\n"
-      "    " << nm << "_fini_i(slice" << zeros << ");\n"
-      "    " << nm << "_init_i(slice" << zeros << ");\n"
-      "  }\n"
-      "  static void construct(" << nm << "_slice* slice)\n"
-      "  {\n"
-      "    " << nm << "_init_i(slice" << zeros << ");\n"
-      "  }\n"
-      "  static void destroy(" << nm << "_slice* slice)\n"
-      "  {\n"
-      "    " << nm << "_fini_i(slice" << zeros << ");\n"
-      "  }\n"
-      "};\n}\nTAO_END_VERSIONED_NAMESPACE_DECL\n\n";
-  }
 
 #ifdef ACE_HAS_CDR_FIXED
   void gen_fixed(UTL_ScopedName* name, AST_Fixed* fixed)
@@ -1339,7 +1562,7 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       generator_->gen_sequence(name, AST_Sequence::narrow_from_decl(base));
       break;
     case AST_Decl::NT_array:
-      gen_array(name, arr = AST_Array::narrow_from_decl(base));
+      generator_->gen_array(name, arr = AST_Array::narrow_from_decl(base));
       break;
     case AST_Decl::NT_fixed:
 # ifdef ACE_HAS_CDR_FIXED
@@ -1352,38 +1575,20 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 # endif
     default:
       be_global->lang_header_ <<
-        "typedef " << map_type(base) << ' ' << nm << ";\n";
-      if ((cls & CL_STRING) == 0) {
-          be_global->lang_header_ <<
-            "typedef " << map_type(base) << "_out " << nm << "_out;\n";
-        }
+        "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
+      generator_->gen_typedef_varout(nm, base);
 
       AST_Type* actual_base = resolveActualType(base);
       if (actual_base->node_type() == AST_Decl::NT_array) {
-        be_global->lang_header_ <<
-          "typedef " << map_type(base) << "_var " << nm << "_var;\n" <<
-          "typedef " << map_type(base) << "_slice " << nm << "_slice;\n" <<
-          "typedef " << map_type(base) << "_forany " << nm << "_forany;\n\n" <<
-          "inline " << nm << "_slice *" << nm << "_alloc() { return " << map_type(base) << "_alloc(); }\n" <<
-          "inline " << nm << "_slice* " << nm << "_dup(" << nm << "_slice *a) { return " << map_type(base) << "_dup(a); }\n" <<
-          "inline void " << nm << "_copy(" << nm << "_slice* to, const " << nm << "_slice* from) { " << map_type(base) << "_copy(to, from); }\n" <<
-          "inline void " << nm << "_free(" << nm << "_slice *a) { " << map_type(base) << "_free(a); }\n";
+        generator_->gen_array_typedef(nm, base);
       }
 
       break;
     }
 
-    if (cls & CL_STRING) {
-      const Helper var = (cls & CL_WIDE) ? HLP_WSTR_VAR : HLP_STR_VAR,
-        out = (cls & CL_WIDE) ? HLP_WSTR_OUT : HLP_STR_OUT;
-      be_global->lang_header_ <<
-        "typedef " << helpers_[var] << ' ' << nm << "_var;\n"
-        "typedef " << helpers_[out] << ' ' << nm << "_out;\n";
-    }
-
     gen_typecode(name);
   }
-  if (arr) gen_array_traits(name, arr);
+  if (arr) generator_->gen_array_traits(name, arr);
   return true;
 }
 
@@ -1392,7 +1597,7 @@ bool langmap_generator::gen_union_fwd(AST_UnionFwd* node,
                                       AST_Type::SIZE_TYPE)
 {
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-  struct_decls(name, node->full_definition()->size_type());
+  generator_->struct_decls(name, node->full_definition()->size_type(), "class");
   return true;
 }
 
