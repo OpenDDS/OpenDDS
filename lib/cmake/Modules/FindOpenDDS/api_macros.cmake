@@ -107,6 +107,28 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
   set(${output} ${_output_file})
 endmacro()
 
+# OPENDDS_TARGET_SOURCES(target
+#   [items...]
+#   [<INTERFACE|PUBLIC|PRIVATE> items...])
+#
+# This macro behaves similarly to target_sources(...) with the following
+# differences:
+#   1) Items can be either C/C++ sources or IDL sources.
+#   2) The scope-qualifier (PUBLIC, PRIVATE, INTERFACE) is not required.
+#      When it is omitted, PUBLIC is used by default.
+#
+# When IDL sources are supplied, custom commands are generated which will
+# be invoked to compile the IDL sources into their component cpp/h files.
+#
+# A custom command will also be added to generate the required IDL export
+# header file (*target*_export.h) to add the required export macros. This
+# file is then added as a dependency for the supplied target.
+#
+# The following defines are implicitly added to the target and any exe/lib
+# which uses the library:
+#   *TARGET*_BUILD_DLL
+#   OPENDDS_SECURITY (if security is enabled)
+#
 macro(OPENDDS_TARGET_SOURCES target)
   OPENDDS_INCLUDE_DIRS_ONCE()
 
@@ -160,6 +182,9 @@ macro(OPENDDS_TARGET_SOURCES target)
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
+    # TODO: Test the output of the scope qualifiers with IDL files.
+    # Does it get inherited by all generated c/cpp/h files? Does it
+    # matter?
     if(_idl_sources_${scope})
       dds_idl_sources(
         TARGETS ${target}
@@ -173,104 +198,5 @@ macro(OPENDDS_TARGET_SOURCES target)
     # regular c/cpp/h files specified by the user are added.
     target_sources(${target} ${scope} ${_sources_${scope}})
 
-  endforeach()
-endmacro()
-
-
-macro(OPENDDS_IDL_COMMANDS target
-  idl_prefix
-  src_prefix
-  cmake_options
-  tao_options
-  opendds_options
-  options)
-
-  foreach(scope PUBLIC PRIVATE INTERFACE)
-    if(${idl_prefix}_${scope})
-      dds_idl_sources(
-        TARGETS ${target}
-        TAO_IDL_FLAGS ${tao_options}
-        DDS_IDL_FLAGS ${opendds_options}
-        IDL_FILES ${${idl_prefix}_${scope}}
-        ${options})
-    endif()
-  endforeach()
-endmacro()
-
-
-# OPENDDS_ADD_LIBRARY(target
-#   file0 file1 ...
-#   [<INTERFACE|PUBLIC|PRIVATE> file0 file1...] ...]
-#   [lib0 lib1 ...]
-#   [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL]
-#   [SKIP_TAO_IDL]
-#   [TAO_IDL_OPTIONS ...]
-#   [OPENDDS_IDL_OPTIONS ...])
-macro(OPENDDS_ADD_LIBRARY target)
-
-  OPENDDS_INCLUDE_DIRS_ONCE()
-
-  OPENDDS_GET_SOURCES_AND_OPTIONS(
-    _sources
-    _idl_sources
-    _libs
-    _cmake_options
-    _tao_options
-    _opendds_options
-    _options
-    ${ARGN})
-
-  add_library(${target} ${_cmake_options})
-  target_link_libraries(${target} ${_libs})
-
-  OPENDDS_IDL_COMMANDS(${target}
-    _idl_sources
-    _sources
-    "${_cmake_options}"
-    "${_tao_options}"
-    "${_opendds_options}"
-    "${_options}")
-
-  foreach(scope PUBLIC PRIVATE INTERFACE)
-    target_sources(${target} ${scope} ${_sources_${scope}})
-  endforeach()
-endmacro()
-
-
-# OPENDDS_ADD_EXECUTABLE(target
-#   file0 file1 ...
-#   [<INTERFACE|PUBLIC|PRIVATE> file0 file1...] ...]
-#   [lib0 lib1 ...]
-#   [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
-#   [SKIP_TAO_IDL]
-#   [TAO_IDL_OPTIONS ...]
-#   [OPENDDS_IDL_OPTIONS ...])
-macro(OPENDDS_ADD_EXECUTABLE target)
-
-  OPENDDS_INCLUDE_DIRS_ONCE()
-
-  OPENDDS_GET_SOURCES_AND_OPTIONS(
-    _sources
-    _idl_sources
-    _libs
-    _cmake_options
-    _tao_options
-    _opendds_options
-    _options
-    ${ARGN})
-
-  add_executable(${target} ${_cmake_options})
-  target_link_libraries(${target} ${_libs})
-
-  OPENDDS_IDL_COMMANDS(${target}
-    _idl_sources
-    _sources
-    "${_cmake_options}"
-    "${_tao_options}"
-    "${_opendds_options}"
-    "${_options}")
-
-  foreach(scope PUBLIC PRIVATE INTERFACE)
-    target_sources(${target} ${scope} ${_sources_${scope}})
   endforeach()
 endmacro()
