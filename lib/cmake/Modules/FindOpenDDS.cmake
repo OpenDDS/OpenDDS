@@ -374,6 +374,7 @@ if(OPENDDS_FOUND)
 
   endforeach()
 
+  include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/config.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/options.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/FindOpenDDS/api_macros.cmake)
 
