@@ -11,17 +11,6 @@ define_property(SOURCE PROPERTY DDS_IDL_MAIN_TARGET
 
 set(DDS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-if (NOT DEFINED DDS_BASE_IDL_FLAGS)
-  if (OPENDDS_SUPPRESS_ANYS)
-    list(APPEND TAO_BASE_IDL_FLAGS -Sa -St)
-    list(APPEND DDS_BASE_IDL_FLAGS -Sa -St)
-  endif()
-  foreach(definition ${DCPS_COMPILE_DEFINITIONS})
-    list(APPEND TAO_BASE_IDL_FLAGS -D${definition})
-    list(APPEND DDS_BASE_IDL_FLAGS -D${definition})
-  endforeach()
-endif()
-
 if (WIN32 AND NOT TAO_INSTALL_DIR)
   ## we use TAO_INSTALL_DIR to check if tao_idl is imported or not;
   ## TAO_INSTALL_DIR is only defined when TAO is not imported
@@ -30,11 +19,6 @@ if (WIN32 AND NOT TAO_INSTALL_DIR)
   set (tao_idl_fe_dir "$ACE_ROOT/bin")
   set(IDL_PATH_ENV "PATH=\"${tao_idl_fe_dir}\;%PATH%\"")
 endif()
-
-
-
-set(FACE_TAO_IDL_FLAGS -SS -Wb,no_fixed_err)
-set(FACE_DDS_IDL_FLAGS -GfaceTS -Lface)
 
 function(dds_idl_command Name)
   set(dds_idl_command_usage "dds_idl_command(<Name> TAO_IDL_FLAGS flags DDS_IDL_FLAGS flags IDL_FILES Input1 Input2 ...]")
@@ -73,7 +57,7 @@ function(dds_idl_command Name)
     endif()
   endforeach()
 
-  set(_ddsidl_flags ${DDS_BASE_IDL_FLAGS} ${_converted_dds_idl_flags})
+  set(_ddsidl_flags ${_converted_dds_idl_flags})
 
   # cmake_parse_arguments(_ddsidl_cmd_arg "-SI;-GfaceTS" "-o" "" ${_ddsidl_flags})
 
@@ -183,7 +167,7 @@ function(dds_idl_sources)
   set(multiValueArgs TARGETS TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(_arg "SKIP_TAO_IDL" "" "${multiValueArgs}" ${ARGN})
 
-  set(is_face OFF)
+  set(target_links_against_face OFF)
 
   tao_filter_valid_targets(_arg_TARGETS)
 
@@ -193,8 +177,8 @@ function(dds_idl_sources)
 
   foreach(target ${_arg_TARGETS})
     get_property(target_link_libs TARGET ${target} PROPERTY LINK_LIBRARIES)
-    if ("OpenDDS_FACE" IN_LIST target_link_libs)
-      set(is_face ON)
+    if ("OpenDDS::FACE" IN_LIST target_link_libs)
+      set(target_links_against_face ON)
     endif()
     set(first_target ${target})
     break()
@@ -224,9 +208,18 @@ function(dds_idl_sources)
     set(OPTIONAL_TAO_IDL SKIP_TAO_IDL)
   endif()
 
-  if (is_face)
-    list(APPEND _arg_TAO_IDL_FLAGS ${FACE_TAO_IDL_FLAGS})
-    list(APPEND _arg_DDS_IDL_FLAGS ${FACE_DDS_IDL_FLAGS})
+  if (target_links_against_face)
+    foreach(_tao_face_flag -SS -Wb,no_fixed_err)
+      if (NOT "${_arg_TAO_IDL_FLAGS}" MATCHES "${_tao_face_flag}")
+        list(APPEND _arg_TAO_IDL_FLAGS ${_tao_face_flag})
+      endif()
+    endforeach()
+
+    foreach(_dds_face_flag -GfaceTS -Lface)
+      if (NOT "${_arg_DDS_IDL_FLAGS}" MATCHES "${_dds_face_flag}")
+        list(APPEND _arg_DDS_IDL_FLAGS ${_dds_face_flag})
+      endif()
+    endforeach()
   endif()
 
   dds_idl_command(_idl

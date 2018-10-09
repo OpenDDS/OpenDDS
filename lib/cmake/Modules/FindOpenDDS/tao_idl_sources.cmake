@@ -71,7 +71,7 @@ function(tao_idl_command name)
   set(multiValueArgs IDL_FLAGS IDL_FILES USED_BY WORKING_DIRECTORY)
   cmake_parse_arguments(_arg "" "" "${multiValueArgs}" ${ARGN})
 
-  set(_arg_IDL_FLAGS ${TAO_BASE_IDL_FLAGS} ${_arg_IDL_FLAGS})
+  set(_arg_IDL_FLAGS ${_arg_IDL_FLAGS})
 
   if (NOT _arg_IDL_FILES)
     message(FATAL_ERROR "using tao_idl_command(${name}) without specifying IDL_FILES")

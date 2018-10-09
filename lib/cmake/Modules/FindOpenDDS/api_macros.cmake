@@ -165,20 +165,20 @@ macro(OPENDDS_TARGET_SOURCES target)
     endif()
   endif()
 
-  if(NOT "${tao_options}" MATCHES "-Wb,stub_export_include")
-    list(APPEND tao_options "-Wb,stub_export_include=${_export_generated}")
+  if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
+    list(APPEND _tao_options "-Wb,stub_export_include=${_export_generated}")
   endif()
 
-  if(NOT "${tao_options}" MATCHES "-Wb,stub_export_macro")
-    list(APPEND tao_options "-Wb,stub_export_macro=${target}_Export")
+  if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_macro")
+    list(APPEND _tao_options "-Wb,stub_export_macro=${target}_Export")
   endif()
 
-  if(NOT "${tao_options}" MATCHES "-SS")
-    list(APPEND tao_options "-SS")
+  if(NOT "${_tao_options}" MATCHES "-SS")
+    list(APPEND _tao_options "-SS")
   endif()
 
   if(NOT "${_opendds_options}" MATCHES "-Wb,export_macro")
-    list(APPEND opendds_options "-Wb,export_macro=${target}_Export")
+    list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
@@ -188,8 +188,8 @@ macro(OPENDDS_TARGET_SOURCES target)
     if(_idl_sources_${scope})
       dds_idl_sources(
         TARGETS ${target}
-        TAO_IDL_FLAGS ${tao_options}
-        DDS_IDL_FLAGS ${opendds_options}
+        TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS}
+        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS}
         IDL_FILES ${_idl_sources_${scope}}
         ${options})
     endif()
