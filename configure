@@ -1916,11 +1916,15 @@ sub write_cmake_file {
     persistence-profile
   );
 
+  my %disabled_by_default = map {$_, 0} qw(
+    security
+  );
+
   sub generate_cmake_options {
     my $result = "";
     # Merge the hashes together; the user-supplied %opts will override
-    # the enabled-defaults (for example, when disabled).
-    my %opts_ = (%enabled_by_default, %opts);
+    # the enabled-/disabled-defaults.
+    my %opts_ = (%enabled_by_default, %disabled_by_default, %opts);
 
     for my $k (sort keys %opts_) {
       my $var = uc "OPENDDS_${k}" =~ s/-/_/gr;
