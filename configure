@@ -1902,11 +1902,29 @@ sub write_cmake_file {
     join ';', map {whack_to_slash($_)} @list;
   };
 
+  # Flags which are enabled by default but do not appear in the %opts map
+  # unless specified by the user.
+  my %enabled_by_default = map {$_, 1} qw(
+    built-in-topics
+    content-subscription
+    content-filtered-topic
+    multi-topic
+    query-condition
+    ownership-profile
+    ownership-kind-exclusive
+    object-model-profile
+    persistence-profile
+  );
+
   sub generate_cmake_options {
     my $result = "";
-    for my $k (sort keys %opts) {
+    # Merge the hashes together; the user-supplied %opts will override
+    # the enabled-defaults (for example, when disabled).
+    my %opts_ = (%enabled_by_default, %opts);
+
+    for my $k (sort keys %opts_) {
       my $var = uc "OPENDDS_${k}" =~ s/-/_/gr;
-      my $val = $opts{$k};
+      my $val = $opts_{$k};
 
       if (ref($val) eq 'ARRAY') {
         $result .= qq{set($var "${\( to_cmake_list($val))}")\n};
