@@ -1855,10 +1855,15 @@ namespace {
 
   bool
   is_bit(const char* topic_name) {
+#if !defined (DDS_HAS_MINIMUM_BIT)
     return strcmp(topic_name, BUILT_IN_PARTICIPANT_TOPIC) == 0
       || strcmp(topic_name, BUILT_IN_TOPIC_TOPIC) == 0
       || strcmp(topic_name, BUILT_IN_PUBLICATION_TOPIC) == 0
       || strcmp(topic_name, BUILT_IN_SUBSCRIPTION_TOPIC) == 0;
+#else
+    ACE_UNUSED_ARG(topic_name);
+    return false;
+#endif // !defined (DDS_HAS_MINIMUM_BIT)
   }
 
 }
