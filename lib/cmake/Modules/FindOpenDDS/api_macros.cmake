@@ -158,11 +158,11 @@ macro(OPENDDS_TARGET_SOURCES target)
     target_sources(${target} PUBLIC ${_export_generated})
 
     string(TOUPPER "${target}" _target_upper)
-    target_compile_definitions(${target} PUBLIC ${_target_upper}_BUILD_DLL)
+    target_compile_definitions(${target}
+      PUBLIC
+        ${_target_upper}_BUILD_DLL
+        ${OPENDDS_DCPS_COMPILE_DEFS})
 
-    if(OPENDDS_SECURITY)
-      target_compile_definitions(${target} PUBLIC OPENDDS_SECURITY)
-    endif()
   endif()
 
   if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
