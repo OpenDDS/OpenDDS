@@ -1987,25 +1987,24 @@ sub write_cmake_file {
     join ';', map {whack_to_slash($_)} @list;
   };
 
-  # Flags which are enabled by default but do not appear in the %opts map
-  # unless specified by the user.
-  my %enabled_by_default = map {$_, 1} qw(
-    built-in-topics
-    content-subscription
-    content-filtered-topic
-    multi-topic
-    query-condition
-    ownership-profile
-    ownership-kind-exclusive
-    object-model-profile
-    persistence-profile
-  );
-
-  my %disabled_by_default = map {$_, 0} qw(
-    security
-  );
-
   sub generate_cmake_options {
+    # These flags only appear in the %opts map when specified by the user.
+    my %enabled_by_default = map {$_, 1} qw(
+      built-in-topics
+      content-subscription
+      content-filtered-topic
+      multi-topic
+      query-condition
+      ownership-profile
+      ownership-kind-exclusive
+      object-model-profile
+      persistence-profile
+    );
+
+    my %disabled_by_default = map {$_, 0} qw(
+      security
+    );
+
     my $result = "";
     # Merge the hashes together; the user-supplied %opts will override
     # the enabled-/disabled-defaults.
