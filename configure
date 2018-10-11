@@ -1981,9 +1981,6 @@ sub write_cmake_file {
         my $cmake_scalar = to_cmake_scalar($val);
 
         if ($cmake_scalar eq 'ON' || $cmake_scalar eq 'OFF') {
-          # Users can modify these with cmd-line switches; for example,
-          # `cmake -DOPENDDS_BUILT_IN_TOPICS=OFF ..` will disable built-in
-          # topics at compile-time regardless of the config.cmake contents.
           $result .= qq{set($var $cmake_scalar)\n};
 
         } else {
