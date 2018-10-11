@@ -77,9 +77,12 @@ jobs:
         ConfigOpts: --safety-profile
       SafeSmallSecure:
         ConfigOpts: --no-inline --no-debug --safety-profile --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
+        PackageDeps: libxerces-c-dev libssl-dev cmake
+
   steps:
-  - script: sudo apt-get update && sudo apt-get install libxerces-c-dev libssl-dev
+  - script: sudo apt-get update && sudo apt-get install ${PackageDeps}
     displayName: apt-get install libxerces-c-dev libssl-dev
+    condition: and(succeeded(), ne(variables['Build.PackageDeps'], ''))
   - script: git clone --depth 1 git://github.com/DOCGroup/MPC ext/MPC
     displayName: git clone MPC
   - script: git clone --depth 1 git://github.com/DOCGroup/ACE_TAO
