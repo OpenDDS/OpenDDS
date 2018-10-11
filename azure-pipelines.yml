@@ -75,8 +75,8 @@ jobs:
         ConfigOpts: --no-debug --optimize
       Safety:
         ConfigOpts: --safety-profile
-      SafeSmallSecure:
-        ConfigOpts: --no-inline --no-debug --safety-profile --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
+      SecurityWithoutFeatures:
+        ConfigOpts: --no-inline --no-debug --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
         PackageDeps: libxerces-c-dev libssl-dev cmake
 
   steps:
