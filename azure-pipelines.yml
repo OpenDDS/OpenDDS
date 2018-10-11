@@ -76,7 +76,7 @@ jobs:
       Safety:
         ConfigOpts: --safety-profile
       SafeSmallSecure:
-        ConfigOpts: --no-inline --no-debug --safety-profile --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistance-profile --security
+        ConfigOpts: --no-inline --no-debug --safety-profile --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --security
   steps:
   - script: sudo apt-get update && sudo apt-get install libxerces-c-dev libssl-dev
     displayName: apt-get install libxerces-c-dev libssl-dev
