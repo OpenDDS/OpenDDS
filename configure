@@ -148,7 +148,6 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
     'mpcopts=s@', 'Extra command-line args for MPC (if MPC is run)',
-    'cmake-config', 'Generate FindOpenDDS.cmake configuration',
    ],
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -1761,47 +1760,8 @@ sub configure_build {
   }
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
-  if ($opts{'cmake-config'}) {
-    write_cmake_file($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
-  }
-}
 
-sub configure_std_cxx_cmake {
-  if ($opts{'std'} && $opts{'std'} =~ /(03|98)$/) {
-    return "cxx_std_98";
-  } elsif ($opts{'std'} && $opts{'std'} =~ /(0x|11)$/) {
-    return "cxx_std_11";
-  } elsif ($opts{'std'} && $opts{'std'} =~ /(1y|14)$/) {
-    return "cxx_std_14";
-  } elsif ($opts{'std'} && $opts{'std'} =~ /(1z|17)$/) {
-    return "cxx_std_17";
-  } else {
-    return "none";
-  }
-}
-
-sub configure_cxx_compile_opts_cmake {
-  my $cxxopts = "";
-  #inline / debug - we will only create this for Makefile-based solutions
-
-  if ($_[0] eq 'gnuace') {
-    if ($opts{'no-inline'}) {
-      $cxxopts .= ' -DACE_NO_INLINE';
-    }
-    else {
-      $cxxopts .= ' -DACE_INLINE';
-    }
-
-    if ($opts{'no-debug'}) {
-      $cxxopts .= ' -DACE_NDEBUG';
-    }
-  }
-
-  if ($opts{'ipv6'}) {
-     $cxxopts .= ' -DACE_HAS_IPV6';
-   }
-
-  return $cxxopts;
+  write_cmake_file($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 }
 
 sub write_cross_compile_makefile {
@@ -2024,7 +1984,7 @@ sub write_cmake_file {
           # Users can modify these with cmd-line switches; for example,
           # `cmake -DOPENDDS_BUILT_IN_TOPICS=OFF ..` will disable built-in
           # topics at compile-time regardless of the config.cmake contents.
-          $result .= qq{option($var "" $cmake_scalar)\n};
+          $result .= qq{set($var $cmake_scalar)\n};
 
         } else {
           $result .= qq{set($var "$cmake_scalar")\n};
